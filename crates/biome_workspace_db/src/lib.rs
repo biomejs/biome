@@ -26,7 +26,11 @@ use std::sync::Arc;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ParsedSourceUpdateMode {
+    /// Mint a new Salsa input and replace the path mapping. Existing handles no
+    /// longer identify the file stored at that path.
     Replace,
+    /// Mutate an existing Salsa input in place. The handle remains stable, but
+    /// setters wait until no live database clone is reading the old revision.
     Setters,
 }
 
@@ -119,14 +123,18 @@ impl WorkspaceDb {
         self.data().insert_source(document_file_source)
     }
 
+    /// Replaces the path mapping with the provided input handle.
     pub fn insert_file(&mut self, path: &Utf8Path, file: ParsedSource) {
         self.files.pin().insert(path.to_path_buf(), file);
     }
 
+    /// Replaces the path mapping with the provided input handle.
     pub fn update_file(&mut self, path: &Utf8Path, file: ParsedSource) {
         self.files.pin().update(path.to_path_buf(), |_| file);
     }
 
+    /// Updates a file according to `mode`, preserving the handle only for
+    /// [`ParsedSourceUpdateMode::Setters`].
     pub fn update_file_with_mode(
         &mut self,
         path: &Utf8Path,
@@ -139,6 +147,7 @@ impl WorkspaceDb {
         self.update_or_insert_file(path, parsed, document_source_index, snippets, mode)
     }
 
+    /// Mints a new input and replaces the path mapping (`Replace` semantics).
     pub fn replace_file(
         &mut self,
         path: &Utf8Path,
@@ -157,6 +166,8 @@ impl WorkspaceDb {
         file
     }
 
+    /// Mutates an existing input in place, or mints one if absent (`Setters`
+    /// semantics).
     pub fn upsert_file(
         &mut self,
         path: &Utf8Path,
@@ -173,6 +184,8 @@ impl WorkspaceDb {
         )
     }
 
+    /// Applies the selected replacement or setter semantics and returns the
+    /// handle now mapped to `path`.
     pub fn update_or_insert_file(
         &mut self,
         path: &Utf8Path,

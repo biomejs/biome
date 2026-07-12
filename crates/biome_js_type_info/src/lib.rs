@@ -11,7 +11,7 @@ mod globals_builder;
 pub(crate) mod globals_ids;
 mod helpers;
 mod inferred_type;
-pub mod interned_types;
+mod interned_types;
 mod local_inference;
 mod misleading_return;
 pub mod resolved;

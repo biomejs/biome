@@ -142,7 +142,7 @@ impl Rule for NoMisleadingReturnType {
                     .name()
                     .ok()?;
                 let return_type =
-                    ctx.inferred_return_type_of_member(method.syntax(), name.text())?;
+                    ctx.return_type_of_member(method.syntax(), name.text())?;
                 run_for_member(
                     ctx,
                     annotation.range(),
@@ -164,7 +164,7 @@ impl Rule for NoMisleadingReturnType {
                     .name()
                     .ok()?;
                 let return_type =
-                    ctx.inferred_return_type_of_member(method.syntax(), name.text())?;
+                    ctx.return_type_of_member(method.syntax(), name.text())?;
                 run_for_member(
                     ctx,
                     annotation.range(),
@@ -182,7 +182,7 @@ impl Rule for NoMisleadingReturnType {
                     return None;
                 }
                 let return_type =
-                    ctx.inferred_return_type_of_member(getter.syntax(), name.text())?;
+                    ctx.return_type_of_member(getter.syntax(), name.text())?;
                 run_for_member(
                     ctx,
                     annotation.range(),
@@ -200,7 +200,7 @@ impl Rule for NoMisleadingReturnType {
                     return None;
                 }
                 let return_type =
-                    ctx.inferred_return_type_of_member(getter.syntax(), name.text())?;
+                    ctx.return_type_of_member(getter.syntax(), name.text())?;
                 run_for_member(
                     ctx,
                     annotation.range(),
@@ -289,7 +289,7 @@ fn run_for_function(
         return None;
     }
 
-    let return_type = ctx.inferred_return_type_of_function(node)?;
+    let return_type = ctx.return_type_of_function(node)?;
     let is_async = node.async_token().is_some();
     let body = node.body().ok()?;
 

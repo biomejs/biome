@@ -1,3 +1,5 @@
+//! Salsa database traits and tracked module-graph queries.
+
 use crate::{CssModuleInfo, HtmlModuleInfo, JsModuleInfo, ModuleInfo, ModuleInfoKind};
 pub use biome_js_type_info::TypeDb;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -14,9 +16,12 @@ pub struct ModuleGraphGeneration {
 #[salsa::db]
 pub trait ModuleDb: TypeDb {
     /// Returns the generation of the module path index.
-    fn module_graph_generation(&self) -> u64 {
-        0
-    }
+    ///
+    /// Every registry reader must read this value so Salsa records the
+    /// dependency. Every registry mutator must bump it after changing paths or
+    /// module handles. Implementations with immutable registries may return a
+    /// constant value.
+    fn module_graph_generation(&self) -> u64;
 
     /// Given a path, it retrieves its corresponding module info.
     fn module_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo>;

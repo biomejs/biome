@@ -1,3 +1,5 @@
+//! Conversion and lookup of canonical global type definitions.
+
 #![allow(
     unused_lifetimes,
     reason = "Salsa interned handle lifetimes are used by generated code."
@@ -14,8 +16,8 @@ use biome_js_type_info::{
     resolved::{
         GlobalTypeId, InferredAssertsReturnType, InferredClass, InferredConstructor,
         InferredConstructorParameter, InferredFunction, InferredFunctionParameter,
-        InferredFunctionParameterBinding, InferredInterface, InferredInternedGenericTypeParameter,
-        InferredInternedLiteral, InferredLiteral, InferredMergedReference, InferredModule,
+        InferredFunctionParameterBinding, InferredGenericTypeParameter, InferredInterface,
+        InferredLiteral, InferredLiteralValue, InferredMergedReference, InferredModule,
         InferredNamedFunctionParameter, InferredNamespace, InferredObject,
         InferredPatternFunctionParameter, InferredPredicateReturnType, InferredReturnType,
         InferredTuple, InferredTupleElementType, InferredTypeData, InferredTypeMember,
@@ -252,7 +254,7 @@ fn resolve_global_type_id_with_resolver<'db>(
                 let default = has_default.then(|| pop_global_type(&mut values));
                 let constraint = has_constraint.then(|| pop_global_type(&mut values));
                 values.push(GlobalTypeValue::Type(InferredTypeData::Generic(
-                    InferredInternedGenericTypeParameter::new(db, constraint, default, name),
+                    InferredGenericTypeParameter::new(db, constraint, default, name),
                 )));
             }
             GlobalTypeWork::RebuildInstance(type_parameters) => {
@@ -285,9 +287,9 @@ fn resolve_global_type_id_with_resolver<'db>(
             GlobalTypeWork::RebuildLiteralObject(members) => {
                 let members = pop_global_members(&mut values, members);
                 values.push(GlobalTypeValue::Type(InferredTypeData::Literal(
-                    InferredInternedLiteral::new(
+                    InferredLiteral::new(
                         db,
-                        InferredLiteral::Object(members.into_boxed_slice()),
+                        InferredLiteralValue::Object(members.into_boxed_slice()),
                     ),
                 )));
             }
@@ -630,29 +632,29 @@ fn push_global_literal<'a, 'db>(
 ) {
     match literal {
         RawLiteral::BigInt(value) => values.push(GlobalTypeValue::Type(InferredTypeData::Literal(
-            InferredInternedLiteral::new(db, InferredLiteral::BigInt(value.clone())),
+            InferredLiteral::new(db, InferredLiteralValue::BigInt(value.clone())),
         ))),
         RawLiteral::Boolean(value) => {
             values.push(GlobalTypeValue::Type(InferredTypeData::Literal(
-                InferredInternedLiteral::new(db, InferredLiteral::Boolean(value.clone())),
+                InferredLiteral::new(db, InferredLiteralValue::Boolean(value.clone())),
             )))
         }
         RawLiteral::Number(value) => values.push(GlobalTypeValue::Type(InferredTypeData::Literal(
-            InferredInternedLiteral::new(db, InferredLiteral::Number(value.clone())),
+            InferredLiteral::new(db, InferredLiteralValue::Number(value.clone())),
         ))),
         RawLiteral::Object(object) => {
             stack.push(GlobalTypeWork::RebuildLiteralObject(object.members().len()));
             push_raw_members(stack, object.members());
         }
         RawLiteral::RegExp(value) => values.push(GlobalTypeValue::Type(InferredTypeData::Literal(
-            InferredInternedLiteral::new(db, InferredLiteral::RegExp(value.clone())),
+            InferredLiteral::new(db, InferredLiteralValue::RegExp(value.clone())),
         ))),
         RawLiteral::String(value) => values.push(GlobalTypeValue::Type(InferredTypeData::Literal(
-            InferredInternedLiteral::new(db, InferredLiteral::String(value.clone())),
+            InferredLiteral::new(db, InferredLiteralValue::String(value.clone())),
         ))),
         RawLiteral::Template(value) => {
             values.push(GlobalTypeValue::Type(InferredTypeData::Literal(
-                InferredInternedLiteral::new(db, InferredLiteral::Template(value.clone())),
+                InferredLiteral::new(db, InferredLiteralValue::Template(value.clone())),
             )))
         }
     }

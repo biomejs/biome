@@ -1,10 +1,11 @@
-//! Detection and rendering for misleading declared return types.
+//! Policy and evidence extraction for `noMisleadingReturnType` diagnostics.
 
 use crate::TypeDb;
 use crate::interned_types::{InternedClass, Literal, TypeData, TypeMember, TypeMemberKind};
 use rustc_hash::FxHashSet;
 
 const MAX_RETURN_TYPE_STEPS: usize = 50;
+const MAX_RETURN_TYPE_DEPTH: usize = 50;
 const MAX_RETURN_TYPE_DESCRIPTION_LENGTH: usize = 80;
 const RETURN_TYPE_SEPARATOR: &str = " | ";
 
@@ -333,7 +334,7 @@ fn class_has_instance_shape<'db>(
     depth: usize,
 ) -> Option<bool> {
     let ty = TypeData::Class(class);
-    if depth >= MAX_RETURN_TYPE_STEPS || !seen.insert(ty) {
+    if depth >= MAX_RETURN_TYPE_DEPTH || !seen.insert(ty) {
         return None;
     }
     if class
@@ -772,16 +773,24 @@ fn render_narrowed<'db>(
 }
 
 #[derive(Clone, Copy, Debug, Default)]
+/// Evidence collected from return expressions for the user-visible diagnostic.
 pub struct ReturnTypeEvidence {
+    /// At least one return expression contains a const assertion.
     pub has_any_const: bool,
+    /// Number of object-widening casts observed in return expressions.
     pub object_wide_casts: usize,
+    /// At least one return is narrower than the declared object type.
     pub has_narrower_than_object: bool,
+    /// At least one assertion intentionally pins the declared return type.
     pub has_pinning_assertion: bool,
+    /// Prefer showing the inferred replacement over a generic widening hint.
     pub prefer_inferred_suggestion: bool,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+/// Data used to render a `noMisleadingReturnType` diagnostic.
 pub struct MisleadingReturnType {
+    /// A concise inferred return-type replacement when one can be rendered.
     pub suggestion: Option<String>,
 }
 
@@ -1196,7 +1205,7 @@ mod tests {
                     &mut FxHashSet::default(),
                     0,
                 ),
-                (steps <= MAX_RETURN_TYPE_STEPS).then_some(false),
+                (steps <= MAX_RETURN_TYPE_DEPTH).then_some(false),
                 "class shape steps {steps}"
             );
         }

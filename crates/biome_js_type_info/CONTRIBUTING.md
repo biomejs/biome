@@ -97,6 +97,21 @@ slow, and possibly both.
 We wanted simplicity, so we opted to sidestep this problem using
 `TypeReference`s instead.
 
+## Raw and Inferred Types
+
+Type inference has two distinct `TypeData` representations. The collector-side
+type in [`type_data.rs`](src/type_data.rs) stores `TypeReference`s and is suitable
+for compact module metadata. The database-backed type in
+[`interned_types.rs`](src/interned_types.rs) stores Salsa handles and can refer to
+types from other modules without copying their data.
+
+The bridge between these representations is intentionally lossy when no module
+resolver is available. Imports, local handles, divergent values, and unsupported
+references degrade to internal `Unknown` rather than inventing a precise type.
+Code outside this crate uses the canonical names from
+[`resolved.rs`](src/resolved.rs): database-backed names use the `Inferred`
+prefix, while unique names remain unprefixed.
+
 But even though the constraints of our module graph were our primary reason for
 choosing to use type references, they have other advantages too:
 
@@ -213,9 +228,26 @@ which point it becomes a `TypeReference::Resolved` variant again.
 
 Full inference is implemented as tracked database queries in
 [`queries.rs`](../biome_module_graph/src/db/queries.rs). Query dependencies
-invalidate cached results when modules change. External callers use
-`infer_module_types()` or `infer_module_types_bottom_up()`, which iteratively
-warm imported modules before evaluating the requested module.
+invalidate cached results when modules change. `infer_module_types()`
+iteratively warms imported modules, innermost first, before evaluating the
+requested module. This keeps both execution and Salsa revalidation shallow on
+long import chains.
+
+The result is `InferredModuleTypes`, which contains the module key, its local
+type table, named type IDs, expression types, and binding types. Consumers should
+normalize values through `normalize_type()` before inspecting them. Normalization
+resolves local handles, expands structural globals, unwraps `typeof` wrappers,
+and degrades cycles or exhausted walks to `Unknown`.
+
+Salsa invokes a `cycle_result` fallback when imports form a cycle. The fallback
+computes the strongly connected component and resolves it with `CycleFallback`,
+which prevents recursive imports from manufacturing partial exact types.
+
+Every expanding walk has a deterministic query-local budget. Revisited states
+are deduplicated without consuming another step. Exhaustion returns `Unknown`
+for a type result or `None` for a tri-state predicate. For `Option<bool>` APIs,
+`Some(true)` and `Some(false)` are complete answers; `None` means inference or
+the walk could not complete and diagnostics should be suppressed.
 
 ## Type Resolvers
 
@@ -234,7 +266,7 @@ The `TypeResolver` trait is defined in [`resolver.rs`](src/resolver.rs).
   information about a module, and for performing thin inference on it.
 Raw types are stored in a `TypeStore` and consumed into `JsModuleInfo`. Full
 cross-module resolution then produces database-backed inferred types in
-`InferredModuleTypes`; it is not performed by a `ModuleResolver`.
+`InferredModuleTypes`.
 
 ## Flattening
 

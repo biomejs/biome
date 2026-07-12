@@ -66,7 +66,7 @@ impl Rule for UseAwaitThenable {
             Some(false) => {}
         }
 
-        (!ctx.inferred_expression_has_callable_member(&expression, "then")?).then_some(())
+        (!ctx.expression_has_callable_member(&expression, "then")?).then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {

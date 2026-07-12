@@ -20,6 +20,13 @@ consume("sync", async () => {});
 declare function consumeRest(...callbacks: Array<() => void>): void;
 consumeRest(async () => {});
 
+class ConstructorConsumer {
+  constructor(callback: () => void);
+  constructor(callback: () => Promise<void>, marker: number);
+  constructor(_callback: (() => void) | (() => Promise<void>), _marker?: number) {}
+}
+new ConstructorConsumer(async () => {});
+
 ```
 
 # Diagnostics
@@ -94,6 +101,25 @@ checksVoidReturnInvalid.ts:15:13 lint/nursery/noMisusedPromises ━━━━━�
   > 15 │ consumeRest(async () => {});
        │             ^^^^^^^^^^^^^^
     16 │ 
+    17 │ class ConstructorConsumer {
+  
+  i This may not have the desired result if you expect the Promise to be `await`-ed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+checksVoidReturnInvalid.ts:22:25 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a Promise, but no return value was expected.
+  
+    20 │   constructor(_callback: (() => void) | (() => Promise<void>), _marker?: number) {}
+    21 │ }
+  > 22 │ new ConstructorConsumer(async () => {});
+       │                         ^^^^^^^^^^^^^^
+    23 │ 
   
   i This may not have the desired result if you expect the Promise to be `await`-ed.
   

@@ -258,7 +258,7 @@ fn find_misused_promise_returning_callback(
         .skip(1)
         .find_map(JsCallExpression::cast)
     {
-        ctx.inferred_expected_argument_type(
+        ctx.expected_argument_type(
             &call_expression.callee().ok()?,
             &argument_list,
             argument_index,
@@ -270,7 +270,7 @@ fn find_misused_promise_returning_callback(
         .skip(1)
         .find_map(JsNewExpression::cast)
     {
-        ctx.inferred_expected_argument_type(
+        ctx.expected_argument_type(
             &new_expression.callee().ok()?,
             &argument_list,
             argument_index,

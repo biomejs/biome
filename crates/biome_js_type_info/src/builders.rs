@@ -1,3 +1,8 @@
+//! Canonical builders for inferred unions, intersections, and object shapes.
+//!
+//! Builders flatten nested containers, remove duplicates, absorb literals into
+//! wider primitive types, and poison partial results with internal `Unknown`.
+
 use std::hash::Hash;
 
 use crate::Path;

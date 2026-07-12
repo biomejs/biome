@@ -1,8 +1,12 @@
+//! Resolution of scoped names and qualified type paths.
+
 use super::{lookup::declared_type_parameters, resolver::ResolutionCtx};
 use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_type_info::{
     GLOBAL_RESOLVER, Path, TypeImportQualifier, TypeReferenceQualifier, TypeResolver,
-    resolved::{InferredLiteral, InferredTypeData, InferredTypeMember, InferredTypeMemberKind},
+    resolved::{
+        InferredLiteralValue, InferredTypeData, InferredTypeMember, InferredTypeMemberKind,
+    },
 };
 use biome_rowan::Text;
 
@@ -286,13 +290,13 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
                 InferredTypeData::InstanceOf(instance) => ty = instance.ty(self.db),
                 InferredTypeData::Literal(literal) => match literal.literal(self.db) {
-                    InferredLiteral::Object(members) => return Some(members.to_vec()),
-                    InferredLiteral::BigInt(_)
-                    | InferredLiteral::Boolean(_)
-                    | InferredLiteral::Number(_)
-                    | InferredLiteral::RegExp(_)
-                    | InferredLiteral::String(_)
-                    | InferredLiteral::Template(_) => return None,
+                    InferredLiteralValue::Object(members) => return Some(members.to_vec()),
+                    InferredLiteralValue::BigInt(_)
+                    | InferredLiteralValue::Boolean(_)
+                    | InferredLiteralValue::Number(_)
+                    | InferredLiteralValue::RegExp(_)
+                    | InferredLiteralValue::String(_)
+                    | InferredLiteralValue::Template(_) => return None,
                 },
                 InferredTypeData::Module(module) => return Some(module.members(self.db).to_vec()),
                 InferredTypeData::Namespace(namespace) => {
@@ -338,13 +342,13 @@ impl<'db> ResolutionCtx<'db, '_> {
     fn string_literal_keys(&mut self, ty: InferredTypeData<'db>) -> Option<Vec<Text>> {
         match self.resolve_inferred_type(ty) {
             InferredTypeData::Literal(literal) => match literal.literal(self.db) {
-                InferredLiteral::String(value) => Some(vec![value.as_ref().clone()]),
-                InferredLiteral::BigInt(_)
-                | InferredLiteral::Boolean(_)
-                | InferredLiteral::Number(_)
-                | InferredLiteral::Object(_)
-                | InferredLiteral::RegExp(_)
-                | InferredLiteral::Template(_) => None,
+                InferredLiteralValue::String(value) => Some(vec![value.as_ref().clone()]),
+                InferredLiteralValue::BigInt(_)
+                | InferredLiteralValue::Boolean(_)
+                | InferredLiteralValue::Number(_)
+                | InferredLiteralValue::Object(_)
+                | InferredLiteralValue::RegExp(_)
+                | InferredLiteralValue::Template(_) => None,
             },
             InferredTypeData::Union(union) => Some(
                 union
@@ -395,13 +399,13 @@ impl<'db> ResolutionCtx<'db, '_> {
     fn string_literal_key(&mut self, ty: InferredTypeData<'db>) -> Option<Text> {
         match self.resolve_inferred_type(ty) {
             InferredTypeData::Literal(literal) => match literal.literal(self.db) {
-                InferredLiteral::String(value) => Some(value.as_ref().clone()),
-                InferredLiteral::BigInt(_)
-                | InferredLiteral::Boolean(_)
-                | InferredLiteral::Number(_)
-                | InferredLiteral::Object(_)
-                | InferredLiteral::RegExp(_)
-                | InferredLiteral::Template(_) => None,
+                InferredLiteralValue::String(value) => Some(value.as_ref().clone()),
+                InferredLiteralValue::BigInt(_)
+                | InferredLiteralValue::Boolean(_)
+                | InferredLiteralValue::Number(_)
+                | InferredLiteralValue::Object(_)
+                | InferredLiteralValue::RegExp(_)
+                | InferredLiteralValue::Template(_) => None,
             },
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)

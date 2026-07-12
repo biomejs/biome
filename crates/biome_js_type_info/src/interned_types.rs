@@ -76,7 +76,9 @@ enum StructuralTypeMapItem<'db> {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum StructuralMapError {
+    /// The caller must degrade the incomplete result to `Unknown`.
     StepLimitExceeded,
+    /// A child sequence could not rebuild the original structural shape.
     InvalidRebuild,
 }
 
@@ -132,8 +134,10 @@ pub struct DivergentType {
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, salsa::Update)]
 pub enum TypeData<'db> {
+    /// Inference could not produce a usable type.
     #[default]
     Unknown,
+    /// A deliberately distinct unresolved value used to prevent accidental deduplication.
     Divergent(DivergentType),
     Global,
     BigInt,
@@ -154,12 +158,15 @@ pub enum TypeData<'db> {
     Tuple(InternedTuple<'db>),
     Generic(InternedGenericTypeParameter<'db>),
     Local(LocalTypeHandle<'db>),
+    /// A canonical global handle that remains memberless until database expansion.
     GlobalType(GlobalTypeId),
     Intersection(InternedIntersection<'db>),
     Union(InternedUnion<'db>),
     TypeOperator(InternedTypeOperatorType<'db>),
     Literal(InternedLiteral<'db>),
+    /// A nominal target paired with its applied type arguments.
     InstanceOf(InternedTypeInstance<'db>),
+    /// The type, value, and namespace targets produced by declaration merging.
     MergedReference(InternedMergedReference<'db>),
     TypeofExpression(InternedTypeofExpression<'db>),
     TypeofType(InternedTypeofType<'db>),
@@ -168,6 +175,7 @@ pub enum TypeData<'db> {
     NeverKeyword,
     ObjectKeyword,
     ThisKeyword,
+    /// The explicit TypeScript `unknown` keyword, which is a successfully inferred type.
     UnknownKeyword,
     VoidKeyword,
 }
@@ -510,6 +518,13 @@ impl<'db> TypeData<'db> {
         Some(replacements)
     }
 
+    /// Substitutes a generic throughout a type, stopping below nested binders.
+    ///
+    /// ```rust,ignore
+    /// // For `f<T>(x: T): T`, substituting `T := string` on the whole function
+    /// // preserves the nested binder and therefore leaves `f` unchanged.
+    /// let unchanged = function.substitute_type(db, substitution)?;
+    /// ```
     pub fn substitute_type(
         self,
         db: &'db dyn TypeDb,
@@ -542,6 +557,13 @@ impl<'db> TypeData<'db> {
         )
     }
 
+    /// Substitutes inside the root binder while respecting nested binders.
+    ///
+    /// ```rust,ignore
+    /// // For `f<T>(x: T): T`, root-body substitution with `T := string`
+    /// // rewrites the parameter and return type to `string`.
+    /// let specialized = function.substitute_type_in_root_body(db, substitution)?;
+    /// ```
     pub fn substitute_type_in_root_body(
         self,
         db: &'db dyn TypeDb,
@@ -555,27 +577,23 @@ impl<'db> TypeData<'db> {
         if structural_type_child_count(db, self) > remaining_steps {
             return Err(StructuralMapError::StepLimitExceeded);
         }
+        let root_type_parameter_count = declared_type_parameters(db, self).map_or(0, <[_]>::len);
         let children = structural_type_children(db, self)
             .into_iter()
-            .map(|child| child.substitute_type_with_budget(db, substitution, &mut remaining_steps))
+            .enumerate()
+            .map(|(index, child)| {
+                if index < root_type_parameter_count {
+                    Ok(child)
+                } else {
+                    child.substitute_type_with_budget(db, substitution, &mut remaining_steps)
+                }
+            })
             .collect::<Result<_, _>>()?;
         rebuild_structural_type(db, self, children).ok_or(StructuralMapError::InvalidRebuild)
     }
 
     fn declares_generic(self, db: &'db dyn TypeDb, generic: Self) -> bool {
-        let type_parameters = if let Self::Class(class) = self {
-            class.type_parameters(db)
-        } else if let Self::Constructor(constructor) = self {
-            constructor.type_parameters(db)
-        } else if let Self::Function(function) = self {
-            function.type_parameters(db)
-        } else if let Self::Interface(interface) = self {
-            interface.type_parameters(db)
-        } else {
-            return false;
-        };
-
-        type_parameters.contains(&generic)
+        declared_type_parameters(db, self).is_some_and(|parameters| parameters.contains(&generic))
     }
 
     /// Iteratively maps this type and all structurally nested types.
@@ -601,6 +619,9 @@ impl<'db> TypeData<'db> {
         mut map: impl FnMut(Self) -> ControlFlow<Self, Self>,
         mut finish: impl FnMut(Self) -> Self,
     ) -> Result<Self, StructuralMapError> {
+        // Reserve enough budget for queued children before materializing a
+        // frontier. Back-edges to active ancestors are completion edges, so
+        // they rebuild the cycle without consuming another step.
         let mut stack = Vec::from([StructuralTypeMapItem::Enter(self)]);
         let mut results = Vec::new();
         let mut active = FxHashSet::default();
@@ -681,18 +702,19 @@ impl<'db> TypeData<'db> {
 
     /// Builds the smallest type that represents a list of union variants.
     ///
-    /// Duplicate variants are removed. An empty list becomes `never`, and a
-    /// single remaining variant is returned directly instead of wrapping it in
-    /// a union.
+    /// Duplicate and nested variants are flattened. Internal `Unknown` and
+    /// `any` absorb the union, `true | false` becomes `boolean`, literals are
+    /// absorbed by their wider primitive, an empty list becomes `never`, and a
+    /// single remaining variant is returned directly.
     pub fn union_from_types(db: &'db dyn TypeDb, types: Vec<Self>) -> Self {
         UnionBuilder::new(db).add_all(types).build()
     }
 
     /// Builds the smallest type that represents a list of intersection variants.
     ///
-    /// Nested intersections are flattened, duplicate variants are removed, an
-    /// empty list becomes `never`, and a single remaining variant is returned
-    /// directly instead of wrapping it in an intersection.
+    /// Nested intersections are flattened, duplicates are removed, and
+    /// conflicting primitive variants become `never`. An empty list becomes
+    /// `never`, and a single remaining variant is returned directly.
     pub fn intersection_from_types(db: &'db dyn TypeDb, types: Vec<Self>) -> Self {
         IntersectionBuilder::new(db).add_all(types).build()
     }
@@ -799,6 +821,10 @@ impl<'db> TypeData<'db> {
         Self::instance_of(db, Self::weak_map_class(db), type_parameters)
     }
 
+    /// Converts collector-side data without a module resolver.
+    ///
+    /// Import namespaces, imports, unresolved IDs, and qualifiers without a
+    /// known type argument degrade to `Unknown`.
     pub fn from_raw_lossy(db: &'db dyn TypeDb, raw: &RawTypeData) -> Self {
         let mut resolve_reference =
             |reference: &raw::TypeReference| Self::from_raw_reference_lossy(db, reference);
@@ -951,6 +977,10 @@ impl<'db> TypeData<'db> {
         }
     }
 
+    /// Converts a raw reference using only well-known global IDs.
+    ///
+    /// Imports, unrecognized IDs, and unresolved qualifiers degrade to
+    /// `Unknown`.
     pub fn from_raw_reference_lossy(db: &'db dyn TypeDb, reference: &raw::TypeReference) -> Self {
         match reference {
             raw::TypeReference::Resolved(id) if *id == GLOBAL_UNKNOWN_ID => Self::Unknown,
@@ -990,6 +1020,10 @@ impl<'db> TypeData<'db> {
         }
     }
 
+    /// Converts inferred data back to the collector representation.
+    ///
+    /// Divergent values, local handles, and canonical global handles degrade to
+    /// raw `Unknown`; structural children use the lossy reference conversion.
     pub fn to_raw_lossy(self, db: &'db dyn TypeDb) -> RawTypeData {
         match self {
             Self::Unknown | Self::Divergent(_) => raw::TypeData::Unknown,
@@ -1116,6 +1150,10 @@ impl<'db> TypeData<'db> {
         }
     }
 
+    /// Converts a type to a raw reference when a stable raw ID exists.
+    ///
+    /// Structural types, locals, unsupported primitives, and unresolved values
+    /// degrade to the raw global `unknown` reference.
     pub fn to_raw_reference_lossy(self) -> raw::TypeReference {
         match self {
             Self::Unknown | Self::Divergent(_) => raw::TypeReference::Resolved(GLOBAL_UNKNOWN_ID),
@@ -1146,6 +1184,23 @@ impl<'db> TypeSubstitution<'db> {
         } else {
             self.generic
         }
+    }
+}
+
+fn declared_type_parameters<'db>(
+    db: &'db dyn TypeDb,
+    ty: TypeData<'db>,
+) -> Option<&'db [TypeData<'db>]> {
+    if let TypeData::Class(class) = ty {
+        Some(class.type_parameters(db))
+    } else if let TypeData::Constructor(constructor) = ty {
+        Some(constructor.type_parameters(db))
+    } else if let TypeData::Function(function) = ty {
+        Some(function.type_parameters(db))
+    } else if let TypeData::Interface(interface) = ty {
+        Some(interface.type_parameters(db))
+    } else {
+        None
     }
 }
 
@@ -3218,7 +3273,7 @@ mod tests {
                 None,
             ));
             let result = function.substitute_type_in_root_body(&db, substitution);
-            if distinct_types < MAX_TYPE_SUBSTITUTION_STEPS {
+            if distinct_types <= MAX_TYPE_SUBSTITUTION_STEPS {
                 assert!(result.is_ok(), "distinct types {distinct_types}");
             } else {
                 assert_eq!(
@@ -3262,6 +3317,44 @@ mod tests {
         assert_eq!(
             function.substitute_type_in_root_body(&db, substitution),
             Err(StructuralMapError::StepLimitExceeded)
+        );
+    }
+
+    #[test]
+    fn root_body_substitution_preserves_the_root_binder() {
+        let db = TestDb::default();
+        let generic = generic(&db);
+        let function = TypeData::Function(InternedFunction::new(
+            &db,
+            boxed([generic]),
+            boxed([FunctionParameter::Named(NamedFunctionParameter {
+                name: text("value"),
+                ty: generic,
+                is_optional: false,
+                is_rest: false,
+            })]),
+            ReturnType::Type(generic),
+            false,
+            None,
+        ));
+        let substituted = function
+            .substitute_type_in_root_body(
+                &db,
+                TypeSubstitution {
+                    generic,
+                    replacement: TypeData::String,
+                },
+            )
+            .expect("root body substitution must complete");
+        let TypeData::Function(substituted) = substituted else {
+            panic!("expected a function");
+        };
+
+        assert_eq!(substituted.type_parameters(&db).as_ref(), &[generic]);
+        assert_eq!(substituted.parameters(&db)[0].ty(), TypeData::String);
+        assert_eq!(
+            substituted.return_type(&db),
+            &ReturnType::Type(TypeData::String)
         );
     }
 

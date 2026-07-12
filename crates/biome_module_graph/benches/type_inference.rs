@@ -6,7 +6,7 @@ use biome_js_type_info::resolved::InferredTypeData;
 use biome_languages::JsFileSource;
 use biome_module_graph::{
     InferredModuleTypes, ModuleDb, ModuleInfo, ModuleInfoKind, PathInfoCache, TypeInferenceMode,
-    infer_module_types_bottom_up, resolve_js_module_with_inference_mode,
+    infer_module_types, resolve_js_module_with_inference_mode,
 };
 use biome_project_layout::ProjectLayout;
 use biome_workspace_db::WorkspaceDb;
@@ -105,7 +105,7 @@ fn generic_fanout_source(width: usize, separator: &str) -> String {
 
 fn bench_member_lookup(bencher: Bencher, source: &str, expected_variants: Option<usize>) {
     let (db, module) = build_module_from_source(source);
-    let inferred = infer_module_types_bottom_up(&db, module).expect("types must be inferred");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
     let subject = inferred_binding_type(&db, module, &inferred, "subject")
         .expect("subject binding must be inferred");
     let member = inferred
@@ -214,7 +214,7 @@ fn bench_index_d_ts_db_end_to_end(bencher: Bencher, name: &str) {
             db.modules
                 .pin()
                 .insert(path.as_path().to_path_buf(), module);
-            divan::black_box(infer_module_types_bottom_up(&db, module));
+            divan::black_box(infer_module_types(&db, module));
         });
 }
 
@@ -226,7 +226,7 @@ fn bench_index_d_ts_db_memoized(bencher: Bencher, name: &str) {
             (db, module)
         })
         .bench_local_values(|(db, module)| {
-            divan::black_box(infer_module_types_bottom_up(&db, module));
+            divan::black_box(infer_module_types(&db, module));
             db
         });
 }
@@ -237,7 +237,7 @@ fn bench_index_d_ts_db_invalidated(bencher: Bencher, name: &str) {
         .with_inputs(|| build_inferred_db(name))
         .bench_local_values(|(mut db, module, kind)| {
             salsa::Setter::to(module.set_kind(&mut db), kind);
-            divan::black_box(infer_module_types_bottom_up(&db, module));
+            divan::black_box(infer_module_types(&db, module));
             db
         });
 }
@@ -315,7 +315,7 @@ fn bench_index_d_ts_db_incremental_first_run(bencher: Bencher) {
                 }
             }
             let index_module = index_module.expect("index module must exist");
-            divan::black_box(infer_module_types_bottom_up(&db, index_module));
+            divan::black_box(infer_module_types(&db, index_module));
             db
         });
 }
@@ -359,7 +359,7 @@ fn bench_index_d_ts_db_incremental(bencher: Bencher) {
                 }
             }
             let index_module = index_module.expect("index module must exist");
-            infer_module_types_bottom_up(&db, index_module);
+            infer_module_types(&db, index_module);
 
             fs.insert("index.ts".into(), INDEX_TS_AFTER_EDIT);
             let path = BiomePath::new("index.ts");
@@ -382,7 +382,7 @@ fn bench_index_d_ts_db_incremental(bencher: Bencher) {
                 index_module.set_kind(&mut db),
                 ModuleInfoKind::Js(module_info),
             );
-            divan::black_box(infer_module_types_bottom_up(&db, index_module));
+            divan::black_box(infer_module_types(&db, index_module));
             db
         });
 }
@@ -416,7 +416,7 @@ fn build_inferred_db(name: &str) -> (WorkspaceDb, ModuleInfo, ModuleInfoKind) {
     db.modules
         .pin()
         .insert(path.as_path().to_path_buf(), module);
-    infer_module_types_bottom_up(&db, module);
+    infer_module_types(&db, module);
     (db, module, kind)
 }
 

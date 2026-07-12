@@ -1,3 +1,8 @@
+//! Read-only, lint-facing queries over database-backed inferred types.
+//!
+//! Predicates intentionally return indeterminate results when a type walk
+//! reaches unresolved data or its deterministic query-local budget.
+
 use crate::TypeDb;
 use crate::interned_types::{ConditionalType, Literal, ReturnType, TypeData, TypeMember};
 use crate::misleading_return::{
@@ -8,7 +13,7 @@ use rustc_hash::FxHashSet;
 use std::collections::VecDeque;
 
 const MAX_TYPE_VARIANT_STEPS: usize = 1024;
-const MAX_TYPE_RELATION_STEPS: usize = 50;
+const MAX_TYPE_RELATION_DEPTH: usize = 50;
 const MAX_PROMISE_TYPE_STEPS: usize = 64;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -195,6 +200,9 @@ impl<'db> InferredType<'db> {
         matches!(self.data, TypeData::InstanceOf(instance) if instance.ty(self.db).is_array_class(self.db))
     }
 
+    /// Returns whether this is an array whose element type is a Promise.
+    ///
+    /// Returns `None` when the element type is unresolved or the walk is exhausted.
     pub fn is_array_of_promise(self) -> Option<bool> {
         let TypeData::InstanceOf(instance) = self.data else {
             return if is_indeterminate_type(self.data) {
@@ -221,6 +229,9 @@ impl<'db> InferredType<'db> {
         self.has_computed_member("Symbol.asyncDispose")
     }
 
+    /// Returns whether this is a Promise or Promise-like instance.
+    ///
+    /// Returns `None` when inheritance is unresolved or the walk is exhausted.
     pub fn is_promise_instance(self) -> Option<bool> {
         is_promise_instance(self.db, self.data)
     }
@@ -248,6 +259,10 @@ impl<'db> InferredType<'db> {
         )
     }
 
+    /// Returns whether this callable returns a Promise.
+    ///
+    /// Returns `None` when the callable or return type is unresolved or the walk
+    /// is exhausted.
     pub fn function_returns_promise(self) -> Option<bool> {
         let Some(function) = self.data.callable_function(self.db) else {
             return if is_indeterminate_type(self.data) {
@@ -270,6 +285,9 @@ impl<'db> InferredType<'db> {
         self.function_return_matches(|ty| matches!(ty, TypeData::VoidKeyword))
     }
 
+    /// Returns whether a union contains a Promise variant.
+    ///
+    /// Returns `None` when a variant is unresolved or the walk is exhausted.
     pub fn has_promise_variant(self) -> Option<bool> {
         match self.data {
             TypeData::Union(_) => is_promise_instance(self.db, self.data),
@@ -307,6 +325,9 @@ impl<'db> InferredType<'db> {
         self.conditional_type().is_nullish()
     }
 
+    /// Returns whether the type contains a nullish variant.
+    ///
+    /// Returns `None` when a variant is unresolved or the walk is exhausted.
     pub fn has_nullish_variant(self) -> Option<bool> {
         self.try_any_variant_matches(|data| {
             matches!(
@@ -316,6 +337,9 @@ impl<'db> InferredType<'db> {
         })
     }
 
+    /// Returns whether every variant makes `??` equivalent to `||`.
+    ///
+    /// Returns `None` when a variant is unresolved or the walk is exhausted.
     pub fn is_safe_for_nullish_coalescing(self) -> Option<bool> {
         self.try_all_variants_match(|data| {
             if matches!(data, TypeData::InstanceOf(_)) {
@@ -328,6 +352,9 @@ impl<'db> InferredType<'db> {
         })
     }
 
+    /// Returns whether a nullish union contains only ignored primitive types.
+    ///
+    /// Returns `None` when a variant is unresolved or the walk is exhausted.
     pub fn nullish_union_matches_ignored_primitives(
         self,
         ignored: IgnoredPrimitiveTypes,
@@ -353,10 +380,16 @@ impl<'db> InferredType<'db> {
         })
     }
 
+    /// Returns whether the type contains `null`.
+    ///
+    /// Returns `None` when a variant is unresolved or the walk is exhausted.
     pub fn has_null_variant(self) -> Option<bool> {
         self.try_any_variant_matches(|data| matches!(data, TypeData::Null))
     }
 
+    /// Returns whether the type contains `undefined` or `void`.
+    ///
+    /// Returns `None` when a variant is unresolved or the walk is exhausted.
     pub fn has_undefined_variant(self) -> Option<bool> {
         self.try_any_variant_matches(|data| {
             matches!(data, TypeData::Undefined | TypeData::VoidKeyword)
@@ -407,6 +440,15 @@ impl<'db> InferredType<'db> {
         type_description(self.db, self.data)
     }
 
+    /// Returns the finite variants that can appear as switch cases.
+    ///
+    /// Returns `None` when a variant is unresolved or the walk is exhausted.
+    ///
+    /// ```rust,ignore
+    /// // `"ready" | 1 | undefined` becomes three switch-case variants.
+    /// let cases = inferred_type.try_switch_case_variants()?;
+    /// assert_eq!(cases.len(), 3);
+    /// ```
     pub fn try_switch_case_variants(self) -> Option<Vec<InferredSwitchCase>> {
         let mut cases = Vec::new();
         let mut seen = FxHashSet::default();
@@ -912,7 +954,7 @@ fn is_at_least_as_wide_as_object<'db>(
 ) -> bool {
     // `true` treats the cast target as wide and suppresses
     // `noMisleadingReturnType`; it cannot create a diagnostic.
-    if depth >= MAX_TYPE_RELATION_STEPS || !seen.insert(ty) {
+    if depth >= MAX_TYPE_RELATION_DEPTH || !seen.insert(ty) {
         return true;
     }
     let result = match ty {
@@ -1285,6 +1327,7 @@ pub(crate) fn is_promise_instance<'db>(db: &'db dyn TypeDb, data: TypeData<'db>)
         if is_promise_target(db, data) {
             return Some(true);
         }
+        // Keep this filter synchronized with the unreachable variants below.
         if is_indeterminate_type(data) {
             indeterminate = true;
             continue;
@@ -1402,6 +1445,7 @@ pub(crate) fn is_promise_instance<'db>(db: &'db dyn TypeDb, data: TypeData<'db>)
             | TypeData::ObjectKeyword
             | TypeData::ThisKeyword
             | TypeData::VoidKeyword => {}
+            // These variants are handled by is_indeterminate_type above.
             TypeData::Unknown
             | TypeData::Divergent(_)
             | TypeData::Local(_)

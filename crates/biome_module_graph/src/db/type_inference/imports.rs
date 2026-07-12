@@ -1,3 +1,5 @@
+//! Cross-module import, export, and namespace resolution.
+
 use super::{InferredModuleTypes, globals::global_type, resolver::ResolutionCtx};
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsExport, JsImport, JsOwnExport, ModuleDb, ResolvedPath};
@@ -39,10 +41,6 @@ impl<'db> ResolutionCtx<'db, '_> {
         &mut self,
         qualifier: &TypeImportQualifier,
     ) -> InferredTypeData<'db> {
-        self.resolve_import_qualifier(qualifier)
-    }
-
-    fn resolve_import_qualifier(&self, qualifier: &TypeImportQualifier) -> InferredTypeData<'db> {
         let Some(module) = self.module_for_resolved_path(&qualifier.resolved_path) else {
             return InferredTypeData::Unknown;
         };

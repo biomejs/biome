@@ -1,3 +1,9 @@
+//! Database-backed JavaScript and TypeScript type inference.
+//!
+//! Every potentially cyclic or expanding walk has a deterministic query-local
+//! budget. Exhaustion degrades to `Unknown` or `None`; deduplicated revisits do
+//! not consume additional budget.
+
 #![deny(clippy::wildcard_enum_match_arm)]
 
 use crate::db::queries::NormalizeTypeInput;
@@ -42,11 +48,12 @@ pub struct InferredModuleTypes<'db> {
     pub binding_type_data: FxHashMap<TextRange, BindingTypeData<'db>>,
 }
 
-// SAFETY: The aggregate owns its containers and contains no Rust references.
-// Its `'db` values are Salsa handles whose `Update` implementations perform the
-// required cross-revision transition. Updating each field delegates equality
-// and replacement to those implementations, so this never compares the old
-// aggregate's handles directly with handles from the new revision.
+// SAFETY: `infer_module_types_query` and `infer_module_types` return this
+// aggregate from tracked queries. The aggregate owns its containers and
+// contains only Salsa handles, whose `Update` implementations perform the
+// required cross-revision transition. Each field update delegates equality and
+// replacement to those implementations, so old-revision handles are never
+// compared directly with handles from the new revision.
 unsafe impl salsa::Update for InferredModuleTypes<'_> {
     unsafe fn maybe_update(old_pointer: *mut Self, new_value: Self) -> bool {
         let Self {
@@ -92,26 +99,7 @@ unsafe fn maybe_update_range_map<V: salsa::Update>(
     changed
 }
 
-impl<'db> InferredModuleTypes<'db> {
-    pub fn resolve_type(
-        &self,
-        db: &'db dyn ModuleDb,
-        ty: InferredTypeData<'db>,
-    ) -> InferredTypeData<'db> {
-        self.resolve_type_iterative(db, ty)
-    }
-
-    pub fn find_member_type(
-        &self,
-        db: &'db dyn ModuleDb,
-        ty: InferredTypeData<'db>,
-        name: &str,
-    ) -> Option<InferredTypeData<'db>> {
-        self.find_member_type_iterative(db, ty, name)
-    }
-}
-
-pub(super) fn collected_type_result<'db>(
+pub(in crate::db) fn collected_type_result<'db>(
     db: &'db dyn ModuleDb,
     types: Vec<InferredTypeData<'db>>,
 ) -> Option<InferredTypeData<'db>> {
@@ -122,6 +110,9 @@ pub(super) fn collected_type_result<'db>(
     }
 }
 
+/// Expands a canonical global handle to the exact type stored in the database.
+///
+/// Use this for identity-aware operations such as direct member lookup.
 fn expand_canonical_global<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
@@ -133,6 +124,10 @@ fn expand_canonical_global<'db>(
     }
 }
 
+/// Expands only globals whose result is safe to use structurally.
+///
+/// Nominal classes and interfaces remain canonical handles so identity checks,
+/// including Promise-class recognition, continue to observe the global ID.
 fn expand_structural_global<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
@@ -255,7 +250,7 @@ pub(in crate::db) fn normalize_structural_type<'db>(
     )
 }
 
-pub(super) fn infer_module_types_cycle_result<'db>(
+pub(in crate::db) fn infer_module_types_cycle_result<'db>(
     db: &'db dyn ModuleDb,
     _id: salsa::Id,
     module: ModuleInfo,
@@ -277,6 +272,10 @@ pub(super) fn infer_module_types_cycle_result<'db>(
 }
 
 fn inference_scc(db: &dyn ModuleDb, root: ModuleInfo) -> FxHashSet<ModuleInfo> {
+    // Salsa invokes this from the cycle fallback. The first pass records every
+    // dependency reachable from the root and builds reverse edges; the second
+    // walks predecessors back to the root, retaining only its strongly
+    // connected component for CycleFallback import suppression.
     let mut reachable = FxHashSet::default();
     let mut reverse = FxHashMap::<ModuleInfo, Vec<ModuleInfo>>::default();
     let mut pending = vec![root];
@@ -348,7 +347,7 @@ fn inferable_dependencies(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<ModuleIn
     dependencies
 }
 
-pub(super) fn normalize_type_cycle_result<'db>(
+pub(in crate::db) fn normalize_type_cycle_result<'db>(
     _db: &'db dyn ModuleDb,
     _id: salsa::Id,
     _input: NormalizeTypeInput<'db>,

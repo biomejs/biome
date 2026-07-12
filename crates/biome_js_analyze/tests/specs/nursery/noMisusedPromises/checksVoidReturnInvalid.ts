@@ -13,3 +13,10 @@ consume("sync", async () => {});
 
 declare function consumeRest(...callbacks: Array<() => void>): void;
 consumeRest(async () => {});
+
+class ConstructorConsumer {
+  constructor(callback: () => void);
+  constructor(callback: () => Promise<void>, marker: number);
+  constructor(_callback: (() => void) | (() => Promise<void>), _marker?: number) {}
+}
+new ConstructorConsumer(async () => {});

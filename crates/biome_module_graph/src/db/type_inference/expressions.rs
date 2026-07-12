@@ -1,3 +1,5 @@
+//! Resolution of deferred expression types and member-access results.
+
 use super::{
     collected_type_result, expand_canonical_global,
     lookup::{
@@ -16,7 +18,7 @@ use biome_js_type_info::{
     literal::NumberLiteral,
     resolved::{
         ConditionalSubset, ConditionalType, InferredCallArgumentType, InferredClass,
-        InferredConstructor, InferredFunction, InferredInternedLiteral, InferredLiteral,
+        InferredConstructor, InferredFunction, InferredLiteral, InferredLiteralValue,
         InferredLocalTypeHandle, InferredReturnType, InferredTuple, InferredTupleElementType,
         InferredTypeData, InferredTypeMember, InferredTypeSubstitution, InferredTypeofExpression,
     },
@@ -1326,7 +1328,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     pending.extend(interface.extends(self.db).iter().rev().copied());
                 }
                 InferredTypeData::Literal(literal) => {
-                    if let InferredLiteral::Object(members) = literal.literal(self.db)
+                    if let InferredLiteralValue::Object(members) = literal.literal(self.db)
                         && let Some(member) =
                             find_member_in_members_for_mode(self.db, members, member_name, mode)
                     {
@@ -1773,14 +1775,14 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::Tuple(_)
             | InferredTypeData::String => Some(InferredTypeData::String),
             InferredTypeData::Literal(literal) => match literal.literal(self.db) {
-                InferredLiteral::BigInt(_) => Some(InferredTypeData::BigInt),
-                InferredLiteral::Boolean(_) | InferredLiteral::Number(_) => {
+                InferredLiteralValue::BigInt(_) => Some(InferredTypeData::BigInt),
+                InferredLiteralValue::Boolean(_) | InferredLiteralValue::Number(_) => {
                     Some(InferredTypeData::Number)
                 }
-                InferredLiteral::Object(_)
-                | InferredLiteral::RegExp(_)
-                | InferredLiteral::String(_)
-                | InferredLiteral::Template(_) => Some(InferredTypeData::String),
+                InferredLiteralValue::Object(_)
+                | InferredLiteralValue::RegExp(_)
+                | InferredLiteralValue::String(_)
+                | InferredLiteralValue::Template(_) => Some(InferredTypeData::String),
             },
             InferredTypeData::Unknown => Some(InferredTypeData::Unknown),
             InferredTypeData::Divergent(_)
@@ -1863,13 +1865,13 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Boolean => self.typeof_string_literal("boolean"),
             InferredTypeData::Function(_) => self.typeof_string_literal("function"),
             InferredTypeData::Literal(literal) => match literal.literal(self.db) {
-                InferredLiteral::BigInt(_) => self.typeof_string_literal("bigint"),
-                InferredLiteral::Boolean(_) => self.typeof_string_literal("boolean"),
-                InferredLiteral::Object(_) | InferredLiteral::RegExp(_) => {
+                InferredLiteralValue::BigInt(_) => self.typeof_string_literal("bigint"),
+                InferredLiteralValue::Boolean(_) => self.typeof_string_literal("boolean"),
+                InferredLiteralValue::Object(_) | InferredLiteralValue::RegExp(_) => {
                     self.typeof_string_literal("object")
                 }
-                InferredLiteral::Number(_) => self.typeof_string_literal("number"),
-                InferredLiteral::String(_) | InferredLiteral::Template(_) => {
+                InferredLiteralValue::Number(_) => self.typeof_string_literal("number"),
+                InferredLiteralValue::String(_) | InferredLiteralValue::Template(_) => {
                     self.typeof_string_literal("string")
                 }
             },
@@ -1931,9 +1933,9 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     fn typeof_string_literal(&self, value: &'static str) -> InferredTypeData<'db> {
         // TODO: Replace this with canonical `global_types(db)` literal entries in Phase 6e.
-        InferredTypeData::Literal(InferredInternedLiteral::new(
+        InferredTypeData::Literal(InferredLiteral::new(
             self.db,
-            InferredLiteral::String(Text::new_static(value).into()),
+            InferredLiteralValue::String(Text::new_static(value).into()),
         ))
     }
 
@@ -2216,30 +2218,30 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     fn bigint_literal(&self, value: &'static str) -> InferredTypeData<'db> {
-        InferredTypeData::Literal(InferredInternedLiteral::new(
+        InferredTypeData::Literal(InferredLiteral::new(
             self.db,
-            InferredLiteral::BigInt(Text::new_static(value)),
+            InferredLiteralValue::BigInt(Text::new_static(value)),
         ))
     }
 
     fn boolean_literal(&self, value: bool) -> InferredTypeData<'db> {
-        InferredTypeData::Literal(InferredInternedLiteral::new(
+        InferredTypeData::Literal(InferredLiteral::new(
             self.db,
-            InferredLiteral::Boolean(value.into()),
+            InferredLiteralValue::Boolean(value.into()),
         ))
     }
 
     fn number_literal(&self, value: &'static str) -> InferredTypeData<'db> {
-        InferredTypeData::Literal(InferredInternedLiteral::new(
+        InferredTypeData::Literal(InferredLiteral::new(
             self.db,
-            InferredLiteral::Number(NumberLiteral::new(Text::new_static(value))),
+            InferredLiteralValue::Number(NumberLiteral::new(Text::new_static(value))),
         ))
     }
 
     fn string_literal(&self, value: &'static str) -> InferredTypeData<'db> {
-        InferredTypeData::Literal(InferredInternedLiteral::new(
+        InferredTypeData::Literal(InferredLiteral::new(
             self.db,
-            InferredLiteral::String(Text::new_static(value).into()),
+            InferredLiteralValue::String(Text::new_static(value).into()),
         ))
     }
 }
@@ -2353,7 +2355,7 @@ fn collect_rest_object_members<'db>(
                 pending.extend(interface.extends(db).iter().rev().copied());
             }
             InferredTypeData::Literal(literal) => {
-                let InferredLiteral::Object(own_members) = literal.literal(db) else {
+                let InferredLiteralValue::Object(own_members) = literal.literal(db) else {
                     return None;
                 };
                 collect_rest_members(
@@ -2475,9 +2477,8 @@ mod tests {
     use biome_js_type_info::{
         TypeDb,
         resolved::{
-            InferredConstructorParameter, InferredFunctionParameter,
-            InferredInternedGenericTypeParameter, InferredNamedFunctionParameter, InferredObject,
-            InferredTypeMemberKind,
+            InferredConstructorParameter, InferredFunctionParameter, InferredGenericTypeParameter,
+            InferredNamedFunctionParameter, InferredObject, InferredTypeMemberKind,
         },
     };
     use camino::Utf8Path;
@@ -2600,7 +2601,7 @@ mod tests {
 
         let db = TestDb::default();
         for steps in [LIMIT - 1, LIMIT, LIMIT + 1] {
-            let generic = InferredTypeData::Generic(InferredInternedGenericTypeParameter::new(
+            let generic = InferredTypeData::Generic(InferredGenericTypeParameter::new(
                 &db,
                 None,
                 None,

@@ -3,7 +3,7 @@ use crate::ModuleDb;
 use crate::db::queries::infer_module_types_query;
 use crate::module_graph::ModuleInfo;
 use biome_js_type_info::resolved::{
-    InferredLiteral, InferredLocalTypeHandle, InferredModuleKey, InferredReturnType,
+    InferredLiteralValue, InferredLocalTypeHandle, InferredModuleKey, InferredReturnType,
     InferredTypeData, InferredTypeMember, InferredTypeMemberKind, InferredTypeSubstitution,
     StructuralMapError,
 };
@@ -14,7 +14,7 @@ use std::rc::Rc;
 const MAX_MEMBER_LOOKUP_STEPS: usize = 1024;
 
 impl<'db> InferredModuleTypes<'db> {
-    pub(in crate::db::type_inference) fn resolve_type_iterative(
+    pub fn resolve_type(
         &self,
         db: &'db dyn ModuleDb,
         mut ty: InferredTypeData<'db>,
@@ -57,7 +57,18 @@ impl<'db> InferredModuleTypes<'db> {
             .and_then(|types| types.types.get(type_id.index()).copied())
     }
 
-    pub(in crate::db::type_inference) fn find_member_type_iterative(
+    /// Finds a member on an already normalized inferred type.
+    ///
+    /// `None` means the member is definitively absent. `Some(Unknown)` means a
+    /// local, `any`/`unknown` branch, cycle, or budget prevented a complete
+    /// answer. Any other `Some(ty)` is the found member type.
+    ///
+    /// ```text
+    /// { value: string }.value   -> Some(string)
+    /// { value: string }.missing -> None
+    /// unknown.value             -> Some(Unknown)
+    /// ```
+    pub fn find_member_type(
         &self,
         db: &'db dyn ModuleDb,
         ty: InferredTypeData<'db>,
@@ -69,6 +80,8 @@ impl<'db> InferredModuleTypes<'db> {
         let mut remaining_steps = MAX_MEMBER_LOOKUP_STEPS;
         let mut exhausted = false;
 
+        // Aggregate fan-out must finish completely. One unresolved branch
+        // poisons the combined result so a partial member cannot look exact.
         while let Some(mut state) = pending.pop() {
             let lookup = state.lookup;
             let collect = state.collect;
@@ -384,15 +397,15 @@ impl<'db> InferredModuleTypes<'db> {
                 find_member_type(db, interface.members(db), name, lookup, true)
             }
             InferredTypeData::Literal(literal) => match literal.literal(db) {
-                InferredLiteral::Object(members) => {
+                InferredLiteralValue::Object(members) => {
                     find_member_type(db, members, name, lookup, true)
                 }
-                InferredLiteral::BigInt(_)
-                | InferredLiteral::Boolean(_)
-                | InferredLiteral::Number(_)
-                | InferredLiteral::RegExp(_)
-                | InferredLiteral::String(_)
-                | InferredLiteral::Template(_) => None,
+                InferredLiteralValue::BigInt(_)
+                | InferredLiteralValue::Boolean(_)
+                | InferredLiteralValue::Number(_)
+                | InferredLiteralValue::RegExp(_)
+                | InferredLiteralValue::String(_)
+                | InferredLiteralValue::Template(_) => None,
             },
             InferredTypeData::Module(module) => {
                 find_member_type(db, module.members(db), name, lookup, true)
@@ -500,6 +513,9 @@ pub(in crate::db) fn substitutions_for_instance<'db>(
         let declared = apply_substitutions(db, *declared, inherited)?;
         let replacement = apply_substitutions(db, *replacement, inherited)?;
         let declared_instance = InferredTypeData::instance_of(db, declared, Box::default());
+        // A generic may appear either directly as `T` or wrapped as `T<>` by
+        // instance syntax. Record both spellings so nested members specialize
+        // identically regardless of which representation collection produced.
         if declared_instance != declared {
             substitutions.push(InferredTypeSubstitution {
                 generic: declared_instance,
@@ -515,7 +531,7 @@ pub(in crate::db) fn substitutions_for_instance<'db>(
     Ok(substitutions)
 }
 
-pub(super) fn declared_type_parameters<'db>(
+pub(in crate::db::type_inference) fn declared_type_parameters<'db>(
     db: &'db dyn ModuleDb,
     target: InferredTypeData<'db>,
 ) -> Option<&'db [InferredTypeData<'db>]> {
@@ -582,7 +598,7 @@ pub(in crate::db) fn apply_substitutions_to_root_body<'db>(
     Ok(ty)
 }
 
-pub(super) fn class_side_type<'db>(
+pub(in crate::db::type_inference) fn class_side_type<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
 ) -> InferredTypeData<'db> {

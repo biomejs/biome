@@ -29,9 +29,10 @@ use biome_css_syntax::{TextRange, TextSize};
 use biome_js_type_info::{
     ImportSymbol, RawTypeData, TypeReference, TypeResolverLevel,
     resolved::{
-        InferredCallArgumentType, InferredFunction, InferredFunctionParameter, InferredLiteral,
-        InferredLocalTypeHandle, InferredLocalTypeId, InferredMergedReference, InferredModuleKey,
-        InferredReturnType, InferredTypeData, InferredTypeMember, InferredTypeSubstitution,
+        InferredCallArgumentType, InferredFunction, InferredFunctionParameter,
+        InferredLiteralValue, InferredLocalTypeHandle, InferredLocalTypeId,
+        InferredMergedReference, InferredModuleKey, InferredReturnType, InferredTypeData,
+        InferredTypeMember, InferredTypeSubstitution,
     },
 };
 use biome_jsdoc_comment::JsdocComment;
@@ -49,7 +50,7 @@ const MAX_ARGUMENT_SEQUENCE_STEPS: usize = 1024;
 const MAX_LOCAL_EXTENDS_STEPS: usize = 1024;
 
 #[salsa::tracked(cycle_result=infer_module_types_cycle_result)]
-pub(crate) fn infer_module_types_query<'db>(
+pub(in crate::db) fn infer_module_types_query<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
 ) -> Option<Arc<InferredModuleTypes<'db>>> {
@@ -77,33 +78,12 @@ pub(crate) fn infer_module_types_query<'db>(
 }
 
 /// Infers the types of a module after iteratively warming all dependencies.
+///
+/// The innermost-first walk keeps both execution and Salsa revalidation shallow
+/// on long import chains. Tracking this wrapper records a flat dependency list
+/// instead of adding one public query frame per imported module.
 #[salsa::tracked]
 pub fn infer_module_types<'db>(
-    db: &'db dyn ModuleDb,
-    module: ModuleInfo,
-) -> Option<Arc<InferredModuleTypes<'db>>> {
-    infer_module_types_bottom_up_impl(db, module)
-}
-
-// NOTE: this is the only exception to the rule.
-/// Infers the types of a module, preparing the modules it imports first.
-///
-/// This is the entry point to use when answering an outside request, such as
-/// a lint rule asking for type information after a file was opened or
-/// changed. At that moment the imported modules may not have been inferred
-/// yet, and this function works through them one at a time, innermost imports
-/// first, so that even very long import chains are handled safely.
-///
-/// Crate-internal database queries use the private dependency query after this
-/// entry point has warmed imported modules.
-pub fn infer_module_types_bottom_up<'db>(
-    db: &'db dyn ModuleDb,
-    module: ModuleInfo,
-) -> Option<Arc<InferredModuleTypes<'db>>> {
-    infer_module_types(db, module)
-}
-
-fn infer_module_types_bottom_up_impl<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
 ) -> Option<Arc<InferredModuleTypes<'db>>> {
@@ -172,44 +152,34 @@ fn push_inference_dependency(
     }
 }
 
-#[salsa::interned]
-#[derive(Debug)]
-pub struct CallExpressionTypeInput<'db> {
-    pub module: ModuleInfo,
-    pub callee: InferredTypeData<'db>,
-    #[returns(ref)]
-    pub args: Box<[InferredTypeData<'db>]>,
-}
-
 #[derive(Clone, Copy, Debug)]
-pub(crate) enum ResolvedCallArgument<'db> {
+pub(in crate::db) enum ResolvedCallArgument<'db> {
     Argument(InferredTypeData<'db>),
     Optional(InferredTypeData<'db>),
     Spread(InferredTypeData<'db>),
 }
 
 impl<'db> ResolvedCallArgument<'db> {
-    pub(crate) fn ty(self) -> InferredTypeData<'db> {
+    pub(in crate::db) fn ty(self) -> InferredTypeData<'db> {
         match self {
             Self::Argument(ty) | Self::Optional(ty) | Self::Spread(ty) => ty,
         }
     }
 }
 
-#[salsa::tracked]
 pub fn infer_call_expression_type<'db>(
     db: &'db dyn ModuleDb,
-    input: CallExpressionTypeInput<'db>,
+    module: ModuleInfo,
+    callee: InferredTypeData<'db>,
+    args: &[InferredTypeData<'db>],
 ) -> InferredTypeData<'db> {
-    let module = input.module(db);
-    let callee = normalize_type(db, NormalizeTypeInput::new(db, module, input.callee(db)));
-    let args = input.args(db);
+    let callee = normalize_type(db, NormalizeTypeInput::new(db, module, callee));
     let ty = infer_call_expression_return_type(db, callee, args);
 
     normalize_type(db, NormalizeTypeInput::new(db, module, ty))
 }
 
-pub(crate) fn infer_call_expression_return_type<'db>(
+pub(in crate::db) fn infer_call_expression_return_type<'db>(
     db: &'db dyn ModuleDb,
     callee: InferredTypeData<'db>,
     args: &[InferredTypeData<'db>],
@@ -222,7 +192,7 @@ pub(crate) fn infer_call_expression_return_type<'db>(
     infer_call_expression_return_type_from_args(db, callee, &args)
 }
 
-pub(crate) fn infer_call_expression_return_type_from_args<'db>(
+pub(in crate::db) fn infer_call_expression_return_type_from_args<'db>(
     db: &'db dyn ModuleDb,
     callee: InferredTypeData<'db>,
     args: &[ResolvedCallArgument<'db>],
@@ -403,18 +373,36 @@ fn select_call_signature<'db>(
 
 /// Returns the parameter type selected for a call argument.
 ///
-/// Overloaded callables use the same declaration-ordered, uncertainty-aware
+/// Overloaded callables use the same declaration-ordered, indeterminate-aware
 /// signature matching as return-type inference. The requested argument is
 /// ignored while selecting the signature because its expected type is the
 /// result of this operation.
+#[salsa::interned]
+#[derive(Debug)]
+pub struct CallArgumentTypeInput<'db> {
+    pub callee: InferredTypeData<'db>,
+    #[returns(ref)]
+    pub args: Box<[InferredCallArgumentType<'db>]>,
+    pub argument_index: usize,
+}
+
+#[salsa::tracked]
 pub fn infer_call_argument_type<'db>(
     db: &'db dyn ModuleDb,
-    callee: InferredTypeData<'db>,
-    args: &[InferredCallArgumentType<'db>],
-    argument_index: usize,
+    input: CallArgumentTypeInput<'db>,
 ) -> Option<InferredTypeData<'db>> {
-    let args = resolved_call_arguments(args);
-    infer_function_argument_type(db, callee, &args, argument_index)
+    let args = resolved_call_arguments(input.args(db));
+    infer_function_argument_type(db, input.callee(db), &args, input.argument_index(db))
+}
+
+/// Returns the constructor parameter type selected for a call argument.
+#[salsa::tracked]
+pub fn infer_constructor_argument_type<'db>(
+    db: &'db dyn ModuleDb,
+    input: CallArgumentTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let args = resolved_call_arguments(input.args(db));
+    infer_constructor_argument_type_inner(db, input.callee(db), &args, input.argument_index(db))
 }
 
 fn resolved_call_arguments<'db>(
@@ -511,6 +499,168 @@ fn infer_function_argument_type<'db>(
     }
 }
 
+fn infer_constructor_argument_type_inner<'db>(
+    db: &'db dyn ModuleDb,
+    callee: InferredTypeData<'db>,
+    args: &[ResolvedCallArgument<'db>],
+    argument_index: usize,
+) -> Option<InferredTypeData<'db>> {
+    match callee {
+        InferredTypeData::Class(class) => {
+            select_constructor_argument_type(db, class.members(db), args, argument_index)
+        }
+        InferredTypeData::Constructor(constructor) => {
+            let parameters = constructor
+                .parameters(db)
+                .iter()
+                .map(|parameter| parameter.parameter.clone())
+                .collect::<Vec<_>>();
+            parameter_for_argument(&parameters, argument_index)
+                .map(|parameter| parameter_argument_type(db, parameter))
+        }
+        InferredTypeData::InstanceOf(instance) => {
+            let target = instance.ty(db);
+            let substitutions =
+                substitutions_for_instance(db, target, instance.type_parameters(db), &[]).ok()?;
+            let target = apply_substitutions_to_root_body(db, target, &substitutions).ok()?;
+            infer_constructor_argument_type_inner(db, target, args, argument_index)
+        }
+        InferredTypeData::Union(union) => {
+            let mut parameter_types = Vec::new();
+            for callee in union.types(db) {
+                parameter_types.push(infer_constructor_argument_type_inner(
+                    db,
+                    *callee,
+                    args,
+                    argument_index,
+                )?);
+            }
+            collected_type_result(db, parameter_types)
+        }
+        InferredTypeData::TypeofType(typeof_type) => {
+            infer_constructor_argument_type_inner(db, typeof_type.ty(db), args, argument_index)
+        }
+        InferredTypeData::TypeofValue(typeof_value) => {
+            infer_constructor_argument_type_inner(db, typeof_value.ty(db), args, argument_index)
+        }
+        InferredTypeData::Unknown
+        | InferredTypeData::Divergent(_)
+        | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
+        | InferredTypeData::BigInt
+        | InferredTypeData::Boolean
+        | InferredTypeData::Null
+        | InferredTypeData::Number
+        | InferredTypeData::String
+        | InferredTypeData::Symbol
+        | InferredTypeData::Undefined
+        | InferredTypeData::Conditional
+        | InferredTypeData::Function(_)
+        | InferredTypeData::Interface(_)
+        | InferredTypeData::Module(_)
+        | InferredTypeData::Namespace(_)
+        | InferredTypeData::Object(_)
+        | InferredTypeData::Tuple(_)
+        | InferredTypeData::Generic(_)
+        | InferredTypeData::Local(_)
+        | InferredTypeData::Intersection(_)
+        | InferredTypeData::TypeOperator(_)
+        | InferredTypeData::Literal(_)
+        | InferredTypeData::MergedReference(_)
+        | InferredTypeData::TypeofExpression(_)
+        | InferredTypeData::AnyKeyword
+        | InferredTypeData::NeverKeyword
+        | InferredTypeData::ObjectKeyword
+        | InferredTypeData::ThisKeyword
+        | InferredTypeData::UnknownKeyword
+        | InferredTypeData::VoidKeyword => None,
+    }
+}
+
+fn select_constructor_argument_type<'db>(
+    db: &'db dyn ModuleDb,
+    members: &[InferredTypeMember<'db>],
+    args: &[ResolvedCallArgument<'db>],
+    argument_index: usize,
+) -> Option<InferredTypeData<'db>> {
+    let signatures = members
+        .iter()
+        .filter(|member| member.kind.is_constructor())
+        .filter_map(|member| constructor_signature_parameters(db, member.ty))
+        .collect::<Vec<_>>();
+
+    let parameters = if signatures.len() < 2 {
+        signatures.first()?
+    } else {
+        let mut selected = None;
+        for parameters in &signatures {
+            match parameters_accept_arguments(db, parameters, args, Some(argument_index)) {
+                Some(true) => {
+                    selected = Some(parameters);
+                    break;
+                }
+                Some(false) => {}
+                None => return None,
+            }
+        }
+        selected?
+    };
+
+    parameter_for_argument(parameters, argument_index)
+        .map(|parameter| parameter_argument_type(db, parameter))
+}
+
+fn constructor_signature_parameters<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+) -> Option<Box<[InferredFunctionParameter<'db>]>> {
+    match ty {
+        InferredTypeData::Constructor(constructor) => Some(
+            constructor
+                .parameters(db)
+                .iter()
+                .map(|parameter| parameter.parameter.clone())
+                .collect(),
+        ),
+        InferredTypeData::Function(function) => Some(function.parameters(db).clone()),
+        InferredTypeData::Unknown
+        | InferredTypeData::Divergent(_)
+        | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
+        | InferredTypeData::BigInt
+        | InferredTypeData::Boolean
+        | InferredTypeData::Null
+        | InferredTypeData::Number
+        | InferredTypeData::String
+        | InferredTypeData::Symbol
+        | InferredTypeData::Undefined
+        | InferredTypeData::Conditional
+        | InferredTypeData::Class(_)
+        | InferredTypeData::Interface(_)
+        | InferredTypeData::Module(_)
+        | InferredTypeData::Namespace(_)
+        | InferredTypeData::Object(_)
+        | InferredTypeData::Tuple(_)
+        | InferredTypeData::Generic(_)
+        | InferredTypeData::Local(_)
+        | InferredTypeData::Intersection(_)
+        | InferredTypeData::Union(_)
+        | InferredTypeData::TypeOperator(_)
+        | InferredTypeData::Literal(_)
+        | InferredTypeData::InstanceOf(_)
+        | InferredTypeData::MergedReference(_)
+        | InferredTypeData::TypeofExpression(_)
+        | InferredTypeData::TypeofType(_)
+        | InferredTypeData::TypeofValue(_)
+        | InferredTypeData::AnyKeyword
+        | InferredTypeData::NeverKeyword
+        | InferredTypeData::ObjectKeyword
+        | InferredTypeData::ThisKeyword
+        | InferredTypeData::UnknownKeyword
+        | InferredTypeData::VoidKeyword => None,
+    }
+}
+
 fn signature_accepts_arguments<'db>(
     db: &'db dyn ModuleDb,
     function: InferredFunction<'db>,
@@ -526,13 +676,16 @@ fn parameters_accept_arguments<'db>(
     args: &[ResolvedCallArgument<'db>],
     ignored_argument_index: Option<usize>,
 ) -> Option<bool> {
+    // Optional and spread arguments create alternative sequence states. A full
+    // indeterminate match is remembered rather than returned immediately
+    // because another branch may still prove a definite match.
     let mut pending = Vec::from([(0, 0, false)]);
     let mut seen = FxHashSet::default();
     let mut processed_states = 0;
-    let mut found_uncertain_match = false;
+    let mut found_indeterminate_match = false;
 
-    while let Some((parameter_index, argument_index, uncertain)) = pending.pop() {
-        if !seen.insert((parameter_index, argument_index, uncertain)) {
+    while let Some((parameter_index, argument_index, indeterminate)) = pending.pop() {
+        if !seen.insert((parameter_index, argument_index, indeterminate)) {
             continue;
         }
         if processed_states == MAX_ARGUMENT_SEQUENCE_STEPS {
@@ -542,8 +695,8 @@ fn parameters_accept_arguments<'db>(
 
         let Some(argument) = args.get(argument_index).copied() else {
             if remaining_parameters_accept_zero(parameters, parameter_index) {
-                if uncertain {
-                    found_uncertain_match = true;
+                if indeterminate {
+                    found_indeterminate_match = true;
                 } else {
                     return Some(true);
                 }
@@ -556,12 +709,12 @@ fn parameters_accept_arguments<'db>(
                 continue;
             };
             if matches!(argument, ResolvedCallArgument::Optional(_)) {
-                pending.push((parameter_index, argument_index + 1, uncertain));
+                pending.push((parameter_index, argument_index + 1, indeterminate));
             }
             pending.push((
                 next_parameter_index(parameter, parameter_index),
                 argument_index + 1,
-                uncertain,
+                indeterminate,
             ));
             continue;
         }
@@ -573,23 +726,23 @@ fn parameters_accept_arguments<'db>(
                 parameter_index,
                 argument_index + 1,
                 arg_ty,
-                uncertain,
+                indeterminate,
                 &mut pending,
             ),
             ResolvedCallArgument::Optional(arg_ty) => {
-                pending.push((parameter_index, argument_index + 1, uncertain));
+                pending.push((parameter_index, argument_index + 1, indeterminate));
                 push_consumed_argument_state(
                     db,
                     parameters,
                     parameter_index,
                     argument_index + 1,
                     arg_ty,
-                    uncertain,
+                    indeterminate,
                     &mut pending,
                 );
             }
             ResolvedCallArgument::Spread(arg_ty) => {
-                pending.push((parameter_index, argument_index + 1, uncertain));
+                pending.push((parameter_index, argument_index + 1, indeterminate));
                 let arg_ty = spread_argument_element_type(db, arg_ty);
                 push_consumed_spread_state(
                     db,
@@ -597,14 +750,14 @@ fn parameters_accept_arguments<'db>(
                     parameter_index,
                     argument_index,
                     arg_ty,
-                    uncertain,
+                    indeterminate,
                     &mut pending,
                 );
             }
         }
     }
 
-    if found_uncertain_match {
+    if found_indeterminate_match {
         None
     } else {
         Some(false)
@@ -617,14 +770,14 @@ fn push_consumed_argument_state<'db>(
     parameter_index: usize,
     next_argument_index: usize,
     arg_ty: InferredTypeData<'db>,
-    uncertain: bool,
+    indeterminate: bool,
     pending: &mut Vec<(usize, usize, bool)>,
 ) {
     let Some(parameter) = parameter_for_argument(parameters, parameter_index) else {
         return;
     };
-    let uncertain = match argument_satisfies_parameter(db, parameter, arg_ty) {
-        Some(true) => uncertain,
+    let indeterminate = match argument_satisfies_parameter(db, arg_ty, parameter) {
+        Some(true) => indeterminate,
         Some(false) => return,
         None => true,
     };
@@ -632,7 +785,7 @@ fn push_consumed_argument_state<'db>(
     pending.push((
         next_parameter_index(parameter, parameter_index),
         next_argument_index,
-        uncertain,
+        indeterminate,
     ));
 }
 
@@ -642,32 +795,32 @@ fn push_consumed_spread_state<'db>(
     parameter_index: usize,
     argument_index: usize,
     arg_ty: InferredTypeData<'db>,
-    uncertain: bool,
+    indeterminate: bool,
     pending: &mut Vec<(usize, usize, bool)>,
 ) {
     let Some(parameter) = parameter_for_argument(parameters, parameter_index) else {
         return;
     };
-    let uncertain = match argument_satisfies_parameter(db, parameter, arg_ty) {
-        Some(true) => uncertain,
+    let indeterminate = match argument_satisfies_parameter(db, arg_ty, parameter) {
+        Some(true) => indeterminate,
         Some(false) => return,
         None => true,
     };
 
     if parameter.is_rest() {
-        pending.push((parameter_index, argument_index + 1, uncertain));
+        pending.push((parameter_index, argument_index + 1, indeterminate));
     } else {
-        pending.push((parameter_index + 1, argument_index, uncertain));
+        pending.push((parameter_index + 1, argument_index, indeterminate));
     }
 }
 
 fn argument_satisfies_parameter<'db>(
     db: &'db dyn ModuleDb,
-    parameter: &InferredFunctionParameter<'db>,
     arg_ty: InferredTypeData<'db>,
+    parameter: &InferredFunctionParameter<'db>,
 ) -> Option<bool> {
     let parameter_ty = parameter_argument_type(db, parameter);
-    let type_match = argument_may_match_parameter(db, parameter_ty, arg_ty);
+    let type_match = argument_may_match_parameter(db, arg_ty, parameter_ty);
 
     let callable_match = match (
         parameter_ty.callable_function(db),
@@ -775,17 +928,17 @@ fn parameter_argument_type<'db>(
 
 fn argument_may_match_parameter<'db>(
     db: &'db dyn ModuleDb,
-    parameter_ty: InferredTypeData<'db>,
     arg_ty: InferredTypeData<'db>,
+    parameter_ty: InferredTypeData<'db>,
 ) -> Option<bool> {
     let mut pending = Vec::from([(Vec::from([(parameter_ty, arg_ty)]), false)]);
     let mut processed_states = 0;
-    let mut found_uncertain_match = false;
+    let mut found_indeterminate_match = false;
 
-    while let Some((mut required_pairs, uncertain)) = pending.pop() {
+    while let Some((mut required_pairs, indeterminate)) = pending.pop() {
         let Some((parameter_ty, arg_ty)) = required_pairs.pop() else {
-            if uncertain {
-                found_uncertain_match = true;
+            if indeterminate {
+                found_indeterminate_match = true;
                 continue;
             }
             return Some(true);
@@ -796,18 +949,18 @@ fn argument_may_match_parameter<'db>(
         processed_states += 1;
 
         if parameter_ty == arg_ty {
-            pending.push((required_pairs, uncertain));
+            pending.push((required_pairs, indeterminate));
             continue;
         }
         if let (InferredTypeData::Literal(parameter), InferredTypeData::Literal(argument)) =
             (parameter_ty, arg_ty)
-            && !matches!(parameter.literal(db), InferredLiteral::Object(_))
-            && !matches!(argument.literal(db), InferredLiteral::Object(_))
+            && !matches!(parameter.literal(db), InferredLiteralValue::Object(_))
+            && !matches!(argument.literal(db), InferredLiteralValue::Object(_))
         {
             continue;
         }
         if let InferredTypeData::Literal(parameter) = parameter_ty
-            && !matches!(parameter.literal(db), InferredLiteral::Object(_))
+            && !matches!(parameter.literal(db), InferredLiteralValue::Object(_))
             && literal_base_type(db, parameter_ty) == Some(arg_ty)
         {
             pending.push((required_pairs, true));
@@ -818,19 +971,19 @@ fn argument_may_match_parameter<'db>(
         let arg_ty = literal_base_type(db, arg_ty).unwrap_or(arg_ty);
 
         if parameter_ty == arg_ty {
-            pending.push((required_pairs, uncertain));
+            pending.push((required_pairs, indeterminate));
             continue;
         }
 
         let remaining_steps = MAX_ARGUMENT_MATCH_STEPS - processed_states;
-        if argument_match_child_count(db, parameter_ty, arg_ty) > remaining_steps {
+        if argument_match_child_count(db, arg_ty, parameter_ty) > remaining_steps {
             return None;
         }
 
-        match argument_match_action(db, parameter_ty, arg_ty) {
-            ArgumentMatchAction::Match => pending.push((required_pairs, uncertain)),
+        match argument_match_action(db, arg_ty, parameter_ty) {
+            ArgumentMatchAction::Match => pending.push((required_pairs, indeterminate)),
             ArgumentMatchAction::Mismatch => {}
-            ArgumentMatchAction::Unknown => pending.push((required_pairs, true)),
+            ArgumentMatchAction::Indeterminate => pending.push((required_pairs, true)),
             ArgumentMatchAction::All(pairs) => {
                 let queued_pairs = pending.iter().map(|(pairs, _)| pairs.len()).sum::<usize>();
                 if queued_pairs
@@ -841,7 +994,7 @@ fn argument_may_match_parameter<'db>(
                     return None;
                 }
                 required_pairs.extend(pairs);
-                pending.push((required_pairs, uncertain));
+                pending.push((required_pairs, indeterminate));
             }
             ArgumentMatchAction::Any(pairs) => {
                 let queued_pairs = pending.iter().map(|(pairs, _)| pairs.len()).sum::<usize>();
@@ -857,13 +1010,13 @@ fn argument_may_match_parameter<'db>(
                 for pair in pairs.into_iter().rev() {
                     let mut branch_pairs = required_pairs.clone();
                     branch_pairs.push(pair);
-                    pending.push((branch_pairs, uncertain));
+                    pending.push((branch_pairs, indeterminate));
                 }
             }
         }
     }
 
-    if found_uncertain_match {
+    if found_indeterminate_match {
         None
     } else {
         Some(false)
@@ -872,8 +1025,8 @@ fn argument_may_match_parameter<'db>(
 
 fn argument_match_child_count<'db>(
     db: &'db dyn ModuleDb,
-    parameter_ty: InferredTypeData<'db>,
     arg_ty: InferredTypeData<'db>,
+    parameter_ty: InferredTypeData<'db>,
 ) -> usize {
     match (parameter_ty, arg_ty) {
         (InferredTypeData::Generic(generic), _) => usize::from(generic.constraint(db).is_some()),
@@ -900,15 +1053,15 @@ fn argument_match_child_count<'db>(
 enum ArgumentMatchAction<'db> {
     Match,
     Mismatch,
-    Unknown,
+    Indeterminate,
     All(Vec<(InferredTypeData<'db>, InferredTypeData<'db>)>),
     Any(Vec<(InferredTypeData<'db>, InferredTypeData<'db>)>),
 }
 
 fn argument_match_action<'db>(
     db: &'db dyn ModuleDb,
-    parameter_ty: InferredTypeData<'db>,
     arg_ty: InferredTypeData<'db>,
+    parameter_ty: InferredTypeData<'db>,
 ) -> ArgumentMatchAction<'db> {
     match (parameter_ty, arg_ty) {
         (InferredTypeData::AnyKeyword | InferredTypeData::UnknownKeyword, _) => {
@@ -929,7 +1082,7 @@ fn argument_match_action<'db>(
             | InferredTypeData::Divergent(_),
         )
         | (InferredTypeData::Unknown | InferredTypeData::ThisKeyword, _) => {
-            ArgumentMatchAction::Unknown
+            ArgumentMatchAction::Indeterminate
         }
         (_, InferredTypeData::NeverKeyword) => ArgumentMatchAction::Match,
         (InferredTypeData::NeverKeyword, _) => ArgumentMatchAction::Mismatch,
@@ -937,21 +1090,21 @@ fn argument_match_action<'db>(
             match argument_type_extends_parameter_local(db, arg_ty, parameter) {
                 Some(true) => ArgumentMatchAction::Match,
                 Some(false) => ArgumentMatchAction::Mismatch,
-                None => ArgumentMatchAction::Unknown,
+                None => ArgumentMatchAction::Indeterminate,
             }
         }
         (parameter_ty, InferredTypeData::Local(argument)) => {
             match argument_local_extends_parameter_type(db, argument, parameter_ty) {
                 Some(true) => ArgumentMatchAction::Match,
                 Some(false) => ArgumentMatchAction::Mismatch,
-                None => ArgumentMatchAction::Unknown,
+                None => ArgumentMatchAction::Indeterminate,
             }
         }
         (InferredTypeData::Class(_), InferredTypeData::Class(_)) => {
             match argument_type_extends_parameter_type(db, arg_ty, parameter_ty) {
                 Some(true) => ArgumentMatchAction::Match,
                 Some(false) => ArgumentMatchAction::Mismatch,
-                None => ArgumentMatchAction::Unknown,
+                None => ArgumentMatchAction::Indeterminate,
             }
         }
         (parameter_ty @ InferredTypeData::Union(_), InferredTypeData::Union(argument_union)) => {
@@ -1070,7 +1223,7 @@ fn argument_match_action<'db>(
             | InferredTypeData::ObjectKeyword
             | InferredTypeData::TypeOperator(_)
             | InferredTypeData::TypeofExpression(_),
-        ) => ArgumentMatchAction::Unknown,
+        ) => ArgumentMatchAction::Indeterminate,
         (
             InferredTypeData::Class(_)
             | InferredTypeData::Constructor(_)
@@ -1511,11 +1664,13 @@ fn literal_base_type<'db>(
     };
 
     match literal.literal(db) {
-        InferredLiteral::BigInt(_) => Some(InferredTypeData::BigInt),
-        InferredLiteral::Boolean(_) => Some(InferredTypeData::Boolean),
-        InferredLiteral::Number(_) => Some(InferredTypeData::Number),
-        InferredLiteral::String(_) | InferredLiteral::Template(_) => Some(InferredTypeData::String),
-        InferredLiteral::Object(_) | InferredLiteral::RegExp(_) => None,
+        InferredLiteralValue::BigInt(_) => Some(InferredTypeData::BigInt),
+        InferredLiteralValue::Boolean(_) => Some(InferredTypeData::Boolean),
+        InferredLiteralValue::Number(_) => Some(InferredTypeData::Number),
+        InferredLiteralValue::String(_) | InferredLiteralValue::Template(_) => {
+            Some(InferredTypeData::String)
+        }
+        InferredLiteralValue::Object(_) | InferredLiteralValue::RegExp(_) => None,
     }
 }
 
@@ -1614,7 +1769,7 @@ pub fn normalize_type<'db>(
 ///
 /// Tracked: depends on `js_module_info(db, module)` and on the CSS modules it
 /// imports. If any of those change, this recomputes.
-#[salsa::tracked(no_eq, returns(deref))]
+#[salsa::tracked(returns(deref))]
 pub fn css_classes_for_module(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<CssClassStep> {
     let module_kind = module.kind(db);
     let Some(js_info) = module_kind.as_js_module_info() else {
@@ -1647,6 +1802,8 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
     let mut result = Vec::new();
     let mut visited: FxHashSet<Utf8PathBuf> = FxHashSet::default();
     let mut queue = VecDeque::new();
+    let mut modules = db.all_modules().into_iter().collect::<Vec<_>>();
+    modules.sort_unstable_by(|(left, _), (right, _)| left.cmp(right));
     queue.push_back(module.path(db).to_path_buf());
 
     while let Some(current) = queue.pop_front() {
@@ -1654,9 +1811,9 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
             continue;
         }
 
-        db.for_each_module(&mut |file_path, module_info| {
+        for (file_path, module_info) in &modules {
             if file_path == current.as_path() {
-                return;
+                continue;
             }
             let imports_current = match module_info {
                 ModuleInfoKind::Js(js_info) => js_info
@@ -1684,7 +1841,7 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
                 }
             };
 
-            if imports_current && !visited.contains(file_path) {
+            if imports_current && !visited.contains(file_path.as_path()) {
                 match module_info {
                     ModuleInfoKind::Js(_) | ModuleInfoKind::Html(_) => {
                         result.push(file_path.to_path_buf());
@@ -1694,9 +1851,11 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
                     }
                 }
             }
-        });
+        }
     }
 
+    result.sort_unstable();
+    result.dedup();
     result
 }
 
@@ -2166,12 +2325,13 @@ pub fn build_import_tree_for_html(db: &dyn ModuleDb, module: ModuleInfo) -> Opti
     Some(root)
 }
 
-pub(crate) fn build_parent_nodes(
+fn build_parent_nodes(
     db: &dyn ModuleDb,
     current_path: &Utf8Path,
     visited: &mut FxHashSet<Utf8PathBuf>,
 ) -> Vec<ImportTreeNode> {
-    let all_modules = db.all_modules();
+    let mut all_modules = db.all_modules().into_iter().collect::<Vec<_>>();
+    all_modules.sort_unstable_by(|(left, _), (right, _)| left.cmp(right));
     let mut parents = Vec::new();
 
     for (file_path, module_info) in &all_modules {
@@ -2240,7 +2400,7 @@ mod tests {
     use super::*;
     use biome_js_type_info::{
         TypeDb,
-        interned_types::{InternedGenericTypeParameter, InternedTypeInstance, InternedTypeofType},
+        resolved::{InferredGenericTypeParameter, InferredTypeInstance, InferredTypeofType},
     };
 
     #[salsa::db]
@@ -2264,6 +2424,10 @@ mod tests {
 
     #[salsa::db]
     impl ModuleDb for TestDb {
+        fn module_graph_generation(&self) -> u64 {
+            0
+        }
+
         fn module_for_path(&self, _path: &Utf8Path) -> Option<ModuleInfo> {
             None
         }
@@ -2277,7 +2441,7 @@ mod tests {
         leaf: InferredTypeData<'db>,
     ) -> InferredTypeData<'db> {
         (1..distinct_types).fold(leaf, |ty, _| {
-            InferredTypeData::TypeofType(InternedTypeofType::new(db, ty))
+            InferredTypeData::TypeofType(InferredTypeofType::new(db, ty))
         })
     }
 
@@ -2286,7 +2450,7 @@ mod tests {
         let db = TestDb::default();
 
         for distinct_types in [1023, 1024, 1025] {
-            let generic = InferredTypeData::Generic(InternedGenericTypeParameter::new(
+            let generic = InferredTypeData::Generic(InferredGenericTypeParameter::new(
                 &db,
                 None,
                 None,
@@ -2300,14 +2464,14 @@ mod tests {
                 false,
                 None,
             ));
-            let callee = InferredTypeData::InstanceOf(InternedTypeInstance::new(
+            let callee = InferredTypeData::InstanceOf(InferredTypeInstance::new(
                 &db,
                 function,
                 Vec::from([InferredTypeData::Number]).into_boxed_slice(),
             ));
             let result = infer_call_expression_return_type(&db, callee, &[]);
 
-            if distinct_types < 1024 {
+            if distinct_types <= 1024 {
                 let mut leaf = result;
                 while let InferredTypeData::TypeofType(typeof_type) = leaf {
                     leaf = typeof_type.ty(&db);

@@ -1,3 +1,5 @@
+//! Conversion from collector-side raw types to database-backed inferred types.
+
 use super::{BindingTypeData, InferredModuleTypes, globals::global_type, lookup::module_for_key};
 use crate::db::queries::infer_module_types_query;
 use crate::js_module_info::is_named_type_declaration;
@@ -8,7 +10,7 @@ use biome_js_type_info::{
     TypeResolverLevel,
     resolved::{
         GlobalTypeId, InferredLocalTypeHandle, InferredLocalTypeId, InferredModuleKey,
-        InferredTypeData, InternedTypeofValue,
+        InferredTypeData, InferredTypeofValue,
     },
 };
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -195,6 +197,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             return *ty;
         }
 
+        // Re-entry means the raw type refers back to itself. Return its stable
+        // local handle now; the outer resolution stores the completed value in
+        // the module table and later normalization follows the handle.
         if !self.in_progress.insert(type_id) {
             return self.local_type(type_id);
         }
@@ -226,7 +231,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             } else {
                 self.resolve(&value.ty)
             };
-            return InferredTypeData::TypeofValue(InternedTypeofValue::new(
+            return InferredTypeData::TypeofValue(InferredTypeofValue::new(
                 self.db,
                 ty,
                 value.identifier.clone(),
