@@ -1,0 +1,89 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+> x
+>     + s
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [],
+                marker_token: R_ANGLE@0..1 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] [],
+            },
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@2..3 "x" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@3..4 "\n" [] [],
+                        },
+                        MdQuotePrefix {
+                            pre_marker_indent: MdQuoteIndentList [],
+                            marker_token: R_ANGLE@4..5 ">" [] [],
+                            post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@5..6 " " [] [],
+                        },
+                        MdIndentToken {
+                            md_indent_char_token: MD_INDENT_CHAR@6..10 "    " [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@10..13 "+ s" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@13..14 "\n" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@14..14 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..14
+  0: (empty)
+  1: MD_BLOCK_LIST@0..14
+    0: MD_QUOTE@0..14
+      0: MD_QUOTE_PREFIX@0..2
+        0: MD_QUOTE_INDENT_LIST@0..0
+        1: R_ANGLE@0..1 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] []
+      1: MD_BLOCK_LIST@2..14
+        0: MD_PARAGRAPH@2..14
+          0: MD_INLINE_ITEM_LIST@2..14
+            0: MD_TEXTUAL@2..3
+              0: MD_TEXTUAL_LITERAL@2..3 "x" [] []
+            1: MD_TEXTUAL@3..4
+              0: MD_TEXTUAL_LITERAL@3..4 "\n" [] []
+            2: MD_QUOTE_PREFIX@4..6
+              0: MD_QUOTE_INDENT_LIST@4..4
+              1: R_ANGLE@4..5 ">" [] []
+              2: MD_QUOTE_POST_MARKER_SPACE@5..6 " " [] []
+            3: MD_INDENT_TOKEN@6..10
+              0: MD_INDENT_CHAR@6..10 "    " [] []
+            4: MD_TEXTUAL@10..13
+              0: MD_TEXTUAL_LITERAL@10..13 "+ s" [] []
+            5: MD_TEXTUAL@13..14
+              0: MD_TEXTUAL_LITERAL@13..14 "\n" [] []
+  2: EOF@14..14 "" [] []
+
+```
