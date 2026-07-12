@@ -16,6 +16,11 @@ class BarError extends TypeError {
 	}
 }
 
+// Labeled via an instance class field instead of the constructor.
+class FieldError extends Error {
+	name = "FieldError";
+}
+
 // Does not extend a built-in error — out of scope.
 class NotAnError extends SomeBase {
 	constructor() {

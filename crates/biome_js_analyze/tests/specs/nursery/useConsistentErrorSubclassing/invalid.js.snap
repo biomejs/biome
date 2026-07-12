@@ -29,6 +29,9 @@ class DatabaseError extends Error {
 	}
 }
 
+// No constructor and no `name` field — never labels itself.
+class TimeoutError extends Error {}
+
 // `this.name` assigned dynamically.
 class ApiError extends Error {
 	constructor(message) {
@@ -85,19 +88,15 @@ invalid.js:12:7 lint/nursery/useConsistentErrorSubclassing ━━━━━━━
 ```
 
 ```
-invalid.js:21:2 lint/nursery/useConsistentErrorSubclassing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:20:7 lint/nursery/useConsistentErrorSubclassing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This custom error class doesn't set this.name.
   
     19 │ // Constructor never assigns `this.name`.
-    20 │ class DatabaseError extends Error {
-  > 21 │ 	constructor(message) {
-       │ 	^^^^^^^^^^^^^^^^^^^^^^
-  > 22 │ 		super(message);
-  > 23 │ 	}
-       │ 	^
-    24 │ }
-    25 │ 
+  > 20 │ class DatabaseError extends Error {
+       │       ^^^^^^^^^^^^^
+    21 │ 	constructor(message) {
+    22 │ 		super(message);
   
   i Set this.name to a string literal matching the class name so the error is identifiable at runtime.
   
@@ -107,16 +106,34 @@ invalid.js:21:2 lint/nursery/useConsistentErrorSubclassing ━━━━━━━
 ```
 
 ```
-invalid.js:30:3 lint/nursery/useConsistentErrorSubclassing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:27:7 lint/nursery/useConsistentErrorSubclassing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This custom error class doesn't set this.name.
+  
+    26 │ // No constructor and no `name` field — never labels itself.
+  > 27 │ class TimeoutError extends Error {}
+       │       ^^^^^^^^^^^^
+    28 │ 
+    29 │ // `this.name` assigned dynamically.
+  
+  i Set this.name to a string literal matching the class name so the error is identifiable at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:3 lint/nursery/useConsistentErrorSubclassing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i this.name should be assigned a string literal, not a computed value.
   
-    28 │ 	constructor(message) {
-    29 │ 		super(message);
-  > 30 │ 		this.name = this.constructor.name;
+    31 │ 	constructor(message) {
+    32 │ 		super(message);
+  > 33 │ 		this.name = this.constructor.name;
        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    31 │ 	}
-    32 │ }
+    34 │ 	}
+    35 │ }
   
   i Computed names like this.constructor.name break after minification. Use a string literal matching the class name.
   
@@ -126,16 +143,16 @@ invalid.js:30:3 lint/nursery/useConsistentErrorSubclassing ━━━━━━━
 ```
 
 ```
-invalid.js:38:3 lint/nursery/useConsistentErrorSubclassing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:41:3 lint/nursery/useConsistentErrorSubclassing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i this.name should match the class name CacheError.
   
-    36 │ 	constructor(message) {
-    37 │ 		super(message);
-  > 38 │ 		this.name = "WrongName";
+    39 │ 	constructor(message) {
+    40 │ 		super(message);
+  > 41 │ 		this.name = "WrongName";
        │ 		^^^^^^^^^^^^^^^^^^^^^^^
-    39 │ 	}
-    40 │ }
+    42 │ 	}
+    43 │ }
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

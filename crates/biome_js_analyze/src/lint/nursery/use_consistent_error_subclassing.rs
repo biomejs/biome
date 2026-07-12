@@ -20,7 +20,8 @@ declare_lint_rule! {
     /// `AggregateError`) when:
     ///
     /// - the class name does not end in `Error`;
-    /// - the constructor does not assign `this.name`;
+    /// - the class never assigns `this.name` (in the constructor or via an
+    ///   instance `name` field);
     /// - `this.name` is assigned dynamically (e.g. `this.constructor.name`) instead
     ///   of a string literal; or
     /// - `this.name` is assigned a string literal that does not match the class name.
@@ -39,11 +40,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// class FooError extends Error {
-    ///     constructor(message) {
-    ///         super(message);
-    ///     }
-    /// }
+    /// class FooError extends Error {}
     /// ```
     ///
     /// ```js,expect_diagnostic
@@ -75,6 +72,12 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```js
+    /// class FooError extends Error {
+    ///     name = "FooError";
+    /// }
+    /// ```
+    ///
     pub UseConsistentErrorSubclassing {
         version: "next",
         name: "useConsistentErrorSubclassing",
@@ -100,7 +103,7 @@ const BUILTIN_ERRORS: &[&str] = &[
 pub enum RuleState {
     /// The class extends a built-in error but its name doesn't end in `Error`.
     NameNotEndingInError(TextRange),
-    /// The constructor never assigns `this.name`.
+    /// The class never assigns `this.name`.
     MissingName(TextRange),
     /// `this.name` is assigned from a non-string-literal (e.g. `this.constructor.name`).
     DynamicName(TextRange),
@@ -144,65 +147,92 @@ impl Rule for UseConsistentErrorSubclassing {
             ));
         }
 
-        // Inspect the constructor's `this.name` assignment, if a constructor exists.
-        let constructor = class.members().iter().find_map(|member| match member {
+        // A well-formed custom error labels itself by assigning `this.name` a
+        // string literal matching the class name — either in the constructor
+        // (`this.name = "…"`) or via an instance `name` field (`name = "…"`).
+        // The constructor assignment wins at runtime, so it's checked first.
+        let members = class.members();
+
+        if let Some(constructor) = members.iter().find_map(|member| match member {
             AnyJsClassMember::JsConstructorClassMember(ctor) => Some(ctor),
             _ => None,
-        })?;
+        }) && let Ok(body) = constructor.body()
+        {
+            for statement in body.statements() {
+                let AnyJsStatement::JsExpressionStatement(expr_statement) = statement else {
+                    continue;
+                };
+                let Ok(AnyJsExpression::JsAssignmentExpression(assignment)) =
+                    expr_statement.expression()
+                else {
+                    continue;
+                };
+                let Ok(AnyJsAssignmentPattern::AnyJsAssignment(
+                    AnyJsAssignment::JsStaticMemberAssignment(target),
+                )) = assignment.left()
+                else {
+                    continue;
+                };
+                // Target must be `this.name`. A failure to resolve the object or
+                // member (e.g. parser recovery) skips this statement rather than
+                // abandoning the whole class.
+                if target
+                    .object()
+                    .ok()
+                    .as_ref()
+                    .and_then(AnyJsExpression::as_js_this_expression)
+                    .is_none()
+                {
+                    continue;
+                }
+                let Ok(member) = target.member() else {
+                    continue;
+                };
+                let Ok(member_token) = member.value_token() else {
+                    continue;
+                };
+                if member_token.text_trimmed() != "name" {
+                    continue;
+                }
+                let Ok(right) = assignment.right() else {
+                    continue;
+                };
+                // `this.name` is assigned in the constructor — the authoritative label.
+                return check_name_value(&right, assignment.range(), &class_name);
+            }
+        }
 
-        let body = constructor.body().ok()?;
-        for statement in body.statements() {
-            let AnyJsStatement::JsExpressionStatement(expr_statement) = statement else {
+        // No `this.name` assignment in a constructor — fall back to an instance
+        // `name = "…"` class field.
+        for member in members.iter() {
+            let AnyJsClassMember::JsPropertyClassMember(property) = member else {
                 continue;
             };
-            let Ok(AnyJsExpression::JsAssignmentExpression(assignment)) =
-                expr_statement.expression()
-            else {
-                continue;
-            };
-            let Ok(AnyJsAssignmentPattern::AnyJsAssignment(
-                AnyJsAssignment::JsStaticMemberAssignment(target),
-            )) = assignment.left()
-            else {
-                continue;
-            };
-            // Target must be `this.name`.
-            if target
-                .object()
-                .ok()
-                .as_ref()
-                .and_then(AnyJsExpression::as_js_this_expression)
-                .is_none()
+            // A `static name` sets `Class.name`, not the instance name.
+            if property
+                .modifiers()
+                .iter()
+                .any(|modifier| modifier.as_js_static_modifier().is_some())
             {
                 continue;
             }
-            if target.member().ok()?.value_token().ok()?.text_trimmed() != "name" {
+            let Ok(property_name) = property.name() else {
+                continue;
+            };
+            if property_name.to_trimmed_text() != "name" {
                 continue;
             }
-
-            // Found a `this.name = …` assignment — validate its right-hand side.
-            let right = assignment.right().ok()?;
-            let range = assignment.range();
-            return match right {
-                AnyJsExpression::AnyJsLiteralExpression(
-                    AnyJsLiteralExpression::JsStringLiteralExpression(literal),
-                ) => {
-                    let value = literal.inner_string_text().ok()?;
-                    if value.text() == class_name {
-                        None
-                    } else {
-                        Some(RuleState::MismatchedName {
-                            range,
-                            expected: class_name,
-                        })
-                    }
-                }
-                _ => Some(RuleState::DynamicName(range)),
+            let Some(initializer) = property.value() else {
+                continue;
             };
+            let Ok(right) = initializer.expression() else {
+                continue;
+            };
+            return check_name_value(&right, property.range(), &class_name);
         }
 
-        // No `this.name` assignment in the constructor.
-        Some(RuleState::MissingName(constructor.range()))
+        // Nothing assigns `this.name` — the class never labels itself.
+        Some(RuleState::MissingName(name_token.text_trimmed_range()))
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -246,5 +276,32 @@ impl Rule for UseConsistentErrorSubclassing {
             ),
         };
         Some(diagnostic)
+    }
+}
+
+/// Validates the right-hand side of a `name` assignment against the class name.
+///
+/// Returns `None` when the value is the correct string literal (no diagnostic),
+/// otherwise the specific violation.
+fn check_name_value(
+    right: &AnyJsExpression,
+    range: TextRange,
+    class_name: &str,
+) -> Option<RuleState> {
+    match right {
+        AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsStringLiteralExpression(literal),
+        ) => {
+            let value = literal.inner_string_text().ok()?;
+            if value.text() == class_name {
+                None
+            } else {
+                Some(RuleState::MismatchedName {
+                    range,
+                    expected: class_name.to_string(),
+                })
+            }
+        }
+        _ => Some(RuleState::DynamicName(range)),
     }
 }

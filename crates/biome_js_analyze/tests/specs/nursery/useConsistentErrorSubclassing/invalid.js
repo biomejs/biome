@@ -23,6 +23,9 @@ class DatabaseError extends Error {
 	}
 }
 
+// No constructor and no `name` field — never labels itself.
+class TimeoutError extends Error {}
+
 // `this.name` assigned dynamically.
 class ApiError extends Error {
 	constructor(message) {
