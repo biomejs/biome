@@ -6919,7 +6919,7 @@
 					]
 				},
 				"useConsistentReturn": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/use-consistent-return",
+					"description": "Require return statements to either always or never specify values.\nSee https://biomejs.dev/linter/rules/use-consistent-return",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentReturnConfiguration" },
 						{ "type": "null" }

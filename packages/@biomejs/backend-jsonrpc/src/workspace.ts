@@ -2607,7 +2607,7 @@ See https://biomejs.dev/linter/rules/use-baseline
 	 */
 	useBaseline?: UseBaselineConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Require return statements to either always or never specify values.
 See https://biomejs.dev/linter/rules/use-consistent-return 
 	 */
 	useConsistentReturn?: UseConsistentReturnConfiguration;

@@ -67,7 +67,10 @@ declare_lint_rule! {
         name: "useConsistentReturn",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::Eslint("consistent-return").same()],
+        sources: &[
+            RuleSource::Eslint("consistent-return").same(),
+            RuleSource::EslintTypeScript("consistent-return").same(),
+        ],
     }
 }
 
