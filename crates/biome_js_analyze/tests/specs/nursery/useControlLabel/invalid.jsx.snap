@@ -14,6 +14,12 @@ const c = <area />;
 
 const d = <menuitem />;
 
+// `aria-hidden="false"` is still exposed — a label is still required.
+const e = <button aria-hidden="false" />;
+
+// An empty labeling attribute is not a real label.
+const f = <button aria-label="" />;
+
 ```
 
 # Diagnostics
@@ -31,7 +37,7 @@ invalid.jsx:3:11 lint/nursery/useControlLabel ━━━━━━━━━━━�
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   
-  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  i Add text content, or an aria-label, aria-labelledby, title, or alt attribute.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -52,7 +58,7 @@ invalid.jsx:5:11 lint/nursery/useControlLabel ━━━━━━━━━━━�
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   
-  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  i Add text content, or an aria-label, aria-labelledby, title, or alt attribute.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -73,7 +79,7 @@ invalid.jsx:7:11 lint/nursery/useControlLabel ━━━━━━━━━━━�
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   
-  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  i Add text content, or an aria-label, aria-labelledby, title, or alt attribute.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -90,10 +96,50 @@ invalid.jsx:9:11 lint/nursery/useControlLabel ━━━━━━━━━━━�
    > 9 │ const d = <menuitem />;
        │           ^^^^^^^^^^^^
     10 │ 
+    11 │ // `aria-hidden="false"` is still exposed — a label is still required.
   
   i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
   
-  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  i Add text content, or an aria-label, aria-labelledby, title, or alt attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:12:11 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This control element has no accessible label.
+  
+    11 │ // `aria-hidden="false"` is still exposed — a label is still required.
+  > 12 │ const e = <button aria-hidden="false" />;
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ // An empty labeling attribute is not a real label.
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, title, or alt attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:15:11 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This control element has no accessible label.
+  
+    14 │ // An empty labeling attribute is not a real label.
+  > 15 │ const f = <button aria-label="" />;
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, title, or alt attribute.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

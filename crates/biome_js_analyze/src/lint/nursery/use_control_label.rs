@@ -75,15 +75,12 @@ impl Rule for UseControlLabel {
         }
 
         // An element hidden from the accessibility tree does not need a label.
-        if element.find_attribute_by_name("aria-hidden").is_some() {
+        if is_aria_hidden(element) {
             return None;
         }
 
-        // A labeling attribute supplies the accessible name.
-        if LABEL_ATTRIBUTES
-            .iter()
-            .any(|attribute| element.find_attribute_by_name(attribute).is_some())
-        {
+        // A non-empty labeling attribute supplies the accessible name.
+        if has_labeling_attribute(element) {
             return None;
         }
 
@@ -113,8 +110,36 @@ impl Rule for UseControlLabel {
                 "Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users."
             })
             .note(markup! {
-                "Add text content, or an "<Emphasis>"aria-label"</Emphasis>", "<Emphasis>"aria-labelledby"</Emphasis>", or "<Emphasis>"title"</Emphasis>" attribute."
+                "Add text content, or an "<Emphasis>"aria-label"</Emphasis>", "<Emphasis>"aria-labelledby"</Emphasis>", "<Emphasis>"title"</Emphasis>", or "<Emphasis>"alt"</Emphasis>" attribute."
             }),
         )
     }
+}
+
+/// Whether the element is hidden from the accessibility tree by a truthy
+/// `aria-hidden`. A bare `aria-hidden` counts as `true`; only an explicit
+/// `aria-hidden="false"` (or `{false}`) is treated as visible.
+fn is_aria_hidden(element: &AnyJsxElement) -> bool {
+    let Some(attribute) = element.find_attribute_by_name("aria-hidden") else {
+        return false;
+    };
+    match attribute.as_static_value() {
+        None => true,
+        Some(value) => value.text() != "false",
+    }
+}
+
+/// Whether the element carries a labeling attribute with a non-empty value. A
+/// dynamic value (not statically known, e.g. `aria-label={label}`) is assumed
+/// to provide a label; an empty literal (`aria-label=""`) does not.
+fn has_labeling_attribute(element: &AnyJsxElement) -> bool {
+    LABEL_ATTRIBUTES.iter().any(|name| {
+        let Some(attribute) = element.find_attribute_by_name(name) else {
+            return false;
+        };
+        match attribute.as_static_value() {
+            None => true,
+            Some(value) => !value.text().is_empty(),
+        }
+    })
 }
