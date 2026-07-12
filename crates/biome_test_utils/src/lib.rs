@@ -30,7 +30,7 @@ use biome_html_syntax::HtmlRoot;
 #[cfg(feature = "lang_js")]
 use biome_js_parser::{AnyJsRoot, JsParserOptions};
 #[cfg(feature = "type_inference")]
-use biome_js_type_info::{TypeData, TypeResolver};
+use biome_js_type_info::TypeData;
 use biome_languages::DocumentFileSource;
 #[cfg(all(feature = "module_graph", feature = "lang_html"))]
 use biome_module_graph::HtmlEmbeddedContent;
@@ -747,28 +747,6 @@ fn markup_to_string(markup: biome_console::Markup) -> String {
     fmt.write_markup(markup).unwrap();
 
     String::from_utf8(buffer).unwrap()
-}
-
-#[cfg(feature = "type_inference")]
-pub fn dump_registered_types(content: &mut String, resolver: &dyn TypeResolver) {
-    let mut registered_types = String::new();
-    let mut resolver = Some(resolver);
-    while let Some(current_resolver) = resolver {
-        for (i, ty) in current_resolver.registered_types().iter().enumerate() {
-            let level = current_resolver.level();
-            registered_types.push_str(&format!("\n{level:?} TypeId({i}) => {ty}\n"));
-        }
-
-        resolver = current_resolver.fallback_resolver();
-    }
-
-    if !registered_types.is_empty() {
-        content.push_str("## Registered types\n\n");
-
-        content.push_str("```");
-        content.push_str(&registered_types);
-        content.push_str("```\n");
-    }
 }
 
 #[cfg(feature = "type_inference")]

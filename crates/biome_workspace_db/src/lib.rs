@@ -101,10 +101,14 @@ impl WorkspaceDbData {
 
 impl WorkspaceDb {
     #[cfg(feature = "module_graph")]
-    fn bump_module_graph_generation(&mut self) {
+    fn mutate_modules(&mut self, mutate: impl FnOnce(&HashMap<Utf8PathBuf, ModuleInfo>)) {
         let generation = ModuleGraphGeneration::get(self);
         let next = generation.value(self).wrapping_add(1);
-        generation.set_value(self).to(next);
+        let modules = self.modules.clone();
+
+        let pending_setter = generation.set_value(self);
+        mutate(&modules);
+        pending_setter.to(next);
     }
 
     /// Returns handles to the collections that this database shares with all
@@ -236,8 +240,9 @@ impl WorkspaceDb {
 
     #[cfg(feature = "module_graph")]
     pub fn insert_module(&mut self, path: Utf8PathBuf, module: ModuleInfo) {
-        self.modules.pin().insert(path, module);
-        self.bump_module_graph_generation();
+        self.mutate_modules(|modules| {
+            modules.pin().insert(path, module);
+        });
     }
 
     #[cfg(feature = "module_graph")]
@@ -291,26 +296,32 @@ impl WorkspaceDb {
 
     #[cfg(feature = "module_graph")]
     pub fn remove_module(&mut self, path: &Utf8Path) {
-        if self.modules.pin().remove(path).is_some() {
-            self.bump_module_graph_generation();
+        if self.modules.pin().contains_key(path) {
+            self.mutate_modules(|modules| {
+                let modules = modules.pin();
+                let removed = modules.remove(path);
+                debug_assert!(removed.is_some());
+            });
         }
     }
 
     pub fn unload_path(&mut self, path: &Utf8Path) {
         #[cfg(feature = "module_graph")]
         {
-            let modules = self.modules.pin();
-            let to_remove = modules
+            let to_remove = self
+                .modules
+                .pin()
                 .keys()
                 .filter(|module_path| module_path.starts_with(path))
                 .cloned()
                 .collect::<Vec<_>>();
-            for module_path in &to_remove {
-                modules.remove(module_path);
-            }
-            drop(modules);
             if !to_remove.is_empty() {
-                self.bump_module_graph_generation();
+                self.mutate_modules(|modules| {
+                    let modules = modules.pin();
+                    for module_path in &to_remove {
+                        modules.remove(module_path);
+                    }
+                });
             }
         }
         #[cfg(not(feature = "module_graph"))]
@@ -430,10 +441,20 @@ impl LanguageDb for WorkspaceDb {
 mod tests {
     use super::*;
     use biome_db::Db;
+    #[cfg(feature = "module_graph")]
+    use biome_fs::{BiomePath, MemoryFileSystem};
+    #[cfg(feature = "module_graph")]
+    use biome_html_parser::{HtmlParserOptions, parse_html};
     use biome_js_parser::{JsParserOptions, parse};
     use biome_languages::JsFileSource;
+    #[cfg(feature = "module_graph")]
+    use biome_module_graph::{ModuleDb, PathInfoCache, resolve_html_module};
+    #[cfg(feature = "module_graph")]
+    use biome_project_layout::ProjectLayout;
     use salsa::plumbing::AsId;
     use std::sync::Barrier;
+    #[cfg(feature = "module_graph")]
+    use std::sync::atomic::{AtomicBool, Ordering};
     use std::sync::mpsc;
     use std::time::{Duration, Instant};
 
@@ -446,6 +467,45 @@ mod tests {
             JsParserOptions::default(),
         )
         .into()
+    }
+
+    #[cfg(feature = "module_graph")]
+    fn module_transaction_db(barrier: Arc<Barrier>, armed: Arc<AtomicBool>) -> WorkspaceDb {
+        let storage = Storage::new(Some(Box::new(move |event| {
+            if armed.load(Ordering::Acquire)
+                && matches!(event.kind, salsa::EventKind::DidSetCancellationFlag)
+            {
+                barrier.wait();
+            }
+        })));
+        let db = WorkspaceDb {
+            files: Arc::default(),
+            modules: Arc::default(),
+            file_sources: Arc::default(),
+            storage,
+        };
+        ModuleGraphGeneration::new(&db, 0);
+        db
+    }
+
+    #[cfg(feature = "module_graph")]
+    fn test_module(db: &WorkspaceDb, path: &str) -> ModuleInfo {
+        let path = BiomePath::new(path);
+        let fs = MemoryFileSystem::default();
+        let root = parse_html("", HtmlParserOptions::default()).tree();
+        let (module, _, _) = resolve_html_module(
+            root,
+            &[],
+            &path,
+            &fs,
+            &ProjectLayout::default(),
+            &PathInfoCache::default(),
+        );
+        ModuleInfo::new(
+            db,
+            path.as_path().to_path_buf(),
+            ModuleInfoKind::Html(module),
+        )
     }
 
     #[salsa::tracked]
@@ -518,5 +578,135 @@ mod tests {
                 "{result:?}"
             );
         });
+    }
+
+    #[cfg(feature = "module_graph")]
+    #[test]
+    fn module_insertion_publishes_after_generation_invalidation() {
+        let barrier = Arc::new(Barrier::new(2));
+        let armed = Arc::new(AtomicBool::new(false));
+        let mut db = module_transaction_db(barrier.clone(), armed.clone());
+        let path = Utf8PathBuf::from("inserted.html");
+        let module = test_module(&db, path.as_str());
+        let old_generation = db.module_graph_generation();
+        let reader_db = db.clone();
+        armed.store(true, Ordering::Release);
+
+        let db = std::thread::scope(|scope| {
+            let writer_path = path.clone();
+            let writer = scope.spawn(move || {
+                db.insert_module(writer_path, module);
+                db
+            });
+
+            barrier.wait();
+            assert_eq!(reader_db.module_graph_generation(), old_generation);
+            assert!(reader_db.module_for_path(&path).is_none());
+            drop(reader_db);
+
+            writer.join().unwrap()
+        });
+
+        assert_eq!(db.module_graph_generation(), old_generation.wrapping_add(1));
+        assert_eq!(
+            db.module_for_path(&path).map(|module| module.as_id()),
+            Some(module.as_id())
+        );
+    }
+
+    #[cfg(feature = "module_graph")]
+    #[test]
+    fn module_removal_publishes_after_generation_invalidation() {
+        let barrier = Arc::new(Barrier::new(2));
+        let armed = Arc::new(AtomicBool::new(false));
+        let mut db = module_transaction_db(barrier.clone(), armed.clone());
+        let path = Utf8PathBuf::from("removed.html");
+        let module = test_module(&db, path.as_str());
+        db.insert_module(path.clone(), module);
+        let old_generation = db.module_graph_generation();
+        let reader_db = db.clone();
+        armed.store(true, Ordering::Release);
+
+        let db = std::thread::scope(|scope| {
+            let writer_path = path.clone();
+            let writer = scope.spawn(move || {
+                db.remove_module(&writer_path);
+                db
+            });
+
+            barrier.wait();
+            assert_eq!(reader_db.module_graph_generation(), old_generation);
+            assert_eq!(
+                reader_db
+                    .module_for_path(&path)
+                    .map(|module| module.as_id()),
+                Some(module.as_id())
+            );
+            drop(reader_db);
+
+            writer.join().unwrap()
+        });
+
+        assert_eq!(db.module_graph_generation(), old_generation.wrapping_add(1));
+        assert!(db.module_for_path(&path).is_none());
+    }
+
+    #[cfg(feature = "module_graph")]
+    #[test]
+    fn module_unload_publishes_after_generation_invalidation() {
+        let barrier = Arc::new(Barrier::new(2));
+        let armed = Arc::new(AtomicBool::new(false));
+        let mut db = module_transaction_db(barrier.clone(), armed.clone());
+        let root = Utf8PathBuf::from("root/a.html");
+        let nested = Utf8PathBuf::from("root/nested/b.html");
+        let outside = Utf8PathBuf::from("other/c.html");
+        let root_module = test_module(&db, root.as_str());
+        let nested_module = test_module(&db, nested.as_str());
+        let outside_module = test_module(&db, outside.as_str());
+        db.insert_module(root.clone(), root_module);
+        db.insert_module(nested.clone(), nested_module);
+        db.insert_module(outside.clone(), outside_module);
+        let old_generation = db.module_graph_generation();
+        let reader_db = db.clone();
+        armed.store(true, Ordering::Release);
+
+        let db = std::thread::scope(|scope| {
+            let writer = scope.spawn(move || {
+                db.unload_path(Utf8Path::new("root"));
+                db
+            });
+
+            barrier.wait();
+            assert_eq!(reader_db.module_graph_generation(), old_generation);
+            assert_eq!(
+                reader_db
+                    .module_for_path(&root)
+                    .map(|module| module.as_id()),
+                Some(root_module.as_id())
+            );
+            assert_eq!(
+                reader_db
+                    .module_for_path(&nested)
+                    .map(|module| module.as_id()),
+                Some(nested_module.as_id())
+            );
+            assert_eq!(
+                reader_db
+                    .module_for_path(&outside)
+                    .map(|module| module.as_id()),
+                Some(outside_module.as_id())
+            );
+            drop(reader_db);
+
+            writer.join().unwrap()
+        });
+
+        assert_eq!(db.module_graph_generation(), old_generation.wrapping_add(1));
+        assert!(db.module_for_path(&root).is_none());
+        assert!(db.module_for_path(&nested).is_none());
+        assert_eq!(
+            db.module_for_path(&outside).map(|module| module.as_id()),
+            Some(outside_module.as_id())
+        );
     }
 }

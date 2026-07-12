@@ -1,13 +1,13 @@
 //! Cross-module import, export, and namespace resolution.
 
-use super::{InferredModuleTypes, globals::global_type, resolver::ResolutionCtx};
+use super::{InferredModuleTypes, resolver::ResolutionCtx};
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsExport, JsImport, JsOwnExport, ModuleDb, ResolvedPath};
 use biome_js_type_info::{
-    ImportSymbol, Path, ResolvedTypeId, TypeImportQualifier, TypeResolverLevel,
+    ImportSymbol, Path, TypeId, TypeImportQualifier,
     resolved::{
-        GlobalTypeId, InferredLocalTypeHandle, InferredLocalTypeId, InferredModuleKey,
-        InferredNamespace, InferredTypeData, InferredTypeMember, InferredTypeMemberKind,
+        InferredLocalTypeHandle, InferredLocalTypeId, InferredModuleKey, InferredNamespace,
+        InferredTypeData, InferredTypeMember, InferredTypeMemberKind,
     },
 };
 use biome_rowan::Text;
@@ -292,35 +292,20 @@ impl<'db> ResolutionCtx<'db, '_> {
 fn inferred_type_from_resolved_id<'db>(
     db: &'db dyn ModuleDb,
     inferred_types: &InferredModuleTypes<'db>,
-    resolved_id: ResolvedTypeId,
+    type_id: TypeId,
 ) -> InferredTypeData<'db> {
-    match resolved_id.level() {
-        TypeResolverLevel::Thin => {
-            let local_type_id = InferredLocalTypeId::new(resolved_id.index());
-            if inferred_types.named_type_ids.contains(&local_type_id) {
-                InferredTypeData::Local(InferredLocalTypeHandle::new(
-                    db,
-                    inferred_types.module_key,
-                    local_type_id,
-                ))
-            } else {
-                inferred_types
-                    .types
-                    .get(resolved_id.index())
-                    .copied()
-                    .unwrap_or(InferredTypeData::Unknown)
-            }
-        }
-        TypeResolverLevel::Global => GlobalTypeId::try_from_type_id(resolved_id.id()).map_or_else(
-            || {
-                debug_assert!(
-                    false,
-                    "global export TypeId must index the predefined global manifest"
-                );
-                InferredTypeData::Unknown
-            },
-            |type_id| global_type(db, type_id),
-        ),
-        TypeResolverLevel::Full | TypeResolverLevel::Import => InferredTypeData::Unknown,
+    let local_type_id = InferredLocalTypeId::new(type_id.index());
+    if inferred_types.named_type_ids.contains(&local_type_id) {
+        InferredTypeData::Local(InferredLocalTypeHandle::new(
+            db,
+            inferred_types.module_key,
+            local_type_id,
+        ))
+    } else {
+        inferred_types
+            .types
+            .get(type_id.index())
+            .copied()
+            .unwrap_or(InferredTypeData::Unknown)
     }
 }

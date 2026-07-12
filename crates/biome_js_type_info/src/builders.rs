@@ -138,9 +138,9 @@ impl<'db> IntersectionBuilder<'db> {
 
             match ty {
                 TypeData::NeverKeyword => {
-                    if self.types.is_empty() {
-                        self.types.push(TypeData::NeverKeyword);
-                    }
+                    self.types.clear();
+                    self.types.push(TypeData::NeverKeyword);
+                    return self;
                 }
                 ty => {
                     if ty.is_primitive(self.db)
@@ -646,7 +646,30 @@ impl<'db> UnionBuilder<'db> {
 
 #[cfg(test)]
 mod tests {
-    use super::{CycleDetector, CycleEntry};
+    use super::{CycleDetector, CycleEntry, IntersectionBuilder};
+    use crate::{TypeDb, interned_types::TypeData};
+
+    #[salsa::db]
+    #[derive(Default)]
+    struct TestDb {
+        storage: salsa::Storage<Self>,
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    #[salsa::db]
+    impl biome_db::Db for TestDb {
+        fn parsed_source_for_path(
+            &self,
+            _path: &camino::Utf8Path,
+        ) -> Option<biome_db::ParsedSource> {
+            None
+        }
+    }
+
+    #[salsa::db]
+    impl TypeDb for TestDb {}
 
     #[test]
     fn cycle_detector_reports_reentry_before_finish() {
@@ -666,5 +689,20 @@ mod tests {
         assert!(matches!(detector.enter(1), CycleEntry::Entered));
         detector.finish(1, "cached");
         assert!(matches!(detector.enter(1), CycleEntry::Cached("cached")));
+    }
+
+    #[test]
+    fn never_absorbs_intersections_in_both_orders() {
+        let db = TestDb::default();
+
+        for types in [
+            [TypeData::String, TypeData::NeverKeyword],
+            [TypeData::NeverKeyword, TypeData::String],
+        ] {
+            assert_eq!(
+                IntersectionBuilder::new(&db).add_all(types).build(),
+                TypeData::NeverKeyword
+            );
+        }
     }
 }

@@ -229,8 +229,6 @@ fn find_misused_promise_expression(
         _ => return None,
     };
 
-    // Uncomment the following line for debugging convenience:
-    //let printed = format!("type of {expression:?} = {ty:?}");
     (ty.is_promise_instance() == Some(true)).then_some(state)
 }
 

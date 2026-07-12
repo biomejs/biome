@@ -48,8 +48,8 @@ pub struct InferredModuleTypes<'db> {
     pub binding_type_data: FxHashMap<TextRange, BindingTypeData<'db>>,
 }
 
-// SAFETY: `infer_module_types_query` and `infer_module_types` return this
-// aggregate from tracked queries. The aggregate owns its containers and
+// SAFETY: `infer_module_types` returns this aggregate from a tracked query. The
+// aggregate owns its containers and
 // contains only Salsa handles, whose `Update` implementations perform the
 // required cross-revision transition. Each field update delegates equality and
 // replacement to those implementations, so old-revision handles are never

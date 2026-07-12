@@ -18,32 +18,36 @@ function destruct(
 sync Function "destruct" {
   accepts: {
     params: [
-      required (bindings: a: Global TypeId(1),
-      b: Global TypeId(2)): Global TypeId(0)
-      required (bindings: first: Global TypeId(4),
-      rest: Global TypeId(5)): Global TypeId(3)
+      required (bindings: a: Local TypeId(1),
+      b: Local TypeId(2)): Local TypeId(0)
+      required (bindings: first: Local TypeId(5),
+      rest: Local TypeId(6)): Local TypeId(4)
     ]
     type_args: []
   }
-  returns: void
+  returns: Local TypeId(7)
 }
 ```
 
 ## Registered types
 
 ```
-Global TypeId(0) => Object {
+Module TypeId(0) => Object {
   prototype: No prototype
   members: ["a": number, "b": string]
 }
 
-Global TypeId(1) => Global TypeId(0).a
+Module TypeId(1) => Local TypeId(0).a
 
-Global TypeId(2) => Global TypeId(0).b
+Module TypeId(2) => Local TypeId(0).b
 
-Global TypeId(3) => instanceof unresolved reference "Array"<boolean> (scope ID: 0)
+Module TypeId(3) => boolean
 
-Global TypeId(4) => Global TypeId(3)[0]
+Module TypeId(4) => instanceof unresolved reference "Array"<Local TypeId(3)> (scope ID: 0)
 
-Global TypeId(5) => [(1 others)...Global TypeId(3)]
+Module TypeId(5) => Local TypeId(4)[0]
+
+Module TypeId(6) => [(1 others)...Local TypeId(4)]
+
+Module TypeId(7) => void
 ```

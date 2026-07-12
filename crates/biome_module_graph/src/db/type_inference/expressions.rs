@@ -13,8 +13,8 @@ use crate::db::queries::{ResolvedCallArgument, infer_call_expression_return_type
 use biome_js_semantic::ScopeId;
 use biome_js_type_info::{
     CallArgumentType as RawCallArgumentType, DestructureField as RawDestructureField,
-    GLOBAL_RESOLVER, Literal as RawLiteral, Path, RawTypeData, TypeDb, TypeId,
-    TypeReferenceQualifier, TypeResolver, TypeofExpression as RawTypeofExpression,
+    Literal as RawLiteral, Path, RawTypeData, TypeDb, TypeId, TypeReferenceQualifier,
+    TypeofExpression as RawTypeofExpression, global_type_id_for_qualifier, global_types,
     literal::NumberLiteral,
     resolved::{
         ConditionalSubset, ConditionalType, InferredCallArgumentType, InferredClass,
@@ -1467,12 +1467,11 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     fn resolve_global_name(&mut self, name: &str) -> Option<InferredTypeData<'db>> {
-        GLOBAL_RESOLVER
-            .resolve_qualifier(&TypeReferenceQualifier::from_path(
-                ScopeId::GLOBAL,
-                Path::from(Text::new_owned(name.into())),
-            ))
-            .map(|resolved_id| self.resolve_resolved_id(resolved_id))
+        global_type_id_for_qualifier(&TypeReferenceQualifier::from_path(
+            ScopeId::GLOBAL,
+            Path::from(Text::new_owned(name.into())),
+        ))
+        .map(|id| super::globals::global_type(self.db, id))
     }
 
     fn member_type(
@@ -1913,30 +1912,11 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     fn typeof_return_union(&self) -> InferredTypeData<'db> {
-        InferredTypeData::union_from_types(
-            self.db,
-            [
-                "bigint",
-                "boolean",
-                "function",
-                "number",
-                "object",
-                "string",
-                "symbol",
-                "undefined",
-            ]
-            .into_iter()
-            .map(|value| self.typeof_string_literal(value))
-            .collect(),
-        )
+        global_types(self.db).typeof_return_union()
     }
 
     fn typeof_string_literal(&self, value: &'static str) -> InferredTypeData<'db> {
-        // TODO: Replace this with canonical `global_types(db)` literal entries in Phase 6e.
-        InferredTypeData::Literal(InferredLiteral::new(
-            self.db,
-            InferredLiteralValue::String(Text::new_static(value).into()),
-        ))
+        global_types(self.db).typeof_literal(value)
     }
 
     fn conditional_type(&mut self, ty: InferredTypeData<'db>) -> ConditionalType {

@@ -11,7 +11,7 @@ use biome_js_syntax::{
     JsSyntaxNode,
 };
 use biome_js_type_info::{
-    InferredType, TypeResolverLevel,
+    InferredType,
     resolved::{
         InferredCallArgumentType, InferredLocalTypeHandle, InferredLocalTypeId, InferredReturnType,
         InferredTypeData,
@@ -20,7 +20,7 @@ use biome_js_type_info::{
 use biome_module_graph::{
     CallArgumentTypeInput, InferredModuleTypes, JsOwnExport, ModuleDb, ModuleInfo, ModuleInfoKind,
     NormalizeTypeInput, infer_call_argument_type, infer_constructor_argument_type,
-    infer_module_types, normalize_type,
+    infer_module_types_bottom_up, normalize_type,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use std::{rc::Rc, sync::Arc};
@@ -37,7 +37,7 @@ impl TypedModule {
     }
 
     fn inferred_types<'db>(&'db self) -> Option<Arc<InferredModuleTypes<'db>>> {
-        infer_module_types(self.db.as_ref(), self.module)
+        infer_module_types_bottom_up(self.db.as_ref(), self.module)
     }
 }
 
@@ -249,7 +249,7 @@ impl TypedService {
         let own_export = js_info.exports.get("default")?.as_own_export()?;
         let ty = match own_export {
             JsOwnExport::Binding(range) => inferred.binding_type_data.get(range)?.ty,
-            JsOwnExport::Type(resolved) if resolved.level() == TypeResolverLevel::Thin => {
+            JsOwnExport::Type(resolved) => {
                 let type_id = InferredLocalTypeId::new(resolved.index());
                 if inferred.named_type_ids.contains(&type_id) {
                     InferredTypeData::Local(InferredLocalTypeHandle::new(
@@ -261,7 +261,7 @@ impl TypedService {
                     *inferred.types.get(resolved.index())?
                 }
             }
-            JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => return None,
+            JsOwnExport::Namespace(_) => return None,
         };
         Some(ty)
     }

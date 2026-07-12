@@ -178,8 +178,6 @@ impl Rule for NoFloatingPromises {
         let expression = node.expression().ok()?;
         let ty = ctx.type_of_expression(&expression)?;
 
-        // Uncomment the following line for debugging convenience:
-        //let printed = format!("type of {expression:?} = {ty:?}");
         if ty.is_array_of_promise() == Some(true) {
             return Some(NoFloatingPromisesState::ArrayOfPromises);
         }

@@ -3,7 +3,7 @@
 use super::{lookup::declared_type_parameters, resolver::ResolutionCtx};
 use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_type_info::{
-    GLOBAL_RESOLVER, Path, TypeImportQualifier, TypeReferenceQualifier, TypeResolver,
+    Path, TypeImportQualifier, TypeReferenceQualifier, global_type_id_for_qualifier,
     resolved::{
         InferredLiteralValue, InferredTypeData, InferredTypeMember, InferredTypeMemberKind,
     },
@@ -168,8 +168,8 @@ impl<'db> ResolutionCtx<'db, '_> {
             return ty;
         }
 
-        if let Some(resolved_id) = GLOBAL_RESOLVER.resolve_qualifier(qualifier) {
-            return self.resolve_resolved_id(resolved_id);
+        if let Some(id) = global_type_id_for_qualifier(qualifier) {
+            return super::globals::global_type(self.db, id);
         }
 
         InferredTypeData::Unknown
@@ -182,15 +182,14 @@ impl<'db> ResolutionCtx<'db, '_> {
         let mut parts = qualifier.path.iter();
         let first = parts.next()?;
         let mut target = parts.next().and_then(|member| {
-            let base = GLOBAL_RESOLVER
-                .resolve_qualifier(&TypeReferenceQualifier {
-                    path: Path::from(first.clone()),
-                    type_parameters: Box::default(),
-                    scope_id: qualifier.scope_id,
-                    type_only: qualifier.type_only,
-                    excluded_binding_id: qualifier.excluded_binding_id,
-                })
-                .map(|resolved_id| self.resolve_resolved_id(resolved_id))?;
+            let base = global_type_id_for_qualifier(&TypeReferenceQualifier {
+                path: Path::from(first.clone()),
+                type_parameters: Box::default(),
+                scope_id: qualifier.scope_id,
+                type_only: qualifier.type_only,
+                excluded_binding_id: qualifier.excluded_binding_id,
+            })
+            .map(|id| super::globals::global_type(self.db, id))?;
             self.resolve_static_member_expression(base, member.text())
         })?;
 

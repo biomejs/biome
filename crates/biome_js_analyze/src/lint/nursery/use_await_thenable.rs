@@ -58,9 +58,6 @@ impl Rule for UseAwaitThenable {
         let expression = node.argument().ok()?;
         let ty = ctx.type_of_expression(&expression)?;
 
-        // Uncomment the following line for debugging convenience:
-        //let printed = format!("type of {expression:?} = {ty:?}");
-
         match ty.is_promise_instance() {
             Some(true) | None => return None,
             Some(false) => {}

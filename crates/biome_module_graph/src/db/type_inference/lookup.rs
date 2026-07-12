@@ -1,6 +1,6 @@
 use super::{InferredModuleTypes, collected_type_result, expand_canonical_global};
 use crate::ModuleDb;
-use crate::db::queries::infer_module_types_query;
+use crate::db::queries::infer_module_types;
 use crate::module_graph::ModuleInfo;
 use biome_js_type_info::resolved::{
     InferredLiteralValue, InferredLocalTypeHandle, InferredModuleKey, InferredReturnType,
@@ -53,8 +53,7 @@ impl<'db> InferredModuleTypes<'db> {
         }
 
         let module = module_for_key(db, module_key)?;
-        infer_module_types_query(db, module)
-            .and_then(|types| types.types.get(type_id.index()).copied())
+        infer_module_types(db, module).and_then(|types| types.types.get(type_id.index()).copied())
     }
 
     /// Finds a member on an already normalized inferred type.

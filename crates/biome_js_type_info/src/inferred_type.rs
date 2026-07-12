@@ -232,6 +232,14 @@ impl<'db> InferredType<'db> {
     /// Returns whether this is a Promise or Promise-like instance.
     ///
     /// Returns `None` when inheritance is unresolved or the walk is exhausted.
+    ///
+    /// ```rust,ignore
+    /// match ty.is_promise_instance() {
+    ///     Some(true) => report_floating_promise(),
+    ///     Some(false) => {}
+    ///     None => return, // Suppress diagnostics when inference cannot decide.
+    /// }
+    /// ```
     pub fn is_promise_instance(self) -> Option<bool> {
         is_promise_instance(self.db, self.data)
     }

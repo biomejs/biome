@@ -74,15 +74,16 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsTemplateElement, JsCallArgumentList, JsCallArguments, JsCallExpression,
     JsTemplateExpression,
 };
+#[cfg(feature = "type_inference")]
+use biome_js_syntax::{
+    AnyJsExpression as TypeInfoExpression, JsClassDeclaration, JsClassExpression,
+    JsFunctionDeclaration, JsVariableDeclarator,
+};
 use biome_js_syntax::{
     AnyJsRoot, JsLanguage, JsSyntaxNode, JsTemplateChunkElement, TextRange, TextSize, TokenAtOffset,
 };
 #[cfg(feature = "type_inference")]
-use biome_js_syntax::{
-    JsClassDeclaration, JsClassExpression, JsFunctionDeclaration, JsVariableDeclarator,
-};
-#[cfg(feature = "type_inference")]
-use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
+use biome_js_type_info::{RawTypeCollector, ScopeId, TypeData, TypeId, TypeStore};
 #[cfg(feature = "js_embeds")]
 use biome_languages::CssFileSource;
 #[cfg(all(feature = "js_embeds", feature = "lang_graphql"))]
@@ -870,7 +871,7 @@ fn debug_type_info(
         let mut result = String::new();
         let preorder = tree.syntax().preorder();
 
-        let mut resolver = GlobalsResolver::default();
+        let mut resolver = DebugTypeCollector::default();
         let scope_id = ScopeId::GLOBAL;
 
         for event in preorder {
@@ -936,7 +937,7 @@ fn debug_registered_types(
         let mut result = String::new();
         let preorder = tree.syntax().preorder();
 
-        let mut resolver = GlobalsResolver::default();
+        let mut resolver = DebugTypeCollector::default();
         let scope_id = ScopeId::GLOBAL;
 
         for event in preorder {
@@ -956,7 +957,7 @@ fn debug_registered_types(
             }
         }
 
-        for (i, ty) in resolver.registered_types().iter().enumerate() {
+        for (i, ty) in resolver.types.as_references().iter().enumerate() {
             result.push_str(&format!("\nTypeId({i}) => {ty}\n"));
         }
 
@@ -967,6 +968,35 @@ fn debug_registered_types(
     {
         let _ = (_path, parse, workspace_db);
         Err(WorkspaceError::feature_not_enabled())
+    }
+}
+
+#[cfg(feature = "type_inference")]
+#[derive(Default)]
+struct DebugTypeCollector {
+    types: TypeStore,
+}
+
+#[cfg(feature = "type_inference")]
+impl RawTypeCollector for DebugTypeCollector {
+    fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
+        self.types.find(type_data)
+    }
+
+    fn get_by_id(&self, id: TypeId) -> &TypeData {
+        self.types.get_by_id(id)
+    }
+
+    fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
+        self.types.insert_cow(type_data)
+    }
+
+    fn resolve_expression(
+        &mut self,
+        scope_id: ScopeId,
+        expression: &TypeInfoExpression,
+    ) -> Cow<'_, TypeData> {
+        Cow::Owned(TypeData::from_any_js_expression(self, scope_id, expression))
     }
 }
 

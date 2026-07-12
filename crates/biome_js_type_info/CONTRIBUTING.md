@@ -1,319 +1,130 @@
 # Biome Type Architecture
 
-In order to contribute to Biome's type inference, it's good to understand our
-type architecture.
+Biome's type inference is designed for incremental IDE use. Any module can be
+replaced while analysis is running, so cross-module types must remain tracked by
+Salsa rather than copied between module-graph entries.
 
-## Architecture Constraints
+## Two Type Worlds
 
-The main thing to understand about Biome is that we put our **User Experience**
-front and center. Whether it's our
-[Rule Pillars](https://biomejs.dev/linter/#rule-pillars), our Batteries-Included
-approach, the
-[`biome migrate`](https://biomejs.dev/guides/migrate-eslint-prettier/) command
-for users coming from other tools, or our focus on IDE support, we know that
-without users we are nowhere.
+The type system has two intentionally separate representations.
 
-And it's precisely this last point, our IDE support, that's so important here.
-IDE support was already an important consideration in our
-[approach to multi-file support](https://github.com/biomejs/biome/discussions/4653),
-and this seeps through into our type inference architecture.
+The raw collector representation is [`RawTypeData`](src/type_data.rs). It owns
+`TypeReference` values and is stored in `JsModuleInfo`. The collector has no
+database access and performs no cross-module or global resolution. Its
+`TypeStore` is only a stable, module-local table.
 
-For many tools, such as bundlers, it is sufficient to optimise the performance
-for CLI usage. Development servers may have an interest in optimising hot-reload
-performance as well, but they tend to do so by pushing responsibility to the
-client instead of rebuilding their bundles faster.
+The database-backed representation is
+[`InferredTypeData`](src/interned_types.rs). Complex payloads are Salsa interned
+handles, so inferred values are cheap to copy and participate in dependency
+tracking. Public inferred names come from [`resolved.rs`](src/resolved.rs):
+database-backed names use the `Inferred` prefix when a raw type has the same
+conceptual name.
 
-For Biome, priorities are different: If a user changes file A, they want the
-diagnostics for file B to update in their IDE, regardless of whether it has
-dependencies on file A. Updates need to happen near-instantaneously, and
-the IDE is not a client we can offload responsibility to.
+Raw references distinguish identities explicitly:
 
-## Module Graph
-
-Biome's [module graph](../biome_module_graph/) is central to our multi-file
-support and is designed with these considerations in mind. And our type
-architecture is built upon this module graph. The module graph is effectively
-just a [fancy hash map](https://github.com/ibraheemdev/papaya/) that contains
-entries for every module (every JS/TS file in a repository), including metadata
-such as which other modules that module depends on, which symbols it exports,
-and yes, also which types it contains.
-
-The key constraint the module graph operates under is this: No module may copy
-or clone data from another module, not even if that data is behind an
-[`Arc`](https://doc.rust-lang.org/std/sync/struct.Arc.html).
-The reason for this is simple: Because of our focus on IDE support, we maintain
-the idea that any module in the module graph may be updated at any point in time
-due to a user action. Whenever that happens, we shouldn't have trouble figuring
-out which other modules need their data to be invalidated, which might happen if
-modules were to copy each other's data.
-
-Some other tools use complex systems to track dependencies between modules, both
-explicit dependencies as well as implicit ones, so they can do very granular
-cache invalidation. With Biome we're trying radical simplicity instead: just
-make sure we don't have such dependencies between entries in our module graph.
-So far, that appears to be working well enough, but naturally, it comes with its
-own challenges.
-
-## Type Data Structures
-
-In Biome, the most basic data structure for type information is a giant `enum`,
-called `TypeData`, defined in [`type_info.rs`](src/type_info.rs).
-
-This enum has many different variants in order to cover all the different kinds
-of types that TypeScript supports. But a few are specifically
-interesting to mention here:
-
-* `TypeData::Unknown` is important because our implementation of type inference
-  is only a partial implementation. Whenever something is not implemented, we
-  default to `Unknown` to indicate that, well, the type is unknown. This is
-  practically identical to the `unknown` keyword that exists in TypeScript, but
-  we do have a separate `TypeData::UnknownKeyword` variant for that so that we
-  can distinguish between situations where our inference falls short versus
-  situations where we _can't_ infer because the user explicitly used `unknown`.
-  They're semantically identical, so the difference is only for measuring the
-  effectiveness of our inference.
-* Complex types such as `TypeData::Function` and `TypeData::Object` carry extra
-  information, such as definitions of function parameters and object properties.
-  Because function parameters and object properties themselves also have a type,
-  we can recognise that `TypeData` is potentially a circular data structure.
-* Rather than allowing the data structure itself to become circular/recursive,
-  we use `TypeReference` to refer to other types. And because we try to avoid
-  duplicating types if we can, we have `TypeData::Reference` to indicate a type
-  is nothing but a reference to another type.
-
-## Why Use Type References?
-
-Theoretically, we _could_ use `Arc` and let types reference each other directly.
-But remember that module graph mentioned above? If a type from module A were to
-reference a type from module B, and we'd store the type from module B behind an
-`Arc`, then what would happen if module B were replaced in our module graph?
-
-The result would be that the module graph would have an updated version of
-module B, but the types in module A would hang on to old versions of those
-types, because the `Arc` would keep those old versions alive. Of course we could
-try to mitigate that, but solutions tend to become either very complex or very
-slow, and possibly both.
-
-We wanted simplicity, so we opted to sidestep this problem using
-`TypeReference`s instead.
-
-## Raw and Inferred Types
-
-Type inference has two distinct `TypeData` representations. The collector-side
-type in [`type_data.rs`](src/type_data.rs) stores `TypeReference`s and is suitable
-for compact module metadata. The database-backed type in
-[`interned_types.rs`](src/interned_types.rs) stores Salsa handles and can refer to
-types from other modules without copying their data.
-
-The bridge between these representations is intentionally lossy when no module
-resolver is available. Imports, local handles, divergent values, and unsupported
-references degrade to internal `Unknown` rather than inventing a precise type.
-Code outside this crate uses the canonical names from
-[`resolved.rs`](src/resolved.rs): database-backed names use the `Inferred`
-prefix, while unique names remain unprefixed.
-
-But even though the constraints of our module graph were our primary reason for
-choosing to use type references, they have other advantages too:
-
-* By not putting the type data behind `Arc`s, we can store data for multiple
-  types in a linear vector. This improves data locality, and with it,
-  performance.
-* Storing type data in a vector also makes it more convenient to see which types
-  have been registered, which in turn helps with debugging and test snapshots.
-* Not having to deal with recursive data structures made some of our algorithms
-  easier to reason about as well. If we want to perform some action on every
-  type, we just run it on the vector instead of traversing a graph
-  while tracking which parts of the graph have already been visited.
-
-## Type Resolution Phases
-
-Type references come in multiple variants:
-
-```rs
+```rust,ignore
 enum TypeReference {
     Qualifier(TypeReferenceQualifier),
-    Resolved(ResolvedTypeId),
+    Resolved(RawTypeId),
     Import(TypeImportQualifier),
-    Unknown,
+}
+
+enum RawTypeId {
+    Local(TypeId),
+    Global(GlobalTypeId),
 }
 ```
 
-The reason for these variants is that _type resolution_, the process of
-resolving type references, works in multiple phases.
+`RawTypeId::Local` addresses the current module's raw table. A global ID names a
+canonical database-native global. Neither should be inspected as an inferred
+type without resolution.
 
-Biome recognises three levels of type inference, and has different resolution
-phases to support those...
+## Collection
 
-### Local Inference
+Local inference in [`local_inference.rs`](src/local_inference.rs) derives raw
+types from syntax. For example, `a + b` becomes a deferred expression containing
+references to `a` and `b`; the collector does not attempt to discover their
+cross-module values.
 
-_Local inference_ is when we look at an expression and derive a type definition.
-For example, consider this seemingly trivial example:
+[`RawTypeCollector`](src/type_store.rs) is the narrow interface used during this
+phase. It registers raw values and creates local references. Imports and scoped
+qualifiers remain explicit so later database queries can resolve them against
+the current module graph and semantic model.
 
-```js
-a + b
+## Database Inference
+
+`infer_module_types` is the tracked dependency query in
+[`queries.rs`](../biome_module_graph/src/db/queries.rs). External consumers call
+`infer_module_types_bottom_up`, whose nontracked iterative walk warms imports
+innermost-first. This avoids deep Rust and Salsa revalidation stacks while
+preserving backdating at each tracked module query.
+
+`resolve_raw_types` converts a module's raw table into `InferredModuleTypes`.
+The result contains:
+
+- the module key used by local inferred handles;
+- the resolved type table;
+- named declaration IDs;
+- expression types keyed by source range;
+- binding types keyed by source range.
+
+Imports are resolved through tracked module queries. Globals come from the
+memoized database-native global table. Expression evaluation and structural
+normalization happen in the module graph, not in the collector.
+
+## Handles And Normalization
+
+`InferredTypeData::Local` contains both a module key and a local type ID. The
+pair identifies a type within one database, including when the handle crosses an
+import boundary. `GlobalType` contains a canonical global ID and remains
+memberless until expanded.
+
+Consumers must call `normalize_type` or use an `InferredModuleTypes` lookup
+before inspecting values that may contain handles. Normalization resolves local
+handles, expands non-nominal globals, unwraps deferred `typeof` values, and
+collapses structural wrappers. Cycles and exhausted walks degrade to `Unknown`.
+
+## Cycles
+
+Salsa invokes `infer_module_types_cycle_result` when tracked module inference
+encounters an import cycle. The fallback computes the root's strongly connected
+component and resolves that component with `CycleFallback`, suppressing imports
+that would re-enter it. Imports outside the component remain tracked normally.
+
+Raw self-references use local handles. During raw conversion, re-entering a type
+currently being resolved returns its stable local handle; the outer resolution
+then stores the completed value in the module table.
+
+## Budgets And Tri-State Results
+
+Every potentially cyclic or expanding walk has a deterministic query-local
+budget. Deduplicated revisits do not consume another step. An incomplete type
+result degrades to `Unknown`; an incomplete predicate returns `None`.
+
+For `Option<bool>` predicates:
+
+```rust,ignore
+match ty.is_promise_instance() {
+    Some(true) => report(),
+    Some(false) => {}
+    None => return, // Do not diagnose from partial inference.
+}
 ```
 
-It looks like this should be easy, but because local inference doesn't have any
-context such as definitions from surrounding scopes, it will never be able to
-understand what `a` or `b` refers to.
+`Some(true)` and `Some(false)` are complete answers. `None` means unresolved
+data, a cycle, or budget exhaustion prevented a reliable answer.
 
-Therefore, local inference cannot resolve this to a _concrete_ type. But with
-the help of type references, we can rewrite the expression into something
-useful:
+## Module Index Invalidation
 
-```rs
-TypeData::TypeofExpression(TypeofExpression::Addition {
-    left: TypeReference::from(TypeReferenceQualifier::from_name("a")),
-    right: TypeReference::from(TypeReferenceQualifier::from_name("b"))
-})
-```
+Every dynamic module-path lookup must read `ModuleDb::module_graph_generation`.
+Structural registry mutations acquire the pending Salsa setter before publishing
+map changes and commit the new generation afterward. This prevents a reader from
+observing a new map under an old generation.
 
-Local inference doesn't do any type resolution yet, it only creates type
-references. So in most cases we won't know a concrete type yet, but it still
-provides a useful starting point for later inference.
+## Testing
 
-Local inference is implemented in [`local_inference.rs`](src/local_inference.rs).
-
-### Module-Level ("Thin") Inference
-
-_Module-level inference_, sometimes called: "thin inference", allows us to put
-those types from the local inference phase into context. This is where we look
-at a module as a whole, take its import and export definitions, look at the
-scopes that are created, as well as the types derived using local inference, and
-apply another round of inference to it.
-
-Within the scope of a module, we do our first round of type resolution: We take
-all the references of the variant `TypeReference::Qualifier` (the only ones
-created thus far), and attempt to look them up in the relevant scopes. If a
-local scope declaration is found, we consider the type _resolved_ and convert
-the reference into a `TypeReference::Resolved` variant with an associated
-`ResolvedTypeId` structure, which looks like this:
-
-```rs
-struct ResolvedTypeId(ResolverId, TypeId)
-```
-
-Both `ResolverId` and `TypeId` are a `u32` internally, so this is a really
-compact representation for referencing another type, not bigger than a regular
-64-bit pointer. The `TypeId` is a literal index into a vector where types are
-stored, while the `ResolverId` is a slightly more complex identifier that allows
-us to determine _which_ vector we need to look in, because every module will
-have its own vector (and there are a few more places to look besides).
-
-Another possibility is that the qualifier references a binding from an
-_import statement_, such as `import { a } from "./a.ts"`. In this case, we
-cannot fully resolve the type yet, because thin inference cannot look beyond the
-boundaries of its own module. But we can mark this case as an explicit import
-reference. This is what the `TypeReference::Import` variant is for.
-
-And if the qualifier exists neither as a local declaration, nor as an imported
-binding, then we know it must come from the global scope, where we can find
-predefined bindings such as `Array` and `Promise`, or the `window` object. If a
-global reference is found, it also gets converted to a `TypeReference::Resolved`
-variant, where the `ResolverId` can be used to indicate this type can be looked
-up from a vector of predefined types.
-
-But ultimately, if not even a global declaration was found, then we're at a loss
-and fall back to `TypeReference::Unknown`.
-
-Thin inference is implemented in
-[`js_module_info/collector.rs`](../biome_module_graph/src/js_module_info/collector.rs).
-
-## Full Inference
-
-_Full inference_ is where we can tie all the loose ends together. It's where we
-have the entire module graph at our disposal, so that whenever we run into an
-unresolved `TypeReference::Import` variant, we can resolve it on the spot, at
-which point it becomes a `TypeReference::Resolved` variant again.
-
-Full inference is implemented as tracked database queries in
-[`queries.rs`](../biome_module_graph/src/db/queries.rs). Query dependencies
-invalidate cached results when modules change. `infer_module_types()`
-iteratively warms imported modules, innermost first, before evaluating the
-requested module. This keeps both execution and Salsa revalidation shallow on
-long import chains.
-
-The result is `InferredModuleTypes`, which contains the module key, its local
-type table, named type IDs, expression types, and binding types. Consumers should
-normalize values through `normalize_type()` before inspecting them. Normalization
-resolves local handles, expands structural globals, unwraps `typeof` wrappers,
-and degrades cycles or exhausted walks to `Unknown`.
-
-Salsa invokes a `cycle_result` fallback when imports form a cycle. The fallback
-computes the strongly connected component and resolves it with `CycleFallback`,
-which prevents recursive imports from manufacturing partial exact types.
-
-Every expanding walk has a deterministic query-local budget. Revisited states
-are deduplicated without consuming another step. Exhaustion returns `Unknown`
-for a type result or `None` for a tri-state predicate. For `Option<bool>` APIs,
-`Some(true)` and `Some(false)` are complete answers; `None` means inference or
-the walk could not complete and diagnostics should be suppressed.
-
-## Type Resolvers
-
-The raw collector representation still uses explicit type resolvers to follow
-references before values enter the database-backed resolved representation.
-The `TypeResolver` trait is defined in [`resolver.rs`](src/resolver.rs).
-
-* **`HardcodedSymbolResolver`**. This one is purely for test purposes.
-* **`GlobalsResolver`**. This is the one that is responsible for resolving
-  globals such as `Promise` and `Array`. The way we do this is still rather
-  primitive with hardcoded, predefined symbols. At some point we probably should
-  be able to use TypeScript's own global `.d.ts` files, such as
-  [`es2023.array.d.ts`](https://github.com/microsoft/TypeScript/blob/main/src/lib/es2023.array.d.ts),
-  directly.
-* **`JsModuleInfoCollector`**. This one is responsible for collecting
-  information about a module, and for performing thin inference on it.
-Raw types are stored in a `TypeStore` and consumed into `JsModuleInfo`. Full
-cross-module resolution then produces database-backed inferred types in
-`InferredModuleTypes`.
-
-## Flattening
-
-Apart from type resolution, there's one other, last important piece to type
-inference: _type flattening_.
-
-Let's look at the `a + b` expression again. After local inference, it was
-interpreted as this:
-
-```rs
-TypeData::TypeofExpression(TypeofExpression::Addition {
-    left: TypeReference::from(TypeReferenceQualifier::from_name("a")),
-    right: TypeReference::from(TypeReferenceQualifier::from_name("b"))
-})
-```
-
-But at some point, supposedly one of the resolvers is going to be able to
-resolve `a` and `b`, and the expression becomes something such as:
-
-```rs
-TypeData::TypeofExpression(TypeofExpression::Addition {
-    left: TypeReference::from(ResolvedTypeId(/* resolver ID and type ID */)),
-    right: TypeReference::from(ResolvedTypeId(/* resolver ID and type ID */))
-})
-```
-
-At this point we know the actual types we are dealing with. If the types for
-both `left` and `right` resolve to `TypeData::Number`, the entire expression can
-be _flattened_ to `TypeData::Number`, because that's the result of adding two
-numbers. And in most other cases it will become `TypeData::String` instead.
-
-Flattening is implemented in [`flattening.rs`](src/flattening.rs).
-
-## `ResolvedTypeData`
-
-One more important data structure to be aware of is `ResolvedTypeData`. Whenever
-we request type data from a resolver, we don't receive a `&TypeData` reference,
-but `ResolvedTypeData`.
-
-The reason for this structure is that it tracks the `ResolverId` so we remember
-where this type data was found. This is important if you want to resolve
-`TypeReference`s that are part of the type data and you need to make subsequent
-calls to the resolver.
-
-`ResolvedTypeData` has an `as_raw_data()` method that returns the raw
-`&TypeData` reference. This is often used for matching against the variants of
-the `TypeData` enum. But keep in mind that any data that you retrieve this way
-cannot be used with a resolver unless you explicitly and manually apply the
-right `ResolverId` to it! Unfortunately we cannot enforce this through the type
-system, and **mistakes can lead to panics**.
+Use module-graph v2 tests for database inference, invalidation, backdating,
+cycles, and normalization. Raw collector snapshots should describe only local
+table identities; they must not imply that unresolved collector entries are
+canonical globals. Type-aware analyzer fixtures verify the final lint-facing
+behavior.

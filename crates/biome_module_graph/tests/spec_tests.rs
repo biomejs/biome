@@ -24,7 +24,7 @@ use biome_module_graph::{
     HtmlEmbeddedContent, ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase,
     JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic, ModuleInfo,
     ModuleInfoKind, PathInfoCache, ResolvedPath, SymbolFromModuleInfo, find_js_exported_symbol,
-    infer_call_expression_type, infer_module_types, is_class_referenced_by_importers,
+    infer_call_expression_type, infer_module_types_bottom_up, is_class_referenced_by_importers,
     resolve_css_module, resolve_html_module, resolve_js_module, transitive_importers_of,
     traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
 };
@@ -1165,8 +1165,8 @@ fn test_resolve_swr_types() {
             "{fixtures_path}/frontend/src/index.ts"
         )))
         .expect("module input must exist");
-    let inferred =
-        infer_module_types(&db, index_module_input).expect("Salsa types must be inferred");
+    let inferred = infer_module_types_bottom_up(&db, index_module_input)
+        .expect("Salsa types must be inferred");
     let ModuleInfoKind::Js(index_info) = index_module_input.kind(&db) else {
         panic!("index module must be JavaScript");
     };

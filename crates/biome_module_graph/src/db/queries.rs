@@ -4,12 +4,13 @@
 //! the tracked queries. Salsa uses the tracked dependencies to invalidate query
 //! results when their inputs change.
 //!
-//! Salsa queries must accept only two inputs:
-//! 1. The salsa db
-//! 2. A Salsa input or interned
+//! Salsa queries in this module must accept exactly two inputs:
+//! 1. The Salsa database.
+//! 2. A Salsa input or interned value.
 //!
-//! Breaking this pattern makes the queries a bit more convoluted because Salsa creates an interned for each
-//! input.
+//! The tracked-function macro creates an implicit interned ingredient for each
+//! additional non-database argument. Group multiple logical inputs into one
+//! explicit interned input type so query identity and style remain consistent.
 
 #![deny(clippy::wildcard_enum_match_arm)]
 #![allow(
@@ -27,7 +28,7 @@ use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{ImportTreeNode, JsExport, JsOwnExport, ModuleDb, ResolvedPath};
 use biome_css_syntax::{TextRange, TextSize};
 use biome_js_type_info::{
-    ImportSymbol, RawTypeData, TypeReference, TypeResolverLevel,
+    ImportSymbol, RawTypeData, RawTypeId, TypeReference,
     resolved::{
         InferredCallArgumentType, InferredFunction, InferredFunctionParameter,
         InferredLiteralValue, InferredLocalTypeHandle, InferredLocalTypeId,
@@ -50,7 +51,7 @@ const MAX_ARGUMENT_SEQUENCE_STEPS: usize = 1024;
 const MAX_LOCAL_EXTENDS_STEPS: usize = 1024;
 
 #[salsa::tracked(cycle_result=infer_module_types_cycle_result)]
-pub(in crate::db) fn infer_module_types_query<'db>(
+pub fn infer_module_types<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
 ) -> Option<Arc<InferredModuleTypes<'db>>> {
@@ -65,7 +66,7 @@ pub(in crate::db) fn infer_module_types_query<'db>(
         if let Some(path) = import_path.as_path()
             && let Some(target) = db.module_for_path(path)
         {
-            let _ = infer_module_types_query(db, target);
+            let _ = infer_module_types(db, target);
         }
     }
 
@@ -77,13 +78,12 @@ pub(in crate::db) fn infer_module_types_query<'db>(
     )))
 }
 
-/// Infers the types of a module after iteratively warming all dependencies.
+/// Infers a module after iteratively warming dependencies innermost-first.
 ///
-/// The innermost-first walk keeps both execution and Salsa revalidation shallow
-/// on long import chains. Tracking this wrapper records a flat dependency list
-/// instead of adding one public query frame per imported module.
-#[salsa::tracked]
-pub fn infer_module_types<'db>(
+/// External consumers should use this entry point. The iterative walk keeps the
+/// Rust stack shallow while the tracked [`infer_module_types`] query retains
+/// dependency-level backdating.
+pub fn infer_module_types_bottom_up<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
 ) -> Option<Arc<InferredModuleTypes<'db>>> {
@@ -92,7 +92,7 @@ pub fn infer_module_types<'db>(
 
     while let Some((current, imports_visited)) = stack.pop() {
         if imports_visited {
-            infer_module_types_query(db, current);
+            infer_module_types(db, current);
             continue;
         }
         if !visited.insert(current) {
@@ -135,7 +135,7 @@ pub fn infer_module_types<'db>(
         }
     }
 
-    infer_module_types_query(db, module)
+    infer_module_types(db, module)
 }
 
 fn push_inference_dependency(
@@ -1641,12 +1641,9 @@ fn local_handle_from_reference<'db>(
     module_key: InferredModuleKey,
     reference: &TypeReference,
 ) -> Option<InferredLocalTypeHandle<'db>> {
-    let TypeReference::Resolved(resolved) = reference else {
+    let TypeReference::Resolved(RawTypeId::Local(resolved)) = reference else {
         return None;
     };
-    if resolved.level() != TypeResolverLevel::Thin {
-        return None;
-    }
 
     Some(InferredLocalTypeHandle::new(
         db,
@@ -1757,7 +1754,7 @@ pub fn normalize_type<'db>(
 ) -> InferredTypeData<'db> {
     let module = input.module(db);
     let ty = input.ty(db);
-    let Some(inferred) = infer_module_types_query(db, module) else {
+    let Some(inferred) = infer_module_types(db, module) else {
         return ty;
     };
 

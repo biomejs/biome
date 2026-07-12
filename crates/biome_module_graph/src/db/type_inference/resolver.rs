@@ -1,16 +1,16 @@
 //! Conversion from collector-side raw types to database-backed inferred types.
 
 use super::{BindingTypeData, InferredModuleTypes, globals::global_type, lookup::module_for_key};
-use crate::db::queries::infer_module_types_query;
+use crate::db::queries::infer_module_types;
 use crate::js_module_info::is_named_type_declaration;
 use crate::module_graph::ModuleInfo;
 use crate::{JsModuleInfo, ModuleDb};
 use biome_js_type_info::{
-    RawTypeData, ResolvedTypeId, ScopeId, TypeId, TypeReference, TypeReferenceQualifier,
-    TypeResolverLevel,
+    RawTypeData, RawTypeId, ScopeId, TypeId, TypeReference, TypeReferenceQualifier,
     resolved::{
-        GlobalTypeId, InferredLocalTypeHandle, InferredLocalTypeId, InferredModuleKey,
-        InferredTypeData, InferredTypeofValue,
+        InferredLocalTypeHandle, InferredLocalTypeId, InferredModule, InferredModuleKey,
+        InferredNamespace, InferredTypeData, InferredTypeMember, InferredTypeMemberKind,
+        InferredTypeofValue,
     },
 };
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -112,7 +112,10 @@ fn named_type_ids(js_info: &JsModuleInfo) -> FxHashSet<TypeId> {
             let TypeReference::Resolved(resolved_id) = reference else {
                 return None;
             };
-            (resolved_id.level() == TypeResolverLevel::Thin).then(|| resolved_id.id())
+            match resolved_id {
+                RawTypeId::Local(id) => Some(*id),
+                RawTypeId::Global(_) => None,
+            }
         })
         .collect()
 }
@@ -123,12 +126,12 @@ impl<'db> ResolutionCtx<'db, '_> {
         module: ModuleInfo,
     ) -> Option<Arc<InferredModuleTypes<'db>>> {
         match self.import_resolution {
-            ImportResolution::Full => infer_module_types_query(self.db, module),
+            ImportResolution::Full => infer_module_types(self.db, module),
             ImportResolution::CycleFallback(blocked) => {
                 if blocked.contains(&module) {
                     None
                 } else {
-                    infer_module_types_query(self.db, module)
+                    infer_module_types(self.db, module)
                 }
             }
         }
@@ -154,26 +157,12 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     pub(in crate::db::type_inference) fn resolve_resolved_id(
         &mut self,
-        resolved_id: ResolvedTypeId,
+        resolved_id: RawTypeId,
     ) -> InferredTypeData<'db> {
-        match resolved_id.level() {
-            TypeResolverLevel::Thin => self.resolve_raw_type_reference(resolved_id.id()),
-            TypeResolverLevel::Global => self.resolve_global_type_id(resolved_id.id()),
-            TypeResolverLevel::Full | TypeResolverLevel::Import => InferredTypeData::Unknown,
+        match resolved_id {
+            RawTypeId::Local(id) => self.resolve_raw_type_reference(id),
+            RawTypeId::Global(id) => global_type(self.db, id),
         }
-    }
-
-    fn resolve_global_type_id(&mut self, type_id: TypeId) -> InferredTypeData<'db> {
-        GlobalTypeId::try_from_type_id(type_id).map_or_else(
-            || {
-                debug_assert!(
-                    false,
-                    "global resolved TypeId must index the predefined global manifest"
-                );
-                InferredTypeData::Unknown
-            },
-            |type_id| global_type(self.db, type_id),
-        )
     }
 
     fn resolve_raw_type_reference(&mut self, type_id: TypeId) -> InferredTypeData<'db> {
@@ -209,10 +198,92 @@ impl<'db> ResolutionCtx<'db, '_> {
             .raw_types
             .get(type_id.index())
             .map_or(InferredTypeData::Unknown, |raw| self.resolve_raw_type(raw));
+        let ty = self.with_namespace_members(type_id, ty);
 
         self.in_progress.remove(&type_id);
         self.resolved.insert(type_id, ty);
         ty
+    }
+
+    fn with_namespace_members(
+        &mut self,
+        type_id: TypeId,
+        fallback: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        let Some(raw) = self.js_info.raw_types.get(type_id.index()) else {
+            return fallback;
+        };
+        enum NamespaceMetadata {
+            Module(biome_rowan::Text),
+            Namespace(biome_js_type_info::Path),
+        }
+        let metadata = match raw {
+            RawTypeData::Module(module) => NamespaceMetadata::Module(module.name.clone()),
+            RawTypeData::Namespace(namespace) => {
+                NamespaceMetadata::Namespace(namespace.path.clone())
+            }
+            _ => return fallback,
+        };
+        let scope_id = self
+            .js_info
+            .semantic_model
+            .all_bindings()
+            .find_map(|binding| {
+                let reference = self
+                    .js_info
+                    .raw_binding_types
+                    .get(&binding.syntax().text_trimmed_range())?;
+                matches!(
+                    reference,
+                    TypeReference::Resolved(RawTypeId::Local(id)) if *id == type_id
+                )
+                .then(|| binding.scope().id())
+            });
+        let Some(scope_id) = scope_id else {
+            return fallback;
+        };
+
+        let members = self
+            .js_info
+            .semantic_model
+            .all_bindings()
+            .filter(|binding| {
+                binding
+                    .scope()
+                    .parent()
+                    .is_some_and(|parent| parent.id() == scope_id)
+            })
+            .filter_map(|binding| {
+                let name = binding
+                    .tree()
+                    .name_token()
+                    .ok()?
+                    .token_text_trimmed()
+                    .into();
+                let reference = self
+                    .js_info
+                    .raw_binding_types
+                    .get(&binding.syntax().text_trimmed_range())?
+                    .clone();
+                Some((name, reference))
+            })
+            .collect::<Vec<_>>();
+        let members = members
+            .into_iter()
+            .map(|(name, reference)| InferredTypeMember {
+                kind: InferredTypeMemberKind::NamedStatic(name),
+                ty: self.resolve(&reference),
+            })
+            .collect::<Box<[_]>>();
+
+        match metadata {
+            NamespaceMetadata::Module(name) => {
+                InferredTypeData::Module(InferredModule::new(self.db, members, name))
+            }
+            NamespaceMetadata::Namespace(path) => {
+                InferredTypeData::Namespace(InferredNamespace::new(self.db, members, path))
+            }
+        }
     }
 
     fn resolve_raw_type(&mut self, raw: &RawTypeData) -> InferredTypeData<'db> {

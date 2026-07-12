@@ -10,8 +10,7 @@ use crate::css_module_info::CssClassReference;
 use biome_js_semantic::JsDeclarationKind;
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{
-    ImportSymbol, RawTypeData, ResolvedTypeId, TypeReference, TypeResolverLevel,
-    resolved::InferredLocalTypeId,
+    ImportSymbol, RawTypeData, RawTypeId, TypeId, TypeReference, resolved::InferredLocalTypeId,
 };
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};
@@ -141,12 +140,10 @@ impl JsModuleInfo {
         self.raw_binding_types
             .iter()
             .find_map(|(range, reference)| {
-                let TypeReference::Resolved(resolved_id) = reference else {
+                let TypeReference::Resolved(RawTypeId::Local(resolved_id)) = reference else {
                     return None;
                 };
-                if resolved_id.level() != TypeResolverLevel::Thin
-                    || resolved_id.index() != type_id.index()
-                {
+                if resolved_id.index() != type_id.index() {
                     return None;
                 }
 
@@ -390,7 +387,7 @@ pub enum JsOwnExport {
     /// The range can be used to look up type augmentation data.
     Binding(TextRange),
     /// An export that directly references a resolved type.
-    Type(ResolvedTypeId),
+    Type(TypeId),
     /// A namespace export created by `export * as Name from "..."`.
     ///
     /// The entire module namespace of the target is re-exported under `Name`,

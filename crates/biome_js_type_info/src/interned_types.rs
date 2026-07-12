@@ -18,14 +18,10 @@ use crate::{
     builders::{IntersectionBuilder, UnionBuilder},
     globals_ids::{
         ARRAY_ID_GLOBAL_TYPE_ID, ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID, DATE_ID_GLOBAL_TYPE_ID,
-        DISPOSABLE_ID_GLOBAL_TYPE_ID, ERROR_ID_GLOBAL_TYPE_ID, GLOBAL_ARRAY_ID,
-        GLOBAL_ASYNC_DISPOSABLE_ID, GLOBAL_BOOLEAN_ID, GLOBAL_CONDITIONAL_ID, GLOBAL_DATE_ID,
-        GLOBAL_DISPOSABLE_ID, GLOBAL_ERROR_ID, GLOBAL_GLOBAL_ID, GLOBAL_MAP_ID, GLOBAL_NUMBER_ID,
-        GLOBAL_PROMISE_ID, GLOBAL_REGEXP_ID, GLOBAL_SET_ID, GLOBAL_STRING_ID,
-        GLOBAL_SYMBOL_ASYNC_DISPOSE_ID, GLOBAL_SYMBOL_DISPOSE_ID, GLOBAL_SYMBOL_ID,
-        GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID, GLOBAL_VOID_ID, GLOBAL_WEAK_MAP_ID, GlobalTypeId,
-        MAP_ID_GLOBAL_TYPE_ID, PROMISE_ID_GLOBAL_TYPE_ID, REGEXP_ID_GLOBAL_TYPE_ID,
-        SET_ID_GLOBAL_TYPE_ID, SYMBOL_ID_GLOBAL_TYPE_ID, WEAK_MAP_ID_GLOBAL_TYPE_ID,
+        DISPOSABLE_ID_GLOBAL_TYPE_ID, ERROR_ID_GLOBAL_TYPE_ID, GLOBAL_SYMBOL_ASYNC_DISPOSE_ID,
+        GLOBAL_SYMBOL_DISPOSE_ID, GlobalTypeId, MAP_ID_GLOBAL_TYPE_ID, PROMISE_ID_GLOBAL_TYPE_ID,
+        REGEXP_ID_GLOBAL_TYPE_ID, SET_ID_GLOBAL_TYPE_ID, SYMBOL_ID_GLOBAL_TYPE_ID,
+        WEAK_MAP_ID_GLOBAL_TYPE_ID,
     },
     literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral},
     type_data as raw,
@@ -82,6 +78,17 @@ pub enum StructuralMapError {
     InvalidRebuild,
 }
 
+impl std::fmt::Display for StructuralMapError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Self::StepLimitExceeded => "structural type traversal exceeded its step limit",
+            Self::InvalidRebuild => "structural type children could not rebuild their parent",
+        })
+    }
+}
+
+impl std::error::Error for StructuralMapError {}
+
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, salsa::Update)]
 pub struct ModuleKey {
     id: salsa::Id,
@@ -110,7 +117,7 @@ pub struct LocalTypeId {
 impl LocalTypeId {
     pub fn new(index: usize) -> Self {
         Self {
-            index: index as u32,
+            index: u32::try_from(index).expect("local type index exceeds u32::MAX"),
         }
     }
 
@@ -525,6 +532,12 @@ impl<'db> TypeData<'db> {
     /// // preserves the nested binder and therefore leaves `f` unchanged.
     /// let unchanged = function.substitute_type(db, substitution)?;
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns [`StructuralMapError::StepLimitExceeded`] if traversal exhausts
+    /// its budget, or [`StructuralMapError::InvalidRebuild`] if transformed
+    /// children cannot reconstruct their parent type.
     pub fn substitute_type(
         self,
         db: &'db dyn TypeDb,
@@ -564,6 +577,12 @@ impl<'db> TypeData<'db> {
     /// // rewrites the parameter and return type to `string`.
     /// let specialized = function.substitute_type_in_root_body(db, substitution)?;
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns [`StructuralMapError::StepLimitExceeded`] if traversal exhausts
+    /// its budget, or [`StructuralMapError::InvalidRebuild`] if transformed
+    /// children cannot reconstruct their parent type.
     pub fn substitute_type_in_root_body(
         self,
         db: &'db dyn TypeDb,
@@ -601,6 +620,12 @@ impl<'db> TypeData<'db> {
     /// `map` runs before children are visited. Returning `Break` replaces a
     /// complete subtree, while `Continue` descends into the returned type.
     /// `finish` runs after a descended type has been rebuilt.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`StructuralMapError::StepLimitExceeded`] when `max_steps` is
+    /// exhausted, or [`StructuralMapError::InvalidRebuild`] when mapped children
+    /// cannot reconstruct their parent type.
     pub fn try_map_structural(
         self,
         db: &'db dyn TypeDb,
@@ -821,16 +846,6 @@ impl<'db> TypeData<'db> {
         Self::instance_of(db, Self::weak_map_class(db), type_parameters)
     }
 
-    /// Converts collector-side data without a module resolver.
-    ///
-    /// Import namespaces, imports, unresolved IDs, and qualifiers without a
-    /// known type argument degrade to `Unknown`.
-    pub fn from_raw_lossy(db: &'db dyn TypeDb, raw: &RawTypeData) -> Self {
-        let mut resolve_reference =
-            |reference: &raw::TypeReference| Self::from_raw_reference_lossy(db, reference);
-        Self::from_raw_with_resolver(db, raw, &mut resolve_reference)
-    }
-
     pub fn from_raw_with_resolver(
         db: &'db dyn TypeDb,
         raw: &RawTypeData,
@@ -974,202 +989,6 @@ impl<'db> TypeData<'db> {
             raw::TypeData::ThisKeyword => Self::ThisKeyword,
             raw::TypeData::UnknownKeyword => Self::UnknownKeyword,
             raw::TypeData::VoidKeyword => Self::VoidKeyword,
-        }
-    }
-
-    /// Converts a raw reference using only well-known global IDs.
-    ///
-    /// Imports, unrecognized IDs, and unresolved qualifiers degrade to
-    /// `Unknown`.
-    pub fn from_raw_reference_lossy(db: &'db dyn TypeDb, reference: &raw::TypeReference) -> Self {
-        match reference {
-            raw::TypeReference::Resolved(id) if *id == GLOBAL_UNKNOWN_ID => Self::Unknown,
-            raw::TypeReference::Resolved(id) if *id == GLOBAL_UNDEFINED_ID => Self::Undefined,
-            raw::TypeReference::Resolved(id) if *id == GLOBAL_VOID_ID => Self::VoidKeyword,
-            raw::TypeReference::Resolved(id) if *id == GLOBAL_CONDITIONAL_ID => Self::Conditional,
-            raw::TypeReference::Resolved(id) if *id == GLOBAL_NUMBER_ID => Self::Number,
-            raw::TypeReference::Resolved(id) if *id == GLOBAL_STRING_ID => Self::String,
-            raw::TypeReference::Resolved(id) if *id == GLOBAL_GLOBAL_ID => Self::Global,
-            raw::TypeReference::Resolved(id) if *id == GLOBAL_BOOLEAN_ID => Self::Boolean,
-            raw::TypeReference::Resolved(id) if *id == GLOBAL_ARRAY_ID => Self::array_class(db),
-            raw::TypeReference::Resolved(id) if *id == GLOBAL_ASYNC_DISPOSABLE_ID => {
-                Self::async_disposable_interface(db)
-            }
-            raw::TypeReference::Resolved(id) if *id == GLOBAL_DATE_ID => Self::date_class(db),
-            raw::TypeReference::Resolved(id) if *id == GLOBAL_DISPOSABLE_ID => {
-                Self::disposable_interface(db)
-            }
-            raw::TypeReference::Resolved(id) if *id == GLOBAL_ERROR_ID => Self::error_class(db),
-            raw::TypeReference::Resolved(id) if *id == GLOBAL_MAP_ID => Self::map_class(db),
-            raw::TypeReference::Resolved(id) if *id == GLOBAL_PROMISE_ID => Self::promise_class(db),
-            raw::TypeReference::Resolved(id) if *id == GLOBAL_REGEXP_ID => Self::regexp_class(db),
-            raw::TypeReference::Resolved(id) if *id == GLOBAL_SET_ID => Self::set_class(db),
-            raw::TypeReference::Resolved(id) if *id == GLOBAL_SYMBOL_ID => Self::symbol_class(db),
-            raw::TypeReference::Resolved(id) if *id == GLOBAL_WEAK_MAP_ID => {
-                Self::weak_map_class(db)
-            }
-            raw::TypeReference::Resolved(_) => Self::Unknown,
-            raw::TypeReference::Qualifier(qualifier) => qualifier
-                .type_parameters
-                .iter()
-                .find(|param| param.is_known())
-                .map_or(Self::Unknown, |param| {
-                    Self::from_raw_reference_lossy(db, param)
-                }),
-            raw::TypeReference::Import(_) => Self::Unknown,
-        }
-    }
-
-    /// Converts inferred data back to the collector representation.
-    ///
-    /// Divergent values, local handles, and canonical global handles degrade to
-    /// raw `Unknown`; structural children use the lossy reference conversion.
-    pub fn to_raw_lossy(self, db: &'db dyn TypeDb) -> RawTypeData {
-        match self {
-            Self::Unknown | Self::Divergent(_) => raw::TypeData::Unknown,
-            Self::Global => raw::TypeData::Global,
-            Self::BigInt => raw::TypeData::BigInt,
-            Self::Boolean => raw::TypeData::Boolean,
-            Self::Null => raw::TypeData::Null,
-            Self::Number => raw::TypeData::Number,
-            Self::String => raw::TypeData::String,
-            Self::Symbol => raw::TypeData::Symbol,
-            Self::Undefined => raw::TypeData::Undefined,
-            Self::Conditional => raw::TypeData::Conditional,
-            Self::Class(class) => raw::TypeData::Class(Box::new(raw::Class {
-                name: class.name(db).clone(),
-                type_parameters: raw_references_from_types(class.type_parameters(db)),
-                extends: class.extends(db).map(Self::to_raw_reference_lossy),
-                implements: raw_references_from_types(class.implements(db)),
-                members: raw_type_members_from_types(db, class.members(db)),
-            })),
-            Self::Constructor(constructor) => {
-                raw::TypeData::Constructor(Box::new(raw::Constructor {
-                    type_parameters: raw_references_from_types(constructor.type_parameters(db)),
-                    parameters: raw_constructor_parameters_from_types(
-                        db,
-                        constructor.parameters(db),
-                    ),
-                    return_type: constructor
-                        .return_type(db)
-                        .map(Self::to_raw_reference_lossy),
-                }))
-            }
-            Self::Function(function) => raw::TypeData::Function(Box::new(raw::Function {
-                is_async: function.is_async(db),
-                type_parameters: raw_references_from_types(function.type_parameters(db)),
-                name: function.name(db).clone(),
-                parameters: raw_function_parameters_from_types(db, function.parameters(db)),
-                return_type: raw_return_type_from_type(db, function.return_type(db)),
-            })),
-            Self::Interface(interface) => raw::TypeData::Interface(Box::new(raw::Interface {
-                name: interface.name(db).clone(),
-                type_parameters: raw_references_from_types(interface.type_parameters(db)),
-                extends: raw_references_from_types(interface.extends(db)),
-                members: raw_type_members_from_types(db, interface.members(db)),
-            })),
-            Self::Module(module) => raw::TypeData::Module(Box::new(raw::Module {
-                name: module.name(db).clone(),
-                members: raw_type_members_from_types(db, module.members(db)),
-            })),
-            Self::Namespace(namespace) => raw::TypeData::Namespace(Box::new(raw::Namespace {
-                path: namespace.path(db).clone(),
-                members: raw_type_members_from_types(db, namespace.members(db)),
-            })),
-            Self::Object(object) => raw::TypeData::Object(Box::new(raw::Object {
-                prototype: object.prototype(db).map(Self::to_raw_reference_lossy),
-                members: raw_type_members_from_types(db, object.members(db)),
-            })),
-            Self::Tuple(tuple) => raw::TypeData::Tuple(Box::new(raw::Tuple(
-                tuple
-                    .elements(db)
-                    .iter()
-                    .map(|element| raw::TupleElementType {
-                        ty: element.ty.to_raw_reference_lossy(),
-                        name: element.name.clone(),
-                        is_optional: element.is_optional,
-                        is_rest: element.is_rest,
-                    })
-                    .collect(),
-            ))),
-            Self::Generic(generic) => raw::TypeData::Generic(Box::new(raw::GenericTypeParameter {
-                name: generic.name(db).clone(),
-                constraint: generic.constraint(db).map_or_else(
-                    raw::TypeReference::unknown,
-                    TypeData::to_raw_reference_lossy,
-                ),
-                default: generic.default(db).map_or_else(
-                    raw::TypeReference::unknown,
-                    TypeData::to_raw_reference_lossy,
-                ),
-            })),
-            Self::Local(_) | Self::GlobalType(_) => raw::TypeData::Unknown,
-            Self::Intersection(intersection) => raw::TypeData::Intersection(Box::new(
-                raw::Intersection(raw_references_from_types(intersection.types(db))),
-            )),
-            Self::Union(union) => raw::TypeData::Union(Box::new(raw::Union(
-                raw_references_from_types(union.types(db)),
-            ))),
-            Self::TypeOperator(type_operator) => {
-                raw::TypeData::TypeOperator(Box::new(raw::TypeOperatorType {
-                    operator: type_operator.operator(db),
-                    ty: type_operator.ty(db).to_raw_reference_lossy(),
-                }))
-            }
-            Self::Literal(literal) => {
-                raw::TypeData::Literal(Box::new(raw_literal_from_type(db, literal.literal(db))))
-            }
-            Self::InstanceOf(instance) => raw::TypeData::InstanceOf(Box::new(raw::TypeInstance {
-                ty: instance.ty(db).to_raw_reference_lossy(),
-                type_parameters: raw_references_from_types(instance.type_parameters(db)),
-            })),
-            Self::MergedReference(reference) => {
-                raw::TypeData::MergedReference(Box::new(raw::MergedReference {
-                    ty: reference.ty(db).map(Self::to_raw_reference_lossy),
-                    value_ty: reference.value_ty(db).map(Self::to_raw_reference_lossy),
-                    namespace_ty: reference.namespace_ty(db).map(Self::to_raw_reference_lossy),
-                }))
-            }
-            Self::TypeofExpression(expression) => raw::TypeData::TypeofExpression(Box::new(
-                raw_typeof_expression_from_type(db, expression.expression(db)),
-            )),
-            Self::TypeofType(ty) => {
-                raw::TypeData::TypeofType(Box::new(ty.ty(db).to_raw_reference_lossy()))
-            }
-            Self::TypeofValue(value) => raw::TypeData::TypeofValue(Box::new(raw::TypeofValue {
-                identifier: value.identifier(db).clone(),
-                ty: value.ty(db).to_raw_reference_lossy(),
-                scope_id: value.scope_id(db),
-            })),
-            Self::AnyKeyword => raw::TypeData::AnyKeyword,
-            Self::NeverKeyword => raw::TypeData::NeverKeyword,
-            Self::ObjectKeyword => raw::TypeData::ObjectKeyword,
-            Self::ThisKeyword => raw::TypeData::ThisKeyword,
-            Self::UnknownKeyword => raw::TypeData::UnknownKeyword,
-            Self::VoidKeyword => raw::TypeData::VoidKeyword,
-        }
-    }
-
-    /// Converts a type to a raw reference when a stable raw ID exists.
-    ///
-    /// Structural types, locals, unsupported primitives, and unresolved values
-    /// degrade to the raw global `unknown` reference.
-    pub fn to_raw_reference_lossy(self) -> raw::TypeReference {
-        match self {
-            Self::Unknown | Self::Divergent(_) => raw::TypeReference::Resolved(GLOBAL_UNKNOWN_ID),
-            Self::Global => raw::TypeReference::Resolved(GLOBAL_GLOBAL_ID),
-            Self::Boolean => raw::TypeReference::Resolved(GLOBAL_BOOLEAN_ID),
-            Self::Number => raw::TypeReference::Resolved(GLOBAL_NUMBER_ID),
-            Self::String => raw::TypeReference::Resolved(GLOBAL_STRING_ID),
-            Self::Undefined => raw::TypeReference::Resolved(GLOBAL_UNDEFINED_ID),
-            Self::Conditional => raw::TypeReference::Resolved(GLOBAL_CONDITIONAL_ID),
-            Self::VoidKeyword => raw::TypeReference::Resolved(GLOBAL_VOID_ID),
-            Self::Local(_) => raw::TypeReference::Resolved(GLOBAL_UNKNOWN_ID),
-            Self::GlobalType(id) => raw::TypeReference::Resolved(crate::ResolvedTypeId::new(
-                crate::TypeResolverLevel::Global,
-                id.as_type_id(),
-            )),
-            _ => raw::TypeReference::Resolved(GLOBAL_UNKNOWN_ID),
         }
     }
 }
@@ -2785,279 +2604,6 @@ fn convert_call_arguments<'db>(
         .collect()
 }
 
-fn raw_references_from_types(types: &[TypeData<'_>]) -> Box<[raw::TypeReference]> {
-    types.iter().map(|ty| ty.to_raw_reference_lossy()).collect()
-}
-
-fn raw_type_members_from_types<'db>(
-    db: &'db dyn TypeDb,
-    members: &[TypeMember<'db>],
-) -> Box<[raw::TypeMember]> {
-    members
-        .iter()
-        .map(|member| raw::TypeMember {
-            kind: raw_type_member_kind_from_type(db, &member.kind),
-            ty: member.ty.to_raw_reference_lossy(),
-        })
-        .collect()
-}
-
-fn raw_type_member_kind_from_type<'db>(
-    _db: &'db dyn TypeDb,
-    kind: &TypeMemberKind<'db>,
-) -> raw::TypeMemberKind {
-    match kind {
-        TypeMemberKind::CallSignature => raw::TypeMemberKind::CallSignature,
-        TypeMemberKind::ComputedValue(ty) => {
-            raw::TypeMemberKind::ComputedValue(ty.to_raw_reference_lossy())
-        }
-        TypeMemberKind::ComputedValueNamed(_, ty) => {
-            raw::TypeMemberKind::ComputedValue(ty.to_raw_reference_lossy())
-        }
-        TypeMemberKind::ConstAssertedCallSignature => {
-            raw::TypeMemberKind::ConstAssertedCallSignature
-        }
-        TypeMemberKind::ConstAssertedComputedValue(ty) => {
-            raw::TypeMemberKind::ConstAssertedComputedValue(ty.to_raw_reference_lossy())
-        }
-        TypeMemberKind::ConstAssertedComputedValueNamed(_, ty) => {
-            raw::TypeMemberKind::ConstAssertedComputedValue(ty.to_raw_reference_lossy())
-        }
-        TypeMemberKind::ConstAssertedConstructor => raw::TypeMemberKind::ConstAssertedConstructor,
-        TypeMemberKind::ConstAssertedGetter(name) => {
-            raw::TypeMemberKind::ConstAssertedGetter(name.clone())
-        }
-        TypeMemberKind::ConstAssertedIndexSignature(ty) => {
-            raw::TypeMemberKind::ConstAssertedIndexSignature(ty.to_raw_reference_lossy())
-        }
-        TypeMemberKind::ConstAssertedNamed(name) => {
-            raw::TypeMemberKind::ConstAssertedNamed(name.clone())
-        }
-        TypeMemberKind::ConstAssertedNamedOptional(name) => {
-            raw::TypeMemberKind::ConstAssertedNamedOptional(name.clone())
-        }
-        TypeMemberKind::ConstAssertedNamedStatic(name) => {
-            raw::TypeMemberKind::ConstAssertedNamedStatic(name.clone())
-        }
-        TypeMemberKind::Constructor => raw::TypeMemberKind::Constructor,
-        TypeMemberKind::Getter(name) => raw::TypeMemberKind::Getter(name.clone()),
-        TypeMemberKind::IndexSignature(ty) => {
-            raw::TypeMemberKind::IndexSignature(ty.to_raw_reference_lossy())
-        }
-        TypeMemberKind::Named(name) => raw::TypeMemberKind::Named(name.clone()),
-        TypeMemberKind::NamedOptional(name) => raw::TypeMemberKind::NamedOptional(name.clone()),
-        TypeMemberKind::NamedStatic(name) => raw::TypeMemberKind::NamedStatic(name.clone()),
-    }
-}
-
-fn raw_constructor_parameters_from_types<'db>(
-    db: &'db dyn TypeDb,
-    parameters: &[ConstructorParameter<'db>],
-) -> Box<[raw::ConstructorParameter]> {
-    parameters
-        .iter()
-        .map(|parameter| raw::ConstructorParameter {
-            parameter: raw_function_parameter_from_type(db, &parameter.parameter),
-            accessibility: parameter.accessibility,
-        })
-        .collect()
-}
-
-fn raw_function_parameters_from_types<'db>(
-    db: &'db dyn TypeDb,
-    parameters: &[FunctionParameter<'db>],
-) -> Box<[raw::FunctionParameter]> {
-    parameters
-        .iter()
-        .map(|parameter| raw_function_parameter_from_type(db, parameter))
-        .collect()
-}
-
-fn raw_function_parameter_from_type<'db>(
-    _db: &'db dyn TypeDb,
-    parameter: &FunctionParameter<'db>,
-) -> raw::FunctionParameter {
-    match parameter {
-        FunctionParameter::Named(named) => {
-            raw::FunctionParameter::Named(raw::NamedFunctionParameter {
-                name: named.name.clone(),
-                ty: named.ty.to_raw_reference_lossy(),
-                is_optional: named.is_optional,
-                is_rest: named.is_rest,
-            })
-        }
-        FunctionParameter::Pattern(pattern) => {
-            raw::FunctionParameter::Pattern(raw::PatternFunctionParameter {
-                bindings: pattern
-                    .bindings
-                    .iter()
-                    .map(|binding| raw::FunctionParameterBinding {
-                        name: binding.name.clone(),
-                        ty: binding.ty.to_raw_reference_lossy(),
-                    })
-                    .collect(),
-                ty: pattern.ty.to_raw_reference_lossy(),
-                is_optional: pattern.is_optional,
-                is_rest: pattern.is_rest,
-            })
-        }
-    }
-}
-
-fn raw_return_type_from_type<'db>(
-    _db: &'db dyn TypeDb,
-    return_type: &ReturnType<'db>,
-) -> raw::ReturnType {
-    match return_type {
-        ReturnType::Type(ty) => raw::ReturnType::Type(ty.to_raw_reference_lossy()),
-        ReturnType::Predicate(predicate) => {
-            raw::ReturnType::Predicate(Box::new(raw::PredicateReturnType {
-                parameter_name: predicate.parameter_name.clone(),
-                ty: predicate.ty.to_raw_reference_lossy(),
-            }))
-        }
-        ReturnType::Asserts(asserts) => {
-            raw::ReturnType::Asserts(Box::new(raw::AssertsReturnType {
-                parameter_name: asserts.parameter_name.clone(),
-                ty: asserts.ty.to_raw_reference_lossy(),
-            }))
-        }
-    }
-}
-
-fn raw_literal_from_type<'db>(db: &'db dyn TypeDb, literal: &Literal<'db>) -> raw::Literal {
-    match literal {
-        Literal::BigInt(text) => raw::Literal::BigInt(text.clone()),
-        Literal::Boolean(boolean) => raw::Literal::Boolean(boolean.clone()),
-        Literal::Number(number) => raw::Literal::Number(number.clone()),
-        Literal::Object(members) => {
-            raw::Literal::Object(raw::ObjectLiteral(raw_type_members_from_types(db, members)))
-        }
-        Literal::RegExp(regexp) => raw::Literal::RegExp(regexp.clone()),
-        Literal::String(string) => raw::Literal::String(string.clone()),
-        Literal::Template(text) => raw::Literal::Template(text.clone()),
-    }
-}
-
-fn raw_typeof_expression_from_type<'db>(
-    db: &'db dyn TypeDb,
-    expression: &TypeofExpression<'db>,
-) -> raw::TypeofExpression {
-    match expression {
-        TypeofExpression::Addition(expression) => {
-            raw::TypeofExpression::Addition(raw::TypeofAdditionExpression {
-                left: expression.left.to_raw_reference_lossy(),
-                right: expression.right.to_raw_reference_lossy(),
-            })
-        }
-        TypeofExpression::Await(expression) => {
-            raw::TypeofExpression::Await(raw::TypeofAwaitExpression {
-                argument: expression.argument.to_raw_reference_lossy(),
-            })
-        }
-        TypeofExpression::BitwiseNot(expression) => {
-            raw::TypeofExpression::BitwiseNot(raw::TypeofBitwiseNotExpression {
-                argument: expression.argument.to_raw_reference_lossy(),
-            })
-        }
-        TypeofExpression::Call(expression) => {
-            raw::TypeofExpression::Call(raw::TypeofCallExpression {
-                callee: expression.callee.to_raw_reference_lossy(),
-                arguments: raw_call_arguments_from_types(db, &expression.arguments),
-            })
-        }
-        TypeofExpression::Conditional(expression) => {
-            raw::TypeofExpression::Conditional(raw::TypeofConditionalExpression {
-                test: expression.test.to_raw_reference_lossy(),
-                consequent: expression.consequent.to_raw_reference_lossy(),
-                alternate: expression.alternate.to_raw_reference_lossy(),
-            })
-        }
-        TypeofExpression::Destructure(expression) => {
-            raw::TypeofExpression::Destructure(raw::TypeofDestructureExpression {
-                ty: expression.ty.to_raw_reference_lossy(),
-                destructure_field: expression.destructure_field.clone(),
-            })
-        }
-        TypeofExpression::Index(expression) => {
-            raw::TypeofExpression::Index(raw::TypeofIndexExpression {
-                object: expression.object.to_raw_reference_lossy(),
-                index: expression.index,
-            })
-        }
-        TypeofExpression::IterableValueOf(expression) => {
-            raw::TypeofExpression::IterableValueOf(raw::TypeofIterableValueOfExpression {
-                ty: expression.ty.to_raw_reference_lossy(),
-            })
-        }
-        TypeofExpression::LogicalAnd(expression) => {
-            raw::TypeofExpression::LogicalAnd(raw::TypeofLogicalAndExpression {
-                left: expression.left.to_raw_reference_lossy(),
-                right: expression.right.to_raw_reference_lossy(),
-            })
-        }
-        TypeofExpression::LogicalOr(expression) => {
-            raw::TypeofExpression::LogicalOr(raw::TypeofLogicalOrExpression {
-                left: expression.left.to_raw_reference_lossy(),
-                right: expression.right.to_raw_reference_lossy(),
-            })
-        }
-        TypeofExpression::New(expression) => raw::TypeofExpression::New(raw::TypeofNewExpression {
-            callee: expression.callee.to_raw_reference_lossy(),
-            arguments: raw_call_arguments_from_types(db, &expression.arguments),
-        }),
-        TypeofExpression::NullishCoalescing(expression) => {
-            raw::TypeofExpression::NullishCoalescing(raw::TypeofNullishCoalescingExpression {
-                left: expression.left.to_raw_reference_lossy(),
-                right: expression.right.to_raw_reference_lossy(),
-            })
-        }
-        TypeofExpression::StaticMember(expression) => {
-            raw::TypeofExpression::StaticMember(raw::TypeofStaticMemberExpression {
-                object: expression.object.to_raw_reference_lossy(),
-                member: expression.member.clone(),
-            })
-        }
-        TypeofExpression::Super(expression) => {
-            raw::TypeofExpression::Super(raw::TypeofThisOrSuperExpression {
-                parent: expression.parent.to_raw_reference_lossy(),
-            })
-        }
-        TypeofExpression::This(expression) => {
-            raw::TypeofExpression::This(raw::TypeofThisOrSuperExpression {
-                parent: expression.parent.to_raw_reference_lossy(),
-            })
-        }
-        TypeofExpression::Typeof(expression) => {
-            raw::TypeofExpression::Typeof(raw::TypeofTypeofExpression {
-                argument: expression.argument.to_raw_reference_lossy(),
-            })
-        }
-        TypeofExpression::UnaryMinus(expression) => {
-            raw::TypeofExpression::UnaryMinus(raw::TypeofUnaryMinusExpression {
-                argument: expression.argument.to_raw_reference_lossy(),
-            })
-        }
-    }
-}
-
-fn raw_call_arguments_from_types<'db>(
-    _db: &'db dyn TypeDb,
-    arguments: &[CallArgumentType<'db>],
-) -> Box<[raw::CallArgumentType]> {
-    arguments
-        .iter()
-        .map(|argument| match argument {
-            CallArgumentType::Argument(ty) => {
-                raw::CallArgumentType::Argument(ty.to_raw_reference_lossy())
-            }
-            CallArgumentType::Spread(ty) => {
-                raw::CallArgumentType::Spread(ty.to_raw_reference_lossy())
-            }
-        })
-        .collect()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -3084,6 +2630,13 @@ mod tests {
 
     #[salsa::db]
     impl TypeDb for TestDb {}
+
+    #[test]
+    #[cfg(target_pointer_width = "64")]
+    #[should_panic(expected = "local type index exceeds u32::MAX")]
+    fn local_type_id_rejects_unrepresentable_indices() {
+        let _ = LocalTypeId::new(u32::MAX as usize + 1);
+    }
 
     #[derive(Default)]
     struct Sentinels(usize);
