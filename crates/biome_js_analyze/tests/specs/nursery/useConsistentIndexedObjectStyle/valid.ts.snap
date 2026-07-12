@@ -24,4 +24,12 @@ type D = { name: string };
 // Empty type literal.
 type E = {};
 
+// An interface with a heritage clause can't drop its `extends` for a Record.
+interface Base {
+	id: string;
+}
+interface WithHeritage extends Base {
+	[key: string]: unknown;
+}
+
 ```

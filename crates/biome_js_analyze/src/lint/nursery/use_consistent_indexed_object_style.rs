@@ -66,7 +66,14 @@ impl Rule for UseConsistentIndexedObjectStyle {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let members: TsTypeMemberList = match ctx.query() {
             AnyIndexSignatureContainer::TsObjectType(object) => object.members(),
-            AnyIndexSignatureContainer::TsInterfaceDeclaration(interface) => interface.members(),
+            AnyIndexSignatureContainer::TsInterfaceDeclaration(interface) => {
+                // An interface with a heritage clause can't be rewritten as a
+                // `Record` without dropping its `extends`, so leave it alone.
+                if interface.extends_clause().is_some() {
+                    return None;
+                }
+                interface.members()
+            }
         };
 
         // The type must consist of exactly one member, an index signature.
