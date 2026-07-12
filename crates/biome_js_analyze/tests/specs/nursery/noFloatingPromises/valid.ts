@@ -254,3 +254,7 @@ void [1, 2, 3].map(async (x) => x + 1);
 async function floatingArray() {
   await Promise.all([1, 2, 3].map((x) => Promise.resolve(x + 1)));
 }
+declare function selectUnknown(value: string): Promise<string>;
+declare function selectUnknown(value: unknown): number;
+declare const unresolvedArgument: MissingArgumentType;
+selectUnknown(unresolvedArgument);

@@ -5,7 +5,9 @@ use crate::db::type_inference::globals::global_type;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsExport, JsOwnExport, ModuleDb, ResolvedPath};
 use biome_css_syntax::TextRange;
-use biome_js_type_info::resolved::{InferredTypeData, LocalTypeId, ModuleKey, StructuralMapError};
+use biome_js_type_info::resolved::{
+    InferredLocalTypeId, InferredModuleKey, InferredTypeData, StructuralMapError,
+};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::ops::ControlFlow;
 use std::sync::Arc;
@@ -33,8 +35,8 @@ pub struct BindingTypeData<'db> {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct InferredModuleTypes<'db> {
-    pub module_key: ModuleKey,
-    pub named_type_ids: Box<[LocalTypeId]>,
+    pub module_key: InferredModuleKey,
+    pub named_type_ids: Box<[InferredLocalTypeId]>,
     pub types: Box<[InferredTypeData<'db>]>,
     pub expressions: FxHashMap<TextRange, InferredTypeData<'db>>,
     pub binding_type_data: FxHashMap<TextRange, BindingTypeData<'db>>,

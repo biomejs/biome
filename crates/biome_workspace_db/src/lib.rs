@@ -9,7 +9,8 @@ use biome_languages::DocumentFileSource;
 use biome_languages::LanguageDb;
 #[cfg(feature = "module_graph")]
 use biome_module_graph::{
-    LocalTypeId, ModuleDb, ModuleGraphGeneration, ModuleInfo, ModuleInfoKind, ModuleKey, TypeDb,
+    InferredLocalTypeId, InferredModuleKey, ModuleDb, ModuleGraphGeneration, ModuleInfo,
+    ModuleInfoKind, TypeDb,
 };
 use biome_parser::AnyParse;
 use biome_rowan::SendNode;
@@ -361,10 +362,14 @@ impl biome_db::Db for WorkspaceDb {
 #[cfg(feature = "module_graph")]
 #[salsa::db]
 impl TypeDb for WorkspaceDb {
-    fn local_type_name(&self, module_key: ModuleKey, type_id: LocalTypeId) -> Option<Text> {
+    fn local_type_name(
+        &self,
+        module_key: InferredModuleKey,
+        type_id: InferredLocalTypeId,
+    ) -> Option<Text> {
         let module = ModuleInfo::from_id(module_key.as_id());
         let current = self.module_for_path(module.path(self))?;
-        if ModuleKey::new(current.as_id()) != module_key {
+        if InferredModuleKey::new(current.as_id()) != module_key {
             return None;
         }
 

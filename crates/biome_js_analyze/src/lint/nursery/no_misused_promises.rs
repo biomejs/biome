@@ -260,6 +260,7 @@ fn find_misused_promise_returning_callback(
     {
         ctx.inferred_expected_argument_type(
             &call_expression.callee().ok()?,
+            &argument_list,
             argument_index,
             false,
         )?
@@ -271,6 +272,7 @@ fn find_misused_promise_returning_callback(
     {
         ctx.inferred_expected_argument_type(
             &new_expression.callee().ok()?,
+            &argument_list,
             argument_index,
             true,
         )?

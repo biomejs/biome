@@ -1,4 +1,4 @@
-//! Salsa-backed type data for the resolved type-inference world.
+//! Database-backed type data for the resolved type-inference world.
 //!
 //! The existing `type_data` module remains the raw, collector-side representation
 //! for now. This module introduces the interned resolved representation that

@@ -11,7 +11,7 @@ use biome_js_semantic::JsDeclarationKind;
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{
     ImportSymbol, RawTypeData, ResolvedTypeId, TypeReference, TypeResolverLevel,
-    resolved::LocalTypeId,
+    resolved::InferredLocalTypeId,
 };
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};
@@ -137,7 +137,7 @@ impl JsModuleInfo {
             })
     }
 
-    pub fn local_type_name(&self, type_id: LocalTypeId) -> Option<Text> {
+    pub fn local_type_name(&self, type_id: InferredLocalTypeId) -> Option<Text> {
         self.raw_binding_types
             .iter()
             .find_map(|(range, reference)| {

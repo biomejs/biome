@@ -4,21 +4,22 @@ use biome_analyze::{
 };
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsClassDeclaration, JsClassExpression,
-    JsLanguage, JsObjectExpression, JsReferenceIdentifier, JsSyntaxNode,
+    AnyJsBinding, AnyJsCallArgument, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsCallArgumentList,
+    JsClassDeclaration, JsClassExpression, JsLanguage, JsObjectExpression, JsReferenceIdentifier,
+    JsSyntaxNode,
 };
 use biome_js_type_info::{
     InferredType, TypeResolverLevel,
     resolved::{
-        InferredFunctionParameter, InferredReturnType, InferredTypeData, LocalTypeHandle,
-        LocalTypeId,
+        InferredCallArgumentType, InferredFunctionParameter, InferredLocalTypeHandle,
+        InferredLocalTypeId, InferredReturnType, InferredTypeData,
     },
 };
 use biome_module_graph::{
     InferredModuleTypes, JsOwnExport, ModuleDb, ModuleInfo, ModuleInfoKind, NormalizeTypeInput,
-    infer_module_types, infer_module_types_bottom_up, normalize_type,
+    infer_call_argument_type, infer_module_types, infer_module_types_bottom_up, normalize_type,
 };
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use std::{cell::OnceCell, rc::Rc, sync::Arc};
 
 #[derive(Clone)]
@@ -47,7 +48,7 @@ impl TypedModule {
 
 /// Service for use with type inference rules.
 ///
-/// This service retrieves Salsa-inferred types from the module graph.
+/// This service retrieves database-inferred types from the module graph.
 /// Methods returning [`Option<InferredType>`] return `None` when the specific
 /// type could not be inferred.
 #[derive(Clone)]
@@ -113,7 +114,7 @@ impl TypedService {
         self.normalized_inferred_type(self.inferred_function_data(function)?)
     }
 
-    /// Returns the normalized Salsa-inferred return type for a function.
+    /// Returns the normalized database-inferred return type for a function.
     pub fn inferred_return_type_of_function<'db>(
         &'db self,
         function: &AnyJsFunction,
@@ -177,7 +178,7 @@ impl TypedService {
         self.normalized_inferred_type(self.inferred_member_data(member_syntax, member_name)?)
     }
 
-    /// Returns the normalized Salsa-inferred return type for a class or object member.
+    /// Returns the normalized database-inferred return type for a class or object member.
     pub fn inferred_return_type_of_member<'db>(
         &'db self,
         member_syntax: &JsSyntaxNode,
@@ -247,9 +248,13 @@ impl TypedService {
         let ty = match own_export {
             JsOwnExport::Binding(range) => inferred.binding_type_data.get(range)?.ty,
             JsOwnExport::Type(resolved) if resolved.level() == TypeResolverLevel::Thin => {
-                let type_id = LocalTypeId::new(resolved.index());
+                let type_id = InferredLocalTypeId::new(resolved.index());
                 if inferred.named_type_ids.contains(&type_id) {
-                    InferredTypeData::Local(LocalTypeHandle::new(db, inferred.module_key, type_id))
+                    InferredTypeData::Local(InferredLocalTypeHandle::new(
+                        db,
+                        inferred.module_key,
+                        type_id,
+                    ))
                 } else {
                     *inferred.types.get(resolved.index())?
                 }
@@ -309,6 +314,7 @@ impl TypedService {
     pub fn inferred_expected_argument_type<'db>(
         &'db self,
         callee: &AnyJsExpression,
+        arguments: &JsCallArgumentList,
         argument_index: usize,
         is_constructor: bool,
     ) -> Option<InferredType<'db>> {
@@ -323,7 +329,25 @@ impl TypedService {
         let argument_ty = if is_constructor {
             constructor_argument_type(db, callee_ty, argument_index)?
         } else {
-            call_argument_type(db, callee_ty, argument_index)?
+            let arguments = arguments
+                .iter()
+                .map(|argument| {
+                    let argument = argument.ok()?;
+                    let (expression, is_spread) = match argument {
+                        AnyJsCallArgument::AnyJsExpression(expression) => (expression, false),
+                        AnyJsCallArgument::JsSpread(spread) => (spread.argument().ok()?, true),
+                    };
+                    let ty = inferred.expressions.get(&expression.range()).copied()?;
+                    let ty =
+                        normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
+                    Some(if is_spread {
+                        InferredCallArgumentType::Spread(ty)
+                    } else {
+                        InferredCallArgumentType::Argument(ty)
+                    })
+                })
+                .collect::<Option<Vec<_>>>()?;
+            infer_call_argument_type(db, callee_ty, &arguments, argument_index)?
         };
         let argument_ty = normalize_type(
             db,

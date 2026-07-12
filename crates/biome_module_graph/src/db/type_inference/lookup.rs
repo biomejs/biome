@@ -3,8 +3,8 @@ use crate::ModuleDb;
 use crate::db::queries::infer_module_types;
 use crate::module_graph::ModuleInfo;
 use biome_js_type_info::resolved::{
-    InferredLiteral, InferredReturnType, InferredTypeData, InferredTypeMember,
-    InferredTypeMemberKind, InferredTypeSubstitution, LocalTypeHandle, ModuleKey,
+    InferredLiteral, InferredLocalTypeHandle, InferredModuleKey, InferredReturnType,
+    InferredTypeData, InferredTypeMember, InferredTypeMemberKind, InferredTypeSubstitution,
     StructuralMapError,
 };
 use rustc_hash::FxHashSet;
@@ -44,7 +44,7 @@ impl<'db> InferredModuleTypes<'db> {
     fn type_for_local_handle(
         &self,
         db: &'db dyn ModuleDb,
-        local: LocalTypeHandle<'db>,
+        local: InferredLocalTypeHandle<'db>,
     ) -> Option<InferredTypeData<'db>> {
         let module_key = local.module(db);
         let type_id = local.type_id(db);
@@ -89,6 +89,7 @@ impl<'db> InferredModuleTypes<'db> {
                         }
                         return Some(InferredTypeData::Unknown);
                     };
+                    let target = expand_canonical_global(db, target);
                     let Ok(substitutions) = substitutions_for_instance(
                         db,
                         target,
@@ -601,11 +602,11 @@ fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> Inf
 
 pub(in crate::db::type_inference) fn module_for_key(
     db: &dyn ModuleDb,
-    module_key: ModuleKey,
+    module_key: InferredModuleKey,
 ) -> Option<ModuleInfo> {
     let module = ModuleInfo::from_id(module_key.as_id());
     let current = db.module_for_path(module.path(db))?;
-    (ModuleKey::new(current.as_id()) == module_key).then_some(current)
+    (InferredModuleKey::new(current.as_id()) == module_key).then_some(current)
 }
 
 fn find_member_type<'db>(

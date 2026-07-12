@@ -4,8 +4,8 @@ use crate::{JsExport, JsImport, JsOwnExport, ModuleDb, ResolvedPath};
 use biome_js_type_info::{
     ImportSymbol, Path, ResolvedTypeId, TypeImportQualifier, TypeResolverLevel,
     resolved::{
-        GlobalTypeId, InferredNamespace, InferredTypeData, InferredTypeMember,
-        InferredTypeMemberKind, LocalTypeHandle, LocalTypeId, ModuleKey,
+        GlobalTypeId, InferredLocalTypeHandle, InferredLocalTypeId, InferredModuleKey,
+        InferredNamespace, InferredTypeData, InferredTypeMember, InferredTypeMemberKind,
     },
 };
 use biome_rowan::Text;
@@ -17,7 +17,7 @@ const MAX_EXPORT_RESOLUTION_STEPS: usize = 1024;
 struct NamespaceExportCollection<'db> {
     members: Vec<InferredTypeMember<'db>>,
     seen_names: FxHashSet<String>,
-    seen_modules: FxHashSet<ModuleKey>,
+    seen_modules: FxHashSet<InferredModuleKey>,
     stack: Vec<(ModuleInfo, bool)>,
     remaining_steps: usize,
 }
@@ -91,13 +91,13 @@ impl<'db> ResolutionCtx<'db, '_> {
 
         collection
             .seen_modules
-            .insert(ModuleKey::new(module.as_id()));
+            .insert(InferredModuleKey::new(module.as_id()));
         if !self.collect_namespace_members(module, inferred_types, true, &mut collection) {
             return InferredTypeData::Unknown;
         }
 
         while let Some((module, include_default)) = collection.stack.pop() {
-            let module_key = ModuleKey::new(module.as_id());
+            let module_key = InferredModuleKey::new(module.as_id());
             if collection.seen_modules.contains(&module_key) {
                 continue;
             }
@@ -217,10 +217,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         inferred_types: &InferredModuleTypes<'db>,
         name: &str,
         stack: &mut Vec<(ModuleInfo, String)>,
-        seen: &mut FxHashSet<(ModuleKey, String)>,
+        seen: &mut FxHashSet<(InferredModuleKey, String)>,
         remaining_steps: &mut usize,
     ) -> Option<InferredTypeData<'db>> {
-        let module_key = ModuleKey::new(module.as_id());
+        let module_key = InferredModuleKey::new(module.as_id());
         if !seen.insert((module_key, name.to_string())) {
             return None;
         }
@@ -298,9 +298,9 @@ fn inferred_type_from_resolved_id<'db>(
 ) -> InferredTypeData<'db> {
     match resolved_id.level() {
         TypeResolverLevel::Thin => {
-            let local_type_id = LocalTypeId::new(resolved_id.index());
+            let local_type_id = InferredLocalTypeId::new(resolved_id.index());
             if inferred_types.named_type_ids.contains(&local_type_id) {
-                InferredTypeData::Local(LocalTypeHandle::new(
+                InferredTypeData::Local(InferredLocalTypeHandle::new(
                     db,
                     inferred_types.module_key,
                     local_type_id,
@@ -313,11 +313,16 @@ fn inferred_type_from_resolved_id<'db>(
                     .unwrap_or(InferredTypeData::Unknown)
             }
         }
-        TypeResolverLevel::Global => {
-            let type_id = GlobalTypeId::try_from_type_id(resolved_id.id())
-                .expect("global export TypeId must index the predefined global manifest");
-            global_type(db, type_id)
-        }
+        TypeResolverLevel::Global => GlobalTypeId::try_from_type_id(resolved_id.id()).map_or_else(
+            || {
+                debug_assert!(
+                    false,
+                    "global export TypeId must index the predefined global manifest"
+                );
+                InferredTypeData::Unknown
+            },
+            |type_id| global_type(db, type_id),
+        ),
         TypeResolverLevel::Full | TypeResolverLevel::Import => InferredTypeData::Unknown,
     }
 }

@@ -1,3 +1,5 @@
+//! Detection and rendering for misleading declared return types.
+
 use crate::TypeDb;
 use crate::interned_types::{InternedClass, Literal, TypeData, TypeMember, TypeMemberKind};
 use rustc_hash::FxHashSet;

@@ -1,3 +1,8 @@
+//! Canonical names for database-backed inferred types.
+//!
+//! Names use the `Inferred` prefix when the raw type world exports the same
+//! conceptual type. Unique names such as [`ConditionalType`] remain unprefixed.
+
 pub use crate::globals_ids::GlobalTypeId;
 pub use crate::interned_types::{
     AssertsReturnType as InferredAssertsReturnType, CallArgumentType as InferredCallArgumentType,
@@ -11,13 +16,11 @@ pub use crate::interned_types::{
     InternedNamespace as InferredNamespace, InternedObject as InferredObject,
     InternedTuple as InferredTuple, InternedTypeOperatorType as InferredTypeOperatorType,
     InternedTypeofValue, InternedUnion as InferredUnion, Literal as InferredLiteral,
-    LocalTypeHandle, LocalTypeHandle as InferredLocalTypeHandle, LocalTypeId,
-    LocalTypeId as InferredLocalTypeId, ModuleKey, ModuleKey as InferredModuleKey,
-    NamedFunctionParameter as InferredNamedFunctionParameter,
+    LocalTypeHandle as InferredLocalTypeHandle, LocalTypeId as InferredLocalTypeId,
+    ModuleKey as InferredModuleKey, NamedFunctionParameter as InferredNamedFunctionParameter,
     PatternFunctionParameter as InferredPatternFunctionParameter,
-    PredicateReturnType as InferredPredicateReturnType, ReturnType,
-    ReturnType as InferredReturnType, StructuralMapError,
-    TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
+    PredicateReturnType as InferredPredicateReturnType, ReturnType as InferredReturnType,
+    StructuralMapError, TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
     TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
     TypeSubstitution as InferredTypeSubstitution, TypeofExpression as InferredTypeofExpression,
     well_known_symbol_name,

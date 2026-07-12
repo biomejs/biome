@@ -11,14 +11,14 @@ use crate::db::queries::{ResolvedCallArgument, infer_call_expression_return_type
 use biome_js_semantic::ScopeId;
 use biome_js_type_info::{
     CallArgumentType as RawCallArgumentType, DestructureField as RawDestructureField,
-    GLOBAL_RESOLVER, Path, TypeReferenceQualifier, TypeResolver,
-    TypeofExpression as RawTypeofExpression,
+    GLOBAL_RESOLVER, Literal as RawLiteral, Path, RawTypeData, TypeDb, TypeId,
+    TypeReferenceQualifier, TypeResolver, TypeofExpression as RawTypeofExpression,
     literal::NumberLiteral,
     resolved::{
         ConditionalSubset, ConditionalType, InferredCallArgumentType, InferredClass,
         InferredConstructor, InferredFunction, InferredInternedLiteral, InferredLiteral,
-        InferredReturnType, InferredTuple, InferredTupleElementType, InferredTypeData,
-        InferredTypeMember, InferredTypeofExpression,
+        InferredLocalTypeHandle, InferredReturnType, InferredTuple, InferredTupleElementType,
+        InferredTypeData, InferredTypeMember, InferredTypeSubstitution, InferredTypeofExpression,
     },
 };
 use biome_rowan::Text;
@@ -132,12 +132,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             RawTypeofExpression::This(expression) => {
                 let parent = self.resolve(&expression.parent);
-                // FIXME: Generic class type parameters are not carried into `this` yet.
-                Some(InferredTypeData::instance_of(
-                    self.db,
-                    parent,
-                    Box::default(),
-                ))
+                Some(self.resolve_this_expression(parent))
             }
             RawTypeofExpression::Typeof(expression) => {
                 let argument = self.resolve(&expression.argument);
@@ -219,12 +214,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 Some(self.resolve_super_expression(expression.parent))
             }
             InferredTypeofExpression::This(expression) => {
-                // FIXME: Generic class type parameters are not carried into `this` yet.
-                Some(InferredTypeData::instance_of(
-                    self.db,
-                    expression.parent,
-                    Box::default(),
-                ))
+                Some(self.resolve_this_expression(expression.parent))
             }
             InferredTypeofExpression::Typeof(expression) => {
                 Some(self.resolve_typeof_operator(expression.argument))
@@ -327,6 +317,52 @@ impl<'db> ResolutionCtx<'db, '_> {
         let args = self.resolve_call_arguments(arguments);
         let callee = self.resolve_call_callee(callee);
         infer_call_expression_return_type_from_args(self.db, callee, &args)
+    }
+
+    fn resolve_this_expression(&self, parent: InferredTypeData<'db>) -> InferredTypeData<'db> {
+        if matches!(parent, InferredTypeData::InstanceOf(_)) {
+            return parent;
+        }
+        let type_parameters: &[InferredTypeData<'db>] = match parent {
+            InferredTypeData::Class(class) => class.type_parameters(self.db),
+            InferredTypeData::Interface(interface) => interface.type_parameters(self.db),
+            InferredTypeData::Unknown
+            | InferredTypeData::Divergent(_)
+            | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
+            | InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::Conditional
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Object(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::Literal(_)
+            | InferredTypeData::InstanceOf(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::VoidKeyword => &[],
+        };
+        InferredTypeData::instance_of(self.db, parent, type_parameters.to_vec().into_boxed_slice())
     }
 
     fn resolve_inferred_call_expression(
@@ -966,17 +1002,12 @@ impl<'db> ResolutionCtx<'db, '_> {
                 };
                 if matches!(target, InferredTypeData::Union(_)) {
                     let ty = self.resolve_static_member_expression(target, member_name)?;
-                    return Some(
-                        apply_substitutions(self.db, ty, &substitutions)
-                            .unwrap_or(InferredTypeData::Unknown),
-                    );
+                    return Some(self.apply_member_substitutions(ty, &substitutions));
                 }
                 self.find_static_member_on_resolved_type(target, member_name)
                     .map(|(ty, is_optional)| {
-                        apply_substitutions(self.db, ty, &substitutions)
-                            .map_or(InferredTypeData::Unknown, |ty| {
-                                self.member_type(ty, is_optional)
-                            })
+                        let ty = self.apply_member_substitutions(ty, &substitutions);
+                        self.member_type(ty, is_optional)
                     })
             }
             InferredTypeData::Union(union) => {
@@ -1093,20 +1124,20 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     fn resolve_in_progress_local_member(
         &mut self,
-        local: biome_js_type_info::resolved::LocalTypeHandle<'db>,
+        local: InferredLocalTypeHandle<'db>,
         member_name: &str,
     ) -> Option<InferredTypeData<'db>> {
         if local.module(self.db) != self.module_key {
             return None;
         }
 
-        let type_id = biome_js_type_info::TypeId::new(local.type_id(self.db).index());
+        let type_id = TypeId::new(local.type_id(self.db).index());
         if !self.in_progress.contains(&type_id) {
             return None;
         }
 
         let raw = self.js_info.raw_types.get(type_id.index())?;
-        if let biome_js_type_info::RawTypeData::TypeofExpression(expression) = raw
+        if let RawTypeData::TypeofExpression(expression) = raw
             && let RawTypeofExpression::This(expression) = expression.as_ref()
         {
             let parent = expression.parent.clone();
@@ -1115,12 +1146,12 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
 
         let member = match raw {
-            biome_js_type_info::RawTypeData::Object(object) => object
+            RawTypeData::Object(object) => object
                 .members
                 .iter()
                 .find(|member| member.kind.has_name(member_name)),
-            biome_js_type_info::RawTypeData::Literal(literal) => {
-                let biome_js_type_info::Literal::Object(object) = literal.as_ref() else {
+            RawTypeData::Literal(literal) => {
+                let RawLiteral::Object(object) = literal.as_ref() else {
                     return None;
                 };
                 object
@@ -1128,40 +1159,40 @@ impl<'db> ResolutionCtx<'db, '_> {
                     .iter()
                     .find(|member| member.kind.has_name(member_name))
             }
-            biome_js_type_info::RawTypeData::Unknown
-            | biome_js_type_info::RawTypeData::Global
-            | biome_js_type_info::RawTypeData::BigInt
-            | biome_js_type_info::RawTypeData::Boolean
-            | biome_js_type_info::RawTypeData::Null
-            | biome_js_type_info::RawTypeData::Number
-            | biome_js_type_info::RawTypeData::String
-            | biome_js_type_info::RawTypeData::Symbol
-            | biome_js_type_info::RawTypeData::Undefined
-            | biome_js_type_info::RawTypeData::Conditional
-            | biome_js_type_info::RawTypeData::ImportNamespace(_)
-            | biome_js_type_info::RawTypeData::Class(_)
-            | biome_js_type_info::RawTypeData::Constructor(_)
-            | biome_js_type_info::RawTypeData::Function(_)
-            | biome_js_type_info::RawTypeData::Interface(_)
-            | biome_js_type_info::RawTypeData::Module(_)
-            | biome_js_type_info::RawTypeData::Namespace(_)
-            | biome_js_type_info::RawTypeData::Tuple(_)
-            | biome_js_type_info::RawTypeData::Generic(_)
-            | biome_js_type_info::RawTypeData::Intersection(_)
-            | biome_js_type_info::RawTypeData::Union(_)
-            | biome_js_type_info::RawTypeData::TypeOperator(_)
-            | biome_js_type_info::RawTypeData::InstanceOf(_)
-            | biome_js_type_info::RawTypeData::Reference(_)
-            | biome_js_type_info::RawTypeData::MergedReference(_)
-            | biome_js_type_info::RawTypeData::TypeofExpression(_)
-            | biome_js_type_info::RawTypeData::TypeofType(_)
-            | biome_js_type_info::RawTypeData::TypeofValue(_)
-            | biome_js_type_info::RawTypeData::AnyKeyword
-            | biome_js_type_info::RawTypeData::NeverKeyword
-            | biome_js_type_info::RawTypeData::ObjectKeyword
-            | biome_js_type_info::RawTypeData::ThisKeyword
-            | biome_js_type_info::RawTypeData::UnknownKeyword
-            | biome_js_type_info::RawTypeData::VoidKeyword => return None,
+            RawTypeData::Unknown
+            | RawTypeData::Global
+            | RawTypeData::BigInt
+            | RawTypeData::Boolean
+            | RawTypeData::Null
+            | RawTypeData::Number
+            | RawTypeData::String
+            | RawTypeData::Symbol
+            | RawTypeData::Undefined
+            | RawTypeData::Conditional
+            | RawTypeData::ImportNamespace(_)
+            | RawTypeData::Class(_)
+            | RawTypeData::Constructor(_)
+            | RawTypeData::Function(_)
+            | RawTypeData::Interface(_)
+            | RawTypeData::Module(_)
+            | RawTypeData::Namespace(_)
+            | RawTypeData::Tuple(_)
+            | RawTypeData::Generic(_)
+            | RawTypeData::Intersection(_)
+            | RawTypeData::Union(_)
+            | RawTypeData::TypeOperator(_)
+            | RawTypeData::InstanceOf(_)
+            | RawTypeData::Reference(_)
+            | RawTypeData::MergedReference(_)
+            | RawTypeData::TypeofExpression(_)
+            | RawTypeData::TypeofType(_)
+            | RawTypeData::TypeofValue(_)
+            | RawTypeData::AnyKeyword
+            | RawTypeData::NeverKeyword
+            | RawTypeData::ObjectKeyword
+            | RawTypeData::ThisKeyword
+            | RawTypeData::UnknownKeyword
+            | RawTypeData::VoidKeyword => return None,
         }?;
         let reference = member.ty.clone();
         let is_getter = member.is_getter();
@@ -1385,6 +1416,18 @@ impl<'db> ResolutionCtx<'db, '_> {
         } else {
             self.resolve_inferred_type(ty)
         }
+    }
+
+    fn apply_member_substitutions(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        substitutions: &[InferredTypeSubstitution<'db>],
+    ) -> InferredTypeData<'db> {
+        let db = self.db;
+        let Ok(ty) = normalize_structural_type(db, ty, |ty| self.resolve_inferred_type(ty)) else {
+            return InferredTypeData::Unknown;
+        };
+        apply_substitutions(db, ty, substitutions).unwrap_or(InferredTypeData::Unknown)
     }
 
     fn resolve_element_type_at_index(
@@ -2195,7 +2238,7 @@ enum RestMemberMode {
 }
 
 fn collect_rest_object_members<'db>(
-    db: &'db dyn biome_js_type_info::TypeDb,
+    db: &'db dyn TypeDb,
     ty: InferredTypeData<'db>,
     excluded_names: &[Text],
     mut resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,

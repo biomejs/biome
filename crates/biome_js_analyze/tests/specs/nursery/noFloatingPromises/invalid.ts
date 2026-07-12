@@ -381,3 +381,10 @@ const objectApi = {
 	},
 };
 objectApi.getPromise();
+class GenericBox<T> {
+	constructor(readonly value: T) {}
+	read() {
+		return this.value;
+	}
+}
+new GenericBox(Promise.resolve("value")).read();

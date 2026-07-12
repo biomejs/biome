@@ -20,3 +20,6 @@ new Promise((resolve, reject) => {
     resolve();
   })();
 });
+declare function consume(kind: "async", callback: () => Promise<void>): void;
+declare function consume(kind: "sync", callback: () => void): void;
+consume("async", async () => {});

@@ -176,8 +176,8 @@ fn inferred_binding_type<'db>(
         .map(|data| data.ty)
 }
 
-#[divan::bench(name = "bench_index_d_ts_salsa_end_to_end", args = index_d_ts_cases())]
-fn bench_index_d_ts_salsa_end_to_end(bencher: Bencher, name: &str) {
+#[divan::bench(name = "bench_index_d_ts_db_end_to_end", args = index_d_ts_cases())]
+fn bench_index_d_ts_db_end_to_end(bencher: Bencher, name: &str) {
     bencher
         .with_inputs(|| {
             let content = INDEX_D_TS_CASES
@@ -218,8 +218,8 @@ fn bench_index_d_ts_salsa_end_to_end(bencher: Bencher, name: &str) {
         });
 }
 
-#[divan::bench(name = "bench_index_d_ts_salsa_memoized", args = index_d_ts_cases())]
-fn bench_index_d_ts_salsa_memoized(bencher: Bencher, name: &str) {
+#[divan::bench(name = "bench_index_d_ts_db_memoized", args = index_d_ts_cases())]
+fn bench_index_d_ts_db_memoized(bencher: Bencher, name: &str) {
     bencher
         .with_inputs(|| {
             let (db, module, _) = build_inferred_db(name);
@@ -231,8 +231,8 @@ fn bench_index_d_ts_salsa_memoized(bencher: Bencher, name: &str) {
         });
 }
 
-#[divan::bench(name = "bench_index_d_ts_salsa_invalidated", args = index_d_ts_cases())]
-fn bench_index_d_ts_salsa_invalidated(bencher: Bencher, name: &str) {
+#[divan::bench(name = "bench_index_d_ts_db_invalidated", args = index_d_ts_cases())]
+fn bench_index_d_ts_db_invalidated(bencher: Bencher, name: &str) {
     bencher
         .with_inputs(|| build_inferred_db(name))
         .bench_local_values(|(mut db, module, kind)| {
@@ -266,8 +266,8 @@ export function read(value: string): string {
 }
 "#;
 
-#[divan::bench(name = "bench_index_d_ts_salsa_incremental_first_run")]
-fn bench_index_d_ts_salsa_incremental_first_run(bencher: Bencher) {
+#[divan::bench(name = "bench_index_d_ts_db_incremental_first_run")]
+fn bench_index_d_ts_db_incremental_first_run(bencher: Bencher) {
     bencher
         .with_inputs(|| {
             let fs = MemoryFileSystem::default();
@@ -320,8 +320,8 @@ fn bench_index_d_ts_salsa_incremental_first_run(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_index_d_ts_salsa_incremental")]
-fn bench_index_d_ts_salsa_incremental(bencher: Bencher) {
+#[divan::bench(name = "bench_index_d_ts_db_incremental")]
+fn bench_index_d_ts_db_incremental(bencher: Bencher) {
     bencher
         .with_inputs(|| {
             let fs = MemoryFileSystem::default();

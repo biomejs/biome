@@ -11,12 +11,9 @@ use crate::services::typed::Typed;
 declare_lint_rule! {
     /// Enforce that `await` is _only_ used on `Promise` values.
     ///
-    /// :::caution
-    /// At the moment, this rule only checks for instances of the global
-    /// `Promise` class. This is a major shortcoming compared to the ESLint
-    /// rule if you are using custom `Promise`-like implementations such as
-    /// [Bluebird](http://bluebirdjs.com/) or in-house solutions.
-    /// :::
+    /// The rule accepts global `Promise` values, `PromiseLike` values, and
+    /// custom thenables with a callable `then` member. It suppresses the
+    /// diagnostic when type or member resolution is incomplete.
     ///
     /// ## Examples
     ///

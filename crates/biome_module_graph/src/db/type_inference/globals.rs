@@ -92,6 +92,7 @@ enum GlobalTypeWork<'a> {
 }
 
 enum GlobalTypeValue<'db> {
+    Invalid,
     Type(InferredTypeData<'db>),
     Member(InferredTypeMember<'db>),
     ConstructorParameter(InferredConstructorParameter<'db>),
@@ -102,7 +103,7 @@ enum GlobalTypeValue<'db> {
 }
 
 #[salsa::interned]
-struct GlobalTypeInput<'db> {
+struct GlobalTypeKey<'db> {
     id: GlobalTypeId,
 }
 
@@ -110,13 +111,13 @@ pub(in crate::db::type_inference) fn global_type<'db>(
     db: &'db dyn ModuleDb,
     type_id: GlobalTypeId,
 ) -> InferredTypeData<'db> {
-    expand_global_type(db, GlobalTypeInput::new(db, type_id))
+    expand_global_type(db, GlobalTypeKey::new(db, type_id))
 }
 
 #[salsa::tracked]
 fn expand_global_type<'db>(
     db: &'db dyn ModuleDb,
-    input: GlobalTypeInput<'db>,
+    input: GlobalTypeKey<'db>,
 ) -> InferredTypeData<'db> {
     resolve_global_type_id_with_resolver(db, GLOBAL_RESOLVER.as_ref(), input.id(db).as_type_id())
 }
@@ -135,7 +136,7 @@ fn resolve_global_type_id_with_resolver<'db>(
         match work {
             GlobalTypeWork::Raw(raw) => push_global_raw_type(db, raw, &mut stack, &mut values),
             GlobalTypeWork::Reference(reference) => {
-                push_global_reference(resolver, reference, &mut stack, &mut values)
+                push_global_reference(resolver, reference, &mut values)
             }
             GlobalTypeWork::RebuildClass {
                 type_parameters,
@@ -393,12 +394,20 @@ fn resolve_global_type_id_with_resolver<'db>(
         }
     }
 
-    debug_assert_eq!(
-        values.len(),
-        1,
-        "global type converter stack imbalance; check that every GlobalTypeWork rebuild pushes one value"
-    );
-    pop_global_type(&mut values)
+    if values.len() != 1 {
+        debug_assert!(
+            false,
+            "global type converter stack imbalance; check that every GlobalTypeWork rebuild pushes one value"
+        );
+        return InferredTypeData::Unknown;
+    }
+    match values.pop() {
+        Some(GlobalTypeValue::Type(ty)) => ty,
+        _ => {
+            debug_assert!(false, "global type converter root must be a type");
+            InferredTypeData::Unknown
+        }
+    }
 }
 
 fn push_global_raw_type<'a, 'db>(
@@ -579,22 +588,17 @@ fn push_global_raw_type<'a, 'db>(
 fn push_global_reference<'a, 'db>(
     resolver: &'a dyn TypeResolver,
     reference: &'a TypeReference,
-    _stack: &mut Vec<GlobalTypeWork<'a>>,
     values: &mut Vec<GlobalTypeValue<'db>>,
 ) {
     match reference {
         TypeReference::Resolved(resolved_id)
             if resolved_id.level() == TypeResolverLevel::Global =>
         {
-            let type_id = GlobalTypeId::try_from_type_id(resolved_id.id())
-                .expect("global reference TypeId must index the predefined global manifest");
-            values.push(GlobalTypeValue::Type(InferredTypeData::GlobalType(type_id)));
+            values.push(GlobalTypeValue::Type(global_type_handle(resolved_id.id())));
         }
         TypeReference::Qualifier(qualifier) => {
             if let Some(resolved_id) = resolver.resolve_qualifier(qualifier) {
-                let type_id = GlobalTypeId::try_from_type_id(resolved_id.id())
-                    .expect("global qualifier TypeId must index the predefined global manifest");
-                values.push(GlobalTypeValue::Type(InferredTypeData::GlobalType(type_id)));
+                values.push(GlobalTypeValue::Type(global_type_handle(resolved_id.id())));
             } else {
                 values.push(GlobalTypeValue::Type(InferredTypeData::Unknown));
             }
@@ -603,6 +607,19 @@ fn push_global_reference<'a, 'db>(
             values.push(GlobalTypeValue::Type(InferredTypeData::Unknown));
         }
     }
+}
+
+fn global_type_handle<'db>(type_id: TypeId) -> InferredTypeData<'db> {
+    GlobalTypeId::try_from_type_id(type_id).map_or_else(
+        || {
+            debug_assert!(
+                false,
+                "global TypeId must index the predefined global manifest"
+            );
+            InferredTypeData::Unknown
+        },
+        InferredTypeData::GlobalType,
+    )
 }
 
 fn push_global_literal<'a, 'db>(
@@ -819,6 +836,7 @@ fn pop_global_type<'db>(values: &mut Vec<GlobalTypeValue<'db>>) -> InferredTypeD
         Some(GlobalTypeValue::Type(ty)) => ty,
         _ => {
             unexpected_global_value("type");
+            values.push(GlobalTypeValue::Invalid);
             InferredTypeData::Unknown
         }
     }
@@ -846,6 +864,7 @@ fn pop_global_members<'db>(
             Some(GlobalTypeValue::Member(member)) => members.push(member),
             _ => {
                 unexpected_global_value("member");
+                values.push(GlobalTypeValue::Invalid);
                 members.push(InferredTypeMember {
                     kind: InferredTypeMemberKind::Named(Text::new_static("unknown")),
                     ty: InferredTypeData::Unknown,
@@ -867,6 +886,7 @@ fn pop_global_constructor_parameters<'db>(
             Some(GlobalTypeValue::ConstructorParameter(parameter)) => parameters.push(parameter),
             _ => {
                 unexpected_global_value("constructor parameter");
+                values.push(GlobalTypeValue::Invalid);
                 parameters.push(InferredConstructorParameter {
                     parameter: InferredFunctionParameter::Pattern(
                         InferredPatternFunctionParameter {
@@ -904,6 +924,7 @@ fn pop_global_function_parameter<'db>(
         Some(GlobalTypeValue::FunctionParameter(parameter)) => parameter,
         _ => {
             unexpected_global_value("function parameter");
+            values.push(GlobalTypeValue::Invalid);
             InferredFunctionParameter::Pattern(InferredPatternFunctionParameter {
                 bindings: Box::default(),
                 ty: InferredTypeData::Unknown,
@@ -924,6 +945,7 @@ fn pop_global_function_parameter_bindings<'db>(
             Some(GlobalTypeValue::FunctionParameterBinding(binding)) => bindings.push(binding),
             _ => {
                 unexpected_global_value("function parameter binding");
+                values.push(GlobalTypeValue::Invalid);
                 bindings.push(InferredFunctionParameterBinding {
                     name: Text::new_static("unknown"),
                     ty: InferredTypeData::Unknown,
@@ -940,6 +962,7 @@ fn pop_global_return_type<'db>(values: &mut Vec<GlobalTypeValue<'db>>) -> Inferr
         Some(GlobalTypeValue::ReturnType(return_type)) => return_type,
         _ => {
             unexpected_global_value("return type");
+            values.push(GlobalTypeValue::Invalid);
             InferredReturnType::Type(InferredTypeData::Unknown)
         }
     }
@@ -955,6 +978,7 @@ fn pop_global_tuple_elements<'db>(
             Some(GlobalTypeValue::TupleElement(element)) => elements.push(element),
             _ => {
                 unexpected_global_value("tuple element");
+                values.push(GlobalTypeValue::Invalid);
                 elements.push(InferredTupleElementType {
                     ty: InferredTypeData::Unknown,
                     name: None,

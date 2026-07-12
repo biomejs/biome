@@ -5387,6 +5387,76 @@ fn test_infer_module_types_evaluates_this_and_super_edge_expressions_on_build() 
 }
 
 #[test]
+fn test_infer_module_types_preserves_generic_class_this_parameters() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            class Box<T> {
+                constructor(readonly value: T) {}
+                read() { return this.value; }
+            }
+
+            export const direct = new Box(Promise.resolve("value")).value;
+            export const method = new Box(Promise.resolve("value")).read;
+            export const result = method();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let direct = inferred_binding_ty_by_name(&db, module, &inferred, "direct")
+        .expect("direct binding type must be inferred");
+    let direct = normalize_type(&db, module, direct);
+    assert!(
+        is_inferred_promise_instance(&db, direct),
+        "expected direct Promise, got {}",
+        format_inferred_type(&db, direct)
+    );
+    let method = inferred_binding_ty_by_name(&db, module, &inferred, "method")
+        .expect("method binding type must be inferred");
+    let method = normalize_type(&db, module, method);
+    let method_details = match method {
+        InferredTypeData::Function(function) => match function.return_type(&db) {
+            InferredReturnType::Type(ty) => format_inferred_type(&db, *ty),
+            return_type => format!("{return_type:?}"),
+        },
+        _ => format_inferred_type(&db, method),
+    };
+    assert!(
+        matches!(
+            method,
+            InferredTypeData::Function(function)
+                if matches!(function.return_type(&db), InferredReturnType::Type(ty) if is_inferred_promise_instance(&db, *ty))
+        ),
+        "expected method returning Promise, got {method_details}"
+    );
+    let result = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result binding type must be inferred");
+
+    let result = normalize_type(&db, module, result);
+    let result_details = match result {
+        InferredTypeData::InstanceOf(instance) => format!(
+            "target={}, parameters={:?}",
+            format_inferred_type(&db, instance.ty(&db)),
+            instance
+                .type_parameters(&db)
+                .iter()
+                .map(|ty| format_inferred_type(&db, *ty))
+                .collect::<Vec<_>>()
+        ),
+        _ => format_inferred_type(&db, result),
+    };
+    assert!(
+        is_inferred_promise_instance(&db, result),
+        "expected Promise, got {result_details}"
+    );
+}
+
+#[test]
 fn test_infer_call_expression_type_resolves_imported_default_function_return_type() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -5917,6 +5987,90 @@ fn test_infer_call_expression_type_blocks_later_distinct_return_after_uncertaint
     let call_ty = infer_call_expression_type(&db, module, select_ty, vec![arg_ty]);
 
     assert_eq!(call_ty, InferredTypeData::Unknown);
+}
+
+#[test]
+fn test_infer_call_expression_type_treats_internal_unknown_argument_as_uncertain() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function select(value: string): Promise<string>;
+            export function select(value: unknown): number;
+            export function select(_value: unknown): Promise<string> | number {
+                return 0;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let select_ty = inferred_overload_ty_by_name(&db, module, &inferred, "select")
+        .expect("select overload type must be inferred");
+
+    assert_eq!(
+        infer_call_expression_type(&db, module, select_ty, vec![InferredTypeData::Unknown],),
+        InferredTypeData::Unknown
+    );
+}
+
+#[test]
+fn test_infer_call_expression_type_treats_distinct_global_handles_as_uncertain() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function select(value: Array<unknown>): string;
+            export function select(value: unknown): number;
+            export function select(_value: unknown): string | number {
+                return 0;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let select_ty = inferred_overload_ty_by_name(&db, module, &inferred, "select")
+        .expect("select overload type must be inferred");
+    let promise = InferredTypeData::instance_of(
+        &db,
+        InferredTypeData::promise_class(&db),
+        Box::new([InferredTypeData::Number]),
+    );
+
+    assert_eq!(
+        infer_call_expression_type(&db, module, select_ty, vec![promise]),
+        InferredTypeData::Unknown
+    );
+}
+
+#[test]
+fn test_member_lookup_expands_global_instance_target() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        "export const promise: Promise<number> = Promise.resolve(1);".to_string(),
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let promise = inferred_binding_ty_by_name(&db, module, &inferred, "promise")
+        .expect("promise binding type must be inferred");
+
+    assert!(
+        inferred
+            .find_member_type(&db, inferred.resolve_type(&db, promise), "then")
+            .is_some()
+    );
 }
 
 #[test]

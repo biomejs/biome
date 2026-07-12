@@ -7,8 +7,8 @@ use biome_js_type_info::{
     RawTypeData, ResolvedTypeId, ScopeId, TypeId, TypeReference, TypeReferenceQualifier,
     TypeResolverLevel,
     resolved::{
-        GlobalTypeId, InferredTypeData, InternedTypeofValue, LocalTypeHandle, LocalTypeId,
-        ModuleKey,
+        GlobalTypeId, InferredLocalTypeHandle, InferredLocalTypeId, InferredModuleKey,
+        InferredTypeData, InternedTypeofValue,
     },
 };
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -31,7 +31,7 @@ pub(in crate::db) enum ImportResolution<'a> {
 
 pub(in crate::db::type_inference) struct ResolutionCtx<'db, 'a> {
     pub(in crate::db::type_inference) db: &'db dyn ModuleDb,
-    pub(in crate::db::type_inference) module_key: ModuleKey,
+    pub(in crate::db::type_inference) module_key: InferredModuleKey,
     pub(in crate::db::type_inference) js_info: &'a JsModuleInfo,
     pub(in crate::db::type_inference) import_resolution: ImportResolution<'a>,
     pub(in crate::db::type_inference) named_type_ids: FxHashSet<TypeId>,
@@ -46,7 +46,7 @@ pub(in crate::db) fn resolve_raw_types<'db>(
     js_info: &JsModuleInfo,
     import_resolution: ImportResolution<'_>,
 ) -> InferredModuleTypes<'db> {
-    let module_key = ModuleKey::new(module.as_id());
+    let module_key = InferredModuleKey::new(module.as_id());
     let named_type_ids = named_type_ids(js_info);
     let mut ctx = ResolutionCtx {
         db,
@@ -62,7 +62,7 @@ pub(in crate::db) fn resolve_raw_types<'db>(
     let mut named_type_ids = ctx
         .named_type_ids
         .iter()
-        .map(|type_id| LocalTypeId::new(type_id.index()))
+        .map(|type_id| InferredLocalTypeId::new(type_id.index()))
         .collect::<Vec<_>>();
     named_type_ids.sort_unstable();
 
@@ -162,9 +162,16 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     fn resolve_global_type_id(&mut self, type_id: TypeId) -> InferredTypeData<'db> {
-        let type_id = GlobalTypeId::try_from_type_id(type_id)
-            .expect("global resolved TypeId must index the predefined global manifest");
-        global_type(self.db, type_id)
+        GlobalTypeId::try_from_type_id(type_id).map_or_else(
+            || {
+                debug_assert!(
+                    false,
+                    "global resolved TypeId must index the predefined global manifest"
+                );
+                InferredTypeData::Unknown
+            },
+            |type_id| global_type(self.db, type_id),
+        )
     }
 
     fn resolve_raw_type_reference(&mut self, type_id: TypeId) -> InferredTypeData<'db> {
@@ -176,10 +183,10 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     fn local_type(&self, type_id: TypeId) -> InferredTypeData<'db> {
-        InferredTypeData::Local(LocalTypeHandle::new(
+        InferredTypeData::Local(InferredLocalTypeHandle::new(
             self.db,
             self.module_key,
-            LocalTypeId::new(type_id.index()),
+            InferredLocalTypeId::new(type_id.index()),
         ))
     }
 

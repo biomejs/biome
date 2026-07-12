@@ -37,7 +37,7 @@ pub enum StringificationUsefulness {
     Never,
 }
 
-/// A Salsa-backed type value returned by type inference.
+/// A database-backed type value returned by type inference.
 #[derive(Clone, Copy)]
 pub struct InferredType<'db> {
     db: &'db dyn TypeDb,
