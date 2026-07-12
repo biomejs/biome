@@ -8,11 +8,15 @@ use biome_db::{ParsedSnippet, ParsedSource};
 use biome_languages::DocumentFileSource;
 use biome_languages::LanguageDb;
 #[cfg(feature = "module_graph")]
-use biome_module_graph::{ModuleDb, ModuleInfo, ModuleInfoKind};
+use biome_module_graph::{LocalTypeId, ModuleDb, ModuleInfo, ModuleInfoKind, ModuleKey, TypeDb};
 use biome_parser::AnyParse;
 use biome_rowan::SendNode;
+#[cfg(feature = "module_graph")]
+use biome_rowan::Text;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
+#[cfg(feature = "module_graph")]
+use salsa::plumbing::{AsId, FromId};
 use salsa::{Setter, Storage};
 use std::rc::Rc;
 use std::sync::Arc;
@@ -245,6 +249,24 @@ impl WorkspaceDb {
         self.data().insert_module(path, module);
     }
 
+    #[cfg(feature = "module_graph")]
+    pub fn update_or_insert_module(
+        &mut self,
+        path: Utf8PathBuf,
+        kind: ModuleInfoKind,
+    ) -> ModuleInfo {
+        let existing_module = { self.modules.pin().get(&path).copied() };
+
+        if let Some(existing_module) = existing_module {
+            existing_module.set_kind(self).to(kind);
+            existing_module
+        } else {
+            let module = ModuleInfo::new(self, path.clone(), kind);
+            self.insert_module(path, module);
+            module
+        }
+    }
+
     /// It updates the CST of an existing parsed source
     pub fn update_parsed_root(&mut self, path: &Utf8Path, new_root: SendNode) {
         self.update_parsed_root_with_mode(path, new_root, ParsedSourceUpdateMode::Setters);
@@ -318,6 +340,23 @@ impl salsa::Database for WorkspaceDb {}
 impl biome_db::Db for WorkspaceDb {
     fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<ParsedSource> {
         self.files.pin().get(path).copied()
+    }
+}
+
+#[cfg(feature = "module_graph")]
+#[salsa::db]
+impl TypeDb for WorkspaceDb {
+    fn local_type_name(&self, module_key: ModuleKey, type_id: LocalTypeId) -> Option<Text> {
+        let module = ModuleInfo::from_id(module_key.as_id());
+        let current = self.module_for_path(module.path(self))?;
+        if ModuleKey::new(current.as_id()) != module_key {
+            return None;
+        }
+
+        let ModuleInfoKind::Js(info) = current.kind(self) else {
+            return None;
+        };
+        info.local_type_name(type_id)
     }
 }
 

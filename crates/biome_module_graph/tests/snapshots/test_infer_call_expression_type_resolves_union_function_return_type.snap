@@ -1,0 +1,42 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function readString(): string {
+	return "value";
+}
+
+export function readNumber(): number {
+	return 1;
+}
+```
+
+## Inferred types
+
+```
+Binding readString "readString" => sync Function "readString" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "\"value\"" => string: value
+
+Binding readNumber "readNumber" => sync Function "readNumber" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "1" => number: 1
+```

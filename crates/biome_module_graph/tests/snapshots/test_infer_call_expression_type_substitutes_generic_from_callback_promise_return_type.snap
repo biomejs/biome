@@ -1,0 +1,78 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function unwrap<T>(cb: () => Promise<T>): T {
+	return undefined as T;
+}
+
+export function readNumber(): Promise<number> {
+	return Promise.resolve(1);
+}
+```
+
+## Inferred types
+
+```
+Binding unwrap "unwrap" => sync Function "unwrap" {
+  accepts: {
+    params: [
+      required cb: sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: instanceof Promise<instanceof T>
+      }
+    ]
+    type_args: [T]
+  }
+  returns: instanceof T
+}
+
+Binding T "T" => T
+
+Binding cb "cb" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof T>
+}
+
+Expression "undefined" => undefined
+
+Expression "undefined as T" => instanceof T
+
+Binding readNumber "readNumber" => sync Function "readNumber" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<number>
+}
+
+Expression "Promise" => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "Promise.resolve" => sync Function "Promise.resolve" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise
+}
+
+Expression "Promise.resolve(1)" => instanceof Promise
+
+Expression "1" => number: 1
+```

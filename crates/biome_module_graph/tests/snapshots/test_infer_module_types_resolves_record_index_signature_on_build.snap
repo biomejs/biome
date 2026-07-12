@@ -1,0 +1,46 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function readRecord(
+	value: Record<string, number>,
+): Record<string, number> {
+	return value;
+}
+```
+
+## Inferred types
+
+```
+Binding readRecord "readRecord" => sync Function "readRecord" {
+  accepts: {
+    params: [
+      required value: instanceof Object {
+        prototype: No prototype
+        members: [[string]: number]
+      }
+    ]
+    type_args: []
+  }
+  returns: instanceof Object {
+    prototype: No prototype
+    members: [[string]: number]
+  }
+}
+
+Binding value "value" => instanceof Object {
+  prototype: No prototype
+  members: [[string]: number]
+}
+
+Expression "value" => instanceof Object {
+  prototype: No prototype
+  members: [[string]: number]
+}
+```

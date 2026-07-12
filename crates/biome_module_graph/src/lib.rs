@@ -1,4 +1,8 @@
 #![deny(clippy::use_self)]
+#![expect(
+    unused_lifetimes,
+    reason = "Salsa interned structs can use the database lifetime only in generated field storage."
+)]
 
 pub mod css_module_info;
 mod db;
@@ -9,22 +13,27 @@ pub mod js_module_info;
 mod module_graph;
 mod path_info_cache;
 
-pub use biome_js_type_info::ImportSymbol;
+pub use biome_js_type_info::{
+    ImportSymbol,
+    interned_types::{LocalTypeId, ModuleKey},
+};
 pub use biome_resolver::ResolvedPath;
 pub use css_module_info::{
     CssClassReference, CssClassStep, CssImport, CssImports, CssModuleInfo, CssTraversalStep,
     ImportTreeDisplay, ImportTreeNode,
 };
-pub use db::ModuleDb;
 pub use db::queries::*;
+pub use db::{ModuleDb, TypeDb};
 pub use diagnostics::ModuleDiagnostic;
 pub use html_module_info::{HtmlEmbeddedContent, HtmlModuleInfo, SerializedHtmlModuleInfo};
 pub use js_module_info::{
     BindingTypeData, JsExport, JsImport, JsImportPath, JsImportPhase, JsModuleInfo,
     JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleResolver, SerializedJsModuleInfo,
+    TypeInferenceMode,
 };
 pub use module_graph::{
     ModuleDependencies, ModuleInfo, ModuleInfoKind, SUPPORTED_EXTENSIONS, SerializedModuleInfo,
     resolve_css_module, resolve_html_module, resolve_js_module,
+    resolve_js_module_with_inference_mode,
 };
 pub use path_info_cache::PathInfoCache;

@@ -1,4 +1,7 @@
+#[cfg(not(feature = "module_graph"))]
 use crate::module_graph::PathInfoCache;
+#[cfg(feature = "module_graph")]
+use crate::module_graph::{ModuleInfo, ModuleInfoKind, PathInfoCache};
 use biome_db::{ParsedSnippet, ParsedSource};
 use biome_languages::DocumentFileSource;
 use biome_parser::AnyParse;
@@ -6,8 +9,11 @@ use biome_rowan::SendNode;
 use biome_workspace_db::{ParsedSourceUpdateMode, SharedWorkspaceDb, WorkspaceDb, WorkspaceDbData};
 use camino::Utf8Path;
 use parking_lot::Mutex;
+use std::cell::Cell;
+use std::ops::Deref;
 use std::panic::resume_unwind;
 use std::sync::atomic::{AtomicUsize, Ordering};
+use tracing::error;
 
 use crate::embed::EmbedContent;
 
@@ -20,6 +26,84 @@ pub struct DbState {
 enum DbStorage {
     Shared(SharedWorkspaceDb),
     Owned(OwnedDb),
+}
+
+// Counts database forks held by the current thread.
+thread_local! {
+    static LIVE_READS: Cell<usize> = const { Cell::new(0) };
+}
+
+/// Read guard returned by [`DbState::fork`].
+///
+/// It records that the current thread is using a database fork, so [`OwnedDb`]
+/// can reject setter-based writes before they wait on that same fork.
+///
+/// NOTE: This is a runtime safety check, not a complete guarantee. Calling
+/// [`Self::into_untracked_db`] or cloning the inner [`WorkspaceDb`] through
+/// [`Deref`] can create a database handle that is no longer counted here. Keep
+/// those escapes limited to read-only leaf operations.
+pub(crate) struct DbReadGuard {
+    db: WorkspaceDb,
+    _live_read: LiveReadGuard,
+}
+
+impl DbReadGuard {
+    fn new(db: WorkspaceDb, tracks_live_read: bool) -> Self {
+        Self {
+            db,
+            _live_read: LiveReadGuard::new(tracks_live_read),
+        }
+    }
+
+    /// Consumes the guard and returns the raw database without read tracking.
+    ///
+    /// NOTE: After this returns, same-thread writes cannot see that this
+    /// database handle is live. Do not call this before code that may perform a
+    /// [`DbState`] write on the same thread. Prefer keeping the guard alive for
+    /// normal reads, and only use this when a lower-level read-only API needs a
+    /// plain [`WorkspaceDb`].
+    pub(crate) fn into_untracked_db(self) -> WorkspaceDb {
+        self.db
+    }
+}
+
+/// Increments the current thread's read count while a [`DbReadGuard`] is alive.
+struct LiveReadGuard {
+    tracks_live_read: bool,
+}
+
+impl LiveReadGuard {
+    fn new(tracks_live_read: bool) -> Self {
+        if tracks_live_read {
+            LIVE_READS.with(|reads| reads.set(reads.get() + 1));
+        }
+
+        Self { tracks_live_read }
+    }
+}
+
+impl Drop for LiveReadGuard {
+    fn drop(&mut self) {
+        if self.tracks_live_read {
+            LIVE_READS.with(|reads| {
+                let count = reads.get();
+                debug_assert!(
+                    count > 0,
+                    "db read guard counter underflowed; create read guards only through DbState::fork and keep LiveReadGuard ownership paired with DbReadGuard"
+                );
+                reads.set(count.saturating_sub(1));
+            });
+            self.tracks_live_read = false;
+        }
+    }
+}
+
+impl Deref for DbReadGuard {
+    type Target = WorkspaceDb;
+
+    fn deref(&self) -> &Self::Target {
+        &self.db
+    }
 }
 
 /// Storage for the LSP, where the database is updated through salsa setters
@@ -91,6 +175,17 @@ impl OwnedDb {
             }
         }
 
+        if LIVE_READS.with(|reads| reads.get()) != 0 {
+            debug_assert!(
+                false,
+                "db setter invoked while this thread holds a db clone; move database reads into a smaller scope, collect owned inputs, then call the DbState write after the read guard is dropped"
+            );
+            error!(
+                "db setter invoked while this thread holds a db clone; cancelling the update to avoid a deadlock"
+            );
+            resume_unwind(Box::new(salsa::Cancelled::PendingWrite));
+        }
+
         self.pending_setters.fetch_add(1, Ordering::Release);
         let _guard = PendingSetterGuard(&self.pending_setters);
         let mut db = self.db.lock();
@@ -115,10 +210,10 @@ impl DbState {
         }
     }
 
-    pub(crate) fn fork(&self) -> WorkspaceDb {
+    pub(crate) fn fork(&self) -> DbReadGuard {
         match &self.storage {
-            DbStorage::Shared(shared_db) => shared_db.fork(),
-            DbStorage::Owned(db) => db.fork(),
+            DbStorage::Shared(shared_db) => DbReadGuard::new(shared_db.fork(), false),
+            DbStorage::Owned(db) => DbReadGuard::new(db.fork(), true),
         }
     }
 
@@ -182,14 +277,19 @@ impl DbState {
     }
 
     #[cfg(feature = "module_graph")]
-    pub(crate) fn insert_module(
+    pub(crate) fn upsert_module_kind(
         &self,
         path: camino::Utf8PathBuf,
-        module: biome_module_graph::ModuleInfo,
-    ) {
+        kind: ModuleInfoKind,
+    ) -> ModuleInfo {
         match &self.storage {
-            DbStorage::Shared(shared_db) => shared_db.fork().insert_module(path, module),
-            DbStorage::Owned(db) => db.data.insert_module(path, module),
+            DbStorage::Shared(shared_db) => {
+                let db = shared_db.fork();
+                let module = ModuleInfo::new(&db, path.clone(), kind);
+                db.insert_module(path, module);
+                module
+            }
+            DbStorage::Owned(db) => db.with_setter(|db| db.update_or_insert_module(path, kind)),
         }
     }
 
@@ -205,7 +305,7 @@ impl DbState {
     /// waiting to run. Only used by tests to synchronize with a setter
     /// without relying on sleeps.
     #[cfg(test)]
-    fn pending_setters(&self) -> usize {
+    pub(crate) fn pending_setters(&self) -> usize {
         match &self.storage {
             DbStorage::Shared(_) => 0,
             DbStorage::Owned(db) => db.pending_setters.load(Ordering::Acquire),
@@ -345,6 +445,65 @@ mod tests {
         );
 
         drop(db);
+        setter.join().unwrap();
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic(expected = "db setter invoked while this thread holds a db clone")]
+    fn owned_storage_setter_panics_when_this_thread_holds_read_guard() {
+        let state = DbState::lsp();
+        let path = Utf8PathBuf::from("test.js");
+        let _db = state.fork();
+
+        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+    }
+
+    #[cfg(not(debug_assertions))]
+    #[test]
+    fn owned_storage_setter_cancels_when_this_thread_holds_read_guard() {
+        let state = DbState::lsp();
+        let path = Utf8PathBuf::from("test.js");
+        let _db = state.fork();
+
+        let result = salsa::Cancelled::catch(AssertUnwindSafe(|| {
+            state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        }));
+        assert!(
+            matches!(result, Err(salsa::Cancelled::PendingWrite)),
+            "setter should cancel instead of deadlocking when this thread holds a read guard"
+        );
+    }
+
+    #[test]
+    fn owned_storage_setter_from_other_thread_waits_for_read_guard() {
+        let state = Arc::new(DbState::lsp());
+        let path = Utf8PathBuf::from("test.js");
+        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+
+        let db = state.fork();
+        let (done_tx, done_rx) = mpsc::channel();
+
+        let setter = {
+            let state = state.clone();
+            let path = path.clone();
+            thread::spawn(move || {
+                state.update_parsed_file(&path, parse_js("let b = 2;"), 0, vec![]);
+                done_tx.send(()).unwrap();
+            })
+        };
+
+        wait_for_pending_setter(&state);
+        assert!(
+            done_rx.recv_timeout(Duration::from_millis(25)).is_err(),
+            "setter should wait while another thread holds a read guard"
+        );
+
+        drop(db);
+        assert!(
+            done_rx.recv_timeout(Duration::from_secs(5)).is_ok(),
+            "setter should complete after the other thread drops its read guard"
+        );
         setter.join().unwrap();
     }
 }

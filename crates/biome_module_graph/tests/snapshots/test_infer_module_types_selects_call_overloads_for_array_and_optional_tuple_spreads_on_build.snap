@@ -1,0 +1,289 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function readArray(value: string): string;
+export function readArray(left: number, right: number): boolean;
+export function readArray(..._args: [string] | [number, number]) {
+	return undefined as string | boolean;
+}
+
+export const numbers: number[] = [1, 2];
+export const arraySpread = readArray(...numbers);
+
+export function readTuple(value: string): string;
+export function readTuple(value: string, count: number): number;
+export function readTuple(..._args: [string, number?]) {
+	return undefined as string | number;
+}
+
+export const optionalTuple: [string, number?] = ["value"];
+export const optionalTupleSpread = readTuple(...optionalTuple);
+```
+
+## Inferred types
+
+```
+Binding readArray "readArray" => sync Function "readArray" {
+  accepts: {
+    params: [
+      required value: string
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Binding value "value" => string
+
+Binding readArray "readArray" => sync Function "readArray" {
+  accepts: {
+    params: [
+      required left: number
+      required right: number
+    ]
+    type_args: []
+  }
+  returns: boolean
+}
+
+Binding left "left" => number
+
+Binding right "right" => number
+
+Binding readArray "readArray" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "readArray" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "readArray" {
+        accepts: {
+          params: [
+            required left: number
+            required right: number
+          ]
+          type_args: []
+        }
+        returns: boolean
+      }
+    ,
+    ():
+      sync Function "readArray" {
+        accepts: {
+          params: [
+            required ..._args: [string] | [number,
+            number]
+          ]
+          type_args: []
+        }
+        returns: string | boolean
+      }
+  ]
+}
+
+Binding _args "_args" => [string] | [number,
+number]
+
+Expression "undefined" => undefined
+
+Expression "undefined as string | boolean" => string | boolean
+
+Binding numbers "numbers" => instanceof Array<number>
+
+Expression "[1, 2]" => [number: 1,
+number: 2]
+
+Expression "1" => number: 1
+
+Expression "2" => number: 2
+
+Binding arraySpread "arraySpread" => boolean
+
+Expression "readArray" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "readArray" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "readArray" {
+        accepts: {
+          params: [
+            required left: number
+            required right: number
+          ]
+          type_args: []
+        }
+        returns: boolean
+      }
+    ,
+    ():
+      sync Function "readArray" {
+        accepts: {
+          params: [
+            required ..._args: [string] | [number,
+            number]
+          ]
+          type_args: []
+        }
+        returns: string | boolean
+      }
+  ]
+}
+
+Expression "readArray(...numbers)" => boolean
+
+Expression "numbers" => instanceof Array<number>
+
+Binding readTuple "readTuple" => sync Function "readTuple" {
+  accepts: {
+    params: [
+      required value: string
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Binding value "value" => string
+
+Binding readTuple "readTuple" => sync Function "readTuple" {
+  accepts: {
+    params: [
+      required value: string
+      required count: number
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Binding value "value" => string
+
+Binding count "count" => number
+
+Binding readTuple "readTuple" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "readTuple" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "readTuple" {
+        accepts: {
+          params: [
+            required value: string
+            required count: number
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "readTuple" {
+        accepts: {
+          params: [
+            required ..._args: [string,
+            number?]
+          ]
+          type_args: []
+        }
+        returns: string | number
+      }
+  ]
+}
+
+Binding _args "_args" => [string,
+number?]
+
+Expression "undefined" => undefined
+
+Expression "undefined as string | number" => string | number
+
+Binding optionalTuple "optionalTuple" => instanceof [string,
+number?]
+
+Expression "[\"value\"]" => [string: value]
+
+Expression "\"value\"" => string: value
+
+Binding optionalTupleSpread "optionalTupleSpread" => string
+
+Expression "readTuple" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "readTuple" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "readTuple" {
+        accepts: {
+          params: [
+            required value: string
+            required count: number
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "readTuple" {
+        accepts: {
+          params: [
+            required ..._args: [string,
+            number?]
+          ]
+          type_args: []
+        }
+        returns: string | number
+      }
+  ]
+}
+
+Expression "readTuple(...optionalTuple)" => string
+
+Expression "optionalTuple" => instanceof [string,
+number?]
+```
