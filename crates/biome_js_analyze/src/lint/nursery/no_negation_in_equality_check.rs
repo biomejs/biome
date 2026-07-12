@@ -132,8 +132,11 @@ impl Rule for NoNegationInEqualityCheck {
 
         // --- ASI safety check ---
         // If a newline precedes the `!` operator and the argument starts with
-        // `/`, removing the `!` would expose `/` at the start of a line, which
-        // the parser would treat as a regex literal instead of division.
+        // a character that would continue the previous expression
+        // (/, [, `, +, -), removing the `!` would change the parse.
+        // `/` would become a regex literal, `[` property access,
+        // `` ` `` a tagged template, and `+`/`-` a unary operator.
+        // Skip the fix when any of these would be exposed at line start.
         {
             let has_preceding_newline = neg_op_token
                 .leading_trivia()
@@ -141,7 +144,8 @@ impl Rule for NoNegationInEqualityCheck {
                 .any(|p| p.kind() == TriviaPieceKind::Newline);
             if has_preceding_newline {
                 let arg_text = negated_expr.syntax().text_trimmed().to_string();
-                if arg_text.starts_with('/') {
+                let first_char = arg_text.chars().next().unwrap_or('\0');
+                if matches!(first_char, '/' | '[' | '`' | '+' | '-') {
                     return None;
                 }
             }
@@ -157,25 +161,21 @@ impl Rule for NoNegationInEqualityCheck {
         // --- Trivia transfer ---
         // Collect trivia from discarded tokens (the `!` operator and any
         // wrapping parentheses) so that comments are preserved in the fix.
-        //
-        // - Leading trivia of `!` → should appear before the new left expr.
-        // - Trailing trivia of `!` (comments between `!` and its argument)
-        //   → should appear before the new comparison operator.
-        // - Paren `(` trivia → before the new left expr.
-        // - Paren `)` trivia → before the new operator.
-        // - Old operator's leading trivia → before the new operator.
 
-        // Collect leading trivia pieces for the new left expression.
+        // Collect trivia pieces for the new left expression.
         let mut leading_for_left: Vec<SyntaxTriviaPiece<biome_js_syntax::JsLanguage>> = Vec::new();
         for p in neg_op_token.leading_trivia().pieces() {
             leading_for_left.push(p);
         }
 
-        // Collect trailing/operator trivia pieces.
+        // Collect trivia pieces for the new operator.
+        // Trailing trivia of `!` stays near the operator (Bug 3: cannot safely
+        // move to left without losing comments in the tree replacement).
         let mut leading_for_op: Vec<SyntaxTriviaPiece<biome_js_syntax::JsLanguage>> = Vec::new();
         for p in neg_op_token.trailing_trivia().pieces() {
             leading_for_op.push(p);
         }
+        let mut trailing_for_op: Vec<SyntaxTriviaPiece<biome_js_syntax::JsLanguage>> = Vec::new();
 
         // Walk through parenthesized wrappers from outer to inner.
         {
@@ -207,36 +207,48 @@ impl Rule for NoNegationInEqualityCheck {
             }
         }
 
-        // Transfer the original comparison operator's leading trivia.
+        // Transfer the original comparison operator's trivia.
         for p in operator.leading_trivia().pieces() {
             leading_for_op.push(p);
+        }
+        for p in operator.trailing_trivia().pieces() {
+            trailing_for_op.push(p);
         }
 
         // --- Build the new expression ---
 
-        // 1. Prepend collected leading trivia to the new left expression.
+        // 1. Build the new left expression with preserved trivia.
+        // Use the node-level prepend_trivia_pieces which handles the token
+        // replacement internally.
         let mut left_syntax = negated_expr.syntax().clone();
         if !leading_for_left.is_empty() {
-            if let Some(first_token) = left_syntax.first_token() {
-                let new_first = first_token.prepend_trivia_pieces(leading_for_left);
-                left_syntax = left_syntax.replace_child(
-                    first_token.into(),
-                    new_first.into(),
-                )?;
+            left_syntax = left_syntax.prepend_trivia_pieces(leading_for_left)?;
+        }
+
+        let mut new_left = AnyJsExpression::cast_ref(&left_syntax)?.clone();
+
+        // Bug 1: Wrap function/class/object literals in parens to prevent
+        // them from being reinterpreted as declarations/blocks at statement
+        // level (e.g. `!function(){}===bar` removing `!` would expose
+        // `function` at statement start, which is a function declaration).
+        {
+            let kind = new_left.syntax().kind();
+            if matches!(kind, JS_FUNCTION_EXPRESSION | JS_CLASS_EXPRESSION | JS_OBJECT_EXPRESSION) {
+                new_left = AnyJsExpression::from(make::parenthesized(new_left));
             }
         }
 
-        // 2. Build the new operator token with transferred trivia.
-        // Start with a standard space-decorated token (has leading+trailing space).
-        let new_op = make::token_decorated_with_space(new_op_kind);
-        // Prepend preserved trivia pieces before the existing leading space.
-        let new_op = if leading_for_op.is_empty() {
-            new_op
-        } else {
-            new_op.prepend_trivia_pieces(leading_for_op)
-        };
+        // 2. Build the new operator token.
+        // Use plain make::token (no automatic spacing) and copy trivia from
+        // the old operator to avoid double whitespace (Bug 4 fix).
+        let mut new_op = make::token(new_op_kind);
+        if !leading_for_op.is_empty() {
+            new_op = new_op.prepend_trivia_pieces(leading_for_op);
+        }
+        if !trailing_for_op.is_empty() {
+            new_op = new_op.append_trivia_pieces(trailing_for_op);
+        }
 
-        let new_left = AnyJsExpression::cast_ref(&left_syntax)?.clone();
         let new_binary = make::js_binary_expression(
             new_left,
             new_op,

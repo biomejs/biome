@@ -25,7 +25,7 @@ invalid.jsonc:1:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━�
   i Unsafe fix: Use the proper negated comparison operator instead.
   
   - !foo·===·bar
-  + foo··!==·bar
+  + foo·!==·bar
   
 
 ```
@@ -53,7 +53,7 @@ invalid.jsonc:1:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━�
   i Unsafe fix: Use the proper negated comparison operator instead.
   
   - !foo·!==·bar
-  + foo··===·bar
+  + foo·===·bar
   
 
 ```
@@ -81,7 +81,7 @@ invalid.jsonc:1:5 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━�
   i Unsafe fix: Use the proper negated comparison operator instead.
   
   - if·(!a·===·b)·{}
-  + if·(a··!==·b)·{}
+  + if·(a·!==·b)·{}
   
 
 ```
@@ -109,7 +109,7 @@ invalid.jsonc:1:5 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━�
   i Unsafe fix: Use the proper negated comparison operator instead.
   
   - if·(!a·!==·b)·{}
-  + if·(a··===·b)·{}
+  + if·(a·===·b)·{}
   
 
 ```
@@ -137,7 +137,7 @@ invalid.jsonc:1:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━�
   i Unsafe fix: Use the proper negated comparison operator instead.
   
   - !a·===·b·?·c·:·d
-  + a··!==·b·?·c·:·d
+  + a·!==·b·?·c·:·d
   
 
 ```
@@ -165,7 +165,7 @@ invalid.jsonc:1:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━�
   i Unsafe fix: Use the proper negated comparison operator instead.
   
   - !result·!==·expected
-  + result··===·expected
+  + result·===·expected
   
 
 ```

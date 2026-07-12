@@ -12,3 +12,19 @@
 /* should signal but fix should be skipped (ASI unsafe) */
 foo
 !/regex/.test(value) === bar;
+/* ASI unsafe: [ at start of expression after newline */
+foo
+![1,2,3] === bar;
+/* ASI unsafe: template literal after newline */
+foo
+!`template` === bar;
+/* ASI unsafe: unary + after newline */
+foo
+!+x === bar;
+/* ASI unsafe: unary - after newline */
+foo
+!-x === bar;
+/* Bug 1: function/class/object at expression start should be wrapped in parens */
+!function(){} === bar;
+!class{} === bar;
+!{} === bar;
