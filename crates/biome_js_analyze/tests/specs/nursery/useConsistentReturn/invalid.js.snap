@@ -1,0 +1,135 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Bare `return;` alongside a value return.
+function a(x) {
+	if (x) {
+		return true;
+	}
+	return;
+}
+
+// Implicit fall-off alongside a value return.
+function b(x) {
+	if (x) {
+		return true;
+	}
+}
+
+// Arrow function with a block body.
+const c = (x) => {
+	if (x) {
+		return 1;
+	}
+	return;
+};
+
+// Method.
+const obj = {
+	m(x) {
+		if (x) {
+			return 1;
+		}
+	},
+};
+
+```
+
+# Diagnostics
+```
+invalid.js:8:2 lint/nursery/useConsistentReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return does not return a value.
+  
+     6 │ 		return true;
+     7 │ 	}
+   > 8 │ 	return;
+       │ 	^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i This function returns a value on another code path, so its returns are inconsistent.
+  
+  i Return a value here, or remove the values from the other returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/useConsistentReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function can finish without returning a value.
+  
+    11 │ // Implicit fall-off alongside a value return.
+  > 12 │ function b(x) {
+       │ ^^^^^^^^^^^^^^^
+  > 13 │ 	if (x) {
+  > 14 │ 		return true;
+  > 15 │ 	}
+  > 16 │ }
+       │ ^
+    17 │ 
+    18 │ // Arrow function with a block body.
+  
+  i It returns a value on another code path, so completing without a value is inconsistent.
+  
+  i Return a value on every code path, or on none of them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:2 lint/nursery/useConsistentReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return does not return a value.
+  
+    21 │ 		return 1;
+    22 │ 	}
+  > 23 │ 	return;
+       │ 	^^^^^^^
+    24 │ };
+    25 │ 
+  
+  i This function returns a value on another code path, so its returns are inconsistent.
+  
+  i Return a value here, or remove the values from the other returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:2 lint/nursery/useConsistentReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function can finish without returning a value.
+  
+    26 │ // Method.
+    27 │ const obj = {
+  > 28 │ 	m(x) {
+       │ 	^^^^^^
+  > 29 │ 		if (x) {
+  > 30 │ 			return 1;
+  > 31 │ 		}
+  > 32 │ 	},
+       │ 	^
+    33 │ };
+    34 │ 
+  
+  i It returns a value on another code path, so completing without a value is inconsistent.
+  
+  i Return a value on every code path, or on none of them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

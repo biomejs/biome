@@ -1678,6 +1678,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("style", "useConsistentObjectDefinitions", TypeId::of::<biome_rule_options::use_consistent_object_definitions::UseConsistentObjectDefinitionsOptions>()));
     result.push((
         "nursery",
+        "useConsistentReturn",
+        TypeId::of::<biome_rule_options::use_consistent_return::UseConsistentReturnOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useConsistentTestIt",
         TypeId::of::<biome_rule_options::use_consistent_test_it::UseConsistentTestItOptions>(),
     ));

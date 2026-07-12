@@ -2607,6 +2607,11 @@ See https://biomejs.dev/linter/rules/use-baseline
 	 */
 	useBaseline?: UseBaselineConfiguration;
 	/**
+	* Succinct description of the rule.
+See https://biomejs.dev/linter/rules/use-consistent-return 
+	 */
+	useConsistentReturn?: UseConsistentReturnConfiguration;
+	/**
 	* Enforce consistent use of it or test for test functions.
 See https://biomejs.dev/linter/rules/use-consistent-test-it 
 	 */
@@ -4776,6 +4781,9 @@ export type UseAwaitThenableConfiguration =
 export type UseBaselineConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseBaselineOptions;
+export type UseConsistentReturnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentReturnOptions;
 export type UseConsistentTestItConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentTestItOptions;
@@ -6670,6 +6678,10 @@ export interface RuleWithUseBaselineOptions {
 	level: RulePlainConfiguration;
 	options?: UseBaselineOptions;
 }
+export interface RuleWithUseConsistentReturnOptions {
+	level: RulePlainConfiguration;
+	options?: UseConsistentReturnOptions;
+}
 export interface RuleWithUseConsistentTestItOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8406,6 +8418,7 @@ export interface UseBaselineOptions {
 	 */
 	available?: AvailabilityTarget;
 }
+export type UseConsistentReturnOptions = {};
 /**
  * Options for the `useConsistentTestIt` rule
  */
@@ -9674,7 +9687,6 @@ export type Category =
 	| "lint/correctness/useVueValidVPre"
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
-	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noComponentHookFactories"
@@ -9711,6 +9723,7 @@ export type Category =
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactStringRefs"
+	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
@@ -9729,6 +9742,7 @@ export type Category =
 	| "lint/nursery/useBaseline"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
+	| "lint/nursery/useConsistentReturn"
 	| "lint/nursery/useConsistentTestIt"
 	| "lint/nursery/useDisposables"
 	| "lint/nursery/useDomNodeTextContent"
@@ -9739,7 +9753,6 @@ export type Category =
 	| "lint/nursery/useExplicitReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
-	| "lint/nursery/useReactFunctionComponentDefinition"
 	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useIframeSandbox"
 	| "lint/nursery/useImportRestrictions"
@@ -9755,6 +9768,7 @@ export type Category =
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useReactAsyncServerFunction"
+	| "lint/nursery/useReactFunctionComponentDefinition"
 	| "lint/nursery/useReactNativePlatformComponents"
 	| "lint/nursery/useReduceTypeParameter"
 	| "lint/nursery/useRegexpExec"

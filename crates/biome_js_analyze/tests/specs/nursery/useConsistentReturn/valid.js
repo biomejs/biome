@@ -1,0 +1,35 @@
+/* should not generate diagnostics */
+
+// Always returns a value.
+function a(x) {
+	if (x) {
+		return true;
+	}
+	return false;
+}
+
+// Never returns a value (bare return + implicit fall-off, no value returns).
+function b(x) {
+	if (x) {
+		return;
+	}
+}
+
+// No return statements at all.
+function c() {
+	doSomething();
+}
+
+// Expression-body arrow always yields a value.
+const d = (x) => x + 1;
+
+// A nested function's returns don't affect the outer one.
+function e(x) {
+	const inner = (y) => {
+		if (y) {
+			return 1;
+		}
+		return 2;
+	};
+	return inner(x);
+}

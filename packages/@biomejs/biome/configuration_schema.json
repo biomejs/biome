@@ -6918,6 +6918,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentReturn": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/use-consistent-return",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentReturnConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentTestIt": {
 					"description": "Enforce consistent use of it or test for test functions.\nSee https://biomejs.dev/linter/rules/use-consistent-test-it",
 					"anyOf": [
@@ -11156,6 +11163,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentReturnOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentReturnOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentTestItOptions": {
 			"type": "object",
 			"properties": {
@@ -14946,6 +14962,16 @@
 					]
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseConsistentReturnConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentReturnOptions" }
+			]
+		},
+		"UseConsistentReturnOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseConsistentTestItConfiguration": {
