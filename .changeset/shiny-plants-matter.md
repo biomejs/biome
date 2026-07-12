@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Removed stale Unix daemon sockets from older Biome versions when starting a newer daemon.
+Biome will now remove stale Unix daemon sockets from older Biome versions when starting a newer daemon.
