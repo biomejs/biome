@@ -8,5 +8,6 @@ expression: valid.js
 foo !== bar
 !!foo === bar
 !(!foo) === bar
+!((!foo)) === bar
 
 ```

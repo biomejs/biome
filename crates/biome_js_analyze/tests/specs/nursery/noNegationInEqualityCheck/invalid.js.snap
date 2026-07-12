@@ -8,12 +8,13 @@ expression: invalid.js
 !foo === bar
 (!foo) === bar
 (!foo) !== bar
+((!foo)) === bar
 
 ```
 
 # Diagnostics
 ```
-invalid.js:2:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A negation is used on the left side of this equality check.
   
@@ -23,13 +24,21 @@ invalid.js:2:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━�
   > 3 │ (!foo) === bar
       │ ^^^^^^
     4 │ (!foo) !== bar
-    5 │ 
+    5 │ ((!foo)) === bar
   
   i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
   
   i Replace !left operator right with the proper negated comparison, or wrap the comparison in parentheses with a negation.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the proper negated comparison operator instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - !foo·===·bar
+      2 │ + foo··!==·bar
+    3 3 │   (!foo) === bar
+    4 4 │   (!foo) !== bar
   
 
 ```
