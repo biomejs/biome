@@ -23,7 +23,7 @@ const a = !x === y;
 ```
 invalid.js:4:5 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Negating the left operand of an equality check is likely a mistake.
+  i This negation applies only to the left operand, not to the equality check.
   
     3 │ // Negated left operand of a strict equality check.
   > 4 │ if (!foo === bar) {
@@ -31,7 +31,9 @@ invalid.js:4:5 lint/nursery/noNegationInEqualityCheck ━━━━━━━━�
     5 │ }
     6 │ 
   
-  i !a === b is evaluated as (!a) === b. Did you mean a !== b or !(a === b)?
+  i ! binds tighter than the equality operator, so !a === b is evaluated as (!a) === b — it compares the boolean !a against b, which is rarely what's intended.
+  
+  i To negate the comparison, use a !== b. If comparing the negated value is intentional, make it explicit with parentheses: (!a) === b.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -41,7 +43,7 @@ invalid.js:4:5 lint/nursery/noNegationInEqualityCheck ━━━━━━━━�
 ```
 invalid.js:8:5 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Negating the left operand of an equality check is likely a mistake.
+  i This negation applies only to the left operand, not to the equality check.
   
      7 │ // Negated left operand of a strict inequality check.
    > 8 │ if (!foo !== bar) {
@@ -49,7 +51,9 @@ invalid.js:8:5 lint/nursery/noNegationInEqualityCheck ━━━━━━━━�
      9 │ }
     10 │ 
   
-  i !a === b is evaluated as (!a) === b. Did you mean a !== b or !(a === b)?
+  i ! binds tighter than the equality operator, so !a === b is evaluated as (!a) === b — it compares the boolean !a against b, which is rarely what's intended.
+  
+  i To negate the comparison, use a !== b. If comparing the negated value is intentional, make it explicit with parentheses: (!a) === b.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -59,14 +63,16 @@ invalid.js:8:5 lint/nursery/noNegationInEqualityCheck ━━━━━━━━�
 ```
 invalid.js:12:11 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Negating the left operand of an equality check is likely a mistake.
+  i This negation applies only to the left operand, not to the equality check.
   
     11 │ // In an assignment / expression position.
   > 12 │ const a = !x === y;
        │           ^^^^^^^^
     13 │ 
   
-  i !a === b is evaluated as (!a) === b. Did you mean a !== b or !(a === b)?
+  i ! binds tighter than the equality operator, so !a === b is evaluated as (!a) === b — it compares the boolean !a against b, which is rarely what's intended.
+  
+  i To negate the comparison, use a !== b. If comparing the negated value is intentional, make it explicit with parentheses: (!a) === b.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

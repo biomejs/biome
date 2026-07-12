@@ -87,11 +87,14 @@ impl Rule for NoNegationInEqualityCheck {
                 rule_category!(),
                 binary.range(),
                 markup! {
-                    "Negating the left operand of an equality check is likely a mistake."
+                    "This negation applies only to the left operand, not to the equality check."
                 },
             )
             .note(markup! {
-                ""<Emphasis>"!a === b"</Emphasis>" is evaluated as "<Emphasis>"(!a) === b"</Emphasis>". Did you mean "<Emphasis>"a !== b"</Emphasis>" or "<Emphasis>"!(a === b)"</Emphasis>"?"
+                ""<Emphasis>"!"</Emphasis>" binds tighter than the equality operator, so "<Emphasis>"!a === b"</Emphasis>" is evaluated as "<Emphasis>"(!a) === b"</Emphasis>" — it compares the boolean "<Emphasis>"!a"</Emphasis>" against "<Emphasis>"b"</Emphasis>", which is rarely what's intended."
+            })
+            .note(markup! {
+                "To negate the comparison, use "<Emphasis>"a !== b"</Emphasis>". If comparing the negated value is intentional, make it explicit with parentheses: "<Emphasis>"(!a) === b"</Emphasis>"."
             }),
         )
     }
