@@ -798,6 +798,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noNegationElse",
         TypeId::of::<biome_rule_options::no_negation_else::NoNegationElseOptions>(),
     ));
+    result.push((
+        "nursery",
+        "noNegationInEqualityCheck",
+        TypeId::of::<
+            biome_rule_options::no_negation_in_equality_check::NoNegationInEqualityCheckOptions,
+        >(),
+    ));
     result.push(("correctness", "noNestedComponentDefinitions", TypeId::of::<biome_rule_options::no_nested_component_definitions::NoNestedComponentDefinitionsOptions>()));
     result.push((
         "suspicious",

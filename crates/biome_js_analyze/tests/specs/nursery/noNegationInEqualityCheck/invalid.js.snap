@@ -1,0 +1,74 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Negated left operand of a strict equality check.
+if (!foo === bar) {
+}
+
+// Negated left operand of a strict inequality check.
+if (!foo !== bar) {
+}
+
+// In an assignment / expression position.
+const a = !x === y;
+
+```
+
+# Diagnostics
+```
+invalid.js:4:5 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Negating the left operand of an equality check is likely a mistake.
+  
+    3 │ // Negated left operand of a strict equality check.
+  > 4 │ if (!foo === bar) {
+      │     ^^^^^^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i !a === b is evaluated as (!a) === b. Did you mean a !== b or !(a === b)?
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:5 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Negating the left operand of an equality check is likely a mistake.
+  
+     7 │ // Negated left operand of a strict inequality check.
+   > 8 │ if (!foo !== bar) {
+       │     ^^^^^^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i !a === b is evaluated as (!a) === b. Did you mean a !== b or !(a === b)?
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:11 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Negating the left operand of an equality check is likely a mistake.
+  
+    11 │ // In an assignment / expression position.
+  > 12 │ const a = !x === y;
+       │           ^^^^^^^^
+    13 │ 
+  
+  i !a === b is evaluated as (!a) === b. Did you mean a !== b or !(a === b)?
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
