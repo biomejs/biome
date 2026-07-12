@@ -9,9 +9,8 @@ use biome_js_syntax::{
 };
 use biome_languages::JsFileSource;
 use biome_module_graph::{
-    ImportTreeDisplay, ImportTreeNode, ModuleDb, build_import_tree_for_html,
-    build_import_tree_for_js, traverse_import_tree_for_classes,
-    traverse_import_tree_for_html_classes,
+    ImportTreeDisplay, ImportTreeNode, build_import_tree_for_html, build_import_tree_for_js,
+    traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TextSize, declare_node_union};
 use biome_rule_options::no_undeclared_classes::NoUndeclaredClassesOptions;

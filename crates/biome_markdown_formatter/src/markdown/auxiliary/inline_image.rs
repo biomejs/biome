@@ -1,3 +1,4 @@
+use crate::markdown::auxiliary::inline_link::format_inline_destination;
 use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions;
 use crate::prelude::*;
 use crate::shared::{TextContext, TextPrintMode, TrimMode};
@@ -32,18 +33,15 @@ impl FormatNodeRule<MdInlineImage> for FormatMdInlineImage {
                     }),
                 r_brack_token.format(),
                 l_paren_token.format(),
-                destination
-                    .format()
-                    .with_options(FormatMdFormatInlineItemListOptions {
-                        print_mode: TextPrintMode::Trim(TrimMode::AutoLinkLike),
-                        keep_fences_in_italics: false,
-                        text_context: TextContext::Neutral,
-                    })
+                format_inline_destination(
+                    &destination,
+                    TextPrintMode::Trim(TrimMode::AutoLinkLike)
+                )
             ]
         )?;
 
         if let Some(title) = title {
-            write!(f, [space(), title.format()])?;
+            write!(f, [title.format()])?;
         }
 
         write!(f, [r_paren_token.format()])

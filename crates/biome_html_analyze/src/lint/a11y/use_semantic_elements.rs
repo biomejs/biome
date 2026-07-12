@@ -6,7 +6,7 @@ use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_deserialize::TextRange;
 use biome_diagnostics::Severity;
-use biome_html_syntax::HtmlAttribute;
+use biome_html_syntax::AnyHtmlAttribute;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
@@ -65,16 +65,16 @@ declare_lint_rule! {
 
 impl Rule for UseSemanticElements {
     type Query = Ast<AnyHtmlTagElement>;
-    type State = HtmlAttribute;
+    type State = AnyHtmlAttribute;
     type Signals = Option<Self::State>;
     type Options = UseSemanticElementsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let role_attribute = node.find_attribute_by_name("role")?;
-        let role_value = role_attribute.initializer()?.value().ok()?.string_value()?;
-        let role_value = role_value.trim();
+        let role_attribute = node.find_attribute_or_vue_binding("role")?;
+        let role_value = role_attribute.as_static_value()?;
+        let role_value = role_value.text().trim();
 
         let role = AriaRole::from_roles(role_value)?;
 
@@ -104,8 +104,8 @@ impl Rule for UseSemanticElements {
                 .any(|instance| {
                     is_html_tag(node, source_type, instance.element.as_str())
                         && instance.attributes.iter().all(|required_attr| {
-                            node.find_attribute_by_name(required_attr.attribute.as_str())
-                                .and_then(|attr| attr.initializer()?.value().ok()?.string_value())
+                            node.find_attribute_or_vue_binding(required_attr.attribute.as_str())
+                                .and_then(|attr| attr.as_static_value())
                                 .is_some_and(|value| {
                                     if is_html {
                                         value.text().eq_ignore_ascii_case(required_attr.value)
@@ -123,8 +123,8 @@ impl Rule for UseSemanticElements {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let role_value = state.initializer()?.value().ok()?.string_value()?;
-        let role_value = role_value.trim();
+        let role_value = state.as_static_value()?;
+        let role_value = role_value.text().trim();
         let role = AriaRole::from_roles(role_value)?;
 
         Some(

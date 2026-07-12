@@ -51,35 +51,35 @@ info: markdown/ordered_lists.md
 1. Foo
 2. Bar
 
-1. Foo
+3. Foo
    Bar
 
-1. Foo
+4. Foo
    1. Bar
       1. Lorem
          Ipsum
 
-1. Foo
+5. Foo
    With some
    Space
 
-1. Mixed with sub-bullet
+6. Mixed with sub-bullet
    - bullet sub-item
    - another sub-item
 
-1. First
-2. Second
-3. Third
+7. First
+8. Second
+9. Third
 
 10. Ten
 11. Eleven
 
-100. Hundred
-101. Hundred-one
+12. Hundred
+13. Hundred-one
 
-1.   Extra spaces after marker
-2.   More extra spaces
+14.   Extra spaces after marker
+15.   More extra spaces
 
-1.    Four spaces after marker
+16.    Four spaces after marker
 
 ```

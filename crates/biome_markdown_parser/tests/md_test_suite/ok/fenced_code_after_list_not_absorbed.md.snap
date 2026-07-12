@@ -70,14 +70,8 @@ MdDocument {
             l_fence: TRIPLE_BACKTICK@12..15 "```" [] [],
             code_list: MdCodeNameList [],
             content: MdInlineItemList [
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@15..16 "\n" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@16..25 "code here" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@25..26 "\n" [] [],
+                MdCodeContent {
+                    value_token: MD_CODE_LITERAL@15..26 "\ncode here\n" [] [],
                 },
             ],
             r_fence_indent: MdIndentTokenList [],
@@ -130,12 +124,8 @@ MdDocument {
       1: TRIPLE_BACKTICK@12..15 "```" [] []
       2: MD_CODE_NAME_LIST@15..15
       3: MD_INLINE_ITEM_LIST@15..26
-        0: MD_TEXTUAL@15..16
-          0: MD_TEXTUAL_LITERAL@15..16 "\n" [] []
-        1: MD_TEXTUAL@16..25
-          0: MD_TEXTUAL_LITERAL@16..25 "code here" [] []
-        2: MD_TEXTUAL@25..26
-          0: MD_TEXTUAL_LITERAL@25..26 "\n" [] []
+        0: MD_CODE_CONTENT@15..26
+          0: MD_CODE_LITERAL@15..26 "\ncode here\n" [] []
       4: MD_INDENT_TOKEN_LIST@26..26
       5: TRIPLE_BACKTICK@26..29 "```" [] []
     2: MD_NEWLINE@29..30

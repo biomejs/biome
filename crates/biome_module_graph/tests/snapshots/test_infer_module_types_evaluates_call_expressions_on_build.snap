@@ -1,0 +1,79 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function readValue(): string {
+	return "value";
+}
+
+export function identity<T>(input: T): T {
+	return input;
+}
+
+export const text = readValue();
+export const numeric = identity(1);
+```
+
+## Inferred types
+
+```
+Binding readValue "readValue" => sync Function "readValue" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "\"value\"" => string: value
+
+Binding identity "identity" => sync Function "identity" {
+  accepts: {
+    params: [
+      required input: instanceof T
+    ]
+    type_args: [T]
+  }
+  returns: instanceof T
+}
+
+Binding T "T" => T
+
+Binding input "input" => instanceof T
+
+Expression "input" => instanceof T
+
+Binding text "text" => string
+
+Expression "readValue" => sync Function "readValue" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "readValue()" => string
+
+Binding numeric "numeric" => number: 1
+
+Expression "identity" => sync Function "identity" {
+  accepts: {
+    params: [
+      required input: instanceof T
+    ]
+    type_args: [T]
+  }
+  returns: instanceof T
+}
+
+Expression "identity(1)" => number: 1
+
+Expression "1" => number: 1
+```

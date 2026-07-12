@@ -1,13 +1,53 @@
 use super::*;
 use biome_analyze::{ActionFilter, AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
+use biome_db::ParsedSource;
 use biome_diagnostics::category;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
-use biome_js_parser::{JsParserOptions, parse};
+use biome_js_parser::{JsParserOptions, Parse, parse};
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{TextRange, TextSize};
-use biome_languages::JsFileSource;
+use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_package::{Dependencies, PackageJson};
+use camino::{Utf8Path, Utf8PathBuf};
+use salsa::Storage;
 use std::slice;
+
+#[salsa::db]
+#[derive(Default)]
+struct TestDb {
+    parsed: Option<ParsedSource>,
+    storage: Storage<Self>,
+}
+
+#[salsa::db]
+impl LanguageDb for TestDb {
+    fn source_from_index(&self, _index: usize) -> Option<DocumentFileSource> {
+        Some(DocumentFileSource::Js(JsFileSource::tsx()))
+    }
+}
+
+#[salsa::db]
+impl biome_db::Db for TestDb {
+    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
+        self.parsed
+    }
+}
+
+#[salsa::db]
+impl salsa::Database for TestDb {}
+
+fn embedded_db(parsed: &Parse<AnyJsRoot>) -> Rc<dyn LanguageDb> {
+    let mut db = TestDb::default();
+    let parsed = ParsedSource::new(
+        &db,
+        Utf8PathBuf::new(),
+        parsed.syntax().as_send().unwrap().into(),
+        0,
+        vec![],
+    );
+    db.parsed = Some(parsed);
+    Rc::new(db)
+}
 
 #[ignore]
 #[test]
@@ -25,7 +65,7 @@ fn quick_test() {
 
     let services = crate::JsAnalyzerServices::default()
         .with_source_type(JsFileSource::tsx())
-        .with_semantic_model(semantic_model)
+        .with_semantic_model(&semantic_model)
         .with_project_layout(project_layout_with_top_level_dependencies(dependencies));
 
     crate::analyze(
@@ -77,7 +117,11 @@ fn quick_test_suppression() {
         JsFileSource::js_module(),
         JsParserOptions::default(),
     );
-    let services = JsAnalyzerServices::from(&parsed.tree());
+    let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
+
+    let services = JsAnalyzerServices::from(&parsed.tree())
+        .with_semantic_model(&semantic_model)
+        .with_language_db(embedded_db(&parsed));
     let options = AnalyzerOptions::default();
     crate::analyze(
         &parsed.tree(),
@@ -162,7 +206,10 @@ fn suppression() {
 
     let mut lint_ranges: Vec<TextRange> = Vec::new();
     let mut parse_ranges: Vec<TextRange> = Vec::new();
-    let services = JsAnalyzerServices::from(&parsed.tree());
+    let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
+    let services = JsAnalyzerServices::from(&parsed.tree())
+        .with_semantic_model(&semantic_model)
+        .with_language_db(embedded_db(&parsed));
     let options = AnalyzerOptions::default();
     crate::analyze(
         &parsed.tree(),
@@ -813,7 +860,7 @@ const foo0 = function (bar: string) {
 
     let services = crate::JsAnalyzerServices::default()
         .with_source_type(JsFileSource::ts())
-        .with_semantic_model(semantic_model);
+        .with_semantic_model(&semantic_model);
 
     crate::analyze(&root, filter, &options, &[], services, |signal| {
         if let Some(diag) = signal.diagnostic() {
@@ -900,7 +947,7 @@ var foo = {
         ..AnalysisFilter::default()
     };
 
-    let services = JsAnalyzerServices::from(&parsed.tree());
+    let services = JsAnalyzerServices::from(&parsed.tree()).with_language_db(embedded_db(&parsed));
 
     let options = AnalyzerOptions::default();
     crate::analyze(&parsed.tree(), filter, &options, &[], services, |signal| {
@@ -938,7 +985,7 @@ console.log("should be suppressed");"#;
     };
 
     let options = AnalyzerOptions::default();
-    let services = JsAnalyzerServices::from(&parsed.tree());
+    let services = JsAnalyzerServices::from(&parsed.tree()).with_language_db(embedded_db(&parsed));
     let mut diagnostic_found = false;
     analyze(&parsed.tree(), filter, &options, &[], services, |signal| {
         if let Some(diag) = signal.diagnostic() {

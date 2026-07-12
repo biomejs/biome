@@ -1,0 +1,57 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/import-comments.scss
+---
+
+# Input
+
+```scss
+@import
+// Comment
+"mixins" ,
+"variables",
+// Comment
+"reset" ,
+"scaffolding"   ,"type",
+// Comment
+"bar" ,"tabs" ;
+
+@import  "print.css"  print,
+// Comment
+screen ;
+
+@import "separator.css" print,// Separator
+screen ;
+
+@import "theme.css"  print,
+// Comment
+#{$query} ;
+
+```
+
+
+# Formatted
+
+```scss
+@import // Comment
+	"mixins",
+	"variables",
+	// Comment
+	"reset",
+	"scaffolding", "type",
+	// Comment
+	"bar",
+	"tabs";
+
+@import "print.css" print,
+	// Comment
+	screen;
+
+@import "separator.css" print, // Separator
+	screen;
+
+@import "theme.css" print,
+	// Comment
+	#{$query};
+
+```

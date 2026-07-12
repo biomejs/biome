@@ -573,6 +573,20 @@ impl FunctionParameter {
             Self::Pattern(pattern) => &pattern.ty,
         }
     }
+
+    pub fn is_optional(&self) -> bool {
+        match self {
+            Self::Named(named) => named.is_optional,
+            Self::Pattern(pattern) => pattern.is_optional,
+        }
+    }
+
+    pub fn is_rest(&self) -> bool {
+        match self {
+            Self::Named(named) => named.is_rest,
+            Self::Pattern(pattern) => pattern.is_rest,
+        }
+    }
 }
 
 /// A plain function parameter where the name of the parameter is also the name
@@ -991,6 +1005,19 @@ impl TypeMember {
         }
     }
 
+    /// Returns whether this member is keyed by a type reference matching
+    /// `predicate`, whether the key is spelled as an index signature or as a
+    /// computed value.
+    pub fn is_keyed_member_with_ty(&self, predicate: impl Fn(&TypeReference) -> bool) -> bool {
+        match &self.kind {
+            TypeMemberKind::IndexSignature(key_type)
+            | TypeMemberKind::ConstAssertedIndexSignature(key_type)
+            | TypeMemberKind::ComputedValue(key_type)
+            | TypeMemberKind::ConstAssertedComputedValue(key_type) => predicate(key_type),
+            _ => false,
+        }
+    }
+
     #[inline]
     pub fn is_getter(&self) -> bool {
         self.kind.is_getter()
@@ -1011,7 +1038,14 @@ impl TypeMember {
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum TypeMemberKind {
     CallSignature,
+    /// A member keyed by a computed value, such as `[Symbol.dispose]`. The reference is the key's
+    /// type. Currently produced by the generated global types; local inference of source objects
+    /// still spells computed keys as [`Self::IndexSignature`], so the two spellings coexist and
+    /// [`TypeMember::is_keyed_member_with_ty`] accepts either.
+    ComputedValue(TypeReference),
     ConstAssertedCallSignature,
+    /// A [`Self::ComputedValue`] carried through an `as const` assertion.
+    ConstAssertedComputedValue(TypeReference),
     ConstAssertedConstructor,
     ConstAssertedGetter(Text),
     ConstAssertedIndexSignature(TypeReference),
@@ -1031,6 +1065,8 @@ impl TypeMemberKind {
         match self {
             Self::CallSignature
             | Self::ConstAssertedCallSignature
+            | Self::ComputedValue(_)
+            | Self::ConstAssertedComputedValue(_)
             | Self::IndexSignature(_)
             | Self::ConstAssertedIndexSignature(_) => false,
             Self::Constructor | Self::ConstAssertedConstructor => name == "constructor",
@@ -1085,6 +1121,7 @@ impl TypeMemberKind {
         matches!(
             self,
             Self::ConstAssertedCallSignature
+                | Self::ConstAssertedComputedValue(_)
                 | Self::ConstAssertedConstructor
                 | Self::ConstAssertedGetter(_)
                 | Self::ConstAssertedIndexSignature(_)
@@ -1099,6 +1136,9 @@ impl TypeMemberKind {
         match self {
             Self::CallSignature | Self::ConstAssertedCallSignature => {
                 Self::ConstAssertedCallSignature
+            }
+            Self::ComputedValue(key_type) | Self::ConstAssertedComputedValue(key_type) => {
+                Self::ConstAssertedComputedValue(key_type)
             }
             Self::Constructor | Self::ConstAssertedConstructor => Self::ConstAssertedConstructor,
             Self::Getter(name) | Self::ConstAssertedGetter(name) => Self::ConstAssertedGetter(name),
@@ -1120,6 +1160,7 @@ impl TypeMemberKind {
     pub fn without_const_asserted(&self) -> Self {
         match self {
             Self::ConstAssertedCallSignature => Self::CallSignature,
+            Self::ConstAssertedComputedValue(key_type) => Self::ComputedValue(key_type.clone()),
             Self::ConstAssertedConstructor => Self::Constructor,
             Self::ConstAssertedGetter(name) => Self::Getter(name.clone()),
             Self::ConstAssertedIndexSignature(index_signature_type) => {
@@ -1154,6 +1195,8 @@ impl TypeMemberKind {
         match self {
             Self::CallSignature
             | Self::ConstAssertedCallSignature
+            | Self::ComputedValue(_)
+            | Self::ConstAssertedComputedValue(_)
             | Self::IndexSignature(_)
             | Self::ConstAssertedIndexSignature(_) => None,
             Self::Constructor | Self::ConstAssertedConstructor => {

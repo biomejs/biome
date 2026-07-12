@@ -352,6 +352,12 @@ impl Format<FormatTypeContext> for TypeMemberKind {
             | Self::ConstAssertedIndexSignature(index_signature_type) => {
                 write!(formatter, [token("["), index_signature_type, token("]")])
             }
+            Self::ComputedValue(key_type) | Self::ConstAssertedComputedValue(key_type) => {
+                write!(
+                    formatter,
+                    [token("computed"), space(), token("["), key_type, token("]")]
+                )
+            }
             Self::Named(name) | Self::ConstAssertedNamed(name) => {
                 let quoted = std::format!("\"{name}\"");
                 write!(formatter, [text(&quoted, None)])

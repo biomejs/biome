@@ -2,6 +2,16 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## `biome.jsonc`
+
+```json
+{
+  "files": {
+    "includes": ["**"]
+  }
+}
+```
+
 ## `package/biome.jsonc`
 
 ```json
@@ -9,16 +19,6 @@ expression: redactor(content)
   "extends": "//",
   "linter": {
     "includes": ["**", "!**/*.test.js"]
-  }
-}
-```
-
-## `biome.jsonc`
-
-```json
-{
-  "files": {
-    "includes": ["**"]
   }
 }
 ```

@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/property/block_properties.yaml
+---
+
+# Input
+
+```yaml
+sequence: !!seq
+  - !!str a
+  - !!map
+    key: !!str value
+
+sequence:
+  !!seq
+  - !!str a
+  - !!map
+    key: !!str value
+
+mapping: !!map
+  key: !!str value
+
+mapping:
+  !!map
+  key: !!str value
+
+```
+
+
+# Formatted
+
+```yaml
+sequence:
+  !!seq
+  - !!str a
+  - !!map
+    key: !!str value
+
+sequence:
+  !!seq
+  - !!str a
+  - !!map
+    key: !!str value
+
+mapping:
+  !!map
+  key: !!str value
+
+mapping:
+  !!map
+  key: !!str value
+
+```

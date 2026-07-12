@@ -30,8 +30,8 @@ whitespace-around-colon-in-mappings.yml:7:3 parse ━━━━━━━━━━
   × expected `:` but instead found `*alias1`
   
     5 │ top3:
-    6 │   &node3·
-  > 7 │   *alias1 : scalar3
+    6 │   &node3
+  > 7 │   *alias1: scalar3
       │   ^^^^^^^
     8 │ top4:
     9 │   *alias2: scalar4

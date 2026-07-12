@@ -2,10 +2,10 @@ use bpaf::Args;
 use camino::Utf8Path;
 
 use biome_console::BufferConsole;
-use biome_fs::MemoryFileSystem;
+use biome_fs::{MemoryFileSystem, TemporaryFs};
 
-use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
+use crate::{run_cli, run_cli_with_dyn_fs};
 
 /// Regression test for https://github.com/biomejs/biome/issues/9180
 ///
@@ -110,6 +110,94 @@ fn issue_9300() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "issue_9300",
+        fs,
+        console,
+        result,
+    ));
+}
+
+/// Regression test for https://github.com/biomejs/biome/issues/10885
+#[test]
+fn issue_10885() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let mut temp_fs = TemporaryFs::new("issue_10885");
+
+    for (path, content) in [
+        (
+            "biome.json",
+            r#"{
+    "linter": {
+        "domains": {
+            "types": "recommended"
+        },
+        "rules": {
+            "nursery": {
+                "noFloatingPromises": "error"
+            }
+        }
+    }
+}
+"#,
+        ),
+        (
+            "router.ts",
+            r#"import { protectedProcedure } from "./procedures";
+
+export const routerProcedure = protectedProcedure.mutation;
+"#,
+        ),
+        (
+            "procedures.ts",
+            r#"declare const trpc: unknown;
+
+export const protectedProcedure = trpc.baseProcedure.use;
+"#,
+        ),
+    ] {
+        temp_fs.create_file(path, content);
+    }
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(temp_fs.create_os()),
+        &mut console,
+        Args::from(["check", temp_fs.cli_path(), "--formatter-enabled=false"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "issue_10885",
+        fs,
+        console,
+        result,
+    ));
+}
+
+/// Regression test for https://github.com/biomejs/biome/issues/9196
+#[test]
+fn issue_9196() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let jsx_file = Utf8Path::new("test.jsx");
+    fs.insert(
+        jsx_file.into(),
+        "<div>\n\ttext // first\n\t{/* ok */}\n\ttail /* second */ more\n</div>;\n".as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", jsx_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "issue_9196",
         fs,
         console,
         result,

@@ -9,7 +9,8 @@ Runs formatter, linter and import sorting to the requested files.
 
 Usage: check [--write] [--unsafe] [--assist-enabled=<true|false>] [--enforce-assist=<true|false>] [
 --format-with-errors=<true|false>] [--profile-rules] [--staged] [--changed] [--since=REF] [--only=
-<GROUP|RULE|DOMAIN|ACTION>]... [--skip=<GROUP|RULE|DOMAIN|ACTION>]... [--watch] [PATH]...
+<GROUP|RULE|DOMAIN|ACTION|PLUGIN>]... [--skip=<GROUP|RULE|DOMAIN|ACTION|PLUGIN>]... [--watch] [PATH
+]...
 
 Options that changes how the JSON parser behaves
         --json-parse-allow-comments=<true|false>  Allow parsing comments in `.json` files
@@ -395,20 +396,22 @@ Available options:
         --since=REF           Use this to specify the base branch to compare against when you're
                               using the --changed flag and the `defaultBranch` is not set in your
                               `biome.json`
-        --only=<GROUP|RULE|DOMAIN|ACTION>  Run only the given lint rule, assist action, group of
-                              rules and actions, or domain. If the severity level of a rule is
+        --only=<GROUP|RULE|DOMAIN|ACTION|PLUGIN>  Run only the given lint rule, assist action, group
+                              of rules and actions, or domain. If the severity level of a rule is
                               `off`, then the severity level of the rule is set to `error` if it is
-                              a recommended rule or `warn` otherwise.
+                              a recommended rule or `warn` otherwise. Use the `plugin` group to run
+                              only the analyzer plugins.
                               Example:
                               ```shell
-                              biome check --only=correctness/noUnusedVariables --only=suspicious --only=test
+                              biome check --only=correctness/noUnusedVariables --only=suspicious --only=test --only=plugin
                               ```
-        --skip=<GROUP|RULE|DOMAIN|ACTION>  Skip the given lint rule, assist action, group of rules
-                              and actions, or domain by setting the severity level of the rules to
-                              `off`. This option takes precedence over `--only`.
+        --skip=<GROUP|RULE|DOMAIN|ACTION|PLUGIN>  Skip the given lint rule, assist action, group of
+                              rules and actions, or domain by setting the severity level of the
+                              rules to `off`. This option takes precedence over `--only`. Use the
+                              `plugin` group to skip the analyzer plugins.
                               Example:
                               ```shell
-                              biome check --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
+                              biome check --skip=correctness/noUnusedVariables --skip=suspicious --skip=project --skip=plugin
                               ```
         --watch               Enables the watch mode to re-run the check automatically when any
                               non-excluded file in the workspace has changed.

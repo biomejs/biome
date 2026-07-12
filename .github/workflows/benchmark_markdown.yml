@@ -69,7 +69,7 @@ jobs:
           CARGO_BUILD_JOBS: 3
 
       - name: Run the benchmarks
-        uses: CodSpeedHQ/action@c145068895e045cc725ee76fcd2307624b65c3af # v4.17.5
+        uses: CodSpeedHQ/action@a4a36bb07c0638b0b4ca52bf1f3dad1b4289e52f # v4.18.1
         timeout-minutes: 50
         with:
           mode: simulation

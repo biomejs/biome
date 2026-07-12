@@ -34,13 +34,7 @@ MdDocument {
                             label: MdLinkLabel {
                                 content: MdInlineItemList [
                                     MdTextual {
-                                        value_token: MD_TEXTUAL_LITERAL@3..8 "valid" [] [],
-                                    },
-                                    MdTextual {
-                                        value_token: MD_TEXTUAL_LITERAL@8..9 "-" [] [],
-                                    },
-                                    MdTextual {
-                                        value_token: MD_TEXTUAL_LITERAL@9..14 "title" [] [],
+                                        value_token: MD_TEXTUAL_LITERAL@3..14 "valid-title" [] [],
                                     },
                                 ],
                             },
@@ -73,10 +67,7 @@ MdDocument {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@31..32 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@32..33 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@31..33 "  " [] [],
                                 },
                             ],
                         },
@@ -125,12 +116,8 @@ MdDocument {
               1: L_BRACK@2..3 "[" [] []
               2: MD_LINK_LABEL@3..14
                 0: MD_INLINE_ITEM_LIST@3..14
-                  0: MD_TEXTUAL@3..8
-                    0: MD_TEXTUAL_LITERAL@3..8 "valid" [] []
-                  1: MD_TEXTUAL@8..9
-                    0: MD_TEXTUAL_LITERAL@8..9 "-" [] []
-                  2: MD_TEXTUAL@9..14
-                    0: MD_TEXTUAL_LITERAL@9..14 "title" [] []
+                  0: MD_TEXTUAL@3..14
+                    0: MD_TEXTUAL_LITERAL@3..14 "valid-title" [] []
               3: R_BRACK@14..15 "]" [] []
               4: COLON@15..16 ":" [] []
               5: MD_LINK_DESTINATION@16..22
@@ -149,10 +136,8 @@ MdDocument {
               0: NEWLINE@30..31 "\n" [] []
             2: MD_CONTINUATION_INDENT@31..33
               0: MD_INDENT_TOKEN_LIST@31..33
-                0: MD_INDENT_TOKEN@31..32
-                  0: MD_INDENT_CHAR@31..32 " " [] []
-                1: MD_INDENT_TOKEN@32..33
-                  0: MD_INDENT_CHAR@32..33 " " [] []
+                0: MD_INDENT_TOKEN@31..33
+                  0: MD_INDENT_CHAR@31..33 "  " [] []
             3: MD_THEMATIC_BREAK_BLOCK@33..36
               0: MD_THEMATIC_BREAK_PART_LIST@33..36
                 0: MD_THEMATIC_BREAK_CHAR@33..34

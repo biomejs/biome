@@ -43,13 +43,13 @@ unicode-width                = { workspace = true }
 [dev-dependencies]
 biome_configuration  = { path = "../biome_configuration" }
 biome_formatter      = { path = "../biome_formatter", features = ["countme"] }
-biome_formatter_test = { path = "../biome_formatter_test" }
+biome_formatter_test = { path = "../biome_formatter_test", features = ["lang_js"] }
 biome_fs             = { path = "../biome_fs" }
 biome_js_factory     = { path = "../biome_js_factory" }
 biome_js_parser      = { path = "../biome_js_parser" }
 biome_parser         = { path = "../biome_parser" }
-biome_service        = { path = "../biome_service" }
-biome_test_utils     = { path = "../biome_test_utils" }
+biome_service        = { path = "../biome_service", features = ["lang_js"] }
+biome_test_utils     = { path = "../biome_test_utils", features = ["lang_js"] }
 countme              = { workspace = true, features = ["enable"] }
 criterion            = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 quickcheck           = { workspace = true }

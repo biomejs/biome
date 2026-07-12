@@ -204,3 +204,8 @@ async function asyncUnionBothReturns(b: boolean): Promise<string | null> {
 function partialAbsorbUnion(b: boolean): "a" | "b" | string | null { if (b) return "a"; return null; }
 
 function crossPrimitiveUnion(): "a" | string | 1 { return "a"; }
+
+function literalAssertionNarrows(b: boolean): string { if (b) return "a" as "a"; return "b" as "b"; }
+function satisfiesDoesNotWiden(b: boolean): string { if (b) return "a" satisfies string; return "b" satisfies string; }
+function doubleCastNarrows(b: boolean): string { if (b) return "a" as unknown as "a"; return "b" as unknown as "b"; }
+function singleAssertedBooleanLiteral(): boolean { return false as false; }

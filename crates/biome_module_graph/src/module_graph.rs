@@ -4,14 +4,8 @@
 //! This can be used by lint rules for things such as cycle detection, and
 //! detecting broken imports.
 //!
-//! Module info is stored as Salsa inputs in a `ProjectDatabase`. Query and
+//! Module info is stored as Salsa inputs in a `WorkspaceDb`. Query and
 //! traversal functions in this module accept `&dyn ModuleDb` to look up data.
-
-// Salsa's `#[salsa::input]` macro generates `use<...>` capture syntax that
-// clippy flags as redundant. We cannot suppress it on the struct itself because
-// the lint fires inside the macro expansion.
-#![allow(impl_trait_redundant_captures)]
-
 pub(crate) mod fs_proxy;
 
 use crate::css_module_info::{CssModuleInfo, CssModuleVisitor, SerializedCssModuleInfo};
@@ -20,7 +14,8 @@ use crate::html_module_info::{
 };
 use crate::path_info_cache::PathInfoCache;
 use crate::{
-    JsModuleInfo, ModuleDiagnostic, SerializedJsModuleInfo, js_module_info::JsModuleVisitor,
+    JsModuleInfo, ModuleDiagnostic, SerializedJsModuleInfo, TypeInferenceMode,
+    js_module_info::JsModuleVisitor,
 };
 use biome_css_syntax::AnyCssRoot;
 use biome_fs::BiomePath;
@@ -52,6 +47,31 @@ pub fn resolve_js_module(
     path_info_cache: &PathInfoCache,
     enable_type_inference: bool,
 ) -> (JsModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
+    let inference_mode = if enable_type_inference {
+        TypeInferenceMode::Complete
+    } else {
+        TypeInferenceMode::Disabled
+    };
+    resolve_js_module_with_inference_mode(
+        root,
+        path,
+        fs,
+        project_layout,
+        semantic_model,
+        path_info_cache,
+        inference_mode,
+    )
+}
+
+pub fn resolve_js_module_with_inference_mode(
+    root: AnyJsRoot,
+    path: &BiomePath,
+    fs: &dyn FsWithResolverProxy,
+    project_layout: &ProjectLayout,
+    semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
+    path_info_cache: &PathInfoCache,
+    inference_mode: TypeInferenceMode,
+) -> (JsModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
     path_info_cache.prepopulate_directory_path_info(fs, &[path]);
 
     let directory = path.parent().unwrap_or(path);
@@ -62,7 +82,7 @@ pub fn resolve_js_module(
         directory,
         &fs_proxy,
         semantic_model,
-        enable_type_inference,
+        inference_mode,
     );
 
     let module_info = visitor.collect_info();

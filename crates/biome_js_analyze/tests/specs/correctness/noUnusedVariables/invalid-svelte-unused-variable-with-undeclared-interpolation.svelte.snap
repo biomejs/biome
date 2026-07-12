@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-unused-variable-with-undeclared-interpolation.svelte
+---
+# Input
+```svelte
+<script lang="ts">
+let unused = 0;
+</script>
+
+<div style="top: {foo}px"></div>
+
+```
+
+# Diagnostics
+```
+invalid-svelte-unused-variable-with-undeclared-interpolation.svelte:2:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━
+
+  ! This variable unused is unused.
+  
+    1 │ <script lang="ts">
+  > 2 │ let unused = 0;
+      │     ^^^^^^
+    3 │ </script>
+    4 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend unused with an underscore.
+  
+    1 1 │   
+    2   │ - let·unused·=·0;
+      2 │ + let·_unused·=·0;
+    3 3 │   
+  
+
+```

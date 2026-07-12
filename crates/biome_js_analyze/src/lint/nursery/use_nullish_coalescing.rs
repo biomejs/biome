@@ -7,9 +7,10 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsExpression, JsAssignmentExpression, JsAssignmentOperator,
-    JsBinaryOperator, JsConditionalExpression, JsDoWhileStatement, JsForStatement,
-    JsIfStatement, JsLogicalExpression, JsLogicalOperator, JsParenthesizedExpression,
-    JsSyntaxKind, JsWhileStatement, OperatorPrecedence, T,
+    JsBinaryOperator, JsCallArgumentList, JsCallArguments, JsCallExpression,
+    JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement,
+    JsLogicalExpression, JsLogicalOperator, JsParenthesizedExpression, JsSyntaxKind,
+    JsWhileStatement, OperatorPrecedence, T,
 };
 use biome_js_type_info::{ConditionalType, TypeData};
 use biome_rowan::{
@@ -155,6 +156,71 @@ declare_lint_rule! {
     /// declare const b: string;
     /// declare let assigned: string | null;
     /// assigned ||= b && 'fallback';
+    /// ```
+    ///
+    /// ### ignoreBooleanCoercion
+    ///
+    /// Ignore `||` and `||=` used inside a `Boolean()` call, where coalescing on
+    /// falsy values is intentional. Default: `false`.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "ignoreBooleanCoercion": true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// `||` and `||=` outside a `Boolean()` call are still reported.
+    ///
+    /// ```ts,expect_diagnostic,use_options,file=invalid-boolean-coercion.ts
+    /// declare const maybeString: string | null;
+    /// const value = maybeString || 'default';
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// `||` and `||=` inside a `Boolean()` call are not reported.
+    ///
+    /// ```ts,use_options,file=valid-boolean-coercion.ts
+    /// declare const a: string | null;
+    /// declare const b: string;
+    /// const r = Boolean(a || b);
+    /// ```
+    ///
+    /// ### ignorePrimitives
+    ///
+    /// Ignore `||`, `||=`, and ternary expressions when every non-nullish variant
+    /// of the operand is a primitive the option opts out of. Use `true` to ignore
+    /// all primitives, or an object selecting `string`, `number`, `boolean`, or
+    /// `bigint`. Default: none.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "ignorePrimitives": { "string": true }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// Primitive kinds that are not opted out of are still reported.
+    ///
+    /// ```ts,expect_diagnostic,use_options,file=invalid-primitives.ts
+    /// declare const count: number | null;
+    /// const value = count || 0;
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// A `string` operand is not reported when `string` is ignored.
+    ///
+    /// ```ts,use_options,file=valid-primitives.ts
+    /// declare const name: string | null;
+    /// const value = name || 'default';
     /// ```
     ///
     pub UseNullishCoalescing {
@@ -399,10 +465,20 @@ fn run_logical_or(
         return None;
     }
 
+    if options.ignore_boolean_coercion()
+        && is_in_boolean_call_context(&AnyJsLogicalOrLikeExpression::from(logical.clone()))
+    {
+        return None;
+    }
+
     let left = logical.left().ok()?;
     let left_ty = ctx.type_of_expression(&left);
 
     if !is_possibly_nullish(&left_ty) {
+        return None;
+    }
+
+    if options.has_any_ignore_primitives() && should_ignore_for_primitives(options, &left_ty) {
         return None;
     }
 
@@ -432,6 +508,12 @@ fn run_logical_or_assignment(
         return None;
     }
 
+    if options.ignore_boolean_coercion()
+        && is_in_boolean_call_context(&AnyJsLogicalOrLikeExpression::from(assignment.clone()))
+    {
+        return None;
+    }
+
     let left = assignment.left().ok()?;
     let left_ty = match &left {
         AnyJsAssignmentPattern::AnyJsAssignment(assign) => {
@@ -443,6 +525,10 @@ fn run_logical_or_assignment(
     };
 
     if !is_possibly_nullish(&left_ty) {
+        return None;
+    }
+
+    if options.has_any_ignore_primitives() && should_ignore_for_primitives(options, &left_ty) {
         return None;
     }
 
@@ -477,6 +563,44 @@ fn is_possibly_nullish(ty: &biome_js_type_info::Type) -> bool {
     } else {
         ty.conditional_semantics().is_nullish()
     }
+}
+
+/// Returns `true` when every non-nullish variant of `ty` is a primitive that the
+/// configured `ignorePrimitives` option suppresses. A non-union type is never
+/// ignored here, since the diagnostic only fires once the operand is a nullish
+/// union in the first place.
+fn should_ignore_for_primitives(
+    options: &UseNullishCoalescingOptions,
+    ty: &biome_js_type_info::Type,
+) -> bool {
+    if !ty.is_union() {
+        return false;
+    }
+    ty.flattened_union_variants()
+        .filter(|variant| !variant.conditional_semantics().is_nullish())
+        .all(|variant| is_ignored_primitive(options, &variant))
+}
+
+/// Maps a resolved primitive (or primitive literal) type to its matching
+/// `ignorePrimitives` selector. Non-primitive types are never ignored.
+fn is_ignored_primitive(
+    options: &UseNullishCoalescingOptions,
+    ty: &biome_js_type_info::Type,
+) -> bool {
+    ty.resolved_data().is_some_and(|data| match data.as_raw_data() {
+        TypeData::String => options.should_ignore_primitive_string(),
+        TypeData::Number => options.should_ignore_primitive_number(),
+        TypeData::Boolean => options.should_ignore_primitive_boolean(),
+        TypeData::BigInt => options.should_ignore_primitive_bigint(),
+        TypeData::Literal(literal) => match literal.as_ref() {
+            biome_js_type_info::Literal::String(_) => options.should_ignore_primitive_string(),
+            biome_js_type_info::Literal::Number(_) => options.should_ignore_primitive_number(),
+            biome_js_type_info::Literal::Boolean(_) => options.should_ignore_primitive_boolean(),
+            biome_js_type_info::Literal::BigInt(_) => options.should_ignore_primitive_bigint(),
+            _ => false,
+        },
+        _ => false,
+    })
 }
 
 fn is_safe_syntax_context_for_replacement(logical: &JsLogicalExpression) -> bool {
@@ -606,6 +730,30 @@ fn operand_reaches_logical_and(operand: SyntaxResult<AnyJsExpression>) -> bool {
     })
 }
 
+/// Returns `true` when the `||`/`||=` expression is boolean-coerced by an
+/// enclosing `Boolean(...)` call, where coalescing on falsy values is the
+/// intended behavior.
+///
+/// It skips parenthesized and logical-expression ancestors (both `||` and `&&`,
+/// since the coerced value still flows into the call) so that
+/// `Boolean(a || b || c)` and `Boolean(x && (a || b))` are both treated as
+/// coerced, then inspects the first ancestor that is neither. That ancestor must
+/// be the argument list of a `Boolean(...)` call for the expression to be
+/// considered coerced.
+fn is_in_boolean_call_context(node: &AnyJsLogicalOrLikeExpression) -> bool {
+    node.syntax()
+        .ancestors()
+        .skip(1)
+        .find(|ancestor| {
+            !(JsParenthesizedExpression::can_cast(ancestor.kind())
+                || JsLogicalExpression::can_cast(ancestor.kind()))
+        })
+        .and_then(JsCallArgumentList::cast)
+        .and_then(|list| list.parent::<JsCallArguments>())
+        .and_then(|args| args.parent::<JsCallExpression>())
+        .is_some_and(|call| call.has_callee("Boolean"))
+}
+
 fn is_in_test_position(logical: &JsLogicalExpression) -> bool {
     let logical_range = logical.syntax().text_trimmed_range();
 
@@ -653,6 +801,14 @@ fn run_ternary(
 
     let (checked_expr, fallback_expr, is_positive, check_kind) =
         check_ternary_nullish_pattern(&test, &consequent, &alternate)?;
+
+    let options = ctx.options();
+    if options.has_any_ignore_primitives() {
+        let checked_ty = ctx.type_of_expression(&checked_expr);
+        if should_ignore_for_primitives(options, &checked_ty) {
+            return None;
+        }
+    }
 
     // The fix is unsafe when the checked expression contains calls or `new`, because
     // the ternary evaluates it twice (test + branch) while `??` evaluates it once.

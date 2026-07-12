@@ -1,4 +1,5 @@
 pub mod builder;
+pub mod db;
 pub mod model;
 pub mod specificity;
 
@@ -74,14 +75,8 @@ mod tests {
         let rule = rules.first().unwrap();
 
         assert_eq!(rule.declarations.len(), 2);
-        assert!(matches!(
-            rule.declarations[0].value(),
-            crate::model::CssPropertyInitialValue::Composes(_)
-        ));
-        assert!(matches!(
-            rule.declarations[1].value(),
-            crate::model::CssPropertyInitialValue::Composes(_)
-        ));
+        assert!(rule.declarations[0].value().is_composes());
+        assert!(rule.declarations[1].value().is_composes());
     }
 
     #[test]

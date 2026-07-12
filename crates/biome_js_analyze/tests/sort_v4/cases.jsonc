@@ -112,6 +112,22 @@
 	"p-4 bg-linear-to-r from-blue-500 to-purple-500 m-2",         // linear gradient with surrounding spacing
 	"mask-linear-to-75% mask-linear-from-25%",                    // mask gradient stops
 
+	// ─── important suffix ──────────────────────────────────────────
+	// `flex!` sorts exactly where `flex` does; an exact-key tie breaks
+	// plain-first. Expected order cross-checked against
+	// prettier-plugin-tailwindcss.
+
+	"px-2! flex p-4",               // position-neutral: sorts as px-2
+	"underline flex!",              // jumps ahead with its utility
+	"flex! flex",                   // twin tie: plain first
+	"p-4! p-4",                     // twin tie: plain first even from behind
+	"w-1/2! flex",                  // ratio value + important
+	"bg-red-500! flex p-4",         // theme value + important
+	"flex! block",                  // static bucket + important
+	"[display:block]! [color:red]", // arbitrary candidate + important
+	"mt-4 -mt-2!",                  // negative + important
+	"not-a-class! flex",            // unknown base stays front even with `!`
+
 	// ─── real-world strings (shadcn/ui v4, MIT) ─────────────────────
 	// Inputs scrambled; output captured by snapshot.
 	// Source: github.com/shadcn-ui/ui registry/new-york-v4.

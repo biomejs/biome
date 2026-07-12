@@ -3,14 +3,15 @@ use biome_analyze::{
     ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
 use biome_html_syntax::{HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
-use biome_module_graph::ProjectDatabase;
+use biome_module_graph::ModuleDb;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::AstNode;
+use std::rc::Rc;
 use std::sync::Arc;
 
 /// Service providing access to the module database for HTML lint rules.
 #[derive(Clone)]
-pub struct HtmlDbService(ProjectDatabase, Arc<ProjectLayout>);
+pub struct HtmlDbService(Rc<dyn ModuleDb>, Arc<ProjectLayout>);
 
 impl std::fmt::Debug for HtmlDbService {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -19,8 +20,8 @@ impl std::fmt::Debug for HtmlDbService {
 }
 
 impl HtmlDbService {
-    pub fn db(&self) -> &ProjectDatabase {
-        &self.0
+    pub fn db(&self) -> &dyn ModuleDb {
+        self.0.as_ref()
     }
 
     pub fn project_layout(&self) -> &ProjectLayout {
@@ -34,7 +35,7 @@ impl FromServices for HtmlDbService {
         _rule_metadata: &RuleMetadata,
         services: &ServiceBag,
     ) -> Result<Self, ServicesDiagnostic> {
-        let module_db: &ProjectDatabase = services
+        let module_db: &Rc<dyn ModuleDb> = services
             .get_service()
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["ModuleDb"]))?;
 

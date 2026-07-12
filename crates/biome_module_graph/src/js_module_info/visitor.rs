@@ -15,7 +15,8 @@ use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::{
     JsImport, JsImportPhase, JsModuleInfo, JsReexport, SUPPORTED_EXTENSIONS,
-    js_module_info::collector::JsCollectedExport, module_graph::ModuleGraphFsProxy,
+    js_module_info::collector::{JsCollectedExport, TypeInferenceMode},
+    module_graph::ModuleGraphFsProxy,
 };
 
 use super::{ResolvedPath, collector::JsModuleInfoCollector};
@@ -34,7 +35,7 @@ pub(crate) struct JsModuleVisitor<'a> {
     directory: &'a Utf8Path,
     fs_proxy: &'a ModuleGraphFsProxy<'a>,
     semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
-    infer_types: bool,
+    inference_mode: TypeInferenceMode,
 }
 
 impl<'a> JsModuleVisitor<'a> {
@@ -44,7 +45,7 @@ impl<'a> JsModuleVisitor<'a> {
         directory: &'a Utf8Path,
         fs_proxy: &'a ModuleGraphFsProxy,
         semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
-        infer_types: bool,
+        inference_mode: TypeInferenceMode,
     ) -> Self {
         Self {
             root,
@@ -52,7 +53,7 @@ impl<'a> JsModuleVisitor<'a> {
             directory,
             fs_proxy,
             semantic_model,
-            infer_types,
+            inference_mode,
         }
     }
 
@@ -77,7 +78,7 @@ impl<'a> JsModuleVisitor<'a> {
             }
         }
 
-        JsModuleInfo::new(collector, self.semantic_model, self.infer_types)
+        JsModuleInfo::new(collector, self.semantic_model, self.inference_mode)
     }
 
     /// Collects static CSS class references from JSX `class` and `className`
@@ -261,22 +262,34 @@ impl<'a> JsModuleVisitor<'a> {
         node: &AnyJsExportDefaultDeclaration,
         collector: &mut JsModuleInfoCollector,
     ) -> Option<()> {
-        let name = match &node {
+        let name = match node {
             AnyJsExportDefaultDeclaration::JsClassExportDefaultDeclaration(node) => {
-                node.id().and_then(get_name)?
+                node.id().and_then(get_name)
             }
             AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(node) => {
-                node.id().and_then(get_name)?
+                node.id().and_then(get_name)
             }
             AnyJsExportDefaultDeclaration::TsDeclareFunctionExportDefaultDeclaration(node) => {
-                node.id().and_then(get_name)?
+                node.id().and_then(get_name)
             }
             AnyJsExportDefaultDeclaration::TsInterfaceDeclaration(node) => {
-                node.id().ok().and_then(get_ts_name)?
+                node.id().ok().and_then(get_ts_name)
             }
         };
 
-        collector.register_export_with_name("default", name);
+        if let Some(name) = name {
+            collector.register_export_with_name("default", name);
+        } else if matches!(
+            node,
+            AnyJsExportDefaultDeclaration::JsClassExportDefaultDeclaration(_)
+                | AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(_)
+                | AnyJsExportDefaultDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
+        ) {
+            collector.register_default_export_declaration(node);
+        } else {
+            return None;
+        }
+
         Some(())
     }
 

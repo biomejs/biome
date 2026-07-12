@@ -41,10 +41,7 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@6..7 "\n" [] [],
                                 },
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@7..8 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@8..9 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@7..9 "  " [] [],
                                 },
                                 MdReferenceLink {
                                     l_brack_token: L_BRACK@9..10 "[" [] [],
@@ -57,10 +54,7 @@ MdDocument {
                                     label: missing (optional),
                                 },
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@14..15 ":" [] [],
-                                },
-                                MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@15..21 " /path" [] [],
+                                    value_token: MD_TEXTUAL_LITERAL@14..21 ": /path" [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@21..22 "\n" [] [],
@@ -156,22 +150,18 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@2..6 "text" [] []
                 1: MD_TEXTUAL@6..7
                   0: MD_TEXTUAL_LITERAL@6..7 "\n" [] []
-                2: MD_INDENT_TOKEN@7..8
-                  0: MD_INDENT_CHAR@7..8 " " [] []
-                3: MD_INDENT_TOKEN@8..9
-                  0: MD_INDENT_CHAR@8..9 " " [] []
-                4: MD_REFERENCE_LINK@9..14
+                2: MD_INDENT_TOKEN@7..9
+                  0: MD_INDENT_CHAR@7..9 "  " [] []
+                3: MD_REFERENCE_LINK@9..14
                   0: L_BRACK@9..10 "[" [] []
                   1: MD_INLINE_ITEM_LIST@10..13
                     0: MD_TEXTUAL@10..13
                       0: MD_TEXTUAL_LITERAL@10..13 "foo" [] []
                   2: R_BRACK@13..14 "]" [] []
                   3: (empty)
-                5: MD_TEXTUAL@14..15
-                  0: MD_TEXTUAL_LITERAL@14..15 ":" [] []
-                6: MD_TEXTUAL@15..21
-                  0: MD_TEXTUAL_LITERAL@15..21 " /path" [] []
-                7: MD_TEXTUAL@21..22
+                4: MD_TEXTUAL@14..21
+                  0: MD_TEXTUAL_LITERAL@14..21 ": /path" [] []
+                5: MD_TEXTUAL@21..22
                   0: MD_TEXTUAL_LITERAL@21..22 "\n" [] []
     1: MD_NEWLINE@22..23
       0: NEWLINE@22..23 "\n" [] []

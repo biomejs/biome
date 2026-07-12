@@ -101,16 +101,10 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@80..106 "Asterisk after space: foo " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@106..107 "*" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@106..111 "* bar" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@107..111 " bar" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@111..112 "*" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@112..135 " should not be emphasis" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@111..135 "* should not be emphasis" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@135..136 "\n" [] [],
@@ -123,28 +117,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@137..162 "Underscore intraword: foo" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@162..163 "_" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@163..166 "bar" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@166..167 "_" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@167..171 "baz " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@171..172 "(" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@172..184 "not emphasis" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@184..185 ")" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@137..185 "Underscore intraword: foo_bar_baz (not emphasis)" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@185..186 "\n" [] [],
@@ -257,37 +230,19 @@ MdDocument {
       0: MD_INLINE_ITEM_LIST@80..136
         0: MD_TEXTUAL@80..106
           0: MD_TEXTUAL_LITERAL@80..106 "Asterisk after space: foo " [] []
-        1: MD_TEXTUAL@106..107
-          0: MD_TEXTUAL_LITERAL@106..107 "*" [] []
-        2: MD_TEXTUAL@107..111
-          0: MD_TEXTUAL_LITERAL@107..111 " bar" [] []
-        3: MD_TEXTUAL@111..112
-          0: MD_TEXTUAL_LITERAL@111..112 "*" [] []
-        4: MD_TEXTUAL@112..135
-          0: MD_TEXTUAL_LITERAL@112..135 " should not be emphasis" [] []
-        5: MD_TEXTUAL@135..136
+        1: MD_TEXTUAL@106..111
+          0: MD_TEXTUAL_LITERAL@106..111 "* bar" [] []
+        2: MD_TEXTUAL@111..135
+          0: MD_TEXTUAL_LITERAL@111..135 "* should not be emphasis" [] []
+        3: MD_TEXTUAL@135..136
           0: MD_TEXTUAL_LITERAL@135..136 "\n" [] []
     5: MD_NEWLINE@136..137
       0: NEWLINE@136..137 "\n" [] []
     6: MD_PARAGRAPH@137..186
       0: MD_INLINE_ITEM_LIST@137..186
-        0: MD_TEXTUAL@137..162
-          0: MD_TEXTUAL_LITERAL@137..162 "Underscore intraword: foo" [] []
-        1: MD_TEXTUAL@162..163
-          0: MD_TEXTUAL_LITERAL@162..163 "_" [] []
-        2: MD_TEXTUAL@163..166
-          0: MD_TEXTUAL_LITERAL@163..166 "bar" [] []
-        3: MD_TEXTUAL@166..167
-          0: MD_TEXTUAL_LITERAL@166..167 "_" [] []
-        4: MD_TEXTUAL@167..171
-          0: MD_TEXTUAL_LITERAL@167..171 "baz " [] []
-        5: MD_TEXTUAL@171..172
-          0: MD_TEXTUAL_LITERAL@171..172 "(" [] []
-        6: MD_TEXTUAL@172..184
-          0: MD_TEXTUAL_LITERAL@172..184 "not emphasis" [] []
-        7: MD_TEXTUAL@184..185
-          0: MD_TEXTUAL_LITERAL@184..185 ")" [] []
-        8: MD_TEXTUAL@185..186
+        0: MD_TEXTUAL@137..185
+          0: MD_TEXTUAL_LITERAL@137..185 "Underscore intraword: foo_bar_baz (not emphasis)" [] []
+        1: MD_TEXTUAL@185..186
           0: MD_TEXTUAL_LITERAL@185..186 "\n" [] []
     7: MD_NEWLINE@186..187
       0: NEWLINE@186..187 "\n" [] []

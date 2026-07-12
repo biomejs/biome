@@ -413,7 +413,7 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
     let formatted = format_node(
         JsFormatOptions::new(JsFileSource::ts()),
         module.syntax(),
-        false,
+        vec![],
     )
     .unwrap();
     let printed = formatted.print().unwrap();

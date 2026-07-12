@@ -6,7 +6,7 @@ use crate::analyzer::assist::Actions;
 pub use crate::analyzer::linter::*;
 use crate::analyzer::presets::PresetConfig;
 use biome_analyze::options::RuleOptions;
-use biome_analyze::{FixKind, Rule, RuleCategory, RuleDomain, RuleFilter};
+use biome_analyze::{FixKind, PLUGIN_GROUP, Rule, RuleCategory, RuleDomain, RuleFilter};
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext, Merge,
 };
@@ -571,6 +571,7 @@ where
 pub enum AnalyzerSelector {
     Rule(RuleSelector),
     Domain(DomainSelector),
+    Plugin,
 }
 
 impl AnalyzerSelector {
@@ -581,6 +582,7 @@ impl AnalyzerSelector {
         match self {
             Self::Rule(rule) => rule.match_rule::<R>(),
             Self::Domain(domain) => domain.match_rule::<R>(),
+            Self::Plugin => false,
         }
     }
 }
@@ -608,6 +610,7 @@ impl Display for AnalyzerSelector {
         match self {
             Self::Rule(group) => Display::fmt(group, f),
             Self::Domain(domain) => Display::fmt(domain, f),
+            Self::Plugin => f.write_str(PLUGIN_GROUP),
         }
     }
 }
@@ -616,6 +619,23 @@ impl FromStr for AnalyzerSelector {
     type Err = &'static str;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // The reserved `plugin` group selects every analyzer plugin. Accept `plugin` and,
+        // for parity with the rule syntax, the `plugin/plugin` alias (each optionally with
+        // a `lint/` prefix). Plugins have no per-instance identity, so any other
+        // `plugin/<name>` is rejected.
+        let plugin_selector = s.strip_prefix("lint/").unwrap_or(s);
+        if plugin_selector == PLUGIN_GROUP || plugin_selector == "plugin/plugin" {
+            return Ok(Self::Plugin);
+        }
+        if plugin_selector
+            .strip_prefix(PLUGIN_GROUP)
+            .is_some_and(|rest| rest.starts_with('/'))
+        {
+            return Err(
+                "Per-plugin selection is not supported. Use `plugin` to target all plugins.",
+            );
+        }
+
         RuleSelector::from_str(s)
             .map(Self::Rule)
             .or(DomainSelector::from_str(s).map(Self::Domain))
@@ -628,6 +648,7 @@ impl serde::Serialize for AnalyzerSelector {
         match self {
             Self::Rule(rule) => rule.serialize(serializer),
             Self::Domain(domain) => domain.serialize(serializer),
+            Self::Plugin => serializer.serialize_str(PLUGIN_GROUP),
         }
     }
 }
@@ -1260,6 +1281,34 @@ mod test {
         assert_eq!(
             RuleSelector::from_str("assist/source/useSortedKeys").unwrap(),
             RuleSelector::Rule("source", "useSortedKeys")
+        );
+    }
+
+    #[test]
+    fn parses_plugin_selector() {
+        use crate::analyzer::AnalyzerSelector;
+
+        for selector in [
+            "plugin",
+            "lint/plugin",
+            "plugin/plugin",
+            "lint/plugin/plugin",
+        ] {
+            assert_eq!(
+                AnalyzerSelector::from_str(selector).unwrap(),
+                AnalyzerSelector::Plugin,
+                "{selector} should parse as the plugin selector"
+            );
+        }
+    }
+
+    #[test]
+    fn rejects_per_plugin_selector() {
+        use crate::analyzer::AnalyzerSelector;
+
+        assert_eq!(
+            AnalyzerSelector::from_str("plugin/foo"),
+            Err("Per-plugin selection is not supported. Use `plugin` to target all plugins.")
         );
     }
 }

@@ -23,19 +23,15 @@ mapping: !!map
 +++ Biome
 @@ -1,6 +1,8 @@
 -sequence: !!seq
--  - entry
--  - !!seq
--    - nested
--mapping: !!map
--  foo: bar
 +sequence:
 +  !!seq
-+- entry
-+- !!seq
-+ - nested
+   - entry
+   - !!seq
+     - nested
+-mapping: !!map
 +mapping:
 +  !!map
-+ foo: bar
+   foo: bar
 ```
 
 # Output
@@ -43,10 +39,10 @@ mapping: !!map
 ```yml
 sequence:
   !!seq
-- entry
-- !!seq
- - nested
+  - entry
+  - !!seq
+    - nested
 mapping:
   !!map
- foo: bar
+  foo: bar
 ```

@@ -1,11 +1,11 @@
 mod visitor;
 
 use crate::css_module_info::{CssClassDefinition, CssClassReference};
-use biome_css_syntax::AnyCssRoot;
+use biome_css_syntax::{AnyCssRoot, TextRange};
 use biome_js_syntax::AnyJsRoot;
 use biome_languages::CssFileSource;
 use biome_resolver::ResolvedPath;
-use biome_rowan::{Text, TextSize};
+use biome_rowan::{Text, TextSize, TokenText};
 use indexmap::IndexMap;
 use indexmap::IndexSet;
 use std::collections::BTreeSet;
@@ -124,6 +124,17 @@ pub struct HtmlModuleInfoInner {
 
     /// Resolved paths of JS/TS modules imported from dynamic imports.
     pub dynamic_import_paths: IndexMap<Text, ResolvedPath>,
+}
+
+impl HtmlModuleInfoInner {
+    /// Returns CSS classes defined in `global` definitions
+    pub(crate) fn get_global_styles(&self) -> IndexMap<TextRange, TokenText> {
+        self.style_classes
+            .iter()
+            .filter(|declaration| declaration.applicability.is_global())
+            .map(|c| (c.range, c.name.clone()))
+            .collect()
+    }
 }
 
 #[derive(Debug)]

@@ -1,0 +1,40 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+assertion_line: 486
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export const values = [1, 2] as const;
+export const text = values + "!";
+```
+
+## Inferred types
+
+```
+Binding values "values" => [number: 1,
+number: 2]
+
+Expression "[1, 2]" => [number: 1,
+number: 2]
+
+Expression "[1, 2] as const" => [number: 1,
+number: 2]
+
+Expression "1" => number: 1
+
+Expression "2" => number: 2
+
+Binding text "text" => string
+
+Expression "values" => [number: 1,
+number: 2]
+
+Expression "values + \"!\"" => string
+
+Expression "\"!\"" => string: !
+```

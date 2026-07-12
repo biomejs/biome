@@ -5,3 +5,5 @@
 
 <!-- valid tristate -->
 <span aria-checked="mixed">some text</span>
+
+<div role="grid" aria-rowcount={count}></div>

@@ -12,9 +12,17 @@ declare_lint_rule! {
     /// Enforce valid `v-on` directives with proper arguments, modifiers, and handlers.
     ///
     /// This rule reports v-on directives in the following cases:
-    /// - The directive does not have an event name. E.g. `<div v-on="foo"></div>`
+    /// - The directive has neither an event name nor a value (an arg-less
+    ///   `v-on` with a value is the
+    ///   [object syntax](https://vuejs.org/api/built-in-directives.html#v-on),
+    ///   e.g. `<div v-on="$listeners"></div>`, which is valid).
     /// - The directive has invalid modifiers. E.g. `<div v-on:click.bogus="foo"></div>`
-    /// - The directive is missing a handler expression. E.g. `<div v-on:click></div>`
+    /// - The directive is missing a handler expression, **unless one of the
+    ///   [verb modifiers](https://vuejs.org/guide/essentials/event-handling.html#event-modifiers)
+    ///   (`stop`, `prevent`) is present**. The verb modifiers carry an intrinsic
+    ///   side effect (`event.stopPropagation()` / `event.preventDefault()`) and
+    ///   are valid Vue syntax without a handler. E.g. `<div v-on:click></div>`
+    ///   is invalid but `<div @click.stop></div>` is valid.
     ///
     /// ## Examples
     ///
@@ -28,6 +36,10 @@ declare_lint_rule! {
     ///
     /// ```vue
     /// <Foo v-on:click="foo" />
+    /// ```
+    ///
+    /// ```vue
+    /// <div @click.stop></div>
     /// ```
     ///
     pub UseVueValidVOn {
@@ -59,24 +71,28 @@ impl Rule for UseVueValidVOn {
 
         match node {
             AnyVueDirective::VueDirective(vue_directive) => {
-                if vue_directive.name_token().ok()?.text_trimmed() != "v-on" {
+                if !vue_directive.is_event_listener() {
                     return None;
                 }
 
-                // Check for missing event name
-                if vue_directive.arg().is_none() {
+                // Check for missing event name. An arg-less `v-on` is the
+                // object syntax (`v-on="$listeners"`); only flag when there
+                // is also no value to spread.
+                if vue_directive.arg().is_none() && vue_directive.initializer().is_none() {
                     return Some(ViolationKind::MissingEventName);
                 }
 
+                let modifiers = vue_directive.modifiers();
+
                 // Check for invalid modifiers
                 if let Some(invalid_range) =
-                    find_invalid_modifiers(&vue_directive.modifiers(), options.modifiers.as_ref())
+                    find_invalid_modifiers(&modifiers, options.modifiers.as_ref())
                 {
                     return Some(ViolationKind::InvalidModifier(invalid_range));
                 }
 
                 // Check for missing handler
-                if vue_directive.initializer().is_none() {
+                if vue_directive.initializer().is_none() && !has_verb_modifier(&modifiers) {
                     return Some(ViolationKind::MissingHandler);
                 }
 
@@ -85,15 +101,17 @@ impl Rule for UseVueValidVOn {
             AnyVueDirective::VueVOnShorthandDirective(dir) => {
                 // Shorthand always has an argument (parser enforces this)
 
+                let modifiers = dir.modifiers();
+
                 // Check for invalid modifiers
                 if let Some(invalid_range) =
-                    find_invalid_modifiers(&dir.modifiers(), options.modifiers.as_ref())
+                    find_invalid_modifiers(&modifiers, options.modifiers.as_ref())
                 {
                     return Some(ViolationKind::InvalidModifier(invalid_range));
                 }
 
                 // Check for missing handler
-                if dir.initializer().is_none() {
+                if dir.initializer().is_none() && !has_verb_modifier(&modifiers) {
                     return Some(ViolationKind::MissingHandler);
                 }
 
@@ -161,7 +179,7 @@ fn find_invalid_modifiers(
 ) -> Option<TextRange> {
     for modifier in modifiers {
         if let Ok(modifier_token) = modifier.modifier_token() {
-            let modifier_text = modifier_token.text();
+            let modifier_text = modifier_token.text_trimmed();
             if modifier_text.len() == 1 {
                 // allow single character modifiers (e.g. key codes)
                 continue;
@@ -186,6 +204,29 @@ fn find_invalid_modifiers(
     }
     None
 }
+
+/// Returns `true` if any of the modifiers is a "verb" modifier
+/// (`.stop` or `.prevent`). Verb modifiers carry an intrinsic side
+/// effect (`event.stopPropagation()` / `event.preventDefault()`) and
+/// make the directive valid even without a handler expression.
+///
+/// This mirrors `eslint-plugin-vue`'s `VERB_MODIFIERS` set, which the
+/// upstream `valid-v-on` rule uses for the same purpose.
+///
+/// See <https://vuejs.org/guide/essentials/event-handling.html#event-modifiers>.
+fn has_verb_modifier(modifiers: &VueModifierList) -> bool {
+    for modifier in modifiers {
+        if modifier
+            .modifier_token()
+            .is_ok_and(|t| VERB_MODIFIERS.contains(t.text_trimmed()))
+        {
+            return true;
+        }
+    }
+    false
+}
+
+static VERB_MODIFIERS: phf::Set<&'static str> = phf_set! { "stop", "prevent" };
 
 static VALID_MODIFIERS: phf::Set<&'static str> = phf_set! {
     "stop", "prevent", "capture", "self", "ctrl", "shift", "alt", "meta", "native", "once", "left",

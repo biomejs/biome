@@ -33,7 +33,7 @@ impl FormatNodeRule<MdLinkReferenceDefinition> for FormatMdLinkReferenceDefiniti
         )?;
 
         if let Some(title) = title {
-            write!(f, [space(), title.format()])?;
+            write!(f, [title.format()])?;
         }
 
         Ok(())

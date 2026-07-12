@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::utils::comment_trivia::is_leading_comment_on_node;
 use crate::utils::scss_expression::is_self_breaking_value;
 use crate::utils::scss_map_layout::is_direct_each_value_map;
 use biome_css_syntax::{
@@ -105,17 +106,7 @@ fn has_source_leading_comment(pair: &ScssMapExpressionPair, f: &CssFormatter) ->
     f.comments()
         .leading_comments(pair.syntax())
         .iter()
-        .any(|comment| {
-            let comment_piece = comment.piece().as_piece();
-
-            pair.syntax().first_token().is_some_and(|token| {
-                token == comment_piece.token()
-                    && token
-                        .leading_trivia()
-                        .text_range()
-                        .contains_range(comment_piece.text_range())
-            })
-        })
+        .any(|comment| is_leading_comment_on_node(pair.syntax(), comment.piece()))
 }
 
 /// Returns `true` for a last value that breaks itself, e.g. `key: (a: b)`.

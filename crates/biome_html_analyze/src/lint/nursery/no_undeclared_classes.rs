@@ -6,7 +6,7 @@ use biome_html_syntax::{
     HtmlSelfClosingElement,
 };
 use biome_module_graph::{
-    ImportTreeDisplay, ImportTreeNode, ModuleDb, build_import_tree_for_html,
+    ImportTreeDisplay, ImportTreeNode, build_import_tree_for_html,
     traverse_import_tree_for_html_classes,
 };
 use biome_rowan::{AstNode, TextRange, TextSize};

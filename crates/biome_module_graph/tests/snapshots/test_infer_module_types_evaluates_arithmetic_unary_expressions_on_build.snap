@@ -1,0 +1,56 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export const numeric = 1 + 2;
+export const textual = "value" + numeric;
+export const unknown = notDeclared + alsoMissing;
+export const negative = -numeric;
+export const inverted = ~numeric;
+```
+
+## Inferred types
+
+```
+Binding numeric "numeric" => number
+
+Expression "1" => number: 1
+
+Expression "1 + 2" => number
+
+Expression "2" => number: 2
+
+Binding textual "textual" => string
+
+Expression "\"value\"" => string: value
+
+Expression "\"value\" + numeric" => string
+
+Expression "numeric" => number
+
+Binding unknown "unknown" => unknown
+
+Expression "notDeclared" => unknown
+
+Expression "notDeclared + alsoMissing" => unknown
+
+Expression "alsoMissing" => unknown
+
+Binding negative "negative" => number
+
+Expression "-numeric" => number
+
+Expression "numeric" => number
+
+Binding inverted "inverted" => number
+
+Expression "~numeric" => number
+
+Expression "numeric" => number
+```

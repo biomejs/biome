@@ -50,10 +50,7 @@ MdDocument {
                                         MdQuotePrefix {
                                             pre_marker_indent: MdQuoteIndentList [
                                                 MdQuoteIndent {
-                                                    md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@13..14 " " [] [],
-                                                },
-                                                MdQuoteIndent {
-                                                    md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@14..15 " " [] [],
+                                                    md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@13..15 "  " [] [],
                                                 },
                                             ],
                                             marker_token: R_ANGLE@15..16 ">" [] [],
@@ -70,10 +67,7 @@ MdDocument {
                                 MdQuotePrefix {
                                     pre_marker_indent: MdQuoteIndentList [
                                         MdQuoteIndent {
-                                            md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@24..25 " " [] [],
-                                        },
-                                        MdQuoteIndent {
-                                            md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@25..26 " " [] [],
+                                            md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@24..26 "  " [] [],
                                         },
                                     ],
                                     marker_token: R_ANGLE@26..27 ">" [] [],
@@ -85,10 +79,7 @@ MdDocument {
                                 MdQuotePrefix {
                                     pre_marker_indent: MdQuoteIndentList [
                                         MdQuoteIndent {
-                                            md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@28..29 " " [] [],
-                                        },
-                                        MdQuoteIndent {
-                                            md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@29..30 " " [] [],
+                                            md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@28..30 "  " [] [],
                                         },
                                     ],
                                     marker_token: R_ANGLE@30..31 ">" [] [],
@@ -167,10 +158,8 @@ MdDocument {
                       0: MD_HARD_LINE_LITERAL@10..13 "  \n" [] []
                     2: MD_QUOTE_PREFIX@13..17
                       0: MD_QUOTE_INDENT_LIST@13..15
-                        0: MD_QUOTE_INDENT@13..14
-                          0: MD_QUOTE_PRE_MARKER_INDENT@13..14 " " [] []
-                        1: MD_QUOTE_INDENT@14..15
-                          0: MD_QUOTE_PRE_MARKER_INDENT@14..15 " " [] []
+                        0: MD_QUOTE_INDENT@13..15
+                          0: MD_QUOTE_PRE_MARKER_INDENT@13..15 "  " [] []
                       1: R_ANGLE@15..16 ">" [] []
                       2: MD_QUOTE_POST_MARKER_SPACE@16..17 " " [] []
                     3: MD_TEXTUAL@17..21
@@ -179,20 +168,16 @@ MdDocument {
                       0: MD_HARD_LINE_LITERAL@21..24 "  \n" [] []
                 1: MD_QUOTE_PREFIX@24..27
                   0: MD_QUOTE_INDENT_LIST@24..26
-                    0: MD_QUOTE_INDENT@24..25
-                      0: MD_QUOTE_PRE_MARKER_INDENT@24..25 " " [] []
-                    1: MD_QUOTE_INDENT@25..26
-                      0: MD_QUOTE_PRE_MARKER_INDENT@25..26 " " [] []
+                    0: MD_QUOTE_INDENT@24..26
+                      0: MD_QUOTE_PRE_MARKER_INDENT@24..26 "  " [] []
                   1: R_ANGLE@26..27 ">" [] []
                   2: (empty)
                 2: MD_NEWLINE@27..28
                   0: NEWLINE@27..28 "\n" [] []
                 3: MD_QUOTE_PREFIX@28..32
                   0: MD_QUOTE_INDENT_LIST@28..30
-                    0: MD_QUOTE_INDENT@28..29
-                      0: MD_QUOTE_PRE_MARKER_INDENT@28..29 " " [] []
-                    1: MD_QUOTE_INDENT@29..30
-                      0: MD_QUOTE_PRE_MARKER_INDENT@29..30 " " [] []
+                    0: MD_QUOTE_INDENT@28..30
+                      0: MD_QUOTE_PRE_MARKER_INDENT@28..30 "  " [] []
                   1: R_ANGLE@30..31 ">" [] []
                   2: MD_QUOTE_POST_MARKER_SPACE@31..32 " " [] []
                 4: MD_PARAGRAPH@32..42

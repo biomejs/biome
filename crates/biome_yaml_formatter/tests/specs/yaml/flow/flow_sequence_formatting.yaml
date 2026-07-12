@@ -1,0 +1,10 @@
+formatted: [1, 'abc', "xyz", plain]
+unformatted: [  1  ,  'abc',"xyz"  , plain ]
+emptyLineFormatted: [
+  a,
+
+  b,
+]
+emptyLineUnformatted: [ a,
+
+b ]

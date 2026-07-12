@@ -16,7 +16,7 @@ expression: invalid.html
 ```
 invalid.html:3:2 lint/a11y/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The HTML element with the interactive role "button" is not focusable.
+  × The HTML element with the interactive role button is not focusable.
   
     1 │ <!-- should generate diagnostics -->
     2 │ <div>
@@ -25,7 +25,7 @@ invalid.html:3:2 lint/a11y/useFocusableInteractive ━━━━━━━━━�
     4 │ 	<div role="tab"></div>
     5 │ </div>
   
-  i A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "button".
+  i A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like button.
   
   i Add a tabindex attribute to make this element focusable.
   
@@ -35,7 +35,7 @@ invalid.html:3:2 lint/a11y/useFocusableInteractive ━━━━━━━━━�
 ```
 invalid.html:4:2 lint/a11y/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The HTML element with the interactive role "tab" is not focusable.
+  × The HTML element with the interactive role tab is not focusable.
   
     2 │ <div>
     3 │ 	<div role="button"></div>
@@ -44,7 +44,7 @@ invalid.html:4:2 lint/a11y/useFocusableInteractive ━━━━━━━━━�
     5 │ </div>
     6 │ 
   
-  i A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "tab".
+  i A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like tab.
   
   i Add a tabindex attribute to make this element focusable.
   

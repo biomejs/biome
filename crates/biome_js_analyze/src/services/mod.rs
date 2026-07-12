@@ -1,8 +1,7 @@
 pub mod aria;
 pub mod control_flow;
 pub mod database;
-pub mod embedded_bindings;
-pub mod embedded_value_references;
+pub mod embedded;
 pub mod manifest;
 pub mod semantic;
 pub mod semantic_class;

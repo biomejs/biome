@@ -1,0 +1,96 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/html/multiline-attribute.md
+---
+
+# Input
+
+```md
+<unknown title="line 1
+  line 2
+"></unknown>
+
+<div title="line 1
+  line 2
+"></div>
+
+- In list
+
+  - In list
+
+    <unknown title="line 1
+      line 2
+    "></unknown>
+
+    <div title="line 1
+      line 2
+    "></div>
+
+> in blockquote
+>
+> <unknown title="line 1
+>   line 2
+> "></unknown>
+>
+> <div title="line 1
+>   line 2
+> "></div>
+
+text <unknown title="line 1
+  line 2
+">text </unknown> text
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -7,7 +7,6 @@
+ "></div>
+ 
+ - In list
+-
+   - In list
+ 
+     <unknown title="line 1
+```
+
+# Output
+
+```md
+<unknown title="line 1
+  line 2
+"></unknown>
+
+<div title="line 1
+  line 2
+"></div>
+
+- In list
+  - In list
+
+    <unknown title="line 1
+      line 2
+    "></unknown>
+
+    <div title="line 1
+      line 2
+    "></div>
+
+> in blockquote
+>
+> <unknown title="line 1
+>   line 2
+> "></unknown>
+>
+> <div title="line 1
+>   line 2
+> "></div>
+
+text <unknown title="line 1
+  line 2
+">text </unknown> text
+```

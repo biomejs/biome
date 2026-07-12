@@ -18,11 +18,11 @@ info: yaml/flow-sequence/empty-item-colon.yml
 +++ Biome
 @@ -1 +1 @@
 -[: ]
-+[ : ]
++[:]
 ```
 
 # Output
 
 ```yml
-[ : ]
+[:]
 ```

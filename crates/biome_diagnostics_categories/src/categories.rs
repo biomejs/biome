@@ -237,6 +237,7 @@ define_categories! {
     "lint/nursery/noReactNativeLiteralColors": "https://biomejs.dev/linter/rules/no-react-native-literal-colors",
     "lint/nursery/noReactNativeRawText": "https://biomejs.dev/linter/rules/no-react-native-raw-text",
     "lint/nursery/noReactStringRefs": "https://biomejs.dev/linter/rules/no-react-string-refs",
+    "lint/nursery/noSvelteUnnecessaryStateWrap": "https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap",
     "lint/nursery/noTopLevelLiterals": "https://biomejs.dev/linter/rules/no-top-level-literals",
     "lint/nursery/noUndeclaredClasses": "https://biomejs.dev/linter/rules/no-undeclared-classes",
     "lint/nursery/noUnnecessaryTemplateExpression": "https://biomejs.dev/linter/rules/no-unnecessary-template-expression",

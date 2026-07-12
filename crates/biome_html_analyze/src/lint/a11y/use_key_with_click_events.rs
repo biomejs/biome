@@ -75,11 +75,7 @@ impl Rule for UseKeyWithClickEvents {
         let aria_roles = ctx.aria_roles();
 
         // Only flag elements that have an onclick attribute
-        if element.find_attribute_by_name("onclick").is_none()
-            && element.find_vue_event_handling_directive("click").is_none()
-        {
-            return None;
-        }
+        element.find_attribute_or_vue_event_binding("onclick")?;
 
         if element.is_custom_component() {
             return None;
@@ -92,22 +88,21 @@ impl Rule for UseKeyWithClickEvents {
         if !aria_roles.is_not_interactive_element(element) {
             let source_type = ctx.source_type::<HtmlFileSource>();
             if !is_html_tag(element, source_type, "a")
-                || element.find_attribute_by_name("href").is_some()
+                || element.find_attribute_or_vue_binding("href").is_some()
             {
                 return None;
             }
         }
 
         // Check for keyboard event handlers
-        if element.find_attribute_by_name("onkeydown").is_some()
+        if element
+            .find_attribute_or_vue_event_binding("onkeydown")
+            .is_some()
             || element
-                .find_vue_event_handling_directive("keydown")
+                .find_attribute_or_vue_event_binding("onkeyup")
                 .is_some()
-            || element.find_attribute_by_name("onkeyup").is_some()
-            || element.find_vue_event_handling_directive("keyup").is_some()
-            || element.find_attribute_by_name("onkeypress").is_some()
             || element
-                .find_vue_event_handling_directive("keypress")
+                .find_attribute_or_vue_event_binding("onkeypress")
                 .is_some()
         {
             return None;

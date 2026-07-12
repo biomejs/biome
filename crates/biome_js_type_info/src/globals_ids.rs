@@ -12,7 +12,7 @@ use crate::{ResolvedTypeId, TypeId, TypeMember, TypeMemberKind};
 use super::globals::GLOBAL_LEVEL;
 
 /// Compile-time guard for manifest length; ordering is checked by `manifest_names_match_id_name_constants`.
-const PREDEFINED_TYPE_COUNT: usize = 63;
+const PREDEFINED_TYPE_COUNT: usize = 65;
 
 /// Type ID that is known to index the predefined global resolver.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -265,11 +265,16 @@ predefined_globals! {
     (INSTANCEOF_ERROR_ID, INSTANCEOF_ERROR_ID_NAME, INSTANCEOF_ERROR_ID_GLOBAL_TYPE_ID, GLOBAL_INSTANCEOF_ERROR_ID, "instanceof Error", Helper),
     (ERROR_ID, ERROR_ID_NAME, ERROR_ID_GLOBAL_TYPE_ID, GLOBAL_ERROR_ID, "Error", ManualGlobal),
     (BOOLEAN_ID, BOOLEAN_ID_NAME, BOOLEAN_ID_GLOBAL_TYPE_ID, GLOBAL_BOOLEAN_ID, "boolean", Primitive),
+    (ERROR_CONSTRUCTOR_ID, ERROR_CONSTRUCTOR_ID_NAME, ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID, GLOBAL_ERROR_CONSTRUCTOR_ID, "Error.constructor", ManualSynthetic),
+    (ERROR_CALL_ID, ERROR_CALL_ID_NAME, ERROR_CALL_ID_GLOBAL_TYPE_ID, GLOBAL_ERROR_CALL_ID, "Error.call", ManualSynthetic),
 }
 
 #[cfg(test)]
 mod tests {
+    use std::borrow::Cow;
+
     use super::*;
+    use crate::{GlobalsResolver, TypeData, TypeResolver, Union};
 
     #[test]
     fn num_predefined_types_matches_manifest_len() {
@@ -351,6 +356,8 @@ mod tests {
             (INSTANCEOF_ERROR_ID, INSTANCEOF_ERROR_ID_NAME),
             (ERROR_ID, ERROR_ID_NAME),
             (BOOLEAN_ID, BOOLEAN_ID_NAME),
+            (ERROR_CONSTRUCTOR_ID, ERROR_CONSTRUCTOR_ID_NAME),
+            (ERROR_CALL_ID, ERROR_CALL_ID_NAME),
         ];
         assert_eq!(pairs.len(), NUM_PREDEFINED_TYPES);
         assert_eq!(pairs.len(), PREDEFINED_ID_ROWS.len());
@@ -439,6 +446,8 @@ mod tests {
             (GLOBAL_INSTANCEOF_ERROR_ID, INSTANCEOF_ERROR_ID),
             (GLOBAL_ERROR_ID, ERROR_ID),
             (GLOBAL_BOOLEAN_ID, BOOLEAN_ID),
+            (GLOBAL_ERROR_CONSTRUCTOR_ID, ERROR_CONSTRUCTOR_ID),
+            (GLOBAL_ERROR_CALL_ID, ERROR_CALL_ID),
         ];
         assert_eq!(pairs.len(), NUM_PREDEFINED_TYPES);
         for (resolved_id, id) in pairs {
@@ -452,13 +461,35 @@ mod tests {
     }
 
     #[test]
-    fn migrated_predefined_ids_require_structural_diff_harness() {
+    fn error_and_disposable_globals_are_migrated() {
         let migrated = crate::generated::global_types::MIGRATED_PREDEFINED_IDS;
+        assert_eq!(
+            migrated,
+            &[
+                DISPOSABLE_ID_GLOBAL_TYPE_ID,
+                DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID,
+                ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID,
+                ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
+                ERROR_ID_GLOBAL_TYPE_ID,
+                ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
+                ERROR_CALL_ID_GLOBAL_TYPE_ID,
+            ]
+        );
+    }
+
+    #[test]
+    fn optional_string_is_not_named_like_error_stack() {
+        let mut resolver = GlobalsResolver::default();
+        let optional_string = TypeData::Union(Box::new(Union(Box::new([
+            GLOBAL_STRING_ID.into(),
+            GLOBAL_UNDEFINED_ID.into(),
+        ]))));
+        let id = resolver.register_type(Cow::Owned(optional_string));
+
         assert!(
-            migrated.is_empty(),
-            "Non-empty MIGRATED_PREDEFINED_IDS ({} entries) requires the structural diff comparator: \
-             crates/biome_js_type_info/tests/generated_equivalence.rs + tests/fixtures/manual_globals.rs.",
-            migrated.len()
+            id.index() >= NUM_PREDEFINED_TYPES,
+            "generic optional string must not reuse predefined name {:?}",
+            global_type_name(id),
         );
     }
 

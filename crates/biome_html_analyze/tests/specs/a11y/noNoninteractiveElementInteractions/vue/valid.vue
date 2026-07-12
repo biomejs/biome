@@ -28,6 +28,9 @@
 <div role="menuitemradio" @click="() => { }"></div>
 <div role="option" @click="() => { }"></div>
 <div role="radio" @click="() => { }"></div>
+<!-- static Vue role bindings with interactive roles are valid -->
+<div :role="'button'" @click="() => { }"></div>
+<div v-bind:role="'checkbox'" @click="() => { }"></div>
 <div role="row" @click="() => { }"></div>
 <div role="scrollbar" @click="() => { }"></div>
 <div role="searchbox" @click="() => { }"></div>

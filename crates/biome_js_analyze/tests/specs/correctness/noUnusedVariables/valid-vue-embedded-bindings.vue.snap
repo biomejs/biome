@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
 expression: valid-vue-embedded-bindings.vue
 ---
 # Input
@@ -19,9 +20,9 @@ function reasonText() {
 
 
 <template>
-    <span>{hello}</span>
-    <span>{notDefined}</span>
-    <span>{greeting}</span>
+    <span>{{ hello }}</span>
+    <span>{{ notDefined }}</span>
+    <span>{{ greeting }}</span>
     <Component />
     <span class="dc-reason">{{ reasonText() }}</span>
 </template>

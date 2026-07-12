@@ -1,0 +1,13 @@
+.attribute-names[data-#{$name}=x] {}
+
+.attribute-modifier[title="x" #{$mod}] {}
+
+.pseudo-value:lang(#{$locale}) {}
+
+.nth:nth-child(#{$i}) {}
+
+%placeholder {}
+
+#{$tag} {}
+
+.button-#{$state} {}

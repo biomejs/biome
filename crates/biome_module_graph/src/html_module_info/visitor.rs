@@ -71,11 +71,7 @@ impl<'a> HtmlModuleVisitor<'a> {
                 continue;
             };
             if let Some(element) = HtmlElement::cast(node.clone()) {
-                self.visit_html_element(
-                    element,
-                    &mut referenced_classes,
-                    &mut imported_stylesheets,
-                );
+                self.visit_html_element(element, &mut referenced_classes);
             } else if let Some(element) = HtmlSelfClosingElement::cast(node) {
                 self.visit_self_closing_element(
                     element,
@@ -172,7 +168,6 @@ impl<'a> HtmlModuleVisitor<'a> {
         &self,
         element: HtmlElement,
         referenced_classes: &mut Vec<CssClassReference>,
-        _imported_stylesheets: &mut Vec<ResolvedPath>,
     ) {
         let Ok(opening) = element.opening_element() else {
             return;
@@ -241,7 +236,7 @@ impl<'a> HtmlModuleVisitor<'a> {
 
         let is_stylesheet = element
             .find_attribute_by_name("rel")
-            .and_then(|rel_attr| rel_attr.value())
+            .and_then(|rel_attr| rel_attr.as_static_value())
             .is_some_and(|rel_val| rel_val.text().eq_ignore_ascii_case("stylesheet"));
         if !is_stylesheet {
             return;
@@ -249,7 +244,7 @@ impl<'a> HtmlModuleVisitor<'a> {
 
         if let Some(href_value) = element
             .find_attribute_by_name("href")
-            .and_then(|href_attr| href_attr.value())
+            .and_then(|href_attr| href_attr.as_static_value())
         {
             let resolved = self.resolved_path_from_specifier(href_value.text());
             imported_stylesheets.push(resolved);

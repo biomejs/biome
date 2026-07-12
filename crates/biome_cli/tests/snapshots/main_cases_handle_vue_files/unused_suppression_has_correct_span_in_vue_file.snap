@@ -17,7 +17,7 @@ expression: redactor(content)
 
 ```vue
 <template>
-  <div>Hello</div>
+  <div>{{ mdiSquareOutline }}</div>
 </template>
 
 <script lang="ts" setup>

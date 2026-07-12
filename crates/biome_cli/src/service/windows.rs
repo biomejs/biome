@@ -34,7 +34,7 @@ pub(crate) fn enumerate_pipes() -> io::Result<impl Iterator<Item = (String, Utf8
             let entry = Utf8PathBuf::from_path_buf(entry.ok()?.path()).ok()?;
             let file_name = entry.file_name()?;
 
-            let version = file_name.strip_prefix("rome-service")?;
+            let version = file_name.strip_prefix("biome-service")?;
             if version.is_empty() {
                 Some((String::new(), entry))
             } else {

@@ -4,22 +4,23 @@ use crate::requests::syntax_tree::{SYNTAX_TREE_REQUEST, SyntaxTreePayload};
 use crate::session::{
     CapabilitySet, CapabilityStatus, ClientInformation, Session, SessionHandle, SessionKey,
 };
-use crate::utils::{into_lsp_error, panic_to_lsp_error};
+use crate::utils::{cancelled_to_lsp_error, into_lsp_error, panic_to_lsp_error};
 use crate::{handlers, requests};
 use biome_console::markup;
 use biome_diagnostics::panic::PanicError;
 use biome_fs::{ConfigName, MemoryFileSystem, OsFileSystem};
 use biome_resolver::FsWithResolverProxy;
+use biome_service::workspace::db::DbState;
 use biome_service::workspace::{
     CloseProjectParams, GritSearchQuery, RageEntry, RageParams, RageResult, ServiceNotification,
 };
-use biome_service::{WatcherInstruction, WorkspaceServer};
+use biome_service::{WatcherInstruction, Workspace, WorkspaceServer};
 use crossbeam::channel::{Sender, bounded};
 use futures::FutureExt;
 use futures::future::ready;
 use rustc_hash::FxHashMap;
 use serde_json::json;
-use std::panic::RefUnwindSafe;
+use std::panic::{AssertUnwindSafe, RefUnwindSafe};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use tokio::io::{AsyncRead, AsyncWrite};
@@ -44,6 +45,15 @@ pub struct LSPServer {
 
 impl RefUnwindSafe for LSPServer {}
 
+fn catch_lsp_operation<F, T>(operation: F) -> Result<Result<T, salsa::Cancelled>, PanicError>
+where
+    F: FnOnce() -> T,
+{
+    biome_diagnostics::panic::catch_unwind(AssertUnwindSafe(move || {
+        salsa::Cancelled::catch(AssertUnwindSafe(operation))
+    }))
+}
+
 impl LSPServer {
     fn new(
         session: SessionHandle,
@@ -61,8 +71,12 @@ impl LSPServer {
 
     async fn syntax_tree_request(&self, params: SyntaxTreePayload) -> LspResult<String> {
         let url = params.text_document.uri;
-        match requests::syntax_tree::syntax_tree(&self.session, &url) {
-            Ok(result) => Ok(result.unwrap_or_default()),
+        let result =
+            catch_lsp_operation(move || requests::syntax_tree::syntax_tree(&self.session, &url));
+        match result {
+            Ok(Ok(Ok(result))) => Ok(result.unwrap_or_default()),
+            Ok(Ok(Err(err))) => Err(into_lsp_error(err)),
+            Ok(Err(cancelled)) => Err(cancelled_to_lsp_error(cancelled)),
             Err(err) => Err(into_lsp_error(err)),
         }
     }
@@ -489,7 +503,7 @@ impl LanguageServer for LSPServer {
             {
                 let result = self
                     .session
-                    .workspace
+                    .workspace()
                     .close_project(CloseProjectParams { project_key })
                     .map_err(LspError::from);
 
@@ -509,23 +523,24 @@ impl LanguageServer for LSPServer {
     }
 
     async fn code_action(&self, params: CodeActionParams) -> LspResult<Option<CodeActionResponse>> {
-        let result = biome_diagnostics::panic::catch_unwind(move || {
-            handlers::analysis::code_actions(&self.session, params)
-        });
+        let result =
+            catch_lsp_operation(move || handlers::analysis::code_actions(&self.session, params));
 
-        self.map_op_error(result).await
+        match result {
+            Ok(Ok(result)) => self.map_op_error(Ok(result)).await,
+            Ok(Err(cancelled)) => Err(cancelled_to_lsp_error(cancelled)),
+            Err(err) => Err(into_lsp_error(err)),
+        }
     }
 
     async fn code_action_resolve(&self, params: CodeAction) -> LspResult<CodeAction> {
-        let result = biome_diagnostics::panic::catch_unwind(move || {
+        let result = catch_lsp_operation(move || {
             handlers::analysis::code_action_resolve(&self.session, params)
         });
 
         match result {
-            Ok(result) => match result {
-                Ok(action) => Ok(action),
-                Err(err) => Err(into_lsp_error(err)),
-            },
+            Ok(Ok(action)) => action.map_err(into_lsp_error),
+            Ok(Err(cancelled)) => Err(cancelled_to_lsp_error(cancelled)),
             Err(err) => Err(into_lsp_error(err)),
         }
     }
@@ -534,43 +549,57 @@ impl LanguageServer for LSPServer {
         &self,
         params: DocumentFormattingParams,
     ) -> LspResult<Option<Vec<TextEdit>>> {
-        let result = biome_diagnostics::panic::catch_unwind(move || {
-            handlers::formatting::format(&self.session, params)
-        });
+        let result =
+            catch_lsp_operation(move || handlers::formatting::format(&self.session, params));
 
-        self.map_op_error(result).await
+        match result {
+            Ok(Ok(result)) => self.map_op_error(Ok(result)).await,
+            Ok(Err(cancelled)) => Err(cancelled_to_lsp_error(cancelled)),
+            Err(err) => Err(into_lsp_error(err)),
+        }
     }
 
     async fn range_formatting(
         &self,
         params: DocumentRangeFormattingParams,
     ) -> LspResult<Option<Vec<TextEdit>>> {
-        let result = biome_diagnostics::panic::catch_unwind(move || {
-            handlers::formatting::format_range(&self.session, params)
-        });
-        self.map_op_error(result).await
+        let result =
+            catch_lsp_operation(move || handlers::formatting::format_range(&self.session, params));
+        match result {
+            Ok(Ok(result)) => self.map_op_error(Ok(result)).await,
+            Ok(Err(cancelled)) => Err(cancelled_to_lsp_error(cancelled)),
+            Err(err) => Err(into_lsp_error(err)),
+        }
     }
 
     async fn on_type_formatting(
         &self,
         params: DocumentOnTypeFormattingParams,
     ) -> LspResult<Option<Vec<TextEdit>>> {
-        let result = biome_diagnostics::panic::catch_unwind(move || {
+        let result = catch_lsp_operation(move || {
             handlers::formatting::format_on_type(&self.session, params)
         });
 
-        self.map_op_error(result).await
+        match result {
+            Ok(Ok(result)) => self.map_op_error(Ok(result)).await,
+            Ok(Err(cancelled)) => Err(cancelled_to_lsp_error(cancelled)),
+            Err(err) => Err(into_lsp_error(err)),
+        }
     }
 
     async fn goto_definition(
         &self,
         params: GotoDefinitionParams,
     ) -> LspResult<Option<GotoDefinitionResponse>> {
-        let result = biome_diagnostics::panic::catch_unwind(move || {
+        let result = catch_lsp_operation(move || {
             handlers::navigation::goto_definition(&self.session, params)
         });
 
-        self.map_op_error(result).await
+        match result {
+            Ok(Ok(result)) => self.map_op_error(Ok(result)).await,
+            Ok(Err(cancelled)) => Err(cancelled_to_lsp_error(cancelled)),
+            Err(err) => Err(into_lsp_error(err)),
+        }
     }
 }
 
@@ -602,19 +631,19 @@ macro_rules! workspace_method {
             |server: &LSPServer, params| {
                 let span = tracing::trace_span!(concat!("biome/", stringify!($method)), params = ?params).or_current();
 
-                let workspace = server.session.workspace.clone();
+                let session = server.session.clone();
                 let result = spawn_blocking(move || {
                     let _guard = span.entered();
-                    workspace.$method(params)
+                    catch_lsp_operation(|| session.workspace_for_request().$method(params))
                 });
 
                 result.map(move |result| {
-                    // The type of `result` is `Result<Result<R, RomeError>, JoinError>`,
-                    // where the inner result is the return value of `$method` while the
-                    // outer one is added by `spawn_blocking` to catch panics or
-                    // cancellations of the task
+                    // The outer result comes from `spawn_blocking`, the middle result is
+                    // Salsa cancellation, and the inner result is the workspace method.
                     match result {
-                        Ok(Ok(result)) => Ok(result),
+                        Ok(Ok(Ok(Ok(result)))) => Ok(result),
+                        Ok(Ok(Ok(Err(err)))) => Err(into_lsp_error(err)),
+                        Ok(Ok(Err(cancelled))) => Err(cancelled_to_lsp_error(cancelled)),
                         Ok(Err(err)) => Err(into_lsp_error(err)),
                         Err(err) => match err.try_into_panic() {
                             Ok(err) => Err(panic_to_lsp_error(err)),
@@ -634,8 +663,11 @@ pub struct ServerFactory {
     /// active connections
     cancellation: Arc<Notify>,
 
-    /// [Workspace] instance shared between all clients.
+    /// Workspace server state shared between all clients.
     workspace: Arc<WorkspaceServer>,
+
+    /// Database state shared by LSP sessions and the watcher.
+    db_state: Arc<DbState>,
 
     /// The sessions of the connected clients indexed by session key.
     sessions: Sessions,
@@ -677,6 +709,7 @@ impl ServerFactory {
                 Arc::new(biome_service::workspace::GritSearchQuery::default()),
                 None,
             )),
+            db_state: Arc::new(DbState::lsp()),
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
             stop_on_disconnect,
@@ -687,6 +720,18 @@ impl ServerFactory {
 
     /// Constructor for use in tests.
     pub fn new_with_fs(fs: Arc<dyn FsWithResolverProxy>) -> Self {
+        Self::new_with_fs_and_db_state(fs, Arc::new(DbState::lsp()))
+    }
+
+    /// Constructor for CLI socket tests.
+    ///
+    /// These tests exercise CLI traversal through the socket transport, but
+    /// should keep the CLI database update strategy.
+    pub fn new_cli_test_with_fs(fs: Arc<dyn FsWithResolverProxy>) -> Self {
+        Self::new_with_fs_and_db_state(fs, Arc::new(DbState::default()))
+    }
+
+    fn new_with_fs_and_db_state(fs: Arc<dyn FsWithResolverProxy>, db_state: Arc<DbState>) -> Self {
         let (watcher_tx, _) = bounded(0);
         let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
         Self {
@@ -698,6 +743,7 @@ impl ServerFactory {
                 Arc::new(GritSearchQuery::default()),
                 None,
             )),
+            db_state,
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
             stop_on_disconnect: true,
@@ -709,6 +755,7 @@ impl ServerFactory {
     /// Creates a new [ServerConnection] from this factory.
     pub fn create(&self) -> ServerConnection {
         let workspace = self.workspace.clone();
+        let db_state = self.db_state.clone();
 
         let session_key = SessionKey(self.next_session_key.fetch_add(1, Ordering::Relaxed));
 
@@ -717,6 +764,7 @@ impl ServerFactory {
                 session_key,
                 client,
                 workspace,
+                db_state,
                 self.cancellation.clone(),
                 self.service_rx.clone(),
             );
@@ -786,6 +834,10 @@ impl ServerFactory {
     pub fn workspace(&self) -> Arc<WorkspaceServer> {
         self.workspace.clone()
     }
+
+    pub fn db_state(&self) -> Arc<DbState> {
+        self.db_state.clone()
+    }
 }
 
 /// Handle type created by the server for each incoming connection
@@ -820,3 +872,7 @@ mod tests;
 #[cfg(test)]
 #[path = "server_goto.tests.rs"]
 mod server_goto;
+
+#[cfg(test)]
+#[path = "server_type_on_format.tests.rs"]
+mod server_type_on_format;
