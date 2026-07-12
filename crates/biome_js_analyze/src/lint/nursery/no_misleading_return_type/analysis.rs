@@ -1,10 +1,11 @@
-use std::io;
+//! Editorial policy for `noMisleadingReturnType`.
+//!
+//! This module decides which wider relations are misleading, when syntax
+//! evidence suppresses a diagnostic, and how replacement types are rendered.
 
-use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
-use biome_console::{
-    fmt::{Display, Formatter},
-    markup,
-};
+use std::iter::FusedIterator;
+
+use biome_analyze::context::RuleContext;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunction, AnyJsFunctionBody, AnyJsGetter, AnyTsCastExpression, AnyTsType,
     JsArrowFunctionExpression, JsConstructorClassMember, JsFunctionBody, JsFunctionDeclaration,
@@ -13,116 +14,21 @@ use biome_js_syntax::{
     JsSetterClassMember, JsSetterObjectMember, JsSyntaxNode, JsVariableStatement, TsAsExpression,
     TsDeclareFunctionDeclaration, TsMethodSignatureClassMember, TsTypeAssertionExpression,
 };
-use biome_js_type_info::{InferredType, ReturnTypeEvidence};
+use biome_js_type_info::{
+    InferredType, NarrowedTypeCandidates, ReturnTypeRelation, ReturnTypeVerdict,
+    resolved::{InferredLiteralValue, InferredTypeData},
+};
 use biome_rowan::{AstNode, TextRange, declare_node_union};
-use biome_rule_options::no_misleading_return_type::NoMisleadingReturnTypeOptions;
 use smallvec::SmallVec;
-use std::iter::FusedIterator;
 
-use crate::services::typed::Typed;
-
-declare_lint_rule! {
-    /// Detect return type annotations that are misleadingly wider than what
-    /// the implementation actually returns.
-    ///
-    /// Reports when a function's explicit return type annotation is wider than
-    /// what TypeScript would infer from the implementation, hiding precise types
-    /// from callers.
-    ///
-    /// ## Examples
-    ///
-    /// ### Invalid
-    ///
-    /// ```ts,expect_diagnostic,file=invalid.ts
-    /// function getStatus(b: boolean): string { if (b) return "loading"; return "idle"; }
-    /// ```
-    ///
-    /// ```ts,expect_diagnostic,file=invalid2.ts
-    /// function getCode(ok: boolean): number { if (ok) return 200; return 404; }
-    /// ```
-    ///
-    /// ```ts,expect_diagnostic,file=invalid3.ts
-    /// class Foo { getStatus(b: boolean): string { if (b) return "loading"; return "idle"; } }
-    /// ```
-    ///
-    /// ```ts,expect_diagnostic,file=invalid4.ts
-    /// const obj = { getMode(b: boolean): string { if (b) return "dark"; return "light"; } };
-    /// ```
-    ///
-    /// ```ts,expect_diagnostic,file=invalid5.ts
-    /// function makeData(): object { return { retry: true }; }
-    /// ```
-    ///
-    /// ### Valid
-    ///
-    /// ```ts
-    /// function getStatus() { return "loading"; }
-    /// ```
-    ///
-    /// ```ts
-    /// function run(): void { return; }
-    /// ```
-    ///
-    /// ```ts
-    /// class Foo { greet(): string { return "hello"; } }
-    /// ```
-    ///
-    /// ## Known limitations
-    ///
-    /// - Suggested replacement types are only shown when their textual
-    ///   representation is up to 80 characters long. Longer unions fall back to
-    ///   a generic note without the specific suggestion.
-    /// - When a return uses a type assertion such as `as T`, the rule does
-    ///   not flag the return unless it can prove that `T` is narrower than
-    ///   `object`. Trusted cases include `unknown`, `any`, `typeof` queries,
-    ///   conditional types, generic type parameters, and types the rule
-    ///   cannot resolve. Intersections (`A & B`) are trusted when every
-    ///   member is or when any member is `any`; unions (`A | B`) when at
-    ///   least one is.
-    pub NoMisleadingReturnType {
-        version: "2.4.11",
-        name: "noMisleadingReturnType",
-        language: "ts",
-        recommended: false,
-        domains: &[RuleDomain::Types],
-        issue_number: Some("9810"),
-    }
-}
-
-declare_node_union! {
-    pub AnyFunctionLikeWithReturnType =
-        AnyJsFunction
-        | JsMethodClassMember
-        | JsMethodObjectMember
-        | JsGetterClassMember
-        | JsGetterObjectMember
-}
-
-pub struct RuleState {
-    annotation_range: TextRange,
-    suggestion: Option<String>,
-}
+use super::{AnyFunctionLikeWithReturnType, NoMisleadingReturnType, RuleState};
 
 /// Maximum iterations for expression traversal to guard against infinite loops.
 const MAX_EXPRESSION_TRAVERSAL_ITERATIONS: usize = 200;
+const MAX_RETURN_TYPE_DESCRIPTION_LENGTH: usize = 80;
+const RETURN_TYPE_SEPARATOR: &str = " | ";
 
-impl Display for RuleState {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> io::Result<()> {
-        if let Some(suggestion) = &self.suggestion {
-            formatter.write_str(suggestion)
-        } else {
-            Ok(())
-        }
-    }
-}
-
-impl Rule for NoMisleadingReturnType {
-    type Query = Typed<AnyFunctionLikeWithReturnType>;
-    type State = RuleState;
-    type Signals = Option<Self::State>;
-    type Options = NoMisleadingReturnTypeOptions;
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+pub(super) fn run(ctx: &RuleContext<NoMisleadingReturnType>) -> Option<RuleState> {
         let node = ctx.query();
 
         match node {
@@ -211,32 +117,6 @@ impl Rule for NoMisleadingReturnType {
                 )
             }
         }
-    }
-
-    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let diag = RuleDiagnostic::new(
-            rule_category!(),
-            state.annotation_range,
-            markup! {
-                "The return type annotation is wider than what the function actually returns."
-            },
-        )
-        .note(markup! {
-            "A wider return type hides the precise types that callers could rely on."
-        });
-
-        let diag = if state.suggestion.is_some() {
-            diag.note(markup! {
-                "Consider using "{state}" as the return type."
-            })
-        } else {
-            diag.note(markup! {
-                "Narrow the return type to match what the function actually returns."
-            })
-        };
-
-        Some(diag)
-    }
 }
 
 /// Looks for sibling function declarations with the same name but no body,
@@ -333,21 +213,170 @@ fn run_for_member_with_body<'db>(
     if !return_type.is_inferred() || info.has_uninferred_return {
         return None;
     }
-    let analysis = return_type.check_misleading_return_type(
-        &info.types,
-        ReturnTypeEvidence {
-            has_any_const: info.has_any_const,
-            object_wide_casts: info.object_wide_casts,
-            has_narrower_than_object: info.has_narrower_than_object,
-            has_pinning_assertion: info.has_pinning_assertion,
-            prefer_inferred_suggestion,
-        },
-        is_async,
-    )?;
+    let declared = if is_async {
+        return_type
+            .promise_inner_type()
+            .filter(|inner| !inner.is_return_type_relation_escape_hatch())
+            .unwrap_or(return_type)
+    } else {
+        return_type
+    };
+    let relation = declared.compare_declared_return_type(&info.types);
+    let suggestion = misleading_suggestion(&relation, &info, prefer_inferred_suggestion)?;
     Some(RuleState {
         annotation_range,
-        suggestion: analysis.suggestion,
+        suggestion,
     })
+}
+
+fn misleading_suggestion(
+    relation: &ReturnTypeRelation<'_>,
+    evidence: &ReturnTypeEvidence<'_>,
+    prefer_inferred_suggestion: bool,
+) -> Option<Option<String>> {
+    let declared = relation.declared();
+    if relation.declared_is_escape_hatch()
+        || relation.inferred_is_empty()
+        || relation.has_any_contaminated_inferred()
+        || relation.declared_union_contains_unknown()
+        || relation.has_undefined_mismatch()
+        || relation.inferred_has_generic_intersection()
+    {
+        return None;
+    }
+    if relation.has_single_primitive_literal_return()
+        && !evidence.has_any_const
+        && !evidence.has_pinning_assertion
+        && !matches!(declared, InferredTypeData::Union(_))
+    {
+        return None;
+    }
+    if !evidence.has_any_const
+        && evidence.object_wide_casts == relation.inferred().len()
+        && matches!(declared, InferredTypeData::ObjectKeyword)
+    {
+        return None;
+    }
+    if !evidence.has_any_const && relation.is_only_property_literal_widening()? {
+        return None;
+    }
+
+    let is_misleading = if matches!(declared, InferredTypeData::ObjectKeyword) {
+        !relation.includes_object_return()
+            && evidence.object_wide_casts == 0
+            && (evidence.has_narrower_than_object || relation.object_has_wider_return()?)
+    } else {
+        matches!(relation.verdict(), ReturnTypeVerdict::Wider)
+    };
+    if !is_misleading {
+        return None;
+    }
+
+    let inferred = || render_inferred(relation);
+    let suggestion = if evidence.has_any_const || prefer_inferred_suggestion {
+        inferred()
+    } else {
+        match relation.narrowed() {
+            NarrowedTypeCandidates::Available(types) => {
+                render_narrowed(relation, types).or_else(inferred)
+            }
+            NarrowedTypeCandidates::Unavailable => inferred(),
+            NarrowedTypeCandidates::Indeterminate => return None,
+        }
+    };
+    Some(suggestion)
+}
+
+fn literal_text(relation: &ReturnTypeRelation<'_>, ty: InferredTypeData<'_>) -> Option<String> {
+    let InferredTypeData::Literal(literal) = ty else {
+        return None;
+    };
+    match literal.literal(relation.db()) {
+        InferredLiteralValue::String(value) => Some(format!("\"{}\"", value.as_str())),
+        InferredLiteralValue::Number(value) => Some(value.as_str().to_string()),
+        InferredLiteralValue::Boolean(value) => Some(value.as_bool().to_string()),
+        InferredLiteralValue::BigInt(_)
+        | InferredLiteralValue::Object(_)
+        | InferredLiteralValue::RegExp(_)
+        | InferredLiteralValue::Template(_) => None,
+    }
+}
+
+fn renderable_variant(
+    relation: &ReturnTypeRelation<'_>,
+    ty: InferredTypeData<'_>,
+) -> Option<String> {
+    match ty {
+        InferredTypeData::String => Some("string".into()),
+        InferredTypeData::Number => Some("number".into()),
+        InferredTypeData::Boolean => Some("boolean".into()),
+        InferredTypeData::BigInt => Some("bigint".into()),
+        InferredTypeData::Literal(_) => literal_text(relation, ty),
+        InferredTypeData::Unknown
+        | InferredTypeData::Divergent(_)
+        | InferredTypeData::Global
+        | InferredTypeData::Null
+        | InferredTypeData::Symbol
+        | InferredTypeData::Undefined
+        | InferredTypeData::Conditional
+        | InferredTypeData::Class(_)
+        | InferredTypeData::Constructor(_)
+        | InferredTypeData::Function(_)
+        | InferredTypeData::Interface(_)
+        | InferredTypeData::Module(_)
+        | InferredTypeData::Namespace(_)
+        | InferredTypeData::Object(_)
+        | InferredTypeData::Tuple(_)
+        | InferredTypeData::Generic(_)
+        | InferredTypeData::Local(_)
+        | InferredTypeData::GlobalType(_)
+        | InferredTypeData::Intersection(_)
+        | InferredTypeData::Union(_)
+        | InferredTypeData::TypeOperator(_)
+        | InferredTypeData::InstanceOf(_)
+        | InferredTypeData::MergedReference(_)
+        | InferredTypeData::TypeofExpression(_)
+        | InferredTypeData::TypeofType(_)
+        | InferredTypeData::TypeofValue(_)
+        | InferredTypeData::AnyKeyword
+        | InferredTypeData::NeverKeyword
+        | InferredTypeData::ObjectKeyword
+        | InferredTypeData::ThisKeyword
+        | InferredTypeData::UnknownKeyword
+        | InferredTypeData::VoidKeyword => None,
+    }
+}
+
+fn clean_literal_text(text: &str) -> bool {
+    !text.contains("...") && !text.contains("__internal") && !text.contains("typeof import(")
+}
+
+fn join_description(parts: &[String]) -> Option<String> {
+    if parts.is_empty() || parts.iter().any(|part| !clean_literal_text(part)) {
+        return None;
+    }
+    let description = parts.join(RETURN_TYPE_SEPARATOR);
+    (description.len() <= MAX_RETURN_TYPE_DESCRIPTION_LENGTH).then_some(description)
+}
+
+fn render_inferred(relation: &ReturnTypeRelation<'_>) -> Option<String> {
+    let parts = relation
+        .inferred()
+        .iter()
+        .map(|ty| literal_text(relation, *ty))
+        .collect::<Option<Vec<_>>>()?;
+    join_description(&parts)
+}
+
+fn render_narrowed(
+    relation: &ReturnTypeRelation<'_>,
+    types: &[InferredTypeData<'_>],
+) -> Option<String> {
+    let parts = types
+        .iter()
+        .map(|ty| renderable_variant(relation, *ty))
+        .collect::<Option<Vec<_>>>()?;
+    join_description(&parts)
 }
 
 fn prefers_inferred_suggestion(annotation: &JsSyntaxNode) -> bool {
@@ -401,7 +430,7 @@ fn is_class_method_overload_implementation(method: &JsMethodClassMember) -> bool
 
 /// Per-body accumulator for the misleading-return check.
 #[derive(Default)]
-struct ReturnInfo<'db> {
+struct ReturnTypeEvidence<'db> {
     types: Vec<InferredType<'db>>,
     has_uninferred_return: bool,
     has_any_const: bool,
@@ -417,12 +446,12 @@ struct ReturnInfo<'db> {
     has_pinning_assertion: bool,
 }
 
-/// Walks the function body and populates a [`ReturnInfo`].
+/// Walks the function body and populates [`ReturnTypeEvidence`].
 fn collect_return_info<'db>(
     ctx: &'db RuleContext<NoMisleadingReturnType>,
     body: &AnyJsFunctionBody,
-) -> ReturnInfo<'db> {
-    let mut info = ReturnInfo::default();
+) -> ReturnTypeEvidence<'db> {
+    let mut info = ReturnTypeEvidence::default();
 
     match body {
         AnyJsFunctionBody::JsFunctionBody(block) => {
@@ -451,7 +480,7 @@ fn collect_return_info<'db>(
 fn collect_block_returns<'db>(
     ctx: &'db RuleContext<NoMisleadingReturnType>,
     block: &JsFunctionBody,
-    info: &mut ReturnInfo<'db>,
+    info: &mut ReturnTypeEvidence<'db>,
 ) {
     for node in block
         .syntax()

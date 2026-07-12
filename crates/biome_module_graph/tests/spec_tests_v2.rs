@@ -1,4 +1,7 @@
-use std::collections::BTreeMap;
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, Condvar, Mutex},
+};
 
 use biome_db::ParsedSource;
 use biome_db::testing::{
@@ -38,10 +41,21 @@ use salsa::Storage;
 use salsa::plumbing::{AsId, FromId};
 
 #[salsa::db]
+#[derive(Clone)]
 struct TestModuleDb {
     modules: BTreeMap<Utf8PathBuf, ModuleInfo>,
     events: Events,
+    cancellation_gate: Option<Arc<(Mutex<CancellationState>, Condvar)>>,
     storage: Storage<Self>,
+}
+
+#[derive(Default)]
+struct CancellationState {
+    armed: bool,
+    query_started: bool,
+    reader_started: bool,
+    cancellation_set: bool,
+    cancellation_observed: bool,
 }
 
 #[salsa::input]
@@ -503,12 +517,18 @@ fn test_namespace_import_discards_known_members_when_blanket_module_cannot_infer
 
 impl TestModuleDb {
     fn new() -> Self {
+        Self::with_event_callback(|_| {})
+    }
+
+    fn with_event_callback(event_callback: impl Fn(&salsa::Event) + Send + Sync + 'static) -> Self {
         let events = Events::default();
         let db = Self {
             modules: BTreeMap::new(),
+            cancellation_gate: None,
             storage: salsa::Storage::new(Some(Box::new({
                 let events = events.clone();
                 move |event| {
+                    event_callback(&event);
                     events.0.lock().unwrap().push(event);
                 }
             }))),
@@ -582,6 +602,28 @@ impl ModuleDb for TestModuleDb {
 
     fn module_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo> {
         let _ = self.module_graph_generation();
+        if let Some(gate) = &self.cancellation_gate {
+            let mut state = gate.0.lock().unwrap();
+            if state.armed && state.query_started {
+                state.armed = false;
+                state.reader_started = true;
+                gate.1.notify_all();
+                while !state.cancellation_set {
+                    state = gate.1.wait(state).unwrap();
+                }
+                drop(state);
+                let cancellation = salsa::Cancelled::catch(std::panic::AssertUnwindSafe(|| {
+                    salsa::Database::unwind_if_revision_cancelled(self);
+                }));
+                let mut state = gate.0.lock().unwrap();
+                state.cancellation_observed = true;
+                gate.1.notify_all();
+                drop(state);
+                if let Err(cancellation) = cancellation {
+                    std::panic::resume_unwind(Box::new(cancellation));
+                }
+            }
+        }
         self.modules.get(path).copied()
     }
 
@@ -1731,6 +1773,7 @@ fn test_infer_module_types_normalizes_nested_compounds_with_cycle_detector() {
 
     let intersection_ty =
         inferred_function_return_ty_by_name(&db, index_module, &inferred, "readIntersection")
+            .map(|ty| normalize_type(&db, index_module, ty))
             .expect("readIntersection return type must be inferred");
     assert_eq!(intersection_ty, InferredTypeData::NeverKeyword);
 }
@@ -8044,23 +8087,67 @@ fn test_infer_module_types_invalidates_cycle_result_after_cycle_is_broken() {
 }
 
 #[test]
-fn test_module_info_set_kind_triggers_cancellation() {
+fn test_module_info_set_kind_cancels_active_inference() {
     let fs = MemoryFileSystem::default();
-    fs.insert("/src/index.ts".into(), "export const value = 1;");
-    let mut db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
-    let module = db
-        .module_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-    let replacement = resolve_js_module_kind_for_test(&fs, "/src/index.ts", true);
-
-    db.clear_salsa_events();
-    salsa::Setter::to(module.set_kind(&mut db), replacement);
-    let events = db.take_salsa_events();
-    assert!(
-        events
-            .iter()
-            .any(|event| matches!(event.kind, salsa::EventKind::DidSetCancellationFlag))
+    fs.insert("/src/source.ts".into(), "export const value = 1;");
+    fs.insert(
+        "/src/index.ts".into(),
+        "import { value } from './source'; export { value };",
     );
+    let state = Arc::new((Mutex::new(CancellationState::default()), Condvar::new()));
+    let callback_state = state.clone();
+    let mut db = TestModuleDb::with_event_callback(move |event| {
+        let (state, changed) = &*callback_state;
+        if matches!(event.kind, salsa::EventKind::DidSetCancellationFlag) {
+            let mut state = state.lock().unwrap();
+            if state.reader_started {
+                state.cancellation_set = true;
+                changed.notify_all();
+                while !state.cancellation_observed {
+                    state = changed.wait(state).unwrap();
+                }
+            }
+        } else if matches!(event.kind, salsa::EventKind::WillExecute { .. }) {
+            state.lock().unwrap().query_started = true;
+        }
+    });
+    db.cancellation_gate = Some(state.clone());
+    let source_module = ModuleInfo::new(
+        &db,
+        Utf8PathBuf::from("/src/source.ts"),
+        resolve_js_module_kind_for_test(&fs, "/src/source.ts", true),
+    );
+    db.insert_module(Utf8PathBuf::from("/src/source.ts"), source_module);
+    let module = ModuleInfo::new(
+        &db,
+        Utf8PathBuf::from("/src/index.ts"),
+        resolve_js_module_kind_for_test(&fs, "/src/index.ts", true),
+    );
+    db.insert_module(Utf8PathBuf::from("/src/index.ts"), module);
+    let replacement = resolve_js_module_kind_for_test(&fs, "/src/source.ts", true);
+
+    state.0.lock().unwrap().armed = true;
+    std::thread::scope(|scope| {
+        let reader_db = db.clone();
+        let reader = scope.spawn(move || {
+            salsa::Cancelled::catch(std::panic::AssertUnwindSafe(move || {
+                let _ = infer_module_types(&reader_db, module);
+            }))
+        });
+
+        let mut cancellation = state.0.lock().unwrap();
+        while !cancellation.reader_started {
+            cancellation = state.1.wait(cancellation).unwrap();
+        }
+        drop(cancellation);
+
+        salsa::Setter::to(source_module.set_kind(&mut db), replacement);
+        let result = reader.join().unwrap();
+        assert!(
+            matches!(result, Err(salsa::Cancelled::PendingWrite)),
+            "active inference returned {result:?}"
+        );
+    });
 }
 
 #[test]

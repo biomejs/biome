@@ -1,4 +1,9 @@
-//! Policy and evidence extraction for `noMisleadingReturnType` diagnostics.
+//! Relations between a declared return type and inferred return values.
+//!
+//! This module returns structured relation verdicts and candidate type handles.
+//! It deliberately contains no diagnostic policy or rendering.
+
+#![deny(clippy::wildcard_enum_match_arm)]
 
 use crate::TypeDb;
 use crate::interned_types::{InternedClass, Literal, TypeData, TypeMember, TypeMemberKind};
@@ -6,10 +11,8 @@ use rustc_hash::FxHashSet;
 
 const MAX_RETURN_TYPE_STEPS: usize = 50;
 const MAX_RETURN_TYPE_DEPTH: usize = 50;
-const MAX_RETURN_TYPE_DESCRIPTION_LENGTH: usize = 80;
-const RETURN_TYPE_SEPARATOR: &str = " | ";
 
-fn is_escape_hatch(ty: TypeData<'_>) -> bool {
+pub(crate) fn is_escape_hatch(ty: TypeData<'_>) -> bool {
     matches!(
         ty,
         TypeData::AnyKeyword
@@ -49,24 +52,55 @@ fn normalize_boolean_return_types<'db>(
     types
 }
 
-fn promise_inner<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> Option<TypeData<'db>> {
+pub(crate) fn promise_inner<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> Option<TypeData<'db>> {
     let TypeData::InstanceOf(instance) = ty else {
         return None;
     };
     if !instance.ty(db).is_promise_class(db) {
         return None;
     }
-    instance
-        .type_parameters(db)
-        .first()
-        .copied()
-        .filter(|ty| !is_escape_hatch(*ty))
+    instance.type_parameters(db).first().copied()
 }
 
 fn union_variants<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> Vec<TypeData<'db>> {
     match ty {
         TypeData::Union(union) => union.types(db).to_vec(),
-        ty => Vec::from([ty]),
+        ty @ (TypeData::Unknown
+        | TypeData::Divergent(_)
+        | TypeData::Global
+        | TypeData::BigInt
+        | TypeData::Boolean
+        | TypeData::Null
+        | TypeData::Number
+        | TypeData::String
+        | TypeData::Symbol
+        | TypeData::Undefined
+        | TypeData::Conditional
+        | TypeData::Class(_)
+        | TypeData::Constructor(_)
+        | TypeData::Function(_)
+        | TypeData::Interface(_)
+        | TypeData::Module(_)
+        | TypeData::Namespace(_)
+        | TypeData::Object(_)
+        | TypeData::Tuple(_)
+        | TypeData::Generic(_)
+        | TypeData::Local(_)
+        | TypeData::GlobalType(_)
+        | TypeData::Intersection(_)
+        | TypeData::TypeOperator(_)
+        | TypeData::Literal(_)
+        | TypeData::InstanceOf(_)
+        | TypeData::MergedReference(_)
+        | TypeData::TypeofExpression(_)
+        | TypeData::TypeofType(_)
+        | TypeData::TypeofValue(_)
+        | TypeData::AnyKeyword
+        | TypeData::NeverKeyword
+        | TypeData::ObjectKeyword
+        | TypeData::ThisKeyword
+        | TypeData::UnknownKeyword
+        | TypeData::VoidKeyword) => Vec::from([ty]),
     }
 }
 
@@ -129,7 +163,40 @@ fn is_any_contaminated(db: &dyn TypeDb, ty: TypeData<'_>) -> bool {
             .types(db)
             .iter()
             .any(|ty| matches!(ty, TypeData::AnyKeyword)),
-        _ => false,
+        TypeData::Unknown
+        | TypeData::Divergent(_)
+        | TypeData::Global
+        | TypeData::BigInt
+        | TypeData::Boolean
+        | TypeData::Null
+        | TypeData::Number
+        | TypeData::String
+        | TypeData::Symbol
+        | TypeData::Undefined
+        | TypeData::Conditional
+        | TypeData::Class(_)
+        | TypeData::Constructor(_)
+        | TypeData::Function(_)
+        | TypeData::Interface(_)
+        | TypeData::Module(_)
+        | TypeData::Namespace(_)
+        | TypeData::Object(_)
+        | TypeData::Tuple(_)
+        | TypeData::Generic(_)
+        | TypeData::Local(_)
+        | TypeData::GlobalType(_)
+        | TypeData::TypeOperator(_)
+        | TypeData::Literal(_)
+        | TypeData::InstanceOf(_)
+        | TypeData::MergedReference(_)
+        | TypeData::TypeofExpression(_)
+        | TypeData::TypeofType(_)
+        | TypeData::TypeofValue(_)
+        | TypeData::NeverKeyword
+        | TypeData::ObjectKeyword
+        | TypeData::ThisKeyword
+        | TypeData::UnknownKeyword
+        | TypeData::VoidKeyword => false,
     }
 }
 
@@ -150,7 +217,42 @@ fn is_literal_of_primitive(db: &dyn TypeDb, ty: TypeData<'_>) -> bool {
         TypeData::Union(union) if union.types(db).len() == 1 => {
             is_literal_of_primitive(db, union.types(db)[0])
         }
-        _ => false,
+        TypeData::Union(_)
+        | TypeData::Unknown
+        | TypeData::Divergent(_)
+        | TypeData::Global
+        | TypeData::BigInt
+        | TypeData::Boolean
+        | TypeData::Null
+        | TypeData::Number
+        | TypeData::String
+        | TypeData::Symbol
+        | TypeData::Undefined
+        | TypeData::Conditional
+        | TypeData::Class(_)
+        | TypeData::Constructor(_)
+        | TypeData::Function(_)
+        | TypeData::Interface(_)
+        | TypeData::Module(_)
+        | TypeData::Namespace(_)
+        | TypeData::Object(_)
+        | TypeData::Tuple(_)
+        | TypeData::Generic(_)
+        | TypeData::Local(_)
+        | TypeData::GlobalType(_)
+        | TypeData::Intersection(_)
+        | TypeData::TypeOperator(_)
+        | TypeData::InstanceOf(_)
+        | TypeData::MergedReference(_)
+        | TypeData::TypeofExpression(_)
+        | TypeData::TypeofType(_)
+        | TypeData::TypeofValue(_)
+        | TypeData::AnyKeyword
+        | TypeData::NeverKeyword
+        | TypeData::ObjectKeyword
+        | TypeData::ThisKeyword
+        | TypeData::UnknownKeyword
+        | TypeData::VoidKeyword => false,
     }
 }
 
@@ -213,9 +315,48 @@ fn is_only_property_literal_widening(
                 TypeData::Object(object) => object.members(db),
                 TypeData::Literal(literal) => match literal.literal(db) {
                     Literal::Object(members) => members,
-                    _ => return Some(false),
+                    Literal::BigInt(_)
+                    | Literal::Boolean(_)
+                    | Literal::Number(_)
+                    | Literal::RegExp(_)
+                    | Literal::String(_)
+                    | Literal::Template(_) => return Some(false),
                 },
-                _ => return Some(false),
+                TypeData::Unknown
+                | TypeData::Divergent(_)
+                | TypeData::Global
+                | TypeData::BigInt
+                | TypeData::Boolean
+                | TypeData::Null
+                | TypeData::Number
+                | TypeData::String
+                | TypeData::Symbol
+                | TypeData::Undefined
+                | TypeData::Conditional
+                | TypeData::Class(_)
+                | TypeData::Constructor(_)
+                | TypeData::Function(_)
+                | TypeData::Interface(_)
+                | TypeData::Module(_)
+                | TypeData::Namespace(_)
+                | TypeData::Tuple(_)
+                | TypeData::Generic(_)
+                | TypeData::Local(_)
+                | TypeData::GlobalType(_)
+                | TypeData::Intersection(_)
+                | TypeData::Union(_)
+                | TypeData::TypeOperator(_)
+                | TypeData::InstanceOf(_)
+                | TypeData::MergedReference(_)
+                | TypeData::TypeofExpression(_)
+                | TypeData::TypeofType(_)
+                | TypeData::TypeofValue(_)
+                | TypeData::AnyKeyword
+                | TypeData::NeverKeyword
+                | TypeData::ObjectKeyword
+                | TypeData::ThisKeyword
+                | TypeData::UnknownKeyword
+                | TypeData::VoidKeyword => return Some(false),
             };
             if inferred_members.is_empty() {
                 return Some(false);
@@ -302,9 +443,48 @@ fn type_members<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> Option<&'db [Typ
         TypeData::Object(object) => Some(object.members(db)),
         TypeData::Literal(literal) => match literal.literal(db) {
             Literal::Object(members) => Some(members),
-            _ => None,
+            Literal::BigInt(_)
+            | Literal::Boolean(_)
+            | Literal::Number(_)
+            | Literal::RegExp(_)
+            | Literal::String(_)
+            | Literal::Template(_) => None,
         },
-        _ => None,
+        TypeData::Unknown
+        | TypeData::Divergent(_)
+        | TypeData::Global
+        | TypeData::BigInt
+        | TypeData::Boolean
+        | TypeData::Null
+        | TypeData::Number
+        | TypeData::String
+        | TypeData::Symbol
+        | TypeData::Undefined
+        | TypeData::Conditional
+        | TypeData::Class(_)
+        | TypeData::Constructor(_)
+        | TypeData::Function(_)
+        | TypeData::Interface(_)
+        | TypeData::Module(_)
+        | TypeData::Namespace(_)
+        | TypeData::Tuple(_)
+        | TypeData::Generic(_)
+        | TypeData::Local(_)
+        | TypeData::GlobalType(_)
+        | TypeData::Intersection(_)
+        | TypeData::Union(_)
+        | TypeData::TypeOperator(_)
+        | TypeData::InstanceOf(_)
+        | TypeData::MergedReference(_)
+        | TypeData::TypeofExpression(_)
+        | TypeData::TypeofType(_)
+        | TypeData::TypeofValue(_)
+        | TypeData::AnyKeyword
+        | TypeData::NeverKeyword
+        | TypeData::ObjectKeyword
+        | TypeData::ThisKeyword
+        | TypeData::UnknownKeyword
+        | TypeData::VoidKeyword => None,
     }
 }
 
@@ -315,15 +495,85 @@ fn is_strictly_narrower_than_object_keyword(db: &dyn TypeDb, ty: TypeData<'_>) -
             TypeData::Class(class) => {
                 class_has_instance_shape(db, class, &mut FxHashSet::default(), 0)
             }
-            _ => Some(true),
+            TypeData::Unknown
+            | TypeData::Divergent(_)
+            | TypeData::Global
+            | TypeData::BigInt
+            | TypeData::Boolean
+            | TypeData::Null
+            | TypeData::Number
+            | TypeData::String
+            | TypeData::Symbol
+            | TypeData::Undefined
+            | TypeData::Conditional
+            | TypeData::Constructor(_)
+            | TypeData::Function(_)
+            | TypeData::Interface(_)
+            | TypeData::Module(_)
+            | TypeData::Namespace(_)
+            | TypeData::Object(_)
+            | TypeData::Tuple(_)
+            | TypeData::Generic(_)
+            | TypeData::Local(_)
+            | TypeData::GlobalType(_)
+            | TypeData::Intersection(_)
+            | TypeData::Union(_)
+            | TypeData::TypeOperator(_)
+            | TypeData::Literal(_)
+            | TypeData::InstanceOf(_)
+            | TypeData::MergedReference(_)
+            | TypeData::TypeofExpression(_)
+            | TypeData::TypeofType(_)
+            | TypeData::TypeofValue(_)
+            | TypeData::AnyKeyword
+            | TypeData::NeverKeyword
+            | TypeData::ObjectKeyword
+            | TypeData::ThisKeyword
+            | TypeData::UnknownKeyword
+            | TypeData::VoidKeyword => Some(true),
         },
         TypeData::Tuple(_) | TypeData::Function(_) => Some(true),
         TypeData::Literal(literal) => match literal.literal(db) {
             Literal::RegExp(_) => Some(true),
             Literal::Object(members) => Some(!members.is_empty()),
-            _ => Some(false),
+            Literal::BigInt(_)
+            | Literal::Boolean(_)
+            | Literal::Number(_)
+            | Literal::String(_)
+            | Literal::Template(_) => Some(false),
         },
-        _ => Some(false),
+        TypeData::Unknown
+        | TypeData::Divergent(_)
+        | TypeData::Global
+        | TypeData::BigInt
+        | TypeData::Boolean
+        | TypeData::Null
+        | TypeData::Number
+        | TypeData::String
+        | TypeData::Symbol
+        | TypeData::Undefined
+        | TypeData::Conditional
+        | TypeData::Class(_)
+        | TypeData::Constructor(_)
+        | TypeData::Interface(_)
+        | TypeData::Module(_)
+        | TypeData::Namespace(_)
+        | TypeData::Generic(_)
+        | TypeData::Local(_)
+        | TypeData::GlobalType(_)
+        | TypeData::Intersection(_)
+        | TypeData::Union(_)
+        | TypeData::TypeOperator(_)
+        | TypeData::MergedReference(_)
+        | TypeData::TypeofExpression(_)
+        | TypeData::TypeofType(_)
+        | TypeData::TypeofValue(_)
+        | TypeData::AnyKeyword
+        | TypeData::NeverKeyword
+        | TypeData::ObjectKeyword
+        | TypeData::ThisKeyword
+        | TypeData::UnknownKeyword
+        | TypeData::VoidKeyword => Some(false),
     }
 }
 
@@ -350,9 +600,78 @@ fn class_has_instance_shape<'db>(
             TypeData::Class(base) => class_has_instance_shape(db, base, seen, depth + 1),
             TypeData::InstanceOf(instance) => match instance.ty(db) {
                 TypeData::Class(base) => class_has_instance_shape(db, base, seen, depth + 1),
-                _ => Some(true),
+                TypeData::Unknown
+                | TypeData::Divergent(_)
+                | TypeData::Global
+                | TypeData::BigInt
+                | TypeData::Boolean
+                | TypeData::Null
+                | TypeData::Number
+                | TypeData::String
+                | TypeData::Symbol
+                | TypeData::Undefined
+                | TypeData::Conditional
+                | TypeData::Constructor(_)
+                | TypeData::Function(_)
+                | TypeData::Interface(_)
+                | TypeData::Module(_)
+                | TypeData::Namespace(_)
+                | TypeData::Object(_)
+                | TypeData::Tuple(_)
+                | TypeData::Generic(_)
+                | TypeData::Local(_)
+                | TypeData::GlobalType(_)
+                | TypeData::Intersection(_)
+                | TypeData::Union(_)
+                | TypeData::TypeOperator(_)
+                | TypeData::Literal(_)
+                | TypeData::InstanceOf(_)
+                | TypeData::MergedReference(_)
+                | TypeData::TypeofExpression(_)
+                | TypeData::TypeofType(_)
+                | TypeData::TypeofValue(_)
+                | TypeData::AnyKeyword
+                | TypeData::NeverKeyword
+                | TypeData::ObjectKeyword
+                | TypeData::ThisKeyword
+                | TypeData::UnknownKeyword
+                | TypeData::VoidKeyword => Some(true),
             },
-            _ => Some(true),
+            TypeData::Unknown
+            | TypeData::Divergent(_)
+            | TypeData::Global
+            | TypeData::BigInt
+            | TypeData::Boolean
+            | TypeData::Null
+            | TypeData::Number
+            | TypeData::String
+            | TypeData::Symbol
+            | TypeData::Undefined
+            | TypeData::Conditional
+            | TypeData::Constructor(_)
+            | TypeData::Function(_)
+            | TypeData::Interface(_)
+            | TypeData::Module(_)
+            | TypeData::Namespace(_)
+            | TypeData::Object(_)
+            | TypeData::Tuple(_)
+            | TypeData::Generic(_)
+            | TypeData::Local(_)
+            | TypeData::GlobalType(_)
+            | TypeData::Intersection(_)
+            | TypeData::Union(_)
+            | TypeData::TypeOperator(_)
+            | TypeData::Literal(_)
+            | TypeData::MergedReference(_)
+            | TypeData::TypeofExpression(_)
+            | TypeData::TypeofType(_)
+            | TypeData::TypeofValue(_)
+            | TypeData::AnyKeyword
+            | TypeData::NeverKeyword
+            | TypeData::ObjectKeyword
+            | TypeData::ThisKeyword
+            | TypeData::UnknownKeyword
+            | TypeData::VoidKeyword => Some(true),
         },
     }
 }
@@ -382,55 +701,62 @@ fn is_nonunion_wider<'db>(
             Some(false) => {}
         }
 
-        match (annotated, inferred) {
-            (TypeData::ObjectKeyword, TypeData::InstanceOf(_)) => found_wider = true,
-            (TypeData::InstanceOf(annotated), TypeData::InstanceOf(inferred)) => {
-                match types_match(db, annotated.ty(db), inferred.ty(db)) {
-                    Some(true) => {}
-                    Some(false) => return Some(false),
-                    None => return None,
-                }
-                let annotated_parameters = annotated.type_parameters(db);
-                let inferred_parameters = inferred.type_parameters(db);
-                if annotated_parameters.len() != inferred_parameters.len()
-                    || annotated_parameters.is_empty()
-                {
-                    return Some(false);
-                }
-                stack.extend(
-                    annotated_parameters
-                        .iter()
-                        .zip(inferred_parameters)
-                        .map(|(annotated, inferred)| (*annotated, *inferred)),
-                );
-            }
-            (TypeData::Object(_), TypeData::Object(_) | TypeData::Literal(_)) => {
-                if !push_object_pairs(db, annotated, inferred, &mut stack) {
-                    return Some(false);
-                }
-            }
-            (TypeData::ObjectKeyword, inferred)
-                if is_strictly_narrower_than_object_keyword(db, inferred)? =>
+        if matches!(annotated, TypeData::ObjectKeyword) {
+            if matches!(inferred, TypeData::InstanceOf(_))
+                || is_strictly_narrower_than_object_keyword(db, inferred)?
             {
                 found_wider = true;
+                continue;
             }
-            (TypeData::Tuple(annotated), TypeData::Tuple(inferred)) => {
-                let annotated_elements = annotated.elements(db);
-                let inferred_elements = inferred.elements(db);
-                if annotated_elements.len() != inferred_elements.len()
-                    || annotated_elements.is_empty()
-                {
-                    return Some(false);
-                }
-                stack.extend(
-                    annotated_elements
-                        .iter()
-                        .zip(inferred_elements)
-                        .map(|(annotated, inferred)| (annotated.ty, inferred.ty)),
-                );
-            }
-            _ => return Some(false),
+            return Some(false);
         }
+        if let (TypeData::InstanceOf(annotated), TypeData::InstanceOf(inferred)) =
+            (annotated, inferred)
+        {
+            match types_match(db, annotated.ty(db), inferred.ty(db)) {
+                Some(true) => {}
+                Some(false) => return Some(false),
+                None => return None,
+            }
+            let annotated_parameters = annotated.type_parameters(db);
+            let inferred_parameters = inferred.type_parameters(db);
+            if annotated_parameters.len() != inferred_parameters.len()
+                || annotated_parameters.is_empty()
+            {
+                return Some(false);
+            }
+            stack.extend(
+                annotated_parameters
+                    .iter()
+                    .zip(inferred_parameters)
+                    .map(|(annotated, inferred)| (*annotated, *inferred)),
+            );
+            continue;
+        }
+        if matches!(annotated, TypeData::Object(_))
+            && matches!(inferred, TypeData::Object(_) | TypeData::Literal(_))
+        {
+            if !push_object_pairs(db, annotated, inferred, &mut stack) {
+                return Some(false);
+            }
+            continue;
+        }
+        if let (TypeData::Tuple(annotated), TypeData::Tuple(inferred)) = (annotated, inferred) {
+            let annotated_elements = annotated.elements(db);
+            let inferred_elements = inferred.elements(db);
+            if annotated_elements.len() != inferred_elements.len() || annotated_elements.is_empty()
+            {
+                return Some(false);
+            }
+            stack.extend(
+                annotated_elements
+                    .iter()
+                    .zip(inferred_elements)
+                    .map(|(annotated, inferred)| (annotated.ty, inferred.ty)),
+            );
+            continue;
+        }
+        return Some(false);
     }
 
     Some(found_wider)
@@ -487,41 +813,37 @@ fn is_wider_than<'db>(
     inferred: TypeData<'db>,
 ) -> Option<bool> {
     let inferred = resolve_generic_chain(db, inferred)?;
-    match (annotated, inferred) {
-        (TypeData::String, TypeData::String)
-        | (TypeData::Number, TypeData::Number)
-        | (TypeData::Boolean, TypeData::Boolean)
-        | (TypeData::BigInt, TypeData::BigInt) => Some(false),
-        (TypeData::Union(_), _) => is_union_wider(db, annotated, inferred),
-        (_, TypeData::Union(_)) => {
-            let variants = union_variants(db, inferred);
-            let has_base = try_any(
+    if matches!(annotated, TypeData::Union(_)) {
+        return is_union_wider(db, annotated, inferred);
+    }
+    if matches!(inferred, TypeData::Union(_)) {
+        let variants = union_variants(db, inferred);
+        let has_base = try_any(
+            variants
+                .iter()
+                .map(|variant| types_match(db, annotated, *variant)),
+        )?;
+        let all_subsumed = try_all(variants.iter().map(|variant| {
+            relation_or(types_match(db, annotated, *variant), || {
+                Some(is_base_type_of_literal(db, annotated, *variant))
+            })
+        }))?;
+        if has_base && all_subsumed {
+            return Some(false);
+        }
+        return Some(
+            try_all(variants.iter().map(|variant| {
+                relation_or(types_match(db, annotated, *variant), || {
+                    is_nonunion_wider(db, annotated, *variant)
+                })
+            }))? && try_any(
                 variants
                     .iter()
-                    .map(|variant| types_match(db, annotated, *variant)),
-            )?;
-            let all_subsumed = try_all(variants.iter().map(|variant| {
-                relation_or(types_match(db, annotated, *variant), || {
-                    Some(is_base_type_of_literal(db, annotated, *variant))
-                })
-            }))?;
-            if has_base && all_subsumed {
-                return Some(false);
-            }
-            Some(
-                try_all(variants.iter().map(|variant| {
-                    relation_or(types_match(db, annotated, *variant), || {
-                        is_nonunion_wider(db, annotated, *variant)
-                    })
-                }))? && try_any(
-                    variants
-                        .iter()
-                        .map(|variant| is_nonunion_wider(db, annotated, *variant)),
-                )?,
-            )
-        }
-        _ => is_nonunion_wider(db, annotated, inferred),
+                    .map(|variant| is_nonunion_wider(db, annotated, *variant)),
+            )?,
+        );
     }
+    is_nonunion_wider(db, annotated, inferred)
 }
 
 fn is_union_wider_than_returns<'db>(
@@ -622,33 +944,33 @@ fn types_match<'db>(
         if left == right {
             return Some(true);
         }
-        match (left, right) {
-            (TypeData::Generic(left_generic), TypeData::Generic(right_generic)) => {
-                return Some(left_generic.name(db) == right_generic.name(db));
-            }
-            (TypeData::InstanceOf(left_instance), TypeData::InstanceOf(right_instance))
-                if left_instance.type_parameters(db).is_empty()
-                    && right_instance.type_parameters(db).is_empty() =>
-            {
-                left = left_instance.ty(db);
-                right = right_instance.ty(db);
-            }
-            (TypeData::Generic(generic), TypeData::InstanceOf(instance))
-                if instance.type_parameters(db).is_empty() =>
-            {
-                return Some(
-                    matches!(instance.ty(db), TypeData::Generic(other) if generic.name(db) == other.name(db)),
-                );
-            }
-            (TypeData::InstanceOf(instance), TypeData::Generic(generic))
-                if instance.type_parameters(db).is_empty() =>
-            {
-                return Some(
-                    matches!(instance.ty(db), TypeData::Generic(other) if generic.name(db) == other.name(db)),
-                );
-            }
-            _ => return Some(false),
+        if let (TypeData::Generic(left_generic), TypeData::Generic(right_generic)) = (left, right) {
+            return Some(left_generic.name(db) == right_generic.name(db));
         }
+        if let (TypeData::InstanceOf(left_instance), TypeData::InstanceOf(right_instance)) =
+            (left, right)
+            && left_instance.type_parameters(db).is_empty()
+            && right_instance.type_parameters(db).is_empty()
+        {
+            left = left_instance.ty(db);
+            right = right_instance.ty(db);
+            continue;
+        }
+        if let (TypeData::Generic(generic), TypeData::InstanceOf(instance)) = (left, right)
+            && instance.type_parameters(db).is_empty()
+        {
+            return Some(
+                matches!(instance.ty(db), TypeData::Generic(other) if generic.name(db) == other.name(db)),
+            );
+        }
+        if let (TypeData::InstanceOf(instance), TypeData::Generic(generic)) = (left, right)
+            && instance.type_parameters(db).is_empty()
+        {
+            return Some(
+                matches!(instance.ty(db), TypeData::Generic(other) if generic.name(db) == other.name(db)),
+            );
+        }
+        return Some(false);
     }
     None
 }
@@ -688,216 +1010,280 @@ fn try_any(results: impl IntoIterator<Item = Option<bool>>) -> Option<bool> {
     (!unknown).then_some(false)
 }
 
-fn literal_text(db: &dyn TypeDb, ty: TypeData<'_>) -> Option<String> {
-    let TypeData::Literal(literal) = ty else {
-        return None;
-    };
-    match literal.literal(db) {
-        Literal::String(value) => Some(format!("\"{}\"", value.as_str())),
-        Literal::Number(value) => Some(value.as_str().to_string()),
-        Literal::Boolean(value) => Some(value.as_bool().to_string()),
-        _ => None,
-    }
-}
-
-fn renderable_variant(db: &dyn TypeDb, ty: TypeData<'_>) -> Option<String> {
-    match ty {
-        TypeData::String => Some("string".into()),
-        TypeData::Number => Some("number".into()),
-        TypeData::Boolean => Some("boolean".into()),
-        TypeData::BigInt => Some("bigint".into()),
-        _ => literal_text(db, ty),
-    }
-}
-
-fn clean_literal_text(text: &str) -> bool {
-    !text.contains("...") && !text.contains("__internal") && !text.contains("typeof import(")
-}
-
-fn join_description(parts: Vec<String>) -> Option<String> {
-    if parts.is_empty() || parts.iter().any(|part| !clean_literal_text(part)) {
-        return None;
-    }
-    let description = parts.join(RETURN_TYPE_SEPARATOR);
-    (description.len() <= MAX_RETURN_TYPE_DESCRIPTION_LENGTH).then_some(description)
-}
-
-fn render_inferred(db: &dyn TypeDb, returns: &[TypeData<'_>]) -> Option<String> {
-    join_description(
-        returns
-            .iter()
-            .map(|ty| literal_text(db, *ty))
-            .collect::<Option<Vec<_>>>()?,
-    )
-}
-
-fn render_narrowed<'db>(
+fn narrowed_type_candidates<'db>(
     db: &'db dyn TypeDb,
     annotation: TypeData<'db>,
     returns: &[TypeData<'db>],
-) -> Result<Option<String>, ()> {
+) -> NarrowedTypeCandidates<'db> {
     let variants = union_variants(db, annotation);
     let mut covered = Vec::new();
     for variant in &variants {
-        if try_any(returns.iter().map(|return_ty| {
+        let Some(is_covered) = try_any(returns.iter().map(|return_ty| {
             relation_or(types_match(db, *variant, *return_ty), || {
                 is_nonunion_wider(db, *variant, *return_ty)
             })
-        }))
-        .ok_or(())?
-        {
+        })) else {
+            return NarrowedTypeCandidates::Indeterminate;
+        };
+        if is_covered {
             covered.push(*variant);
         }
     }
     if covered.is_empty() || covered.len() == variants.len() {
-        return Ok(None);
+        return NarrowedTypeCandidates::Unavailable;
     }
-    let has_widening = try_any(covered.iter().map(|variant| {
+    let Some(has_widening) = try_any(covered.iter().map(|variant| {
         try_any(returns.iter().map(|return_ty| {
             let matches = types_match(db, *variant, *return_ty)?;
             let wider = is_nonunion_wider(db, *variant, *return_ty)?;
             Some(!matches && wider)
         }))
-    }))
-    .ok_or(())?;
+    })) else {
+        return NarrowedTypeCandidates::Indeterminate;
+    };
     if has_widening
         && !(covered.len() == 1 && returns.len() == 1 && is_literal_of_primitive(db, returns[0]))
     {
-        return Ok(None);
+        return NarrowedTypeCandidates::Unavailable;
     }
-    Ok(covered
-        .iter()
-        .map(|ty| renderable_variant(db, *ty))
-        .collect::<Option<Vec<_>>>()
-        .and_then(join_description))
+    NarrowedTypeCandidates::Available(covered.into_boxed_slice())
 }
 
-#[derive(Clone, Copy, Debug, Default)]
-/// Evidence collected from return expressions for the user-visible diagnostic.
-pub struct ReturnTypeEvidence {
-    /// At least one return expression contains a const assertion.
-    pub has_any_const: bool,
-    /// Number of object-widening casts observed in return expressions.
-    pub object_wide_casts: usize,
-    /// At least one return is narrower than the declared object type.
-    pub has_narrower_than_object: bool,
-    /// At least one assertion intentionally pins the declared return type.
-    pub has_pinning_assertion: bool,
-    /// Prefer showing the inferred replacement over a generic widening hint.
-    pub prefer_inferred_suggestion: bool,
+/// The relation between a declared return type and the inferred return values.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ReturnTypeVerdict {
+    /// The declared type has a strict widening relation to the inferred returns.
+    Wider,
+    /// The declared and inferred return types are equivalent.
+    Equal,
+    /// At least one inferred return is not covered by the declared type.
+    Incompatible,
+    /// Resolution, a cycle, or a traversal budget prevented a reliable answer.
+    Indeterminate,
 }
 
+/// Candidate declared-type variants that cover the inferred returns.
 #[derive(Clone, Debug, Eq, PartialEq)]
-/// Data used to render a `noMisleadingReturnType` diagnostic.
-pub struct MisleadingReturnType {
-    /// A concise inferred return-type replacement when one can be rendered.
-    pub suggestion: Option<String>,
+pub enum NarrowedTypeCandidates<'db> {
+    /// Candidate variants were computed successfully.
+    Available(Box<[TypeData<'db>]>),
+    /// No strict subset of the declared variants is suitable.
+    Unavailable,
+    /// Candidate traversal could not produce a reliable result.
+    Indeterminate,
 }
 
-pub(crate) fn check_misleading_return_type<'db>(
+/// Structured result of comparing declared and inferred return types.
+pub struct ReturnTypeRelation<'db> {
     db: &'db dyn TypeDb,
-    mut annotation: TypeData<'db>,
-    returns: Vec<TypeData<'db>>,
-    evidence: ReturnTypeEvidence,
-    is_async: bool,
-) -> Option<MisleadingReturnType> {
-    if is_escape_hatch(annotation) {
-        return None;
-    }
-    if is_async {
-        annotation = promise_inner(db, annotation).unwrap_or(annotation);
-    }
-    annotation = collapse_union_absorbed_by_primitive(db, annotation)
-        .ok()?
-        .unwrap_or(annotation);
+    declared: TypeData<'db>,
+    inferred: Box<[TypeData<'db>]>,
+    verdict: ReturnTypeVerdict,
+    narrowed: NarrowedTypeCandidates<'db>,
+    only_property_literal_widening: Option<bool>,
+}
 
-    let return_types = normalize_boolean_return_types(db, returns);
-    if return_types.is_empty() {
-        return None;
-    }
-    if return_types.len() == 1
-        && !evidence.has_any_const
-        && !evidence.has_pinning_assertion
-        && is_literal_of_primitive(db, return_types[0])
-        && !matches!(annotation, TypeData::Union(_))
-    {
-        return None;
-    }
-    if !evidence.has_any_const
-        && evidence.object_wide_casts == return_types.len()
-        && matches!(annotation, TypeData::ObjectKeyword)
-    {
-        return None;
-    }
-    if matches!(annotation, TypeData::Boolean)
-        && return_types
-            .iter()
-            .any(|ty| ty.is_boolean_literal(db, true))
-        && return_types
-            .iter()
-            .any(|ty| ty.is_boolean_literal(db, false))
-    {
-        return None;
-    }
-    if return_types.iter().any(|ty| is_any_contaminated(db, *ty)) {
-        return None;
-    }
-    if matches!(annotation, TypeData::Union(_))
-        && union_variants(db, annotation)
-            .iter()
-            .any(|ty| matches!(ty, TypeData::UnknownKeyword | TypeData::Unknown))
-    {
-        return None;
-    }
-    if includes_undefined(db, annotation)
-        && !return_types.iter().any(|ty| includes_undefined(db, *ty))
-    {
-        return None;
-    }
-    if return_types
-        .iter()
-        .any(|ty| is_intersection_with_type_param(db, *ty))
-    {
-        return None;
-    }
-    if !evidence.has_any_const && is_only_property_literal_widening(db, annotation, &return_types)?
-    {
-        return None;
+impl<'db> ReturnTypeRelation<'db> {
+    pub fn db(&self) -> &'db dyn TypeDb {
+        self.db
     }
 
-    let is_misleading = if matches!(annotation, TypeData::Union(_)) {
-        is_union_wider_than_returns(db, annotation, &return_types)?
-    } else if matches!(annotation, TypeData::ObjectKeyword) {
-        !return_types
+    pub fn declared(&self) -> TypeData<'db> {
+        self.declared
+    }
+
+    pub fn inferred(&self) -> &[TypeData<'db>] {
+        &self.inferred
+    }
+
+    pub fn verdict(&self) -> ReturnTypeVerdict {
+        self.verdict
+    }
+
+    pub fn narrowed(&self) -> &NarrowedTypeCandidates<'db> {
+        &self.narrowed
+    }
+
+    pub fn is_only_property_literal_widening(&self) -> Option<bool> {
+        self.only_property_literal_widening
+    }
+
+    pub fn has_single_primitive_literal_return(&self) -> bool {
+        self.inferred.len() == 1 && is_literal_of_primitive(self.db, self.inferred[0])
+    }
+
+    pub fn declared_is_escape_hatch(&self) -> bool {
+        is_escape_hatch(self.declared)
+    }
+
+    pub fn inferred_is_empty(&self) -> bool {
+        self.inferred.is_empty()
+    }
+
+    pub fn has_any_contaminated_inferred(&self) -> bool {
+        self.inferred
             .iter()
-            .any(|ty| includes_object_keyword(db, *ty))
-            && evidence.object_wide_casts == 0
-            && (evidence.has_narrower_than_object
-                || return_types
-                    .iter()
-                    .map(|ty| is_wider_than(db, annotation, *ty))
-                    .collect::<Option<Vec<_>>>()?
-                    .into_iter()
-                    .any(|is_wider| is_wider))
-    } else {
-        try_all(
-            return_types
+            .any(|ty| is_any_contaminated(self.db, *ty))
+    }
+
+    pub fn declared_union_contains_unknown(&self) -> bool {
+        matches!(self.declared, TypeData::Union(_))
+            && union_variants(self.db, self.declared)
                 .iter()
-                .map(|ty| is_wider_than(db, annotation, *ty)),
-        )?
-    };
-    if !is_misleading {
-        return None;
+                .any(|ty| matches!(ty, TypeData::UnknownKeyword | TypeData::Unknown))
     }
 
-    let suggestion = if evidence.has_any_const || evidence.prefer_inferred_suggestion {
-        render_inferred(db, &return_types)
-    } else {
-        render_narrowed(db, annotation, &return_types)
-            .ok()?
-            .or_else(|| render_inferred(db, &return_types))
+    pub fn has_undefined_mismatch(&self) -> bool {
+        includes_undefined(self.db, self.declared)
+            && !self
+                .inferred
+                .iter()
+                .any(|ty| includes_undefined(self.db, *ty))
+    }
+
+    pub fn inferred_has_generic_intersection(&self) -> bool {
+        self.inferred
+            .iter()
+            .any(|ty| is_intersection_with_type_param(self.db, *ty))
+    }
+
+    pub fn includes_object_return(&self) -> bool {
+        self.inferred
+            .iter()
+            .any(|ty| includes_object_keyword(self.db, *ty))
+    }
+
+    pub fn object_has_wider_return(&self) -> Option<bool> {
+        complete_any(
+            self.inferred
+                .iter()
+                .map(|ty| is_wider_than(self.db, self.declared, *ty)),
+        )
+    }
+}
+
+fn indeterminate_relation<'db>(
+    db: &'db dyn TypeDb,
+    declared: TypeData<'db>,
+    inferred: Box<[TypeData<'db>]>,
+) -> ReturnTypeRelation<'db> {
+    ReturnTypeRelation {
+        db,
+        declared,
+        inferred,
+        verdict: ReturnTypeVerdict::Indeterminate,
+        narrowed: NarrowedTypeCandidates::Indeterminate,
+        only_property_literal_widening: None,
+    }
+}
+
+fn exact_returns_match(
+    db: &dyn TypeDb,
+    declared: TypeData<'_>,
+    inferred: &[TypeData<'_>],
+) -> Option<bool> {
+    try_all(
+        inferred
+            .iter()
+            .map(|inferred| types_match(db, declared, *inferred)),
+    )
+}
+
+fn union_covers_returns(
+    db: &dyn TypeDb,
+    declared: TypeData<'_>,
+    inferred: &[TypeData<'_>],
+) -> Option<bool> {
+    let variants = union_variants(db, declared);
+    try_all(inferred.iter().map(|inferred| {
+        try_any(variants.iter().map(|variant| {
+            relation_or(types_match(db, *variant, *inferred), || {
+                is_nonunion_wider(db, *variant, *inferred)
+            })
+        }))
+    }))
+}
+
+fn complete_any(results: impl IntoIterator<Item = Option<bool>>) -> Option<bool> {
+    let mut any = false;
+    for result in results {
+        any |= result?;
+    }
+    Some(any)
+}
+
+/// Compares a declared return type with the inferred return values.
+pub fn compare_declared_return_type<'db>(
+    db: &'db dyn TypeDb,
+    declared: TypeData<'db>,
+    inferred: &[TypeData<'db>],
+) -> ReturnTypeRelation<'db> {
+    if is_escape_hatch(declared) {
+        return indeterminate_relation(db, declared, inferred.into());
+    }
+    let Ok(collapsed) = collapse_union_absorbed_by_primitive(db, declared) else {
+        return indeterminate_relation(db, declared, inferred.into());
     };
-    Some(MisleadingReturnType { suggestion })
+    let declared = collapsed.unwrap_or(declared);
+    let inferred = normalize_boolean_return_types(db, inferred.to_vec()).into_boxed_slice();
+
+    if inferred.is_empty()
+        || inferred.iter().any(|ty| is_any_contaminated(db, *ty))
+        || matches!(declared, TypeData::Union(_))
+            && union_variants(db, declared)
+                .iter()
+                .any(|ty| matches!(ty, TypeData::UnknownKeyword | TypeData::Unknown))
+        || includes_undefined(db, declared)
+            && !inferred.iter().any(|ty| includes_undefined(db, *ty))
+        || inferred
+            .iter()
+            .any(|ty| is_intersection_with_type_param(db, *ty))
+    {
+        return indeterminate_relation(db, declared, inferred);
+    }
+
+    let only_property_literal_widening = is_only_property_literal_widening(db, declared, &inferred);
+    let narrowed = narrowed_type_candidates(db, declared, &inferred);
+    let verdict = if matches!(declared, TypeData::Union(_)) {
+        match is_union_wider_than_returns(db, declared, &inferred) {
+            Some(true) => ReturnTypeVerdict::Wider,
+            Some(false) => match union_covers_returns(db, declared, &inferred) {
+                Some(true) => ReturnTypeVerdict::Equal,
+                Some(false) => ReturnTypeVerdict::Incompatible,
+                None => ReturnTypeVerdict::Indeterminate,
+            },
+            None => ReturnTypeVerdict::Indeterminate,
+        }
+    } else if matches!(declared, TypeData::ObjectKeyword) {
+        if inferred.iter().any(|ty| includes_object_keyword(db, *ty)) {
+            ReturnTypeVerdict::Equal
+        } else {
+            match complete_any(inferred.iter().map(|ty| is_wider_than(db, declared, *ty))) {
+                Some(true) => ReturnTypeVerdict::Wider,
+                Some(false) => ReturnTypeVerdict::Incompatible,
+                None => ReturnTypeVerdict::Indeterminate,
+            }
+        }
+    } else {
+        match try_all(inferred.iter().map(|ty| is_wider_than(db, declared, *ty))) {
+            Some(true) => ReturnTypeVerdict::Wider,
+            Some(false) => match exact_returns_match(db, declared, &inferred) {
+                Some(true) => ReturnTypeVerdict::Equal,
+                Some(false) => ReturnTypeVerdict::Incompatible,
+                None => ReturnTypeVerdict::Indeterminate,
+            },
+            None => ReturnTypeVerdict::Indeterminate,
+        }
+    };
+
+    ReturnTypeRelation {
+        db,
+        declared,
+        inferred,
+        verdict,
+        narrowed,
+        only_property_literal_widening,
+    }
 }
 
 #[cfg(test)]
@@ -1042,6 +1428,13 @@ mod tests {
     }
 
     #[test]
+    fn object_widening_requires_complete_comparisons() {
+        assert_eq!(complete_any([Some(true), None]), None);
+        assert_eq!(complete_any([Some(false), None]), None);
+        assert_eq!(complete_any([Some(false), Some(true)]), Some(true));
+    }
+
+    #[test]
     fn generic_cycles_do_not_resolve() {
         let db = TestDb::default();
         let self_reference =
@@ -1159,20 +1552,15 @@ mod tests {
                 expected,
                 "structural widening steps {steps}"
             );
+            let relation = compare_declared_return_type(&db, annotated, &[inferred]);
             assert_eq!(
-                check_misleading_return_type(
-                    &db,
-                    annotated,
-                    vec![inferred],
-                    ReturnTypeEvidence {
-                        has_any_const: true,
-                        ..ReturnTypeEvidence::default()
-                    },
-                    false,
-                )
-                .is_some(),
-                steps <= MAX_RETURN_TYPE_STEPS,
-                "diagnostic steps {steps}"
+                relation.verdict(),
+                if steps <= MAX_RETURN_TYPE_STEPS {
+                    ReturnTypeVerdict::Wider
+                } else {
+                    ReturnTypeVerdict::Indeterminate
+                },
+                "public relation steps {steps}"
             );
         }
     }
@@ -1212,7 +1600,7 @@ mod tests {
     }
 
     #[test]
-    fn generic_union_extra_variant_remains_misleading() {
+    fn generic_union_extra_variant_remains_wider() {
         let db = TestDb::default();
         let generic = TypeData::Generic(InternedGenericTypeParameter::new(
             &db,
@@ -1229,16 +1617,11 @@ mod tests {
             is_union_wider_than_returns(&db, annotation, &[generic]),
             Some(true)
         );
-        assert!(render_narrowed(&db, annotation, &[generic]).is_ok());
-        assert!(
-            check_misleading_return_type(
-                &db,
-                annotation,
-                vec![generic],
-                ReturnTypeEvidence::default(),
-                false,
-            )
-            .is_some()
+        let relation = compare_declared_return_type(&db, annotation, &[generic]);
+        assert_eq!(relation.verdict(), ReturnTypeVerdict::Wider);
+        assert_eq!(
+            relation.narrowed(),
+            &NarrowedTypeCandidates::Available(Box::new([generic]))
         );
     }
 }

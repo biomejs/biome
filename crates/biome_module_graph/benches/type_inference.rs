@@ -231,6 +231,27 @@ fn bench_index_d_ts_db_memoized(bencher: Bencher, name: &str) {
         });
 }
 
+#[divan::bench(
+    name = "bench_index_d_ts_db_unrelated_registry_change",
+    args = index_d_ts_cases()
+)]
+fn bench_index_d_ts_db_unrelated_registry_change(bencher: Bencher, name: &str) {
+    bencher
+        .with_inputs(|| {
+            let (db, module, kind) = build_inferred_db(name);
+            let path = BiomePath::new("unrelated.ts").as_path().to_path_buf();
+            let unrelated = ModuleInfo::new(&db, path.clone(), kind);
+            (db, module, path, unrelated)
+        })
+        .bench_local_values(|(mut db, module, path, unrelated)| {
+            db.insert_module(path.clone(), unrelated);
+            divan::black_box(infer_module_types(&db, module));
+            db.remove_module(&path);
+            divan::black_box(infer_module_types(&db, module));
+            db
+        });
+}
+
 #[divan::bench(name = "bench_index_d_ts_db_invalidated", args = index_d_ts_cases())]
 fn bench_index_d_ts_db_invalidated(bencher: Bencher, name: &str) {
     bencher

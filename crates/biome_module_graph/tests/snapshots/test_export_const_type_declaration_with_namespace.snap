@@ -24,7 +24,7 @@ export = shared;
 ```
 Exports {
   "default" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(4))
+    ExportOwnExport => JsOwnExport::Type(TypeId(4))
   }
 }
 Imports {

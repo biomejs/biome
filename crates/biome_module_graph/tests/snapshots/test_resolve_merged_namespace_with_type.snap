@@ -20,7 +20,7 @@ export type Foo = Foo.Bar;
 ```
 Exports {
   "Foo" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(3))
+    ExportOwnExport => JsOwnExport::Type(TypeId(3))
   }
 }
 Imports {

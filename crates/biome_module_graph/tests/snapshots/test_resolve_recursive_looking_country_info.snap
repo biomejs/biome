@@ -68,10 +68,10 @@ export const codes: {
 ```
 Exports {
   "CountryInfo" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(38))
+    ExportOwnExport => JsOwnExport::Type(TypeId(38))
   }
   "SubdivisionInfo" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(39))
+    ExportOwnExport => JsOwnExport::Type(TypeId(39))
   }
   "subdivision" => {
     ExportOwnExport => JsOwnExport::Binding(1138..1149)

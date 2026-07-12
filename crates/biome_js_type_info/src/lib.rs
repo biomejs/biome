@@ -10,8 +10,8 @@ pub(crate) mod globals_ids;
 mod inferred_type;
 mod interned_types;
 mod local_inference;
-mod misleading_return;
 pub mod resolved;
+mod return_type_relation;
 mod type_data;
 mod type_store;
 
@@ -23,7 +23,9 @@ pub use inferred_type::{
     StringificationUsefulness,
 };
 pub use interned_types::{RawTypeData, TypeDb};
-pub use misleading_return::{MisleadingReturnType, ReturnTypeEvidence};
+pub use return_type_relation::{
+    NarrowedTypeCandidates, ReturnTypeRelation, ReturnTypeVerdict, compare_declared_return_type,
+};
 pub use type_data::*;
 pub use type_store::{RawTypeCollector, TypeStore, UnionCollector};
 

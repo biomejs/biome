@@ -33,10 +33,10 @@ Exports {
     ExportOwnExport => JsOwnExport::Binding(131..137)
   }
   "A" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(0))
+    ExportOwnExport => JsOwnExport::Type(TypeId(0))
   }
   "B" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(13))
+    ExportOwnExport => JsOwnExport::Type(TypeId(13))
   }
 }
 Imports {

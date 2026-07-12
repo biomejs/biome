@@ -79,23 +79,27 @@ fn generate_group_code(category: &str, group: &str) -> Result<TokenStream> {
     {
         let entry = entry?.path();
 
-        // Check if it's a file and has .rs extension
-        if !entry.is_file() || entry.extension().and_then(|e| e.to_str()) != Some("rs") {
+        let file_name = if entry.is_file()
+            && entry.extension().and_then(|extension| extension.to_str()) == Some("rs")
+        {
+            let file_stem = entry
+                .file_stem()
+                .context("path has no file name")?
+                .to_str()
+                .context("could not convert file name to string")?;
+            if file_stem == "mod" {
+                continue;
+            }
+            file_stem
+        } else if entry.is_dir() && entry.join("mod.rs").is_file() {
+            entry
+                .file_name()
+                .context("path has no directory name")?
+                .to_str()
+                .context("could not convert directory name to string")?
+        } else {
             continue;
-        }
-
-        let file_stem = entry
-            .file_stem()
-            .context("path has no file name")?
-            .to_str()
-            .context("could not convert file name to string")?;
-
-        // Skip mod.rs files
-        if file_stem == "mod" {
-            continue;
-        }
-
-        let file_name = file_stem;
+        };
 
         let rule_type = Case::Pascal.convert(file_name);
 

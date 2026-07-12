@@ -2422,15 +2422,14 @@ fn computed_member_reference(
                 .and_then(|name| text_from_token(name.value_token())),
             member.member().ok().and_then(text_from_any_js_name),
         )
+        && object_name.text() == "Symbol"
     {
-        if object_name.text() == "Symbol" {
-            match member_name.text() {
-                "dispose" => return TypeReference::Resolved(GLOBAL_SYMBOL_DISPOSE_ID),
-                "asyncDispose" => {
-                    return TypeReference::Resolved(GLOBAL_SYMBOL_ASYNC_DISPOSE_ID);
-                }
-                _ => {}
+        match member_name.text() {
+            "dispose" => return TypeReference::Resolved(GLOBAL_SYMBOL_DISPOSE_ID),
+            "asyncDispose" => {
+                return TypeReference::Resolved(GLOBAL_SYMBOL_ASYNC_DISPOSE_ID);
             }
+            _ => {}
         }
     }
 

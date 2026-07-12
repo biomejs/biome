@@ -24,9 +24,9 @@ papaya             = { workspace = true }
 salsa              = { workspace = true }
 
 [dev-dependencies]
-biome_fs          = { path = "../biome_fs" }
-biome_html_parser = { path = "../biome_html_parser" }
-biome_js_parser   = { path = "../biome_js_parser", features = ["tests"] }
+biome_fs             = { path = "../biome_fs" }
+biome_html_parser    = { path = "../biome_html_parser" }
+biome_js_parser      = { path = "../biome_js_parser", features = ["tests"] }
 biome_project_layout = { path = "../biome_project_layout" }
 
 [features]

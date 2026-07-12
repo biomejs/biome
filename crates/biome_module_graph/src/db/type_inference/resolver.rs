@@ -217,12 +217,12 @@ impl<'db> ResolutionCtx<'db, '_> {
             Module(biome_rowan::Text),
             Namespace(biome_js_type_info::Path),
         }
-        let metadata = match raw {
-            RawTypeData::Module(module) => NamespaceMetadata::Module(module.name.clone()),
-            RawTypeData::Namespace(namespace) => {
-                NamespaceMetadata::Namespace(namespace.path.clone())
-            }
-            _ => return fallback,
+        let metadata = if let RawTypeData::Module(module) = raw {
+            NamespaceMetadata::Module(module.name.clone())
+        } else if let RawTypeData::Namespace(namespace) = raw {
+            NamespaceMetadata::Namespace(namespace.path.clone())
+        } else {
+            return fallback;
         };
         let scope_id = self
             .js_info

@@ -5,8 +5,8 @@
 
 use crate::TypeDb;
 use crate::interned_types::{ConditionalType, Literal, ReturnType, TypeData, TypeMember};
-use crate::misleading_return::{
-    MisleadingReturnType, ReturnTypeEvidence, check_misleading_return_type,
+use crate::return_type_relation::{
+    ReturnTypeRelation, compare_declared_return_type, is_escape_hatch, promise_inner,
 };
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
@@ -252,19 +252,17 @@ impl<'db> InferredType<'db> {
         is_at_least_as_wide_as_object(self.db, self.data, &mut FxHashSet::default(), 0)
     }
 
-    pub fn check_misleading_return_type(
-        self,
-        returns: &[Self],
-        evidence: ReturnTypeEvidence,
-        is_async: bool,
-    ) -> Option<MisleadingReturnType> {
-        check_misleading_return_type(
-            self.db,
-            self.data,
-            returns.iter().map(|ty| ty.data).collect::<Vec<_>>(),
-            evidence,
-            is_async,
-        )
+    pub fn promise_inner_type(self) -> Option<Self> {
+        promise_inner(self.db, self.data).map(|data| Self::new(self.db, data))
+    }
+
+    pub fn is_return_type_relation_escape_hatch(self) -> bool {
+        is_escape_hatch(self.data)
+    }
+
+    pub fn compare_declared_return_type(self, inferred: &[Self]) -> ReturnTypeRelation<'db> {
+        let inferred = inferred.iter().map(|ty| ty.data).collect::<Vec<_>>();
+        compare_declared_return_type(self.db, self.data, &inferred)
     }
 
     /// Returns whether this callable returns a Promise.
@@ -960,8 +958,8 @@ fn is_at_least_as_wide_as_object<'db>(
     seen: &mut FxHashSet<TypeData<'db>>,
     depth: usize,
 ) -> bool {
-    // `true` treats the cast target as wide and suppresses
-    // `noMisleadingReturnType`; it cannot create a diagnostic.
+    // Exhaustion conservatively treats the target as at least as wide as
+    // `object`; callers must not infer a narrower shape from a partial walk.
     if depth >= MAX_TYPE_RELATION_DEPTH || !seen.insert(ty) {
         return true;
     }

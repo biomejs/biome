@@ -176,7 +176,7 @@ export = vfile;
 ```
 Exports {
   "default" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(27))
+    ExportOwnExport => JsOwnExport::Type(TypeId(27))
   }
 }
 Imports {
