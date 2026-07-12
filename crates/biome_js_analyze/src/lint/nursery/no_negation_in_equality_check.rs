@@ -7,7 +7,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsExpression, JsBinaryExpression, JsParenthesizedExpression, JsSyntaxKind::*, JsSyntaxNode};
 use biome_js_syntax::is_negation;
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxTriviaPiece, TriviaPieceKind};
 use biome_rule_options::no_negation_in_equality_check::NoNegationInEqualityCheckOptions;
 
 declare_lint_rule! {
@@ -128,6 +128,24 @@ impl Rule for NoNegationInEqualityCheck {
 
         // The argument of `!` is the expression to use as the new left side
         let negated_expr = unary.argument().ok()?;
+        let neg_op_token = unary.operator_token().ok()?;
+
+        // --- ASI safety check ---
+        // If a newline precedes the `!` operator and the argument starts with
+        // `/`, removing the `!` would expose `/` at the start of a line, which
+        // the parser would treat as a regex literal instead of division.
+        {
+            let has_preceding_newline = neg_op_token
+                .leading_trivia()
+                .pieces()
+                .any(|p| p.kind() == TriviaPieceKind::Newline);
+            if has_preceding_newline {
+                let arg_text = negated_expr.syntax().text_trimmed().to_string();
+                if arg_text.starts_with('/') {
+                    return None;
+                }
+            }
+        }
 
         // Flip the operator: === → !==, !== → ===
         let new_op_kind = match operator.kind() {
@@ -136,9 +154,92 @@ impl Rule for NoNegationInEqualityCheck {
             _ => return None,
         };
 
+        // --- Trivia transfer ---
+        // Collect trivia from discarded tokens (the `!` operator and any
+        // wrapping parentheses) so that comments are preserved in the fix.
+        //
+        // - Leading trivia of `!` → should appear before the new left expr.
+        // - Trailing trivia of `!` (comments between `!` and its argument)
+        //   → should appear before the new comparison operator.
+        // - Paren `(` trivia → before the new left expr.
+        // - Paren `)` trivia → before the new operator.
+        // - Old operator's leading trivia → before the new operator.
+
+        // Collect leading trivia pieces for the new left expression.
+        let mut leading_for_left: Vec<SyntaxTriviaPiece<biome_js_syntax::JsLanguage>> = Vec::new();
+        for p in neg_op_token.leading_trivia().pieces() {
+            leading_for_left.push(p);
+        }
+
+        // Collect trailing/operator trivia pieces.
+        let mut leading_for_op: Vec<SyntaxTriviaPiece<biome_js_syntax::JsLanguage>> = Vec::new();
+        for p in neg_op_token.trailing_trivia().pieces() {
+            leading_for_op.push(p);
+        }
+
+        // Walk through parenthesized wrappers from outer to inner.
+        {
+            let mut current = left.syntax().clone();
+            loop {
+                let Some(paren) = JsParenthesizedExpression::cast_ref(&current) else {
+                    break;
+                };
+                if let Ok(lp) = paren.l_paren_token() {
+                    for p in lp.leading_trivia().pieces() {
+                        leading_for_left.push(p);
+                    }
+                    for p in lp.trailing_trivia().pieces() {
+                        leading_for_left.push(p);
+                    }
+                }
+                if let Ok(rp) = paren.r_paren_token() {
+                    for p in rp.leading_trivia().pieces() {
+                        leading_for_op.push(p);
+                    }
+                    for p in rp.trailing_trivia().pieces() {
+                        leading_for_op.push(p);
+                    }
+                }
+                match paren.expression() {
+                    Ok(inner_expr) => current = inner_expr.into_syntax(),
+                    Err(_) => break,
+                }
+            }
+        }
+
+        // Transfer the original comparison operator's leading trivia.
+        for p in operator.leading_trivia().pieces() {
+            leading_for_op.push(p);
+        }
+
+        // --- Build the new expression ---
+
+        // 1. Prepend collected leading trivia to the new left expression.
+        let mut left_syntax = negated_expr.syntax().clone();
+        if !leading_for_left.is_empty() {
+            if let Some(first_token) = left_syntax.first_token() {
+                let new_first = first_token.prepend_trivia_pieces(leading_for_left);
+                left_syntax = left_syntax.replace_child(
+                    first_token.into(),
+                    new_first.into(),
+                )?;
+            }
+        }
+
+        // 2. Build the new operator token with transferred trivia.
+        // Start with a standard space-decorated token (has leading+trailing space).
+        let new_op = make::token_decorated_with_space(new_op_kind);
+        // Prepend preserved trivia pieces before the existing leading space.
+        let new_op = if leading_for_op.is_empty() {
+            new_op
+        } else {
+            new_op.prepend_trivia_pieces(leading_for_op)
+        };
+
+        let new_left = AnyJsExpression::cast_ref(&left_syntax)?.clone();
         let new_binary = make::js_binary_expression(
-            negated_expr,
-            make::token_decorated_with_space(new_op_kind),
+            new_left,
+            new_op,
             right,
         );
 
