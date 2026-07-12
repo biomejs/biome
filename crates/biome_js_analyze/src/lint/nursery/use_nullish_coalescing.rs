@@ -94,7 +94,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```ts,use_options
+    /// ```ts,expect_diagnostic,use_options
     /// declare const cond: string | null;
     /// if (cond || 'fallback') {}
     /// ```

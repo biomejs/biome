@@ -30,7 +30,7 @@ declare_lint_rule! {
     ///
     /// A non-nullable value never needs an `if` guard:
     ///
-    /// ```ts
+    /// ```ts,expect_diagnostic
     /// function head<T>(items: T[]) {
     ///     if (items) {
     ///         return items[0];
@@ -41,7 +41,7 @@ declare_lint_rule! {
     /// A literal-union type can never be empty, so the truthiness check is
     /// redundant:
     ///
-    /// ```ts
+    /// ```ts,expect_diagnostic
     /// function foo(arg: 'bar' | 'baz') {
     ///     if (arg) {}
     /// }
@@ -49,13 +49,13 @@ declare_lint_rule! {
     ///
     /// `?.` and `??` on operands that are guaranteed to be non-nullish:
     ///
-    /// ```ts
+    /// ```ts,expect_diagnostic
     /// function bar(arg: string) {
     ///     return arg?.length;
     /// }
     /// ```
     ///
-    /// ```ts
+    /// ```ts,expect_diagnostic
     /// function withDefault(name: string) {
     ///     return name ?? "anonymous";
     /// }
@@ -63,7 +63,7 @@ declare_lint_rule! {
     ///
     /// `||` and `&&` on always-truthy operands:
     ///
-    /// ```ts
+    /// ```ts,expect_diagnostic
     /// interface Config { items: string[] }
     /// function f(c: Config) {
     ///     return c.items || [];
@@ -72,14 +72,14 @@ declare_lint_rule! {
     ///
     /// `!expr` on a value that is always truthy:
     ///
-    /// ```ts
+    /// ```ts,expect_diagnostic
     /// const items = [];
     /// if (!items) {}
     /// ```
     ///
     /// Comparing a non-nullable value against `null` or `undefined`:
     ///
-    /// ```ts
+    /// ```ts,expect_diagnostic
     /// function f(x: string) {
     ///     return x === null;
     /// }
@@ -87,7 +87,7 @@ declare_lint_rule! {
     ///
     /// A `case` whose value can never equal the value passed to `switch`:
     ///
-    /// ```ts
+    /// ```ts,expect_diagnostic
     /// function f(v: 'a' | 'b') {
     ///     switch (v) {
     ///         case 'c': return 1;

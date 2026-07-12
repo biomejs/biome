@@ -71,16 +71,8 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"export function foo(_arg: string) {
-  const { bar, ...params } = something();
-  return console.log(bar, params);
-
-  function something() {
-    const obj: Record<string, string> = { bar: "bar" };
-    const { bar, baz } = obj;
-    return { bar, baz };
-  }
-}
+    const SOURCE: &str = r#"declare const x: string | null;
+const value = x !== null ? x : 'default';
 "#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
@@ -98,7 +90,7 @@ fn quick_test() {
             AnalyzerConfiguration::default().with_jsx_runtime(JsxRuntime::ReactClassic),
         )
         .with_working_directory(fs.working_directory.clone());
-    let rule_filter = RuleFilter::Rule("correctness", "noUnusedImports");
+    let rule_filter = RuleFilter::Rule("nursery", "useNullishCoalescing");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
@@ -140,7 +132,7 @@ fn quick_test() {
         },
     );
 
-    // assert_eq!(error_ranges.as_slice(), &[]);
+    assert_eq!(error_ranges.len(), 1);
 }
 
 #[test]

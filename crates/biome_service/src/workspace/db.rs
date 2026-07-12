@@ -189,6 +189,16 @@ impl OwnedDb {
         let mut db = self.db.lock();
         f(&mut db)
     }
+
+    fn with_parsed_source_update<R>(&self, f: impl FnOnce(&mut WorkspaceDb) -> R) -> R {
+        match self.update_mode {
+            ParsedSourceUpdateMode::Replace => {
+                let mut db = self.db.lock().clone();
+                f(&mut db)
+            }
+            ParsedSourceUpdateMode::Setters => self.with_setter(f),
+        }
+    }
 }
 
 impl Default for DbState {
@@ -217,7 +227,7 @@ impl DbState {
     }
 
     pub(crate) fn update_parsed_root(&self, path: &Utf8Path, new_root: SendNode) {
-        self.storage.with_setter(|db| {
+        self.storage.with_parsed_source_update(|db| {
             db.update_parsed_root_with_mode(path, new_root, self.storage.update_mode)
         })
     }
@@ -229,7 +239,7 @@ impl DbState {
         language_index: usize,
         snippets: Vec<(AnyParse, EmbedContent, usize)>,
     ) -> ParsedSource {
-        self.storage.with_setter(|db| {
+        self.storage.with_parsed_source_update(|db| {
             let parsed_snippets = create_parsed_snippets(db, snippets);
             db.update_or_insert_file(
                 path,
@@ -414,6 +424,18 @@ mod tests {
         let _db = state.fork();
 
         state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+    }
+
+    #[test]
+    fn replacement_update_does_not_cancel_concurrent_reads() {
+        let state = DbState::default();
+        let path = Utf8PathBuf::from("test.js");
+        let db = state.fork();
+
+        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+
+        assert_eq!(state.pending_setters(), 0);
+        assert!(db.get_file(&path).is_some());
     }
 
     #[test]
