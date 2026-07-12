@@ -52,93 +52,152 @@ declare_lint_rule! {
         name: "noNegationInEqualityCheck",
         language: "js",
         recommended: false,
-        fix_kind: FixKind::Safe,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
-pub struct RuleState {
-    negated_expression: AnyJsExpression,
-    operator_kind: JsSyntaxKind,
+#[derive(Debug, Clone)]
+pub enum RuleState {
+    FlipOperator {
+        negated_expression: AnyJsExpression,
+        operator_kind: JsSyntaxKind,
+    },
+    NegateEntireEquality,
 }
 
 impl Rule for NoNegationInEqualityCheck {
     type Query = Ast<JsBinaryExpression>;
     type State = RuleState;
-    type Signals = Option<Self::State>;
+    type Signals = Vec<Self::State>;
     type Options = NoNegationInEqualityCheckOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let n = ctx.query();
-        let op_kind = n.operator_token().ok()?.kind();
+        let op_kind = match n.operator_token().ok() {
+            Some(op) => op.kind(),
+            None => return vec![],
+        };
 
         if !matches!(op_kind, JsSyntaxKind::EQ3 | JsSyntaxKind::NEQ2) {
-            return None;
+            return vec![];
         }
 
-        let left = n.left().ok()?;
-        let unary_expr = left.as_js_unary_expression()?;
+        let left = match n.left().ok() {
+            Some(left) => left,
+            None => return vec![],
+        };
+        let unary_expr = match left.as_js_unary_expression() {
+            Some(unary) => unary,
+            None => return vec![],
+        };
 
-        if unary_expr.operator().ok()? == JsUnaryOperator::LogicalNot {
+        if unary_expr.operator().ok() == Some(JsUnaryOperator::LogicalNot) {
             // Skip double negation !!
-            let argument = unary_expr.argument().ok()?;
-            if let AnyJsExpression::JsUnaryExpression(inner_unary) = &argument
-                && inner_unary.operator().ok()? == JsUnaryOperator::LogicalNot
-            {
-                return None;
+            let argument = match unary_expr.argument().ok() {
+                Some(arg) => arg,
+                None => return vec![],
+            };
+            if let AnyJsExpression::JsUnaryExpression(inner_unary) = &argument {
+                if inner_unary.operator().ok() == Some(JsUnaryOperator::LogicalNot) {
+                    return vec![];
+                }
             }
 
-            return Some(RuleState {
-                negated_expression: argument,
-                operator_kind: op_kind,
-            });
+            return vec![
+                RuleState::FlipOperator {
+                    negated_expression: argument,
+                    operator_kind: op_kind,
+                },
+                RuleState::NegateEntireEquality,
+            ];
         }
 
-        None
+        vec![]
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                markup! {
-                    "The negation operator "<Emphasis>"!"</Emphasis>" is evaluated before the equality operator."
-                },
-            )
-            .note(markup! {
-                "This is often a mistake as it compares a boolean value with another value."
-            })
-            .note(markup! {
-                "If you want to negate the whole equality, use parentheses: "<Emphasis>"!(a === b)"</Emphasis>"."
-            }),
+        let diag = RuleDiagnostic::new(
+            rule_category!(),
+            node.range(),
+            markup! {
+                "The negation operator "<Emphasis>"!"</Emphasis>" is evaluated before the equality operator."
+            },
         )
+        .note(markup! {
+            "This is often a mistake as it compares a boolean value with another value."
+        });
+
+        match state {
+            RuleState::FlipOperator { .. } => Some(diag.note(markup! {
+                "If you want to remove the negation, exchange the operator: "<Emphasis>"a !== b"</Emphasis>"."
+            })),
+            RuleState::NegateEntireEquality => Some(diag.note(markup! {
+                "If you want to negate the whole equality, use parentheses: "<Emphasis>"!(a === b)"</Emphasis>"."
+            })),
+        }
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
 
-        let new_operator = match state.operator_kind {
-            JsSyntaxKind::EQ3 => T![!==],
-            JsSyntaxKind::NEQ2 => T![===],
-            _ => return None,
-        };
+        match state {
+            RuleState::FlipOperator {
+                negated_expression,
+                operator_kind,
+            } => {
+                let new_operator = match operator_kind {
+                    JsSyntaxKind::EQ3 => T![!==],
+                    JsSyntaxKind::NEQ2 => T![===],
+                    _ => return None,
+                };
 
-        let old_op = node.operator_token().ok()?;
-        let new_op_token = make::token(new_operator)
-            .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
-            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
-        mutation.replace_token(old_op, new_op_token);
+                let old_op = node.operator_token().ok()?;
+                let new_op_token = make::token(new_operator)
+                    .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
+                    .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+                mutation.replace_token(old_op, new_op_token);
 
-        let left = node.left().ok()?;
-        mutation.replace_node(left, state.negated_expression.clone());
+                let left = node.left().ok()?;
+                mutation.replace_node(left, negated_expression.clone());
 
-        Some(JsRuleAction::new(
-            ctx.metadata().action_category(ctx.category(), ctx.group()),
-            ctx.metadata().applicability(),
-            markup! { "Exchange the operator to remove the negation." }.to_owned(),
-            mutation,
-        ))
+                Some(JsRuleAction::new(
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
+                    ctx.metadata().applicability(),
+                    markup! { "Exchange the operator to remove the negation." }.to_owned(),
+                    mutation,
+                ))
+            }
+            RuleState::NegateEntireEquality => {
+                let left = node.left().ok()?;
+                let unary_expr = left.as_js_unary_expression()?;
+                let argument = unary_expr.argument().ok()?;
+                let op_token = unary_expr.operator_token().ok()?;
+
+                let new_bin_expr = node.clone().with_left(argument);
+                let paren_expr = make::js_parenthesized_expression(
+                    make::token(T!['(']),
+                    AnyJsExpression::JsBinaryExpression(new_bin_expr),
+                    make::token(T![')']),
+                );
+                let new_unary_expr = make::js_unary_expression(
+                    op_token,
+                    AnyJsExpression::JsParenthesizedExpression(paren_expr),
+                );
+
+                mutation.replace_node(
+                    AnyJsExpression::JsBinaryExpression(node.clone()),
+                    AnyJsExpression::from(new_unary_expr),
+                );
+
+                Some(JsRuleAction::new(
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
+                    ctx.metadata().applicability(),
+                    markup! { "Negate the whole equality with parentheses." }.to_owned(),
+                    mutation,
+                ))
+            }
+        }
     }
 }
