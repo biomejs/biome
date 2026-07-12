@@ -1,6 +1,6 @@
 use super::{InferredModuleTypes, collected_type_result, expand_canonical_global};
 use crate::ModuleDb;
-use crate::db::queries::infer_module_types;
+use crate::db::queries::infer_module_types_query;
 use crate::module_graph::ModuleInfo;
 use biome_js_type_info::resolved::{
     InferredLiteral, InferredLocalTypeHandle, InferredModuleKey, InferredReturnType,
@@ -53,7 +53,8 @@ impl<'db> InferredModuleTypes<'db> {
         }
 
         let module = module_for_key(db, module_key)?;
-        infer_module_types(db, module).and_then(|types| types.types.get(type_id.index()).copied())
+        infer_module_types_query(db, module)
+            .and_then(|types| types.types.get(type_id.index()).copied())
     }
 
     pub(in crate::db::type_inference) fn find_member_type_iterative(
@@ -175,6 +176,9 @@ impl<'db> InferredModuleTypes<'db> {
             match ty {
                 InferredTypeData::Class(class) => {
                     if let Some(mut extends) = class.extends(db) {
+                        if pending.len() >= remaining_steps {
+                            return Some(InferredTypeData::Unknown);
+                        }
                         if matches!(lookup, MemberLookup::Any) {
                             extends = class_side_type(db, extends);
                         }
@@ -191,6 +195,9 @@ impl<'db> InferredModuleTypes<'db> {
                     }
                 }
                 InferredTypeData::Interface(interface) => {
+                    if interface.extends(db).len() > remaining_steps.saturating_sub(pending.len()) {
+                        return Some(InferredTypeData::Unknown);
+                    }
                     for ty in interface.extends(db).iter().rev() {
                         let Ok(ty) = apply_substitutions(db, *ty, &state.substitutions) else {
                             return Some(InferredTypeData::Unknown);
@@ -205,6 +212,9 @@ impl<'db> InferredModuleTypes<'db> {
                 }
                 InferredTypeData::Generic(generic) => {
                     if let Some(constraint) = generic.constraint(db) {
+                        if pending.len() >= remaining_steps {
+                            return Some(InferredTypeData::Unknown);
+                        }
                         let Ok(constraint) =
                             apply_substitutions(db, constraint, &state.substitutions)
                         else {
@@ -219,6 +229,10 @@ impl<'db> InferredModuleTypes<'db> {
                     }
                 }
                 InferredTypeData::Intersection(intersection) => {
+                    if intersection.types(db).len() > remaining_steps.saturating_sub(pending.len())
+                    {
+                        return Some(InferredTypeData::Unknown);
+                    }
                     for ty in intersection.types(db).iter().rev() {
                         let Ok(ty) = apply_substitutions(db, *ty, &state.substitutions) else {
                             return Some(InferredTypeData::Unknown);
@@ -232,6 +246,10 @@ impl<'db> InferredModuleTypes<'db> {
                     }
                 }
                 InferredTypeData::MergedReference(reference) => {
+                    if reference.targets(db).count() > remaining_steps.saturating_sub(pending.len())
+                    {
+                        return Some(InferredTypeData::Unknown);
+                    }
                     for ty in reference.targets(db) {
                         let Ok(ty) = apply_substitutions(db, ty, &state.substitutions) else {
                             return Some(InferredTypeData::Unknown);
@@ -246,6 +264,9 @@ impl<'db> InferredModuleTypes<'db> {
                 }
                 InferredTypeData::Object(object) => {
                     if let Some(prototype) = object.prototype(db) {
+                        if pending.len() >= remaining_steps {
+                            return Some(InferredTypeData::Unknown);
+                        }
                         let Ok(prototype) =
                             apply_substitutions(db, prototype, &state.substitutions)
                         else {
@@ -260,6 +281,9 @@ impl<'db> InferredModuleTypes<'db> {
                     }
                 }
                 InferredTypeData::Union(union) => {
+                    if union.types(db).len() > remaining_steps.saturating_sub(pending.len()) {
+                        return Some(InferredTypeData::Unknown);
+                    }
                     for ty in union.types(db).iter().rev() {
                         let Ok(ty) = apply_substitutions(db, *ty, &state.substitutions) else {
                             return Some(InferredTypeData::Unknown);
@@ -558,7 +582,10 @@ pub(in crate::db) fn apply_substitutions_to_root_body<'db>(
     Ok(ty)
 }
 
-fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> InferredTypeData<'db> {
+pub(super) fn class_side_type<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
     match ty {
         InferredTypeData::InstanceOf(instance) => instance.ty(db),
         ty @ (InferredTypeData::Unknown

@@ -211,19 +211,17 @@ have the entire module graph at our disposal, so that whenever we run into an
 unresolved `TypeReference::Import` variant, we can resolve it on the spot, at
 which point it becomes a `TypeReference::Resolved` variant again.
 
-Today, results from our full inference cannot be cached for the same reason
-we've seen before: Such a cache would get stale the moment a module is replaced,
-and we don't want to have complex cache invalidation schemes.
-
-Full inference is implemented in
-[`scoped_resolver.rs`](../biome_module_graph/src/js_module_info/scoped_resolver.rs).
+Full inference is implemented as tracked database queries in
+[`queries.rs`](../biome_module_graph/src/db/queries.rs). Query dependencies
+invalidate cached results when modules change. External callers use
+`infer_module_types()` or `infer_module_types_bottom_up()`, which iteratively
+warm imported modules before evaluating the requested module.
 
 ## Type Resolvers
 
-The thing about having all these type references all over the place is that you
-need to perform explicit type resolution to follow these references. That's why
-we have _type resolvers_. There's a `TypeResolver` trait, defined in
-[`resolver.rs`](src/resolver.rs). As of today, we have 4 implementations of it:
+The raw collector representation still uses explicit type resolvers to follow
+references before values enter the database-backed resolved representation.
+The `TypeResolver` trait is defined in [`resolver.rs`](src/resolver.rs).
 
 * **`HardcodedSymbolResolver`**. This one is purely for test purposes.
 * **`GlobalsResolver`**. This is the one that is responsible for resolving
@@ -234,16 +232,9 @@ we have _type resolvers_. There's a `TypeResolver` trait, defined in
   directly.
 * **`JsModuleInfoCollector`**. This one is responsible for collecting
   information about a module, and for performing thin inference on it.
-* **`ModuleResolver`**. This is the one that is responsible for our actual full
-  inference, that is able to infer _across_ modules. Compare this to the
-  `JsModuleInfoCollector` which only collects information inside a single
-  module.
-
-I've mentioned before that types are stored in vectors. Those type vectors are
-stored inside `TypeStore` structures which are kept inside the various
-`TypeResolver` implementations. The nice thing about `TypeStore` is that it
-provides lookups that are as fast as a vector when the `TypeId` is known, while
-also maintaining a hash table for when the `TypeId` is not known.
+Raw types are stored in a `TypeStore` and consumed into `JsModuleInfo`. Full
+cross-module resolution then produces database-backed inferred types in
+`InferredModuleTypes`; it is not performed by a `ModuleResolver`.
 
 ## Flattening
 

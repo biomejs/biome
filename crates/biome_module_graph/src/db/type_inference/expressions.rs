@@ -1,7 +1,7 @@
 use super::{
     collected_type_result, expand_canonical_global,
     lookup::{
-        StaticMemberMode, apply_substitutions, find_member_in_members_for_mode,
+        StaticMemberMode, apply_substitutions, class_side_type, find_member_in_members_for_mode,
         substitutions_for_instance,
     },
     normalize_structural_type,
@@ -678,7 +678,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         let mut seen = FxHashSet::default();
         let mut pending = Vec::from([argument]);
 
-        for _ in 0..MAX_AWAIT_EXPRESSION_STEPS {
+        for step in 0..MAX_AWAIT_EXPRESSION_STEPS {
             let Some(ty) = pending.pop() else {
                 return collected_type_result(self.db, types);
             };
@@ -698,10 +698,20 @@ impl<'db> ResolutionCtx<'db, '_> {
             ) {
                 return Some(InferredTypeData::Unknown);
             } else if let InferredTypeData::Union(union) = ty {
+                let remaining_steps = MAX_AWAIT_EXPRESSION_STEPS - step - 1;
+                if union.types(self.db).len() > remaining_steps.saturating_sub(pending.len()) {
+                    return Some(InferredTypeData::Unknown);
+                }
                 pending.extend(union.types(self.db).iter().rev().copied());
             } else if matches!(ty, InferredTypeData::InstanceOf(_)) {
                 match self.resolve_promise_value_type(ty) {
-                    PromiseValueResolution::Found(value_ty) => pending.push(value_ty),
+                    PromiseValueResolution::Found(value_ty) => {
+                        let remaining_steps = MAX_AWAIT_EXPRESSION_STEPS - step - 1;
+                        if pending.len() >= remaining_steps {
+                            return Some(InferredTypeData::Unknown);
+                        }
+                        pending.push(value_ty);
+                    }
                     PromiseValueResolution::NotPromise => types.push(ty),
                     PromiseValueResolution::Indeterminate => {
                         return Some(InferredTypeData::Unknown);
@@ -752,6 +762,10 @@ impl<'db> ResolutionCtx<'db, '_> {
                 continue;
             }
             if let InferredTypeData::Union(union) = ty {
+                let remaining_steps = MAX_PROMISE_UNWRAP_STEPS - processed;
+                if union.types(self.db).len() > remaining_steps.saturating_sub(pending.len()) {
+                    return PromiseValueResolution::Indeterminate;
+                }
                 let mut child_path = path;
                 child_path.push(ty);
                 pending.extend(
@@ -764,20 +778,32 @@ impl<'db> ResolutionCtx<'db, '_> {
                 continue;
             }
 
-            let direct_bases: Vec<InferredTypeData<'db>> =
-                if let InferredTypeData::Class(class) = ty {
-                    class.extends(self.db).into_iter().collect()
-                } else if let InferredTypeData::Interface(interface) = ty {
-                    interface.extends(self.db).to_vec()
-                } else {
-                    Vec::new()
-                };
-            if !direct_bases.is_empty() {
+            if let InferredTypeData::Class(class) = ty
+                && let Some(base) = class.extends(self.db)
+            {
+                if pending.len() >= MAX_PROMISE_UNWRAP_STEPS - processed {
+                    return PromiseValueResolution::Indeterminate;
+                }
+                let mut child_path = path;
+                child_path.push(ty);
+                pending.push_back((base, child_path));
+                continue;
+            }
+            if let InferredTypeData::Interface(interface) = ty
+                && !interface.extends(self.db).is_empty()
+            {
+                let remaining_steps = MAX_PROMISE_UNWRAP_STEPS - processed;
+                if interface.extends(self.db).len() > remaining_steps.saturating_sub(pending.len())
+                {
+                    return PromiseValueResolution::Indeterminate;
+                }
                 let mut child_path = path;
                 child_path.push(ty);
                 pending.extend(
-                    direct_bases
-                        .into_iter()
+                    interface
+                        .extends(self.db)
+                        .iter()
+                        .copied()
                         .map(|base| (base, child_path.clone())),
                 );
                 continue;
@@ -971,13 +997,9 @@ impl<'db> ResolutionCtx<'db, '_> {
         let object = self.resolve_inferred_type(object);
         let object = expand_canonical_global(self.db, object);
         match object {
-            InferredTypeData::Class(class) => find_member_in_members_for_mode(
-                self.db,
-                class.members(self.db),
-                member_name,
-                StaticMemberMode::Class,
-            )
-            .map(|(ty, is_optional)| self.member_type(ty, is_optional)),
+            InferredTypeData::Class(_) => self
+                .find_static_member_on_resolved_type(object, member_name, StaticMemberMode::Class)
+                .map(|(ty, is_optional)| self.member_type(ty, is_optional)),
             InferredTypeData::InstanceOf(instance) => {
                 let target = instance.ty(self.db);
                 if let InferredTypeData::Local(local) = target
@@ -1004,11 +1026,15 @@ impl<'db> ResolutionCtx<'db, '_> {
                     let ty = self.resolve_static_member_expression(target, member_name)?;
                     return Some(self.apply_member_substitutions(ty, &substitutions));
                 }
-                self.find_static_member_on_resolved_type(target, member_name)
-                    .map(|(ty, is_optional)| {
-                        let ty = self.apply_member_substitutions(ty, &substitutions);
-                        self.member_type(ty, is_optional)
-                    })
+                self.find_static_member_on_resolved_type(
+                    target,
+                    member_name,
+                    StaticMemberMode::Instance,
+                )
+                .map(|(ty, is_optional)| {
+                    let ty = self.apply_member_substitutions(ty, &substitutions);
+                    self.member_type(ty, is_optional)
+                })
             }
             InferredTypeData::Union(union) => {
                 let mut types = Vec::new();
@@ -1051,8 +1077,16 @@ impl<'db> ResolutionCtx<'db, '_> {
                         | InferredTypeData::ThisKeyword
                         | InferredTypeData::UnknownKeyword
                         | InferredTypeData::VoidKeyword) => {
-                            if let Some((member_ty, is_optional)) =
-                                self.find_static_member_on_resolved_type(ty, member_name)
+                            if let Some((member_ty, is_optional)) = self
+                                .find_static_member_on_resolved_type(
+                                    ty,
+                                    member_name,
+                                    if matches!(ty, InferredTypeData::Class(_)) {
+                                        StaticMemberMode::Class
+                                    } else {
+                                        StaticMemberMode::Instance
+                                    },
+                                )
                             {
                                 types.push(self.member_type(member_ty, is_optional));
                             }
@@ -1078,13 +1112,17 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let Some(substitutions) = substitutions else {
                     return Some(InferredTypeData::Unknown);
                 };
-                self.find_static_member_on_resolved_type(target, member_name)
-                    .map(|(ty, is_optional)| {
-                        apply_substitutions(self.db, ty, &substitutions)
-                            .map_or(InferredTypeData::Unknown, |ty| {
-                                self.member_type(ty, is_optional)
-                            })
-                    })
+                self.find_static_member_on_resolved_type(
+                    target,
+                    member_name,
+                    StaticMemberMode::Instance,
+                )
+                .map(|(ty, is_optional)| {
+                    apply_substitutions(self.db, ty, &substitutions)
+                        .map_or(InferredTypeData::Unknown, |ty| {
+                            self.member_type(ty, is_optional)
+                        })
+                })
             }
             ty @ (InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
@@ -1117,7 +1155,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::ThisKeyword
             | InferredTypeData::UnknownKeyword
             | InferredTypeData::VoidKeyword) => self
-                .find_static_member_on_resolved_type(ty, member_name)
+                .find_static_member_on_resolved_type(ty, member_name, StaticMemberMode::Instance)
                 .map(|(ty, is_optional)| self.member_type(ty, is_optional)),
         }
     }
@@ -1211,6 +1249,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         &mut self,
         ty: InferredTypeData<'db>,
         member_name: &str,
+        mode: StaticMemberMode,
     ) -> Option<(InferredTypeData<'db>, bool)> {
         let mut seen_types = FxHashSet::default();
         let mut pending = Vec::from([ty]);
@@ -1230,23 +1269,43 @@ impl<'db> ResolutionCtx<'db, '_> {
                         self.db,
                         class.members(self.db),
                         member_name,
-                        StaticMemberMode::Instance,
+                        mode,
                     ) {
                         return Some(member);
                     }
-                    if let Some(extends) = class.extends(self.db) {
+                    if let Some(mut extends) = class.extends(self.db) {
+                        if pending.len() >= MAX_STATIC_MEMBER_LOOKUP_STEPS - seen_types.len() {
+                            return Some((InferredTypeData::Unknown, false));
+                        }
+                        if matches!(mode, StaticMemberMode::Class) {
+                            extends = class_side_type(self.db, extends);
+                        }
                         pending.push(extends);
                     }
                 }
                 InferredTypeData::Generic(generic) => {
                     if let Some(constraint) = generic.constraint(self.db) {
+                        if pending.len() >= MAX_STATIC_MEMBER_LOOKUP_STEPS - seen_types.len() {
+                            return Some((InferredTypeData::Unknown, false));
+                        }
                         pending.push(constraint);
                     } else {
                         return Some((InferredTypeData::Unknown, false));
                     }
                 }
-                InferredTypeData::InstanceOf(instance) => pending.push(instance.ty(self.db)),
+                InferredTypeData::InstanceOf(instance) => {
+                    if pending.len() >= MAX_STATIC_MEMBER_LOOKUP_STEPS - seen_types.len() {
+                        return Some((InferredTypeData::Unknown, false));
+                    }
+                    pending.push(instance.ty(self.db));
+                }
                 InferredTypeData::Intersection(intersection) => {
+                    if intersection.types(self.db).len()
+                        > (MAX_STATIC_MEMBER_LOOKUP_STEPS - seen_types.len())
+                            .saturating_sub(pending.len())
+                    {
+                        return Some((InferredTypeData::Unknown, false));
+                    }
                     pending.extend(intersection.types(self.db).iter().rev().copied());
                 }
                 InferredTypeData::Interface(interface) => {
@@ -1254,20 +1313,22 @@ impl<'db> ResolutionCtx<'db, '_> {
                         self.db,
                         interface.members(self.db),
                         member_name,
-                        StaticMemberMode::Instance,
+                        mode,
                     ) {
                         return Some(member);
+                    }
+                    if interface.extends(self.db).len()
+                        > (MAX_STATIC_MEMBER_LOOKUP_STEPS - seen_types.len())
+                            .saturating_sub(pending.len())
+                    {
+                        return Some((InferredTypeData::Unknown, false));
                     }
                     pending.extend(interface.extends(self.db).iter().rev().copied());
                 }
                 InferredTypeData::Literal(literal) => {
                     if let InferredLiteral::Object(members) = literal.literal(self.db)
-                        && let Some(member) = find_member_in_members_for_mode(
-                            self.db,
-                            members,
-                            member_name,
-                            StaticMemberMode::Instance,
-                        )
+                        && let Some(member) =
+                            find_member_in_members_for_mode(self.db, members, member_name, mode)
                     {
                         return Some(member);
                     }
@@ -1307,15 +1368,24 @@ impl<'db> ResolutionCtx<'db, '_> {
                         self.db,
                         object.members(self.db),
                         member_name,
-                        StaticMemberMode::Instance,
+                        mode,
                     ) {
                         return Some(member);
                     }
                     if let Some(prototype) = object.prototype(self.db) {
+                        if pending.len() >= MAX_STATIC_MEMBER_LOOKUP_STEPS - seen_types.len() {
+                            return Some((InferredTypeData::Unknown, false));
+                        }
                         pending.push(prototype);
                     }
                 }
                 InferredTypeData::MergedReference(reference) => {
+                    if reference.targets(self.db).count()
+                        > (MAX_STATIC_MEMBER_LOOKUP_STEPS - seen_types.len())
+                            .saturating_sub(pending.len())
+                    {
+                        return Some((InferredTypeData::Unknown, false));
+                    }
                     pending.extend(reference.targets(self.db));
                 }
                 InferredTypeData::Union(union) => {

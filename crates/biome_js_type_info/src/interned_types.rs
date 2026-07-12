@@ -1,8 +1,8 @@
 //! Database-backed type data for the resolved type-inference world.
 //!
-//! The existing `type_data` module remains the raw, collector-side representation
-//! for now. This module introduces the interned resolved representation that
-//! later phases will wire into module inference.
+//! The existing `type_data` module is the raw, collector-side representation.
+//! This module provides the interned resolved representation used by module
+//! inference and type-aware analyzer rules.
 
 #![allow(
     unused_lifetimes,
@@ -515,10 +515,20 @@ impl<'db> TypeData<'db> {
         db: &'db dyn TypeDb,
         substitution: TypeSubstitution<'db>,
     ) -> Result<Self, StructuralMapError> {
+        let mut remaining_steps = MAX_TYPE_SUBSTITUTION_STEPS;
+        self.substitute_type_with_budget(db, substitution, &mut remaining_steps)
+    }
+
+    fn substitute_type_with_budget(
+        self,
+        db: &'db dyn TypeDb,
+        substitution: TypeSubstitution<'db>,
+        remaining_steps: &mut usize,
+    ) -> Result<Self, StructuralMapError> {
         let binder_generic = substitution.binder_generic(db);
-        self.try_map_structural(
+        self.try_map_structural_with_budget(
             db,
-            MAX_TYPE_SUBSTITUTION_STEPS,
+            remaining_steps,
             |ty| {
                 if ty.declares_generic(db, binder_generic) {
                     ControlFlow::Break(ty)
@@ -541,9 +551,13 @@ impl<'db> TypeData<'db> {
             return self.substitute_type(db, substitution);
         }
 
+        let mut remaining_steps = MAX_TYPE_SUBSTITUTION_STEPS;
+        if structural_type_child_count(db, self) > remaining_steps {
+            return Err(StructuralMapError::StepLimitExceeded);
+        }
         let children = structural_type_children(db, self)
             .into_iter()
-            .map(|child| child.substitute_type(db, substitution))
+            .map(|child| child.substitute_type_with_budget(db, substitution, &mut remaining_steps))
             .collect::<Result<_, _>>()?;
         rebuild_structural_type(db, self, children).ok_or(StructuralMapError::InvalidRebuild)
     }
@@ -573,13 +587,23 @@ impl<'db> TypeData<'db> {
         self,
         db: &'db dyn TypeDb,
         max_steps: usize,
+        map: impl FnMut(Self) -> ControlFlow<Self, Self>,
+        finish: impl FnMut(Self) -> Self,
+    ) -> Result<Self, StructuralMapError> {
+        let mut remaining_steps = max_steps;
+        self.try_map_structural_with_budget(db, &mut remaining_steps, map, finish)
+    }
+
+    fn try_map_structural_with_budget(
+        self,
+        db: &'db dyn TypeDb,
+        remaining_steps: &mut usize,
         mut map: impl FnMut(Self) -> ControlFlow<Self, Self>,
         mut finish: impl FnMut(Self) -> Self,
     ) -> Result<Self, StructuralMapError> {
         let mut stack = Vec::from([StructuralTypeMapItem::Enter(self)]);
         let mut results = Vec::new();
         let mut active = FxHashSet::default();
-        let mut remaining_steps = max_steps;
 
         while let Some(item) = stack.pop() {
             match item {
@@ -589,10 +613,10 @@ impl<'db> TypeData<'db> {
                         continue;
                     }
 
-                    if remaining_steps == 0 {
+                    if *remaining_steps == 0 {
                         return Err(StructuralMapError::StepLimitExceeded);
                     }
-                    remaining_steps -= 1;
+                    *remaining_steps -= 1;
 
                     let source = ty;
                     let ty = match map(ty) {
@@ -602,15 +626,35 @@ impl<'db> TypeData<'db> {
                         }
                         ControlFlow::Continue(ty) => ty,
                     };
-                    let children = structural_type_children(db, ty);
-                    if children.is_empty() {
+                    let child_count = structural_type_child_count(db, ty);
+                    if child_count == 0 {
                         results.push(finish(ty));
                         continue;
+                    }
+                    let queued_entries = stack
+                        .iter()
+                        .filter(|item| matches!(item, StructuralTypeMapItem::Enter(_)))
+                        .count();
+                    let available_steps = remaining_steps.saturating_sub(queued_entries);
+                    if child_count
+                        > available_steps
+                            .saturating_add(active.len())
+                            .saturating_add(1)
+                    {
+                        return Err(StructuralMapError::StepLimitExceeded);
+                    }
+                    let children = structural_type_children(db, ty);
+                    let new_children = children
+                        .iter()
+                        .filter(|child| **child != source && !active.contains(*child))
+                        .count();
+                    if new_children > available_steps {
+                        return Err(StructuralMapError::StepLimitExceeded);
                     }
 
                     active.insert(source);
                     stack.push(StructuralTypeMapItem::Exit(source));
-                    stack.push(StructuralTypeMapItem::Rebuild(ty, children.len()));
+                    stack.push(StructuralTypeMapItem::Rebuild(ty, child_count));
                     stack.extend(children.into_iter().rev().map(StructuralTypeMapItem::Enter));
                 }
                 StructuralTypeMapItem::Rebuild(ty, child_count) => {
@@ -1102,6 +1146,147 @@ impl<'db> TypeSubstitution<'db> {
         } else {
             self.generic
         }
+    }
+}
+
+fn function_parameter_child_count(parameter: &FunctionParameter<'_>) -> usize {
+    match parameter {
+        FunctionParameter::Named(_) => 1,
+        FunctionParameter::Pattern(parameter) => parameter.bindings.len().saturating_add(1),
+    }
+}
+
+fn type_member_child_count(member: &TypeMember<'_>) -> usize {
+    let key_count = usize::from(matches!(
+        &member.kind,
+        TypeMemberKind::ComputedValue(_)
+            | TypeMemberKind::ComputedValueNamed(_, _)
+            | TypeMemberKind::ConstAssertedComputedValue(_)
+            | TypeMemberKind::ConstAssertedComputedValueNamed(_, _)
+            | TypeMemberKind::ConstAssertedIndexSignature(_)
+            | TypeMemberKind::IndexSignature(_)
+    ));
+    key_count + 1
+}
+
+fn typeof_expression_child_count(expression: &TypeofExpression<'_>) -> usize {
+    match expression {
+        TypeofExpression::Addition(_)
+        | TypeofExpression::LogicalAnd(_)
+        | TypeofExpression::LogicalOr(_)
+        | TypeofExpression::NullishCoalescing(_) => 2,
+        TypeofExpression::Conditional(_) => 3,
+        TypeofExpression::Call(expression) => expression.arguments.len().saturating_add(1),
+        TypeofExpression::New(expression) => expression.arguments.len().saturating_add(1),
+        TypeofExpression::Await(_)
+        | TypeofExpression::BitwiseNot(_)
+        | TypeofExpression::Destructure(_)
+        | TypeofExpression::Index(_)
+        | TypeofExpression::IterableValueOf(_)
+        | TypeofExpression::StaticMember(_)
+        | TypeofExpression::Super(_)
+        | TypeofExpression::This(_)
+        | TypeofExpression::Typeof(_)
+        | TypeofExpression::UnaryMinus(_) => 1,
+    }
+}
+
+#[deny(clippy::wildcard_enum_match_arm)]
+fn structural_type_child_count<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> usize {
+    match ty {
+        TypeData::Class(class) => class
+            .type_parameters(db)
+            .len()
+            .saturating_add(usize::from(class.extends(db).is_some()))
+            .saturating_add(class.implements(db).len())
+            .saturating_add(class.members(db).iter().map(type_member_child_count).sum()),
+        TypeData::Constructor(constructor) => constructor
+            .type_parameters(db)
+            .len()
+            .saturating_add(
+                constructor
+                    .parameters(db)
+                    .iter()
+                    .map(|parameter| function_parameter_child_count(&parameter.parameter))
+                    .sum(),
+            )
+            .saturating_add(usize::from(constructor.return_type(db).is_some())),
+        TypeData::Function(function) => function
+            .type_parameters(db)
+            .len()
+            .saturating_add(
+                function
+                    .parameters(db)
+                    .iter()
+                    .map(function_parameter_child_count)
+                    .sum(),
+            )
+            .saturating_add(1),
+        TypeData::Interface(interface) => interface
+            .type_parameters(db)
+            .len()
+            .saturating_add(interface.extends(db).len())
+            .saturating_add(
+                interface
+                    .members(db)
+                    .iter()
+                    .map(type_member_child_count)
+                    .sum(),
+            ),
+        TypeData::Module(module) => module.members(db).iter().map(type_member_child_count).sum(),
+        TypeData::Namespace(namespace) => namespace
+            .members(db)
+            .iter()
+            .map(type_member_child_count)
+            .sum(),
+        TypeData::Object(object) => usize::from(object.prototype(db).is_some())
+            .saturating_add(object.members(db).iter().map(type_member_child_count).sum()),
+        TypeData::Tuple(tuple) => tuple.elements(db).len(),
+        TypeData::Generic(generic) => {
+            usize::from(generic.constraint(db).is_some())
+                + usize::from(generic.default(db).is_some())
+        }
+        TypeData::Intersection(intersection) => intersection.types(db).len(),
+        TypeData::Union(union) => union.types(db).len(),
+        TypeData::TypeOperator(_) => 1,
+        TypeData::Literal(literal) => match literal.literal(db) {
+            Literal::Object(members) => members.iter().map(type_member_child_count).sum(),
+            Literal::BigInt(_)
+            | Literal::Boolean(_)
+            | Literal::Number(_)
+            | Literal::RegExp(_)
+            | Literal::String(_)
+            | Literal::Template(_) => 0,
+        },
+        TypeData::InstanceOf(instance) => instance.type_parameters(db).len().saturating_add(1),
+        TypeData::MergedReference(reference) => {
+            usize::from(reference.ty(db).is_some())
+                + usize::from(reference.value_ty(db).is_some())
+                + usize::from(reference.namespace_ty(db).is_some())
+        }
+        TypeData::TypeofExpression(expression) => {
+            typeof_expression_child_count(expression.expression(db))
+        }
+        TypeData::TypeofType(_) | TypeData::TypeofValue(_) => 1,
+        TypeData::Unknown
+        | TypeData::Divergent(_)
+        | TypeData::Global
+        | TypeData::GlobalType(_)
+        | TypeData::BigInt
+        | TypeData::Boolean
+        | TypeData::Null
+        | TypeData::Number
+        | TypeData::String
+        | TypeData::Symbol
+        | TypeData::Undefined
+        | TypeData::Conditional
+        | TypeData::Local(_)
+        | TypeData::AnyKeyword
+        | TypeData::NeverKeyword
+        | TypeData::ObjectKeyword
+        | TypeData::ThisKeyword
+        | TypeData::UnknownKeyword
+        | TypeData::VoidKeyword => 0,
     }
 }
 
@@ -3033,7 +3218,7 @@ mod tests {
                 None,
             ));
             let result = function.substitute_type_in_root_body(&db, substitution);
-            if distinct_types <= MAX_TYPE_SUBSTITUTION_STEPS {
+            if distinct_types < MAX_TYPE_SUBSTITUTION_STEPS {
                 assert!(result.is_ok(), "distinct types {distinct_types}");
             } else {
                 assert_eq!(
@@ -3043,6 +3228,41 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[test]
+    fn root_body_substitution_shares_one_budget_across_children() {
+        let db = TestDb::default();
+        let generic = generic(&db);
+        let substitution = TypeSubstitution {
+            generic,
+            replacement: TypeData::String,
+        };
+        let parameter = |name, ty| {
+            FunctionParameter::Named(NamedFunctionParameter {
+                name: text(name),
+                ty,
+                is_optional: false,
+                is_rest: false,
+            })
+        };
+        let function = TypeData::Function(InternedFunction::new(
+            &db,
+            boxed([generic]),
+            Vec::from([
+                parameter("first", typeof_chain(&db, 600, generic)),
+                parameter("second", typeof_chain(&db, 600, generic)),
+            ])
+            .into_boxed_slice(),
+            ReturnType::Type(generic),
+            false,
+            None,
+        ));
+
+        assert_eq!(
+            function.substitute_type_in_root_body(&db, substitution),
+            Err(StructuralMapError::StepLimitExceeded)
+        );
     }
 
     #[test]

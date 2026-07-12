@@ -258,3 +258,12 @@ declare function selectUnknown(value: string): Promise<string>;
 declare function selectUnknown(value: unknown): number;
 declare const unresolvedArgument: MissingArgumentType;
 selectUnknown(unresolvedArgument);
+
+declare function readUnion(value: string): Promise<void>;
+declare function readUnion(value: string | number): number;
+declare const unionArgument: string | number;
+readUnion(unionArgument);
+
+declare function readConstrained<T extends string>(value: T): Promise<void>;
+declare function readConstrained(value: number): number;
+readConstrained(1);

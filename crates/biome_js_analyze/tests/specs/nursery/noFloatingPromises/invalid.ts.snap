@@ -395,6 +395,14 @@ class GenericBox<T> {
 }
 new GenericBox(Promise.resolve("value")).read();
 
+class StaticPromiseBase {
+	static read(): Promise<void> {
+		return Promise.resolve();
+	}
+}
+class StaticPromiseDerived extends StaticPromiseBase {}
+StaticPromiseDerived.read();
+
 ```
 
 # Diagnostics
@@ -2022,6 +2030,25 @@ invalid.ts:390:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   > 390 │ new GenericBox(Promise.resolve("value")).read();
         │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     391 │ 
+    392 │ class StaticPromiseBase {
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:398:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    396 │ }
+    397 │ class StaticPromiseDerived extends StaticPromiseBase {}
+  > 398 │ StaticPromiseDerived.read();
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    399 │ 
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   

@@ -1,5 +1,5 @@
 use super::{BindingTypeData, InferredModuleTypes, globals::global_type, lookup::module_for_key};
-use crate::db::queries::infer_module_types;
+use crate::db::queries::infer_module_types_query;
 use crate::js_module_info::is_named_type_declaration;
 use crate::module_graph::ModuleInfo;
 use crate::{JsModuleInfo, ModuleDb};
@@ -121,12 +121,12 @@ impl<'db> ResolutionCtx<'db, '_> {
         module: ModuleInfo,
     ) -> Option<Arc<InferredModuleTypes<'db>>> {
         match self.import_resolution {
-            ImportResolution::Full => infer_module_types(self.db, module),
+            ImportResolution::Full => infer_module_types_query(self.db, module),
             ImportResolution::CycleFallback(blocked) => {
                 if blocked.contains(&module) {
                     None
                 } else {
-                    infer_module_types(self.db, module)
+                    infer_module_types_query(self.db, module)
                 }
             }
         }

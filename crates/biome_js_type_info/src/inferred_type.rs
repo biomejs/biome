@@ -1292,23 +1292,94 @@ pub(crate) fn is_promise_instance<'db>(db: &'db dyn TypeDb, data: TypeData<'db>)
 
         let mut child_path = path;
         child_path.push(data);
-        let mut push = |child| pending.push_back((child, child_path.clone()));
+        let remaining_steps = MAX_PROMISE_TYPE_STEPS - processed;
+        let available_frontier = remaining_steps.saturating_sub(pending.len());
         match data {
-            TypeData::Class(class) => class.extends(db).into_iter().for_each(&mut push),
-            TypeData::Generic(generic) => generic.constraint(db).into_iter().for_each(&mut push),
-            TypeData::InstanceOf(instance) => push(instance.ty(db)),
+            TypeData::Class(class) => {
+                if let Some(base) = class.extends(db) {
+                    if available_frontier == 0 {
+                        return None;
+                    }
+                    pending.push_back((base, child_path));
+                }
+            }
+            TypeData::Generic(generic) => {
+                if let Some(constraint) = generic.constraint(db) {
+                    if available_frontier == 0 {
+                        return None;
+                    }
+                    pending.push_back((constraint, child_path));
+                }
+            }
+            TypeData::InstanceOf(instance) => {
+                if available_frontier == 0 {
+                    return None;
+                }
+                pending.push_back((instance.ty(db), child_path));
+            }
             TypeData::Interface(interface) => {
-                interface.extends(db).iter().copied().for_each(&mut push);
+                if interface.extends(db).len() > available_frontier {
+                    return None;
+                }
+                pending.extend(
+                    interface
+                        .extends(db)
+                        .iter()
+                        .copied()
+                        .map(|child| (child, child_path.clone())),
+                );
             }
             TypeData::Intersection(intersection) => {
-                intersection.types(db).iter().copied().for_each(&mut push);
+                if intersection.types(db).len() > available_frontier {
+                    return None;
+                }
+                pending.extend(
+                    intersection
+                        .types(db)
+                        .iter()
+                        .copied()
+                        .map(|child| (child, child_path.clone())),
+                );
             }
-            TypeData::MergedReference(reference) => reference.targets(db).for_each(&mut push),
-            TypeData::TypeOperator(operator) => push(operator.ty(db)),
-            TypeData::TypeofType(typeof_type) => push(typeof_type.ty(db)),
-            TypeData::TypeofValue(typeof_value) => push(typeof_value.ty(db)),
+            TypeData::MergedReference(reference) => {
+                if reference.targets(db).count() > available_frontier {
+                    return None;
+                }
+                pending.extend(
+                    reference
+                        .targets(db)
+                        .map(|child| (child, child_path.clone())),
+                );
+            }
+            TypeData::TypeOperator(operator) => {
+                if available_frontier == 0 {
+                    return None;
+                }
+                pending.push_back((operator.ty(db), child_path));
+            }
+            TypeData::TypeofType(typeof_type) => {
+                if available_frontier == 0 {
+                    return None;
+                }
+                pending.push_back((typeof_type.ty(db), child_path));
+            }
+            TypeData::TypeofValue(typeof_value) => {
+                if available_frontier == 0 {
+                    return None;
+                }
+                pending.push_back((typeof_value.ty(db), child_path));
+            }
             TypeData::Union(union) => {
-                union.types(db).iter().copied().for_each(&mut push);
+                if union.types(db).len() > available_frontier {
+                    return None;
+                }
+                pending.extend(
+                    union
+                        .types(db)
+                        .iter()
+                        .copied()
+                        .map(|child| (child, child_path.clone())),
+                );
             }
             TypeData::Global
             | TypeData::GlobalType(_)
@@ -1744,6 +1815,17 @@ mod tests {
                 "PromiseLike inheritance steps {steps}"
             );
         }
+    }
+
+    #[test]
+    fn promise_status_rejects_over_budget_union_frontier() {
+        let db = TestDb::default();
+        let union = TypeData::Union(InternedUnion::new(
+            &db,
+            vec![TypeData::Number; MAX_PROMISE_TYPE_STEPS + 1].into_boxed_slice(),
+        ));
+
+        assert_eq!(is_promise_instance(&db, union), None);
     }
 
     #[test]

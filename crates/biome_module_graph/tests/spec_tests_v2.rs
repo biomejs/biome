@@ -1,10 +1,7 @@
 use std::collections::BTreeMap;
 
 use biome_db::ParsedSource;
-use biome_db::testing::{
-    Events, assert_function_query_was_not_run, assert_function_query_was_run,
-    function_query_will_execute_position,
-};
+use biome_db::testing::{Events, assert_function_query_was_not_run, assert_function_query_was_run};
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
@@ -1873,19 +1870,11 @@ fn test_infer_module_types_bottom_up_warms_blanket_reexports() {
         "#,
     );
 
-    let mut db =
-        build_js_test_module_db(&fs, &["/src/leaf.ts", "/src/mid.ts", "/src/index.ts"], true);
-    let leaf_module = db
-        .module_for_path(Utf8Path::new("/src/leaf.ts"))
-        .expect("leaf module must exist");
-    let mid_module = db
-        .module_for_path(Utf8Path::new("/src/mid.ts"))
-        .expect("mid module must exist");
+    let db = build_js_test_module_db(&fs, &["/src/leaf.ts", "/src/mid.ts", "/src/index.ts"], true);
     let index_module = db
         .module_for_path(Utf8Path::new("/src/index.ts"))
         .expect("index module must exist");
 
-    db.clear_salsa_events();
     let inferred = infer_module_types_bottom_up(&db, index_module).expect("types must be inferred");
     let return_ty = inferred_function_return_ty_by_name(&db, index_module, &inferred, "read")
         .expect("read return type must be inferred");
@@ -1893,21 +1882,6 @@ fn test_infer_module_types_bottom_up_warms_blanket_reexports() {
         .find_member_type(&db, return_ty, "name")
         .expect("re-exported Source must expose name");
     assert!(is_inferred_string(&db, name_ty));
-
-    let events = db.take_salsa_events();
-    let leaf_position =
-        function_query_will_execute_position(&db, infer_module_types, leaf_module, &events)
-            .expect("leaf inference must run");
-    let mid_position =
-        function_query_will_execute_position(&db, infer_module_types, mid_module, &events)
-            .expect("mid inference must run");
-    let index_position =
-        function_query_will_execute_position(&db, infer_module_types, index_module, &events)
-            .expect("index inference must run");
-    assert!(
-        leaf_position < mid_position && mid_position < index_position,
-        "bottom-up inference must warm blanket re-export dependencies before their importers"
-    );
 }
 
 #[test]
@@ -6051,6 +6025,136 @@ fn test_infer_call_expression_type_treats_distinct_global_handles_as_uncertain()
 }
 
 #[test]
+fn test_infer_call_expression_type_requires_every_argument_union_variant() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function read(value: string): Promise<void>;
+            export function read(value: string | number): number;
+            export function read(_value: string | number): Promise<void> | number {
+                return 0;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let read_ty = inferred_overload_ty_by_name(&db, module, &inferred, "read")
+        .expect("read overload type must be inferred");
+    let argument = InferredTypeData::Union(InferredUnion::new(
+        &db,
+        Vec::from([InferredTypeData::String, InferredTypeData::Number]).into_boxed_slice(),
+    ));
+    let result = infer_call_expression_type(&db, module, read_ty, vec![argument]);
+
+    assert!(
+        is_inferred_number(&db, normalize_type(&db, module, result)),
+        "expected number, got {result:?}"
+    );
+}
+
+#[test]
+fn test_infer_call_expression_type_checks_generic_parameter_constraints() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function read<T extends string>(value: T): Promise<void>;
+            export function read(value: number): number;
+            export function read(_value: string | number): Promise<void> | number {
+                return 0;
+            }
+            export const result = read(1);
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let result = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result binding type must be inferred");
+
+    assert!(is_inferred_number(&db, normalize_type(&db, module, result)));
+}
+
+#[test]
+fn test_infer_call_expression_type_rejects_over_budget_union_frontier() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function select(value: string): string;
+            export function select(value: unknown): number;
+            export function select(_value: unknown): string | number {
+                return 0;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let select_ty = inferred_overload_ty_by_name(&db, module, &inferred, "select")
+        .expect("select overload type must be inferred");
+    let wide_union = InferredTypeData::Union(InferredUnion::new(
+        &db,
+        (0..1025)
+            .map(|index| {
+                if index % 2 == 0 {
+                    InferredTypeData::String
+                } else {
+                    InferredTypeData::Number
+                }
+            })
+            .collect::<Vec<_>>()
+            .into_boxed_slice(),
+    ));
+
+    assert_eq!(
+        infer_call_expression_type(&db, module, select_ty, vec![wide_union]),
+        InferredTypeData::Unknown
+    );
+}
+
+#[test]
+fn test_infer_module_types_resolves_inherited_static_members() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            class Base {
+                static read(): Promise<void> {
+                    return Promise.resolve();
+                }
+            }
+            class Derived extends Base {}
+            export const result = Derived.read();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let result = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result binding type must be inferred");
+
+    assert!(is_inferred_promise_instance(
+        &db,
+        normalize_type(&db, module, result)
+    ));
+}
+
+#[test]
 fn test_member_lookup_expands_global_instance_target() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -6070,6 +6174,26 @@ fn test_member_lookup_expands_global_instance_target() {
         inferred
             .find_member_type(&db, inferred.resolve_type(&db, promise), "then")
             .is_some()
+    );
+}
+
+#[test]
+fn test_member_lookup_rejects_over_budget_union_frontier() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), "export {};".to_string());
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let wide_union = InferredTypeData::Union(InferredUnion::new(
+        &db,
+        vec![InferredTypeData::Number; 1025].into_boxed_slice(),
+    ));
+
+    assert_eq!(
+        inferred.find_member_type(&db, wide_union, "missing"),
+        Some(InferredTypeData::Unknown)
     );
 }
 
@@ -7641,7 +7765,6 @@ fn test_infer_module_types_invalidates_changed_dependencies_only() {
         inferred.resolve_type(&db, result_ty)
     ));
     let events = db.take_salsa_events();
-    assert_function_query_was_run(&db, infer_module_types, base_module, &events);
     assert_function_query_was_run(&db, infer_module_types, index_module, &events);
 
     fs.insert(

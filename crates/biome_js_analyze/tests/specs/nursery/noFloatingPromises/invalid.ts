@@ -388,3 +388,11 @@ class GenericBox<T> {
 	}
 }
 new GenericBox(Promise.resolve("value")).read();
+
+class StaticPromiseBase {
+	static read(): Promise<void> {
+		return Promise.resolve();
+	}
+}
+class StaticPromiseDerived extends StaticPromiseBase {}
+StaticPromiseDerived.read();
