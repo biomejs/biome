@@ -1,0 +1,106 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Type literal with a sole index signature.
+type A = { [key: string]: unknown };
+
+// Interface with a sole index signature.
+interface B {
+	[key: string]: unknown;
+}
+
+// Inline annotation.
+let c: { [key: number]: string };
+
+// Non-string key type.
+type D = { [key: symbol]: () => void };
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:10 lint/nursery/useConsistentIndexedObjectStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer the Record type over an index signature.
+  
+    3 │ // Type literal with a sole index signature.
+  > 4 │ type A = { [key: string]: unknown };
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ // Interface with a sole index signature.
+  
+  i A type whose only member is an index signature is equivalent to a Record, which is more concise and consistent.
+  
+  i Replace it with Record<Key, Value>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:7:1 lint/nursery/useConsistentIndexedObjectStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer the Record type over an index signature.
+  
+     6 │ // Interface with a sole index signature.
+   > 7 │ interface B {
+       │ ^^^^^^^^^^^^^
+   > 8 │ 	[key: string]: unknown;
+   > 9 │ }
+       │ ^
+    10 │ 
+    11 │ // Inline annotation.
+  
+  i A type whose only member is an index signature is equivalent to a Record, which is more concise and consistent.
+  
+  i Replace it with Record<Key, Value>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:12:8 lint/nursery/useConsistentIndexedObjectStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer the Record type over an index signature.
+  
+    11 │ // Inline annotation.
+  > 12 │ let c: { [key: number]: string };
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ // Non-string key type.
+  
+  i A type whose only member is an index signature is equivalent to a Record, which is more concise and consistent.
+  
+  i Replace it with Record<Key, Value>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:15:10 lint/nursery/useConsistentIndexedObjectStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer the Record type over an index signature.
+  
+    14 │ // Non-string key type.
+  > 15 │ type D = { [key: symbol]: () => void };
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+  
+  i A type whose only member is an index signature is equivalent to a Record, which is more concise and consistent.
+  
+  i Replace it with Record<Key, Value>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

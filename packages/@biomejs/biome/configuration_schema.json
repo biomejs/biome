@@ -6918,6 +6918,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentIndexedObjectStyle": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/use-consistent-indexed-object-style",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentIndexedObjectStyleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentTestIt": {
 					"description": "Enforce consistent use of it or test for test functions.\nSee https://biomejs.dev/linter/rules/use-consistent-test-it",
 					"anyOf": [
@@ -11127,6 +11134,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentIndexedObjectStyleOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentIndexedObjectStyleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentMemberAccessibilityOptions": {
 			"type": "object",
 			"properties": {
@@ -14892,6 +14908,16 @@
 			"description": "The GraphQL description style to enforce.",
 			"type": "string",
 			"enum": ["block", "inline"]
+		},
+		"UseConsistentIndexedObjectStyleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentIndexedObjectStyleOptions" }
+			]
+		},
+		"UseConsistentIndexedObjectStyleOptions": {
+			"type": "object",
+			"additionalProperties": false
 		},
 		"UseConsistentMemberAccessibilityConfiguration": {
 			"oneOf": [
