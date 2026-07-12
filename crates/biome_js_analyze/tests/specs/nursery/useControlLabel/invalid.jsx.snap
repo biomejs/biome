@@ -1,0 +1,101 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+
+const a = <button />;
+
+const b = <button></button>;
+
+const c = <area />;
+
+const d = <menuitem />;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:3:11 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This control element has no accessible label.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ const a = <button />;
+      │           ^^^^^^^^^^
+    4 │ 
+    5 │ const b = <button></button>;
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:5:11 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This control element has no accessible label.
+  
+    3 │ const a = <button />;
+    4 │ 
+  > 5 │ const b = <button></button>;
+      │           ^^^^^^^^
+    6 │ 
+    7 │ const c = <area />;
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:7:11 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This control element has no accessible label.
+  
+    5 │ const b = <button></button>;
+    6 │ 
+  > 7 │ const c = <area />;
+      │           ^^^^^^^^
+    8 │ 
+    9 │ const d = <menuitem />;
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:9:11 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This control element has no accessible label.
+  
+     7 │ const c = <area />;
+     8 │ 
+   > 9 │ const d = <menuitem />;
+       │           ^^^^^^^^^^^^
+    10 │ 
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

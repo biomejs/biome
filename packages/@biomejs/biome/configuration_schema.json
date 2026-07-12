@@ -6925,6 +6925,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useControlLabel": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/use-control-label",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseControlLabelConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useDisposables": {
 					"description": "Detects a disposable object assigned to a variable without using or await using syntax.\nSee https://biomejs.dev/linter/rules/use-disposables",
 					"anyOf": [
@@ -11186,6 +11193,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseControlLabelOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseControlLabelOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseDateNowOptions": {
 			"type": "object",
 			"properties": {
@@ -14994,6 +15010,16 @@
 			]
 		},
 		"UseConstOptions": { "type": "object", "additionalProperties": false },
+		"UseControlLabelConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseControlLabelOptions" }
+			]
+		},
+		"UseControlLabelOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseDateNowConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
