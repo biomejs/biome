@@ -517,6 +517,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_exports_in_test::NoExportsInTestOptions>(),
     ));
     result.push((
+        "nursery",
+        "noExtendNative",
+        TypeId::of::<biome_rule_options::no_extend_native::NoExtendNativeOptions>(),
+    ));
+    result.push((
         "complexity",
         "noExtraBooleanCast",
         TypeId::of::<biome_rule_options::no_extra_boolean_cast::NoExtraBooleanCastOptions>(),

@@ -2409,6 +2409,11 @@ See https://biomejs.dev/linter/rules/no-excessive-selector-classes
 	 */
 	noExcessiveSelectorClasses?: NoExcessiveSelectorClassesConfiguration;
 	/**
+	* Succinct description of the rule.
+See https://biomejs.dev/linter/rules/no-extend-native 
+	 */
+	noExtendNative?: NoExtendNativeConfiguration;
+	/**
 	* Require Promise-like statements to be handled appropriately.
 See https://biomejs.dev/linter/rules/no-floating-promises 
 	 */
@@ -4662,6 +4667,9 @@ export type NoExcessiveNestedCallbacksConfiguration =
 export type NoExcessiveSelectorClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveSelectorClassesOptions;
+export type NoExtendNativeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExtendNativeOptions;
 export type NoFloatingPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFloatingPromisesOptions;
@@ -6507,6 +6515,10 @@ export interface RuleWithNoExcessiveSelectorClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoExcessiveSelectorClassesOptions;
 }
+export interface RuleWithNoExtendNativeOptions {
+	level: RulePlainConfiguration;
+	options?: NoExtendNativeOptions;
+}
 export interface RuleWithNoFloatingPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8286,6 +8298,7 @@ Use `0` to disallow class selectors entirely.
 	 */
 	maxClasses?: number;
 }
+export type NoExtendNativeOptions = {};
 export type NoFloatingPromisesOptions = {};
 export type NoIdenticalTestTitleOptions = {};
 export type NoImpliedEvalOptions = {};
@@ -9674,7 +9687,6 @@ export type Category =
 	| "lint/correctness/useVueValidVPre"
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
-	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noComponentHookFactories"
@@ -9686,6 +9698,7 @@ export type Category =
 	| "lint/nursery/noEmptyObjectKeys"
 	| "lint/nursery/noExcessiveNestedCallbacks"
 	| "lint/nursery/noExcessiveSelectorClasses"
+	| "lint/nursery/noExtendNative"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noIdenticalTestTitle"
 	| "lint/nursery/noImplicitCoercion"
@@ -9711,6 +9724,7 @@ export type Category =
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactStringRefs"
+	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
@@ -9739,7 +9753,6 @@ export type Category =
 	| "lint/nursery/useExplicitReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
-	| "lint/nursery/useReactFunctionComponentDefinition"
 	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useIframeSandbox"
 	| "lint/nursery/useImportRestrictions"
@@ -9755,6 +9768,7 @@ export type Category =
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useReactAsyncServerFunction"
+	| "lint/nursery/useReactFunctionComponentDefinition"
 	| "lint/nursery/useReactNativePlatformComponents"
 	| "lint/nursery/useReduceTypeParameter"
 	| "lint/nursery/useRegexpExec"
