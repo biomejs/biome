@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+if (a !== b) {}
+if (!(a === b)) {}
+if (!(a !== b)) {}
+if (a === !b) {}
+if ((!a) === b) {}
+if (!a == b) {}
+if (!a != b) {}
+if (!!a === b) {}
+const isOk = a === b;
+const isNotOk = a !== b;
+
+```

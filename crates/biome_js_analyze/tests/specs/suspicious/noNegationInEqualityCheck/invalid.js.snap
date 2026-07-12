@@ -1,0 +1,238 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+if (!a === b) {}
+if (!a !== b) {}
+const isInvalid = !foo === bar;
+const isNotEqualInvalid = !foo !== bar;
+const result = !a === b ? "no" : "yes";
+if (!isReady === true) {}
+if (!obj.prop === value) {}
+if (!(a) === b) {}
+
+```
+
+# Diagnostics
+```
+invalid.js:2:5 lint/suspicious/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The negation operator ! is evaluated before the equality operator.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ if (!a === b) {}
+      │     ^^^^^^^^
+    3 │ if (!a !== b) {}
+    4 │ const isInvalid = !foo === bar;
+  
+  i This is often a mistake as it compares a boolean value with another value.
+  
+  i If you want to negate the whole equality, use parentheses: !(a === b).
+  
+  i Safe fix: Exchange the operator to remove the negation.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - if·(!a·===·b)·{}
+        2 │ + if·(a·!==·b)·{}
+     3  3 │   if (!a !== b) {}
+     4  4 │   const isInvalid = !foo === bar;
+  
+
+```
+
+```
+invalid.js:3:5 lint/suspicious/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The negation operator ! is evaluated before the equality operator.
+  
+    1 │ /* should generate diagnostics */
+    2 │ if (!a === b) {}
+  > 3 │ if (!a !== b) {}
+      │     ^^^^^^^^
+    4 │ const isInvalid = !foo === bar;
+    5 │ const isNotEqualInvalid = !foo !== bar;
+  
+  i This is often a mistake as it compares a boolean value with another value.
+  
+  i If you want to negate the whole equality, use parentheses: !(a === b).
+  
+  i Safe fix: Exchange the operator to remove the negation.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   if (!a === b) {}
+     3    │ - if·(!a·!==·b)·{}
+        3 │ + if·(a·===·b)·{}
+     4  4 │   const isInvalid = !foo === bar;
+     5  5 │   const isNotEqualInvalid = !foo !== bar;
+  
+
+```
+
+```
+invalid.js:4:19 lint/suspicious/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The negation operator ! is evaluated before the equality operator.
+  
+    2 │ if (!a === b) {}
+    3 │ if (!a !== b) {}
+  > 4 │ const isInvalid = !foo === bar;
+      │                   ^^^^^^^^^^^^
+    5 │ const isNotEqualInvalid = !foo !== bar;
+    6 │ const result = !a === b ? "no" : "yes";
+  
+  i This is often a mistake as it compares a boolean value with another value.
+  
+  i If you want to negate the whole equality, use parentheses: !(a === b).
+  
+  i Safe fix: Exchange the operator to remove the negation.
+  
+     2  2 │   if (!a === b) {}
+     3  3 │   if (!a !== b) {}
+     4    │ - const·isInvalid·=·!foo·===·bar;
+        4 │ + const·isInvalid·=·foo·!==·bar;
+     5  5 │   const isNotEqualInvalid = !foo !== bar;
+     6  6 │   const result = !a === b ? "no" : "yes";
+  
+
+```
+
+```
+invalid.js:5:27 lint/suspicious/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The negation operator ! is evaluated before the equality operator.
+  
+    3 │ if (!a !== b) {}
+    4 │ const isInvalid = !foo === bar;
+  > 5 │ const isNotEqualInvalid = !foo !== bar;
+      │                           ^^^^^^^^^^^^
+    6 │ const result = !a === b ? "no" : "yes";
+    7 │ if (!isReady === true) {}
+  
+  i This is often a mistake as it compares a boolean value with another value.
+  
+  i If you want to negate the whole equality, use parentheses: !(a === b).
+  
+  i Safe fix: Exchange the operator to remove the negation.
+  
+     3  3 │   if (!a !== b) {}
+     4  4 │   const isInvalid = !foo === bar;
+     5    │ - const·isNotEqualInvalid·=·!foo·!==·bar;
+        5 │ + const·isNotEqualInvalid·=·foo·===·bar;
+     6  6 │   const result = !a === b ? "no" : "yes";
+     7  7 │   if (!isReady === true) {}
+  
+
+```
+
+```
+invalid.js:6:16 lint/suspicious/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The negation operator ! is evaluated before the equality operator.
+  
+    4 │ const isInvalid = !foo === bar;
+    5 │ const isNotEqualInvalid = !foo !== bar;
+  > 6 │ const result = !a === b ? "no" : "yes";
+      │                ^^^^^^^^
+    7 │ if (!isReady === true) {}
+    8 │ if (!obj.prop === value) {}
+  
+  i This is often a mistake as it compares a boolean value with another value.
+  
+  i If you want to negate the whole equality, use parentheses: !(a === b).
+  
+  i Safe fix: Exchange the operator to remove the negation.
+  
+     4  4 │   const isInvalid = !foo === bar;
+     5  5 │   const isNotEqualInvalid = !foo !== bar;
+     6    │ - const·result·=·!a·===·b·?·"no"·:·"yes";
+        6 │ + const·result·=·a·!==·b·?·"no"·:·"yes";
+     7  7 │   if (!isReady === true) {}
+     8  8 │   if (!obj.prop === value) {}
+  
+
+```
+
+```
+invalid.js:7:5 lint/suspicious/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The negation operator ! is evaluated before the equality operator.
+  
+    5 │ const isNotEqualInvalid = !foo !== bar;
+    6 │ const result = !a === b ? "no" : "yes";
+  > 7 │ if (!isReady === true) {}
+      │     ^^^^^^^^^^^^^^^^^
+    8 │ if (!obj.prop === value) {}
+    9 │ if (!(a) === b) {}
+  
+  i This is often a mistake as it compares a boolean value with another value.
+  
+  i If you want to negate the whole equality, use parentheses: !(a === b).
+  
+  i Safe fix: Exchange the operator to remove the negation.
+  
+     5  5 │   const isNotEqualInvalid = !foo !== bar;
+     6  6 │   const result = !a === b ? "no" : "yes";
+     7    │ - if·(!isReady·===·true)·{}
+        7 │ + if·(isReady·!==·true)·{}
+     8  8 │   if (!obj.prop === value) {}
+     9  9 │   if (!(a) === b) {}
+  
+
+```
+
+```
+invalid.js:8:5 lint/suspicious/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The negation operator ! is evaluated before the equality operator.
+  
+     6 │ const result = !a === b ? "no" : "yes";
+     7 │ if (!isReady === true) {}
+   > 8 │ if (!obj.prop === value) {}
+       │     ^^^^^^^^^^^^^^^^^^^
+     9 │ if (!(a) === b) {}
+    10 │ 
+  
+  i This is often a mistake as it compares a boolean value with another value.
+  
+  i If you want to negate the whole equality, use parentheses: !(a === b).
+  
+  i Safe fix: Exchange the operator to remove the negation.
+  
+     6  6 │   const result = !a === b ? "no" : "yes";
+     7  7 │   if (!isReady === true) {}
+     8    │ - if·(!obj.prop·===·value)·{}
+        8 │ + if·(obj.prop·!==·value)·{}
+     9  9 │   if (!(a) === b) {}
+    10 10 │   
+  
+
+```
+
+```
+invalid.js:9:5 lint/suspicious/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The negation operator ! is evaluated before the equality operator.
+  
+     7 │ if (!isReady === true) {}
+     8 │ if (!obj.prop === value) {}
+   > 9 │ if (!(a) === b) {}
+       │     ^^^^^^^^^^
+    10 │ 
+  
+  i This is often a mistake as it compares a boolean value with another value.
+  
+  i If you want to negate the whole equality, use parentheses: !(a === b).
+  
+  i Safe fix: Exchange the operator to remove the negation.
+  
+     7  7 │   if (!isReady === true) {}
+     8  8 │   if (!obj.prop === value) {}
+     9    │ - if·(!(a)·===·b)·{}
+        9 │ + if·((a)·!==·b)·{}
+    10 10 │   
+  
+
+```
