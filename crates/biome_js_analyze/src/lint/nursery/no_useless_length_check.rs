@@ -215,7 +215,12 @@ fn numeric_literal(expr: &AnyJsExpression) -> Option<i64> {
         .as_any_js_literal_expression()?
         .as_js_number_literal_expression()?
         .as_number()?;
-    Some(value.round() as i64)
+    // Reject non-integer literals: `x.length < 1.4` is not equivalent to
+    // `x.length < 1`, so treating it as an emptiness check would be wrong.
+    if value.fract() != 0.0 {
+        return None;
+    }
+    Some(value as i64)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]

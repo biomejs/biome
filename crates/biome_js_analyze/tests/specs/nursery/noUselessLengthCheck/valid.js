@@ -16,3 +16,6 @@ const f = array.some(Boolean);
 
 // Not a length check.
 const g = array.size === 0 || array.every(Boolean);
+
+// Non-integer literal is not a `< 1` emptiness check.
+const h = array.length < 1.4 || array.every(Boolean);
