@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsExpression, JsAssignmentExpression,
-    JsCallExpression,
+    JsCallExpression, JsSyntaxToken,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, declare_node_union};
 use biome_rule_options::no_extend_native::NoExtendNativeOptions;
@@ -130,7 +130,7 @@ impl Rule for NoExtendNative {
                 let member_expr = callee.as_js_static_member_expression()?;
 
                 // Callee object must be the global `Object`.
-                if identifier_name(&member_expr.object().ok()?)? != "Object" {
+                if identifier_name(&member_expr.object().ok()?)?.text_trimmed() != "Object" {
                     return None;
                 }
                 // Method must be defineProperty / defineProperties.
@@ -186,18 +186,14 @@ fn is_native_prototype(expr: &AnyJsExpression) -> bool {
         .ok()
         .as_ref()
         .and_then(identifier_name)
-        .is_some_and(|name| NATIVE_BUILTINS.contains(&name.as_str()))
+        .is_some_and(|token| NATIVE_BUILTINS.contains(&token.text_trimmed()))
 }
 
 /// Extracts the identifier name from a plain identifier expression.
-fn identifier_name(expr: &AnyJsExpression) -> Option<String> {
-    Some(
-        expr.as_js_identifier_expression()?
-            .name()
-            .ok()?
-            .value_token()
-            .ok()?
-            .text_trimmed()
-            .to_string(),
-    )
+fn identifier_name(expr: &AnyJsExpression) -> Option<JsSyntaxToken> {
+    expr.as_js_identifier_expression()?
+        .name()
+        .ok()?
+        .value_token()
+        .ok()
 }
