@@ -1,14 +1,11 @@
 use super::{InferredModuleTypes, collected_type_result, expand_canonical_global};
-use crate::ModuleDb;
 use crate::db::queries::infer_module_types;
-use crate::module_graph::ModuleInfo;
+use crate::{ModuleDb, module_for_key};
 use biome_js_type_info::resolved::{
-    InferredLiteralValue, InferredLocalTypeHandle, InferredModuleKey, InferredReturnType,
-    InferredTypeData, InferredTypeMember, InferredTypeMemberKind, InferredTypeSubstitution,
-    StructuralMapError,
+    InferredLiteralValue, InferredLocalTypeHandle, InferredReturnType, InferredTypeData,
+    InferredTypeMember, InferredTypeMemberKind, InferredTypeSubstitution, StructuralMapError,
 };
 use rustc_hash::FxHashSet;
-use salsa::plumbing::{AsId, FromId};
 use std::rc::Rc;
 
 const MAX_MEMBER_LOOKUP_STEPS: usize = 1024;
@@ -640,15 +637,6 @@ pub(in crate::db::type_inference) fn class_side_type<'db>(
         | InferredTypeData::UnknownKeyword
         | InferredTypeData::VoidKeyword) => ty,
     }
-}
-
-pub(in crate::db::type_inference) fn module_for_key(
-    db: &dyn ModuleDb,
-    module_key: InferredModuleKey,
-) -> Option<ModuleInfo> {
-    let module = ModuleInfo::from_id(module_key.as_id());
-    let current = db.module_for_path(module.path(db))?;
-    (InferredModuleKey::new(current.as_id()) == module_key).then_some(current)
 }
 
 fn find_member_type<'db>(

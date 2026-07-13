@@ -122,7 +122,7 @@ fn assert_exhaustive_switch_has_no_diagnostic(source: &str, module_source: Optio
         .0
     };
     let mut module_db = WorkspaceDb::default();
-    let module = ModuleInfo::new(
+    let module = ModuleInfo::new_published(
         &module_db,
         path.as_path().to_path_buf(),
         ModuleInfoKind::Js(module_info),
@@ -239,7 +239,7 @@ fn await_thenable_suppresses_member_lookup_exhaustion() {
         true,
     );
     let mut module_db = WorkspaceDb::default();
-    let module = ModuleInfo::new(
+    let module = ModuleInfo::new_published(
         &module_db,
         path.as_path().to_path_buf(),
         ModuleInfoKind::Js(module_info),

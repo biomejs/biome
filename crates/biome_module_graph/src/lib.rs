@@ -28,7 +28,7 @@ pub use db::queries::{
     transitive_importers_of, traverse_import_tree_for_classes,
     traverse_import_tree_for_html_classes,
 };
-pub use db::{ModuleDb, ModuleGraphGeneration, TypeDb};
+pub use db::{ModuleDb, ModuleGraphGeneration, TypeDb, module_for_key};
 pub use diagnostics::ModuleDiagnostic;
 pub use html_module_info::{HtmlEmbeddedContent, HtmlModuleInfo, SerializedHtmlModuleInfo};
 pub use js_module_info::{
@@ -36,8 +36,8 @@ pub use js_module_info::{
     JsOwnExport, JsReexport, SerializedJsModuleInfo, TypeInferenceMode,
 };
 pub use module_graph::{
-    ModuleDependencies, ModuleInfo, ModuleInfoKind, SUPPORTED_EXTENSIONS, SerializedModuleInfo,
-    resolve_css_module, resolve_html_module, resolve_js_module,
+    ModuleDependencies, ModuleInfo, ModuleInfoKind, ModuleInfoOrigin, SUPPORTED_EXTENSIONS,
+    SerializedModuleInfo, resolve_css_module, resolve_html_module, resolve_js_module,
     resolve_js_module_with_inference_mode,
 };
 pub use path_info_cache::PathInfoCache;

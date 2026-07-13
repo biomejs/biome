@@ -27,10 +27,11 @@ use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_languages::JsFileSource;
 use biome_module_graph::{
     CallArgumentTypeInput, CallExpressionTypeInput, InferredModuleTypes, JsExport, JsOwnExport,
-    ModuleDb, ModuleGraphGeneration, ModuleInfo, ModuleInfoKind, NormalizeTypeInput, PathInfoCache,
-    ResolvedCallArgument, infer_call_expression_type as infer_call_expression_type_query,
+    ModuleDb, ModuleGraphGeneration, ModuleInfo, ModuleInfoKind, ModuleInfoOrigin,
+    NormalizeTypeInput, PathInfoCache, ResolvedCallArgument,
+    infer_call_expression_type as infer_call_expression_type_query,
     infer_constructor_argument_type, infer_module_types, infer_module_types_bottom_up,
-    normalize_type as normalize_type_query, resolve_js_module,
+    module_for_key, normalize_type as normalize_type_query, resolve_js_module,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
@@ -498,7 +499,7 @@ fn test_namespace_import_discards_known_members_when_blanket_module_cannot_infer
         "import * as namespace from './source'; export { namespace };",
     );
     let mut db = build_js_test_module_db(&fs, &["/src/source.ts", "/src/index.ts"], true);
-    let unavailable = ModuleInfo::new(
+    let unavailable = ModuleInfo::new_published(
         &db,
         Utf8PathBuf::from("/src/unavailable.ts"),
         resolve_js_module_kind_for_test(&fs, "/src/unavailable.ts", false),
@@ -581,11 +582,7 @@ impl biome_module_graph::TypeDb for TestModuleDb {
         module_key: InferredModuleKey,
         type_id: InferredLocalTypeId,
     ) -> Option<Text> {
-        let module = ModuleInfo::from_id(module_key.as_id());
-        let current = self.module_for_path(module.path(self))?;
-        if InferredModuleKey::new(current.as_id()) != module_key {
-            return None;
-        }
+        let current = module_for_key(self, module_key)?;
 
         let ModuleInfoKind::Js(info) = current.kind(self) else {
             return None;
@@ -1397,7 +1394,7 @@ fn build_js_test_module_db_with_layout(
 ) -> TestModuleDb {
     let mut db = TestModuleDb::new();
     for path in paths {
-        let module_info = ModuleInfo::new(
+        let module_info = ModuleInfo::new_published(
             &db,
             Utf8PathBuf::from(*path),
             resolve_js_module_kind_with_layout(fs, project_layout, path, infer_types),
@@ -6463,47 +6460,67 @@ fn test_infer_call_expression_type_rejects_partial_call_signature_set_repeatedly
 fn test_infer_call_expression_query_reuses_identical_inputs() {
     let fs = MemoryFileSystem::default();
     fs.insert("/src/index.ts".into(), "export {};".to_string());
-    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let mut db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
     let module = db
         .module_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let callee = InferredTypeData::Function(InferredFunction::new(
-        &db,
-        Box::default(),
-        Box::default(),
-        InferredReturnType::Type(InferredTypeData::Number),
-        false,
-        None,
-    ));
-    let input = CallExpressionTypeInput::new(&db, module, callee, Box::default());
+    let input_id = {
+        let callee = InferredTypeData::Function(InferredFunction::new(
+            &db,
+            Box::default(),
+            Box::default(),
+            InferredReturnType::Type(InferredTypeData::Number),
+            false,
+            None,
+        ));
+        let input = CallExpressionTypeInput::new(&db, module, callee, Box::default());
 
+        assert_eq!(
+            infer_call_expression_type_query(&db, input),
+            InferredTypeData::Number
+        );
+        db.events.0.lock().unwrap().clear();
+        assert_eq!(
+            infer_call_expression_type_query(&db, input),
+            InferredTypeData::Number
+        );
+        let events = std::mem::take(&mut *db.events.0.lock().unwrap());
+        assert_function_query_was_not_run(&db, infer_call_expression_type_query, input, &events);
+
+        let changed_input = CallExpressionTypeInput::new(
+            &db,
+            module,
+            callee,
+            Vec::from([ResolvedCallArgument::Argument(InferredTypeData::String)])
+                .into_boxed_slice(),
+        );
+        db.events.0.lock().unwrap().clear();
+        let _ = infer_call_expression_type_query(&db, changed_input);
+        let events = std::mem::take(&mut *db.events.0.lock().unwrap());
+        assert_function_query_was_run(
+            &db,
+            infer_call_expression_type_query,
+            changed_input,
+            &events,
+        );
+
+        input.as_id()
+    };
+
+    fs.insert(
+        "/src/index.ts".into(),
+        "export {}; // Change the module input.".to_string(),
+    );
+    let replacement = resolve_js_module_kind_for_test(&fs, "/src/index.ts", true);
+    salsa::Setter::to(module.set_kind(&mut db), replacement);
+    db.clear_salsa_events();
+    let input = CallExpressionTypeInput::from_id(input_id);
     assert_eq!(
         infer_call_expression_type_query(&db, input),
         InferredTypeData::Number
     );
-    db.events.0.lock().unwrap().clear();
-    assert_eq!(
-        infer_call_expression_type_query(&db, input),
-        InferredTypeData::Number
-    );
-    let events = std::mem::take(&mut *db.events.0.lock().unwrap());
-    assert_function_query_was_not_run(&db, infer_call_expression_type_query, input, &events);
-
-    let changed_input = CallExpressionTypeInput::new(
-        &db,
-        module,
-        callee,
-        Vec::from([ResolvedCallArgument::Argument(InferredTypeData::String)]).into_boxed_slice(),
-    );
-    db.events.0.lock().unwrap().clear();
-    let _ = infer_call_expression_type_query(&db, changed_input);
-    let events = std::mem::take(&mut *db.events.0.lock().unwrap());
-    assert_function_query_was_run(
-        &db,
-        infer_call_expression_type_query,
-        changed_input,
-        &events,
-    );
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(&db, infer_call_expression_type_query, input, &events);
 }
 
 #[test]
@@ -8004,6 +8021,137 @@ fn test_infer_module_types_is_memoized() {
 }
 
 #[test]
+fn test_detached_inference_is_isolated_from_published_modules() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/base.ts".into(),
+        "export async function task(): Promise<void> {}",
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        "export const published: string = 'published';",
+    );
+    let mut db = build_js_test_module_db(&fs, &["/src/base.ts", "/src/index.ts"], true);
+    let published = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("published module must exist");
+    let published_inferred =
+        infer_module_types(&db, published).expect("published types must be inferred");
+    let published_ptr = Arc::as_ptr(&published_inferred) as usize;
+    drop(published_inferred);
+    let generation = db.module_graph_generation();
+    let revision = salsa::plumbing::current_revision(&db);
+
+    fs.insert(
+        "/src/index.ts".into(),
+        "import { task } from './base'; export class Base { value = 'value'; } export class Derived extends Base {} export const member = new Derived().value; export const detached = task();",
+    );
+    let detached_kind = resolve_js_module_kind_for_test(&fs, "/src/index.ts", true);
+    db.clear_salsa_events();
+    let detached = ModuleInfo::new_detached(&db, Utf8PathBuf::from("/src/index.ts"), detached_kind);
+
+    assert_eq!(detached.origin(&db), ModuleInfoOrigin::Detached);
+    assert_eq!(salsa::plumbing::current_revision(&db), revision);
+    assert_eq!(db.module_graph_generation(), generation);
+    assert_eq!(
+        db.module_for_path(Utf8Path::new("/src/index.ts")),
+        Some(published)
+    );
+    assert_eq!(
+        module_for_key(&db, InferredModuleKey::new(detached.as_id())),
+        Some(detached)
+    );
+    assert!(db.module_for_path(Utf8Path::new("/src/base.ts")).is_some());
+
+    let detached_inferred =
+        infer_module_types(&db, detached).expect("detached types must be inferred");
+    let detached_ty = inferred_binding_ty_by_name(&db, detached, &detached_inferred, "detached")
+        .expect("detached binding must be inferred");
+    assert!(format_inferred_type(&db, detached_ty).contains("Promise"));
+    let member_ty = inferred_binding_ty_by_name(&db, detached, &detached_inferred, "member")
+        .expect("detached class member must be inferred");
+    assert!(
+        is_inferred_string(&db, detached_inferred.resolve_type(&db, member_ty)),
+        "detached class hierarchy and member lookup must retain local handles"
+    );
+    drop(detached_inferred);
+
+    let events = db.take_salsa_events();
+    assert!(
+        !events
+            .iter()
+            .any(|event| matches!(event.kind, salsa::EventKind::DidSetCancellationFlag))
+    );
+    let published_inferred =
+        infer_module_types(&db, published).expect("published types must remain inferred");
+    assert_eq!(Arc::as_ptr(&published_inferred) as usize, published_ptr);
+    assert_eq!(
+        db.module_for_path(Utf8Path::new("/src/index.ts")),
+        Some(published)
+    );
+
+    let replacement = ModuleInfo::new_published(
+        &db,
+        Utf8PathBuf::from("/src/index.ts"),
+        resolve_js_module_kind_for_test(&fs, "/src/index.ts", true),
+    );
+    db.insert_module(Utf8PathBuf::from("/src/index.ts"), replacement);
+    assert!(
+        module_for_key(&db, InferredModuleKey::new(published.as_id())).is_none(),
+        "stale published handles must remain rejected"
+    );
+}
+
+#[test]
+fn test_detached_cycle_uses_published_back_edge_without_memo_contamination() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/a.ts".into(),
+        "import { b } from './b'; export const a = b;",
+    );
+    fs.insert(
+        "/src/b.ts".into(),
+        "import { a } from './a'; export const b = a;",
+    );
+    let db = build_js_test_module_db(&fs, &["/src/a.ts", "/src/b.ts"], true);
+    let published_a = db.module_for_path(Utf8Path::new("/src/a.ts")).unwrap();
+    let published_b = db.module_for_path(Utf8Path::new("/src/b.ts")).unwrap();
+    let published = infer_module_types_bottom_up(&db, published_a)
+        .expect("published cycle must use stage-1 recovery");
+    let published_ptr = Arc::as_ptr(&published) as usize;
+    drop(published);
+
+    fs.insert(
+        "/src/a.ts".into(),
+        "import { b } from './b'; export const detachedA = b;",
+    );
+    let detached_a = ModuleInfo::new_detached(
+        &db,
+        Utf8PathBuf::from("/src/a.ts"),
+        resolve_js_module_kind_for_test(&fs, "/src/a.ts", true),
+    );
+    let detached = infer_module_types_bottom_up(&db, detached_a)
+        .expect("detached cycle must terminate using stage-1 recovery");
+    assert!(
+        inferred_binding_ty_by_name(&db, detached_a, &detached, "detachedA").is_some(),
+        "the detached root must retain its own local handles"
+    );
+    drop(detached);
+
+    assert_eq!(
+        db.module_for_path(Utf8Path::new("/src/a.ts")),
+        Some(published_a)
+    );
+    assert_eq!(
+        db.module_for_path(Utf8Path::new("/src/b.ts")),
+        Some(published_b)
+    );
+    let published = infer_module_types_bottom_up(&db, published_a)
+        .expect("published cycle must remain available");
+    assert_eq!(Arc::as_ptr(&published) as usize, published_ptr);
+}
+
+#[test]
 fn test_infer_module_types_invalidates_changed_dependencies_only() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -8096,7 +8244,7 @@ fn test_infer_module_types_invalidates_when_imported_modules_are_added_or_remove
 
     let b_path = Utf8PathBuf::from("/src/b.ts");
     let b_kind = resolve_js_module_kind_for_test(&fs, b_path.as_str(), true);
-    let b_module = ModuleInfo::new(&db, b_path.clone(), b_kind);
+    let b_module = ModuleInfo::new_published(&db, b_path.clone(), b_kind);
     db.insert_module(b_path.clone(), b_module);
 
     let inferred = infer_module_types(&db, a_module).expect("a types must be inferred");
@@ -8221,7 +8369,7 @@ fn test_infer_module_types_contains_unrelated_registry_changes() {
     infer_module_types_bottom_up(&db, index_module).expect("types must be inferred");
     let expression_count = inferred_expression_count(&db, index_module);
     let unrelated_path = Utf8PathBuf::from("/src/unrelated.ts");
-    let unrelated = ModuleInfo::new(
+    let unrelated = ModuleInfo::new_published(
         &db,
         unrelated_path.clone(),
         resolve_js_module_kind_for_test(&fs, unrelated_path.as_str(), true),
@@ -8328,13 +8476,13 @@ fn test_module_info_set_kind_cancels_active_inference() {
         }
     });
     db.cancellation_gate = Some(state.clone());
-    let source_module = ModuleInfo::new(
+    let source_module = ModuleInfo::new_published(
         &db,
         Utf8PathBuf::from("/src/source.ts"),
         resolve_js_module_kind_for_test(&fs, "/src/source.ts", true),
     );
     db.insert_module(Utf8PathBuf::from("/src/source.ts"), source_module);
-    let module = ModuleInfo::new(
+    let module = ModuleInfo::new_published(
         &db,
         Utf8PathBuf::from("/src/index.ts"),
         resolve_js_module_kind_for_test(&fs, "/src/index.ts", true),

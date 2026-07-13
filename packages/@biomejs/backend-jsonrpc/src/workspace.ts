@@ -10434,9 +10434,11 @@ export interface ChangeFileParams {
 	editorFeatures?: EditorFeatures;
 	inlineConfig?: Configuration;
 	path: BiomePath;
+	projectDataUpdate?: ProjectDataUpdate;
 	projectKey: ProjectKey;
 	version: number;
 }
+export type ProjectDataUpdate = "refresh" | "documentOnly";
 export interface ChangeFileResult {
 	diagnostics: Diagnostic[];
 }

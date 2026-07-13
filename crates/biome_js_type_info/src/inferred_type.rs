@@ -6,9 +6,7 @@
 
 use crate::TypeDb;
 use crate::interned_types::{ConditionalType, Literal, ReturnType, TypeData, TypeMember};
-use crate::return_type_relation::{
-    ReturnTypeRelation, compare_declared_return_type, is_escape_hatch, promise_inner,
-};
+use crate::return_type_relation::{ReturnTypeRelation, is_escape_hatch, promise_inner};
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
 use std::collections::VecDeque;
@@ -82,6 +80,9 @@ pub struct IgnoredPrimitiveTypes {
 
 impl<'db> InferredType<'db> {
     /// Creates a query facade for `data` in `db`.
+    ///
+    /// Interned handles inside `data` must come from the same database. This
+    /// constructor does not validate, resolve, or normalize the supplied type.
     ///
     /// ```
     /// use biome_js_type_info::{InferredType, TypeDb, resolved::InferredTypeData};
@@ -203,7 +204,7 @@ impl<'db> InferredType<'db> {
     }
 
     /// Returns whether every variant is a string, tuple, or `Array` instance.
-    pub fn is_all_string_array_or_tuple(self) -> bool {
+    pub fn is_all_string_or_array_or_tuple(self) -> bool {
         self.try_all_variants_match(|data| {
             matches!(data, TypeData::String | TypeData::Tuple(_))
                 || matches!(
@@ -230,14 +231,14 @@ impl<'db> InferredType<'db> {
     }
 
     /// Returns the stored pattern and flags for a regular-expression literal.
-    pub fn regexp_literal(self) -> Option<(Text, Text)> {
+    pub fn regexp_literal(self) -> Option<(&'db Text, &'db Text)> {
         let TypeData::Literal(literal) = self.data else {
             return None;
         };
         let Literal::RegExp(regexp) = literal.literal(self.db) else {
             return None;
         };
-        Some((regexp.pattern.clone(), regexp.flags.clone()))
+        Some((&regexp.pattern, &regexp.flags))
     }
 
     /// Returns whether this is directly an instance of the `Array` class.
@@ -247,7 +248,9 @@ impl<'db> InferredType<'db> {
 
     /// Returns whether this is an array whose element type reaches `Promise` or `PromiseLike`.
     ///
-    /// Returns `None` when the element type is unresolved or the walk is exhausted.
+    /// `Some(true)` confirms a promise element, `Some(false)` confirms a known
+    /// nonmatching type, and `None` means missing or unresolved element data, a
+    /// cycle, or budget exhaustion prevented a reliable answer.
     pub fn is_array_of_promise(self) -> Option<bool> {
         let TypeData::InstanceOf(instance) = self.data else {
             return if is_indeterminate_type(self.data) {
@@ -278,7 +281,9 @@ impl<'db> InferredType<'db> {
 
     /// Searches this type and its reachable targets for `Promise` or `PromiseLike`.
     ///
-    /// Returns `None` when inheritance is unresolved or the walk is exhausted.
+    /// `Some(true)` confirms a promise target, `Some(false)` proves no target
+    /// exists, and `None` means unresolved data, a cycle, or budget exhaustion
+    /// prevented a reliable negative answer.
     ///
     /// ```
     /// use biome_js_type_info::InferredType;
@@ -312,15 +317,32 @@ impl<'db> InferredType<'db> {
     }
 
     /// Compares this declared return type with inferred returned-value types.
+    ///
+    /// Boolean literal returns are normalized before comparison. Unresolved
+    /// data, cycles, or traversal limits produce an indeterminate verdict.
+    ///
+    /// ```
+    /// use biome_js_type_info::{InferredType, ReturnTypeVerdict};
+    ///
+    /// fn verdict<'db>(
+    ///     declared: InferredType<'db>,
+    ///     inferred: &[InferredType<'db>],
+    /// ) -> ReturnTypeVerdict {
+    ///     declared.compare_declared_return_type(inferred).verdict()
+    /// }
+    /// ```
     pub fn compare_declared_return_type(self, inferred: &[Self]) -> ReturnTypeRelation<'db> {
         let inferred = inferred.iter().map(|ty| ty.data).collect::<Vec<_>>();
-        compare_declared_return_type(self.db, self.data, &inferred)
+        crate::return_type_relation::compare_declared_return_type_owned(
+            self.db, self.data, inferred,
+        )
     }
 
     /// Returns whether this callable returns a `Promise` or `PromiseLike`.
     ///
-    /// Returns `None` when the callable or return type is unresolved or the walk
-    /// is exhausted.
+    /// `Some(true)` confirms a promise return, `Some(false)` confirms a known
+    /// non-promise return or non-callable type, and `None` means unresolved data,
+    /// a cycle, or budget exhaustion prevented a reliable answer.
     pub fn function_returns_promise(self) -> Option<bool> {
         let Some(function) = self.data.callable_function(self.db) else {
             return if is_indeterminate_type(self.data) {
@@ -347,7 +369,9 @@ impl<'db> InferredType<'db> {
 
     /// Returns whether a top-level union contains a `Promise` or `PromiseLike` variant.
     ///
-    /// Returns `None` when a variant is unresolved or the walk is exhausted.
+    /// `Some(true)` confirms a promise variant, `Some(false)` confirms a known
+    /// nonmatching top-level type, and `None` means unresolved data, a cycle, or
+    /// budget exhaustion prevented a reliable negative answer.
     pub fn has_promise_variant(self) -> Option<bool> {
         match self.data {
             TypeData::Union(_) => is_promise_instance(self.db, self.data),
@@ -391,7 +415,9 @@ impl<'db> InferredType<'db> {
 
     /// Returns `Some(true)` when a reachable nullish variant is found.
     ///
-    /// Returns `None` when a variant is unresolved or the walk is exhausted.
+    /// `Some(true)` confirms a nullish variant, `Some(false)` proves none exists,
+    /// and `None` means unresolved data, a cycle, or budget exhaustion prevented
+    /// a reliable negative answer.
     pub fn has_nullish_variant(self) -> Option<bool> {
         self.try_any_variant_matches(|data| {
             matches!(
@@ -403,7 +429,9 @@ impl<'db> InferredType<'db> {
 
     /// Returns whether every variant makes `??` equivalent to `||`.
     ///
-    /// Returns `None` when a variant is unresolved or the walk is exhausted.
+    /// `Some(true)` means every variant is safe, `Some(false)` identifies a known
+    /// counterexample, and `None` means unresolved data, a cycle, or budget
+    /// exhaustion prevented a reliable answer.
     pub fn is_safe_for_nullish_coalescing(self) -> Option<bool> {
         self.try_all_variants_match(|data| {
             if matches!(data, TypeData::InstanceOf(_)) {
@@ -418,7 +446,9 @@ impl<'db> InferredType<'db> {
 
     /// Returns whether a top-level union contains only nullish or enabled primitive variants.
     ///
-    /// Returns `None` when a variant is unresolved or the walk is exhausted.
+    /// `Some(true)` means every variant is accepted, `Some(false)` identifies a
+    /// disallowed variant or non-union type, and `None` means unresolved data, a
+    /// cycle, or budget exhaustion prevented a reliable answer.
     ///
     /// ```
     /// use biome_js_type_info::{IgnoredPrimitiveTypes, InferredType};
@@ -457,14 +487,18 @@ impl<'db> InferredType<'db> {
 
     /// Returns whether the type contains `null`.
     ///
-    /// Returns `None` when a variant is unresolved or the walk is exhausted.
+    /// `Some(true)` confirms a `null` variant, `Some(false)` proves none exists,
+    /// and `None` means unresolved data, a cycle, or budget exhaustion prevented
+    /// a reliable negative answer.
     pub fn has_null_variant(self) -> Option<bool> {
         self.try_any_variant_matches(|data| matches!(data, TypeData::Null))
     }
 
     /// Returns whether the type contains `undefined` or `void`.
     ///
-    /// Returns `None` when a variant is unresolved or the walk is exhausted.
+    /// `Some(true)` confirms an `undefined` or `void` variant, `Some(false)`
+    /// proves none exists, and `None` means unresolved data, a cycle, or budget
+    /// exhaustion prevented a reliable negative answer.
     pub fn has_undefined_variant(self) -> Option<bool> {
         self.try_any_variant_matches(|data| {
             matches!(data, TypeData::Undefined | TypeData::VoidKeyword)

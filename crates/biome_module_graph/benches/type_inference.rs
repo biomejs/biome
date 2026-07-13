@@ -143,15 +143,13 @@ fn build_module_from_source(source: &str) -> (WorkspaceDb, ModuleInfo) {
         &PathInfoCache::default(),
         TypeInferenceMode::RawTypesOnly,
     );
-    let db = WorkspaceDb::default();
-    let module = ModuleInfo::new(
+    let mut db = WorkspaceDb::default();
+    let module = ModuleInfo::new_published(
         &db,
         path.as_path().to_path_buf(),
         ModuleInfoKind::Js(module_info),
     );
-    db.modules
-        .pin()
-        .insert(path.as_path().to_path_buf(), module);
+    db.insert_module(path.as_path().to_path_buf(), module);
     (db, module)
 }
 
@@ -205,15 +203,13 @@ fn bench_index_d_ts_db_end_to_end(bencher: Bencher, name: &str) {
                 TypeInferenceMode::RawTypesOnly,
             );
 
-            let db = WorkspaceDb::default();
-            let module = ModuleInfo::new(
+            let mut db = WorkspaceDb::default();
+            let module = ModuleInfo::new_published(
                 &db,
                 path.as_path().to_path_buf(),
                 ModuleInfoKind::Js(module_info),
             );
-            db.modules
-                .pin()
-                .insert(path.as_path().to_path_buf(), module);
+            db.insert_module(path.as_path().to_path_buf(), module);
             divan::black_box(infer_module_types_bottom_up(&db, module));
         });
 }
@@ -240,7 +236,7 @@ fn bench_index_d_ts_db_unrelated_registry_change(bencher: Bencher, name: &str) {
         .with_inputs(|| {
             let (db, module, kind) = build_inferred_db(name);
             let path = BiomePath::new("unrelated.ts").as_path().to_path_buf();
-            let unrelated = ModuleInfo::new(&db, path.clone(), kind);
+            let unrelated = ModuleInfo::new_published(&db, path.clone(), kind);
             (db, module, path, unrelated)
         })
         .bench_local_values(|(mut db, module, path, unrelated)| {
@@ -310,7 +306,7 @@ fn bench_index_d_ts_db_incremental_first_run(bencher: Bencher) {
             (fs, modules)
         })
         .bench_local_values(|(fs, modules)| {
-            let db = WorkspaceDb::default();
+            let mut db = WorkspaceDb::default();
             let mut index_module = None;
             for (name, root, semantic_model) in modules {
                 let path = BiomePath::new(name);
@@ -323,14 +319,12 @@ fn bench_index_d_ts_db_incremental_first_run(bencher: Bencher) {
                     &PathInfoCache::default(),
                     TypeInferenceMode::RawTypesOnly,
                 );
-                let module = ModuleInfo::new(
+                let module = ModuleInfo::new_published(
                     &db,
                     path.as_path().to_path_buf(),
                     ModuleInfoKind::Js(module_info),
                 );
-                db.modules
-                    .pin()
-                    .insert(path.as_path().to_path_buf(), module);
+                db.insert_module(path.as_path().to_path_buf(), module);
                 if name == "index.ts" {
                     index_module = Some(module);
                 }
@@ -351,7 +345,7 @@ fn bench_index_d_ts_db_incremental(bencher: Bencher) {
             }
             fs.insert("index.ts".into(), INDEX_TS_BEFORE_EDIT);
 
-            let db = WorkspaceDb::default();
+            let mut db = WorkspaceDb::default();
             let mut index_module = None;
             for name in index_d_ts_cases().chain(["index.ts"]) {
                 let path = BiomePath::new(name);
@@ -367,14 +361,12 @@ fn bench_index_d_ts_db_incremental(bencher: Bencher) {
                     &PathInfoCache::default(),
                     TypeInferenceMode::RawTypesOnly,
                 );
-                let module = ModuleInfo::new(
+                let module = ModuleInfo::new_published(
                     &db,
                     path.as_path().to_path_buf(),
                     ModuleInfoKind::Js(module_info),
                 );
-                db.modules
-                    .pin()
-                    .insert(path.as_path().to_path_buf(), module);
+                db.insert_module(path.as_path().to_path_buf(), module);
                 if name == "index.ts" {
                     index_module = Some(module);
                 }
@@ -432,11 +424,9 @@ fn build_inferred_db(name: &str) -> (WorkspaceDb, ModuleInfo, ModuleInfoKind) {
     );
 
     let kind = ModuleInfoKind::Js(module_info);
-    let db = WorkspaceDb::default();
-    let module = ModuleInfo::new(&db, path.as_path().to_path_buf(), kind.clone());
-    db.modules
-        .pin()
-        .insert(path.as_path().to_path_buf(), module);
+    let mut db = WorkspaceDb::default();
+    let module = ModuleInfo::new_published(&db, path.as_path().to_path_buf(), kind.clone());
+    db.insert_module(path.as_path().to_path_buf(), module);
     infer_module_types_bottom_up(&db, module);
     (db, module, kind)
 }

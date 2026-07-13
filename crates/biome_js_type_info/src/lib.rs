@@ -1,3 +1,11 @@
+//! Type representations and inference queries for JavaScript and TypeScript.
+//!
+//! Collector-side types such as [`TypeData`] describe syntax-local information
+//! without database access. Database-backed inferred types are exposed through
+//! [`resolved`], where interned handles can refer to types from other modules.
+//! Lint rules should normally use [`InferredType`], which provides conservative
+//! read-only queries over those inferred values.
+
 #![deny(clippy::use_self)]
 
 mod builders;

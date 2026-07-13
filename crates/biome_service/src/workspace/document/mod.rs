@@ -2,6 +2,16 @@ pub(crate) mod services;
 
 use crate::diagnostics::FileTooLarge;
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum ProjectDataState {
+    /// Shared project data reflects the current document.
+    Current,
+    /// Shared project data still needs to be refreshed for this document.
+    RefreshPending,
+    /// Only document-local state reflects the current content.
+    DocumentOnly,
+}
+
 #[derive(Clone, Debug)]
 pub(crate) struct Document {
     /// Document content.
@@ -17,8 +27,8 @@ pub(crate) struct Document {
     /// do not have a version.
     pub(crate) version: Option<i32>,
 
-    /// Whether service data such as the module graph reflects this version.
-    pub(crate) service_data_synced: bool,
+    /// Whether shared project data reflects this version or a scan snapshot.
+    pub(crate) project_data_state: ProjectDataState,
 
     /// The index of where the original file source is saved.
     /// Use `WorkspaceServer#file_sources` to retrieve the file source that belongs to the document.

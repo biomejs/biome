@@ -48,7 +48,7 @@ fn build_js_db(
     added_paths: &[(&BiomePath, AnyJsRoot, Arc<biome_js_semantic::SemanticModel>)],
     infer_types: bool,
 ) -> WorkspaceDb {
-    let db = WorkspaceDb::default();
+    let mut db = WorkspaceDb::default();
     let path_info_cache = PathInfoCache::default();
     for (path, root, semantic_model) in added_paths {
         let (module_info, _, _) = resolve_js_module(
@@ -60,12 +60,12 @@ fn build_js_db(
             &path_info_cache,
             infer_types,
         );
-        let md = ModuleInfo::new(
+        let md = ModuleInfo::new_published(
             &db,
             path.as_path().to_path_buf(),
             ModuleInfoKind::Js(module_info),
         );
-        db.modules.pin().insert(path.as_path().to_path_buf(), md);
+        db.insert_module(path.as_path().to_path_buf(), md);
     }
     db
 }
@@ -79,7 +79,7 @@ fn build_html_db(
         Vec<HtmlEmbeddedContent>,
     )],
 ) -> WorkspaceDb {
-    let db = WorkspaceDb::default();
+    let mut db = WorkspaceDb::default();
     let path_info_cache = PathInfoCache::default();
     for (path, root, embedded_content) in html_data {
         let (module_info, _, _) = resolve_html_module(
@@ -90,18 +90,18 @@ fn build_html_db(
             layout,
             &path_info_cache,
         );
-        let md = ModuleInfo::new(
+        let md = ModuleInfo::new_published(
             &db,
             path.as_path().to_path_buf(),
             ModuleInfoKind::Html(module_info),
         );
-        db.modules.pin().insert(path.as_path().to_path_buf(), md);
+        db.insert_module(path.as_path().to_path_buf(), md);
     }
     db
 }
 
 fn add_js_modules(
-    db: &WorkspaceDb,
+    db: &mut WorkspaceDb,
     fs: &dyn biome_resolver::FsWithResolverProxy,
     layout: &ProjectLayout,
     added_paths: &[(&BiomePath, AnyJsRoot, Arc<biome_js_semantic::SemanticModel>)],
@@ -118,17 +118,17 @@ fn add_js_modules(
             &path_info_cache,
             infer_types,
         );
-        let md = ModuleInfo::new(
+        let md = ModuleInfo::new_published(
             db,
             path.as_path().to_path_buf(),
             ModuleInfoKind::Js(module_info),
         );
-        db.modules.pin().insert(path.as_path().to_path_buf(), md);
+        db.insert_module(path.as_path().to_path_buf(), md);
     }
 }
 
 fn add_css_modules(
-    db: &WorkspaceDb,
+    db: &mut WorkspaceDb,
     fs: &dyn biome_resolver::FsWithResolverProxy,
     layout: &ProjectLayout,
     css_roots: &[(&BiomePath, biome_css_syntax::AnyCssRoot)],
@@ -137,17 +137,17 @@ fn add_css_modules(
     for (path, root) in css_roots {
         let (module_info, _, _) =
             resolve_css_module(root.clone(), path, fs, layout, &path_info_cache);
-        let md = ModuleInfo::new(
+        let md = ModuleInfo::new_published(
             db,
             path.as_path().to_path_buf(),
             ModuleInfoKind::Css(module_info),
         );
-        db.modules.pin().insert(path.as_path().to_path_buf(), md);
+        db.insert_module(path.as_path().to_path_buf(), md);
     }
 }
 
 fn add_html_modules(
-    db: &WorkspaceDb,
+    db: &mut WorkspaceDb,
     fs: &dyn biome_resolver::FsWithResolverProxy,
     layout: &ProjectLayout,
     html_data: &[(
@@ -166,12 +166,12 @@ fn add_html_modules(
             layout,
             &path_info_cache,
         );
-        let md = ModuleInfo::new(
+        let md = ModuleInfo::new_published(
             db,
             path.as_path().to_path_buf(),
             ModuleInfoKind::Html(module_info),
         );
-        db.modules.pin().insert(path.as_path().to_path_buf(), md);
+        db.insert_module(path.as_path().to_path_buf(), md);
     }
 }
 
@@ -1537,9 +1537,9 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = WorkspaceDb::default();
-    add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
-    add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
+    let mut db = WorkspaceDb::default();
+    add_css_modules(&mut db, &fs, &ProjectLayout::default(), &css_roots);
+    add_js_modules(&mut db, &fs, &ProjectLayout::default(), &js_roots, false);
 
     // Verify the JS module info has the CSS import edge resolved
     let app_info = db
@@ -1616,9 +1616,9 @@ export function Component() {
     let js_paths = [BiomePath::new("/src/Component.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = WorkspaceDb::default();
-    add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
-    add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
+    let mut db = WorkspaceDb::default();
+    add_css_modules(&mut db, &fs, &ProjectLayout::default(), &css_roots);
+    add_js_modules(&mut db, &fs, &ProjectLayout::default(), &js_roots, false);
     let styles_css = db
         .module_for_path(Utf8Path::new("/src/styles.css"))
         .unwrap();
@@ -1677,9 +1677,9 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = WorkspaceDb::default();
-    add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
-    add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
+    let mut db = WorkspaceDb::default();
+    add_css_modules(&mut db, &fs, &ProjectLayout::default(), &css_roots);
+    add_js_modules(&mut db, &fs, &ProjectLayout::default(), &js_roots, false);
 
     // CSS class consumers of base.css must include App.jsx (via theme.css).
     let module = db.module_for_path(Utf8Path::new("/src/base.css")).unwrap();
@@ -1772,9 +1772,9 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.tsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = WorkspaceDb::default();
-    add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
-    add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
+    let mut db = WorkspaceDb::default();
+    add_css_modules(&mut db, &fs, &ProjectLayout::default(), &css_roots);
+    add_js_modules(&mut db, &fs, &ProjectLayout::default(), &js_roots, false);
 
     // App.tsx should be found as consumer of components.css (via app.css)
     let components_css = db
@@ -1888,9 +1888,9 @@ export function Dashboard() {
     ];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = WorkspaceDb::default();
-    add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
-    add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
+    let mut db = WorkspaceDb::default();
+    add_css_modules(&mut db, &fs, &ProjectLayout::default(), &css_roots);
+    add_js_modules(&mut db, &fs, &ProjectLayout::default(), &js_roots, false);
 
     // Both entry points should be found as consumers
     let components_css = db
@@ -1971,9 +1971,9 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = WorkspaceDb::default();
-    add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
-    add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
+    let mut db = WorkspaceDb::default();
+    add_css_modules(&mut db, &fs, &ProjectLayout::default(), &css_roots);
+    add_js_modules(&mut db, &fs, &ProjectLayout::default(), &js_roots, false);
 
     let traversal = traverse_import_tree_for_classes(
         &db,
@@ -2036,9 +2036,9 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = WorkspaceDb::default();
-    add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
-    add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
+    let mut db = WorkspaceDb::default();
+    add_css_modules(&mut db, &fs, &ProjectLayout::default(), &css_roots);
+    add_js_modules(&mut db, &fs, &ProjectLayout::default(), &js_roots, false);
 
     let traversal = traverse_import_tree_for_classes(
         &db,
@@ -2573,12 +2573,12 @@ fn test_vue_upward_traversal() {
     fs.insert("/src/Button.vue".into(), "");
 
     let layout = ProjectLayout::default();
-    let db = WorkspaceDb::default();
+    let mut db = WorkspaceDb::default();
 
     // Add CSS
     let css_paths = [BiomePath::new("/src/app.css")];
     let css_roots = get_css_added_paths(&fs, &css_paths);
-    add_css_modules(&db, &fs, &layout, &css_roots);
+    add_css_modules(&mut db, &fs, &layout, &css_roots);
 
     // Parse HTML files
     let app_root = biome_html_parser::parse_html(
@@ -2619,7 +2619,7 @@ fn test_vue_upward_traversal() {
     let button_path = BiomePath::new("/src/Button.vue");
 
     add_html_modules(
-        &db,
+        &mut db,
         &fs,
         &layout,
         &[

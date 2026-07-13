@@ -1,10 +1,10 @@
 //! Conversion from collector-side raw types to database-backed inferred types.
 
-use super::{BindingTypeData, InferredModuleTypes, globals::global_type, lookup::module_for_key};
+use super::{BindingTypeData, InferredModuleTypes, globals::global_type};
 use crate::db::queries::infer_module_types;
 use crate::js_module_info::is_named_type_declaration;
 use crate::module_graph::ModuleInfo;
-use crate::{JsModuleInfo, ModuleDb};
+use crate::{JsModuleInfo, ModuleDb, module_for_key};
 use biome_js_type_info::{
     RawTypeData, RawTypeId, ScopeId, TypeId, TypeReference, TypeReferenceQualifier,
     resolved::{

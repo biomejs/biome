@@ -41,7 +41,7 @@ pub fn assert_type_data_snapshot(
     content.push_str(&ty.to_string());
     content.push_str("\n```\n\n");
 
-    dump_registered_module_types(&mut content, resolver.types.as_references());
+    dump_registered_module_types(&mut content, resolver.types.as_slice());
 
     insta::with_settings!({
         snapshot_path => "snapshots",
@@ -82,7 +82,7 @@ pub fn assert_typed_bindings_snapshot(
     }
     content.push_str("\n```\n\n");
 
-    dump_registered_module_types(&mut content, resolver.types.as_references());
+    dump_registered_module_types(&mut content, resolver.types.as_slice());
 
     insta::with_settings!({
         snapshot_path => "snapshots",

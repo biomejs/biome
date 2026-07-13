@@ -1,7 +1,10 @@
 use super::*;
 use crate::settings::ModuleGraphResolutionKind;
-use crate::test_utils::setup_workspace_and_open_project;
-use crate::workspace::UpdateSettingsParams;
+use crate::test_utils::{
+    setup_disposable_workspace_and_open_project, setup_workspace_and_open_project,
+};
+use crate::workspace::{ProjectDataUpdate, UpdateSettingsParams};
+use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::{
     FormatterConfiguration, JsConfiguration,
     analyzer::AnalyzerSelector,
@@ -15,6 +18,614 @@ use biome_rowan::TextSize;
 use camino::Utf8Path;
 use std::panic::AssertUnwindSafe;
 use std::str::FromStr;
+use std::sync::{Arc, Barrier};
+
+fn diagnostics_for_rule(
+    workspace: &LocalWorkspace,
+    project_key: ProjectKey,
+    path: &str,
+    rule: &str,
+) -> PullDiagnosticsResult {
+    workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new(path),
+            only: vec![AnalyzerSelector::from_str(rule).unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap()
+}
+
+#[test]
+fn document_only_change_uses_detached_module_without_updating_project_data() {
+    const BASE_PATH: &str = "/project/base.ts";
+    const INDEX_PATH: &str = "/project/index.ts";
+    const OLD_BASE: &str = "export function task(): void {}\ntask();";
+    const NEW_BASE: &str = "export async function task(): Promise<void> {}\ntask();";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(BASE_PATH), OLD_BASE.as_bytes());
+    fs.insert(
+        Utf8PathBuf::from(INDEX_PATH),
+        b"import { task } from './base';\ntask();",
+    );
+    let (workspace, project_key) = setup_disposable_workspace_and_open_project(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    let (published_module, published_kind, generation) = {
+        let db = workspace.get_db();
+        let module = db.module_for_path(Utf8Path::new(BASE_PATH)).unwrap();
+        (
+            module,
+            module.kind(&db).clone(),
+            db.module_graph_generation(),
+        )
+    };
+    workspace.db_state.reset_setter_count();
+
+    workspace
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new(BASE_PATH),
+            content: NEW_BASE.into(),
+            version: 1,
+            inline_config: None,
+            editor_features: None,
+            project_data_update: ProjectDataUpdate::DocumentOnly,
+        })
+        .unwrap();
+
+    assert_eq!(
+        diagnostics_for_rule(
+            &workspace,
+            project_key,
+            BASE_PATH,
+            "lint/nursery/noFloatingPromises",
+        )
+        .diagnostics
+        .len(),
+        1
+    );
+    assert!(
+        diagnostics_for_rule(
+            &workspace,
+            project_key,
+            INDEX_PATH,
+            "lint/nursery/noFloatingPromises",
+        )
+        .diagnostics
+        .is_empty()
+    );
+
+    let db = workspace.get_db();
+    let current_module = db.module_for_path(Utf8Path::new(BASE_PATH)).unwrap();
+    assert_eq!(current_module, published_module);
+    assert_eq!(
+        format!("{:?}", current_module.kind(&db)),
+        format!("{published_kind:?}")
+    );
+    assert_eq!(db.module_graph_generation(), generation);
+    assert_eq!(workspace.db_state.setter_count(), 0);
+    drop(db);
+
+    workspace
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new(BASE_PATH),
+            content: NEW_BASE.into(),
+            version: 1,
+            inline_config: None,
+            editor_features: None,
+            project_data_update: ProjectDataUpdate::Refresh,
+        })
+        .unwrap();
+    assert_eq!(
+        diagnostics_for_rule(
+            &workspace,
+            project_key,
+            INDEX_PATH,
+            "lint/nursery/noFloatingPromises",
+        )
+        .diagnostics
+        .len(),
+        1
+    );
+}
+
+#[test]
+fn concurrent_document_only_processing_uses_no_project_data_setters() {
+    const BASE_PATH: &str = "/project/base.ts";
+    const INDEX_PATH: &str = "/project/index.ts";
+    const SYNC_BASE: &str = "export function task(): void {}\ntask();";
+    const ASYNC_BASE: &str = "export async function task(): Promise<void> {}\ntask();";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(BASE_PATH), SYNC_BASE.as_bytes());
+    fs.insert(
+        Utf8PathBuf::from(INDEX_PATH),
+        b"import { task } from './base';\ntask();",
+    );
+    let (workspace, project_key) = setup_disposable_workspace_and_open_project(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+    workspace.db_state.reset_setter_count();
+
+    let barrier = Arc::new(Barrier::new(2));
+    std::thread::scope(|scope| {
+        let reader_barrier = barrier.clone();
+        let reader_workspace = &workspace;
+        scope.spawn(move || {
+            reader_barrier.wait();
+            for _ in 0..32 {
+                assert!(
+                    diagnostics_for_rule(
+                        reader_workspace,
+                        project_key,
+                        INDEX_PATH,
+                        "lint/nursery/noFloatingPromises",
+                    )
+                    .diagnostics
+                    .is_empty()
+                );
+            }
+        });
+        let writer_workspace = &workspace;
+        scope.spawn(move || {
+            barrier.wait();
+            for version in 1..=32 {
+                writer_workspace
+                    .change_file(ChangeFileParams {
+                        project_key,
+                        path: BiomePath::new(BASE_PATH),
+                        content: if version % 2 == 0 {
+                            SYNC_BASE.into()
+                        } else {
+                            ASYNC_BASE.into()
+                        },
+                        version,
+                        inline_config: None,
+                        editor_features: None,
+                        project_data_update: ProjectDataUpdate::DocumentOnly,
+                    })
+                    .unwrap();
+            }
+        });
+    });
+
+    workspace
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new(BASE_PATH),
+            content: ASYNC_BASE.into(),
+            version: 33,
+            inline_config: None,
+            editor_features: None,
+            project_data_update: ProjectDataUpdate::DocumentOnly,
+        })
+        .unwrap();
+    assert_eq!(
+        diagnostics_for_rule(
+            &workspace,
+            project_key,
+            BASE_PATH,
+            "lint/nursery/noFloatingPromises",
+        )
+        .diagnostics
+        .len(),
+        1
+    );
+    assert_eq!(workspace.db_state.setter_count(), 0);
+}
+
+#[test]
+#[should_panic(expected = "ProjectDataUpdate::DocumentOnly was requested for indexed path")]
+fn persistent_workspace_asserts_on_document_only_updates_to_indexed_files() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/file.js"), b"let value = 1;");
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::Modules,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.js"),
+            content: FileContent::from_client("let value = 1;"),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    workspace
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.js"),
+            content: "let value = 2;".into(),
+            version: 1,
+            inline_config: None,
+            editor_features: None,
+            project_data_update: ProjectDataUpdate::DocumentOnly,
+        })
+        .unwrap();
+}
+
+#[test]
+fn persistent_workspace_accepts_document_only_updates_for_unindexed_files() {
+    const PATH: &str = "/project/biome.json";
+    const UPDATED: &str = r#"{ "formatter": { "enabled": true } }"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), b"{}");
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::from_client("{}"),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+    workspace.db_state.reset_setter_count();
+
+    workspace
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: UPDATED.into(),
+            version: 1,
+            inline_config: None,
+            editor_features: None,
+            project_data_update: ProjectDataUpdate::DocumentOnly,
+        })
+        .unwrap();
+
+    assert_eq!(
+        workspace
+            .get_file_content(GetFileContentParams {
+                project_key,
+                path: BiomePath::new(PATH),
+            })
+            .unwrap(),
+        UPDATED
+    );
+    assert_eq!(
+        workspace
+            .documents
+            .pin()
+            .get(Utf8Path::new(PATH))
+            .unwrap()
+            .project_data_state,
+        ProjectDataState::Current
+    );
+    assert_eq!(workspace.db_state.setter_count(), 0);
+}
+
+#[test]
+fn type_aware_fix_uses_detached_module_after_ranges_shift() {
+    const PATH: &str = "/project/file.ts";
+    const SOURCE: &str = "process.cwd();\nasync function task(): Promise<void> {}\ntask();\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    let (workspace, project_key) = setup_disposable_workspace_and_open_project(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    let no_floating = AnalyzerSelector::from_str("lint/nursery/noFloatingPromises").unwrap();
+    let no_process_global = AnalyzerSelector::from_str("lint/correctness/noProcessGlobal").unwrap();
+    assert_eq!(
+        diagnostics_for_rule(
+            &workspace,
+            project_key,
+            PATH,
+            "lint/nursery/noFloatingPromises",
+        )
+        .diagnostics
+        .len(),
+        1
+    );
+    let result = workspace
+        .fix_file(crate::workspace::FixFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            fix_file_mode: FixFileMode::SafeFixes,
+            should_format: false,
+            only: vec![no_floating.clone(), no_process_global.clone()],
+            skip: vec![],
+            enabled_rules: vec![no_floating.clone(), no_process_global],
+            rule_categories: RuleCategoriesBuilder::default()
+                .with_syntax()
+                .with_lint()
+                .build(),
+            suppression_reason: None,
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert!(
+        result.code.contains("import process from \"node:process\""),
+        "{}",
+        result.code
+    );
+
+    workspace
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: result.code.clone(),
+            version: 1,
+            inline_config: None,
+            editor_features: None,
+            project_data_update: ProjectDataUpdate::DocumentOnly,
+        })
+        .unwrap();
+    let diagnostics = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new(PATH),
+            only: vec![no_floating],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+    assert_eq!(diagnostics.diagnostics.len(), 1);
+    let span = diagnostics.diagnostics[0].location().span.unwrap();
+    assert_eq!(&result.code[span], "task();");
+}
+
+#[test]
+fn type_aware_fix_iteration_uses_tree_after_an_import_is_added() {
+    const PATH: &str = "/project/file.ts";
+    const SOURCE: &str = "async function task(): Promise<void> {}\nasync function main() {\n    process.cwd();\n    task();\n}\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    let (workspace, project_key) = setup_disposable_workspace_and_open_project(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    let no_floating = AnalyzerSelector::from_str("lint/nursery/noFloatingPromises").unwrap();
+    let no_process_global = AnalyzerSelector::from_str("lint/correctness/noProcessGlobal").unwrap();
+    let result = workspace
+        .fix_file(crate::workspace::FixFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            fix_file_mode: FixFileMode::SafeAndUnsafeFixes,
+            should_format: false,
+            only: vec![no_floating.clone(), no_process_global.clone()],
+            skip: vec![],
+            enabled_rules: vec![no_floating, no_process_global],
+            rule_categories: RuleCategoriesBuilder::default()
+                .with_syntax()
+                .with_lint()
+                .build(),
+            suppression_reason: None,
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert!(result.code.contains("import process from \"node:process\""));
+    assert!(result.code.contains("await task();"), "{}", result.code);
+}
+
+#[test]
+fn syntax_only_and_persistent_fixes_do_not_create_detached_modules() {
+    const PATH: &str = "/project/file.ts";
+    const SOURCE: &str = "process.cwd();\n";
+
+    for disposable in [true, false] {
+        let fs = MemoryFileSystem::default();
+        fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+        let (workspace, project_key) = if disposable {
+            setup_disposable_workspace_and_open_project(fs, "/project")
+        } else {
+            setup_workspace_and_open_project(fs, "/project")
+        };
+        workspace
+            .update_settings(UpdateSettingsParams {
+                project_key,
+                workspace_directory: Some(BiomePath::new("/project")),
+                configuration: Configuration::default(),
+                extended_configurations: vec![],
+                module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+            })
+            .unwrap();
+        workspace
+            .scan_project(ScanProjectParams {
+                project_key,
+                watch: false,
+                force: false,
+                scan_kind: ScanKind::TypeAware,
+                verbose: false,
+            })
+            .unwrap();
+        workspace
+            .server
+            .detached_module_count
+            .store(0, Ordering::Relaxed);
+
+        let no_process_global =
+            AnalyzerSelector::from_str("lint/correctness/noProcessGlobal").unwrap();
+        workspace
+            .fix_file(crate::workspace::FixFileParams {
+                project_key,
+                path: BiomePath::new(PATH),
+                fix_file_mode: FixFileMode::SafeFixes,
+                should_format: false,
+                only: vec![no_process_global.clone()],
+                skip: vec![],
+                enabled_rules: vec![no_process_global],
+                rule_categories: RuleCategoriesBuilder::default()
+                    .with_syntax()
+                    .with_lint()
+                    .build(),
+                suppression_reason: None,
+                inline_config: None,
+            })
+            .unwrap();
+
+        assert_eq!(
+            workspace
+                .server
+                .detached_module_count
+                .load(Ordering::Relaxed),
+            0
+        );
+    }
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from(PATH),
+        b"async function task(): Promise<void> {}\nasync function main() { process.cwd(); task(); }",
+    );
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+    workspace
+        .server
+        .detached_module_count
+        .store(0, Ordering::Relaxed);
+    let no_process_global = AnalyzerSelector::from_str("lint/correctness/noProcessGlobal").unwrap();
+    let no_floating = AnalyzerSelector::from_str("lint/nursery/noFloatingPromises").unwrap();
+    workspace
+        .fix_file(crate::workspace::FixFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            fix_file_mode: FixFileMode::SafeAndUnsafeFixes,
+            should_format: false,
+            only: vec![no_process_global.clone(), no_floating.clone()],
+            skip: vec![],
+            enabled_rules: vec![no_process_global, no_floating],
+            rule_categories: RuleCategoriesBuilder::default()
+                .with_syntax()
+                .with_lint()
+                .build(),
+            suppression_reason: None,
+            inline_config: None,
+        })
+        .unwrap();
+    assert_eq!(
+        workspace
+            .server
+            .detached_module_count
+            .load(Ordering::Relaxed),
+        0
+    );
+}
 
 #[test]
 fn change_file_resumes_module_update_after_cancellation() {
@@ -88,6 +699,7 @@ fn change_file_resumes_module_update_after_cancellation() {
         version: 2,
         inline_config: None,
         editor_features: None,
+        project_data_update: ProjectDataUpdate::Refresh,
     };
     workspace
         .server

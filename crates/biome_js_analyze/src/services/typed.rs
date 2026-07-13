@@ -48,46 +48,105 @@ impl TypedModule {
     /// results. If the first attempt cannot infer the types, the preparation is
     /// attempted again on the next call.
     fn inferred_types<'db>(&'db self) -> Option<Arc<InferredModuleTypes<'db>>> {
-        get_or_warm(
-            &self.dependencies_warmed,
+        self.get_or_warm(
             || infer_module_types_bottom_up(self.db.as_ref(), self.module),
             || infer_module_types(self.db.as_ref(), self.module),
         )
     }
-}
 
-fn get_or_warm<T>(
-    warmed: &OnceCell<()>,
-    warm: impl FnOnce() -> Option<T>,
-    cached: impl FnOnce() -> Option<T>,
-) -> Option<T> {
-    if warmed.get().is_some() {
-        cached()
-    } else {
-        let result = warm();
-        if result.is_some() {
-            let _ = warmed.set(());
+    fn get_or_warm<T>(
+        &self,
+        warm: impl FnOnce() -> Option<T>,
+        cached: impl FnOnce() -> Option<T>,
+    ) -> Option<T> {
+        if self.dependencies_warmed.get().is_some() {
+            cached()
+        } else {
+            let result = warm();
+            if result.is_some() {
+                let _ = self.dependencies_warmed.set(());
+            }
+            result
         }
-        result
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::get_or_warm;
-    use std::{cell::Cell, rc::Rc};
+    use super::TypedModule;
+    use biome_fs::{BiomePath, MemoryFileSystem};
+    use biome_js_parser::{JsParserOptions, parse};
+    use biome_js_semantic::{SemanticModelOptions, semantic_model};
+    use biome_languages::JsFileSource;
+    use biome_module_graph::{
+        ModuleDb, ModuleInfo, ModuleInfoKind, PathInfoCache, TypeDb, resolve_js_module,
+    };
+    use biome_project_layout::ProjectLayout;
+    use camino::Utf8Path;
+    use std::{cell::Cell, rc::Rc, sync::Arc};
+
+    #[salsa::db]
+    #[derive(Default)]
+    struct TestDb {
+        storage: salsa::Storage<Self>,
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    #[salsa::db]
+    impl biome_db::Db for TestDb {
+        fn parsed_source_for_path(&self, _: &Utf8Path) -> Option<biome_db::ParsedSource> {
+            None
+        }
+    }
+
+    #[salsa::db]
+    impl TypeDb for TestDb {}
+
+    #[salsa::db]
+    impl ModuleDb for TestDb {
+        fn module_graph_generation(&self) -> u64 {
+            0
+        }
+
+        fn module_for_path(&self, _: &Utf8Path) -> Option<ModuleInfo> {
+            None
+        }
+
+        fn for_each_module(&self, _: &mut dyn FnMut(&Utf8Path, &ModuleInfoKind)) {}
+    }
 
     #[test]
     fn cloned_typed_modules_share_dependency_warming() {
-        let warmed = Rc::new(std::cell::OnceCell::new());
-        let cloned = Rc::clone(&warmed);
+        let fs = MemoryFileSystem::default();
+        let path = BiomePath::new("test.ts");
+        fs.insert(path.as_path().to_path_buf(), "export {};".as_bytes());
+        let root = parse("export {};", JsFileSource::ts(), JsParserOptions::default()).tree();
+        let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
+        let (module_info, _, _) = resolve_js_module(
+            root,
+            &path,
+            &fs,
+            &ProjectLayout::default(),
+            semantic_model,
+            &PathInfoCache::default(),
+            true,
+        );
+        let db = Rc::new(TestDb::default());
+        let module = ModuleInfo::new_published(
+            db.as_ref(),
+            path.as_path().to_path_buf(),
+            ModuleInfoKind::Js(module_info),
+        );
+        let typed_module = TypedModule::new(db, module);
+        let cloned = typed_module.clone();
         let warm_count = Cell::new(0);
         let cached_count = Cell::new(0);
 
-        for warmed in [&*warmed, &*cloned] {
+        for module in [&typed_module, &cloned] {
             assert_eq!(
-                get_or_warm(
-                    warmed,
+                module.get_or_warm(
                     || {
                         warm_count.set(warm_count.get() + 1);
                         Some(1)
@@ -149,7 +208,7 @@ impl TypedService {
         Some(InferredType::new(db, ty))
     }
 
-    /// Returns the inferred type of a named value visible at `range`.
+    /// Returns the inferred type of named value visible at `range`.
     pub fn type_of_named_value<'db>(
         &'db self,
         range: TextRange,

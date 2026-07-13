@@ -143,22 +143,20 @@ impl<'db> IntersectionBuilder<'db> {
                     return self;
                 }
                 ty => {
-                    if ty.is_primitive(self.db) {
-                        if let Some(index) = self
+                    if ty.is_primitive(self.db)
+                        && let Some(index) = self
                             .types
                             .iter()
                             .position(|other| other.is_primitive(self.db))
-                        {
-                            let primitive =
-                                intersect_primitive_types(self.db, self.types[index], ty);
-                            if primitive == TypeData::NeverKeyword {
-                                self.types.clear();
-                                self.types.push(TypeData::NeverKeyword);
-                                return self;
-                            }
-                            self.types[index] = primitive;
-                            continue;
+                    {
+                        let primitive = intersect_primitive_types(self.db, self.types[index], ty);
+                        if primitive == TypeData::NeverKeyword {
+                            self.types.clear();
+                            self.types.push(TypeData::NeverKeyword);
+                            return self;
                         }
+                        self.types[index] = primitive;
+                        continue;
                     }
 
                     if !self.types.contains(&ty) {
@@ -200,9 +198,7 @@ fn intersect_primitive_types<'db>(
     left: TypeData<'db>,
     right: TypeData<'db>,
 ) -> TypeData<'db> {
-    if left == right {
-        left
-    } else if left.literal_base_type(db) == Some(right) {
+    if left == right || left.literal_base_type(db) == Some(right) {
         left
     } else if right.literal_base_type(db) == Some(left) {
         right

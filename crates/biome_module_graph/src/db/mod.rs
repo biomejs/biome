@@ -1,8 +1,12 @@
 //! Salsa database traits and tracked module-graph queries.
 
-use crate::{CssModuleInfo, HtmlModuleInfo, JsModuleInfo, ModuleInfo, ModuleInfoKind};
+use crate::{
+    CssModuleInfo, HtmlModuleInfo, JsModuleInfo, ModuleInfo, ModuleInfoKind, ModuleInfoOrigin,
+};
 pub use biome_js_type_info::TypeDb;
+use biome_js_type_info::resolved::InferredModuleKey;
 use camino::{Utf8Path, Utf8PathBuf};
+use salsa::plumbing::{AsId, FromId};
 
 pub mod queries;
 mod type_inference;
@@ -75,4 +79,14 @@ pub trait ModuleDb: TypeDb {
         });
         result
     }
+}
+
+/// Resolves a module key while rejecting stale published module handles.
+pub fn module_for_key(db: &dyn ModuleDb, module_key: InferredModuleKey) -> Option<ModuleInfo> {
+    let module = ModuleInfo::from_id(module_key.as_id());
+    if module.origin(db) == ModuleInfoOrigin::Detached {
+        return Some(module);
+    }
+    let current = db.module_for_path(module.path(db))?;
+    (InferredModuleKey::new(current.as_id()) == module_key).then_some(current)
 }

@@ -9,7 +9,8 @@ use biome_languages::DocumentFileSource;
 use biome_rowan::{TextRange, TextSize};
 use biome_service::workspace::{
     ChangeFileParams, FileContent, FormatFileParams, FormatRangeParams, GetFormatterIRParams,
-    OpenFileParams, OpenProjectParams, OpenProjectResult, UpdateSettingsParams, server,
+    OpenFileParams, OpenProjectParams, OpenProjectResult, ProjectDataUpdate, UpdateSettingsParams,
+    server,
 };
 use camino::{Utf8Path, Utf8PathBuf};
 use std::ops::Range;
@@ -299,6 +300,7 @@ impl<'a> SpecSnapshot<'a> {
                     version: 1,
                     inline_config: None,
                     editor_features: None,
+                    project_data_update: ProjectDataUpdate::Refresh,
                 })
                 .unwrap();
 

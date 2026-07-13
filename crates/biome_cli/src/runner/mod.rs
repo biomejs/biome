@@ -160,7 +160,8 @@ use biome_service::diagnostics::ConfigurationOutsideProject;
 use biome_service::projects::ProjectKey;
 use biome_service::settings::ModuleGraphResolutionKind;
 use biome_service::workspace::{
-    OpenProjectParams, ScanKind, ScanProjectParams, UpdateSettingsParams,
+    OpenProjectParams, ProjectDataUpdate, ScanKind, ScanProjectParams, UpdateSettingsParams,
+    WorkspaceLifetime,
 };
 use biome_service::{Workspace, WorkspaceError};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -292,6 +293,7 @@ pub(crate) trait CommandRunner {
             duration,
             configuration_files: _,
             project_key,
+            project_data_update,
         } = configured_workspace;
 
         if let Some(stdin) = self.get_stdin(console, execution.as_ref())? {
@@ -325,6 +327,7 @@ pub(crate) trait CommandRunner {
             workspace,
             fs,
             project_key,
+            project_data_update,
             paths
                 .iter()
                 .map(|path| CrawlPath::String(path.clone()))
@@ -366,6 +369,7 @@ pub(crate) trait CommandRunner {
                             workspace,
                             fs,
                             project_key,
+                            project_data_update,
                             paths
                                 .iter()
                                 .map(|path| CrawlPath::Path(path.clone()))
@@ -545,6 +549,13 @@ pub(crate) trait CommandRunner {
             duration: Some(result.duration),
             configuration_files: result.configuration_files,
             project_key: open_project_result.project_key,
+            project_data_update: if workspace.lifetime() == WorkspaceLifetime::Disposable
+                && !self.is_watch_mode()
+            {
+                ProjectDataUpdate::DocumentOnly
+            } else {
+                ProjectDataUpdate::Refresh
+            },
         })
     }
 
@@ -660,4 +671,6 @@ pub(crate) struct ConfiguredWorkspace {
     pub configuration_files: Vec<BiomePath>,
     /// The unique identifier of the project
     pub project_key: ProjectKey,
+    /// Controls whether writes refresh shared project data.
+    pub project_data_update: ProjectDataUpdate,
 }

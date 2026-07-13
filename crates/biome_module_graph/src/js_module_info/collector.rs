@@ -813,7 +813,7 @@ impl JsModuleInfoCollector {
     }
 
     fn raw_type_by_resolved_id(&self, id: TypeId) -> Option<&TypeData> {
-        self.types.as_references().get(id.index())
+        self.types.as_slice().get(id.index())
     }
 }
 

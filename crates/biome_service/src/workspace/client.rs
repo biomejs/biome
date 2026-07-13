@@ -12,7 +12,7 @@ use super::{
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
     GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams, OpenProjectParams,
-    OpenProjectResult, PathIsIgnoredParams, RageParams, RageResult, ServerInfo,
+    OpenProjectResult, PathIsIgnoredParams, RageParams, RageResult, ServerInfo, WorkspaceLifetime,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
@@ -280,5 +280,9 @@ where
 
     fn server_info(&self) -> Option<&ServerInfo> {
         self.server_info.as_ref()
+    }
+
+    fn lifetime(&self) -> WorkspaceLifetime {
+        WorkspaceLifetime::Persistent
     }
 }

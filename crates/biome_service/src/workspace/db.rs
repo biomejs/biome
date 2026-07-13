@@ -138,6 +138,8 @@ struct OwnedDb {
     /// setter-based update.
     pending_setters: AtomicUsize,
     update_mode: ParsedSourceUpdateMode,
+    #[cfg(test)]
+    setter_count: AtomicUsize,
 }
 
 impl OwnedDb {
@@ -148,6 +150,8 @@ impl OwnedDb {
             data,
             pending_setters: AtomicUsize::new(0),
             update_mode,
+            #[cfg(test)]
+            setter_count: AtomicUsize::new(0),
         }
     }
 
@@ -184,6 +188,8 @@ impl OwnedDb {
             );
         }
 
+        #[cfg(test)]
+        self.setter_count.fetch_add(1, Ordering::Relaxed);
         self.pending_setters.fetch_add(1, Ordering::Release);
         let _guard = PendingSetterGuard(&self.pending_setters);
         let mut db = self.db.lock();
@@ -211,6 +217,16 @@ impl Default for DbState {
 }
 
 impl DbState {
+    #[cfg(test)]
+    pub(crate) fn setter_count(&self) -> usize {
+        self.storage.setter_count.load(Ordering::Relaxed)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn reset_setter_count(&self) {
+        self.storage.setter_count.store(0, Ordering::Relaxed);
+    }
+
     pub fn lsp() -> Self {
         Self {
             storage: OwnedDb::new(WorkspaceDb::default(), ParsedSourceUpdateMode::Setters),

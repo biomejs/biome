@@ -1,8 +1,8 @@
 use super::{
     ChangeFileParams, CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult,
     FileGuard, GetFileContentParams, GetModuleGraphParams, GetSyntaxTreeParams, OpenFileParams,
-    OpenProjectParams, OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectParams,
-    UpdateKind, UpdateModuleGraphParams, UpdateSettingsParams, server,
+    OpenProjectParams, OpenProjectResult, ProjectDataUpdate, PullDiagnosticsParams, ScanKind,
+    ScanProjectParams, UpdateKind, UpdateModuleGraphParams, UpdateSettingsParams, server,
 };
 use crate::projects::ProjectKey;
 use crate::settings::ModuleGraphResolutionKind;
@@ -24,6 +24,24 @@ use std::collections::BTreeMap;
 use std::num::NonZeroU64;
 use std::str::FromStr;
 use std::sync::{Arc, Barrier};
+
+#[test]
+fn missing_project_data_update_defaults_to_refresh() {
+    let params = ChangeFileParams {
+        project_key: ProjectKey::new(),
+        path: BiomePath::new("file.js"),
+        content: "let value = 1;".into(),
+        version: 1,
+        inline_config: None,
+        editor_features: None,
+        project_data_update: ProjectDataUpdate::DocumentOnly,
+    };
+    let mut value = serde_json::to_value(params).unwrap();
+    value.as_object_mut().unwrap().remove("projectDataUpdate");
+    let params: ChangeFileParams = serde_json::from_value(value).unwrap();
+
+    assert_eq!(params.project_data_update, ProjectDataUpdate::Refresh);
+}
 
 #[test]
 fn local_server_retries_reads_interrupted_by_module_updates() {
@@ -121,6 +139,7 @@ fn local_server_retries_reads_interrupted_by_module_updates() {
                         version,
                         inline_config: None,
                         editor_features: None,
+                        project_data_update: ProjectDataUpdate::Refresh,
                     })
                     .unwrap();
             }

@@ -47,13 +47,14 @@ use crate::utils::growth_guard::GrowthGuard;
 use crate::workspace::{
     CodeAction, DefinitionReference, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult,
     GoToDefinitionResult, PatternId, PullActionsResult, PullDiagnosticsAndActionsResult,
-    RenameResult, SearchQuery,
+    RenameResult, SearchQuery, WorkspaceLifetime,
 };
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
     ActionFilter, AnalyzerAction, AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec,
     AnalyzerSignal, ControlFlow, FixKind, GroupCategory, Never, PLUGIN_GROUP, Queryable,
-    RegistryVisitor, Rule, RuleCategories, RuleCategory, RuleError, RuleFilter, RuleGroup,
+    RegistryVisitor, Rule, RuleCategories, RuleCategory, RuleDomain, RuleError, RuleFilter,
+    RuleGroup,
 };
 use biome_configuration::Rules;
 use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
@@ -84,9 +85,13 @@ use biome_languages::DocumentFileSource;
 use biome_languages::javascript::{
     JsEmbeddingKind, JsFileSource, Language, LanguageVariant, SvelteFileKind,
 };
+#[cfg(feature = "module_graph")]
+use biome_module_graph::{ModuleInfo, PathInfoCache};
 use biome_package::PackageJson;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
+#[cfg(feature = "module_graph")]
+use biome_resolver::FsWithResolverProxy;
 #[cfg(feature = "lang_js")]
 use biome_rowan::TokenText;
 use biome_rowan::{BatchMutation, NodeCache, SendNode, SyntaxNode, TextRange, TextSize};
@@ -104,6 +109,8 @@ use std::borrow::Cow;
 use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
+#[cfg(test)]
+use std::sync::atomic::AtomicUsize;
 use tracing::trace;
 
 /// Characters that will enable the format on type
@@ -127,6 +134,12 @@ pub struct FixAllParams<'a> {
     pub(crate) biome_path: &'a BiomePath,
     pub(crate) workspace_db: WorkspaceDb,
     pub(crate) project_layout: Arc<ProjectLayout>,
+    #[cfg(feature = "module_graph")]
+    pub(crate) fs: &'a dyn FsWithResolverProxy,
+    #[cfg(feature = "module_graph")]
+    pub(crate) path_info_cache: &'a PathInfoCache,
+    #[cfg(feature = "module_graph")]
+    pub(crate) infer_types: bool,
     pub(crate) document_file_source: DocumentFileSource,
     pub(crate) only: &'a [AnalyzerSelector],
     pub(crate) skip: &'a [AnalyzerSelector],
@@ -139,6 +152,9 @@ pub struct FixAllParams<'a> {
     /// Used by embedded language handlers (Svelte, Vue) to preserve
     /// `indentScriptAndStyle` indentation during fix-all operations.
     pub(crate) embeds_initial_indent: u16,
+    pub(crate) workspace_lifetime: WorkspaceLifetime,
+    #[cfg(test)]
+    pub(crate) detached_module_count: &'a AtomicUsize,
 }
 
 #[derive(Default)]
@@ -223,6 +239,8 @@ pub(crate) struct LintParams<'a> {
     pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) categories: RuleCategories,
     pub(crate) workspace_db: WorkspaceDb,
+    #[cfg(feature = "module_graph")]
+    pub(crate) current_module: Option<ModuleInfo>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_selectors: &'a [AnalyzerSelector],
@@ -1324,6 +1342,7 @@ struct LintVisitor<'a, 'b> {
     /// Set of rules that have a code fix, regardless of whether they are enabled.
     /// Used after `finish()` to derive the fixable subset of `enabled_rules`.
     pub(crate) rules_with_fix: FxHashSet<RuleFilter<'a>>,
+    pub(crate) type_rules_with_fix: FxHashSet<RuleFilter<'a>>,
     // lint_params: &'b LintParams<'a>,
     only: Option<&'b [AnalyzerSelector]>,
     skip: Option<&'b [AnalyzerSelector]>,
@@ -1346,6 +1365,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             enabled_rules: Default::default(),
             disabled_rules: Default::default(),
             rules_with_fix: Default::default(),
+            type_rules_with_fix: Default::default(),
             only,
             skip,
             settings,
@@ -1477,6 +1497,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         FxHashSet<RuleFilter<'a>>,
         FxHashSet<RuleFilter<'a>>,
         Vec<RuleFilter<'a>>,
+        bool,
     ) {
         let has_only_filter = self.only.is_none_or(|only| !only.is_empty());
         let rules = self
@@ -1487,13 +1508,21 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             self.enabled_rules.extend(rules.as_enabled_rules());
             self.disabled_rules.extend(rules.as_disabled_rules());
         }
-        let fixable_rules = self
+        let fixable_rules: Vec<_> = self
             .enabled_rules
             .iter()
             .filter(|rule| self.rules_with_fix.contains(rule))
             .copied()
             .collect();
-        (self.enabled_rules, self.disabled_rules, fixable_rules)
+        let fixable_rules_require_types = fixable_rules
+            .iter()
+            .any(|rule| self.type_rules_with_fix.contains(rule));
+        (
+            self.enabled_rules,
+            self.disabled_rules,
+            fixable_rules,
+            fixable_rules_require_types,
+        )
     }
 
     fn push_rule<R, L>(&mut self, rule_filter: Option<RuleFilter<'static>>)
@@ -1553,6 +1582,9 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
 
         if R::METADATA.fix_kind != FixKind::None {
             self.rules_with_fix.insert(rule_filter);
+            if R::METADATA.domains.contains(&RuleDomain::Types) {
+                self.type_rules_with_fix.insert(rule_filter);
+            }
         }
     }
 }
@@ -1884,6 +1916,7 @@ pub(crate) struct AnalyzerVisitorResult {
     pub(crate) analyzer_options: AnalyzerOptions,
     /// Subset of `enabled_rules` that have a code fix (`FixKind::Safe` or `FixKind::Unsafe`).
     pub(crate) fixable_rules: Vec<RuleFilter<'static>>,
+    pub(crate) fixable_rules_require_types: bool,
 }
 
 pub(crate) struct AnalyzerVisitorBuilder<'a> {
@@ -2046,6 +2079,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
                 enabled_rules: cached.enabled_rules.clone(),
                 disabled_rules: cached.disabled_rules.clone(),
                 fixable_rules: cached.fixable_rules.clone(),
+                fixable_rules_require_types: cached.fixable_rules_require_types,
                 analyzer_options: opts,
             };
         }
@@ -2147,7 +2181,12 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_graphql_analyze::visit_registry(&mut lint);
         #[cfg(feature = "lang_html")]
         biome_html_analyze::visit_registry(&mut lint);
-        let (linter_enabled_rules, linter_disabled_rules, linter_fixable_rules) = lint.finish();
+        let (
+            linter_enabled_rules,
+            linter_disabled_rules,
+            linter_fixable_rules,
+            fixable_rules_require_types,
+        ) = lint.finish();
         enabled_rules.extend(linter_enabled_rules);
         disabled_rules.extend(linter_disabled_rules);
 
@@ -2175,6 +2214,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
             disabled_rules,
             analyzer_options,
             fixable_rules,
+            fixable_rules_require_types,
         };
 
         if let Some(key) = key.as_ref()
@@ -2234,6 +2274,7 @@ pub(crate) struct CachedRuleSet {
     pub(crate) enabled_rules: Vec<RuleFilter<'static>>,
     pub(crate) disabled_rules: Vec<RuleFilter<'static>>,
     pub(crate) fixable_rules: Vec<RuleFilter<'static>>,
+    pub(crate) fixable_rules_require_types: bool,
     /// Globals added during domain/manifest resolution.
     pub(crate) globals: Vec<Box<str>>,
     /// JSX factory from tsconfig (None if not ReactClassic or not resolved).
@@ -2247,6 +2288,7 @@ impl CachedRuleSet {
             enabled_rules: result.enabled_rules.clone(),
             disabled_rules: result.disabled_rules.clone(),
             fixable_rules: result.fixable_rules.clone(),
+            fixable_rules_require_types: result.fixable_rules_require_types,
             globals: result
                 .analyzer_options
                 .globals()
@@ -2294,6 +2336,7 @@ mod tests {
                 enabled_rules: vec![RuleFilter::Rule("style", "noVar")],
                 disabled_rules: vec![],
                 fixable_rules: vec![],
+                fixable_rules_require_types: false,
                 globals: vec![],
                 jsx_factory: None,
                 jsx_fragment_factory: None,
@@ -2333,6 +2376,7 @@ mod tests {
                     enabled_rules: vec![RuleFilter::Rule("style", "noVar")],
                     disabled_rules: vec![],
                     fixable_rules: vec![],
+                    fixable_rules_require_types: false,
                     globals: vec![],
                     jsx_factory: None,
                     jsx_fragment_factory: None,
@@ -2344,6 +2388,7 @@ mod tests {
                     enabled_rules: vec![RuleFilter::Rule("correctness", "noUnusedVariables")],
                     disabled_rules: vec![],
                     fixable_rules: vec![],
+                    fixable_rules_require_types: false,
                     globals: vec![],
                     jsx_factory: None,
                     jsx_fragment_factory: None,
@@ -2374,6 +2419,7 @@ mod tests {
                     enabled_rules: vec![],
                     disabled_rules: vec![],
                     fixable_rules: vec![],
+                    fixable_rules_require_types: false,
                     globals: vec![],
                     jsx_factory: None,
                     jsx_fragment_factory: None,
@@ -2404,6 +2450,7 @@ mod tests {
                         enabled_rules: vec![],
                         disabled_rules: vec![],
                         fixable_rules: vec![],
+                        fixable_rules_require_types: false,
                         globals: vec![],
                         jsx_factory: None,
                         jsx_fragment_factory: None,
@@ -2508,6 +2555,7 @@ mod tests {
                     enabled_rules: vec![RuleFilter::Rule("style", "noVar")],
                     disabled_rules: vec![],
                     fixable_rules: vec![],
+                    fixable_rules_require_types: false,
                     globals: vec!["React".into(), "JSX".into()],
                     jsx_factory: Some("h".into()),
                     jsx_fragment_factory: Some("Fragment".into()),

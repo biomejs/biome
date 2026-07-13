@@ -7,7 +7,7 @@ use biome_languages::DocumentFileSource;
 use biome_service::Workspace;
 use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, FeaturesBuilder, FileContent, GetFileContentParams,
-    IgnoreKind, OpenFileParams, PathIsIgnoredParams, ProjectKey,
+    IgnoreKind, OpenFileParams, PathIsIgnoredParams, ProjectDataUpdate, ProjectKey,
 };
 use camino::{Utf8Path, Utf8PathBuf};
 use std::sync::Arc;
@@ -231,6 +231,7 @@ pub(crate) async fn did_change(
         content: text,
         inline_config: session.inline_config(),
         editor_features: None,
+        project_data_update: ProjectDataUpdate::Refresh,
     })?;
 
     session.schedule_diagnostics(url, version);
@@ -261,6 +262,7 @@ pub(crate) async fn did_save(
             version: doc.version,
             inline_config: None,
             editor_features: None,
+            project_data_update: ProjectDataUpdate::Refresh,
         })?;
 
         session.insert_document(

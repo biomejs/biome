@@ -38,7 +38,8 @@ impl TypeStore {
         }
     }
 
-    pub fn as_references(&self) -> &[TypeData] {
+    /// Returns the registered types in local ID order.
+    pub fn as_slice(&self) -> &[TypeData] {
         &self.types
     }
 

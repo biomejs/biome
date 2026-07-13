@@ -20,7 +20,7 @@ use biome_rowan::{AstNode, NodeCache};
 use biome_service::Workspace;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
-    ChangeFileParams, FileContent, FixAction, FormatFileParams, OpenFileParams,
+    ChangeFileParams, FileContent, FixAction, FormatFileParams, OpenFileParams, ProjectDataUpdate,
 };
 use camino::Utf8PathBuf;
 use std::borrow::Cow;
@@ -257,6 +257,7 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                     version: 1,
                     inline_config: None,
                     editor_features: None,
+                    project_data_update: ProjectDataUpdate::DocumentOnly,
                 })?;
                 let printed = workspace.format_file(FormatFileParams {
                     project_key,
@@ -337,6 +338,7 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                     version: 1,
                     inline_config: None,
                     editor_features: None,
+                    project_data_update: ProjectDataUpdate::DocumentOnly,
                 })?;
                 let printed = workspace.format_file(FormatFileParams {
                     project_key,
@@ -426,6 +428,7 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                         version: 1,
                         inline_config: None,
                         editor_features: None,
+                        project_data_update: ProjectDataUpdate::DocumentOnly,
                     })?;
                     let printed = workspace.format_file(FormatFileParams {
                         project_key,

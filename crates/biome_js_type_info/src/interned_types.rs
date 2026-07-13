@@ -429,6 +429,11 @@ impl<'db> TypeData<'db> {
         }
     }
 
+    /// Returns whether this type reaches a `Promise` or `PromiseLike` target.
+    ///
+    /// `Some(true)` confirms a target, `Some(false)` proves no target exists, and
+    /// `None` means unresolved data, a cycle, or budget exhaustion prevented a
+    /// reliable negative answer.
     pub fn is_promise_instance(self, db: &'db dyn TypeDb) -> Option<bool> {
         crate::inferred_type::is_promise_instance(db, self)
     }
@@ -527,10 +532,45 @@ impl<'db> TypeData<'db> {
 
     /// Substitutes a generic throughout a type, stopping below nested binders.
     ///
-    /// ```rust,ignore
-    /// // For `f<T>(x: T): T`, substituting `T := string` on the whole function
-    /// // preserves the nested binder and therefore leaves `f` unchanged.
-    /// let unchanged = function.substitute_type(db, substitution)?;
+    /// ```
+    /// use biome_js_type_info::{TypeDb, resolved::{
+    ///     InferredFunction, InferredGenericTypeParameter, InferredReturnType,
+    ///     InferredTypeData, InferredTypeSubstitution,
+    /// }};
+    /// use biome_rowan::Text;
+    ///
+    /// # #[salsa::db]
+    /// # #[derive(Default)]
+    /// # struct Db { storage: salsa::Storage<Self> }
+    /// # #[salsa::db]
+    /// # impl salsa::Database for Db {}
+    /// # #[salsa::db]
+    /// # impl biome_db::Db for Db {
+    /// #     fn parsed_source_for_path(&self, _: &camino::Utf8Path) -> Option<biome_db::ParsedSource> {
+    /// #         None
+    /// #     }
+    /// # }
+    /// # #[salsa::db]
+    /// # impl TypeDb for Db {}
+    /// # let db = Db::default();
+    /// let generic = InferredTypeData::Generic(InferredGenericTypeParameter::new(
+    ///     &db, None, None, Text::new_static("T"),
+    /// ));
+    /// let function = InferredTypeData::Function(InferredFunction::new(
+    ///     &db,
+    ///     Vec::from([generic]).into_boxed_slice(),
+    ///     Box::default(),
+    ///     InferredReturnType::Type(generic),
+    ///     false,
+    ///     None,
+    /// ));
+    /// let substitution = InferredTypeSubstitution {
+    ///     generic,
+    ///     replacement: InferredTypeData::String,
+    /// };
+    ///
+    /// // The function declares `T`, so ordinary substitution does not enter it.
+    /// assert_eq!(function.substitute_type(&db, substitution).unwrap(), function);
     /// ```
     ///
     /// # Errors
@@ -572,10 +612,53 @@ impl<'db> TypeData<'db> {
 
     /// Substitutes inside the root binder while respecting nested binders.
     ///
-    /// ```rust,ignore
-    /// // For `f<T>(x: T): T`, root-body substitution with `T := string`
-    /// // rewrites the parameter and return type to `string`.
-    /// let specialized = function.substitute_type_in_root_body(db, substitution)?;
+    /// ```
+    /// use biome_js_type_info::{TypeDb, resolved::{
+    ///     InferredFunction, InferredGenericTypeParameter, InferredReturnType,
+    ///     InferredTypeData, InferredTypeSubstitution,
+    /// }};
+    /// use biome_rowan::Text;
+    ///
+    /// # #[salsa::db]
+    /// # #[derive(Default)]
+    /// # struct Db { storage: salsa::Storage<Self> }
+    /// # #[salsa::db]
+    /// # impl salsa::Database for Db {}
+    /// # #[salsa::db]
+    /// # impl biome_db::Db for Db {
+    /// #     fn parsed_source_for_path(&self, _: &camino::Utf8Path) -> Option<biome_db::ParsedSource> {
+    /// #         None
+    /// #     }
+    /// # }
+    /// # #[salsa::db]
+    /// # impl TypeDb for Db {}
+    /// # let db = Db::default();
+    /// let generic = InferredTypeData::Generic(InferredGenericTypeParameter::new(
+    ///     &db, None, None, Text::new_static("T"),
+    /// ));
+    /// let function = InferredTypeData::Function(InferredFunction::new(
+    ///     &db,
+    ///     Vec::from([generic]).into_boxed_slice(),
+    ///     Box::default(),
+    ///     InferredReturnType::Type(generic),
+    ///     false,
+    ///     None,
+    /// ));
+    /// let substitution = InferredTypeSubstitution {
+    ///     generic,
+    ///     replacement: InferredTypeData::String,
+    /// };
+    ///
+    /// let specialized = function
+    ///     .substitute_type_in_root_body(&db, substitution)
+    ///     .unwrap();
+    /// let InferredTypeData::Function(specialized) = specialized else {
+    ///     panic!("expected a function");
+    /// };
+    /// assert_eq!(
+    ///     specialized.return_type(&db),
+    ///     &InferredReturnType::Type(InferredTypeData::String),
+    /// );
     /// ```
     ///
     /// # Errors
@@ -2144,6 +2227,11 @@ impl<'db> InternedFunction<'db> {
         Self::new(db, Box::default(), Box::default(), return_type, false, None)
     }
 
+    /// Returns whether this function has a `Promise` or `PromiseLike` return type.
+    ///
+    /// `Some(true)` confirms a promise return, `Some(false)` confirms a known
+    /// non-promise return, and `None` means unresolved data, a cycle, or budget
+    /// exhaustion prevented a reliable answer.
     pub fn returns_promise(self, db: &'db dyn TypeDb) -> Option<bool> {
         match self.return_type(db) {
             ReturnType::Type(ty) => ty.is_promise_instance(db),

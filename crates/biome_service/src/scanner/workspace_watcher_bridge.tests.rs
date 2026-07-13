@@ -14,7 +14,7 @@ use crate::scanner::workspace_bridges::ScannerWatcherBridge;
 use crate::test_utils::setup_workspace_and_open_project_and_get_watcher_instruction_receiver;
 use crate::workspace::{
     ChangeFileParams, CloseFileParams, FileContent, GetFileContentParams, GetModuleGraphParams,
-    OpenFileParams,
+    OpenFileParams, ProjectDataUpdate,
 };
 use crate::{WatcherInstruction, Workspace};
 
@@ -60,6 +60,7 @@ fn close_modified_file_from_client_before_watcher() {
             version: 2,
             inline_config: None,
             editor_features: None,
+            project_data_update: ProjectDataUpdate::Refresh,
         })
         .expect("can change file");
 

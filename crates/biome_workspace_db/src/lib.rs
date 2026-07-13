@@ -10,7 +10,7 @@ use biome_languages::LanguageDb;
 #[cfg(feature = "module_graph")]
 use biome_module_graph::{
     InferredLocalTypeId, InferredModuleKey, ModuleDb, ModuleGraphGeneration, ModuleInfo,
-    ModuleInfoKind, TypeDb,
+    ModuleInfoKind, ModuleInfoOrigin, TypeDb, module_for_key,
 };
 use biome_parser::AnyParse;
 use biome_rowan::SendNode;
@@ -18,8 +18,6 @@ use biome_rowan::SendNode;
 use biome_rowan::Text;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
-#[cfg(feature = "module_graph")]
-use salsa::plumbing::{AsId, FromId};
 use salsa::{Setter, Storage};
 use std::rc::Rc;
 use std::sync::Arc;
@@ -44,7 +42,7 @@ pub struct WorkspaceDb {
     files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
     /// It maps a file path to its module graph representation
     #[cfg(feature = "module_graph")]
-    pub modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
+    modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     /// It stores the file sources across projects.
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
     // NOTE: this must stay last as per salsa restrictions.
@@ -219,7 +217,7 @@ impl WorkspaceDb {
     }
 
     #[cfg(feature = "module_graph")]
-    pub fn get_module(&self, path: &Utf8Path) -> Option<ModuleInfo> {
+    fn get_module(&self, path: &Utf8Path) -> Option<ModuleInfo> {
         self.modules.pin().get(path).copied()
     }
 
@@ -242,6 +240,11 @@ impl WorkspaceDb {
 
     #[cfg(feature = "module_graph")]
     pub fn insert_module(&mut self, path: Utf8PathBuf, module: ModuleInfo) {
+        assert_eq!(
+            module.origin(self),
+            ModuleInfoOrigin::Published,
+            "detached modules must not be inserted into the shared module registry"
+        );
         self.mutate_modules(|modules| {
             modules.pin().insert(path, module);
         });
@@ -259,7 +262,7 @@ impl WorkspaceDb {
             existing_module.set_kind(self).to(kind);
             existing_module
         } else {
-            let module = ModuleInfo::new(self, path.clone(), kind);
+            let module = ModuleInfo::new_published(self, path.clone(), kind);
             self.insert_module(path, module);
             module
         }
@@ -393,11 +396,7 @@ impl TypeDb for WorkspaceDb {
         module_key: InferredModuleKey,
         type_id: InferredLocalTypeId,
     ) -> Option<Text> {
-        let module = ModuleInfo::from_id(module_key.as_id());
-        let current = self.module_for_path(module.path(self))?;
-        if InferredModuleKey::new(current.as_id()) != module_key {
-            return None;
-        }
+        let current = module_for_key(self, module_key)?;
 
         let ModuleInfoKind::Js(info) = current.kind(self) else {
             return None;
@@ -503,7 +502,7 @@ mod tests {
             &ProjectLayout::default(),
             &PathInfoCache::default(),
         );
-        ModuleInfo::new(
+        ModuleInfo::new_published(
             db,
             path.as_path().to_path_buf(),
             ModuleInfoKind::Html(module),

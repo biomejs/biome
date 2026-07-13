@@ -25,7 +25,7 @@ use crate::db::type_inference::{
     resolve_raw_types, substitutions_for_instance,
 };
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
-use crate::{ImportTreeNode, JsExport, JsOwnExport, ModuleDb, ResolvedPath};
+use crate::{ImportTreeNode, JsExport, JsOwnExport, ModuleDb, ResolvedPath, module_for_key};
 use biome_css_syntax::{TextRange, TextSize};
 use biome_js_type_info::{
     ImportSymbol, RawTypeData, RawTypeId, TypeReference,
@@ -40,7 +40,6 @@ use biome_jsdoc_comment::JsdocComment;
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexMap;
 use rustc_hash::FxHashSet;
-use salsa::plumbing::{AsId, FromId};
 use std::collections::VecDeque;
 use std::sync::Arc;
 
@@ -1624,11 +1623,7 @@ fn raw_local_class_name<'db>(
     local: InferredLocalTypeHandle<'db>,
 ) -> Option<String> {
     let module_key = local.module(db);
-    let module = ModuleInfo::from_id(module_key.as_id());
-    let current = db.module_for_path(module.path(db))?;
-    if InferredModuleKey::new(current.as_id()) != module_key {
-        return None;
-    }
+    let current = module_for_key(db, module_key)?;
     let ModuleInfoKind::Js(js_info) = current.kind(db) else {
         return None;
     };
@@ -1643,11 +1638,7 @@ fn raw_local_class_extends<'db>(
     local: InferredLocalTypeHandle<'db>,
 ) -> Option<InferredLocalTypeHandle<'db>> {
     let module_key = local.module(db);
-    let module = ModuleInfo::from_id(module_key.as_id());
-    let current = db.module_for_path(module.path(db))?;
-    if InferredModuleKey::new(current.as_id()) != module_key {
-        return None;
-    };
+    let current = module_for_key(db, module_key)?;
     let ModuleInfoKind::Js(js_info) = current.kind(db) else {
         return None;
     };
@@ -1763,12 +1754,20 @@ fn infer_generic_return_type<'db>(
 
 #[salsa::interned]
 #[derive(Debug)]
+/// Input for normalizing a type in the context of its owning module.
 pub struct NormalizeTypeInput<'db> {
+    /// Module used to resolve local inferred handles.
     pub module: ModuleInfo,
+    /// Type to normalize.
     pub ty: InferredTypeData<'db>,
 }
 
 #[salsa::tracked(cycle_result=normalize_type_cycle_result)]
+/// Resolves local handles and simplifies structural wrappers in `input`.
+///
+/// If module inference is unavailable, the original type is returned. A cycle,
+/// invalid structural rebuild, or exhausted normalization budget returns
+/// [`InferredTypeData::Unknown`].
 pub fn normalize_type<'db>(
     db: &'db dyn ModuleDb,
     input: NormalizeTypeInput<'db>,

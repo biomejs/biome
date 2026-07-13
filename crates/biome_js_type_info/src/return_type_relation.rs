@@ -1104,6 +1104,11 @@ impl<'db> ReturnTypeRelation<'db> {
         &self.narrowed
     }
 
+    /// Returns whether widening is limited to object-property literal values.
+    ///
+    /// `Some(true)` confirms that specific widening, `Some(false)` confirms a
+    /// different relation, and `None` means the overall comparison was
+    /// indeterminate.
     pub fn is_only_property_literal_widening(&self) -> Option<bool> {
         self.only_property_literal_widening
     }
@@ -1153,6 +1158,11 @@ impl<'db> ReturnTypeRelation<'db> {
             .any(|ty| includes_object_keyword(self.db, *ty))
     }
 
+    /// Returns whether an inferred object return is wider than the declaration.
+    ///
+    /// `Some(true)` confirms a wider return, `Some(false)` proves no inferred
+    /// return is wider, and `None` means unresolved data, a cycle, or budget
+    /// exhaustion prevented a reliable answer.
     pub fn object_has_wider_return(&self) -> Option<bool> {
         complete_any(
             self.inferred
@@ -1213,10 +1223,22 @@ fn complete_any(results: impl IntoIterator<Item = Option<bool>>) -> Option<bool>
 }
 
 /// Compares a declared return type with the inferred return values.
+///
+/// Boolean literal returns are normalized before comparison. Unresolved data,
+/// cycles, or the relation's traversal limits produce
+/// [`ReturnTypeVerdict::Indeterminate`] and indeterminate narrowing candidates.
 pub fn compare_declared_return_type<'db>(
     db: &'db dyn TypeDb,
     declared: TypeData<'db>,
     inferred: &[TypeData<'db>],
+) -> ReturnTypeRelation<'db> {
+    compare_declared_return_type_owned(db, declared, inferred.to_vec())
+}
+
+pub(crate) fn compare_declared_return_type_owned<'db>(
+    db: &'db dyn TypeDb,
+    declared: TypeData<'db>,
+    inferred: Vec<TypeData<'db>>,
 ) -> ReturnTypeRelation<'db> {
     if is_escape_hatch(declared) {
         return indeterminate_relation(db, declared, inferred.into());
@@ -1225,7 +1247,7 @@ pub fn compare_declared_return_type<'db>(
         return indeterminate_relation(db, declared, inferred.into());
     };
     let declared = collapsed.unwrap_or(declared);
-    let inferred = normalize_boolean_return_types(db, inferred.to_vec()).into_boxed_slice();
+    let inferred = normalize_boolean_return_types(db, inferred).into_boxed_slice();
 
     if inferred.is_empty()
         || inferred.iter().any(|ty| is_any_contaminated(db, *ty))
