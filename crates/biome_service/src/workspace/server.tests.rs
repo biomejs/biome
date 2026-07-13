@@ -406,9 +406,9 @@ fn type_aware_fix_uses_detached_module_after_ranges_shift() {
             path: BiomePath::new(PATH),
             fix_file_mode: FixFileMode::SafeFixes,
             should_format: false,
-            only: vec![no_floating.clone(), no_process_global.clone()],
+            only: vec![no_floating, no_process_global],
             skip: vec![],
-            enabled_rules: vec![no_floating.clone(), no_process_global],
+            enabled_rules: vec![no_floating, no_process_global],
             rule_categories: RuleCategoriesBuilder::default()
                 .with_syntax()
                 .with_lint()
@@ -490,7 +490,7 @@ fn type_aware_fix_iteration_uses_tree_after_an_import_is_added() {
             path: BiomePath::new(PATH),
             fix_file_mode: FixFileMode::SafeAndUnsafeFixes,
             should_format: false,
-            only: vec![no_floating.clone(), no_process_global.clone()],
+            only: vec![no_floating, no_process_global],
             skip: vec![],
             enabled_rules: vec![no_floating, no_process_global],
             rule_categories: RuleCategoriesBuilder::default()
@@ -550,7 +550,7 @@ fn syntax_only_and_persistent_fixes_do_not_create_detached_modules() {
                 path: BiomePath::new(PATH),
                 fix_file_mode: FixFileMode::SafeFixes,
                 should_format: false,
-                only: vec![no_process_global.clone()],
+                only: vec![no_process_global],
                 skip: vec![],
                 enabled_rules: vec![no_process_global],
                 rule_categories: RuleCategoriesBuilder::default()
@@ -607,7 +607,7 @@ fn syntax_only_and_persistent_fixes_do_not_create_detached_modules() {
             path: BiomePath::new(PATH),
             fix_file_mode: FixFileMode::SafeAndUnsafeFixes,
             should_format: false,
-            only: vec![no_process_global.clone(), no_floating.clone()],
+            only: vec![no_process_global, no_floating],
             skip: vec![],
             enabled_rules: vec![no_process_global, no_floating],
             rule_categories: RuleCategoriesBuilder::default()

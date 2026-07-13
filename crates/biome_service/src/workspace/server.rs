@@ -1664,7 +1664,7 @@ impl WorkspaceServerWithDb<'_> {
         infer_types: bool,
     ) -> Result<Option<ModuleInfo>, WorkspaceError> {
         let inputs = self.extract_module_inputs(
-            &db,
+            db,
             path,
             &UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, parsed),
         )?;

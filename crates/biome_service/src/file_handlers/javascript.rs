@@ -1069,7 +1069,7 @@ fn js_analyzer_services_for_fix<'a>(
         params
             .detached_module_count
             .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-        return services.with_current_module(current_module);
+        services.with_current_module(current_module)
     }
 
     #[cfg(not(feature = "module_graph"))]
