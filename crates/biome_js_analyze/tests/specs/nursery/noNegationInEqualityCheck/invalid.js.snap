@@ -51,8 +51,6 @@ invalid.js:2:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━�
   
   i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
   
-  i Replace !left operator right with the proper negated comparison, or wrap the comparison in parentheses with a negation.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use the proper negated comparison operator instead.
@@ -79,8 +77,6 @@ invalid.js:3:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━�
     5 │ ((!foo)) === bar;
   
   i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
-  
-  i Replace !left operator right with the proper negated comparison, or wrap the comparison in parentheses with a negation.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -110,8 +106,6 @@ invalid.js:4:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━�
   
   i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
   
-  i Replace !left operator right with the proper negated comparison, or wrap the comparison in parentheses with a negation.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use the proper negated comparison operator instead.
@@ -139,8 +133,6 @@ invalid.js:5:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━�
     7 │ /* should preserve trailing comments */
   
   i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
-  
-  i Replace !left operator right with the proper negated comparison, or wrap the comparison in parentheses with a negation.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -170,8 +162,6 @@ invalid.js:6:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━�
   
   i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
   
-  i Replace !left operator right with the proper negated comparison, or wrap the comparison in parentheses with a negation.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use the proper negated comparison operator instead.
@@ -199,8 +189,6 @@ invalid.js:8:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━�
     10 │ /* c1 */!foo === bar;
   
   i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
-  
-  i Replace !left operator right with the proper negated comparison, or wrap the comparison in parentheses with a negation.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -230,8 +218,6 @@ invalid.js:10:9 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━
   
   i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
   
-  i Replace !left operator right with the proper negated comparison, or wrap the comparison in parentheses with a negation.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use the proper negated comparison operator instead.
@@ -259,8 +245,6 @@ invalid.js:11:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━
     13 │ foo
   
   i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
-  
-  i Replace !left operator right with the proper negated comparison, or wrap the comparison in parentheses with a negation.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -290,8 +274,6 @@ invalid.js:14:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━�
   
   i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
   
-  i Replace !left operator right with the proper negated comparison, or wrap the comparison in parentheses with a negation.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -310,8 +292,6 @@ invalid.js:17:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━�
     19 │ foo
   
   i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
-  
-  i Replace !left operator right with the proper negated comparison, or wrap the comparison in parentheses with a negation.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -332,8 +312,6 @@ invalid.js:20:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━�
   
   i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
   
-  i Replace !left operator right with the proper negated comparison, or wrap the comparison in parentheses with a negation.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -352,8 +330,6 @@ invalid.js:23:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━�
     25 │ foo
   
   i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
-  
-  i Replace !left operator right with the proper negated comparison, or wrap the comparison in parentheses with a negation.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -374,8 +350,6 @@ invalid.js:26:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━�
   
   i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
   
-  i Replace !left operator right with the proper negated comparison, or wrap the comparison in parentheses with a negation.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -394,8 +368,6 @@ invalid.js:28:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━
     30 │ !{} === bar;
   
   i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
-  
-  i Replace !left operator right with the proper negated comparison, or wrap the comparison in parentheses with a negation.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -427,8 +399,6 @@ invalid.js:29:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━
   
   i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
   
-  i Replace !left operator right with the proper negated comparison, or wrap the comparison in parentheses with a negation.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use the proper negated comparison operator instead.
@@ -456,8 +426,6 @@ invalid.js:30:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━
     31 │ 
   
   i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
-  
-  i Replace !left operator right with the proper negated comparison, or wrap the comparison in parentheses with a negation.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

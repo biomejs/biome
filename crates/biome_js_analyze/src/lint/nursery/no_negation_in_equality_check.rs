@@ -109,9 +109,6 @@ impl Rule for NoNegationInEqualityCheck {
             .note(markup! {
                     "Due to operator precedence, the negation binds more tightly than the equality operator. "
                     "The expression "<Emphasis>"!foo === bar"</Emphasis>" evaluates as "<Emphasis>"(!foo) === bar"</Emphasis>", not "<Emphasis>"!(foo === bar)"</Emphasis>"."
-            })
-            .note(markup! {
-                "Replace "<Emphasis>"!left operator right"</Emphasis>" with the proper negated comparison, or wrap the comparison in parentheses with a negation."
             }),
         )
     }
