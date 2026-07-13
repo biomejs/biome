@@ -14,8 +14,8 @@ use crate::{
         GLOBAL_ARRAY_ID, GLOBAL_ASYNC_DISPOSABLE_ID, GLOBAL_BOOLEAN_ID, GLOBAL_CONDITIONAL_ID,
         GLOBAL_DATE_ID, GLOBAL_DISPOSABLE_ID, GLOBAL_ERROR_ID, GLOBAL_GLOBAL_ID, GLOBAL_MAP_ID,
         GLOBAL_NUMBER_ID, GLOBAL_PROMISE_ID, GLOBAL_REGEXP_ID, GLOBAL_SET_ID, GLOBAL_STRING_ID,
-        GLOBAL_SYMBOL_ID, GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID, GLOBAL_VOID_ID,
-        GLOBAL_WEAK_MAP_ID,
+        GLOBAL_SYMBOL_ASYNC_DISPOSE_ID, GLOBAL_SYMBOL_DISPOSE_ID, GLOBAL_SYMBOL_ID,
+        GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID, GLOBAL_VOID_ID, GLOBAL_WEAK_MAP_ID,
     },
     literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral},
     type_data as raw,
@@ -26,6 +26,30 @@ pub type ReferenceResolver<'db, 'resolver> =
     dyn FnMut(&raw::TypeReference) -> TypeData<'db> + 'resolver;
 const MAX_GENERIC_REPLACEMENT_STEPS: usize = 64;
 const MAX_TYPE_SUBSTITUTION_STEPS: usize = 1024;
+
+pub fn well_known_symbol_name(reference: &raw::TypeReference) -> Option<Text> {
+    match reference {
+        raw::TypeReference::Resolved(id) if *id == GLOBAL_SYMBOL_DISPOSE_ID => {
+            Some(Text::new_static("Symbol.dispose"))
+        }
+        raw::TypeReference::Resolved(id) if *id == GLOBAL_SYMBOL_ASYNC_DISPOSE_ID => {
+            Some(Text::new_static("Symbol.asyncDispose"))
+        }
+        raw::TypeReference::Qualifier(qualifier) => {
+            let mut parts = qualifier.path.iter();
+            match (parts.next(), parts.next(), parts.next()) {
+                (Some(symbol), Some(member), None)
+                    if symbol.text() == "Symbol"
+                        && matches!(member.text(), "dispose" | "asyncDispose") =>
+                {
+                    Some(Text::new_owned(format!("Symbol.{}", member.text()).into()))
+                }
+                _ => None,
+            }
+        }
+        _ => None,
+    }
+}
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
 pub struct TypeSubstitution<'db> {
@@ -1189,8 +1213,10 @@ impl TypeMember<'_> {
 pub enum TypeMemberKind<'db> {
     CallSignature,
     ComputedValue(TypeData<'db>),
+    ComputedValueNamed(Text, TypeData<'db>),
     ConstAssertedCallSignature,
     ConstAssertedComputedValue(TypeData<'db>),
+    ConstAssertedComputedValueNamed(Text, TypeData<'db>),
     ConstAssertedConstructor,
     ConstAssertedGetter(Text),
     ConstAssertedIndexSignature(TypeData<'db>),
@@ -1211,6 +1237,8 @@ impl<'db> TypeMemberKind<'db> {
             Self::Constructor | Self::ConstAssertedConstructor => name == "constructor",
             Self::Getter(own_name)
             | Self::ConstAssertedGetter(own_name)
+            | Self::ComputedValueNamed(own_name, _)
+            | Self::ConstAssertedComputedValueNamed(own_name, _)
             | Self::Named(own_name)
             | Self::ConstAssertedNamed(own_name)
             | Self::NamedOptional(own_name)
@@ -1254,6 +1282,21 @@ impl<'db> TypeMemberKind<'db> {
         )
     }
 
+    pub fn is_const_asserted(&self) -> bool {
+        matches!(
+            self,
+            Self::ConstAssertedCallSignature
+                | Self::ConstAssertedComputedValue(_)
+                | Self::ConstAssertedComputedValueNamed(_, _)
+                | Self::ConstAssertedConstructor
+                | Self::ConstAssertedGetter(_)
+                | Self::ConstAssertedIndexSignature(_)
+                | Self::ConstAssertedNamed(_)
+                | Self::ConstAssertedNamedOptional(_)
+                | Self::ConstAssertedNamedStatic(_)
+        )
+    }
+
     pub fn with_optional(self) -> Self {
         match self {
             Self::Named(name) => Self::NamedOptional(name),
@@ -1286,13 +1329,34 @@ impl<'db> TypeMemberKind<'db> {
                 Some(Text::new_static("constructor"))
             }
             Self::ConstAssertedGetter(name)
+            | Self::ConstAssertedComputedValueNamed(name, _)
             | Self::ConstAssertedNamed(name)
             | Self::ConstAssertedNamedOptional(name)
             | Self::ConstAssertedNamedStatic(name)
             | Self::Getter(name)
+            | Self::ComputedValueNamed(name, _)
             | Self::Named(name)
             | Self::NamedOptional(name)
             | Self::NamedStatic(name) => Some(name.clone()),
+        }
+    }
+
+    pub fn computed_name(&self) -> Option<&str> {
+        match self {
+            Self::ComputedValueNamed(name, _) | Self::ConstAssertedComputedValueNamed(name, _) => {
+                Some(name.text())
+            }
+            _ => None,
+        }
+    }
+
+    pub fn computed_value_type(&self) -> Option<TypeData<'db>> {
+        match self {
+            Self::ComputedValue(ty)
+            | Self::ComputedValueNamed(_, ty)
+            | Self::ConstAssertedComputedValue(ty)
+            | Self::ConstAssertedComputedValueNamed(_, ty) => Some(*ty),
+            _ => None,
         }
     }
 }
@@ -1663,13 +1727,20 @@ fn convert_type_member_kind<'db>(
     match kind {
         raw::TypeMemberKind::CallSignature => TypeMemberKind::CallSignature,
         raw::TypeMemberKind::ComputedValue(ty) => {
-            TypeMemberKind::ComputedValue(resolve_reference(ty))
+            let resolved = resolve_reference(ty);
+            well_known_symbol_name(ty).map_or(TypeMemberKind::ComputedValue(resolved), |name| {
+                TypeMemberKind::ComputedValueNamed(name, resolved)
+            })
         }
         raw::TypeMemberKind::ConstAssertedCallSignature => {
             TypeMemberKind::ConstAssertedCallSignature
         }
         raw::TypeMemberKind::ConstAssertedComputedValue(ty) => {
-            TypeMemberKind::ConstAssertedComputedValue(resolve_reference(ty))
+            let resolved = resolve_reference(ty);
+            well_known_symbol_name(ty).map_or(
+                TypeMemberKind::ConstAssertedComputedValue(resolved),
+                |name| TypeMemberKind::ConstAssertedComputedValueNamed(name, resolved),
+            )
         }
         raw::TypeMemberKind::ConstAssertedConstructor => TypeMemberKind::ConstAssertedConstructor,
         raw::TypeMemberKind::ConstAssertedGetter(name) => {
@@ -1941,10 +2012,16 @@ fn raw_type_member_kind_from_type<'db>(
         TypeMemberKind::ComputedValue(ty) => {
             raw::TypeMemberKind::ComputedValue(ty.to_raw_reference_lossy())
         }
+        TypeMemberKind::ComputedValueNamed(_, ty) => {
+            raw::TypeMemberKind::ComputedValue(ty.to_raw_reference_lossy())
+        }
         TypeMemberKind::ConstAssertedCallSignature => {
             raw::TypeMemberKind::ConstAssertedCallSignature
         }
         TypeMemberKind::ConstAssertedComputedValue(ty) => {
+            raw::TypeMemberKind::ConstAssertedComputedValue(ty.to_raw_reference_lossy())
+        }
+        TypeMemberKind::ConstAssertedComputedValueNamed(_, ty) => {
             raw::TypeMemberKind::ConstAssertedComputedValue(ty.to_raw_reference_lossy())
         }
         TypeMemberKind::ConstAssertedConstructor => raw::TypeMemberKind::ConstAssertedConstructor,

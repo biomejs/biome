@@ -3,6 +3,7 @@ mod collector;
 mod diagnostics;
 mod module_resolver;
 mod scope;
+pub(crate) use scope::TsBindingReferenceExt;
 mod utils;
 mod visitor;
 

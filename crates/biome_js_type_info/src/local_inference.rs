@@ -29,6 +29,7 @@ use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
 
 use crate::globals::{
     GLOBAL_GLOBAL_ID, GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_ID, GLOBAL_STRING_ID,
+    GLOBAL_SYMBOL_ASYNC_DISPOSE_ID, GLOBAL_SYMBOL_DISPOSE_ID, GLOBAL_SYMBOL_ID,
     GLOBAL_UNDEFINED_ID,
 };
 use crate::literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral};
@@ -2058,7 +2059,7 @@ impl TypeMember {
                 .and_then(|name| match name {
                     AnyJsObjectMemberName::JsComputedMemberName(name) => {
                         name.expression().ok().map(|expr| {
-                            TypeMemberKind::IndexSignature(TypeReference::from_any_js_expression(
+                            TypeMemberKind::ComputedValue(computed_member_reference(
                                 resolver, scope_id, &expr,
                             ))
                         })
@@ -2106,7 +2107,7 @@ impl TypeMember {
                 .and_then(|name| match name {
                     AnyJsObjectMemberName::JsComputedMemberName(name) => {
                         name.expression().ok().map(|expr| {
-                            TypeMemberKind::IndexSignature(TypeReference::from_any_js_expression(
+                            TypeMemberKind::ComputedValue(computed_member_reference(
                                 resolver, scope_id, &expr,
                             ))
                         })
@@ -2303,8 +2304,8 @@ impl TypeMember {
         is_optional: bool,
     ) -> Option<Self> {
         let kind = match name {
-            AnyJsClassMemberName::JsComputedMemberName(name) => TypeMemberKind::IndexSignature(
-                TypeReference::from_any_js_expression(resolver, scope_id, &name.expression().ok()?),
+            AnyJsClassMemberName::JsComputedMemberName(name) => TypeMemberKind::ComputedValue(
+                computed_member_reference(resolver, scope_id, &name.expression().ok()?),
             ),
             _ => {
                 let name = text_from_class_member_name(name.name()?);
@@ -2389,6 +2390,37 @@ impl TypeMember {
 
         members.into()
     }
+}
+
+fn computed_member_reference(
+    resolver: &mut dyn TypeResolver,
+    scope_id: ScopeId,
+    expression: &AnyJsExpression,
+) -> TypeReference {
+    if let Some(member) = expression.as_js_static_member_expression()
+        && let Ok(object) = member.object()
+        && let Some(identifier) = object.as_js_identifier_expression()
+        && let (Some(object_name), Some(member_name)) = (
+            identifier
+                .name()
+                .ok()
+                .and_then(|name| text_from_token(name.value_token())),
+            member.member().ok().and_then(text_from_any_js_name),
+        )
+    {
+        let symbol_qualifier = TypeReferenceQualifier::from_path(scope_id, object_name.clone());
+        if resolver.resolve_qualifier(&symbol_qualifier) == Some(GLOBAL_SYMBOL_ID) {
+            match member_name.text() {
+                "dispose" => return TypeReference::Resolved(GLOBAL_SYMBOL_DISPOSE_ID),
+                "asyncDispose" => {
+                    return TypeReference::Resolved(GLOBAL_SYMBOL_ASYNC_DISPOSE_ID);
+                }
+                _ => {}
+            }
+        }
+    }
+
+    TypeReference::from_any_js_expression(resolver, scope_id, expression)
 }
 
 impl TypeReference {

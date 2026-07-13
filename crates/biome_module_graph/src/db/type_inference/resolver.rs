@@ -6,8 +6,11 @@ use crate::module_graph::ModuleInfo;
 use crate::{JsModuleInfo, ModuleDb, ResolvedPath};
 use biome_js_semantic::JsDeclarationKind;
 use biome_js_type_info::{
-    RawTypeData, ResolvedTypeId, TypeId, TypeReference, TypeResolverLevel,
-    interned_types::{LocalTypeHandle, LocalTypeId, ModuleKey, TypeData as InferredTypeData},
+    RawTypeData, ResolvedTypeId, ScopeId, TypeId, TypeReference, TypeReferenceQualifier,
+    TypeResolverLevel,
+    interned_types::{
+        InternedTypeofValue, LocalTypeHandle, LocalTypeId, ModuleKey, TypeData as InferredTypeData,
+    },
 };
 use rustc_hash::{FxHashMap, FxHashSet};
 use salsa::plumbing::AsId;
@@ -197,6 +200,23 @@ impl<'db> ResolutionCtx<'db, '_> {
             && let Some(ty) = self.resolve_typeof_expression(expression)
         {
             return ty;
+        }
+
+        if let RawTypeData::TypeofValue(value) = raw {
+            let ty = if value.ty.is_unknown() {
+                self.resolve_qualifier(&TypeReferenceQualifier::from_path(
+                    value.scope_id.unwrap_or(ScopeId::GLOBAL),
+                    value.identifier.clone(),
+                ))
+            } else {
+                self.resolve(&value.ty)
+            };
+            return InferredTypeData::TypeofValue(InternedTypeofValue::new(
+                self.db,
+                ty,
+                value.identifier.clone(),
+                value.scope_id,
+            ));
         }
 
         let db = self.db;
