@@ -27,25 +27,3 @@ Imports {
   No imports
 }
 ```
-
-## Exported Bindings
-
-```
-Component => BindingTypeData {
-  Types Module(0) TypeId(1),
-}
-```
-
-## Registered types
-
-```
-Module TypeId(0) => unknown
-
-Module TypeId(1) => sync Function "Component" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(0) TypeId(0)
-}
-```

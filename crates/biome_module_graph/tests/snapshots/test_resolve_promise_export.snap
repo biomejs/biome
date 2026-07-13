@@ -27,29 +27,3 @@ Imports {
   No imports
 }
 ```
-
-## Exported Bindings
-
-```
-promise  => BindingTypeData {
-  Types Module(0) TypeId(2),
-}
-```
-
-## Registered types
-
-```
-Module TypeId(0) => string: value
-
-Module TypeId(1) => Module(0) TypeId(3)
-
-Module TypeId(2) => instanceof Promise<Module(0) TypeId(0)>
-
-Module TypeId(3) => async Function "returnsPromise" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(0) TypeId(2)
-}
-```
