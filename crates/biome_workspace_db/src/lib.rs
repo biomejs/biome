@@ -79,6 +79,8 @@ impl Default for WorkspaceDb {
 #[derive(Clone)]
 pub struct WorkspaceDbData {
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
+    #[cfg(feature = "module_graph")]
+    modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
 }
 
 impl WorkspaceDbData {
@@ -94,6 +96,19 @@ impl WorkspaceDbData {
                 || self.file_sources.push(document_file_source),
                 |(index, _)| index,
             )
+    }
+
+    /// Checks whether the shared module map currently contains `path`.
+    ///
+    /// Use this for decisions such as skipping a file the scanner has already
+    /// indexed.
+    ///
+    /// Do not use this inside a Salsa query or before reading module contents.
+    /// Use [`ModuleDb::module_for_path`] instead so Salsa reruns the query when
+    /// the module graph changes.
+    #[cfg(feature = "module_graph")]
+    pub fn contains_module_untracked(&self, path: &Utf8Path) -> bool {
+        self.modules.pin().contains_key(path)
     }
 }
 
@@ -116,6 +131,8 @@ impl WorkspaceDb {
     pub fn data(&self) -> WorkspaceDbData {
         WorkspaceDbData {
             file_sources: self.file_sources.clone(),
+            #[cfg(feature = "module_graph")]
+            modules: self.modules.clone(),
         }
     }
 

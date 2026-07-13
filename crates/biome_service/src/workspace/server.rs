@@ -3664,7 +3664,7 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
             _ => {
                 #[cfg(feature = "module_graph")]
                 {
-                    self.module_db().contains(path)
+                    self.db_state.contains_module_untracked(path)
                 }
                 #[cfg(not(feature = "module_graph"))]
                 {

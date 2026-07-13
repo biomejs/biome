@@ -242,6 +242,16 @@ impl DbState {
         self.storage.data.insert_source(document_file_source)
     }
 
+    /// Checks whether the shared module map currently contains `path` without
+    /// creating a database snapshot.
+    ///
+    /// Use this to skip work that has already been done. Use the module
+    /// database APIs when reading or analyzing the module itself.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn contains_module_untracked(&self, path: &Utf8Path) -> bool {
+        self.storage.data.contains_module_untracked(path)
+    }
+
     pub(crate) fn update_parsed_root(&self, path: &Utf8Path, new_root: SendNode) {
         self.storage.with_parsed_source_update(|db| {
             db.update_parsed_root_with_mode(path, new_root, self.storage.update_mode)
@@ -427,6 +437,32 @@ mod tests {
             matches!(result, Err(salsa::Cancelled::PendingWrite)),
             "fork should fail with a cancellation instead of waiting for the setter"
         );
+
+        drop(db);
+        setter.join().unwrap();
+    }
+
+    /// Scanner bookkeeping must remain available while another thread is
+    /// publishing database updates. Unlike a tracked database fork, checking
+    /// shared module membership must not unwind when a setter is pending.
+    #[cfg(feature = "module_graph")]
+    #[test]
+    fn untracked_module_membership_does_not_wait_for_pending_setters() {
+        let state = Arc::new(DbState::lsp());
+        let path = Utf8PathBuf::from("test.js");
+        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+
+        let db = state.fork();
+        let setter = {
+            let state = state.clone();
+            let path = path.clone();
+            thread::spawn(move || {
+                state.update_parsed_file(&path, parse_js("let b = 2;"), 0, vec![]);
+            })
+        };
+
+        wait_for_pending_setter(&state);
+        assert!(!state.contains_module_untracked(&path));
 
         drop(db);
         setter.join().unwrap();
