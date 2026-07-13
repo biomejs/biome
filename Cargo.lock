@@ -1196,16 +1196,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "biome_js_type_info_macros"
-version = "0.0.1"
-dependencies = [
- "proc-macro-error2",
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
 name = "biome_jsdoc_comment"
 version = "0.0.1"
 dependencies = [
