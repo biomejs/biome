@@ -11,7 +11,7 @@ use biome_js_syntax::{
     JsIfStatement, JsLogicalExpression, JsLogicalOperator, JsStaticMemberExpression, JsSwitchStatement,
     JsUnaryOperator, JsWhileStatement, inner_string_text,
 };
-use biome_js_type_info::Type;
+use biome_js_type_info::InferredType;
 use biome_rowan::{AstNode, TextRange, TokenText, declare_node_union};
 use biome_rule_options::no_unnecessary_conditions::NoUnnecessaryConditionsOptions;
 
@@ -457,11 +457,10 @@ fn check_condition_necessity(
                 return Some(IssueKind::AlwaysFalsyCondition(expr.range()));
             }
 
-            let ty = ctx.type_of_expression(expr);
-            let conditional = ty.conditional_semantics();
-            if conditional.is_truthy() {
+            let ty = ctx.inferred_type_of_expression(expr)?;
+            if ty.is_always_truthy() {
                 return Some(IssueKind::AlwaysTruthyCondition(expr.range()));
-            } else if conditional.is_falsy() {
+            } else if ty.is_always_falsy() {
                 return Some(IssueKind::AlwaysFalsyCondition(expr.range()));
             }
         }
@@ -492,11 +491,10 @@ fn check_condition_necessity(
                 return None;
             }
 
-            let ty = ctx.type_of_expression(expr);
-            let conditional = ty.conditional_semantics();
-            if conditional.is_truthy() {
+            let ty = ctx.inferred_type_of_expression(expr)?;
+            if ty.is_always_truthy() {
                 return Some(IssueKind::AlwaysTruthyCondition(expr.range()));
-            } else if conditional.is_falsy() {
+            } else if ty.is_always_falsy() {
                 return Some(IssueKind::AlwaysFalsyCondition(expr.range()));
             }
         }
@@ -547,8 +545,8 @@ fn check_nullish_necessity(
     }
 
     // Type-aware path: report when the left-hand side is statically non-nullish.
-    let ty = ctx.type_of_expression(expr);
-    if ty.conditional_semantics().is_non_nullish() {
+    let ty = ctx.inferred_type_of_expression(expr)?;
+    if ty.is_non_nullish() {
         return Some(IssueKind::UnnecessaryCoalescing(
             expr.range(),
             optional_chain_range,
@@ -581,8 +579,8 @@ fn check_optional_chain_necessity(
     }
 
     // Type-aware path: report when the object is statically non-nullish.
-    let ty = ctx.type_of_expression(expr);
-    if ty.conditional_semantics().is_non_nullish() {
+    let ty = ctx.inferred_type_of_expression(expr)?;
+    if ty.is_non_nullish() {
         return Some(IssueKind::UnnecessaryOptionalChain(
             expr.range(),
             optional_chain_range,
@@ -740,13 +738,12 @@ fn check_comparison_necessity(
         _ => return None,
     };
 
-    let ty = ctx.type_of_expression(typed_side);
-    let conditional = ty.conditional_semantics();
+    let ty = ctx.inferred_type_of_expression(typed_side)?;
 
     // Is the non-null side known to be non-nullish? Then the comparison is unnecessary
     // for any equality operator: `x === null`, `x !== undefined`, `x == null` are
     // all statically false/true.
-    if conditional.is_non_nullish() {
+    if ty.is_non_nullish() {
         let range = TextRange::new(left.range().start(), right.range().end());
         return Some(IssueKind::UnnecessaryComparison(range));
     }
@@ -758,7 +755,7 @@ fn check_comparison_necessity(
     // literal, so skip those to avoid false positives.
     // Note: this narrow pass does not detect `void 0` because it's a unary
     // expression, not an identifier.
-    if conditional.is_nullish()
+    if ty.is_nullish()
         && matches!(
             operator,
             JsBinaryOperator::Equality | JsBinaryOperator::Inequality
@@ -803,69 +800,12 @@ fn extract_case_literal(test: &AnyJsExpression) -> Option<CaseLiteral> {
 /// unresolved references, type variables, complex types), it returns `true`.
 /// Used to determine case-clause reachability: if this returns `false`, the
 /// `case` is statically guaranteed to never match.
-fn type_could_equal_literal(ty: &Type, literal: &CaseLiteral) -> bool {
-    if ty.is_union() {
-        return ty
-            .flattened_union_variants()
-            .any(|variant| single_type_could_equal_literal(&variant, literal));
-    }
-    single_type_could_equal_literal(ty, literal)
-}
-
-/// Same predicate as [`type_could_equal_literal`], but for a single non-union
-/// type. Callers from union handling pass each variant through here; direct
-/// callers pass the type as-is.
-fn single_type_could_equal_literal(ty: &Type, literal: &CaseLiteral) -> bool {
-    use biome_js_type_info::TypeData;
-
-    let raw = &**ty;
-
-    // Unknown / any / inference failures: always treat as "possibly equal".
-    if matches!(
-        raw,
-        TypeData::Unknown | TypeData::AnyKeyword | TypeData::UnknownKeyword
-    ) {
-        return true;
-    }
-
+fn type_could_equal_literal(ty: InferredType, literal: &CaseLiteral) -> bool {
     match literal {
-        CaseLiteral::String(s) => {
-            // `string` could be any string.
-            if ty.is_string_or_string_literal() {
-                // A plain `string` (non-literal) could equal any value.
-                if matches!(raw, TypeData::String) {
-                    return true;
-                }
-                // Otherwise it's a string literal: match on exact value.
-                return ty.is_string_literal(s.text());
-            }
-            false
-        }
-        CaseLiteral::Number(n) => {
-            if ty.is_number_or_number_literal() {
-                if matches!(raw, TypeData::Number) {
-                    return true;
-                }
-                return ty.is_number_literal(*n);
-            }
-            false
-        }
-        CaseLiteral::Boolean(b) => {
-            if matches!(raw, TypeData::Boolean) {
-                return true;
-            }
-            ty.is_boolean_literal(*b)
-        }
-        CaseLiteral::Null => {
-            // Conservative: also treat Undefined and VoidKeyword as possible
-            // matches for a null-literal case, to avoid false positives.
-            // Strictly, `null === undefined` is false, so `case null:` inside
-            // `switch (x: undefined)` is unreachable. Detecting that requires
-            // distinguishing strict-equality semantics we do not yet model.
-            // TODO: tighten to only match TypeData::Null when disjointness
-            // becomes reliable.
-            matches!(raw, TypeData::Null | TypeData::Undefined | TypeData::VoidKeyword)
-        }
+        CaseLiteral::String(value) => ty.could_equal_string_literal(value.text()),
+        CaseLiteral::Number(value) => ty.could_equal_number_literal(*value),
+        CaseLiteral::Boolean(value) => ty.could_equal_boolean_literal(*value),
+        CaseLiteral::Null => ty.could_equal_null(),
     }
 }
 
@@ -889,8 +829,8 @@ fn check_case_clause_reachability(
         .find_map(JsSwitchStatement::cast)?;
     let discriminant = switch_stmt.discriminant().ok()?;
 
-    let discriminant_ty = ctx.type_of_expression(&discriminant);
-    if type_could_equal_literal(&discriminant_ty, &case_literal) {
+    let discriminant_ty = ctx.inferred_type_of_expression(&discriminant)?;
+    if type_could_equal_literal(discriminant_ty, &case_literal) {
         None
     } else {
         Some(IssueKind::UnreachableCase(test.range()))

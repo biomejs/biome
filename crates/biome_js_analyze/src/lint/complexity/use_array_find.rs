@@ -46,8 +46,8 @@ declare_lint_rule! {
 }
 
 fn is_first_position(ctx: &RuleContext<UseArrayFind>, express: &AnyJsExpression) -> bool {
-    ctx.type_of_expression(express).is_number_literal(0.)
-        || ctx.type_of_expression(express).is_bigint_literal(0)
+    ctx.inferred_type_of_expression(express)
+        .is_some_and(|ty| ty.is_number_literal(0.) || ty.is_bigint_literal(0))
 }
 
 impl Rule for UseArrayFind {

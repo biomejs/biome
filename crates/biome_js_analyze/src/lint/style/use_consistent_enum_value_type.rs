@@ -100,9 +100,9 @@ impl Rule for UseConsistentEnumValueType {
                 continue;
             };
 
-            let expr_type = ctx.type_of_expression(&expr);
+            let expr_type = ctx.inferred_type_of_expression(&expr);
 
-            if expr_type.is_string_or_string_literal() {
+            if expr_type.is_some_and(|ty| ty.is_string_or_string_literal()) {
                 if let Some(enum_type) = enum_type.clone() {
                     if enum_type != EnumValueType::String {
                         found.push(member.range());
@@ -113,7 +113,7 @@ impl Rule for UseConsistentEnumValueType {
                 continue;
             }
 
-            if expr_type.is_number_or_number_literal() {
+            if expr_type.is_some_and(|ty| ty.is_number_or_number_literal()) {
                 if let Some(enum_type) = enum_type.clone() {
                     if enum_type != EnumValueType::Number {
                         found.push(member.range());

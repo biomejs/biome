@@ -17,6 +17,7 @@ use crate::db::type_inference::{
     collected_type_result, infer_module_types_cycle_result, normalize_type_cycle_result,
     resolve_raw_types,
 };
+use crate::module_for_key;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{ImportTreeNode, JsExport, JsOwnExport, ModuleDb, ResolvedPath};
 use biome_css_syntax::{TextRange, TextSize};
@@ -35,7 +36,6 @@ use biome_jsdoc_comment::JsdocComment;
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexMap;
 use rustc_hash::{FxHashMap, FxHashSet};
-use salsa::plumbing::{AsId, FromId};
 use std::collections::VecDeque;
 
 pub use crate::db::type_inference::InferredModuleTypes;
@@ -215,11 +215,12 @@ pub(crate) fn infer_call_expression_return_type_from_args<'db>(
             union
                 .types(db)
                 .iter()
-                .filter_map(|callee| match callee {
-                    InferredTypeData::Null | InferredTypeData::Undefined => {
+                .filter_map(|callee| {
+                    if matches!(callee, InferredTypeData::Null | InferredTypeData::Undefined) {
                         Some(InferredTypeData::Undefined)
+                    } else {
+                        infer_function_call_type(db, *callee, args)
                     }
-                    callee => infer_function_call_type(db, *callee, args),
                 })
                 .collect(),
         )
@@ -329,11 +330,12 @@ fn infer_function_call_type<'db>(
             union
                 .types(db)
                 .iter()
-                .filter_map(|callee| match callee {
-                    InferredTypeData::Null | InferredTypeData::Undefined => {
+                .filter_map(|callee| {
+                    if matches!(callee, InferredTypeData::Null | InferredTypeData::Undefined) {
                         Some(InferredTypeData::Undefined)
+                    } else {
+                        infer_function_call_type(db, *callee, args)
                     }
-                    callee => infer_function_call_type(db, *callee, args),
                 })
                 .collect(),
         ),
@@ -1199,11 +1201,7 @@ fn raw_local_class_name<'db>(
     local: InferredLocalTypeHandle<'db>,
 ) -> Option<String> {
     let module_key = local.module(db);
-    let module = ModuleInfo::from_id(module_key.as_id());
-    let current = db.module_for_path(module.path(db))?;
-    if InferredModuleKey::new(current.as_id()) != module_key {
-        return None;
-    }
+    let current = module_for_key(db, module_key)?;
     let ModuleInfoKind::Js(js_info) = current.kind(db) else {
         return None;
     };
@@ -1219,11 +1217,7 @@ fn raw_local_class_extends<'db>(
     local: InferredLocalTypeHandle<'db>,
 ) -> Option<InferredLocalTypeHandle<'db>> {
     let module_key = local.module(db);
-    let module = ModuleInfo::from_id(module_key.as_id());
-    let current = db.module_for_path(module.path(db))?;
-    if InferredModuleKey::new(current.as_id()) != module_key {
-        return None;
-    };
+    let current = module_for_key(db, module_key)?;
     let ModuleInfoKind::Js(js_info) = current.kind(db) else {
         return None;
     };
