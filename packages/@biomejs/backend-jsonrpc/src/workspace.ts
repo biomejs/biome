@@ -10438,6 +10438,9 @@ export interface ChangeFileParams {
 	projectKey: ProjectKey;
 	version: number;
 }
+/**
+ * How the project should be updated when there's a change.
+ */
 export type ProjectDataUpdate = "refresh" | "documentOnly";
 export interface ChangeFileResult {
 	diagnostics: Diagnostic[];
