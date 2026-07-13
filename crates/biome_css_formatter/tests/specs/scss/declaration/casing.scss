@@ -6,6 +6,8 @@
 
 @FORWARD "tokens" hide $KeepVar, KeepMixin;
 
+@FORWARD   "tokens" AS Keep-*;
+
 @FORWARD "theme" with ($Keep: KeepValue !DEFAULT);
 
 @USE "theme" WITH ($Keep: 1 !DEFAULT, $Other: KeepValue);
@@ -57,6 +59,10 @@ $KeepNotParen: NOT ($Keep AND $Other);
         COLOR: RED;
     }
 
+    #{$Keep + 15PX}:KeepValue;
+
+    #{$Keep + 15FuTuRe}:KeepValue;
+
     :root {
         --Keep-custom-Prop: $Keep;
     }
@@ -98,6 +104,8 @@ $KeepNotParen: NOT ($Keep AND $Other);
 @CONTAINER (#{$Feature}: #{$Value}) { .KeepClass:HOVER { COLOR: RED; } }
 
 @CONTAINER (#{$Min} <= WIDTH <= #{$Max}) { .KeepClass:HOVER { COLOR: RED; } }
+
+@MEDIA (#{$Boolean}),(#{$Range}>1PX),(1PX<#{$Reverse}),(1PX<#{$Interval}<2PX),($KeepBoolean),(1PX<$KeepReverse){.KeepClass{COLOR:RED}}
 
 @supports #{"(DISPLAY: GRID)"} AND (COLOR: RED) { .KeepClass:HOVER { COLOR: RED; } }
 
@@ -144,3 +152,5 @@ $KeepNotParen: NOT ($Keep AND $Other);
 .Block { $Parent: &; &__Elem--MOD { COLOR: RED; } &-100 { COLOR: RED; } &-#{$State} { COLOR: RED; } &#{$State}-MOD { COLOR: RED; } }
 
 %KeepPlaceholder{COLOR:RED;}
+
+.units{X:1PX;Y:1FuTuRe;Q:1q;H:1HZ;K:1khz}

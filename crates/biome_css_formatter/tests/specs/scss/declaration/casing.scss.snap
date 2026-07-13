@@ -14,6 +14,8 @@ info: scss/declaration/casing.scss
 
 @FORWARD "tokens" hide $KeepVar, KeepMixin;
 
+@FORWARD   "tokens" AS Keep-*;
+
 @FORWARD "theme" with ($Keep: KeepValue !DEFAULT);
 
 @USE "theme" WITH ($Keep: 1 !DEFAULT, $Other: KeepValue);
@@ -65,6 +67,10 @@ $KeepNotParen: NOT ($Keep AND $Other);
         COLOR: RED;
     }
 
+    #{$Keep + 15PX}:KeepValue;
+
+    #{$Keep + 15FuTuRe}:KeepValue;
+
     :root {
         --Keep-custom-Prop: $Keep;
     }
@@ -106,6 +112,8 @@ $KeepNotParen: NOT ($Keep AND $Other);
 @CONTAINER (#{$Feature}: #{$Value}) { .KeepClass:HOVER { COLOR: RED; } }
 
 @CONTAINER (#{$Min} <= WIDTH <= #{$Max}) { .KeepClass:HOVER { COLOR: RED; } }
+
+@MEDIA (#{$Boolean}),(#{$Range}>1PX),(1PX<#{$Reverse}),(1PX<#{$Interval}<2PX),($KeepBoolean),(1PX<$KeepReverse){.KeepClass{COLOR:RED}}
 
 @supports #{"(DISPLAY: GRID)"} AND (COLOR: RED) { .KeepClass:HOVER { COLOR: RED; } }
 
@@ -153,6 +161,8 @@ $KeepNotParen: NOT ($Keep AND $Other);
 
 %KeepPlaceholder{COLOR:RED;}
 
+.units{X:1PX;Y:1FuTuRe;Q:1q;H:1HZ;K:1khz}
+
 ```
 
 
@@ -167,6 +177,8 @@ $KeepNotParen: NOT ($Keep AND $Other);
 
 @forward "tokens" hide $KeepVar, KeepMixin;
 
+@forward "tokens" AS Keep-*;
+
 @forward "theme" with (
 	$Keep: KeepValue !DEFAULT
 );
@@ -180,7 +192,7 @@ $KeepNotParen: NOT ($Keep AND $Other);
 
 @import "Keep#{$Name}.scss";
 
-@import "KeepImport.CSS" PRINT and (min-width: 700px);
+@import "KeepImport.CSS" PRINT and (min-width: 700PX);
 
 KeepUse.$Keep: 1 !GLOBAL;
 
@@ -210,7 +222,7 @@ $KeepNotParen: NOT($Keep AND $Other);
 	@return $Input;
 }
 
-@mixin KeepMixin($Keep: 15in, $Args...) {
+@mixin KeepMixin($Keep: 15IN, $Args...) {
 	@content($Keep);
 
 	@include KeepOther($Args...);
@@ -236,11 +248,15 @@ $KeepNotParen: NOT($Keep AND $Other);
 		color: RED;
 	}
 
+	#{$Keep + 15PX}: KeepValue;
+
+	#{$Keep + 15FuTuRe}: KeepValue;
+
 	:root {
 		--Keep-custom-Prop: $Keep;
 	}
 
-	@media (min-width: 700px) {
+	@media (min-width: 700PX) {
 		.KeepClass:hover::first-letter {
 			color: #aabbcc;
 			background: Var(--Keep-custom-Prop);
@@ -292,7 +308,7 @@ $KeepNotParen: NOT($Keep AND $Other);
 	}
 }
 
-@media #{$Query}, PRINT AND (min-width: 700px) {
+@media #{$Query}, PRINT AND (min-width: 700PX) {
 	.KeepClass:hover {
 		color: RED;
 	}
@@ -306,6 +322,13 @@ $KeepNotParen: NOT($Keep AND $Other);
 
 @container (#{$Min} <= width <= #{$Max}) {
 	.KeepClass:hover {
+		color: RED;
+	}
+}
+
+@media (#{$Boolean}), (#{$Range} > 1PX), (1PX < #{$Reverse}),
+	(1PX < #{$Interval} < 2PX), ($KeepBoolean), (1PX < $KeepReverse) {
+	.KeepClass {
 		color: RED;
 	}
 }
@@ -392,13 +415,13 @@ $KeepNotParen: NOT($Keep AND $Other);
 	}
 }
 
-@include KeepMixin($Keep: 15in);
+@include KeepMixin($Keep: 15IN);
 
 .KeepClass {
 	@extend %KeepPlaceholder !OPTIONAL;
 }
 
-@include KeepMixin($Keep: 15in) USING ($Item) {
+@include KeepMixin($Keep: 15IN) USING ($Item) {
 	color: RED;
 }
 
@@ -440,9 +463,17 @@ $KeepNotParen: NOT($Keep AND $Other);
 	color: RED;
 }
 
+.units {
+	x: 1PX;
+	y: 1FuTuRe;
+	q: 1q;
+	h: 1HZ;
+	k: 1khz;
+}
+
 ```
 
 # Lines exceeding max width of 80 characters
 ```
-  124: #{$KeepType}.#{$KeepClass}##{$KeepId}[data-#{$KeepAttr}="#{$KeepAttrValue}" #{$KeepMod}] {
+  130: #{$KeepType}.#{$KeepClass}##{$KeepId}[data-#{$KeepAttr}="#{$KeepAttrValue}" #{$KeepMod}] {
 ```

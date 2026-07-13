@@ -5,8 +5,7 @@ use crate::CssFormatter;
 use biome_css_syntax::CssSyntaxToken;
 use biome_css_syntax::{
     AnyCssQueryFeatureName, AnyCssSelectorIdentifier, CssContainerScrollStateQueryInParens,
-    CssGenericProperty, CssIdentifier, CssIfMediaTest, CssLanguage, CssQualifiedRule,
-    CssSyntaxKind, CssSyntaxNode, ScssInterpolatedIdentifier,
+    CssIdentifier, CssIfMediaTest, CssLanguage, CssQualifiedRule, CssSyntaxKind, CssSyntaxNode,
 };
 #[cfg(debug_assertions)]
 use biome_formatter::Buffer;
@@ -75,8 +74,8 @@ pub(crate) fn record_auto_contextual_token(token: &CssSyntaxToken, f: &mut CssFo
     ));
 }
 
-/// Lowercases CSS-wide keywords such as `INITIAL` and preserves other identifiers.
-pub(crate) fn css_wide_keyword_case(value: &CssIdentifier) -> CssCase {
+/// Lowercases `INITIAL`, `INHERIT`, `UNSET`, and `REVERT` in value position.
+pub(crate) fn value_identifier_case(value: &CssIdentifier) -> CssCase {
     if is_lowercase_value_keyword(value) {
         CssCase::Lowercase
     } else {
@@ -145,26 +144,4 @@ fn is_front_matter_selector(name: &CssIdentifier) -> bool {
         .ancestors()
         .find_map(CssQualifiedRule::cast)
         .is_some_and(|rule| rule.prelude().syntax().text_trimmed().starts_with("---"))
-}
-
-/// Preserves units in interpolated declaration names such as:
-///
-/// ```scss
-/// #{$size + 15PX}: value;
-/// ```
-pub(crate) fn should_preserve_interpolated_property_dimension_unit_case(
-    node: &CssSyntaxNode,
-) -> bool {
-    let Some(identifier) = node
-        .ancestors()
-        .skip(1)
-        .find_map(ScssInterpolatedIdentifier::cast)
-    else {
-        return false;
-    };
-
-    identifier
-        .syntax()
-        .parent()
-        .is_some_and(|parent| CssGenericProperty::can_cast(parent.kind()))
 }

@@ -77,13 +77,13 @@ pub struct CssFormatOptions {
     delimiter_spacing: DelimiterSpacing,
     /// Whether to add a trailing newline at the end of the file. Defaults to true.
     trailing_newline: TrailingNewline,
-    _file_source: CssFileSource,
+    file_source: CssFileSource,
 }
 
 impl CssFormatOptions {
     pub fn new(file_source: CssFileSource) -> Self {
         Self {
-            _file_source: file_source,
+            file_source,
             indent_style: IndentStyle::default(),
             indent_width: IndentWidth::default(),
             line_ending: LineEnding::default(),
@@ -92,6 +92,10 @@ impl CssFormatOptions {
             delimiter_spacing: DelimiterSpacing::default(),
             trailing_newline: TrailingNewline::default(),
         }
+    }
+
+    pub(crate) fn file_source(&self) -> &CssFileSource {
+        &self.file_source
     }
 
     pub fn with_indent_style(mut self, indent_style: IndentStyle) -> Self {

@@ -445,9 +445,10 @@ mod tests {
     use crate::utils::case::CssCase;
     use crate::{AsFormat, CssFormatContext, CssFormatLanguage, CssFormatter, FormatNodeRule};
     use biome_css_parser::{CssParserOptions, parse_css};
-    use biome_css_syntax::CssSyntaxKind;
     use biome_css_syntax::{
-        AnyCssFunctionName, CssGenericComponentValueList, CssIdentifier, CssRoot,
+        AnyCssFunctionName, AnyCssGenericComponentValue, CssCompoundSelector,
+        CssGenericComponentValueList, CssIdentifier, CssIfSupportsIdentifierTest,
+        CssPseudoClassFunctionSelector, CssRoot, CssSyntaxElement, CssSyntaxKind, CssSyntaxNode,
     };
     use biome_formatter::comments::Comments;
     use biome_formatter::prelude::token;
@@ -465,6 +466,80 @@ mod tests {
         let options = CssFormatOptions::default();
         let formatted = format_node(options, &parse.syntax()).unwrap();
         assert_eq!(formatted.print().unwrap().as_code(), "html {\n}\n");
+    }
+
+    #[test]
+    fn detached_casing_owners_have_explicit_policies() {
+        use biome_css_syntax::CssSyntaxKind::*;
+
+        // These grammar nodes are not emitted by the current parser. Assemble
+        // them from valid parsed children so their formatter policies are still tested.
+        let supports = parse_css(
+            "A{COLOR:1}",
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+        let supports_syntax = supports.syntax();
+        let ident = supports_syntax
+            .descendants()
+            .filter_map(CssIdentifier::cast)
+            .find(|ident| ident.syntax().text_trimmed() == "COLOR")
+            .unwrap();
+        let value = supports_syntax
+            .descendants()
+            .filter_map(AnyCssGenericComponentValue::cast)
+            .find(|value| value.syntax().text_trimmed() == "1")
+            .unwrap();
+        let colon = supports_syntax
+            .descendants_tokens(Direction::Next)
+            .find(|token| token.kind() == COLON)
+            .unwrap();
+        let supports_test = CssIfSupportsIdentifierTest::unwrap_cast(CssSyntaxNode::new_detached(
+            CSS_IF_SUPPORTS_IDENTIFIER_TEST,
+            [
+                Some(CssSyntaxElement::Node(ident.into_syntax())),
+                Some(CssSyntaxElement::Token(colon)),
+                Some(CssSyntaxElement::Node(value.into_syntax())),
+            ],
+        ));
+
+        let formatted = format_node(CssFormatOptions::default(), supports_test.syntax()).unwrap();
+        assert_eq!(formatted.print().unwrap().as_code(), "COLOR:1");
+
+        let pseudo = parse_css(
+            ":GLOBAL(A){}",
+            CssFileSource::css(),
+            CssParserOptions::default().allow_css_modules(),
+        );
+        let pseudo_syntax = pseudo.syntax();
+        let name = pseudo_syntax
+            .descendants()
+            .filter_map(CssIdentifier::cast)
+            .find(|ident| ident.syntax().text_trimmed() == "GLOBAL")
+            .unwrap();
+        let selector = pseudo_syntax
+            .descendants()
+            .filter_map(CssCompoundSelector::cast)
+            .find(|selector| selector.syntax().text_trimmed() == "A")
+            .unwrap();
+        let mut parens = pseudo_syntax
+            .descendants_tokens(Direction::Next)
+            .filter(|token| matches!(token.kind(), L_PAREN | R_PAREN));
+        let l_paren = parens.next().unwrap();
+        let r_paren = parens.next().unwrap();
+        let pseudo_selector =
+            CssPseudoClassFunctionSelector::unwrap_cast(CssSyntaxNode::new_detached(
+                CSS_PSEUDO_CLASS_FUNCTION_SELECTOR,
+                [
+                    Some(CssSyntaxElement::Node(name.into_syntax())),
+                    Some(CssSyntaxElement::Token(l_paren)),
+                    Some(CssSyntaxElement::Node(selector.into_syntax())),
+                    Some(CssSyntaxElement::Token(r_paren)),
+                ],
+            ));
+
+        let formatted = format_node(CssFormatOptions::default(), pseudo_selector.syntax()).unwrap();
+        assert_eq!(formatted.print().unwrap().as_code(), "global(A)");
     }
 
     #[test]

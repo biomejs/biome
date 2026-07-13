@@ -1,7 +1,7 @@
 use crate::CssFormatter;
 use crate::comments::CssComments;
 use crate::prelude::*;
-use crate::utils::case::css_wide_keyword_case;
+use crate::utils::case::value_identifier_case;
 use biome_css_syntax::{
     CssFunction, CssGenericDelimiter, CssGenericProperty, CssIdentifier, CssLanguage,
     CssSyntaxKind, ScssExpression, ScssIncludeArgumentList, css_grid_template_property,
@@ -312,7 +312,7 @@ where
     I::Format: FormatWithRule<CssFormatContext, Item = I>,
 {
     let case = CssIdentifier::cast_ref(element.syntax()).map_or(CssCase::Preserve, |identifier| {
-        css_wide_keyword_case(&identifier)
+        value_identifier_case(&identifier)
     });
     element.into_format().with_text_case(case)
 }

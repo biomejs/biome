@@ -1,3 +1,5 @@
+@CHARSET   "UTF-8";
+
 /*
  * Role-based casing:
  * - CSS-owned names such as declaration names, pseudo names, and query feature
@@ -14,6 +16,10 @@ DIV.classNames#AND_Ids.ArePreserved {}
 [attr=IdentifierValuesPreserveWhenStringified] {}
 
 @MEDiA NoT SCReEN AND (  CoLOR  ), PRINT AND (COLOR) { }
+
+@MEDIA NOT (COLOR){A{COLOR:RED}}
+
+@MEDIA (COLOR) OR (HOVER){A{COLOR:RED}}
 
 DIV {
     --Preserved-Casing: BLUE;
@@ -86,9 +92,15 @@ A:NTH-CHILD(ODD),B:NTH-LAST-CHILD(EVEN){COLOR:RED}
     A:HOVER { COLOR: RED; }
 }
 
+@CONTAINER KeepAnd (WIDTH>1PX) AND (HEIGHT>2PX){A{COLOR:RED}}
+
 @CONTAINER scroll-state((SCROLLED: TOP) AND (STUCK)) {
     A:HOVER { COLOR: RED; }
 }
+
+@CONTAINER scroll-state(NOT (STUCK)){A{COLOR:RED}}
+
+@CONTAINER scroll-state((STUCK) OR (SCROLLED:BOTTOM)){A{COLOR:RED}}
 
 @SUPPORTS (COLOR: RED) {
     a { COLOR: RED; }
@@ -101,6 +113,8 @@ A:NTH-CHILD(ODD),B:NTH-LAST-CHILD(EVEN){COLOR:RED}
 @supports (COLOR: RED) or (DISPLAY: GRID) {
     A:HOVER { COLOR: RED; }
 }
+
+@SUPPORTS(COLOR:RED)AND(DISPLAY:GRID){A{COLOR:RED}}
 
 @supports selector(A:HOVER) {
     A { COLOR: RED; }
@@ -186,6 +200,10 @@ A:NTH-CHILD(ODD),B:NTH-LAST-CHILD(EVEN){COLOR:RED}
 
 .keyword-value { COLOR: INITIAL; BACKGROUND-COLOR: REVERT-LAYER; BORDER-COLOR: DEFAULT; }
 
+.keyword-policy{COLOR:UNSET;BACKGROUND:REVERT;BORDER-COLOR:REVERT-RULE}
+
+.unknown-dimension{WIDTH:0UnKnOwN}
+
 .important-value { COLOR: RED !IMPORTANT; }
 
 @STARTING-STYLE {
@@ -230,9 +248,13 @@ A:NTH-CHILD(ODD),B:NTH-LAST-CHILD(EVEN){COLOR:RED}
 
 .attr { content: ATTR(DATA-KEEP REM); width: ATTR(DATA-KEEP type(<COLOR>), KeepFallback / KeepOther); list-style-type: ATTR(DATA-KEEP | ARIA-LABEL type(<STRING>), KeepFallback / KeepOther); height: ATTR(DATA-SIZE | DATA-WIDTH REM, KeepFallback); quotes: ATTR(DATA-RAW RAW-STRING, KeepFallback); order: ATTR(DATA-COUNT NUMBER, KeepFallback); transform: ATTR(DATA-SYNTAX type(<COLOR># | <STRING>+), KeepFallback); }
 
+.attr-unknown{width:ATTR(DATA-X FuTuRe,Keep)}
+
 .module { COMPOSES: KeepClass from global; }
 
 .module-typed { composes: KeepClass from global; }
+
+:EXPORT{KeepProp:KeepValue}
 
 .module-source { COMPOSES: KeepClass from KeepSource; }
 
@@ -269,7 +291,7 @@ A:NTH-CHILD(ODD),B:NTH-LAST-CHILD(EVEN){COLOR:RED}
 }
 
 @IMPORT"KeepCase.CSS" LAYER(Keep.Layer) SUPPORTS(COLOR:RED) PRINT;
-.case-tokens[DATA-X I]{COMPOSES:KeepClass FROM global;a:ATTR(DATA-X RAW-STRING,Keep);b:ATTR(DATA-X NUMBER,Keep);c:ATTR(DATA-X TYPE(<COLOR>),Keep);COLOR:IF(NOT MEDIA(WIDTH>1PX) AND STYLE(COLOR:RED) OR SUPPORTS(DISPLAY:GRID):RED; ELSE:BLUE)}
+.case-tokens[DATA-X=Keep I]{COMPOSES:KeepClass FROM global;a:ATTR(DATA-X RAW-STRING,Keep);b:ATTR(DATA-X NUMBER,Keep);c:ATTR(DATA-X TYPE(<COLOR>),Keep);COLOR:IF(MEDIA(WIDTH>1PX):RED;ELSE:BLUE)}
 @VALUE KeepImported AS KeepLocal FROM KeepSource;
 @CONTAINER STYLE(COLOR:RED){A:HOVER{COLOR:RED}}
 @FUNCTION --KeepCase(--Keep TYPE(<COLOR>):RED) RETURNS TYPE(<COLOR>){RESULT:RED}

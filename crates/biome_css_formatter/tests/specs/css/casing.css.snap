@@ -6,6 +6,8 @@ info: css/casing.css
 # Input
 
 ```css
+@CHARSET   "UTF-8";
+
 /*
  * Role-based casing:
  * - CSS-owned names such as declaration names, pseudo names, and query feature
@@ -22,6 +24,10 @@ DIV.classNames#AND_Ids.ArePreserved {}
 [attr=IdentifierValuesPreserveWhenStringified] {}
 
 @MEDiA NoT SCReEN AND (  CoLOR  ), PRINT AND (COLOR) { }
+
+@MEDIA NOT (COLOR){A{COLOR:RED}}
+
+@MEDIA (COLOR) OR (HOVER){A{COLOR:RED}}
 
 DIV {
     --Preserved-Casing: BLUE;
@@ -94,9 +100,15 @@ A:NTH-CHILD(ODD),B:NTH-LAST-CHILD(EVEN){COLOR:RED}
     A:HOVER { COLOR: RED; }
 }
 
+@CONTAINER KeepAnd (WIDTH>1PX) AND (HEIGHT>2PX){A{COLOR:RED}}
+
 @CONTAINER scroll-state((SCROLLED: TOP) AND (STUCK)) {
     A:HOVER { COLOR: RED; }
 }
+
+@CONTAINER scroll-state(NOT (STUCK)){A{COLOR:RED}}
+
+@CONTAINER scroll-state((STUCK) OR (SCROLLED:BOTTOM)){A{COLOR:RED}}
 
 @SUPPORTS (COLOR: RED) {
     a { COLOR: RED; }
@@ -109,6 +121,8 @@ A:NTH-CHILD(ODD),B:NTH-LAST-CHILD(EVEN){COLOR:RED}
 @supports (COLOR: RED) or (DISPLAY: GRID) {
     A:HOVER { COLOR: RED; }
 }
+
+@SUPPORTS(COLOR:RED)AND(DISPLAY:GRID){A{COLOR:RED}}
 
 @supports selector(A:HOVER) {
     A { COLOR: RED; }
@@ -194,6 +208,10 @@ A:NTH-CHILD(ODD),B:NTH-LAST-CHILD(EVEN){COLOR:RED}
 
 .keyword-value { COLOR: INITIAL; BACKGROUND-COLOR: REVERT-LAYER; BORDER-COLOR: DEFAULT; }
 
+.keyword-policy{COLOR:UNSET;BACKGROUND:REVERT;BORDER-COLOR:REVERT-RULE}
+
+.unknown-dimension{WIDTH:0UnKnOwN}
+
 .important-value { COLOR: RED !IMPORTANT; }
 
 @STARTING-STYLE {
@@ -238,9 +256,13 @@ A:NTH-CHILD(ODD),B:NTH-LAST-CHILD(EVEN){COLOR:RED}
 
 .attr { content: ATTR(DATA-KEEP REM); width: ATTR(DATA-KEEP type(<COLOR>), KeepFallback / KeepOther); list-style-type: ATTR(DATA-KEEP | ARIA-LABEL type(<STRING>), KeepFallback / KeepOther); height: ATTR(DATA-SIZE | DATA-WIDTH REM, KeepFallback); quotes: ATTR(DATA-RAW RAW-STRING, KeepFallback); order: ATTR(DATA-COUNT NUMBER, KeepFallback); transform: ATTR(DATA-SYNTAX type(<COLOR># | <STRING>+), KeepFallback); }
 
+.attr-unknown{width:ATTR(DATA-X FuTuRe,Keep)}
+
 .module { COMPOSES: KeepClass from global; }
 
 .module-typed { composes: KeepClass from global; }
+
+:EXPORT{KeepProp:KeepValue}
 
 .module-source { COMPOSES: KeepClass from KeepSource; }
 
@@ -277,7 +299,7 @@ A:NTH-CHILD(ODD),B:NTH-LAST-CHILD(EVEN){COLOR:RED}
 }
 
 @IMPORT"KeepCase.CSS" LAYER(Keep.Layer) SUPPORTS(COLOR:RED) PRINT;
-.case-tokens[DATA-X I]{COMPOSES:KeepClass FROM global;a:ATTR(DATA-X RAW-STRING,Keep);b:ATTR(DATA-X NUMBER,Keep);c:ATTR(DATA-X TYPE(<COLOR>),Keep);COLOR:IF(NOT MEDIA(WIDTH>1PX) AND STYLE(COLOR:RED) OR SUPPORTS(DISPLAY:GRID):RED; ELSE:BLUE)}
+.case-tokens[DATA-X=Keep I]{COMPOSES:KeepClass FROM global;a:ATTR(DATA-X RAW-STRING,Keep);b:ATTR(DATA-X NUMBER,Keep);c:ATTR(DATA-X TYPE(<COLOR>),Keep);COLOR:IF(MEDIA(WIDTH>1PX):RED;ELSE:BLUE)}
 @VALUE KeepImported AS KeepLocal FROM KeepSource;
 @CONTAINER STYLE(COLOR:RED){A:HOVER{COLOR:RED}}
 @FUNCTION --KeepCase(--Keep TYPE(<COLOR>):RED) RETURNS TYPE(<COLOR>){RESULT:RED}
@@ -288,6 +310,8 @@ A:NTH-CHILD(ODD),B:NTH-LAST-CHILD(EVEN){COLOR:RED}
 # Formatted
 
 ```css
+@charset "UTF-8";
+
 /*
  * Role-based casing:
  * - CSS-owned names such as declaration names, pseudo names, and query feature
@@ -308,6 +332,18 @@ DIV.classNames#AND_Ids.ArePreserved {
 }
 
 @media NoT SCReEN AND (color), PRINT AND (color) {
+}
+
+@media NOT (color) {
+	A {
+		color: RED;
+	}
+}
+
+@media (color) OR (hover) {
+	A {
+		color: RED;
+	}
 }
 
 DIV {
@@ -412,8 +448,26 @@ B:nth-last-child(EVEN) {
 	}
 }
 
+@container KeepAnd (width > 1px) AND (height > 2px) {
+	A {
+		color: RED;
+	}
+}
+
 @container scroll-state((SCROLLED: TOP) AND (STUCK)) {
 	A:hover {
+		color: RED;
+	}
+}
+
+@container scroll-state(NOT (STUCK)) {
+	A {
+		color: RED;
+	}
+}
+
+@container scroll-state((STUCK) OR (SCROLLED: BOTTOM)) {
+	A {
 		color: RED;
 	}
 }
@@ -432,6 +486,12 @@ B:nth-last-child(EVEN) {
 
 @supports (COLOR: RED) or (DISPLAY: GRID) {
 	A:hover {
+		color: RED;
+	}
+}
+
+@supports (COLOR: RED) AND (DISPLAY: GRID) {
+	A {
 		color: RED;
 	}
 }
@@ -579,6 +639,16 @@ B:nth-last-child(EVEN) {
 	color: initial;
 	background-color: REVERT-LAYER;
 	border-color: DEFAULT;
+}
+
+.keyword-policy {
+	color: unset;
+	background: revert;
+	border-color: REVERT-RULE;
+}
+
+.unknown-dimension {
+	width: 0UnKnOwN;
 }
 
 .important-value {
@@ -764,17 +834,21 @@ B:nth-last-child(EVEN) {
 }
 
 .attr {
-	content: ATTR(DATA-KEEP rem);
+	content: ATTR(DATA-KEEP REM);
 	width: ATTR(DATA-KEEP type(<COLOR>), KeepFallback / KeepOther);
 	list-style-type: ATTR(
 		DATA-KEEP | ARIA-LABEL
 		type(<STRING>),
 		KeepFallback / KeepOther
 	);
-	height: ATTR(DATA-SIZE | DATA-WIDTH rem, KeepFallback);
+	height: ATTR(DATA-SIZE | DATA-WIDTH REM, KeepFallback);
 	quotes: ATTR(DATA-RAW RAW-STRING, KeepFallback);
 	order: ATTR(DATA-COUNT NUMBER, KeepFallback);
 	transform: ATTR(DATA-SYNTAX type(<COLOR># | <STRING>+), KeepFallback);
+}
+
+.attr-unknown {
+	width: ATTR(DATA-X FuTuRe, Keep);
 }
 
 .module {
@@ -783,6 +857,10 @@ B:nth-last-child(EVEN) {
 
 .module-typed {
 	composes: KeepClass from global;
+}
+
+:export {
+	KeepProp: KeepValue;
 }
 
 .module-source {
@@ -838,15 +916,12 @@ B:nth-last-child(EVEN) {
 }
 
 @import "KeepCase.CSS" LAYER(Keep.Layer) SUPPORTS(COLOR: RED) PRINT;
-.case-tokens[DATA-X I] {
+.case-tokens[DATA-X="Keep" I] {
 	composes: KeepClass FROM global;
 	a: ATTR(DATA-X RAW-STRING, Keep);
 	b: ATTR(DATA-X NUMBER, Keep);
 	c: ATTR(DATA-X TYPE(<COLOR>), Keep);
-	color: IF(
-		NOT MEDIA(WIDTH>1PX) AND STYLE(COLOR:RED) OR SUPPORTS(DISPLAY:GRID):RED;
-		ELSE: BLUE;
-	);
+	color: IF(MEDIA(WIDTH > 1px): RED; ELSE: BLUE);
 }
 @value KeepImported AS KeepLocal FROM KeepSource;
 @container STYLE(COLOR: RED) {
@@ -862,7 +937,7 @@ B:nth-last-child(EVEN) {
 
 # Lines exceeding max width of 80 characters
 ```
-    7:  *   selector pseudo identifiers, and plain value function names preserve casing.
-  470: @document URL("HTTPS://KeepHost/Exact"), URL-PREFIX("HTTPS://KeepHost/Doc"), DOMAIN("KeepHost.COM"), MEDIA-DOCUMENT("KeepMedia"), REGEXP("Keep.*") {
-  508: @value KeepBareString, KeepImportedString as KeepLocalString from "KeepSource.css";
+    9:  *   selector pseudo identifiers, and plain value function names preserve casing.
+  518: @document URL("HTTPS://KeepHost/Exact"), URL-PREFIX("HTTPS://KeepHost/Doc"), DOMAIN("KeepHost.COM"), MEDIA-DOCUMENT("KeepMedia"), REGEXP("Keep.*") {
+  564: @value KeepBareString, KeepImportedString as KeepLocalString from "KeepSource.css";
 ```
