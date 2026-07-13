@@ -17,6 +17,9 @@ pub(crate) struct Document {
     /// do not have a version.
     pub(crate) version: Option<i32>,
 
+    /// Whether service data such as the module graph reflects this version.
+    pub(crate) service_data_synced: bool,
+
     /// The index of where the original file source is saved.
     /// Use `WorkspaceServer#file_sources` to retrieve the file source that belongs to the document.
     pub(crate) file_source_index: usize,

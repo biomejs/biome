@@ -38,8 +38,8 @@ impl TypeStore {
         }
     }
 
-    pub fn as_references(&self) -> Vec<&TypeData> {
-        self.types.iter().collect()
+    pub fn as_references(&self) -> &[TypeData] {
+        &self.types
     }
 
     /// Returns the `TypeId` of the given `data`, if it is registered.

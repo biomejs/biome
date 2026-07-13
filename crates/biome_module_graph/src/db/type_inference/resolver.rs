@@ -33,6 +33,7 @@ pub(in crate::db) enum ImportResolution<'a> {
 
 pub(in crate::db::type_inference) struct ResolutionCtx<'db, 'a> {
     pub(in crate::db::type_inference) db: &'db dyn ModuleDb,
+    pub(in crate::db::type_inference) module: ModuleInfo,
     pub(in crate::db::type_inference) module_key: InferredModuleKey,
     pub(in crate::db::type_inference) js_info: &'a JsModuleInfo,
     pub(in crate::db::type_inference) import_resolution: ImportResolution<'a>,
@@ -52,6 +53,7 @@ pub(in crate::db) fn resolve_raw_types<'db>(
     let named_type_ids = named_type_ids(js_info);
     let mut ctx = ResolutionCtx {
         db,
+        module,
         module_key,
         js_info,
         import_resolution,

@@ -750,7 +750,7 @@ fn markup_to_string(markup: biome_console::Markup) -> String {
 }
 
 #[cfg(feature = "type_inference")]
-pub fn dump_registered_module_types(content: &mut String, types: &[&TypeData]) {
+pub fn dump_registered_module_types(content: &mut String, types: &[TypeData]) {
     if types.is_empty() {
         return;
     }

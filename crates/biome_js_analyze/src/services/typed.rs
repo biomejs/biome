@@ -20,24 +20,89 @@ use biome_js_type_info::{
 use biome_module_graph::{
     CallArgumentTypeInput, InferredModuleTypes, JsOwnExport, ModuleDb, ModuleInfo, ModuleInfoKind,
     NormalizeTypeInput, infer_call_argument_type, infer_constructor_argument_type,
-    infer_module_types_bottom_up, normalize_type,
+    infer_module_types, infer_module_types_bottom_up, normalize_type,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
-use std::{rc::Rc, sync::Arc};
+use std::{cell::OnceCell, rc::Rc, sync::Arc};
 
 #[derive(Clone)]
 pub(crate) struct TypedModule {
     db: Rc<dyn ModuleDb>,
     module: ModuleInfo,
+    dependencies_warmed: Rc<OnceCell<()>>,
 }
 
 impl TypedModule {
     pub(crate) fn new(db: Rc<dyn ModuleDb>, module: ModuleInfo) -> Self {
-        Self { db, module }
+        Self {
+            db,
+            module,
+            dependencies_warmed: Rc::new(OnceCell::new()),
+        }
     }
 
+    /// Returns the inferred types for this module.
+    ///
+    /// On the first call, imported modules are prepared before this module is
+    /// processed. Later calls skip that preparation and reuse the stored
+    /// results. If the first attempt cannot infer the types, the preparation is
+    /// attempted again on the next call.
     fn inferred_types<'db>(&'db self) -> Option<Arc<InferredModuleTypes<'db>>> {
-        infer_module_types_bottom_up(self.db.as_ref(), self.module)
+        get_or_warm(
+            &self.dependencies_warmed,
+            || infer_module_types_bottom_up(self.db.as_ref(), self.module),
+            || infer_module_types(self.db.as_ref(), self.module),
+        )
+    }
+}
+
+fn get_or_warm<T>(
+    warmed: &OnceCell<()>,
+    warm: impl FnOnce() -> Option<T>,
+    cached: impl FnOnce() -> Option<T>,
+) -> Option<T> {
+    if warmed.get().is_some() {
+        cached()
+    } else {
+        let result = warm();
+        if result.is_some() {
+            let _ = warmed.set(());
+        }
+        result
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::get_or_warm;
+    use std::{cell::Cell, rc::Rc};
+
+    #[test]
+    fn cloned_typed_modules_share_dependency_warming() {
+        let warmed = Rc::new(std::cell::OnceCell::new());
+        let cloned = Rc::clone(&warmed);
+        let warm_count = Cell::new(0);
+        let cached_count = Cell::new(0);
+
+        for warmed in [&*warmed, &*cloned] {
+            assert_eq!(
+                get_or_warm(
+                    warmed,
+                    || {
+                        warm_count.set(warm_count.get() + 1);
+                        Some(1)
+                    },
+                    || {
+                        cached_count.set(cached_count.get() + 1);
+                        Some(1)
+                    },
+                ),
+                Some(1)
+            );
+        }
+
+        assert_eq!(warm_count.get(), 1);
+        assert_eq!(cached_count.get(), 1);
     }
 }
 

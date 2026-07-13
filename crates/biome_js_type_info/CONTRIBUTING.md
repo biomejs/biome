@@ -97,9 +97,11 @@ then stores the completed value in the module table.
 
 ## Budgets And Tri-State Results
 
-Every potentially cyclic or expanding walk has a deterministic query-local
-budget. Deduplicated revisits do not consume another step. An incomplete type
-result degrades to `Unknown`; an incomplete predicate returns `None`.
+Potentially cyclic or expanding walks that cross inferred type or module-graph
+edges use deterministic query-local budgets. Deduplicated revisits do not
+consume another step. A bounded walk documents its conservative fallback:
+incomplete type results generally degrade to `Unknown`, while incomplete
+fallible predicates return `None`.
 
 For `Option<bool>` predicates:
 

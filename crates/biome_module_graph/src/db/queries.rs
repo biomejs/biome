@@ -48,6 +48,9 @@ pub use crate::db::type_inference::InferredModuleTypes;
 
 const MAX_ARGUMENT_MATCH_STEPS: usize = 1024;
 const MAX_ARGUMENT_SEQUENCE_STEPS: usize = 1024;
+// The root query itself is not a dependency step, so this admits the root plus
+// the same 1024-edge boundary used by export resolution.
+const MAX_INFERENCE_DEPENDENCY_STEPS: usize = 1025;
 const MAX_LOCAL_EXTENDS_STEPS: usize = 1024;
 
 #[salsa::tracked(cycle_result=infer_module_types_cycle_result)]
@@ -89,14 +92,30 @@ pub fn infer_module_types_bottom_up<'db>(
 ) -> Option<Arc<InferredModuleTypes<'db>>> {
     let mut visited = FxHashSet::default();
     let mut stack = vec![(module, false)];
+    let mut remaining_dependency_steps = MAX_INFERENCE_DEPENDENCY_STEPS;
 
     while let Some((current, imports_visited)) = stack.pop() {
+        db.unwind_if_revision_cancelled();
         if imports_visited {
             infer_module_types(db, current);
             continue;
         }
         if !visited.insert(current) {
             continue;
+        }
+        if current != module {
+            if remaining_dependency_steps == 0 {
+                let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+                    return None;
+                };
+                return Some(Arc::new(resolve_raw_types(
+                    db,
+                    module,
+                    &js_info,
+                    ImportResolution::CycleFallback(&visited),
+                )));
+            }
+            remaining_dependency_steps -= 1;
         }
 
         // Revisit this module to infer it once its imports below are done.
@@ -152,44 +171,46 @@ fn push_inference_dependency(
     }
 }
 
-#[derive(Clone, Copy, Debug)]
-pub(in crate::db) enum ResolvedCallArgument<'db> {
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
+/// A resolved argument supplied to call-expression inference.
+pub enum ResolvedCallArgument<'db> {
+    /// A required argument.
     Argument(InferredTypeData<'db>),
+    /// An argument that may be absent, such as an optional tuple element.
     Optional(InferredTypeData<'db>),
+    /// A spread argument.
     Spread(InferredTypeData<'db>),
 }
 
 impl<'db> ResolvedCallArgument<'db> {
-    pub(in crate::db) fn ty(self) -> InferredTypeData<'db> {
+    pub(crate) fn ty(self) -> InferredTypeData<'db> {
         match self {
             Self::Argument(ty) | Self::Optional(ty) | Self::Spread(ty) => ty,
         }
     }
 }
 
-pub fn infer_call_expression_type<'db>(
-    db: &'db dyn ModuleDb,
-    module: ModuleInfo,
-    callee: InferredTypeData<'db>,
-    args: &[InferredTypeData<'db>],
-) -> InferredTypeData<'db> {
-    let callee = normalize_type(db, NormalizeTypeInput::new(db, module, callee));
-    let ty = infer_call_expression_return_type(db, callee, args);
-
-    normalize_type(db, NormalizeTypeInput::new(db, module, ty))
+#[salsa::interned]
+#[derive(Debug)]
+/// Interned identity for a call-expression inference query.
+pub struct CallExpressionTypeInput<'db> {
+    /// Module in which the call is evaluated.
+    pub module: ModuleInfo,
+    /// Normalized callable type.
+    pub callee: InferredTypeData<'db>,
+    /// Resolved call arguments in source order.
+    #[returns(ref)]
+    pub args: Box<[ResolvedCallArgument<'db>]>,
 }
 
-pub(in crate::db) fn infer_call_expression_return_type<'db>(
+#[salsa::tracked]
+/// Infers the return type of a normalized call expression.
+pub fn infer_call_expression_type<'db>(
     db: &'db dyn ModuleDb,
-    callee: InferredTypeData<'db>,
-    args: &[InferredTypeData<'db>],
+    input: CallExpressionTypeInput<'db>,
 ) -> InferredTypeData<'db> {
-    let args = args
-        .iter()
-        .copied()
-        .map(ResolvedCallArgument::Argument)
-        .collect::<Vec<_>>();
-    infer_call_expression_return_type_from_args(db, callee, &args)
+    let _ = input.module(db).kind(db);
+    infer_call_expression_return_type_from_args(db, input.callee(db), input.args(db))
 }
 
 pub(in crate::db) fn infer_call_expression_return_type_from_args<'db>(
@@ -2466,7 +2487,7 @@ mod tests {
                 function,
                 Vec::from([InferredTypeData::Number]).into_boxed_slice(),
             ));
-            let result = infer_call_expression_return_type(&db, callee, &[]);
+            let result = infer_call_expression_return_type_from_args(&db, callee, &[]);
 
             if distinct_types <= 1024 {
                 let mut leaf = result;

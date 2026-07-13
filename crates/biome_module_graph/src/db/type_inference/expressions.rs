@@ -9,7 +9,9 @@ use super::{
     normalize_structural_type,
     resolver::ResolutionCtx,
 };
-use crate::db::queries::{ResolvedCallArgument, infer_call_expression_return_type_from_args};
+use crate::db::queries::{
+    CallExpressionTypeInput, ResolvedCallArgument, infer_call_expression_type,
+};
 use biome_js_semantic::ScopeId;
 use biome_js_type_info::{
     CallArgumentType as RawCallArgumentType, DestructureField as RawDestructureField,
@@ -318,7 +320,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> InferredTypeData<'db> {
         let args = self.resolve_call_arguments(arguments);
         let callee = self.resolve_call_callee(callee);
-        infer_call_expression_return_type_from_args(self.db, callee, &args)
+        let input =
+            CallExpressionTypeInput::new(self.db, self.module, callee, args.into_boxed_slice());
+        infer_call_expression_type(self.db, input)
     }
 
     fn resolve_this_expression(&self, parent: InferredTypeData<'db>) -> InferredTypeData<'db> {
@@ -374,7 +378,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> InferredTypeData<'db> {
         let args = self.resolve_inferred_call_arguments(arguments);
         let callee = self.resolve_call_callee(callee);
-        infer_call_expression_return_type_from_args(self.db, callee, &args)
+        let input =
+            CallExpressionTypeInput::new(self.db, self.module, callee, args.into_boxed_slice());
+        infer_call_expression_type(self.db, input)
     }
 
     fn resolve_call_callee(&mut self, callee: InferredTypeData<'db>) -> InferredTypeData<'db> {

@@ -13,7 +13,131 @@ use biome_fs::MemoryFileSystem;
 use biome_js_syntax::JsLanguage;
 use biome_rowan::TextSize;
 use camino::Utf8Path;
+use std::panic::AssertUnwindSafe;
 use std::str::FromStr;
+
+#[test]
+fn change_file_resumes_module_update_after_cancellation() {
+    const BASE_PATH: &str = "/project/base.ts";
+    const INDEX_PATH: &str = "/project/index.ts";
+    const OLD_BASE: &str = "export function task(): void {}";
+    const NEW_BASE: &str = "export async function task(): Promise<void> {}";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(BASE_PATH), OLD_BASE.as_bytes());
+    fs.insert(
+        Utf8PathBuf::from(INDEX_PATH),
+        b"import { task } from './base';\ntask();",
+    );
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(BASE_PATH),
+            content: FileContent::FromClient {
+                content: OLD_BASE.into(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let initial_diagnostics = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new(INDEX_PATH),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noFloatingPromises").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+    assert!(initial_diagnostics.diagnostics.is_empty());
+
+    let params = ChangeFileParams {
+        project_key,
+        path: BiomePath::new(BASE_PATH),
+        content: NEW_BASE.into(),
+        version: 2,
+        inline_config: None,
+        editor_features: None,
+    };
+    workspace
+        .server
+        .cancel_change_file_after_document_update
+        .store(true, Ordering::Release);
+
+    let cancelled = salsa::Cancelled::catch(AssertUnwindSafe(|| {
+        workspace.as_workspace().change_file(params.clone())
+    }));
+    assert!(matches!(cancelled, Err(salsa::Cancelled::PendingWrite)));
+
+    let db = workspace.get_db();
+    let module = db
+        .module_for_path(Utf8Path::new(BASE_PATH))
+        .expect("base module must remain registered");
+    let ModuleInfoKind::Js(js_info) = module.kind(&db) else {
+        panic!("base module must be JavaScript");
+    };
+    assert!(!format!("{:?}", js_info.raw_types).contains("Promise"));
+    drop(db);
+
+    workspace.change_file(params).unwrap();
+
+    let db = workspace.get_db();
+    let module = db
+        .module_for_path(Utf8Path::new(BASE_PATH))
+        .expect("base module must remain registered");
+    let ModuleInfoKind::Js(js_info) = module.kind(&db) else {
+        panic!("base module must be JavaScript");
+    };
+    assert!(format!("{:?}", js_info.raw_types).contains("Promise"));
+    drop(db);
+
+    let diagnostics = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new(INDEX_PATH),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noFloatingPromises").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+    assert_eq!(diagnostics.diagnostics.len(), 1);
+}
 
 #[test]
 fn commonjs_file_rejects_import_statement() {

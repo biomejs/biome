@@ -13,7 +13,13 @@ TypeId(1) => Constructor {
                 NamedFunctionParameter {
                     name: "name",
                     ty: Resolved(
-                        string,
+                        Global(
+                            GlobalTypeId(
+                                TypeId(
+                                    5,
+                                ),
+                            ),
+                        ),
                     ),
                     is_optional: false,
                     is_rest: false,
@@ -26,7 +32,13 @@ TypeId(1) => Constructor {
                 NamedFunctionParameter {
                     name: "age",
                     ty: Resolved(
-                        number,
+                        Global(
+                            GlobalTypeId(
+                                TypeId(
+                                    4,
+                                ),
+                            ),
+                        ),
                     ),
                     is_optional: false,
                     is_rest: false,

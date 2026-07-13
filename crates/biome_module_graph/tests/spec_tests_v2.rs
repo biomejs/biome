@@ -26,9 +26,9 @@ use biome_js_type_info::{
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_languages::JsFileSource;
 use biome_module_graph::{
-    CallArgumentTypeInput, InferredModuleTypes, JsExport, JsOwnExport, ModuleDb,
-    ModuleGraphGeneration, ModuleInfo, ModuleInfoKind, NormalizeTypeInput, PathInfoCache,
-    infer_call_expression_type as infer_call_expression_type_query,
+    CallArgumentTypeInput, CallExpressionTypeInput, InferredModuleTypes, JsExport, JsOwnExport,
+    ModuleDb, ModuleGraphGeneration, ModuleInfo, ModuleInfoKind, NormalizeTypeInput, PathInfoCache,
+    ResolvedCallArgument, infer_call_expression_type as infer_call_expression_type_query,
     infer_constructor_argument_type, infer_module_types, infer_module_types_bottom_up,
     normalize_type as normalize_type_query, resolve_js_module,
 };
@@ -947,7 +947,18 @@ fn infer_call_expression_type<'db>(
     callee: InferredTypeData<'db>,
     args: Vec<InferredTypeData<'db>>,
 ) -> InferredTypeData<'db> {
-    infer_call_expression_type_query(db, module, callee, &args)
+    let callee = normalize_type_query(db, NormalizeTypeInput::new(db, module, callee));
+    let input = CallExpressionTypeInput::new(
+        db,
+        module,
+        callee,
+        args.into_iter()
+            .map(ResolvedCallArgument::Argument)
+            .collect::<Vec<_>>()
+            .into_boxed_slice(),
+    );
+    let ty = infer_call_expression_type_query(db, input);
+    normalize_type_query(db, NormalizeTypeInput::new(db, module, ty))
 }
 
 fn nested_instance_type<'db>(
@@ -1427,7 +1438,7 @@ fn test_infer_module_types_resolves_generic_builtin_instances_on_build() {
     let InferredTypeData::InstanceOf(map_instance) = map_ty else {
         panic!("readMap must return a Map instance, got {map_ty:?}");
     };
-    assert_eq!(map_instance.ty(&db), InferredTypeData::map_class(&db));
+    assert_eq!(map_instance.ty(&db), InferredTypeData::map_class());
     assert_eq!(map_instance.type_parameters(&db).len(), 2);
     assert!(is_inferred_string(
         &db,
@@ -1443,7 +1454,7 @@ fn test_infer_module_types_resolves_generic_builtin_instances_on_build() {
     let InferredTypeData::InstanceOf(set_instance) = set_ty else {
         panic!("readSet must return a Set instance, got {set_ty:?}");
     };
-    assert_eq!(set_instance.ty(&db), InferredTypeData::set_class(&db));
+    assert_eq!(set_instance.ty(&db), InferredTypeData::set_class());
     assert_eq!(set_instance.type_parameters(&db).len(), 1);
     assert!(is_inferred_string(
         &db,
@@ -1458,7 +1469,7 @@ fn test_infer_module_types_resolves_generic_builtin_instances_on_build() {
     };
     assert_eq!(
         weak_map_instance.ty(&db),
-        InferredTypeData::weak_map_class(&db)
+        InferredTypeData::weak_map_class()
     );
     assert_eq!(weak_map_instance.type_parameters(&db).len(), 2);
     assert!(is_inferred_string(
@@ -1870,6 +1881,136 @@ fn test_infer_module_types_resolves_namespace_reexport_members() {
         &db,
         &fs,
     );
+}
+
+#[test]
+fn test_blanket_reexport_ambiguity_is_order_independent() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/a.ts".into(), "export const value = 1;");
+    fs.insert("/src/b.ts".into(), "export const value = 1;");
+    fs.insert(
+        "/src/first.ts".into(),
+        "export * from './a'; export * from './b';",
+    );
+    fs.insert(
+        "/src/second.ts".into(),
+        "export * from './b'; export * from './a';",
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import { value as first } from "./first";
+            import { value as second } from "./second";
+            import * as firstNamespace from "./first";
+            import * as secondNamespace from "./second";
+            export const firstNamed = first;
+            export const secondNamed = second;
+            export const firstMember = firstNamespace.value;
+            export const secondMember = secondNamespace.value;
+        "#,
+    );
+
+    let db = build_js_test_module_db(
+        &fs,
+        &[
+            "/src/a.ts",
+            "/src/b.ts",
+            "/src/first.ts",
+            "/src/second.ts",
+            "/src/index.ts",
+        ],
+        true,
+    );
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    for name in ["firstNamed", "secondNamed", "firstMember", "secondMember"] {
+        let ty = inferred_binding_ty_by_name(&db, module, &inferred, name)
+            .expect("binding must be inferred");
+        assert_eq!(inferred.resolve_type(&db, ty), InferredTypeData::Unknown);
+    }
+}
+
+#[test]
+fn test_blanket_reexport_diamond_preserves_original_binding() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/leaf.ts".into(), "export const value = 'leaf';");
+    fs.insert("/src/left.ts".into(), "export * from './leaf';");
+    fs.insert("/src/right.ts".into(), "export * from './leaf';");
+    fs.insert(
+        "/src/barrel.ts".into(),
+        "export * from './left'; export * from './right';",
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        "import { value } from './barrel'; export const result = value;",
+    );
+
+    let db = build_js_test_module_db(
+        &fs,
+        &[
+            "/src/leaf.ts",
+            "/src/left.ts",
+            "/src/right.ts",
+            "/src/barrel.ts",
+            "/src/index.ts",
+        ],
+        true,
+    );
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let result = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result must be inferred");
+
+    assert!(is_inferred_string_literal(
+        &db,
+        inferred.resolve_type(&db, result),
+        "leaf"
+    ));
+}
+
+#[test]
+fn test_explicit_reexport_takes_precedence_over_blanket_ambiguity() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/a.ts".into(), "export const value = 'a';");
+    fs.insert("/src/b.ts".into(), "export const value = 'b';");
+    fs.insert("/src/chosen.ts".into(), "export const value = 'chosen';");
+    fs.insert(
+        "/src/barrel.ts".into(),
+        "export * from './a'; export * from './b'; export { value } from './chosen';",
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        "import { value } from './barrel'; export const result = value;",
+    );
+
+    let db = build_js_test_module_db(
+        &fs,
+        &[
+            "/src/a.ts",
+            "/src/b.ts",
+            "/src/chosen.ts",
+            "/src/barrel.ts",
+            "/src/index.ts",
+        ],
+        true,
+    );
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let result = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result must be inferred");
+
+    assert!(is_inferred_string_literal(
+        &db,
+        inferred.resolve_type(&db, result),
+        "chosen"
+    ));
 }
 
 #[test]
@@ -6065,7 +6206,7 @@ fn test_infer_call_expression_type_treats_distinct_global_handles_as_uncertain()
         .expect("select overload type must be inferred");
     let promise = InferredTypeData::instance_of(
         &db,
-        InferredTypeData::promise_class(&db),
+        InferredTypeData::promise_class(),
         Box::new([InferredTypeData::Number]),
     );
 
@@ -6319,6 +6460,53 @@ fn test_infer_call_expression_type_rejects_partial_call_signature_set_repeatedly
 }
 
 #[test]
+fn test_infer_call_expression_query_reuses_identical_inputs() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), "export {};".to_string());
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let callee = InferredTypeData::Function(InferredFunction::new(
+        &db,
+        Box::default(),
+        Box::default(),
+        InferredReturnType::Type(InferredTypeData::Number),
+        false,
+        None,
+    ));
+    let input = CallExpressionTypeInput::new(&db, module, callee, Box::default());
+
+    assert_eq!(
+        infer_call_expression_type_query(&db, input),
+        InferredTypeData::Number
+    );
+    db.events.0.lock().unwrap().clear();
+    assert_eq!(
+        infer_call_expression_type_query(&db, input),
+        InferredTypeData::Number
+    );
+    let events = std::mem::take(&mut *db.events.0.lock().unwrap());
+    assert_function_query_was_not_run(&db, infer_call_expression_type_query, input, &events);
+
+    let changed_input = CallExpressionTypeInput::new(
+        &db,
+        module,
+        callee,
+        Vec::from([ResolvedCallArgument::Argument(InferredTypeData::String)]).into_boxed_slice(),
+    );
+    db.events.0.lock().unwrap().clear();
+    let _ = infer_call_expression_type_query(&db, changed_input);
+    let events = std::mem::take(&mut *db.events.0.lock().unwrap());
+    assert_function_query_was_run(
+        &db,
+        infer_call_expression_type_query,
+        changed_input,
+        &events,
+    );
+}
+
+#[test]
 fn test_infer_call_expression_type_invalidates_indeterminate_call_signature() {
     let fs = MemoryFileSystem::default();
     fs.insert("/src/index.ts".into(), "export {};".to_string());
@@ -6411,7 +6599,7 @@ fn test_generic_replacement_budget_boundaries_for_call_query() {
 
     for steps in [LIMIT - 1, LIMIT, LIMIT + 1] {
         let (callee, argument) = generic_call_types(&db, steps);
-        let result = infer_call_expression_type_query(&db, module, callee, &[argument]);
+        let result = infer_call_expression_type(&db, module, callee, vec![argument]);
         let expected = if steps <= LIMIT {
             InferredTypeData::Number
         } else {
@@ -7207,11 +7395,11 @@ fn test_infer_call_expression_type_poisoned_by_indeterminate_union_variants_in_b
                 Vec::from(variants).into_boxed_slice(),
             ));
             assert_eq!(
-                infer_call_expression_type_query(&db, module, callee, &[]),
+                infer_call_expression_type(&db, module, callee, vec![]),
                 InferredTypeData::Unknown
             );
             assert_eq!(
-                infer_call_expression_type_query(&db, module, callee, &[]),
+                infer_call_expression_type(&db, module, callee, vec![]),
                 InferredTypeData::Unknown
             );
         }
@@ -7392,6 +7580,22 @@ fn test_infer_module_types_normalizes_primitive_intersections_on_build() {
             export function readNever(value: string & number): string & number {
                 return value;
             }
+
+            export function readStringLiteral(value: string & "value"): string & "value" {
+                return value;
+            }
+
+            export function readReversedStringLiteral(value: "value" & string): "value" & string {
+                return value;
+            }
+
+            export function readNumberLiteral(value: number & 1): number & 1 {
+                return value;
+            }
+
+            export function readReversedNumberLiteral(value: 1 & number): 1 & number {
+                return value;
+            }
         "#,
     );
 
@@ -7408,6 +7612,18 @@ fn test_infer_module_types_normalizes_primitive_intersections_on_build() {
     let never_ty = inferred_function_return_ty_by_name(&db, index_module, &inferred, "readNever")
         .expect("readNever return type must be inferred");
     assert_eq!(never_ty, InferredTypeData::NeverKeyword);
+
+    for name in ["readStringLiteral", "readReversedStringLiteral"] {
+        let ty = inferred_function_return_ty_by_name(&db, index_module, &inferred, name)
+            .expect("string literal intersection must be inferred");
+        assert!(is_inferred_string_literal(&db, ty, "value"));
+    }
+
+    for name in ["readNumberLiteral", "readReversedNumberLiteral"] {
+        let ty = inferred_function_return_ty_by_name(&db, index_module, &inferred, name)
+            .expect("number literal intersection must be inferred");
+        assert!(is_inferred_number_literal(&db, ty, "1"));
+    }
 
     assert_inferred_type_snapshot(
         "test_infer_module_types_normalizes_primitive_intersections_on_build",

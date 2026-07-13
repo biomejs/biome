@@ -772,47 +772,47 @@ impl<'db> TypeData<'db> {
         crate::builders::with_all_required_members(db, members)
     }
 
-    pub fn array_class(_db: &'db dyn TypeDb) -> Self {
+    pub const fn array_class() -> Self {
         Self::GlobalType(ARRAY_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn async_disposable_interface(_db: &'db dyn TypeDb) -> Self {
+    pub const fn async_disposable_interface() -> Self {
         Self::GlobalType(ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn date_class(_db: &'db dyn TypeDb) -> Self {
+    pub const fn date_class() -> Self {
         Self::GlobalType(DATE_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn disposable_interface(_db: &'db dyn TypeDb) -> Self {
+    pub const fn disposable_interface() -> Self {
         Self::GlobalType(DISPOSABLE_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn error_class(_db: &'db dyn TypeDb) -> Self {
+    pub const fn error_class() -> Self {
         Self::GlobalType(ERROR_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn map_class(_db: &'db dyn TypeDb) -> Self {
+    pub const fn map_class() -> Self {
         Self::GlobalType(MAP_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn promise_class(_db: &'db dyn TypeDb) -> Self {
+    pub const fn promise_class() -> Self {
         Self::GlobalType(PROMISE_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn regexp_class(_db: &'db dyn TypeDb) -> Self {
+    pub const fn regexp_class() -> Self {
         Self::GlobalType(REGEXP_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn set_class(_db: &'db dyn TypeDb) -> Self {
+    pub const fn set_class() -> Self {
         Self::GlobalType(SET_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn symbol_class(_db: &'db dyn TypeDb) -> Self {
+    pub const fn symbol_class() -> Self {
         Self::GlobalType(SYMBOL_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn weak_map_class(_db: &'db dyn TypeDb) -> Self {
+    pub const fn weak_map_class() -> Self {
         Self::GlobalType(WEAK_MAP_ID_GLOBAL_TYPE_ID)
     }
 
@@ -827,23 +827,23 @@ impl<'db> TypeData<'db> {
     }
 
     pub fn array_instance(db: &'db dyn TypeDb, type_parameters: Box<[Self]>) -> Self {
-        Self::instance_of(db, Self::array_class(db), type_parameters)
+        Self::instance_of(db, Self::array_class(), type_parameters)
     }
 
     pub fn map_instance(db: &'db dyn TypeDb, type_parameters: Box<[Self]>) -> Self {
-        Self::instance_of(db, Self::map_class(db), type_parameters)
+        Self::instance_of(db, Self::map_class(), type_parameters)
     }
 
     pub fn promise_instance(db: &'db dyn TypeDb, type_parameters: Box<[Self]>) -> Self {
-        Self::instance_of(db, Self::promise_class(db), type_parameters)
+        Self::instance_of(db, Self::promise_class(), type_parameters)
     }
 
     pub fn set_instance(db: &'db dyn TypeDb, type_parameters: Box<[Self]>) -> Self {
-        Self::instance_of(db, Self::set_class(db), type_parameters)
+        Self::instance_of(db, Self::set_class(), type_parameters)
     }
 
     pub fn weak_map_instance(db: &'db dyn TypeDb, type_parameters: Box<[Self]>) -> Self {
-        Self::instance_of(db, Self::weak_map_class(db), type_parameters)
+        Self::instance_of(db, Self::weak_map_class(), type_parameters)
     }
 
     pub fn from_raw_with_resolver(

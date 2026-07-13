@@ -94,6 +94,8 @@ use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::fmt::Debug;
 use std::ops::Deref;
 use std::panic::RefUnwindSafe;
+#[cfg(test)]
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::watch;
@@ -150,6 +152,9 @@ pub struct WorkspaceServer {
 
     /// Re-usable cache for analyzer visitors.
     analyzer_cache: HashMap<ProjectKey, AnalyzerVisitorCache>,
+
+    #[cfg(test)]
+    cancel_change_file_after_document_update: AtomicBool,
 }
 
 /// A convenient wrapper around a [WorkspaceServer] that holds salsa database state.
@@ -306,6 +311,8 @@ impl WorkspaceServer {
             fs,
             notification_tx,
             analyzer_cache: HashMap::default(),
+            #[cfg(test)]
+            cancel_change_file_after_document_update: AtomicBool::new(false),
         }
     }
 
@@ -406,6 +413,53 @@ impl LocalWorkspace {
 }
 
 impl WorkspaceServerWithDb<'_> {
+    fn finish_change_file(
+        &self,
+        project_key: ProjectKey,
+        path: &BiomePath,
+        version: i32,
+        parsed: ParsedSource,
+    ) -> Result<ChangeFileResult, WorkspaceError> {
+        let mut final_diagnostics = vec![];
+
+        if self.is_indexed(path) {
+            let (dependencies, diagnostics) = self.update_service_data(
+                path,
+                UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, parsed.into()),
+                project_key,
+            )?;
+            final_diagnostics.extend(
+                diagnostics
+                    .into_iter()
+                    .map(biome_diagnostics::serde::Diagnostic::new),
+            );
+            if !dependencies.is_empty()
+                && let Some(project_path) = self.projects.get_project_path(project_key)
+            {
+                let diagnostics = self.scanner.index_dependencies(
+                    self,
+                    project_key,
+                    &project_path,
+                    dependencies,
+                    IndexTrigger::Update,
+                )?;
+                final_diagnostics.extend(diagnostics);
+            }
+        }
+
+        self.documents.pin().update(path.to_path_buf(), |document| {
+            let mut document = document.clone();
+            if document.version == Some(version) {
+                document.service_data_synced = true;
+            }
+            document
+        });
+
+        Ok(ChangeFileResult {
+            diagnostics: final_diagnostics,
+        })
+    }
+
     /// Returns a clone of the project database for passing to analyzers.
     fn module_db(&self) -> db::DbReadGuard {
         self.db_state.fork()
@@ -815,6 +869,7 @@ impl WorkspaceServerWithDb<'_> {
                     Document {
                         content: content.clone(),
                         version,
+                        service_data_synced: true,
                         file_source_index,
                         syntax: syntax.clone(),
                     }
@@ -822,6 +877,7 @@ impl WorkspaceServerWithDb<'_> {
                 || Document {
                     content: content.clone(),
                     version,
+                    service_data_synced: true,
                     file_source_index,
                     syntax: syntax.clone(),
                 },
@@ -1754,6 +1810,16 @@ macro_rules! delegate_workspace_methods {
     };
 }
 
+macro_rules! delegate_retrying_workspace_methods {
+    ($(fn $name:ident($params:ident: $params_ty:ty) -> $return_ty:ty;)*) => {
+        $(
+            fn $name(&self, $params: $params_ty) -> $return_ty {
+                retry_on_pending_write(|| self.as_workspace().$name($params.clone()))
+            }
+        )*
+    };
+}
+
 impl Workspace for LocalWorkspace {
     delegate_workspace_methods! {
         fn open_project(params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError>;
@@ -1762,25 +1828,29 @@ impl Workspace for LocalWorkspace {
         fn close_project(params: CloseProjectParams) -> Result<(), WorkspaceError>;
         fn open_file(params: OpenFileParams) -> Result<OpenFileResult, WorkspaceError>;
         fn file_exists(params: FileExistsParams) -> Result<bool, WorkspaceError>;
-        fn file_features(params: SupportsFeatureParams) -> Result<FileFeaturesResult, WorkspaceError>;
         fn is_path_ignored(params: PathIsIgnoredParams) -> Result<bool, WorkspaceError>;
         fn get_file_content(params: GetFileContentParams) -> Result<String, WorkspaceError>;
         fn check_file_size(params: CheckFileSizeParams) -> Result<CheckFileSizeResult, WorkspaceError>;
-        fn change_file(params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError>;
-        fn pull_diagnostics(params: PullDiagnosticsParams) -> Result<PullDiagnosticsResult, WorkspaceError>;
-        fn pull_actions(params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError>;
-        fn pull_diagnostics_and_actions(params: PullDiagnosticsAndActionsParams) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError>;
         fn format_file(params: FormatFileParams) -> Result<Printed, WorkspaceError>;
         fn format_range(params: FormatRangeParams) -> Result<Printed, WorkspaceError>;
         fn format_on_type(params: FormatOnTypeParams) -> Result<Printed, WorkspaceError>;
         fn fix_file(params: FixFileParams) -> Result<FixFileResult, WorkspaceError>;
-        fn rename(params: RenameParams) -> Result<RenameResult, WorkspaceError>;
-        fn go_to_definition(params: GoToDefinitionParams) -> Result<Option<GoToDefinitionResult>, WorkspaceError>;
         fn close_file(params: CloseFileParams) -> Result<(), WorkspaceError>;
         fn update_module_graph(params: UpdateModuleGraphParams) -> Result<(), WorkspaceError>;
         fn parse_pattern(params: ParsePatternParams) -> Result<ParsePatternResult, WorkspaceError>;
         fn search_pattern(params: SearchPatternParams) -> Result<SearchResults, WorkspaceError>;
         fn drop_pattern(params: DropPatternParams) -> Result<(), WorkspaceError>;
+        fn rage(params: RageParams) -> Result<RageResult, WorkspaceError>;
+    }
+
+    delegate_retrying_workspace_methods! {
+        fn change_file(params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError>;
+        fn file_features(params: SupportsFeatureParams) -> Result<FileFeaturesResult, WorkspaceError>;
+        fn pull_diagnostics(params: PullDiagnosticsParams) -> Result<PullDiagnosticsResult, WorkspaceError>;
+        fn pull_actions(params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError>;
+        fn pull_diagnostics_and_actions(params: PullDiagnosticsAndActionsParams) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError>;
+        fn rename(params: RenameParams) -> Result<RenameResult, WorkspaceError>;
+        fn go_to_definition(params: GoToDefinitionParams) -> Result<Option<GoToDefinitionResult>, WorkspaceError>;
         fn get_syntax_tree(params: GetSyntaxTreeParams) -> Result<GetSyntaxTreeResult, WorkspaceError>;
         fn get_control_flow_graph(params: GetControlFlowGraphParams) -> Result<String, WorkspaceError>;
         fn get_formatter_ir(params: GetFormatterIRParams) -> Result<String, WorkspaceError>;
@@ -1788,7 +1858,6 @@ impl Workspace for LocalWorkspace {
         fn get_registered_types(params: GetRegisteredTypesParams) -> Result<String, WorkspaceError>;
         fn get_semantic_model(params: GetSemanticModelParams) -> Result<String, WorkspaceError>;
         fn get_module_graph(params: GetModuleGraphParams) -> Result<GetModuleGraphResult, WorkspaceError>;
-        fn rage(params: RageParams) -> Result<RageResult, WorkspaceError>;
     }
 
     fn fs(&self) -> &dyn FsWithResolverProxy {
@@ -2314,17 +2383,35 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         }: ChangeFileParams,
     ) -> Result<ChangeFileResult, WorkspaceError> {
         let documents = self.documents.pin();
-        let (index, existing_version) = documents
+        let (index, existing_version, service_data_synced, same_content) = documents
             .get(path.as_path())
-            .map(|document| (document.file_source_index, document.version))
+            .map(|document| {
+                (
+                    document.file_source_index,
+                    document.version,
+                    document.service_data_synced,
+                    document.content == content,
+                )
+            })
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
-        if existing_version.is_some_and(|existing_version| existing_version >= version) {
+        if existing_version.is_some_and(|existing_version| existing_version > version)
+            || existing_version == Some(version) && (!same_content || service_data_synced)
+        {
             warn!(%version, %path, "outdated_file_change");
             // Safely ignore older versions.
             return Ok(ChangeFileResult {
                 diagnostics: Vec::new(),
             });
+        }
+
+        if existing_version == Some(version) {
+            let parsed = {
+                let db = self.get_db();
+                db.get_file(path.as_path())
+                    .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?
+            };
+            return self.finish_change_file(project_key, &path, version, parsed);
         }
 
         let settings = self
@@ -2390,6 +2477,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         let document = Document {
             content,
             version: Some(version),
+            service_data_synced: !self.is_indexed(&path),
             file_source_index: index,
             syntax: Some(Ok(())),
         };
@@ -2405,37 +2493,15 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             .insert(path.clone().into(), document)
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
-        let mut final_diagnostics = vec![];
-
-        if self.is_indexed(&path) {
-            let (dependencies, diagnostics) = self.update_service_data(
-                &path,
-                UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, parsed.into()),
-                project_key,
-            )?;
-            final_diagnostics.extend(
-                diagnostics
-                    .into_iter()
-                    .map(biome_diagnostics::serde::Diagnostic::new)
-                    .collect::<Vec<_>>(),
-            );
-            if !dependencies.is_empty()
-                && let Some(project_path) = self.projects.get_project_path(project_key)
-            {
-                let diagnostics = self.scanner.index_dependencies(
-                    self,
-                    project_key,
-                    &project_path,
-                    dependencies,
-                    IndexTrigger::Update,
-                )?;
-                final_diagnostics.extend(diagnostics);
-            }
+        #[cfg(test)]
+        if self
+            .cancel_change_file_after_document_update
+            .swap(false, Ordering::AcqRel)
+        {
+            std::panic::resume_unwind(Box::new(salsa::Cancelled::PendingWrite));
         }
 
-        Ok(ChangeFileResult {
-            diagnostics: final_diagnostics,
-        })
+        self.finish_change_file(project_key, &path, version, parsed)
     }
 
     /// Retrieves the list of diagnostics associated with a file

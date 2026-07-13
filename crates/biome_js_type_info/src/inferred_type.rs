@@ -1,7 +1,8 @@
 //! Read-only, lint-facing queries over database-backed inferred types.
 //!
-//! Predicates intentionally return indeterminate results when a type walk
-//! reaches unresolved data or its deterministic query-local budget.
+//! Fallible predicates return `None` when resolution, cycles, or traversal
+//! limits prevent a reliable answer. Boolean-only queries use conservative
+//! fallbacks that suppress diagnostics when inference is incomplete.
 
 use crate::TypeDb;
 use crate::interned_types::{ConditionalType, Literal, ReturnType, TypeData, TypeMember};
@@ -17,32 +18,49 @@ const MAX_TYPE_RELATION_DEPTH: usize = 50;
 const MAX_PROMISE_TYPE_STEPS: usize = 64;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
+/// A case-relevant representation extracted from an inferred switch discriminant.
 pub enum InferredSwitchCase {
+    /// The broad `boolean` type.
     Boolean,
+    /// A specific boolean literal.
     BooleanLiteral(bool),
+    /// Bigint source text in canonical decimal notation when conversion succeeds.
     BigInt(Text),
+    /// The stored source text of a number literal.
     Number(Text),
+    /// String-literal text without delimiters.
     String(Text),
+    /// The `null` value.
     Null,
+    /// The `undefined` value.
     Undefined,
+    /// The broad `symbol` type.
     Symbol,
+    /// A literal that cannot become an emitted switch case.
     UnsupportedLiteral,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+/// The JavaScript operation for which stringification is classified.
 pub enum StringificationMode {
+    /// Element stringification performed by an array or tuple `join` operation.
     Join,
+    /// Direct or implicit conversion of a value to a string.
     ToString,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+/// Whether possible values have an intentional string representation.
 pub enum StringificationUsefulness {
+    /// Every value stringifies usefully, or uncertainty suppresses a diagnostic.
     Always,
+    /// Some values stringify usefully and others use the base object representation.
     Sometimes,
+    /// Every value uses the base object representation.
     Never,
 }
 
-/// A database-backed type value returned by type inference.
+/// An opaque, copyable view of database-backed inferred type data.
 #[derive(Clone, Copy)]
 pub struct InferredType<'db> {
     db: &'db dyn TypeDb,
@@ -50,18 +68,33 @@ pub struct InferredType<'db> {
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+/// Primitive families accepted by [`InferredType::nullish_union_matches_ignored_primitives`].
 pub struct IgnoredPrimitiveTypes {
+    /// Accept the broad string type and string literals.
     pub string: bool,
+    /// Accept the broad number type and number literals.
     pub number: bool,
+    /// Accept the broad boolean type and boolean literals.
     pub boolean: bool,
+    /// Accept the broad bigint type and bigint literals.
     pub bigint: bool,
 }
 
 impl<'db> InferredType<'db> {
+    /// Creates a query facade for `data` in `db`.
+    ///
+    /// ```
+    /// use biome_js_type_info::{InferredType, TypeDb, resolved::InferredTypeData};
+    ///
+    /// fn number_type<'db>(db: &'db dyn TypeDb) -> InferredType<'db> {
+    ///     InferredType::new(db, InferredTypeData::Number)
+    /// }
+    /// ```
     pub const fn new(db: &'db dyn TypeDb, data: TypeData<'db>) -> Self {
         Self { db, data }
     }
 
+    /// Returns whether this is a number literal equal to `value`.
     pub fn is_number_literal(self, value: f64) -> bool {
         matches!(
             self.data,
@@ -70,6 +103,7 @@ impl<'db> InferredType<'db> {
         )
     }
 
+    /// Returns whether this is exactly the broad number type or a number literal.
     pub fn is_number_or_number_literal(self) -> bool {
         matches!(self.data, TypeData::Number)
             || matches!(
@@ -79,6 +113,7 @@ impl<'db> InferredType<'db> {
             )
     }
 
+    /// Returns whether this is a decimal bigint literal equal to `value`.
     pub fn is_bigint_literal(self, value: i64) -> bool {
         matches!(
             self.data,
@@ -87,6 +122,7 @@ impl<'db> InferredType<'db> {
         )
     }
 
+    /// Returns whether this is exactly the broad string type or a string literal.
     pub fn is_string_or_string_literal(self) -> bool {
         matches!(self.data, TypeData::String)
             || matches!(
@@ -96,6 +132,7 @@ impl<'db> InferredType<'db> {
             )
     }
 
+    /// Returns whether every reachable variant is string-like.
     pub fn is_all_string_like(self) -> bool {
         // Exhaustion is conservative: every consumer treats `false` as "do not
         // diagnose" (and therefore cannot offer a fix).
@@ -110,6 +147,7 @@ impl<'db> InferredType<'db> {
         .unwrap_or(false)
     }
 
+    /// Returns whether every reachable variant is number-like.
     pub fn is_all_number_like(self) -> bool {
         self.try_all_variants_match(|data| {
             matches!(data, TypeData::Number)
@@ -122,6 +160,7 @@ impl<'db> InferredType<'db> {
         .unwrap_or(false)
     }
 
+    /// Returns whether every reachable variant is boolean-like.
     pub fn is_all_boolean_like(self) -> bool {
         self.try_all_variants_match(|data| {
             matches!(data, TypeData::Boolean)
@@ -134,6 +173,7 @@ impl<'db> InferredType<'db> {
         .unwrap_or(false)
     }
 
+    /// Returns whether every reachable variant is bigint-like.
     pub fn is_all_bigint_like(self) -> bool {
         self.try_all_variants_match(|data| {
             matches!(data, TypeData::BigInt)
@@ -146,6 +186,7 @@ impl<'db> InferredType<'db> {
         .unwrap_or(false)
     }
 
+    /// Returns whether every reachable variant is an integer literal or bigint-like.
     pub fn is_all_integer_like(self) -> bool {
         self.try_all_variants_match(|data| match data {
             TypeData::BigInt => true,
@@ -161,6 +202,7 @@ impl<'db> InferredType<'db> {
         .unwrap_or(false)
     }
 
+    /// Returns whether every variant is a string, tuple, or `Array` instance.
     pub fn is_all_string_array_or_tuple(self) -> bool {
         self.try_all_variants_match(|data| {
             matches!(data, TypeData::String | TypeData::Tuple(_))
@@ -178,6 +220,7 @@ impl<'db> InferredType<'db> {
         .unwrap_or(false)
     }
 
+    /// Returns whether this is a regular-expression literal without the `g` flag.
     pub fn is_regexp_literal_without_global_flag(self) -> bool {
         matches!(
         self.data,
@@ -186,6 +229,7 @@ impl<'db> InferredType<'db> {
         )
     }
 
+    /// Returns the stored pattern and flags for a regular-expression literal.
     pub fn regexp_literal(self) -> Option<(Text, Text)> {
         let TypeData::Literal(literal) = self.data else {
             return None;
@@ -196,11 +240,12 @@ impl<'db> InferredType<'db> {
         Some((regexp.pattern.clone(), regexp.flags.clone()))
     }
 
+    /// Returns whether this is directly an instance of the `Array` class.
     pub fn is_array(self) -> bool {
         matches!(self.data, TypeData::InstanceOf(instance) if instance.ty(self.db).is_array_class(self.db))
     }
 
-    /// Returns whether this is an array whose element type is a Promise.
+    /// Returns whether this is an array whose element type reaches `Promise` or `PromiseLike`.
     ///
     /// Returns `None` when the element type is unresolved or the walk is exhausted.
     pub fn is_array_of_promise(self) -> Option<bool> {
@@ -221,51 +266,58 @@ impl<'db> InferredType<'db> {
             .and_then(|ty| is_promise_instance(self.db, *ty))
     }
 
+    /// Returns whether a reachable type declares or inherits `Symbol.dispose`.
     pub fn is_disposable(self) -> bool {
         self.has_computed_member("Symbol.dispose")
     }
 
+    /// Returns whether a reachable type declares or inherits `Symbol.asyncDispose`.
     pub fn is_async_disposable(self) -> bool {
         self.has_computed_member("Symbol.asyncDispose")
     }
 
-    /// Returns whether this is a Promise or Promise-like instance.
+    /// Searches this type and its reachable targets for `Promise` or `PromiseLike`.
     ///
     /// Returns `None` when inheritance is unresolved or the walk is exhausted.
     ///
-    /// ```rust,ignore
-    /// match ty.is_promise_instance() {
-    ///     Some(true) => report_floating_promise(),
-    ///     Some(false) => {}
-    ///     None => return, // Suppress diagnostics when inference cannot decide.
+    /// ```
+    /// use biome_js_type_info::InferredType;
+    ///
+    /// fn should_report(ty: InferredType<'_>) -> bool {
+    ///     ty.is_promise_instance() == Some(true)
     /// }
     /// ```
     pub fn is_promise_instance(self) -> Option<bool> {
         is_promise_instance(self.db, self.data)
     }
 
+    /// Returns whether this is directly represented as a callable function.
     pub fn is_function(self) -> bool {
         self.data.callable_function(self.db).is_some()
     }
 
+    /// Conservatively returns whether this type is at least as wide as `object`.
     pub fn is_at_least_as_wide_as_object(self) -> bool {
         is_at_least_as_wide_as_object(self.db, self.data, &mut FxHashSet::default(), 0)
     }
 
+    /// Returns the first type argument of a directly represented `Promise<T>`.
     pub fn promise_inner_type(self) -> Option<Self> {
         promise_inner(self.db, self.data).map(|data| Self::new(self.db, data))
     }
 
+    /// Returns whether this is an inconclusive declared return type.
     pub fn is_return_type_relation_escape_hatch(self) -> bool {
         is_escape_hatch(self.data)
     }
 
+    /// Compares this declared return type with inferred returned-value types.
     pub fn compare_declared_return_type(self, inferred: &[Self]) -> ReturnTypeRelation<'db> {
         let inferred = inferred.iter().map(|ty| ty.data).collect::<Vec<_>>();
         compare_declared_return_type(self.db, self.data, &inferred)
     }
 
-    /// Returns whether this callable returns a Promise.
+    /// Returns whether this callable returns a `Promise` or `PromiseLike`.
     ///
     /// Returns `None` when the callable or return type is unresolved or the walk
     /// is exhausted.
@@ -283,15 +335,17 @@ impl<'db> InferredType<'db> {
         is_promise_instance(self.db, *return_ty)
     }
 
+    /// Returns whether this callable has an unresolved conditional return type.
     pub fn function_returns_conditional(self) -> bool {
         self.function_return_matches(|ty| matches!(ty, TypeData::Conditional))
     }
 
+    /// Returns whether this callable has an explicit `void` return type.
     pub fn function_returns_void(self) -> bool {
         self.function_return_matches(|ty| matches!(ty, TypeData::VoidKeyword))
     }
 
-    /// Returns whether a union contains a Promise variant.
+    /// Returns whether a top-level union contains a `Promise` or `PromiseLike` variant.
     ///
     /// Returns `None` when a variant is unresolved or the walk is exhausted.
     pub fn has_promise_variant(self) -> Option<bool> {
@@ -301,7 +355,7 @@ impl<'db> InferredType<'db> {
         }
     }
 
-    /// Returns whether the top-level type was successfully inferred.
+    /// Returns whether the top-level representation is usable inferred data.
     ///
     /// Internal `Unknown` variants poison unions in `UnionBuilder`, while the
     /// explicit TypeScript `unknown` keyword remains an inferred type.
@@ -315,23 +369,27 @@ impl<'db> InferredType<'db> {
         )
     }
 
+    /// Returns whether every reachable value is known to be truthy.
     pub fn is_always_truthy(self) -> bool {
         self.conditional_type().is_truthy()
     }
 
+    /// Returns whether every reachable value is known to be falsy.
     pub fn is_always_falsy(self) -> bool {
         self.conditional_type().is_falsy()
     }
 
+    /// Returns whether every reachable value is known to be non-nullish.
     pub fn is_non_nullish(self) -> bool {
         self.conditional_type().is_non_nullish()
     }
 
+    /// Returns whether every reachable value is known to be nullish.
     pub fn is_nullish(self) -> bool {
         self.conditional_type().is_nullish()
     }
 
-    /// Returns whether the type contains a nullish variant.
+    /// Returns `Some(true)` when a reachable nullish variant is found.
     ///
     /// Returns `None` when a variant is unresolved or the walk is exhausted.
     pub fn has_nullish_variant(self) -> Option<bool> {
@@ -358,9 +416,20 @@ impl<'db> InferredType<'db> {
         })
     }
 
-    /// Returns whether a nullish union contains only ignored primitive types.
+    /// Returns whether a top-level union contains only nullish or enabled primitive variants.
     ///
     /// Returns `None` when a variant is unresolved or the walk is exhausted.
+    ///
+    /// ```
+    /// use biome_js_type_info::{IgnoredPrimitiveTypes, InferredType};
+    ///
+    /// fn accepts_nullish_or_string(ty: InferredType<'_>) -> Option<bool> {
+    ///     ty.nullish_union_matches_ignored_primitives(IgnoredPrimitiveTypes {
+    ///         string: true,
+    ///         ..IgnoredPrimitiveTypes::default()
+    ///     })
+    /// }
+    /// ```
     pub fn nullish_union_matches_ignored_primitives(
         self,
         ignored: IgnoredPrimitiveTypes,
@@ -402,6 +471,7 @@ impl<'db> InferredType<'db> {
         })
     }
 
+    /// Returns whether a reachable variant is invalid or unsafe as a `+` operand.
     pub fn has_invalid_plus_operand_variant(self) -> bool {
         // Exhaustion returns `false`, which can only suppress this diagnostic.
         self.try_any_variant_matches(|data| match data {
@@ -418,6 +488,7 @@ impl<'db> InferredType<'db> {
         .unwrap_or(false)
     }
 
+    /// Returns whether a reachable variant is number-like.
     pub fn has_number_like_variant(self) -> bool {
         self.try_any_variant_matches(|data| {
             matches!(data, TypeData::Number)
@@ -430,6 +501,7 @@ impl<'db> InferredType<'db> {
         .unwrap_or(false)
     }
 
+    /// Returns whether a reachable variant is bigint-like.
     pub fn has_bigint_like_variant(self) -> bool {
         self.try_any_variant_matches(|data| {
             matches!(data, TypeData::BigInt)
@@ -442,18 +514,21 @@ impl<'db> InferredType<'db> {
         .unwrap_or(false)
     }
 
+    /// Returns a coarse diagnostic description of this type.
     pub fn plus_operand_description(self) -> String {
         type_description(self.db, self.data)
     }
 
-    /// Returns the finite variants that can appear as switch cases.
+    /// Collects deduplicated switch-case representations reachable from this type.
     ///
-    /// Returns `None` when a variant is unresolved or the walk is exhausted.
+    /// Returns `None` only when the traversal budget is exhausted.
     ///
-    /// ```rust,ignore
-    /// // `"ready" | 1 | undefined` becomes three switch-case variants.
-    /// let cases = inferred_type.try_switch_case_variants()?;
-    /// assert_eq!(cases.len(), 3);
+    /// ```
+    /// use biome_js_type_info::{InferredSwitchCase, InferredType};
+    ///
+    /// fn includes_both_booleans(ty: InferredType<'_>) -> Option<bool> {
+    ///     Some(ty.try_switch_case_variants()?.contains(&InferredSwitchCase::Boolean))
+    /// }
     /// ```
     pub fn try_switch_case_variants(self) -> Option<Vec<InferredSwitchCase>> {
         let mut cases = Vec::new();
@@ -513,6 +588,16 @@ impl<'db> InferredType<'db> {
         Some(cases)
     }
 
+    /// Classifies whether stringifying this type avoids the base object representation.
+    ///
+    /// ```
+    /// use biome_js_type_info::{InferredType, StringificationMode, StringificationUsefulness};
+    ///
+    /// fn stringifies_usefully(ty: InferredType<'_>) -> bool {
+    ///     ty.stringification_usefulness(StringificationMode::ToString, &["Error", "RegExp"])
+    ///         == StringificationUsefulness::Always
+    /// }
+    /// ```
     pub fn stringification_usefulness(
         self,
         mode: StringificationMode,
@@ -522,6 +607,7 @@ impl<'db> InferredType<'db> {
         stringification_usefulness(self.db, self.data, mode, ignored_type_names, &mut active, 0)
     }
 
+    /// Conservatively returns whether this type could equal `value`.
     pub fn could_equal_string_literal(self, value: &str) -> bool {
         self.could_equal_literal(|data| match data {
             TypeData::String => Some(true),
@@ -533,6 +619,7 @@ impl<'db> InferredType<'db> {
         })
     }
 
+    /// Conservatively returns whether this type could equal `value`.
     pub fn could_equal_number_literal(self, value: f64) -> bool {
         self.could_equal_literal(|data| match data {
             TypeData::Number => Some(true),
@@ -544,6 +631,7 @@ impl<'db> InferredType<'db> {
         })
     }
 
+    /// Conservatively returns whether this type could equal `value`.
     pub fn could_equal_boolean_literal(self, value: bool) -> bool {
         self.could_equal_literal(|data| match data {
             TypeData::Boolean => Some(true),
@@ -555,6 +643,7 @@ impl<'db> InferredType<'db> {
         })
     }
 
+    /// Conservatively returns whether this type could be nullish.
     pub fn could_equal_null(self) -> bool {
         self.could_equal_literal(|data| {
             Some(matches!(
@@ -564,10 +653,12 @@ impl<'db> InferredType<'db> {
         })
     }
 
+    /// Returns whether the top-level type is exactly `null`.
     pub const fn is_null(self) -> bool {
         matches!(self.data, TypeData::Null)
     }
 
+    /// Returns whether the top-level type is exactly `undefined`.
     pub const fn is_undefined(self) -> bool {
         matches!(self.data, TypeData::Undefined)
     }
@@ -1625,10 +1716,11 @@ mod tests {
                 Text::new_static("PromiseLike"),
             )),
             |extends, _| {
+                let extends: Box<[_]> = Box::new([extends]);
                 TypeData::Interface(InternedInterface::new(
                     db,
                     Box::default(),
-                    Vec::from([extends]).into_boxed_slice(),
+                    extends,
                     Box::default(),
                     Text::new_static("Derived"),
                 ))

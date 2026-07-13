@@ -40,11 +40,20 @@ pub struct BindingTypeData<'db> {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+/// Inferred type information for a single module.
+///
+/// It stores the types discovered for declarations, expressions, and bindings
+/// while preserving the module identity needed to interpret local type IDs.
 pub struct InferredModuleTypes<'db> {
+    /// Identifies the module that owns the local type IDs in this result.
     pub module_key: InferredModuleKey,
+    /// Local type IDs that belong to named type declarations.
     pub named_type_ids: Box<[InferredLocalTypeId]>,
+    /// Inferred types indexed by their local type ID.
     pub types: Box<[InferredTypeData<'db>]>,
+    /// Inferred expression types indexed by their source ranges.
     pub expressions: FxHashMap<TextRange, InferredTypeData<'db>>,
+    /// Inferred binding types indexed by their source ranges.
     pub binding_type_data: FxHashMap<TextRange, BindingTypeData<'db>>,
 }
 
@@ -272,6 +281,8 @@ pub(in crate::db) fn infer_module_types_cycle_result<'db>(
 }
 
 fn inference_scc(db: &dyn ModuleDb, root: ModuleInfo) -> FxHashSet<ModuleInfo> {
+    const MAX_DEPENDENCY_STEPS: usize = 1024;
+
     // Salsa invokes this from the cycle fallback. The first pass records every
     // dependency reachable from the root and builds reverse edges; the second
     // walks predecessors back to the root, retaining only its strongly
@@ -279,12 +290,18 @@ fn inference_scc(db: &dyn ModuleDb, root: ModuleInfo) -> FxHashSet<ModuleInfo> {
     let mut reachable = FxHashSet::default();
     let mut reverse = FxHashMap::<ModuleInfo, Vec<ModuleInfo>>::default();
     let mut pending = vec![root];
+    let mut remaining_dependency_steps = MAX_DEPENDENCY_STEPS;
     reachable.insert(root);
 
     while let Some(source) = pending.pop() {
+        db.unwind_if_revision_cancelled();
         for target in inferable_dependencies(db, source) {
             reverse.entry(target).or_default().push(source);
             if reachable.insert(target) {
+                if remaining_dependency_steps == 0 {
+                    return reachable;
+                }
+                remaining_dependency_steps -= 1;
                 pending.push(target);
             }
         }
@@ -292,11 +309,17 @@ fn inference_scc(db: &dyn ModuleDb, root: ModuleInfo) -> FxHashSet<ModuleInfo> {
 
     let mut scc = FxHashSet::default();
     let mut pending = vec![root];
+    let mut remaining_dependency_steps = MAX_DEPENDENCY_STEPS;
     scc.insert(root);
     while let Some(target) = pending.pop() {
+        db.unwind_if_revision_cancelled();
         if let Some(predecessors) = reverse.get(&target) {
             for predecessor in predecessors {
                 if scc.insert(*predecessor) {
+                    if remaining_dependency_steps == 0 {
+                        return reachable;
+                    }
+                    remaining_dependency_steps -= 1;
                     pending.push(*predecessor);
                 }
             }

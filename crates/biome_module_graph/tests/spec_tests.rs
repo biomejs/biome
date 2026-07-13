@@ -21,11 +21,12 @@ use biome_json_value::{JsonObject, JsonString};
 use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
 use biome_languages::{CssFileSource, DocumentFileSource, HtmlFileSource, JsFileSource};
 use biome_module_graph::{
-    HtmlEmbeddedContent, ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase,
-    JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic, ModuleInfo,
-    ModuleInfoKind, PathInfoCache, ResolvedPath, SymbolFromModuleInfo, find_js_exported_symbol,
-    infer_call_expression_type, infer_module_types_bottom_up, is_class_referenced_by_importers,
-    resolve_css_module, resolve_html_module, resolve_js_module, transitive_importers_of,
+    CallExpressionTypeInput, HtmlEmbeddedContent, ImportSymbol, JsExport, JsImport, JsImportPath,
+    JsImportPhase, JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic,
+    ModuleInfo, ModuleInfoKind, PathInfoCache, ResolvedCallArgument, ResolvedPath,
+    SymbolFromModuleInfo, find_js_exported_symbol, infer_call_expression_type,
+    infer_module_types_bottom_up, is_class_referenced_by_importers, resolve_css_module,
+    resolve_html_module, resolve_js_module, transitive_importers_of,
     traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
 };
 use biome_package::{Dependencies, PackageJson};
@@ -1195,12 +1196,13 @@ fn test_resolve_swr_types() {
         .get(&mutate_binding.syntax().text_trimmed_range())
         .map(|data| data.ty)
         .expect("Salsa mutate type must be inferred");
-    let direct_mutate_result = infer_call_expression_type(
+    let call_input = CallExpressionTypeInput::new(
         &db,
         index_module_input,
         raw_mutate_ty,
-        &[InferredTypeData::String],
+        Vec::from([ResolvedCallArgument::Argument(InferredTypeData::String)]).into_boxed_slice(),
     );
+    let direct_mutate_result = infer_call_expression_type(&db, call_input);
     assert_eq!(direct_mutate_result, InferredTypeData::Unknown);
     let mutate_result_ty = inferred
         .binding_type_data
@@ -1504,11 +1506,6 @@ fn test_namespace_reexport_is_own_export() {
     );
 }
 
-/// `export * as Ns from "./mod"` should also support type inference: when
-/// `index.ts` imports `{ MyNs }` from a barrel that uses `export * as MyNs`,
-/// calling `MyNs.alpha()` must resolve to the return type of `alpha` in
-/// the source module. This verifies the `JsOwnExport::Namespace(JsReexport)`
-/// variant drives the correct `TypeData::ImportNamespace` path.
 #[test]
 fn test_jsx_imports_css_file() {
     let fs = MemoryFileSystem::default();

@@ -143,15 +143,22 @@ impl<'db> IntersectionBuilder<'db> {
                     return self;
                 }
                 ty => {
-                    if ty.is_primitive(self.db)
-                        && self
+                    if ty.is_primitive(self.db) {
+                        if let Some(index) = self
                             .types
                             .iter()
-                            .any(|other| *other != ty && other.is_primitive(self.db))
-                    {
-                        self.types.clear();
-                        self.types.push(TypeData::NeverKeyword);
-                        return self;
+                            .position(|other| other.is_primitive(self.db))
+                        {
+                            let primitive =
+                                intersect_primitive_types(self.db, self.types[index], ty);
+                            if primitive == TypeData::NeverKeyword {
+                                self.types.clear();
+                                self.types.push(TypeData::NeverKeyword);
+                                return self;
+                            }
+                            self.types[index] = primitive;
+                            continue;
+                        }
                     }
 
                     if !self.types.contains(&ty) {
@@ -185,6 +192,22 @@ impl<'db> IntersectionBuilder<'db> {
                 self.types.into_boxed_slice(),
             )),
         }
+    }
+}
+
+fn intersect_primitive_types<'db>(
+    db: &'db dyn TypeDb,
+    left: TypeData<'db>,
+    right: TypeData<'db>,
+) -> TypeData<'db> {
+    if left == right {
+        left
+    } else if left.literal_base_type(db) == Some(right) {
+        left
+    } else if right.literal_base_type(db) == Some(left) {
+        right
+    } else {
+        TypeData::NeverKeyword
     }
 }
 
@@ -406,7 +429,12 @@ impl<'db> MergedType<'db> {
                 Self::Function(left.intersection_with(db, right))
             }
             (Self::Never, _) | (_, Self::Never) => Self::Never,
-            (Self::Primitive(_), Self::Primitive(_)) => Self::Never,
+            (Self::Primitive(left), Self::Primitive(right)) => {
+                match intersect_primitive_types(db, left, right) {
+                    TypeData::NeverKeyword => Self::Never,
+                    primitive => Self::Primitive(primitive),
+                }
+            }
             (Self::Primitive(primitive), _) | (_, Self::Primitive(primitive)) => {
                 Self::Primitive(primitive)
             }
@@ -647,7 +675,12 @@ impl<'db> UnionBuilder<'db> {
 #[cfg(test)]
 mod tests {
     use super::{CycleDetector, CycleEntry, IntersectionBuilder};
-    use crate::{TypeDb, interned_types::TypeData};
+    use crate::{
+        TypeDb,
+        interned_types::{InternedLiteral, Literal, TypeData},
+        literal::{BooleanLiteral, NumberLiteral, StringLiteral},
+    };
+    use biome_rowan::Text;
 
     #[salsa::db]
     #[derive(Default)]
@@ -699,6 +732,56 @@ mod tests {
             [TypeData::String, TypeData::NeverKeyword],
             [TypeData::NeverKeyword, TypeData::String],
         ] {
+            assert_eq!(
+                IntersectionBuilder::new(&db).add_all(types).build(),
+                TypeData::NeverKeyword
+            );
+        }
+    }
+
+    #[test]
+    fn primitive_literal_intersections_narrow_in_both_orders() {
+        let db = TestDb::default();
+        let literals = [
+            (
+                TypeData::String,
+                Literal::String(StringLiteral::from("value")),
+            ),
+            (
+                TypeData::Number,
+                Literal::Number(NumberLiteral::new(Text::new_static("1"))),
+            ),
+            (TypeData::BigInt, Literal::BigInt(Text::new_static("1n"))),
+            (
+                TypeData::Boolean,
+                Literal::Boolean(BooleanLiteral::from(true)),
+            ),
+        ];
+
+        for (primitive, literal) in literals {
+            let literal = TypeData::Literal(InternedLiteral::new(&db, literal));
+            for types in [[primitive, literal], [literal, primitive]] {
+                assert_eq!(
+                    IntersectionBuilder::new(&db).add_all(types).build(),
+                    literal
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn incompatible_primitive_literals_normalize_to_never() {
+        let db = TestDb::default();
+        let left = TypeData::Literal(InternedLiteral::new(
+            &db,
+            Literal::String(StringLiteral::from("left")),
+        ));
+        let right = TypeData::Literal(InternedLiteral::new(
+            &db,
+            Literal::String(StringLiteral::from("right")),
+        ));
+
+        for types in [[left, right], [left, TypeData::Number]] {
             assert_eq!(
                 IntersectionBuilder::new(&db).add_all(types).build(),
                 TypeData::NeverKeyword

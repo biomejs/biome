@@ -106,6 +106,8 @@ impl WorkspaceDb {
         let next = generation.value(self).wrapping_add(1);
         let modules = self.modules.clone();
 
+        // Begin the Salsa write before mutating the shared registry, then publish
+        // the new generation only after the registry mutation is complete.
         let pending_setter = generation.set_value(self);
         mutate(&modules);
         pending_setter.to(next);
