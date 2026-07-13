@@ -656,6 +656,37 @@ macro_rules! workspace_method {
     };
 }
 
+/// Registers a custom workspace method that retries interrupted database reads.
+/// CLI requests are not tied to an editor document version, so retrying them is
+/// safe and avoids exposing transient Salsa writes through the socket protocol.
+macro_rules! retrying_workspace_method {
+    ( $builder:ident, $method:ident ) => {
+        $builder = $builder.custom_method(
+            concat!("biome/", stringify!($method)),
+            |server: &LSPServer, params| {
+                let span = tracing::trace_span!(concat!("biome/", stringify!($method)), params = ?params).or_current();
+
+                let session = server.session.clone();
+                let result = spawn_blocking(move || {
+                    let _guard = span.entered();
+                    catch_lsp_operation(|| session.workspace().$method(params))
+                });
+
+                result.map(move |result| match result {
+                    Ok(Ok(Ok(Ok(result)))) => Ok(result),
+                    Ok(Ok(Ok(Err(err)))) => Err(into_lsp_error(err)),
+                    Ok(Ok(Err(cancelled))) => Err(cancelled_to_lsp_error(cancelled)),
+                    Ok(Err(err)) => Err(into_lsp_error(err)),
+                    Err(err) => match err.try_into_panic() {
+                        Ok(err) => Err(panic_to_lsp_error(err)),
+                        Err(err) => Err(into_lsp_error(err)),
+                    },
+                })
+            },
+        );
+    };
+}
+
 /// Factory data structure responsible for creating [ServerConnection] handles
 /// for each incoming connection accepted by the server
 pub struct ServerFactory {
@@ -805,7 +836,8 @@ impl ServerFactory {
         workspace_method!(builder, get_formatter_ir);
         workspace_method!(builder, get_module_graph);
         workspace_method!(builder, get_type_info);
-        workspace_method!(builder, change_file);
+        retrying_workspace_method!(builder, change_file);
+        retrying_workspace_method!(builder, process_file);
         workspace_method!(builder, check_file_size);
         workspace_method!(builder, get_file_content);
         workspace_method!(builder, close_file);

@@ -5,8 +5,9 @@ mod parse_embedded_nodes;
 use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, Capabilities,
     CodeActionsParams, DebugCapabilities, DocumentFileSource, EditorCapabilities, EnabledForPath,
-    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities, ProcessFixAll, ProcessLint, SearchCapabilities, UpdateSnippetsNodes,
+    ExtensionHandler, FixAllParams, FixedFileResult, FormatterCapabilities, LintParams,
+    LintResults, ParseResult, ParserCapabilities, ProcessFixAll, ProcessLint, SearchCapabilities,
+    UpdateSnippetsNodes,
 };
 #[cfg(not(feature = "html_embeds"))]
 use super::{ParseEmbedResult, ParseEmbeddedParams};
@@ -21,7 +22,7 @@ use crate::settings::{
 };
 use crate::workspace::CodeAction;
 use crate::workspace::FixFileMode;
-use crate::workspace::{FixFileResult, PullActionsResult};
+use crate::workspace::PullActionsResult;
 use crate::{
     WorkspaceError,
     settings::{ServiceLanguage, Settings},
@@ -37,7 +38,7 @@ use biome_configuration::html::{
 };
 #[cfg(feature = "html_embeds")]
 use biome_css_syntax::CssLanguage;
-use biome_db::{AnyParsedSource, ParsedSnippet};
+use biome_db::AnyParsedSource;
 #[cfg(feature = "html_embeds")]
 use biome_formatter::FormatElement;
 #[cfg(feature = "html_embeds")]
@@ -65,13 +66,12 @@ use biome_js_syntax::JsLanguage;
 #[cfg(feature = "html_embeds")]
 use biome_json_syntax::JsonLanguage;
 #[cfg(feature = "html_embeds")]
-use biome_languages::{HtmlFileSource, JsFileSource, LanguageDb};
+use biome_languages::{HtmlFileSource, JsFileSource};
 #[cfg(feature = "html_embeds")]
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode};
 use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
-use either::Either;
 use std::borrow::Cow;
 use std::fmt::Debug;
 use tracing::{debug_span, error, instrument, trace_span};
@@ -483,7 +483,7 @@ fn debug_formatter_ir(
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
@@ -502,9 +502,9 @@ fn format(
 fn format_embedded(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
-    embedded_nodes: Vec<ParsedSnippet>,
+    embedded_nodes: Vec<super::ParsedSnippetOrigin>,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
@@ -515,8 +515,7 @@ fn format_embedded(
     formatted.format_embedded(move |range| {
         let mut iter = embedded_nodes.iter();
         let snippet = iter.find(|node| node.content_range(&workspace_db) == range)?;
-        let snippet_file_source =
-            workspace_db.source_from_index(snippet.document_source_index(&workspace_db))?;
+        let snippet_file_source = snippet.file_source(&workspace_db)?;
 
         let wrap_document = |document: Document, should_indent: bool| {
             if indent_script_and_style && should_indent {
@@ -543,8 +542,8 @@ fn format_embedded(
                 let js_options =
                     settings.format_options::<JsLanguage>(biome_path, &snippet_file_source);
                 let node = snippet
-                    .parsed(&workspace_db)
-                    .clone()
+                    .parsed_origin()
+                    .parse(&workspace_db)
                     .embedded_syntax::<JsLanguage>();
                 let formatted =
                     biome_js_formatter::format_node_with_offset(js_options, &node).ok()?;
@@ -558,8 +557,8 @@ fn format_embedded(
                 let json_options =
                     settings.format_options::<JsonLanguage>(biome_path, &snippet_file_source);
                 let node = snippet
-                    .parsed(&workspace_db)
-                    .clone()
+                    .parsed_origin()
+                    .parse(&workspace_db)
                     .embedded_syntax::<JsonLanguage>();
                 let formatted =
                     biome_json_formatter::format_node_with_offset(json_options, &node).ok()?;
@@ -569,8 +568,8 @@ fn format_embedded(
                 let css_options =
                     settings.format_options::<CssLanguage>(biome_path, &snippet_file_source);
                 let node = snippet
-                    .parsed(&workspace_db)
-                    .clone()
+                    .parsed_origin()
+                    .parse(&workspace_db)
                     .embedded_syntax::<CssLanguage>();
                 let formatted =
                     biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
@@ -594,9 +593,9 @@ fn format_embedded(
 fn format_embedded(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
-    embedded_nodes: Vec<ParsedSnippet>,
+    embedded_nodes: Vec<super::ParsedSnippetOrigin>,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let _ = embedded_nodes;
@@ -648,7 +647,7 @@ fn lint(params: LintParams) -> LintResults {
         module_db: {
             #[cfg(feature = "module_graph")]
             {
-                Some(params.workspace_db.rc_module_db())
+                Some(params.module_db.clone())
             }
             #[cfg(not(feature = "module_graph"))]
             {
@@ -786,7 +785,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 }
 
 #[tracing::instrument(level = "debug", skip(params))]
-pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     let mut tree: HtmlRoot = params.parsed_source.tree(&params.workspace_db);
 
     // Compute final rules (taking `overrides` into account)
@@ -838,7 +837,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 module_db: {
                     #[cfg(feature = "module_graph")]
                     {
-                        Some(params.workspace_db.rc_module_db())
+                        Some(params.module_db.clone())
                     }
                     #[cfg(not(feature = "module_graph"))]
                     {
@@ -854,7 +853,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 &analyzer_options,
                 source_type,
                 html_services,
-                |signal| process_fix_all.collect_signal(signal, &mut pending_actions),
+                |signal| {
+                    if params.collect_final_diagnostics {
+                        process_fix_all.collect_signal(signal, &mut pending_actions)
+                    } else {
+                        process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions)
+                    }
+                },
             );
 
             let result = process_fix_all.process_batch_actions(pending_actions, |root| {
@@ -866,27 +871,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             })?;
 
             if result.is_none() {
-                return process_fix_all.finish(
-                    || {
-                        Ok(if params.should_format {
-                            Either::Left(format_node(
-                                params.settings.format_options::<HtmlLanguage>(
-                                    params.biome_path,
-                                    &params.document_file_source,
-                                ),
-                                tree.syntax(),
-                                // NOTE: this is important that stays false. In this instance, the formatting of embedded
-                                // nodes has already happened, because the workspace during fix_all() process the embedded nodes
-                                // first, and then the root document. This means the embedded nodes don't need to be formatted and can
-                                // be printed verbatim by the formatter.
-                                false,
-                            ))
-                        } else {
-                            Either::Right(tree.syntax().to_string())
-                        })
-                    },
-                    params.embeds_initial_indent,
-                );
+                return Ok(Some(
+                    process_fix_all.finish(tree.syntax().as_send().unwrap()),
+                ));
             }
         }
     }
@@ -905,7 +892,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             module_db: {
                 #[cfg(feature = "module_graph")]
                 {
-                    Some(params.workspace_db.rc_module_db())
+                    Some(params.module_db.clone())
                 }
                 #[cfg(not(feature = "module_graph"))]
                 {
@@ -938,12 +925,12 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     }
 
     // Phase 2: all rules for final diagnostics
-    {
+    if params.collect_final_diagnostics {
         let html_services = HtmlAnalyzerServices {
             module_db: {
                 #[cfg(feature = "module_graph")]
                 {
-                    Some(params.workspace_db.rc_module_db())
+                    Some(params.module_db.clone())
                 }
                 #[cfg(not(feature = "module_graph"))]
                 {
@@ -962,30 +949,16 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         );
     }
 
-    process_fix_all.finish(
-        || {
-            Ok(if params.should_format {
-                Either::Left(format_node(
-                    params.settings.format_options::<HtmlLanguage>(
-                        params.biome_path,
-                        &params.document_file_source,
-                    ),
-                    tree.syntax(),
-                    false,
-                ))
-            } else {
-                Either::Right(tree.syntax().to_string())
-            })
-        },
-        params.embeds_initial_indent,
-    )
+    Ok(Some(
+        process_fix_all.finish(tree.syntax().as_send().unwrap()),
+    ))
 }
 
 #[instrument(level = "debug", skip_all)]
 pub(crate) fn update_snippets(
-    root: AnyParsedSource,
+    root: super::ParsedOrigin,
     workspace_db: WorkspaceDb,
-    new_snippets: Vec<UpdateSnippetsNodes>,
+    mut new_snippets: Vec<UpdateSnippetsNodes>,
 ) -> Result<SendNode, WorkspaceError> {
     let tree: HtmlRoot = root.tree(&workspace_db);
     let mut mutation = BatchMutation::new(tree.syntax().clone());
@@ -995,12 +968,13 @@ pub(crate) fn update_snippets(
         .filter_map(AnyEmbeddedContent::cast);
 
     for element in iterator {
-        let Some(snippet) = new_snippets
+        let Some(snippet_index) = new_snippets
             .iter()
-            .find(|snippet| snippet.range == element.range())
+            .position(|snippet| snippet.range == element.range())
         else {
             continue;
         };
+        let snippet = new_snippets.swap_remove(snippet_index);
 
         if let Some(value_token) = element.value_token() {
             let new_token_text = if snippet.needs_reindent {
@@ -1011,10 +985,13 @@ pub(crate) fn update_snippets(
                 let leading_trivia = read_leading_trivia(old_text);
                 let trailing_trivia = read_trailing_trivia(old_text);
                 let indent_prefix = content_indent_prefix(&leading_trivia);
-                let reindented = reindent_embedded_code(snippet.new_code.trim(), indent_prefix);
-                format!("{}{}{}", leading_trivia, reindented, trailing_trivia)
+                let mut reconstructed = String::new();
+                reconstructed.push_str(&leading_trivia);
+                push_reindented_code(&mut reconstructed, snippet.new_code.trim(), indent_prefix);
+                reconstructed.push_str(&trailing_trivia);
+                reconstructed
             } else {
-                snippet.new_code.clone()
+                snippet.new_code
             };
 
             mutation.replace_token(value_token, ident(&new_token_text));
@@ -1107,21 +1084,16 @@ fn content_indent_prefix(leading_trivia: &str) -> &str {
 
 /// Prefixes every line of `code` after the first with `indent`. Empty
 /// lines are left alone so no trailing whitespace sneaks in.
-fn reindent_embedded_code(code: &str, indent: &str) -> String {
-    if indent.is_empty() {
-        return code.to_string();
-    }
-    let mut out = String::new();
+fn push_reindented_code(output: &mut String, code: &str, indent: &str) {
     for (i, line) in code.split('\n').enumerate() {
         if i > 0 {
-            out.push('\n');
-            if !line.is_empty() {
-                out.push_str(indent);
+            output.push('\n');
+            if !line.is_empty() && !indent.is_empty() {
+                output.push_str(indent);
             }
         }
-        out.push_str(line);
+        output.push_str(line);
     }
-    out
 }
 
 /// Checks if the attribute belongs to a component element rather than a
@@ -1139,7 +1111,13 @@ fn is_component_element(attr: &HtmlAttribute) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{content_indent_prefix, reindent_embedded_code};
+    use super::{content_indent_prefix, push_reindented_code};
+
+    fn reindent_embedded_code(code: &str, indent: &str) -> String {
+        let mut output = String::new();
+        push_reindented_code(&mut output, code, indent);
+        output
+    }
 
     #[test]
     fn content_indent_prefix_reads_indent_after_last_newline() {

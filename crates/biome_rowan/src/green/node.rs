@@ -149,6 +149,16 @@ impl fmt::Display for GreenNodeData {
 }
 
 impl GreenNodeData {
+    pub(crate) fn write_source_text(&self, output: &mut String) {
+        for slot in self.slots() {
+            match slot {
+                Slot::Node { node, .. } => node.write_source_text(output),
+                Slot::Token { token, .. } => output.push_str(token.text()),
+                Slot::Empty { .. } => {}
+            }
+        }
+    }
+
     #[inline]
     fn header(&self) -> &GreenNodeHead {
         &self.data.header

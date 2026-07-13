@@ -1821,6 +1821,7 @@ dependencies = [
  "serde",
  "serde_json",
  "smallvec",
+ "static_assertions",
  "tokio",
  "tracing",
  "web-time",

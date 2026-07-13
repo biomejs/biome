@@ -78,6 +78,19 @@ impl WorkspaceDbData {
             )
     }
 
+    /// Checks whether the shared module map currently contains `path`.
+    ///
+    /// Use this for decisions such as skipping a file the scanner has already
+    /// indexed.
+    ///
+    /// Do not use this inside a Salsa query or before reading module contents.
+    /// Use [`ModuleDb::module_for_path`] instead so Salsa reruns the query when
+    /// the module graph changes.
+    #[cfg(feature = "module_graph")]
+    pub fn contains_module_untracked(&self, path: &Utf8Path) -> bool {
+        self.modules.pin().contains_key(path)
+    }
+
     #[cfg(feature = "module_graph")]
     pub fn insert_module(&self, path: Utf8PathBuf, module: ModuleInfo) {
         self.modules.pin().insert(path, module);

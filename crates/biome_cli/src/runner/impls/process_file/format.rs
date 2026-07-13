@@ -2,104 +2,27 @@ use crate::CliDiagnostic;
 use crate::diagnostics::StdinDiagnostic;
 use crate::runner::crawler::CrawlerContext;
 use crate::runner::diagnostics::{ResultExt, SkippedDiagnostic};
-use crate::runner::execution::Execution;
 use crate::runner::process_file::{
     DiffKind, FileStatus, Message, ProcessFile, ProcessStdinFilePayload, WorkspaceFile,
+    print_stdin_diagnostics,
 };
 use biome_analyze::RuleCategoriesBuilder;
 use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Error, PrintDiagnostic, Severity, category};
 use biome_service::WorkspaceError;
-use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
-    CloseFileParams, FeaturesBuilder, FeaturesSupported, FileContent, FileFeaturesResult,
-    FormatFileParams, OpenFileParams, SupportsFeatureParams,
+    FeaturesBuilder, FeaturesSupported, FileContent, FileFeaturesResult, ProcessFileParams,
+    SupportsFeatureParams,
 };
 use tracing::debug;
 
 pub(crate) struct FormatProcessFile;
 
-impl FormatProcessFile {
-    /// Format a file without pulling diagnostics. Used in check mode where
-    /// lint already pulled and reported diagnostics.
-    pub(crate) fn format_only<Ctx>(
-        ctx: &Ctx,
-        workspace_file: &mut WorkspaceFile,
-        features_supported: &FeaturesSupported,
-    ) -> Result<FileStatus, Message>
-    where
-        Ctx: CrawlerContext,
-    {
-        let execution = ctx.execution();
-        let input = workspace_file.input()?;
-        Self::do_format(execution, workspace_file, features_supported, input)
-    }
-
-    /// Shared formatting logic: format the file, compare with input, produce
-    /// a diff or write depending on execution mode.
-    fn do_format(
-        execution: &dyn Execution,
-        workspace_file: &mut WorkspaceFile,
-        features_supported: &FeaturesSupported,
-        input: String,
-    ) -> Result<FileStatus, Message> {
-        let should_write = execution.requires_write_access();
-
-        let printed = workspace_file
-            .guard()
-            .format_file()
-            .with_file_path_and_code(workspace_file.path.to_string(), category!("format"))?;
-
-        let mut output = printed.into_code();
-
-        if !features_supported.supports_full_html_support() {
-            match workspace_file.as_extension() {
-                Some("astro") => {
-                    if output.is_empty() {
-                        return Ok(FileStatus::Unchanged);
-                    }
-                    output = AstroFileHandler::output(input.as_str(), output.as_str());
-                }
-                Some("vue") => {
-                    if output.is_empty() {
-                        return Ok(FileStatus::Unchanged);
-                    }
-                    output = VueFileHandler::output(input.as_str(), output.as_str());
-                }
-                Some("svelte") => {
-                    if output.is_empty() {
-                        return Ok(FileStatus::Unchanged);
-                    }
-                    output = SvelteFileHandler::output(input.as_str(), output.as_str());
-                }
-                _ => {}
-            }
-        }
-
-        debug!("Format output is different from input: {}", output != input);
-        if output != input {
-            if should_write {
-                workspace_file.update_file(output)?;
-                Ok(FileStatus::Changed)
-            } else {
-                Ok(FileStatus::Message(Message::Diff {
-                    file_name: workspace_file.path.to_string(),
-                    old: input,
-                    new: output,
-                    diff_kind: DiffKind::Format,
-                }))
-            }
-        } else {
-            Ok(FileStatus::Unchanged)
-        }
-    }
-}
-
 impl ProcessFile for FormatProcessFile {
     fn process_file<Ctx>(
         ctx: &Ctx,
         workspace_file: &mut WorkspaceFile,
-        features_supported: &FeaturesSupported,
+        _features_supported: &FeaturesSupported,
         max_diagnostics: u32,
         diagnostic_level: Severity,
     ) -> Result<FileStatus, Message>
@@ -107,55 +30,89 @@ impl ProcessFile for FormatProcessFile {
         Ctx: CrawlerContext,
     {
         let execution = ctx.execution();
-        let guard = workspace_file.guard();
-
-        // Pull parse diagnostics — only needed when format runs standalone
-        // (not in check mode where lint already handles diagnostics)
-        let diagnostics_result = guard
-            .pull_diagnostics(
-                RuleCategoriesBuilder::default().with_syntax().build(),
-                Vec::new(),
-                Vec::new(),
-                false, // NOTE: probably to revisit
-                Some(max_diagnostics),
+        let result = ctx
+            .workspace()
+            .process_file(ProcessFileParams {
+                project_key: ctx.project_key(),
+                path: workspace_file.path.clone(),
+                content: FileContent::FromServer,
+                categories: RuleCategoriesBuilder::default().with_syntax().build(),
+                only: vec![],
+                skip: vec![],
+                enabled_rules: vec![],
+                fix_file_mode: None,
+                suppression_reason: None,
+                format: true,
+                write: execution.requires_write_access(),
+                include_code_fix: false,
+                max_diagnostics: Some(max_diagnostics),
                 diagnostic_level,
-                false, // enforce_assist: format never promotes assist diagnostics
-            )
+                enforce_assist: false,
+                skip_parse_errors: execution.should_skip_parse_errors(),
+            })
             .with_file_path_and_code(workspace_file.path.to_string(), category!("format"))?;
 
-        let input = workspace_file.input()?;
-        let skip_parse_errors = execution.should_skip_parse_errors();
-
-        if diagnostics_result.parse_errors > 0 && skip_parse_errors {
+        if result.parse_errors > 0 && execution.should_skip_parse_errors() {
             ctx.push_message(Message::from(
                 SkippedDiagnostic.with_file_path(workspace_file.path.to_string()),
             ));
             return Ok(FileStatus::Ignored);
         }
 
+        let output = result.output;
+        let diagnostics: Vec<_> = result
+            .diagnostics
+            .into_iter()
+            // Formatting is usually blocked by errors, so we want to print only diagnostics that
+            // Have error severity
+            .filter_map(|diagnostic| {
+                if diagnostic.severity() >= Severity::Error {
+                    Some(Error::from(diagnostic))
+                } else {
+                    None
+                }
+            })
+            .collect();
+        let content = if diagnostics.is_empty() {
+            String::new()
+        } else {
+            workspace_file.input()?
+        };
         ctx.push_message(Message::Diagnostics {
             file_path: workspace_file.path.to_string(),
-            content: input.clone(),
-            diagnostics: diagnostics_result
-                .diagnostics
-                .into_iter()
-                // Formatting is usually blocked by errors, so we want to print only diagnostics that
-                // Have error severity
-                .filter_map(|diagnostic| {
-                    if diagnostic.severity() >= Severity::Error {
-                        Some(Error::from(diagnostic))
-                    } else {
-                        None
-                    }
-                })
-                .collect(),
-            skipped_diagnostics: diagnostics_result.skipped_diagnostics as u32,
-            errors: diagnostics_result.errors,
-            warnings: diagnostics_result.warnings,
-            infos: diagnostics_result.infos,
+            content,
+            diagnostics,
+            skipped_diagnostics: result.skipped_diagnostics as u32,
+            errors: result.errors,
+            warnings: result.warnings,
+            infos: result.infos,
         });
 
-        Self::do_format(execution, workspace_file, features_supported, input)
+        if result.format_with_errors_disabled {
+            return Err(Message::from(
+                WorkspaceError::format_with_errors_disabled()
+                    .with_file_path(workspace_file.path.to_string()),
+            ));
+        }
+
+        debug!(
+            "Format output is different from input: {}",
+            output.is_some()
+        );
+        if let Some(output) = output {
+            if execution.requires_write_access() {
+                Ok(FileStatus::Changed(workspace_file.write_to_disk(output)?))
+            } else {
+                Ok(FileStatus::Message(Message::Diff {
+                    file_name: workspace_file.path.to_string(),
+                    old: workspace_file.input()?,
+                    new: output,
+                    diff_kind: DiffKind::Format,
+                }))
+            }
+        } else {
+            Ok(FileStatus::Unchanged)
+        }
     }
 
     fn process_std_in(payload: ProcessStdinFilePayload) -> Result<(), CliDiagnostic> {
@@ -166,7 +123,7 @@ impl ProcessFile for FormatProcessFile {
             biome_path,
             console,
             cli_options,
-            execution: _,
+            execution,
             skip_ignore_check,
         } = payload;
 
@@ -202,41 +159,31 @@ impl ProcessFile for FormatProcessFile {
             return Ok(());
         };
         if file_features.supports_format() {
-            workspace.open_file(OpenFileParams {
+            let result = workspace.process_file(ProcessFileParams {
                 project_key,
                 path: biome_path.clone(),
-                content: FileContent::from_client(content),
-                document_file_source: None,
-                persist_node_cache: false,
-                inline_config: None,
-                editor_features: None,
+                content: FileContent::from_client(content.clone()),
+                categories: RuleCategoriesBuilder::default().with_syntax().build(),
+                only: vec![],
+                skip: vec![],
+                enabled_rules: vec![],
+                fix_file_mode: None,
+                suppression_reason: None,
+                format: true,
+                write: true,
+                include_code_fix: false,
+                max_diagnostics: Some(execution.get_max_diagnostics(cli_options)),
+                diagnostic_level: cli_options.diagnostic_level,
+                enforce_assist: false,
+                skip_parse_errors: execution.should_skip_parse_errors(),
             })?;
-            let printed = workspace.format_file(FormatFileParams {
-                project_key,
-                path: biome_path.clone(),
-                inline_config: None,
-            })?;
-
-            let code = printed.into_code();
-            let output = if !file_features.supports_full_html_support() {
-                match biome_path.extension() {
-                    Some("astro") => AstroFileHandler::output(content, code.as_str()),
-                    Some("vue") => VueFileHandler::output(content, code.as_str()),
-                    Some("svelte") => SvelteFileHandler::output(content, code.as_str()),
-                    _ => code,
-                }
-            } else {
-                code
-            };
-            console.append(markup! {
-                {output}
-            });
-            workspace
-                .close_file(CloseFileParams {
-                    project_key,
-                    path: biome_path.clone(),
-                })
-                .map_err(|err| err.into())
+            let source = result.output.as_deref().unwrap_or(&content);
+            print_stdin_diagnostics(console, cli_options, biome_path, source, result.diagnostics);
+            if result.format_with_errors_disabled {
+                return Err(WorkspaceError::format_with_errors_disabled().into());
+            }
+            console.append(markup! {{source}});
+            Ok(())
         } else {
             console.append(markup! {
                 {content}

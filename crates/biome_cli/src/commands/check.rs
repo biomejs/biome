@@ -114,11 +114,6 @@ impl Execution for CheckExecution {
             .is_some_and(|fix_mode| fix_mode == FixFileMode::SafeFixes)
     }
 
-    fn is_safe_and_unsafe_fixes_enabled(&self) -> bool {
-        self.fix_file_mode
-            .is_some_and(|fix_mode| fix_mode == FixFileMode::SafeAndUnsafeFixes)
-    }
-
     fn as_fix_file_mode(&self) -> Option<FixFileMode> {
         self.fix_file_mode
     }

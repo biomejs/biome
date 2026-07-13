@@ -295,12 +295,13 @@ pub(crate) trait CommandRunner {
         } = configured_workspace;
 
         if let Some(stdin) = self.get_stdin(console, execution.as_ref())? {
-            let biome_path = BiomePath::new(stdin.as_path());
+            let (stdin_path, content) = stdin.into_parts();
+            let biome_path = BiomePath::new(stdin_path);
             if biome_path.extension().is_none() {
                 console.error(markup! {
                     {PrintDiagnostic::simple(&CliDiagnostic::from(StdinDiagnostic::new_no_extension()))}
                 });
-                console.append(markup! {{stdin.as_content()}});
+                console.append(markup! {{content}});
                 return Ok(());
             }
 
@@ -309,7 +310,7 @@ pub(crate) trait CommandRunner {
                 project_key,
                 workspace,
                 execution: execution.as_ref(),
-                content: stdin.as_content(),
+                content,
                 cli_options,
                 console,
                 skip_ignore_check: Self::ProcessFile::should_skip_ignore_check(
@@ -325,6 +326,7 @@ pub(crate) trait CommandRunner {
             workspace,
             fs,
             project_key,
+            cli_options.use_server,
             paths
                 .iter()
                 .map(|path| CrawlPath::String(path.clone()))
@@ -366,6 +368,7 @@ pub(crate) trait CommandRunner {
                             workspace,
                             fs,
                             project_key,
+                            cli_options.use_server,
                             paths
                                 .iter()
                                 .map(|path| CrawlPath::Path(path.clone()))
@@ -525,8 +528,8 @@ pub(crate) trait CommandRunner {
 
         let result = workspace.scan_project(ScanProjectParams {
             project_key: open_project_result.project_key,
-            watch: cli_options.use_server,
-            force: false, // TODO: Maybe we'll want a CLI flag for this.
+            watch: self.is_watch_mode(),
+            force: cli_options.use_server && !self.is_watch_mode(),
             scan_kind,
             verbose: cli_options.verbose,
         })?;
