@@ -16,24 +16,47 @@ use salsa::plumbing::AsId;
 
 const MAX_EXPORT_RESOLUTION_STEPS: usize = 1024;
 
-struct NamespaceExportCollection<'db> {
-    members: Vec<InferredTypeMember<'db>>,
+struct NamespaceExportCollection {
+    names: Vec<Text>,
     seen_names: FxHashSet<String>,
     seen_modules: FxHashSet<ModuleKey>,
     stack: Vec<(ModuleInfo, bool)>,
     remaining_steps: usize,
 }
 
-impl NamespaceExportCollection<'_> {
+impl NamespaceExportCollection {
     fn new() -> Self {
         Self {
-            members: Vec::new(),
+            names: Vec::new(),
             seen_names: FxHashSet::default(),
             seen_modules: FxHashSet::default(),
             stack: Vec::new(),
             remaining_steps: MAX_EXPORT_RESOLUTION_STEPS,
         }
     }
+}
+
+#[derive(Clone, PartialEq)]
+struct ExportIdentity {
+    module: ModuleKey,
+    own_export: JsOwnExport,
+}
+
+struct ResolvedExport<'db> {
+    identity: ExportIdentity,
+    ty: InferredTypeData<'db>,
+}
+
+enum ExportResolution<'db> {
+    Missing,
+    Resolved(ResolvedExport<'db>),
+    Ambiguous,
+    Indeterminate,
+}
+
+enum ExportResolutionStep<'db> {
+    Continue,
+    Resolved(ResolvedExport<'db>),
 }
 
 impl<'db> ResolutionCtx<'db, '_> {
@@ -95,29 +118,48 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> InferredTypeData<'db> {
         let mut collection = NamespaceExportCollection::new();
 
-        self.collect_namespace_members(module, inferred_types, true, &mut collection);
+        collection
+            .seen_modules
+            .insert(ModuleKey::new(module.as_id()));
+        if !self.collect_namespace_members(module, true, &mut collection) {
+            return InferredTypeData::Unknown;
+        }
 
         while let Some((module, include_default)) = collection.stack.pop() {
+            let module_key = ModuleKey::new(module.as_id());
+            if collection.seen_modules.contains(&module_key) {
+                continue;
+            }
             if collection.remaining_steps == 0 {
-                break;
+                return InferredTypeData::Unknown;
             }
             collection.remaining_steps -= 1;
+            collection.seen_modules.insert(module_key);
 
-            let Some(inferred_types) = infer_module_types(self.db, module) else {
-                continue;
+            if infer_module_types(self.db, module).is_none() {
+                return InferredTypeData::Unknown;
+            }
+
+            if !self.collect_namespace_members(module, include_default, &mut collection) {
+                return InferredTypeData::Unknown;
+            }
+        }
+
+        let mut members = Vec::with_capacity(collection.names.len());
+        for name in collection.names {
+            match self.resolve_export_name_result(module, inferred_types, name.text()) {
+                ExportResolution::Resolved(resolved) => members.push(InferredTypeMember {
+                    kind: InferredTypeMemberKind::Named(name),
+                    ty: resolved.ty,
+                }),
+                ExportResolution::Missing | ExportResolution::Ambiguous => {}
+                ExportResolution::Indeterminate => return InferredTypeData::Unknown,
             };
-
-            self.collect_namespace_members(
-                module,
-                &inferred_types,
-                include_default,
-                &mut collection,
-            );
         }
 
         InferredTypeData::Namespace(InferredNamespace::new(
             self.db,
-            collection.members.into_boxed_slice(),
+            members.into_boxed_slice(),
             Path::from(Text::from(module.path(self.db).to_string())),
         ))
     }
@@ -125,17 +167,11 @@ impl<'db> ResolutionCtx<'db, '_> {
     fn collect_namespace_members(
         &self,
         module: ModuleInfo,
-        inferred_types: &InferredModuleTypes<'db>,
         include_default: bool,
-        collection: &mut NamespaceExportCollection<'db>,
-    ) {
-        let module_key = ModuleKey::new(module.as_id());
-        if !collection.seen_modules.insert(module_key) {
-            return;
-        }
-
+        collection: &mut NamespaceExportCollection,
+    ) -> bool {
         let ModuleInfoKind::Js(js_info) = module.kind(self.db) else {
-            return;
+            return false;
         };
 
         for (name, _) in js_info.exports.iter() {
@@ -147,17 +183,17 @@ impl<'db> ResolutionCtx<'db, '_> {
                 continue;
             }
 
-            collection.members.push(InferredTypeMember {
-                kind: InferredTypeMemberKind::Named(name.clone()),
-                ty: self.resolve_export_name(module, inferred_types, name.text()),
-            });
+            collection.names.push(name.clone());
         }
 
         for reexport in js_info.blanket_reexports.iter().rev() {
-            if let Some(module) = self.module_for_resolved_path(&reexport.import.resolved_path) {
-                collection.stack.push((module, false));
-            }
+            let Some(module) = self.module_for_resolved_path(&reexport.import.resolved_path) else {
+                return false;
+            };
+            collection.stack.push((module, false));
         }
+
+        true
     }
 
     fn resolve_export_name(
@@ -166,25 +202,37 @@ impl<'db> ResolutionCtx<'db, '_> {
         inferred_types: &InferredModuleTypes<'db>,
         name: &str,
     ) -> InferredTypeData<'db> {
+        match self.resolve_export_name_result(module, inferred_types, name) {
+            ExportResolution::Resolved(resolved) => resolved.ty,
+            ExportResolution::Missing
+            | ExportResolution::Ambiguous
+            | ExportResolution::Indeterminate => InferredTypeData::Unknown,
+        }
+    }
+
+    fn resolve_export_name_result(
+        &self,
+        module: ModuleInfo,
+        inferred_types: &InferredModuleTypes<'db>,
+        name: &str,
+    ) -> ExportResolution<'db> {
         let mut stack = Vec::new();
         let mut seen = FxHashSet::default();
-        // Shared across direct stack pops and blanket reexport scans.
+        let mut resolved: Option<ResolvedExport<'db>> = None;
         let mut remaining_steps = MAX_EXPORT_RESOLUTION_STEPS;
 
-        if let Some(ty) = self.resolve_export_name_in_module(
-            module,
-            inferred_types,
-            name,
-            &mut stack,
-            &mut seen,
-            &mut remaining_steps,
-        ) {
-            return ty;
+        seen.insert((ModuleKey::new(module.as_id()), name.to_string()));
+        match self.resolve_export_name_in_module(module, inferred_types, name, &mut stack) {
+            ExportResolutionStep::Continue => {}
+            ExportResolutionStep::Resolved(candidate) => resolved = Some(candidate),
         }
 
         while let Some((module, name)) = stack.pop() {
+            if !seen.insert((ModuleKey::new(module.as_id()), name.clone())) {
+                continue;
+            }
             if remaining_steps == 0 {
-                return InferredTypeData::Unknown;
+                return ExportResolution::Indeterminate;
             }
             remaining_steps -= 1;
 
@@ -192,19 +240,21 @@ impl<'db> ResolutionCtx<'db, '_> {
                 continue;
             };
 
-            if let Some(ty) = self.resolve_export_name_in_module(
-                module,
-                &inferred_types,
-                &name,
-                &mut stack,
-                &mut seen,
-                &mut remaining_steps,
-            ) {
-                return ty;
+            match self.resolve_export_name_in_module(module, &inferred_types, &name, &mut stack) {
+                ExportResolutionStep::Continue => {}
+                ExportResolutionStep::Resolved(candidate) => {
+                    if let Some(previous) = &resolved {
+                        if previous.identity != candidate.identity {
+                            return ExportResolution::Ambiguous;
+                        }
+                    } else {
+                        resolved = Some(candidate);
+                    }
+                }
             }
         }
 
-        InferredTypeData::Unknown
+        resolved.map_or(ExportResolution::Missing, ExportResolution::Resolved)
     }
 
     fn resolve_export_name_in_module(
@@ -213,39 +263,35 @@ impl<'db> ResolutionCtx<'db, '_> {
         inferred_types: &InferredModuleTypes<'db>,
         name: &str,
         stack: &mut Vec<(ModuleInfo, String)>,
-        seen: &mut FxHashSet<(ModuleKey, String)>,
-        remaining_steps: &mut usize,
-    ) -> Option<InferredTypeData<'db>> {
+    ) -> ExportResolutionStep<'db> {
         let module_key = ModuleKey::new(module.as_id());
-        if !seen.insert((module_key, name.to_string())) {
-            return None;
-        }
-
         let ModuleInfoKind::Js(js_info) = module.kind(self.db) else {
-            return None;
+            return ExportResolutionStep::Continue;
         };
 
         match js_info.exports.get(name) {
             Some(JsExport::Own(own_export) | JsExport::OwnType(own_export)) => {
-                Some(self.resolve_own_export(inferred_types, own_export))
+                ExportResolutionStep::Resolved(ResolvedExport {
+                    identity: ExportIdentity {
+                        module: module_key,
+                        own_export: own_export.clone(),
+                    },
+                    ty: self.resolve_own_export(inferred_types, own_export),
+                })
             }
             Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
                 self.push_reexport_target(reexport.import.clone(), name, stack);
-                None
+                ExportResolutionStep::Continue
             }
             None => {
                 for reexport in js_info.blanket_reexports.iter().rev() {
-                    if *remaining_steps == 0 {
-                        return Some(InferredTypeData::Unknown);
-                    }
-                    *remaining_steps -= 1;
                     if let Some(module) =
                         self.module_for_resolved_path(&reexport.import.resolved_path)
                     {
                         stack.push((module, name.to_string()));
                     }
                 }
-                None
+                ExportResolutionStep::Continue
             }
         }
     }

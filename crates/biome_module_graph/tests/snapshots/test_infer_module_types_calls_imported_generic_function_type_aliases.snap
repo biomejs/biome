@@ -1,0 +1,50 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/factory.ts`
+
+## Source
+
+```ts
+type Factory<T> = () => Promise<T>;
+export declare const makeString: Factory<string>;
+```
+
+## Inferred types
+
+```
+Binding Factory "Factory" => instanceof sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof T>
+}<T>
+
+Binding T "T" => T
+
+Binding makeString "makeString" => instanceof Factory<string>
+```
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+import { makeString } from "./factory";
+export const result = makeString();
+```
+
+## Inferred types
+
+```
+Binding makeString "makeString" => instanceof Factory<string>
+
+Binding result "result" => instanceof Promise<string>
+
+Expression "makeString" => instanceof Factory<string>
+
+Expression "makeString()" => instanceof Promise<string>
+```
