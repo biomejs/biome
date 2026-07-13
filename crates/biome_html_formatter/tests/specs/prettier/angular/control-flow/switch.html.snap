@@ -1,0 +1,74 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/control-flow/switch.html
+---
+
+# Input
+
+```html
+@switch (radioValue()) {
+@case (1) {
+<span>Case 1</span>
+}
+@case (2) {
+<span>Case 2</span>
+}
+@default {
+<span>Default case (Not 1 or 2)</span>
+}
+}
+
+
+@switch(
+  should
+.be.formatted
+) {
+  @case(
+  should
+.be.formatted) {}
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,15 +1,7 @@
+-@switch (radioValue()) {
+-  @case (1) {
+-    <span>Case 1</span>
+-  }
+-  @case (2) {
+-    <span>Case 2</span>
+-  }
+-  @default {
+-    <span>Default case (Not 1 or 2)</span>
+-  }
+-}
+-
+-@switch (should.be.formatted) {
+-  @case (should.be.formatted) {}
+-}
++@switch (radioValue()) { @case (1) {
++<span>Case 1</span>
++} @case (2) {
++<span>Case 2</span>
++} @default {
++<span>Default case (Not 1 or 2)</span>
++} } @switch( should .be.formatted ) { @case( should .be.formatted) { } }
+```
+
+# Output
+
+```html
+@switch (radioValue()) { @case (1) {
+<span>Case 1</span>
+} @case (2) {
+<span>Case 2</span>
+} @default {
+<span>Default case (Not 1 or 2)</span>
+} } @switch( should .be.formatted ) { @case( should .be.formatted) { } }
+```

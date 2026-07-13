@@ -16,3 +16,4 @@ allowBuilds:
 minimumReleaseAgeExclude:
   # Renovate security update: vite@7.3.5
   - vite@7.3.5
+  - prettier@3.9.5

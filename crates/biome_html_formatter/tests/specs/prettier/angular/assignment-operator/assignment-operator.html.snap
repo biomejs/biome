@@ -1,0 +1,134 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/assignment-operator/assignment-operator.html
+---
+
+# Input
+
+```html
+<b (click)="
+  a   = b"></b>
+<b (click)="
+  a   += b"></b>
+<b (click)="
+  a   -= b"></b>
+<b (click)="
+  a   *= b"></b>
+<b (click)="
+  a   /= b"></b>
+<b (click)="
+  a   %= b"></b>
+<b (click)="
+  a   **= b"></b>
+<b (click)="
+  a   &&= b"></b>
+<b (click)="
+  a   ||= b"></b>
+<b (click)="
+  a   ??= b"></b>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,10 +1,40 @@
+-<b (click)="a = b"></b>
+-<b (click)="a += b"></b>
+-<b (click)="a -= b"></b>
+-<b (click)="a *= b"></b>
+-<b (click)="a /= b"></b>
+-<b (click)="a %= b"></b>
+-<b (click)="a **= b"></b>
+-<b (click)="a &&= b"></b>
+-<b (click)="a ||= b"></b>
+-<b (click)="a ??= b"></b>
++<b
++  (click)="
++  a   = b"
++></b>
++<b
++  (click)="
++  a   += b"
++></b>
++<b
++  (click)="
++  a   -= b"
++></b>
++<b
++  (click)="
++  a   *= b"
++></b>
++<b
++  (click)="
++  a   /= b"
++></b>
++<b
++  (click)="
++  a   %= b"
++></b>
++<b
++  (click)="
++  a   **= b"
++></b>
++<b
++  (click)="
++  a   &&= b"
++></b>
++<b
++  (click)="
++  a   ||= b"
++></b>
++<b
++  (click)="
++  a   ??= b"
++></b>
+```
+
+# Output
+
+```html
+<b
+  (click)="
+  a   = b"
+></b>
+<b
+  (click)="
+  a   += b"
+></b>
+<b
+  (click)="
+  a   -= b"
+></b>
+<b
+  (click)="
+  a   *= b"
+></b>
+<b
+  (click)="
+  a   /= b"
+></b>
+<b
+  (click)="
+  a   %= b"
+></b>
+<b
+  (click)="
+  a   **= b"
+></b>
+<b
+  (click)="
+  a   &&= b"
+></b>
+<b
+  (click)="
+  a   ||= b"
+></b>
+<b
+  (click)="
+  a   ??= b"
+></b>
+```
