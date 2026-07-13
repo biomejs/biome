@@ -493,16 +493,16 @@ impl<'db> TypeData<'db> {
     }
 
     pub fn is_array_class(self, db: &'db dyn TypeDb) -> bool {
-        self.is_class_named(db, "Array")
+        self.is_builtin_class_named(db, "Array")
     }
 
     pub fn is_promise_class(self, db: &'db dyn TypeDb) -> bool {
-        self.is_class_named(db, "Promise")
+        self.is_builtin_class_named(db, "Promise")
     }
 
-    pub fn is_class_named(self, db: &'db dyn TypeDb, expected_name: &str) -> bool {
+    fn is_builtin_class_named(self, db: &'db dyn TypeDb, expected_name: &str) -> bool {
         match self {
-            Self::Class(class) => class
+            Self::Class(class) if class.is_builtin(db) => class
                 .name(db)
                 .as_ref()
                 .is_some_and(|name| name.text() == expected_name),
@@ -676,6 +676,7 @@ impl<'db> TypeData<'db> {
             Box::default(),
             Box::default(),
             Some(Text::new_static(name)),
+            true,
         ))
     }
 
@@ -793,6 +794,7 @@ impl<'db> TypeData<'db> {
                 convert_references(db, &class.implements, resolve_reference),
                 convert_type_members(db, &class.members, resolve_reference),
                 class.name.clone(),
+                false,
             )),
             raw::TypeData::Constructor(constructor) => Self::Constructor(InternedConstructor::new(
                 db,
@@ -1525,6 +1527,7 @@ pub struct InternedClass<'db> {
     pub members: Box<[TypeMember<'db>]>,
     #[returns(ref)]
     pub name: Option<Text>,
+    pub is_builtin: bool,
 }
 
 #[salsa::interned]
