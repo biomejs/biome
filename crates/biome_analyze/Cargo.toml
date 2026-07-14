@@ -13,6 +13,9 @@ publish              = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[package.metadata.cargo-shear]
+ignored = ["biome_deserialize"]  # Used in macro
+
 [dependencies]
 biome_analyze_macros     = { workspace = true }
 biome_console            = { workspace = true }
@@ -39,6 +42,3 @@ serde  = ["dep:biome_deserialize", "dep:biome_deserialize_macros", "dep:serde"]
 
 [lints]
 workspace = true
-
-[package.metadata.cargo-shear]
-ignored = ["biome_deserialize"] # Used in macro

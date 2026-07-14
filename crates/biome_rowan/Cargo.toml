@@ -11,6 +11,9 @@ keywords.workspace   = true
 categories.workspace = true
 publish              = true
 
+[package.metadata.cargo-shear]
+ignored = ["quickcheck"]  # Used in macro
+
 [[bench]]
 harness = false
 name    = "mutation"
@@ -36,6 +39,3 @@ serde   = ["biome_text_size/serde", "biome_text_size/serde", "dep:serde"]
 
 [lints]
 workspace = true
-
-[package.metadata.cargo-shear]
-ignored = ["quickcheck"] # Used in macro

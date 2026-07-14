@@ -4,6 +4,9 @@ version = "0.0.0"
 edition = "2024"
 publish = false
 
+[package.metadata.cargo-shear]
+ignored = ["biome_console"]  # Used in macro
+
 [dependencies]
 ascii_table           = "4.0.8"
 backtrace             = "0.3.76"
@@ -34,6 +37,3 @@ yastl                 = "0.1.2"
 
 [lints]
 workspace = true
-
-[package.metadata.cargo-shear]
-ignored = ["biome_console"] # Used in macro

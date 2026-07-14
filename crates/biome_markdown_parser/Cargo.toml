@@ -31,8 +31,8 @@ htmlize                = { version = "1.0.6", features = ["unescape"], optional 
 percent-encoding       = { version = "2.3.2", optional = true }
 
 [dev-dependencies]
-biome_console     = { path = "../biome_console" }
-biome_diagnostics = { path = "../biome_diagnostics" }
+biome_console         = { path = "../biome_console" }
+biome_diagnostics     = { path = "../biome_diagnostics" }
 # Self-dependency to enable test_utils for integration tests.
 # Integration tests are compiled as separate crates and can only access public API,
 # so we need to enable the feature here to make to_html available for spec tests.

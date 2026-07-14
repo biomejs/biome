@@ -35,7 +35,7 @@ biome_service        = { path = "../biome_service", features = ["lang_yaml"] }
 biome_yaml_parser    = { path = "../biome_yaml_parser" }
 camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
-serde             = { workspace = true, features = ["derive"] }
+serde                = { workspace = true, features = ["derive"] }
 similar-asserts      = { workspace = true }
 tests_macros         = { path = "../tests_macros" }
 
