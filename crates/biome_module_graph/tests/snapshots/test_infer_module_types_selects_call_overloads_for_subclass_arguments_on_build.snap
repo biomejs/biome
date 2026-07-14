@@ -1,0 +1,168 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export class Base {}
+export class Derived extends Base {}
+export class Other {}
+
+export function select(value: Other): number;
+export function select(value: Base): string;
+export function select(_value: Other | Base): string | number {
+	return undefined as string | number;
+}
+
+export const selected = select(new Derived());
+```
+
+## Inferred types
+
+```
+Binding Base "Base" => class "Base" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding Derived "Derived" => class "Derived" {
+  extends: Base
+  implements: []
+  type_args: []
+}
+
+Expression "Base" => class "Base" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding Other "Other" => class "Other" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding select "select" => sync Function "select" {
+  accepts: {
+    params: [
+      required value: instanceof Other
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Binding value "value" => instanceof Other
+
+Binding select "select" => sync Function "select" {
+  accepts: {
+    params: [
+      required value: instanceof Base
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Binding value "value" => instanceof Base
+
+Binding select "select" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required value: instanceof Other
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required value: instanceof Base
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required _value: instanceof Other | instanceof Base
+          ]
+          type_args: []
+        }
+        returns: string | number
+      }
+  ]
+}
+
+Binding _value "_value" => instanceof Other | instanceof Base
+
+Expression "undefined" => undefined
+
+Expression "undefined as string | number" => string | number
+
+Binding selected "selected" => string
+
+Expression "select" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required value: instanceof Other
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required value: instanceof Base
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required _value: instanceof Other | instanceof Base
+          ]
+          type_args: []
+        }
+        returns: string | number
+      }
+  ]
+}
+
+Expression "select(new Derived())" => string
+
+Expression "new Derived()" => instanceof Derived
+
+Expression "Derived" => class "Derived" {
+  extends: Base
+  implements: []
+  type_args: []
+}
+```

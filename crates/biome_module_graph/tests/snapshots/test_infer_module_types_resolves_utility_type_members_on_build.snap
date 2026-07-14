@@ -1,0 +1,269 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+type Source = {
+	[key: string]: string | number | undefined;
+	name: string;
+	value: number;
+	optional?: string;
+};
+
+export function readPick(
+	value: Pick<Source, "name" | "value">,
+): Pick<Source, "name" | "value"> {
+	return value;
+}
+
+export function readOmit(value: Omit<Source, "value">): Omit<Source, "value"> {
+	return value;
+}
+
+export function readPartial(value: Partial<Source>): Partial<Source> {
+	return value;
+}
+
+export function readRequired(value: Required<Source>): Required<Source> {
+	return value;
+}
+
+export function readReadonly(value: Readonly<Source>): Readonly<Source> {
+	return value;
+}
+```
+
+## Inferred types
+
+```
+Binding Source "Source" => Object {
+  prototype: No prototype
+  members: [
+    [string]: string | number | undefined,
+    "name": string,
+    "value": number,
+    "optional"?: string | undefined
+  ]
+}
+
+Binding key "key" => Object {
+  prototype: No prototype
+  members: [
+    [string]: string | number | undefined,
+    "name": string,
+    "value": number,
+    "optional"?: string | undefined
+  ]
+}
+
+Binding readPick "readPick" => sync Function "readPick" {
+  accepts: {
+    params: [
+      required value: instanceof Object {
+        prototype: No prototype
+        members: ["name": string, "value": number]
+      }
+    ]
+    type_args: []
+  }
+  returns: instanceof Object {
+    prototype: No prototype
+    members: ["name": string, "value": number]
+  }
+}
+
+Binding value "value" => instanceof Object {
+  prototype: No prototype
+  members: ["name": string, "value": number]
+}
+
+Expression "value" => instanceof Object {
+  prototype: No prototype
+  members: ["name": string, "value": number]
+}
+
+Binding readOmit "readOmit" => sync Function "readOmit" {
+  accepts: {
+    params: [
+      required value: instanceof Object {
+        prototype: No prototype
+        members: [
+          [string]: string | number | undefined,
+          "name": string,
+          "optional"?: string | undefined
+        ]
+      }
+    ]
+    type_args: []
+  }
+  returns: instanceof Object {
+    prototype: No prototype
+    members: [
+      [string]: string | number | undefined,
+      "name": string,
+      "optional"?: string | undefined
+    ]
+  }
+}
+
+Binding value "value" => instanceof Object {
+  prototype: No prototype
+  members: [
+    [string]: string | number | undefined,
+    "name": string,
+    "optional"?: string | undefined
+  ]
+}
+
+Expression "value" => instanceof Object {
+  prototype: No prototype
+  members: [
+    [string]: string | number | undefined,
+    "name": string,
+    "optional"?: string | undefined
+  ]
+}
+
+Binding readPartial "readPartial" => sync Function "readPartial" {
+  accepts: {
+    params: [
+      required value: instanceof Object {
+        prototype: No prototype
+        members: [
+          [string]: string | number | undefined,
+          "name"?: string | undefined,
+          "value"?: number | undefined,
+          "optional"?: string | undefined
+        ]
+      }
+    ]
+    type_args: []
+  }
+  returns: instanceof Object {
+    prototype: No prototype
+    members: [
+      [string]: string | number | undefined,
+      "name"?: string | undefined,
+      "value"?: number | undefined,
+      "optional"?: string | undefined
+    ]
+  }
+}
+
+Binding value "value" => instanceof Object {
+  prototype: No prototype
+  members: [
+    [string]: string | number | undefined,
+    "name"?: string | undefined,
+    "value"?: number | undefined,
+    "optional"?: string | undefined
+  ]
+}
+
+Expression "value" => instanceof Object {
+  prototype: No prototype
+  members: [
+    [string]: string | number | undefined,
+    "name"?: string | undefined,
+    "value"?: number | undefined,
+    "optional"?: string | undefined
+  ]
+}
+
+Binding readRequired "readRequired" => sync Function "readRequired" {
+  accepts: {
+    params: [
+      required value: instanceof Object {
+        prototype: No prototype
+        members: [
+          [string]: string | number | undefined,
+          "name": string,
+          "value": number,
+          "optional": string
+        ]
+      }
+    ]
+    type_args: []
+  }
+  returns: instanceof Object {
+    prototype: No prototype
+    members: [
+      [string]: string | number | undefined,
+      "name": string,
+      "value": number,
+      "optional": string
+    ]
+  }
+}
+
+Binding value "value" => instanceof Object {
+  prototype: No prototype
+  members: [
+    [string]: string | number | undefined,
+    "name": string,
+    "value": number,
+    "optional": string
+  ]
+}
+
+Expression "value" => instanceof Object {
+  prototype: No prototype
+  members: [
+    [string]: string | number | undefined,
+    "name": string,
+    "value": number,
+    "optional": string
+  ]
+}
+
+Binding readReadonly "readReadonly" => sync Function "readReadonly" {
+  accepts: {
+    params: [
+      required value: instanceof Object {
+        prototype: No prototype
+        members: [
+          [string]: string | number | undefined,
+          "name": string,
+          "value": number,
+          "optional"?: string | undefined
+        ]
+      }
+    ]
+    type_args: []
+  }
+  returns: instanceof Object {
+    prototype: No prototype
+    members: [
+      [string]: string | number | undefined,
+      "name": string,
+      "value": number,
+      "optional"?: string | undefined
+    ]
+  }
+}
+
+Binding value "value" => instanceof Object {
+  prototype: No prototype
+  members: [
+    [string]: string | number | undefined,
+    "name": string,
+    "value": number,
+    "optional"?: string | undefined
+  ]
+}
+
+Expression "value" => instanceof Object {
+  prototype: No prototype
+  members: [
+    [string]: string | number | undefined,
+    "name": string,
+    "value": number,
+    "optional"?: string | undefined
+  ]
+}
+```

@@ -1,0 +1,155 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export class Foo {}
+export class Bar {}
+
+export function select(value: Foo): string;
+export function select(value: Bar): number;
+export function select(_value: Foo | Bar): string | number {
+	return undefined as string | number;
+}
+
+export const selected = select(new Bar());
+```
+
+## Inferred types
+
+```
+Binding Foo "Foo" => class "Foo" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding Bar "Bar" => class "Bar" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding select "select" => sync Function "select" {
+  accepts: {
+    params: [
+      required value: instanceof Foo
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Binding value "value" => instanceof Foo
+
+Binding select "select" => sync Function "select" {
+  accepts: {
+    params: [
+      required value: instanceof Bar
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Binding value "value" => instanceof Bar
+
+Binding select "select" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required value: instanceof Foo
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required value: instanceof Bar
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required _value: instanceof Foo | instanceof Bar
+          ]
+          type_args: []
+        }
+        returns: string | number
+      }
+  ]
+}
+
+Binding _value "_value" => instanceof Foo | instanceof Bar
+
+Expression "undefined" => undefined
+
+Expression "undefined as string | number" => string | number
+
+Binding selected "selected" => number
+
+Expression "select" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required value: instanceof Foo
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required value: instanceof Bar
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required _value: instanceof Foo | instanceof Bar
+          ]
+          type_args: []
+        }
+        returns: string | number
+      }
+  ]
+}
+
+Expression "select(new Bar())" => number
+
+Expression "new Bar()" => instanceof Bar
+
+Expression "Bar" => class "Bar" {
+  extends: none
+  implements: []
+  type_args: []
+}
+```

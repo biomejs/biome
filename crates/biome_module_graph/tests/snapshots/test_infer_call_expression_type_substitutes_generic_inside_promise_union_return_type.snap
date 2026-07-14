@@ -1,0 +1,52 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function boxed<T>(value: T): Promise<T | number> {
+	return Promise.resolve(value as T | number);
+}
+```
+
+## Inferred types
+
+```
+Binding boxed "boxed" => sync Function "boxed" {
+  accepts: {
+    params: [
+      required value: instanceof T
+    ]
+    type_args: [T]
+  }
+  returns: instanceof Promise<instanceof T | number>
+}
+
+Binding T "T" => T
+
+Binding value "value" => instanceof T
+
+Expression "Promise" => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "Promise.resolve" => sync Function "Promise.resolve" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise
+}
+
+Expression "Promise.resolve(value as T | number)" => instanceof Promise
+
+Expression "value" => instanceof T
+
+Expression "value as T | number" => instanceof T | number
+```

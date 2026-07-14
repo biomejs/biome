@@ -394,6 +394,39 @@ async fn on_type_formatting_does_not_edit_formatted_css_block() -> Result<()> {
 }
 
 #[tokio::test]
+async fn on_type_formatting_does_not_edit_css_block_with_leading_comment() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    let uri = uri!("document.css");
+    let text = "a {\n\tcolor: blue;\n}\n\n/* heading */\nb {\n\tcolor: red;\n}\n";
+    server.open_named_document(text, uri.clone(), "css").await?;
+
+    let edits = request_on_type_formatting(
+        &mut server,
+        uri,
+        position_after(text, "\tcolor: red;\n}"),
+        "}",
+    )
+    .await?;
+
+    assert_no_edits(edits);
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn on_type_formatting_formats_css_closing_curly() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();
@@ -521,6 +554,50 @@ async fn on_type_formatting_still_formats_closing_curly() -> Result<()> {
         !edits.is_empty(),
         "expected closing curly to format the block"
     );
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn on_type_formatting_does_not_edit_if_statement_with_leading_comments() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    let uri = uri!("document.js");
+    let text = r#"function test() {
+	const num = Math.random();
+
+	// Add a new check
+	// TODO: try removing and re-adding closing paren
+	if (num < 0.5 && num < 0.4) {
+		console.log("Less than 0.5");
+	}
+}
+"#;
+    server
+        .open_named_document(text, uri.clone(), "javascript")
+        .await?;
+
+    let edits = request_on_type_formatting(
+        &mut server,
+        uri,
+        position_after(text, "num < 0.5 && num < 0.4)"),
+        ")",
+    )
+    .await?;
+
+    assert_no_edits(edits);
 
     server.shutdown().await?;
     reader.abort();

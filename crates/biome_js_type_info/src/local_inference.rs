@@ -12,15 +12,16 @@ use biome_js_syntax::{
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
     JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList,
-    JsConstructorParameters, JsForInStatement, JsForOfStatement, JsForVariableDeclaration,
-    JsFormalParameter, JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression,
-    JsGetterObjectMember, JsInitializerClause, JsLogicalExpression, JsLogicalOperator,
-    JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern, JsObjectExpression,
-    JsParameters, JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier,
-    JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode,
-    JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator,
-    TsDeclareFunctionDeclaration, TsExternalModuleDeclaration, TsInterfaceDeclaration,
-    TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
+    JsConstructorParameters, JsExtendsClause, JsForInStatement, JsForOfStatement,
+    JsForVariableDeclaration, JsFormalParameter, JsFunctionBody, JsFunctionDeclaration,
+    JsFunctionExpression, JsGetterObjectMember, JsInitializerClause, JsLogicalExpression,
+    JsLogicalOperator, JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern,
+    JsObjectExpression, JsParameters, JsPropertyClassMember, JsPropertyObjectMember,
+    JsReferenceIdentifier, JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind,
+    JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
+    JsVariableDeclarator, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration,
+    TsInstantiationExpression, TsInterfaceDeclaration, TsModuleDeclaration,
+    TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
     TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
     TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
@@ -337,12 +338,9 @@ impl TypeData {
                             )
                         })
                         .unwrap_or_default(),
-                    extends: decl
-                        .extends_clause()
-                        .and_then(|extends| extends.super_class().ok())
-                        .map(|super_class| {
-                            resolver.reference_to_resolved_expression(scope_id, &super_class)
-                        }),
+                    extends: decl.extends_clause().and_then(|extends| {
+                        reference_to_extends_clause(resolver, scope_id, extends)
+                    }),
                     implements: decl
                         .implements_clause()
                         .map(|implements| {
@@ -467,6 +465,14 @@ impl TypeData {
             ))),
             AnyJsExpression::JsArrowFunctionExpression(expr) => {
                 Self::from_js_arrow_function_expression(resolver, scope_id, expr)
+            }
+            AnyJsExpression::JsAwaitExpression(expr) => {
+                Self::from(TypeofExpression::Await(TypeofAwaitExpression {
+                    argument: expr
+                        .argument()
+                        .map(|arg| resolver.reference_to_resolved_expression(scope_id, &arg))
+                        .unwrap_or_default(),
+                }))
             }
             AnyJsExpression::JsBinaryExpression(expr) => {
                 Self::from_js_binary_expression(resolver, scope_id, expr)
@@ -608,6 +614,9 @@ impl TypeData {
                 } else {
                     Self::from_any_ts_type(resolver, scope_id, &annotation)
                 }
+            }
+            AnyJsExpression::TsInstantiationExpression(expr) => {
+                Self::from_ts_instantiation_expression(resolver, scope_id, expr).unwrap_or_default()
             }
             AnyJsExpression::TsTypeAssertionExpression(expr) => {
                 let Ok(annotation) = expr.ty() else {
@@ -965,10 +974,7 @@ impl TypeData {
             ),
             extends: decl
                 .extends_clause()
-                .and_then(|extends| extends.super_class().ok())
-                .map(|super_class| {
-                    resolver.reference_to_resolved_expression(scope_id, &super_class)
-                }),
+                .and_then(|extends| reference_to_extends_clause(resolver, scope_id, extends)),
             implements: decl
                 .implements_clause()
                 .map(|implements| {
@@ -998,10 +1004,7 @@ impl TypeData {
             ),
             extends: decl
                 .extends_clause()
-                .and_then(|extends| extends.super_class().ok())
-                .map(|super_class| {
-                    resolver.reference_to_resolved_expression(scope_id, &super_class)
-                }),
+                .and_then(|extends| reference_to_extends_clause(resolver, scope_id, extends)),
             implements: decl
                 .implements_clause()
                 .map(|implements| {
@@ -1113,6 +1116,21 @@ impl TypeData {
                 expr.arguments(),
             ),
         })))
+    }
+
+    pub fn from_ts_instantiation_expression(
+        resolver: &mut dyn TypeResolver,
+        scope_id: ScopeId,
+        expr: &TsInstantiationExpression,
+    ) -> Option<Self> {
+        let expression = expr.expression().ok()?;
+        let arguments = expr.arguments().ok();
+        Some(Self::instance_of(TypeInstance {
+            ty: resolver.reference_to_resolved_expression(scope_id, &expression),
+            type_parameters: TypeReference::types_from_ts_type_arguments(
+                resolver, scope_id, arguments,
+            ),
+        }))
     }
 
     pub fn from_js_object_expression(
@@ -2626,6 +2644,28 @@ impl TypeofThisOrSuperExpression {
             .unwrap_or_default();
 
         Self { parent }
+    }
+}
+
+fn reference_to_extends_clause(
+    resolver: &mut dyn TypeResolver,
+    scope_id: ScopeId,
+    extends: JsExtendsClause,
+) -> Option<TypeReference> {
+    let super_class = extends.super_class().ok()?;
+    let super_class = resolver.reference_to_resolved_expression(scope_id, &super_class);
+    let type_parameters =
+        TypeReference::types_from_ts_type_arguments(resolver, scope_id, extends.type_arguments());
+
+    if type_parameters.is_empty() {
+        Some(super_class)
+    } else {
+        Some(
+            resolver.reference_to_owned_data(TypeData::instance_of(TypeInstance {
+                ty: super_class,
+                type_parameters,
+            })),
+        )
     }
 }
 

@@ -15,6 +15,7 @@
 <label><img alt="A label" /><input /></label>
 <label><img aria-label="A label" /><input /></label>
 <label><span>A label<input /></span></label>
+<label><span>{{ stringVariable }}<input /></span></label>
 <label><span><span>A label<input /></span></span></label>
 <label><span><span><span>A label<input /></span></span></span></label>
 <label><span><span><span><span>A label</span><input /></span></span></span></label>

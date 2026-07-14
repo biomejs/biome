@@ -359,7 +359,9 @@ impl<'a> ResolvedTypeData<'a> {
 
     /// Returns a reference to the raw data.
     ///
-    /// **Be careful:** If you intend to invoke the resolver on the data, it may
+    /// ## Warning
+    ///
+    /// If you intend to invoke the resolver on the data, it may
     /// not be aware of the context in which the data was resolved, and further
     /// references may be resolved from the wrong context. If you wish to call
     /// the resolver on the data, use [`Self::to_data()`] instead.

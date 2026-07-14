@@ -209,8 +209,8 @@ pub(super) fn flattened_expression(
         }
         TypeofExpression::StaticMember(expr) => {
             let object = resolver.resolve_and_get(&expr.object)?;
-            if let TypeData::TypeofExpression(object_expr) = object.as_raw_data()
-                && should_flatten_static_member_object(object_expr)
+            if let TypeData::TypeofExpression(object_expr) = object.to_data()
+                && should_flatten_static_member_object(&object_expr)
             {
                 let object = flattened_static_member_object_expression(
                     object_expr.as_ref().clone(),
@@ -312,31 +312,31 @@ fn flattened_static_member_object_expression(
     while remaining_depth > 0 {
         remaining_depth -= 1;
 
-        match expr {
+        return match expr {
             TypeofExpression::Call(expr) => {
                 let callee = resolver.resolve_and_get(&expr.callee)?;
                 let object = flattened_call(&expr, callee.to_data(), resolver)?;
-                return apply_static_member_chain(object, pending_members, resolver);
+                apply_static_member_chain(object, pending_members, resolver)
             }
             TypeofExpression::New(expr) => {
                 let object = flattened_new(&expr, resolver)?;
-                return apply_static_member_chain(object, pending_members, resolver);
+                apply_static_member_chain(object, pending_members, resolver)
             }
-            TypeofExpression::StaticMember(member_expr) => {
+            TypeofExpression::StaticMember(ref member_expr) => {
                 let object = resolver.resolve_and_get(&member_expr.object)?;
-                if let TypeData::TypeofExpression(object_expr) = object.as_raw_data()
-                    && should_flatten_static_member_object(object_expr)
+                if let TypeData::TypeofExpression(object_expr) = object.to_data()
+                    && should_flatten_static_member_object(&object_expr)
                 {
-                    pending_members.push(member_expr.member)?;
+                    pending_members.push(member_expr.member.clone())?;
                     expr = object_expr.as_ref().clone();
                     continue;
                 }
 
                 let object = flattened_static_member(object, &member_expr.member, resolver)?;
-                return apply_static_member_chain(object, pending_members, resolver);
+                apply_static_member_chain(object, pending_members, resolver)
             }
-            _ => return None,
-        }
+            _ => None,
+        };
     }
 
     None
