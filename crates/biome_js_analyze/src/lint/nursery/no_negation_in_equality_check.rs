@@ -201,52 +201,50 @@ impl Rule for NoNegationInEqualityCheck {
         let mut leading_for_op: Vec<SyntaxTriviaPiece<biome_js_syntax::JsLanguage>> = Vec::new();
         let mut trailing_for_op: Vec<SyntaxTriviaPiece<biome_js_syntax::JsLanguage>> = Vec::new();
 
-        // Phase 1: Collect trivia from parenthesized wrappers.
-        // Walk from outer to inner, collecting COMMENT trivia from
-        // discarded `(` and `)` tokens and routing it to the new operator.
-        // We skip whitespace pieces to avoid double-spacing with the
-        // operator's own trivia.
+        // Phase 1: Collect trivia in document (source) order.
         //
-        // IMPORTANT: We skip l_paren.leading_trivia() because for the
-        // outermost paren, this IS the old binary's first token leading
-        // trivia, which replace_node auto-copies. Collecting it here
-        // would put it on the new operator too, causing duplication and
-        // unwanted line breaks.
+        // The surviving expression is the old unary argument (e.g. `foo`).
+        // Everything before it (`(`, `!`) and after it (`)`, `===`) becomes
+        // trivia routed to the new comparison operator.
         //
-        // We DO collect COMMENT pieces from l_paren.trailing_trivia()
-        // (gap between `(` and the inner expression, e.g. `/* keep */`).
-        // We also collect COMMENT pieces from r_paren trivia.
+        // Document order of discarded tokens:
+        //   outer `(` → … → inner `(` → `!` → inner `)` → … → outer `)` → `===`
+        //
+        // We walk paren wrappers outer→inner collecting `(` trivia, then
+        // collect `!` trivia, then walk back inner→outer collecting `)`
+        // trivia, then collect the original operator trivia. This preserves
+        // the original left-to-right order of comments and whitespace.
+        //
+        // Whitespace from `l_paren.trailing` and `r_paren.leading` is
+        // filtered out (COMMENT only) — that space was padding around
+        // deleted tokens and would cause unwanted extra spacing in the
+        // replacement. Whitespace from `r_paren.trailing` and the `!`
+        // operator is preserved because it provides the proper gap between
+        // the surviving expression and the new operator.
+
+        // Accumulate paren nodes so we can traverse back inner→outer.
+        let mut paren_nodes: Vec<JsParenthesizedExpression> = Vec::new();
+
+        // Step 1a: Walk outer→inner, collecting `(` trivia.
         {
             let mut current = left.syntax().clone();
             let mut is_outermost = true;
             while let Some(paren) = JsParenthesizedExpression::cast_ref(&current) {
                 if let Ok(lp) = paren.l_paren_token() {
                     // Skip leading trivia on outermost `(` — replace_node
-                    // handles it. Collect for inner parens (nested case).
+                    // auto-copies it. Collect for inner parens (nested).
                     if !is_outermost {
                         for p in lp.leading_trivia().pieces() {
                             leading_for_op.push(p);
                         }
                     }
-                    // Only collect COMMENT pieces from trailing trivia.
-                    // Whitespace pieces are skipped to avoid double-spacing.
+                    // COMMENT pieces only — whitespace here was
+                    // padding around the deleted `(`, not needed.
                     for p in lp.trailing_trivia().pieces().filter(|p| p.kind().is_comment()) {
                         leading_for_op.push(p);
                     }
                 }
-                if let Ok(rp) = paren.r_paren_token() {
-                    // Only collect COMMENT pieces from leading trivia —
-                    // whitespace would duplicate with l_paren padding.
-                    for p in rp.leading_trivia().pieces().filter(|p| p.kind().is_comment()) {
-                        leading_for_op.push(p);
-                    }
-                    // Collect ALL trailing trivia pieces. This is the
-                    // gap between `)` and the next token (operator or
-                    // outer `)`) — we need the spacing here.
-                    for p in rp.trailing_trivia().pieces() {
-                        leading_for_op.push(p);
-                    }
-                }
+                paren_nodes.push(paren.clone());
                 match paren.expression() {
                     Ok(inner_expr) => current = inner_expr.into_syntax(),
                     Err(_) => break,
@@ -255,29 +253,49 @@ impl Rule for NoNegationInEqualityCheck {
             }
         }
 
-        // Phase 2: Collect trivia from the removed `!` operator.
+        // Step 1b: Collect `!` operator trivia.
         //
-        // We intentionally do NOT collect neg_op_token.leading_trivia():
-        // for non-parenthesized cases, neg_op_token IS the old binary's
-        // first token, and its leading trivia is auto-copied by
-        // replace_node. Collecting it here would cause duplication.
+        // For non-parenthesized cases (!foo === bar), neg_op_token IS the
+        // binary's first token and its leading trivia is auto-copied by
+        // replace_node — skip to avoid duplication.
         //
-        // For parenthesized cases, the trivia between `(` and `!` may be
-        // stored as trailing trivia of `(` already, but it may also be
-        // stored as leading trivia of `!`. To avoid double-counting, we
-        // skip neg_op_token.leading_trivia() entirely and rely on the
-        // parenthesized wrapper's `l_paren.trailing_trivia()` collected in
-        // Phase 1 (which covers the same gap from the left side).
+        // For parenthesized cases ((!foo) === bar), the outermost `(` is
+        // the binary's first token, NOT `!`. replace_node copies `(`'s
+        // leading trivia but leaves `!`'s leading trivia untouched.
+        // Comments between `(` and `!` (e.g., `(/* keep */ !foo)`) may be
+        // stored as leading trivia of `!` rather than trailing trivia of
+        // `(`, depending on parser internals. To avoid losing them, we
+        // collect neg_op_token.leading_trivia() when paren wrappers exist.
         //
-        // We DO collect neg_op_token.trailing_trivia(): this is the trivia
-        // between `!` and its argument (e.g., `/* keep */` in
-        // `!/* keep */foo`). This trivia is not covered by replace_node
-        // and not covered by the paren wrapper loop.
+        // We always collect neg_op_token.trailing_trivia(): trivia between
+        // `!` and its argument (e.g., `/* keep */` in `!/* keep */foo`).
+        let has_paren_wrappers = !paren_nodes.is_empty();
+        if has_paren_wrappers {
+            for p in neg_op_token.leading_trivia().pieces() {
+                leading_for_op.push(p);
+            }
+        }
         for p in neg_op_token.trailing_trivia().pieces() {
             leading_for_op.push(p);
         }
 
-        // Phase 3: Transfer the original comparison operator's trivia.
+        // Step 1c: Walk inner→outer, collecting `)` trivia.
+        for paren in paren_nodes.iter().rev() {
+            if let Ok(rp) = paren.r_paren_token() {
+                // COMMENT pieces only — whitespace here was padding
+                // around the deleted `)`, not needed.
+                for p in rp.leading_trivia().pieces().filter(|p| p.kind().is_comment()) {
+                    leading_for_op.push(p);
+                }
+                // Collect ALL trailing trivia pieces — this is the gap
+                // between `)` and the next token (`===` or outer `)`).
+                for p in rp.trailing_trivia().pieces() {
+                    leading_for_op.push(p);
+                }
+            }
+        }
+
+        // Phase 2: Transfer the original comparison operator's trivia.
         for p in operator.leading_trivia().pieces() {
             leading_for_op.push(p);
         }

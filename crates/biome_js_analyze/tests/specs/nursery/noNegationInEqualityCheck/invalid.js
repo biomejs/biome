@@ -8,6 +8,10 @@
 !/* keep */foo === bar;
 !/* keep */ foo === bar;
 (/* keep */ !foo) === bar;
+(/* keep */ !foo) !== bar;
+((/* keep */ !foo)) === bar;
+(/* a */ /* b */ !foo) === bar;
+(/* c1 */!foo/* c2 */) === bar;
 /* comment before bang should be preserved */
 /* c1 */!foo === bar;
 !foo /* c2 */ === bar;
