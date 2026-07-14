@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 196
 expression: invalid.js
 ---
 # Input
@@ -38,6 +37,9 @@ foo
 !function(){} === bar;
 !class{} === bar;
 !{} === bar;
+/* ASI unsafe: block comment with newline in previous token's trailing trivia */
+foo /* multi
+line */!(x) === bar;
 /* ASI unsafe: block comment with newline before ! exposes restricted char */
 /*
 */!/regex/.test(value) === bar;
@@ -391,7 +393,7 @@ invalid.js:32:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━
   > 32 │ !class{} === bar;
        │ ^^^^^^^^^^^^^^^^
     33 │ !{} === bar;
-    34 │ /* ASI unsafe: block comment with newline before ! exposes restricted char */
+    34 │ /* ASI unsafe: block comment with newline in previous token's trailing trivia */
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -403,7 +405,7 @@ invalid.js:32:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━
        32 │ + (
        33 │ + class{}·)!==·bar;
     33 34 │   !{} === bar;
-    34 35 │   /* ASI unsafe: block comment with newline before ! exposes restricted char */
+    34 35 │   /* ASI unsafe: block comment with newline in previous token's trailing trivia */
   
 
 ```
@@ -417,8 +419,8 @@ invalid.js:33:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━
     32 │ !class{} === bar;
   > 33 │ !{} === bar;
        │ ^^^^^^^^^^^
-    34 │ /* ASI unsafe: block comment with newline before ! exposes restricted char */
-    35 │ /*
+    34 │ /* ASI unsafe: block comment with newline in previous token's trailing trivia */
+    35 │ foo /* multi
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -429,22 +431,39 @@ invalid.js:33:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━
     33    │ - !{}·===·bar;
        33 │ + (
        34 │ + {}·)!==·bar;
-    34 35 │   /* ASI unsafe: block comment with newline before ! exposes restricted char */
-    35 36 │   /*
+    34 35 │   /* ASI unsafe: block comment with newline in previous token's trailing trivia */
+    35 36 │   foo /* multi
   
 
 ```
 
 ```
-invalid.js:36:3 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:36:8 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A negation is used on the left side of this equality check.
   
-    34 │ /* ASI unsafe: block comment with newline before ! exposes restricted char */
-    35 │ /*
-  > 36 │ */!/regex/.test(value) === bar;
+    34 │ /* ASI unsafe: block comment with newline in previous token's trailing trivia */
+    35 │ foo /* multi
+  > 36 │ line */!(x) === bar;
+       │        ^^^^^^^^^^^^
+    37 │ /* ASI unsafe: block comment with newline before ! exposes restricted char */
+    38 │ /*
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:3 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A negation is used on the left side of this equality check.
+  
+    37 │ /* ASI unsafe: block comment with newline before ! exposes restricted char */
+    38 │ /*
+  > 39 │ */!/regex/.test(value) === bar;
        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    37 │ 
+    40 │ 
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

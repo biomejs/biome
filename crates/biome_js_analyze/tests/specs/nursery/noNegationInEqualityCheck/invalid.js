@@ -31,6 +31,9 @@ foo
 !function(){} === bar;
 !class{} === bar;
 !{} === bar;
+/* ASI unsafe: block comment with newline in previous token's trailing trivia */
+foo /* multi
+line */!(x) === bar;
 /* ASI unsafe: block comment with newline before ! exposes restricted char */
 /*
 */!/regex/.test(value) === bar;

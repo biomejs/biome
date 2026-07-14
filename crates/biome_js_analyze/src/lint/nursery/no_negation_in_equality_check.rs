@@ -136,6 +136,10 @@ impl Rule for NoNegationInEqualityCheck {
         // block comments are represented as MultiLineComment (not Newline)
         // pieces, but the line break inside them puts the argument at line
         // start just like a standalone newline would.
+        //
+        // Block comments may be attached as trailing trivia of the previous
+        // token rather than leading trivia of `!` (e.g. `foo/*...\n...*/!x`).
+        // We check both locations to avoid false-negative ASI hazards.
         {
             let has_preceding_newline = neg_op_token
                 .leading_trivia()
@@ -144,7 +148,18 @@ impl Rule for NoNegationInEqualityCheck {
                     p.kind() == TriviaPieceKind::Newline
                         || p.kind() == TriviaPieceKind::MultiLineComment
                 });
-            if has_preceding_newline {
+            let prev_trailing_has_newline = neg_op_token
+                .prev_token()
+                .map(|t| {
+                    t.trailing_trivia()
+                        .pieces()
+                        .any(|p| {
+                            p.kind() == TriviaPieceKind::Newline
+                                || p.kind() == TriviaPieceKind::MultiLineComment
+                        })
+                })
+                .unwrap_or(false);
+            if has_preceding_newline || prev_trailing_has_newline {
                 let arg_text = negated_expr.syntax().text_trimmed().to_string();
                 let first_char = arg_text.chars().next().unwrap_or('\0');
                 if matches!(first_char, '/' | '[' | '`' | '+' | '-' | '(' | '<') {
