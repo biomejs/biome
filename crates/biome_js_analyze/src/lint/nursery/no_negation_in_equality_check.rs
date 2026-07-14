@@ -126,16 +126,24 @@ impl Rule for NoNegationInEqualityCheck {
         // --- ASI safety check ---
         // If a newline precedes the `!` operator and the argument starts with
         // a character that would continue the previous expression
-        // (/, [, `, +, -, (), removing the `!` would change the parse.
+        // (/, [, `, +, -, (, <), removing the `!` would change the parse.
         // `/` would become a regex literal, `[` property access,
         // `` ` `` a tagged template, `+`/`-` a unary operator, `(`
         // a function call, and `<` a JSX element or TS type assertion.
         // Skip the fix when any of these would be exposed at line start.
+        //
+        // MultiLineComment trivia also contains embedded newlines:
+        // block comments are represented as MultiLineComment (not Newline)
+        // pieces, but the line break inside them puts the argument at line
+        // start just like a standalone newline would.
         {
             let has_preceding_newline = neg_op_token
                 .leading_trivia()
                 .pieces()
-                .any(|p| p.kind() == TriviaPieceKind::Newline);
+                .any(|p| {
+                    p.kind() == TriviaPieceKind::Newline
+                        || p.kind() == TriviaPieceKind::MultiLineComment
+                });
             if has_preceding_newline {
                 let arg_text = negated_expr.syntax().text_trimmed().to_string();
                 let first_char = arg_text.chars().next().unwrap_or('\0');
