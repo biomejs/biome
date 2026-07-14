@@ -207,6 +207,12 @@ pub fn css_binary_expression(
         ],
     ))
 }
+pub fn css_boolean_media_query(boolean_token: SyntaxToken) -> CssBooleanMediaQuery {
+    CssBooleanMediaQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOOLEAN_MEDIA_QUERY,
+        [Some(SyntaxElement::Token(boolean_token))],
+    ))
+}
 pub fn css_bracketed_value(
     l_brack_token: SyntaxToken,
     items: CssBracketedValueList,
@@ -674,6 +680,32 @@ pub fn css_custom_identifier(value_token: SyntaxToken) -> CssCustomIdentifier {
     CssCustomIdentifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_CUSTOM_IDENTIFIER,
         [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_custom_media_at_rule(
+    declarator: CssCustomMediaAtRuleDeclarator,
+    semicolon_token: SyntaxToken,
+) -> CssCustomMediaAtRule {
+    CssCustomMediaAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_MEDIA_AT_RULE,
+        [
+            Some(SyntaxElement::Node(declarator.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn css_custom_media_at_rule_declarator(
+    custom_media_token: SyntaxToken,
+    name: AnyCssDashedIdentifier,
+    queries: AnyCssCustomMediaQuery,
+) -> CssCustomMediaAtRuleDeclarator {
+    CssCustomMediaAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_MEDIA_AT_RULE_DECLARATOR,
+        [
+            Some(SyntaxElement::Token(custom_media_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(queries.into_syntax())),
+        ],
     ))
 }
 pub fn css_dashed_identifier(value_token: SyntaxToken) -> CssDashedIdentifier {

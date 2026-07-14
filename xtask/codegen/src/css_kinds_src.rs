@@ -157,6 +157,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "ridge",
         "inset",
         "outset",
+        "true",
+        "false",
         // Tailwind CSS 4.0 keywords
         "theme",
         "utility",
@@ -298,6 +300,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "view-transition",
         "function",
         "returns",
+        "custom-media",
         //
         "font-face",
         // Don't add to the end of this list, add new keywords above the "HERE"
@@ -606,6 +609,9 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_FUNCTION_PARAMETER_DEFAULT_VALUE",
         "CSS_FUNCTION_PARAMETER_LIST",
         "CSS_RETURNS_STATEMENT",
+        "CSS_CUSTOM_MEDIA_AT_RULE",
+        "CSS_CUSTOM_MEDIA_AT_RULE_DECLARATOR",
+        "CSS_BOOLEAN_MEDIA_QUERY",
         // SCSS
         "SCSS_AT_ROOT_AT_RULE",
         "SCSS_AT_ROOT_QUERY",
