@@ -10,7 +10,7 @@ use biome_diagnostics::Applicability;
 use biome_html_syntax::{
     AnyAstroDirective, AnyHtmlAttribute, AnySvelteBindingProperty, AnySvelteDirective,
     AnyVueDirective, AnyVueDirectiveArgument, AstroDirectiveValue, HtmlAttributeList, HtmlLanguage,
-    HtmlOpeningElement, HtmlSelfClosingElement, SvelteDirectiveValue,
+    HtmlOpeningElement, HtmlProcessingInstruction, HtmlSelfClosingElement, SvelteDirectiveValue,
 };
 use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt, SyntaxToken};
 use biome_rule_options::use_sorted_attributes::{SortOrder, UseSortedAttributesOptions};
@@ -135,8 +135,19 @@ impl Rule for UseSortedAttributes {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let attrs = ctx.query();
-        let options = ctx.options();
 
+        // Skip processing instructions (like <?xml ...?>) as their pseudo-attributes
+        // have a fixed order mandated by the XML specification
+        let is_processing_instruction = attrs
+            .syntax()
+            .ancestors()
+            .any(|node| HtmlProcessingInstruction::can_cast(node.kind()));
+
+        if is_processing_instruction {
+            return [][..].into();
+        }
+
+        let options = ctx.options();
         let mut current_attr_group = AttributeGroup::default();
         let mut attr_groups = Vec::new();
         let sort_by = options.sort_order.unwrap_or_default();
