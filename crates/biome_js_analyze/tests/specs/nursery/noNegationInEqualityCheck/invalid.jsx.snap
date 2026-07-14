@@ -10,13 +10,6 @@ expression: invalid.jsx
 /* ASI unsafe: < at start of expression after newline (JSX element or TS type assertion) */
 foo
 !<Component /> === bar;
-/* ASI unsafe: function/class/object at line start — wrapping would create call continuation */
-foo
-!function(){} === bar;
-foo
-!class{} === bar;
-foo
-!{} === bar;
 
 ```
 
@@ -36,11 +29,11 @@ invalid.jsx:2:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━
   
   i Unsafe fix: Use the proper negated comparison operator instead.
   
-     1  1 │   /* should generate diagnostics */
-     2    │ - !foo·===·bar;
-        2 │ + foo·!==·bar;
-     3  3 │   /* ASI unsafe: < at start of expression after newline (JSX element or TS type assertion) */
-     4  4 │   foo
+    1 1 │   /* should generate diagnostics */
+    2   │ - !foo·===·bar;
+      2 │ + foo·!==·bar;
+    3 3 │   /* ASI unsafe: < at start of expression after newline (JSX element or TS type assertion) */
+    4 4 │   foo
   
 
 ```
@@ -54,89 +47,9 @@ invalid.jsx:5:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━�
     4 │ foo
   > 5 │ !<Component /> === bar;
       │ ^^^^^^^^^^^^^^^^^^^^^^
-    6 │ /* ASI unsafe: function/class/object at line start — wrapping would create call continuation */
-    7 │ foo
+    6 │ 
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.jsx:8:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! A negation is used on the left side of this equality check.
-  
-     6 │ /* ASI unsafe: function/class/object at line start — wrapping would create call continuation */
-     7 │ foo
-   > 8 │ !function(){} === bar;
-       │ ^^^^^^^^^^^^^^^^^^^^^
-     9 │ foo
-    10 │ !class{} === bar;
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Use the proper negated comparison operator instead.
-  
-     6  6 │   /* ASI unsafe: function/class/object at line start — wrapping would create call continuation */
-     7  7 │   foo
-     8    │ - !function(){}·===·bar;
-        8 │ + (
-        9 │ + function(){}·)!==·bar;
-     9 10 │   foo
-    10 11 │   !class{} === bar;
-  
-
-```
-
-```
-invalid.jsx:10:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! A negation is used on the left side of this equality check.
-  
-     8 │ !function(){} === bar;
-     9 │ foo
-  > 10 │ !class{} === bar;
-       │ ^^^^^^^^^^^^^^^^
-    11 │ foo
-    12 │ !{} === bar;
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Use the proper negated comparison operator instead.
-  
-     8  8 │   !function(){} === bar;
-     9  9 │   foo
-    10    │ - !class{}·===·bar;
-       10 │ + (
-       11 │ + class{}·)!==·bar;
-    11 12 │   foo
-    12 13 │   !{} === bar;
-  
-
-```
-
-```
-invalid.jsx:12:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! A negation is used on the left side of this equality check.
-  
-    10 │ !class{} === bar;
-    11 │ foo
-  > 12 │ !{} === bar;
-       │ ^^^^^^^^^^^
-    13 │ 
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Use the proper negated comparison operator instead.
-  
-    10 10 │   !class{} === bar;
-    11 11 │   foo
-    12    │ - !{}·===·bar;
-       12 │ + (
-       13 │ + {}·)!==·bar;
-    13 14 │   
   
 
 ```

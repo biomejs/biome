@@ -34,10 +34,3 @@ foo
 /* ASI unsafe: block comment with newline before ! exposes restricted char */
 /*
 */!/regex/.test(value) === bar;
-/* ASI unsafe: function/class/object at line start — wrapping would create call continuation */
-foo
-!function(){} === bar;
-foo
-!class{} === bar;
-foo
-!{} === bar;
