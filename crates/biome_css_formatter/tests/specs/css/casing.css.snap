@@ -860,7 +860,7 @@ B:nth-last-child(EVEN) {
 }
 
 :export {
-	KeepProp: KeepValue;
+	keepprop: KeepValue;
 }
 
 .module-source {

@@ -1,4 +1,6 @@
 @plugin    "my-plugin"     {
 	debug:   false;
 	threshold:0.5;
+	KeepOption:KeepValue;
+	Keyword:INITIAL;
 }

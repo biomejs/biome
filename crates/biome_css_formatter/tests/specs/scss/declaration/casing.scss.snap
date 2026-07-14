@@ -6,6 +6,10 @@ info: scss/declaration/casing.scss
 # Input
 
 ```scss
+@CHARSET"UTF-8";
+
+@-MOZ-DOCUMENT URL("x"){.a{COLOR:RED}}
+
 @USE "x" AS KeepUse;
 
 @USE "reset" AS *;
@@ -71,6 +75,8 @@ $KeepNotParen: NOT ($Keep AND $Other);
 
     #{$Keep + 15FuTuRe}:KeepValue;
 
+    #{$Keep + 16PX}:{COLOR:RED}
+
     :root {
         --Keep-custom-Prop: $Keep;
     }
@@ -119,6 +125,8 @@ $KeepNotParen: NOT ($Keep AND $Other);
 
 @supports (COLOR: RED) OR SELECTOR(A:HOVER) { .KeepClass:HOVER { COLOR: RED; } }
 
+@SUPPORTS(DISPLAY:GRID){.KeepClass{COLOR:RED}}
+
 @PAGE KeepScssPage:FIRST { $KeepPageColor: RED; BACKGROUND: { COLOR: $KeepPageColor; } }
 
 @EACH $Name IN KeepOne, KeepTwo { .#{$Name} { COLOR: RED; } }
@@ -163,12 +171,26 @@ $KeepNotParen: NOT ($Keep AND $Other);
 
 .units{X:1PX;Y:1FuTuRe;Q:1q;H:1HZ;K:1khz}
 
+.Unit-#{1PX}{COLOR:RED}
+
+$KeepKeyword:INITIAL;.#{$KeepKeyword}{COLOR:RED}
+
+.Nesting{FONT:INITIAL{FAMILY:sans-serif}}
+
 ```
 
 
 # Formatted
 
 ```scss
+@charset "UTF-8";
+
+@-moz-document URL("x") {
+	.a {
+		color: RED;
+	}
+}
+
 @use "x" AS KeepUse;
 
 @use "reset" AS *;
@@ -251,6 +273,10 @@ $KeepNotParen: NOT($Keep AND $Other);
 	#{$Keep + 15PX}: KeepValue;
 
 	#{$Keep + 15FuTuRe}: KeepValue;
+
+	#{$Keep + 16px}: {
+		color: RED;
+	}
 
 	:root {
 		--Keep-custom-Prop: $Keep;
@@ -345,6 +371,12 @@ $KeepNotParen: NOT($Keep AND $Other);
 	}
 }
 
+@supports (DISPLAY: GRID) {
+	.KeepClass {
+		color: RED;
+	}
+}
+
 @page KeepScssPage:FIRST {
 	$KeepPageColor: RED;
 	background: {
@@ -405,7 +437,7 @@ $KeepNotParen: NOT($Keep AND $Other);
 	.KeepClass {
 		color: RED;
 	}
-} @else if $Other {
+} @else IF $Other {
 	.KeepClass {
 		background: RED;
 	}
@@ -471,9 +503,24 @@ $KeepNotParen: NOT($Keep AND $Other);
 	k: 1kHz;
 }
 
+.Unit-#{1px} {
+	color: RED;
+}
+
+$KeepKeyword: initial;
+.#{$KeepKeyword} {
+	color: RED;
+}
+
+.Nesting {
+	FONT:initial {
+		family: sans-serif;
+	}
+}
+
 ```
 
 # Lines exceeding max width of 80 characters
 ```
-  130: #{$KeepType}.#{$KeepClass}##{$KeepId}[data-#{$KeepAttr}="#{$KeepAttrValue}" #{$KeepMod}] {
+  142: #{$KeepType}.#{$KeepClass}##{$KeepId}[data-#{$KeepAttr}="#{$KeepAttrValue}" #{$KeepMod}] {
 ```

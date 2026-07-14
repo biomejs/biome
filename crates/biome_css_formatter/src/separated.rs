@@ -1,6 +1,6 @@
 use crate::FormatCssSyntaxToken;
 use crate::prelude::*;
-use biome_css_syntax::{CssIdentifier, CssLanguage, CssSyntaxToken};
+use biome_css_syntax::{CssLanguage, CssSyntaxToken};
 use biome_formatter::separated::{
     FormatSeparatedElementRule, FormatSeparatedIter, TrailingSeparator,
 };
@@ -135,6 +135,6 @@ pub(crate) trait FormatAstSeparatedListWithScopedOptionsExtension<O>:
 }
 
 impl<T, O> FormatAstSeparatedListWithScopedOptionsExtension<O> for T where
-    T: AstSeparatedList<Language = CssLanguage, Node = CssIdentifier>
+    T: AstSeparatedList<Language = CssLanguage>
 {
 }

@@ -9,6 +9,8 @@ info: css/tailwind/plugin-with-options.css
 @plugin    "my-plugin"     {
 	debug:   false;
 	threshold:0.5;
+	KeepOption:KeepValue;
+	Keyword:INITIAL;
 }
 
 ```
@@ -32,6 +34,8 @@ info: css/tailwind/plugin-with-options.css
 @plugin "my-plugin" {
 	debug: false;
 	threshold: 0.5;
+	keepoption: KeepValue;
+	keyword: initial;
 }
 
 ```

@@ -1,3 +1,7 @@
+@CHARSET"UTF-8";
+
+@-MOZ-DOCUMENT URL("x"){.a{COLOR:RED}}
+
 @USE "x" AS KeepUse;
 
 @USE "reset" AS *;
@@ -63,6 +67,8 @@ $KeepNotParen: NOT ($Keep AND $Other);
 
     #{$Keep + 15FuTuRe}:KeepValue;
 
+    #{$Keep + 16PX}:{COLOR:RED}
+
     :root {
         --Keep-custom-Prop: $Keep;
     }
@@ -111,6 +117,8 @@ $KeepNotParen: NOT ($Keep AND $Other);
 
 @supports (COLOR: RED) OR SELECTOR(A:HOVER) { .KeepClass:HOVER { COLOR: RED; } }
 
+@SUPPORTS(DISPLAY:GRID){.KeepClass{COLOR:RED}}
+
 @PAGE KeepScssPage:FIRST { $KeepPageColor: RED; BACKGROUND: { COLOR: $KeepPageColor; } }
 
 @EACH $Name IN KeepOne, KeepTwo { .#{$Name} { COLOR: RED; } }
@@ -154,3 +162,9 @@ $KeepNotParen: NOT ($Keep AND $Other);
 %KeepPlaceholder{COLOR:RED;}
 
 .units{X:1PX;Y:1FuTuRe;Q:1q;H:1HZ;K:1khz}
+
+.Unit-#{1PX}{COLOR:RED}
+
+$KeepKeyword:INITIAL;.#{$KeepKeyword}{COLOR:RED}
+
+.Nesting{FONT:INITIAL{FAMILY:sans-serif}}

@@ -24,6 +24,11 @@ impl FormatNodeRule<ScssIfAtRule> for FormatScssIfAtRule {
             .syntax()
             .parent()
             .is_some_and(|parent| ScssElseClause::can_cast(parent.kind()));
+        let if_case = if is_else_if {
+            CssCase::Preserve
+        } else {
+            CssCase::Lowercase
+        };
         let should_split_after_if = is_else_if && is_else_if_condition_split_after_if(&condition);
         let condition_layout = ScssControlConditionLayout::from_condition(&condition);
         let block_separator = format_with(|f| {
@@ -34,7 +39,7 @@ impl FormatNodeRule<ScssIfAtRule> for FormatScssIfAtRule {
             }
         });
 
-        write!(f, [if_token.format()?.with_text_case(CssCase::Lowercase)])?;
+        write!(f, [if_token.format()?.with_text_case(if_case)])?;
 
         if !should_split_after_if {
             write!(f, [space()])?;

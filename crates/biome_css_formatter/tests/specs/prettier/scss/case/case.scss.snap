@@ -176,7 +176,7 @@ TABLE {}
  
  $KeepTopLevelVar: val;
 -@KeepLessVar: val;
-+@keeplessvar : val;
++@KeepLessVar : val;
  
  @mixin KeepMixinName($Keep: 15in, $Keep: $Keep15IN, $Keep: Keep-1E-2Em) {
    $KeepVar: KeepFuncName();
@@ -184,7 +184,7 @@ TABLE {}
    #{$Keep + 15PX}: val;
    #{$Keep + $Keep15PX}: val;
 -  @KeepLessVar: val;
-+  @keeplessvar : val;
++  @KeepLessVar : val;
    @extend %KeepPlaceholderSelector;
  
    #{$Keep}[#{$Keep}][#{Keep}^="#{Keep-1A}"]:#{$Keep} {
@@ -251,14 +251,14 @@ svg[viewBox] linearGradient,
 }
 
 $KeepTopLevelVar: val;
-@keeplessvar : val;
+@KeepLessVar : val;
 
 @mixin KeepMixinName($Keep: 15in, $Keep: $Keep15IN, $Keep: Keep-1E-2Em) {
   $KeepVar: KeepFuncName();
   #{$KeepInterpolationVar}: val;
   #{$Keep + 15PX}: val;
   #{$Keep + $Keep15PX}: val;
-  @keeplessvar : val;
+  @KeepLessVar : val;
   @extend %KeepPlaceholderSelector;
 
   #{$Keep}[#{$Keep}][#{Keep}^="#{Keep-1A}"]:#{$Keep} {

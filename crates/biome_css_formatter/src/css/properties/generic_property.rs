@@ -5,8 +5,8 @@ use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssGenericPropertyValueOrExpression, AnyCssSelectorIdentifier,
     CssContainerStyleInParens, CssContainerStyleQueryInParens, CssDeclaration, CssGenericProperty,
     CssGenericPropertyFields, CssIdentifier, CssIfStyleTest, CssIfSupportsTest, CssImportSupports,
-    CssLanguage, CssPseudoClassFunctionIdentifier, CssPseudoClassIdentifier, CssQualifiedRule,
-    CssSupportsFeatureDeclaration,
+    CssLanguage, CssPseudoClassFunctionIdentifier, CssPseudoClassIdentifier,
+    CssPseudoClassSelector, CssQualifiedRule, CssSupportsFeatureDeclaration, CssSyntaxNode,
 };
 use biome_formatter::comments::SourceComment;
 use biome_formatter::trivia::format_dangling_comment;
@@ -97,21 +97,28 @@ fn is_css_modules_import_export_declaration(property: &CssGenericProperty) -> bo
         return false;
     };
 
-    let Some(rule) = declaration
+    declaration
         .syntax()
         .ancestors()
         .find_map(CssQualifiedRule::cast)
-    else {
-        return false;
-    };
-
-    rule.prelude()
-        .syntax()
-        .descendants()
-        .any(is_css_modules_import_export_pseudo)
+        .is_some_and(|rule| is_css_modules_import_export_rule(&rule))
 }
 
-fn is_css_modules_import_export_pseudo(node: biome_css_syntax::CssSyntaxNode) -> bool {
+fn is_css_modules_import_export_rule(rule: &CssQualifiedRule) -> bool {
+    let prelude = rule.prelude();
+
+    prelude
+        .syntax()
+        .descendants()
+        .filter(is_css_modules_import_export_pseudo)
+        .filter_map(|node| node.parent())
+        .filter_map(CssPseudoClassSelector::cast)
+        .any(|selector| {
+            selector.syntax().text_trimmed_range() == prelude.syntax().text_trimmed_range()
+        })
+}
+
+fn is_css_modules_import_export_pseudo(node: &CssSyntaxNode) -> bool {
     if let Some(pseudo) = CssPseudoClassIdentifier::cast(node.clone()) {
         return pseudo.name().is_ok_and(|name| {
             selector_identifier_text_eq(&name, "export")
@@ -119,7 +126,7 @@ fn is_css_modules_import_export_pseudo(node: biome_css_syntax::CssSyntaxNode) ->
         });
     }
 
-    CssPseudoClassFunctionIdentifier::cast(node).is_some_and(|pseudo| {
+    CssPseudoClassFunctionIdentifier::cast(node.clone()).is_some_and(|pseudo| {
         pseudo.name().is_ok_and(|name| {
             identifier_text_eq(&name, "export") || identifier_text_eq(&name, "import")
         })
@@ -130,10 +137,10 @@ fn selector_identifier_text_eq(name: &AnyCssSelectorIdentifier, expected: &str) 
     matches!(name, AnyCssSelectorIdentifier::CssIdentifier(identifier) if identifier_text_eq(identifier, expected))
 }
 
-fn identifier_text_eq(identifier: &biome_css_syntax::CssIdentifier, expected: &str) -> bool {
+fn identifier_text_eq(identifier: &CssIdentifier, expected: &str) -> bool {
     identifier
         .value_token()
-        .is_ok_and(|token| token.token_text_trimmed().eq_ignore_ascii_case(expected))
+        .is_ok_and(|token| token.token_text_trimmed() == expected)
 }
 
 /// Formats declaration-colon comments like `a { color/* a */:/* b */ red; }`.

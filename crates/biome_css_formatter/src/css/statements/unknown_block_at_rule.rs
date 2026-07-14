@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::utils::case::unknown_at_rule_name_case;
 use biome_css_syntax::{CssUnknownBlockAtRule, CssUnknownBlockAtRuleFields};
 use biome_formatter::write;
 
@@ -12,10 +13,13 @@ impl FormatNodeRule<CssUnknownBlockAtRule> for FormatCssUnknownBlockAtRule {
             block,
         } = node.as_fields();
 
+        let name = name?;
+        let name_case = unknown_at_rule_name_case(&name, components.as_ref().ok());
+
         write!(
             f,
             [
-                name?.format().with_text_case(CssCase::Lowercase),
+                name.format().with_text_case(name_case),
                 space(),
                 components.format()
             ]

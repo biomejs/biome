@@ -4,8 +4,9 @@ use crate::CssFormatter;
 #[cfg(debug_assertions)]
 use biome_css_syntax::CssSyntaxToken;
 use biome_css_syntax::{
-    AnyCssQueryFeatureName, AnyCssSelectorIdentifier, CssContainerScrollStateQueryInParens,
-    CssIdentifier, CssIfMediaTest, CssLanguage, CssQualifiedRule, CssSyntaxKind, CssSyntaxNode,
+    AnyCssQueryFeatureName, AnyCssSelectorIdentifier, AnyCssUnknownAtRuleName,
+    CssContainerScrollStateQueryInParens, CssIdentifier, CssIfMediaTest, CssLanguage,
+    CssSyntaxKind, CssSyntaxNode, CssUnknownAtRuleComponentList,
 };
 #[cfg(debug_assertions)]
 use biome_formatter::Buffer;
@@ -18,9 +19,9 @@ use biome_rowan::AstNode as _;
 ///
 /// - Use [`CssCase::Lowercase`] for case-insensitive, syntax-owned names that
 ///   the formatter canonicalizes, such as `@IMPORT` or `:HOVER`.
-/// - Use [`CssCase::Preserve`] for author or externally owned text, including
-///   custom identifiers, Sass names and interpolation, framework names, and
-///   unknown future syntax, such as `--Brand`, `$Theme`, or `#{$Name}`.
+/// - Use [`CssCase::Preserve`] for author-owned text, including custom
+///   identifiers, Sass names and interpolation, such as `--Brand`, `$Theme`,
+///   or `#{$Name}`.
 /// - Leave [`CssCase::Auto`] only as the default that exposes a missing decision
 ///   in formatter tests. Do not select it explicitly at a formatting callsite.
 pub(crate) type CssCase = TextCase;
@@ -74,7 +75,7 @@ pub(crate) fn record_auto_contextual_token(token: &CssSyntaxToken, f: &mut CssFo
     ));
 }
 
-/// Lowercases `INITIAL`, `INHERIT`, `UNSET`, and `REVERT` in value position.
+/// Lowercases CSS-wide keywords such as `INITIAL` and `REVERT` in values.
 pub(crate) fn value_identifier_case(value: &CssIdentifier) -> CssCase {
     if is_lowercase_value_keyword(value) {
         CssCase::Lowercase
@@ -93,6 +94,30 @@ fn is_lowercase_value_keyword(value: &CssIdentifier) -> bool {
             || text.eq_ignore_ascii_case("unset")
             || text.eq_ignore_ascii_case("revert")
     })
+}
+
+/// Preserves custom, interpolated, and colon-prefixed unknown at-rule names.
+pub(crate) fn unknown_at_rule_name_case(
+    name: &AnyCssUnknownAtRuleName,
+    components: Option<&CssUnknownAtRuleComponentList>,
+) -> CssCase {
+    match name.as_css_identifier() {
+        None => CssCase::Preserve,
+        Some(identifier)
+            if is_dashed_identifier(identifier)
+                || components.is_some_and(unknown_components_start_with_colon) =>
+        {
+            CssCase::Preserve
+        }
+        Some(_) => CssCase::Lowercase,
+    }
+}
+
+fn unknown_components_start_with_colon(components: &CssUnknownAtRuleComponentList) -> bool {
+    components
+        .syntax()
+        .first_token()
+        .is_some_and(|token| token.kind() == CssSyntaxKind::COLON)
 }
 
 /// Lowercases standard query features such as `(MIN-WIDTH: 1PX)`.
@@ -118,7 +143,7 @@ fn is_preserved_query_feature_context(node: &CssSyntaxNode) -> bool {
     })
 }
 
-/// Matches identifiers beginning with `--`.
+/// Matches identifiers beginning with a literal `--`.
 fn is_dashed_identifier(identifier: &CssIdentifier) -> bool {
     identifier
         .value_token()
@@ -131,17 +156,25 @@ pub(crate) fn pseudo_name_case(name: &AnyCssSelectorIdentifier) -> CssCase {
         return CssCase::Preserve;
     };
 
-    if is_dashed_identifier(name) || is_front_matter_selector(name) {
+    pseudo_identifier_case(name)
+}
+
+/// Returns the casing policy for identifier-backed pseudo names.
+pub(crate) fn pseudo_identifier_case(name: &CssIdentifier) -> CssCase {
+    if is_dashed_identifier(name) || has_hex_escape(name) {
         CssCase::Preserve
     } else {
         CssCase::Lowercase
     }
 }
 
-/// Matches YAML front matter recovered as a selector beginning with `---`.
-fn is_front_matter_selector(name: &CssIdentifier) -> bool {
-    name.syntax()
-        .ancestors()
-        .find_map(CssQualifiedRule::cast)
-        .is_some_and(|rule| rule.prelude().syntax().text_trimmed().starts_with("---"))
+/// Prettier preserves pseudo names containing hexadecimal escapes.
+fn has_hex_escape(name: &CssIdentifier) -> bool {
+    name.value_token().is_ok_and(|token| {
+        token
+            .token_text_trimmed()
+            .as_bytes()
+            .windows(2)
+            .any(|pair| pair[0] == b'\\' && pair[1].is_ascii_hexdigit())
+    })
 }

@@ -453,9 +453,11 @@ mod tests {
     use biome_formatter::comments::Comments;
     use biome_formatter::prelude::token;
     use biome_formatter::{
-        Buffer, FormatLanguage, FormatRefWithRule, FormatResult, FormatRule, FormatState,
-        FormatTextCaseExt as _, VecBuffer, write,
+        Buffer, FormatLanguage, FormatRefWithRule, FormatResult, FormatRule,
+        FormatTextCaseExt as _, write,
     };
+    #[cfg(debug_assertions)]
+    use biome_formatter::{FormatState, VecBuffer};
     use biome_languages::CssFileSource;
     use biome_rowan::{AstNode, Direction};
 
@@ -713,6 +715,35 @@ mod tests {
         }
 
         state.assert_no_audit_events();
+    }
+
+    #[cfg(not(debug_assertions))]
+    #[test]
+    fn default_css_case_preserves_source_in_release() {
+        let parse = parse_css(
+            "@IMPORT \"Keep\";A{COLOR:red}",
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+        assert!(parse.diagnostics().is_empty(), "{:?}", parse.diagnostics());
+        let syntax = parse.syntax();
+        let import_token = syntax
+            .descendants_tokens(Direction::Next)
+            .find(|token| token.kind() == CssSyntaxKind::IMPORT_KW)
+            .unwrap();
+        let identifier = syntax
+            .descendants()
+            .filter_map(CssIdentifier::cast)
+            .find(|identifier| identifier.syntax().text_trimmed() == "COLOR")
+            .unwrap();
+        let comments = Comments::from_node(&syntax, &CssCommentStyle, None);
+        let context = CssFormatContext::new(CssFormatOptions::default(), comments);
+
+        let formatted =
+            biome_formatter::format!(context, [import_token.format(), identifier.format()])
+                .unwrap();
+
+        assert_eq!(formatted.print().unwrap().as_code(), "IMPORTCOLOR");
     }
 
     #[test]
