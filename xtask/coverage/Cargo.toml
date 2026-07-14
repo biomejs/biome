@@ -7,6 +7,7 @@ publish = false
 [dependencies]
 ascii_table           = "4.0.8"
 backtrace             = "0.3.76"
+biome_console         = { workspace = true }
 biome_diagnostics     = { workspace = true }
 biome_js_parser       = { workspace = true }
 biome_js_semantic     = { workspace = true }
@@ -33,3 +34,6 @@ yastl                 = "0.1.2"
 
 [lints]
 workspace = true
+
+[package.metadata.cargo-shear]
+ignored = ["biome_console"] # Used in macro

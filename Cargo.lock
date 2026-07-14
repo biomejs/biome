@@ -263,16 +263,13 @@ dependencies = [
  "biome_formatter",
  "biome_glob",
  "biome_html_formatter",
- "biome_html_syntax",
  "biome_js_formatter",
  "biome_json_formatter",
  "biome_json_parser",
- "biome_json_syntax",
  "biome_plugin_loader",
  "biome_resolver",
  "biome_rowan",
  "biome_rule_options",
- "biome_yaml_syntax",
  "bpaf",
  "camino",
  "codspeed-criterion-compat",
@@ -359,7 +356,6 @@ dependencies = [
  "phf 0.13.1",
  "regex",
  "rustc-hash 2.1.2",
- "schemars",
  "tests_macros",
  "tikv-jemallocator",
 ]
@@ -450,7 +446,6 @@ dependencies = [
  "biome_css_parser",
  "biome_rowan",
  "biome_string_case",
- "schemars",
  "serde",
 ]
 
@@ -643,7 +638,6 @@ dependencies = [
  "insta",
  "jiff",
  "rustc-hash 2.1.2",
- "schemars",
  "tests_macros",
 ]
 
@@ -759,7 +753,6 @@ dependencies = [
  "biome_test_utils",
  "insta",
  "quickcheck_macros",
- "schemars",
  "tests_macros",
 ]
 
@@ -838,7 +831,6 @@ dependencies = [
  "insta",
  "mimalloc",
  "phf 0.13.1",
- "schemars",
  "smallvec",
  "tests_macros",
  "tikv-jemallocator",
@@ -917,7 +909,6 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_string_case",
- "schemars",
  "serde",
 ]
 
@@ -936,7 +927,6 @@ dependencies = [
  "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_fs",
- "biome_glob",
  "biome_js_factory",
  "biome_js_parser",
  "biome_js_semantic",
@@ -992,6 +982,7 @@ name = "biome_js_formatter"
 version = "0.5.7"
 dependencies = [
  "biome_configuration",
+ "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics_categories",
  "biome_formatter",
@@ -1210,6 +1201,7 @@ name = "biome_json_formatter"
 version = "0.5.7"
 dependencies = [
  "biome_configuration",
+ "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_formatter",
@@ -1261,7 +1253,6 @@ name = "biome_json_syntax"
 version = "0.5.7"
 dependencies = [
  "biome_rowan",
- "schemars",
  "serde",
 ]
 
@@ -1372,8 +1363,6 @@ dependencies = [
  "biome_service",
  "camino",
  "countme",
- "schemars",
- "serde",
  "similar-asserts",
  "tests_macros",
 ]
@@ -1410,7 +1399,6 @@ name = "biome_markdown_syntax"
 version = "0.0.1"
 dependencies = [
  "biome_rowan",
- "schemars",
  "serde",
 ]
 
@@ -1609,9 +1597,9 @@ dependencies = [
  "countme",
  "hashbrown 0.15.5",
  "iai",
+ "quickcheck",
  "quickcheck_macros",
  "rustc-hash 2.1.2",
- "schemars",
  "serde",
  "serde_json",
 ]
@@ -1812,7 +1800,6 @@ name = "biome_tailwind_syntax"
 version = "0.0.1"
 dependencies = [
  "biome_rowan",
- "schemars",
  "serde",
 ]
 
@@ -1829,7 +1816,6 @@ dependencies = [
  "biome_fs",
  "biome_html_parser",
  "biome_html_syntax",
- "biome_js_analyze",
  "biome_js_parser",
  "biome_js_semantic",
  "biome_js_type_info",
@@ -1946,7 +1932,6 @@ dependencies = [
  "biome_yaml_syntax",
  "camino",
  "countme",
- "schemars",
  "serde",
  "similar-asserts",
  "tests_macros",
@@ -7312,6 +7297,7 @@ version = "0.0.0"
 dependencies = [
  "ascii_table",
  "backtrace",
+ "biome_console",
  "biome_diagnostics",
  "biome_js_parser",
  "biome_js_semantic",

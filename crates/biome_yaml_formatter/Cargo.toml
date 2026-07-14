@@ -24,8 +24,6 @@ biome_formatter   = { workspace = true }
 biome_rowan       = { workspace = true }
 biome_suppression = { workspace = true }
 biome_yaml_syntax = { workspace = true }
-schemars          = { workspace = true, optional = true }
-serde             = { workspace = true, features = ["derive"], optional = true }
 
 [dev-dependencies]
 biome_configuration  = { path = "../biome_configuration/", features = ["lang_yaml"] }
@@ -37,12 +35,9 @@ biome_service        = { path = "../biome_service", features = ["lang_yaml"] }
 biome_yaml_parser    = { path = "../biome_yaml_parser" }
 camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
+serde             = { workspace = true, features = ["derive"] }
 similar-asserts      = { workspace = true }
 tests_macros         = { path = "../tests_macros" }
-
-[features]
-schema = ["dep:schemars", "serde"]
-serde  = ["dep:serde"]
 
 [lints]
 workspace = true

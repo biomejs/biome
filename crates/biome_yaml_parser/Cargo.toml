@@ -20,11 +20,11 @@ biome_yaml_factory  = { workspace = true }
 biome_yaml_syntax   = { workspace = true }
 
 [dev-dependencies]
+biome_console     = { path = "../biome_console" }
 biome_test_utils  = { path = "../biome_test_utils" }
 insta             = { workspace = true }
 quickcheck_macros = { workspace = true }
 tests_macros      = { workspace = true }
-biome_console = { workspace = true }
 
 [lints]
 workspace = true

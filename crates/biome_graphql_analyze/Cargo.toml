@@ -25,7 +25,6 @@ biome_string_case        = { workspace = true }
 biome_suppression        = { workspace = true }
 jiff                     = { workspace = true }
 rustc-hash               = { workspace = true }
-schemars                 = { workspace = true, optional = true }
 
 [dev-dependencies]
 biome_graphql_parser = { path = "../biome_graphql_parser" }
@@ -37,9 +36,6 @@ tests_macros         = { path = "../tests_macros" }
 
 [build-dependencies]
 filetime = { workspace = true }
-
-[features]
-schema = ["schemars"]
 
 [lints]
 workspace = true

@@ -14,7 +14,6 @@ pub use parser::{CssModulesKind, CssParserOptions};
 
 mod lexer;
 mod parser;
-mod prelude;
 mod state;
 mod syntax;
 mod token_source;

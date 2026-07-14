@@ -22,6 +22,7 @@ harness = false
 name    = "json_formatter"
 
 [dependencies]
+biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
 biome_formatter          = { workspace = true }
@@ -42,11 +43,11 @@ biome_languages      = { path = "../biome_languages", features = ["lang_json"] }
 biome_parser         = { path = "../biome_parser" }
 biome_service        = { path = "../biome_service", features = ["lang_json"] }
 biome_test_utils     = { path = "../biome_test_utils", features = ["lang_json"] }
+camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
 criterion            = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 similar-asserts      = { workspace = true }
 tests_macros         = { path = "../tests_macros" }
-camino = { workspace = true }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }
@@ -60,3 +61,6 @@ serde  = ["dep:serde"]
 
 [lints]
 workspace = true
+
+[package.metadata.cargo-shear]
+ignored = ["biome_deserialize"] # Used in macro

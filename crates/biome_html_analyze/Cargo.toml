@@ -33,13 +33,12 @@ biome_string_case        = { workspace = true }
 biome_suppression        = { workspace = true }
 biome_unicode_table      = { workspace = true }
 phf                      = { workspace = true }
-schemars                 = { workspace = true, optional = true }
 smallvec                 = { workspace = true }
 
 [dev-dependencies]
 biome_html_parser = { path = "../biome_html_parser" }
 biome_test_utils  = { path = "../biome_test_utils", features = ["html_embeds", "module_graph"] }
-camino = { workspace = true }
+camino            = { workspace = true }
 criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta             = { workspace = true, features = ["glob"] }
 tests_macros      = { path = "../tests_macros" }
@@ -52,9 +51,6 @@ tikv-jemallocator = { workspace = true }
 
 [target.'cfg(target_os = "windows")'.dev-dependencies]
 mimalloc = { workspace = true }
-
-[features]
-schema = ["schemars"]
 
 [lints]
 workspace = true

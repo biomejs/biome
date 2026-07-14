@@ -29,13 +29,13 @@ biome_unicode_table = { workspace = true }
 unicode-bom         = { workspace = true }
 
 [dev-dependencies]
+biome_console     = { path = "../biome_console" }
+biome_diagnostics = { path = "../biome_diagnostics" }
 biome_test_utils  = { path = "../biome_test_utils" }
 criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta             = { workspace = true }
 quickcheck_macros = { workspace = true }
 tests_macros      = { path = "../tests_macros" }
-biome_console = { workspace = true }
-biome_diagnostics = { workspace = true }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }

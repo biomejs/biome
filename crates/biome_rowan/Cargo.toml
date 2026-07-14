@@ -21,18 +21,21 @@ biome_text_size = { workspace = true }
 countme         = { workspace = true, optional = true }
 hashbrown       = { workspace = true, features = ["inline-more", "raw-entry"] }
 rustc-hash      = { workspace = true }
-schemars        = { workspace = true, optional = true }
 serde           = { workspace = true, optional = true }
 
 [dev-dependencies]
 iai               = "=0.1.1"
+quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
 serde_json        = { workspace = true }
 
 [features]
 countme = ["dep:countme"]
-schema  = ["dep:schemars", "serde"]
+schema  = ["serde"]
 serde   = ["biome_text_size/serde", "biome_text_size/serde", "dep:serde"]
 
 [lints]
 workspace = true
+
+[package.metadata.cargo-shear]
+ignored = ["quickcheck"] # Used in macro

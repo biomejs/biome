@@ -252,6 +252,14 @@ unused_import_braces           = "warn"
 unused_lifetimes               = "warn"
 unused_macro_rules             = "warn"
 
+# We use cargo-shear without expanding macros, so several paths needs to be ignored
+[workspace.metadata.cargo-shear]
+ignored-paths = [
+	"crates/*_analyze/src/{assist,lint,syntax}/*/*.rs",
+	"crates/biome_console/tests/markup/*.rs",
+	"crates/biome_diagnostics/tests/macros/*.rs",
+]
+
 # Dev optimisations
 [profile.dev]
 debug = "line-tables-only"

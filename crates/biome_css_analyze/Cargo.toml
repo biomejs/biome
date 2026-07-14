@@ -35,7 +35,6 @@ biome_suppression        = { workspace = true }
 phf                      = { workspace = true }
 regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
-schemars                 = { workspace = true, optional = true }
 
 [dev-dependencies]
 biome_css_parser    = { path = "../biome_css_parser" }
@@ -56,9 +55,6 @@ tikv-jemallocator = { workspace = true }
 
 [target.'cfg(target_os = "windows")'.dev-dependencies]
 mimalloc = { workspace = true }
-
-[features]
-schema = ["schemars"]
 
 [lints]
 workspace = true

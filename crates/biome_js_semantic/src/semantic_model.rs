@@ -8,6 +8,7 @@ mod is_constant;
 mod model;
 mod reference;
 mod scope;
+mod tests;
 
 use crate::{SemanticEvent, SemanticEventExtractor};
 use biome_js_syntax::{
