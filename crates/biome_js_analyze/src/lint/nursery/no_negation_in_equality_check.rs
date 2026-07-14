@@ -176,43 +176,73 @@ impl Rule for NoNegationInEqualityCheck {
         };
 
         // --- Trivia transfer ---
-        // Collect trivia from discarded tokens (the `!` operator and any
-        // wrapping parentheses) so that comments are preserved in the fix.
+        // Collect trivia from discarded tokens so that comments are
+        // preserved in the fix output.
+        //
+        // Discarded tokens:
+        //   - Outer `(` and `)` from JsParenthesizedExpression wrappers
+        //   - The `!` operator token from the JsUnaryExpression
+        //   - The original comparison operator (`===` or `!==`)
+        //
+        // Note on replace_node behavior:
+        //   `BatchMutation::replace_node` auto-copies the OLD node's first
+        //   token's leading trivia to the NEW node's first token's leading
+        //   trivia (it *replaces*, not chains). The new node's first token
+        //   is the surviving argument expression (e.g., `foo`). The new
+        //   node's middle token is the new comparison operator, which is
+        //   untouched by replace_node.
+        //
+        // Strategy: put all manually-collected trivia into the new
+        // operator's trivia vectors (leading_for_op / trailing_for_op).
+        // The new operator is a middle token — safe from replace_node's
+        // first/last-token replacement. The old first token's leading
+        // trivia is handled automatically by replace_node.
 
-        // Collect trivia pieces for the new left expression.
-        let mut leading_for_left: Vec<SyntaxTriviaPiece<biome_js_syntax::JsLanguage>> = Vec::new();
-        for p in neg_op_token.leading_trivia().pieces() {
-            leading_for_left.push(p);
-        }
-
-        // Collect trivia pieces for the new operator.
-        // Trailing trivia of `!` stays near the operator (Bug 3: cannot safely
-        // move to left without losing comments in the tree replacement).
         let mut leading_for_op: Vec<SyntaxTriviaPiece<biome_js_syntax::JsLanguage>> = Vec::new();
-        for p in neg_op_token.trailing_trivia().pieces() {
-            leading_for_op.push(p);
-        }
         let mut trailing_for_op: Vec<SyntaxTriviaPiece<biome_js_syntax::JsLanguage>> = Vec::new();
 
-        // Walk through parenthesized wrappers from outer to inner.
+        // Phase 1: Collect trivia from parenthesized wrappers.
+        // Walk from outer to inner, collecting COMMENT trivia from
+        // discarded `(` and `)` tokens and routing it to the new operator.
+        // We skip whitespace pieces to avoid double-spacing with the
+        // operator's own trivia.
+        //
+        // IMPORTANT: We skip l_paren.leading_trivia() because for the
+        // outermost paren, this IS the old binary's first token leading
+        // trivia, which replace_node auto-copies. Collecting it here
+        // would put it on the new operator too, causing duplication and
+        // unwanted line breaks.
+        //
+        // We DO collect COMMENT pieces from l_paren.trailing_trivia()
+        // (gap between `(` and the inner expression, e.g. `/* keep */`).
+        // We also collect COMMENT pieces from r_paren trivia.
         {
             let mut current = left.syntax().clone();
-            loop {
-                let Some(paren) = JsParenthesizedExpression::cast_ref(&current) else {
-                    break;
-                };
+            let mut is_outermost = true;
+            while let Some(paren) = JsParenthesizedExpression::cast_ref(&current) {
                 if let Ok(lp) = paren.l_paren_token() {
-                    for p in lp.leading_trivia().pieces() {
-                        leading_for_left.push(p);
+                    // Skip leading trivia on outermost `(` — replace_node
+                    // handles it. Collect for inner parens (nested case).
+                    if !is_outermost {
+                        for p in lp.leading_trivia().pieces() {
+                            leading_for_op.push(p);
+                        }
                     }
-                    for p in lp.trailing_trivia().pieces() {
-                        leading_for_left.push(p);
+                    // Only collect COMMENT pieces from trailing trivia.
+                    // Whitespace pieces are skipped to avoid double-spacing.
+                    for p in lp.trailing_trivia().pieces().filter(|p| p.kind().is_comment()) {
+                        leading_for_op.push(p);
                     }
                 }
                 if let Ok(rp) = paren.r_paren_token() {
-                    for p in rp.leading_trivia().pieces() {
+                    // Only collect COMMENT pieces from leading trivia —
+                    // whitespace would duplicate with l_paren padding.
+                    for p in rp.leading_trivia().pieces().filter(|p| p.kind().is_comment()) {
                         leading_for_op.push(p);
                     }
+                    // Collect ALL trailing trivia pieces. This is the
+                    // gap between `)` and the next token (operator or
+                    // outer `)`) — we need the spacing here.
                     for p in rp.trailing_trivia().pieces() {
                         leading_for_op.push(p);
                     }
@@ -221,10 +251,33 @@ impl Rule for NoNegationInEqualityCheck {
                     Ok(inner_expr) => current = inner_expr.into_syntax(),
                     Err(_) => break,
                 }
+                is_outermost = false;
             }
         }
 
-        // Transfer the original comparison operator's trivia.
+        // Phase 2: Collect trivia from the removed `!` operator.
+        //
+        // We intentionally do NOT collect neg_op_token.leading_trivia():
+        // for non-parenthesized cases, neg_op_token IS the old binary's
+        // first token, and its leading trivia is auto-copied by
+        // replace_node. Collecting it here would cause duplication.
+        //
+        // For parenthesized cases, the trivia between `(` and `!` may be
+        // stored as trailing trivia of `(` already, but it may also be
+        // stored as leading trivia of `!`. To avoid double-counting, we
+        // skip neg_op_token.leading_trivia() entirely and rely on the
+        // parenthesized wrapper's `l_paren.trailing_trivia()` collected in
+        // Phase 1 (which covers the same gap from the left side).
+        //
+        // We DO collect neg_op_token.trailing_trivia(): this is the trivia
+        // between `!` and its argument (e.g., `/* keep */` in
+        // `!/* keep */foo`). This trivia is not covered by replace_node
+        // and not covered by the paren wrapper loop.
+        for p in neg_op_token.trailing_trivia().pieces() {
+            leading_for_op.push(p);
+        }
+
+        // Phase 3: Transfer the original comparison operator's trivia.
         for p in operator.leading_trivia().pieces() {
             leading_for_op.push(p);
         }
@@ -234,18 +287,13 @@ impl Rule for NoNegationInEqualityCheck {
 
         // --- Build the new expression ---
 
-        // 1. Build the new left expression with preserved trivia.
-        // Use the node-level prepend_trivia_pieces which handles the token
-        // replacement internally.
-        let mut left_syntax = negated_expr.syntax().clone();
-        if !leading_for_left.is_empty() {
-            left_syntax = left_syntax.prepend_trivia_pieces(leading_for_left)?;
-        }
+        // 1. The new left expression: use the argument expression directly.
+        //    replace_node will auto-copy the old first token's leading trivia
+        //    to it, so no manual prepend is needed.
+        let mut new_left = negated_expr;
 
-        let mut new_left = AnyJsExpression::cast_ref(&left_syntax)?.clone();
-
-        // Bug 1: Wrap function/class/object literals in parens to prevent
-        // them from being reinterpreted as declarations/blocks at statement
+        // Wrap function/class/object literals in parens to prevent them
+        // from being reinterpreted as declarations/blocks at statement
         // level (e.g. `!function(){}===bar` removing `!` would expose
         // `function` at statement start, which is a function declaration).
         {
@@ -255,9 +303,7 @@ impl Rule for NoNegationInEqualityCheck {
             }
         }
 
-        // 2. Build the new operator token.
-        // Use plain make::token (no automatic spacing) and copy trivia from
-        // the old operator to avoid double whitespace (Bug 4 fix).
+        // 2. Build the new operator token with preserved trivia.
         let mut new_op = make::token(new_op_kind);
         if !leading_for_op.is_empty() {
             new_op = new_op.prepend_trivia_pieces(leading_for_op);

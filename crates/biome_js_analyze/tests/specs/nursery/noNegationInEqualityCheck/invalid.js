@@ -6,6 +6,8 @@
 (((!foo))) === bar;
 /* should preserve trailing comments */
 !/* keep */foo === bar;
+!/* keep */ foo === bar;
+(/* keep */ !foo) === bar;
 /* comment before bang should be preserved */
 /* c1 */!foo === bar;
 !foo /* c2 */ === bar;

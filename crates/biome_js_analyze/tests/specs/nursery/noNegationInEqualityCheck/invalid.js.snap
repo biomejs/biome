@@ -12,6 +12,8 @@ expression: invalid.js
 (((!foo))) === bar;
 /* should preserve trailing comments */
 !/* keep */foo === bar;
+!/* keep */ foo === bar;
+(/* keep */ !foo) === bar;
 /* comment before bang should be preserved */
 /* c1 */!foo === bar;
 !foo /* c2 */ === bar;
@@ -184,8 +186,8 @@ invalid.js:8:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━�
      7 │ /* should preserve trailing comments */
    > 8 │ !/* keep */foo === bar;
        │ ^^^^^^^^^^^^^^^^^^^^^^
-     9 │ /* comment before bang should be preserved */
-    10 │ /* c1 */!foo === bar;
+     9 │ !/* keep */ foo === bar;
+    10 │ (/* keep */ !foo) === bar;
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -195,75 +197,127 @@ invalid.js:8:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━�
      7  7 │   /* should preserve trailing comments */
      8    │ - !/*·keep·*/foo·===·bar;
         8 │ + foo·/*·keep·*/!==·bar;
-     9  9 │   /* comment before bang should be preserved */
-    10 10 │   /* c1 */!foo === bar;
+     9  9 │   !/* keep */ foo === bar;
+    10 10 │   (/* keep */ !foo) === bar;
   
 
 ```
 
 ```
-invalid.js:10:9 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A negation is used on the left side of this equality check.
+  
+     7 │ /* should preserve trailing comments */
+     8 │ !/* keep */foo === bar;
+   > 9 │ !/* keep */ foo === bar;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ (/* keep */ !foo) === bar;
+    11 │ /* comment before bang should be preserved */
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the proper negated comparison operator instead.
+  
+     7  7 │   /* should preserve trailing comments */
+     8  8 │   !/* keep */foo === bar;
+     9    │ - !/*·keep·*/·foo·===·bar;
+        9 │ + foo·/*·keep·*/·!==·bar;
+    10 10 │   (/* keep */ !foo) === bar;
+    11 11 │   /* comment before bang should be preserved */
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A negation is used on the left side of this equality check.
   
      8 │ !/* keep */foo === bar;
-     9 │ /* comment before bang should be preserved */
-  > 10 │ /* c1 */!foo === bar;
-       │         ^^^^^^^^^^^^
-    11 │ !foo /* c2 */ === bar;
-    12 │ /* should signal but fix should be skipped (ASI unsafe) */
+     9 │ !/* keep */ foo === bar;
+  > 10 │ (/* keep */ !foo) === bar;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ /* comment before bang should be preserved */
+    12 │ /* c1 */!foo === bar;
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use the proper negated comparison operator instead.
   
      8  8 │   !/* keep */foo === bar;
-     9  9 │   /* comment before bang should be preserved */
-    10    │ - /*·c1·*/!foo·===·bar;
-       10 │ + /*·c1·*/foo·!==·bar;
-    11 11 │   !foo /* c2 */ === bar;
-    12 12 │   /* should signal but fix should be skipped (ASI unsafe) */
+     9  9 │   !/* keep */ foo === bar;
+    10    │ - (/*·keep·*/·!foo)·===·bar;
+       10 │ + foo/*·keep·*/·!==·bar;
+    11 11 │   /* comment before bang should be preserved */
+    12 12 │   /* c1 */!foo === bar;
   
 
 ```
 
 ```
-invalid.js:11:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:9 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A negation is used on the left side of this equality check.
   
-     9 │ /* comment before bang should be preserved */
-    10 │ /* c1 */!foo === bar;
-  > 11 │ !foo /* c2 */ === bar;
-       │ ^^^^^^^^^^^^^^^^^^^^^
-    12 │ /* should signal but fix should be skipped (ASI unsafe) */
-    13 │ foo
+    10 │ (/* keep */ !foo) === bar;
+    11 │ /* comment before bang should be preserved */
+  > 12 │ /* c1 */!foo === bar;
+       │         ^^^^^^^^^^^^
+    13 │ !foo /* c2 */ === bar;
+    14 │ /* should signal but fix should be skipped (ASI unsafe) */
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use the proper negated comparison operator instead.
   
-     9  9 │   /* comment before bang should be preserved */
-    10 10 │   /* c1 */!foo === bar;
-    11    │ - !foo·/*·c2·*/·===·bar;
-       11 │ + foo·/*·c2·*/·!==·bar;
-    12 12 │   /* should signal but fix should be skipped (ASI unsafe) */
-    13 13 │   foo
+    10 10 │   (/* keep */ !foo) === bar;
+    11 11 │   /* comment before bang should be preserved */
+    12    │ - /*·c1·*/!foo·===·bar;
+       12 │ + /*·c1·*/foo·!==·bar;
+    13 13 │   !foo /* c2 */ === bar;
+    14 14 │   /* should signal but fix should be skipped (ASI unsafe) */
   
 
 ```
 
 ```
-invalid.js:14:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A negation is used on the left side of this equality check.
   
-    12 │ /* should signal but fix should be skipped (ASI unsafe) */
-    13 │ foo
-  > 14 │ !/regex/.test(value) === bar;
+    11 │ /* comment before bang should be preserved */
+    12 │ /* c1 */!foo === bar;
+  > 13 │ !foo /* c2 */ === bar;
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    14 │ /* should signal but fix should be skipped (ASI unsafe) */
+    15 │ foo
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the proper negated comparison operator instead.
+  
+    11 11 │   /* comment before bang should be preserved */
+    12 12 │   /* c1 */!foo === bar;
+    13    │ - !foo·/*·c2·*/·===·bar;
+       13 │ + foo·/*·c2·*/·!==·bar;
+    14 14 │   /* should signal but fix should be skipped (ASI unsafe) */
+    15 15 │   foo
+  
+
+```
+
+```
+invalid.js:16:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A negation is used on the left side of this equality check.
+  
+    14 │ /* should signal but fix should be skipped (ASI unsafe) */
+    15 │ foo
+  > 16 │ !/regex/.test(value) === bar;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    15 │ /* ASI unsafe: [ at start of expression after newline */
-    16 │ foo
+    17 │ /* ASI unsafe: [ at start of expression after newline */
+    18 │ foo
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -271,16 +325,16 @@ invalid.js:14:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━�
 ```
 
 ```
-invalid.js:17:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A negation is used on the left side of this equality check.
   
-    15 │ /* ASI unsafe: [ at start of expression after newline */
-    16 │ foo
-  > 17 │ ![1,2,3] === bar;
+    17 │ /* ASI unsafe: [ at start of expression after newline */
+    18 │ foo
+  > 19 │ ![1,2,3] === bar;
        │ ^^^^^^^^^^^^^^^^
-    18 │ /* ASI unsafe: template literal after newline */
-    19 │ foo
+    20 │ /* ASI unsafe: template literal after newline */
+    21 │ foo
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -288,16 +342,16 @@ invalid.js:17:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━�
 ```
 
 ```
-invalid.js:20:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:22:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A negation is used on the left side of this equality check.
   
-    18 │ /* ASI unsafe: template literal after newline */
-    19 │ foo
-  > 20 │ !`template` === bar;
+    20 │ /* ASI unsafe: template literal after newline */
+    21 │ foo
+  > 22 │ !`template` === bar;
        │ ^^^^^^^^^^^^^^^^^^^
-    21 │ /* ASI unsafe: unary + after newline */
-    22 │ foo
+    23 │ /* ASI unsafe: unary + after newline */
+    24 │ foo
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -305,16 +359,16 @@ invalid.js:20:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━�
 ```
 
 ```
-invalid.js:23:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:25:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A negation is used on the left side of this equality check.
   
-    21 │ /* ASI unsafe: unary + after newline */
-    22 │ foo
-  > 23 │ !+x === bar;
+    23 │ /* ASI unsafe: unary + after newline */
+    24 │ foo
+  > 25 │ !+x === bar;
        │ ^^^^^^^^^^^
-    24 │ /* ASI unsafe: unary - after newline */
-    25 │ foo
+    26 │ /* ASI unsafe: unary - after newline */
+    27 │ foo
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -322,16 +376,16 @@ invalid.js:23:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━�
 ```
 
 ```
-invalid.js:26:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A negation is used on the left side of this equality check.
   
-    24 │ /* ASI unsafe: unary - after newline */
-    25 │ foo
-  > 26 │ !-x === bar;
+    26 │ /* ASI unsafe: unary - after newline */
+    27 │ foo
+  > 28 │ !-x === bar;
        │ ^^^^^^^^^^^
-    27 │ /* ASI unsafe: ( at start of expression after newline */
-    28 │ foo
+    29 │ /* ASI unsafe: ( at start of expression after newline */
+    30 │ foo
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -339,73 +393,18 @@ invalid.js:26:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━�
 ```
 
 ```
-invalid.js:29:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:31:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A negation is used on the left side of this equality check.
   
-    27 │ /* ASI unsafe: ( at start of expression after newline */
-    28 │ foo
-  > 29 │ !(x) === bar;
+    29 │ /* ASI unsafe: ( at start of expression after newline */
+    30 │ foo
+  > 31 │ !(x) === bar;
        │ ^^^^^^^^^^^^
-    30 │ /* Bug 1: function/class/object at expression start should be wrapped in parens */
-    31 │ !function(){} === bar;
+    32 │ /* Bug 1: function/class/object at expression start should be wrapped in parens */
+    33 │ !function(){} === bar;
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:31:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! A negation is used on the left side of this equality check.
-  
-    29 │ !(x) === bar;
-    30 │ /* Bug 1: function/class/object at expression start should be wrapped in parens */
-  > 31 │ !function(){} === bar;
-       │ ^^^^^^^^^^^^^^^^^^^^^
-    32 │ !class{} === bar;
-    33 │ !{} === bar;
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Use the proper negated comparison operator instead.
-  
-    29 29 │   !(x) === bar;
-    30 30 │   /* Bug 1: function/class/object at expression start should be wrapped in parens */
-    31    │ - !function(){}·===·bar;
-       31 │ + (
-       32 │ + /*·Bug·1:·function/class/object·at·expression·start·should·be·wrapped·in·parens·*/
-       33 │ + function(){}·)!==·bar;
-    32 34 │   !class{} === bar;
-    33 35 │   !{} === bar;
-  
-
-```
-
-```
-invalid.js:32:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! A negation is used on the left side of this equality check.
-  
-    30 │ /* Bug 1: function/class/object at expression start should be wrapped in parens */
-    31 │ !function(){} === bar;
-  > 32 │ !class{} === bar;
-       │ ^^^^^^^^^^^^^^^^
-    33 │ !{} === bar;
-    34 │ /* ASI unsafe: block comment with newline in previous token's trailing trivia */
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Use the proper negated comparison operator instead.
-  
-    30 30 │   /* Bug 1: function/class/object at expression start should be wrapped in parens */
-    31 31 │   !function(){} === bar;
-    32    │ - !class{}·===·bar;
-       32 │ + (
-       33 │ + class{}·)!==·bar;
-    33 34 │   !{} === bar;
-    34 35 │   /* ASI unsafe: block comment with newline in previous token's trailing trivia */
   
 
 ```
@@ -415,39 +414,90 @@ invalid.js:33:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━
 
   ! A negation is used on the left side of this equality check.
   
-    31 │ !function(){} === bar;
-    32 │ !class{} === bar;
-  > 33 │ !{} === bar;
-       │ ^^^^^^^^^^^
-    34 │ /* ASI unsafe: block comment with newline in previous token's trailing trivia */
-    35 │ foo /* multi
+    31 │ !(x) === bar;
+    32 │ /* Bug 1: function/class/object at expression start should be wrapped in parens */
+  > 33 │ !function(){} === bar;
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    34 │ !class{} === bar;
+    35 │ !{} === bar;
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use the proper negated comparison operator instead.
   
-    31 31 │   !function(){} === bar;
-    32 32 │   !class{} === bar;
-    33    │ - !{}·===·bar;
-       33 │ + (
-       34 │ + {}·)!==·bar;
-    34 35 │   /* ASI unsafe: block comment with newline in previous token's trailing trivia */
-    35 36 │   foo /* multi
+    31 31 │   !(x) === bar;
+    32 32 │   /* Bug 1: function/class/object at expression start should be wrapped in parens */
+    33    │ - !function(){}·===·bar;
+       33 │ + (function(){}·)!==·bar;
+    34 34 │   !class{} === bar;
+    35 35 │   !{} === bar;
   
 
 ```
 
 ```
-invalid.js:36:8 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:34:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A negation is used on the left side of this equality check.
   
-    34 │ /* ASI unsafe: block comment with newline in previous token's trailing trivia */
-    35 │ foo /* multi
-  > 36 │ line */!(x) === bar;
+    32 │ /* Bug 1: function/class/object at expression start should be wrapped in parens */
+    33 │ !function(){} === bar;
+  > 34 │ !class{} === bar;
+       │ ^^^^^^^^^^^^^^^^
+    35 │ !{} === bar;
+    36 │ /* ASI unsafe: block comment with newline in previous token's trailing trivia */
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the proper negated comparison operator instead.
+  
+    32 32 │   /* Bug 1: function/class/object at expression start should be wrapped in parens */
+    33 33 │   !function(){} === bar;
+    34    │ - !class{}·===·bar;
+       34 │ + (class{}·)!==·bar;
+    35 35 │   !{} === bar;
+    36 36 │   /* ASI unsafe: block comment with newline in previous token's trailing trivia */
+  
+
+```
+
+```
+invalid.js:35:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A negation is used on the left side of this equality check.
+  
+    33 │ !function(){} === bar;
+    34 │ !class{} === bar;
+  > 35 │ !{} === bar;
+       │ ^^^^^^^^^^^
+    36 │ /* ASI unsafe: block comment with newline in previous token's trailing trivia */
+    37 │ foo /* multi
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the proper negated comparison operator instead.
+  
+    33 33 │   !function(){} === bar;
+    34 34 │   !class{} === bar;
+    35    │ - !{}·===·bar;
+       35 │ + ({}·)!==·bar;
+    36 36 │   /* ASI unsafe: block comment with newline in previous token's trailing trivia */
+    37 37 │   foo /* multi
+  
+
+```
+
+```
+invalid.js:38:8 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A negation is used on the left side of this equality check.
+  
+    36 │ /* ASI unsafe: block comment with newline in previous token's trailing trivia */
+    37 │ foo /* multi
+  > 38 │ line */!(x) === bar;
        │        ^^^^^^^^^^^^
-    37 │ /* ASI unsafe: block comment with newline before ! exposes restricted char */
-    38 │ /*
+    39 │ /* ASI unsafe: block comment with newline before ! exposes restricted char */
+    40 │ /*
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -455,15 +505,15 @@ invalid.js:36:8 lint/nursery/noNegationInEqualityCheck ━━━━━━━━�
 ```
 
 ```
-invalid.js:39:3 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:41:3 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A negation is used on the left side of this equality check.
   
-    37 │ /* ASI unsafe: block comment with newline before ! exposes restricted char */
-    38 │ /*
-  > 39 │ */!/regex/.test(value) === bar;
+    39 │ /* ASI unsafe: block comment with newline before ! exposes restricted char */
+    40 │ /*
+  > 41 │ */!/regex/.test(value) === bar;
        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    40 │ 
+    42 │ 
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
