@@ -22,7 +22,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@0..1 "<" [] [],
             name: HtmlComponentName {
-                value_token: HTML_LITERAL@1..5 "Foo" [] [Whitespace(" ")],
+                value_token: HTML_COMPONENT_LITERAL@1..5 "Foo" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 VueBogusDirective {
@@ -61,7 +61,7 @@ HtmlRoot {
     0: HTML_SELF_CLOSING_ELEMENT@0..29
       0: L_ANGLE@0..1 "<" [] []
       1: HTML_COMPONENT_NAME@1..5
-        0: HTML_LITERAL@1..5 "Foo" [] [Whitespace(" ")]
+        0: HTML_COMPONENT_LITERAL@1..5 "Foo" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@5..27
         0: VUE_BOGUS_DIRECTIVE@5..7
           0: AT@5..7 "@" [] [Whitespace(" ")]

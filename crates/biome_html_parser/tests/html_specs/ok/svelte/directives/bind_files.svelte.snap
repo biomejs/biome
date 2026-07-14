@@ -23,7 +23,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@0..1 "<" [] [],
             name: HtmlTagName {
-                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+                value_token: INPUT_KW@1..7 "input" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 HtmlAttribute {
@@ -64,7 +64,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@43..45 "<" [Newline("\n")] [],
             name: HtmlTagName {
-                value_token: HTML_LITERAL@45..51 "input" [] [Whitespace(" ")],
+                value_token: INPUT_KW@45..51 "input" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 HtmlAttribute {
@@ -124,7 +124,7 @@ HtmlRoot {
     0: HTML_SELF_CLOSING_ELEMENT@0..43
       0: L_ANGLE@0..1 "<" [] []
       1: HTML_TAG_NAME@1..7
-        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+        0: INPUT_KW@1..7 "input" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@7..41
         0: HTML_ATTRIBUTE@7..19
           0: HTML_ATTRIBUTE_NAME@7..11
@@ -152,7 +152,7 @@ HtmlRoot {
     1: HTML_SELF_CLOSING_ELEMENT@43..93
       0: L_ANGLE@43..45 "<" [Newline("\n")] []
       1: HTML_TAG_NAME@45..51
-        0: HTML_LITERAL@45..51 "input" [] [Whitespace(" ")]
+        0: INPUT_KW@45..51 "input" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@51..91
         0: HTML_ATTRIBUTE@51..63
           0: HTML_ATTRIBUTE_NAME@51..55
