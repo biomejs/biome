@@ -24,6 +24,9 @@ foo
 /* ASI unsafe: unary - after newline */
 foo
 !-x === bar;
+/* ASI unsafe: ( at start of expression after newline */
+foo
+!(x) === bar;
 /* Bug 1: function/class/object at expression start should be wrapped in parens */
 !function(){} === bar;
 !class{} === bar;

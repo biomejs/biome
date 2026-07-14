@@ -105,11 +105,7 @@ impl Rule for NoNegationInEqualityCheck {
                 markup! {
                     "A negation is used on the left side of this equality check."
                 },
-            )
-            .note(markup! {
-                    "Due to operator precedence, the negation binds more tightly than the equality operator. "
-                    "The expression "<Emphasis>"!foo === bar"</Emphasis>" evaluates as "<Emphasis>"(!foo) === bar"</Emphasis>", not "<Emphasis>"!(foo === bar)"</Emphasis>"."
-            }),
+            ),
         )
     }
 
@@ -130,9 +126,10 @@ impl Rule for NoNegationInEqualityCheck {
         // --- ASI safety check ---
         // If a newline precedes the `!` operator and the argument starts with
         // a character that would continue the previous expression
-        // (/, [, `, +, -), removing the `!` would change the parse.
+        // (/, [, `, +, -, (), removing the `!` would change the parse.
         // `/` would become a regex literal, `[` property access,
-        // `` ` `` a tagged template, and `+`/`-` a unary operator.
+        // `` ` `` a tagged template, `+`/`-` a unary operator, and `(`
+        // would become a function call.
         // Skip the fix when any of these would be exposed at line start.
         {
             let has_preceding_newline = neg_op_token
@@ -142,7 +139,7 @@ impl Rule for NoNegationInEqualityCheck {
             if has_preceding_newline {
                 let arg_text = negated_expr.syntax().text_trimmed().to_string();
                 let first_char = arg_text.chars().next().unwrap_or('\0');
-                if matches!(first_char, '/' | '[' | '`' | '+' | '-') {
+                if matches!(first_char, '/' | '[' | '`' | '+' | '-' | '(') {
                     return None;
                 }
             }
