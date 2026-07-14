@@ -22,7 +22,6 @@ harness = false
 name    = "json_formatter"
 
 [dependencies]
-biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
 biome_formatter          = { workspace = true }
@@ -30,7 +29,6 @@ biome_json_syntax        = { workspace = true }
 biome_languages          = { workspace = true, features = ["lang_json"] }
 biome_rowan              = { workspace = true }
 biome_suppression        = { workspace = true }
-camino                   = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"], optional = true }
 
@@ -46,9 +44,9 @@ biome_service        = { path = "../biome_service", features = ["lang_json"] }
 biome_test_utils     = { path = "../biome_test_utils", features = ["lang_json"] }
 countme              = { workspace = true, features = ["enable"] }
 criterion            = { package = "codspeed-criterion-compat", version = "=3.0.5" }
-serde_json           = { workspace = true }
 similar-asserts      = { workspace = true }
 tests_macros         = { path = "../tests_macros" }
+camino = { workspace = true }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }

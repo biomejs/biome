@@ -78,7 +78,6 @@ camino                   = { workspace = true }
 crossbeam                = { workspace = true }
 either                   = { workspace = true }
 enumflags2               = { workspace = true, features = ["serde"] }
-getrandom                = { workspace = true, features = ["js"] }
 ignore                   = { workspace = true }
 notify                   = { workspace = true, features = ["crossbeam-channel"] }
 papaya                   = { workspace = true }
@@ -97,7 +96,6 @@ web-time                 = { workspace = true }
 
 [dev-dependencies]
 biome_configuration = { path = "../biome_configuration", features = ["test-utils"] }
-biome_service       = { path = ".", features = ["testing"] }
 insta               = { workspace = true }
 
 [features]

@@ -20,8 +20,6 @@ harness = false
 name    = "markdown_parser"
 
 [dependencies]
-biome_console          = { workspace = true }
-biome_diagnostics      = { workspace = true }
 biome_markdown_factory = { workspace = true }
 biome_markdown_syntax  = { workspace = true }
 biome_parser           = { workspace = true }
@@ -31,8 +29,6 @@ biome_unicode_table    = { workspace = true }
 # Optional dependency for test_utils feature (HTML rendering for spec tests)
 htmlize                = { version = "1.0.6", features = ["unescape"], optional = true }
 percent-encoding       = { version = "2.3.2", optional = true }
-tracing                = { workspace = true }
-unicode-bom            = { workspace = true }
 
 [dev-dependencies]
 # Self-dependency to enable test_utils for integration tests.
@@ -42,12 +38,13 @@ biome_markdown_parser = { path = ".", features = ["test_utils"] }
 biome_test_utils      = { path = "../biome_test_utils" }
 criterion             = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta                 = { workspace = true }
-quickcheck            = { workspace = true }
 quickcheck_macros     = { workspace = true }
 serde                 = { workspace = true, features = ["derive"] }
 serde_json            = { workspace = true }
 similar-asserts       = { workspace = true }
 tests_macros          = { path = "../tests_macros" }
+biome_console = { workspace = true }
+biome_diagnostics = { workspace = true }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }

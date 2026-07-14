@@ -22,7 +22,6 @@ harness = false
 name    = "js_formatter"
 
 [dependencies]
-biome_deserialize            = { workspace = true }
 biome_deserialize_macros     = { workspace = true }
 biome_diagnostics_categories = { workspace = true }
 biome_formatter              = { workspace = true }
@@ -34,7 +33,6 @@ biome_string_case            = { workspace = true }
 biome_suppression            = { workspace = true }
 biome_text_size              = { workspace = true }
 biome_unicode_table          = { workspace = true }
-camino                       = { workspace = true }
 schemars                     = { workspace = true, optional = true }
 serde                        = { workspace = true, features = ["derive"], optional = true }
 smallvec                     = { workspace = true }
@@ -54,9 +52,9 @@ countme              = { workspace = true, features = ["enable"] }
 criterion            = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 quickcheck           = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
-serde_json           = { workspace = true }
 similar-asserts      = { workspace = true }
 tests_macros         = { path = "../tests_macros" }
+camino = { workspace = true }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }

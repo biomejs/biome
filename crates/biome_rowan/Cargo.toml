@@ -26,7 +26,6 @@ serde           = { workspace = true, optional = true }
 
 [dev-dependencies]
 iai               = "=0.1.1"
-quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
 serde_json        = { workspace = true }
 

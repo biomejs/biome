@@ -18,7 +18,6 @@ biome_diagnostics = { workspace = true, features = ["std"] }
 camino            = { workspace = true }
 crossbeam         = { workspace = true }
 directories       = { workspace = true }
-enumflags2        = { workspace = true, features = ["serde"] }
 papaya            = { workspace = true }
 parking_lot       = { workspace = true, features = ["arc_lock"] }
 path-absolutize   = { workspace = true }
@@ -26,11 +25,7 @@ rayon             = { workspace = true }
 rustc-hash        = { workspace = true }
 schemars          = { workspace = true, optional = true }
 serde             = { workspace = true }
-smallvec          = { workspace = true }
 tracing           = { workspace = true }
-
-[dev-dependencies]
-serde_json = { workspace = true }
 
 [features]
 schema = ["biome_diagnostics/schema", "dep:schemars", "serde"]
