@@ -140,31 +140,34 @@ impl Rule for NoNegationInEqualityCheck {
         // Block comments may be attached as trailing trivia of the previous
         // token rather than leading trivia of `!` (e.g. `foo/*...\n...*/!x`).
         // We check both locations to avoid false-negative ASI hazards.
-        {
-            let has_preceding_newline = neg_op_token
-                .leading_trivia()
-                .pieces()
-                .any(|p| {
-                    p.kind() == TriviaPieceKind::Newline
-                        || p.kind() == TriviaPieceKind::MultiLineComment
-                });
-            let prev_trailing_has_newline = neg_op_token
-                .prev_token()
-                .map(|t| {
-                    t.trailing_trivia()
-                        .pieces()
-                        .any(|p| {
-                            p.kind() == TriviaPieceKind::Newline
-                                || p.kind() == TriviaPieceKind::MultiLineComment
-                        })
-                })
-                .unwrap_or(false);
-            if has_preceding_newline || prev_trailing_has_newline {
-                let arg_text = negated_expr.syntax().text_trimmed().to_string();
-                let first_char = arg_text.chars().next().unwrap_or('\0');
-                if matches!(first_char, '/' | '[' | '`' | '+' | '-' | '(' | '<') {
-                    return None;
-                }
+        //
+        // The `has_newline` flag is also used below after wrapping
+        // function/class/object expressions in parens — the generated `(`
+        // is itself an ASI hazard when preceded by a newline.
+        let has_preceding_newline = neg_op_token
+            .leading_trivia()
+            .pieces()
+            .any(|p| {
+                p.kind() == TriviaPieceKind::Newline
+                    || p.kind() == TriviaPieceKind::MultiLineComment
+            });
+        let prev_trailing_has_newline = neg_op_token
+            .prev_token()
+            .map(|t| {
+                t.trailing_trivia()
+                    .pieces()
+                    .any(|p| {
+                        p.kind() == TriviaPieceKind::Newline
+                            || p.kind() == TriviaPieceKind::MultiLineComment
+                    })
+            })
+            .unwrap_or(false);
+        let has_newline = has_preceding_newline || prev_trailing_has_newline;
+        if has_newline {
+            let arg_text = negated_expr.syntax().text_trimmed().to_string();
+            let first_char = arg_text.chars().next().unwrap_or('\0');
+            if matches!(first_char, '/' | '[' | '`' | '+' | '-' | '(' | '<') {
+                return None;
             }
         }
 
@@ -216,10 +219,13 @@ impl Rule for NoNegationInEqualityCheck {
         // the original left-to-right order of comments and whitespace.
         //
         // Whitespace from `l_paren.trailing` and `r_paren.leading` is
-        // filtered out (COMMENT only) — that space was padding around
-        // deleted tokens and would cause unwanted extra spacing in the
-        // replacement. Whitespace from `r_paren.trailing` and the `!`
-        // operator is preserved because it provides the proper gap between
+        // filtered to COMMENTS + NEWLINES only — spaces/tabs were padding
+        // around deleted tokens and would cause unwanted extra spacing.
+        // Newlines are preserved because they are needed to terminate line
+        // comments (without a trailing newline a `//` comment would
+        // comment out the replacement operator).
+        // Whitespace from `r_paren.trailing` and the `!` operator is
+        // preserved in full because it provides the proper gap between
         // the surviving expression and the new operator.
 
         // Accumulate paren nodes so we can traverse back inner→outer.
@@ -238,9 +244,9 @@ impl Rule for NoNegationInEqualityCheck {
                             leading_for_op.push(p);
                         }
                     }
-                    // COMMENT pieces only — whitespace here was
+                    // COMMENTS + NEWLINES only — spaces/tabs were
                     // padding around the deleted `(`, not needed.
-                    for p in lp.trailing_trivia().pieces().filter(|p| p.kind().is_comment()) {
+                    for p in lp.trailing_trivia().pieces().filter(|p| p.kind().is_comment() || p.kind() == TriviaPieceKind::Newline) {
                         leading_for_op.push(p);
                     }
                 }
@@ -279,12 +285,22 @@ impl Rule for NoNegationInEqualityCheck {
             leading_for_op.push(p);
         }
 
+        // Collect the argument's own leading trivia so that comments
+        // attached directly to the surviving expression (e.g. `!/*x*/foo`
+        // where the parser stores `/*x*/` as `foo`'s leading trivia rather
+        // than `!`'s trailing trivia) are not clobbered by replace_node.
+        if let Some(arg_first) = negated_expr.syntax().first_token() {
+            for p in arg_first.leading_trivia().pieces() {
+                leading_for_op.push(p);
+            }
+        }
+
         // Step 1c: Walk inner→outer, collecting `)` trivia.
         for paren in paren_nodes.iter().rev() {
             if let Ok(rp) = paren.r_paren_token() {
-                // COMMENT pieces only — whitespace here was padding
+                // COMMENTS + NEWLINES only — spaces/tabs were padding
                 // around the deleted `)`, not needed.
-                for p in rp.leading_trivia().pieces().filter(|p| p.kind().is_comment()) {
+                for p in rp.leading_trivia().pieces().filter(|p| p.kind().is_comment() || p.kind() == TriviaPieceKind::Newline) {
                     leading_for_op.push(p);
                 }
                 // Collect ALL trailing trivia pieces — this is the gap
@@ -318,6 +334,12 @@ impl Rule for NoNegationInEqualityCheck {
             let kind = new_left.syntax().kind();
             if matches!(kind, JS_FUNCTION_EXPRESSION | JS_CLASS_EXPRESSION | JS_OBJECT_EXPRESSION) {
                 new_left = AnyJsExpression::from(make::parenthesized(new_left));
+                // Re-check ASI: the generated `(` is itself a hazard when
+                // preceded by a newline. e.g. `foo\n!function(){}===bar` →
+                // `foo\n(function(){})!==bar` which parses as a call.
+                if has_newline {
+                    return None;
+                }
             }
         }
 

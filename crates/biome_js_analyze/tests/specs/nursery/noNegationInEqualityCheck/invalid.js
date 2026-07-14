@@ -43,3 +43,18 @@ line */!(x) === bar;
 /* ASI unsafe: block comment with newline before ! exposes restricted char */
 /*
 */!/regex/.test(value) === bar;
+/* Issue 1: ASI guard misses generated parens — function/class/object
+with newline should skip fix (wrapping adds '(' which is an ASI hazard) */
+foo
+!function(){} === bar;
+foo
+!class{} === bar;
+foo
+!{} === bar;
+/* Issue 2: line comment newlines preserved — without \n the comment
+would comment out the replacement operator */
+(!foo // close
+) === bar;
+/* Issue 3: leading comments on argument preserved — parser may attach
+trivia between ! and arg as the argument's leading trivia */
+!/* leading on arg */foo === bar;
