@@ -1,0 +1,55 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+!foo === bar;
+/* ASI unsafe: < at start of expression after newline (JSX element or TS type assertion) */
+foo
+!<Component /> === bar;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A negation is used on the left side of this equality check.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ !foo === bar;
+      │ ^^^^^^^^^^^^
+    3 │ /* ASI unsafe: < at start of expression after newline (JSX element or TS type assertion) */
+    4 │ foo
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the proper negated comparison operator instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - !foo·===·bar;
+      2 │ + foo·!==·bar;
+    3 3 │   /* ASI unsafe: < at start of expression after newline (JSX element or TS type assertion) */
+    4 4 │   foo
+  
+
+```
+
+```
+invalid.jsx:5:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A negation is used on the left side of this equality check.
+  
+    3 │ /* ASI unsafe: < at start of expression after newline (JSX element or TS type assertion) */
+    4 │ foo
+  > 5 │ !<Component /> === bar;
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

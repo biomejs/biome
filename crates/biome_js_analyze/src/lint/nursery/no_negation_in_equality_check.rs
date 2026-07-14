@@ -128,8 +128,8 @@ impl Rule for NoNegationInEqualityCheck {
         // a character that would continue the previous expression
         // (/, [, `, +, -, (), removing the `!` would change the parse.
         // `/` would become a regex literal, `[` property access,
-        // `` ` `` a tagged template, `+`/`-` a unary operator, and `(`
-        // would become a function call.
+        // `` ` `` a tagged template, `+`/`-` a unary operator, `(`
+        // a function call, and `<` a JSX element or TS type assertion.
         // Skip the fix when any of these would be exposed at line start.
         {
             let has_preceding_newline = neg_op_token
@@ -139,7 +139,7 @@ impl Rule for NoNegationInEqualityCheck {
             if has_preceding_newline {
                 let arg_text = negated_expr.syntax().text_trimmed().to_string();
                 let first_char = arg_text.chars().next().unwrap_or('\0');
-                if matches!(first_char, '/' | '[' | '`' | '+' | '-' | '(') {
+                if matches!(first_char, '/' | '[' | '`' | '+' | '-' | '(' | '<') {
                     return None;
                 }
             }
