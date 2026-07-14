@@ -10,6 +10,7 @@ use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use crate::parser::CssParser;
 use crate::syntax::at_rule::media::MediaQueryList;
 use crate::syntax::parse_dashed_identifier;
+use crate::syntax::parse_error::expected_dashed_identifier;
 
 #[inline]
 fn is_at_custom_media_at_rule(p: &mut CssParser) -> bool {
@@ -42,7 +43,8 @@ fn parse_custom_media_at_rule_declarator(
     let m = p.start();
 
     p.bump(T![custom_media]);
-    parse_dashed_identifier(p).ok();
+
+    parse_dashed_identifier(p).or_add_diagnostic(p, expected_dashed_identifier);
 
     if is_at_boolean_media_query(p) {
         parse_boolean_media_query(p).ok();
