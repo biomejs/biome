@@ -4,12 +4,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlElement, HtmlRoot};
-use biome_languages::HtmlFileSource;
+use biome_html_syntax::{HtmlElement, HtmlRoot, T};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 use biome_rule_options::use_vue_valid_template_root::UseVueValidTemplateRootOptions;
-
-use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforce valid Vue `<template>` root usage.
@@ -65,12 +62,11 @@ impl Rule for UseVueValidTemplateRoot {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let root = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
 
         // Find top-level `<template>` elements only
         let element = root.html().into_iter().find(|el| {
             if let Some(element) = el.clone().as_any_html_tag_element() {
-                return is_html_tag(&element, source_type, "template");
+                return element.tag_name_kind() == Some(T![template]);
             }
             false
         })?;

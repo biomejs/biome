@@ -6,7 +6,6 @@ mod lint;
 mod registry;
 mod services;
 mod suppression_action;
-mod utils;
 
 pub use crate::registry::visit_registry;
 pub use crate::services::aria::{Aria, AriaServices};
