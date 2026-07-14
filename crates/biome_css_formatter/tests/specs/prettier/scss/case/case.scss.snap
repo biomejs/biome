@@ -171,24 +171,6 @@ TABLE {}
  
  HTML#KeepId.KeepClass,
  a[HREF="KeepAttrValue"]:hover::first-letter,
-@@ -12,7 +12,7 @@
- :not(:nth-child(2n + 1)) {
-   color: #aabbcc;
-   background-image: URL("KeepString");
--  margin: 5px 0.2e10em;
-+  margin: 5PX 0.2e10Em;
-   --Keep-custom-Prop: red;
-   background: Var(--Keep-custom-Prop);
-   animation-name: KeepAnimationName;
-@@ -33,7 +33,7 @@
-   }
- 
-   #{$KeepInterpolationVar},
--  #{$Keep + 15px + Keep15PX + "15PX" + "15PX"},
-+  #{$Keep + 15PX + Keep15PX + "15PX" + "15PX"},
-   #{$Keep + $Keep15PX} {
-     prop: val;
-   }
 @@ -56,14 +56,14 @@
  }
  
@@ -196,8 +178,7 @@ TABLE {}
 -@KeepLessVar: val;
 +@keeplessvar : val;
  
--@mixin KeepMixinName($Keep: 15in, $Keep: $Keep15IN, $Keep: Keep-1E-2Em) {
-+@mixin KeepMixinName($Keep: 15IN, $Keep: $Keep15IN, $Keep: Keep-1E-2Em) {
+ @mixin KeepMixinName($Keep: 15in, $Keep: $Keep15IN, $Keep: Keep-1E-2Em) {
    $KeepVar: KeepFuncName();
    #{$KeepInterpolationVar}: val;
    #{$Keep + 15PX}: val;
@@ -207,41 +188,6 @@ TABLE {}
    @extend %KeepPlaceholderSelector;
  
    #{$Keep}[#{$Keep}][#{Keep}^="#{Keep-1A}"]:#{$Keep} {
-@@ -78,11 +78,11 @@
-     color: RED;
-   }
- 
--  background: Keep 15px Keep15PX {
-+  background: Keep 15PX Keep15PX {
-     color: RED;
-   }
- 
--  #{$Keep + 15px + Keep15PX + "15PX" + "15PX"}: {
-+  #{$Keep + 15PX + Keep15PX + "15PX" + "15PX"}: {
-     color: RED;
-   }
- }
-@@ -90,9 +90,9 @@
- @mixin Keep($Keep: $Keep15IN, $Keep: Keepå1E1) {
- }
- 
--@media (min-width: 700px) {
-+@media (min-width: 700PX) {
-   @include Keep;
--  @include Keep(0.12e1ch);
-+  @include Keep(0.12e1cH);
-   @include Keep($Keep12E01cH);
- }
- 
-@@ -124,7 +124,7 @@
- }
- 
- .foo {
--  color: hsl(0.75turn, 60%, 70%);
-+  color: hsl(0.75TURN, 60%, 70%);
- }
- 
- p:first-child {
 ```
 
 # Output
@@ -261,7 +207,7 @@ svg[viewBox] linearGradient,
 :not(:nth-child(2n + 1)) {
   color: #aabbcc;
   background-image: URL("KeepString");
-  margin: 5PX 0.2e10Em;
+  margin: 5px 0.2e10em;
   --Keep-custom-Prop: red;
   background: Var(--Keep-custom-Prop);
   animation-name: KeepAnimationName;
@@ -282,7 +228,7 @@ svg[viewBox] linearGradient,
   }
 
   #{$KeepInterpolationVar},
-  #{$Keep + 15PX + Keep15PX + "15PX" + "15PX"},
+  #{$Keep + 15px + Keep15PX + "15PX" + "15PX"},
   #{$Keep + $Keep15PX} {
     prop: val;
   }
@@ -307,7 +253,7 @@ svg[viewBox] linearGradient,
 $KeepTopLevelVar: val;
 @keeplessvar : val;
 
-@mixin KeepMixinName($Keep: 15IN, $Keep: $Keep15IN, $Keep: Keep-1E-2Em) {
+@mixin KeepMixinName($Keep: 15in, $Keep: $Keep15IN, $Keep: Keep-1E-2Em) {
   $KeepVar: KeepFuncName();
   #{$KeepInterpolationVar}: val;
   #{$Keep + 15PX}: val;
@@ -327,11 +273,11 @@ $KeepTopLevelVar: val;
     color: RED;
   }
 
-  background: Keep 15PX Keep15PX {
+  background: Keep 15px Keep15PX {
     color: RED;
   }
 
-  #{$Keep + 15PX + Keep15PX + "15PX" + "15PX"}: {
+  #{$Keep + 15px + Keep15PX + "15PX" + "15PX"}: {
     color: RED;
   }
 }
@@ -339,9 +285,9 @@ $KeepTopLevelVar: val;
 @mixin Keep($Keep: $Keep15IN, $Keep: Keepå1E1) {
 }
 
-@media (min-width: 700PX) {
+@media (min-width: 700px) {
   @include Keep;
-  @include Keep(0.12e1cH);
+  @include Keep(0.12e1ch);
   @include Keep($Keep12E01cH);
 }
 
@@ -373,7 +319,7 @@ $KeepTopLevelVar: val;
 }
 
 .foo {
-  color: hsl(0.75TURN, 60%, 70%);
+  color: hsl(0.75turn, 60%, 70%);
 }
 
 p:first-child {

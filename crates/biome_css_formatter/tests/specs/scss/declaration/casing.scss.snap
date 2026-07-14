@@ -192,7 +192,7 @@ $KeepNotParen: NOT ($Keep AND $Other);
 
 @import "Keep#{$Name}.scss";
 
-@import "KeepImport.CSS" PRINT and (min-width: 700PX);
+@import "KeepImport.CSS" PRINT and (min-width: 700px);
 
 KeepUse.$Keep: 1 !GLOBAL;
 
@@ -222,7 +222,7 @@ $KeepNotParen: NOT($Keep AND $Other);
 	@return $Input;
 }
 
-@mixin KeepMixin($Keep: 15IN, $Args...) {
+@mixin KeepMixin($Keep: 15in, $Args...) {
 	@content($Keep);
 
 	@include KeepOther($Args...);
@@ -256,7 +256,7 @@ $KeepNotParen: NOT($Keep AND $Other);
 		--Keep-custom-Prop: $Keep;
 	}
 
-	@media (min-width: 700PX) {
+	@media (min-width: 700px) {
 		.KeepClass:hover::first-letter {
 			color: #aabbcc;
 			background: Var(--Keep-custom-Prop);
@@ -308,7 +308,7 @@ $KeepNotParen: NOT($Keep AND $Other);
 	}
 }
 
-@media #{$Query}, PRINT AND (min-width: 700PX) {
+@media #{$Query}, PRINT AND (min-width: 700px) {
 	.KeepClass:hover {
 		color: RED;
 	}
@@ -326,8 +326,8 @@ $KeepNotParen: NOT($Keep AND $Other);
 	}
 }
 
-@media (#{$Boolean}), (#{$Range} > 1PX), (1PX < #{$Reverse}),
-	(1PX < #{$Interval} < 2PX), ($KeepBoolean), (1PX < $KeepReverse) {
+@media (#{$Boolean}), (#{$Range} > 1px), (1px < #{$Reverse}),
+	(1px < #{$Interval} < 2px), ($KeepBoolean), (1px < $KeepReverse) {
 	.KeepClass {
 		color: RED;
 	}
@@ -415,13 +415,13 @@ $KeepNotParen: NOT($Keep AND $Other);
 	}
 }
 
-@include KeepMixin($Keep: 15IN);
+@include KeepMixin($Keep: 15in);
 
 .KeepClass {
 	@extend %KeepPlaceholder !OPTIONAL;
 }
 
-@include KeepMixin($Keep: 15IN) USING ($Item) {
+@include KeepMixin($Keep: 15in) USING ($Item) {
 	color: RED;
 }
 
@@ -464,11 +464,11 @@ $KeepNotParen: NOT($Keep AND $Other);
 }
 
 .units {
-	x: 1PX;
+	x: 1px;
 	y: 1FuTuRe;
-	q: 1q;
-	h: 1HZ;
-	k: 1khz;
+	q: 1Q;
+	h: 1Hz;
+	k: 1kHz;
 }
 
 ```

@@ -45,6 +45,6 @@ $inline-config:
 $buttonConfig:
 	"save" 50px,
 	"cancel" 50px,
-	"help" 100PX;
+	"help" 100px;
 
 ```

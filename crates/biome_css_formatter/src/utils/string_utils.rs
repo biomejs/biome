@@ -283,7 +283,7 @@ impl<'token> LiteralStringNormaliser<'token> {
     }
 }
 
-/// Canonicalizes CSS dimension units and preserves source casing for Sass units.
+/// Canonicalizes known CSS dimension units unless source casing is preserved.
 pub(crate) struct FormatDimensionUnit {
     token: SyntaxToken<CssLanguage>,
     preserve_source_case: bool,
@@ -310,7 +310,7 @@ impl FormatDimensionUnit {
 
 impl Format<CssFormatContext> for FormatDimensionUnit {
     fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
-        if self.preserve_source_case || f.options().file_source().is_scss() {
+        if self.preserve_source_case {
             return write!(f, [self.token.format()]);
         }
 
