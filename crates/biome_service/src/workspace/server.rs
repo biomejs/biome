@@ -772,7 +772,9 @@ impl WorkspaceServerWithDb<'_> {
         // must still register the document, otherwise later lookups like
         // `check_file_size`/`get_file_content` incorrectly report the file
         // as not found even though it was just "opened".
-        (reason.is_index() && biome_path.is_dependency() && !biome_path.is_manifest())
+        (reason.is_index()
+            && biome_path.is_dependency()
+            && !biome_path.is_manifest())
             || (
                 // If the request is for indexing, we don't insert any document
                 // unless the document isn't ignored.
