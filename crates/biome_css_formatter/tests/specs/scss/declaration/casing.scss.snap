@@ -171,6 +171,8 @@ $KeepNotParen: NOT ($Keep AND $Other);
 
 .units{X:1PX;Y:1FuTuRe;Q:1q;H:1HZ;K:1khz}
 
+.nested-property-case{#{foo-#{$Keep + 17PX}}:v;foo-#{bar-#{$Keep + 18PX}}:w}
+
 .Unit-#{1PX}{COLOR:RED}
 
 $KeepKeyword:INITIAL;.#{$KeepKeyword}{COLOR:RED}
@@ -503,6 +505,11 @@ $KeepNotParen: NOT($Keep AND $Other);
 	q: 1Q;
 	h: 1Hz;
 	k: 1kHz;
+}
+
+.nested-property-case {
+	#{foo-#{$Keep + 17PX}}: v;
+	foo-#{bar-#{$Keep + 18PX}}: w;
 }
 
 .Unit-#{1px} {

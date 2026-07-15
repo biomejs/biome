@@ -30,11 +30,11 @@ impl FormatNodeRule<CssRegularDimension> for FormatCssRegularDimension {
     }
 }
 
-/// Matches units embedded in interpolated property names such as `#{$size + 1PX}`.
+/// Matches units in interpolated property names such as `#{foo-#{$size + 1PX}}`.
 fn is_in_interpolated_property_name(node: &CssRegularDimension) -> bool {
     node.syntax()
         .ancestors()
         .skip(1)
-        .find_map(ScssInterpolatedIdentifier::cast)
-        .is_some_and(|identifier| identifier.parent::<CssGenericProperty>().is_some())
+        .filter_map(ScssInterpolatedIdentifier::cast)
+        .any(|identifier| identifier.parent::<CssGenericProperty>().is_some())
 }
