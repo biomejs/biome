@@ -97,8 +97,7 @@ impl Rule for NoAriaUnsupportedElements {
                         AnyVueDirective::VueVBindShorthandDirective(d) => Some(
                             d.arg()
                                 .ok()?
-                                .arg()
-                                .ok()?
+                                .arg()?
                                 .as_vue_static_argument()?
                                 .name_token()
                                 .ok()?
@@ -110,8 +109,7 @@ impl Rule for NoAriaUnsupportedElements {
                             }
                             Some(
                                 d.arg()?
-                                    .arg()
-                                    .ok()?
+                                    .arg()?
                                     .as_vue_static_argument()?
                                     .name_token()
                                     .ok()?

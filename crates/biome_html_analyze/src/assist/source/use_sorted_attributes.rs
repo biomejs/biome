@@ -364,30 +364,30 @@ impl SortableHtmlAttribute {
                 }
             }
             AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueVBindShorthandDirective(dir)) => {
-                if let Ok(arg) = dir.arg().and_then(|arg| arg.arg()) {
-                    match arg {
-                        AnyVueDirectiveArgument::VueBogusDirectiveArgument(_) => {
-                            SortCategory::Unknown
-                        }
-                        AnyVueDirectiveArgument::VueDynamicArgument(_) => {
-                            SortCategory::VueOtherAttribute
-                        }
-                        AnyVueDirectiveArgument::VueStaticArgument(arg) => {
-                            if let Ok(arg_name) =
-                                arg.name_token().as_ref().map(|token| token.text_trimmed())
-                            {
-                                match arg_name {
-                                    "is" => SortCategory::VueDefinition,
-                                    "key" => SortCategory::VueUnique,
-                                    _ => SortCategory::VueOtherAttribute,
-                                }
-                            } else {
-                                SortCategory::VueCustomDirective
+                let Ok(directive_arg) = dir.arg() else {
+                    return SortCategory::VueCustomDirective;
+                };
+                let Some(arg) = directive_arg.arg() else {
+                    return SortCategory::VueOtherAttribute;
+                };
+                match arg {
+                    AnyVueDirectiveArgument::VueBogusDirectiveArgument(_) => SortCategory::Unknown,
+                    AnyVueDirectiveArgument::VueDynamicArgument(_) => {
+                        SortCategory::VueOtherAttribute
+                    }
+                    AnyVueDirectiveArgument::VueStaticArgument(arg) => {
+                        if let Ok(arg_name) =
+                            arg.name_token().as_ref().map(|token| token.text_trimmed())
+                        {
+                            match arg_name {
+                                "is" => SortCategory::VueDefinition,
+                                "key" => SortCategory::VueUnique,
+                                _ => SortCategory::VueOtherAttribute,
                             }
+                        } else {
+                            SortCategory::VueCustomDirective
                         }
                     }
-                } else {
-                    SortCategory::VueCustomDirective
                 }
             }
             AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueVOnShorthandDirective(_)) => {
@@ -485,13 +485,12 @@ impl SortableAttribute for SortableHtmlAttribute {
                     "v-on" | "v-bind" | "v-slot" => dir
                         .arg()?
                         .arg()
-                        .ok()
                         .and_then(|arg| vue_directive_arg_token(&arg)),
                     _ => dir.name_token().ok(),
                 }
             }
             AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueVBindShorthandDirective(dir)) => {
-                vue_directive_arg_token(&dir.arg().ok()?.arg().ok()?)
+                vue_directive_arg_token(&dir.arg().ok()?.arg()?)
             }
             AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueVSlotShorthandDirective(dir)) => {
                 vue_directive_arg_token(&dir.arg().ok()?)
