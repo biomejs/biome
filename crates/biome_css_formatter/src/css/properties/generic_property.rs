@@ -1,12 +1,12 @@
 use crate::prelude::*;
-use crate::utils::case::is_css_modules_import_export_declaration;
+use crate::utils::case::{is_css_modules_import_export_declaration, is_supports_test_declaration};
 use crate::utils::comment_trivia::has_source_gap_before_token;
 use crate::utils::component_value_list::{ValueListLayout, get_value_list_layout};
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssGenericPropertyValueOrExpression, CssContainerStyleInParens,
     CssContainerStyleQueryInParens, CssDeclaration, CssFontFeatureValuesItem, CssGenericProperty,
-    CssGenericPropertyFields, CssIdentifier, CssIfStyleTest, CssIfSupportsTest, CssImportSupports,
-    CssLanguage, CssSupportsFeatureDeclaration, TwPluginAtRule,
+    CssGenericPropertyFields, CssIdentifier, CssIfStyleTest, CssLanguage,
+    CssSupportsFeatureDeclaration, TwPluginAtRule,
 };
 use biome_formatter::comments::SourceComment;
 use biome_formatter::trivia::format_dangling_comment;
@@ -82,11 +82,12 @@ fn is_preserved_declaration_context(property: &CssGenericProperty) -> bool {
         return false;
     };
 
+    if is_supports_test_declaration(&declaration) {
+        return true;
+    }
+
     declaration.syntax().ancestors().any(|ancestor| {
-        CssSupportsFeatureDeclaration::can_cast(ancestor.kind())
-            || CssImportSupports::can_cast(ancestor.kind())
-            || CssIfSupportsTest::can_cast(ancestor.kind())
-            || CssContainerStyleQueryInParens::can_cast(ancestor.kind())
+        CssContainerStyleQueryInParens::can_cast(ancestor.kind())
             || CssContainerStyleInParens::can_cast(ancestor.kind())
             || CssIfStyleTest::can_cast(ancestor.kind())
             || CssFontFeatureValuesItem::can_cast(ancestor.kind())

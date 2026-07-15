@@ -6,9 +6,10 @@ use biome_css_syntax::CssSyntaxToken;
 use biome_css_syntax::{
     AnyCssAtRule, AnyCssQueryFeatureName, AnyCssSelectorIdentifier, AnyCssUnknownAtRuleName,
     CssContainerScrollStateQueryInParens, CssDeclaration, CssFontFeatureValuesItem,
-    CssGenericProperty, CssIdentifier, CssIfMediaTest, CssLanguage, CssNestedQualifiedRule,
-    CssPseudoClassFunctionIdentifier, CssPseudoClassIdentifier, CssPseudoClassSelector,
-    CssQualifiedRule, CssSyntaxKind, CssSyntaxNode, CssUnknownAtRuleComponentList,
+    CssGenericProperty, CssIdentifier, CssIfMediaTest, CssIfSupportsTest, CssImportSupports,
+    CssLanguage, CssNestedQualifiedRule, CssPseudoClassFunctionIdentifier,
+    CssPseudoClassIdentifier, CssPseudoClassSelector, CssQualifiedRule,
+    CssSupportsFeatureDeclaration, CssSyntaxKind, CssSyntaxNode, CssUnknownAtRuleComponentList,
     CssUnknownBlockAtRule, TwPluginAtRule,
 };
 #[cfg(debug_assertions)]
@@ -194,6 +195,15 @@ pub(crate) fn is_css_modules_import_export_declaration(property: &CssGenericProp
         .ancestors()
         .find_map(CssQualifiedRule::cast)
         .is_some_and(|rule| is_css_modules_import_export_rule(&rule))
+}
+
+/// Matches declarations used by `@supports`, import `supports()`, and CSS `if()` tests.
+pub(crate) fn is_supports_test_declaration(declaration: &CssDeclaration) -> bool {
+    declaration
+        .parent::<CssSupportsFeatureDeclaration>()
+        .is_some()
+        || declaration.parent::<CssImportSupports>().is_some()
+        || declaration.parent::<CssIfSupportsTest>().is_some()
 }
 
 /// Matches opaque values such as `@plugin "x" { Option: INITIAL; }`.

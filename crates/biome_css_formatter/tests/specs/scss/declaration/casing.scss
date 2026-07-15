@@ -165,6 +165,14 @@ $KeepNotParen: NOT ($Keep AND $Other);
 
 .nested-property-case{#{foo-#{$Keep + 17PX}}:v;foo-#{bar-#{$Keep + 18PX}}:w}
 
+.custom-property-case{--#{1PX}:v;--foo-#{1PX}:w}
+
+@supports(#{1PX}:x){}
+
+@import "x" supports(#{1PX}:x);
+
+.if-supports-case{x:if(supports(#{1PX}:x):red;else:blue)}
+
 .Unit-#{1PX}{COLOR:RED}
 
 $KeepKeyword:INITIAL;.#{$KeepKeyword}{COLOR:RED}
