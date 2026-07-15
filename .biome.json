@@ -80,8 +80,7 @@
     }
   },
   "plugins": [
-    "plugins/no-object-assign.grit",
-    "plugins/plugin.js"
+    "plugins/no-object-assign.grit"
   ],
   "vcs": {
     "clientKind": "git",
