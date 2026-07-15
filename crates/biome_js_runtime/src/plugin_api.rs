@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 use boa_engine::module::SyntheticModuleInitializer;
@@ -9,26 +9,46 @@ use biome_analyze::RuleDiagnostic;
 use biome_diagnostics::{Severity, category};
 use biome_text_size::TextRange;
 
+type DiagnosticRangeResolver = fn(&JsValue) -> Option<TextRange>;
+
 pub(crate) struct JsPluginApi {
     diagnostics: Rc<RefCell<Vec<RuleDiagnostic>>>,
+    diagnostic_range_resolver: Rc<Cell<Option<DiagnosticRangeResolver>>>,
 }
 
 impl JsPluginApi {
     pub(crate) fn new() -> Self {
         Self {
             diagnostics: Rc::new(RefCell::new(Vec::new())),
+            diagnostic_range_resolver: Rc::new(Cell::new(None)),
         }
     }
 
     pub(crate) fn create_module(&self, context: &mut Context) -> Module {
         let diagnostics = self.diagnostics.clone();
+        let diagnostic_range_resolver = self.diagnostic_range_resolver.clone();
 
         // SAFETY: The closure doesn't capture any GC-managed values.
         let register_diagnostic = FunctionObjectBuilder::new(context.realm(), unsafe {
             NativeFunction::from_closure(move |_this, args, context| {
-                let [severity, message] = args else {
+                let [node, severity, message] = args else {
                     return Err(JsNativeError::typ()
-                        .with_message("registerDiagnostic() expects two string arguments")
+                        .with_message(
+                            "registerDiagnostic() expects an AST node, severity, and message",
+                        )
+                        .into());
+                };
+
+                let Some(resolve_range) = diagnostic_range_resolver.get() else {
+                    return Err(JsNativeError::error()
+                        .with_message("AST diagnostics are not available in this context")
+                        .into());
+                };
+                let Some(range) = resolve_range(node) else {
+                    return Err(JsNativeError::typ()
+                        .with_message(
+                            "registerDiagnostic() expects an AST node as its first argument",
+                        )
                         .into());
                 };
 
@@ -48,7 +68,7 @@ impl JsPluginApi {
 
                 let diagnostic = RuleDiagnostic::new(
                     category!("plugin"),
-                    None::<TextRange>, // TODO: retrieve a span from the AST
+                    range,
                     message.to_string(context)?.to_std_string_lossy(),
                 )
                 .with_severity(severity);
@@ -58,11 +78,10 @@ impl JsPluginApi {
                 Ok(JsValue::undefined())
             })
         })
-        .length(2)
+        .length(3)
         .name("registerDiagnostic")
         .build();
 
-        // TODO: auto-generate AST classes and insert into the runtime
         // TODO: more runtime APIs?
 
         Module::synthetic(
@@ -81,5 +100,9 @@ impl JsPluginApi {
 
     pub(crate) fn pull_diagnostics(&self) -> Vec<RuleDiagnostic> {
         std::mem::take(&mut self.diagnostics.borrow_mut())
+    }
+
+    pub(crate) fn set_diagnostic_range_resolver(&self, resolver: DiagnosticRangeResolver) {
+        self.diagnostic_range_resolver.set(Some(resolver));
     }
 }

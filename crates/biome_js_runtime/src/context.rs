@@ -11,6 +11,7 @@ use camino::Utf8Path;
 
 use biome_analyze::RuleDiagnostic;
 use biome_resolver::FsWithResolverProxy;
+use biome_text_size::TextRange;
 
 use crate::JsModuleLoader;
 use crate::plugin_api::JsPluginApi;
@@ -113,6 +114,10 @@ impl JsExecContext {
         }
 
         Ok(C::from_data(data, &mut self.ctx)?.into())
+    }
+
+    pub fn set_diagnostic_range_resolver(&mut self, resolver: fn(&JsValue) -> Option<TextRange>) {
+        self.api.set_diagnostic_range_resolver(resolver);
     }
 
     pub fn call_function(

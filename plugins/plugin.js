@@ -18,6 +18,7 @@ export default function noTopLevelVar(_path, root) {
 			statement.declaration?.kindToken === "var"
 		) {
 			registerDiagnostic(
+				statement,
 				"warning",
 				"Use let or const instead of a top-level var declaration.",
 			);

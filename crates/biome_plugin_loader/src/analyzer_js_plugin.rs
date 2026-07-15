@@ -87,6 +87,12 @@ impl JsAstNode {
         node.data.resolve_field(field, context)
     }
 
+    fn text_range(value: &JsValue) -> Option<TextRange> {
+        let object = value.as_object()?;
+        let node = object.downcast_ref::<Self>()?;
+        Some(node.data.syntax().text_trimmed_range())
+    }
+
     fn get_kind(this: &JsValue, _args: &[JsValue], _context: &mut Context) -> JsResult<JsValue> {
         let node = Self::from_this(this)?;
         Ok(JsString::from(format!("{:?}", node.kind())).into())
@@ -165,6 +171,7 @@ impl Class for JsAstNode {
 
 fn load_plugin(fs: Arc<dyn FsWithResolverProxy>, path: &Utf8Path) -> JsResult<LoadedPlugin> {
     let mut ctx = JsExecContext::new(fs)?;
+    ctx.set_diagnostic_range_resolver(JsAstNode::text_range);
     let module = ctx.import_module(path)?;
     let entrypoint = ctx.get_default_export(&module)?;
 
@@ -359,8 +366,8 @@ mod tests {
     fn load_test_plugin(includes: Option<&[NormalizedGlob]>) -> AnalyzerJsPlugin {
         load_test_plugin_from_source(
             r#"import { registerDiagnostic } from "@biomejs/plugin-api";
-            export default function useMyPlugin() {
-                registerDiagnostic("information", "Hello, world!");
+            export default function useMyPlugin(_path, root) {
+                registerDiagnostic(root, "information", "Hello, world!");
             }"#,
             includes,
         )
@@ -406,6 +413,7 @@ mod tests {
                 );
                 const hasChildNodes = "childNodes" in root;
                 registerDiagnostic(
+                    root,
                     "information",
                     `${path}|${root.kind}|${typeof descriptor.get}|${Object.prototype.hasOwnProperty.call(root, "items")}|${hasChildNodes}`,
                 );
@@ -440,6 +448,7 @@ mod tests {
                         statement.declaration?.kindToken === "var"
                     ) {
                         registerDiagnostic(
+                            statement,
                             "warning",
                             "Use let or const instead of a top-level var declaration.",
                         );
@@ -456,6 +465,10 @@ mod tests {
 
         let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
         assert_eq!(result.entries.len(), 1);
+        assert_eq!(
+            result.entries[0].diagnostic.span(),
+            Some(TextRange::new(0.into(), 15.into()))
+        );
         let content = result
             .entries
             .into_iter()
@@ -473,8 +486,8 @@ mod tests {
         fs.insert(
             "/plugin.js".into(),
             r#"import { registerDiagnostic } from "@biomejs/plugin-api";
-            export default function useMyPlugin() {
-                registerDiagnostic("information", "Hello, world!");
+            export default function useMyPlugin(_path, root) {
+                registerDiagnostic(root, "information", "Hello, world!");
             }"#,
         );
 
