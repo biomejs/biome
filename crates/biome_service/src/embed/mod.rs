@@ -6,7 +6,7 @@ pub(crate) mod js;
 use biome_rowan::{TextRange, TextSize, TokenText};
 
 /// The text content and position information for an embed site.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 #[cfg_attr(
     not(any(feature = "html_embeds", feature = "js_embeds")),
     expect(

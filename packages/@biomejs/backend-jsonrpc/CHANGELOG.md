@@ -1,5 +1,7 @@
 # @biomejs/backend-jsonrpc
 
+## 2.0.58
+
 ## 2.0.57
 
 ## 2.0.56

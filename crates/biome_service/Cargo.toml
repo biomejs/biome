@@ -97,6 +97,7 @@ web-time                 = { workspace = true }
 [dev-dependencies]
 biome_configuration = { path = "../biome_configuration", features = ["test-utils"] }
 insta               = { workspace = true }
+static_assertions   = { workspace = true }
 
 [features]
 # To parse snippets and embeds inside HTML files

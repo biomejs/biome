@@ -1,12 +1,13 @@
 use super::{
     AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, EditorCapabilities,
-    EnabledForPath, ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults,
-    ParseResult, ParserCapabilities, SearchCapabilities, format_on_type_noop, matches_on_type_char,
+    EnabledForPath, ExtensionHandler, FixAllParams, FixedFileResult, FormatterCapabilities,
+    LintParams, LintResults, ParseResult, ParserCapabilities, SearchCapabilities,
+    format_on_type_noop, matches_on_type_char,
 };
 use crate::settings::{
     OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
-use crate::workspace::{FixFileResult, GetSyntaxTreeResult};
+use crate::workspace::GetSyntaxTreeResult;
 use crate::{
     WorkspaceError,
     settings::{ServiceLanguage, Settings},
@@ -358,7 +359,7 @@ fn debug_formatter_ir(
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
@@ -477,24 +478,12 @@ fn lint(params: LintParams) -> LintResults {
 }
 
 #[tracing::instrument(level = "debug", skip(params))]
-pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     let tree: GritRoot = params.parsed_source.tree(&params.workspace_db);
-    let code = if params.should_format {
-        format_node(
-            params
-                .settings
-                .format_options::<GritLanguage>(params.biome_path, &params.document_file_source),
-            tree.syntax(),
-        )?
-        .print()?
-        .into_code()
-    } else {
-        tree.syntax().to_string()
-    };
-    Ok(FixFileResult {
-        code,
+    Ok(Some(FixedFileResult {
+        root: tree.syntax().as_send().unwrap(),
         skipped_suggested_fixes: 0,
         actions: vec![],
         errors: 0,
-    })
+    }))
 }
