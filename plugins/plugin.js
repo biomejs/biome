@@ -1,16 +1,26 @@
 import { registerDiagnostic } from "@biomejs/plugin-api";
 
 /**
- * @param {string} path
+ * @param {string} _path
  * @param {import("@biomejs/plugin-api").AnyJsRoot} root
  */
-export default function useMyPlugin(path, root) {
-	if (path.endsWith("plugin.js")) {
-		registerDiagnostic("warning", "Hello, world!");
-	}
+export default function noTopLevelVar(_path, root) {
+	const statements =
+		root.kind === "JS_MODULE" || root.kind === "TS_DECLARATION_MODULE"
+			? root.items
+			: root.kind === "JS_SCRIPT"
+				? root.statements
+				: [];
 
-	const statement = root.children[1].children[1];
-	if (statement.text.includes("useMyPlugin")) {
-		registerDiagnostic("information", "Found useMyPlugin in AST");
+	for (const statement of statements) {
+		if (
+			statement.kind === "JS_VARIABLE_STATEMENT" &&
+			statement.declaration?.kindToken === "var"
+		) {
+			registerDiagnostic(
+				"warning",
+				"Use let or const instead of a top-level var declaration.",
+			);
+		}
 	}
 }

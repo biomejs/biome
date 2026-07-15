@@ -18,7 +18,7 @@ use biome_console::markup;
 use biome_diagnostics::category;
 use biome_glob::NormalizedGlob;
 use biome_js_runtime::JsExecContext;
-use biome_js_syntax::{AnyJsRoot, JsSyntaxNode};
+use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, JsSyntaxToken};
 use biome_resolver::FsWithResolverProxy;
 use biome_rowan::{AnySyntaxNode, AstNode, RawSyntaxKind, SyntaxKind};
 use biome_text_size::TextRange;
@@ -36,7 +36,7 @@ struct LoadedPlugin {
 
 #[derive(Debug, JsData)]
 struct JsAstNode {
-    node: JsSyntaxNode,
+    data: JsAstNodeData,
 }
 
 impl Finalize for JsAstNode {}
@@ -47,6 +47,16 @@ unsafe impl Trace for JsAstNode {
 }
 
 impl JsAstNode {
+    fn from_syntax(node: JsSyntaxNode) -> JsResult<Self> {
+        let Some(data) = JsAstNodeData::cast(node) else {
+            return Err(JsNativeError::typ()
+                .with_message("Unsupported JavaScript AST node")
+                .into());
+        };
+
+        Ok(Self { data })
+    }
+
     fn from_this(this: &JsValue) -> JsResult<JsSyntaxNode> {
         let Some(object) = this.as_object() else {
             return Err(JsNativeError::typ()
@@ -59,7 +69,22 @@ impl JsAstNode {
                 .into());
         };
 
-        Ok(node.node.clone())
+        Ok(node.data.syntax().clone())
+    }
+
+    fn resolve_field(this: &JsValue, field: &str, context: &mut Context) -> JsResult<JsValue> {
+        let Some(object) = this.as_object() else {
+            return Err(JsNativeError::typ()
+                .with_message("AST getter called with an invalid receiver")
+                .into());
+        };
+        let Some(node) = object.downcast_ref::<Self>() else {
+            return Err(JsNativeError::typ()
+                .with_message("AST getter called with an invalid receiver")
+                .into());
+        };
+
+        node.data.resolve_field(field, context)
     }
 
     fn get_kind(this: &JsValue, _args: &[JsValue], _context: &mut Context) -> JsResult<JsValue> {
@@ -72,16 +97,43 @@ impl JsAstNode {
         Ok(JsString::from(node.text_trimmed().to_string()).into())
     }
 
-    fn get_children(this: &JsValue, _args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
-        let node = Self::from_this(this)?;
-        let children = node
-            .children()
-            .map(|node| Self::from_data(Self { node }, context).map(Into::into))
+    fn wrap_optional_node<N>(node: Option<N>, context: &mut Context) -> JsResult<JsValue>
+    where
+        N: AstNode<Language = JsLanguage>,
+    {
+        match node {
+            Some(node) => Self::from_syntax(node.into_syntax())
+                .and_then(|node| Self::from_data(node, context))
+                .map(Into::into),
+            None => Ok(JsValue::undefined()),
+        }
+    }
+
+    fn wrap_node_list<I, N>(nodes: I, context: &mut Context) -> JsResult<JsValue>
+    where
+        I: IntoIterator<Item = N>,
+        N: AstNode<Language = JsLanguage>,
+    {
+        let nodes = nodes
+            .into_iter()
+            .map(|node| {
+                Self::from_syntax(node.into_syntax())
+                    .and_then(|node| Self::from_data(node, context))
+                    .map(Into::into)
+            })
             .collect::<JsResult<Vec<_>>>()?;
 
-        Ok(JsArray::from_iter(children, context).into())
+        Ok(JsArray::from_iter(nodes, context).into())
+    }
+
+    fn wrap_token(token: Option<JsSyntaxToken>) -> JsValue {
+        token.map_or_else(JsValue::undefined, |token| {
+            JsString::from(token.text_trimmed().to_string()).into()
+        })
     }
 }
+
+include!("generated/js_ast.rs");
 
 impl Class for JsAstNode {
     const NAME: &'static str = "__BiomeJsAstNode";
@@ -91,18 +143,11 @@ impl Class for JsAstNode {
             NativeFunction::from_fn_ptr(Self::get_kind).to_js_function(class.context().realm());
         let text =
             NativeFunction::from_fn_ptr(Self::get_text).to_js_function(class.context().realm());
-        let children =
-            NativeFunction::from_fn_ptr(Self::get_children).to_js_function(class.context().realm());
-
         class
             .accessor(js_string!("kind"), Some(kind), None, Attribute::ENUMERABLE)
-            .accessor(js_string!("text"), Some(text), None, Attribute::ENUMERABLE)
-            .accessor(
-                js_string!("children"),
-                Some(children),
-                None,
-                Attribute::ENUMERABLE,
-            );
+            .accessor(js_string!("text"), Some(text), None, Attribute::ENUMERABLE);
+
+        Self::init_generated(class);
 
         Ok(())
     }
@@ -229,7 +274,9 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
             };
         };
 
-        let ast = match plugin.ctx.create_class_instance(JsAstNode { node }) {
+        let ast = match JsAstNode::from_syntax(node)
+            .and_then(|node| plugin.ctx.create_class_instance(node))
+        {
             Ok(ast) => ast,
             Err(err) => {
                 return PluginEvalResult {
@@ -355,11 +402,12 @@ mod tests {
             export default function useMyPlugin(path, root) {
                 const descriptor = Object.getOwnPropertyDescriptor(
                     Object.getPrototypeOf(root),
-                    "children",
+                    "items",
                 );
+                const hasChildNodes = "childNodes" in root;
                 registerDiagnostic(
                     "information",
-                    `${path}|${root.kind}|${typeof descriptor.get}|${Object.prototype.hasOwnProperty.call(root, "children")}`,
+                    `${path}|${root.kind}|${typeof descriptor.get}|${Object.prototype.hasOwnProperty.call(root, "items")}|${hasChildNodes}`,
                 );
             }"#,
             None,
@@ -377,36 +425,44 @@ mod tests {
             .map(|entry| print_diagnostic_to_string(&Error::from(entry.diagnostic)))
             .collect::<String>();
 
-        assert!(content.contains("/file.js|JS_MODULE|function|false"));
+        assert!(content.contains("/file.js|JS_MODULE|function|false|false"));
     }
 
     #[test]
-    fn accesses_child_nodes_through_getters() {
+    fn reports_top_level_var_declarations_using_ast_fields() {
         let plugin = load_test_plugin_from_source(
             r#"import { registerDiagnostic } from "@biomejs/plugin-api";
-            export default function useMyPlugin(_path, root) {
-                const statement = root.children[1].children[0];
-                registerDiagnostic(
-                    "information",
-                    `${statement.kind}|${statement.text}`,
-                );
+            export default function noTopLevelVar(_path, root) {
+                const statements = root.kind === "JS_MODULE" ? root.items : [];
+                for (const statement of statements) {
+                    if (
+                        statement.kind === "JS_VARIABLE_STATEMENT" &&
+                        statement.declaration?.kindToken === "var"
+                    ) {
+                        registerDiagnostic(
+                            "warning",
+                            "Use let or const instead of a top-level var declaration.",
+                        );
+                    }
+                }
             }"#,
             None,
         );
         let parse = biome_js_parser::parse(
-            "let foo;",
+            "var legacy = 1; const modern = 2;",
             JsFileSource::js_module(),
             JsParserOptions::default(),
         );
 
         let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+        assert_eq!(result.entries.len(), 1);
         let content = result
             .entries
             .into_iter()
             .map(|entry| print_diagnostic_to_string(&Error::from(entry.diagnostic)))
             .collect::<String>();
 
-        assert!(content.contains("JS_VARIABLE_STATEMENT|let foo;"));
+        assert!(content.contains("Use let or const instead of a top-level var declaration."));
     }
 
     #[test]
