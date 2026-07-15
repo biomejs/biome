@@ -36,3 +36,9 @@ A{} --- B:HOVER --- C{COLOR:RED}
 @\-\-Future{COLOR:RED}
 .opaque{COLOR:INITIAL;--keyword:INITIAL;color:fn(INHERIT)}
 @supports(/* keep */COLOR){}
+@supports KeepDirect{}
+@supports KeepLeft and KeepRight{}
+@supports not KeepNot{}
+@supports KeepLeft or KeepRight{}
+@import"x"supports(KeepImport);
+.a{x:if(supports(KeepIfLeft and KeepIfRight):red;else:blue)}

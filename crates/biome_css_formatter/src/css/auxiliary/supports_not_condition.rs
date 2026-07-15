@@ -13,7 +13,7 @@ impl FormatNodeRule<CssSupportsNotCondition> for FormatCssSupportsNotCondition {
             [
                 not_token.format()?.with_text_case(CssCase::Preserve),
                 space(),
-                query.format()
+                query?.format().with_text_case(CssCase::Preserve)
             ]
         )
     }

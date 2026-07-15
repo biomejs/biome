@@ -20,7 +20,9 @@ impl FormatNodeRule<CssSupportsAtRuleDeclarator> for FormatCssSupportsAtRuleDecl
             [
                 supports_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
-                group(&indent(&condition.format())),
+                group(&indent(
+                    &condition?.format().with_text_case(CssCase::Preserve)
+                )),
             ]
         )
     }
