@@ -2,8 +2,9 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlElementList};
+use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlElementList, HtmlSyntaxKind, T};
 use biome_languages::HtmlFileSource;
+use biome_parser::{TokenSet, token_set};
 use biome_rowan::AstNode;
 use biome_rule_options::use_heading_content::UseHeadingContentOptions;
 
@@ -13,7 +14,6 @@ use crate::a11y::{
     html_self_closing_element_has_non_empty_attribute,
     html_self_closing_element_has_truthy_aria_hidden,
 };
-use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforce that heading elements (`h1`, `h2`, etc.) have content and that the content is
@@ -74,7 +74,8 @@ declare_lint_rule! {
     }
 }
 
-const HEADING_ELEMENTS: [&str; 6] = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const HEADING_ELEMENTS: TokenSet<HtmlSyntaxKind> =
+    token_set!(T![h1], T![h2], T![h3], T![h4], T![h5], T![h6]);
 
 impl Rule for UseHeadingContent {
     type Query = Ast<AnyHtmlElement>;
@@ -88,9 +89,9 @@ impl Rule for UseHeadingContent {
         let source_type = ctx.source_type::<HtmlFileSource>();
 
         let tag_element = node.clone().as_any_html_tag_element()?;
-        let is_heading = HEADING_ELEMENTS
-            .iter()
-            .any(|&h| is_html_tag(&tag_element, source_type, h));
+        let is_heading = tag_element
+            .tag_name_kind()
+            .is_some_and(|kind| HEADING_ELEMENTS.contains(kind));
 
         if !is_heading {
             return None;

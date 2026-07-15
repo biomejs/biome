@@ -44,7 +44,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@359..361 "<" [Newline("\n")] [],
                 name: HtmlComponentName {
-                    value_token: HTML_LITERAL@361..371 "PageLayout" [] [],
+                    value_token: HTML_COMPONENT_LITERAL@361..371 "PageLayout" [] [],
                 },
                 attributes: HtmlAttributeList [],
                 r_angle_token: R_ANGLE@371..372 ">" [] [],
@@ -54,7 +54,7 @@ HtmlRoot {
                     opening_element: HtmlOpeningElement {
                         l_angle_token: L_ANGLE@372..375 "<" [Newline("\n"), Whitespace("\t")] [],
                         name: HtmlTagName {
-                            value_token: HTML_LITERAL@375..380 "main" [] [Whitespace(" ")],
+                            value_token: MAIN_KW@375..380 "main" [] [Whitespace(" ")],
                         },
                         attributes: HtmlAttributeList [
                             HtmlAttribute {
@@ -76,7 +76,7 @@ HtmlRoot {
                             opening_element: HtmlOpeningElement {
                                 l_angle_token: L_ANGLE@448..452 "<" [Newline("\n"), Whitespace("\t\t")] [],
                                 name: HtmlComponentName {
-                                    value_token: HTML_LITERAL@452..460 "Counter" [] [Whitespace(" ")],
+                                    value_token: HTML_COMPONENT_LITERAL@452..460 "Counter" [] [Whitespace(" ")],
                                 },
                                 attributes: HtmlAttributeList [
                                     AstroClientDirective {
@@ -97,7 +97,7 @@ HtmlRoot {
                                     opening_element: HtmlOpeningElement {
                                         l_angle_token: L_ANGLE@472..479 "<" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t\t\t")] [],
                                         name: HtmlTagName {
-                                            value_token: HTML_LITERAL@479..483 "span" [] [],
+                                            value_token: SPAN_KW@479..483 "span" [] [],
                                         },
                                         attributes: HtmlAttributeList [],
                                         r_angle_token: R_ANGLE@483..484 ">" [] [],
@@ -111,7 +111,7 @@ HtmlRoot {
                                         l_angle_token: L_ANGLE@486..487 "<" [] [],
                                         slash_token: SLASH@487..488 "/" [] [],
                                         name: HtmlTagName {
-                                            value_token: HTML_LITERAL@488..492 "span" [] [],
+                                            value_token: SPAN_KW@488..492 "span" [] [],
                                         },
                                         r_angle_token: R_ANGLE@492..493 ">" [] [],
                                     },
@@ -121,7 +121,7 @@ HtmlRoot {
                                 l_angle_token: L_ANGLE@493..497 "<" [Newline("\n"), Whitespace("\t\t")] [],
                                 slash_token: SLASH@497..498 "/" [] [],
                                 name: HtmlComponentName {
-                                    value_token: HTML_LITERAL@498..505 "Counter" [] [],
+                                    value_token: HTML_COMPONENT_LITERAL@498..505 "Counter" [] [],
                                 },
                                 r_angle_token: R_ANGLE@505..506 ">" [] [],
                             },
@@ -131,7 +131,7 @@ HtmlRoot {
                         l_angle_token: L_ANGLE@506..509 "<" [Newline("\n"), Whitespace("\t")] [],
                         slash_token: SLASH@509..510 "/" [] [],
                         name: HtmlTagName {
-                            value_token: HTML_LITERAL@510..514 "main" [] [],
+                            value_token: MAIN_KW@510..514 "main" [] [],
                         },
                         r_angle_token: R_ANGLE@514..515 ">" [] [],
                     },
@@ -141,7 +141,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@515..517 "<" [Newline("\n")] [],
                 slash_token: SLASH@517..518 "/" [] [],
                 name: HtmlComponentName {
-                    value_token: HTML_LITERAL@518..528 "PageLayout" [] [],
+                    value_token: HTML_COMPONENT_LITERAL@518..528 "PageLayout" [] [],
                 },
                 r_angle_token: R_ANGLE@528..529 ">" [] [],
             },
@@ -167,7 +167,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@359..372
         0: L_ANGLE@359..361 "<" [Newline("\n")] []
         1: HTML_COMPONENT_NAME@361..371
-          0: HTML_LITERAL@361..371 "PageLayout" [] []
+          0: HTML_COMPONENT_LITERAL@361..371 "PageLayout" [] []
         2: HTML_ATTRIBUTE_LIST@371..371
         3: R_ANGLE@371..372 ">" [] []
       1: HTML_ELEMENT_LIST@372..515
@@ -175,7 +175,7 @@ HtmlRoot {
           0: HTML_OPENING_ELEMENT@372..448
             0: L_ANGLE@372..375 "<" [Newline("\n"), Whitespace("\t")] []
             1: HTML_TAG_NAME@375..380
-              0: HTML_LITERAL@375..380 "main" [] [Whitespace(" ")]
+              0: MAIN_KW@375..380 "main" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@380..447
               0: HTML_ATTRIBUTE@380..447
                 0: HTML_ATTRIBUTE_NAME@380..385
@@ -190,7 +190,7 @@ HtmlRoot {
               0: HTML_OPENING_ELEMENT@448..472
                 0: L_ANGLE@448..452 "<" [Newline("\n"), Whitespace("\t\t")] []
                 1: HTML_COMPONENT_NAME@452..460
-                  0: HTML_LITERAL@452..460 "Counter" [] [Whitespace(" ")]
+                  0: HTML_COMPONENT_LITERAL@452..460 "Counter" [] [Whitespace(" ")]
                 2: HTML_ATTRIBUTE_LIST@460..471
                   0: ASTRO_CLIENT_DIRECTIVE@460..471
                     0: CLIENT_KW@460..466 "client" [] []
@@ -205,7 +205,7 @@ HtmlRoot {
                   0: HTML_OPENING_ELEMENT@472..484
                     0: L_ANGLE@472..479 "<" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t\t\t")] []
                     1: HTML_TAG_NAME@479..483
-                      0: HTML_LITERAL@479..483 "span" [] []
+                      0: SPAN_KW@479..483 "span" [] []
                     2: HTML_ATTRIBUTE_LIST@483..483
                     3: R_ANGLE@483..484 ">" [] []
                   1: HTML_ELEMENT_LIST@484..486
@@ -215,25 +215,25 @@ HtmlRoot {
                     0: L_ANGLE@486..487 "<" [] []
                     1: SLASH@487..488 "/" [] []
                     2: HTML_TAG_NAME@488..492
-                      0: HTML_LITERAL@488..492 "span" [] []
+                      0: SPAN_KW@488..492 "span" [] []
                     3: R_ANGLE@492..493 ">" [] []
               2: HTML_CLOSING_ELEMENT@493..506
                 0: L_ANGLE@493..497 "<" [Newline("\n"), Whitespace("\t\t")] []
                 1: SLASH@497..498 "/" [] []
                 2: HTML_COMPONENT_NAME@498..505
-                  0: HTML_LITERAL@498..505 "Counter" [] []
+                  0: HTML_COMPONENT_LITERAL@498..505 "Counter" [] []
                 3: R_ANGLE@505..506 ">" [] []
           2: HTML_CLOSING_ELEMENT@506..515
             0: L_ANGLE@506..509 "<" [Newline("\n"), Whitespace("\t")] []
             1: SLASH@509..510 "/" [] []
             2: HTML_TAG_NAME@510..514
-              0: HTML_LITERAL@510..514 "main" [] []
+              0: MAIN_KW@510..514 "main" [] []
             3: R_ANGLE@514..515 ">" [] []
       2: HTML_CLOSING_ELEMENT@515..529
         0: L_ANGLE@515..517 "<" [Newline("\n")] []
         1: SLASH@517..518 "/" [] []
         2: HTML_COMPONENT_NAME@518..528
-          0: HTML_LITERAL@518..528 "PageLayout" [] []
+          0: HTML_COMPONENT_LITERAL@518..528 "PageLayout" [] []
         3: R_ANGLE@528..529 ">" [] []
   4: EOF@529..530 "" [Newline("\n")] []
 

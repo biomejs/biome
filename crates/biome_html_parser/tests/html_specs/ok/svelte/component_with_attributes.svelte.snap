@@ -26,11 +26,11 @@ HtmlRoot {
             l_angle_token: L_ANGLE@0..1 "<" [] [],
             name: HtmlMemberName {
                 object: HtmlComponentName {
-                    value_token: HTML_LITERAL@1..16 "AvatarPrimitive" [] [],
+                    value_token: HTML_COMPONENT_LITERAL@1..16 "AvatarPrimitive" [] [],
                 },
                 dot_token: DOT@16..17 "." [] [],
-                member: HtmlTagName {
-                    value_token: HTML_LITERAL@17..25 "Fallback" [] [],
+                member: HtmlComponentName {
+                    value_token: HTML_COMPONENT_LITERAL@17..25 "Fallback" [] [],
                 },
             },
             attributes: HtmlAttributeList [
@@ -77,10 +77,10 @@ HtmlRoot {
       0: L_ANGLE@0..1 "<" [] []
       1: HTML_MEMBER_NAME@1..25
         0: HTML_COMPONENT_NAME@1..16
-          0: HTML_LITERAL@1..16 "AvatarPrimitive" [] []
+          0: HTML_COMPONENT_LITERAL@1..16 "AvatarPrimitive" [] []
         1: DOT@16..17 "." [] []
-        2: HTML_TAG_NAME@17..25
-          0: HTML_LITERAL@17..25 "Fallback" [] []
+        2: HTML_COMPONENT_NAME@17..25
+          0: HTML_COMPONENT_LITERAL@17..25 "Fallback" [] []
       2: HTML_ATTRIBUTE_LIST@25..70
         0: HTML_ATTRIBUTE@25..50
           0: HTML_ATTRIBUTE_NAME@25..33

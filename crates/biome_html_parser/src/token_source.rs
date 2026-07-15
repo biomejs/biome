@@ -26,17 +26,17 @@ pub(crate) enum HtmlLexContext {
     #[default]
     Regular,
     /// When the lexer is inside a tag, special characters are lexed as tag tokens.
-    InsideTag,
-    /// Like [InsideTag], but with Vue-style directive tokens enabled (`.`, `:`, `@`, `#`, etc.).
-    /// When `svelte` is `true`, also recognizes `//` and `/* */` as JS-style comments (for Svelte
-    /// component names which need both member-expression `.` support and comment support).
+    ///
+    /// This single context covers plain HTML as well as the Vue/Svelte/Astro
+    /// variants, parameterized by `framework`, which selects the directive lexing
+    /// and whether PascalCase tag names are treated as component names.
+    InsideTag { framework: HtmlFramework },
+    /// Like [InsideTag], but used **only** when lexing a component name or member
+    /// expression (e.g. `Foo` / `Foo.Bar`), after the parser has already decided
+    /// the name is a component. The tag-name token is always emitted as
+    /// `HTML_COMPONENT_LITERAL`, and `.` is lexed as a token for member access.
+    /// When `svelte` is `true`, also recognizes `//` and `/* */` JS-style comments.
     InsideTagWithDirectives { svelte: bool },
-    /// Like [InsideTag], but with Svelte-specific tokens enabled.
-    /// This enables parsing of JS-style `//` and `/* */` comments as trivia.
-    InsideTagSvelte,
-    /// Like [InsideTag], but with Astro-specific tokens enabled.
-    /// This enables parsing of Astro directives (client:, set:, class:, is:, server:)
-    InsideTagAstro,
     /// Lexes Vue directive arguments inside `[]`.
     VueDirectiveArgument,
     /// Lexes the binding and operator portions of a Vue `v-for` value.
@@ -84,6 +84,29 @@ pub(crate) enum HtmlLexContext {
     /// Lexing the Astro frontmatter. When in this context, the lexer will treat `---`
     /// as a boundary for `HTML_LITERAL`
     AstroFencedCodeBlock,
+}
+
+/// The framework flavor of an HTML file, used to parameterize the [HtmlLexContext::InsideTag]
+/// context so the lexer knows which directive tokens to recognize and whether
+/// PascalCase tag names should be treated as component names.
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum HtmlFramework {
+    /// Plain HTML. PascalCase names are still HTML tags (case-insensitive).
+    #[default]
+    Plain,
+    /// Vue single-file component. Enables Vue directive tokens (`.`, `:`, `@`, `[`, `]`, `#`).
+    Vue,
+    /// Svelte component. Enables `.` and JS-style comments.
+    Svelte,
+    /// Astro component. Enables Astro directive tokens (`:`, `.`).
+    Astro,
+}
+
+impl HtmlFramework {
+    /// Whether PascalCase tag names should be treated as component names.
+    pub(crate) const fn supports_components(self) -> bool {
+        !matches!(self, Self::Plain)
+    }
 }
 
 impl HtmlLexContext {
