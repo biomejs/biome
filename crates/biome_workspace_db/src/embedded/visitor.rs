@@ -8,20 +8,24 @@ use biome_html_syntax::{
     AnyVueVForDestructuredBinding, HtmlElement, HtmlRoot, HtmlSelfClosingElement,
     VueVForIdentifierBinding, VueVForValue,
 };
+use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement, AnyJsArrayElement,
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsExpression,
     AnyJsIdentifierUsage, AnyJsModuleItem, AnyJsObjectAssignmentPatternMember,
     AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsRoot, AnyJsStatement,
-    AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression, JsCallExpression, JsExport,
-    JsImport, JsModuleItemList, JsReferenceIdentifier, JsStaticMemberExpression,
-    JsSvelteSnippetRoot, JsVariableStatement, JsxReferenceIdentifier,
+    AnyTsIdentifierBinding, AnyTsName, AnyTsType, JsAssignmentExpression, JsCallExpression,
+    JsExport, JsImport, JsModuleItemList, JsReferenceIdentifier, JsStaticMemberExpression,
+    JsSvelteSnippetRoot, JsVariableStatement, JsxReferenceIdentifier, TsReferenceType,
+    TsTypeAliasDeclaration,
 };
 use biome_languages::html::HtmlVariant;
 use biome_languages::javascript::JsEmbeddingKind;
 use biome_languages::{HtmlFileSource, JsFileSource, LanguageDb};
-use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
-use std::collections::VecDeque;
+use biome_rowan::{
+    AstNode, AstSeparatedList, RawSyntaxKind, TextRange, TextSize, TokenText, WalkEvent,
+};
+use std::collections::{HashSet, VecDeque};
 
 #[derive(Debug, Default, Clone, Copy)]
 enum EmbeddedBlockKind {
@@ -1134,6 +1138,9 @@ impl EmbeddedReferencesBuilder {
         let is_svelte = file_source.is_svelte();
         for node in root.syntax().descendants() {
             if let Some(element) = HtmlElement::cast_ref(&node) {
+                if is_svelte && element.is_script_tag() {
+                    self.visit_svelte_script_generics_attribute(&element);
+                }
                 self.visit_html_element(&element);
             }
 
@@ -1274,5 +1281,89 @@ impl EmbeddedReferencesBuilder {
             self.visit_reference_identifier(reference.clone())?;
         }
         Some(())
+    }
+
+    fn visit_svelte_script_generics_attribute(&mut self, element: &HtmlElement) {
+        let Some(attribute) = element.find_attribute_by_name("generics") else {
+            return;
+        };
+        let Some(static_value) = attribute.as_static_value() else {
+            return;
+        };
+        let generics = static_value.text();
+        if generics.is_empty() {
+            return;
+        }
+
+        let source = format!("type __<{generics}> = never;");
+        let parsed = parse(&source, JsFileSource::ts(), JsParserOptions::default());
+        if parsed.has_errors() {
+            return;
+        }
+
+        let root = parsed.tree();
+        let Some(type_alias) = type_alias_from_root(&root) else {
+            return;
+        };
+
+        let mut type_parameters = HashSet::new();
+        if let Some(type_params) = type_alias.type_parameters() {
+            for parameter in type_params.items().into_iter().flatten() {
+                if let Ok(name) = parameter.name().and_then(|n| n.ident_token()) {
+                    type_parameters.insert(name.token_text_trimmed().text().to_string());
+                }
+            }
+        }
+
+        for name in collect_type_reference_names(type_alias.syntax(), &type_parameters) {
+            self.register_type_reference(
+                TextRange::empty(TextSize::from(0)),
+                TokenText::new_raw(RawSyntaxKind(0), &name),
+            );
+        }
+    }
+}
+
+fn type_alias_from_root(root: &AnyJsRoot) -> Option<TsTypeAliasDeclaration> {
+    root.as_js_module()?.items().into_iter().find_map(|item| {
+        item.as_any_js_statement()?
+            .as_ts_type_alias_declaration()
+            .cloned()
+    })
+}
+
+fn collect_type_reference_names(
+    root: &biome_rowan::SyntaxNode<biome_js_syntax::JsLanguage>,
+    type_parameters: &HashSet<String>,
+) -> HashSet<String> {
+    let mut references = HashSet::new();
+    for event in root.preorder() {
+        let WalkEvent::Enter(node) = event else {
+            continue;
+        };
+        let Some(reference_type) = TsReferenceType::cast_ref(&node) else {
+            continue;
+        };
+        let Ok(name) = reference_type.name() else {
+            continue;
+        };
+        let Some(root_name) = type_reference_root_name(&name) else {
+            continue;
+        };
+        if type_parameters.contains(&root_name) {
+            continue;
+        }
+        references.insert(root_name);
+    }
+    references
+}
+
+fn type_reference_root_name(name: &AnyTsName) -> Option<String> {
+    match name {
+        AnyTsName::JsReferenceIdentifier(identifier) => identifier
+            .value_token()
+            .ok()
+            .map(|token| token.text_trimmed().to_string()),
+        AnyTsName::TsQualifiedName(qualified) => type_reference_root_name(&qualified.left().ok()?),
     }
 }
