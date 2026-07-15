@@ -1,0 +1,110 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export class Parent {
+	async returnsPromise(): Promise<string> {
+		return "value";
+	}
+}
+
+export class Child extends Parent {}
+
+export const direct = new Child().returnsPromise();
+export const then = direct.then(() => {});
+export const finalResult = then.finally(() => {});
+```
+
+## Inferred types
+
+```
+Binding Parent "Parent" => class "Parent" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "\"value\"" => string: value
+
+Binding Child "Child" => class "Child" {
+  extends: Parent
+  implements: []
+  type_args: []
+}
+
+Expression "Parent" => class "Parent" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding direct "direct" => instanceof Promise<string>
+
+Expression "new Child()" => instanceof Child
+
+Expression "new Child().returnsPromise" => async Function "returnsPromise" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<string>
+}
+
+Expression "new Child().returnsPromise()" => instanceof Promise<string>
+
+Expression "Child" => class "Child" {
+  extends: Parent
+  implements: []
+  type_args: []
+}
+
+Binding then "then" => instanceof Promise
+
+Expression "direct" => instanceof Promise<string>
+
+Expression "direct.then" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise
+}
+
+Expression "direct.then(() => {})" => instanceof Promise
+
+Expression "() => {}" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Binding finalResult "finalResult" => instanceof Promise
+
+Expression "then" => instanceof Promise
+
+Expression "then.finally" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise
+}
+
+Expression "then.finally(() => {})" => instanceof Promise
+
+Expression "() => {}" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+```

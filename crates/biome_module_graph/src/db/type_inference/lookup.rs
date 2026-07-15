@@ -3,9 +3,9 @@ use crate::ModuleDb;
 use crate::db::queries::infer_module_types;
 use crate::module_graph::ModuleInfo;
 use biome_js_type_info::interned_types::{
-    Literal as InferredLiteral, LocalTypeHandle, ModuleKey, TypeData as InferredTypeData,
-    TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
-    TypeSubstitution as InferredTypeSubstitution,
+    Literal as InferredLiteral, LocalTypeHandle, ModuleKey, ReturnType as InferredReturnType,
+    TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+    TypeMemberKind as InferredTypeMemberKind, TypeSubstitution as InferredTypeSubstitution,
 };
 use rustc_hash::FxHashSet;
 use salsa::plumbing::{AsId, FromId};
@@ -526,9 +526,20 @@ fn find_member_in_members<'db>(
     let named_member = members
         .iter()
         .find(|member| allows_named_member(&member.kind) && member.kind.has_name(name))
-        .map(|member| (member.ty, member.kind.is_optional()));
+        .map(|member| (member_value_type(db, member), member.kind.is_optional()));
     if named_member.is_some() {
         return named_member;
+    }
+
+    let computed_member = members.iter().find_map(|member| {
+        member
+            .kind
+            .computed_value_type()
+            .is_some_and(|ty| ty.is_string_literal_key(db, name))
+            .then_some((member.ty, false))
+    });
+    if computed_member.is_some() {
+        return computed_member;
     }
 
     allow_index_signature.then(|| {
@@ -540,6 +551,22 @@ fn find_member_in_members<'db>(
                 .then_some((member.ty, false))
         })
     })?
+}
+
+fn member_value_type<'db>(
+    db: &'db dyn ModuleDb,
+    member: &InferredTypeMember<'db>,
+) -> InferredTypeData<'db> {
+    if matches!(
+        member.kind,
+        InferredTypeMemberKind::Getter(_) | InferredTypeMemberKind::ConstAssertedGetter(_)
+    ) && let InferredTypeData::Function(function) = member.ty
+        && let InferredReturnType::Type(return_ty) = function.return_type(db)
+    {
+        *return_ty
+    } else {
+        member.ty
+    }
 }
 
 pub(in crate::db::type_inference) fn find_member_in_members_for_mode<'db>(

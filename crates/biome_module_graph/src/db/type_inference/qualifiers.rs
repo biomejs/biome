@@ -1,4 +1,5 @@
 use super::resolver::ResolutionCtx;
+use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_type_info::{
     GLOBAL_RESOLVER, Path, TypeImportQualifier, TypeReferenceQualifier, TypeResolver,
     interned_types::{
@@ -16,9 +17,11 @@ impl<'db> ResolutionCtx<'db, '_> {
         &mut self,
         qualifier: &TypeReferenceQualifier,
     ) -> InferredTypeData<'db> {
-        let Some(identifier) = qualifier.path.iter().next() else {
+        let mut path = qualifier.path.iter();
+        let Some(identifier) = path.next() else {
             return InferredTypeData::Unknown;
         };
+        let members = path.collect::<Vec<_>>();
 
         let mut scope = self
             .js_info
@@ -26,26 +29,38 @@ impl<'db> ResolutionCtx<'db, '_> {
             .scope_from_id(qualifier.scope_id);
         let mut reached_root_scope = false;
         for _ in 0..MAX_SCOPE_RESOLUTION_STEPS {
-            if let Some(binding) = scope.get_binding(identifier.text()) {
-                if binding.is_imported()
+            let binding = scope
+                .get_binding_reference(identifier.text())
+                .and_then(|reference| reference.get_binding_id_for_qualifier(qualifier))
+                .and_then(|id| self.js_info.semantic_model.binding_by_id(id));
+            if let Some(binding) = binding {
+                let mut target = if binding.is_imported()
                     && let Some(import) = self.js_info.static_imports.get(identifier.text())
                 {
-                    let target = self.resolve_import(&TypeImportQualifier {
+                    self.resolve_import(&TypeImportQualifier {
                         symbol: import.symbol.clone(),
                         resolved_path: import.resolved_path.clone(),
                         type_only: qualifier.type_only,
-                    });
-                    return self.apply_qualifier_type_parameters(target, qualifier);
+                    })
+                } else {
+                    self.js_info
+                        .raw_binding_types
+                        .get(&binding.syntax().text_trimmed_range())
+                        .cloned()
+                        .map_or(InferredTypeData::Unknown, |reference| {
+                            self.resolve(&reference)
+                        })
+                };
+
+                for member in &members {
+                    let Some(member_ty) =
+                        self.resolve_static_member_expression(target, member.text())
+                    else {
+                        return InferredTypeData::Unknown;
+                    };
+                    target = member_ty;
                 }
 
-                let target = self
-                    .js_info
-                    .raw_binding_types
-                    .get(&binding.syntax().text_trimmed_range())
-                    .cloned()
-                    .map_or(InferredTypeData::Unknown, |reference| {
-                        self.resolve(&reference)
-                    });
                 return self.apply_qualifier_type_parameters(target, qualifier);
             }
 

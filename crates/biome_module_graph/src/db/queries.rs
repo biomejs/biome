@@ -24,10 +24,11 @@ use biome_js_type_info::{
     ImportSymbol, RawTypeData, TypeReference, TypeResolverLevel,
     interned_types::{
         FunctionParameter as InferredFunctionParameter, InternedFunction as InferredFunction,
-        InternedMergedReference as InferredMergedReference, Literal as InferredLiteral,
-        LocalTypeHandle as InferredLocalTypeHandle, LocalTypeId as InferredLocalTypeId,
-        ModuleKey as InferredModuleKey, ReturnType, TypeData as InferredTypeData,
-        TypeMember as InferredTypeMember, TypeSubstitution as InferredTypeSubstitution,
+        InternedMergedReference as InferredMergedReference, InternedTuple as InferredTuple,
+        Literal as InferredLiteral, LocalTypeHandle as InferredLocalTypeHandle,
+        LocalTypeId as InferredLocalTypeId, ModuleKey as InferredModuleKey, ReturnType,
+        TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+        TypeSubstitution as InferredTypeSubstitution,
     },
 };
 use biome_jsdoc_comment::JsdocComment;
@@ -214,7 +215,12 @@ pub(crate) fn infer_call_expression_return_type_from_args<'db>(
             union
                 .types(db)
                 .iter()
-                .filter_map(|callee| infer_function_call_type(db, *callee, args))
+                .filter_map(|callee| match callee {
+                    InferredTypeData::Null | InferredTypeData::Undefined => {
+                        Some(InferredTypeData::Undefined)
+                    }
+                    callee => infer_function_call_type(db, *callee, args),
+                })
                 .collect(),
         )
         .unwrap_or(InferredTypeData::Unknown),
@@ -274,6 +280,15 @@ fn infer_function_call_type<'db>(
             InferredTypeData::Object(object) => {
                 infer_call_signature_type(db, object.members(db), args)
             }
+            InferredTypeData::Union(union) => {
+                infer_function_call_type(db, InferredTypeData::Union(union), args)
+            }
+            InferredTypeData::TypeofType(typeof_type) => {
+                infer_function_call_type(db, typeof_type.ty(db), args)
+            }
+            InferredTypeData::TypeofValue(typeof_value) => {
+                infer_function_call_type(db, typeof_value.ty(db), args)
+            }
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
@@ -293,14 +308,11 @@ fn infer_function_call_type<'db>(
             | InferredTypeData::Generic(_)
             | InferredTypeData::Local(_)
             | InferredTypeData::Intersection(_)
-            | InferredTypeData::Union(_)
             | InferredTypeData::TypeOperator(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::InstanceOf(_)
             | InferredTypeData::MergedReference(_)
             | InferredTypeData::TypeofExpression(_)
-            | InferredTypeData::TypeofType(_)
-            | InferredTypeData::TypeofValue(_)
             | InferredTypeData::AnyKeyword
             | InferredTypeData::NeverKeyword
             | InferredTypeData::ObjectKeyword
@@ -312,6 +324,25 @@ fn infer_function_call_type<'db>(
             infer_call_signature_type(db, interface.members(db), args)
         }
         InferredTypeData::Object(object) => infer_call_signature_type(db, object.members(db), args),
+        InferredTypeData::Union(union) => collected_type_result(
+            db,
+            union
+                .types(db)
+                .iter()
+                .filter_map(|callee| match callee {
+                    InferredTypeData::Null | InferredTypeData::Undefined => {
+                        Some(InferredTypeData::Undefined)
+                    }
+                    callee => infer_function_call_type(db, *callee, args),
+                })
+                .collect(),
+        ),
+        InferredTypeData::TypeofType(typeof_type) => {
+            infer_function_call_type(db, typeof_type.ty(db), args)
+        }
+        InferredTypeData::TypeofValue(typeof_value) => {
+            infer_function_call_type(db, typeof_value.ty(db), args)
+        }
         InferredTypeData::Unknown
         | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
@@ -331,13 +362,10 @@ fn infer_function_call_type<'db>(
         | InferredTypeData::Generic(_)
         | InferredTypeData::Local(_)
         | InferredTypeData::Intersection(_)
-        | InferredTypeData::Union(_)
         | InferredTypeData::TypeOperator(_)
         | InferredTypeData::Literal(_)
         | InferredTypeData::MergedReference(_)
         | InferredTypeData::TypeofExpression(_)
-        | InferredTypeData::TypeofType(_)
-        | InferredTypeData::TypeofValue(_)
         | InferredTypeData::AnyKeyword
         | InferredTypeData::NeverKeyword
         | InferredTypeData::ObjectKeyword
@@ -1316,6 +1344,7 @@ enum TypeNormalizationItem<'db> {
         has_value_ty: bool,
         has_namespace_ty: bool,
     },
+    RebuildTuple(InferredTuple<'db>),
     RebuildUnion(usize),
 }
 
@@ -1453,6 +1482,12 @@ pub fn normalize_type<'db>(
                             stack.push(TypeNormalizationItem::Type(ty));
                         }
                     }
+                    InferredTypeData::Tuple(tuple) => {
+                        stack.push(TypeNormalizationItem::RebuildTuple(tuple));
+                        for element in tuple.elements(db).iter().rev() {
+                            stack.push(TypeNormalizationItem::Type(element.ty));
+                        }
+                    }
                     InferredTypeData::Union(union) => {
                         stack.push(TypeNormalizationItem::RebuildUnion(union.types(db).len()));
                         for ty in union.types(db).iter().rev() {
@@ -1477,7 +1512,6 @@ pub fn normalize_type<'db>(
                     | InferredTypeData::Module(_)
                     | InferredTypeData::Namespace(_)
                     | InferredTypeData::Object(_)
-                    | InferredTypeData::Tuple(_)
                     | InferredTypeData::Generic(_)
                     | InferredTypeData::Local(_)
                     | InferredTypeData::TypeOperator(_)
@@ -1548,6 +1582,26 @@ pub fn normalize_type<'db>(
                         InferredMergedReference::new(db, ty, value_ty, namespace_ty),
                     ));
                 }
+            }
+            TypeNormalizationItem::RebuildTuple(tuple) => {
+                let Some(start) = results.len().checked_sub(tuple.elements(db).len()) else {
+                    return original;
+                };
+                let types = results.split_off(start);
+                let elements = tuple
+                    .elements(db)
+                    .iter()
+                    .zip(types)
+                    .map(|(element, ty)| {
+                        let mut element = element.clone();
+                        element.ty = ty;
+                        element
+                    })
+                    .collect::<Vec<_>>();
+                results.push(InferredTypeData::Tuple(InferredTuple::new(
+                    db,
+                    elements.into_boxed_slice(),
+                )));
             }
             TypeNormalizationItem::RebuildUnion(type_count) => {
                 let Some(start) = results.len().checked_sub(type_count) else {

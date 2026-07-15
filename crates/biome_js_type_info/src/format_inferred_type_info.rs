@@ -376,6 +376,9 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeMemberKind<'db> {
             Self::ComputedValue(ty) | Self::ConstAssertedComputedValue(ty) => {
                 write!(f, [token("computed"), space(), token("["), ty, token("]")])
             }
+            Self::ComputedValueNamed(name, _) | Self::ConstAssertedComputedValueNamed(name, _) => {
+                write!(f, [text(&std::format!("computed [{name}]"), None)])
+            }
             Self::Named(name) | Self::ConstAssertedNamed(name) => {
                 write!(f, [text(&std::format!("\"{name}\""), None)])
             }
