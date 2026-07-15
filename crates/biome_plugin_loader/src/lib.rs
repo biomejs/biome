@@ -189,6 +189,31 @@ mod test {
     }
 
     #[test]
+    fn load_missing_single_rule_plugin() {
+        let fs = Arc::new(MemoryFileSystem::default()) as Arc<dyn FsWithResolverProxy>;
+        let error = BiomePlugin::load(fs, "./missing.grit", Utf8Path::new("/"), None)
+            .expect_err("Plugin loading should've failed");
+        snap_diagnostic("load_missing_single_rule_plugin", error.into());
+    }
+
+    #[test]
+    fn load_plugin_with_missing_rule_file() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            "/my-plugin/biome-manifest.jsonc".into(),
+            r#"{
+    "version": 1,
+    "rules": ["rules/missing.grit"]
+}"#,
+        );
+
+        let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
+        let error = BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/"), None)
+            .expect_err("Plugin loading should've failed");
+        snap_diagnostic("load_plugin_with_missing_rule_file", error.into());
+    }
+
+    #[test]
     fn load_plugin_with_wrong_version() {
         let fs = MemoryFileSystem::default();
         fs.insert(

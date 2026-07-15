@@ -38,7 +38,9 @@ impl AnalyzerGritPlugin {
         path: &Utf8Path,
         includes: Option<&[NormalizedGlob]>,
     ) -> Result<Self, PluginDiagnostic> {
-        let source = fs.read_file_from_path(path)?;
+        let source = fs
+            .read_file_from_path(path)
+            .map_err(|source| PluginDiagnostic::cant_read_file(path.to_path_buf(), source))?;
         let options = CompilePatternOptions::default()
             .with_extra_built_ins(vec![
                 BuiltInFunction::new(

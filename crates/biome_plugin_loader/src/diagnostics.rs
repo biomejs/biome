@@ -30,6 +30,9 @@ pub enum PluginDiagnostic {
     /// Error loading the plugin from the file system.
     FileSystem(FileSystemDiagnostic),
 
+    /// Error reading a plugin file from the file system.
+    CantReadFile(CantReadFile),
+
     /// When something is wrong with the manifest.
     InvalidManifest(InvalidManifest),
 
@@ -105,6 +108,14 @@ impl PluginDiagnostic {
     pub fn unsupported_rule_format(message: impl Display) -> Self {
         Self::UnsupportedRuleFormat(UnsupportedRuleFormat {
             message: MessageAndDescription::from(markup! {{message}}.to_owned()),
+        })
+    }
+
+    pub fn cant_read_file(path: Utf8PathBuf, source: FileSystemDiagnostic) -> Self {
+        Self::CantReadFile(CantReadFile {
+            message: MessageAndDescription::from(markup! {"Cannot read plugin file"}.to_owned()),
+            path: path.to_string(),
+            source: Some(Error::from(source)),
         })
     }
 
@@ -193,6 +204,24 @@ pub struct UnsupportedRuleFormat {
     #[message]
     #[description]
     pub message: MessageAndDescription,
+}
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "plugin",
+    severity = Error,
+)]
+pub struct CantReadFile {
+    #[message]
+    #[description]
+    message: MessageAndDescription,
+
+    #[location(resource)]
+    path: String,
+
+    #[serde(skip)]
+    #[source]
+    source: Option<Error>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
