@@ -148,8 +148,16 @@ impl Rule for UseConsistentObjectDefinitions {
                         let variable_token = identifier_token.name().ok()?.value_token().ok()?;
                         inner_string_text(&variable_token)
                     }
-                    AnyJsExpression::JsFunctionExpression(_function_token) => {
-                        // Functions are always shorthandable
+                    AnyJsExpression::JsFunctionExpression(function) => {
+                        // A named function expression keeps its own name, so for
+                        // `a: function b() {}` the value of `obj.a.name` is `"b"`. Converting it
+                        // to a shorthand method renames it after the property key, changing
+                        // `obj.a.name` to `"a"`, so it isn't safe to shorthand. Anonymous function
+                        // expressions already take their name from the property key and stay
+                        // shorthandable.
+                        if function.id().is_some() {
+                            return None;
+                        }
                         match syntax {
                             ObjectPropertySyntax::Shorthand => return Some(()),
                             ObjectPropertySyntax::Explicit => return None,

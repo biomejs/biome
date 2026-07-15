@@ -47,5 +47,12 @@ const validShorthand = {
     get getter() { return "getter"; },
     set setter(value) { this._setter = value; },
 
+    // Named function expressions: shorthanding would rename the function after the property
+    // key, changing `named.name` from "actualName" to "named", so they can't be shorthanded
+    named: function actualName() {},
+    namedGenerator: function* actualGenerator() {},
+    // ...also with a computed key
+    ["computedName"]: function computedNamed() {},
+
     ...spread,
 };
