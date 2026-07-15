@@ -365,3 +365,34 @@ getReqP().p;
 
 declare function getReadonlyP(): Readonly<{p: Promise<void>}>;
 getReadonlyP().p;
+
+type AsyncCallback<T> = () => Promise<T>;
+declare const aliasedCallback: AsyncCallback<void>;
+aliasedCallback();
+
+declare const explicitArray: Array<number>;
+explicitArray.map(async value => value);
+[1, 2, 3].map(value => value).map(async value => value);
+
+const objectApi = {
+	promise: Promise.resolve("value"),
+	getPromise() {
+		return this.promise;
+	},
+};
+objectApi.getPromise();
+class GenericBox<T> {
+	constructor(readonly value: T) {}
+	read() {
+		return this.value;
+	}
+}
+new GenericBox(Promise.resolve("value")).read();
+
+class StaticPromiseBase {
+	static read(): Promise<void> {
+		return Promise.resolve();
+	}
+}
+class StaticPromiseDerived extends StaticPromiseBase {}
+StaticPromiseDerived.read();

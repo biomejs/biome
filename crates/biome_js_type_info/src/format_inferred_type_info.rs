@@ -54,18 +54,22 @@ impl Display for InferredTypeDisplay<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let formatted =
             biome_formatter::format!(FormatInferredTypeContext::new(self.db), [self.ty])
-                .expect("Formatting not to throw any FormatErrors");
-        f.write_str(
-            formatted
-                .print()
-                .expect("Expected a valid document")
-                .as_code(),
-        )
+                .map_err(|_| std::fmt::Error)?;
+        let printed = formatted.print().map_err(|_| std::fmt::Error)?;
+        f.write_str(printed.as_code())
     }
 }
 
+/// Formats an inferred type, returning `unknown` if the formatter cannot build
+/// or print its internal document.
 pub fn format_inferred_type<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> String {
-    InferredTypeDisplay::new(db, ty).to_string()
+    let Ok(formatted) = biome_formatter::format!(FormatInferredTypeContext::new(db), [ty]) else {
+        return "unknown".to_string();
+    };
+    formatted.print().map_or_else(
+        |_| "unknown".to_string(),
+        |printed| printed.as_code().to_string(),
+    )
 }
 
 impl<'db> Format<FormatInferredTypeContext<'db>> for TypeData<'db> {
@@ -106,6 +110,22 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeData<'db> {
                             token("type"),
                             space(),
                             text(&type_id.index().to_string(), None)
+                        ]]
+                    )
+                }
+            }
+            Self::GlobalType(id) => {
+                if let Some(name) = crate::globals_ids::global_type_name(id.as_type_id()) {
+                    write!(f, [text(name, None)])
+                } else {
+                    write!(
+                        f,
+                        [&format_args![
+                            token("global"),
+                            space(),
+                            token("type"),
+                            space(),
+                            text(&id.index().to_string(), None)
                         ]]
                     )
                 }
@@ -375,6 +395,9 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeMemberKind<'db> {
             }
             Self::ComputedValue(ty) | Self::ConstAssertedComputedValue(ty) => {
                 write!(f, [token("computed"), space(), token("["), ty, token("]")])
+            }
+            Self::ComputedValueNamed(name, _) | Self::ConstAssertedComputedValueNamed(name, _) => {
+                write!(f, [text(&std::format!("computed [{name}]"), None)])
             }
             Self::Named(name) | Self::ConstAssertedNamed(name) => {
                 write!(f, [text(&std::format!("\"{name}\""), None)])

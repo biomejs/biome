@@ -14,7 +14,7 @@ use biome_service::WorkspaceError;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, FeaturesSupported, FileContent, FileFeaturesResult,
-    FixFileParams, FormatFileParams, OpenFileParams, SupportsFeatureParams,
+    FixFileParams, FormatFileParams, OpenFileParams, ProjectDataUpdate, SupportsFeatureParams,
 };
 use std::borrow::Cow;
 use tracing::info;
@@ -96,7 +96,7 @@ impl ProcessFile for LintAssistProcessFile {
             }
             if output != input {
                 changed = true;
-                workspace_file.update_file(output)?;
+                workspace_file.update_file(output, ctx.project_data_update())?;
                 input = workspace_file.input()?;
             }
         }
@@ -273,6 +273,7 @@ impl ProcessFile for LintAssistProcessFile {
                     version,
                     inline_config: None,
                     editor_features: None,
+                    project_data_update: ProjectDataUpdate::Refresh,
                 })?;
                 new_content = Cow::Owned(output);
             }

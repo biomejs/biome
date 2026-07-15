@@ -1184,7 +1184,6 @@ dependencies = [
  "biome_js_parser",
  "biome_js_semantic",
  "biome_js_syntax",
- "biome_js_type_info_macros",
  "biome_languages",
  "biome_resolver",
  "biome_rowan",
@@ -1194,16 +1193,6 @@ dependencies = [
  "insta",
  "rustc-hash 2.1.2",
  "salsa",
-]
-
-[[package]]
-name = "biome_js_type_info_macros"
-version = "0.0.1"
-dependencies = [
- "proc-macro-error2",
- "proc-macro2",
- "quote",
- "syn 1.0.109",
 ]
 
 [[package]]
@@ -1823,6 +1812,7 @@ dependencies = [
  "serde",
  "serde_json",
  "smallvec",
+ "static_assertions",
  "tokio",
  "tracing",
  "web-time",
@@ -1991,6 +1981,7 @@ name = "biome_workspace_db"
 version = "0.1.0"
 dependencies = [
  "biome_db",
+ "biome_fs",
  "biome_html_parser",
  "biome_html_syntax",
  "biome_js_parser",
@@ -1998,6 +1989,7 @@ dependencies = [
  "biome_languages",
  "biome_module_graph",
  "biome_parser",
+ "biome_project_layout",
  "biome_rowan",
  "boxcar",
  "camino",

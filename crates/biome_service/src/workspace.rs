@@ -968,6 +968,29 @@ impl CheckFileSizeResult {
     }
 }
 
+/// How the project should be updated when there's a change.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum ProjectDataUpdate {
+    /// Refresh shared module, dependency, and project-layout data.
+    #[default]
+    Refresh,
+
+    /// Update document-local state without refreshing shared project data.
+    DocumentOnly,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum WorkspaceLifetime {
+    /// The workspace may outlive an individual operation and must keep shared
+    /// project data current.
+    Persistent,
+    /// The workspace is dropped after its current workload and may apply
+    /// document-only updates against its existing project data.
+    Disposable,
+}
+
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
@@ -983,6 +1006,9 @@ pub struct ChangeFileParams {
     /// Used to enable further document services e.g. semantic model
     #[serde(skip_serializing_if = "Option::is_none")]
     pub editor_features: Option<EditorFeatures>,
+
+    #[serde(default)]
+    pub project_data_update: ProjectDataUpdate,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1810,6 +1836,9 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// `None` if the workspace isn't connected to a server.
     fn server_info(&self) -> Option<&ServerInfo>;
 
+    /// Returns whether the workspace is persistent or disposable.
+    fn lifetime(&self) -> WorkspaceLifetime;
+
     // #endregion
 }
 
@@ -1903,10 +1932,34 @@ impl<W: Workspace> Workspace for RetryingWorkspace<W> {
     fn server_info(&self) -> Option<&ServerInfo> {
         self.0.server_info()
     }
+
+    fn lifetime(&self) -> WorkspaceLifetime {
+        self.0.lifetime()
+    }
 }
 
-/// Convenience function for constructing a server instance of [Workspace]
+/// Constructs a persistent in-process [Workspace].
 pub fn server(fs: Arc<dyn FsWithResolverProxy>, threads: Option<usize>) -> Box<dyn Workspace> {
+    local_server(fs, threads, WorkspaceLifetime::Persistent)
+}
+
+/// Constructs a disposable in-process [Workspace].
+///
+/// Document-only updates are accepted because the workspace is discarded after
+/// its current workload instead of publishing those updates to shared project
+/// data.
+pub fn disposable_server(
+    fs: Arc<dyn FsWithResolverProxy>,
+    threads: Option<usize>,
+) -> Box<dyn Workspace> {
+    local_server(fs, threads, WorkspaceLifetime::Disposable)
+}
+
+fn local_server(
+    fs: Arc<dyn FsWithResolverProxy>,
+    threads: Option<usize>,
+    lifetime: WorkspaceLifetime,
+) -> Box<dyn Workspace> {
     let (watcher_tx, _) = bounded(0);
     let (service_tx, _) = watch::channel(ServiceNotification::IndexUpdated);
     let search_provider = cfg_select! {
@@ -1915,13 +1968,15 @@ pub fn server(fs: Arc<dyn FsWithResolverProxy>, threads: Option<usize>) -> Box<d
         }
         _ => NoopQueryProvider {}
     };
-    Box::new(LocalWorkspace::new(
-        fs,
-        watcher_tx,
-        service_tx,
-        Arc::new(search_provider),
-        threads,
-    ))
+    let search_provider = Arc::new(search_provider);
+    Box::new(match lifetime {
+        WorkspaceLifetime::Persistent => {
+            LocalWorkspace::new(fs, watcher_tx, service_tx, search_provider, threads)
+        }
+        WorkspaceLifetime::Disposable => {
+            LocalWorkspace::new_disposable(fs, watcher_tx, service_tx, search_provider, threads)
+        }
+    })
 }
 
 /// Convenience function for constructing a client instance of [Workspace]
@@ -2013,6 +2068,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         &self,
         version: i32,
         content: String,
+        project_data_update: ProjectDataUpdate,
     ) -> Result<ChangeFileResult, WorkspaceError> {
         self.workspace.change_file(ChangeFileParams {
             project_key: self.project_key,
@@ -2021,6 +2077,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             content,
             inline_config: None,
             editor_features: None,
+            project_data_update,
         })
     }
 

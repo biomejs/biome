@@ -13,7 +13,7 @@ use biome_service::WorkspaceError;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     CloseFileParams, FeaturesBuilder, FeaturesSupported, FileContent, FileFeaturesResult,
-    FormatFileParams, OpenFileParams, SupportsFeatureParams,
+    FormatFileParams, OpenFileParams, ProjectDataUpdate, SupportsFeatureParams,
 };
 use tracing::debug;
 
@@ -32,7 +32,13 @@ impl FormatProcessFile {
     {
         let execution = ctx.execution();
         let input = workspace_file.input()?;
-        Self::do_format(execution, workspace_file, features_supported, input)
+        Self::do_format(
+            execution,
+            workspace_file,
+            features_supported,
+            input,
+            ctx.project_data_update(),
+        )
     }
 
     /// Shared formatting logic: format the file, compare with input, produce
@@ -42,6 +48,7 @@ impl FormatProcessFile {
         workspace_file: &mut WorkspaceFile,
         features_supported: &FeaturesSupported,
         input: String,
+        project_data_update: ProjectDataUpdate,
     ) -> Result<FileStatus, Message> {
         let should_write = execution.requires_write_access();
 
@@ -79,7 +86,7 @@ impl FormatProcessFile {
         debug!("Format output is different from input: {}", output != input);
         if output != input {
             if should_write {
-                workspace_file.update_file(output)?;
+                workspace_file.update_file(output, project_data_update)?;
                 Ok(FileStatus::Changed)
             } else {
                 Ok(FileStatus::Message(Message::Diff {
@@ -155,7 +162,13 @@ impl ProcessFile for FormatProcessFile {
             infos: diagnostics_result.infos,
         });
 
-        Self::do_format(execution, workspace_file, features_supported, input)
+        Self::do_format(
+            execution,
+            workspace_file,
+            features_supported,
+            input,
+            ctx.project_data_update(),
+        )
     }
 
     fn process_std_in(payload: ProcessStdinFilePayload) -> Result<(), CliDiagnostic> {

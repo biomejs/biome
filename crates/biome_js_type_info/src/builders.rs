@@ -1,3 +1,8 @@
+//! Canonical builders for inferred unions, intersections, and object shapes.
+//!
+//! Builders flatten nested containers, remove duplicates, absorb literals into
+//! wider primitive types, and poison partial results with internal `Unknown`.
+
 use std::hash::Hash;
 
 use crate::Path;
@@ -133,20 +138,25 @@ impl<'db> IntersectionBuilder<'db> {
 
             match ty {
                 TypeData::NeverKeyword => {
-                    if self.types.is_empty() {
-                        self.types.push(TypeData::NeverKeyword);
-                    }
+                    self.types.clear();
+                    self.types.push(TypeData::NeverKeyword);
+                    return self;
                 }
                 ty => {
                     if ty.is_primitive(self.db)
-                        && self
+                        && let Some(index) = self
                             .types
                             .iter()
-                            .any(|other| *other != ty && other.is_primitive(self.db))
+                            .position(|other| other.is_primitive(self.db))
                     {
-                        self.types.clear();
-                        self.types.push(TypeData::NeverKeyword);
-                        return self;
+                        let primitive = intersect_primitive_types(self.db, self.types[index], ty);
+                        if primitive == TypeData::NeverKeyword {
+                            self.types.clear();
+                            self.types.push(TypeData::NeverKeyword);
+                            return self;
+                        }
+                        self.types[index] = primitive;
+                        continue;
                     }
 
                     if !self.types.contains(&ty) {
@@ -180,6 +190,20 @@ impl<'db> IntersectionBuilder<'db> {
                 self.types.into_boxed_slice(),
             )),
         }
+    }
+}
+
+fn intersect_primitive_types<'db>(
+    db: &'db dyn TypeDb,
+    left: TypeData<'db>,
+    right: TypeData<'db>,
+) -> TypeData<'db> {
+    if left == right || left.literal_base_type(db) == Some(right) {
+        left
+    } else if right.literal_base_type(db) == Some(left) {
+        right
+    } else {
+        TypeData::NeverKeyword
     }
 }
 
@@ -343,6 +367,11 @@ impl<'db> MergedType<'db> {
         if types.len() < 2 {
             return None;
         }
+        if types.iter().any(|ty| ty.is_primitive(db))
+            && types.iter().any(|ty| is_structural_object_type(db, *ty))
+        {
+            return None;
+        }
 
         let mut types = types.iter().copied();
         let mut merged = Self::from_type(db, types.next()?)?;
@@ -396,7 +425,12 @@ impl<'db> MergedType<'db> {
                 Self::Function(left.intersection_with(db, right))
             }
             (Self::Never, _) | (_, Self::Never) => Self::Never,
-            (Self::Primitive(_), Self::Primitive(_)) => Self::Never,
+            (Self::Primitive(left), Self::Primitive(right)) => {
+                match intersect_primitive_types(db, left, right) {
+                    TypeData::NeverKeyword => Self::Never,
+                    primitive => Self::Primitive(primitive),
+                }
+            }
             (Self::Primitive(primitive), _) | (_, Self::Primitive(primitive)) => {
                 Self::Primitive(primitive)
             }
@@ -477,6 +511,23 @@ impl<'db> MergedType<'db> {
     }
 }
 
+fn is_structural_object_type<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> bool {
+    match ty {
+        TypeData::Class(_)
+        | TypeData::Constructor(_)
+        | TypeData::Function(_)
+        | TypeData::Interface(_)
+        | TypeData::Module(_)
+        | TypeData::Namespace(_)
+        | TypeData::Object(_)
+        | TypeData::Tuple(_)
+        | TypeData::ObjectKeyword => true,
+        TypeData::InstanceOf(instance) => is_structural_object_type(db, instance.ty(db)),
+        TypeData::Literal(literal) => matches!(literal.literal(db), Literal::Object(_)),
+        _ => false,
+    }
+}
+
 fn class_instance_members<'db>(members: &[TypeMember<'db>]) -> Vec<TypeMember<'db>> {
     members
         .iter()
@@ -548,6 +599,11 @@ impl<'db> UnionBuilder<'db> {
                     self.types.clear();
                     self.types.push(TypeData::AnyKeyword);
                 }
+                _ if self.types.as_slice() == [TypeData::Unknown] => {}
+                TypeData::Unknown => {
+                    self.types.clear();
+                    self.types.push(TypeData::Unknown);
+                }
                 TypeData::NeverKeyword => {}
                 ty => {
                     if !self.types.contains(&ty) {
@@ -614,7 +670,35 @@ impl<'db> UnionBuilder<'db> {
 
 #[cfg(test)]
 mod tests {
-    use super::{CycleDetector, CycleEntry};
+    use super::{CycleDetector, CycleEntry, IntersectionBuilder};
+    use crate::{
+        TypeDb,
+        interned_types::{InternedLiteral, Literal, TypeData},
+        literal::{BooleanLiteral, NumberLiteral, StringLiteral},
+    };
+    use biome_rowan::Text;
+
+    #[salsa::db]
+    #[derive(Default)]
+    struct TestDb {
+        storage: salsa::Storage<Self>,
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    #[salsa::db]
+    impl biome_db::Db for TestDb {
+        fn parsed_source_for_path(
+            &self,
+            _path: &camino::Utf8Path,
+        ) -> Option<biome_db::ParsedSource> {
+            None
+        }
+    }
+
+    #[salsa::db]
+    impl TypeDb for TestDb {}
 
     #[test]
     fn cycle_detector_reports_reentry_before_finish() {
@@ -634,5 +718,70 @@ mod tests {
         assert!(matches!(detector.enter(1), CycleEntry::Entered));
         detector.finish(1, "cached");
         assert!(matches!(detector.enter(1), CycleEntry::Cached("cached")));
+    }
+
+    #[test]
+    fn never_absorbs_intersections_in_both_orders() {
+        let db = TestDb::default();
+
+        for types in [
+            [TypeData::String, TypeData::NeverKeyword],
+            [TypeData::NeverKeyword, TypeData::String],
+        ] {
+            assert_eq!(
+                IntersectionBuilder::new(&db).add_all(types).build(),
+                TypeData::NeverKeyword
+            );
+        }
+    }
+
+    #[test]
+    fn primitive_literal_intersections_narrow_in_both_orders() {
+        let db = TestDb::default();
+        let literals = [
+            (
+                TypeData::String,
+                Literal::String(StringLiteral::from("value")),
+            ),
+            (
+                TypeData::Number,
+                Literal::Number(NumberLiteral::new(Text::new_static("1"))),
+            ),
+            (TypeData::BigInt, Literal::BigInt(Text::new_static("1n"))),
+            (
+                TypeData::Boolean,
+                Literal::Boolean(BooleanLiteral::from(true)),
+            ),
+        ];
+
+        for (primitive, literal) in literals {
+            let literal = TypeData::Literal(InternedLiteral::new(&db, literal));
+            for types in [[primitive, literal], [literal, primitive]] {
+                assert_eq!(
+                    IntersectionBuilder::new(&db).add_all(types).build(),
+                    literal
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn incompatible_primitive_literals_normalize_to_never() {
+        let db = TestDb::default();
+        let left = TypeData::Literal(InternedLiteral::new(
+            &db,
+            Literal::String(StringLiteral::from("left")),
+        ));
+        let right = TypeData::Literal(InternedLiteral::new(
+            &db,
+            Literal::String(StringLiteral::from("right")),
+        ));
+
+        for types in [[left, right], [left, TypeData::Number]] {
+            assert_eq!(
+                IntersectionBuilder::new(&db).add_all(types).build(),
+                TypeData::NeverKeyword
+            );
+        }
     }
 }

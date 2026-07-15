@@ -10,7 +10,6 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression,
     JsBinaryOperator, JsCallExpression, JsStaticMemberExpression, JsSyntaxToken, T,
 };
-use biome_js_type_info::{Literal, ResolvedTypeData, Type, TypeData};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TextRange, declare_node_union};
 use biome_rule_options::use_string_starts_ends_with::UseStringStartsEndsWithOptions;
 
@@ -778,57 +777,16 @@ fn ensure_known_string_type(
     ctx: &RuleContext<UseStringStartsEndsWith>,
     expression: &AnyJsExpression,
 ) -> bool {
-    all_type_variants_match(&ctx.type_of_expression(expression), |current, _| {
-        current.is_string_or_string_literal()
-    })
-}
-
-/// Walks a possibly-unioned type and requires every concrete branch to satisfy the predicate.
-///
-/// ```ts
-/// declare const text: string | string[];
-/// declare const suffix: string;
-/// ```
-fn all_type_variants_match(ty: &Type, mut predicate: impl FnMut(&Type, &TypeData) -> bool) -> bool {
-    let mut saw_variant = false;
-    let mut pending = vec![ty.clone()];
-
-    while let Some(current) = pending.pop() {
-        if current.is_union() {
-            let mut variants = current.flattened_union_variants().peekable();
-            if variants.peek().is_none() {
-                return false;
-            }
-            saw_variant = true;
-            pending.extend(variants);
-            continue;
-        }
-
-        let Some(raw) = current.resolved_data().map(ResolvedTypeData::as_raw_data) else {
-            return false;
-        };
-
-        match raw {
-            TypeData::Generic(generic) if generic.constraint.is_known() => {
-                let Some(constraint) = current.resolve(&generic.constraint) else {
-                    return false;
-                };
-                pending.push(constraint);
-            }
-            TypeData::Generic(_) => return false,
-            _ if predicate(&current, raw) => saw_variant = true,
-            _ => return false,
-        }
-    }
-
-    saw_variant
+    ctx.type_of_expression(expression)
+        .is_some_and(|ty| ty.is_all_string_like())
 }
 
 fn is_zero_number_expression(
     ctx: &RuleContext<UseStringStartsEndsWith>,
     expression: &AnyJsExpression,
 ) -> bool {
-    ctx.type_of_expression(expression).is_number_literal(0.0)
+    ctx.type_of_expression(expression)
+        .is_some_and(|ty| ty.is_number_literal(0.0))
 }
 
 fn is_length_minus_number(
@@ -979,21 +937,13 @@ fn build_method_call_with_regex_literal(
     method: PreferredMethod,
     negated: bool,
 ) -> Option<AnyJsExpression> {
-    let ty = ctx.type_of_expression(regex);
-    let raw = ty.resolved_data()?.as_raw_data();
-    let regex = match raw {
-        TypeData::Literal(literal) => match literal.as_ref() {
-            Literal::RegExp(regex) => regex,
-            _ => return None,
-        },
-        _ => return None,
-    };
+    let (pattern, flags) = ctx.type_of_expression(regex)?.regexp_literal()?;
 
-    if !regex.flags.is_empty() {
+    if !flags.text().is_empty() {
         return None;
     }
 
-    let pattern = regex.pattern.text();
+    let pattern = pattern.text();
     // We decode at fix time so the borrowed regex text stays borrowed until we actually need to
     // materialize the replacement string literal.
     let text = match method {
@@ -1085,7 +1035,7 @@ fn matches_length_expression(
         // Literal strings are the easy case: the target length is known up front.
         return ctx
             .type_of_expression(expression)
-            .is_number_literal(expected_len as f64);
+            .is_some_and(|ty| ty.is_number_literal(expected_len as f64));
     }
 
     // Otherwise we only trust `.length` on the exact same expression, e.g. `needle.length`
@@ -1242,22 +1192,16 @@ fn extract_plain_anchored_regex(
     ctx: &RuleContext<UseStringStartsEndsWith>,
     expression: &AnyJsExpression,
 ) -> Option<PreferredMethod> {
-    let ty = ctx.type_of_expression(expression);
-    let raw = ty.resolved_data()?.as_raw_data();
-    let regex = match raw {
-        TypeData::Literal(literal) => match literal.as_ref() {
-            Literal::RegExp(regex) => regex,
-            _ => return None,
-        },
-        _ => return None,
-    };
+    let (pattern, flags) = ctx
+        .type_of_expression(expression)?
+        .regexp_literal()?;
 
-    if !regex.flags.is_empty() {
+    if !flags.text().is_empty() {
         // Anchored prefix/suffix rewrites are only obviously safe for plain regexes without flags.
         return None;
     }
 
-    let pattern = regex.pattern.text();
+    let pattern = pattern.text();
     if let Some(body) = pattern.strip_prefix('^') {
         decode_plain_regex_text(body)?;
         return Some(PreferredMethod::StartsWith);

@@ -1,7 +1,7 @@
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_service::workspace::{
     ChangeFileParams, FileContent, FormatFileParams, GetFormatterIRParams, OpenFileParams,
-    OpenProjectParams, server,
+    OpenProjectParams, ProjectDataUpdate, server,
 };
 use std::sync::Arc;
 
@@ -66,6 +66,7 @@ fn quick_test() {
             version: 1,
             inline_config: None,
             editor_features: None,
+            project_data_update: ProjectDataUpdate::Refresh,
         })
         .unwrap();
 

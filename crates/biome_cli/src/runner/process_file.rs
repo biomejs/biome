@@ -10,7 +10,8 @@ use biome_languages::DocumentFileSource;
 use biome_service::diagnostics::FileTooLarge;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
-    FeaturesSupported, FileExistsParams, FileFeaturesResult, SupportKind, SupportsFeatureParams,
+    FeaturesSupported, FileExistsParams, FileFeaturesResult, ProjectDataUpdate, SupportKind,
+    SupportsFeatureParams,
 };
 use biome_service::workspace::{FileContent, FileGuard, OpenFileParams};
 use biome_service::{Workspace, WorkspaceError};
@@ -311,14 +312,18 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
     }
 
     /// It updates the workspace file with `new_content`
-    pub(crate) fn update_file(&mut self, new_content: impl Into<String>) -> Result<(), Error> {
+    pub(crate) fn update_file(
+        &mut self,
+        new_content: impl Into<String>,
+        project_data_update: ProjectDataUpdate,
+    ) -> Result<(), Error> {
         let new_content = new_content.into();
 
         self.file
             .set_content(new_content.as_bytes())
             .with_file_path(self.path.to_string())?;
         self.guard
-            .change_file(self.file.file_version(), new_content)?;
+            .change_file(self.file.file_version(), new_content, project_data_update)?;
         Ok(())
     }
 }
@@ -335,7 +340,8 @@ mod tests {
     use biome_service::projects::ProjectKey;
     use biome_service::workspace::{
         FeatureName, FeaturesBuilder, FeaturesSupported, FileContent, GetFileContentParams,
-        OpenFileParams, OpenProjectParams, OpenProjectResult, SupportKind, server,
+        OpenFileParams, OpenProjectParams, OpenProjectResult, ProjectDataUpdate, SupportKind,
+        server,
     };
     use biome_service::{Workspace, WorkspaceError};
     use camino::Utf8PathBuf;
@@ -422,6 +428,10 @@ mod tests {
 
         fn project_key(&self) -> ProjectKey {
             self.project_key
+        }
+
+        fn project_data_update(&self) -> ProjectDataUpdate {
+            ProjectDataUpdate::Refresh
         }
 
         fn execution(&self) -> &dyn Execution {
@@ -542,7 +552,9 @@ mod tests {
             let mut workspace_file = WorkspaceFile::new(&ctx, path.clone()).unwrap();
             assert_eq!(workspace_file.input().unwrap(), SOURCE);
 
-            workspace_file.update_file(UPDATED).unwrap();
+            workspace_file
+                .update_file(UPDATED, ProjectDataUpdate::Refresh)
+                .unwrap();
             let content = workspace
                 .get_file_content(GetFileContentParams {
                     project_key,

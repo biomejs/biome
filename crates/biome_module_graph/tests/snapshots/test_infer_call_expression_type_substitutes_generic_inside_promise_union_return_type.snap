@@ -36,13 +36,7 @@ Expression "Promise" => class "Promise" {
   type_args: [T]
 }
 
-Expression "Promise.resolve" => sync Function "Promise.resolve" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof Promise
-}
+Expression "Promise.resolve" => Promise.resolve
 
 Expression "Promise.resolve(value as T | number)" => instanceof Promise
 

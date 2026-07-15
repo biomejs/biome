@@ -798,6 +798,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         disabled_rules,
         analyzer_options,
         fixable_rules,
+        ..
     } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
         .with_only(params.only)
         .with_skip(params.skip)

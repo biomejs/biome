@@ -422,7 +422,7 @@ pub(crate) fn run_cli_with_server_workspace(
 
     let files = fs.files.clone();
 
-    let workspace = workspace::server(Arc::new(fs), None);
+    let workspace = workspace::disposable_server(Arc::new(fs), None);
     let app = App::new(console, WorkspaceRef::Owned(workspace));
 
     let mut session = CliSession {

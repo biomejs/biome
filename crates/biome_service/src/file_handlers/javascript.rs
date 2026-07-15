@@ -21,7 +21,7 @@ use crate::settings::{
     OverrideSettings, Settings, SettingsWithEditor, check_feature_activity,
     check_override_feature_activity,
 };
-use crate::workspace::{FixFileMode, SearchQuery};
+use crate::workspace::{FixFileMode, SearchQuery, WorkspaceLifetime};
 use crate::workspace::{PatternId, PullDiagnosticsAndActionsResult};
 use crate::{
     WorkspaceError,
@@ -68,21 +68,24 @@ use biome_js_formatter::context::{
 };
 use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
-use biome_js_semantic::{SVELTE_RUNES, SemanticModelOptions, js_semantic_model, semantic_model};
+use biome_js_semantic::{
+    SVELTE_RUNES, SemanticModel, SemanticModelOptions, js_semantic_model, semantic_model,
+};
 #[cfg(feature = "js_embeds")]
 use biome_js_syntax::{
     AnyJsExpression, AnyJsTemplateElement, JsCallArgumentList, JsCallArguments, JsCallExpression,
     JsTemplateExpression,
 };
+#[cfg(feature = "type_inference")]
+use biome_js_syntax::{
+    AnyJsExpression as TypeInfoExpression, JsClassDeclaration, JsClassExpression,
+    JsFunctionDeclaration, JsVariableDeclarator,
+};
 use biome_js_syntax::{
     AnyJsRoot, JsLanguage, JsSyntaxNode, JsTemplateChunkElement, TextRange, TextSize, TokenAtOffset,
 };
 #[cfg(feature = "type_inference")]
-use biome_js_syntax::{
-    JsClassDeclaration, JsClassExpression, JsFunctionDeclaration, JsVariableDeclarator,
-};
-#[cfg(feature = "type_inference")]
-use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
+use biome_js_type_info::{RawTypeCollector, ScopeId, TypeData, TypeId, TypeStore};
 #[cfg(feature = "js_embeds")]
 use biome_languages::CssFileSource;
 #[cfg(all(feature = "js_embeds", feature = "lang_graphql"))]
@@ -90,6 +93,8 @@ use biome_languages::GraphqlFileSource;
 #[cfg(feature = "js_embeds")]
 use biome_languages::css::CssEmbeddingKind;
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
+#[cfg(feature = "module_graph")]
+use biome_module_graph::{ModuleInfo, ModuleInfoKind, resolve_js_module};
 #[cfg(feature = "js_embeds")]
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
@@ -870,7 +875,7 @@ fn debug_type_info(
         let mut result = String::new();
         let preorder = tree.syntax().preorder();
 
-        let mut resolver = GlobalsResolver::default();
+        let mut resolver = DebugTypeCollector::default();
         let scope_id = ScopeId::GLOBAL;
 
         for event in preorder {
@@ -936,7 +941,7 @@ fn debug_registered_types(
         let mut result = String::new();
         let preorder = tree.syntax().preorder();
 
-        let mut resolver = GlobalsResolver::default();
+        let mut resolver = DebugTypeCollector::default();
         let scope_id = ScopeId::GLOBAL;
 
         for event in preorder {
@@ -956,7 +961,7 @@ fn debug_registered_types(
             }
         }
 
-        for (i, ty) in resolver.registered_types().iter().enumerate() {
+        for (i, ty) in resolver.types.as_slice().iter().enumerate() {
             result.push_str(&format!("\nTypeId({i}) => {ty}\n"));
         }
 
@@ -967,6 +972,35 @@ fn debug_registered_types(
     {
         let _ = (_path, parse, workspace_db);
         Err(WorkspaceError::feature_not_enabled())
+    }
+}
+
+#[cfg(feature = "type_inference")]
+#[derive(Default)]
+struct DebugTypeCollector {
+    types: TypeStore,
+}
+
+#[cfg(feature = "type_inference")]
+impl RawTypeCollector for DebugTypeCollector {
+    fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
+        self.types.find(type_data)
+    }
+
+    fn get_by_id(&self, id: TypeId) -> &TypeData {
+        self.types.get_by_id(id)
+    }
+
+    fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
+        self.types.insert_cow(type_data)
+    }
+
+    fn resolve_expression(
+        &mut self,
+        scope_id: ScopeId,
+        expression: &TypeInfoExpression,
+    ) -> Cow<'_, TypeData> {
+        Cow::Owned(TypeData::from_any_js_expression(self, scope_id, expression))
     }
 }
 
@@ -996,6 +1030,56 @@ fn js_analyzer_services<'a>(
         .with_source_type(source_type);
 
     services.with_language_db(workspace_db.rc_language_db())
+}
+
+fn js_analyzer_services_for_fix<'a>(
+    root: &'a AnyJsRoot,
+    semantic_model: &'a SemanticModel,
+    params: &FixAllParams,
+    source_type: JsFileSource,
+    use_detached_module: bool,
+) -> JsAnalyzerServices<'a> {
+    #[cfg(feature = "module_graph")]
+    {
+        let services = js_analyzer_services(
+            root,
+            &params.workspace_db,
+            params.project_layout.clone(),
+            source_type,
+        )
+        .with_semantic_model(semantic_model);
+        if !use_detached_module {
+            return services;
+        }
+        let (module, _, _) = resolve_js_module(
+            root.clone(),
+            params.biome_path,
+            params.fs,
+            &params.project_layout,
+            Arc::new(semantic_model.clone()),
+            params.path_info_cache,
+            params.infer_types,
+        );
+        let current_module = ModuleInfo::new_detached(
+            &params.workspace_db,
+            params.biome_path.to_path_buf(),
+            ModuleInfoKind::Js(module),
+        );
+        #[cfg(test)]
+        params
+            .detached_module_count
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        services.with_current_module(current_module)
+    }
+
+    #[cfg(not(feature = "module_graph"))]
+    js_analyzer_services(
+        root,
+        &params.workspace_db,
+        params.project_layout.clone(),
+        source_type,
+    )
+    .with_semantic_model(semantic_model)
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {
@@ -1051,8 +1135,14 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         &params.workspace_db,
         params.project_layout.clone(),
         files_source,
-    )
-    .with_semantic_model(semantic_model);
+    );
+    #[cfg(feature = "module_graph")]
+    let services = if let Some(current_module) = params.current_module {
+        services.with_current_module(current_module)
+    } else {
+        services
+    };
+    let services = services.with_semantic_model(semantic_model);
 
     let (_, analyze_diagnostics) = analyze(
         &tree,
@@ -1202,6 +1292,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         disabled_rules,
         analyzer_options,
         fixable_rules,
+        fixable_rules_require_types,
     } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
         .with_only(params.only)
         .with_skip(params.skip)
@@ -1242,12 +1333,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
         // Suppressions apply to all rules -- keep original single-phase loop
         loop {
-            let services = js_analyzer_services(
-                &tree,
-                &params.workspace_db,
-                params.project_layout.clone(),
-                file_source,
-            );
+            let semantic_model = semantic_model(&tree, SemanticModelOptions::from(&file_source));
+            let services =
+                js_analyzer_services_for_fix(&tree, &semantic_model, &params, file_source, false);
 
             let mut pending_actions = Vec::new();
 
@@ -1299,13 +1387,18 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         disabled_rules: &disabled_rules,
         range: None,
     };
+    let use_detached_modules =
+        params.workspace_lifetime == WorkspaceLifetime::Disposable && fixable_rules_require_types;
+    let mut tree_was_changed = false;
 
     loop {
-        let services = js_analyzer_services(
+        let semantic_model = semantic_model(&tree, SemanticModelOptions::from(&file_source));
+        let services = js_analyzer_services_for_fix(
             &tree,
-            &params.workspace_db,
-            params.project_layout.clone(),
+            &semantic_model,
+            &params,
             file_source,
+            use_detached_modules && tree_was_changed,
         );
 
         let mut pending_actions = Vec::new();
@@ -1328,6 +1421,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 Some(tree) => tree,
                 None => return None,
             };
+            tree_was_changed = true;
             Some(tree.syntax().text_range_with_trivia().len().into())
         })?;
 
@@ -1340,6 +1434,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                     .parse_options::<JsLanguage>(params.biome_path, &params.document_file_source);
                 let parse = biome_js_parser::parse(&new_text, file_source, options);
                 tree = parse.tree();
+                tree_was_changed = true;
                 continue;
             }
 
@@ -1349,11 +1444,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
     // Phase 2: run all rules on the fixed tree for final diagnostics
     {
-        let services = js_analyzer_services(
+        let semantic_model = semantic_model(&tree, SemanticModelOptions::from(&file_source));
+        let services = js_analyzer_services_for_fix(
             &tree,
-            &params.workspace_db,
-            params.project_layout.clone(),
+            &semantic_model,
+            &params,
             file_source,
+            use_detached_modules && tree_was_changed,
         );
 
         let (_, _) = analyze(

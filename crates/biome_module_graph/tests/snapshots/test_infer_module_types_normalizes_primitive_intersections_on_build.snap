@@ -15,6 +15,24 @@ export function readString(value: string & string): string & string {
 export function readNever(value: string & number): string & number {
 	return value;
 }
+
+export function readStringLiteral(value: string & "value"): string & "value" {
+	return value;
+}
+
+export function readReversedStringLiteral(
+	value: "value" & string,
+): "value" & string {
+	return value;
+}
+
+export function readNumberLiteral(value: number & 1): number & 1 {
+	return value;
+}
+
+export function readReversedNumberLiteral(value: 1 & number): 1 & number {
+	return value;
+}
 ```
 
 ## Inferred types
@@ -47,4 +65,60 @@ Binding readNever "readNever" => sync Function "readNever" {
 Binding value "value" => never
 
 Expression "value" => never
+
+Binding readStringLiteral "readStringLiteral" => sync Function "readStringLiteral" {
+  accepts: {
+    params: [
+      required value: string: value
+    ]
+    type_args: []
+  }
+  returns: string: value
+}
+
+Binding value "value" => string: value
+
+Expression "value" => string: value
+
+Binding readReversedStringLiteral "readReversedStringLiteral" => sync Function "readReversedStringLiteral" {
+  accepts: {
+    params: [
+      required value: string: value
+    ]
+    type_args: []
+  }
+  returns: string: value
+}
+
+Binding value "value" => string: value
+
+Expression "value" => string: value
+
+Binding readNumberLiteral "readNumberLiteral" => sync Function "readNumberLiteral" {
+  accepts: {
+    params: [
+      required value: number: 1
+    ]
+    type_args: []
+  }
+  returns: number: 1
+}
+
+Binding value "value" => number: 1
+
+Expression "value" => number: 1
+
+Binding readReversedNumberLiteral "readReversedNumberLiteral" => sync Function "readReversedNumberLiteral" {
+  accepts: {
+    params: [
+      required value: number: 1
+    ]
+    type_args: []
+  }
+  returns: number: 1
+}
+
+Binding value "value" => number: 1
+
+Expression "value" => number: 1
 ```

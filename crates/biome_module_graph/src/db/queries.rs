@@ -1,55 +1,62 @@
-//! This module represents the database queries used by the module graph.
+//! Tracked query API used by the module graph.
 //!
-//! The queries are defined in terms of `ModuleInfo` inputs.
+//! Interned query inputs and private implementation helpers coexist here with
+//! the tracked queries. Salsa uses the tracked dependencies to invalidate query
+//! results when their inputs change.
 //!
-//! The queries are tracked so that Salsa can invalidate them when the inputs
-//! change.
+//! Salsa queries in this module must accept exactly two inputs:
+//! 1. The Salsa database.
+//! 2. A Salsa input or interned value.
 //!
-//! The queries are also interned, so that Salsa can reuse the same computation
-//! when the inputs are the same.
-//!
-//! This module should contain only tracked functions, exposed to the consumers. Middle
-//! functions that aren't queries should be moved somewhere else, unless they are used
-//! directly by the tracked functions e.g. cycle detection
+//! The tracked-function macro creates an implicit interned ingredient for each
+//! additional non-database argument. Group multiple logical inputs into one
+//! explicit interned input type so query identity and style remain consistent.
+
+#![deny(clippy::wildcard_enum_match_arm)]
+#![allow(
+    unused_lifetimes,
+    reason = "Salsa interned handle lifetimes are used by generated code."
+)]
 
 use crate::css_module_info::traverse::{CssClassStep, ImportTreeTraversal};
 use crate::db::type_inference::{
-    collected_type_result, infer_module_types_cycle_result, normalize_type_cycle_result,
-    resolve_raw_types,
+    ImportResolution, apply_substitutions_to_root_body, collected_type_result,
+    infer_module_types_cycle_result, normalize_structural_type, normalize_type_cycle_result,
+    resolve_raw_types, substitutions_for_instance,
 };
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
-use crate::{ImportTreeNode, JsExport, JsOwnExport, ModuleDb, ResolvedPath};
+use crate::{ImportTreeNode, JsExport, JsOwnExport, ModuleDb, ResolvedPath, module_for_key};
 use biome_css_syntax::{TextRange, TextSize};
 use biome_js_type_info::{
-    ImportSymbol, RawTypeData, TypeReference, TypeResolverLevel,
-    interned_types::{
-        FunctionParameter as InferredFunctionParameter, InternedFunction as InferredFunction,
-        InternedMergedReference as InferredMergedReference, Literal as InferredLiteral,
-        LocalTypeHandle as InferredLocalTypeHandle, LocalTypeId as InferredLocalTypeId,
-        ModuleKey as InferredModuleKey, ReturnType, TypeData as InferredTypeData,
-        TypeMember as InferredTypeMember, TypeSubstitution as InferredTypeSubstitution,
+    ImportSymbol, RawTypeData, RawTypeId, TypeReference,
+    resolved::{
+        InferredCallArgumentType, InferredFunction, InferredFunctionParameter,
+        InferredLiteralValue, InferredLocalTypeHandle, InferredLocalTypeId,
+        InferredMergedReference, InferredModuleKey, InferredReturnType, InferredTypeData,
+        InferredTypeMember, InferredTypeSubstitution,
     },
 };
 use biome_jsdoc_comment::JsdocComment;
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexMap;
-use rustc_hash::{FxHashMap, FxHashSet};
-use salsa::plumbing::{AsId, FromId};
+use rustc_hash::FxHashSet;
 use std::collections::VecDeque;
+use std::sync::Arc;
 
 pub use crate::db::type_inference::InferredModuleTypes;
 
-const MAX_TYPE_NORMALIZATION_STEPS: usize = 1024;
 const MAX_ARGUMENT_MATCH_STEPS: usize = 1024;
 const MAX_ARGUMENT_SEQUENCE_STEPS: usize = 1024;
+// The root query itself is not a dependency step, so this admits the root plus
+// the same 1024-edge boundary used by export resolution.
+const MAX_INFERENCE_DEPENDENCY_STEPS: usize = 1025;
 const MAX_LOCAL_EXTENDS_STEPS: usize = 1024;
 
 #[salsa::tracked(cycle_result=infer_module_types_cycle_result)]
-#[deny(clippy::wildcard_enum_match_arm)]
 pub fn infer_module_types<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
-) -> Option<InferredModuleTypes<'db>> {
+) -> Option<Arc<InferredModuleTypes<'db>>> {
     let ModuleInfoKind::Js(js_info) = module.kind(db) else {
         return None;
     };
@@ -57,45 +64,57 @@ pub fn infer_module_types<'db>(
         return None;
     }
 
-    let mut import_types = FxHashMap::default();
     for import_path in js_info.static_import_paths.values() {
         if let Some(path) = import_path.as_path()
             && let Some(target) = db.module_for_path(path)
-            && let Some(target_types) = infer_module_types(db, target)
         {
-            import_types.insert(import_path.resolved_path.clone(), target_types);
+            let _ = infer_module_types(db, target);
         }
     }
 
-    Some(resolve_raw_types(db, module, &js_info, &import_types))
+    Some(Arc::new(resolve_raw_types(
+        db,
+        module,
+        &js_info,
+        ImportResolution::Full,
+    )))
 }
 
-// NOTE: this is the only exception to the rule.
-/// Infers the types of a module, preparing the modules it imports first.
+/// Infers a module after iteratively warming dependencies innermost-first.
 ///
-/// This is the entry point to use when answering an outside request, such as
-/// a lint rule asking for type information after a file was opened or
-/// changed. At that moment the imported modules may not have been inferred
-/// yet, and this function works through them one at a time, innermost imports
-/// first, so that even very long import chains are handled safely.
-///
-/// From within other database queries, call [`infer_module_types`] directly
-/// instead: there, the imported modules are already taken care of.
-#[deny(clippy::wildcard_enum_match_arm)]
+/// External consumers should use this entry point. The iterative walk keeps the
+/// Rust stack shallow while the tracked [`infer_module_types`] query retains
+/// dependency-level backdating.
 pub fn infer_module_types_bottom_up<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
-) -> Option<InferredModuleTypes<'db>> {
+) -> Option<Arc<InferredModuleTypes<'db>>> {
     let mut visited = FxHashSet::default();
     let mut stack = vec![(module, false)];
+    let mut remaining_dependency_steps = MAX_INFERENCE_DEPENDENCY_STEPS;
 
     while let Some((current, imports_visited)) = stack.pop() {
+        db.unwind_if_revision_cancelled();
         if imports_visited {
             infer_module_types(db, current);
             continue;
         }
         if !visited.insert(current) {
             continue;
+        }
+        if current != module {
+            if remaining_dependency_steps == 0 {
+                let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+                    return None;
+                };
+                return Some(Arc::new(resolve_raw_types(
+                    db,
+                    module,
+                    &js_info,
+                    ImportResolution::CycleFallback(&visited),
+                )));
+            }
+            remaining_dependency_steps -= 1;
         }
 
         // Revisit this module to infer it once its imports below are done.
@@ -151,19 +170,14 @@ fn push_inference_dependency(
     }
 }
 
-#[salsa::interned]
-#[derive(Debug)]
-pub struct CallExpressionTypeInput<'db> {
-    pub module: ModuleInfo,
-    pub callee: InferredTypeData<'db>,
-    #[returns(ref)]
-    pub args: Box<[InferredTypeData<'db>]>,
-}
-
-#[derive(Clone, Copy, Debug)]
-pub(crate) enum ResolvedCallArgument<'db> {
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
+/// A resolved argument supplied to call-expression inference.
+pub enum ResolvedCallArgument<'db> {
+    /// A required argument.
     Argument(InferredTypeData<'db>),
+    /// An argument that may be absent, such as an optional tuple element.
     Optional(InferredTypeData<'db>),
+    /// A spread argument.
     Spread(InferredTypeData<'db>),
 }
 
@@ -175,35 +189,30 @@ impl<'db> ResolvedCallArgument<'db> {
     }
 }
 
+#[salsa::interned]
+#[derive(Debug)]
+/// Interned identity for a call-expression inference query.
+pub struct CallExpressionTypeInput<'db> {
+    /// Module in which the call is evaluated.
+    pub module: ModuleInfo,
+    /// Normalized callable type.
+    pub callee: InferredTypeData<'db>,
+    /// Resolved call arguments in source order.
+    #[returns(ref)]
+    pub args: Box<[ResolvedCallArgument<'db>]>,
+}
+
 #[salsa::tracked]
-#[deny(clippy::wildcard_enum_match_arm)]
+/// Infers the return type of a normalized call expression.
 pub fn infer_call_expression_type<'db>(
     db: &'db dyn ModuleDb,
     input: CallExpressionTypeInput<'db>,
 ) -> InferredTypeData<'db> {
-    let module = input.module(db);
-    let callee = input.callee(db);
-    let args = input.args(db);
-    let ty = infer_call_expression_return_type(db, callee, args);
-
-    normalize_type(db, NormalizeTypeInput::new(db, module, ty))
+    let _ = input.module(db).kind(db);
+    infer_call_expression_return_type_from_args(db, input.callee(db), input.args(db))
 }
 
-pub(crate) fn infer_call_expression_return_type<'db>(
-    db: &'db dyn ModuleDb,
-    callee: InferredTypeData<'db>,
-    args: &[InferredTypeData<'db>],
-) -> InferredTypeData<'db> {
-    let args = args
-        .iter()
-        .copied()
-        .map(ResolvedCallArgument::Argument)
-        .collect::<Vec<_>>();
-    infer_call_expression_return_type_from_args(db, callee, &args)
-}
-
-#[deny(clippy::wildcard_enum_match_arm)]
-pub(crate) fn infer_call_expression_return_type_from_args<'db>(
+pub(in crate::db) fn infer_call_expression_return_type_from_args<'db>(
     db: &'db dyn ModuleDb,
     callee: InferredTypeData<'db>,
     args: &[ResolvedCallArgument<'db>],
@@ -214,13 +223,21 @@ pub(crate) fn infer_call_expression_return_type_from_args<'db>(
             union
                 .types(db)
                 .iter()
-                .filter_map(|callee| infer_function_call_type(db, *callee, args))
+                .map(|callee| {
+                    if matches!(callee, InferredTypeData::Null | InferredTypeData::Undefined) {
+                        InferredTypeData::Undefined
+                    } else {
+                        infer_function_call_type(db, *callee, args)
+                            .unwrap_or(InferredTypeData::Unknown)
+                    }
+                })
                 .collect(),
         )
         .unwrap_or(InferredTypeData::Unknown),
         callee @ (InferredTypeData::Unknown
         | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
         | InferredTypeData::BigInt
         | InferredTypeData::Boolean
         | InferredTypeData::Null
@@ -258,7 +275,6 @@ pub(crate) fn infer_call_expression_return_type_from_args<'db>(
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn infer_function_call_type<'db>(
     db: &'db dyn ModuleDb,
     callee: InferredTypeData<'db>,
@@ -266,55 +282,42 @@ fn infer_function_call_type<'db>(
 ) -> Option<InferredTypeData<'db>> {
     match callee {
         InferredTypeData::Function(function) => infer_function_return_type(db, function, args),
-        InferredTypeData::InstanceOf(instance) => match instance.ty(db) {
-            InferredTypeData::Function(function) => infer_function_return_type(db, function, args),
-            InferredTypeData::Interface(interface) => {
-                infer_call_signature_type(db, interface.members(db), args)
-            }
-            InferredTypeData::Object(object) => {
-                infer_call_signature_type(db, object.members(db), args)
-            }
-            InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
-            | InferredTypeData::Global
-            | InferredTypeData::BigInt
-            | InferredTypeData::Boolean
-            | InferredTypeData::Null
-            | InferredTypeData::Number
-            | InferredTypeData::String
-            | InferredTypeData::Symbol
-            | InferredTypeData::Undefined
-            | InferredTypeData::Conditional
-            | InferredTypeData::Class(_)
-            | InferredTypeData::Constructor(_)
-            | InferredTypeData::Module(_)
-            | InferredTypeData::Namespace(_)
-            | InferredTypeData::Tuple(_)
-            | InferredTypeData::Generic(_)
-            | InferredTypeData::Local(_)
-            | InferredTypeData::Intersection(_)
-            | InferredTypeData::Union(_)
-            | InferredTypeData::TypeOperator(_)
-            | InferredTypeData::Literal(_)
-            | InferredTypeData::InstanceOf(_)
-            | InferredTypeData::MergedReference(_)
-            | InferredTypeData::TypeofExpression(_)
-            | InferredTypeData::TypeofType(_)
-            | InferredTypeData::TypeofValue(_)
-            | InferredTypeData::AnyKeyword
-            | InferredTypeData::NeverKeyword
-            | InferredTypeData::ObjectKeyword
-            | InferredTypeData::ThisKeyword
-            | InferredTypeData::UnknownKeyword
-            | InferredTypeData::VoidKeyword => None,
-        },
+        InferredTypeData::InstanceOf(instance) => {
+            let target = instance.ty(db);
+            let substitutions =
+                substitutions_for_instance(db, target, instance.type_parameters(db), &[]).ok()?;
+            let target = apply_substitutions_to_root_body(db, target, &substitutions).ok()?;
+            infer_function_call_type(db, target, args)
+        }
         InferredTypeData::Interface(interface) => {
             infer_call_signature_type(db, interface.members(db), args)
         }
         InferredTypeData::Object(object) => infer_call_signature_type(db, object.members(db), args),
+        InferredTypeData::Union(union) => collected_type_result(
+            db,
+            union
+                .types(db)
+                .iter()
+                .map(|callee| {
+                    if matches!(callee, InferredTypeData::Null | InferredTypeData::Undefined) {
+                        InferredTypeData::Undefined
+                    } else {
+                        infer_function_call_type(db, *callee, args)
+                            .unwrap_or(InferredTypeData::Unknown)
+                    }
+                })
+                .collect(),
+        ),
+        InferredTypeData::TypeofType(typeof_type) => {
+            infer_function_call_type(db, typeof_type.ty(db), args)
+        }
+        InferredTypeData::TypeofValue(typeof_value) => {
+            infer_function_call_type(db, typeof_value.ty(db), args)
+        }
         InferredTypeData::Unknown
         | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
         | InferredTypeData::BigInt
         | InferredTypeData::Boolean
         | InferredTypeData::Null
@@ -331,9 +334,340 @@ fn infer_function_call_type<'db>(
         | InferredTypeData::Generic(_)
         | InferredTypeData::Local(_)
         | InferredTypeData::Intersection(_)
+        | InferredTypeData::TypeOperator(_)
+        | InferredTypeData::Literal(_)
+        | InferredTypeData::MergedReference(_)
+        | InferredTypeData::TypeofExpression(_)
+        | InferredTypeData::AnyKeyword
+        | InferredTypeData::NeverKeyword
+        | InferredTypeData::ObjectKeyword
+        | InferredTypeData::ThisKeyword
+        | InferredTypeData::UnknownKeyword
+        | InferredTypeData::VoidKeyword => None,
+    }
+}
+
+fn infer_call_signature_type<'db>(
+    db: &'db dyn ModuleDb,
+    members: &[InferredTypeMember<'db>],
+    args: &[ResolvedCallArgument<'db>],
+) -> Option<InferredTypeData<'db>> {
+    match select_call_signature(db, members, args, None) {
+        Ok(Some(function)) => infer_function_return_type(db, function, args),
+        Ok(None) => None,
+        Err(()) => Some(InferredTypeData::Unknown),
+    }
+}
+
+fn select_call_signature<'db>(
+    db: &'db dyn ModuleDb,
+    members: &[InferredTypeMember<'db>],
+    args: &[ResolvedCallArgument<'db>],
+    ignored_argument_index: Option<usize>,
+) -> Result<Option<InferredFunction<'db>>, ()> {
+    let mut signatures = Vec::new();
+    for member in members {
+        if !member.kind.is_call_signature() {
+            continue;
+        }
+        let Some(function) = member.ty.callable_function(db) else {
+            return Err(());
+        };
+        signatures.push(function);
+    }
+
+    if signatures.len() < 2 {
+        return Ok(signatures.first().copied());
+    }
+
+    for function in signatures {
+        match signature_accepts_arguments(db, function, args, ignored_argument_index) {
+            Some(true) => return Ok(Some(function)),
+            Some(false) => {}
+            None => return Err(()),
+        }
+    }
+
+    Ok(None)
+}
+
+/// Returns the parameter type selected for a call argument.
+///
+/// Overloaded callables use the same declaration-ordered, indeterminate-aware
+/// signature matching as return-type inference. The requested argument is
+/// ignored while selecting the signature because its expected type is the
+/// result of this operation.
+#[salsa::interned]
+#[derive(Debug)]
+pub struct CallArgumentTypeInput<'db> {
+    pub callee: InferredTypeData<'db>,
+    #[returns(ref)]
+    pub args: Box<[InferredCallArgumentType<'db>]>,
+    pub argument_index: usize,
+}
+
+#[salsa::tracked]
+pub fn infer_call_argument_type<'db>(
+    db: &'db dyn ModuleDb,
+    input: CallArgumentTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let args = resolved_call_arguments(input.args(db));
+    infer_function_argument_type(db, input.callee(db), &args, input.argument_index(db))
+}
+
+/// Returns the constructor parameter type selected for a call argument.
+#[salsa::tracked]
+pub fn infer_constructor_argument_type<'db>(
+    db: &'db dyn ModuleDb,
+    input: CallArgumentTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let args = resolved_call_arguments(input.args(db));
+    infer_constructor_argument_type_inner(db, input.callee(db), &args, input.argument_index(db))
+}
+
+fn resolved_call_arguments<'db>(
+    args: &[InferredCallArgumentType<'db>],
+) -> Vec<ResolvedCallArgument<'db>> {
+    args.iter()
+        .map(|argument| match argument {
+            InferredCallArgumentType::Argument(ty) => ResolvedCallArgument::Argument(*ty),
+            InferredCallArgumentType::Spread(ty) => ResolvedCallArgument::Spread(*ty),
+        })
+        .collect()
+}
+
+fn infer_function_argument_type<'db>(
+    db: &'db dyn ModuleDb,
+    callee: InferredTypeData<'db>,
+    args: &[ResolvedCallArgument<'db>],
+    argument_index: usize,
+) -> Option<InferredTypeData<'db>> {
+    match callee {
+        InferredTypeData::Function(function) => {
+            parameter_for_argument(function.parameters(db), argument_index)
+                .map(|parameter| parameter_argument_type(db, parameter))
+        }
+        InferredTypeData::InstanceOf(instance) => {
+            let target = instance.ty(db);
+            let substitutions =
+                substitutions_for_instance(db, target, instance.type_parameters(db), &[]).ok()?;
+            let target = apply_substitutions_to_root_body(db, target, &substitutions).ok()?;
+            infer_function_argument_type(db, target, args, argument_index)
+        }
+        InferredTypeData::Interface(interface) => {
+            let function =
+                select_call_signature(db, interface.members(db), args, Some(argument_index))
+                    .ok()??;
+            parameter_for_argument(function.parameters(db), argument_index)
+                .map(|parameter| parameter_argument_type(db, parameter))
+        }
+        InferredTypeData::Object(object) => {
+            let function =
+                select_call_signature(db, object.members(db), args, Some(argument_index))
+                    .ok()??;
+            parameter_for_argument(function.parameters(db), argument_index)
+                .map(|parameter| parameter_argument_type(db, parameter))
+        }
+        InferredTypeData::Union(union) => {
+            let mut parameter_types = Vec::new();
+            for callee in union.types(db) {
+                parameter_types.push(infer_function_argument_type(
+                    db,
+                    *callee,
+                    args,
+                    argument_index,
+                )?);
+            }
+            collected_type_result(db, parameter_types)
+        }
+        InferredTypeData::TypeofType(typeof_type) => {
+            infer_function_argument_type(db, typeof_type.ty(db), args, argument_index)
+        }
+        InferredTypeData::TypeofValue(typeof_value) => {
+            infer_function_argument_type(db, typeof_value.ty(db), args, argument_index)
+        }
+        InferredTypeData::Unknown
+        | InferredTypeData::Divergent(_)
+        | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
+        | InferredTypeData::BigInt
+        | InferredTypeData::Boolean
+        | InferredTypeData::Null
+        | InferredTypeData::Number
+        | InferredTypeData::String
+        | InferredTypeData::Symbol
+        | InferredTypeData::Undefined
+        | InferredTypeData::Conditional
+        | InferredTypeData::Class(_)
+        | InferredTypeData::Constructor(_)
+        | InferredTypeData::Module(_)
+        | InferredTypeData::Namespace(_)
+        | InferredTypeData::Tuple(_)
+        | InferredTypeData::Generic(_)
+        | InferredTypeData::Local(_)
+        | InferredTypeData::Intersection(_)
+        | InferredTypeData::TypeOperator(_)
+        | InferredTypeData::Literal(_)
+        | InferredTypeData::MergedReference(_)
+        | InferredTypeData::TypeofExpression(_)
+        | InferredTypeData::AnyKeyword
+        | InferredTypeData::NeverKeyword
+        | InferredTypeData::ObjectKeyword
+        | InferredTypeData::ThisKeyword
+        | InferredTypeData::UnknownKeyword
+        | InferredTypeData::VoidKeyword => None,
+    }
+}
+
+fn infer_constructor_argument_type_inner<'db>(
+    db: &'db dyn ModuleDb,
+    callee: InferredTypeData<'db>,
+    args: &[ResolvedCallArgument<'db>],
+    argument_index: usize,
+) -> Option<InferredTypeData<'db>> {
+    match callee {
+        InferredTypeData::Class(class) => {
+            select_constructor_argument_type(db, class.members(db), args, argument_index)
+        }
+        InferredTypeData::Constructor(constructor) => {
+            let parameters = constructor
+                .parameters(db)
+                .iter()
+                .map(|parameter| parameter.parameter.clone())
+                .collect::<Vec<_>>();
+            parameter_for_argument(&parameters, argument_index)
+                .map(|parameter| parameter_argument_type(db, parameter))
+        }
+        InferredTypeData::InstanceOf(instance) => {
+            let target = instance.ty(db);
+            let substitutions =
+                substitutions_for_instance(db, target, instance.type_parameters(db), &[]).ok()?;
+            let target = apply_substitutions_to_root_body(db, target, &substitutions).ok()?;
+            infer_constructor_argument_type_inner(db, target, args, argument_index)
+        }
+        InferredTypeData::Union(union) => {
+            let mut parameter_types = Vec::new();
+            for callee in union.types(db) {
+                parameter_types.push(infer_constructor_argument_type_inner(
+                    db,
+                    *callee,
+                    args,
+                    argument_index,
+                )?);
+            }
+            collected_type_result(db, parameter_types)
+        }
+        InferredTypeData::TypeofType(typeof_type) => {
+            infer_constructor_argument_type_inner(db, typeof_type.ty(db), args, argument_index)
+        }
+        InferredTypeData::TypeofValue(typeof_value) => {
+            infer_constructor_argument_type_inner(db, typeof_value.ty(db), args, argument_index)
+        }
+        InferredTypeData::Unknown
+        | InferredTypeData::Divergent(_)
+        | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
+        | InferredTypeData::BigInt
+        | InferredTypeData::Boolean
+        | InferredTypeData::Null
+        | InferredTypeData::Number
+        | InferredTypeData::String
+        | InferredTypeData::Symbol
+        | InferredTypeData::Undefined
+        | InferredTypeData::Conditional
+        | InferredTypeData::Function(_)
+        | InferredTypeData::Interface(_)
+        | InferredTypeData::Module(_)
+        | InferredTypeData::Namespace(_)
+        | InferredTypeData::Object(_)
+        | InferredTypeData::Tuple(_)
+        | InferredTypeData::Generic(_)
+        | InferredTypeData::Local(_)
+        | InferredTypeData::Intersection(_)
+        | InferredTypeData::TypeOperator(_)
+        | InferredTypeData::Literal(_)
+        | InferredTypeData::MergedReference(_)
+        | InferredTypeData::TypeofExpression(_)
+        | InferredTypeData::AnyKeyword
+        | InferredTypeData::NeverKeyword
+        | InferredTypeData::ObjectKeyword
+        | InferredTypeData::ThisKeyword
+        | InferredTypeData::UnknownKeyword
+        | InferredTypeData::VoidKeyword => None,
+    }
+}
+
+fn select_constructor_argument_type<'db>(
+    db: &'db dyn ModuleDb,
+    members: &[InferredTypeMember<'db>],
+    args: &[ResolvedCallArgument<'db>],
+    argument_index: usize,
+) -> Option<InferredTypeData<'db>> {
+    let signatures = members
+        .iter()
+        .filter(|member| member.kind.is_constructor())
+        .filter_map(|member| constructor_signature_parameters(db, member.ty))
+        .collect::<Vec<_>>();
+
+    let parameters = if signatures.len() < 2 {
+        signatures.first()?
+    } else {
+        let mut selected = None;
+        for parameters in &signatures {
+            match parameters_accept_arguments(db, parameters, args, Some(argument_index)) {
+                Some(true) => {
+                    selected = Some(parameters);
+                    break;
+                }
+                Some(false) => {}
+                None => return None,
+            }
+        }
+        selected?
+    };
+
+    parameter_for_argument(parameters, argument_index)
+        .map(|parameter| parameter_argument_type(db, parameter))
+}
+
+fn constructor_signature_parameters<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+) -> Option<Box<[InferredFunctionParameter<'db>]>> {
+    match ty {
+        InferredTypeData::Constructor(constructor) => Some(
+            constructor
+                .parameters(db)
+                .iter()
+                .map(|parameter| parameter.parameter.clone())
+                .collect(),
+        ),
+        InferredTypeData::Function(function) => Some(function.parameters(db).clone()),
+        InferredTypeData::Unknown
+        | InferredTypeData::Divergent(_)
+        | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
+        | InferredTypeData::BigInt
+        | InferredTypeData::Boolean
+        | InferredTypeData::Null
+        | InferredTypeData::Number
+        | InferredTypeData::String
+        | InferredTypeData::Symbol
+        | InferredTypeData::Undefined
+        | InferredTypeData::Conditional
+        | InferredTypeData::Class(_)
+        | InferredTypeData::Interface(_)
+        | InferredTypeData::Module(_)
+        | InferredTypeData::Namespace(_)
+        | InferredTypeData::Object(_)
+        | InferredTypeData::Tuple(_)
+        | InferredTypeData::Generic(_)
+        | InferredTypeData::Local(_)
+        | InferredTypeData::Intersection(_)
         | InferredTypeData::Union(_)
         | InferredTypeData::TypeOperator(_)
         | InferredTypeData::Literal(_)
+        | InferredTypeData::InstanceOf(_)
         | InferredTypeData::MergedReference(_)
         | InferredTypeData::TypeofExpression(_)
         | InferredTypeData::TypeofType(_)
@@ -347,54 +681,63 @@ fn infer_function_call_type<'db>(
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
-fn infer_call_signature_type<'db>(
-    db: &'db dyn ModuleDb,
-    members: &[InferredTypeMember<'db>],
-    args: &[ResolvedCallArgument<'db>],
-) -> Option<InferredTypeData<'db>> {
-    let signatures = members
-        .iter()
-        .filter(|member| member.kind.is_call_signature())
-        .filter_map(|member| member.ty.callable_function(db))
-        .collect::<Vec<_>>();
-
-    if signatures.len() < 2 {
-        return signatures
-            .first()
-            .and_then(|function| infer_function_return_type(db, *function, args));
-    }
-
-    signatures
-        .into_iter()
-        .find(|function| signature_accepts_arguments(db, *function, args))
-        .and_then(|function| infer_function_return_type(db, function, args))
-}
-
-#[deny(clippy::wildcard_enum_match_arm)]
 fn signature_accepts_arguments<'db>(
     db: &'db dyn ModuleDb,
     function: InferredFunction<'db>,
     args: &[ResolvedCallArgument<'db>],
-) -> bool {
-    let parameters = function.parameters(db);
-    let mut pending = Vec::from([(0, 0)]);
-    let mut seen = FxHashSet::default();
+    ignored_argument_index: Option<usize>,
+) -> Option<bool> {
+    parameters_accept_arguments(db, function.parameters(db), args, ignored_argument_index)
+}
 
-    for _ in 0..MAX_ARGUMENT_SEQUENCE_STEPS {
-        let Some((parameter_index, argument_index)) = pending.pop() else {
-            return false;
-        };
-        if !seen.insert((parameter_index, argument_index)) {
+fn parameters_accept_arguments<'db>(
+    db: &'db dyn ModuleDb,
+    parameters: &[InferredFunctionParameter<'db>],
+    args: &[ResolvedCallArgument<'db>],
+    ignored_argument_index: Option<usize>,
+) -> Option<bool> {
+    // Optional and spread arguments create alternative sequence states. A full
+    // indeterminate match is remembered rather than returned immediately
+    // because another branch may still prove a definite match.
+    let mut pending = Vec::from([(0, 0, false)]);
+    let mut seen = FxHashSet::default();
+    let mut processed_states = 0;
+    let mut found_indeterminate_match = false;
+
+    while let Some((parameter_index, argument_index, indeterminate)) = pending.pop() {
+        if !seen.insert((parameter_index, argument_index, indeterminate)) {
             continue;
         }
+        if processed_states == MAX_ARGUMENT_SEQUENCE_STEPS {
+            return None;
+        }
+        processed_states += 1;
 
         let Some(argument) = args.get(argument_index).copied() else {
             if remaining_parameters_accept_zero(parameters, parameter_index) {
-                return true;
+                if indeterminate {
+                    found_indeterminate_match = true;
+                } else {
+                    return Some(true);
+                }
             }
             continue;
         };
+
+        if ignored_argument_index == Some(argument_index) {
+            let Some(parameter) = parameter_for_argument(parameters, parameter_index) else {
+                continue;
+            };
+            if matches!(argument, ResolvedCallArgument::Optional(_)) {
+                pending.push((parameter_index, argument_index + 1, indeterminate));
+            }
+            pending.push((
+                next_parameter_index(parameter, parameter_index),
+                argument_index + 1,
+                indeterminate,
+            ));
+            continue;
+        }
 
         match argument {
             ResolvedCallArgument::Argument(arg_ty) => push_consumed_argument_state(
@@ -403,21 +746,23 @@ fn signature_accepts_arguments<'db>(
                 parameter_index,
                 argument_index + 1,
                 arg_ty,
+                indeterminate,
                 &mut pending,
             ),
             ResolvedCallArgument::Optional(arg_ty) => {
-                pending.push((parameter_index, argument_index + 1));
+                pending.push((parameter_index, argument_index + 1, indeterminate));
                 push_consumed_argument_state(
                     db,
                     parameters,
                     parameter_index,
                     argument_index + 1,
                     arg_ty,
+                    indeterminate,
                     &mut pending,
                 );
             }
             ResolvedCallArgument::Spread(arg_ty) => {
-                pending.push((parameter_index, argument_index + 1));
+                pending.push((parameter_index, argument_index + 1, indeterminate));
                 let arg_ty = spread_argument_element_type(db, arg_ty);
                 push_consumed_spread_state(
                     db,
@@ -425,85 +770,103 @@ fn signature_accepts_arguments<'db>(
                     parameter_index,
                     argument_index,
                     arg_ty,
+                    indeterminate,
                     &mut pending,
                 );
             }
         }
     }
 
-    true
+    if found_indeterminate_match {
+        None
+    } else {
+        Some(false)
+    }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn push_consumed_argument_state<'db>(
     db: &'db dyn ModuleDb,
-    parameters: &'db [InferredFunctionParameter<'db>],
+    parameters: &[InferredFunctionParameter<'db>],
     parameter_index: usize,
     next_argument_index: usize,
     arg_ty: InferredTypeData<'db>,
-    pending: &mut Vec<(usize, usize)>,
+    indeterminate: bool,
+    pending: &mut Vec<(usize, usize, bool)>,
 ) {
     let Some(parameter) = parameter_for_argument(parameters, parameter_index) else {
         return;
     };
-    if !argument_satisfies_parameter(db, parameter, arg_ty) {
-        return;
-    }
+    let indeterminate = match argument_satisfies_parameter(db, arg_ty, parameter) {
+        Some(true) => indeterminate,
+        Some(false) => return,
+        None => true,
+    };
 
     pending.push((
         next_parameter_index(parameter, parameter_index),
         next_argument_index,
+        indeterminate,
     ));
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn push_consumed_spread_state<'db>(
     db: &'db dyn ModuleDb,
-    parameters: &'db [InferredFunctionParameter<'db>],
+    parameters: &[InferredFunctionParameter<'db>],
     parameter_index: usize,
     argument_index: usize,
     arg_ty: InferredTypeData<'db>,
-    pending: &mut Vec<(usize, usize)>,
+    indeterminate: bool,
+    pending: &mut Vec<(usize, usize, bool)>,
 ) {
     let Some(parameter) = parameter_for_argument(parameters, parameter_index) else {
         return;
     };
-    if !argument_satisfies_parameter(db, parameter, arg_ty) {
-        return;
-    }
+    let indeterminate = match argument_satisfies_parameter(db, arg_ty, parameter) {
+        Some(true) => indeterminate,
+        Some(false) => return,
+        None => true,
+    };
 
     if parameter.is_rest() {
-        pending.push((parameter_index, argument_index + 1));
+        pending.push((parameter_index, argument_index + 1, indeterminate));
     } else {
-        pending.push((parameter_index + 1, argument_index));
+        pending.push((parameter_index + 1, argument_index, indeterminate));
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn argument_satisfies_parameter<'db>(
     db: &'db dyn ModuleDb,
-    parameter: &InferredFunctionParameter<'db>,
     arg_ty: InferredTypeData<'db>,
-) -> bool {
+    parameter: &InferredFunctionParameter<'db>,
+) -> Option<bool> {
     let parameter_ty = parameter_argument_type(db, parameter);
-    if !argument_may_match_parameter(db, parameter_ty, arg_ty) {
-        return false;
-    }
+    let type_match = argument_may_match_parameter(db, arg_ty, parameter_ty);
 
-    match (
+    let callable_match = match (
         parameter_ty.callable_function(db),
         arg_ty.callable_function(db),
     ) {
-        (Some(parameter_function), Some(argument_function)) => {
-            parameter_function.returns_promise(db) == argument_function.returns_promise(db)
-        }
-        _ => true,
+        (Some(parameter_function), Some(argument_function)) => match (
+            parameter_function.returns_promise(db),
+            argument_function.returns_promise(db),
+        ) {
+            (Some(parameter_returns_promise), Some(argument_returns_promise)) => {
+                Some(parameter_returns_promise == argument_returns_promise)
+            }
+            _ => None,
+        },
+        _ => Some(true),
+    };
+
+    match (type_match, callable_match) {
+        (Some(false), _) | (_, Some(false)) => Some(false),
+        (Some(true), Some(true)) => Some(true),
+        (None, Some(true)) | (_, None) => None,
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
-fn remaining_parameters_accept_zero<'db>(
-    parameters: &'db [InferredFunctionParameter<'db>],
+fn remaining_parameters_accept_zero(
+    parameters: &[InferredFunctionParameter<'_>],
     parameter_index: usize,
 ) -> bool {
     parameters
@@ -512,17 +875,15 @@ fn remaining_parameters_accept_zero<'db>(
         .all(|parameter| parameter.is_optional() || parameter.is_rest())
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
-fn parameter_for_argument<'db>(
-    parameters: &'db [InferredFunctionParameter<'db>],
+fn parameter_for_argument<'a, 'db>(
+    parameters: &'a [InferredFunctionParameter<'db>],
     index: usize,
-) -> Option<&'db InferredFunctionParameter<'db>> {
+) -> Option<&'a InferredFunctionParameter<'db>> {
     parameters
         .get(index)
         .or_else(|| parameters.last().filter(|parameter| parameter.is_rest()))
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn next_parameter_index<'db>(parameter: &InferredFunctionParameter<'db>, index: usize) -> usize {
     if parameter.is_rest() {
         index
@@ -531,7 +892,6 @@ fn next_parameter_index<'db>(parameter: &InferredFunctionParameter<'db>, index: 
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn parameter_argument_type<'db>(
     db: &'db dyn ModuleDb,
     parameter: &InferredFunctionParameter<'db>,
@@ -549,6 +909,7 @@ fn parameter_argument_type<'db>(
         ty @ (InferredTypeData::Unknown
         | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
         | InferredTypeData::BigInt
         | InferredTypeData::Boolean
         | InferredTypeData::Null
@@ -585,104 +946,195 @@ fn parameter_argument_type<'db>(
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn argument_may_match_parameter<'db>(
     db: &'db dyn ModuleDb,
-    parameter_ty: InferredTypeData<'db>,
     arg_ty: InferredTypeData<'db>,
-) -> bool {
-    let mut pending = Vec::from([Vec::from([(parameter_ty, arg_ty)])]);
-    let mut remaining_steps = MAX_ARGUMENT_MATCH_STEPS;
+    parameter_ty: InferredTypeData<'db>,
+) -> Option<bool> {
+    let mut pending = Vec::from([(Vec::from([(parameter_ty, arg_ty)]), false)]);
+    let mut processed_states = 0;
+    let mut found_indeterminate_match = false;
 
-    while let Some(mut required_pairs) = pending.pop() {
+    while let Some((mut required_pairs, indeterminate)) = pending.pop() {
         let Some((parameter_ty, arg_ty)) = required_pairs.pop() else {
-            return true;
+            if indeterminate {
+                found_indeterminate_match = true;
+                continue;
+            }
+            return Some(true);
         };
-        if remaining_steps == 0 {
-            return true;
+        if processed_states == MAX_ARGUMENT_MATCH_STEPS {
+            return None;
         }
-        remaining_steps -= 1;
+        processed_states += 1;
+
+        if parameter_ty == arg_ty {
+            pending.push((required_pairs, indeterminate));
+            continue;
+        }
+        if let (InferredTypeData::Literal(parameter), InferredTypeData::Literal(argument)) =
+            (parameter_ty, arg_ty)
+            && !matches!(parameter.literal(db), InferredLiteralValue::Object(_))
+            && !matches!(argument.literal(db), InferredLiteralValue::Object(_))
+        {
+            continue;
+        }
+        if let InferredTypeData::Literal(parameter) = parameter_ty
+            && !matches!(parameter.literal(db), InferredLiteralValue::Object(_))
+            && literal_base_type(db, parameter_ty) == Some(arg_ty)
+        {
+            pending.push((required_pairs, true));
+            continue;
+        }
 
         let parameter_ty = literal_base_type(db, parameter_ty).unwrap_or(parameter_ty);
         let arg_ty = literal_base_type(db, arg_ty).unwrap_or(arg_ty);
 
         if parameter_ty == arg_ty {
-            pending.push(required_pairs);
+            pending.push((required_pairs, indeterminate));
             continue;
         }
 
-        match argument_match_action(db, parameter_ty, arg_ty) {
-            ArgumentMatchAction::Match => pending.push(required_pairs),
+        let remaining_steps = MAX_ARGUMENT_MATCH_STEPS - processed_states;
+        if argument_match_child_count(db, arg_ty, parameter_ty) > remaining_steps {
+            return None;
+        }
+
+        match argument_match_action(db, arg_ty, parameter_ty) {
+            ArgumentMatchAction::Match => pending.push((required_pairs, indeterminate)),
             ArgumentMatchAction::Mismatch => {}
+            ArgumentMatchAction::Indeterminate => pending.push((required_pairs, true)),
             ArgumentMatchAction::All(pairs) => {
+                let queued_pairs = pending.iter().map(|(pairs, _)| pairs.len()).sum::<usize>();
+                if queued_pairs
+                    .checked_add(required_pairs.len())
+                    .and_then(|count| count.checked_add(pairs.len()))
+                    .is_none_or(|count| count > remaining_steps)
+                {
+                    return None;
+                }
                 required_pairs.extend(pairs);
-                pending.push(required_pairs);
+                pending.push((required_pairs, indeterminate));
             }
             ArgumentMatchAction::Any(pairs) => {
+                let queued_pairs = pending.iter().map(|(pairs, _)| pairs.len()).sum::<usize>();
+                let branch_pairs = required_pairs.len() + 1;
+                if pairs
+                    .len()
+                    .checked_mul(branch_pairs)
+                    .and_then(|count| count.checked_add(queued_pairs))
+                    .is_none_or(|count| count > remaining_steps)
+                {
+                    return None;
+                }
                 for pair in pairs.into_iter().rev() {
                     let mut branch_pairs = required_pairs.clone();
                     branch_pairs.push(pair);
-                    pending.push(branch_pairs);
+                    pending.push((branch_pairs, indeterminate));
                 }
             }
         }
     }
 
-    false
+    if found_indeterminate_match {
+        None
+    } else {
+        Some(false)
+    }
+}
+
+fn argument_match_child_count<'db>(
+    db: &'db dyn ModuleDb,
+    arg_ty: InferredTypeData<'db>,
+    parameter_ty: InferredTypeData<'db>,
+) -> usize {
+    match (parameter_ty, arg_ty) {
+        (InferredTypeData::Generic(generic), _) => usize::from(generic.constraint(db).is_some()),
+        (InferredTypeData::Union(_), InferredTypeData::Union(union)) => union.types(db).len(),
+        (InferredTypeData::Union(union), _) => union.types(db).len(),
+        (_, InferredTypeData::Union(union)) => union.types(db).len(),
+        (InferredTypeData::Intersection(intersection), _) => intersection.types(db).len(),
+        (_, InferredTypeData::Intersection(intersection)) => intersection.types(db).len(),
+        (InferredTypeData::InstanceOf(parameter), InferredTypeData::InstanceOf(argument)) => {
+            1 + parameter
+                .type_parameters(db)
+                .len()
+                .min(argument.type_parameters(db).len())
+        }
+        (InferredTypeData::InstanceOf(_), _) | (_, InferredTypeData::InstanceOf(_)) => 1,
+        (InferredTypeData::MergedReference(reference), _) => reference.targets(db).count(),
+        (_, InferredTypeData::MergedReference(reference)) => reference.targets(db).count(),
+        (InferredTypeData::TypeofType(_) | InferredTypeData::TypeofValue(_), _)
+        | (_, InferredTypeData::TypeofType(_) | InferredTypeData::TypeofValue(_)) => 1,
+        _ => 0,
+    }
 }
 
 enum ArgumentMatchAction<'db> {
     Match,
     Mismatch,
+    Indeterminate,
     All(Vec<(InferredTypeData<'db>, InferredTypeData<'db>)>),
     Any(Vec<(InferredTypeData<'db>, InferredTypeData<'db>)>),
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn argument_match_action<'db>(
     db: &'db dyn ModuleDb,
-    parameter_ty: InferredTypeData<'db>,
     arg_ty: InferredTypeData<'db>,
+    parameter_ty: InferredTypeData<'db>,
 ) -> ArgumentMatchAction<'db> {
     match (parameter_ty, arg_ty) {
+        (InferredTypeData::AnyKeyword | InferredTypeData::UnknownKeyword, _) => {
+            ArgumentMatchAction::Match
+        }
+        (InferredTypeData::Generic(generic), arg_ty) => generic
+            .constraint(db)
+            .map_or(ArgumentMatchAction::Match, |constraint| {
+                ArgumentMatchAction::All(Vec::from([(constraint, arg_ty)]))
+            }),
         (
-            InferredTypeData::AnyKeyword
-            | InferredTypeData::Unknown
-            | InferredTypeData::UnknownKeyword
-            | InferredTypeData::Generic(_)
-            | InferredTypeData::ThisKeyword,
-            _,
-        )
-        | (
             _,
             InferredTypeData::AnyKeyword
             | InferredTypeData::Unknown
             | InferredTypeData::UnknownKeyword
             | InferredTypeData::Generic(_)
             | InferredTypeData::ThisKeyword
-            | InferredTypeData::NeverKeyword,
-        ) => ArgumentMatchAction::Match,
+            | InferredTypeData::Divergent(_),
+        )
+        | (InferredTypeData::Unknown | InferredTypeData::ThisKeyword, _) => {
+            ArgumentMatchAction::Indeterminate
+        }
+        (_, InferredTypeData::NeverKeyword) => ArgumentMatchAction::Match,
         (InferredTypeData::NeverKeyword, _) => ArgumentMatchAction::Mismatch,
         (InferredTypeData::Local(parameter), arg_ty) => {
             match argument_type_extends_parameter_local(db, arg_ty, parameter) {
                 Some(true) => ArgumentMatchAction::Match,
                 Some(false) => ArgumentMatchAction::Mismatch,
-                None => ArgumentMatchAction::Match,
+                None => ArgumentMatchAction::Indeterminate,
             }
         }
         (parameter_ty, InferredTypeData::Local(argument)) => {
             match argument_local_extends_parameter_type(db, argument, parameter_ty) {
                 Some(true) => ArgumentMatchAction::Match,
                 Some(false) => ArgumentMatchAction::Mismatch,
-                None => ArgumentMatchAction::Match,
+                None => ArgumentMatchAction::Indeterminate,
             }
         }
         (InferredTypeData::Class(_), InferredTypeData::Class(_)) => {
-            if argument_type_extends_parameter_type(db, arg_ty, parameter_ty) {
-                ArgumentMatchAction::Match
-            } else {
-                ArgumentMatchAction::Mismatch
+            match argument_type_extends_parameter_type(db, arg_ty, parameter_ty) {
+                Some(true) => ArgumentMatchAction::Match,
+                Some(false) => ArgumentMatchAction::Mismatch,
+                None => ArgumentMatchAction::Indeterminate,
             }
+        }
+        (parameter_ty @ InferredTypeData::Union(_), InferredTypeData::Union(argument_union)) => {
+            ArgumentMatchAction::All(
+                argument_union
+                    .types(db)
+                    .iter()
+                    .map(|arg_ty| (parameter_ty, *arg_ty))
+                    .collect(),
+            )
         }
         (InferredTypeData::Union(union), arg_ty) => ArgumentMatchAction::Any(
             union
@@ -691,7 +1143,7 @@ fn argument_match_action<'db>(
                 .map(|parameter_ty| (*parameter_ty, arg_ty))
                 .collect(),
         ),
-        (parameter_ty, InferredTypeData::Union(union)) => ArgumentMatchAction::Any(
+        (parameter_ty, InferredTypeData::Union(union)) => ArgumentMatchAction::All(
             union
                 .types(db)
                 .iter()
@@ -775,6 +1227,7 @@ fn argument_match_action<'db>(
             InferredTypeData::Conditional
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::ObjectKeyword
             | InferredTypeData::TypeOperator(_)
@@ -784,14 +1237,14 @@ fn argument_match_action<'db>(
         | (
             _,
             InferredTypeData::Conditional
-            | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::ObjectKeyword
             | InferredTypeData::TypeOperator(_)
             | InferredTypeData::TypeofExpression(_),
-        )
-        | (
+        ) => ArgumentMatchAction::Indeterminate,
+        (
             InferredTypeData::Class(_)
             | InferredTypeData::Constructor(_)
             | InferredTypeData::Function(_)
@@ -848,7 +1301,6 @@ fn argument_match_action<'db>(
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn spread_argument_element_type<'db>(
     db: &'db dyn ModuleDb,
     arg_ty: InferredTypeData<'db>,
@@ -873,6 +1325,7 @@ fn spread_argument_element_type<'db>(
         | InferredTypeData::UnknownKeyword => InferredTypeData::Unknown,
         ty @ (InferredTypeData::Divergent(_)
         | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
         | InferredTypeData::BigInt
         | InferredTypeData::Boolean
         | InferredTypeData::Null
@@ -906,22 +1359,13 @@ fn spread_argument_element_type<'db>(
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn merged_reference_targets<'db>(
     db: &'db dyn ModuleDb,
     reference: InferredMergedReference<'db>,
 ) -> Vec<InferredTypeData<'db>> {
-    [
-        reference.namespace_ty(db),
-        reference.value_ty(db),
-        reference.ty(db),
-    ]
-    .into_iter()
-    .flatten()
-    .collect()
+    reference.targets(db).collect()
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn argument_type_extends_parameter_local<'db>(
     db: &'db dyn ModuleDb,
     argument_ty: InferredTypeData<'db>,
@@ -934,17 +1378,19 @@ fn argument_type_extends_parameter_local<'db>(
     let mut seen = FxHashSet::default();
     let mut pending = Vec::from([argument_ty]);
     let mut resolved_known_type = false;
+    let mut processed_states = 0;
 
-    for _ in 0..MAX_LOCAL_EXTENDS_STEPS {
-        let Some(ty) = pending.pop() else {
-            return resolved_known_type.then_some(false);
-        };
+    while let Some(ty) = pending.pop() {
         if ty == parameter_ty {
             return Some(true);
         }
         if !seen.insert(ty) {
             continue;
         }
+        if processed_states == MAX_LOCAL_EXTENDS_STEPS {
+            return None;
+        }
+        processed_states += 1;
 
         match ty {
             InferredTypeData::Class(class) => {
@@ -982,6 +1428,7 @@ fn argument_type_extends_parameter_local<'db>(
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::Conditional
             | InferredTypeData::Constructor(_)
             | InferredTypeData::Function(_)
@@ -1007,10 +1454,9 @@ fn argument_type_extends_parameter_local<'db>(
         }
     }
 
-    None
+    resolved_known_type.then_some(false)
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn argument_local_extends_parameter_type<'db>(
     db: &'db dyn ModuleDb,
     argument: InferredLocalTypeHandle<'db>,
@@ -1019,7 +1465,7 @@ fn argument_local_extends_parameter_type<'db>(
     match parameter_ty {
         InferredTypeData::Class(parameter) => {
             let parameter_name = parameter.name(db).as_ref()?.text();
-            Some(raw_local_extends_class_name(db, argument, parameter_name))
+            raw_local_extends_class_name(db, argument, parameter_name)
         }
         InferredTypeData::BigInt
         | InferredTypeData::Boolean
@@ -1032,6 +1478,7 @@ fn argument_local_extends_parameter_type<'db>(
         InferredTypeData::Unknown
         | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
         | InferredTypeData::Conditional
         | InferredTypeData::Constructor(_)
         | InferredTypeData::Function(_)
@@ -1059,29 +1506,30 @@ fn argument_local_extends_parameter_type<'db>(
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn argument_type_extends_parameter_type<'db>(
     db: &'db dyn ModuleDb,
     argument_ty: InferredTypeData<'db>,
     parameter_ty: InferredTypeData<'db>,
-) -> bool {
+) -> Option<bool> {
     if argument_ty == parameter_ty {
-        return true;
+        return Some(true);
     }
 
     let mut seen = FxHashSet::default();
     let mut pending = Vec::from([argument_ty]);
+    let mut processed_states = 0;
 
-    for _ in 0..MAX_LOCAL_EXTENDS_STEPS {
-        let Some(ty) = pending.pop() else {
-            return false;
-        };
+    while let Some(ty) = pending.pop() {
         if ty == parameter_ty {
-            return true;
+            return Some(true);
         }
         if !seen.insert(ty) {
             continue;
         }
+        if processed_states == MAX_LOCAL_EXTENDS_STEPS {
+            return None;
+        }
+        processed_states += 1;
 
         match ty {
             InferredTypeData::Class(class) => {
@@ -1093,14 +1541,18 @@ fn argument_type_extends_parameter_type<'db>(
             InferredTypeData::Local(local) => {
                 if let InferredTypeData::Class(parameter) = parameter_ty
                     && let Some(parameter_name) = parameter.name(db).as_ref()
-                    && raw_local_extends_class_name(db, local, parameter_name.text())
                 {
-                    return true;
+                    match raw_local_extends_class_name(db, local, parameter_name.text()) {
+                        Some(true) => return Some(true),
+                        Some(false) => {}
+                        None => return None,
+                    }
                 }
             }
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -1134,48 +1586,44 @@ fn argument_type_extends_parameter_type<'db>(
         }
     }
 
-    false
+    Some(false)
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn raw_local_extends_class_name<'db>(
     db: &'db dyn ModuleDb,
     local: InferredLocalTypeHandle<'db>,
     parameter_name: &str,
-) -> bool {
+) -> Option<bool> {
     let mut seen = FxHashSet::default();
     let mut pending = Vec::from([local]);
+    let mut processed_states = 0;
 
-    for _ in 0..MAX_LOCAL_EXTENDS_STEPS {
-        let Some(local) = pending.pop() else {
-            return false;
-        };
+    while let Some(local) = pending.pop() {
         if !seen.insert(local) {
             continue;
         }
+        if processed_states == MAX_LOCAL_EXTENDS_STEPS {
+            return None;
+        }
+        processed_states += 1;
 
         if raw_local_class_name(db, local).as_deref() == Some(parameter_name) {
-            return true;
+            return Some(true);
         }
         if let Some(extends) = raw_local_class_extends(db, local) {
             pending.push(extends);
         }
     }
 
-    false
+    Some(false)
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn raw_local_class_name<'db>(
     db: &'db dyn ModuleDb,
     local: InferredLocalTypeHandle<'db>,
 ) -> Option<String> {
     let module_key = local.module(db);
-    let module = ModuleInfo::from_id(module_key.as_id());
-    let current = db.module_for_path(module.path(db))?;
-    if InferredModuleKey::new(current.as_id()) != module_key {
-        return None;
-    }
+    let current = module_for_key(db, module_key)?;
     let ModuleInfoKind::Js(js_info) = current.kind(db) else {
         return None;
     };
@@ -1185,17 +1633,12 @@ fn raw_local_class_name<'db>(
     class.name.as_ref().map(|name| name.text().to_string())
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn raw_local_class_extends<'db>(
     db: &'db dyn ModuleDb,
     local: InferredLocalTypeHandle<'db>,
 ) -> Option<InferredLocalTypeHandle<'db>> {
     let module_key = local.module(db);
-    let module = ModuleInfo::from_id(module_key.as_id());
-    let current = db.module_for_path(module.path(db))?;
-    if InferredModuleKey::new(current.as_id()) != module_key {
-        return None;
-    };
+    let current = module_for_key(db, module_key)?;
     let ModuleInfoKind::Js(js_info) = current.kind(db) else {
         return None;
     };
@@ -1205,18 +1648,14 @@ fn raw_local_class_extends<'db>(
     local_handle_from_reference(db, module_key, class.extends.as_ref()?)
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn local_handle_from_reference<'db>(
     db: &'db dyn ModuleDb,
     module_key: InferredModuleKey,
     reference: &TypeReference,
 ) -> Option<InferredLocalTypeHandle<'db>> {
-    let TypeReference::Resolved(resolved) = reference else {
+    let TypeReference::Resolved(RawTypeId::Local(resolved)) = reference else {
         return None;
     };
-    if resolved.level() != TypeResolverLevel::Thin {
-        return None;
-    }
 
     Some(InferredLocalTypeHandle::new(
         db,
@@ -1225,7 +1664,6 @@ fn local_handle_from_reference<'db>(
     ))
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn literal_base_type<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
@@ -1235,27 +1673,29 @@ fn literal_base_type<'db>(
     };
 
     match literal.literal(db) {
-        InferredLiteral::BigInt(_) => Some(InferredTypeData::BigInt),
-        InferredLiteral::Boolean(_) => Some(InferredTypeData::Boolean),
-        InferredLiteral::Number(_) => Some(InferredTypeData::Number),
-        InferredLiteral::String(_) | InferredLiteral::Template(_) => Some(InferredTypeData::String),
-        InferredLiteral::Object(_) | InferredLiteral::RegExp(_) => None,
+        InferredLiteralValue::BigInt(_) => Some(InferredTypeData::BigInt),
+        InferredLiteralValue::Boolean(_) => Some(InferredTypeData::Boolean),
+        InferredLiteralValue::Number(_) => Some(InferredTypeData::Number),
+        InferredLiteralValue::String(_) | InferredLiteralValue::Template(_) => {
+            Some(InferredTypeData::String)
+        }
+        InferredLiteralValue::Object(_) | InferredLiteralValue::RegExp(_) => None,
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn infer_function_return_type<'db>(
     db: &'db dyn ModuleDb,
     function: InferredFunction<'db>,
     args: &[ResolvedCallArgument<'db>],
 ) -> Option<InferredTypeData<'db>> {
     match function.return_type(db) {
-        ReturnType::Type(ty) => Some(infer_generic_return_type(db, function, *ty, args)),
-        ReturnType::Predicate(_) | ReturnType::Asserts(_) => Some(InferredTypeData::Boolean),
+        InferredReturnType::Type(ty) => Some(infer_generic_return_type(db, function, *ty, args)),
+        InferredReturnType::Predicate(_) | InferredReturnType::Asserts(_) => {
+            Some(InferredTypeData::Boolean)
+        }
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn infer_generic_return_type<'db>(
     db: &'db dyn ModuleDb,
     function: InferredFunction<'db>,
@@ -1269,65 +1709,65 @@ fn infer_generic_return_type<'db>(
     {
         let parameter_ty = parameter.ty();
         if parameter_ty.is_generic_reference(db) {
-            return_ty = return_ty.substitute_type(
+            let Ok(substituted) = return_ty.substitute_type(
                 db,
                 InferredTypeSubstitution {
                     generic: parameter_ty,
                     replacement: arg,
                 },
-            );
+            ) else {
+                return InferredTypeData::Unknown;
+            };
+            return_ty = substituted;
             continue;
         }
 
         let Some(parameter_function) = parameter_ty.callable_function(db) else {
             continue;
         };
-        let ReturnType::Type(parameter_return_ty) = parameter_function.return_type(db) else {
+        let InferredReturnType::Type(parameter_return_ty) = parameter_function.return_type(db)
+        else {
             continue;
         };
         let Some(argument_function) = arg.callable_function(db) else {
             continue;
         };
-        let ReturnType::Type(argument_return_ty) = argument_function.return_type(db) else {
+        let InferredReturnType::Type(argument_return_ty) = argument_function.return_type(db) else {
             continue;
         };
 
-        for substitution in
+        let Some(substitutions) =
             parameter_return_ty.collect_generic_replacements(db, *argument_return_ty)
-        {
-            return_ty = return_ty.substitute_type(db, substitution);
+        else {
+            return InferredTypeData::Unknown;
+        };
+        for substitution in substitutions {
+            let Ok(substituted) = return_ty.substitute_type(db, substitution) else {
+                return InferredTypeData::Unknown;
+            };
+            return_ty = substituted;
         }
     }
 
     return_ty
 }
 
-#[derive(Clone, Copy, Debug)]
-enum TypeNormalizationItem<'db> {
-    Type(InferredTypeData<'db>),
-    ExitLocal {
-        module: InferredModuleKey,
-        type_id: InferredLocalTypeId,
-    },
-    RebuildInstance(usize),
-    RebuildIntersection(usize),
-    RebuildMergedReference {
-        has_ty: bool,
-        has_value_ty: bool,
-        has_namespace_ty: bool,
-    },
-    RebuildUnion(usize),
-}
-
 #[salsa::interned]
 #[derive(Debug)]
+/// Input for normalizing a type in the context of its owning module.
 pub struct NormalizeTypeInput<'db> {
+    /// Module used to resolve local inferred handles.
     pub module: ModuleInfo,
+    /// Type to normalize.
     pub ty: InferredTypeData<'db>,
 }
 
 #[salsa::tracked(cycle_result=normalize_type_cycle_result)]
-#[deny(clippy::wildcard_enum_match_arm)]
+/// Resolves local handles and simplifies structural wrappers in `input`.
+///
+/// If module inference is unavailable, the original type is returned. A cycle,
+/// invalid structural rebuild, or exhausted normalization budget returns
+/// [`InferredTypeData::Unknown`].
 pub fn normalize_type<'db>(
     db: &'db dyn ModuleDb,
     input: NormalizeTypeInput<'db>,
@@ -1338,235 +1778,15 @@ pub fn normalize_type<'db>(
         return ty;
     };
 
-    let original = ty;
-    let mut stack = Vec::from([TypeNormalizationItem::Type(ty)]);
-    let mut results = Vec::new();
-    let mut active_locals = FxHashSet::default();
-    let mut remaining_steps = MAX_TYPE_NORMALIZATION_STEPS;
-
-    while let Some(item) = stack.pop() {
-        match item {
-            TypeNormalizationItem::Type(ty) => {
-                if remaining_steps == 0 {
-                    return original;
-                }
-                remaining_steps -= 1;
-
-                let mut exit_local = None;
-                let ty = match ty {
-                    InferredTypeData::Local(local) => {
-                        let module = local.module(db);
-                        let type_id = local.type_id(db);
-                        if !active_locals.insert((module, type_id)) {
-                            results.push(InferredTypeData::Local(local));
-                            continue;
-                        }
-                        exit_local = Some((module, type_id));
-                        inferred.resolve_type(db, ty)
-                    }
-                    ty @ (InferredTypeData::Unknown
-                    | InferredTypeData::Divergent(_)
-                    | InferredTypeData::Global
-                    | InferredTypeData::BigInt
-                    | InferredTypeData::Boolean
-                    | InferredTypeData::Null
-                    | InferredTypeData::Number
-                    | InferredTypeData::String
-                    | InferredTypeData::Symbol
-                    | InferredTypeData::Undefined
-                    | InferredTypeData::Conditional
-                    | InferredTypeData::Class(_)
-                    | InferredTypeData::Constructor(_)
-                    | InferredTypeData::Function(_)
-                    | InferredTypeData::Interface(_)
-                    | InferredTypeData::Module(_)
-                    | InferredTypeData::Namespace(_)
-                    | InferredTypeData::Object(_)
-                    | InferredTypeData::Tuple(_)
-                    | InferredTypeData::Generic(_)
-                    | InferredTypeData::Intersection(_)
-                    | InferredTypeData::Union(_)
-                    | InferredTypeData::TypeOperator(_)
-                    | InferredTypeData::Literal(_)
-                    | InferredTypeData::InstanceOf(_)
-                    | InferredTypeData::MergedReference(_)
-                    | InferredTypeData::TypeofExpression(_)
-                    | InferredTypeData::TypeofType(_)
-                    | InferredTypeData::TypeofValue(_)
-                    | InferredTypeData::AnyKeyword
-                    | InferredTypeData::NeverKeyword
-                    | InferredTypeData::ObjectKeyword
-                    | InferredTypeData::ThisKeyword
-                    | InferredTypeData::UnknownKeyword
-                    | InferredTypeData::VoidKeyword) => inferred.resolve_type(db, ty),
-                };
-
-                if let Some((module, type_id)) = exit_local {
-                    stack.push(TypeNormalizationItem::ExitLocal { module, type_id });
-                }
-
-                match ty {
-                    InferredTypeData::InstanceOf(instance) => {
-                        stack.push(TypeNormalizationItem::RebuildInstance(
-                            instance.type_parameters(db).len(),
-                        ));
-                        for type_parameter in instance.type_parameters(db).iter().rev() {
-                            stack.push(TypeNormalizationItem::Type(*type_parameter));
-                        }
-                        stack.push(TypeNormalizationItem::Type(instance.ty(db)));
-                    }
-                    InferredTypeData::Intersection(intersection) => {
-                        stack.push(TypeNormalizationItem::RebuildIntersection(
-                            intersection.types(db).len(),
-                        ));
-                        for ty in intersection.types(db).iter().rev() {
-                            stack.push(TypeNormalizationItem::Type(*ty));
-                        }
-                    }
-                    InferredTypeData::MergedReference(reference) => {
-                        let ty = reference.ty(db);
-                        let value_ty = reference.value_ty(db);
-                        let namespace_ty = reference.namespace_ty(db);
-                        stack.push(TypeNormalizationItem::RebuildMergedReference {
-                            has_ty: ty.is_some(),
-                            has_value_ty: value_ty.is_some(),
-                            has_namespace_ty: namespace_ty.is_some(),
-                        });
-                        if let Some(namespace_ty) = namespace_ty {
-                            stack.push(TypeNormalizationItem::Type(namespace_ty));
-                        }
-                        if let Some(value_ty) = value_ty {
-                            stack.push(TypeNormalizationItem::Type(value_ty));
-                        }
-                        if let Some(ty) = ty {
-                            stack.push(TypeNormalizationItem::Type(ty));
-                        }
-                    }
-                    InferredTypeData::TypeofType(ty) => {
-                        stack.push(TypeNormalizationItem::Type(ty.ty(db)));
-                    }
-                    InferredTypeData::TypeofValue(value) => {
-                        let ty = value.ty(db);
-                        if ty == InferredTypeData::Unknown {
-                            results.push(InferredTypeData::TypeofValue(value));
-                        } else {
-                            stack.push(TypeNormalizationItem::Type(ty));
-                        }
-                    }
-                    InferredTypeData::Union(union) => {
-                        stack.push(TypeNormalizationItem::RebuildUnion(union.types(db).len()));
-                        for ty in union.types(db).iter().rev() {
-                            stack.push(TypeNormalizationItem::Type(*ty));
-                        }
-                    }
-                    ty @ (InferredTypeData::Unknown
-                    | InferredTypeData::Divergent(_)
-                    | InferredTypeData::Global
-                    | InferredTypeData::BigInt
-                    | InferredTypeData::Boolean
-                    | InferredTypeData::Null
-                    | InferredTypeData::Number
-                    | InferredTypeData::String
-                    | InferredTypeData::Symbol
-                    | InferredTypeData::Undefined
-                    | InferredTypeData::Conditional
-                    | InferredTypeData::Class(_)
-                    | InferredTypeData::Constructor(_)
-                    | InferredTypeData::Function(_)
-                    | InferredTypeData::Interface(_)
-                    | InferredTypeData::Module(_)
-                    | InferredTypeData::Namespace(_)
-                    | InferredTypeData::Object(_)
-                    | InferredTypeData::Tuple(_)
-                    | InferredTypeData::Generic(_)
-                    | InferredTypeData::Local(_)
-                    | InferredTypeData::TypeOperator(_)
-                    | InferredTypeData::Literal(_)
-                    | InferredTypeData::TypeofExpression(_)
-                    | InferredTypeData::AnyKeyword
-                    | InferredTypeData::NeverKeyword
-                    | InferredTypeData::ObjectKeyword
-                    | InferredTypeData::ThisKeyword
-                    | InferredTypeData::UnknownKeyword
-                    | InferredTypeData::VoidKeyword) => results.push(ty),
-                }
-            }
-            TypeNormalizationItem::ExitLocal { module, type_id } => {
-                active_locals.remove(&(module, type_id));
-            }
-            TypeNormalizationItem::RebuildInstance(type_parameter_count) => {
-                let Some(start) = results.len().checked_sub(type_parameter_count + 1) else {
-                    return original;
-                };
-                let mut parts = results.split_off(start);
-                let ty = parts.remove(0);
-                if ty.should_flatten_instance(&parts) {
-                    results.push(ty);
-                } else {
-                    results.push(InferredTypeData::instance_of(
-                        db,
-                        ty,
-                        parts.into_boxed_slice(),
-                    ));
-                }
-            }
-            TypeNormalizationItem::RebuildIntersection(type_count) => {
-                let Some(start) = results.len().checked_sub(type_count) else {
-                    return original;
-                };
-                let types = results.split_off(start);
-                results.push(InferredTypeData::intersection_from_types(db, types));
-            }
-            TypeNormalizationItem::RebuildMergedReference {
-                has_ty,
-                has_value_ty,
-                has_namespace_ty,
-            } => {
-                let target_count = [has_ty, has_value_ty, has_namespace_ty]
-                    .into_iter()
-                    .filter(|has_target| *has_target)
-                    .count();
-                let Some(start) = results.len().checked_sub(target_count) else {
-                    return original;
-                };
-                let mut targets = results.split_off(start).into_iter();
-                let ty = has_ty.then(|| targets.next().unwrap_or(InferredTypeData::Unknown));
-                let value_ty =
-                    has_value_ty.then(|| targets.next().unwrap_or(InferredTypeData::Unknown));
-                let namespace_ty =
-                    has_namespace_ty.then(|| targets.next().unwrap_or(InferredTypeData::Unknown));
-                let target_values = [ty, value_ty, namespace_ty]
-                    .into_iter()
-                    .flatten()
-                    .collect::<Vec<_>>();
-                if let Some(first) = target_values.first().copied()
-                    && target_values.iter().all(|target| *target == first)
-                {
-                    results.push(first);
-                } else {
-                    results.push(InferredTypeData::MergedReference(
-                        InferredMergedReference::new(db, ty, value_ty, namespace_ty),
-                    ));
-                }
-            }
-            TypeNormalizationItem::RebuildUnion(type_count) => {
-                let Some(start) = results.len().checked_sub(type_count) else {
-                    return original;
-                };
-                let types = results.split_off(start);
-                results.push(InferredTypeData::union_from_types(db, types));
-            }
-        }
-    }
-
-    results.pop().unwrap_or(original)
+    normalize_structural_type(db, ty, |ty| inferred.resolve_type(db, ty))
+        .unwrap_or(InferredTypeData::Unknown)
 }
 
 /// Returns CSS class steps for a JS module by traversing its direct CSS imports.
 ///
 /// Tracked: depends on `js_module_info(db, module)` and on the CSS modules it
 /// imports. If any of those change, this recomputes.
-#[salsa::tracked(no_eq, returns(deref))]
+#[salsa::tracked(returns(deref))]
 pub fn css_classes_for_module(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<CssClassStep> {
     let module_kind = module.kind(db);
     let Some(js_info) = module_kind.as_js_module_info() else {
@@ -1599,6 +1819,8 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
     let mut result = Vec::new();
     let mut visited: FxHashSet<Utf8PathBuf> = FxHashSet::default();
     let mut queue = VecDeque::new();
+    let mut modules = db.all_modules().into_iter().collect::<Vec<_>>();
+    modules.sort_unstable_by(|(left, _), (right, _)| left.cmp(right));
     queue.push_back(module.path(db).to_path_buf());
 
     while let Some(current) = queue.pop_front() {
@@ -1606,9 +1828,9 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
             continue;
         }
 
-        db.for_each_module(&mut |file_path, module_info| {
+        for (file_path, module_info) in &modules {
             if file_path == current.as_path() {
-                return;
+                continue;
             }
             let imports_current = match module_info {
                 ModuleInfoKind::Js(js_info) => js_info
@@ -1636,7 +1858,7 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
                 }
             };
 
-            if imports_current && !visited.contains(file_path) {
+            if imports_current && !visited.contains(file_path.as_path()) {
                 match module_info {
                     ModuleInfoKind::Js(_) | ModuleInfoKind::Html(_) => {
                         result.push(file_path.to_path_buf());
@@ -1646,9 +1868,11 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
                     }
                 }
             }
-        });
+        }
     }
 
+    result.sort_unstable();
+    result.dedup();
     result
 }
 
@@ -1752,8 +1976,8 @@ pub fn traverse_import_tree_for_html_classes(
         .collect()
 }
 
-#[salsa::interned]
 /// Generic symbol used by queries to track a generic "symbol", which can represent everything (variable name, class name, etc.)
+#[salsa::interned]
 pub struct SymbolFromModuleInfo {
     #[returns(clone)]
     name: String,
@@ -2118,12 +2342,13 @@ pub fn build_import_tree_for_html(db: &dyn ModuleDb, module: ModuleInfo) -> Opti
     Some(root)
 }
 
-pub(crate) fn build_parent_nodes(
+fn build_parent_nodes(
     db: &dyn ModuleDb,
     current_path: &Utf8Path,
     visited: &mut FxHashSet<Utf8PathBuf>,
 ) -> Vec<ImportTreeNode> {
-    let all_modules = db.all_modules();
+    let mut all_modules = db.all_modules().into_iter().collect::<Vec<_>>();
+    all_modules.sort_unstable_by(|(left, _), (right, _)| left.cmp(right));
     let mut parents = Vec::new();
 
     for (file_path, module_info) in &all_modules {
@@ -2185,4 +2410,93 @@ pub(crate) fn build_parent_nodes(
     }
 
     parents
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_js_type_info::{
+        TypeDb,
+        resolved::{InferredGenericTypeParameter, InferredTypeInstance, InferredTypeofType},
+    };
+
+    #[salsa::db]
+    #[derive(Default)]
+    struct TestDb {
+        storage: salsa::Storage<Self>,
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    #[salsa::db]
+    impl biome_db::Db for TestDb {
+        fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<biome_db::ParsedSource> {
+            None
+        }
+    }
+
+    #[salsa::db]
+    impl TypeDb for TestDb {}
+
+    #[salsa::db]
+    impl ModuleDb for TestDb {
+        fn module_graph_generation(&self) -> u64 {
+            0
+        }
+
+        fn module_for_path(&self, _path: &Utf8Path) -> Option<ModuleInfo> {
+            None
+        }
+
+        fn for_each_module(&self, _f: &mut dyn FnMut(&Utf8Path, &ModuleInfoKind)) {}
+    }
+
+    fn typeof_chain<'db>(
+        db: &'db TestDb,
+        distinct_types: usize,
+        leaf: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        (1..distinct_types).fold(leaf, |ty, _| {
+            InferredTypeData::TypeofType(InferredTypeofType::new(db, ty))
+        })
+    }
+
+    #[test]
+    fn call_return_root_body_substitution_reports_step_boundaries() {
+        let db = TestDb::default();
+
+        for distinct_types in [1023, 1024, 1025] {
+            let generic = InferredTypeData::Generic(InferredGenericTypeParameter::new(
+                &db,
+                None,
+                None,
+                biome_rowan::Text::new_static("T"),
+            ));
+            let function = InferredTypeData::Function(InferredFunction::new(
+                &db,
+                Vec::from([generic]).into_boxed_slice(),
+                Box::default(),
+                InferredReturnType::Type(typeof_chain(&db, distinct_types, generic)),
+                false,
+                None,
+            ));
+            let callee = InferredTypeData::InstanceOf(InferredTypeInstance::new(
+                &db,
+                function,
+                Vec::from([InferredTypeData::Number]).into_boxed_slice(),
+            ));
+            let result = infer_call_expression_return_type_from_args(&db, callee, &[]);
+
+            if distinct_types <= 1024 {
+                let mut leaf = result;
+                while let InferredTypeData::TypeofType(typeof_type) = leaf {
+                    leaf = typeof_type.ty(&db);
+                }
+                assert_eq!(leaf, InferredTypeData::Number);
+            } else {
+                assert_eq!(result, InferredTypeData::Unknown);
+            }
+        }
+    }
 }

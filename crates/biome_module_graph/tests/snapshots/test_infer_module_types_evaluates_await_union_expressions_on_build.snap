@@ -8,7 +8,9 @@ expression: content
 ## Source
 
 ```ts
-export async function consume(value: Promise<string> | number) {
+export async function consume(
+	value: Promise<Promise<string>> | number | undefined,
+) {
 	const awaited = await value;
 	return awaited;
 }
@@ -20,20 +22,20 @@ export async function consume(value: Promise<string> | number) {
 Binding consume "consume" => async Function "consume" {
   accepts: {
     params: [
-      required value: instanceof Promise<string> | number
+      required value: instanceof Promise<instanceof Promise<string>> | number | undefined
     ]
     type_args: []
   }
-  returns: instanceof Promise<string | number>
+  returns: instanceof Promise<string | number | undefined>
 }
 
-Binding value "value" => instanceof Promise<string> | number
+Binding value "value" => instanceof Promise<instanceof Promise<string>> | number | undefined
 
-Binding awaited "awaited" => string | number
+Binding awaited "awaited" => string | number | undefined
 
-Expression "await value" => string | number
+Expression "await value" => string | number | undefined
 
-Expression "value" => instanceof Promise<string> | number
+Expression "value" => instanceof Promise<instanceof Promise<string>> | number | undefined
 
-Expression "awaited" => string | number
+Expression "awaited" => string | number | undefined
 ```

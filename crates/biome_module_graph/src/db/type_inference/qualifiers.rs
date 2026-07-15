@@ -1,9 +1,11 @@
-use super::resolver::ResolutionCtx;
+//! Resolution of scoped names and qualified type paths.
+
+use super::{lookup::declared_type_parameters, resolver::ResolutionCtx};
+use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_type_info::{
-    GLOBAL_RESOLVER, Path, TypeImportQualifier, TypeReferenceQualifier, TypeResolver,
-    interned_types::{
-        Literal as InferredLiteral, TypeData as InferredTypeData, TypeMember as InferredTypeMember,
-        TypeMemberKind as InferredTypeMemberKind,
+    Path, TypeImportQualifier, TypeReferenceQualifier, global_type_id_for_qualifier,
+    resolved::{
+        InferredLiteralValue, InferredTypeData, InferredTypeMember, InferredTypeMemberKind,
     },
 };
 use biome_rowan::Text;
@@ -16,9 +18,11 @@ impl<'db> ResolutionCtx<'db, '_> {
         &mut self,
         qualifier: &TypeReferenceQualifier,
     ) -> InferredTypeData<'db> {
-        let Some(identifier) = qualifier.path.iter().next() else {
+        let mut path = qualifier.path.iter();
+        let Some(identifier) = path.next() else {
             return InferredTypeData::Unknown;
         };
+        let members = path.collect::<Vec<_>>();
 
         let mut scope = self
             .js_info
@@ -26,26 +30,38 @@ impl<'db> ResolutionCtx<'db, '_> {
             .scope_from_id(qualifier.scope_id);
         let mut reached_root_scope = false;
         for _ in 0..MAX_SCOPE_RESOLUTION_STEPS {
-            if let Some(binding) = scope.get_binding(identifier.text()) {
-                if binding.is_imported()
+            let binding = scope
+                .get_binding_reference(identifier.text())
+                .and_then(|reference| reference.get_binding_id_for_qualifier(qualifier))
+                .and_then(|id| self.js_info.semantic_model.binding_by_id(id));
+            if let Some(binding) = binding {
+                let mut target = if binding.is_imported()
                     && let Some(import) = self.js_info.static_imports.get(identifier.text())
                 {
-                    let target = self.resolve_import(&TypeImportQualifier {
+                    self.resolve_import(&TypeImportQualifier {
                         symbol: import.symbol.clone(),
                         resolved_path: import.resolved_path.clone(),
                         type_only: qualifier.type_only,
-                    });
-                    return self.apply_qualifier_type_parameters(target, qualifier);
+                    })
+                } else {
+                    self.js_info
+                        .raw_binding_types
+                        .get(&binding.syntax().text_trimmed_range())
+                        .cloned()
+                        .map_or(InferredTypeData::Unknown, |reference| {
+                            self.resolve(&reference)
+                        })
+                };
+
+                for member in &members {
+                    let Some(member_ty) =
+                        self.resolve_static_member_expression(target, member.text())
+                    else {
+                        return InferredTypeData::Unknown;
+                    };
+                    target = member_ty;
                 }
 
-                let target = self
-                    .js_info
-                    .raw_binding_types
-                    .get(&binding.syntax().text_trimmed_range())
-                    .cloned()
-                    .map_or(InferredTypeData::Unknown, |reference| {
-                        self.resolve(&reference)
-                    });
                 return self.apply_qualifier_type_parameters(target, qualifier);
             }
 
@@ -152,8 +168,8 @@ impl<'db> ResolutionCtx<'db, '_> {
             return ty;
         }
 
-        if let Some(resolved_id) = GLOBAL_RESOLVER.resolve_qualifier(qualifier) {
-            return self.resolve_resolved_id(resolved_id);
+        if let Some(id) = global_type_id_for_qualifier(qualifier) {
+            return super::globals::global_type(self.db, id);
         }
 
         InferredTypeData::Unknown
@@ -166,15 +182,14 @@ impl<'db> ResolutionCtx<'db, '_> {
         let mut parts = qualifier.path.iter();
         let first = parts.next()?;
         let mut target = parts.next().and_then(|member| {
-            let base = GLOBAL_RESOLVER
-                .resolve_qualifier(&TypeReferenceQualifier {
-                    path: Path::from(first.clone()),
-                    type_parameters: Box::default(),
-                    scope_id: qualifier.scope_id,
-                    type_only: qualifier.type_only,
-                    excluded_binding_id: qualifier.excluded_binding_id,
-                })
-                .map(|resolved_id| self.resolve_resolved_id(resolved_id))?;
+            let base = global_type_id_for_qualifier(&TypeReferenceQualifier {
+                path: Path::from(first.clone()),
+                type_parameters: Box::default(),
+                scope_id: qualifier.scope_id,
+                type_only: qualifier.type_only,
+                excluded_binding_id: qualifier.excluded_binding_id,
+            })
+            .map(|id| super::globals::global_type(self.db, id))?;
             self.resolve_static_member_expression(base, member.text())
         })?;
 
@@ -194,7 +209,8 @@ impl<'db> ResolutionCtx<'db, '_> {
             return target;
         }
 
-        let Some(declared_parameters) = self.declared_type_parameters(target) else {
+        let declared_target = self.resolve_inferred_type(target);
+        let Some(declared_parameters) = declared_type_parameters(self.db, declared_target) else {
             return target;
         };
 
@@ -216,56 +232,6 @@ impl<'db> ResolutionCtx<'db, '_> {
             .into_boxed_slice();
 
         InferredTypeData::instance_of(self.db, target, merged_parameters)
-    }
-
-    fn declared_type_parameters(
-        &mut self,
-        target: InferredTypeData<'db>,
-    ) -> Option<Box<[InferredTypeData<'db>]>> {
-        match self.resolve_inferred_type(target) {
-            InferredTypeData::Class(class) => Some(class.type_parameters(self.db).to_vec().into()),
-            InferredTypeData::Function(function) => {
-                Some(function.type_parameters(self.db).to_vec().into())
-            }
-            InferredTypeData::InstanceOf(instance) => {
-                Some(instance.type_parameters(self.db).to_vec().into())
-            }
-            InferredTypeData::Interface(interface) => {
-                Some(interface.type_parameters(self.db).to_vec().into())
-            }
-            InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
-            | InferredTypeData::Global
-            | InferredTypeData::BigInt
-            | InferredTypeData::Boolean
-            | InferredTypeData::Null
-            | InferredTypeData::Number
-            | InferredTypeData::String
-            | InferredTypeData::Symbol
-            | InferredTypeData::Undefined
-            | InferredTypeData::Conditional
-            | InferredTypeData::Constructor(_)
-            | InferredTypeData::Module(_)
-            | InferredTypeData::Namespace(_)
-            | InferredTypeData::Object(_)
-            | InferredTypeData::Tuple(_)
-            | InferredTypeData::Generic(_)
-            | InferredTypeData::Local(_)
-            | InferredTypeData::Intersection(_)
-            | InferredTypeData::Union(_)
-            | InferredTypeData::TypeOperator(_)
-            | InferredTypeData::Literal(_)
-            | InferredTypeData::MergedReference(_)
-            | InferredTypeData::TypeofExpression(_)
-            | InferredTypeData::TypeofType(_)
-            | InferredTypeData::TypeofValue(_)
-            | InferredTypeData::AnyKeyword
-            | InferredTypeData::NeverKeyword
-            | InferredTypeData::ObjectKeyword
-            | InferredTypeData::ThisKeyword
-            | InferredTypeData::UnknownKeyword
-            | InferredTypeData::VoidKeyword => None,
-        }
     }
 
     fn resolve_pick_or_omit(
@@ -323,13 +289,13 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
                 InferredTypeData::InstanceOf(instance) => ty = instance.ty(self.db),
                 InferredTypeData::Literal(literal) => match literal.literal(self.db) {
-                    InferredLiteral::Object(members) => return Some(members.to_vec()),
-                    InferredLiteral::BigInt(_)
-                    | InferredLiteral::Boolean(_)
-                    | InferredLiteral::Number(_)
-                    | InferredLiteral::RegExp(_)
-                    | InferredLiteral::String(_)
-                    | InferredLiteral::Template(_) => return None,
+                    InferredLiteralValue::Object(members) => return Some(members.to_vec()),
+                    InferredLiteralValue::BigInt(_)
+                    | InferredLiteralValue::Boolean(_)
+                    | InferredLiteralValue::Number(_)
+                    | InferredLiteralValue::RegExp(_)
+                    | InferredLiteralValue::String(_)
+                    | InferredLiteralValue::Template(_) => return None,
                 },
                 InferredTypeData::Module(module) => return Some(module.members(self.db).to_vec()),
                 InferredTypeData::Namespace(namespace) => {
@@ -339,6 +305,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Boolean
                 | InferredTypeData::Null
@@ -374,13 +341,13 @@ impl<'db> ResolutionCtx<'db, '_> {
     fn string_literal_keys(&mut self, ty: InferredTypeData<'db>) -> Option<Vec<Text>> {
         match self.resolve_inferred_type(ty) {
             InferredTypeData::Literal(literal) => match literal.literal(self.db) {
-                InferredLiteral::String(value) => Some(vec![value.as_ref().clone()]),
-                InferredLiteral::BigInt(_)
-                | InferredLiteral::Boolean(_)
-                | InferredLiteral::Number(_)
-                | InferredLiteral::Object(_)
-                | InferredLiteral::RegExp(_)
-                | InferredLiteral::Template(_) => None,
+                InferredLiteralValue::String(value) => Some(vec![value.as_ref().clone()]),
+                InferredLiteralValue::BigInt(_)
+                | InferredLiteralValue::Boolean(_)
+                | InferredLiteralValue::Number(_)
+                | InferredLiteralValue::Object(_)
+                | InferredLiteralValue::RegExp(_)
+                | InferredLiteralValue::Template(_) => None,
             },
             InferredTypeData::Union(union) => Some(
                 union
@@ -393,6 +360,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -430,17 +398,18 @@ impl<'db> ResolutionCtx<'db, '_> {
     fn string_literal_key(&mut self, ty: InferredTypeData<'db>) -> Option<Text> {
         match self.resolve_inferred_type(ty) {
             InferredTypeData::Literal(literal) => match literal.literal(self.db) {
-                InferredLiteral::String(value) => Some(value.as_ref().clone()),
-                InferredLiteral::BigInt(_)
-                | InferredLiteral::Boolean(_)
-                | InferredLiteral::Number(_)
-                | InferredLiteral::Object(_)
-                | InferredLiteral::RegExp(_)
-                | InferredLiteral::Template(_) => None,
+                InferredLiteralValue::String(value) => Some(value.as_ref().clone()),
+                InferredLiteralValue::BigInt(_)
+                | InferredLiteralValue::Boolean(_)
+                | InferredLiteralValue::Number(_)
+                | InferredLiteralValue::Object(_)
+                | InferredLiteralValue::RegExp(_)
+                | InferredLiteralValue::Template(_) => None,
             },
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null

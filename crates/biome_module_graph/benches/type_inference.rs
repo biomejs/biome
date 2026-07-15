@@ -2,10 +2,11 @@ use biome_fs::{BiomePath, FileSystem, MemoryFileSystem};
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::AnyJsRoot;
+use biome_js_type_info::resolved::InferredTypeData;
 use biome_languages::JsFileSource;
 use biome_module_graph::{
-    ModuleInfo, ModuleInfoKind, PathInfoCache, TypeInferenceMode, infer_module_types_bottom_up,
-    resolve_js_module_with_inference_mode,
+    InferredModuleTypes, ModuleDb, ModuleInfo, ModuleInfoKind, PathInfoCache, TypeInferenceMode,
+    infer_module_types, infer_module_types_bottom_up, resolve_js_module_with_inference_mode,
 };
 use biome_project_layout::ProjectLayout;
 use biome_workspace_db::WorkspaceDb;
@@ -58,8 +59,123 @@ fn index_d_ts_cases() -> impl Iterator<Item = &'static str> {
     INDEX_D_TS_CASES.iter().map(|(name, _content)| *name)
 }
 
-#[divan::bench(name = "bench_index_d_ts_salsa_end_to_end", args = index_d_ts_cases())]
-fn bench_index_d_ts_salsa_end_to_end(bencher: Bencher, name: &str) {
+#[divan::bench(args = [4, 8, 16])]
+fn member_lookup_deep_generic_inheritance(bencher: Bencher, depth: usize) {
+    let mut source = String::from("interface Level0<T> { value: T; }\n");
+    for level in 1..=depth {
+        source.push_str(&format!(
+            "interface Level{level}<T> extends Level{}<T> {{}}\n",
+            level - 1
+        ));
+    }
+    source.push_str(&format!(
+        "export declare const subject: Level{depth}<string>;\n"
+    ));
+
+    bench_member_lookup(bencher, &source, None);
+}
+
+#[divan::bench(args = [16, 64, 256])]
+fn member_lookup_wide_generic_intersection(bencher: Bencher, width: usize) {
+    bench_member_lookup(bencher, &generic_fanout_source(width, " & "), Some(width));
+}
+
+#[divan::bench(args = [16, 64, 256])]
+fn member_lookup_wide_generic_union(bencher: Bencher, width: usize) {
+    bench_member_lookup(bencher, &generic_fanout_source(width, " | "), Some(width));
+}
+
+fn generic_fanout_source(width: usize, separator: &str) -> String {
+    let mut source = String::new();
+    for index in 0..width {
+        source.push_str(&format!(
+            "interface Leaf{index}<T> {{ value: [T, \"leaf{index}\"]; }}\n"
+        ));
+    }
+    source.push_str("export declare const subject: ");
+    for index in 0..width {
+        if index > 0 {
+            source.push_str(separator);
+        }
+        source.push_str(&format!("Leaf{index}<string>"));
+    }
+    source.push_str(";\n");
+    source
+}
+
+fn bench_member_lookup(bencher: Bencher, source: &str, expected_variants: Option<usize>) {
+    let (db, module) = build_module_from_source(source);
+    let inferred = infer_module_types_bottom_up(&db, module).expect("types must be inferred");
+    let subject = inferred_binding_type(&db, module, &inferred, "subject")
+        .expect("subject binding must be inferred");
+    let member = inferred
+        .find_member_type(&db, subject, "value")
+        .expect("value member must be inferred");
+    if let Some(expected_variants) = expected_variants {
+        let InferredTypeData::Union(union) = member else {
+            panic!("fan-out member must collect all branch types");
+        };
+        assert_eq!(union.types(&db).len(), expected_variants);
+    }
+
+    bencher.bench_local(|| {
+        divan::black_box(inferred.find_member_type(
+            divan::black_box(&db),
+            divan::black_box(subject),
+            divan::black_box("value"),
+        ))
+    });
+}
+
+fn build_module_from_source(source: &str) -> (WorkspaceDb, ModuleInfo) {
+    let fs = MemoryFileSystem::default();
+    let path = BiomePath::new("member_lookup.ts");
+    fs.insert(path.as_path().to_path_buf(), source);
+
+    let root = get_js_root(&fs, &path);
+    let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
+    let (module_info, _, _) = resolve_js_module_with_inference_mode(
+        root,
+        &path,
+        &fs,
+        &ProjectLayout::default(),
+        semantic_model,
+        &PathInfoCache::default(),
+        TypeInferenceMode::RawTypesOnly,
+    );
+    let mut db = WorkspaceDb::default();
+    let module = ModuleInfo::new_published(
+        &db,
+        path.as_path().to_path_buf(),
+        ModuleInfoKind::Js(module_info),
+    );
+    db.insert_module(path.as_path().to_path_buf(), module);
+    (db, module)
+}
+
+fn inferred_binding_type<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    inferred: &InferredModuleTypes<'db>,
+    name: &str,
+) -> Option<InferredTypeData<'db>> {
+    let ModuleInfoKind::Js(info) = module.kind(db) else {
+        return None;
+    };
+    let binding = info.semantic_model.all_bindings().find(|binding| {
+        binding
+            .tree()
+            .name_token()
+            .is_ok_and(|token| token.text_trimmed() == name)
+    })?;
+    inferred
+        .binding_type_data
+        .get(&binding.syntax().text_trimmed_range())
+        .map(|data| data.ty)
+}
+
+#[divan::bench(name = "bench_index_d_ts_db_end_to_end", args = index_d_ts_cases())]
+fn bench_index_d_ts_db_end_to_end(bencher: Bencher, name: &str) {
     bencher
         .with_inputs(|| {
             let content = INDEX_D_TS_CASES
@@ -87,34 +203,53 @@ fn bench_index_d_ts_salsa_end_to_end(bencher: Bencher, name: &str) {
                 TypeInferenceMode::RawTypesOnly,
             );
 
-            let db = WorkspaceDb::default();
-            let module = ModuleInfo::new(
+            let mut db = WorkspaceDb::default();
+            let module = ModuleInfo::new_published(
                 &db,
                 path.as_path().to_path_buf(),
                 ModuleInfoKind::Js(module_info),
             );
-            db.modules
-                .pin()
-                .insert(path.as_path().to_path_buf(), module);
+            db.insert_module(path.as_path().to_path_buf(), module);
             divan::black_box(infer_module_types_bottom_up(&db, module));
         });
 }
 
-#[divan::bench(name = "bench_index_d_ts_salsa_memoized", args = index_d_ts_cases())]
-fn bench_index_d_ts_salsa_memoized(bencher: Bencher, name: &str) {
+#[divan::bench(name = "bench_index_d_ts_db_memoized", args = index_d_ts_cases())]
+fn bench_index_d_ts_db_memoized(bencher: Bencher, name: &str) {
     bencher
         .with_inputs(|| {
             let (db, module, _) = build_inferred_db(name);
             (db, module)
         })
         .bench_local_values(|(db, module)| {
-            divan::black_box(infer_module_types_bottom_up(&db, module));
+            divan::black_box(infer_module_types(&db, module));
             db
         });
 }
 
-#[divan::bench(name = "bench_index_d_ts_salsa_invalidated", args = index_d_ts_cases())]
-fn bench_index_d_ts_salsa_invalidated(bencher: Bencher, name: &str) {
+#[divan::bench(
+    name = "bench_index_d_ts_db_unrelated_registry_change",
+    args = index_d_ts_cases()
+)]
+fn bench_index_d_ts_db_unrelated_registry_change(bencher: Bencher, name: &str) {
+    bencher
+        .with_inputs(|| {
+            let (db, module, kind) = build_inferred_db(name);
+            let path = BiomePath::new("unrelated.ts").as_path().to_path_buf();
+            let unrelated = ModuleInfo::new_published(&db, path.clone(), kind);
+            (db, module, path, unrelated)
+        })
+        .bench_local_values(|(mut db, module, path, unrelated)| {
+            db.insert_module(path.clone(), unrelated);
+            divan::black_box(infer_module_types(&db, module));
+            db.remove_module(&path);
+            divan::black_box(infer_module_types(&db, module));
+            db
+        });
+}
+
+#[divan::bench(name = "bench_index_d_ts_db_invalidated", args = index_d_ts_cases())]
+fn bench_index_d_ts_db_invalidated(bencher: Bencher, name: &str) {
     bencher
         .with_inputs(|| build_inferred_db(name))
         .bench_local_values(|(mut db, module, kind)| {
@@ -148,8 +283,8 @@ export function read(value: string): string {
 }
 "#;
 
-#[divan::bench(name = "bench_index_d_ts_salsa_incremental_first_run")]
-fn bench_index_d_ts_salsa_incremental_first_run(bencher: Bencher) {
+#[divan::bench(name = "bench_index_d_ts_db_incremental_first_run")]
+fn bench_index_d_ts_db_incremental_first_run(bencher: Bencher) {
     bencher
         .with_inputs(|| {
             let fs = MemoryFileSystem::default();
@@ -171,7 +306,7 @@ fn bench_index_d_ts_salsa_incremental_first_run(bencher: Bencher) {
             (fs, modules)
         })
         .bench_local_values(|(fs, modules)| {
-            let db = WorkspaceDb::default();
+            let mut db = WorkspaceDb::default();
             let mut index_module = None;
             for (name, root, semantic_model) in modules {
                 let path = BiomePath::new(name);
@@ -184,14 +319,12 @@ fn bench_index_d_ts_salsa_incremental_first_run(bencher: Bencher) {
                     &PathInfoCache::default(),
                     TypeInferenceMode::RawTypesOnly,
                 );
-                let module = ModuleInfo::new(
+                let module = ModuleInfo::new_published(
                     &db,
                     path.as_path().to_path_buf(),
                     ModuleInfoKind::Js(module_info),
                 );
-                db.modules
-                    .pin()
-                    .insert(path.as_path().to_path_buf(), module);
+                db.insert_module(path.as_path().to_path_buf(), module);
                 if name == "index.ts" {
                     index_module = Some(module);
                 }
@@ -202,8 +335,8 @@ fn bench_index_d_ts_salsa_incremental_first_run(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_index_d_ts_salsa_incremental")]
-fn bench_index_d_ts_salsa_incremental(bencher: Bencher) {
+#[divan::bench(name = "bench_index_d_ts_db_incremental")]
+fn bench_index_d_ts_db_incremental(bencher: Bencher) {
     bencher
         .with_inputs(|| {
             let fs = MemoryFileSystem::default();
@@ -212,7 +345,7 @@ fn bench_index_d_ts_salsa_incremental(bencher: Bencher) {
             }
             fs.insert("index.ts".into(), INDEX_TS_BEFORE_EDIT);
 
-            let db = WorkspaceDb::default();
+            let mut db = WorkspaceDb::default();
             let mut index_module = None;
             for name in index_d_ts_cases().chain(["index.ts"]) {
                 let path = BiomePath::new(name);
@@ -228,14 +361,12 @@ fn bench_index_d_ts_salsa_incremental(bencher: Bencher) {
                     &PathInfoCache::default(),
                     TypeInferenceMode::RawTypesOnly,
                 );
-                let module = ModuleInfo::new(
+                let module = ModuleInfo::new_published(
                     &db,
                     path.as_path().to_path_buf(),
                     ModuleInfoKind::Js(module_info),
                 );
-                db.modules
-                    .pin()
-                    .insert(path.as_path().to_path_buf(), module);
+                db.insert_module(path.as_path().to_path_buf(), module);
                 if name == "index.ts" {
                     index_module = Some(module);
                 }
@@ -293,11 +424,9 @@ fn build_inferred_db(name: &str) -> (WorkspaceDb, ModuleInfo, ModuleInfoKind) {
     );
 
     let kind = ModuleInfoKind::Js(module_info);
-    let db = WorkspaceDb::default();
-    let module = ModuleInfo::new(&db, path.as_path().to_path_buf(), kind.clone());
-    db.modules
-        .pin()
-        .insert(path.as_path().to_path_buf(), module);
+    let mut db = WorkspaceDb::default();
+    let module = ModuleInfo::new_published(&db, path.as_path().to_path_buf(), kind.clone());
+    db.insert_module(path.as_path().to_path_buf(), module);
     infer_module_types_bottom_up(&db, module);
     (db, module, kind)
 }

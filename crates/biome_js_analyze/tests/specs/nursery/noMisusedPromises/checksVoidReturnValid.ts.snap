@@ -26,5 +26,15 @@ new Promise((resolve, reject) => {
     resolve();
   })();
 });
+declare function consume(kind: "async", callback: () => Promise<void>): void;
+declare function consume(kind: "sync", callback: () => void): void;
+consume("async", async () => {});
+
+class ConstructorConsumer {
+  constructor(callback: () => void);
+  constructor(callback: () => Promise<void>, marker: number);
+  constructor(_callback: (() => void) | (() => Promise<void>), _marker?: number) {}
+}
+new ConstructorConsumer(async () => {}, 1);
 
 ```

@@ -68,7 +68,7 @@ fn run_workspace(console: &mut EnvConsole, command: BiomeCommand) -> Result<(), 
         }
     } else {
         let threads = command.get_threads();
-        workspace::server(Arc::new(fs), threads)
+        workspace::disposable_server(Arc::new(fs), threads)
     };
 
     let session = CliSession::new(&*workspace, console)?;

@@ -1,8 +1,10 @@
 /* should not generate diagnostics */
 
 interface Thenable<T> { then(onfulfilled: (value: T) => void): void; }
+interface UnknownThen { then: unknown; }
 declare const thenable: Thenable<number>;
 declare const value: unknown;
+declare const unknownThen: UnknownThen;
 
 // Awaiting a value typed as a custom thenable (a callable `then`) is valid.
 async function awaitDeclaredThenable(): Promise<void> {
@@ -12,4 +14,10 @@ async function awaitDeclaredThenable(): Promise<void> {
 // Awaiting a value cast to a custom thenable is valid.
 async function awaitCastThenable(): Promise<void> {
     await (value as Thenable<number>);
+}
+
+// Unknown containers and explicitly unknown members are indeterminate.
+async function awaitUnknownValues(): Promise<void> {
+    await value;
+    await unknownThen;
 }

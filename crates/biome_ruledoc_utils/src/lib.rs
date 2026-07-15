@@ -12,7 +12,7 @@ use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::DiagnosticExt;
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_analyze::JsAnalyzerServices;
-use biome_js_semantic::semantic_model_from_source;
+use biome_js_semantic::{SemanticModelOptions, semantic_model, semantic_model_from_source};
 use biome_json_factory::make;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonObjectValue};
@@ -35,6 +35,8 @@ use std::sync::Arc;
 /// for multiple code blocks.
 pub struct AnalyzerServicesBuilder {
     module_db: WorkspaceDb,
+    fs: MemoryFileSystem,
+    path_info_cache: PathInfoCache,
     project_layout: Arc<ProjectLayout>,
 }
 
@@ -52,6 +54,8 @@ impl AnalyzerServicesBuilder {
             let db = WorkspaceDb::default();
             return Self {
                 module_db: db,
+                fs: MemoryFileSystem::default(),
+                path_info_cache: PathInfoCache::default(),
                 project_layout: Default::default(),
             };
         }
@@ -105,7 +109,7 @@ impl AnalyzerServicesBuilder {
             fs.insert(path_buf, src);
         }
 
-        let db = WorkspaceDb::default();
+        let mut db = WorkspaceDb::default();
 
         let js_added_paths = get_added_js_paths(&fs, &js_paths);
         for (path, root, semantic_model) in js_added_paths {
@@ -118,7 +122,7 @@ impl AnalyzerServicesBuilder {
                 &path_info_cache,
                 true,
             );
-            let md = biome_module_graph::ModuleInfo::new(
+            let md = biome_module_graph::ModuleInfo::new_published(
                 &db,
                 path.as_path().to_path_buf(),
                 ModuleInfoKind::Js(module_info),
@@ -130,7 +134,7 @@ impl AnalyzerServicesBuilder {
         for (path, root) in css_added_paths {
             let (module_info, _, _) =
                 resolve_css_module(root, path, &fs, &layout, &path_info_cache);
-            let md = biome_module_graph::ModuleInfo::new(
+            let md = biome_module_graph::ModuleInfo::new_published(
                 &db,
                 path.as_path().to_path_buf(),
                 ModuleInfoKind::Css(module_info),
@@ -148,7 +152,7 @@ impl AnalyzerServicesBuilder {
                 &layout,
                 &path_info_cache,
             );
-            let md = biome_module_graph::ModuleInfo::new(
+            let md = biome_module_graph::ModuleInfo::new_published(
                 &db,
                 path.as_path().to_path_buf(),
                 ModuleInfoKind::Html(module_info),
@@ -158,6 +162,8 @@ impl AnalyzerServicesBuilder {
 
         Self {
             module_db: db,
+            fs,
+            path_info_cache,
             project_layout: Arc::new(layout),
         }
     }
@@ -168,6 +174,9 @@ impl AnalyzerServicesBuilder {
         parse: biome_js_parser::Parse<biome_js_parser::AnyJsRoot>,
         file_source: JsFileSource,
     ) -> JsAnalyzerServices<'_> {
+        let root = parse.tree();
+        let module_semantic_model = semantic_model(&root, SemanticModelOptions::default());
+        self.fs.insert(path.clone(), root.syntax().to_string());
         let source_index = self
             .module_db
             .insert_source(DocumentFileSource::Js(file_source));
@@ -179,6 +188,23 @@ impl AnalyzerServicesBuilder {
             vec![],
         );
         self.module_db.insert_file(&path, parsed_source);
+        let biome_path = BiomePath::new(&path);
+        let (module_info, _, _) = resolve_js_module(
+            root,
+            &biome_path,
+            &self.fs,
+            &self.project_layout,
+            Arc::new(module_semantic_model),
+            &self.path_info_cache,
+            true,
+        );
+        let module = biome_module_graph::ModuleInfo::new_published(
+            &self.module_db,
+            path.clone(),
+            ModuleInfoKind::Js(module_info),
+        );
+        self.module_db.insert_module(path, module);
+        let semantic_model = semantic_model_from_source(&self.module_db, parsed_source);
 
         JsAnalyzerServices::from((
             self.module_db.rc_module_db(),
@@ -186,7 +212,7 @@ impl AnalyzerServicesBuilder {
             file_source,
         ))
         .with_language_db(self.module_db.rc_language_db())
-        .with_semantic_model(semantic_model_from_source(&self.module_db, parsed_source))
+        .with_semantic_model(semantic_model)
     }
 }
 

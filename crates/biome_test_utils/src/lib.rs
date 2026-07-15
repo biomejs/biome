@@ -30,7 +30,7 @@ use biome_html_syntax::HtmlRoot;
 #[cfg(feature = "lang_js")]
 use biome_js_parser::{AnyJsRoot, JsParserOptions};
 #[cfg(feature = "type_inference")]
-use biome_js_type_info::{TypeData, TypeResolver};
+use biome_js_type_info::TypeData;
 use biome_languages::DocumentFileSource;
 #[cfg(all(feature = "module_graph", feature = "lang_html"))]
 use biome_module_graph::HtmlEmbeddedContent;
@@ -283,7 +283,7 @@ pub fn module_graph_for_test_file(
     input_file: &Utf8Path,
     project_layout: &ProjectLayout,
 ) -> WorkspaceDb {
-    let db = WorkspaceDb::default();
+    let mut db = WorkspaceDb::default();
     let path_info_cache = PathInfoCache::default();
     let dir = input_file.parent().unwrap().to_path_buf();
     let fs = OsFileSystem::new(dir.clone());
@@ -300,7 +300,7 @@ pub fn module_graph_for_test_file(
             &path_info_cache,
             true,
         );
-        let md = biome_module_graph::ModuleInfo::new(
+        let md = biome_module_graph::ModuleInfo::new_published(
             &db,
             path.as_path().to_path_buf(),
             ModuleInfoKind::Js(module_info),
@@ -315,7 +315,7 @@ pub fn module_graph_for_test_file(
         for (path, root) in css_roots {
             let (module_info, _, _) =
                 resolve_css_module(root, path, &fs, project_layout, &path_info_cache);
-            let md = biome_module_graph::ModuleInfo::new(
+            let md = biome_module_graph::ModuleInfo::new_published(
                 &db,
                 path.as_path().to_path_buf(),
                 ModuleInfoKind::Css(module_info),
@@ -339,7 +339,7 @@ pub fn module_graph_for_css_test_file(
     input_file: &Utf8Path,
     project_layout: &ProjectLayout,
 ) -> WorkspaceDb {
-    let db = WorkspaceDb::default();
+    let mut db = WorkspaceDb::default();
     let path_info_cache = PathInfoCache::default();
     let dir = input_file.parent().unwrap().to_path_buf();
     let fs = OsFileSystem::new(dir.clone());
@@ -349,7 +349,7 @@ pub fn module_graph_for_css_test_file(
     for (path, root) in css_roots {
         let (module_info, _, _) =
             resolve_css_module(root, path, &fs, project_layout, &path_info_cache);
-        let md = biome_module_graph::ModuleInfo::new(
+        let md = biome_module_graph::ModuleInfo::new_published(
             &db,
             path.as_path().to_path_buf(),
             ModuleInfoKind::Css(module_info),
@@ -371,7 +371,7 @@ pub fn module_graph_for_css_test_file(
                 &path_info_cache,
                 false,
             );
-            let md = biome_module_graph::ModuleInfo::new(
+            let md = biome_module_graph::ModuleInfo::new_published(
                 &db,
                 path.as_path().to_path_buf(),
                 ModuleInfoKind::Js(module_info),
@@ -750,29 +750,7 @@ fn markup_to_string(markup: biome_console::Markup) -> String {
 }
 
 #[cfg(feature = "type_inference")]
-pub fn dump_registered_types(content: &mut String, resolver: &dyn TypeResolver) {
-    let mut registered_types = String::new();
-    let mut resolver = Some(resolver);
-    while let Some(current_resolver) = resolver {
-        for (i, ty) in current_resolver.registered_types().iter().enumerate() {
-            let level = current_resolver.level();
-            registered_types.push_str(&format!("\n{level:?} TypeId({i}) => {ty}\n"));
-        }
-
-        resolver = current_resolver.fallback_resolver();
-    }
-
-    if !registered_types.is_empty() {
-        content.push_str("## Registered types\n\n");
-
-        content.push_str("```");
-        content.push_str(&registered_types);
-        content.push_str("```\n");
-    }
-}
-
-#[cfg(feature = "type_inference")]
-pub fn dump_registered_module_types(content: &mut String, types: &[&TypeData]) {
+pub fn dump_registered_module_types(content: &mut String, types: &[TypeData]) {
     if types.is_empty() {
         return;
     }

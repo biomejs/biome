@@ -10434,9 +10434,14 @@ export interface ChangeFileParams {
 	editorFeatures?: EditorFeatures;
 	inlineConfig?: Configuration;
 	path: BiomePath;
+	projectDataUpdate?: ProjectDataUpdate;
 	projectKey: ProjectKey;
 	version: number;
 }
+/**
+ * How the project should be updated when there's a change.
+ */
+export type ProjectDataUpdate = "refresh" | "documentOnly";
 export interface ChangeFileResult {
 	diagnostics: Diagnostic[];
 }

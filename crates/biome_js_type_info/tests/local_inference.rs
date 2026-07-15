@@ -1,10 +1,10 @@
 mod utils;
 
 use biome_js_semantic::ScopeId;
-use biome_js_type_info::{GlobalsResolver, TypeData, TypeResolver};
+use biome_js_type_info::{RawTypeCollector, TypeData};
 
 use utils::{
-    assert_type_data_snapshot, assert_typed_bindings_snapshot, get_expression,
+    TestTypeCollector, assert_type_data_snapshot, assert_typed_bindings_snapshot, get_expression,
     get_function_declaration, get_variable_declaration, parse_ts,
 };
 
@@ -14,7 +14,7 @@ fn infer_type_of_identifier() {
 
     let root = parse_ts(CODE);
     let expr = get_expression(&root);
-    let mut resolver = GlobalsResolver::default();
+    let mut resolver = TestTypeCollector::default();
     let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
     assert_type_data_snapshot(CODE, &ty, &resolver, "infer_type_of_identifier");
 }
@@ -25,7 +25,7 @@ fn infer_type_of_object_member_expression() {
 
     let root = parse_ts(CODE);
     let expr = get_expression(&root);
-    let mut resolver = GlobalsResolver::default();
+    let mut resolver = TestTypeCollector::default();
     let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
     assert_type_data_snapshot(
         CODE,
@@ -41,7 +41,7 @@ fn infer_type_of_regex() {
 
     let root = parse_ts(CODE);
     let expr = get_expression(&root);
-    let mut resolver = GlobalsResolver::default();
+    let mut resolver = TestTypeCollector::default();
     let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
     assert_type_data_snapshot(CODE, &ty, &resolver, "infer_type_of_regex");
 }
@@ -52,7 +52,7 @@ fn infer_type_of_regex_with_flags() {
 
     let root = parse_ts(CODE);
     let expr = get_expression(&root);
-    let mut resolver = GlobalsResolver::default();
+    let mut resolver = TestTypeCollector::default();
     let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
     assert_type_data_snapshot(CODE, &ty, &resolver, "infer_type_of_regex_with_flags");
 }
@@ -63,7 +63,7 @@ fn infer_type_of_typeof_expression() {
 
     let root = parse_ts(CODE);
     let expr = get_expression(&root);
-    let mut resolver = GlobalsResolver::default();
+    let mut resolver = TestTypeCollector::default();
     let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
     assert_type_data_snapshot(CODE, &ty, &resolver, "infer_type_of_typeof_expression");
 }
@@ -74,7 +74,7 @@ fn infer_type_of_const_assertion() {
 
     let syntax_tree = parse_ts(CODE);
     let expression = get_expression(&syntax_tree);
-    let mut resolver = GlobalsResolver::default();
+    let mut resolver = TestTypeCollector::default();
     let expression_type =
         TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expression);
     assert_eq!(expression_type.to_string(), "string: value");
@@ -87,7 +87,7 @@ fn const_assertion_marks_object_property_as_const_asserted() {
 
     let syntax_tree = parse_ts(CODE);
     let expression = get_expression(&syntax_tree);
-    let mut resolver = GlobalsResolver::default();
+    let mut resolver = TestTypeCollector::default();
     let expression_type =
         TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expression);
     let TypeData::Object(object) = expression_type else {
@@ -101,9 +101,9 @@ fn const_assertion_marks_object_property_as_const_asserted() {
         .expect("value member");
     assert!(value.is_const_asserted());
     let value_type = resolver
-        .resolve_and_get(&value.ty)
+        .get_by_reference(&value.ty)
         .expect("value type")
-        .to_data();
+        .clone();
     assert_eq!(value_type.to_string(), "string: x");
 
     let nested = object
@@ -113,9 +113,9 @@ fn const_assertion_marks_object_property_as_const_asserted() {
         .expect("nested member");
     assert!(!nested.is_const_asserted());
     let nested_type = resolver
-        .resolve_and_get(&nested.ty)
+        .get_by_reference(&nested.ty)
         .expect("nested type")
-        .to_data();
+        .clone();
     let TypeData::Object(nested_object) = nested_type else {
         panic!("expected nested object type");
     };
@@ -126,9 +126,9 @@ fn const_assertion_marks_object_property_as_const_asserted() {
         .expect("flag member");
     assert!(flag.is_const_asserted());
     let flag_type = resolver
-        .resolve_and_get(&flag.ty)
+        .get_by_reference(&flag.ty)
         .expect("flag type")
-        .to_data();
+        .clone();
     assert_eq!(flag_type.to_string(), "bool: true");
 
     let parenthesized = object
@@ -145,7 +145,7 @@ fn const_assertion_marks_nested_object_members_as_const_asserted() {
 
     let syntax_tree = parse_ts(CODE);
     let expression = get_expression(&syntax_tree);
-    let mut resolver = GlobalsResolver::default();
+    let mut resolver = TestTypeCollector::default();
     let expression_type =
         TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expression);
     let TypeData::Object(object) = expression_type else {
@@ -159,9 +159,9 @@ fn const_assertion_marks_nested_object_members_as_const_asserted() {
         .expect("value member");
     assert!(value.is_const_asserted());
     let value_type = resolver
-        .resolve_and_get(&value.ty)
+        .get_by_reference(&value.ty)
         .expect("value type")
-        .to_data();
+        .clone();
     let TypeData::Object(value_object) = value_type else {
         panic!("expected nested object type");
     };
@@ -179,7 +179,7 @@ fn const_assertion_preserves_negative_number_literal() {
 
     let syntax_tree = parse_ts(CODE);
     let expression = get_expression(&syntax_tree);
-    let mut resolver = GlobalsResolver::default();
+    let mut resolver = TestTypeCollector::default();
     let expression_type =
         TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expression);
     assert_eq!(expression_type.to_string(), "number: -1");
@@ -193,7 +193,7 @@ fn infer_type_of_promise_returning_function() {
 
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
-    let mut resolver = GlobalsResolver::default();
+    let mut resolver = TestTypeCollector::default();
     let ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
     assert_type_data_snapshot(
         CODE,
@@ -211,7 +211,7 @@ fn infer_type_of_async_function() {
 
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
-    let mut resolver = GlobalsResolver::default();
+    let mut resolver = TestTypeCollector::default();
     let ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
     assert_type_data_snapshot(CODE, &ty, &resolver, "infer_type_of_async_function");
 }
@@ -222,7 +222,7 @@ fn infer_type_of_array() {
 
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
-    let mut resolver = GlobalsResolver::default();
+    let mut resolver = TestTypeCollector::default();
     let bindings = TypeData::typed_bindings_from_js_variable_declaration(
         &mut resolver,
         ScopeId::GLOBAL,
@@ -237,7 +237,7 @@ fn infer_type_of_destructured_array_element() {
 
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
-    let mut resolver = GlobalsResolver::default();
+    let mut resolver = TestTypeCollector::default();
     let bindings = TypeData::typed_bindings_from_js_variable_declaration(
         &mut resolver,
         ScopeId::GLOBAL,
@@ -257,7 +257,7 @@ fn infer_type_of_function_with_destructured_arguments() {
 
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
-    let mut resolver = GlobalsResolver::default();
+    let mut resolver = TestTypeCollector::default();
     let ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
     assert_type_data_snapshot(
         CODE,
@@ -273,7 +273,7 @@ fn infer_type_of_literal() {
 
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
-    let mut resolver = GlobalsResolver::default();
+    let mut resolver = TestTypeCollector::default();
     let bindings = TypeData::typed_bindings_from_js_variable_declaration(
         &mut resolver,
         ScopeId::GLOBAL,
@@ -288,7 +288,7 @@ fn infer_type_of_binary_expression_eq() {
 
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
-    let mut resolver = GlobalsResolver::default();
+    let mut resolver = TestTypeCollector::default();
     let bindings = TypeData::typed_bindings_from_js_variable_declaration(
         &mut resolver,
         ScopeId::GLOBAL,
@@ -308,7 +308,7 @@ fn infer_type_of_binary_expression_ne() {
 
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
-    let mut resolver = GlobalsResolver::default();
+    let mut resolver = TestTypeCollector::default();
     let bindings = TypeData::typed_bindings_from_js_variable_declaration(
         &mut resolver,
         ScopeId::GLOBAL,
@@ -328,7 +328,7 @@ fn infer_type_of_dynamic_import() {
 
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
-    let mut resolver = GlobalsResolver::default();
+    let mut resolver = TestTypeCollector::default();
     let bindings = TypeData::typed_bindings_from_js_variable_declaration(
         &mut resolver,
         ScopeId::GLOBAL,

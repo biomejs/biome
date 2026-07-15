@@ -372,6 +372,37 @@ getReqP().p;
 declare function getReadonlyP(): Readonly<{p: Promise<void>}>;
 getReadonlyP().p;
 
+type AsyncCallback<T> = () => Promise<T>;
+declare const aliasedCallback: AsyncCallback<void>;
+aliasedCallback();
+
+declare const explicitArray: Array<number>;
+explicitArray.map(async value => value);
+[1, 2, 3].map(value => value).map(async value => value);
+
+const objectApi = {
+	promise: Promise.resolve("value"),
+	getPromise() {
+		return this.promise;
+	},
+};
+objectApi.getPromise();
+class GenericBox<T> {
+	constructor(readonly value: T) {}
+	read() {
+		return this.value;
+	}
+}
+new GenericBox(Promise.resolve("value")).read();
+
+class StaticPromiseBase {
+	static read(): Promise<void> {
+		return Promise.resolve();
+	}
+}
+class StaticPromiseDerived extends StaticPromiseBase {}
+StaticPromiseDerived.read();
+
 ```
 
 # Diagnostics
@@ -1905,6 +1936,119 @@ invalid.ts:367:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   > 367 │ getReadonlyP().p;
         │ ^^^^^^^^^^^^^^^^^
     368 │ 
+    369 │ type AsyncCallback<T> = () => Promise<T>;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:371:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    369 │ type AsyncCallback<T> = () => Promise<T>;
+    370 │ declare const aliasedCallback: AsyncCallback<void>;
+  > 371 │ aliasedCallback();
+        │ ^^^^^^^^^^^^^^^^^^
+    372 │ 
+    373 │ declare const explicitArray: Array<number>;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:374:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An array of Promises was found, meaning they are not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    373 │ declare const explicitArray: Array<number>;
+  > 374 │ explicitArray.map(async value => value);
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    375 │ [1, 2, 3].map(value => value).map(async value => value);
+    376 │ 
+  
+  i This happens when an array of Promises is not wrapped with Promise.all() or a similar method, and is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:375:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An array of Promises was found, meaning they are not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    373 │ declare const explicitArray: Array<number>;
+    374 │ explicitArray.map(async value => value);
+  > 375 │ [1, 2, 3].map(value => value).map(async value => value);
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    376 │ 
+    377 │ const objectApi = {
+  
+  i This happens when an array of Promises is not wrapped with Promise.all() or a similar method, and is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:383:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    381 │ 	},
+    382 │ };
+  > 383 │ objectApi.getPromise();
+        │ ^^^^^^^^^^^^^^^^^^^^^^^
+    384 │ class GenericBox<T> {
+    385 │ 	constructor(readonly value: T) {}
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:390:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    388 │ 	}
+    389 │ }
+  > 390 │ new GenericBox(Promise.resolve("value")).read();
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    391 │ 
+    392 │ class StaticPromiseBase {
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:398:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    396 │ }
+    397 │ class StaticPromiseDerived extends StaticPromiseBase {}
+  > 398 │ StaticPromiseDerived.read();
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    399 │ 
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   

@@ -1,9 +1,8 @@
 use std::{borrow::Cow, ops::Neg};
 
-use biome_js_type_info_macros::Resolvable;
 use biome_rowan::Text;
 
-#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct BooleanLiteral(bool);
 
 impl BooleanLiteral {
@@ -27,7 +26,7 @@ impl From<bool> for BooleanLiteral {
     }
 }
 
-#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct NumberLiteral(Text);
 
 impl NumberLiteral {
@@ -81,7 +80,7 @@ impl NumberLiteral {
     }
 }
 
-#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct RegexpLiteral {
     /// The pattern to match against.
     ///
@@ -110,7 +109,7 @@ pub struct RegexpLiteral {
     pub flags: Text,
 }
 
-#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct StringLiteral(Text);
 
 impl StringLiteral {

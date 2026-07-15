@@ -137,6 +137,7 @@ impl CustomExecutionCmd for MigrateCommandPayload {
             paths: _,
             configuration_files,
             duration: _,
+            project_data_update: _,
         } = configured_workspace;
 
         let payload = crate::execute::migrate::MigratePayload {

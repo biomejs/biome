@@ -1,0 +1,12 @@
+/* should not generate diagnostics */
+
+function selectCallback(callback: () => Promise<void>): Promise<void>;
+function selectCallback(callback: () => void): number;
+function selectCallback(callback: () => unknown): Promise<void> | number {
+	return callback() as Promise<void> | number;
+}
+
+declare const unknownCallback: () => unknown;
+
+// Indeterminate Promise parity must not select the Promise-returning overload.
+selectCallback(unknownCallback);

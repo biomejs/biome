@@ -254,3 +254,16 @@ void [1, 2, 3].map(async (x) => x + 1);
 async function floatingArray() {
   await Promise.all([1, 2, 3].map((x) => Promise.resolve(x + 1)));
 }
+declare function selectUnknown(value: string): Promise<string>;
+declare function selectUnknown(value: unknown): number;
+declare const unresolvedArgument: MissingArgumentType;
+selectUnknown(unresolvedArgument);
+
+declare function readUnion(value: string): Promise<void>;
+declare function readUnion(value: string | number): number;
+declare const unionArgument: string | number;
+readUnion(unionArgument);
+
+declare function readConstrained<T extends string>(value: T): Promise<void>;
+declare function readConstrained(value: number): number;
+readConstrained(1);

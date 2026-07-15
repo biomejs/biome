@@ -1,15 +1,13 @@
-use std::io;
-
 use crate::services::typed::Typed;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
-use biome_console::{fmt, markup};
+use biome_console::markup;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsExpression, JsAssignmentExpression,
     JsAssignmentOperator, JsBinaryExpression, JsBinaryOperator, JsParenthesizedExpression,
 };
-use biome_js_type_info::{Literal, Type, TypeData};
+use biome_js_type_info::InferredType;
 use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_unsafe_plus_operands::NoUnsafePlusOperandsOptions;
 
@@ -80,9 +78,9 @@ pub enum NoUnsafePlusOperandsState {
     },
 }
 
-struct OperandInfo {
+struct OperandInfo<'db> {
     range: TextRange,
-    ty: Type,
+    ty: InferredType<'db>,
 }
 
 impl Rule for NoUnsafePlusOperands {
@@ -107,14 +105,14 @@ impl Rule for NoUnsafePlusOperands {
 
         match state {
             NoUnsafePlusOperandsState::InvalidOperand { range } => {
-                let ty = type_for_range(ctx, *range)?;
+                let ty = type_for_range(ctx, *range)?.plus_operand_description();
 
                 Some(
                 RuleDiagnostic::new(
                     rule_category!(),
                     range,
                     markup! {
-                        "Invalid operand for a "<Emphasis>"+"</Emphasis>" operation: "<Emphasis>{TypeDescription(&ty)}</Emphasis>"."
+                        "Invalid operand for a "<Emphasis>"+"</Emphasis>" operation: "<Emphasis>{ty}</Emphasis>"."
                     },
                 )
                 .detail(node.range(), markup! {
@@ -130,8 +128,8 @@ impl Rule for NoUnsafePlusOperands {
                 left_range,
                 right_range,
             } => {
-                let left = type_for_range(ctx, *left_range)?;
-                let right = type_for_range(ctx, *right_range)?;
+                let left = type_for_range(ctx, *left_range)?.plus_operand_description();
+                let right = type_for_range(ctx, *right_range)?.plus_operand_description();
 
                 Some(
                 RuleDiagnostic::new(
@@ -142,7 +140,7 @@ impl Rule for NoUnsafePlusOperands {
                     },
                 )
                 .detail(range, markup! {
-                    "This operation mixes "<Emphasis>{TypeDescription(&left)}</Emphasis>" with "<Emphasis>{TypeDescription(&right)}</Emphasis>"."
+                    "This operation mixes "<Emphasis>{left}</Emphasis>" with "<Emphasis>{right}</Emphasis>"."
                 })
                 .note(markup! {
                     "Convert one side so both operands use the same numeric type before applying "<Emphasis>"+"</Emphasis>" or "<Emphasis>"+="</Emphasis>"."
@@ -179,7 +177,7 @@ fn run_assignment(
     let right = assignment.right().ok()?;
     let left_ty = type_of_assignment_target(ctx, assignment, &left)?;
 
-    let right_ty = ctx.type_of_expression(&right);
+    let right_ty = ctx.type_of_expression(&right)?;
 
     let left = OperandInfo {
         range: left.range(),
@@ -193,11 +191,11 @@ fn run_assignment(
     Some(analyze_pair(assignment.range(), &left, &right))
 }
 
-fn type_of_assignment_target(
-    ctx: &RuleContext<NoUnsafePlusOperands>,
+fn type_of_assignment_target<'a>(
+    ctx: &'a RuleContext<NoUnsafePlusOperands>,
     assignment: &JsAssignmentExpression,
     left: &AnyJsAssignmentPattern,
-) -> Option<Type> {
+) -> Option<InferredType<'a>> {
     match left {
         AnyJsAssignmentPattern::AnyJsAssignment(assignment_target) => {
             type_of_assignment(ctx, assignment, assignment_target)
@@ -207,15 +205,15 @@ fn type_of_assignment_target(
     }
 }
 
-fn type_of_assignment(
-    ctx: &RuleContext<NoUnsafePlusOperands>,
+fn type_of_assignment<'a>(
+    ctx: &'a RuleContext<NoUnsafePlusOperands>,
     assignment: &JsAssignmentExpression,
     target: &AnyJsAssignment,
-) -> Option<Type> {
+) -> Option<InferredType<'a>> {
     match target {
         AnyJsAssignment::JsIdentifierAssignment(identifier) => {
             let name = identifier.name_token().ok()?;
-            Some(ctx.type_of_named_value(assignment.range(), name.text_trimmed()))
+            ctx.type_of_named_value(assignment.range(), name.text_trimmed())
         }
         AnyJsAssignment::JsParenthesizedAssignment(parenthesized) => {
             type_of_assignment(ctx, assignment, &parenthesized.assignment().ok()?)
@@ -245,159 +243,6 @@ fn has_parent_plus_expression(node: &JsBinaryExpression) -> bool {
         .find(|ancestor| !JsParenthesizedExpression::can_cast(ancestor.kind()))
         .and_then(JsBinaryExpression::cast)
         .is_some_and(|parent| parent.operator() == Ok(JsBinaryOperator::Plus))
-}
-
-fn has_invalid_variant(ty: &Type) -> bool {
-    if ty.is_union() {
-        ty.flattened_union_variants()
-            .any(|variant| is_invalid_variant(&variant))
-    } else {
-        is_invalid_variant(ty)
-    }
-}
-
-fn is_invalid_variant(ty: &Type) -> bool {
-    let Some(data) = ty.resolved_data().map(|resolved| resolved.as_raw_data()) else {
-        return true;
-    };
-
-    match data {
-        TypeData::NeverKeyword | TypeData::Symbol | TypeData::UnknownKeyword => true,
-        TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::Object(_)),
-        TypeData::Reference(reference) => ty
-            .resolve(reference)
-            .is_some_and(|resolved| is_invalid_variant(&resolved)),
-        TypeData::Intersection(intersection) => intersection.types().iter().all(|reference| {
-            ty.resolve(reference)
-                .is_some_and(|ty| is_object_like_variant(&ty))
-        }),
-        _ => is_object_like_variant(ty),
-    }
-}
-
-fn is_object_like_variant(ty: &Type) -> bool {
-    let Some(data) = ty.resolved_data().map(|resolved| resolved.as_raw_data()) else {
-        return true;
-    };
-
-    match data {
-        TypeData::Class(_)
-        | TypeData::Constructor(_)
-        | TypeData::Function(_)
-        | TypeData::Interface(_)
-        | TypeData::Module(_)
-        | TypeData::Namespace(_)
-        | TypeData::Object(_)
-        | TypeData::ObjectKeyword
-        | TypeData::Tuple(_) => true,
-        TypeData::Reference(reference) => ty
-            .resolve(reference)
-            .is_some_and(|resolved| is_object_like_variant(&resolved)),
-        TypeData::InstanceOf(instance) => ty
-            .resolve(&instance.ty)
-            .is_some_and(|resolved| is_object_like_variant(&resolved)),
-        _ => false,
-    }
-}
-
-fn has_number_like(ty: &Type) -> bool {
-    ty.is_number_or_number_literal()
-        || ty.has_variant(|variant| variant.is_number_or_number_literal())
-}
-
-fn has_bigint_like(ty: &Type) -> bool {
-    is_bigint_like(ty) || ty.has_variant(|variant| is_bigint_like(&variant))
-}
-
-fn is_bigint_like(ty: &Type) -> bool {
-    match ty.resolved_data().map(|resolved| resolved.as_raw_data()) {
-        Some(TypeData::BigInt) => true,
-        Some(TypeData::Literal(literal)) => matches!(literal.as_ref(), Literal::BigInt(_)),
-        _ => false,
-    }
-}
-
-struct TypeDescription<'a>(&'a Type);
-
-impl fmt::Display for TypeDescription<'_> {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> io::Result<()> {
-        self.write_type(self.0, fmt)
-    }
-}
-
-impl TypeDescription<'_> {
-    fn write_type(&self, ty: &Type, fmt: &mut fmt::Formatter) -> io::Result<()> {
-        if ty.is_union() {
-            let mut variants = ty.flattened_union_variants();
-            let Some(first) = variants.next() else {
-                return fmt.write_str("unknown");
-            };
-
-            self.write_variant(&first, fmt)?;
-            for variant in variants {
-                fmt.write_str(" | ")?;
-                self.write_variant(&variant, fmt)?;
-            }
-            return Ok(());
-        }
-
-        self.write_variant(ty, fmt)
-    }
-
-    fn write_variant(&self, ty: &Type, fmt: &mut fmt::Formatter) -> io::Result<()> {
-        let Some(data) = ty.resolved_data().map(|resolved| resolved.as_raw_data()) else {
-            return fmt.write_str("unknown");
-        };
-
-        match data {
-            TypeData::Unknown | TypeData::UnknownKeyword => fmt.write_str("unknown"),
-            TypeData::AnyKeyword => fmt.write_str("any"),
-            TypeData::NeverKeyword => fmt.write_str("never"),
-            TypeData::Null => fmt.write_str("null"),
-            TypeData::Undefined => fmt.write_str("undefined"),
-            TypeData::Boolean => fmt.write_str("boolean"),
-            TypeData::Number => fmt.write_str("number"),
-            TypeData::String => fmt.write_str("string"),
-            TypeData::BigInt => fmt.write_str("bigint"),
-            TypeData::Symbol => fmt.write_str("symbol"),
-            TypeData::ObjectKeyword | TypeData::Object(_) => fmt.write_str("object"),
-            TypeData::Interface(_) => fmt.write_str("interface"),
-            TypeData::Class(_) => fmt.write_str("class"),
-            TypeData::Function(_) => fmt.write_str("function"),
-            TypeData::Tuple(_) => fmt.write_str("tuple"),
-            TypeData::Module(_) | TypeData::Namespace(_) => fmt.write_str("namespace"),
-            TypeData::Constructor(_) => fmt.write_str("constructor"),
-            TypeData::InstanceOf(instance) => match ty.resolve(&instance.ty) {
-                Some(resolved) => self.write_variant(&resolved, fmt),
-                None => fmt.write_str("object"),
-            },
-            TypeData::Intersection(intersection) => {
-                let mut resolved = intersection
-                    .types()
-                    .iter()
-                    .filter_map(|reference| ty.resolve(reference));
-                let Some(first) = resolved.next() else {
-                    return fmt.write_str("intersection");
-                };
-
-                self.write_variant(&first, fmt)?;
-                for ty in resolved {
-                    fmt.write_str(" & ")?;
-                    self.write_variant(&ty, fmt)?;
-                }
-                Ok(())
-            }
-            TypeData::Literal(literal) => match literal.as_ref() {
-                Literal::BigInt(_) => fmt.write_str("bigint"),
-                Literal::Boolean(_) => fmt.write_str("boolean"),
-                Literal::Number(_) => fmt.write_str("number"),
-                Literal::String(_) | Literal::Template(_) => fmt.write_str("string"),
-                Literal::Object(_) => fmt.write_str("object"),
-                Literal::RegExp(_) => fmt.write_str("RegExp"),
-            },
-            _ => fmt.write_fmt(format_args!("{ty}")),
-        }
-    }
 }
 
 fn analyze_binary_operands(
@@ -457,19 +302,19 @@ fn analyze_expression(
 
     let operand = OperandInfo {
         range: expression.range(),
-        ty: ctx.type_of_expression(&expression),
+        ty: ctx.type_of_expression(&expression)?,
     };
 
-    if has_invalid_variant(&operand.ty) {
+    if operand.ty.has_invalid_plus_operand_variant() {
         return Some(Some(NoUnsafePlusOperandsState::InvalidOperand {
             range: operand.range,
         }));
     }
 
-    if has_number_like(&operand.ty) {
+    if operand.ty.has_number_like_variant() {
         first_number_range.get_or_insert(operand.range);
     }
-    if has_bigint_like(&operand.ty) {
+    if operand.ty.has_bigint_like_variant() {
         first_bigint_range.get_or_insert(operand.range);
     }
 
@@ -481,16 +326,16 @@ fn analyze_pair(
     left: &OperandInfo,
     right: &OperandInfo,
 ) -> Option<NoUnsafePlusOperandsState> {
-    if has_invalid_variant(&left.ty) {
+    if left.ty.has_invalid_plus_operand_variant() {
         return Some(NoUnsafePlusOperandsState::InvalidOperand { range: left.range });
     }
 
-    if has_invalid_variant(&right.ty) {
+    if right.ty.has_invalid_plus_operand_variant() {
         return Some(NoUnsafePlusOperandsState::InvalidOperand { range: right.range });
     }
 
-    if (has_number_like(&left.ty) && has_bigint_like(&right.ty))
-        || (has_bigint_like(&left.ty) && has_number_like(&right.ty))
+    if (left.ty.has_number_like_variant() && right.ty.has_bigint_like_variant())
+        || (left.ty.has_bigint_like_variant() && right.ty.has_number_like_variant())
     {
         return Some(NoUnsafePlusOperandsState::MixedBigIntAndNumber {
             range,
@@ -502,7 +347,10 @@ fn analyze_pair(
     None
 }
 
-fn type_for_range(ctx: &RuleContext<NoUnsafePlusOperands>, range: TextRange) -> Option<Type> {
+fn type_for_range<'a>(
+    ctx: &'a RuleContext<NoUnsafePlusOperands>,
+    range: TextRange,
+) -> Option<InferredType<'a>> {
     match ctx.query() {
         NoUnsafePlusOperandsQuery::JsBinaryExpression(binary) => {
             type_for_range_in_binary(ctx, binary, range)
@@ -513,24 +361,24 @@ fn type_for_range(ctx: &RuleContext<NoUnsafePlusOperands>, range: TextRange) -> 
     }
 }
 
-fn type_for_range_in_binary(
-    ctx: &RuleContext<NoUnsafePlusOperands>,
+fn type_for_range_in_binary<'a>(
+    ctx: &'a RuleContext<NoUnsafePlusOperands>,
     binary: &JsBinaryExpression,
     range: TextRange,
-) -> Option<Type> {
+) -> Option<InferredType<'a>> {
     type_for_range_in_expression(ctx, binary.left().ok()?, range)
         .or_else(|| type_for_range_in_expression(ctx, binary.right().ok()?, range))
 }
 
-fn type_for_range_in_expression(
-    ctx: &RuleContext<NoUnsafePlusOperands>,
+fn type_for_range_in_expression<'a>(
+    ctx: &'a RuleContext<NoUnsafePlusOperands>,
     expression: AnyJsExpression,
     range: TextRange,
-) -> Option<Type> {
+) -> Option<InferredType<'a>> {
     let expression = expression.omit_parentheses();
 
     if expression.range() == range {
-        return Some(ctx.type_of_expression(&expression));
+        return ctx.type_of_expression(&expression);
     }
 
     if let AnyJsExpression::JsBinaryExpression(binary) = &expression
@@ -543,11 +391,11 @@ fn type_for_range_in_expression(
     None
 }
 
-fn type_for_range_in_assignment(
-    ctx: &RuleContext<NoUnsafePlusOperands>,
+fn type_for_range_in_assignment<'a>(
+    ctx: &'a RuleContext<NoUnsafePlusOperands>,
     assignment: &JsAssignmentExpression,
     range: TextRange,
-) -> Option<Type> {
+) -> Option<InferredType<'a>> {
     let left = assignment.left().ok()?;
     let right = assignment.right().ok()?;
 
@@ -556,7 +404,7 @@ fn type_for_range_in_assignment(
     }
 
     if right.range() == range {
-        return Some(ctx.type_of_expression(&right));
+        return ctx.type_of_expression(&right);
     }
 
     None

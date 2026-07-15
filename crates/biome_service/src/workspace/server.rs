@@ -1,4 +1,7 @@
-use super::{document::Document, *};
+use super::{
+    document::{Document, ProjectDataState},
+    *,
+};
 use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
@@ -16,7 +19,7 @@ use crate::module_graph::resolve_js_module;
 #[cfg(all(feature = "module_graph", feature = "lang_html"))]
 use crate::module_graph::{HtmlEmbeddedContent, resolve_html_module};
 #[cfg(feature = "module_graph")]
-use crate::module_graph::{ModuleDb, ModuleInfoKind};
+use crate::module_graph::{ModuleDb, ModuleInfo, ModuleInfoKind};
 use crate::projects::{GetFileFeaturesParams, ProjectKey, Projects};
 use crate::scanner::{
     IndexRequestKind, IndexTrigger, ScanOptions, Scanner, ScannerWatcherBridge, WatcherInstruction,
@@ -85,6 +88,7 @@ use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_project_layout::ProjectLayout;
 use biome_resolver::FsWithResolverProxy;
 use biome_rowan::{NodeCache, SendNode};
+#[cfg(any(test, feature = "module_graph", feature = "testing"))]
 use biome_workspace_db::WorkspaceDb;
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
@@ -93,6 +97,8 @@ use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::fmt::Debug;
 use std::ops::Deref;
 use std::panic::RefUnwindSafe;
+#[cfg(test)]
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::watch;
@@ -149,6 +155,13 @@ pub struct WorkspaceServer {
 
     /// Re-usable cache for analyzer visitors.
     analyzer_cache: HashMap<ProjectKey, AnalyzerVisitorCache>,
+
+    lifetime: WorkspaceLifetime,
+
+    #[cfg(test)]
+    cancel_change_file_after_document_update: AtomicBool,
+    #[cfg(test)]
+    detached_module_count: AtomicUsize,
 }
 
 /// A convenient wrapper around a [WorkspaceServer] that holds salsa database state.
@@ -290,6 +303,24 @@ impl WorkspaceServer {
         search_provider: Arc<dyn SearchQuery>,
         threads: Option<usize>,
     ) -> Self {
+        Self::new_with_lifetime(
+            fs,
+            watcher_tx,
+            notification_tx,
+            search_provider,
+            threads,
+            WorkspaceLifetime::Persistent,
+        )
+    }
+
+    fn new_with_lifetime(
+        fs: Arc<dyn FsWithResolverProxy>,
+        watcher_tx: Sender<WatcherInstruction>,
+        notification_tx: watch::Sender<ServiceNotification>,
+        search_provider: Arc<dyn SearchQuery>,
+        threads: Option<usize>,
+        lifetime: WorkspaceLifetime,
+    ) -> Self {
         init_thread_pool(threads);
 
         Self {
@@ -305,6 +336,11 @@ impl WorkspaceServer {
             fs,
             notification_tx,
             analyzer_cache: HashMap::default(),
+            lifetime,
+            #[cfg(test)]
+            cancel_change_file_after_document_update: AtomicBool::new(false),
+            #[cfg(test)]
+            detached_module_count: AtomicUsize::new(0),
         }
     }
 
@@ -324,7 +360,8 @@ impl WorkspaceServer {
 }
 
 impl LocalWorkspace {
-    /// Creates a new local [Workspace] backed by an in-process [WorkspaceServer].
+    /// Creates a persistent local [Workspace] backed by an in-process
+    /// [WorkspaceServer].
     pub fn new(
         fs: Arc<dyn FsWithResolverProxy>,
         watcher_tx: Sender<WatcherInstruction>,
@@ -334,6 +371,30 @@ impl LocalWorkspace {
     ) -> Self {
         Self {
             server: WorkspaceServer::new(fs, watcher_tx, notification_tx, search_provider, threads),
+            db_state: db::DbState::default(),
+        }
+    }
+
+    /// Creates a disposable local [Workspace].
+    ///
+    /// A disposable workspace accepts document-only updates and is expected to
+    /// be dropped after its current workload completes.
+    pub(crate) fn new_disposable(
+        fs: Arc<dyn FsWithResolverProxy>,
+        watcher_tx: Sender<WatcherInstruction>,
+        notification_tx: watch::Sender<ServiceNotification>,
+        search_provider: Arc<dyn SearchQuery>,
+        threads: Option<usize>,
+    ) -> Self {
+        Self {
+            server: WorkspaceServer::new_with_lifetime(
+                fs,
+                watcher_tx,
+                notification_tx,
+                search_provider,
+                threads,
+                WorkspaceLifetime::Disposable,
+            ),
             db_state: db::DbState::default(),
         }
     }
@@ -405,6 +466,53 @@ impl LocalWorkspace {
 }
 
 impl WorkspaceServerWithDb<'_> {
+    fn finish_change_file(
+        &self,
+        project_key: ProjectKey,
+        path: &BiomePath,
+        version: i32,
+        parsed: ParsedSource,
+    ) -> Result<ChangeFileResult, WorkspaceError> {
+        let mut final_diagnostics = vec![];
+
+        if self.is_indexed(path) {
+            let (dependencies, diagnostics) = self.update_service_data(
+                path,
+                UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, parsed.into()),
+                project_key,
+            )?;
+            final_diagnostics.extend(
+                diagnostics
+                    .into_iter()
+                    .map(biome_diagnostics::serde::Diagnostic::new),
+            );
+            if !dependencies.is_empty()
+                && let Some(project_path) = self.projects.get_project_path(project_key)
+            {
+                let diagnostics = self.scanner.index_dependencies(
+                    self,
+                    project_key,
+                    &project_path,
+                    dependencies,
+                    IndexTrigger::Update,
+                )?;
+                final_diagnostics.extend(diagnostics);
+            }
+        }
+
+        self.documents.pin().update(path.to_path_buf(), |document| {
+            let mut document = document.clone();
+            if document.version == Some(version) {
+                document.project_data_state = ProjectDataState::Current;
+            }
+            document
+        });
+
+        Ok(ChangeFileResult {
+            diagnostics: final_diagnostics,
+        })
+    }
+
     /// Returns a clone of the project database for passing to analyzers.
     fn module_db(&self) -> db::DbReadGuard {
         self.db_state.fork()
@@ -814,6 +922,7 @@ impl WorkspaceServerWithDb<'_> {
                     Document {
                         content: content.clone(),
                         version,
+                        project_data_state: ProjectDataState::Current,
                         file_source_index,
                         syntax: syntax.clone(),
                     }
@@ -821,6 +930,7 @@ impl WorkspaceServerWithDb<'_> {
                 || Document {
                     content: content.clone(),
                     version,
+                    project_data_state: ProjectDataState::Current,
                     file_source_index,
                     syntax: syntax.clone(),
                 },
@@ -940,7 +1050,7 @@ impl WorkspaceServerWithDb<'_> {
                 parsed_source: parse.into(),
                 cursor_offset,
                 path: path.to_path_buf(),
-                workspace_db: workspace_db.clone(),
+                workspace_db: workspace_db.clone_untracked_db(),
             });
             if result.is_some() {
                 let capabilities = resolve_capabilities(&result, capabilities);
@@ -972,7 +1082,7 @@ impl WorkspaceServerWithDb<'_> {
                 parsed_source: snippet.into(),
                 cursor_offset: local_cursor,
                 path: path.to_path_buf(),
-                workspace_db: workspace_db.clone(),
+                workspace_db: workspace_db.clone_untracked_db(),
             });
 
             // If binding is Local, adjust range back to parent document coordinates
@@ -1418,6 +1528,8 @@ impl WorkspaceServerWithDb<'_> {
         path: &BiomePath,
         update_kind: &UpdateKind,
     ) -> Result<ExtractedModuleInputs, WorkspaceError> {
+        #[cfg(not(feature = "html_embeds"))]
+        let _ = path;
         match update_kind {
             UpdateKind::AddedOrChanged(_, root) => {
                 #[cfg(feature = "lang_js")]
@@ -1541,6 +1653,30 @@ impl WorkspaceServerWithDb<'_> {
             ExtractedModuleInputs::Removed => ResolvedModuleGraphUpdate::Remove,
             ExtractedModuleInputs::Unsupported => ResolvedModuleGraphUpdate::Noop,
         }
+    }
+
+    #[cfg(feature = "module_graph")]
+    fn detached_module(
+        &self,
+        db: &WorkspaceDb,
+        path: &BiomePath,
+        parsed: AnyParsedSource,
+        infer_types: bool,
+    ) -> Result<Option<ModuleInfo>, WorkspaceError> {
+        let inputs = self.extract_module_inputs(
+            db,
+            path,
+            &UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, parsed),
+        )?;
+        let resolved = self.resolve_module_graph_update(path, inputs, infer_types);
+        Ok(match resolved {
+            ResolvedModuleGraphUpdate::Upsert { kind, .. } => {
+                #[cfg(test)]
+                self.detached_module_count.fetch_add(1, Ordering::Relaxed);
+                Some(ModuleInfo::new_detached(db, path.to_path_buf(), kind))
+            }
+            ResolvedModuleGraphUpdate::Remove | ResolvedModuleGraphUpdate::Noop => None,
+        })
     }
 
     #[cfg(feature = "module_graph")]
@@ -1751,6 +1887,20 @@ macro_rules! delegate_workspace_methods {
     };
 }
 
+macro_rules! delegate_retrying_workspace_methods {
+    ($(fn $name:ident($params:ident: $params_ty:ty) -> $return_ty:ty;)*) => {
+        $(
+            fn $name(&self, $params: $params_ty) -> $return_ty {
+                if self.lifetime() == WorkspaceLifetime::Disposable {
+                    self.as_workspace().$name($params)
+                } else {
+                    retry_on_pending_write(|| self.as_workspace().$name($params.clone()))
+                }
+            }
+        )*
+    };
+}
+
 impl Workspace for LocalWorkspace {
     delegate_workspace_methods! {
         fn open_project(params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError>;
@@ -1759,25 +1909,29 @@ impl Workspace for LocalWorkspace {
         fn close_project(params: CloseProjectParams) -> Result<(), WorkspaceError>;
         fn open_file(params: OpenFileParams) -> Result<OpenFileResult, WorkspaceError>;
         fn file_exists(params: FileExistsParams) -> Result<bool, WorkspaceError>;
-        fn file_features(params: SupportsFeatureParams) -> Result<FileFeaturesResult, WorkspaceError>;
         fn is_path_ignored(params: PathIsIgnoredParams) -> Result<bool, WorkspaceError>;
         fn get_file_content(params: GetFileContentParams) -> Result<String, WorkspaceError>;
         fn check_file_size(params: CheckFileSizeParams) -> Result<CheckFileSizeResult, WorkspaceError>;
-        fn change_file(params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError>;
-        fn pull_diagnostics(params: PullDiagnosticsParams) -> Result<PullDiagnosticsResult, WorkspaceError>;
-        fn pull_actions(params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError>;
-        fn pull_diagnostics_and_actions(params: PullDiagnosticsAndActionsParams) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError>;
         fn format_file(params: FormatFileParams) -> Result<Printed, WorkspaceError>;
         fn format_range(params: FormatRangeParams) -> Result<Printed, WorkspaceError>;
         fn format_on_type(params: FormatOnTypeParams) -> Result<Printed, WorkspaceError>;
         fn fix_file(params: FixFileParams) -> Result<FixFileResult, WorkspaceError>;
-        fn rename(params: RenameParams) -> Result<RenameResult, WorkspaceError>;
-        fn go_to_definition(params: GoToDefinitionParams) -> Result<Option<GoToDefinitionResult>, WorkspaceError>;
         fn close_file(params: CloseFileParams) -> Result<(), WorkspaceError>;
         fn update_module_graph(params: UpdateModuleGraphParams) -> Result<(), WorkspaceError>;
         fn parse_pattern(params: ParsePatternParams) -> Result<ParsePatternResult, WorkspaceError>;
         fn search_pattern(params: SearchPatternParams) -> Result<SearchResults, WorkspaceError>;
         fn drop_pattern(params: DropPatternParams) -> Result<(), WorkspaceError>;
+        fn rage(params: RageParams) -> Result<RageResult, WorkspaceError>;
+    }
+
+    delegate_retrying_workspace_methods! {
+        fn change_file(params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError>;
+        fn file_features(params: SupportsFeatureParams) -> Result<FileFeaturesResult, WorkspaceError>;
+        fn pull_diagnostics(params: PullDiagnosticsParams) -> Result<PullDiagnosticsResult, WorkspaceError>;
+        fn pull_actions(params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError>;
+        fn pull_diagnostics_and_actions(params: PullDiagnosticsAndActionsParams) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError>;
+        fn rename(params: RenameParams) -> Result<RenameResult, WorkspaceError>;
+        fn go_to_definition(params: GoToDefinitionParams) -> Result<Option<GoToDefinitionResult>, WorkspaceError>;
         fn get_syntax_tree(params: GetSyntaxTreeParams) -> Result<GetSyntaxTreeResult, WorkspaceError>;
         fn get_control_flow_graph(params: GetControlFlowGraphParams) -> Result<String, WorkspaceError>;
         fn get_formatter_ir(params: GetFormatterIRParams) -> Result<String, WorkspaceError>;
@@ -1785,7 +1939,6 @@ impl Workspace for LocalWorkspace {
         fn get_registered_types(params: GetRegisteredTypesParams) -> Result<String, WorkspaceError>;
         fn get_semantic_model(params: GetSemanticModelParams) -> Result<String, WorkspaceError>;
         fn get_module_graph(params: GetModuleGraphParams) -> Result<GetModuleGraphResult, WorkspaceError>;
-        fn rage(params: RageParams) -> Result<RageResult, WorkspaceError>;
     }
 
     fn fs(&self) -> &dyn FsWithResolverProxy {
@@ -1794,6 +1947,10 @@ impl Workspace for LocalWorkspace {
 
     fn server_info(&self) -> Option<&ServerInfo> {
         None
+    }
+
+    fn lifetime(&self) -> WorkspaceLifetime {
+        self.server.lifetime
     }
 }
 
@@ -2308,20 +2465,69 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             version,
             inline_config,
             editor_features,
+            project_data_update,
         }: ChangeFileParams,
     ) -> Result<ChangeFileResult, WorkspaceError> {
+        let is_indexed = self.is_indexed(&path);
+        let invalid_document_only_update = project_data_update == ProjectDataUpdate::DocumentOnly
+            && self.lifetime != WorkspaceLifetime::Disposable
+            && is_indexed;
+        debug_assert!(
+            !invalid_document_only_update,
+            "ProjectDataUpdate::DocumentOnly was requested for indexed path `{path}` in a persistent workspace. This is a bug coming from whoever called this function. This usually happens when the lifetime of the Workspace is disposable, but you requested a service update."
+        );
+        let project_data_update = if invalid_document_only_update {
+            // Keep persistent project data correct if an internal caller violates
+            // the invariant in a release build.
+            ProjectDataUpdate::Refresh
+        } else {
+            project_data_update
+        };
         let documents = self.documents.pin();
-        let (index, existing_version) = documents
+        let (index, existing_version, project_data_state, same_content) = documents
             .get(path.as_path())
-            .map(|document| (document.file_source_index, document.version))
+            .map(|document| {
+                (
+                    document.file_source_index,
+                    document.version,
+                    document.project_data_state,
+                    document.content == content,
+                )
+            })
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
-        if existing_version.is_some_and(|existing_version| existing_version >= version) {
+        if existing_version.is_some_and(|existing_version| existing_version > version)
+            || existing_version == Some(version)
+                && (!same_content || project_data_state == ProjectDataState::Current)
+        {
             warn!(%version, %path, "outdated_file_change");
             // Safely ignore older versions.
             return Ok(ChangeFileResult {
                 diagnostics: Vec::new(),
             });
+        }
+
+        if existing_version == Some(version) {
+            if matches!(project_data_update, ProjectDataUpdate::DocumentOnly) {
+                documents.update(path.to_path_buf(), |document| {
+                    let mut document = document.clone();
+                    document.project_data_state = if is_indexed {
+                        ProjectDataState::DocumentOnly
+                    } else {
+                        ProjectDataState::Current
+                    };
+                    document
+                });
+                return Ok(ChangeFileResult {
+                    diagnostics: Vec::new(),
+                });
+            }
+            let parsed = {
+                let db = self.get_db();
+                db.get_file(path.as_path())
+                    .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?
+            };
+            return self.finish_change_file(project_key, &path, version, parsed);
         }
 
         let settings = self
@@ -2384,9 +2590,17 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         let parsed =
             self.db_update_parsed_file(path.as_path(), any_parse, index, embedded_snippets);
 
+        let project_data_state = if !is_indexed {
+            ProjectDataState::Current
+        } else if matches!(project_data_update, ProjectDataUpdate::Refresh) {
+            ProjectDataState::RefreshPending
+        } else {
+            ProjectDataState::DocumentOnly
+        };
         let document = Document {
             content,
             version: Some(version),
+            project_data_state,
             file_source_index: index,
             syntax: Some(Ok(())),
         };
@@ -2402,37 +2616,21 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             .insert(path.clone().into(), document)
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
-        let mut final_diagnostics = vec![];
-
-        if self.is_indexed(&path) {
-            let (dependencies, diagnostics) = self.update_service_data(
-                &path,
-                UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, parsed.into()),
-                project_key,
-            )?;
-            final_diagnostics.extend(
-                diagnostics
-                    .into_iter()
-                    .map(biome_diagnostics::serde::Diagnostic::new)
-                    .collect::<Vec<_>>(),
-            );
-            if !dependencies.is_empty()
-                && let Some(project_path) = self.projects.get_project_path(project_key)
-            {
-                let diagnostics = self.scanner.index_dependencies(
-                    self,
-                    project_key,
-                    &project_path,
-                    dependencies,
-                    IndexTrigger::Update,
-                )?;
-                final_diagnostics.extend(diagnostics);
-            }
+        #[cfg(test)]
+        if self
+            .cancel_change_file_after_document_update
+            .swap(false, Ordering::AcqRel)
+        {
+            std::panic::resume_unwind(Box::new(salsa::Cancelled::PendingWrite));
         }
 
-        Ok(ChangeFileResult {
-            diagnostics: final_diagnostics,
-        })
+        if project_data_state == ProjectDataState::RefreshPending {
+            self.finish_change_file(project_key, &path, version, parsed)
+        } else {
+            Ok(ChangeFileResult {
+                diagnostics: Vec::new(),
+            })
+        }
     }
 
     /// Retrieves the list of diagnostics associated with a file
@@ -2464,17 +2662,31 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             diagnostic_level,
             enforce_assist,
         } = params;
-        let workspace_db = self.get_db();
         let (working_directory, settings) = self
             .projects
             .get_settings_and_wd_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
+        #[cfg(feature = "module_graph")]
+        let infer_types = settings.module_graph_resolution_kind.is_modules_and_types();
         let (parse, embedded_snippets) = self.get_parsed_snippets_and_parse_source(&path)?;
+        let workspace_db = self.get_db().into_untracked_db();
+        #[cfg(feature = "module_graph")]
+        let document_only = self
+            .documents
+            .pin()
+            .get(path.as_path())
+            .is_some_and(|document| document.project_data_state == ProjectDataState::DocumentOnly);
+        #[cfg(feature = "module_graph")]
+        let current_module = if document_only {
+            self.detached_module(&workspace_db, &path, parse.into(), infer_types)?
+        } else {
+            None
+        };
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let capabilities = self.features.get_deprecated_capabilities(language);
 
-        let parse_errors = parse.error_count(&*workspace_db);
+        let parse_errors = parse.error_count(&workspace_db);
 
         let analyzer_cache_guard = self.analyzer_cache.pin();
         let analyzer_cache =
@@ -2507,7 +2719,9 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 skip: &skip,
                 language,
                 categories,
-                workspace_db: workspace_db.into_untracked_db(),
+                workspace_db,
+                #[cfg(feature = "module_graph")]
+                current_module,
                 project_layout: self.project_layout.clone(),
                 suppression_reason: None,
                 enabled_selectors: &enabled_rules,
@@ -2528,15 +2742,21 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 mut infos,
             } = results;
             for embedded_node in &embedded_snippets {
-                let workspace_db = self.get_db();
+                let workspace_db = self.get_db().into_untracked_db();
                 let Some(file_source) = workspace_db
-                    .source_from_index(embedded_node.document_source_index(&*workspace_db))
+                    .source_from_index(embedded_node.document_source_index(&workspace_db))
                 else {
                     continue;
                 };
                 let capabilities = self.features.get_deprecated_capabilities(file_source);
                 let Some(lint) = capabilities.analyzer.lint else {
                     continue;
+                };
+                #[cfg(feature = "module_graph")]
+                let current_module = if document_only {
+                    self.detached_module(&workspace_db, &path, embedded_node.into(), infer_types)?
+                } else {
+                    None
                 };
                 let results = lint(LintParams {
                     parsed_source: embedded_node.into(),
@@ -2546,7 +2766,9 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                     skip: &skip,
                     language: file_source,
                     categories,
-                    workspace_db: workspace_db.clone(),
+                    workspace_db,
+                    #[cfg(feature = "module_graph")]
+                    current_module,
                     project_layout: self.project_layout.clone(),
                     suppression_reason: None,
                     enabled_selectors: &enabled_rules,
@@ -2569,7 +2791,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             (diagnostics, errors, warnings, infos, skipped_diagnostics)
         } else {
             let mut parse_diagnostics: Vec<_> = parse
-                .serde_diagnostics(&*workspace_db)
+                .serde_diagnostics(&workspace_db)
                 .into_iter()
                 .filter(|diag| diag.severity() >= diagnostic_level)
                 .collect();
@@ -2580,7 +2802,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
 
             for embedded_node in &embedded_snippets {
                 let diagnostics: Vec<_> = embedded_node
-                    .serde_diagnostics(&*workspace_db)
+                    .serde_diagnostics(&workspace_db)
                     .into_iter()
                     .filter(|diag| diag.severity() >= diagnostic_level)
                     .collect();
@@ -2665,7 +2887,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 skip: &skip,
                 language,
                 categories,
-                workspace_db: workspace_db.clone(),
+                workspace_db: workspace_db.clone_untracked_db(),
                 project_layout: self.project_layout.clone(),
                 suppression_reason: None,
                 enabled_selectors: &enabled_rules,
@@ -2694,7 +2916,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                     skip: &skip,
                     language: file_source,
                     categories,
-                    workspace_db: workspace_db.clone(),
+                    workspace_db: workspace_db.clone_untracked_db(),
                     project_layout: self.project_layout.clone(),
                     suppression_reason: None,
                     enabled_selectors: &enabled_rules,
@@ -2765,7 +2987,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             range,
             settings: &settings,
             path: &path,
-            workspace_db: workspace_db.clone(),
+            workspace_db: workspace_db.clone_untracked_db(),
             project_layout: self.project_layout.clone(),
             language,
             only: &only,
@@ -2795,7 +3017,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 range,
                 settings: &settings,
                 path: &path,
-                workspace_db: workspace_db.clone(),
+                workspace_db: workspace_db.clone_untracked_db(),
                 project_layout: self.project_layout.clone(),
                 language: file_source,
                 only: &only,
@@ -2978,6 +3200,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             .projects
             .get_settings_and_wd_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
+        #[cfg(feature = "module_graph")]
+        let infer_types = settings.module_graph_resolution_kind.is_modules_and_types();
         let capabilities =
             self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
         let fix_all = capabilities
@@ -3032,8 +3256,14 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                     settings: &settings,
                     should_format,
                     biome_path: &path,
-                    workspace_db: workspace_db.clone(),
+                    workspace_db: workspace_db.clone_untracked_db(),
                     project_layout: self.project_layout.clone(),
+                    #[cfg(feature = "module_graph")]
+                    fs: self.fs.as_ref(),
+                    #[cfg(feature = "module_graph")]
+                    path_info_cache: &self.db_state.path_info_cache,
+                    #[cfg(feature = "module_graph")]
+                    infer_types,
                     document_file_source,
                     only: &only,
                     skip: &skip,
@@ -3043,6 +3273,9 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                     plugins: plugins.clone(),
                     working_directory: Some(working_directory.as_path()),
                     embeds_initial_indent: 0,
+                    workspace_lifetime: self.lifetime,
+                    #[cfg(test)]
+                    detached_module_count: &self.detached_module_count,
                 })?;
 
                 actions.extend(results.actions);
@@ -3060,7 +3293,11 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             // forks created by `get_db` are dropped before the setter runs.
             let new_root = {
                 let workspace_db = self.get_db();
-                update_snippets(parse.into(), workspace_db.clone(), new_snippets)?
+                update_snippets(
+                    parse.into(),
+                    workspace_db.clone_untracked_db(),
+                    new_snippets,
+                )?
             };
             self.db_update_parsed_root(path.as_path(), new_root);
             parse = {
@@ -3078,8 +3315,14 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             settings: &settings,
             should_format,
             biome_path: &path,
-            workspace_db: workspace_db.clone(),
+            workspace_db: workspace_db.clone_untracked_db(),
             project_layout: self.project_layout.clone(),
+            #[cfg(feature = "module_graph")]
+            fs: self.fs.as_ref(),
+            #[cfg(feature = "module_graph")]
+            path_info_cache: &self.db_state.path_info_cache,
+            #[cfg(feature = "module_graph")]
+            infer_types,
             document_file_source: language,
             only: &only,
             skip: &skip,
@@ -3089,6 +3332,9 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             plugins: plugins.clone(),
             working_directory: Some(working_directory.as_path()),
             embeds_initial_indent: 0,
+            workspace_lifetime: self.lifetime,
+            #[cfg(test)]
+            detached_module_count: &self.detached_module_count,
         })?;
 
         actions.extend(fix_result.actions);
@@ -3198,7 +3444,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             let result = resolve_definition(ResolveDefinitionParams {
                 path,
                 definition_ref: &definition_ref,
-                workspace_db: workspace_db.clone(),
+                workspace_db: workspace_db.clone_untracked_db(),
                 parsed_source: snippet.into(),
             });
 
@@ -3351,6 +3597,10 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         None
     }
 
+    fn lifetime(&self) -> WorkspaceLifetime {
+        self.lifetime
+    }
+
     fn get_module_graph(
         &self,
         _params: GetModuleGraphParams,
@@ -3414,7 +3664,7 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
             _ => {
                 #[cfg(feature = "module_graph")]
                 {
-                    self.module_db().contains(path)
+                    self.db_state.contains_module_untracked(path)
                 }
                 #[cfg(not(feature = "module_graph"))]
                 {

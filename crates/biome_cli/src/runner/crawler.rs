@@ -7,7 +7,7 @@ use biome_diagnostics::{Error, Severity};
 use biome_fs::{BiomePath, FileSystem, PathInterner, TraversalContext, TraversalScope};
 use biome_service::Workspace;
 use biome_service::projects::ProjectKey;
-use biome_service::workspace::FeaturesSupported;
+use biome_service::workspace::{FeaturesSupported, ProjectDataUpdate};
 use camino::Utf8PathBuf;
 use crossbeam::channel::{Sender, unbounded};
 use papaya::{HashMap, HashSet, HashSetRef, LocalGuard};
@@ -40,6 +40,7 @@ pub trait Crawler<Output> {
         workspace: &dyn Workspace,
         fs: &dyn FileSystem,
         project_key: ProjectKey,
+        project_data_update: ProjectDataUpdate,
         inputs: Vec<CrawlPath>,
         collector: Self::Collector,
         max_diagnostics: u32,
@@ -66,6 +67,7 @@ pub trait Crawler<Output> {
                     fs,
                     workspace,
                     project_key,
+                    project_data_update,
                     interner,
                     sender,
                     execution,
@@ -127,6 +129,7 @@ pub trait CrawlerContext: TraversalContext {
     fn fs(&self) -> &dyn FileSystem;
     fn workspace(&self) -> &dyn Workspace;
     fn project_key(&self) -> ProjectKey;
+    fn project_data_update(&self) -> ProjectDataUpdate;
     fn execution(&self) -> &dyn Execution;
     fn insert_file_features(&self, path: BiomePath, features: FeaturesSupported);
     fn get_file_features(&self, path: &BiomePath) -> Option<FeaturesSupported>;
@@ -140,6 +143,8 @@ pub(crate) struct CrawlerOptions<'ctx, 'app, H, P> {
     pub(crate) workspace: &'ctx dyn Workspace,
     /// Key of the project in which we're traversing.
     pub(crate) project_key: ProjectKey,
+    /// Controls whether document writes refresh shared project data.
+    pub(crate) project_data_update: ProjectDataUpdate,
     /// File paths interner cache used by the filesystem traversal
     interner: PathInterner,
     /// Shared atomic counter storing the number of changed files
@@ -212,6 +217,10 @@ where
         self.project_key
     }
 
+    fn project_data_update(&self) -> ProjectDataUpdate {
+        self.project_data_update
+    }
+
     fn execution(&self) -> &dyn Execution {
         self.execution
     }
@@ -235,6 +244,7 @@ where
         fs: &'app dyn FileSystem,
         workspace: &'ctx dyn Workspace,
         project_key: ProjectKey,
+        project_data_update: ProjectDataUpdate,
         interner: PathInterner,
         sender: Sender<Message>,
         execution: &'app dyn Execution,
@@ -245,6 +255,7 @@ where
             fs,
             workspace,
             project_key,
+            project_data_update,
             interner,
             messages: sender,
             evaluated_paths: HashSet::default(),

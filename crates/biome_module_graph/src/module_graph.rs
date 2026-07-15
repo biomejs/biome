@@ -48,7 +48,7 @@ pub fn resolve_js_module(
     enable_type_inference: bool,
 ) -> (JsModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
     let inference_mode = if enable_type_inference {
-        TypeInferenceMode::Complete
+        TypeInferenceMode::RawTypesOnly
     } else {
         TypeInferenceMode::Disabled
     };
@@ -169,6 +169,28 @@ pub struct ModuleInfo {
 
     #[no_eq]
     pub kind: ModuleInfoKind,
+
+    pub origin: ModuleInfoOrigin,
+}
+
+impl ModuleInfo {
+    pub fn new_published(
+        db: &dyn crate::ModuleDb,
+        path: Utf8PathBuf,
+        kind: ModuleInfoKind,
+    ) -> Self {
+        Self::new(db, path, kind, ModuleInfoOrigin::Published)
+    }
+
+    pub fn new_detached(db: &dyn crate::ModuleDb, path: Utf8PathBuf, kind: ModuleInfoKind) -> Self {
+        Self::new(db, path, kind, ModuleInfoOrigin::Detached)
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ModuleInfoOrigin {
+    Published,
+    Detached,
 }
 
 #[derive(Debug, Clone)]

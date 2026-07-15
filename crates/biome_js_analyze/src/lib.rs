@@ -17,7 +17,7 @@ use biome_diagnostics::Error as DiagnosticError;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
 use biome_languages::{JsFileSource, LanguageDb};
-use biome_module_graph::ModuleDb;
+use biome_module_graph::{ModuleDb, ModuleInfo};
 use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextRange;
@@ -52,6 +52,7 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 #[derive(Default)]
 pub struct JsAnalyzerServices<'a> {
     module_db: Option<Rc<dyn ModuleDb>>,
+    current_module: Option<ModuleInfo>,
     language_db: Option<Rc<dyn LanguageDb>>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
@@ -68,6 +69,7 @@ impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
     ) -> Self {
         Self {
             module_db: Some(module_db),
+            current_module: None,
             language_db: None,
             project_layout,
             source_type,
@@ -80,6 +82,7 @@ impl From<&AnyJsRoot> for JsAnalyzerServices<'_> {
     fn from(_value: &AnyJsRoot) -> Self {
         Self {
             module_db: None,
+            current_module: None,
             language_db: None,
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
@@ -101,6 +104,11 @@ impl<'a> JsAnalyzerServices<'a> {
 
     pub fn with_module_db(mut self, module_db: Rc<dyn ModuleDb>) -> Self {
         self.module_db = Some(module_db);
+        self
+    }
+
+    pub fn with_current_module(mut self, current_module: ModuleInfo) -> Self {
+        self.current_module = Some(current_module);
         self
     }
 
@@ -166,6 +174,7 @@ where
 
     let JsAnalyzerServices {
         module_db,
+        current_module,
         language_db: embedded_db,
         project_layout,
         source_type,
@@ -217,7 +226,8 @@ where
         project_layout.find_all_turbo_json_for_path(file_path.as_ref());
 
     let type_resolver = module_db.as_ref().and_then(|db| {
-        db.module_for_path(file_path.as_ref())
+        current_module
+            .or_else(|| db.module_for_path(file_path.as_ref()))
             .map(|module| TypedModule::new(db.clone(), module))
     });
 
