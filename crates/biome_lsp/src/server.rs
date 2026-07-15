@@ -806,6 +806,7 @@ impl ServerFactory {
         workspace_method!(builder, get_module_graph);
         workspace_method!(builder, get_type_info);
         workspace_method!(builder, change_file);
+        workspace_method!(builder, process_file);
         workspace_method!(builder, check_file_size);
         workspace_method!(builder, get_file_content);
         workspace_method!(builder, close_file);

@@ -989,7 +989,9 @@ pub struct ChangeFileParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct ChangeFileResult {
-    diagnostics: Vec<Diagnostic>,
+    /// Problems found while updating dependency and module data.
+    /// This does not include lint or parse results for the changed file.
+    pub diagnostics: Vec<Diagnostic>,
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -1071,6 +1073,47 @@ pub struct PullDiagnosticsResult {
     /// to distinguish parse errors from analyzer errors.
     pub parse_errors: usize,
     pub skipped_diagnostics: u64,
+}
+
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct ProcessFileParams {
+    pub project_key: ProjectKey,
+    pub path: BiomePath,
+    pub content: FileContent,
+    pub categories: RuleCategories,
+    #[serde(default)]
+    pub only: Vec<AnalyzerSelector>,
+    #[serde(default)]
+    pub skip: Vec<AnalyzerSelector>,
+    #[serde(default)]
+    pub enabled_rules: Vec<AnalyzerSelector>,
+    pub fix_file_mode: Option<FixFileMode>,
+    pub suppression_reason: Option<String>,
+    pub format: bool,
+    pub write: bool,
+    pub include_code_fix: bool,
+    pub max_diagnostics: Option<u32>,
+    pub diagnostic_level: Severity,
+    pub enforce_assist: bool,
+    pub skip_parse_errors: bool,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct ProcessFileResult {
+    pub output: Option<String>,
+    pub diagnostics: Vec<Diagnostic>,
+    pub format_with_errors_disabled: bool,
+    pub applied_fixes: usize,
+    pub errors: usize,
+    pub warnings: usize,
+    pub infos: usize,
+    pub parse_errors: usize,
+    pub skipped_diagnostics: u64,
+    pub skipped_suggested_fixes: u32,
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -1681,6 +1724,10 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Changes the content of an open file.
     fn change_file(&self, params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError>;
 
+    /// Processes a file by applying linting, formatting, and assist without changing the open workspace document.
+    /// This is a stateless operation, which means that the new document, after the fixes/fomatting, isn't saved in the workspace.
+    fn process_file(&self, params: ProcessFileParams) -> Result<ProcessFileResult, WorkspaceError>;
+
     /// Retrieves the list of diagnostics associated with a file.
     fn pull_diagnostics(
         &self,
@@ -1870,6 +1917,7 @@ impl<W: Workspace> Workspace for RetryingWorkspace<W> {
         fn get_file_content(params: GetFileContentParams) -> Result<String, WorkspaceError>;
         fn check_file_size(params: CheckFileSizeParams) -> Result<CheckFileSizeResult, WorkspaceError>;
         fn change_file(params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError>;
+        fn process_file(params: ProcessFileParams) -> Result<ProcessFileResult, WorkspaceError>;
         fn pull_diagnostics(params: PullDiagnosticsParams) -> Result<PullDiagnosticsResult, WorkspaceError>;
         fn pull_actions(params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError>;
         fn pull_diagnostics_and_actions(params: PullDiagnosticsAndActionsParams) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError>;
