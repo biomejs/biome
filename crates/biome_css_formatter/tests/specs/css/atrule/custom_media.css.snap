@@ -1,0 +1,35 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/custom_media.css
+---
+
+# Input
+
+```css
+@custom-media    --medium-screen  (min-width : 40em)and   (max-width: 60em);
+
+@custom-media
+	--medium-screen (
+	min-width: 40em
+) and (
+	max-width: 60em
+);
+
+@custom-media --custom all and (-webkit-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (min--moz-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5);
+
+```
+
+
+# Formatted
+
+```css
+@custom-media --medium-screen (min-width: 40em) and (max-width: 60em);
+
+@custom-media --medium-screen (min-width: 40em) and (max-width: 60em);
+
+@custom-media --custom all and (-webkit-min-device-pixel-ratio: 1.5),
+	all and (-o-min-device-pixel-ratio: 3 / 2),
+	all and (min--moz-device-pixel-ratio: 1.5),
+	all and (min-device-pixel-ratio: 1.5);
+
+```

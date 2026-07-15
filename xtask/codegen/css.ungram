@@ -829,6 +829,7 @@ AnyCssAtRule =
 	| CssPositionTryAtRule
 	| CssViewTransitionAtRule
 	| CssFunctionAtRule
+	| CssCustomMediaAtRule
 	// SCSS at rules
 	| ScssEachAtRule
 	| ScssAtRootAtRule
@@ -1535,6 +1536,7 @@ AnyCssQueryFeature =
 
 AnyCssQueryFeatureName =
 	CssIdentifier
+	| CssDashedIdentifier
 	| ScssInterpolatedIdentifier
 	| ScssVariable
 
@@ -2116,6 +2118,27 @@ CssFunctionParameterDefaultValue =
 CssReturnsStatement =
 	'returns'
 	type: AnyCssType
+
+// https://www.w3.org/TR/mediaqueries-5/#custom-mq
+// @custom-media <extension-name> [ <media-query-list> | true | false ] ;
+//
+// @custom-media --small-viewport (max-width: 768px);
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssCustomMediaAtRule =
+	declarator: CssCustomMediaAtRuleDeclarator
+	';'
+
+CssCustomMediaAtRuleDeclarator =
+	'custom-media'
+	name: AnyCssDashedIdentifier
+	queries: AnyCssCustomMediaQuery
+
+AnyCssCustomMediaQuery =
+	CssMediaQueryList
+	| CssBooleanMediaQuery
+
+CssBooleanMediaQuery =
+	boolean: ('true' | 'false')
 
 ///////////////
 // AUXILIARY
