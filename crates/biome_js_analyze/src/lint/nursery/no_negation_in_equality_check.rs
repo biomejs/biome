@@ -5,7 +5,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsExpression, JsBinaryExpression, JsParenthesizedExpression, JsSyntaxKind::*, JsSyntaxNode};
+use biome_js_syntax::{AnyJsExpression, JsBinaryExpression, JsParenthesizedExpression, JsSyntaxKind::*};
 use biome_js_syntax::is_negation;
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxTriviaPiece, TriviaPieceKind};
 use biome_rule_options::no_negation_in_equality_check::NoNegationInEqualityCheckOptions;
@@ -51,21 +51,9 @@ declare_lint_rule! {
     }
 }
 
-/// Recursively walks through `JsParenthesizedExpression` wrappers to find
-/// the innermost non-parenthesized syntax node.
-fn skip_parens(mut node: JsSyntaxNode) -> JsSyntaxNode {
-    while let Some(paren) = JsParenthesizedExpression::cast_ref(&node) {
-        match paren.expression() {
-            Ok(inner) => node = inner.syntax().clone(),
-            Err(_) => break,
-        }
-    }
-    node
-}
-
 impl Rule for NoNegationInEqualityCheck {
     type Query = Ast<JsBinaryExpression>;
-    type State = JsBinaryExpression;
+    type State = ();
     type Signals = Option<Self::State>;
     type Options = NoNegationInEqualityCheckOptions;
 
@@ -81,27 +69,27 @@ impl Rule for NoNegationInEqualityCheck {
         let left = node.left().ok()?;
 
         // Recursively unwrap parenthesized expressions, e.g. `((!foo)) === bar`
-        let inner = skip_parens(left.syntax().clone());
+        let inner = left.omit_parentheses();
 
         // Check if the unwrapped left side is a negation expression (!expr)
-        let unary = is_negation(&inner)?;
+        let unary = is_negation(inner.syntax())?;
 
         // Skip double negation (!!expr or !(...( !expr )...)) — this is
         // intentional boolean coercion, e.g. `!!foo === bar` or `!((!foo)) === bar`.
         let argument = unary.argument().ok()?;
-        let arg_inner = skip_parens(argument.syntax().clone());
-        if is_negation(&arg_inner).is_some() {
+        let arg_inner = argument.omit_parentheses();
+        if is_negation(arg_inner.syntax()).is_some() {
             return None;
         }
 
-        Some(node.clone())
+        Some(())
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                state.range(),
+                ctx.query().range(),
                 markup! {
                     "A negation is used on the left side of this equality check."
                 },
@@ -109,15 +97,15 @@ impl Rule for NoNegationInEqualityCheck {
         )
     }
 
-    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        let node = state;
+    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+        let node = ctx.query();
         let left = node.left().ok()?;
         let right = node.right().ok()?;
         let operator = node.operator_token().ok()?;
 
         // Recursively unwrap parenthesized expressions to find the negation
-        let inner = skip_parens(left.syntax().clone());
-        let unary = is_negation(&inner)?;
+        let inner = left.omit_parentheses();
+        let unary = is_negation(inner.syntax())?;
 
         // The argument of `!` is the expression to use as the new left side
         let negated_expr = unary.argument().ok()?;
@@ -153,15 +141,14 @@ impl Rule for NoNegationInEqualityCheck {
             });
         let prev_trailing_has_newline = neg_op_token
             .prev_token()
-            .map(|t| {
+            .is_some_and(|t| {
                 t.trailing_trivia()
                     .pieces()
                     .any(|p| {
                         p.kind() == TriviaPieceKind::Newline
                             || p.kind() == TriviaPieceKind::MultiLineComment
                     })
-            })
-            .unwrap_or(false);
+            });
         let has_newline = has_preceding_newline || prev_trailing_has_newline;
         if has_newline {
             let arg_text = negated_expr.syntax().text_trimmed().to_string();
@@ -233,7 +220,7 @@ impl Rule for NoNegationInEqualityCheck {
 
         // Step 1a: Walk outer→inner, collecting `(` trivia.
         {
-            let mut current = left.syntax().clone();
+            let mut current = node.left().ok()?.into_syntax();
             let mut is_outermost = true;
             while let Some(paren) = JsParenthesizedExpression::cast_ref(&current) {
                 if let Ok(lp) = paren.l_paren_token() {
