@@ -343,6 +343,11 @@ impl<'db> MergedType<'db> {
         if types.len() < 2 {
             return None;
         }
+        if types.iter().any(|ty| ty.is_primitive(db))
+            && types.iter().any(|ty| is_structural_object_type(db, *ty))
+        {
+            return None;
+        }
 
         let mut types = types.iter().copied();
         let mut merged = Self::from_type(db, types.next()?)?;
@@ -477,6 +482,23 @@ impl<'db> MergedType<'db> {
     }
 }
 
+fn is_structural_object_type<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> bool {
+    match ty {
+        TypeData::Class(_)
+        | TypeData::Constructor(_)
+        | TypeData::Function(_)
+        | TypeData::Interface(_)
+        | TypeData::Module(_)
+        | TypeData::Namespace(_)
+        | TypeData::Object(_)
+        | TypeData::Tuple(_)
+        | TypeData::ObjectKeyword => true,
+        TypeData::InstanceOf(instance) => is_structural_object_type(db, instance.ty(db)),
+        TypeData::Literal(literal) => matches!(literal.literal(db), Literal::Object(_)),
+        _ => false,
+    }
+}
+
 fn class_instance_members<'db>(members: &[TypeMember<'db>]) -> Vec<TypeMember<'db>> {
     members
         .iter()
@@ -547,6 +569,11 @@ impl<'db> UnionBuilder<'db> {
                 TypeData::AnyKeyword => {
                     self.types.clear();
                     self.types.push(TypeData::AnyKeyword);
+                }
+                _ if self.types.as_slice() == [TypeData::Unknown] => {}
+                TypeData::Unknown => {
+                    self.types.clear();
+                    self.types.push(TypeData::Unknown);
                 }
                 TypeData::NeverKeyword => {}
                 ty => {

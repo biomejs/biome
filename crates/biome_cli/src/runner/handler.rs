@@ -126,8 +126,8 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
         // We pass &Ctx which should also implement TraversalContext
 
         match catch_unwind(move || P::execute(ctx, biome_path, max_diagnostics, diagnostic_level)) {
-            Ok(Ok(FileStatus::Changed)) => {
-                ctx.increment_changed(biome_path);
+            Ok(Ok(FileStatus::Changed(changed_file))) => {
+                ctx.increment_changed(biome_path, changed_file);
             }
             Ok(Ok(FileStatus::Unchanged)) => {
                 ctx.increment_unchanged();

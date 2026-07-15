@@ -79,7 +79,7 @@ x-panel {
 +++ Biome
 @@ -1,24 +1,24 @@
 -@custom-media --KeepName (min-width: 500px);
-+@custom-media --KeepName (MIN-WIDTH: 500PX);
++@custom-media --KeepName (MIN-WIDTH: 500px);
  
  .foo {
    color: hsl(0.75turn, 60%, 70%);
@@ -112,7 +112,7 @@ x-panel {
 # Output
 
 ```css
-@custom-media --KeepName (MIN-WIDTH: 500PX);
+@custom-media --KeepName (MIN-WIDTH: 500px);
 
 .foo {
   color: hsl(0.75turn, 60%, 70%);

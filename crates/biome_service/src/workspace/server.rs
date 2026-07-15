@@ -3,11 +3,16 @@ use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
 use crate::embed::EmbedContent;
+#[cfg(feature = "lang_js")]
+use crate::file_handlers::AstroFileHandler;
 use crate::file_handlers::{
     AnalyzerVisitorCache, Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, Features,
-    FixAllParams, LintParams, LintResults, ParseEmbeddedParams, ParseResult, ResolveBindingParams,
-    ResolveDefinitionParams, UpdateSnippetsNodes,
+    FixAllParams, FixedFileResult, LintParams, LintResults, ParseEmbeddedParams, ParseResult,
+    ParsedOrigin, ParsedSnippetOrigin, ResolveBindingParams, ResolveDefinitionParams,
+    SnippetsIterator, UpdateSnippetsNodes,
 };
+#[cfg(all(feature = "lang_js", feature = "lang_html"))]
+use crate::file_handlers::{SvelteFileHandler, VueFileHandler};
 use crate::module_graph::ModuleDependencies;
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
 use crate::module_graph::resolve_css_module;
@@ -84,7 +89,7 @@ use biome_plugin_loader::Plugins;
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_project_layout::ProjectLayout;
 use biome_resolver::FsWithResolverProxy;
-use biome_rowan::{NodeCache, SendNode};
+use biome_rowan::NodeCache;
 use biome_workspace_db::WorkspaceDb;
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
@@ -93,10 +98,14 @@ use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::fmt::Debug;
 use std::ops::Deref;
 use std::panic::RefUnwindSafe;
+#[cfg(feature = "module_graph")]
+use std::rc::Rc;
+#[cfg(test)]
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::watch;
-use tracing::{info, instrument, warn};
+use tracing::{instrument, warn};
 
 pub struct WorkspaceServer {
     /// features available throughout the application
@@ -149,6 +158,9 @@ pub struct WorkspaceServer {
 
     /// Re-usable cache for analyzer visitors.
     analyzer_cache: HashMap<ProjectKey, AnalyzerVisitorCache>,
+
+    #[cfg(test)]
+    cancel_change_file_after_document_update: AtomicBool,
 }
 
 /// A convenient wrapper around a [WorkspaceServer] that holds salsa database state.
@@ -159,10 +171,52 @@ pub struct LocalWorkspace {
     db_state: db::DbState,
 }
 
-/// A reference to
+/// A workspace server and the Salsa database used by one operation.
 pub struct WorkspaceServerWithDb<'a> {
     server: &'a WorkspaceServer,
     db_state: &'a db::DbState,
+}
+
+struct ProcessFileState {
+    parsed: ParsedOrigin,
+    file_source: DocumentFileSource,
+    db: WorkspaceDb,
+}
+
+impl ProcessFileState {
+    fn iter_snippets(&self) -> SnippetsIterator<'_> {
+        match &self.parsed {
+            ParsedOrigin::Workspace(AnyParsedSource::ParsedSource(source)) => {
+                SnippetsIterator::Workspace(source.snippets(&self.db).iter())
+            }
+            ParsedOrigin::Workspace(AnyParsedSource::ParsedSnippet(_)) => {
+                unreachable!("a process-file state must contain a document")
+            }
+            ParsedOrigin::Interned { snippets, .. } => SnippetsIterator::Interned(snippets.iter()),
+        }
+    }
+
+    fn has_errors(&self) -> bool {
+        self.parsed
+            .diagnostics(&self.db)
+            .iter()
+            .any(|diagnostic| diagnostic.severity() >= Severity::Error)
+            || self
+                .iter_snippets()
+                .any(|snippet| snippet.has_errors(&self.db))
+    }
+
+    fn error_count(&self) -> usize {
+        self.parsed
+            .diagnostics(&self.db)
+            .iter()
+            .filter(|diagnostic| diagnostic.severity() >= Severity::Error)
+            .count()
+            + self
+                .iter_snippets()
+                .map(|snippet| snippet.error_count(&self.db))
+                .sum::<usize>()
+    }
 }
 
 /// The kind of operation to execute when updating the module graph due to an external trigger
@@ -305,6 +359,8 @@ impl WorkspaceServer {
             fs,
             notification_tx,
             analyzer_cache: HashMap::default(),
+            #[cfg(test)]
+            cancel_change_file_after_document_update: AtomicBool::new(false),
         }
     }
 
@@ -405,6 +461,44 @@ impl LocalWorkspace {
 }
 
 impl WorkspaceServerWithDb<'_> {
+    fn finish_change_file(
+        &self,
+        project_key: ProjectKey,
+        path: &BiomePath,
+        parsed: ParsedSource,
+    ) -> Result<ChangeFileResult, WorkspaceError> {
+        let mut final_diagnostics = vec![];
+
+        if self.is_indexed(path) {
+            let (dependencies, diagnostics) = self.update_service_data(
+                path,
+                UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, parsed.into()),
+                project_key,
+            )?;
+            final_diagnostics.extend(
+                diagnostics
+                    .into_iter()
+                    .map(biome_diagnostics::serde::Diagnostic::new),
+            );
+            if !dependencies.is_empty()
+                && let Some(project_path) = self.projects.get_project_path(project_key)
+            {
+                let diagnostics = self.scanner.index_dependencies(
+                    self,
+                    project_key,
+                    &project_path,
+                    dependencies,
+                    IndexTrigger::Update,
+                )?;
+                final_diagnostics.extend(diagnostics);
+            }
+        }
+
+        Ok(ChangeFileResult {
+            diagnostics: final_diagnostics,
+        })
+    }
+
     /// Returns a clone of the project database for passing to analyzers.
     fn module_db(&self) -> db::DbReadGuard {
         self.db_state.fork()
@@ -757,7 +851,10 @@ impl WorkspaceServerWithDb<'_> {
                     )?
                 } else {
                     Default::default()
-                };
+                }
+                .into_iter()
+                .map(|(parse, content, source)| (parse, content, self.db_add_source(source)))
+                .collect();
 
             let final_source =
                 self.db_update_parsed_file(&path, any_parse, file_source_index, embedded_snippets);
@@ -833,8 +930,8 @@ impl WorkspaceServerWithDb<'_> {
                 },
             );
 
-            // We check both reason or if the path is indexed.
-            // This is required due to the check at line 441
+            // `open_file_internal` must update project data for both index
+            // requests and client requests for files that are already indexed.
             reason.is_index() || self.is_indexed(&path)
         };
 
@@ -947,7 +1044,7 @@ impl WorkspaceServerWithDb<'_> {
                 parsed_source: parse.into(),
                 cursor_offset,
                 path: path.to_path_buf(),
-                workspace_db: workspace_db.clone(),
+                workspace_db: workspace_db.clone_untracked_db(),
             });
             if result.is_some() {
                 let capabilities = resolve_capabilities(&result, capabilities);
@@ -979,7 +1076,7 @@ impl WorkspaceServerWithDb<'_> {
                 parsed_source: snippet.into(),
                 cursor_offset: local_cursor,
                 path: path.to_path_buf(),
-                workspace_db: workspace_db.clone(),
+                workspace_db: workspace_db.clone_untracked_db(),
             });
 
             // If binding is Local, adjust range back to parent document coordinates
@@ -1000,15 +1097,14 @@ impl WorkspaceServerWithDb<'_> {
     }
 
     /// Parses the language snippets if the current language implements the capability `parser.parse_embedded_nodes`
-    fn parse_embedded_language_snippets<'a>(
+    fn parse_embedded_language_snippets(
         &self,
-        path: &'a BiomePath,
-        file_source: &'a DocumentFileSource,
-        any_parse: &'a AnyParse,
-        node_cache: &'a mut NodeCache,
-        settings: &'a SettingsWithEditor<'a>,
-    ) -> Result<Vec<(AnyParse, EmbedContent, usize)>, WorkspaceError> {
-        let mut embedded_nodes = Vec::new();
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+        any_parse: &AnyParse,
+        node_cache: &mut NodeCache,
+        settings: &SettingsWithEditor,
+    ) -> Result<Vec<(AnyParse, EmbedContent, DocumentFileSource)>, WorkspaceError> {
         let capabilities = self.get_file_capabilities(
             path,
             settings.as_ref().experimental_full_html_support_enabled(),
@@ -1024,12 +1120,7 @@ impl WorkspaceServerWithDb<'_> {
             node_cache,
         });
 
-        for (parse, content, file_source) in result.nodes {
-            let index = self.db_add_source(file_source);
-            embedded_nodes.push((parse, content, index));
-        }
-
-        Ok(embedded_nodes)
+        Ok(result.nodes)
     }
 
     fn parse(
@@ -1058,6 +1149,518 @@ impl WorkspaceServerWithDb<'_> {
             node_cache,
         );
         Ok(parsed)
+    }
+
+    fn process_file_state_from_server(
+        &self,
+        path: &BiomePath,
+    ) -> Result<ProcessFileState, WorkspaceError> {
+        self.assert_parse(path)?;
+        let db = self.get_db().into_untracked_db();
+        let parsed = db
+            .get_file(path.as_path())
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
+        let file_source = db
+            .source_from_index(parsed.document_source_index(&db))
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
+        Ok(ProcessFileState {
+            parsed: parsed.into(),
+            file_source,
+            db,
+        })
+    }
+
+    fn parse_process_file_state(
+        &self,
+        path: &BiomePath,
+        code: &str,
+        mut file_source: DocumentFileSource,
+        settings: &SettingsWithEditor,
+        real_capabilities: bool,
+    ) -> Result<ProcessFileState, WorkspaceError> {
+        #[cfg(feature = "lang_js")]
+        if matches!(file_source, DocumentFileSource::Js(_))
+            && matches!(path.extension(), Some("astro" | "svelte" | "vue"))
+        {
+            file_source = DocumentFileSource::from_path(path.as_path(), false);
+        }
+        let capabilities = if real_capabilities {
+            self.features.get_real_capabilities(file_source)
+        } else {
+            self.features.get_deprecated_capabilities(file_source)
+        };
+        let parse = capabilities
+            .parser
+            .parse
+            .ok_or_else(self.build_capability_error(path))?;
+        let mut node_cache = NodeCache::default();
+        let ParseResult {
+            any_parse,
+            language,
+        } = parse(path, file_source, code, settings, &mut node_cache);
+        let file_source = language.unwrap_or(file_source);
+
+        let mut snippet_cache = NodeCache::default();
+        let snippets = if DocumentFileSource::can_contain_embeds(
+            path.as_path(),
+            settings.as_ref().experimental_full_html_support_enabled(),
+        ) {
+            self.parse_embedded_language_snippets(
+                path,
+                &file_source,
+                &any_parse,
+                &mut snippet_cache,
+                settings,
+            )?
+        } else {
+            Vec::new()
+        }
+        .into_iter()
+        .map(
+            |(parse, content, file_source)| ParsedSnippetOrigin::Interned {
+                parse,
+                content,
+                file_source,
+            },
+        )
+        .collect();
+
+        Ok(ProcessFileState {
+            parsed: ParsedOrigin::interned_document(any_parse, snippets),
+            file_source,
+            db: self.get_db().into_untracked_db(),
+        })
+    }
+
+    fn reconstruct_legacy_file(
+        path: &BiomePath,
+        file_source: DocumentFileSource,
+        input: &str,
+        output: String,
+    ) -> String {
+        #[cfg(feature = "lang_js")]
+        {
+            if !matches!(file_source, DocumentFileSource::Js(_)) {
+                return output;
+            }
+
+            match path.extension() {
+                Some("astro") => AstroFileHandler::output(input, &output),
+                #[cfg(feature = "lang_html")]
+                Some("vue") => VueFileHandler::output(input, &output),
+                #[cfg(feature = "lang_html")]
+                Some("svelte") => SvelteFileHandler::output(input, &output),
+                _ => output,
+            }
+        }
+        #[cfg(not(feature = "lang_js"))]
+        {
+            let _ = (path, file_source, input);
+            output
+        }
+    }
+
+    fn legacy_diagnostic_offset(
+        path: &BiomePath,
+        file_source: DocumentFileSource,
+        source: &str,
+    ) -> Option<u32> {
+        #[cfg(feature = "lang_js")]
+        {
+            if !matches!(file_source, DocumentFileSource::Js(_)) {
+                return None;
+            }
+
+            match path.extension() {
+                Some("astro") => AstroFileHandler::start(source),
+                #[cfg(feature = "lang_html")]
+                Some("vue") => VueFileHandler::start(source),
+                #[cfg(feature = "lang_html")]
+                Some("svelte") => SvelteFileHandler::start(source),
+                _ => None,
+            }
+        }
+        #[cfg(not(feature = "lang_js"))]
+        {
+            let _ = (path, file_source, source);
+            None
+        }
+    }
+
+    fn fix_file_state(
+        &self,
+        params: FixFileParams,
+        state: &mut ProcessFileState,
+        #[cfg(feature = "module_graph")] module_db: Rc<dyn ModuleDb>,
+        collect_final_diagnostics: bool,
+    ) -> Result<Option<FixedFileResult>, WorkspaceError> {
+        let FixFileParams {
+            project_key,
+            path,
+            fix_file_mode,
+            should_format,
+            only,
+            skip,
+            enabled_rules,
+            rule_categories,
+            suppression_reason,
+            inline_config,
+        } = params;
+        let (working_directory, settings) = self
+            .projects
+            .get_settings_and_wd_based_on_path(project_key, &path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let capabilities = self.features.get_deprecated_capabilities(state.file_source);
+        let fix_all = capabilities
+            .analyzer
+            .fix_all
+            .ok_or_else(self.build_capability_error(&path))?;
+        let plugins = cfg_select! {
+            feature = "plugins" => {
+                if rule_categories.contains(biome_analyze::RuleCategory::Lint) {
+                    self.get_analyzer_plugins_for_project(
+                        settings.source_path().unwrap_or_default().as_path(),
+                        &settings.get_plugins_for_path(&path),
+                    )
+                    .map_err(WorkspaceError::plugin_errors)?
+                } else {
+                    Vec::new()
+                }
+            },
+            _ => biome_analyze::AnalyzerPluginVec::new()
+        };
+        let settings = self.settings_handle(&settings, inline_config);
+        let mut errors = 0;
+        let mut actions = Vec::new();
+        let mut skipped_suggested_fixes = 0;
+
+        if let Some(update_snippets) = capabilities.analyzer.update_snippets {
+            let embedded_snippets: Vec<_> = state.iter_snippets().collect();
+            let mut new_snippets = Vec::new();
+            for embedded_snippet in embedded_snippets {
+                let Some(document_file_source) = embedded_snippet.file_source(&state.db) else {
+                    continue;
+                };
+                let capabilities = self
+                    .features
+                    .get_deprecated_capabilities(document_file_source);
+                let Some(fix_all) = capabilities.analyzer.fix_all else {
+                    continue;
+                };
+                let Some(results) = fix_all(FixAllParams {
+                    parsed_source: embedded_snippet.parsed_origin(),
+                    fix_file_mode,
+                    settings: &settings,
+                    biome_path: &path,
+                    workspace_db: state.db.clone(),
+                    #[cfg(feature = "module_graph")]
+                    module_db: module_db.clone(),
+                    project_layout: self.project_layout.clone(),
+                    document_file_source,
+                    only: &only,
+                    skip: &skip,
+                    rule_categories,
+                    suppression_reason: suppression_reason.clone(),
+                    enabled_rules: &enabled_rules,
+                    plugins: plugins.clone(),
+                    working_directory: Some(working_directory.as_path()),
+                    collect_final_diagnostics,
+                })?
+                else {
+                    continue;
+                };
+
+                let FixedFileResult {
+                    root,
+                    skipped_suggested_fixes: snippet_skipped_suggested_fixes,
+                    actions: snippet_actions,
+                    errors: snippet_errors,
+                } = results;
+                let reconstruct_snippet = should_format || !snippet_actions.is_empty();
+                let new_code = if reconstruct_snippet {
+                    if should_format {
+                        let fixed_snippet = ParsedOrigin::interned(
+                            AnyParse::from(root),
+                            Some(embedded_snippet.content_offset(&state.db)),
+                        );
+                        let format = capabilities
+                            .formatter
+                            .format
+                            .ok_or_else(self.build_capability_error(&path))?;
+                        format(
+                            &path,
+                            &document_file_source,
+                            fixed_snippet,
+                            &settings,
+                            state.db.clone(),
+                        )?
+                        .into_code()
+                    } else {
+                        root.into_source_text()
+                    }
+                } else {
+                    String::new()
+                };
+                actions.extend(snippet_actions);
+                errors += snippet_errors;
+                skipped_suggested_fixes += snippet_skipped_suggested_fixes;
+                if reconstruct_snippet {
+                    new_snippets.push(UpdateSnippetsNodes {
+                        range: embedded_snippet.element_range(&state.db),
+                        new_code,
+                        needs_reindent: should_format,
+                    });
+                }
+            }
+
+            if !new_snippets.is_empty() {
+                let new_root =
+                    update_snippets(state.parsed.clone(), state.db.clone(), new_snippets)?;
+                state.parsed = AnyParse::from(new_root).into();
+            }
+        }
+
+        let Some(fix_result) = fix_all(FixAllParams {
+            parsed_source: state.parsed.clone(),
+            fix_file_mode,
+            settings: &settings,
+            biome_path: &path,
+            workspace_db: state.db.clone(),
+            #[cfg(feature = "module_graph")]
+            module_db,
+            project_layout: self.project_layout.clone(),
+            document_file_source: state.file_source,
+            only: &only,
+            skip: &skip,
+            rule_categories,
+            suppression_reason,
+            enabled_rules: &enabled_rules,
+            plugins,
+            working_directory: Some(working_directory.as_path()),
+            collect_final_diagnostics,
+        })?
+        else {
+            return Ok(None);
+        };
+
+        actions.extend(fix_result.actions);
+        errors += fix_result.errors;
+        skipped_suggested_fixes += fix_result.skipped_suggested_fixes;
+
+        Ok(Some(FixedFileResult {
+            root: fix_result.root,
+            errors,
+            actions,
+            skipped_suggested_fixes,
+        }))
+    }
+
+    fn format_file_state(
+        &self,
+        project_key: ProjectKey,
+        path: &BiomePath,
+        state: &ProcessFileState,
+        respect_format_with_errors: bool,
+    ) -> Result<Option<String>, WorkspaceError> {
+        let settings = self
+            .projects
+            .get_settings_based_on_path(project_key, path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        if respect_format_with_errors
+            && !settings.format_with_errors_enabled_for_this_file_path(path)
+            && state.has_errors()
+        {
+            return Ok(None);
+        }
+        let capabilities = self.features.get_deprecated_capabilities(state.file_source);
+        let format = capabilities
+            .formatter
+            .format
+            .ok_or_else(self.build_capability_error(path))?;
+        let settings = self.settings_handle(&settings, None);
+        let embedded_nodes: Vec<_> = state.iter_snippets().collect();
+        let printed = if embedded_nodes.is_empty() {
+            format(
+                path,
+                &state.file_source,
+                state.parsed.clone(),
+                &settings,
+                state.db.clone(),
+            )?
+        } else {
+            let format_embedded = capabilities
+                .formatter
+                .format_embedded
+                .ok_or_else(self.build_capability_error(path))?;
+            format_embedded(
+                path,
+                &state.file_source,
+                state.parsed.clone(),
+                &settings,
+                embedded_nodes,
+                state.db.clone(),
+            )?
+        };
+
+        Ok(Some(printed.into_code()))
+    }
+
+    fn pull_diagnostics_for_state(
+        &self,
+        params: PullDiagnosticsParams,
+        state: &ProcessFileState,
+        #[cfg(feature = "module_graph")] module_db: Rc<dyn ModuleDb>,
+    ) -> Result<PullDiagnosticsResult, WorkspaceError> {
+        let PullDiagnosticsParams {
+            project_key,
+            path,
+            categories,
+            only,
+            skip,
+            enabled_rules,
+            include_code_fix: pull_code_actions,
+            inline_config,
+            max_diagnostics,
+            diagnostic_level,
+            enforce_assist,
+        } = params;
+        let (working_directory, settings) = self
+            .projects
+            .get_settings_and_wd_based_on_path(project_key, &path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let capabilities = self.features.get_deprecated_capabilities(state.file_source);
+        let parse_errors = state.error_count();
+        let analyzer_cache_guard = self.analyzer_cache.pin();
+        let analyzer_cache =
+            analyzer_cache_guard.get_or_insert(project_key, AnalyzerVisitorCache::default());
+
+        let (diagnostics, errors, warnings, infos, skipped_diagnostics) = if (categories.is_lint()
+            || categories.is_assist())
+            && let Some(lint) = capabilities.analyzer.lint
+        {
+            let plugins = cfg_select! {
+                feature = "plugins" => {
+                    if categories.is_lint() {
+                        self.get_analyzer_plugins_for_project(
+                            settings.source_path().unwrap_or_default().as_path(),
+                            &settings.get_plugins_for_path(&path),
+                        )
+                        .map_err(WorkspaceError::plugin_errors)?
+                    } else {
+                        Vec::new()
+                    }
+                },
+                _ => Vec::new()
+            };
+            let settings = self.settings_handle(&settings, inline_config);
+            let results = lint(LintParams {
+                parsed_source: state.parsed.clone(),
+                settings: &settings,
+                path: &path,
+                only: &only,
+                skip: &skip,
+                language: state.file_source,
+                categories,
+                workspace_db: state.db.clone(),
+                #[cfg(feature = "module_graph")]
+                module_db: module_db.clone(),
+                project_layout: self.project_layout.clone(),
+                suppression_reason: None,
+                enabled_selectors: &enabled_rules,
+                pull_code_actions,
+                plugins: plugins.clone(),
+                working_directory: Some(working_directory.as_path()),
+                max_diagnostics,
+                diagnostic_level,
+                enforce_assist,
+                analyzer_cache,
+            });
+            let LintResults {
+                mut diagnostics,
+                mut errors,
+                mut skipped_diagnostics,
+                mut warnings,
+                mut infos,
+            } = results;
+
+            for embedded_node in state.iter_snippets() {
+                let Some(file_source) = embedded_node.file_source(&state.db) else {
+                    continue;
+                };
+                let capabilities = self.features.get_deprecated_capabilities(file_source);
+                let Some(lint) = capabilities.analyzer.lint else {
+                    continue;
+                };
+                let results = lint(LintParams {
+                    parsed_source: embedded_node.parsed_origin(),
+                    settings: &settings,
+                    path: &path,
+                    only: &only,
+                    skip: &skip,
+                    language: file_source,
+                    categories,
+                    workspace_db: state.db.clone(),
+                    #[cfg(feature = "module_graph")]
+                    module_db: module_db.clone(),
+                    project_layout: self.project_layout.clone(),
+                    suppression_reason: None,
+                    enabled_selectors: &enabled_rules,
+                    pull_code_actions,
+                    plugins: plugins.clone(),
+                    working_directory: Some(working_directory.as_path()),
+                    max_diagnostics,
+                    diagnostic_level,
+                    enforce_assist,
+                    analyzer_cache,
+                });
+                diagnostics.extend(results.diagnostics);
+                skipped_diagnostics += results.skipped_diagnostics;
+                errors += results.errors;
+                warnings += results.warnings;
+                infos += results.infos;
+            }
+
+            (diagnostics, errors, warnings, infos, skipped_diagnostics)
+        } else {
+            let mut diagnostics: Vec<_> = state
+                .parsed
+                .serde_diagnostics(&state.db)
+                .into_iter()
+                .filter(|diagnostic| diagnostic.severity() >= diagnostic_level)
+                .collect();
+            let mut errors = diagnostics
+                .iter()
+                .filter(|diagnostic| diagnostic.severity() >= Severity::Error)
+                .count();
+            for embedded_node in state.iter_snippets() {
+                let embedded_diagnostics: Vec<_> = embedded_node
+                    .serde_diagnostics(&state.db)
+                    .into_iter()
+                    .filter(|diagnostic| diagnostic.severity() >= diagnostic_level)
+                    .collect();
+                errors += embedded_diagnostics
+                    .iter()
+                    .filter(|diagnostic| diagnostic.severity() >= Severity::Error)
+                    .count();
+                diagnostics.extend(embedded_diagnostics);
+            }
+            (diagnostics, errors, 0, 0, 0)
+        };
+
+        Ok(PullDiagnosticsResult {
+            diagnostics: diagnostics
+                .into_iter()
+                .map(|diagnostic| {
+                    let diagnostic = diagnostic.with_file_path(path.to_string());
+                    SerdeDiagnostic::new(diagnostic)
+                })
+                .collect(),
+            errors,
+            warnings,
+            infos,
+            parse_errors,
+            skipped_diagnostics: skipped_diagnostics.into(),
+        })
     }
 
     #[cfg(feature = "plugins")]
@@ -1425,6 +2028,8 @@ impl WorkspaceServerWithDb<'_> {
         path: &BiomePath,
         update_kind: &UpdateKind,
     ) -> Result<ExtractedModuleInputs, WorkspaceError> {
+        #[cfg(not(feature = "html_embeds"))]
+        let _ = path;
         match update_kind {
             UpdateKind::AddedOrChanged(_, root) => {
                 #[cfg(feature = "lang_js")]
@@ -1657,10 +2262,6 @@ impl WorkspaceServerWithDb<'_> {
         self.db_state.insert_source(document_file_source)
     }
 
-    fn db_update_parsed_root(&self, path: &Utf8Path, new_root: SendNode) {
-        self.db_state.update_parsed_root(path, new_root);
-    }
-
     /// Purges the path from the database
     fn db_unload_path(&self, path: &Utf8Path) {
         self.db_state.path_info_cache.remove(path);
@@ -1758,6 +2359,18 @@ macro_rules! delegate_workspace_methods {
     };
 }
 
+// Local workspace callers have no outer service that can retry when a Salsa
+// write cancels an operation.
+macro_rules! delegate_retrying_workspace_methods {
+    ($(fn $name:ident($params:ident: $params_ty:ty) -> $return_ty:ty;)*) => {
+        $(
+            fn $name(&self, $params: $params_ty) -> $return_ty {
+                retry_on_pending_write(|| self.as_workspace().$name($params.clone()))
+            }
+        )*
+    };
+}
+
 impl Workspace for LocalWorkspace {
     delegate_workspace_methods! {
         fn open_project(params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError>;
@@ -1766,25 +2379,30 @@ impl Workspace for LocalWorkspace {
         fn close_project(params: CloseProjectParams) -> Result<(), WorkspaceError>;
         fn open_file(params: OpenFileParams) -> Result<OpenFileResult, WorkspaceError>;
         fn file_exists(params: FileExistsParams) -> Result<bool, WorkspaceError>;
-        fn file_features(params: SupportsFeatureParams) -> Result<FileFeaturesResult, WorkspaceError>;
         fn is_path_ignored(params: PathIsIgnoredParams) -> Result<bool, WorkspaceError>;
         fn get_file_content(params: GetFileContentParams) -> Result<String, WorkspaceError>;
         fn check_file_size(params: CheckFileSizeParams) -> Result<CheckFileSizeResult, WorkspaceError>;
-        fn change_file(params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError>;
-        fn pull_diagnostics(params: PullDiagnosticsParams) -> Result<PullDiagnosticsResult, WorkspaceError>;
-        fn pull_actions(params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError>;
-        fn pull_diagnostics_and_actions(params: PullDiagnosticsAndActionsParams) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError>;
         fn format_file(params: FormatFileParams) -> Result<Printed, WorkspaceError>;
         fn format_range(params: FormatRangeParams) -> Result<Printed, WorkspaceError>;
         fn format_on_type(params: FormatOnTypeParams) -> Result<Printed, WorkspaceError>;
         fn fix_file(params: FixFileParams) -> Result<FixFileResult, WorkspaceError>;
-        fn rename(params: RenameParams) -> Result<RenameResult, WorkspaceError>;
-        fn go_to_definition(params: GoToDefinitionParams) -> Result<Option<GoToDefinitionResult>, WorkspaceError>;
         fn close_file(params: CloseFileParams) -> Result<(), WorkspaceError>;
         fn update_module_graph(params: UpdateModuleGraphParams) -> Result<(), WorkspaceError>;
         fn parse_pattern(params: ParsePatternParams) -> Result<ParsePatternResult, WorkspaceError>;
         fn search_pattern(params: SearchPatternParams) -> Result<SearchResults, WorkspaceError>;
         fn drop_pattern(params: DropPatternParams) -> Result<(), WorkspaceError>;
+        fn rage(params: RageParams) -> Result<RageResult, WorkspaceError>;
+    }
+
+    delegate_retrying_workspace_methods! {
+        fn change_file(params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError>;
+        fn process_file(params: ProcessFileParams) -> Result<ProcessFileResult, WorkspaceError>;
+        fn file_features(params: SupportsFeatureParams) -> Result<FileFeaturesResult, WorkspaceError>;
+        fn pull_diagnostics(params: PullDiagnosticsParams) -> Result<PullDiagnosticsResult, WorkspaceError>;
+        fn pull_actions(params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError>;
+        fn pull_diagnostics_and_actions(params: PullDiagnosticsAndActionsParams) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError>;
+        fn rename(params: RenameParams) -> Result<RenameResult, WorkspaceError>;
+        fn go_to_definition(params: GoToDefinitionParams) -> Result<Option<GoToDefinitionResult>, WorkspaceError>;
         fn get_syntax_tree(params: GetSyntaxTreeParams) -> Result<GetSyntaxTreeResult, WorkspaceError>;
         fn get_control_flow_graph(params: GetControlFlowGraphParams) -> Result<String, WorkspaceError>;
         fn get_formatter_ir(params: GetFormatterIRParams) -> Result<String, WorkspaceError>;
@@ -1792,7 +2410,6 @@ impl Workspace for LocalWorkspace {
         fn get_registered_types(params: GetRegisteredTypesParams) -> Result<String, WorkspaceError>;
         fn get_semantic_model(params: GetSemanticModelParams) -> Result<String, WorkspaceError>;
         fn get_module_graph(params: GetModuleGraphParams) -> Result<GetModuleGraphResult, WorkspaceError>;
-        fn rage(params: RageParams) -> Result<RageResult, WorkspaceError>;
     }
 
     fn fs(&self) -> &dyn FsWithResolverProxy {
@@ -2317,18 +2934,36 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             editor_features,
         }: ChangeFileParams,
     ) -> Result<ChangeFileResult, WorkspaceError> {
+        let is_indexed = self.is_indexed(&path);
         let documents = self.documents.pin();
-        let (index, existing_version) = documents
+        let (index, existing_version, same_content) = documents
             .get(path.as_path())
-            .map(|document| (document.file_source_index, document.version))
+            .map(|document| {
+                (
+                    document.file_source_index,
+                    document.version,
+                    document.content == content,
+                )
+            })
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
-        if existing_version.is_some_and(|existing_version| existing_version >= version) {
+        if existing_version.is_some_and(|existing_version| existing_version > version)
+            || existing_version == Some(version) && !same_content
+        {
             warn!(%version, %path, "outdated_file_change");
             // Safely ignore older versions.
             return Ok(ChangeFileResult {
                 diagnostics: Vec::new(),
             });
+        }
+
+        if existing_version == Some(version) {
+            let parsed = {
+                let db = self.get_db();
+                db.get_file(path.as_path())
+                    .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?
+            };
+            return self.finish_change_file(project_key, &path, parsed);
         }
 
         let settings = self
@@ -2386,7 +3021,10 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             )?
         } else {
             vec![]
-        };
+        }
+        .into_iter()
+        .map(|(parse, content, source)| (parse, content, self.db_add_source(source)))
+        .collect();
 
         let parsed =
             self.db_update_parsed_file(path.as_path(), any_parse, index, embedded_snippets);
@@ -2409,37 +3047,219 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             .insert(path.clone().into(), document)
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
-        let mut final_diagnostics = vec![];
-
-        if self.is_indexed(&path) {
-            let (dependencies, diagnostics) = self.update_service_data(
-                &path,
-                UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, parsed.into()),
-                project_key,
-            )?;
-            final_diagnostics.extend(
-                diagnostics
-                    .into_iter()
-                    .map(biome_diagnostics::serde::Diagnostic::new)
-                    .collect::<Vec<_>>(),
-            );
-            if !dependencies.is_empty()
-                && let Some(project_path) = self.projects.get_project_path(project_key)
-            {
-                let diagnostics = self.scanner.index_dependencies(
-                    self,
-                    project_key,
-                    &project_path,
-                    dependencies,
-                    IndexTrigger::Update,
-                )?;
-                final_diagnostics.extend(diagnostics);
-            }
+        #[cfg(test)]
+        if self
+            .cancel_change_file_after_document_update
+            .swap(false, Ordering::AcqRel)
+        {
+            std::panic::resume_unwind(Box::new(salsa::Cancelled::PendingWrite));
         }
 
-        Ok(ChangeFileResult {
-            diagnostics: final_diagnostics,
-        })
+        if is_indexed {
+            self.finish_change_file(project_key, &path, parsed)
+        } else {
+            Ok(ChangeFileResult {
+                diagnostics: Vec::new(),
+            })
+        }
+    }
+
+    fn process_file(&self, params: ProcessFileParams) -> Result<ProcessFileResult, WorkspaceError> {
+        let ProcessFileParams {
+            project_key,
+            path,
+            content,
+            categories,
+            only,
+            skip,
+            enabled_rules,
+            fix_file_mode,
+            suppression_reason,
+            format,
+            write,
+            include_code_fix,
+            max_diagnostics,
+            diagnostic_level,
+            enforce_assist,
+            skip_parse_errors,
+        } = params;
+        let settings = self
+            .projects
+            .get_settings_based_on_path(project_key, &path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let settings_handle = self.settings_handle(&settings, None);
+        let process = |source: &str,
+                       mut state: ProcessFileState,
+                       from_server: bool|
+         -> Result<ProcessFileResult, WorkspaceError> {
+            #[cfg(feature = "module_graph")]
+            let module_db = state.db.rc_module_db();
+            let mut applied_fixes = 0;
+            let mut skipped_suggested_fixes = 0;
+            let mut fixed_source = None;
+            let can_transform = !(skip_parse_errors && state.has_errors());
+            let format_with_errors_disabled = can_transform
+                && format
+                && !settings.format_with_errors_enabled_for_this_file_path(&path)
+                && state.has_errors();
+            let should_format = can_transform && format && !format_with_errors_disabled;
+
+            if can_transform && let Some(fix_file_mode) = fix_file_mode {
+                let fix_result = self.fix_file_state(
+                    FixFileParams {
+                        project_key,
+                        path: path.clone(),
+                        fix_file_mode,
+                        should_format,
+                        only: only.clone(),
+                        skip: skip.clone(),
+                        enabled_rules: enabled_rules.clone(),
+                        rule_categories: categories,
+                        suppression_reason: suppression_reason.clone(),
+                        inline_config: None,
+                    },
+                    &mut state,
+                    #[cfg(feature = "module_graph")]
+                    module_db.clone(),
+                    false,
+                )?;
+                if let Some(fix_result) = fix_result {
+                    applied_fixes = fix_result.actions.len();
+                    skipped_suggested_fixes = fix_result.skipped_suggested_fixes;
+                    let file_source = state.file_source;
+                    let fixed = Self::reconstruct_legacy_file(
+                        &path,
+                        file_source,
+                        source,
+                        fix_result.root.into_source_text(),
+                    );
+                    state = self.parse_process_file_state(
+                        &path,
+                        &fixed,
+                        file_source,
+                        &settings_handle,
+                        settings.experimental_full_html_support_enabled(),
+                    )?;
+                    fixed_source = Some(fixed);
+                }
+            }
+
+            let mut output = None;
+            if should_format
+                && write
+                && let Some(formatted) = self.format_file_state(project_key, &path, &state, true)?
+            {
+                let file_source = state.file_source;
+                let input = fixed_source.as_deref().unwrap_or(source);
+                let formatted = Self::reconstruct_legacy_file(&path, file_source, input, formatted);
+                state = self.parse_process_file_state(
+                    &path,
+                    &formatted,
+                    file_source,
+                    &settings_handle,
+                    settings.experimental_full_html_support_enabled(),
+                )?;
+                output = Some(formatted);
+            } else if applied_fixes > 0
+                && let Some(fixed) = fixed_source
+            {
+                output = Some(fixed);
+            }
+            let mut output = output.filter(|output| output != source);
+
+            let PullDiagnosticsResult {
+                diagnostics,
+                errors,
+                warnings,
+                infos,
+                parse_errors,
+                skipped_diagnostics,
+            } = self.pull_diagnostics_for_state(
+                PullDiagnosticsParams {
+                    project_key,
+                    path: path.clone(),
+                    categories,
+                    only,
+                    skip,
+                    enabled_rules,
+                    include_code_fix,
+                    inline_config: None,
+                    max_diagnostics,
+                    diagnostic_level,
+                    enforce_assist,
+                },
+                &state,
+                #[cfg(feature = "module_graph")]
+                module_db,
+            )?;
+            let diagnostic_source = output.as_deref().unwrap_or(source);
+            let offset =
+                Self::legacy_diagnostic_offset(&path, state.file_source, diagnostic_source);
+            let diagnostics = diagnostics
+                .into_iter()
+                .map(|mut diagnostic| {
+                    if let Some(offset) = offset {
+                        diagnostic.offset_by(TextSize::from(offset));
+                    }
+                    diagnostic
+                })
+                .collect();
+
+            if should_format && !write && from_server {
+                let formatted = self
+                    .format_file(FormatFileParams {
+                        project_key,
+                        path: path.clone(),
+                        inline_config: None,
+                    })?
+                    .into_code();
+                output = Some(Self::reconstruct_legacy_file(
+                    &path,
+                    state.file_source,
+                    source,
+                    formatted,
+                ))
+                .filter(|output| output != source);
+            }
+
+            Ok(ProcessFileResult {
+                output,
+                diagnostics,
+                format_with_errors_disabled,
+                applied_fixes,
+                errors,
+                warnings,
+                infos,
+                parse_errors,
+                skipped_diagnostics,
+                skipped_suggested_fixes,
+            })
+        };
+
+        match content {
+            FileContent::FromServer => {
+                let documents = self.documents.pin();
+                let source = &documents
+                    .get(path.as_path())
+                    .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?
+                    .content;
+                process(source, self.process_file_state_from_server(&path)?, true)
+            }
+            FileContent::FromClient { content, .. } => {
+                let file_source = DocumentFileSource::from_path(
+                    path.as_path(),
+                    settings.experimental_full_html_support_enabled(),
+                );
+                let state = self.parse_process_file_state(
+                    &path,
+                    &content,
+                    file_source,
+                    &settings_handle,
+                    false,
+                )?;
+                process(&content, state, false)
+            }
+        }
     }
 
     /// Retrieves the list of diagnostics associated with a file
@@ -2458,169 +3278,15 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         &self,
         params: PullDiagnosticsParams,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
-        let PullDiagnosticsParams {
-            project_key,
-            path,
-            categories,
-            only,
-            skip,
-            enabled_rules,
-            include_code_fix: pull_code_actions,
-            inline_config,
-            max_diagnostics,
-            diagnostic_level,
-            enforce_assist,
-        } = params;
-        let workspace_db = self.get_db();
-        let (working_directory, settings) = self
-            .projects
-            .get_settings_and_wd_based_on_path(project_key, &path)
-            .ok_or_else(WorkspaceError::no_project)?;
-        let (parse, embedded_snippets) = self.get_parsed_snippets_and_parse_source(&path)?;
-        let language =
-            self.get_file_source(&path, settings.experimental_full_html_support_enabled());
-        let capabilities = self.features.get_deprecated_capabilities(language);
-
-        let parse_errors = parse.error_count(&*workspace_db);
-
-        let analyzer_cache_guard = self.analyzer_cache.pin();
-        let analyzer_cache =
-            analyzer_cache_guard.get_or_insert(project_key, AnalyzerVisitorCache::default());
-
-        let (diagnostics, errors, warnings, infos, skipped_diagnostics) = if (categories.is_lint()
-            || categories.is_assist())
-            && let Some(lint) = capabilities.analyzer.lint
-        {
-            let plugins = cfg_select! {
-                feature = "plugins" => {
-                    if categories.is_lint() {
-                        self.get_analyzer_plugins_for_project(
-                            settings.source_path().unwrap_or_default().as_path(),
-                            &settings.get_plugins_for_path(&path),
-                        )
-                        .map_err(WorkspaceError::plugin_errors)?
-                    } else {
-                        Vec::new()
-                    }
-                },
-                _ => Vec::new()
-            };
-            let settings = self.settings_handle(&settings, inline_config);
-            let results = lint(LintParams {
-                parsed_source: parse.into(),
-                settings: &settings,
-                path: &path,
-                only: &only,
-                skip: &skip,
-                language,
-                categories,
-                workspace_db: workspace_db.into_untracked_db(),
-                project_layout: self.project_layout.clone(),
-                suppression_reason: None,
-                enabled_selectors: &enabled_rules,
-                pull_code_actions,
-                plugins: plugins.clone(),
-                working_directory: Some(working_directory.as_path()),
-                max_diagnostics,
-                diagnostic_level,
-                enforce_assist,
-                analyzer_cache,
-            });
-
-            let LintResults {
-                mut diagnostics,
-                mut errors,
-                mut skipped_diagnostics,
-                mut warnings,
-                mut infos,
-            } = results;
-            for embedded_node in &embedded_snippets {
-                let workspace_db = self.get_db();
-                let Some(file_source) = workspace_db
-                    .source_from_index(embedded_node.document_source_index(&*workspace_db))
-                else {
-                    continue;
-                };
-                let capabilities = self.features.get_deprecated_capabilities(file_source);
-                let Some(lint) = capabilities.analyzer.lint else {
-                    continue;
-                };
-                let results = lint(LintParams {
-                    parsed_source: embedded_node.into(),
-                    settings: &settings,
-                    path: &path,
-                    only: &only,
-                    skip: &skip,
-                    language: file_source,
-                    categories,
-                    workspace_db: workspace_db.clone(),
-                    project_layout: self.project_layout.clone(),
-                    suppression_reason: None,
-                    enabled_selectors: &enabled_rules,
-                    pull_code_actions,
-                    plugins: plugins.clone(),
-                    working_directory: Some(working_directory.as_path()),
-                    max_diagnostics,
-                    diagnostic_level,
-                    enforce_assist,
-                    analyzer_cache,
-                });
-
-                diagnostics.extend(results.diagnostics);
-                skipped_diagnostics += results.skipped_diagnostics;
-                errors += results.errors;
-                warnings += results.warnings;
-                infos += results.infos;
-            }
-
-            (diagnostics, errors, warnings, infos, skipped_diagnostics)
-        } else {
-            let mut parse_diagnostics: Vec<_> = parse
-                .serde_diagnostics(&*workspace_db)
-                .into_iter()
-                .filter(|diag| diag.severity() >= diagnostic_level)
-                .collect();
-            let mut errors = parse_diagnostics
-                .iter()
-                .filter(|diag| diag.severity() >= Severity::Error)
-                .count();
-
-            for embedded_node in &embedded_snippets {
-                let diagnostics: Vec<_> = embedded_node
-                    .serde_diagnostics(&*workspace_db)
-                    .into_iter()
-                    .filter(|diag| diag.severity() >= diagnostic_level)
-                    .collect();
-                errors += diagnostics
-                    .iter()
-                    .filter(|diag| diag.severity() >= Severity::Error)
-                    .count();
-                parse_diagnostics.extend(diagnostics);
-            }
-
-            (parse_diagnostics, errors, 0, 0, 0)
-        };
-
-        info!(
-            "Pulled {:?} diagnostic(s), skipped {:?} diagnostic(s) from {}",
-            diagnostics.len(),
-            skipped_diagnostics,
-            path
-        );
-        Ok(PullDiagnosticsResult {
-            diagnostics: diagnostics
-                .into_iter()
-                .map(|diag| {
-                    let diag = diag.with_file_path(path.to_string());
-                    SerdeDiagnostic::new(diag)
-                })
-                .collect(),
-            errors,
-            warnings,
-            infos,
-            parse_errors,
-            skipped_diagnostics: skipped_diagnostics.into(),
-        })
+        let state = self.process_file_state_from_server(&params.path)?;
+        #[cfg(feature = "module_graph")]
+        let module_db = state.db.rc_module_db();
+        self.pull_diagnostics_for_state(
+            params,
+            &state,
+            #[cfg(feature = "module_graph")]
+            module_db,
+        )
     }
 
     fn pull_diagnostics_and_actions(
@@ -2672,7 +3338,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 skip: &skip,
                 language,
                 categories,
-                workspace_db: workspace_db.clone(),
+                workspace_db: workspace_db.clone_untracked_db(),
                 project_layout: self.project_layout.clone(),
                 suppression_reason: None,
                 enabled_selectors: &enabled_rules,
@@ -2701,7 +3367,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                     skip: &skip,
                     language: file_source,
                     categories,
-                    workspace_db: workspace_db.clone(),
+                    workspace_db: workspace_db.clone_untracked_db(),
                     project_layout: self.project_layout.clone(),
                     suppression_reason: None,
                     enabled_selectors: &enabled_rules,
@@ -2772,7 +3438,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             range,
             settings: &settings,
             path: &path,
-            workspace_db: workspace_db.clone(),
+            workspace_db: workspace_db.clone_untracked_db(),
             project_layout: self.project_layout.clone(),
             language,
             only: &only,
@@ -2802,7 +3468,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 range,
                 settings: &settings,
                 path: &path,
-                workspace_db: workspace_db.clone(),
+                workspace_db: workspace_db.clone_untracked_db(),
                 project_layout: self.project_layout.clone(),
                 language: file_source,
                 only: &only,
@@ -2865,6 +3531,10 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         if !embedded_nodes.is_empty() {
             let format_embedded =
                 format_embedded.ok_or_else(self.build_capability_error(&params.path))?;
+            let embedded_nodes = embedded_nodes
+                .into_iter()
+                .map(ParsedSnippetOrigin::Workspace)
+                .collect();
             return format_embedded(
                 &params.path,
                 &document_file_source,
@@ -2968,144 +3638,59 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         )
     )]
     fn fix_file(&self, params: FixFileParams) -> Result<FixFileResult, WorkspaceError> {
-        let FixFileParams {
-            project_key,
-            path,
-            fix_file_mode,
-            should_format,
-            only,
-            skip,
-            enabled_rules,
-            rule_categories,
-            suppression_reason,
-            inline_config,
-        } = params;
-
-        let (working_directory, settings) = self
+        let project_key = params.project_key;
+        let path = params.path.clone();
+        let should_format = params.should_format;
+        let settings = self
             .projects
-            .get_settings_and_wd_based_on_path(project_key, &path)
+            .get_settings_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
-        let capabilities =
-            self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
-        let fix_all = capabilities
-            .analyzer
-            .fix_all
+        let settings_handle = self.settings_handle(&settings, params.inline_config.clone());
+        let documents = self.documents.pin();
+        let source = &documents
+            .get(path.as_path())
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?
+            .content;
+        let mut state = self.process_file_state_from_server(&path)?;
+        #[cfg(feature = "module_graph")]
+        let module_db = state.db.rc_module_db();
+        let fixed = self
+            .fix_file_state(
+                params,
+                &mut state,
+                #[cfg(feature = "module_graph")]
+                module_db,
+                true,
+            )?
             .ok_or_else(self.build_capability_error(&path))?;
-
-        let (mut parse, embedded_snippets) = self.get_parsed_snippets_and_parse_source(&path)?;
-        let language =
-            self.get_file_source(&path, settings.experimental_full_html_support_enabled());
-
-        let plugins = cfg_select! {
-            feature = "plugins" => {
-                if rule_categories.contains(biome_analyze::RuleCategory::Lint) {
-                    self.get_analyzer_plugins_for_project(
-                        settings.source_path().unwrap_or_default().as_path(),
-                        &settings.get_plugins_for_path(&path),
-                    )
-                    .map_err(WorkspaceError::plugin_errors)?
-                } else {
-                    Vec::new()
-                }
-            },
-            _ => biome_analyze::AnalyzerPluginVec::new()
+        let FixedFileResult {
+            root,
+            skipped_suggested_fixes,
+            actions,
+            errors,
+        } = fixed;
+        let file_source = state.file_source;
+        let fixed_source = root.into_source_text();
+        let code = if should_format {
+            let fixed_file =
+                Self::reconstruct_legacy_file(&path, file_source, source, fixed_source);
+            state = self.parse_process_file_state(
+                &path,
+                &fixed_file,
+                file_source,
+                &settings_handle,
+                settings.experimental_full_html_support_enabled(),
+            )?;
+            self.format_file_state(project_key, &path, &state, false)?
+                .unwrap_or_else(|| state.parsed.send_node(&state.db).into_source_text())
+        } else {
+            fixed_source
         };
 
-        let mut errors = 0;
-        let mut actions = vec![];
-        let mut skipped_suggested_fixes = 0;
-        let settings = self.settings_handle(&settings, inline_config);
-
-        if let Some(update_snippets) = capabilities.analyzer.update_snippets {
-            let mut new_snippets = vec![];
-            for embedded_snippet in embedded_snippets {
-                let workspace_db = self.get_db();
-
-                let Some(document_file_source) = workspace_db
-                    .source_from_index(embedded_snippet.document_source_index(&*workspace_db))
-                else {
-                    continue;
-                };
-                let capabilities = self
-                    .features
-                    .get_deprecated_capabilities(document_file_source);
-                let Some(fix_all) = capabilities.analyzer.fix_all else {
-                    continue;
-                };
-
-                let results = fix_all(FixAllParams {
-                    parsed_source: embedded_snippet.into(),
-                    fix_file_mode,
-                    settings: &settings,
-                    should_format,
-                    biome_path: &path,
-                    workspace_db: workspace_db.clone(),
-                    project_layout: self.project_layout.clone(),
-                    document_file_source,
-                    only: &only,
-                    skip: &skip,
-                    rule_categories,
-                    suppression_reason: suppression_reason.clone(),
-                    enabled_rules: &enabled_rules,
-                    plugins: plugins.clone(),
-                    working_directory: Some(working_directory.as_path()),
-                    embeds_initial_indent: 0,
-                })?;
-
-                actions.extend(results.actions);
-                errors += results.errors;
-                skipped_suggested_fixes += results.skipped_suggested_fixes;
-
-                new_snippets.push(UpdateSnippetsNodes {
-                    range: embedded_snippet.element_range(&*workspace_db),
-                    new_code: results.code,
-                    needs_reindent: should_format,
-                });
-            }
-
-            // Operations are intentionally kept inside blocks so that the
-            // forks created by `get_db` are dropped before the setter runs.
-            let new_root = {
-                let workspace_db = self.get_db();
-                update_snippets(parse.into(), workspace_db.clone(), new_snippets)?
-            };
-            self.db_update_parsed_root(path.as_path(), new_root);
-            parse = {
-                let workspace_db = self.get_db();
-                workspace_db
-                    .get_file(path.as_path())
-                    .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?
-            };
-        }
-
-        let workspace_db = self.get_db();
-        let fix_result = fix_all(FixAllParams {
-            parsed_source: parse.into(),
-            fix_file_mode,
-            settings: &settings,
-            should_format,
-            biome_path: &path,
-            workspace_db: workspace_db.clone(),
-            project_layout: self.project_layout.clone(),
-            document_file_source: language,
-            only: &only,
-            skip: &skip,
-            rule_categories,
-            suppression_reason: suppression_reason.clone(),
-            enabled_rules: &enabled_rules,
-            plugins: plugins.clone(),
-            working_directory: Some(working_directory.as_path()),
-            embeds_initial_indent: 0,
-        })?;
-
-        actions.extend(fix_result.actions);
-        errors += fix_result.errors;
-        skipped_suggested_fixes += fix_result.skipped_suggested_fixes;
-
         Ok(FixFileResult {
-            errors,
-            code: fix_result.code,
+            code,
             actions,
+            errors,
             skipped_suggested_fixes,
         })
     }
@@ -3205,7 +3790,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             let result = resolve_definition(ResolveDefinitionParams {
                 path,
                 definition_ref: &definition_ref,
-                workspace_db: workspace_db.clone(),
+                workspace_db: workspace_db.clone_untracked_db(),
                 parsed_source: snippet.into(),
             });
 
@@ -3421,7 +4006,7 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
             _ => {
                 #[cfg(feature = "module_graph")]
                 {
-                    self.module_db().contains(path)
+                    self.db_state.contains_module_untracked(path)
                 }
                 #[cfg(not(feature = "module_graph"))]
                 {
