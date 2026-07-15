@@ -35,3 +35,4 @@ A{} --- B:HOVER --- C{COLOR:RED}
 ::V-GLOBAL(.child){COLOR:RED}
 @\-\-Future{COLOR:RED}
 .opaque{COLOR:INITIAL;--keyword:INITIAL;color:fn(INHERIT)}
+@supports(/* keep */COLOR){}
