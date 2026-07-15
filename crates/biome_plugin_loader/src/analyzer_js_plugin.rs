@@ -2,13 +2,8 @@ use std::fmt::{Debug, Formatter};
 use std::ops::DerefMut;
 use std::sync::Arc;
 
-use boa_engine::class::{Class, ClassBuilder};
-use boa_engine::object::builtins::{JsArray, JsFunction};
-use boa_engine::property::Attribute;
-use boa_engine::{
-    Context, Finalize, JsData, JsNativeError, JsResult, JsString, JsValue, NativeFunction, Trace,
-    js_string,
-};
+use boa_engine::object::builtins::JsFunction;
+use boa_engine::{JsNativeError, JsResult, JsString, JsValue};
 use camino::{Utf8Path, Utf8PathBuf};
 
 use biome_analyze::{
@@ -18,7 +13,7 @@ use biome_console::markup;
 use biome_diagnostics::category;
 use biome_glob::NormalizedGlob;
 use biome_js_runtime::JsExecContext;
-use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, JsSyntaxToken};
+use biome_js_syntax::{AnyJsRoot, JsSyntaxNode};
 use biome_resolver::FsWithResolverProxy;
 use biome_rowan::{AnySyntaxNode, AstNode, RawSyntaxKind, SyntaxKind};
 use biome_text_size::TextRange;
@@ -34,144 +29,8 @@ struct LoadedPlugin {
     entrypoint: JsFunction,
 }
 
-#[derive(Debug, JsData)]
-struct JsAstNode {
-    data: JsAstNodeData,
-}
-
-impl Finalize for JsAstNode {}
-
-// SAFETY: `JsAstNode` only contains Rowan data and no values managed by Boa's garbage collector.
-unsafe impl Trace for JsAstNode {
-    boa_engine::gc::empty_trace!();
-}
-
-impl JsAstNode {
-    fn from_syntax(node: JsSyntaxNode) -> JsResult<Self> {
-        let Some(data) = JsAstNodeData::cast(node) else {
-            return Err(JsNativeError::typ()
-                .with_message("Unsupported JavaScript AST node")
-                .into());
-        };
-
-        Ok(Self { data })
-    }
-
-    fn from_this(this: &JsValue) -> JsResult<JsSyntaxNode> {
-        let Some(object) = this.as_object() else {
-            return Err(JsNativeError::typ()
-                .with_message("AST getter called with an invalid receiver")
-                .into());
-        };
-        let Some(node) = object.downcast_ref::<Self>() else {
-            return Err(JsNativeError::typ()
-                .with_message("AST getter called with an invalid receiver")
-                .into());
-        };
-
-        Ok(node.data.syntax().clone())
-    }
-
-    fn resolve_field(this: &JsValue, field: &str, context: &mut Context) -> JsResult<JsValue> {
-        let Some(object) = this.as_object() else {
-            return Err(JsNativeError::typ()
-                .with_message("AST getter called with an invalid receiver")
-                .into());
-        };
-        let Some(node) = object.downcast_ref::<Self>() else {
-            return Err(JsNativeError::typ()
-                .with_message("AST getter called with an invalid receiver")
-                .into());
-        };
-
-        node.data.resolve_field(field, context)
-    }
-
-    fn text_range(value: &JsValue) -> Option<TextRange> {
-        let object = value.as_object()?;
-        let node = object.downcast_ref::<Self>()?;
-        Some(node.data.syntax().text_trimmed_range())
-    }
-
-    fn get_kind(this: &JsValue, _args: &[JsValue], _context: &mut Context) -> JsResult<JsValue> {
-        let node = Self::from_this(this)?;
-        Ok(JsString::from(format!("{:?}", node.kind())).into())
-    }
-
-    fn get_text(this: &JsValue, _args: &[JsValue], _context: &mut Context) -> JsResult<JsValue> {
-        let node = Self::from_this(this)?;
-        Ok(JsString::from(node.text_trimmed().to_string()).into())
-    }
-
-    fn wrap_optional_node<N>(node: Option<N>, context: &mut Context) -> JsResult<JsValue>
-    where
-        N: AstNode<Language = JsLanguage>,
-    {
-        match node {
-            Some(node) => Self::from_syntax(node.into_syntax())
-                .and_then(|node| Self::from_data(node, context))
-                .map(Into::into),
-            None => Ok(JsValue::undefined()),
-        }
-    }
-
-    fn wrap_node_list<I, N>(nodes: I, context: &mut Context) -> JsResult<JsValue>
-    where
-        I: IntoIterator<Item = N>,
-        N: AstNode<Language = JsLanguage>,
-    {
-        let nodes = nodes
-            .into_iter()
-            .map(|node| {
-                Self::from_syntax(node.into_syntax())
-                    .and_then(|node| Self::from_data(node, context))
-                    .map(Into::into)
-            })
-            .collect::<JsResult<Vec<_>>>()?;
-
-        Ok(JsArray::from_iter(nodes, context).into())
-    }
-
-    fn wrap_token(token: Option<JsSyntaxToken>) -> JsValue {
-        token.map_or_else(JsValue::undefined, |token| {
-            JsString::from(token.text_trimmed().to_string()).into()
-        })
-    }
-}
-
-include!("generated/js_ast.rs");
-
-impl Class for JsAstNode {
-    const NAME: &'static str = "__BiomeJsAstNode";
-
-    fn init(class: &mut ClassBuilder<'_>) -> JsResult<()> {
-        let kind =
-            NativeFunction::from_fn_ptr(Self::get_kind).to_js_function(class.context().realm());
-        let text =
-            NativeFunction::from_fn_ptr(Self::get_text).to_js_function(class.context().realm());
-        class
-            .accessor(js_string!("kind"), Some(kind), None, Attribute::ENUMERABLE)
-            .accessor(js_string!("text"), Some(text), None, Attribute::ENUMERABLE);
-
-        Self::init_generated(class);
-
-        Ok(())
-    }
-
-    fn data_constructor(
-        _new_target: &JsValue,
-        _args: &[JsValue],
-        _context: &mut Context,
-    ) -> JsResult<Self> {
-        Err(JsNativeError::typ()
-            .with_message("AST nodes cannot be constructed from JavaScript")
-            .into())
-    }
-}
-
 fn load_plugin(fs: Arc<dyn FsWithResolverProxy>, path: &Utf8Path) -> JsResult<LoadedPlugin> {
     let mut ctx = JsExecContext::new(fs)?;
-    ctx.set_diagnostic_range_resolver(JsAstNode::text_range);
     let module = ctx.import_module(path)?;
     let entrypoint = ctx.get_default_export(&module)?;
 
@@ -281,9 +140,8 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
             };
         };
 
-        let ast = match JsAstNode::from_syntax(node)
-            .and_then(|node| plugin.ctx.create_class_instance(node))
-        {
+        let ast = plugin.ctx.create_js_ast(node);
+        let ast = match ast {
             Ok(ast) => ast,
             Err(err) => {
                 return PluginEvalResult {
@@ -438,8 +296,7 @@ mod tests {
 
     #[test]
     fn reports_top_level_var_declarations_using_ast_fields() {
-        let plugin = load_test_plugin_from_source(
-            r#"import { registerDiagnostic } from "@biomejs/plugin-api";
+        let source = r#"import { registerDiagnostic } from "@biomejs/plugin-api";
             export default function noTopLevelVar(_path, root) {
                 const statements = root.kind === "JS_MODULE" ? root.items : [];
                 for (const statement of statements) {
@@ -454,15 +311,14 @@ mod tests {
                         );
                     }
                 }
-            }"#,
-            None,
-        );
+            }"#;
         let parse = biome_js_parser::parse(
             "var legacy = 1; const modern = 2;",
             JsFileSource::js_module(),
             JsParserOptions::default(),
         );
 
+        let plugin = load_test_plugin_from_source(source, None);
         let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
         assert_eq!(result.entries.len(), 1);
         assert_eq!(

@@ -1,4 +1,4 @@
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use std::rc::Rc;
 
 use boa_engine::module::SyntheticModuleInitializer;
@@ -7,26 +7,22 @@ use boa_engine::{Context, JsNativeError, JsValue, Module, NativeFunction, js_str
 
 use biome_analyze::RuleDiagnostic;
 use biome_diagnostics::{Severity, category};
-use biome_text_size::TextRange;
 
-type DiagnosticRangeResolver = fn(&JsValue) -> Option<TextRange>;
+use crate::ast::JsAstNode;
 
 pub(crate) struct JsPluginApi {
     diagnostics: Rc<RefCell<Vec<RuleDiagnostic>>>,
-    diagnostic_range_resolver: Rc<Cell<Option<DiagnosticRangeResolver>>>,
 }
 
 impl JsPluginApi {
     pub(crate) fn new() -> Self {
         Self {
             diagnostics: Rc::new(RefCell::new(Vec::new())),
-            diagnostic_range_resolver: Rc::new(Cell::new(None)),
         }
     }
 
     pub(crate) fn create_module(&self, context: &mut Context) -> Module {
         let diagnostics = self.diagnostics.clone();
-        let diagnostic_range_resolver = self.diagnostic_range_resolver.clone();
 
         // SAFETY: The closure doesn't capture any GC-managed values.
         let register_diagnostic = FunctionObjectBuilder::new(context.realm(), unsafe {
@@ -39,12 +35,7 @@ impl JsPluginApi {
                         .into());
                 };
 
-                let Some(resolve_range) = diagnostic_range_resolver.get() else {
-                    return Err(JsNativeError::error()
-                        .with_message("AST diagnostics are not available in this context")
-                        .into());
-                };
-                let Some(range) = resolve_range(node) else {
+                let Some(range) = JsAstNode::text_range(node) else {
                     return Err(JsNativeError::typ()
                         .with_message(
                             "registerDiagnostic() expects an AST node as its first argument",
@@ -87,10 +78,13 @@ impl JsPluginApi {
         Module::synthetic(
             &[js_string!("registerDiagnostic")],
             SyntheticModuleInitializer::from_copy_closure_with_captures(
-                |module, fns, _| {
-                    module.set_export(&js_string!("registerDiagnostic"), fns.0.clone().into())
+                |module, register_diagnostic, _| {
+                    module.set_export(
+                        &js_string!("registerDiagnostic"),
+                        register_diagnostic.clone().into(),
+                    )
                 },
-                (register_diagnostic,),
+                register_diagnostic,
             ),
             None,
             None,
@@ -100,9 +94,5 @@ impl JsPluginApi {
 
     pub(crate) fn pull_diagnostics(&self) -> Vec<RuleDiagnostic> {
         std::mem::take(&mut self.diagnostics.borrow_mut())
-    }
-
-    pub(crate) fn set_diagnostic_range_resolver(&self, resolver: DiagnosticRangeResolver) {
-        self.diagnostic_range_resolver.set(Some(resolver));
     }
 }

@@ -2,7 +2,6 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 use boa_engine::builtins::promise::PromiseState;
-use boa_engine::class::Class;
 use boa_engine::object::builtins::JsFunction;
 use boa_engine::{
     Context, JsError, JsNativeError, JsResult, JsValue, Module, NativeFunction, Source, js_string,
@@ -10,10 +9,11 @@ use boa_engine::{
 use camino::Utf8Path;
 
 use biome_analyze::RuleDiagnostic;
+use biome_js_syntax::JsSyntaxNode;
 use biome_resolver::FsWithResolverProxy;
-use biome_text_size::TextRange;
 
 use crate::JsModuleLoader;
+use crate::ast::JsAstNode;
 use crate::plugin_api::JsPluginApi;
 
 pub struct JsExecContext {
@@ -29,6 +29,8 @@ impl JsExecContext {
         let mut ctx = Context::builder()
             .module_loader(Rc::clone(&module_loader))
             .build()?;
+
+        JsAstNode::register(&mut ctx)?;
 
         module_loader.register_module(
             js_string!("@biomejs/plugin-api"),
@@ -105,19 +107,8 @@ impl JsExecContext {
         namespace.get(js_string!("default"), ctx)
     }
 
-    pub fn create_class_instance<C>(&mut self, data: C) -> JsResult<JsValue>
-    where
-        C: Class,
-    {
-        if !self.ctx.has_global_class::<C>() {
-            self.ctx.register_global_class::<C>()?;
-        }
-
-        Ok(C::from_data(data, &mut self.ctx)?.into())
-    }
-
-    pub fn set_diagnostic_range_resolver(&mut self, resolver: fn(&JsValue) -> Option<TextRange>) {
-        self.api.set_diagnostic_range_resolver(resolver);
+    pub fn create_js_ast(&mut self, node: JsSyntaxNode) -> JsResult<JsValue> {
+        JsAstNode::from_node(node, &mut self.ctx)
     }
 
     pub fn call_function(

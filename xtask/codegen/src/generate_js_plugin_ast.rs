@@ -1,4 +1,3 @@
-use std::collections::BTreeSet;
 use std::fmt::Write;
 
 use biome_string_case::Case;
@@ -10,7 +9,7 @@ use crate::language_kind::LanguageKind;
 use crate::update;
 
 pub(crate) fn generate_js_plugin_ast(ast: &AstSrc, mode: &Mode) -> Result<()> {
-    let rust_path = project_root().join("crates/biome_plugin_loader/src/generated/js_ast.rs");
+    let rust_path = project_root().join("crates/biome_js_runtime/src/generated/js_ast.rs");
     let rust = generate_rust(ast)?;
     update(&rust_path, &rust, mode)?;
 
@@ -22,28 +21,17 @@ pub(crate) fn generate_js_plugin_ast(ast: &AstSrc, mode: &Mode) -> Result<()> {
 }
 
 fn generate_rust(ast: &AstSrc) -> Result<String> {
-    let mut accessors = BTreeSet::<String>::new();
-    let mut variants = Vec::new();
-    let mut cast_arms = Vec::new();
-    let mut syntax_arms = Vec::new();
-    let mut field_arms = Vec::new();
+    let mut prototype_arms = Vec::new();
 
     for node in &ast.nodes {
         let node_type = format_ident!("{}", node.name);
         let node_kind = format_ident!("{}", Case::Constant.convert(&node.name));
-        variants.push(quote! { #node_type(biome_js_syntax::#node_type) });
-        cast_arms.push(quote! {
-            biome_js_syntax::JsSyntaxKind::#node_kind =>
-                <biome_js_syntax::#node_type as AstNode>::cast(node).map(Self::#node_type)
-        });
-        syntax_arms.push(quote! { Self::#node_type(node) => node.syntax() });
-
-        let mut node_fields = Vec::new();
+        let mut prototype_fields = Vec::new();
 
         for field in &node.fields {
             let method_name = rust_method_name(field);
             let property_name = property_name(field);
-            let field_arm = match field {
+            let accessor_value = match field {
                 Field::Token { optional, .. } => {
                     let value = if *optional {
                         quote! { node.#method_name() }
@@ -51,9 +39,7 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
                         quote! { node.#method_name().ok() }
                     };
 
-                    quote! {
-                        #property_name => Ok(JsAstNode::wrap_token(#value))
-                    }
+                    quote! { Ok(Self::wrap_token(#value)) }
                 }
                 Field::Node {
                     ty, optional: _, ..
@@ -68,9 +54,7 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
                         quote! { node.#method_name() }
                     };
 
-                    quote! {
-                        #property_name => JsAstNode::wrap_node_list(#list, context)
-                    }
+                    quote! { Self::wrap_node_list(#list, context) }
                 }
                 Field::Node { optional, .. } => {
                     let value = if *optional {
@@ -79,99 +63,47 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
                         quote! { node.#method_name().ok() }
                     };
 
-                    quote! {
-                        #property_name => JsAstNode::wrap_optional_node(#value, context)
-                    }
+                    quote! { Self::wrap_optional_node(#value, context) }
                 }
             };
 
-            accessors.insert(property_name);
-            node_fields.push(field_arm);
-        }
-
-        if node_fields.is_empty() {
-            field_arms.push(quote! { Self::#node_type(_) => Ok(JsValue::undefined()) });
-        } else {
-            field_arms.push(quote! {
-                Self::#node_type(node) => match field {
-                    #(#node_fields,)*
-                    _ => Ok(JsValue::undefined()),
-                }
+            prototype_fields.push(quote! {
+                (#property_name, |node, context| #accessor_value)
             });
         }
-    }
 
-    for bogus in &ast.bogus {
-        let node_type = format_ident!("{bogus}");
-        let node_kind = format_ident!("{}", Case::Constant.convert(bogus));
-        variants.push(quote! { #node_type(biome_js_syntax::#node_type) });
-        cast_arms.push(quote! {
-            biome_js_syntax::JsSyntaxKind::#node_kind =>
-                <biome_js_syntax::#node_type as AstNode>::cast(node).map(Self::#node_type)
-        });
-        syntax_arms.push(quote! { Self::#node_type(node) => node.syntax() });
-        field_arms.push(quote! { Self::#node_type(_) => Ok(JsValue::undefined()) });
-    }
-
-    let getter_methods = accessors.iter().map(|property_name| {
-        let getter_name = format_ident!("get_field_{}", Case::Snake.convert(property_name));
-        quote! {
-            fn #getter_name(
-                this: &JsValue,
-                _args: &[JsValue],
-                context: &mut Context,
-            ) -> JsResult<JsValue> {
-                Self::resolve_field(this, #property_name, context)
+        prototype_arms.push(quote! {
+            JsSyntaxKind::#node_kind => {
+                register_js_ast_fields!(
+                    prototype,
+                    JsSyntaxKind::#node_kind,
+                    #node_type,
+                    #(#prototype_fields,)*
+                );
             }
-        }
-    });
-
-    let registrations = accessors.iter().map(|property_name| {
-        let getter_name = format_ident!("get_field_{}", Case::Snake.convert(property_name));
-        quote! {
-            let getter = NativeFunction::from_fn_ptr(Self::#getter_name)
-                .to_js_function(class.context().realm());
-            class.accessor(
-                js_string!(#property_name),
-                Some(getter),
-                None,
-                Attribute::ENUMERABLE,
-            );
-        }
-    });
+        });
+    }
 
     let tokens = quote! {
-        #[derive(Debug)]
-        enum JsAstNodeData {
-            #(#variants,)*
-        }
-
-        impl JsAstNodeData {
-            fn cast(node: JsSyntaxNode) -> Option<Self> {
-                match node.kind() {
-                    #(#cast_arms,)*
-                    _ => None,
-                }
-            }
-
-            fn syntax(&self) -> &JsSyntaxNode {
-                match self {
-                    #(#syntax_arms,)*
-                }
-            }
-
-            fn resolve_field(&self, field: &str, context: &mut Context) -> JsResult<JsValue> {
-                match self {
-                    #(#field_arms,)*
-                }
-            }
-        }
+        use super::*;
+        use biome_js_syntax::*;
 
         impl JsAstNode {
-            #(#getter_methods)*
-
-            fn init_generated(class: &mut ClassBuilder<'_>) {
-                #(#registrations)*
+            pub(super) fn create_generated_prototype(
+                kind: JsSyntaxKind,
+                base_prototype: JsObject,
+                context: &mut Context,
+            ) -> JsObject {
+                let mut prototype = ObjectInitializer::with_native_data_and_proto(
+                    OrdinaryObject,
+                    base_prototype,
+                    context,
+                );
+                match kind {
+                    #(#prototype_arms,)*
+                    _ => {}
+                }
+                prototype.build()
             }
         }
     };
@@ -182,10 +114,10 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
 fn generate_typescript(ast: &AstSrc) -> String {
     let mut output = String::from(
         "// Generated file, do not edit by hand, see `xtask/codegen`.\n\n\
-export interface JsAstNode {\n\
-\treadonly kind: string;\n\
-\treadonly text: string;\n\
-}\n\n",
+	export interface JsAstNode {\n\
+	\treadonly kind: string;\n\
+	\treadonly text: string;\n\
+	}\n\n",
     );
 
     for node in &ast.nodes {
