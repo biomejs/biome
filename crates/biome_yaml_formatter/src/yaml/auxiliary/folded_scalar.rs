@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::utils::block_scalar::{format_block_scalar, is_reindentable_block_scalar};
+use crate::utils::block_scalar::{FormatBlockScalar, is_reindentable_block_scalar};
 use biome_rowan::AstNode;
 use biome_yaml_syntax::YamlFoldedScalar;
 #[derive(Debug, Clone, Default)]
@@ -9,8 +9,16 @@ impl FormatNodeRule<YamlFoldedScalar> for FormatYamlFoldedScalar {
         let fields = node.as_fields();
         let content = fields.content?;
         if !is_reindentable_block_scalar(node.syntax(), &fields.headers, &content) {
+            // TODO: reindent nested and irregularly indented block scalars
+            // instead of emitting them verbatim.
             return format_verbatim_node(node.syntax()).fmt(f);
         }
-        format_block_scalar(&fields.r_angle_token?, &fields.headers, &content, f)
+        let opener = fields.r_angle_token?;
+        FormatBlockScalar {
+            opener: &opener,
+            headers: &fields.headers,
+            content: &content,
+        }
+        .fmt(f)
     }
 }
