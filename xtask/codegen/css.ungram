@@ -941,18 +941,6 @@ CssFunctionAtRuleDeclarator =
 	')'
 	returns: CssReturnsStatement?
 
-CssCustomMediaAtRuleDeclarator =
-	'custom-media'
-	name: AnyCssDashedIdentifier
-	queries: AnyCssCustomMediaQuery
-
-AnyCssCustomMediaQuery =
-	CssMediaQueryList
-	| CssBooleanMediaQuery
-
-CssBooleanMediaQuery =
-	boolean: ('true' | 'false')
-
 // @charset "UTF-8";
 // ^^^^^^^^^^^^^^^^^
 CssCharsetAtRule =
@@ -2139,6 +2127,18 @@ CssReturnsStatement =
 CssCustomMediaAtRule =
 	declarator: CssCustomMediaAtRuleDeclarator
 	';'
+
+CssCustomMediaAtRuleDeclarator =
+	'custom-media'
+	name: AnyCssDashedIdentifier
+	queries: AnyCssCustomMediaQuery
+
+AnyCssCustomMediaQuery =
+	CssMediaQueryList
+	| CssBooleanMediaQuery
+
+CssBooleanMediaQuery =
+	boolean: ('true' | 'false')
 
 ///////////////
 // AUXILIARY

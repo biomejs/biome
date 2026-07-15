@@ -2,10 +2,10 @@ use biome_css_syntax::CssSyntaxKind::{
     CSS_BOOLEAN_MEDIA_QUERY, CSS_CUSTOM_MEDIA_AT_RULE, CSS_CUSTOM_MEDIA_AT_RULE_DECLARATOR,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
-use biome_parser::Parser;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
+use biome_parser::{Parser, TokenSet, token_set};
 
 use crate::parser::CssParser;
 use crate::syntax::at_rule::media::MediaQueryList;
@@ -55,6 +55,8 @@ fn parse_custom_media_at_rule_declarator(
     Present(m.complete(p, CSS_CUSTOM_MEDIA_AT_RULE_DECLARATOR))
 }
 
+const BOOLEAN_MEDIA_QUERY_SET: TokenSet<CssSyntaxKind> = token_set![T![true], T![false]];
+
 #[inline]
 fn is_at_boolean_media_query(p: &mut CssParser) -> bool {
     p.at(T![true]) || p.at(T![false])
@@ -68,8 +70,7 @@ fn parse_boolean_media_query(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.eat(T![true]);
-    p.eat(T![false]);
+    p.eat_ts(BOOLEAN_MEDIA_QUERY_SET);
 
     Present(m.complete(p, CSS_BOOLEAN_MEDIA_QUERY))
 }
