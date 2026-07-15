@@ -17,6 +17,14 @@ info: css/atrule/custom_media.css
 
 @custom-media --custom all and (-webkit-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (min--moz-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5);
 
+@CUSTOM-MEDIA --KeepName (MIN-WIDTH:500PX);
+@CUSTOM-MEDIA --KeepTrue TRUE;
+@CUSTOM-MEDIA --KeepFalse FALSE;
+
+@custom-media --KeepName (min-width: 500px);
+@custom-media --KeepTrue true;
+@custom-media --KeepFalse false;
+
 ```
 
 
@@ -31,5 +39,13 @@ info: css/atrule/custom_media.css
 	all and (-o-min-device-pixel-ratio: 3 / 2),
 	all and (min--moz-device-pixel-ratio: 1.5),
 	all and (min-device-pixel-ratio: 1.5);
+
+@custom-media --KeepName (min-width: 500px);
+@custom-media --KeepTrue true;
+@custom-media --KeepFalse false;
+
+@custom-media --KeepName (min-width: 500px);
+@custom-media --KeepTrue true;
+@custom-media --KeepFalse false;
 
 ```

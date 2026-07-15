@@ -8,6 +8,6 @@ impl FormatNodeRule<CssBooleanMediaQuery> for FormatCssBooleanMediaQuery {
     fn fmt_fields(&self, node: &CssBooleanMediaQuery, f: &mut CssFormatter) -> FormatResult<()> {
         let CssBooleanMediaQueryFields { boolean } = node.as_fields();
 
-        boolean.format().fmt(f)
+        boolean.format()?.with_text_case(CssCase::Lowercase).fmt(f)
     }
 }

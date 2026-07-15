@@ -1,5 +1,7 @@
 use crate::prelude::*;
-use biome_css_syntax::{CssSyntaxNode, map_syntax_node};
+use biome_css_syntax::{
+    CssGenericComponentValueList, CssIdentifier, CssSyntaxNode, map_syntax_node,
+};
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult};
 
 #[derive(Debug, Copy, Clone, Default)]
@@ -9,6 +11,14 @@ impl FormatRule<CssSyntaxNode> for FormatCssSyntaxNode {
     type Context = CssFormatContext;
 
     fn fmt(&self, node: &CssSyntaxNode, f: &mut CssFormatter) -> FormatResult<()> {
+        if let Some(identifier) = CssIdentifier::cast_ref(node)
+            && identifier
+                .parent::<CssGenericComponentValueList>()
+                .is_some()
+        {
+            return identifier.format().with_text_case(CssCase::Preserve).fmt(f);
+        }
+
         map_syntax_node!(node.clone(), node => node.format().fmt(f))
     }
 }

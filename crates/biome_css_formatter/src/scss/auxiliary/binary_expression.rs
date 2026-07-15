@@ -10,13 +10,25 @@ pub(crate) struct FormatScssBinaryExpression;
 
 impl FormatNodeRule<ScssBinaryExpression> for FormatScssBinaryExpression {
     fn fmt_fields(&self, node: &ScssBinaryExpression, f: &mut CssFormatter) -> FormatResult<()> {
-        let left = node.left();
+        let left = node.left()?;
         let formatted_right = FormatScssBinaryRightSide::new(node);
 
         if is_in_scss_control_condition_sequence(node) {
-            write!(f, [left.format(), formatted_right])
+            write!(
+                f,
+                [
+                    left.format().with_text_case(CssCase::Preserve),
+                    formatted_right
+                ]
+            )
         } else {
-            write!(f, [group(&format_args![left.format(), formatted_right])])
+            write!(
+                f,
+                [group(&format_args![
+                    left.format().with_text_case(CssCase::Preserve),
+                    formatted_right
+                ])]
+            )
         }
     }
 }
@@ -54,18 +66,30 @@ impl Format<CssFormatContext> for FormatScssBinaryRightSide<'_> {
             operator, right, ..
         } = self.node.as_fields();
 
-        write!(f, [space(), operator.format()])?;
+        write!(
+            f,
+            [
+                space(),
+                operator.format()?.with_text_case(CssCase::Preserve)
+            ]
+        )?;
 
         if self.should_indent() {
             write!(
                 f,
                 [indent(&format_args![
                     soft_line_break_or_space(),
-                    right.format()
+                    right?.format().with_text_case(CssCase::Preserve)
                 ])]
             )
         } else {
-            write!(f, [soft_line_break_or_space(), right.format()])
+            write!(
+                f,
+                [
+                    soft_line_break_or_space(),
+                    right?.format().with_text_case(CssCase::Preserve)
+                ]
+            )
         }
     }
 }

@@ -1,0 +1,182 @@
+@CHARSET"UTF-8";
+
+@-MOZ-DOCUMENT URL("x"){.a{COLOR:RED}}
+
+@USE "x" AS KeepUse;
+
+@USE "reset" AS *;
+
+@FORWARD "tokens" show $KeepVar, KeepMixin;
+
+@FORWARD "tokens" hide $KeepVar, KeepMixin;
+
+@FORWARD   "tokens" AS Keep-*;
+
+@FORWARD "theme" with ($Keep: KeepValue !DEFAULT);
+
+@USE "theme" WITH ($Keep: 1 !DEFAULT, $Other: KeepValue);
+
+@IMPORT "KeepPlain.scss";
+
+@IMPORT "Keep#{$Name}.scss";
+
+@IMPORT "KeepImport.CSS" PRINT and (MIN-WIDTH: 700PX);
+
+KeepUse.$Keep: 1 !GLOBAL;
+
+$Keep: 2 !DEFAULT;
+
+$Keep: KeepUse.KeepMember;
+
+$KeepParen: (KeepValue);
+
+$KeepUnary: -$Keep;
+
+$KeepNotParen: NOT ($Keep AND $Other);
+
+@FOR $I FROM 1 THROUGH 2 { .KeepClass { COLOR: RED; } }
+
+@FOR $I FROM 1 TO 2 { .KeepClass { COLOR: RED; } }
+
+@FUNCTION KeepFunction($Input) { @RETURN $Input; }
+
+@MIXIN KeepMixin($Keep: 15IN, $Args...) {
+    @CONTENT($Keep);
+
+    @INCLUDE KeepOther($Args...);
+
+    $KeepList: KeepOne, KeepTwo,;
+
+    $KeepMap: (KeepKey: KeepValue, #{$Keep}: $Keep,);
+
+    $KeepString: "prefix #{$Keep} suffix";
+
+    $KeepInterpolatedValue: 1#{$Name};
+
+    WIDTH: ($Keep + KeepValue);
+
+    BACKGROUND: {
+        COLOR: RED;
+    }
+
+    #{$Keep}: {
+        COLOR: RED;
+    }
+
+    #{$Keep + 15PX}:KeepValue;
+
+    #{$Keep + 15FuTuRe}:KeepValue;
+
+    #{$Keep + 16PX}:{COLOR:RED}
+
+    :root {
+        --Keep-custom-Prop: $Keep;
+    }
+
+    @MEDIA (MIN-WIDTH: 700PX) {
+        .KeepClass:HOVER::FIRST-letter {
+            COLOR: #AAbbCC;
+            background: Var(--Keep-custom-Prop);
+            transform: KeepUse.KeepFunc($Keep);
+            filter: #{$KeepFunc}($Keep);
+        }
+
+        &:Not(:NTH-child(2n+1))::PART(KeepPart) {
+            COLOR: #AAbbCC;
+        }
+    }
+}
+
+.KeepClass:#{$KeepPseudo}(> .KeepChild:HOVER) { COLOR: RED; }
+
+.KeepClass:#{$KeepSelector}(.KeepOther:HOVER) { COLOR: RED; }
+
+.KeepClass:#{$KeepNth}(2N+1 OF .KeepClass:HOVER) { COLOR: RED; }
+
+.KeepNthFixed:NTH-child(#{$Sign}2n + #{$Offset}) { COLOR: RED; }
+
+.KeepClass:#{$KeepValue}(KeepValue, HOVER) { COLOR: RED; }
+
+.KeepClass::#{$KeepElement}(.KeepSlot:HOVER) { COLOR: RED; }
+
+.KeepClass::#{$KeepElementValue}(KeepPart, KeepOther) { COLOR: RED; }
+
+#{$KeepType}.#{$KeepClass}##{$KeepId}[data-#{$KeepAttr}=#{$KeepAttrValue} #{$KeepMod}] { COLOR: RED; }
+
+@MEDIA #{$Query} { .KeepClass:HOVER { COLOR: RED; } }
+
+@MEDIA #{$Query}, PRINT AND (MIN-WIDTH: 700PX) { .KeepClass:HOVER { COLOR: RED; } }
+
+@CONTAINER (#{$Feature}: #{$Value}) { .KeepClass:HOVER { COLOR: RED; } }
+
+@CONTAINER (#{$Min} <= WIDTH <= #{$Max}) { .KeepClass:HOVER { COLOR: RED; } }
+
+@MEDIA (#{$Boolean}),(#{$Range}>1PX),(1PX<#{$Reverse}),(1PX<#{$Interval}<2PX),($KeepBoolean),(1PX<$KeepReverse){.KeepClass{COLOR:RED}}
+
+@supports #{"(DISPLAY: GRID)"} AND (COLOR: RED) { .KeepClass:HOVER { COLOR: RED; } }
+
+@supports (COLOR: RED) OR SELECTOR(A:HOVER) { .KeepClass:HOVER { COLOR: RED; } }
+
+@SUPPORTS(DISPLAY:GRID){.KeepClass{COLOR:RED}}
+
+@PAGE KeepScssPage:FIRST { $KeepPageColor: RED; BACKGROUND: { COLOR: $KeepPageColor; } }
+
+@EACH $Name IN KeepOne, KeepTwo { .#{$Name} { COLOR: RED; } }
+
+@EACH $Key, $Value IN (KeepKey: KeepValue, OtherKey: OtherValue) { .#{$Key} { COLOR: $Value; } }
+
+@WHILE $Keep > 0 { $Keep: $Keep - 1 !GLOBAL; .KeepClass { COLOR: RED; } }
+
+@AT-ROOT (WITHOUT: MEDIA SUPPORTS) { .KeepClass { COLOR: RED; } }
+
+@AT-ROOT (WITH: MEDIA SUPPORTS) { .KeepClass { COLOR: RED; } }
+
+@AT-ROOT .KeepRoot:HOVER { COLOR: RED; }
+
+@IF NOT $Keep AND $Other OR $Keep { .KeepClass { COLOR: RED; } }
+
+.if-sass { color: if(sass($Keep): RED; else: BLUE); }
+
+.if-sass-case{COLOR:IF(SASS($Keep):RED; ELSE:BLUE)}
+
+@IF $Keep { .KeepClass { COLOR: RED; } } @ELSE IF $Other { .KeepClass { BACKGROUND: RED; } } @ELSE { .KeepClass { BORDER-COLOR: RED; } }
+
+@INCLUDE KeepMixin($Keep:15IN);
+
+.KeepClass { @EXTEND %KeepPlaceholder !OPTIONAL; }
+
+@INCLUDE KeepMixin($Keep:15IN) USING ($Item) { COLOR: RED; }
+
+@DEBUG $Keep;
+
+@WARN $Keep;
+
+@ERROR $Keep;
+
+@keyframes #{$KeepFrames}{TO{COLOR:RED}}
+
+@keyframes $KeepFrames{TO{COLOR:RED}}
+
+.Block { $Parent: &; &__Elem--MOD { COLOR: RED; } &-100 { COLOR: RED; } &-#{$State} { COLOR: RED; } &#{$State}-MOD { COLOR: RED; } }
+
+%KeepPlaceholder{COLOR:RED;}
+
+.units{X:1PX;Y:1FuTuRe;Q:1q;H:1HZ;K:1khz}
+
+.nested-property-case{#{foo-#{$Keep + 17PX}}:v;foo-#{bar-#{$Keep + 18PX}}:w}
+
+.custom-property-case{--#{1PX}:v;--foo-#{1PX}:w}
+
+@supports(#{1PX}:x){}
+
+@import "x" supports(#{1PX}:x);
+
+.if-supports-case{x:if(supports(#{1PX}:x):red;else:blue)}
+
+.Unit-#{1PX}{COLOR:RED}
+
+$KeepKeyword:INITIAL;.#{$KeepKeyword}{COLOR:RED}
+
+.Nesting{FONT:INITIAL{FAMILY:sans-serif}}
+
+.WideKeywords{FONT-FAMILY:INITIAL;PADDING:UNSET;BORDER:INHERIT;ALL:REVERT}

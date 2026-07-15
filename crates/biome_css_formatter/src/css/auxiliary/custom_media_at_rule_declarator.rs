@@ -20,7 +20,9 @@ impl FormatNodeRule<CssCustomMediaAtRuleDeclarator> for FormatCssCustomMediaAtRu
         write!(
             f,
             [
-                custom_media_token.format(),
+                custom_media_token
+                    .format()?
+                    .with_text_case(CssCase::Lowercase),
                 space(),
                 name.format(),
                 space(),
