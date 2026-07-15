@@ -766,8 +766,13 @@ impl WorkspaceServerWithDb<'_> {
         };
 
         let is_indexed = if
-        // Dependency files can be skipped altoghether
-        (biome_path.is_dependency() && !biome_path.is_manifest())
+        // Dependency files can be skipped altoghether when we're indexing
+        // (scanning) the project automatically. An explicit client request
+        // (e.g. the CLI targeting a specific `node_modules` file directly)
+        // must still register the document, otherwise later lookups like
+        // `check_file_size`/`get_file_content` incorrectly report the file
+        // as not found even though it was just "opened".
+        (reason.is_index() && biome_path.is_dependency() && !biome_path.is_manifest())
             || (
                 // If the request is for indexing, we don't insert any document
                 // unless the document isn't ignored.
