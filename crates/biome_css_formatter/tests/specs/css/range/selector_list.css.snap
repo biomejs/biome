@@ -14,7 +14,7 @@ info: css/range/selector_list.css
 
 ```css
 .foo,
-.bar:FIRST-CHILD,
+.bar:first-child,
 DIV {
 	color: blue;
 }

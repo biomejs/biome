@@ -11,6 +11,21 @@ impl FormatNodeRule<ScssArbitraryArgument> for FormatScssArbitraryArgument {
             dotdotdot_token,
         } = node.as_fields();
 
-        write!(f, [value.format(), dotdotdot_token.format()])
+        let value = value?;
+
+        if let Some(identifier) = value
+            .as_any_css_value()
+            .and_then(|value| value.as_css_identifier())
+        {
+            write!(
+                f,
+                [
+                    identifier.format().with_text_case(CssCase::Preserve),
+                    dotdotdot_token.format()
+                ]
+            )
+        } else {
+            write!(f, [value.format(), dotdotdot_token.format()])
+        }
     }
 }

@@ -38,7 +38,7 @@ impl Format<CssFormatContext> for FormatSyntaxComponentItem {
 
         if let Some(token) = separator {
             if self.last {
-                FormatCssSyntaxToken.format_removed(token, f)?;
+                FormatCssSyntaxToken::default().format_removed(token, f)?;
             } else {
                 write![f, [soft_line_break_or_space(), token.format()]]?;
             }

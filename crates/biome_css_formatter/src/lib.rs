@@ -21,6 +21,7 @@ use crate::context::CssFormatOptions;
 use crate::cst::FormatCssSyntaxNode;
 use crate::prelude::{format_bogus_node, format_suppressed_node};
 pub(crate) use crate::trivia::*;
+use crate::utils::case::CssCase;
 use biome_css_syntax::{
     AnyCssDeclarationBlock, AnyCssRule, AnyCssRuleBlock, AnyCssValue, CssLanguage, CssSyntaxKind,
     CssSyntaxNode, CssSyntaxNodeWithOffset, CssSyntaxToken,
@@ -30,7 +31,7 @@ use biome_formatter::prelude::*;
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
-    TransformSourceMap, write,
+    FormatRuleWithTextCase, TransformSourceMap, write,
 };
 use biome_formatter::{Formatted, Printed};
 use biome_rowan::{AstNode, SyntaxNode, TextRange};
@@ -313,11 +314,19 @@ impl FormatLanguage for CssFormatLanguage {
 
 /// Format implementation specific to CSS tokens.
 ///
-/// This re-implementation of FormatToken allows the formatter to automatically
-/// rewrite all keywords in lowercase, since they are case-insensitive. Other
-/// tokens like identifiers handle lowercasing themselves.
+/// This re-implementation of FormatToken owns token trivia and casing policy.
 #[derive(Default, Debug, Clone, Copy)]
-pub(crate) struct FormatCssSyntaxToken;
+pub(crate) struct FormatCssSyntaxToken {
+    case: CssCase,
+}
+
+impl FormatRuleWithTextCase<CssLanguage> for FormatCssSyntaxToken {
+    #[inline]
+    fn with_text_case(mut self, case: CssCase) -> Self {
+        self.case = case;
+        self
+    }
+}
 
 impl FormatRule<CssSyntaxToken> for FormatCssSyntaxToken {
     type Context = CssFormatContext;
@@ -327,7 +336,12 @@ impl FormatRule<CssSyntaxToken> for FormatCssSyntaxToken {
 
         self.format_skipped_token_trivia(token, f)?;
 
-        if token.kind().is_contextual_keyword() {
+        #[cfg(debug_assertions)]
+        if self.case == CssCase::Auto {
+            crate::utils::case::record_auto_contextual_token(token, f);
+        }
+
+        if self.case == CssCase::Lowercase {
             let original = token.text_trimmed();
             match original.to_ascii_lowercase_cow() {
                 Cow::Borrowed(_) => self.format_trimmed_token_trivia(token, f),
@@ -358,7 +372,7 @@ impl AsFormat<CssFormatContext> for CssSyntaxToken {
     type Format<'a> = FormatRefWithRule<'a, Self, FormatCssSyntaxToken>;
 
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, FormatCssSyntaxToken)
+        FormatRefWithRule::new(self, FormatCssSyntaxToken::default())
     }
 }
 
@@ -366,7 +380,7 @@ impl IntoFormat<CssFormatContext> for CssSyntaxToken {
     type Format = FormatOwnedWithRule<Self, FormatCssSyntaxToken>;
 
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, FormatCssSyntaxToken)
+        FormatOwnedWithRule::new(self, FormatCssSyntaxToken::default())
     }
 }
 
@@ -425,17 +439,27 @@ pub fn format_sub_tree(options: CssFormatOptions, root: &CssSyntaxNode) -> Forma
 
 #[cfg(test)]
 mod tests {
+    use crate::comments::CssCommentStyle;
     use crate::context::CssFormatOptions;
     use crate::format_node;
-    use crate::{CssFormatContext, CssFormatLanguage, CssFormatter, FormatNodeRule};
+    use crate::utils::case::CssCase;
+    use crate::{AsFormat, CssFormatContext, CssFormatLanguage, CssFormatter, FormatNodeRule};
     use biome_css_parser::{CssParserOptions, parse_css};
-    use biome_css_syntax::CssRoot;
+    use biome_css_syntax::{
+        AnyCssFunctionName, AnyCssGenericComponentValue, CssCompoundSelector,
+        CssGenericComponentValueList, CssIdentifier, CssIfSupportsIdentifierTest,
+        CssPseudoClassFunctionSelector, CssRoot, CssSyntaxElement, CssSyntaxKind, CssSyntaxNode,
+    };
+    use biome_formatter::comments::Comments;
     use biome_formatter::prelude::token;
     use biome_formatter::{
-        Buffer, FormatLanguage, FormatRefWithRule, FormatResult, FormatRule, write,
+        Buffer, FormatLanguage, FormatRefWithRule, FormatResult, FormatRule,
+        FormatTextCaseExt as _, write,
     };
+    #[cfg(debug_assertions)]
+    use biome_formatter::{FormatState, VecBuffer};
     use biome_languages::CssFileSource;
-    use biome_rowan::AstNode;
+    use biome_rowan::{AstNode, Direction};
 
     #[test]
     fn smoke_test() {
@@ -444,6 +468,324 @@ mod tests {
         let options = CssFormatOptions::default();
         let formatted = format_node(options, &parse.syntax()).unwrap();
         assert_eq!(formatted.print().unwrap().as_code(), "html {\n}\n");
+    }
+
+    #[test]
+    fn detached_casing_owners_have_explicit_policies() {
+        use biome_css_syntax::CssSyntaxKind::*;
+
+        // These grammar nodes are not emitted by the current parser. Assemble
+        // them from valid parsed children so their formatter policies are still tested.
+        let supports = parse_css(
+            "A{COLOR:1}",
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+        let supports_syntax = supports.syntax();
+        let ident = supports_syntax
+            .descendants()
+            .filter_map(CssIdentifier::cast)
+            .find(|ident| ident.syntax().text_trimmed() == "COLOR")
+            .unwrap();
+        let value = supports_syntax
+            .descendants()
+            .filter_map(AnyCssGenericComponentValue::cast)
+            .find(|value| value.syntax().text_trimmed() == "1")
+            .unwrap();
+        let colon = supports_syntax
+            .descendants_tokens(Direction::Next)
+            .find(|token| token.kind() == COLON)
+            .unwrap();
+        let supports_test = CssIfSupportsIdentifierTest::unwrap_cast(CssSyntaxNode::new_detached(
+            CSS_IF_SUPPORTS_IDENTIFIER_TEST,
+            [
+                Some(CssSyntaxElement::Node(ident.into_syntax())),
+                Some(CssSyntaxElement::Token(colon)),
+                Some(CssSyntaxElement::Node(value.into_syntax())),
+            ],
+        ));
+
+        let formatted = format_node(CssFormatOptions::default(), supports_test.syntax()).unwrap();
+        assert_eq!(formatted.print().unwrap().as_code(), "COLOR:1");
+
+        let pseudo = parse_css(
+            ":GLOBAL(A){}",
+            CssFileSource::css(),
+            CssParserOptions::default().allow_css_modules(),
+        );
+        let pseudo_syntax = pseudo.syntax();
+        let name = pseudo_syntax
+            .descendants()
+            .filter_map(CssIdentifier::cast)
+            .find(|ident| ident.syntax().text_trimmed() == "GLOBAL")
+            .unwrap();
+        let selector = pseudo_syntax
+            .descendants()
+            .filter_map(CssCompoundSelector::cast)
+            .find(|selector| selector.syntax().text_trimmed() == "A")
+            .unwrap();
+        let mut parens = pseudo_syntax
+            .descendants_tokens(Direction::Next)
+            .filter(|token| matches!(token.kind(), L_PAREN | R_PAREN));
+        let l_paren = parens.next().unwrap();
+        let r_paren = parens.next().unwrap();
+        let pseudo_selector =
+            CssPseudoClassFunctionSelector::unwrap_cast(CssSyntaxNode::new_detached(
+                CSS_PSEUDO_CLASS_FUNCTION_SELECTOR,
+                [
+                    Some(CssSyntaxElement::Node(name.into_syntax())),
+                    Some(CssSyntaxElement::Token(l_paren)),
+                    Some(CssSyntaxElement::Node(selector.into_syntax())),
+                    Some(CssSyntaxElement::Token(r_paren)),
+                ],
+            ));
+
+        let formatted = format_node(CssFormatOptions::default(), pseudo_selector.syntax()).unwrap();
+        assert_eq!(formatted.print().unwrap().as_code(), "global(A)");
+    }
+
+    #[test]
+    fn css_syntax_token_format_supports_case_options() {
+        let parse = parse_css(
+            "@IMPORT \"Keep\";",
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+        let syntax = parse.syntax();
+        let import_token = syntax
+            .descendants_tokens(Direction::Next)
+            .find(|token| token.kind() == CssSyntaxKind::IMPORT_KW)
+            .unwrap();
+        let comments = Comments::from_node(&syntax, &CssCommentStyle, None);
+        let context = CssFormatContext::new(CssFormatOptions::default(), comments);
+
+        let lowercase = biome_formatter::format!(
+            context,
+            [import_token.format().with_text_case(CssCase::Lowercase)]
+        )
+        .unwrap();
+        assert_eq!(lowercase.print().unwrap().as_code(), "import");
+
+        let comments = Comments::from_node(&syntax, &CssCommentStyle, None);
+        let context = CssFormatContext::new(CssFormatOptions::default(), comments);
+        let preserved = biome_formatter::format!(
+            context,
+            [import_token.format().with_text_case(CssCase::Preserve)]
+        )
+        .unwrap();
+        assert_eq!(preserved.print().unwrap().as_code(), "IMPORT");
+    }
+
+    #[test]
+    fn scoped_identifier_case_uses_the_normal_union_formatter() {
+        let parse = parse_css(
+            ".a { color: RGB(0 0 0); }",
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+        let syntax = parse.syntax();
+        let name = syntax
+            .descendants()
+            .filter_map(AnyCssFunctionName::cast)
+            .find(|name| name.syntax().text_trimmed() == "RGB")
+            .unwrap();
+        let comments = Comments::from_node(&syntax, &CssCommentStyle, None);
+        let context = CssFormatContext::new(CssFormatOptions::default(), comments);
+
+        let formatted =
+            biome_formatter::format!(context, [name.format().with_text_case(CssCase::Lowercase)])
+                .unwrap();
+
+        assert_eq!(formatted.print().unwrap().as_code(), "rgb");
+        assert_eq!(formatted.context().identifier_case(), CssCase::Auto);
+    }
+
+    #[test]
+    fn scoped_identifier_preserve_overrides_an_enclosing_case() {
+        let parse = parse_css(
+            ".a { color: RGB(0 0 0); }",
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+        let syntax = parse.syntax();
+        let name = syntax
+            .descendants()
+            .filter_map(AnyCssFunctionName::cast)
+            .find(|name| name.syntax().text_trimmed() == "RGB")
+            .unwrap();
+        let comments = Comments::from_node(&syntax, &CssCommentStyle, None);
+        let context = CssFormatContext::new(CssFormatOptions::default(), comments);
+
+        let formatted = biome_formatter::format!(
+            context,
+            [name
+                .format()
+                .with_text_case(CssCase::Preserve)
+                .with_text_case(CssCase::Lowercase)]
+        )
+        .unwrap();
+
+        assert_eq!(formatted.print().unwrap().as_code(), "RGB");
+        assert_eq!(formatted.context().identifier_case(), CssCase::Auto);
+    }
+
+    #[test]
+    fn scoped_identifier_case_does_not_leak_into_scss_function_names() {
+        let parse = parse_css(
+            ".a { x: #{$KeepFunc}($Keep); }",
+            CssFileSource::scss(),
+            CssParserOptions::default(),
+        );
+        assert!(parse.diagnostics().is_empty(), "{:?}", parse.diagnostics());
+
+        let syntax = parse.syntax();
+        let name = syntax
+            .descendants()
+            .filter_map(AnyCssFunctionName::cast)
+            .find(|name| name.syntax().text_trimmed() == "#{$KeepFunc}")
+            .unwrap();
+        let comments = Comments::from_node(&syntax, &CssCommentStyle, None);
+        let context = CssFormatContext::new(CssFormatOptions::default(), comments);
+
+        let formatted =
+            biome_formatter::format!(context, [name.format().with_text_case(CssCase::Lowercase)])
+                .unwrap();
+
+        assert_eq!(formatted.print().unwrap().as_code(), "#{$KeepFunc}");
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic(expected = "CSS identifier case requires an identifier-capable node")]
+    fn scoped_identifier_case_rejects_non_identifier_nodes() {
+        let parse = parse_css("", CssFileSource::css(), CssParserOptions::default());
+        let syntax = parse.syntax();
+        let root = CssRoot::cast(syntax.clone()).unwrap();
+        let comments = Comments::from_node(&syntax, &CssCommentStyle, None);
+        let context = CssFormatContext::new(CssFormatOptions::default(), comments);
+
+        biome_formatter::format!(context, [root.format().with_text_case(CssCase::Preserve)])
+            .unwrap();
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic(expected = "CSS formatter used an unclassified case policy")]
+    fn default_css_token_case_records_formatter_audit_event() {
+        let parse = parse_css(
+            "@IMPORT \"Keep\";",
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+        let syntax = parse.syntax();
+        let import_token = syntax
+            .descendants_tokens(Direction::Next)
+            .find(|token| token.kind() == CssSyntaxKind::IMPORT_KW)
+            .unwrap();
+        let comments = Comments::from_node(&syntax, &CssCommentStyle, None);
+        let context = CssFormatContext::new(CssFormatOptions::default(), comments);
+        let mut state = FormatState::new(context);
+
+        {
+            let mut buffer = VecBuffer::new(&mut state);
+            write!(buffer, [import_token.format()]).unwrap();
+        }
+
+        state.assert_no_audit_events();
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic(expected = "CSS formatter used an unclassified case policy")]
+    fn default_css_identifier_case_records_formatter_audit_event() {
+        let parse = parse_css(
+            "COLOR: red;",
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+        let syntax = parse.syntax();
+        let identifier = syntax.descendants().find_map(CssIdentifier::cast).unwrap();
+        let comments = Comments::from_node(&syntax, &CssCommentStyle, None);
+        let context = CssFormatContext::new(CssFormatOptions::default(), comments);
+        let mut state = FormatState::new(context);
+
+        {
+            let mut buffer = VecBuffer::new(&mut state);
+            write!(buffer, [identifier.format()]).unwrap();
+        }
+
+        state.assert_no_audit_events();
+    }
+
+    #[cfg(not(debug_assertions))]
+    #[test]
+    fn default_css_case_preserves_source_in_release() {
+        let parse = parse_css(
+            "@IMPORT \"Keep\";A{COLOR:red}",
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+        assert!(parse.diagnostics().is_empty(), "{:?}", parse.diagnostics());
+        let syntax = parse.syntax();
+        let import_token = syntax
+            .descendants_tokens(Direction::Next)
+            .find(|token| token.kind() == CssSyntaxKind::IMPORT_KW)
+            .unwrap();
+        let identifier = syntax
+            .descendants()
+            .filter_map(CssIdentifier::cast)
+            .find(|identifier| identifier.syntax().text_trimmed() == "COLOR")
+            .unwrap();
+        let comments = Comments::from_node(&syntax, &CssCommentStyle, None);
+        let context = CssFormatContext::new(CssFormatOptions::default(), comments);
+
+        let formatted =
+            biome_formatter::format!(context, [import_token.format(), identifier.format()])
+                .unwrap();
+
+        assert_eq!(formatted.print().unwrap().as_code(), "IMPORTCOLOR");
+    }
+
+    #[test]
+    fn css_syntax_node_generic_component_identifier_preserves_case() {
+        let parse = parse_css(
+            ".a { unknown: KeepOne; }",
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+        let syntax = parse.syntax();
+        let identifier = syntax
+            .descendants()
+            .filter_map(CssIdentifier::cast)
+            .find(|identifier| {
+                identifier.syntax().text_trimmed() == "KeepOne"
+                    && identifier
+                        .parent::<CssGenericComponentValueList>()
+                        .is_some()
+            })
+            .unwrap();
+
+        let formatted = format_node(CssFormatOptions::default(), identifier.syntax()).unwrap();
+
+        assert_eq!(formatted.print().unwrap().as_code(), "KeepOne");
+    }
+
+    #[test]
+    fn grit_metavariables_preserve_casing() {
+        let src = "\u{00b5}Selector { \u{00b5}Declaration; COLOR: \u{00b5}Value; }\n@media \u{00b5}Query { A:HOVER { COLOR: RED; } }";
+        let parse = parse_css(
+            src,
+            CssFileSource::css(),
+            CssParserOptions::default().allow_metavariables(),
+        );
+        assert!(parse.diagnostics().is_empty(), "{:?}", parse.diagnostics());
+
+        let formatted = format_node(CssFormatOptions::default(), &parse.syntax()).unwrap();
+
+        assert_eq!(
+            formatted.print().unwrap().as_code(),
+            "\u{00b5}Selector {\n\t\u{00b5}Declaration\n\tcolor: \u{00b5}Value;\n}\n@media \u{00b5}Query {\n\tA:hover {\n\t\tcolor: RED;\n\t}\n}\n"
+        );
     }
 
     #[test]

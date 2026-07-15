@@ -27,6 +27,8 @@ mod buffer;
 mod builders;
 pub mod comments;
 pub mod diagnostics;
+#[cfg(debug_assertions)]
+mod format_audit;
 pub mod format_element;
 mod format_extensions;
 pub mod formatter;
@@ -39,6 +41,7 @@ pub mod printer;
 pub mod separated;
 mod source_map;
 pub mod token;
+mod token_case;
 pub mod trivia;
 
 use crate::formatter::Formatter;
@@ -50,8 +53,13 @@ use std::fmt::{Debug, Display};
 use crate::builders::syntax_token_cow_slice;
 use crate::comments::{CommentStyle, Comments, SourceComment};
 pub use crate::diagnostics::{ActualStart, FormatError, InvalidDocumentError, PrintError};
+#[cfg(debug_assertions)]
+use crate::format_audit::FormatAudit;
 use crate::format_element::document::Document;
 use crate::format_element::{Interned, LineMode};
+pub use crate::format_extensions::{
+    FormatScopedOptions, FormatScopedOptionsExt, FormatWithScopedOptions,
+};
 #[cfg(debug_assertions)]
 use crate::printed_tokens::PrintedTokens;
 use crate::printer::{Printer, PrinterOptions};
@@ -79,6 +87,7 @@ pub use source_map::{TransformSourceMap, TransformSourceMapBuilder};
 use std::num::ParseIntError;
 use std::str::FromStr;
 use token::string::Quote;
+pub use token_case::{FormatRuleWithTextCase, FormatTextCaseExt, TextCase};
 
 #[derive(Debug, Default, Clone, Copy, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
@@ -1644,6 +1653,7 @@ where
 
     let mut document = Document::from(buffer.into_vec());
     document.propagate_expand();
+    state.assert_no_audit_events();
 
     Ok(Formatted::new(document, state.into_context()))
 }
@@ -1772,6 +1782,7 @@ pub fn format_node_with_source_map_generation<L: FormatLanguage>(
     document.propagate_expand();
 
     state.assert_formatted_all_tokens(&root);
+    state.assert_no_audit_events();
 
     let context = state.into_context();
     let comments = context.comments();
@@ -1848,6 +1859,7 @@ pub fn format_node_with_offset<L: FormatLanguage>(
     document.propagate_expand();
 
     state.assert_formatted_all_tokens(&root);
+    state.assert_no_audit_events();
 
     let context = state.into_context();
     let comments = context.comments();
@@ -2278,6 +2290,8 @@ pub struct FormatState<Context> {
     // the Formatter is still completely immutable in release builds
     #[cfg(debug_assertions)]
     pub printed_tokens: PrintedTokens,
+    #[cfg(debug_assertions)]
+    format_audit: FormatAudit,
 }
 
 impl<Context> std::fmt::Debug for FormatState<Context>
@@ -2308,6 +2322,8 @@ impl<Context> FormatState<Context> {
 
             #[cfg(debug_assertions)]
             printed_tokens: Default::default(),
+            #[cfg(debug_assertions)]
+            format_audit: Default::default(),
         }
     }
 
@@ -2349,6 +2365,17 @@ impl<Context> FormatState<Context> {
 
     #[cfg(not(debug_assertions))]
     #[inline]
+    pub fn record_audit_event(&mut self, _event: impl Into<String>) {}
+
+    /// Records a formatter audit event that must be resolved before formatting completes.
+    #[cfg(debug_assertions)]
+    #[inline]
+    pub fn record_audit_event(&mut self, event: impl Into<String>) {
+        self.format_audit.record_event(event);
+    }
+
+    #[cfg(not(debug_assertions))]
+    #[inline]
     pub fn set_token_tracking_disabled(&mut self, _: bool) {}
 
     /// Disables or enables token tracking for a portion of the code.
@@ -2381,6 +2408,17 @@ impl<Context> FormatState<Context> {
     pub fn assert_formatted_all_tokens<L: Language>(&self, root: &SyntaxNode<L>) {
         self.printed_tokens.assert_all_tracked(root);
     }
+
+    #[cfg(not(debug_assertions))]
+    #[inline]
+    pub fn assert_no_audit_events(&self) {}
+
+    /// Asserts in debug builds that no formatter audit events were recorded.
+    #[cfg(debug_assertions)]
+    #[inline]
+    pub fn assert_no_audit_events(&self) {
+        self.format_audit.assert_no_events();
+    }
 }
 
 impl<Context> FormatState<Context>
@@ -2391,6 +2429,8 @@ where
         FormatStateSnapshot {
             #[cfg(debug_assertions)]
             printed_tokens: self.printed_tokens.snapshot(),
+            #[cfg(debug_assertions)]
+            format_audit: self.format_audit.snapshot(),
         }
     }
 
@@ -2398,11 +2438,14 @@ where
         let FormatStateSnapshot {
             #[cfg(debug_assertions)]
             printed_tokens,
+            #[cfg(debug_assertions)]
+            format_audit,
         } = snapshot;
 
         cfg_if::cfg_if! {
             if #[cfg(debug_assertions)] {
                 self.printed_tokens.restore(printed_tokens);
+                self.format_audit.restore(format_audit);
             }
         }
     }
@@ -2411,6 +2454,8 @@ where
 pub struct FormatStateSnapshot {
     #[cfg(debug_assertions)]
     printed_tokens: printed_tokens::PrintedTokensSnapshot,
+    #[cfg(debug_assertions)]
+    format_audit: format_audit::FormatAuditSnapshot,
 }
 
 #[cfg(test)]
@@ -2535,5 +2580,183 @@ mod tests {
             } if source_position == TextSize::from(7)
         ));
         assert!(matches!(elements[1], FormatElement::Token { text: ";" }));
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic(expected = "formatter audit failed")]
+    fn format_state_reports_audit_events() {
+        let mut state = FormatState::new(SimpleFormatContext::default());
+
+        state.record_audit_event("missing explicit formatter decision");
+
+        state.assert_no_audit_events();
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic(expected = "formatter audit failed")]
+    fn format_reports_audit_events() {
+        let content = format_with(|f| {
+            f.state_mut()
+                .record_audit_event("missing explicit formatter decision");
+            Ok(())
+        });
+
+        crate::format!(SimpleFormatContext::default(), [content]).unwrap();
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    fn format_state_restores_audit_events_with_snapshot() {
+        let mut state = FormatState::new(SimpleFormatContext::default());
+        let snapshot = state.snapshot();
+
+        state.record_audit_event("speculative formatter decision");
+        state.restore_snapshot(snapshot);
+
+        state.assert_no_audit_events();
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic(expected = "persistent formatter decision")]
+    fn format_state_restore_preserves_earlier_audit_events() {
+        let mut state = FormatState::new(SimpleFormatContext::default());
+        state.record_audit_event("persistent formatter decision");
+        let snapshot = state.snapshot();
+
+        state.record_audit_event("speculative formatter decision");
+        state.restore_snapshot(snapshot);
+
+        state.assert_no_audit_events();
+    }
+
+    #[cfg(debug_assertions)]
+    mod audit_entrypoint_tests {
+        use super::*;
+        use crate::comments::{CommentKind, CommentStyle, Comments, SourceComment};
+        use crate::{
+            CstFormatContext, FormatContext, FormatLanguage, SimpleFormatOptions,
+            TransformSourceMap,
+        };
+        use biome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+        use biome_rowan::{SyntaxNode, SyntaxNodeWithOffset, SyntaxTriviaPieceComments};
+
+        #[derive(Debug, Default)]
+        struct AuditContext {
+            options: SimpleFormatOptions,
+            comments: Comments<RawLanguage>,
+        }
+
+        impl FormatContext for AuditContext {
+            type Options = SimpleFormatOptions;
+
+            fn options(&self) -> &Self::Options {
+                &self.options
+            }
+
+            fn source_map(&self) -> Option<&TransformSourceMap> {
+                None
+            }
+        }
+
+        impl CstFormatContext for AuditContext {
+            type Language = RawLanguage;
+            type Style = AuditCommentStyle;
+            type CommentRule = AuditCommentRule;
+
+            fn comments(&self) -> &Comments<Self::Language> {
+                &self.comments
+            }
+        }
+
+        #[derive(Debug, Default)]
+        struct AuditCommentStyle;
+
+        impl CommentStyle for AuditCommentStyle {
+            type Language = RawLanguage;
+
+            fn get_comment_kind(
+                _comment: &SyntaxTriviaPieceComments<Self::Language>,
+            ) -> CommentKind {
+                CommentKind::InlineBlock
+            }
+        }
+
+        #[derive(Debug, Default)]
+        struct AuditCommentRule;
+
+        impl FormatRule<SourceComment<RawLanguage>> for AuditCommentRule {
+            type Context = AuditContext;
+
+            fn fmt(
+                &self,
+                _item: &SourceComment<RawLanguage>,
+                _f: &mut Formatter<Self::Context>,
+            ) -> FormatResult<()> {
+                Ok(())
+            }
+        }
+
+        #[derive(Debug, Default)]
+        struct AuditRootRule;
+
+        impl FormatRule<SyntaxNode<RawLanguage>> for AuditRootRule {
+            type Context = AuditContext;
+
+            fn fmt(
+                &self,
+                _item: &SyntaxNode<RawLanguage>,
+                f: &mut Formatter<Self::Context>,
+            ) -> FormatResult<()> {
+                f.state_mut().record_audit_event("entrypoint audit event");
+                Ok(())
+            }
+        }
+
+        #[derive(Debug, Default)]
+        struct AuditLanguage {
+            options: SimpleFormatOptions,
+        }
+
+        impl FormatLanguage for AuditLanguage {
+            type SyntaxLanguage = RawLanguage;
+            type Context = AuditContext;
+            type FormatRule = AuditRootRule;
+
+            fn options(&self) -> &SimpleFormatOptions {
+                &self.options
+            }
+
+            fn create_context(
+                self,
+                root: &SyntaxNode<RawLanguage>,
+                _source_map: Option<TransformSourceMap>,
+                _delegate_fmt_embedded_nodes: bool,
+            ) -> AuditContext {
+                AuditContext {
+                    options: self.options,
+                    comments: Comments::from_node(root, &AuditCommentStyle, None),
+                }
+            }
+        }
+
+        fn root() -> SyntaxNode<RawLanguage> {
+            RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |_| {})
+        }
+
+        #[test]
+        #[should_panic(expected = "entrypoint audit event")]
+        fn format_node_reports_audit_events() {
+            crate::format_node(&root(), AuditLanguage::default(), false).unwrap();
+        }
+
+        #[test]
+        #[should_panic(expected = "entrypoint audit event")]
+        fn format_node_with_offset_reports_audit_events() {
+            let root = SyntaxNodeWithOffset::new(root(), TextSize::from(10));
+            crate::format_node_with_offset(&root, AuditLanguage::default(), false).unwrap();
+        }
     }
 }
