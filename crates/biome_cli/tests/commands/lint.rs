@@ -4563,12 +4563,6 @@ fn should_lint_a_dependency_file_targeted_directly() {
 
     let dependency_file = fs.create_file("node_modules/some-pkg/index.js", LINT_ERROR);
 
-    // Targeting a `node_modules` file directly (as opposed to a directory
-    // that happens to contain one) used to report a confusing
-    // `internalError/fs` "does not exist in the workspace" diagnostic
-    // instead of actually linting the file, even though the file had just
-    // been opened successfully. `--vcs-enabled=false` rules out ignore-file
-    // handling as the cause.
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
