@@ -2,8 +2,13 @@ use std::fmt::{Debug, Formatter};
 use std::ops::DerefMut;
 use std::sync::Arc;
 
-use boa_engine::object::builtins::JsFunction;
-use boa_engine::{JsNativeError, JsResult, JsString, JsValue};
+use boa_engine::class::{Class, ClassBuilder};
+use boa_engine::object::builtins::{JsArray, JsFunction};
+use boa_engine::property::Attribute;
+use boa_engine::{
+    Context, Finalize, JsData, JsNativeError, JsResult, JsString, JsValue, NativeFunction, Trace,
+    js_string,
+};
 use camino::{Utf8Path, Utf8PathBuf};
 
 use biome_analyze::{
@@ -13,7 +18,7 @@ use biome_console::markup;
 use biome_diagnostics::category;
 use biome_glob::NormalizedGlob;
 use biome_js_runtime::JsExecContext;
-use biome_js_syntax::AnyJsRoot;
+use biome_js_syntax::{AnyJsRoot, JsSyntaxNode};
 use biome_resolver::FsWithResolverProxy;
 use biome_rowan::{AnySyntaxNode, AstNode, RawSyntaxKind, SyntaxKind};
 use biome_text_size::TextRange;
@@ -27,6 +32,90 @@ use crate::thread_local::ThreadLocalCell;
 struct LoadedPlugin {
     ctx: JsExecContext,
     entrypoint: JsFunction,
+}
+
+#[derive(Debug, JsData)]
+struct JsAstNode {
+    node: JsSyntaxNode,
+}
+
+impl Finalize for JsAstNode {}
+
+// SAFETY: `JsAstNode` only contains Rowan data and no values managed by Boa's garbage collector.
+unsafe impl Trace for JsAstNode {
+    boa_engine::gc::empty_trace!();
+}
+
+impl JsAstNode {
+    fn from_this(this: &JsValue) -> JsResult<JsSyntaxNode> {
+        let Some(object) = this.as_object() else {
+            return Err(JsNativeError::typ()
+                .with_message("AST getter called with an invalid receiver")
+                .into());
+        };
+        let Some(node) = object.downcast_ref::<Self>() else {
+            return Err(JsNativeError::typ()
+                .with_message("AST getter called with an invalid receiver")
+                .into());
+        };
+
+        Ok(node.node.clone())
+    }
+
+    fn get_kind(this: &JsValue, _args: &[JsValue], _context: &mut Context) -> JsResult<JsValue> {
+        let node = Self::from_this(this)?;
+        Ok(JsString::from(format!("{:?}", node.kind())).into())
+    }
+
+    fn get_text(this: &JsValue, _args: &[JsValue], _context: &mut Context) -> JsResult<JsValue> {
+        let node = Self::from_this(this)?;
+        Ok(JsString::from(node.text_trimmed().to_string()).into())
+    }
+
+    fn get_children(this: &JsValue, _args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
+        let node = Self::from_this(this)?;
+        let children = node
+            .children()
+            .map(|node| Self::from_data(Self { node }, context).map(Into::into))
+            .collect::<JsResult<Vec<_>>>()?;
+
+        Ok(JsArray::from_iter(children, context).into())
+    }
+}
+
+impl Class for JsAstNode {
+    const NAME: &'static str = "__BiomeJsAstNode";
+
+    fn init(class: &mut ClassBuilder<'_>) -> JsResult<()> {
+        let kind =
+            NativeFunction::from_fn_ptr(Self::get_kind).to_js_function(class.context().realm());
+        let text =
+            NativeFunction::from_fn_ptr(Self::get_text).to_js_function(class.context().realm());
+        let children =
+            NativeFunction::from_fn_ptr(Self::get_children).to_js_function(class.context().realm());
+
+        class
+            .accessor(js_string!("kind"), Some(kind), None, Attribute::ENUMERABLE)
+            .accessor(js_string!("text"), Some(text), None, Attribute::ENUMERABLE)
+            .accessor(
+                js_string!("children"),
+                Some(children),
+                None,
+                Attribute::ENUMERABLE,
+            );
+
+        Ok(())
+    }
+
+    fn data_constructor(
+        _new_target: &JsValue,
+        _args: &[JsValue],
+        _context: &mut Context,
+    ) -> JsResult<Self> {
+        Err(JsNativeError::typ()
+            .with_message("AST nodes cannot be constructed from JavaScript")
+            .into())
+    }
 }
 
 fn load_plugin(fs: Arc<dyn FsWithResolverProxy>, path: &Utf8Path) -> JsResult<LoadedPlugin> {
@@ -105,7 +194,7 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
             .collect()
     }
 
-    fn evaluate(&self, _node: AnySyntaxNode, path: Utf8PathBuf) -> PluginEvalResult {
+    fn evaluate(&self, node: AnySyntaxNode, path: Utf8PathBuf) -> PluginEvalResult {
         let mut plugin = match self
             .loaded
             .get_mut_or_try_init(|| load_plugin(self.fs.clone(), &self.path))
@@ -127,13 +216,41 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
 
         let plugin = plugin.deref_mut();
 
-        // TODO: pass the AST to the plugin
+        let Some(node) = node.downcast_ref::<JsSyntaxNode>().cloned() else {
+            return PluginEvalResult {
+                entries: vec![PluginDiagnosticEntry {
+                    diagnostic: RuleDiagnostic::new(
+                        category!("plugin"),
+                        None::<TextRange>,
+                        markup!("Could not pass the AST to the plugin"),
+                    ),
+                    action: None,
+                }],
+            };
+        };
+
+        let ast = match plugin.ctx.create_class_instance(JsAstNode { node }) {
+            Ok(ast) => ast,
+            Err(err) => {
+                return PluginEvalResult {
+                    entries: vec![PluginDiagnosticEntry {
+                        diagnostic: RuleDiagnostic::new(
+                            category!("plugin"),
+                            None::<TextRange>,
+                            markup!("Could not pass the AST to the plugin: "<Error>{err.to_string()}</Error>),
+                        ),
+                        action: None,
+                    }],
+                };
+            }
+        };
+
         let diagnostics = plugin
             .ctx
             .call_function(
                 &plugin.entrypoint,
                 &JsValue::undefined(),
-                &[JsValue::from(JsString::from(path.as_str()))],
+                &[JsValue::from(JsString::from(path.as_str())), ast],
             )
             .map_or_else(
                 |err| {
@@ -182,17 +299,24 @@ mod tests {
         });
     }
 
-    fn load_test_plugin(includes: Option<&[NormalizedGlob]>) -> AnalyzerJsPlugin {
+    fn load_test_plugin_from_source(
+        source: &str,
+        includes: Option<&[NormalizedGlob]>,
+    ) -> AnalyzerJsPlugin {
         let fs = MemoryFileSystem::default();
-        fs.insert(
-            "/plugin.js".into(),
+        fs.insert("/plugin.js".into(), source);
+        let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
+        AnalyzerJsPlugin::load(fs, "/plugin.js".into(), includes).unwrap()
+    }
+
+    fn load_test_plugin(includes: Option<&[NormalizedGlob]>) -> AnalyzerJsPlugin {
+        load_test_plugin_from_source(
             r#"import { registerDiagnostic } from "@biomejs/plugin-api";
             export default function useMyPlugin() {
                 registerDiagnostic("information", "Hello, world!");
             }"#,
-        );
-        let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
-        AnalyzerJsPlugin::load(fs, "/plugin.js".into(), includes).unwrap()
+            includes,
+        )
     }
 
     #[test]
@@ -222,6 +346,67 @@ mod tests {
         let plugin = load_test_plugin(Some(&globs));
         assert!(!plugin.applies_to_file(Utf8Path::new("test/foo.ts")));
         assert!(!plugin.applies_to_file(Utf8Path::new("src/main.js")));
+    }
+
+    #[test]
+    fn passes_ast_as_the_second_argument() {
+        let plugin = load_test_plugin_from_source(
+            r#"import { registerDiagnostic } from "@biomejs/plugin-api";
+            export default function useMyPlugin(path, root) {
+                const descriptor = Object.getOwnPropertyDescriptor(
+                    Object.getPrototypeOf(root),
+                    "children",
+                );
+                registerDiagnostic(
+                    "information",
+                    `${path}|${root.kind}|${typeof descriptor.get}|${Object.prototype.hasOwnProperty.call(root, "children")}`,
+                );
+            }"#,
+            None,
+        );
+        let parse = biome_js_parser::parse(
+            "let foo;",
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+        let content = result
+            .entries
+            .into_iter()
+            .map(|entry| print_diagnostic_to_string(&Error::from(entry.diagnostic)))
+            .collect::<String>();
+
+        assert!(content.contains("/file.js|JS_MODULE|function|false"));
+    }
+
+    #[test]
+    fn accesses_child_nodes_through_getters() {
+        let plugin = load_test_plugin_from_source(
+            r#"import { registerDiagnostic } from "@biomejs/plugin-api";
+            export default function useMyPlugin(_path, root) {
+                const statement = root.children[1].children[0];
+                registerDiagnostic(
+                    "information",
+                    `${statement.kind}|${statement.text}`,
+                );
+            }"#,
+            None,
+        );
+        let parse = biome_js_parser::parse(
+            "let foo;",
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+        let content = result
+            .entries
+            .into_iter()
+            .map(|entry| print_diagnostic_to_string(&Error::from(entry.diagnostic)))
+            .collect::<String>();
+
+        assert!(content.contains("JS_VARIABLE_STATEMENT|let foo;"));
     }
 
     #[test]

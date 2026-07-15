@@ -2,6 +2,7 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 use boa_engine::builtins::promise::PromiseState;
+use boa_engine::class::Class;
 use boa_engine::object::builtins::JsFunction;
 use boa_engine::{
     Context, JsError, JsNativeError, JsResult, JsValue, Module, NativeFunction, Source, js_string,
@@ -101,6 +102,17 @@ impl JsExecContext {
         let namespace = module.namespace(ctx);
 
         namespace.get(js_string!("default"), ctx)
+    }
+
+    pub fn create_class_instance<C>(&mut self, data: C) -> JsResult<JsValue>
+    where
+        C: Class,
+    {
+        if !self.ctx.has_global_class::<C>() {
+            self.ctx.register_global_class::<C>()?;
+        }
+
+        Ok(C::from_data(data, &mut self.ctx)?.into())
     }
 
     pub fn call_function(
