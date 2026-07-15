@@ -10434,15 +10434,14 @@ export interface ChangeFileParams {
 	editorFeatures?: EditorFeatures;
 	inlineConfig?: Configuration;
 	path: BiomePath;
-	projectDataUpdate?: ProjectDataUpdate;
 	projectKey: ProjectKey;
 	version: number;
 }
-/**
- * How the project should be updated when there's a change.
- */
-export type ProjectDataUpdate = "refresh" | "documentOnly";
 export interface ChangeFileResult {
+	/**
+	* Problems found while updating dependency and module data.
+This does not include lint or parse results for the changed file. 
+	 */
 	diagnostics: Diagnostic[];
 }
 export interface CloseFileParams {
@@ -10639,6 +10638,43 @@ to distinguish parse errors from analyzer errors.
 	skippedDiagnostics: number;
 	warnings: number;
 }
+export interface ProcessFileParams {
+	categories: RuleCategories;
+	content: FileContent;
+	diagnosticLevel: Severity;
+	enabledRules?: AnalyzerSelector[];
+	enforceAssist: boolean;
+	fixFileMode?: FixFileMode;
+	format: boolean;
+	includeCodeFix: boolean;
+	maxDiagnostics?: number;
+	only?: AnalyzerSelector[];
+	path: BiomePath;
+	projectKey: ProjectKey;
+	skip?: AnalyzerSelector[];
+	skipParseErrors: boolean;
+	suppressionReason?: string;
+	write: boolean;
+}
+/**
+ * Which fixes should be applied during the analyzing phase
+ */
+export type FixFileMode =
+	| "safeFixes"
+	| "safeAndUnsafeFixes"
+	| "applySuppressions";
+export interface ProcessFileResult {
+	appliedFixes: number;
+	diagnostics: Diagnostic[];
+	errors: number;
+	formatWithErrorsDisabled: boolean;
+	infos: number;
+	output?: string;
+	parseErrors: number;
+	skippedDiagnostics: number;
+	skippedSuggestedFixes: number;
+	warnings: number;
+}
 export interface PullActionsParams {
 	categories?: RuleCategories;
 	/**
@@ -10782,13 +10818,6 @@ export interface FixFileParams {
 	skip?: AnalyzerSelector[];
 	suppressionReason?: string;
 }
-/**
- * Which fixes should be applied during the analyzing phase
- */
-export type FixFileMode =
-	| "safeFixes"
-	| "safeAndUnsafeFixes"
-	| "applySuppressions";
 export interface FixFileResult {
 	/**
 	 * List of all the code actions applied to the file
@@ -10877,6 +10906,7 @@ export interface Workspace {
 	pullDiagnostics(
 		params: PullDiagnosticsParams,
 	): Promise<PullDiagnosticsResult>;
+	processFile(params: ProcessFileParams): Promise<ProcessFileResult>;
 	pullActions(params: PullActionsParams): Promise<PullActionsResult>;
 	pullDiagnosticsAndActions(
 		params: PullDiagnosticsAndActionsParams,
@@ -10952,6 +10982,9 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		pullDiagnostics(params) {
 			return transport.request("biome/pull_diagnostics", params);
+		},
+		processFile(params) {
+			return transport.request("biome/process_file", params);
 		},
 		pullActions(params) {
 			return transport.request("biome/pull_actions", params);
