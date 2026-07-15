@@ -108,7 +108,7 @@ pub(crate) type FileResult = Result<FileStatus, Message>;
 
 pub(crate) struct ProcessStdinFilePayload<'a> {
     pub(crate) biome_path: &'a BiomePath,
-    pub(crate) content: String,
+    pub(crate) content: &'a str,
     pub(crate) project_key: ProjectKey,
     pub(crate) workspace: &'a dyn Workspace,
     pub(crate) console: &'a mut dyn Console,

@@ -310,7 +310,7 @@ pub(crate) trait CommandRunner {
                 project_key,
                 workspace,
                 execution: execution.as_ref(),
-                content,
+                content: &content,
                 cli_options,
                 console,
                 skip_ignore_check: Self::ProcessFile::should_skip_ignore_check(

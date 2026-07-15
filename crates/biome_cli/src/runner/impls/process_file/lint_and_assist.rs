@@ -187,7 +187,7 @@ impl ProcessFile for LintAssistProcessFile {
         let result = workspace.process_file(ProcessFileParams {
             project_key,
             path: biome_path.clone(),
-            content: FileContent::from_client(content.clone()),
+            content: FileContent::from_client(content),
             categories: categories.build(),
             only,
             skip,
@@ -204,7 +204,7 @@ impl ProcessFile for LintAssistProcessFile {
             enforce_assist: execution.should_enforce_assist(),
             skip_parse_errors: execution.should_skip_parse_errors(),
         })?;
-        let source = result.output.as_deref().unwrap_or(&content);
+        let source = result.output.as_deref().unwrap_or(content);
         console.append(markup! {{source}});
 
         if result.output.is_none() && !execution.requires_write_access() {

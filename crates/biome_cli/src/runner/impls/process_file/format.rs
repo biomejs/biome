@@ -162,7 +162,7 @@ impl ProcessFile for FormatProcessFile {
             let result = workspace.process_file(ProcessFileParams {
                 project_key,
                 path: biome_path.clone(),
-                content: FileContent::from_client(content.clone()),
+                content: FileContent::from_client(content),
                 categories: RuleCategoriesBuilder::default().with_syntax().build(),
                 only: vec![],
                 skip: vec![],
@@ -177,7 +177,7 @@ impl ProcessFile for FormatProcessFile {
                 enforce_assist: false,
                 skip_parse_errors: execution.should_skip_parse_errors(),
             })?;
-            let source = result.output.as_deref().unwrap_or(&content);
+            let source = result.output.as_deref().unwrap_or(content);
             print_stdin_diagnostics(console, cli_options, biome_path, source, result.diagnostics);
             if result.format_with_errors_disabled {
                 return Err(WorkspaceError::format_with_errors_disabled().into());
