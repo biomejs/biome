@@ -1,0 +1,45 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 577
+expression: redactor(content)
+---
+## `node_modules/some-pkg/index.js`
+
+```js
+for(;true;);
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+node_modules/some-pkg/index.js:1:6 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition always evaluates to the same value.
+  
+  > 1 │ for(;true;);
+      │      ^^^^
+    2 │ 
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```
