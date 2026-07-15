@@ -18,7 +18,7 @@ Note that there are two implementations of the `Workspace` trait:
 ## Watcher
 
 The state inside our workspace is kept in sync with the filesystem using the
-[`WorkspaceWatcher`](src/workspace_watcher.rs). The watcher is only active in
+[`Watcher`](src/scanner/watcher.rs). The watcher is only active in
 daemon mode and not used by the CLI.
 
 ### Debugging
@@ -31,7 +31,7 @@ you can use these CLI commands:
 
 1. Start the daemon using `cargo run --bin=biome -- start`. Note there won't be
    much output to inspect, but the daemon will write its logs in your
-   [cache folder](../../crates/biome_fs/src/dir.rs).
+   [cache folder](../biome_fs/src/utils.rs).
 2. Run commands against the daemon, such as
    `cargo run --bin=biome -- lint --use-server <path>`.
 
@@ -41,7 +41,7 @@ in the project layout and the module graph.
 ### Tests
 
 The watcher has tests related to its workspace methods in
-[`watcher.tests.rs`](src/workspace/watcher.tests.rs), but there are also more
+[`watcher.tests.rs`](src/scanner/watcher.tests.rs), but there are also more
 end-to-end tests inside the [LSP tests](../biome_lsp/src/server.tests.rs).
 
 ## Add a new language to the Workspace
