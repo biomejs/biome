@@ -3094,3 +3094,59 @@ const x = 1;
         "cursor before an embedded script should not resolve to any definition"
     );
 }
+
+#[test]
+fn client_request_registers_dependency_file() {
+    const FILE_CONTENT: &str = "var x = 1;\n";
+    const DEP_PATH: &str = "/project/node_modules/some-pkg/index.js";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(DEP_PATH), FILE_CONTENT.as_bytes());
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    // Simulates the CLI explicitly targeting a `node_modules` file directly
+    // (e.g. `biome lint --vcs-use-ignore-file=false node_modules/some-pkg/index.js`),
+    // which opens it via a client request rather than the scanner's own
+    // background indexing.
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(DEP_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    // Before the fix, a dependency file's document was never inserted for a
+    // client request (only the scanner's own background indexing is meant
+    // to skip that), so these calls returned `WorkspaceError::NotFound`
+    // even though the file was just "opened" moments earlier.
+    workspace
+        .check_file_size(CheckFileSizeParams {
+            project_key,
+            path: BiomePath::new(DEP_PATH),
+        })
+        .expect("dependency file opened via a client request should be tracked");
+
+    let content = workspace
+        .get_file_content(GetFileContentParams {
+            project_key,
+            path: BiomePath::new(DEP_PATH),
+        })
+        .expect("dependency file opened via a client request should be tracked");
+    assert_eq!(content, FILE_CONTENT);
+}
