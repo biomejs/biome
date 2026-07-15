@@ -1,12 +1,12 @@
 use crate::prelude::*;
+use crate::utils::case::is_css_modules_import_export_declaration;
 use crate::utils::comment_trivia::has_source_gap_before_token;
 use crate::utils::component_value_list::{ValueListLayout, get_value_list_layout};
 use biome_css_syntax::{
-    AnyCssDeclarationName, AnyCssGenericPropertyValueOrExpression, AnyCssSelectorIdentifier,
-    CssContainerStyleInParens, CssContainerStyleQueryInParens, CssDeclaration, CssGenericProperty,
+    AnyCssDeclarationName, AnyCssGenericPropertyValueOrExpression, CssContainerStyleInParens,
+    CssContainerStyleQueryInParens, CssDeclaration, CssFontFeatureValuesItem, CssGenericProperty,
     CssGenericPropertyFields, CssIdentifier, CssIfStyleTest, CssIfSupportsTest, CssImportSupports,
-    CssLanguage, CssPseudoClassFunctionIdentifier, CssPseudoClassIdentifier,
-    CssPseudoClassSelector, CssQualifiedRule, CssSupportsFeatureDeclaration, CssSyntaxNode,
+    CssLanguage, CssSupportsFeatureDeclaration, TwPluginAtRule,
 };
 use biome_formatter::comments::SourceComment;
 use biome_formatter::trivia::format_dangling_comment;
@@ -73,11 +73,11 @@ fn is_already_lowercase(name: &CssIdentifier) -> bool {
 }
 
 fn should_preserve_property_name(property: &CssGenericProperty) -> bool {
-    is_support_or_style_test_declaration(property)
-        || is_css_modules_import_export_declaration(property)
+    is_preserved_declaration_context(property) || is_css_modules_import_export_declaration(property)
 }
 
-fn is_support_or_style_test_declaration(property: &CssGenericProperty) -> bool {
+/// Preserves query-test names and author-owned declaration keys.
+fn is_preserved_declaration_context(property: &CssGenericProperty) -> bool {
     let Some(declaration) = property.parent::<CssDeclaration>() else {
         return false;
     };
@@ -89,58 +89,9 @@ fn is_support_or_style_test_declaration(property: &CssGenericProperty) -> bool {
             || CssContainerStyleQueryInParens::can_cast(ancestor.kind())
             || CssContainerStyleInParens::can_cast(ancestor.kind())
             || CssIfStyleTest::can_cast(ancestor.kind())
+            || CssFontFeatureValuesItem::can_cast(ancestor.kind())
+            || TwPluginAtRule::can_cast(ancestor.kind())
     })
-}
-
-fn is_css_modules_import_export_declaration(property: &CssGenericProperty) -> bool {
-    let Some(declaration) = property.parent::<CssDeclaration>() else {
-        return false;
-    };
-
-    declaration
-        .syntax()
-        .ancestors()
-        .find_map(CssQualifiedRule::cast)
-        .is_some_and(|rule| is_css_modules_import_export_rule(&rule))
-}
-
-fn is_css_modules_import_export_rule(rule: &CssQualifiedRule) -> bool {
-    let prelude = rule.prelude();
-
-    prelude
-        .syntax()
-        .descendants()
-        .filter(is_css_modules_import_export_pseudo)
-        .filter_map(|node| node.parent())
-        .filter_map(CssPseudoClassSelector::cast)
-        .any(|selector| {
-            selector.syntax().text_trimmed_range() == prelude.syntax().text_trimmed_range()
-        })
-}
-
-fn is_css_modules_import_export_pseudo(node: &CssSyntaxNode) -> bool {
-    if let Some(pseudo) = CssPseudoClassIdentifier::cast(node.clone()) {
-        return pseudo.name().is_ok_and(|name| {
-            selector_identifier_text_eq(&name, "export")
-                || selector_identifier_text_eq(&name, "import")
-        });
-    }
-
-    CssPseudoClassFunctionIdentifier::cast(node.clone()).is_some_and(|pseudo| {
-        pseudo.name().is_ok_and(|name| {
-            identifier_text_eq(&name, "export") || identifier_text_eq(&name, "import")
-        })
-    })
-}
-
-fn selector_identifier_text_eq(name: &AnyCssSelectorIdentifier, expected: &str) -> bool {
-    matches!(name, AnyCssSelectorIdentifier::CssIdentifier(identifier) if identifier_text_eq(identifier, expected))
-}
-
-fn identifier_text_eq(identifier: &CssIdentifier, expected: &str) -> bool {
-    identifier
-        .value_token()
-        .is_ok_and(|token| token.token_text_trimmed() == expected)
 }
 
 /// Formats declaration-colon comments like `a { color/* a */:/* b */ red; }`.

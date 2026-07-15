@@ -168,3 +168,5 @@ $KeepNotParen: NOT ($Keep AND $Other);
 $KeepKeyword:INITIAL;.#{$KeepKeyword}{COLOR:RED}
 
 .Nesting{FONT:INITIAL{FAMILY:sans-serif}}
+
+.WideKeywords{FONT-FAMILY:INITIAL;PADDING:UNSET;BORDER:INHERIT;ALL:REVERT}

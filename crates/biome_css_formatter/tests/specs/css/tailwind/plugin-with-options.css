@@ -2,5 +2,6 @@
 	debug:   false;
 	threshold:0.5;
 	KeepOption:KeepValue;
+	className:wysiwyg;
 	Keyword:INITIAL;
 }

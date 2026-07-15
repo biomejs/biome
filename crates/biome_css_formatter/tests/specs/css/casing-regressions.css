@@ -1,5 +1,5 @@
 .a{width:ATTR(data-x TYPE(AUTO))}
-@FONT-FEATURE-VALUES KeepFont{@STYLESET{Fancy:1}}
+@FONT-FEATURE-VALUES KeepFont{@STYLESET{Fancy:1;fancy:2}}
 @--Foo{COLOR:RED}
 @--Bar KeepValue;
 @FUTURE KeepValue;
@@ -33,3 +33,5 @@ A{} --- B:HOVER --- C{COLOR:RED}
 ::V-DEEP(.child){COLOR:BLUE}
 ::V-SLOTTED(.child){COLOR:RED}
 ::V-GLOBAL(.child){COLOR:RED}
+@\-\-Future{COLOR:RED}
+.opaque{COLOR:INITIAL;--keyword:INITIAL;color:fn(INHERIT)}

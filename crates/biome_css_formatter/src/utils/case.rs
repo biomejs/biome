@@ -4,9 +4,12 @@ use crate::CssFormatter;
 #[cfg(debug_assertions)]
 use biome_css_syntax::CssSyntaxToken;
 use biome_css_syntax::{
-    AnyCssQueryFeatureName, AnyCssSelectorIdentifier, AnyCssUnknownAtRuleName,
-    CssContainerScrollStateQueryInParens, CssIdentifier, CssIfMediaTest, CssLanguage,
-    CssSyntaxKind, CssSyntaxNode, CssUnknownAtRuleComponentList,
+    AnyCssAtRule, AnyCssQueryFeatureName, AnyCssSelectorIdentifier, AnyCssUnknownAtRuleName,
+    CssContainerScrollStateQueryInParens, CssDeclaration, CssFontFeatureValuesItem,
+    CssGenericProperty, CssIdentifier, CssIfMediaTest, CssLanguage, CssNestedQualifiedRule,
+    CssPseudoClassFunctionIdentifier, CssPseudoClassIdentifier, CssPseudoClassSelector,
+    CssQualifiedRule, CssSyntaxKind, CssSyntaxNode, CssUnknownAtRuleComponentList,
+    CssUnknownBlockAtRule, TwPluginAtRule,
 };
 #[cfg(debug_assertions)]
 use biome_formatter::Buffer;
@@ -19,6 +22,8 @@ use biome_rowan::AstNode as _;
 ///
 /// - Use [`CssCase::Lowercase`] for case-insensitive, syntax-owned names that
 ///   the formatter canonicalizes, such as `@IMPORT` or `:HOVER`.
+///   Escaped identifiers preserve their complete source spelling because
+///   lowercasing only their unescaped characters would be incomplete.
 /// - Use [`CssCase::Preserve`] for author-owned text, including custom
 ///   identifiers, Sass names and interpolation, such as `--Brand`, `$Theme`,
 ///   or `#{$Name}`.
@@ -38,11 +43,14 @@ where
             "CSS identifier case requires an identifier-capable node"
         );
 
-        if CssIdentifier::can_cast(item.syntax().kind()) {
-            Some(context.replace_identifier_case(*self))
+        let identifier = CssIdentifier::cast_ref(item.syntax())?;
+        let case = if *self == Self::Lowercase && identifier_has_escape(&identifier) {
+            Self::Preserve
         } else {
-            None
-        }
+            *self
+        };
+
+        Some(context.replace_identifier_case(case))
     }
 
     fn exit(&self, restore: Self::Restore, context: &mut CssFormatContext) {
@@ -73,6 +81,13 @@ pub(crate) fn record_auto_contextual_token(token: &CssSyntaxToken, f: &mut CssFo
         token.text_trimmed(),
         token.kind()
     ));
+}
+
+/// Returns whether an identifier's source spelling contains a CSS escape.
+pub(crate) fn identifier_has_escape(identifier: &CssIdentifier) -> bool {
+    identifier
+        .value_token()
+        .is_ok_and(|token| token.text_trimmed().contains('\\'))
 }
 
 /// Lowercases CSS-wide keywords such as `INITIAL` and `REVERT` in values.
@@ -161,20 +176,85 @@ pub(crate) fn pseudo_name_case(name: &AnyCssSelectorIdentifier) -> CssCase {
 
 /// Returns the casing policy for identifier-backed pseudo names.
 pub(crate) fn pseudo_identifier_case(name: &CssIdentifier) -> CssCase {
-    if is_dashed_identifier(name) || has_hex_escape(name) {
+    if is_dashed_identifier(name) {
         CssCase::Preserve
     } else {
         CssCase::Lowercase
     }
 }
 
-/// Prettier preserves pseudo names containing hexadecimal escapes.
-fn has_hex_escape(name: &CssIdentifier) -> bool {
-    name.value_token().is_ok_and(|token| {
-        token
-            .token_text_trimmed()
-            .as_bytes()
-            .windows(2)
-            .any(|pair| pair[0] == b'\\' && pair[1].is_ascii_hexdigit())
+/// Matches declarations enclosed by CSS Modules `:import` or `:export` rules.
+pub(crate) fn is_css_modules_import_export_declaration(property: &CssGenericProperty) -> bool {
+    let Some(declaration) = property.parent::<CssDeclaration>() else {
+        return false;
+    };
+
+    declaration
+        .syntax()
+        .ancestors()
+        .find_map(CssQualifiedRule::cast)
+        .is_some_and(|rule| is_css_modules_import_export_rule(&rule))
+}
+
+/// Matches opaque values such as `@plugin "x" { Option: INITIAL; }`.
+pub(crate) fn is_author_owned_property_value(property: &CssGenericProperty) -> bool {
+    for ancestor in property.syntax().ancestors() {
+        if CssFontFeatureValuesItem::can_cast(ancestor.kind())
+            || CssUnknownBlockAtRule::can_cast(ancestor.kind())
+            || TwPluginAtRule::can_cast(ancestor.kind())
+        {
+            return true;
+        }
+
+        if let Some(rule) = CssQualifiedRule::cast(ancestor.clone()) {
+            return is_css_modules_import_export_rule(&rule);
+        }
+
+        if AnyCssAtRule::can_cast(ancestor.kind())
+            || CssNestedQualifiedRule::can_cast(ancestor.kind())
+        {
+            return false;
+        }
+    }
+
+    false
+}
+
+fn is_css_modules_import_export_rule(rule: &CssQualifiedRule) -> bool {
+    let prelude = rule.prelude();
+
+    prelude
+        .syntax()
+        .descendants()
+        .filter(is_css_modules_import_export_pseudo)
+        .filter_map(|node| node.parent())
+        .filter_map(CssPseudoClassSelector::cast)
+        .any(|selector| {
+            selector.syntax().text_trimmed_range() == prelude.syntax().text_trimmed_range()
+        })
+}
+
+fn is_css_modules_import_export_pseudo(node: &CssSyntaxNode) -> bool {
+    if let Some(pseudo) = CssPseudoClassIdentifier::cast(node.clone()) {
+        return pseudo.name().is_ok_and(|name| {
+            selector_identifier_text_eq(&name, "export")
+                || selector_identifier_text_eq(&name, "import")
+        });
+    }
+
+    CssPseudoClassFunctionIdentifier::cast(node.clone()).is_some_and(|pseudo| {
+        pseudo.name().is_ok_and(|name| {
+            identifier_text_eq(&name, "export") || identifier_text_eq(&name, "import")
+        })
     })
+}
+
+fn selector_identifier_text_eq(name: &AnyCssSelectorIdentifier, expected: &str) -> bool {
+    matches!(name, AnyCssSelectorIdentifier::CssIdentifier(identifier) if identifier_text_eq(identifier, expected))
+}
+
+fn identifier_text_eq(identifier: &CssIdentifier, expected: &str) -> bool {
+    identifier
+        .value_token()
+        .is_ok_and(|token| token.token_text_trimmed() == expected)
 }

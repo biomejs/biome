@@ -177,6 +177,8 @@ $KeepKeyword:INITIAL;.#{$KeepKeyword}{COLOR:RED}
 
 .Nesting{FONT:INITIAL{FAMILY:sans-serif}}
 
+.WideKeywords{FONT-FAMILY:INITIAL;PADDING:UNSET;BORDER:INHERIT;ALL:REVERT}
+
 ```
 
 
@@ -507,7 +509,7 @@ $KeepNotParen: NOT($Keep AND $Other);
 	color: RED;
 }
 
-$KeepKeyword: initial;
+$KeepKeyword: INITIAL;
 .#{$KeepKeyword} {
 	color: RED;
 }
@@ -516,6 +518,13 @@ $KeepKeyword: initial;
 	FONT:initial {
 		family: sans-serif;
 	}
+}
+
+.WideKeywords {
+	font-family: initial;
+	padding: unset;
+	border: inherit;
+	all: revert;
 }
 
 ```

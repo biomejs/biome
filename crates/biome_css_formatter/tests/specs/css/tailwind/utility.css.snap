@@ -179,7 +179,7 @@ info: css/tailwind/utility.css
 @config "KeepConfig.js";
 
 @plugin "KeepPlugin" {
-	color: RED;
+	COLOR: RED;
 }
 
 @slot;

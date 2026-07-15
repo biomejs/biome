@@ -7,7 +7,7 @@ info: css/casing-regressions.css
 
 ```css
 .a{width:ATTR(data-x TYPE(AUTO))}
-@FONT-FEATURE-VALUES KeepFont{@STYLESET{Fancy:1}}
+@FONT-FEATURE-VALUES KeepFont{@STYLESET{Fancy:1;fancy:2}}
 @--Foo{COLOR:RED}
 @--Bar KeepValue;
 @FUTURE KeepValue;
@@ -41,6 +41,8 @@ A{} --- B:HOVER --- C{COLOR:RED}
 ::V-DEEP(.child){COLOR:BLUE}
 ::V-SLOTTED(.child){COLOR:RED}
 ::V-GLOBAL(.child){COLOR:RED}
+@\-\-Future{COLOR:RED}
+.opaque{COLOR:INITIAL;--keyword:INITIAL;color:fn(INHERIT)}
 
 ```
 
@@ -53,7 +55,8 @@ A{} --- B:HOVER --- C{COLOR:RED}
 }
 @font-feature-values KeepFont {
 	@styleset {
-		fancy: 1;
+		Fancy: 1;
+		fancy: 2;
 	}
 }
 @--Foo {
@@ -62,24 +65,24 @@ A{} --- B:HOVER --- C{COLOR:RED}
 @--Bar KeepValue;
 @future KeepValue;
 @future KeepValue {
-	color: initial;
+	color: INITIAL;
 }
 @KeepLessVar :KeepValue;
 @KeepLessBlock :KeepValue {
-	nested: initial;
+	nested: INITIAL;
 }
 :\2d\2d Foo {
 	color: RED;
 }
-:\-\-foo {
+:\-\-Foo {
 	color: RED;
 }
-@media (\2d\2d feature) {
+@media (\2d\2d Feature) {
 	A {
 		color: RED;
 	}
 }
-@media (\-\-feature) {
+@media (\-\-Feature) {
 	A {
 		color: RED;
 	}
@@ -106,10 +109,10 @@ A {
 	color: RED;
 }
 .a {
-	\2d\2d foo: KeepValue;
+	\2d\2d Foo: KeepValue;
 }
 .a {
-	\-\-foo: fn(initial);
+	\-\-Foo: fn(INITIAL);
 }
 @--Baz {
 	keepkey: KeepValue;
@@ -123,7 +126,7 @@ A {
 	token: red;
 }
 :export {
-	Keyword: initial;
+	Keyword: INITIAL;
 }
 :export {
 	.Nested {
@@ -131,10 +134,10 @@ A {
 	}
 }
 .a {
-	--payload: fn(initial);
+	--payload: fn(INITIAL);
 }
 @future {
-	payload: fn(inherit);
+	payload: fn(INHERIT);
 	.Nested {
 		color: initial;
 	}
@@ -162,6 +165,14 @@ A {
 }
 ::v-global(.child) {
 	color: RED;
+}
+@\-\-Future {
+	color: RED;
+}
+.opaque {
+	color: initial;
+	--keyword: INITIAL;
+	color: fn(INHERIT);
 }
 
 ```

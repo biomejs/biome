@@ -618,8 +618,8 @@ B:nth-last-child(EVEN) {
 }
 
 .function-keyword-value {
-	color: KeepFuncName(inherit);
-	background: Var(--Keep-custom-Prop, initial);
+	color: KeepFuncName(INHERIT);
+	background: Var(--Keep-custom-Prop, INITIAL);
 }
 
 .var-empty-fallback {
@@ -632,7 +632,7 @@ B:nth-last-child(EVEN) {
 }
 
 .custom-keyword-value {
-	--Keep-keyword: initial;
+	--Keep-keyword: INITIAL;
 }
 
 .keyword-value {
@@ -722,25 +722,25 @@ B:nth-last-child(EVEN) {
 
 @font-feature-values KeepFont Family, "Keep Font" {
 	@stylistic {
-		keepfeaturename: 1;
+		KeepFeatureName: 1;
 	}
 	@historical-forms {
-		keephist: 1;
+		KeepHist: 1;
 	}
 	@styleset {
-		keepset: 1;
+		KeepSet: 1;
 	}
 	@character-variant {
-		keepchar: 1;
+		KeepChar: 1;
 	}
 	@swash {
-		keepswash: 1;
+		KeepSwash: 1;
 	}
 	@ornaments {
-		keeporn: 1;
+		KeepOrn: 1;
 	}
 	@annotation {
-		keepanno: 1;
+		KeepAnno: 1;
 	}
 }
 
