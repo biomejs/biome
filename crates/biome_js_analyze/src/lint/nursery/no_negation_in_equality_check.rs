@@ -7,6 +7,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsExpression, JsBinaryExpression, JsParenthesizedExpression, JsSyntaxKind::*};
 use biome_js_syntax::is_negation;
+use biome_parser::token_set;
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxTriviaPiece, TriviaPieceKind};
 use biome_rule_options::no_negation_in_equality_check::NoNegationInEqualityCheckOptions;
 
@@ -62,7 +63,7 @@ impl Rule for NoNegationInEqualityCheck {
         let op = node.operator_token().ok()?;
 
         // Only check strict equality operators (=== and !==)
-        if !matches!(op.kind(), EQ3 | NEQ2) {
+        if !token_set![EQ3, NEQ2].contains(op.kind()) {
             return None;
         }
 
@@ -93,7 +94,11 @@ impl Rule for NoNegationInEqualityCheck {
                 markup! {
                     "A negation is used on the left side of this equality check."
                 },
-            ),
+            )
+            .note(markup! {
+                "Due to operator precedence, the negation binds more tightly than the equality operator. "
+                "The expression "<Emphasis>"!foo === bar"</Emphasis>" evaluates as "<Emphasis>"(!foo) === bar"</Emphasis>", not "<Emphasis>"!(foo === bar)"</Emphasis>"."
+            }),
         )
     }
 
@@ -319,7 +324,13 @@ impl Rule for NoNegationInEqualityCheck {
         // `function` at statement start, which is a function declaration).
         {
             let kind = new_left.syntax().kind();
-            if matches!(kind, JS_FUNCTION_EXPRESSION | JS_CLASS_EXPRESSION | JS_OBJECT_EXPRESSION) {
+            if token_set![
+                JS_FUNCTION_EXPRESSION,
+                JS_CLASS_EXPRESSION,
+                JS_OBJECT_EXPRESSION
+            ]
+            .contains(kind)
+            {
                 new_left = AnyJsExpression::from(make::parenthesized(new_left));
                 // Re-check ASI: the generated `(` is itself a hazard when
                 // preceded by a newline. e.g. `foo\n!function(){}===bar` →

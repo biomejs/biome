@@ -16,6 +16,8 @@ invalid.jsonc:1:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━�
   > 1 │ !foo === bar
       │ ^^^^^^^^^^^^
   
+  i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use the proper negated comparison operator instead.
@@ -39,6 +41,8 @@ invalid.jsonc:1:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━�
   
   > 1 │ !foo !== bar
       │ ^^^^^^^^^^^^
+  
+  i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -64,6 +68,8 @@ invalid.jsonc:1:5 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━�
   > 1 │ if (!a === b) {}
       │     ^^^^^^^^
   
+  i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use the proper negated comparison operator instead.
@@ -87,6 +93,8 @@ invalid.jsonc:1:5 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━�
   
   > 1 │ if (!a !== b) {}
       │     ^^^^^^^^
+  
+  i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -112,6 +120,8 @@ invalid.jsonc:1:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━�
   > 1 │ !a === b ? c : d
       │ ^^^^^^^^
   
+  i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use the proper negated comparison operator instead.
@@ -135,6 +145,8 @@ invalid.jsonc:1:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━�
   
   > 1 │ !result !== expected
       │ ^^^^^^^^^^^^^^^^^^^^
+  
+  i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
