@@ -35,6 +35,10 @@ serde-wasm-bindgen       = "0.6.5"
 # IMPORTANT: if you update this package, you must update justfile and workflows so we install the same CLI version
 wasm-bindgen             = { version = "=0.2.117", features = ["serde-serialize"] }
 
+[dev-dependencies]
+biome_grit_patterns = { workspace = true }
+wasm-bindgen-test   = "0.3.67"
+
 [build-dependencies]
 biome_js_factory   = { workspace = true }
 biome_js_formatter = { workspace = true }
