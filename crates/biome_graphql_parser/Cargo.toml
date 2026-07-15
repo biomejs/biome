@@ -29,6 +29,7 @@ biome_diagnostics = { path = "../biome_diagnostics" }
 biome_test_utils  = { path = "../biome_test_utils" }
 criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta             = { workspace = true }
+quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
 tests_macros      = { workspace = true }
 

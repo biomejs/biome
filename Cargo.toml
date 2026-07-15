@@ -254,6 +254,7 @@ unused_macro_rules             = "warn"
 
 # We use cargo-shear without expanding macros, so several paths needs to be ignored
 [workspace.metadata.cargo-shear]
+ignored = ["quickcheck"] # Used in quickcheck_macros crate
 ignored-paths = [
   "crates/*_analyze/src/{assist,lint,syntax}/*/*.rs",
   "crates/biome_console/tests/markup/*.rs",

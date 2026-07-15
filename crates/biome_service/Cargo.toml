@@ -76,7 +76,6 @@ biome_yaml_syntax        = { workspace = true, optional = true }
 bpaf                     = { workspace = true }
 camino                   = { workspace = true }
 crossbeam                = { workspace = true }
-either                   = { workspace = true }
 enumflags2               = { workspace = true, features = ["serde"] }
 ignore                   = { workspace = true }
 notify                   = { workspace = true, features = ["crossbeam-channel"] }

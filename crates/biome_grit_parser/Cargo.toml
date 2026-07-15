@@ -26,6 +26,7 @@ biome_console     = { path = "../biome_console" }
 biome_diagnostics = { path = "../biome_diagnostics" }
 biome_test_utils  = { path = "../biome_test_utils" }
 insta             = { workspace = true }
+quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
 tests_macros      = { workspace = true }
 
