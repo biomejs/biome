@@ -57,7 +57,7 @@ own challenges.
 ## Type Data Structures
 
 In Biome, the most basic data structure for type information is a giant `enum`,
-called `TypeData`, defined in [`type_info.rs`](src/type_info.rs).
+called `TypeData`, defined in [`type_data.rs`](src/type_data.rs).
 
 This enum has many different variants in order to cover all the different kinds
 of types that TypeScript supports. But a few are specifically
@@ -216,7 +216,7 @@ we've seen before: Such a cache would get stale the moment a module is replaced,
 and we don't want to have complex cache invalidation schemes.
 
 Full inference is implemented in
-[`scoped_resolver.rs`](../biome_module_graph/src/js_module_info/scoped_resolver.rs).
+[`module_resolver.rs`](../biome_module_graph/src/js_module_info/module_resolver.rs).
 
 ## Type Resolvers
 
