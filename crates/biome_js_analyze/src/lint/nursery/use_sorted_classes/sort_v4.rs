@@ -47,15 +47,119 @@ pub fn sort_class_list(root: &TwRoot) -> String {
     result
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 enum SortKey {
     Unknown,
     Known {
         property_idx: u16,
         property_count: u8,
         registration_idx: u16,
+        value: ValueKey,
         important: bool,
     },
+}
+
+/// The value and modifier text of a candidate — `red-500` + `50` for
+/// `bg-red-500/50`, `[13px]` + `` for `w-[13px]`, `1` + `2` for the
+/// fraction `w-1/2`. Candidates with an identical
+/// (property, registration) placement order by natural comparison of
+/// these texts, mirroring how Tailwind orders same-utility candidates
+/// in generated CSS.
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+struct ValueKey {
+    value: String,
+    modifier: String,
+}
+
+impl ValueKey {
+    fn from_candidate(candidate: &AnyTwCandidate) -> Self {
+        match candidate {
+            AnyTwCandidate::TwArbitraryCandidate(arbitrary) => Self {
+                value: arbitrary.value().syntax().text_trimmed().to_string(),
+                modifier: modifier_text(arbitrary.modifier().as_ref()),
+            },
+            AnyTwCandidate::TwFunctionalCandidate(functional) => Self {
+                value: functional
+                    .value()
+                    .map(|value| value.syntax().text_trimmed().to_string())
+                    .unwrap_or_default(),
+                modifier: modifier_text(functional.modifier().as_ref()),
+            },
+            // Static candidates have no value; ties between distinct
+            // static utilities are broken by `registration_idx`.
+            AnyTwCandidate::TwStaticCandidate(_) | AnyTwCandidate::TwBogusCandidate(_) => {
+                Self::default()
+            }
+        }
+    }
+
+    fn compare(&self, other: &Self) -> Ordering {
+        natural_cmp(&self.value, &other.value)
+            .then_with(|| natural_cmp(&self.modifier, &other.modifier))
+    }
+}
+
+fn modifier_text(modifier: Option<&AnyTwModifier>) -> String {
+    match modifier {
+        Some(AnyTwModifier::TwModifier(modifier)) => modifier
+            .value()
+            .map(|value| value.syntax().text_trimmed().to_string())
+            .unwrap_or_default(),
+        Some(AnyTwModifier::TwBogusModifier(bogus)) => bogus.syntax().text_trimmed().to_string(),
+        None => String::new(),
+    }
+}
+
+/// Byte-wise comparison with numeric digit runs: when both strings hold
+/// a digit at the first point of divergence, the full runs containing
+/// them compare as integers (`75` < `700`, `red-50` < `red-100`);
+/// everywhere else plain byte order applies, which places digits before
+/// `[` and `[` before letters (`4` < `[1px]` < `auto`) — matching the
+/// order Tailwind emits same-utility candidates in.
+fn natural_cmp(a: &str, b: &str) -> Ordering {
+    let (a, b) = (a.as_bytes(), b.as_bytes());
+    let (mut i, mut j) = (0, 0);
+    while let (Some(&byte_a), Some(&byte_b)) = (a.get(i), b.get(j)) {
+        if byte_a.is_ascii_digit() && byte_b.is_ascii_digit() {
+            let (run_a, next_i) = digit_run(a, i);
+            let (run_b, next_j) = digit_run(b, j);
+            match compare_digit_runs(run_a, run_b) {
+                Ordering::Equal => (i, j) = (next_i, next_j),
+                ordering => return ordering,
+            }
+        } else if byte_a == byte_b {
+            i += 1;
+            j += 1;
+        } else {
+            return byte_a.cmp(&byte_b);
+        }
+    }
+    // One string is a prefix of the other; the shorter sorts first
+    // (`in` < `in-out`, and a bare value precedes any longer one).
+    (a.len() - i).cmp(&(b.len() - j))
+}
+
+/// The maximal ASCII digit run starting at `start`, and the index just
+/// past it.
+fn digit_run(bytes: &[u8], start: usize) -> (&[u8], usize) {
+    let mut end = start;
+    while bytes.get(end).is_some_and(|byte| byte.is_ascii_digit()) {
+        end += 1;
+    }
+    (&bytes[start..end], end)
+}
+
+/// Compare digit runs as integers without parsing: strip leading zeros,
+/// then longer runs are larger, then byte order decides.
+fn compare_digit_runs(a: &[u8], b: &[u8]) -> Ordering {
+    let a = trim_leading_zeros(a);
+    let b = trim_leading_zeros(b);
+    a.len().cmp(&b.len()).then_with(|| a.cmp(b))
+}
+
+fn trim_leading_zeros(run: &[u8]) -> &[u8] {
+    let first_nonzero = run.iter().position(|&byte| byte != b'0').unwrap_or(run.len());
+    &run[first_nonzero..]
 }
 
 impl SortKey {
@@ -80,6 +184,7 @@ impl SortKey {
         let Ok(inner) = node.candidate() else {
             return Self::Unknown;
         };
+        let value = ValueKey::from_candidate(&inner);
         let base = match inner {
             AnyTwCandidate::TwArbitraryCandidate(a) => {
                 let Ok(property_token) = a.property_token() else {
@@ -93,6 +198,7 @@ impl SortKey {
                     property_idx,
                     property_count: 1,
                     registration_idx: 0,
+                    value: ValueKey::default(),
                     important: false,
                 }
             }
@@ -117,6 +223,7 @@ impl SortKey {
                     property_idx: entry.property_idx,
                     property_count: entry.property_count,
                     registration_idx,
+                    value: ValueKey::default(),
                     important: false,
                 }
             }
@@ -182,6 +289,7 @@ impl SortKey {
                 property_idx,
                 property_count,
                 registration_idx,
+                value,
                 important: is_important,
             },
         }
@@ -189,7 +297,7 @@ impl SortKey {
 }
 
 fn compare(a: &SortKey, b: &SortKey) -> Ordering {
-    match (*a, *b) {
+    match (a, b) {
         // Unknowns float to the front; relative order between unknowns is
         // preserved by the stable sort.
         (SortKey::Unknown, SortKey::Unknown) => Ordering::Equal,
@@ -200,23 +308,29 @@ fn compare(a: &SortKey, b: &SortKey) -> Ordering {
                 property_idx: p1,
                 property_count: c1,
                 registration_idx: r1,
+                value: v1,
                 important: i1,
             },
             SortKey::Known {
                 property_idx: p2,
                 property_count: c2,
                 registration_idx: r2,
+                value: v2,
                 important: i2,
             },
         ) => p1
-            .cmp(&p2)
+            .cmp(p2)
             // Wider utilities (e.g. `sr-only` setting 9 properties) win
             // their property bucket so they sort before single-property
             // utilities in the same bucket.
-            .then_with(|| c2.cmp(&c1))
-            .then_with(|| r1.cmp(&r2))
+            .then_with(|| c2.cmp(c1))
+            .then_with(|| r1.cmp(r2))
+            // Same-utility candidates order by their value (`p-2 p-4
+            // p-10`, `bg-red-50 bg-red-100`), then modifier
+            // (`bg-red-500/25 bg-red-500/50`).
+            .then_with(|| v1.compare(v2))
             // A plain utility precedes its important twin (`flex flex!`).
-            .then_with(|| i1.cmp(&i2)),
+            .then_with(|| i1.cmp(i2)),
     }
 }
 
@@ -286,7 +400,7 @@ fn named_value_type_matches(
 }
 
 /// Walk a basename's named branch list and return the first matching
-/// branch as a `SortKey::Known` (importance is stamped by
+/// branch as a `SortKey::Known` (value and importance are stamped by
 /// `SortKey::from_candidate`). Branch order in the preset
 /// already reflects the resolution precedence we want
 /// (Keyword → Theme → Typed).
@@ -341,6 +455,7 @@ fn resolve_named_branch(
             property_idx,
             property_count,
             registration_idx,
+            value: ValueKey::default(),
             important: false,
         });
     }
@@ -348,7 +463,7 @@ fn resolve_named_branch(
 }
 
 /// Walk a basename's arbitrary branch list and return the first matching
-/// branch as a `SortKey::Known` (importance is stamped by
+/// branch as a `SortKey::Known` (value and importance are stamped by
 /// `SortKey::from_candidate`). Typed branches precede the
 /// type-blind fallback in generated preset order.
 fn resolve_arbitrary_branch(
@@ -370,6 +485,7 @@ fn resolve_arbitrary_branch(
             property_idx,
             property_count,
             registration_idx,
+            value: ValueKey::default(),
             important: false,
         });
     }
@@ -386,7 +502,15 @@ mod tests {
             property_idx,
             property_count,
             registration_idx,
+            value: ValueKey::default(),
             important: false,
+        }
+    }
+
+    fn value_key(value: &str, modifier: &str) -> ValueKey {
+        ValueKey {
+            value: value.to_string(),
+            modifier: modifier.to_string(),
         }
     }
 
@@ -458,13 +582,79 @@ mod tests {
             property_idx: 5,
             property_count: 1,
             registration_idx: 0,
+            value: ValueKey::default(),
             important: true,
         };
         assert_eq!(compare(&plain, &important), Ordering::Less);
         assert_eq!(compare(&important, &plain), Ordering::Greater);
     }
 
+    #[test]
+    fn compare_breaks_registration_tie_by_value_before_importance() {
+        // `p-2! p-4`: the value decides, the important suffix does not
+        // pull `p-4` ahead of `p-2!`.
+        let important_two = SortKey::Known {
+            property_idx: 5,
+            property_count: 1,
+            registration_idx: 0,
+            value: value_key("2", ""),
+            important: true,
+        };
+        let plain_four = SortKey::Known {
+            property_idx: 5,
+            property_count: 1,
+            registration_idx: 0,
+            value: value_key("4", ""),
+            important: false,
+        };
+        assert_eq!(compare(&important_two, &plain_four), Ordering::Less);
+    }
+
+    #[test]
+    fn compare_breaks_value_tie_by_modifier() {
+        let base = |modifier: &str| SortKey::Known {
+            property_idx: 5,
+            property_count: 1,
+            registration_idx: 0,
+            value: value_key("red-500", modifier),
+            important: false,
+        };
+        assert_eq!(compare(&base("25"), &base("50")), Ordering::Less);
+        assert_eq!(compare(&base("50"), &base("50")), Ordering::Equal);
+    }
+
     // endregion: compare
+
+    // region: natural comparison
+
+    #[test]
+    fn natural_cmp_compares_digit_runs_numerically() {
+        assert_eq!(natural_cmp("2", "10"), Ordering::Less);
+        assert_eq!(natural_cmp("red-50", "red-100"), Ordering::Less);
+        // The run is compared from its start, not from the point of
+        // divergence: `75` < `700` even though `5` > `0`.
+        assert_eq!(natural_cmp("75", "700"), Ordering::Less);
+        assert_eq!(natural_cmp("[2px]", "[10rem]"), Ordering::Less);
+    }
+
+    #[test]
+    fn natural_cmp_uses_byte_order_outside_digit_runs() {
+        // Digits precede `[`, and `[` precedes letters.
+        assert_eq!(natural_cmp("4", "[1px]"), Ordering::Less);
+        assert_eq!(natural_cmp("[13px]", "auto"), Ordering::Less);
+        assert_eq!(natural_cmp("2xl", "base"), Ordering::Less);
+        assert_eq!(natural_cmp("bold", "light"), Ordering::Less);
+    }
+
+    #[test]
+    fn natural_cmp_puts_prefixes_first() {
+        assert_eq!(natural_cmp("", "sm"), Ordering::Less);
+        assert_eq!(natural_cmp("in", "in-out"), Ordering::Less);
+        assert_eq!(natural_cmp("1", "1.5"), Ordering::Less);
+        assert_eq!(natural_cmp("sm", "sm"), Ordering::Equal);
+    }
+
+    // endregion: natural comparison
 
     // region: branch resolution
 
@@ -603,7 +793,16 @@ mod tests {
         let parsed = parse_tailwind("[display:block]");
         let full = parsed.tree().candidates().iter().next().unwrap();
         let display_idx = *PROPERTY_INDEX.get("display").unwrap();
-        assert_eq!(SortKey::from_candidate(&full), known(display_idx, 1, 0));
+        assert_eq!(
+            SortKey::from_candidate(&full),
+            SortKey::Known {
+                property_idx: display_idx,
+                property_count: 1,
+                registration_idx: 0,
+                value: value_key("block", ""),
+                important: false,
+            }
+        );
     }
 
     #[test]
@@ -612,6 +811,7 @@ mod tests {
             property_idx,
             property_count,
             registration_idx,
+            value,
             important: false,
         } = classify("flex")
         else {
@@ -623,6 +823,7 @@ mod tests {
                 property_idx,
                 property_count,
                 registration_idx,
+                value,
                 important: true,
             }
         );
@@ -650,6 +851,24 @@ mod tests {
     fn important_with_variants_is_still_unknown() {
         // Variant weight is the remaining TODO; `!` must not bypass it.
         assert_eq!(classify("hover:flex!"), SortKey::Unknown);
+    }
+
+    #[test]
+    fn classification_captures_value_and_modifier_text() {
+        let value_of = |input: &str| match classify(input) {
+            SortKey::Known { value, .. } => value,
+            SortKey::Unknown => panic!("expected `{input}` to classify as known"),
+        };
+        assert_eq!(value_of("p-4"), value_key("4", ""));
+        // The parser splits a fraction into value and modifier.
+        assert_eq!(value_of("w-1/2"), value_key("1", "2"));
+        assert_eq!(value_of("bg-red-500/50"), value_key("red-500", "50"));
+        // Arbitrary values keep their brackets; arbitrary properties
+        // contribute their value text.
+        assert_eq!(value_of("w-[13px]"), value_key("[13px]", ""));
+        assert_eq!(value_of("[color:red]/50"), value_key("red", "50"));
+        // Static utilities have no value.
+        assert_eq!(value_of("flex"), ValueKey::default());
     }
 
     // endregion: sort key classification
