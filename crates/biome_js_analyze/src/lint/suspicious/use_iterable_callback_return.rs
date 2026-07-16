@@ -43,7 +43,7 @@ declare_lint_rule! {
     /// - `some`
     /// - `sort`
     /// - `toSorted`
-    /// — `from` (when called on `Array`)
+    /// - `from` (when called on `Array`)
     ///
     /// A return value is disallowed in the method `forEach`.
     ///
