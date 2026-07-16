@@ -1,0 +1,22 @@
+.long-selector-name-one .long-selector-name-two .long-selector-name-three/* boundary */>.long-selector-name-four .long-selector-name-five{color:red}
+
+.multiline-block/* multiline
+comment */{color:blue}
+
+.parent{.nested/* nested multiline
+comment */{color:green}}
+
+.descendant-comment/* comment */
+.target{color:black}
+
+.descendant-comment-blank/* comment */
+
+.target{color:white}
+
+.block-comment-gap
+
+/* comment */{color:purple}
+
+.parent{.nested-block-comment-gap
+
+/* comment */{color:orange}}

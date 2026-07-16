@@ -1,0 +1,62 @@
+.a
+// before >
+>
+// after >
+.b
+// before block
+{color:red}
+
+.a
+// before +
++
+// after +
+.b{color:blue}
+
+.a
+// before ~
+~
+// after ~
+.b{color:green}
+
+.a
+// before ||
+||
+// after ||
+.b{color:black}
+
+.a
+// descendant
+.b{color:pink}
+
+.x
+// before forced-flat +
++
+// after forced-flat +
+.y,// row
+.z{color:teal}
+
+.parent{.a
+// nested before +
++
+// nested after +
+.b
+// nested before block
+{color:white}}
+
+.before// keep with >
+>.middle+.after{color:navy}
+
+.before>// keep after >
+.middle+.after{color:teal}
+
+.before>.middle// keep with +
++.after{color:maroon}
+
+.before>
+
+// blank after >
+.middle+.after{color:olive}
+
+.before
+// descendant chain
+.middle+.after{color:purple}

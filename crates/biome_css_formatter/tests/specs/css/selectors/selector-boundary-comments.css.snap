@@ -1,0 +1,229 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/selectors/selector-boundary-comments.css
+---
+
+# Input
+
+```css
+.a
+/* before > */
+>
+/* after > */
+.b
+/* before block */
+{color:red}
+
+.a/* before + */+/* after + */.b/* before block */{color:blue}
+
+.c/* selector trailing */
+/* first before block */
+/* last before block */{color:yellow}
+
+.a
+/* before ~ */
+~
+/* after ~ */
+.b{color:green}
+
+.a
+/* before || */
+||
+/* after || */
+.b{color:black}
+
+.parent{.a
+/* nested before + */
++
+/* nested after + */
+.b
+/* nested before block */
+{color:white}}
+
+.before
+/* keep with > */ > .middle+.after{color:orange}
+
+.before>
+/* keep after > */ .middle+.after{color:purple}
+
+.before>.middle
+/* keep with + */ +.after{color:navy}
+
+.before/* blank before > */
+
+>.middle+.after{color:maroon}
+
+.before>
+
+/* blank after > */.middle+.after{color:olive}
+
+.before/* multiline
+comment */>.middle+.after{color:aqua}
+
+.before>/* multiline
+comment */.middle+.after{color:fuchsia}
+
+.before
+/* descendant */ .middle+.after{color:lime}
+
+.before-explicit/* before explicit */>
+.after-explicit{color:silver}
+
+.A     >/* biome-ignore format: reason */ .B:HOVER{color:red}
+
+.suppressed-block/* biome-ignore format: reason */{color:blue}
+
+.mixed-combinator/* normal *//* biome-ignore format: reason */>.target{color:black}
+
+.mixed-reversed/* biome-ignore format: reason *//* normal */>.target{color:gray}
+
+.mixed-block/* normal *//* biome-ignore format: reason */{color:white}
+
+.adjacent-docs/**
+ * first
+ *//**
+ * second
+ */>.target{color:green}
+
+.adjacent-block-docs/**
+ * first
+ *//**
+ * second
+ */{color:purple}
+
+```
+
+
+# Formatted
+
+```css
+.a
+/* before > */
+>
+/* after > */
+.b
+/* before block */ {
+	color: red;
+}
+
+.a /* before + */ + /* after + */ .b /* before block */ {
+	color: blue;
+}
+
+.c /* selector trailing */
+/* first before block */
+/* last before block */ {
+	color: yellow;
+}
+
+.a
+/* before ~ */
+~
+/* after ~ */
+.b {
+	color: green;
+}
+
+.a
+/* before || */
+||
+/* after || */
+.b {
+	color: black;
+}
+
+.parent {
+	.a
+	/* nested before + */
+	+
+	/* nested after + */
+	.b
+	/* nested before block */ {
+		color: white;
+	}
+}
+
+.before
+/* keep with > */ > .middle + .after {
+	color: orange;
+}
+
+.before >
+/* keep after > */ .middle + .after {
+	color: purple;
+}
+
+.before > .middle
+/* keep with + */ + .after {
+	color: navy;
+}
+
+.before /* blank before > */
+
+> .middle + .after {
+	color: maroon;
+}
+
+.before >
+
+/* blank after > */ .middle + .after {
+	color: olive;
+}
+
+.before /* multiline
+comment */ > .middle + .after {
+	color: aqua;
+}
+
+.before > /* multiline
+comment */ .middle + .after {
+	color: fuchsia;
+}
+
+.before
+/* descendant */ .middle + .after {
+	color: lime;
+}
+
+.before-explicit /* before explicit */ >
+.after-explicit {
+	color: silver;
+}
+
+.A > /* biome-ignore format: reason */ .B:HOVER {
+	color: red;
+}
+
+.suppressed-block /* biome-ignore format: reason */ {
+	color: blue;
+}
+
+.mixed-combinator > /* normal */ /* biome-ignore format: reason */ .target {
+	color: black;
+}
+
+.mixed-reversed > /* biome-ignore format: reason */ /* normal */ .target {
+	color: gray;
+}
+
+.mixed-block /* normal */ /* biome-ignore format: reason */ {
+	color: white;
+}
+
+.adjacent-docs /**
+ * first
+ *//**
+ * second
+ */ > .target {
+	color: green;
+}
+
+.adjacent-block-docs /**
+ * first
+ *//**
+ * second
+ */ {
+	color: purple;
+}
+
+```
