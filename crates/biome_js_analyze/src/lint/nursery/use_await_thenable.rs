@@ -59,14 +59,14 @@ impl Rule for UseAwaitThenable {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let expression = node.argument().ok()?;
-        let ty = ctx.type_of_expression(&expression);
+        let ty = ctx.inferred_type_of_expression(&expression)?;
 
         // Uncomment the following line for debugging convenience:
         //let printed = format!("type of {expression:?} = {ty:?}");
 
         let is_maybe_promise = ty.is_promise_instance()
-            || ty.is_thenable()
-            || ty.has_variant(|ty| ty.is_promise_instance() || ty.is_thenable());
+            || ty.has_promise_variant()
+            || ctx.inferred_expression_has_callable_member(&expression, "then");
         (ty.is_inferred() && !is_maybe_promise).then_some(())
     }
 
