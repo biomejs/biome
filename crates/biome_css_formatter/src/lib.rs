@@ -1,4 +1,8 @@
 #![deny(clippy::use_self)]
+#![expect(
+    clippy::disallowed_methods,
+    reason = "Formatting component values requires complete node text."
+)]
 
 mod comments;
 pub mod context;

@@ -1,4 +1,8 @@
 #![deny(clippy::use_self)]
+#![expect(
+    clippy::disallowed_methods,
+    reason = "Formatting Svelte expressions requires complete node text."
+)]
 
 use crate::prelude::*;
 use biome_formatter::comments::Comments;
