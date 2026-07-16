@@ -4,10 +4,7 @@ expression: content
 ---
 /my-plugin/rules/missing.grit plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Cannot read plugin file
-    
-    Caused by:
-      Cannot read file.
+  × Cannot read file.
     
     Caused by:
       path "/my-plugin/rules/missing.grit" does not exists in memory filesystem

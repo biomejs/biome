@@ -7,7 +7,7 @@ use biome_console::fmt::Display;
 use biome_console::markup;
 use biome_deserialize::DeserializationDiagnostic;
 use biome_diagnostics::{Diagnostic, Error, MessageAndDescription};
-use biome_fs::FileSystemDiagnostic;
+use biome_fs::{FileSystemDiagnostic, FsErrorKind};
 use biome_grit_patterns::CompileError;
 use biome_resolver::{ResolveError, ResolveErrorDiagnostic};
 use biome_rowan::SyntaxError;
@@ -112,10 +112,13 @@ impl PluginDiagnostic {
     }
 
     pub fn cant_read_file(path: Utf8PathBuf, source: FileSystemDiagnostic) -> Self {
+        let FileSystemDiagnostic {
+            error_kind, source, ..
+        } = source;
         Self::CantReadFile(CantReadFile {
-            message: MessageAndDescription::from(markup! {"Cannot read plugin file"}.to_owned()),
+            error_kind,
             path: path.to_string(),
-            source: Some(Error::from(source)),
+            source,
         })
     }
 
@@ -214,7 +217,7 @@ pub struct UnsupportedRuleFormat {
 pub struct CantReadFile {
     #[message]
     #[description]
-    message: MessageAndDescription,
+    error_kind: FsErrorKind,
 
     #[location(resource)]
     path: String,

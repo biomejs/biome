@@ -40,7 +40,7 @@ impl AnalyzerGritPlugin {
     ) -> Result<Self, PluginDiagnostic> {
         let source = fs
             .read_file_from_path(path)
-            .map_err(|source| PluginDiagnostic::cant_read_file(path.to_path_buf(), source))?;
+            .map_err(|error| PluginDiagnostic::cant_read_file(path.to_path_buf(), error))?;
         let options = CompilePatternOptions::default()
             .with_extra_built_ins(vec![
                 BuiltInFunction::new(

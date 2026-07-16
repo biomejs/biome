@@ -150,6 +150,8 @@ mod test {
 
         // Normalize Windows paths...
         let content = content.replace('\\', "/");
+        #[cfg(windows)]
+        let content = content.replace("//", "/");
 
         insta::with_settings!({
             prepend_module_to_snapshot => false,
