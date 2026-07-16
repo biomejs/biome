@@ -148,10 +148,8 @@ mod test {
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {
         let content = print_diagnostic_to_string(&diagnostic);
 
-        // Normalize Windows paths...
-        let content = content.replace('\\', "/");
-        #[cfg(windows)]
-        let content = content.replace("//", "/");
+        // Normalize Windows paths, including separators escaped by Debug output.
+        let content = content.replace("\\\\", "/").replace('\\', "/");
 
         insta::with_settings!({
             prepend_module_to_snapshot => false,
