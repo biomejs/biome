@@ -1673,17 +1673,31 @@ impl VueDirectiveBuilder {
         ))
     }
 }
-pub fn vue_directive_argument(
+pub fn vue_directive_argument(colon_token: SyntaxToken) -> VueDirectiveArgumentBuilder {
+    VueDirectiveArgumentBuilder {
+        colon_token,
+        arg: None,
+    }
+}
+pub struct VueDirectiveArgumentBuilder {
     colon_token: SyntaxToken,
-    arg: AnyVueDirectiveArgument,
-) -> VueDirectiveArgument {
-    VueDirectiveArgument::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::VUE_DIRECTIVE_ARGUMENT,
-        [
-            Some(SyntaxElement::Token(colon_token)),
-            Some(SyntaxElement::Node(arg.into_syntax())),
-        ],
-    ))
+    arg: Option<AnyVueDirectiveArgument>,
+}
+impl VueDirectiveArgumentBuilder {
+    pub fn with_arg(mut self, arg: AnyVueDirectiveArgument) -> Self {
+        self.arg = Some(arg);
+        self
+    }
+    pub fn build(self) -> VueDirectiveArgument {
+        VueDirectiveArgument::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::VUE_DIRECTIVE_ARGUMENT,
+            [
+                Some(SyntaxElement::Token(self.colon_token)),
+                self.arg
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn vue_dynamic_argument(
     l_brack_token: SyntaxToken,

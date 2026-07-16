@@ -302,7 +302,7 @@ pub fn has_event_handler(handler_types: &[&str], element: &AnyHtmlTagElement) ->
                         .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-on"));
                     is_event_handling
                         && d.arg()
-                            .and_then(|arg| arg.arg().ok())
+                            .and_then(|arg| arg.arg())
                             .and_then(|arg| arg.as_vue_static_argument().cloned())
                             .and_then(|s| s.name_token().ok())
                             .is_some_and(|t| matches_event_handler(handler_types, t.text_trimmed()))

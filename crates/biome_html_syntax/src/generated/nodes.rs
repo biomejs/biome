@@ -4082,8 +4082,8 @@ impl VueDirectiveArgument {
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn arg(&self) -> SyntaxResult<AnyVueDirectiveArgument> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn arg(&self) -> Option<AnyVueDirectiveArgument> {
+        support::node(&self.syntax, 1usize)
     }
 }
 impl Serialize for VueDirectiveArgument {
@@ -4097,7 +4097,7 @@ impl Serialize for VueDirectiveArgument {
 #[derive(Serialize)]
 pub struct VueDirectiveArgumentFields {
     pub colon_token: SyntaxResult<SyntaxToken>,
-    pub arg: SyntaxResult<AnyVueDirectiveArgument>,
+    pub arg: Option<AnyVueDirectiveArgument>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct VueDynamicArgument {
@@ -10572,7 +10572,7 @@ impl std::fmt::Debug for VueDirectiveArgument {
                     "colon_token",
                     &support::DebugSyntaxResult(self.colon_token()),
                 )
-                .field("arg", &support::DebugSyntaxResult(self.arg()))
+                .field("arg", &support::DebugOptionalElement(self.arg()))
                 .finish()
         } else {
             f.debug_struct("VueDirectiveArgument").finish()

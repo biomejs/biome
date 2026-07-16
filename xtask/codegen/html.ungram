@@ -943,9 +943,11 @@ VueDirective =
 
 // <div v-bind:href="url" />
 //            ^^^^^
+// <div :="props" />
+//      ^ (arg is absent for the argument-less v-bind shorthand)
 VueDirectiveArgument =
 	':'
-	arg: AnyVueDirectiveArgument
+	arg: AnyVueDirectiveArgument?
 
 // <div :href="url" />
 //      ^^^^^^^^^^^

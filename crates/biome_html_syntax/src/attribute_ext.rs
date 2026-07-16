@@ -117,14 +117,14 @@ impl AnyHtmlAttribute {
                 AnyVueDirective::VueVBindShorthandDirective(d) => d
                     .arg()
                     .ok()
-                    .and_then(|arg| arg.arg().ok())
+                    .and_then(|arg| arg.arg())
                     .and_then(|arg| arg.as_vue_static_argument().cloned())
                     .and_then(|s| s.name_token().ok())
                     .map(|t| t.token_text_trimmed()),
                 // v-bind:attr="..." — full Vue binding
                 AnyVueDirective::VueDirective(d) if d.is_binding() => d
                     .arg()
-                    .and_then(|arg| arg.arg().ok())
+                    .and_then(|arg| arg.arg())
                     .and_then(|arg| arg.as_vue_static_argument().cloned())
                     .and_then(|s| s.name_token().ok())
                     .map(|t| t.token_text_trimmed()),
@@ -173,7 +173,7 @@ impl AnyHtmlAttribute {
                 AnyVueDirective::VueVBindShorthandDirective(d) => d
                     .arg()
                     .ok()
-                    .and_then(|arg| arg.arg().ok())
+                    .and_then(|arg| arg.arg())
                     .and_then(|arg| arg.as_vue_static_argument().cloned())
                     .and_then(|s| s.name_token().ok())
                     .is_some_and(|t| t.text_trimmed().eq_ignore_ascii_case(name_to_lookup)),
@@ -182,7 +182,7 @@ impl AnyHtmlAttribute {
                 AnyVueDirective::VueDirective(d) => {
                     d.is_binding()
                         && d.arg()
-                            .and_then(|arg| arg.arg().ok())
+                            .and_then(|arg| arg.arg())
                             .and_then(|arg| arg.as_vue_static_argument().cloned())
                             .and_then(|s| s.name_token().ok())
                             .is_some_and(|t| t.text_trimmed().eq_ignore_ascii_case(name_to_lookup))
@@ -232,7 +232,7 @@ impl AnyHtmlAttribute {
                     AnyVueDirective::VueDirective(d) => {
                         d.is_event_listener()
                             && d.arg()
-                                .and_then(|arg| arg.arg().ok())
+                                .and_then(|arg| arg.arg())
                                 .and_then(|arg| arg.as_vue_static_argument().cloned())
                                 .and_then(|s| s.name_token().ok())
                                 .is_some_and(|t| {
@@ -393,7 +393,7 @@ impl HtmlAttributeList {
                 AnyVueDirective::VueDirective(d) => {
                     d.is_event_listener()
                         && d.arg()
-                            .and_then(|arg| arg.arg().ok())
+                            .and_then(|arg| arg.arg())
                             .and_then(|arg| arg.as_vue_static_argument().cloned())
                             .and_then(|s| s.name_token().ok())
                             .is_some_and(|t| t.text_trimmed().eq_ignore_ascii_case(name_to_lookup))
@@ -422,7 +422,7 @@ impl HtmlAttributeList {
                 AnyVueDirective::VueVBindShorthandDirective(d) => d
                     .arg()
                     .ok()
-                    .and_then(|arg| arg.arg().ok())
+                    .and_then(|arg| arg.arg())
                     .and_then(|arg| arg.as_vue_static_argument().cloned())
                     .and_then(|s| s.name_token().ok())
                     .is_some_and(|t| t.text_trimmed() == name_to_lookup),
@@ -431,7 +431,7 @@ impl HtmlAttributeList {
                 AnyVueDirective::VueDirective(d) => {
                     d.is_binding()
                         && d.arg()
-                            .and_then(|arg| arg.arg().ok())
+                            .and_then(|arg| arg.arg())
                             .and_then(|arg| arg.as_vue_static_argument().cloned())
                             .and_then(|s| s.name_token().ok())
                             .is_some_and(|t| t.text_trimmed() == name_to_lookup)
