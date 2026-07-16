@@ -4,10 +4,14 @@
 
 /// Predefined global IDs whose `TypeData` is supplied by this generated module.
 pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
+    crate::globals::ARRAY_ID_GLOBAL_TYPE_ID,
+    crate::globals::PROMISE_ID_GLOBAL_TYPE_ID,
     crate::globals::DISPOSABLE_ID_GLOBAL_TYPE_ID,
     crate::globals::DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID,
     crate::globals::ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID,
     crate::globals::ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
+    crate::globals::MAP_ID_GLOBAL_TYPE_ID,
+    crate::globals::SET_ID_GLOBAL_TYPE_ID,
     crate::globals::ERROR_ID_GLOBAL_TYPE_ID,
     crate::globals::ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
     crate::globals::ERROR_CALL_ID_GLOBAL_TYPE_ID,
@@ -17,6 +21,232 @@ pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
 pub(crate) fn set_generated_global_type_data(
     builder: &mut crate::globals_builder::GlobalsResolverBuilder,
 ) {
+    let data = crate::TypeData::Class(Box::new(crate::Class {
+        name: Some(biome_rowan::Text::new_static("Array")),
+        type_parameters: Box::new([crate::globals::GLOBAL_T_ID.into()]),
+        extends: None,
+        implements: Box::default(),
+        members: Box::new([
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("length")),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("toString")),
+                ty: crate::globals::GLOBAL_STRING_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("toLocaleString")),
+                ty: crate::globals::GLOBAL_STRING_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("pop")),
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("push")),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("concat")),
+                ty: crate::globals::GLOBAL_INSTANCEOF_ARRAY_T_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("concat")),
+                ty: crate::globals::GLOBAL_INSTANCEOF_ARRAY_T_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("join")),
+                ty: crate::globals::GLOBAL_STRING_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("reverse")),
+                ty: crate::globals::GLOBAL_INSTANCEOF_ARRAY_T_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("shift")),
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("slice")),
+                ty: crate::globals::GLOBAL_INSTANCEOF_ARRAY_T_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("sort")),
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("splice")),
+                ty: crate::globals::GLOBAL_INSTANCEOF_ARRAY_T_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("splice")),
+                ty: crate::globals::GLOBAL_INSTANCEOF_ARRAY_T_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("unshift")),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("indexOf")),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("lastIndexOf")),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("every")),
+                ty: crate::globals::GLOBAL_BOOLEAN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("every")),
+                ty: crate::globals::GLOBAL_BOOLEAN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("some")),
+                ty: crate::globals::GLOBAL_BOOLEAN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("forEach")),
+                ty: crate::globals::GLOBAL_ARRAY_FOREACH_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("map")),
+                ty: crate::globals::GLOBAL_ARRAY_MAP_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("filter")),
+                ty: crate::globals::GLOBAL_ARRAY_FILTER_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("filter")),
+                ty: crate::globals::GLOBAL_ARRAY_FILTER_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("reduce")),
+                ty: crate::globals::GLOBAL_T_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("reduce")),
+                ty: crate::globals::GLOBAL_T_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("reduce")),
+                ty: crate::globals::GLOBAL_U_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("reduceRight")),
+                ty: crate::globals::GLOBAL_T_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("reduceRight")),
+                ty: crate::globals::GLOBAL_T_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("reduceRight")),
+                ty: crate::globals::GLOBAL_U_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("isArray")),
+                ty: crate::globals::GLOBAL_BOOLEAN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
+                ty: crate::globals::GLOBAL_INSTANCEOF_ARRAY_T_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("from")),
+                ty: crate::globals::GLOBAL_INSTANCEOF_ARRAY_T_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("entries")),
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("keys")),
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("values")),
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Constructor,
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+        ]),
+    }));
+    builder.set_type_data(crate::globals::ARRAY_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Class(Box::new(crate::Class {
+        name: Some(biome_rowan::Text::new_static("Promise")),
+        type_parameters: Box::new([crate::globals::GLOBAL_T_ID.into()]),
+        extends: None,
+        implements: Box::default(),
+        members: Box::new([
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("then")),
+                ty: crate::globals::GLOBAL_PROMISE_THEN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("catch")),
+                ty: crate::globals::GLOBAL_PROMISE_CATCH_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("all")),
+                ty: crate::globals::GLOBAL_PROMISE_ALL_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("race")),
+                ty: crate::globals::GLOBAL_PROMISE_RACE_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
+                ty: crate::globals::GLOBAL_INSTANCEOF_PROMISE_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("reject")),
+                ty: crate::globals::GLOBAL_PROMISE_REJECT_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("resolve")),
+                ty: crate::globals::GLOBAL_PROMISE_RESOLVE_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static(
+                    "allSettled",
+                )),
+                ty: crate::globals::GLOBAL_PROMISE_ALL_SETTLED_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("any")),
+                ty: crate::globals::GLOBAL_PROMISE_ANY_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static(
+                    "withResolvers",
+                )),
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("try")),
+                ty: crate::globals::GLOBAL_INSTANCEOF_PROMISE_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("finally")),
+                ty: crate::globals::GLOBAL_PROMISE_FINALLY_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Constructor,
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+        ]),
+    }));
+    builder.set_type_data(crate::globals::PROMISE_ID_GLOBAL_TYPE_ID, data);
     let data = crate::TypeData::Interface(Box::new(crate::Interface {
         name: biome_rowan::Text::new_static("Disposable"),
         type_parameters: Box::default(),
@@ -60,6 +290,123 @@ pub(crate) fn set_generated_global_type_data(
         crate::globals::ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
         data,
     );
+    let data = crate::TypeData::Class(Box::new(crate::Class {
+        name: Some(biome_rowan::Text::new_static("Map")),
+        type_parameters: Box::new([
+            crate::globals::GLOBAL_T_ID.into(),
+            crate::globals::GLOBAL_U_ID.into(),
+        ]),
+        extends: None,
+        implements: Box::default(),
+        members: Box::new([
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("clear")),
+                ty: crate::globals::GLOBAL_VOID_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("delete")),
+                ty: crate::globals::GLOBAL_BOOLEAN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("forEach")),
+                ty: crate::globals::GLOBAL_VOID_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("get")),
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("has")),
+                ty: crate::globals::GLOBAL_BOOLEAN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("set")),
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("size")),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
+                ty: crate::globals::GLOBAL_INSTANCEOF_MAP_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("entries")),
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("keys")),
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("values")),
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Constructor,
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+        ]),
+    }));
+    builder.set_type_data(crate::globals::MAP_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Class(Box::new(crate::Class {
+        name: Some(biome_rowan::Text::new_static("Set")),
+        type_parameters: Box::new([crate::globals::GLOBAL_T_ID.into()]),
+        extends: None,
+        implements: Box::default(),
+        members: Box::new([
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("add")),
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("clear")),
+                ty: crate::globals::GLOBAL_VOID_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("delete")),
+                ty: crate::globals::GLOBAL_BOOLEAN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("forEach")),
+                ty: crate::globals::GLOBAL_VOID_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("has")),
+                ty: crate::globals::GLOBAL_BOOLEAN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("size")),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static(
+                    "prototype",
+                )),
+                ty: crate::globals::GLOBAL_INSTANCEOF_SET_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("entries")),
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("keys")),
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("values")),
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Constructor,
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+            },
+        ]),
+    }));
+    builder.set_type_data(crate::globals::SET_ID_GLOBAL_TYPE_ID, data);
     let data = crate::TypeData::Class(Box::new(crate::Class {
         name: Some(biome_rowan::Text::new_static("Error")),
         type_parameters: Box::default(),
