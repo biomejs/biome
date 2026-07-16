@@ -932,7 +932,12 @@ fn resolve_function(
 
         let resolved = resolver.resolve_and_get(current_type_reference.as_ref())?;
         match resolved.as_raw_data() {
-            TypeData::Function(function) => return Some(function.clone()),
+            TypeData::Function(_) => {
+                let TypeData::Function(function) = resolved.to_data() else {
+                    return None;
+                };
+                return Some(function);
+            }
             // Callable interfaces/objects: `interface Cb { (): Promise<void> }`
             TypeData::Interface(interface) => {
                 let member = interface
