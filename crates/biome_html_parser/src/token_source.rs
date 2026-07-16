@@ -100,6 +100,8 @@ pub(crate) enum HtmlFramework {
     Svelte,
     /// Astro component. Enables Astro directive tokens (`:`, `.`).
     Astro,
+    /// Angular component. Enables Astro directive tokens (`:`, `.`).
+    Angular,
 }
 
 impl HtmlFramework {

@@ -196,6 +196,9 @@ AnyHtmlAttribute =
 	| HtmlAttributeSingleTextExpression
 	| SvelteAttachAttribute
 	| HtmlSpreadAttribute
+	| AnyAngularBinding
+	| AngularStructuralDirective
+	| AngularTemplateRefVariable
 	| AnySvelteDirective
 	| AnyVueDirective
 	| AnyAstroDirective
@@ -1127,3 +1130,54 @@ VueVForTupleBinding =
 VueVForTupleElement =
 	','
 	binding: AnyVueVForBinding
+
+// ==================================
+// Angular
+// ==================================
+
+// reference: https://angular.dev/guide/templates
+
+AnyAngularBinding =
+	AngularEventBinding
+	| AngularPropertyBinding
+	| AngularTwoWayBinding
+
+// <button (click)="onClick()">
+//         ^^^^^^^^^^^^^^^^^^^
+AngularEventBinding =
+	'('
+	name: AngularBindingName
+	')'
+	initializer: HtmlAttributeInitializerClause?
+
+// <input [value]="val">
+//        ^^^^^^^^^^^^^
+AngularPropertyBinding =
+	'['
+	name: AngularBindingName
+	']'
+	initializer: HtmlAttributeInitializerClause?
+
+// <input [(ngModel)]="value">
+//        ^^^^^^^^^^^^^^^^^^^
+AngularTwoWayBinding =
+	'[('
+	name: AngularBindingName
+	')]'
+	initializer: HtmlAttributeInitializerClause?
+
+// <div *select="cond">
+//      ^^^^^^^^^^^^^^
+AngularStructuralDirective =
+	'*'
+	name: AngularBindingName
+	initializer: HtmlAttributeInitializerClause?
+
+// <ng-template #tmpl="exportAsName">
+//              ^^^^^^^^^^^^^^^^^^^^
+AngularTemplateRefVariable =
+	'#'
+	name: AngularBindingName
+	initializer: HtmlAttributeInitializerClause?
+
+AngularBindingName = value: 'html_literal'
