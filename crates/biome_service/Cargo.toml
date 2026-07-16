@@ -70,15 +70,13 @@ biome_string_case        = { workspace = true }
 biome_text_edit          = { workspace = true }
 biome_unicode_table      = { workspace = true }
 biome_workspace_db       = { workspace = true }
-biome_yaml_formatter     = { workspace = true, features = ["serde"], optional = true }
+biome_yaml_formatter     = { workspace = true, optional = true }
 biome_yaml_parser        = { workspace = true, optional = true }
 biome_yaml_syntax        = { workspace = true, optional = true }
 bpaf                     = { workspace = true }
 camino                   = { workspace = true }
 crossbeam                = { workspace = true }
-either                   = { workspace = true }
 enumflags2               = { workspace = true, features = ["serde"] }
-getrandom                = { workspace = true, features = ["js"] }
 ignore                   = { workspace = true }
 notify                   = { workspace = true, features = ["crossbeam-channel"] }
 papaya                   = { workspace = true }
@@ -97,7 +95,6 @@ web-time                 = { workspace = true }
 
 [dev-dependencies]
 biome_configuration = { path = "../biome_configuration", features = ["test-utils"] }
-biome_service       = { path = ".", features = ["testing"] }
 insta               = { workspace = true }
 static_assertions   = { workspace = true }
 
@@ -190,7 +187,6 @@ schema                       = [
   "biome_markdown_syntax/schema",
   "biome_module_graph/schema",
   "biome_text_edit/schema",
-  "biome_yaml_formatter/schema",
   "biome_yaml_syntax/schema",
   "dep:schemars",
   "lang_css",

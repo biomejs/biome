@@ -15,11 +15,10 @@ publish              = true
 
 [dependencies]
 biome_rowan = { workspace = true, features = ["serde"] }
-schemars    = { workspace = true, optional = true }
 serde       = { workspace = true, features = ["derive"] }
 
 [features]
-schema = ["biome_rowan/serde", "schemars"]
+schema = ["biome_rowan/serde"]
 
 [lints]
 workspace = true

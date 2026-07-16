@@ -24,7 +24,6 @@ biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_string_case        = { workspace = true }
-camino                   = { workspace = true }
 cfg-if                   = { workspace = true }
 countme                  = { workspace = true, optional = true }
 drop_bomb                = "0.1.5"

@@ -16,8 +16,6 @@ publish              = true
 [dependencies]
 biome_rowan       = { workspace = true, features = ["serde"] }
 biome_string_case = { workspace = true }
-camino            = { workspace = true }
-schemars          = { workspace = true, optional = true }
 serde             = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
@@ -25,7 +23,7 @@ biome_css_factory = { path = "../biome_css_factory" }
 biome_css_parser  = { path = "../biome_css_parser" }
 
 [features]
-schema = ["biome_rowan/serde", "schemars"]
+schema = ["biome_rowan/serde"]
 # Remove once SCSS parsing is fully ready
 scss   = []
 

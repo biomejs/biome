@@ -28,7 +28,6 @@ biome_resolver       = { workspace = true }
 biome_rowan          = { workspace = true }
 biome_service        = { workspace = true, features = ["stable"] }
 biome_text_edit      = { workspace = true }
-biome_text_size      = { workspace = true, features = ["serde"] }
 camino               = { workspace = true }
 crossbeam            = { workspace = true }
 futures              = "0.3.32"

@@ -34,9 +34,7 @@ indexmap            = { workspace = true }
 rustc-hash          = { workspace = true }
 schemars            = { workspace = true, optional = true }
 serde               = { workspace = true, features = ["derive"], optional = true }
-serde_json          = { workspace = true }
 smallvec            = { workspace = true }
-tracing             = { workspace = true }
 
 [dev-dependencies]
 biome_configuration = { path = "../biome_configuration" }

@@ -17,6 +17,9 @@ publish              = true
 [package.metadata.workspaces]
 independent = true
 
+[package.metadata.cargo-shear]
+ignored = ["biome_deserialize"]  # Used in macro
+
 [[bench]]
 harness = false
 name    = "json_formatter"
@@ -30,7 +33,6 @@ biome_json_syntax        = { workspace = true }
 biome_languages          = { workspace = true, features = ["lang_json"] }
 biome_rowan              = { workspace = true }
 biome_suppression        = { workspace = true }
-camino                   = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"], optional = true }
 
@@ -44,9 +46,9 @@ biome_languages      = { path = "../biome_languages", features = ["lang_json"] }
 biome_parser         = { path = "../biome_parser" }
 biome_service        = { path = "../biome_service", features = ["lang_json"] }
 biome_test_utils     = { path = "../biome_test_utils", features = ["lang_json"] }
+camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
 criterion            = { package = "codspeed-criterion-compat", version = "=3.0.5" }
-serde_json           = { workspace = true }
 similar-asserts      = { workspace = true }
 tests_macros         = { path = "../tests_macros" }
 

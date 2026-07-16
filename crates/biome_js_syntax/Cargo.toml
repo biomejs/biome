@@ -12,14 +12,12 @@ categories.workspace = true
 publish              = true
 
 [dependencies]
-biome_aria          = { workspace = true }
-biome_aria_metadata = { workspace = true }
-biome_rowan         = { workspace = true, features = ["serde"] }
-biome_string_case   = { workspace = true }
-camino              = { workspace = true }
-enumflags2          = { workspace = true }
-schemars            = { workspace = true, optional = true }
-serde               = { workspace = true, features = ["derive"] }
+biome_aria        = { workspace = true }
+biome_rowan       = { workspace = true, features = ["serde"] }
+biome_string_case = { workspace = true }
+enumflags2        = { workspace = true }
+schemars          = { workspace = true, optional = true }
+serde             = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
 biome_js_factory = { path = "../biome_js_factory" }

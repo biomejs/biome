@@ -16,20 +16,14 @@ publish              = true
 independent = true
 
 [dependencies]
-biome_console      = { workspace = true }
-biome_diagnostics  = { workspace = true }
 biome_grit_factory = { workspace = true }
 biome_grit_syntax  = { workspace = true }
 biome_parser       = { workspace = true }
 biome_rowan        = { workspace = true }
-schemars           = { workspace = true, optional = true }
-serde              = { workspace = true, features = ["derive"] }
-serde_json         = { workspace = true }
-smallvec           = { workspace = true }
-tracing            = { workspace = true }
-unicode-bom        = { workspace = true }
 
 [dev-dependencies]
+biome_console     = { path = "../biome_console" }
+biome_diagnostics = { path = "../biome_diagnostics" }
 biome_test_utils  = { path = "../biome_test_utils" }
 insta             = { workspace = true }
 quickcheck        = { workspace = true }
@@ -37,7 +31,7 @@ quickcheck_macros = { workspace = true }
 tests_macros      = { workspace = true }
 
 [features]
-schemars = ["biome_grit_syntax/schema", "dep:schemars"]
+schemars = ["biome_grit_syntax/schema"]
 
 [lints]
 workspace = true

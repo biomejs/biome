@@ -31,7 +31,6 @@ biome_deserialize         = { workspace = true, features = ["smallvec"] }
 biome_deserialize_macros  = { workspace = true }
 biome_diagnostics         = { workspace = true }
 biome_fs                  = { workspace = true }
-biome_glob                = { workspace = true, features = ["biome_deserialize", "serde"] }
 biome_js_factory          = { workspace = true }
 biome_js_semantic         = { workspace = true }
 biome_js_syntax           = { workspace = true }
@@ -56,7 +55,6 @@ bitvec                    = "1.0.1"
 camino                    = { workspace = true }
 either                    = { workspace = true }
 enumflags2                = { workspace = true }
-globset                   = { workspace = true }
 phf                       = { workspace = true }
 regex                     = { workspace = true }
 roaring                   = "0.11.3"
@@ -70,7 +68,6 @@ biome_db            = { path = "../biome_db" }
 biome_fs            = { path = "../biome_fs" }
 biome_js_parser     = { path = "../biome_js_parser", features = ["tests"] }
 biome_plugin_loader = { path = "../biome_plugin_loader" }
-biome_service       = { path = "../biome_service" }
 biome_test_utils    = { path = "../biome_test_utils", features = ["html_embeds", "module_graph"] }
 criterion           = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta               = { workspace = true, features = ["glob"] }
@@ -87,7 +84,7 @@ tikv-jemallocator = { workspace = true }
 mimalloc = { workspace = true }
 
 [features]
-schema = ["biome_glob/schema", "schemars"]
+schema = ["schemars"]
 
 [lints]
 workspace = true

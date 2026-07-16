@@ -14,7 +14,6 @@ biome_css_parser      = { workspace = true }
 biome_css_semantic    = { workspace = true }
 biome_css_syntax      = { workspace = true }
 biome_diagnostics     = { workspace = true }
-biome_fs              = { workspace = true }
 biome_graphql_analyze = { workspace = true }
 biome_graphql_parser  = { workspace = true }
 biome_graphql_syntax  = { workspace = true }
@@ -28,9 +27,6 @@ biome_json_analyze    = { workspace = true }
 biome_json_parser     = { workspace = true }
 biome_json_syntax     = { workspace = true }
 biome_languages       = { workspace = true, features = ["lang_css", "lang_graphql", "lang_js", "lang_json"] }
-biome_module_graph    = { workspace = true }
-biome_project_layout  = { workspace = true }
-biome_rowan           = { workspace = true }
 biome_ruledoc_utils   = { workspace = true }
 biome_service         = { workspace = true, features = ["lang_graphql", "lang_grit", "lang_md", "lang_yaml"] }
 camino                = { workspace = true }

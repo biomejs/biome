@@ -17,6 +17,9 @@ publish              = true
 [package.metadata.workspaces]
 independent = true
 
+[package.metadata.cargo-shear]
+ignored = ["biome_deserialize"]  # Used in macro
+
 [[bench]]
 harness = false
 name    = "js_formatter"
@@ -34,7 +37,6 @@ biome_string_case            = { workspace = true }
 biome_suppression            = { workspace = true }
 biome_text_size              = { workspace = true }
 biome_unicode_table          = { workspace = true }
-camino                       = { workspace = true }
 schemars                     = { workspace = true, optional = true }
 serde                        = { workspace = true, features = ["derive"], optional = true }
 smallvec                     = { workspace = true }
@@ -50,11 +52,11 @@ biome_js_parser      = { path = "../biome_js_parser" }
 biome_parser         = { path = "../biome_parser" }
 biome_service        = { path = "../biome_service", features = ["lang_js"] }
 biome_test_utils     = { path = "../biome_test_utils", features = ["lang_js"] }
+camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
 criterion            = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 quickcheck           = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
-serde_json           = { workspace = true }
 similar-asserts      = { workspace = true }
 tests_macros         = { path = "../tests_macros" }
 

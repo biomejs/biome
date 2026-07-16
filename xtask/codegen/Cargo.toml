@@ -12,16 +12,13 @@ required-features = ["global_types"]
 [dependencies]
 anyhow                = { workspace = true }
 biome_analyze         = { workspace = true, features = ["schema"], optional = true }
-biome_cli             = { workspace = true, optional = true }
 biome_configuration   = { workspace = true, features = ["schema"], optional = true }
 biome_css_analyze     = { workspace = true, optional = true }
 biome_css_syntax      = { workspace = true, optional = true }
 biome_diagnostics     = { workspace = true, optional = true }
 biome_graphql_analyze = { workspace = true, optional = true }
-biome_graphql_parser  = { workspace = true, optional = true }
 biome_graphql_syntax  = { workspace = true, optional = true }
 biome_html_analyze    = { workspace = true, optional = true }
-biome_html_parser     = { workspace = true, optional = true }
 biome_html_syntax     = { workspace = true, optional = true }
 biome_js_analyze      = { workspace = true, optional = true }
 biome_js_factory      = { workspace = true, optional = true }
@@ -42,7 +39,6 @@ biome_ungrammar       = { workspace = true }
 bpaf                  = { workspace = true, features = ["derive"] }
 git2                  = { version = "0.21.0", default-features = false }
 proc-macro2           = { workspace = true, features = ["span-locations"] }
-pulldown-cmark        = { version = "0.13.3", default-features = false, optional = true }
 quote                 = "1.0.36"
 schemars              = { workspace = true, optional = true }
 serde                 = { workspace = true, optional = true }
@@ -65,7 +61,6 @@ configuration = [
   "biome_json_analyze",
   "biome_json_syntax",
   "biome_rowan",
-  "pulldown-cmark",
 ]
 external_data = ["serde", "serde_json", "ureq/default", "ureq/json"]
 global_types  = ["biome_js_parser", "biome_js_syntax", "biome_rowan", "git2/https"]

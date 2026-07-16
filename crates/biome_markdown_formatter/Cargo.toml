@@ -10,12 +10,9 @@ keywords.workspace   = true
 categories.workspace = true
 
 [dependencies]
-biome_formatter        = { workspace = true }
-biome_markdown_factory = { workspace = true }
-biome_markdown_syntax  = { workspace = true }
-biome_rowan            = { workspace = true }
-schemars               = { workspace = true, optional = true }
-serde                  = { workspace = true, features = ["derive"], optional = true }
+biome_formatter       = { workspace = true }
+biome_markdown_syntax = { workspace = true }
+biome_rowan           = { workspace = true }
 
 [dev-dependencies]
 biome_configuration   = { path = "../biome_configuration" }
@@ -29,10 +26,6 @@ camino                = { workspace = true }
 countme               = { workspace = true, features = ["enable"] }
 similar-asserts       = { workspace = true }
 tests_macros          = { path = "../tests_macros" }
-
-[features]
-schema = ["dep:schemars", "serde"]
-serde  = ["dep:serde"]
 
 [lints]
 workspace = true

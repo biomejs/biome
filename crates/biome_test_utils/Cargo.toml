@@ -19,14 +19,10 @@ biome_configuration  = { workspace = true }
 biome_console        = { workspace = true }
 biome_css_parser     = { workspace = true, optional = true }
 biome_css_syntax     = { workspace = true, optional = true }
-biome_db             = { workspace = true }
-biome_deserialize    = { workspace = true }
 biome_diagnostics    = { workspace = true }
-biome_formatter      = { workspace = true }
 biome_fs             = { workspace = true }
 biome_html_parser    = { workspace = true, optional = true }
 biome_html_syntax    = { workspace = true, optional = true }
-biome_js_analyze     = { workspace = true, optional = true }
 biome_js_parser      = { workspace = true, optional = true }
 biome_js_semantic    = { workspace = true, optional = true }
 biome_js_type_info   = { workspace = true, optional = true }
@@ -78,7 +74,6 @@ lang_js        = [
   "biome_configuration/lang_js",
   "biome_languages/lang_js",
   "biome_service/lang_js",
-  "dep:biome_js_analyze",
   "dep:biome_js_parser",
   "dep:biome_js_semantic"
 ]

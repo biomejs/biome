@@ -13,6 +13,9 @@ publish              = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[package.metadata.cargo-shear]
+ignored = ["biome_console"]  # Used in macro
+
 [dependencies]
 biome_configuration = { workspace = true }
 biome_console       = { workspace = true }
@@ -30,8 +33,6 @@ serde               = { workspace = true, features = ["derive"] }
 serde_json          = { workspace = true }
 similar             = { workspace = true }
 similar-asserts     = { workspace = true }
-
-[dev-dependencies]
 
 [features]
 lang_css     = ["biome_service/lang_css"]

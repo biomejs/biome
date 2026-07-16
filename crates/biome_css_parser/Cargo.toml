@@ -19,18 +19,17 @@ name    = "css_parser"
 biome_console       = { workspace = true }
 biome_css_factory   = { workspace = true }
 biome_css_syntax    = { workspace = true }
-biome_diagnostics   = { workspace = true }
 biome_languages     = { workspace = true, features = ["lang_css"] }
 biome_parser        = { workspace = true }
 biome_rowan         = { workspace = true }
 biome_unicode_table = { workspace = true }
 smallvec            = { workspace = true }
-tracing             = { workspace = true }
 
 [dev-dependencies]
 biome_configuration = { path = "../biome_configuration", features = ["lang_css"] }
 biome_css_syntax    = { path = "../biome_css_syntax", features = ["scss"] }
 biome_deserialize   = { path = "../biome_deserialize" }
+biome_diagnostics   = { path = "../biome_diagnostics" }
 biome_fs            = { path = "../biome_fs" }
 biome_service       = { path = "../biome_service", features = ["lang_css"] }
 biome_test_utils    = { path = "../biome_test_utils" }

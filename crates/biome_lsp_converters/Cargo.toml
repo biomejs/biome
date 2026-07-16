@@ -17,11 +17,7 @@ publish              = true
 anyhow           = { workspace = true }
 biome_line_index = { workspace = true }
 biome_text_size  = { workspace = true }
-rustc-hash       = { workspace = true }
 tower-lsp-server = { workspace = true }
-
-[dev-dependencies]
-tower = { workspace = true, features = ["timeout"] }
 
 [lints]
 workspace = true
