@@ -27,8 +27,8 @@ pub use flattening::MAX_FLATTEN_DEPTH;
 pub use globals::{GLOBAL_RESOLVER, GlobalsResolver};
 pub use globals_ids::{GLOBAL_BOOLEAN_ID, GLOBAL_UNKNOWN_ID, NUM_PREDEFINED_TYPES};
 pub use inferred_type::{
-    InferredSwitchCase, InferredType, MisleadingReturnType, ReturnTypeEvidence,
-    StringificationMode, StringificationUsefulness,
+    IgnoredPrimitiveTypes, InferredSwitchCase, InferredType, MisleadingReturnType,
+    ReturnTypeEvidence, StringificationMode, StringificationUsefulness,
 };
 pub use interned_types::TypeDb;
 pub use resolver::*;

@@ -8,7 +8,7 @@ use biome_js_syntax::{
     JsAssignmentOperator, JsBinaryExpression, JsBinaryOperator, JsCallExpression,
     JsUnaryExpression, JsUnaryOperator, global_identifier,
 };
-use biome_js_type_info::{Literal, ResolvedTypeData, Type, TypeData};
+use biome_js_type_info::InferredType;
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, declare_node_union};
 use biome_rule_options::no_useless_type_conversion::NoUselessTypeConversionOptions;
 
@@ -242,9 +242,9 @@ fn run_builtin_call(
 
     let first_argument = arguments.first()?.ok()?;
     let argument = first_argument.as_any_js_expression()?;
-    let ty = ctx.type_of_expression(argument);
+    let ty = ctx.inferred_type_of_expression(argument)?;
 
-    matches_primitive_type(&ty, primitive).then_some(RuleState {
+    matches_primitive_type(ty, primitive).then_some(RuleState {
         kind: ConversionKind::BuiltinCall,
         primitive,
         range: callee.range(),
@@ -281,9 +281,9 @@ fn run_to_string_call(
     }
 
     let object = member_expression.object().ok()?;
-    let ty = ctx.type_of_expression(&object);
+    let ty = ctx.inferred_type_of_expression(&object)?;
 
-    matches_primitive_type(&ty, PrimitiveKind::String).then_some(RuleState {
+    matches_primitive_type(ty, PrimitiveKind::String).then_some(RuleState {
         kind: ConversionKind::ToString,
         primitive: PrimitiveKind::String,
         range: member.range(),
@@ -325,8 +325,8 @@ fn run_binary_expression(
         return None;
     };
 
-    let ty = ctx.type_of_expression(&expression);
-    matches_primitive_type(&ty, PrimitiveKind::String).then_some(RuleState {
+    let ty = ctx.inferred_type_of_expression(&expression)?;
+    matches_primitive_type(ty, PrimitiveKind::String).then_some(RuleState {
         kind: ConversionKind::StringConcatenation,
         primitive: PrimitiveKind::String,
         range: node.range(),
@@ -366,12 +366,12 @@ fn run_assignment_expression(
             // `type_of_expression()` works on expressions, but the left-hand side
             // of `+=` is an assignment target. Resolve the named value instead so
             // we can ask for the variable's current type.
-            ctx.type_of_named_value(node.range(), name.text_trimmed())
+            ctx.inferred_type_of_named_value(node.range(), name.text_trimmed())?
         }
         _ => return None,
     };
 
-    matches_primitive_type(&ty, PrimitiveKind::String).then_some(RuleState {
+    matches_primitive_type(ty, PrimitiveKind::String).then_some(RuleState {
         kind: ConversionKind::StringAssignment,
         primitive: PrimitiveKind::String,
         range: node.range(),
@@ -405,8 +405,8 @@ fn run_unary_expression(
 
     match node.operator().ok()? {
         JsUnaryOperator::Plus => {
-            let ty = ctx.type_of_expression(&argument);
-            matches_primitive_type(&ty, PrimitiveKind::Number).then_some(RuleState {
+            let ty = ctx.inferred_type_of_expression(&argument)?;
+            matches_primitive_type(ty, PrimitiveKind::Number).then_some(RuleState {
                 kind: ConversionKind::UnaryPlus,
                 primitive: PrimitiveKind::Number,
                 range: node.range(),
@@ -419,8 +419,8 @@ fn run_unary_expression(
             }
 
             let nested_argument = nested.argument().ok()?;
-            let ty = ctx.type_of_expression(&nested_argument);
-            matches_primitive_type(&ty, PrimitiveKind::Boolean).then_some(RuleState {
+            let ty = ctx.inferred_type_of_expression(&nested_argument)?;
+            matches_primitive_type(ty, PrimitiveKind::Boolean).then_some(RuleState {
                 kind: ConversionKind::DoubleNegation,
                 primitive: PrimitiveKind::Boolean,
                 range: node.range(),
@@ -433,10 +433,10 @@ fn run_unary_expression(
             }
 
             let nested_argument = nested.argument().ok()?;
-            let ty = ctx.type_of_expression(&nested_argument);
-            let primitive = if matches_primitive_type(&ty, PrimitiveKind::BigInt) {
+            let ty = ctx.inferred_type_of_expression(&nested_argument)?;
+            let primitive = if matches_primitive_type(ty, PrimitiveKind::BigInt) {
                 PrimitiveKind::BigInt
-            } else if is_integer_like_type(&ty) {
+            } else if ty.is_all_integer_like() {
                 PrimitiveKind::Number
             } else {
                 return None;
@@ -474,91 +474,11 @@ fn is_empty_string_expression(expression: &AnyJsExpression) -> bool {
 /// the conversion may still change runtime behavior for some inputs.
 /// Generic types only match when their resolved constraint is precise enough to
 /// prove the same property.
-fn matches_primitive_type(ty: &Type, primitive: PrimitiveKind) -> bool {
-    all_type_variants_match(ty, |current, raw| {
-        primitive_matches_non_union_type(current, raw, primitive)
-    })
-}
-
-fn primitive_matches_non_union_type(ty: &Type, raw: &TypeData, primitive: PrimitiveKind) -> bool {
+fn matches_primitive_type(ty: InferredType, primitive: PrimitiveKind) -> bool {
     match primitive {
-        PrimitiveKind::String => ty.is_string_or_string_literal(),
-        PrimitiveKind::Number => ty.is_number_or_number_literal(),
-        PrimitiveKind::Boolean => match raw {
-            TypeData::Boolean => true,
-            TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::Boolean(_)),
-            _ => false,
-        },
-        PrimitiveKind::BigInt => match raw {
-            TypeData::BigInt => true,
-            TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::BigInt(_)),
-            _ => false,
-        },
-    }
-}
-
-/// Returns true when every reachable variant keeps the same value after `~~`.
-///
-/// That is true for bigint values and for number literals that are already
-/// integral. As with `matches_primitive_type()`, unions and constrained
-/// generics only match when every resolved variant satisfies the check.
-fn is_integer_like_type(ty: &Type) -> bool {
-    all_type_variants_match(ty, |_current, raw| integer_like_matches_non_union_type(raw))
-}
-
-/// Evaluates `predicate` against every concrete variant reachable from `ty`.
-///
-/// The traversal expands unions and follows known generic constraints until it
-/// reaches non-union, non-generic types. The check succeeds only when at least
-/// one concrete variant is found and every variant satisfies `predicate`.
-fn all_type_variants_match(ty: &Type, mut predicate: impl FnMut(&Type, &TypeData) -> bool) -> bool {
-    let mut saw_variant = false;
-    let mut pending = vec![ty.clone()];
-
-    while let Some(current) = pending.pop() {
-        if current.is_union() {
-            let mut variants = current.flattened_union_variants().peekable();
-            if variants.peek().is_none() {
-                return false;
-            }
-
-            saw_variant = true;
-            pending.extend(variants);
-            continue;
-        }
-
-        let Some(raw) = current.resolved_data().map(ResolvedTypeData::as_raw_data) else {
-            return false;
-        };
-
-        match raw {
-            TypeData::Generic(generic) if generic.constraint.is_known() => {
-                let Some(constraint) = current.resolve(&generic.constraint) else {
-                    return false;
-                };
-
-                pending.push(constraint);
-            }
-            TypeData::Generic(_) => return false,
-            _ if predicate(&current, raw) => saw_variant = true,
-            _ => return false,
-        }
-    }
-
-    saw_variant
-}
-
-fn integer_like_matches_non_union_type(raw: &TypeData) -> bool {
-    match raw {
-        TypeData::BigInt => true,
-        TypeData::Literal(literal) => match literal.as_ref() {
-            // `fract()` returns the fractional part of the numeric literal. It
-            // is `0.0` exactly when the literal already represents an integer,
-            // which means `~~` cannot truncate it any further.
-            Literal::Number(value) => value.to_f64().is_some_and(|value| value.fract() == 0.0),
-            Literal::BigInt(_) => true,
-            _ => false,
-        },
-        _ => false,
+        PrimitiveKind::String => ty.is_all_string_like(),
+        PrimitiveKind::Number => ty.is_all_number_like(),
+        PrimitiveKind::Boolean => ty.is_all_boolean_like(),
+        PrimitiveKind::BigInt => ty.is_all_bigint_like(),
     }
 }
