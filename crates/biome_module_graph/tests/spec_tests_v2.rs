@@ -25,7 +25,8 @@ use biome_module_graph::{
     CallExpressionTypeInput, InferredModuleTypes, JsExport, JsOwnExport, ModuleDb, ModuleInfo,
     ModuleInfoKind, NormalizeTypeInput, PathInfoCache,
     infer_call_expression_type as infer_call_expression_type_query, infer_module_types,
-    infer_module_types_bottom_up, normalize_type as normalize_type_query, resolve_js_module,
+    infer_module_types_bottom_up, module_for_key, normalize_type as normalize_type_query,
+    resolve_js_module,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
@@ -40,6 +41,27 @@ struct TestModuleDb {
     modules: BTreeMap<Utf8PathBuf, ModuleInfo>,
     events: Events,
     storage: Storage<Self>,
+}
+
+#[test]
+fn test_module_keys_reject_stale_handles() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), "export const value = 1;");
+
+    let mut db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let path = Utf8PathBuf::from("/src/index.ts");
+    let original = db.module_for_path(&path).expect("module must exist");
+    let replacement = ModuleInfo::new(&db, path.clone(), original.kind(&db).clone());
+    db.modules.insert(path, replacement);
+
+    assert!(
+        module_for_key(&db, InferredModuleKey::new(original.as_id())).is_none(),
+        "stale module handles must be rejected"
+    );
+    assert_eq!(
+        module_for_key(&db, InferredModuleKey::new(replacement.as_id())),
+        Some(replacement)
+    );
 }
 
 #[test]
