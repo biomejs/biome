@@ -94,68 +94,27 @@ pub fn compile_program(input: CompileInput<'_>) -> Result<CompileOutput> {
     })
 }
 
-/// Name given to React Compiler worker threads so the panic filter can
-/// recognize (and silence) panics that originate inside the compiler.
-const COMPILER_THREAD_NAME: &str = "biome-react-compiler";
-
-/// Installs, once per process, a panic hook that silences panics raised on
-/// React Compiler worker threads and delegates everything else to the
-/// previously installed hook.
-///
-/// Worker panics are already caught in [`run_on_compiler_stack`] and converted
-/// to a non-fatal [`ReactCompilerError::CompilerOutput`]; without this filter
-/// the default hook would still print the panic (and a backtrace) to stderr,
-/// which is just noise for a caught, expected-on-unsupported-input panic. The
-/// hook keys off the worker thread name, so panics on any other thread keep
-/// their normal behavior.
-fn install_panic_filter() {
-    static INSTALL: std::sync::Once = std::sync::Once::new();
-    INSTALL.call_once(|| {
-        let previous = std::panic::take_hook();
-        std::panic::set_hook(Box::new(move |info| {
-            let is_worker = std::thread::current().name() == Some(COMPILER_THREAD_NAME);
-            if !is_worker {
-                previous(info);
-            }
-        }));
-    });
-}
-
+/// Runs `f` on a dedicated thread with a stack large enough for the React
+/// Compiler's recursion; its upstream entrypoint budgets the same
+/// [`COMPILER_STACK_SIZE`]. A panic on the worker is re-raised on the calling
+/// thread, where the analyzer's existing panic handling takes over.
 fn run_on_compiler_stack<T, F>(f: F) -> Result<T>
 where
     T: Send,
     F: FnOnce() -> Result<T> + Send,
 {
-    install_panic_filter();
     std::thread::scope(|scope| {
         let handle = std::thread::Builder::new()
-            .name(COMPILER_THREAD_NAME.to_string())
+            .name("biome-react-compiler".to_string())
             .stack_size(COMPILER_STACK_SIZE)
             .spawn_scoped(scope, f)
             .map_err(|error| ReactCompilerError::CompilerOutput(error.to_string()))?;
 
-        // The React Compiler is a young port and may panic on inputs it does not
-        // yet handle. A panic here must not take down the surrounding lint pass,
-        // so convert it into a non-fatal error that flows through the normal
-        // `Result` path (and is ultimately swallowed by the rule). The worker
-        // thread already isolates the unwinding from the analyzer.
         match handle.join() {
             Ok(result) => result,
-            Err(payload) => Err(ReactCompilerError::CompilerOutput(panic_message(payload))),
+            Err(payload) => std::panic::resume_unwind(payload),
         }
     })
-}
-
-/// Extract a human-readable message from a panic payload, falling back to a
-/// generic message for payloads that are not strings.
-fn panic_message(payload: Box<dyn std::any::Any + Send>) -> String {
-    if let Some(message) = payload.downcast_ref::<&str>() {
-        format!("React Compiler panicked: {message}")
-    } else if let Some(message) = payload.downcast_ref::<String>() {
-        format!("React Compiler panicked: {message}")
-    } else {
-        "React Compiler panicked".to_string()
-    }
 }
 
 pub fn default_lint_options(source: &str) -> PluginOptions {
