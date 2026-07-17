@@ -12,7 +12,7 @@ use biome_js_syntax::{
     AnyJsxAttribute, JsLanguage, JsxAttribute, JsxAttributeList, JsxOpeningElement,
     JsxSelfClosingElement,
 };
-use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt, SyntaxToken};
+use biome_rowan::{AstNode, AstNodeExt, AstNodeListExt, BatchMutationExt, SyntaxToken};
 use biome_rule_options::use_sorted_attributes::{SortOrder, UseSortedAttributesOptions};
 
 use crate::JsRuleAction;
@@ -83,8 +83,8 @@ declare_source_rule! {
 
 impl Rule for UseSortedAttributes {
     type Query = Ast<JsxAttributeList>;
-    type State = AttributeGroup<SortableJsxAttribute>;
-    type Signals = Box<[Self::State]>;
+    type State = Box<[AttributeGroup<SortableJsxAttribute>]>;
+    type Signals = Option<Self::State>;
     type Options = UseSortedAttributesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -104,10 +104,12 @@ impl Rule for UseSortedAttributes {
             comparator(a, b) != Ordering::Greater
         };
 
-        for prop in props {
+        for (index, prop) in props.into_iter().enumerate() {
             match prop {
                 AnyJsxAttribute::JsxAttribute(attr) => {
-                    current_prop_group.attrs.push(SortableJsxAttribute(attr));
+                    current_prop_group
+                        .attrs
+                        .push(SortableJsxAttribute { attr, index });
                 }
                 // spread or shorthand attribute resets sort order: it carries
                 // an opaque expression that may have side effects on the
@@ -131,7 +133,7 @@ impl Rule for UseSortedAttributes {
         if !current_prop_group.is_empty() && !current_prop_group.is_sorted(boolean_comparator) {
             prop_groups.push(current_prop_group);
         }
-        prop_groups.into_boxed_slice()
+        (!prop_groups.is_empty()).then(|| prop_groups.into_boxed_slice())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -153,7 +155,8 @@ impl Rule for UseSortedAttributes {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        let mut mutation = ctx.root().begin();
+        let list = ctx.query();
+        let mut attrs: Vec<_> = list.into_iter().collect();
         let options = ctx.options();
         let sort_by = options.sort_order.unwrap_or_default();
 
@@ -162,11 +165,22 @@ impl Rule for UseSortedAttributes {
             SortOrder::Lexicographic => SortableJsxAttribute::lexicographic_cmp,
         };
 
-        for (SortableJsxAttribute(attr), SortableJsxAttribute(sorted_attr)) in
-            zip(state.attrs.iter(), state.get_sorted_attributes(comparator)?)
-        {
-            mutation.replace_node_discard_trivia(attr.clone(), sorted_attr);
+        for group in state {
+            for (current_attr, sorted_attr) in zip(
+                group.attrs.iter(),
+                group.get_sorted_attributes(comparator)?,
+            ) {
+                *attrs.get_mut(current_attr.index)? =
+                    AnyJsxAttribute::JsxAttribute(sorted_attr.attr);
+            }
         }
+
+        // Replace the complete list as a single mutation. Attribute values can
+        // contain JSX with their own list mutations, so replacing individual
+        // attributes would make the parent and nested mutations overlap.
+        let new_list = list.clone().splice(0..attrs.len(), attrs);
+        let mut mutation = ctx.root().begin();
+        mutation.replace_node_discard_trivia(list.clone(), new_list);
 
         Some(RuleAction::new(
             rule_action_category!(),
@@ -178,17 +192,20 @@ impl Rule for UseSortedAttributes {
 }
 
 #[derive(PartialEq, Eq, Clone)]
-pub struct SortableJsxAttribute(JsxAttribute);
+pub struct SortableJsxAttribute {
+    attr: JsxAttribute,
+    index: usize,
+}
 
 impl SortableAttribute for SortableJsxAttribute {
     type Language = JsLanguage;
 
     fn name(&self) -> Option<SyntaxToken<Self::Language>> {
-        self.0.name().ok()?.name_token().ok()
+        self.attr.name().ok()?.name_token().ok()
     }
 
     fn node(&self) -> &impl AstNode<Language = Self::Language> {
-        &self.0
+        &self.attr
     }
 
     fn replace_token(
@@ -199,9 +216,11 @@ impl SortableAttribute for SortableJsxAttribute {
     where
         Self: Sized,
     {
-        Some(Self(
-            self.0
+        Some(Self {
+            attr: self
+                .attr
                 .replace_token_discard_trivia(prev_token, next_token)?,
-        ))
+            index: self.index,
+        })
     }
 }

@@ -186,3 +186,71 @@ fn assist_writes() {
         result,
     ));
 }
+
+#[test]
+fn sorted_attributes_writes_nested_jsx_atomically() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file = Utf8Path::new("file.jsx");
+    fs.insert(
+        file.into(),
+        r#"<Outer z="x" a={<Inner z={1} a={2} />} />;
+<Outer
+	z="outer"
+	a={() => <Middle y={<Inner z={1} a={2} />} x="middle" />}
+/>;
+<Outer z={<Z b={2} a={1} />} a={<A d={4} c={3} />} />;
+<Outer z="x" a={<Inner z={1} a={2} />}>
+	child
+</Outer>;
+<Widget
+	// first group
+	z={<Inner z={1} a={2} />}
+	a="a"
+	{...props}
+	// second group
+	d="d"
+	c={<Inner y={1} x={2} />}
+/>;
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--write",
+                "--only=assist/source/useSortedAttributes",
+                file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(
+        &fs,
+        file,
+        r#"<Outer a={<Inner a={2} z={1} />} z="x" />;
+<Outer a={() => <Middle x="middle" y={<Inner a={2} z={1} />} />} z="outer" />;
+<Outer a={<A c={3} d={4} />} z={<Z a={1} b={2} />} />;
+<Outer a={<Inner a={2} z={1} />} z="x">
+	child
+</Outer>;
+<Widget
+	a="a"
+	// first group
+	z={<Inner a={2} z={1} />}
+	{...props}
+	c={<Inner x={2} y={1} />}
+	// second group
+	d="d"
+/>;
+"#,
+    );
+}
