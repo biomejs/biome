@@ -1,7 +1,9 @@
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_languages::JsFileSource;
-use biome_react_compiler::{CompileInput, compile_program, default_lint_options};
+use biome_react_compiler::{
+    CompileInput, ReactCompilerError, compile_program, default_lint_options,
+};
 
 #[test]
 fn probe_diagnostics() {
@@ -78,4 +80,47 @@ function Component() {
             "{name}: expected at least one diagnostic"
         );
     }
+}
+
+/// Diagnostic ranges must be UTF-8 byte offsets into the source, even though
+/// the compiler internally reports Babel-style UTF-16 positions. Non-ASCII
+/// text before the offending code makes the two encodings diverge, so the
+/// flagged snippet must be identical to the one from an all-ASCII source.
+#[test]
+fn diagnostic_ranges_are_byte_offsets_in_non_ascii_sources() {
+    fn flagged_snippets(source: &str) -> Vec<&str> {
+        let source_type = JsFileSource::jsx();
+        let parsed = parse(source, source_type, JsParserOptions::default());
+        let model = semantic_model(&parsed.tree(), SemanticModelOptions::from(&source_type));
+        let output = compile_program(CompileInput {
+            root: &parsed.tree(),
+            model: &model,
+            source,
+            source_type,
+            options: default_lint_options(source),
+        })
+        .expect("compilation should succeed");
+        let snippets: Vec<&str> = output
+            .diagnostics
+            .iter()
+            .filter_map(|diagnostic| match diagnostic {
+                ReactCompilerError::CompilerDiagnostic {
+                    range: Some(range), ..
+                } => Some(&source[*range]),
+                _ => None,
+            })
+            .collect();
+        assert!(!snippets.is_empty(), "expected a diagnostic with a range");
+        snippets
+    }
+
+    let body = r#"
+function Component(props) {
+  props.value = true;
+  return <div>{props.value}</div>;
+}
+"#;
+    let ascii = format!("const banner = \"sparkling hello world\";\n{body}");
+    let non_ascii = format!("const banner = \"✨🎉 héllo wörld ✨\";\n{body}");
+    assert_eq!(flagged_snippets(&ascii), flagged_snippets(&non_ascii));
 }

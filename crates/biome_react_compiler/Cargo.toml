@@ -15,6 +15,7 @@ publish              = false
 biome_js_semantic  = { workspace = true }
 biome_js_syntax    = { workspace = true }
 biome_languages    = { workspace = true, features = ["lang_js"] }
+biome_line_index   = { workspace = true }
 biome_rowan        = { workspace = true }
 indexmap           = { workspace = true }
 react_compiler     = { git = "https://github.com/react/react", rev = "e71a6393e66b0d2add46ba2b2c5db563a0563828" }
