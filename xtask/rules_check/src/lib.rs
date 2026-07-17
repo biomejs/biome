@@ -10,7 +10,7 @@ use std::{mem, slice};
 use anyhow::bail;
 use biome_analyze::{
     ActionFilter, AnalysisFilter, ControlFlow, GroupCategory, Queryable, RegistryVisitor, Rule,
-    RuleCategory, RuleDomain, RuleFilter, RuleGroup, RuleMetadata,
+    RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
 };
 use biome_configuration::Configuration;
 use biome_css_analyze::CssAnalyzerServices;
@@ -552,12 +552,7 @@ fn parse_documentation(
 
     let mut diagnostics_writer = DiagnosticConsoleWriter::default();
 
-    let mut test_runner = TestRunner::new(
-        group,
-        rule_metadata.name,
-        rule_metadata.language,
-        rule_metadata.domains.contains(&RuleDomain::Types),
-    );
+    let mut test_runner = TestRunner::new(group, rule_metadata.name, rule_metadata.language);
 
     // Track the last configuration options block that was encountered
     let mut last_options: Option<Configuration> = None;
@@ -646,7 +641,6 @@ struct TestRunner {
     group: &'static str,
     rule_name: &'static str,
     rule_language: &'static str,
-    enable_type_inference: bool,
 
     /// Code block tests for the current documentation section.
     /// Tests are deferred and run as a batch when the section ends.
@@ -660,17 +654,11 @@ struct TestRunner {
 }
 
 impl TestRunner {
-    pub fn new(
-        group: &'static str,
-        rule_name: &'static str,
-        rule_language: &'static str,
-        enable_type_inference: bool,
-    ) -> Self {
+    pub fn new(group: &'static str, rule_name: &'static str, rule_language: &'static str) -> Self {
         Self {
             group,
             rule_name,
             rule_language,
-            enable_type_inference,
             pending_tests: Vec::new(),
             file_system: HashMap::new(),
         }
@@ -680,10 +668,8 @@ impl TestRunner {
     ///
     /// Resets state for the next section.
     pub fn run_pending_tests(&mut self) -> anyhow::Result<()> {
-        let mut services_builder = AnalyzerServicesBuilder::from_files(
-            mem::take(&mut self.file_system),
-            self.enable_type_inference,
-        );
+        let mut services_builder =
+            AnalyzerServicesBuilder::from_files(mem::take(&mut self.file_system));
 
         for test in self.pending_tests.drain(..) {
             assert_lint(
