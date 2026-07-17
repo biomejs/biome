@@ -11,7 +11,6 @@ use biome_rowan::AstNode;
 use biome_rule_options::use_react_compiler::UseReactCompilerOptions;
 use std::sync::Arc;
 
-use super::semantic::SemanticModelBuilderVisitor;
 use crate::lint::nursery::use_react_compiler::UseReactCompiler;
 
 pub type ReactCompilerResult = Arc<Result<CompileOutput, ReactCompilerError>>;
@@ -55,7 +54,6 @@ impl Queryable for ReactCompilerServices {
     type Services = Self;
 
     fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
-        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
         analyzer.add_visitor(Phases::Syntax, || ReactCompilerVisitor::new(root.clone()));
         analyzer.add_visitor(Phases::Semantic, ReactCompilerQueryVisitor::default);
     }
