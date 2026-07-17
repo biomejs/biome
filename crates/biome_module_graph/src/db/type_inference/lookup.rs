@@ -546,8 +546,11 @@ fn find_member_in_members<'db>(
         member
             .kind
             .computed_value_type()
-            .is_some_and(|ty| ty.is_string_literal_key(db, name))
-            .then_some((member.ty, false))
+            .is_some_and(|ty| {
+                ty.is_string_literal_key(db, name)
+                    || allow_index_signature && ty.is_string_key_type(db)
+            })
+            .then_some((member_value_type(db, member), false))
     });
     if computed_member.is_some() {
         return computed_member;

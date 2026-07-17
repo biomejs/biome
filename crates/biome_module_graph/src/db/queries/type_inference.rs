@@ -1802,6 +1802,7 @@ fn infer_function_return_type<'db>(
 }
 
 /// Substitutes generic return references from arguments and callback results.
+/// Type parameters left unsubstituted fall back to their declared defaults.
 fn infer_generic_return_type<'db>(
     db: &'db dyn ModuleDb,
     function: InferredFunction<'db>,
@@ -1842,6 +1843,20 @@ fn infer_generic_return_type<'db>(
             collect_callback_return_replacements(db, *parameter_return_ty, *argument_return_ty)
         {
             return_ty = return_ty.substitute_type(db, substitution);
+        }
+    }
+
+    for type_parameter in function.type_parameters(db) {
+        if let InferredTypeData::Generic(generic) = type_parameter
+            && let Some(default) = generic.default(db)
+        {
+            return_ty = return_ty.substitute_type(
+                db,
+                InferredTypeSubstitution {
+                    generic: *type_parameter,
+                    replacement: default,
+                },
+            );
         }
     }
 

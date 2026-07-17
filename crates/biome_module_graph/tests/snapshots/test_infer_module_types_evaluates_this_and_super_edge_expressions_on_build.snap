@@ -48,7 +48,7 @@ Binding arrow "arrow" => sync Function {
     params: []
     type_args: []
   }
-  returns: unknown
+  returns: local type 1
 }
 
 Expression "() => { const arrowValue = this.value; return arrowValue; }" => sync Function {
@@ -56,7 +56,7 @@ Expression "() => { const arrowValue = this.value; return arrowValue; }" => sync
     params: []
     type_args: []
   }
-  returns: unknown
+  returns: local type 1
 }
 
 Binding arrowValue "arrowValue" => number
@@ -88,10 +88,10 @@ Expression "arrow" => sync Function {
     params: []
     type_args: []
   }
-  returns: unknown
+  returns: local type 1
 }
 
-Expression "arrow()" => unknown
+Expression "arrow()" => number
 
 Binding Solo "Solo" => class "Solo" {
   extends: none
