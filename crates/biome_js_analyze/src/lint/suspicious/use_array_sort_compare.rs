@@ -69,7 +69,10 @@ impl Rule for UseArraySortCompare {
             return None;
         }
 
-        let call_name = callee.member().ok()?.as_js_name()?.to_trimmed_text();
+        let member = callee.member().ok()?;
+        let name = member.as_js_name()?;
+        let token = name.value_token().ok()?;
+        let call_name = token.text_trimmed();
         if call_name != "sort" && call_name != "toSorted" {
             return None;
         }

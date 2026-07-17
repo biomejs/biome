@@ -1,3 +1,5 @@
+#![expect(clippy::disallowed_methods, reason = "This rule compares CSS values that can span multiple tokens.")]
+
 use crate::fonts::{
     CssFontValue, find_font_family, is_font_family_keyword, is_system_family_name_keyword,
 };

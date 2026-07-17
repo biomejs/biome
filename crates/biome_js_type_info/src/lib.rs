@@ -1,4 +1,8 @@
 #![deny(clippy::use_self)]
+#![expect(
+    clippy::disallowed_methods,
+    reason = "Type inference requires complete type syntax."
+)]
 #![allow(
     unused_lifetimes,
     reason = "salsa interned handle lifetimes are used by generated code"

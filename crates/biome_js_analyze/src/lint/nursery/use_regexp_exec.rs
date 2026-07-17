@@ -59,8 +59,15 @@ impl Rule for UseRegexpExec {
             return None;
         }
 
-        let call_name = callee.member().ok()?.as_js_name()?.to_trimmed_text();
-        if call_name != "match" {
+        if callee
+            .member()
+            .ok()?
+            .as_js_name()?
+            .value_token()
+            .ok()?
+            .text_trimmed()
+            != "match"
+        {
             return None;
         }
 
