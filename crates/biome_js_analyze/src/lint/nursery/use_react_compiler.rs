@@ -23,7 +23,15 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```jsx,expect_diagnostic
+    /// ```json,file=package.json
+    /// {
+    ///     "dependencies": {
+    ///         "react": "^19.0.0"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic,file=Component.jsx
     /// import { useState } from "react";
     ///
     /// function Component(props) {
@@ -70,7 +78,15 @@ declare_lint_rule! {
     /// With `"compilationMode": "all"`, violations are reported even in
     /// functions that don't follow React naming conventions:
     ///
-    /// ```js,use_options,expect_diagnostic
+    /// ```json,file=package.json
+    /// {
+    ///     "dependencies": {
+    ///         "react": "^19.0.0"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options,expect_diagnostic,file=counter.js
     /// let counter = 0;
     ///
     /// export function increment() {
