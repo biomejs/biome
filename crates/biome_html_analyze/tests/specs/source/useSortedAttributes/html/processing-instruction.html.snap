@@ -1,0 +1,31 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: processing-instruction.html
+---
+# Input
+```html
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<input type="text" id="name" name="name" />
+
+```
+
+# Diagnostics
+```
+processing-instruction.html:2:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    1 │ <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+  > 2 │ <input type="text" id="name" name="name" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    1 1 │   <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    2   │ - <input·type="text"·id="name"·name="name"·/>
+      2 │ + <input·id="name"·name="name"·type="text"·/>
+    3 3 │   
+  
+
+```

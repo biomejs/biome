@@ -10,7 +10,7 @@ use biome_diagnostics::Applicability;
 use biome_html_syntax::{
     AnyAstroDirective, AnyHtmlAttribute, AnySvelteBindingProperty, AnySvelteDirective,
     AnyVueDirective, AnyVueDirectiveArgument, AstroDirectiveValue, HtmlAttributeList, HtmlLanguage,
-    HtmlOpeningElement, HtmlSelfClosingElement, SvelteDirectiveValue,
+    HtmlOpeningElement, HtmlProcessingInstruction, HtmlSelfClosingElement, SvelteDirectiveValue,
 };
 use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt, SyntaxToken};
 use biome_rule_options::use_sorted_attributes::{SortOrder, UseSortedAttributesOptions};
@@ -135,6 +135,14 @@ impl Rule for UseSortedAttributes {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let attrs = ctx.query();
+        if attrs
+            .syntax()
+            .parent()
+            .is_some_and(|parent| HtmlProcessingInstruction::can_cast(parent.kind()))
+        {
+            return Box::default();
+        }
+
         let options = ctx.options();
 
         let mut current_attr_group = AttributeGroup::default();

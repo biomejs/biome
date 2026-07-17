@@ -1,5 +1,5 @@
 use crate::run_cli;
-use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
+use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
@@ -562,6 +562,71 @@ fn should_lint_a_html_file() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_lint_a_html_file",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn use_sorted_attributes_preserves_xml_declaration() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let svg_file = Utf8Path::new("image.svg");
+    let svg_source = r#"<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg"></svg>
+"#;
+    fs.insert(svg_file.into(), svg_source.as_bytes());
+
+    let html_file = Utf8Path::new("file.html");
+    fs.insert(
+        html_file.into(),
+        r#"<input type="text" id="name" name="name" />
+"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "formatter": {
+        "enabled": false
+    },
+    "assist": {
+        "enabled": true
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--write",
+                "--only=assist/source/useSortedAttributes",
+                svg_file.as_str(),
+                html_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, svg_file, svg_source);
+    assert_file_contents(
+        &fs,
+        html_file,
+        r#"<input id="name" name="name" type="text" />
+"#,
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_sorted_attributes_preserves_xml_declaration",
         fs,
         console,
         result,
