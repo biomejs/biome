@@ -283,7 +283,7 @@ pub fn module_graph_for_test_file(
     input_file: &Utf8Path,
     project_layout: &ProjectLayout,
 ) -> WorkspaceDb {
-    let db = WorkspaceDb::default();
+    let mut db = WorkspaceDb::default();
     let path_info_cache = PathInfoCache::default();
     let dir = input_file.parent().unwrap().to_path_buf();
     let fs = OsFileSystem::new(dir.clone());
@@ -339,7 +339,7 @@ pub fn module_graph_for_css_test_file(
     input_file: &Utf8Path,
     project_layout: &ProjectLayout,
 ) -> WorkspaceDb {
-    let db = WorkspaceDb::default();
+    let mut db = WorkspaceDb::default();
     let path_info_cache = PathInfoCache::default();
     let dir = input_file.parent().unwrap().to_path_buf();
     let fs = OsFileSystem::new(dir.clone());
