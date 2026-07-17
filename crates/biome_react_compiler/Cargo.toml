@@ -12,6 +12,8 @@ categories.workspace = true
 publish              = false
 
 [dependencies]
+biome_console      = { workspace = true }
+biome_diagnostics  = { workspace = true }
 biome_js_semantic  = { workspace = true }
 biome_js_syntax    = { workspace = true }
 biome_languages    = { workspace = true, features = ["lang_js"] }
