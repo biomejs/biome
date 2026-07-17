@@ -84,6 +84,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         domains: &[RuleDomain::React],
+        issue_number: Some("10974"),
     }
 }
 
