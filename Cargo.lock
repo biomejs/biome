@@ -1691,7 +1691,7 @@ dependencies = [
  "react_compiler",
  "react_compiler_ast",
  "react_compiler_hir",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "serde_json",
 ]
 
@@ -5129,7 +5129,7 @@ dependencies = [
  "react_compiler_ssa",
  "react_compiler_typeinference",
  "react_compiler_validation",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "serde",
  "serde_json",
 ]
@@ -5141,7 +5141,7 @@ source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db56
 dependencies = [
  "indexmap",
  "react_compiler_diagnostics",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "serde",
  "serde-transcode",
  "serde_json",
@@ -5152,7 +5152,7 @@ name = "react_compiler_diagnostics"
 version = "0.1.0"
 source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
 dependencies = [
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "serde",
 ]
 
@@ -5163,7 +5163,7 @@ source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db56
 dependencies = [
  "indexmap",
  "react_compiler_diagnostics",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "serde",
  "serde_json",
 ]
@@ -5180,7 +5180,7 @@ dependencies = [
  "react_compiler_optimization",
  "react_compiler_ssa",
  "react_compiler_utils",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -5192,7 +5192,7 @@ dependencies = [
  "react_compiler_ast",
  "react_compiler_diagnostics",
  "react_compiler_hir",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "serde_json",
 ]
 
@@ -5206,7 +5206,7 @@ dependencies = [
  "react_compiler_hir",
  "react_compiler_lowering",
  "react_compiler_ssa",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -5219,7 +5219,7 @@ dependencies = [
  "react_compiler_ast",
  "react_compiler_diagnostics",
  "react_compiler_hir",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "serde_json",
 ]
 
@@ -5231,7 +5231,7 @@ dependencies = [
  "indexmap",
  "react_compiler_diagnostics",
  "react_compiler_hir",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -5242,7 +5242,7 @@ dependencies = [
  "react_compiler_diagnostics",
  "react_compiler_hir",
  "react_compiler_ssa",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -5251,7 +5251,7 @@ version = "0.1.0"
 source = "git+https://github.com/react/react?rev=e71a6393e66b0d2add46ba2b2c5db563a0563828#e71a6393e66b0d2add46ba2b2c5db563a0563828"
 dependencies = [
  "indexmap",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -5262,7 +5262,7 @@ dependencies = [
  "indexmap",
  "react_compiler_diagnostics",
  "react_compiler_hir",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
