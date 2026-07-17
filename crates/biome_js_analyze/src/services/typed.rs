@@ -4,21 +4,24 @@ use biome_analyze::{
 };
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsClassDeclaration, JsClassExpression,
-    JsLanguage, JsObjectExpression, JsReferenceIdentifier, JsSyntaxNode,
+    AnyJsBinding, AnyJsCallArgument, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsCallArgumentList,
+    JsClassDeclaration, JsClassExpression, JsLanguage, JsObjectExpression, JsReferenceIdentifier,
+    JsSyntaxNode,
 };
 use biome_js_type_info::{
     InferredType, Type, TypeResolverLevel,
     interned_types::{
+        CallArgumentType as InferredCallArgumentType,
         FunctionParameter as InferredFunctionParameter, LocalTypeHandle, LocalTypeId,
         ReturnType as InferredReturnType, TypeData as InferredTypeData,
     },
 };
 use biome_module_graph::{
-    JsOwnExport, ModuleDb, ModuleInfo, ModuleInfoKind, ModuleResolver, NormalizeTypeInput,
+    CallArgumentTypeInput, JsOwnExport, ModuleDb, ModuleInfo, ModuleInfoKind, ModuleResolver,
+    NormalizeTypeInput, infer_call_argument_type, infer_constructor_argument_type,
     infer_module_types_bottom_up, normalize_type,
 };
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -274,6 +277,55 @@ impl TypedService {
             constructor_argument_type(db, callee_ty, argument_index)?
         } else {
             call_argument_type(db, callee_ty, argument_index)?
+        };
+        let argument_ty = normalize_type(
+            db,
+            NormalizeTypeInput::new(db, typed_module.module, argument_ty),
+        );
+
+        Some(InferredType::new(db, argument_ty))
+    }
+
+    /// Returns the expected type for a call or constructor argument, selecting
+    /// overloads using the other arguments in the same argument list.
+    pub fn inferred_expected_argument_type_for_arguments<'db>(
+        &'db self,
+        callee: &AnyJsExpression,
+        arguments: &JsCallArgumentList,
+        argument_index: usize,
+        is_constructor: bool,
+    ) -> Option<InferredType<'db>> {
+        let typed_module = self.module.as_ref()?;
+        let db = typed_module.db.as_ref();
+        let inferred = infer_module_types_bottom_up(db, typed_module.module)?;
+        let callee_ty = inferred.expressions.get(&callee.range()).copied()?;
+        let callee_ty = normalize_type(
+            db,
+            NormalizeTypeInput::new(db, typed_module.module, callee_ty),
+        );
+        let arguments = arguments
+            .iter()
+            .map(|argument| {
+                let argument = argument.ok()?;
+                let (expression, is_spread) = match argument {
+                    AnyJsCallArgument::AnyJsExpression(expression) => (expression, false),
+                    AnyJsCallArgument::JsSpread(spread) => (spread.argument().ok()?, true),
+                };
+                let ty = inferred.expressions.get(&expression.range()).copied()?;
+                let ty = normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
+                Some(if is_spread {
+                    InferredCallArgumentType::Spread(ty)
+                } else {
+                    InferredCallArgumentType::Argument(ty)
+                })
+            })
+            .collect::<Option<Vec<_>>>()?;
+        let input =
+            CallArgumentTypeInput::new(db, callee_ty, arguments.into_boxed_slice(), argument_index);
+        let argument_ty = if is_constructor {
+            infer_constructor_argument_type(db, input)?
+        } else {
+            infer_call_argument_type(db, input)?
         };
         let argument_ty = normalize_type(
             db,
