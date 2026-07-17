@@ -32,6 +32,8 @@ globalsReassignment.jsx:6:5 lint/nursery/useReactCompiler ━━━━━━━�
   
   i Keep render logic local and immutable, or move shared updates into state, refs, or event handlers.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/10974 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 

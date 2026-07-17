@@ -47,6 +47,8 @@ invalidUseMemo.jsx:6:27 lint/nursery/useReactCompiler ━━━━━━━━�
   
   i Return the computed value from the callback, or use useEffect if this code only performs a side effect.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/10974 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -66,6 +68,8 @@ invalidUseMemo.jsx:12:5 lint/nursery/useReactCompiler ━━━━━━━━�
   i useMemo should compute a value that is used during render. An unused memo usually means the callback is being used for a side effect.
   
   i Use the memoized value, remove the useMemo call, or move side effects into useEffect.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/10974 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -87,6 +91,8 @@ invalidUseMemo.jsx:20:9 lint/nursery/useReactCompiler ━━━━━━━━�
   i A dynamic dependency list makes it unclear when React should reuse the previous value or compute a new one.
   
   i Pass an inline array literal as the dependency list, and move conditional logic outside of the dependency argument.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/10974 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
