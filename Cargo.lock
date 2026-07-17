@@ -1661,6 +1661,8 @@ dependencies = [
 name = "biome_react_compiler"
 version = "0.0.0"
 dependencies = [
+ "biome_console",
+ "biome_diagnostics",
  "biome_js_parser",
  "biome_js_semantic",
  "biome_js_syntax",

@@ -74,7 +74,7 @@ function Component() {
             source_type,
             options: default_lint_options(source),
         });
-        let output = result.unwrap_or_else(|error| panic!("{name}: unexpected error: {error}"));
+        let output = result.unwrap_or_else(|error| panic!("{name}: unexpected error: {error:?}"));
         assert!(
             !output.diagnostics.is_empty(),
             "{name}: expected at least one diagnostic"

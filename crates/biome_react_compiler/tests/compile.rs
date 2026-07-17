@@ -1,3 +1,4 @@
+use biome_diagnostics::PrintDescription;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_languages::JsFileSource;
@@ -47,7 +48,7 @@ function Component(props) {
     .expect("program should compile far enough to return lint diagnostics");
 
     assert!(output.diagnostics.iter().any(|diagnostic| {
-        diagnostic
+        PrintDescription(diagnostic)
             .to_string()
             .contains("Hooks must always be called in a consistent order")
     }));
