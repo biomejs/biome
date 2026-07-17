@@ -1665,6 +1665,7 @@ dependencies = [
  "biome_js_semantic",
  "biome_js_syntax",
  "biome_languages",
+ "biome_line_index",
  "biome_rowan",
  "indexmap",
  "react_compiler",

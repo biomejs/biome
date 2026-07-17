@@ -7,6 +7,7 @@ mod prefilter;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, TextRange, TextSize};
 use biome_languages::JsFileSource;
+use biome_line_index::{LineIndex, WideEncoding, WideLineCol};
 use biome_rowan::AstNode;
 use react_compiler::entrypoint::compile_result::{CompileResult, LoggerEvent};
 use react_compiler::entrypoint::plugin_options::{CompilerTarget, PluginOptions};
@@ -88,7 +89,8 @@ pub fn compile_program(input: CompileInput<'_>) -> Result<CompileOutput> {
         let result =
             react_compiler::entrypoint::program::compile_program(file, scope_info, input.options);
 
-        Ok(compile_result_to_output(result))
+        let line_index = LineIndex::new(input.source);
+        Ok(compile_result_to_output(result, &line_index))
     })
 }
 
@@ -193,12 +195,12 @@ pub fn default_lint_options(source: &str) -> PluginOptions {
     }
 }
 
-fn compile_result_to_output(result: CompileResult) -> CompileOutput {
+fn compile_result_to_output(result: CompileResult, line_index: &LineIndex) -> CompileOutput {
     match result {
         CompileResult::Success { ast, events, .. } => {
             // `ast` is returned by value as a typed `File`, so no JSON round-trip
             // is needed here anymore.
-            let diagnostics = diagnostics_from_events(&events);
+            let diagnostics = diagnostics_from_events(&events, line_index);
             CompileOutput {
                 file: ast,
                 diagnostics,
@@ -206,7 +208,7 @@ fn compile_result_to_output(result: CompileResult) -> CompileOutput {
             }
         }
         CompileResult::Error { error, events, .. } => {
-            let mut diagnostics = diagnostics_from_events(&events);
+            let mut diagnostics = diagnostics_from_events(&events, line_index);
             diagnostics.push(ReactCompilerError::CompilerOutput(error.reason));
             CompileOutput {
                 file: None,
@@ -217,7 +219,10 @@ fn compile_result_to_output(result: CompileResult) -> CompileOutput {
     }
 }
 
-fn diagnostics_from_events(events: &[LoggerEvent]) -> Vec<ReactCompilerError> {
+fn diagnostics_from_events(
+    events: &[LoggerEvent],
+    line_index: &LineIndex,
+) -> Vec<ReactCompilerError> {
     events
         .iter()
         .filter_map(|event| match event {
@@ -227,13 +232,12 @@ fn diagnostics_from_events(events: &[LoggerEvent]) -> Vec<ReactCompilerError> {
                     range: detail
                         .loc
                         .as_ref()
-                        .and_then(text_range_from_logger_location)
+                        .and_then(|loc| text_range_from_logger_location(line_index, loc))
                         .or_else(|| {
                             detail.details.as_ref()?.iter().find_map(|detail| {
-                                detail
-                                    .loc
-                                    .as_ref()
-                                    .and_then(text_range_from_logger_location)
+                                detail.loc.as_ref().and_then(|loc| {
+                                    text_range_from_logger_location(line_index, loc)
+                                })
                             })
                         }),
                     detail: Box::new(detail.clone()),
@@ -245,10 +249,27 @@ fn diagnostics_from_events(events: &[LoggerEvent]) -> Vec<ReactCompilerError> {
 }
 
 fn text_range_from_logger_location(
+    line_index: &LineIndex,
     loc: &react_compiler::entrypoint::compile_result::LoggerSourceLocation,
 ) -> Option<TextRange> {
-    Some(TextRange::new(
-        TextSize::from(loc.start.index?),
-        TextSize::from(loc.end.index?),
-    ))
+    let start = offset_from_logger_position(line_index, &loc.start)?;
+    let end = offset_from_logger_position(line_index, &loc.end)?;
+    Some(TextRange::new(start, end))
+}
+
+/// Converts a Babel-style position (1-based line, 0-based UTF-16 column) back
+/// into a UTF-8 byte offset.
+fn offset_from_logger_position(
+    line_index: &LineIndex,
+    position: &react_compiler::entrypoint::compile_result::LoggerPosition,
+) -> Option<TextSize> {
+    let line = position.line.checked_sub(1)?;
+    let line_col = line_index.to_utf8(
+        WideEncoding::Utf16,
+        WideLineCol {
+            line,
+            col: position.column,
+        },
+    );
+    line_index.offset(line_col)
 }
