@@ -40,6 +40,8 @@ invalidPropMutation.jsx:4:5 lint/nursery/useReactCompiler ━━━━━━━�
   
   i Create a new value instead of mutating this one, or move the update into state with the appropriate setter.
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/10974 for more information or to report possible bugs.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
@@ -60,6 +62,8 @@ invalidPropMutation.jsx:11:9 lint/nursery/useReactCompiler ━━━━━━━
   i Props, state, and values derived from hooks should be treated as immutable during render. Mutating them can make renders inconsistent.
   
   i Create a new value instead of mutating this one, or move the update into state with the appropriate setter.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/10974 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
