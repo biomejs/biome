@@ -8,6 +8,7 @@ use crate::{
     GLOBAL_UNKNOWN_ID, Literal, NUM_PREDEFINED_TYPES, Object, ScopeId, TypeData, TypeId,
     TypeImportQualifier, TypeInstance, TypeMember, TypeMemberKind, TypeReference,
     TypeReferenceQualifier, TypeofValue, Union,
+    flattening::instantiated_generic_alias,
     globals::{GLOBAL_RESOLVER_ID, GLOBAL_UNDEFINED_ID, UNKNOWN_ID, global_type_name},
 };
 
@@ -747,6 +748,14 @@ pub trait TypeResolver {
         resolved_id
     }
 
+    /// Whether resolving a qualifier with type arguments eagerly expands a generic alias
+    /// application into its substituted body. Defaults to `false`: the application is kept
+    /// as `InstanceOf(target, args)` and expanded later, when its targets are resolvable.
+    /// Resolvers that expand during resolution override this to `true`.
+    fn should_instantiate_generic_qualifiers(&self) -> bool {
+        false
+    }
+
     // #region Utilities for test inspection
 
     /// Returns the resolver's fallback, if it has one.
@@ -812,13 +821,83 @@ pub trait Resolvable: Sized {
     fn update_all_references(&mut self, updater: impl Copy + Fn(&mut TypeReference));
 }
 
+/// Expands a generic alias body (`Maybe<string>` -> `string | null`); wraps other generic decls
+/// in a nominal [`TypeData::InstanceOf`]; `None` for non-generic targets (caller falls back).
+fn instantiated_qualifier(
+    qualifier_ref: &TypeReference,
+    resolver: &mut dyn TypeResolver,
+    target_id: ResolvedTypeId,
+) -> Option<TypeReference> {
+    // Extract owned data so the immutable borrow ends before substitution needs `&mut`.
+    // `body` is `Some` for a generic alias (expand its body), `None` for another generic
+    // declaration (wrap it, preserving arguments).
+    let (body, declared): (Option<TypeReference>, Box<[TypeReference]>) = {
+        let resolved = resolver.get_by_resolved_id(target_id)?;
+        match resolved.as_raw_data() {
+            TypeData::InstanceOf(instance) if !instance.type_parameters.is_empty() => (
+                Some(
+                    resolved
+                        .apply_module_id_to_reference(&instance.ty)
+                        .into_owned(),
+                ),
+                instance
+                    .type_parameters
+                    .iter()
+                    .map(|param| resolved.apply_module_id_to_reference(param).into_owned())
+                    .collect(),
+            ),
+            other => {
+                let declared = other.type_parameters()?;
+                if declared.is_empty() {
+                    return None;
+                }
+                (
+                    None,
+                    declared
+                        .iter()
+                        .map(|param| resolved.apply_module_id_to_reference(param).into_owned())
+                        .collect(),
+                )
+            }
+        }
+    };
+
+    // Resolve the arguments only once the target is known to be a generic decl,
+    // so the early `None` exits above skip this work.
+    let arguments = qualifier_ref.resolved_params(resolver);
+    let instantiated = match body {
+        // Single substitution pass, no repeated `flattened` loop.
+        Some(body) => instantiated_generic_alias(&arguments, &declared, &body, resolver)?,
+        None => TypeData::instance_of(TypeInstance {
+            ty: target_id.into(),
+            type_parameters: TypeReference::merge_parameters(&declared, &arguments),
+        }),
+    };
+    let resolved_id = resolver.register_and_resolve(instantiated);
+
+    Some(TypeReference::Resolved(resolved_id))
+}
+
 impl Resolvable for TypeReference {
     fn resolved(&self, resolver: &mut dyn TypeResolver) -> Option<Self> {
         match self {
             Self::Qualifier(qualifier) => {
                 let resolved_id = resolver.resolve_qualifier(qualifier);
                 match resolved_id {
+                    // Generic instantiation (`Maybe<string>`): expand so arguments bind to the
+                    // alias body. Otherwise (non-generic, or deferring) resolve plainly below.
+                    Some(resolved_id)
+                        if qualifier.has_known_type_parameters()
+                            && resolver.should_instantiate_generic_qualifiers() =>
+                    {
+                        Some(
+                            instantiated_qualifier(self, resolver, resolved_id)
+                                .unwrap_or(Self::Resolved(resolved_id)),
+                        )
+                    }
                     Some(resolved_id) => Some(Self::Resolved(resolved_id)),
+                    // Builtin utility types (`Record`, `Pick`, ...) and
+                    // unresolved generic qualifiers are synthesized here.
                     None if qualifier.has_known_type_parameters() => Some({
                         // Handle Record<K, V> by synthesizing an object type
                         // with an index signature: { [key: K]: V }
@@ -1013,28 +1092,16 @@ impl Resolvable for TypeReference {
                             // If we can't resolve the qualifier as is, attempt to
                             // resolve it without type parameters. If it can be
                             // resolved that way, we create an instantiation for it
-                            // and resolve to there.
+                            // (or, when deferring, resolve straight to it) and
+                            // otherwise fall back to the resolved qualifier.
                             resolver
                                 .resolve_qualifier(&qualifier.without_type_parameters())
                                 .and_then(|resolved_id| {
-                                    let resolved = resolver
-                                        .get_by_resolved_id(resolved_id)
-                                        .map(|data| data.to_data());
-                                    let parameters = resolved
-                                        .as_ref()
-                                        .and_then(|data| data.type_parameters())?;
-                                    let resolved_params = self.resolved_params(resolver);
-                                    let resolved_id: ResolvedTypeId = resolver
-                                        .register_and_resolve(TypeData::instance_of(
-                                            TypeInstance {
-                                                ty: resolved_id.into(),
-                                                type_parameters: Self::merge_parameters(
-                                                    parameters,
-                                                    &resolved_params,
-                                                ),
-                                            },
-                                        ));
-                                    Some(resolved_id.into())
+                                    if resolver.should_instantiate_generic_qualifiers() {
+                                        instantiated_qualifier(self, resolver, resolved_id)
+                                    } else {
+                                        Some(Self::Resolved(resolved_id))
+                                    }
                                 })
                                 .unwrap_or_else(|| {
                                     Self::from(TypeReferenceQualifier {
@@ -1057,6 +1124,92 @@ impl Resolvable for TypeReference {
 
     fn update_all_references(&mut self, updater: impl Copy + Fn(&mut Self)) {
         updater(self)
+    }
+}
+
+/// Hand-written (not derived) so a deferring resolver keeps a generic application's
+/// arguments on the instance instead of expanding the alias.
+impl Resolvable for TypeInstance {
+    fn resolved(&self, resolver: &mut dyn TypeResolver) -> Option<Self> {
+        // Resolve the arguments, keeping the originals borrowed until one actually changes so the
+        // common no-change path allocates and clones nothing before the final `changed` check.
+        let mut resolved_params: Option<Vec<TypeReference>> = None;
+        for (index, param) in self.type_parameters.iter().enumerate() {
+            let resolved = param.resolved(resolver);
+            if let Some(buffer) = resolved_params.as_mut() {
+                buffer.push(resolved.unwrap_or_else(|| param.clone()));
+            } else if let Some(resolved) = resolved
+                && resolved != *param
+            {
+                let mut buffer = self.type_parameters[..index].to_vec();
+                buffer.push(resolved);
+                resolved_params = Some(buffer);
+            }
+        }
+        let mut changed = resolved_params.is_some();
+        // Set by the qualifier arm when the resolved target sheds its arguments.
+        let mut params_override: Option<Box<[TypeReference]>> = None;
+
+        let ty = match &self.ty {
+            TypeReference::Qualifier(qualifier)
+                if qualifier.has_known_type_parameters()
+                    && !resolver.should_instantiate_generic_qualifiers() =>
+            {
+                // The target may only resolve without its arguments (`Maybe<string>` resolves
+                // as `Maybe`); the arguments live on this instance either way.
+                let resolved_id = resolver
+                    .resolve_qualifier(qualifier)
+                    .or_else(|| resolver.resolve_qualifier(&qualifier.without_type_parameters()));
+
+                match resolved_id {
+                    Some(resolved_id) => {
+                        // Resolving the qualifier drops its arguments, so move them onto the
+                        // instance if it does not carry its own.
+                        if self.type_parameters.is_empty() {
+                            params_override = Some(self.ty.resolved_params(resolver));
+                        }
+                        changed = true;
+                        TypeReference::Resolved(resolved_id)
+                    }
+                    None => {
+                        let resolved = self
+                            .ty
+                            .resolved(resolver)
+                            .unwrap_or_else(|| self.ty.clone());
+                        changed |= resolved != self.ty;
+                        resolved
+                    }
+                }
+            }
+            _ => {
+                let resolved = self
+                    .ty
+                    .resolved(resolver)
+                    .unwrap_or_else(|| self.ty.clone());
+                changed |= resolved != self.ty;
+                resolved
+            }
+        };
+
+        if !changed {
+            return None;
+        }
+
+        let type_parameters = params_override.unwrap_or_else(|| {
+            resolved_params.map_or_else(|| self.type_parameters.clone(), Vec::into_boxed_slice)
+        });
+
+        Some(Self {
+            ty,
+            type_parameters,
+        })
+    }
+
+    fn update_all_references(&mut self, updater: impl Copy + Fn(&mut TypeReference)) {
+        updater(&mut self.ty);
+        for param in &mut self.type_parameters {
+            updater(param);
+        }
     }
 }
 

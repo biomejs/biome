@@ -456,6 +456,11 @@ impl TypeResolver for GlobalsResolver {
         GLOBAL_LEVEL
     }
 
+    /// Globals are self-contained, so every target is already resolvable during inference.
+    fn should_instantiate_generic_qualifiers(&self) -> bool {
+        true
+    }
+
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
         self.types.find(type_data)
     }

@@ -1,0 +1,116 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidGenericTypeAlias.ts
+---
+# Input
+```ts
+// `Identity<string>` and `Identity<number>` substitute to `string` and `number`, so each conversion is redundant.
+type Identity<T> = T;
+declare const text: Identity<string>;
+String(text);
+text.toString();
+"" + text;
+declare const count: Identity<number>;
++count;
+
+```
+
+# Diagnostics
+```
+invalidGenericTypeAlias.ts:4:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `String()` on a string value.
+  
+    2 │ type Identity<T> = T;
+    3 │ declare const text: Identity<string>;
+  > 4 │ String(text);
+      │ ^^^^^^
+    5 │ text.toString();
+    6 │ "" + text;
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidGenericTypeAlias.ts:5:6 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `toString()` on a string value.
+  
+    3 │ declare const text: Identity<string>;
+    4 │ String(text);
+  > 5 │ text.toString();
+      │      ^^^^^^^^
+    6 │ "" + text;
+    7 │ declare const count: Identity<number>;
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidGenericTypeAlias.ts:6:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid concatenating a string value with an empty string.
+  
+    4 │ String(text);
+    5 │ text.toString();
+  > 6 │ "" + text;
+      │ ^^^^^^^^^
+    7 │ declare const count: Identity<number>;
+    8 │ +count;
+  
+  i This expression already evaluates to a string.
+  
+  i This expression already evaluates to a string, so the empty string has no effect.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidGenericTypeAlias.ts:8:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid applying unary `+` to a number value.
+  
+    6 │ "" + text;
+    7 │ declare const count: Identity<number>;
+  > 8 │ +count;
+      │ ^^^^^^
+    9 │ 
+  
+  i This expression already evaluates to a number.
+  
+  i This expression already evaluates to a number, so the unary operator has no effect.
+  
+  i Redundant conversions make it harder to see that the value already has the expected number type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -44,65 +44,65 @@ Imports {
 ## Registered types
 
 ```
-Module TypeId(0) => Module(0) TypeId(11) | Module(0) TypeId(12) | Module(0) TypeId(24)
+Module TypeId(0) => instanceof Promise<Module(0) TypeId(12)>
 
-Module TypeId(1) => Module(0) TypeId(0) | undefined
+Module TypeId(1) => Module(0) TypeId(12) | Module(0) TypeId(0) | Module(0) TypeId(24)
 
-Module TypeId(2) => boolean
+Module TypeId(2) => Module(0) TypeId(1) | undefined
 
-Module TypeId(3) => Module(0) TypeId(2) | Module(0) TypeId(24)
+Module TypeId(3) => boolean
 
-Module TypeId(4) => Module(0) TypeId(3) | undefined
+Module TypeId(4) => Module(0) TypeId(3) | Module(0) TypeId(24)
 
-Module TypeId(5) => sync Function {
+Module TypeId(5) => Module(0) TypeId(4) | undefined
+
+Module TypeId(6) => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(7)
+  returns: Module(0) TypeId(8)
 }
 
-Module TypeId(6) => Module(0) TypeId(5)
+Module TypeId(7) => Module(0) TypeId(6)
 
-Module TypeId(7) => interface "(merged)" {
+Module TypeId(8) => interface "(merged)" {
   extends: []
   type_args: []
   members: [
     "cache": Module(0) TypeId(24),
-    "mutate": Module(0) TypeId(8),
+    "mutate": Module(0) TypeId(9),
     "errorRetryInterval": number
   ]
 }
 
-Module TypeId(8) => instanceof Module(0) TypeId(20)<Module(0) TypeId(22), Module(0) TypeId(23)>
+Module TypeId(9) => instanceof Module(0) TypeId(20)<Module(0) TypeId(22), Module(0) TypeId(23)>
 
-Module TypeId(9) => interface "InternalConfiguration" {
+Module TypeId(10) => interface "InternalConfiguration" {
   extends: []
   type_args: []
-  members: ["cache": Module(0) TypeId(24), "mutate": Module(0) TypeId(8)]
+  members: ["cache": Module(0) TypeId(24), "mutate": Module(0) TypeId(9)]
 }
 
-Module TypeId(10) => interface "PublicConfiguration" {
+Module TypeId(11) => interface "PublicConfiguration" {
   extends: []
   type_args: []
   members: ["errorRetryInterval": number]
 }
 
-Module TypeId(11) => instanceof Module(0) TypeId(23)
+Module TypeId(12) => instanceof Module(0) TypeId(23)
 
-Module TypeId(12) => instanceof Promise<Module(0) TypeId(11)>
-
-Module TypeId(13) => Module(0) TypeId(11) | Module(0) TypeId(12) | Module(0) TypeId(24)
+Module TypeId(13) => Module(0) TypeId(12) | Module(0) TypeId(0) | Module(0) TypeId(24)
 
 Module TypeId(14) => Module(0) TypeId(13) | undefined
 
 Module TypeId(15) => instanceof Module(0) TypeId(22)
 
-Module TypeId(16) => Module(0) TypeId(3) | undefined
+Module TypeId(16) => Module(0) TypeId(4) | undefined
 
 Module TypeId(17) => undefined
 
-Module TypeId(18) => Module(0) TypeId(11) | Module(0) TypeId(17)
+Module TypeId(18) => Module(0) TypeId(12) | Module(0) TypeId(17)
 
 Module TypeId(19) => instanceof Promise<Module(0) TypeId(18)>
 
@@ -132,53 +132,53 @@ Module TypeId(24) => unknown
 ## Registered types
 
 ```
-Full TypeId(0) => Module(0) TypeId(11) | Module(0) TypeId(12) | Module(0) TypeId(24)
+Full TypeId(0) => instanceof Promise<Module(0) TypeId(12)>
 
-Full TypeId(1) => Module(0) TypeId(0) | undefined
+Full TypeId(1) => Module(0) TypeId(12) | Module(0) TypeId(0) | Module(0) TypeId(24)
 
-Full TypeId(2) => boolean
+Full TypeId(2) => Module(0) TypeId(1) | undefined
 
-Full TypeId(3) => Module(0) TypeId(2) | Module(0) TypeId(24)
+Full TypeId(3) => boolean
 
-Full TypeId(4) => Module(0) TypeId(3) | undefined
+Full TypeId(4) => Module(0) TypeId(3) | Module(0) TypeId(24)
 
-Full TypeId(5) => sync Function {
+Full TypeId(5) => Module(0) TypeId(4) | undefined
+
+Full TypeId(6) => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(7)
+  returns: Module(0) TypeId(8)
 }
 
-Full TypeId(6) => Module(0) TypeId(5)
+Full TypeId(7) => Module(0) TypeId(6)
 
-Full TypeId(7) => interface "(merged)" {
+Full TypeId(8) => interface "(merged)" {
   extends: []
   type_args: []
   members: [
     "cache": Module(0) TypeId(24),
-    "mutate": Module(0) TypeId(8),
+    "mutate": Module(0) TypeId(9),
     "errorRetryInterval": number
   ]
 }
 
-Full TypeId(8) => instanceof Module(0) TypeId(20)<Module(0) TypeId(22), Module(0) TypeId(23)>
+Full TypeId(9) => instanceof Module(0) TypeId(20)<Module(0) TypeId(22), Module(0) TypeId(23)>
 
-Full TypeId(9) => interface "InternalConfiguration" {
+Full TypeId(10) => interface "InternalConfiguration" {
   extends: []
   type_args: []
-  members: ["cache": Module(0) TypeId(24), "mutate": Module(0) TypeId(8)]
+  members: ["cache": Module(0) TypeId(24), "mutate": Module(0) TypeId(9)]
 }
 
-Full TypeId(10) => interface "PublicConfiguration" {
+Full TypeId(11) => interface "PublicConfiguration" {
   extends: []
   type_args: []
   members: ["errorRetryInterval": number]
 }
 
-Full TypeId(11) => instanceof Module(0) TypeId(23)
-
-Full TypeId(12) => instanceof Promise<Module(0) TypeId(11)>
+Full TypeId(12) => instanceof Module(0) TypeId(23)
 
 Full TypeId(13) => Module(0) TypeId(13) | undefined
 
@@ -186,7 +186,7 @@ Full TypeId(14) => instanceof Module(0) TypeId(22)
 
 Full TypeId(15) => undefined
 
-Full TypeId(16) => Module(0) TypeId(11) | Module(0) TypeId(17)
+Full TypeId(16) => Module(0) TypeId(12) | Module(0) TypeId(17)
 
 Full TypeId(17) => instanceof Promise<Module(0) TypeId(18)>
 

@@ -1215,7 +1215,9 @@ impl TypeMemberKind {
 }
 
 /// Instance of another type.
-#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+///
+/// `Resolvable` is hand-implemented in `resolver.rs` to keep generic applications deferred.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypeInstance {
     /// The type being instantiated.
     pub ty: TypeReference,
