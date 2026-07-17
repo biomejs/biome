@@ -1,15 +1,17 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::property::{is_at_generic_delimiter, parse_generic_component_value};
-use crate::syntax::scss::expression::precedence::parse_scss_binary_expression;
+use crate::syntax::scss::expression::precedence::{
+    parse_scss_binary_expression, parse_scss_binary_tail,
+};
 use crate::syntax::scss::{
-    END_OF_SCSS_EXPRESSION_TOKEN_SET, expected_scss_expression, is_at_scss_identifier,
-    parse_scss_identifier, scss_ellipsis_not_allowed,
+    END_OF_SCSS_EXPRESSION_TOKEN_SET, expected_scss_expression, is_at_scss_variable,
+    parse_scss_variable, scss_ellipsis_not_allowed,
 };
 use biome_css_syntax::CssSyntaxKind::{
     CSS_BOGUS_PROPERTY_VALUE, EOF, SCSS_ARBITRARY_ARGUMENT, SCSS_EXPRESSION,
     SCSS_EXPRESSION_ITEM_LIST, SCSS_KEYWORD_ARGUMENT, SCSS_LIST_EXPRESSION,
-    SCSS_LIST_EXPRESSION_ELEMENT, SCSS_LIST_EXPRESSION_ELEMENT_LIST,
+    SCSS_LIST_EXPRESSION_ELEMENT, SCSS_LIST_EXPRESSION_ELEMENT_LIST, SCSS_STRING_QUOTE,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
@@ -82,13 +84,33 @@ pub(crate) fn parse_required_scss_value_until(
 /// $map: (a: 1);
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/values/maps
+/// Docs: https://sass-lang.com/documentation/syntax/structure
 #[inline]
 pub(crate) fn parse_scss_expression_until(
     p: &mut CssParser,
     end_ts: TokenSet<CssSyntaxKind>,
 ) -> ParsedSyntax {
     parse_scss_expression_with_options(p, ScssExpressionOptions::value(end_ts))
+}
+
+/// Parses a SCSS expression tail after the caller has already parsed the first
+/// value node.
+///
+/// Example:
+/// ```scss
+/// @media (max-width: $breakpoint + 1px) {}
+/// ```
+#[inline]
+pub(crate) fn parse_scss_expression_from_head(
+    p: &mut CssParser,
+    head: CompletedMarker,
+    end_ts: TokenSet<CssSyntaxKind>,
+) -> ParsedSyntax {
+    let options = ScssExpressionOptions::value(end_ts);
+    let expression = parse_scss_binary_tail(p, head, 0, options);
+    let first_item = parse_scss_expression_item_suffix(p, expression, options);
+
+    parse_scss_expression_from_item(p, first_item, options)
 }
 
 /// Parses arguments where `...` may terminate or expand the list and keyword
@@ -99,7 +121,9 @@ pub(crate) fn parse_scss_expression_until(
 /// @include foo($args..., $kw: 1);
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/at-rules/mixin
+/// Docs:
+/// - https://sass-lang.com/documentation/at-rules/mixin/
+/// - https://sass-lang.com/documentation/at-rules/function/
 #[inline]
 pub(crate) fn parse_scss_expression_in_args_until(
     p: &mut CssParser,
@@ -127,6 +151,14 @@ pub(super) fn parse_scss_inner_expression_until(
 }
 
 #[inline]
+pub(crate) fn parse_scss_inner_expression_in_string_until(
+    p: &mut CssParser,
+    end_ts: TokenSet<CssSyntaxKind>,
+) -> ParsedSyntax {
+    parse_scss_expression_with_options(p, ScssExpressionOptions::value_in_string(end_ts))
+}
+
+#[inline]
 pub(crate) fn complete_empty_scss_expression(p: &mut CssParser) -> CompletedMarker {
     let expression = p.start();
     let expression_items = p.start();
@@ -142,9 +174,9 @@ pub(crate) fn complete_empty_scss_expression(p: &mut CssParser) -> CompletedMark
 /// $map: (a: 1, b: 2);
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/values/maps
+/// Docs: https://sass-lang.com/documentation/syntax/structure
 #[inline]
-fn parse_scss_expression_with_options(
+pub(super) fn parse_scss_expression_with_options(
     p: &mut CssParser,
     options: ScssExpressionOptions,
 ) -> ParsedSyntax {
@@ -156,51 +188,79 @@ fn parse_scss_expression_with_options(
         };
     }
 
-    let Present(first_expression) = parse_scss_expression_sequence(p, options) else {
+    let Some(first_item) = parse_scss_expression_sequence_item(p, options) else {
         return Absent;
     };
+
+    parse_scss_expression_from_item(p, first_item, options)
+}
+
+/// Parses a SCSS expression after its first item is available, including
+/// space-separated sequences and comma-separated lists.
+///
+/// Example:
+/// ```scss
+/// margin: 1px 2px, 3px 4px;
+/// ```
+#[inline]
+fn parse_scss_expression_from_item(
+    p: &mut CssParser,
+    first_item: CompletedMarker,
+    options: ScssExpressionOptions,
+) -> ParsedSyntax {
+    let first_expression = parse_scss_expression_sequence(p, first_item, options);
 
     if !options.comma_separates_list() || !p.at(T![,]) {
         return Present(first_expression);
     }
 
     let first_element = complete_scss_list_expression_element(p, first_expression);
-    let list_expression = complete_scss_list_expression(p, first_element, options);
+    let list_expression = parse_scss_list_expression(p, first_element, options);
     Present(complete_scss_expression_from_list(p, list_expression))
 }
 
+/// Parses the remaining items in a space-separated SCSS expression sequence.
+///
+/// Example: `2px` after `1px` in `margin: 1px 2px;`.
 #[inline]
 fn parse_scss_expression_sequence(
     p: &mut CssParser,
+    first_item: CompletedMarker,
     options: ScssExpressionOptions,
-) -> ParsedSyntax {
-    if is_at_scss_expression_sequence_end(p, options) {
-        return Absent;
-    }
-
-    let expression = p.start();
-    let expression_items = p.start();
+) -> CompletedMarker {
+    let expression_items = first_item.precede(p);
     let mut progress = ParserProgress::default();
 
     while !is_at_scss_expression_sequence_end(p, options) {
         progress.assert_progressing(p);
 
-        let parsed_item = parse_scss_expression_item(p, options);
-        if parsed_item
-            .or_recover_with_token_set(
-                p,
-                &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, options.recovery_end_ts())
-                    .enable_recovery_on_line_break(),
-                expected_scss_expression,
-            )
-            .is_err()
-        {
+        if parse_scss_expression_sequence_item(p, options).is_none() {
             break;
         }
     }
 
-    expression_items.complete(p, SCSS_EXPRESSION_ITEM_LIST);
-    Present(expression.complete(p, SCSS_EXPRESSION))
+    expression_items
+        .complete(p, SCSS_EXPRESSION_ITEM_LIST)
+        .precede(p)
+        .complete(p, SCSS_EXPRESSION)
+}
+
+/// Parses one recoverable item in a SCSS expression sequence.
+///
+/// Example: `$gap` in `margin: 1px $gap;`.
+#[inline]
+fn parse_scss_expression_sequence_item(
+    p: &mut CssParser,
+    options: ScssExpressionOptions,
+) -> Option<CompletedMarker> {
+    parse_scss_expression_item(p, options)
+        .or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, options.recovery_end_ts())
+                .enable_recovery_on_line_break(),
+            expected_scss_expression,
+        )
+        .ok()
 }
 
 #[inline]
@@ -208,6 +268,9 @@ fn is_at_scss_expression_sequence_end(p: &mut CssParser, options: ScssExpression
     p.at(EOF)
         || is_at_scss_expression_end(p, options)
         || (options.comma_separates_list() && p.at(T![,]))
+        || (options.stops_at_string_quote
+            && p.at(SCSS_STRING_QUOTE)
+            && !p.is_at_scss_interpolated_string())
 }
 
 #[inline]
@@ -220,7 +283,7 @@ fn parse_scss_expression_item(p: &mut CssParser, options: ScssExpressionOptions)
         return parse_generic_component_value(p);
     }
 
-    let expression = parse_scss_binary_expression(p, 0).or_else(|| {
+    let expression = parse_scss_binary_expression(p, 0, options).or_else(|| {
         if p.at(T![...]) {
             report_and_bump_scss_ellipsis(p);
         }
@@ -232,18 +295,30 @@ fn parse_scss_expression_item(p: &mut CssParser, options: ScssExpressionOptions)
         Absent => return Absent,
     };
 
+    Present(parse_scss_expression_item_suffix(p, expression, options))
+}
+
+/// Parses an optional argument expansion suffix after an expression item.
+///
+/// Example: `...` after `$args` in `@include button($args...);`.
+#[inline]
+fn parse_scss_expression_item_suffix(
+    p: &mut CssParser,
+    expression: CompletedMarker,
+    options: ScssExpressionOptions,
+) -> CompletedMarker {
     if !p.at(T![...]) {
-        return Present(expression);
+        return expression;
     }
 
     if !options.allows_ellipsis {
         report_and_bump_scss_ellipsis(p);
-        return Present(expression);
+        return expression;
     }
 
     let m = expression.precede(p);
     p.bump(T![...]);
-    Present(m.complete(p, SCSS_ARBITRARY_ARGUMENT))
+    m.complete(p, SCSS_ARBITRARY_ARGUMENT)
 }
 
 #[inline]
@@ -257,7 +332,7 @@ fn report_and_bump_scss_ellipsis(p: &mut CssParser) {
 fn is_at_scss_keyword_argument(p: &mut CssParser, options: ScssExpressionOptions) -> bool {
     options.allows_keyword_arguments
         && !options.end_ts.contains(T![:])
-        && is_at_scss_identifier(p)
+        && is_at_scss_variable(p)
         && p.nth_at(2, T![:])
 }
 
@@ -268,17 +343,18 @@ fn parse_scss_keyword_argument(p: &mut CssParser, options: ScssExpressionOptions
     }
 
     let m = p.start();
-    parse_scss_identifier(p).ok();
+    parse_scss_variable(p).ok();
     p.expect(T![:]);
 
     parse_scss_expression_with_options(
         p,
         ScssExpressionOptions {
-            end_ts: options.end_ts,
             allows_empty_value: false,
             allows_keyword_arguments: false,
             allows_ellipsis: false,
             stops_before_variable_modifiers: false,
+            stops_at_string_quote: false,
+            ..options
         },
     )
     .or_add_diagnostic(p, expected_component_value);
@@ -286,8 +362,11 @@ fn parse_scss_keyword_argument(p: &mut CssParser, options: ScssExpressionOptions
     Present(m.complete(p, SCSS_KEYWORD_ARGUMENT))
 }
 
+/// Parses a comma-separated SCSS list after the first element is available.
+///
+/// Example: `, 3px 4px` after `1px 2px` in `margin: 1px 2px, 3px 4px;`.
 #[inline]
-pub(super) fn complete_scss_list_expression(
+pub(super) fn parse_scss_list_expression(
     p: &mut CssParser,
     first_element: CompletedMarker,
     options: ScssExpressionOptions,
@@ -345,8 +424,12 @@ fn parse_scss_list_expression_element(
     p: &mut CssParser,
     options: ScssExpressionOptions,
 ) -> ParsedSyntax {
-    parse_scss_expression_sequence(p, options)
-        .map(|expression| complete_scss_list_expression_element(p, expression))
+    let Some(first_item) = parse_scss_expression_sequence_item(p, options) else {
+        return Absent;
+    };
+
+    let expression = parse_scss_expression_sequence(p, first_item, options);
+    Present(complete_scss_list_expression_element(p, expression))
 }
 
 #[inline]

@@ -4,23 +4,23 @@ use rustc_hash::FxHashMap;
 use std::collections::BTreeMap;
 
 use super::model::{
-    CssGlobalCustomVariable, CssModelDeclaration, ResolvedSelector, Rule, RuleId, Selector,
-    SemanticModel, SemanticModelData, Specificity, selector_tokens,
+    CssGlobalCustomVariableData, CssModelDeclarationData, ResolvedSelector, RuleData, RuleId,
+    SelectorData, SemanticModel, SemanticModelData, Specificity, selector_tokens,
 };
 use crate::events::SemanticEvent;
 use crate::model::AnyRuleStart;
 
 pub struct SemanticModelBuilder {
     root: AnyCssRoot,
-    /// List of all top-level rules in the CSS file
-    rules: Vec<Rule>,
-    global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
+    /// All rules, indexed by RuleId
+    all_rules: Vec<RuleData>,
+    /// IDs of top-level rules only
+    top_level_rule_ids: Vec<RuleId>,
+    global_custom_variables: FxHashMap<TokenText, CssGlobalCustomVariableData>,
     /// Stack of rule IDs to keep track of the current rule hierarchy
     current_rule_stack: Vec<RuleId>,
-    next_rule_id: RuleId,
-    /// Map to get the rule containing the given range of CST nodes
-    range_to_rule: BTreeMap<TextRange, Rule>,
-    rules_by_id: FxHashMap<RuleId, Rule>,
+    /// Map from text range to RuleId
+    range_to_rule_id: BTreeMap<TextRange, RuleId>,
     /// Indicates if the current node is within a `:root` selector
     is_in_root_selector: bool,
 }
@@ -29,35 +29,36 @@ impl SemanticModelBuilder {
     pub fn new(root: AnyCssRoot) -> Self {
         Self {
             root,
-            rules: Vec::new(),
+            all_rules: Vec::new(),
+            top_level_rule_ids: Vec::new(),
             current_rule_stack: Vec::new(),
             global_custom_variables: FxHashMap::default(),
-            range_to_rule: BTreeMap::default(),
+            range_to_rule_id: BTreeMap::default(),
             is_in_root_selector: false,
-            next_rule_id: RuleId::default(),
-            rules_by_id: FxHashMap::default(),
         }
     }
 
-    pub fn get_last_parent_selector_rule(&self) -> Option<&Rule> {
+    fn get_last_parent_selector_rule(&self) -> Option<&RuleData> {
         let mut iterator = self.current_rule_stack.iter().rev();
         let mut current_parent_id = iterator
             .next()
-            .and_then(|rule_id| self.rules_by_id.get(rule_id))
+            .and_then(|rule_id| self.all_rules.get(rule_id.index()))
             .and_then(|rule| rule.parent_id);
 
         loop {
             if let Some(parent_id) = &current_parent_id {
-                let rule = self.rules_by_id.get(parent_id);
+                let rule = self.all_rules.get(parent_id.index());
                 if let Some(rule) = rule {
                     let typed_node = rule.node.to_node(self.root.syntax());
                     if matches!(
                         typed_node,
-                        AnyRuleStart::CssMediaAtRule(_) | AnyRuleStart::CssSupportsAtRule(_)
+                        AnyRuleStart::CssMediaAtRule(_)
+                            | AnyRuleStart::CssScopeAtRule(_)
+                            | AnyRuleStart::CssSupportsAtRule(_)
                     ) {
                         current_parent_id = iterator
                             .next()
-                            .and_then(|rule_id| self.rules_by_id.get(rule_id))
+                            .and_then(|rule_id| self.all_rules.get(rule_id.index()))
                             .and_then(|rule| rule.parent_id);
                     } else {
                         return Some(rule);
@@ -71,26 +72,28 @@ impl SemanticModelBuilder {
         }
     }
 
-    pub fn get_parent_selector_at(&self, index: usize) -> Option<&Rule> {
+    fn get_parent_selector_at(&self, index: usize) -> Option<&RuleData> {
         let mut iterator = self.current_rule_stack.iter().rev();
         let mut current_index = 1;
         let mut current_parent_id = iterator
             .next()
-            .and_then(|rule_id| self.rules_by_id.get(rule_id))
+            .and_then(|rule_id| self.all_rules.get(rule_id.index()))
             .and_then(|rule| rule.parent_id);
 
         loop {
             if let Some(parent_id) = &current_parent_id {
-                let rule = self.rules_by_id.get(parent_id);
+                let rule = self.all_rules.get(parent_id.index());
                 if let Some(rule) = rule {
                     let typed_node = rule.node.to_node(self.root.syntax());
                     if matches!(
                         typed_node,
-                        AnyRuleStart::CssMediaAtRule(_) | AnyRuleStart::CssSupportsAtRule(_)
+                        AnyRuleStart::CssMediaAtRule(_)
+                            | AnyRuleStart::CssScopeAtRule(_)
+                            | AnyRuleStart::CssSupportsAtRule(_)
                     ) {
                         current_parent_id = iterator
                             .next()
-                            .and_then(|rule_id| self.rules_by_id.get(rule_id))
+                            .and_then(|rule_id| self.all_rules.get(rule_id.index()))
                             .and_then(|rule| rule.parent_id);
                     } else {
                         if current_index == index {
@@ -99,7 +102,7 @@ impl SemanticModelBuilder {
 
                         current_parent_id = iterator
                             .next()
-                            .and_then(|rule_id| self.rules_by_id.get(rule_id))
+                            .and_then(|rule_id| self.all_rules.get(rule_id.index()))
                             .and_then(|rule| rule.parent_id);
                         current_index += 1;
                     }
@@ -114,27 +117,24 @@ impl SemanticModelBuilder {
 
     pub fn build(self) -> SemanticModel {
         let data = SemanticModelData {
-            rules: self.rules,
+            root: self.root.syntax().as_send().expect("To be a root node"),
+            all_rules: self.all_rules,
+            top_level_rule_ids: self.top_level_rule_ids,
             global_custom_variables: self.global_custom_variables,
-            range_to_rule: self.range_to_rule,
-            rules_by_id: self.rules_by_id,
+            range_to_rule_id: self.range_to_rule_id,
         };
-        SemanticModel::new(
-            data,
-            self.root.syntax().as_send().expect("To be a root node"),
-        )
+        SemanticModel::new(data)
     }
 
     #[inline]
     pub fn push_event(&mut self, event: SemanticEvent) {
         match event {
             SemanticEvent::RuleStart(node) => {
-                let new_rule_id = self.next_rule_id;
-                self.next_rule_id = RuleId::new(new_rule_id.index() + 1);
+                let new_rule_id = RuleId::new(self.all_rules.len());
 
                 let parent_id = self.current_rule_stack.last().copied();
 
-                let new_rule = Rule {
+                let new_rule = RuleData {
                     id: new_rule_id,
                     node: AstPtr::new(&node),
                     selectors: Vec::new(),
@@ -144,32 +144,27 @@ impl SemanticModelBuilder {
                     specificity: Specificity::default(),
                 };
 
-                if let Some(&parent_id) = self.current_rule_stack.last()
-                    && let Some(parent_rule) = self.rules_by_id.get_mut(&parent_id)
-                {
-                    parent_rule.child_ids.push(new_rule_id);
+                if let Some(&parent_id) = self.current_rule_stack.last() {
+                    self.all_rules[parent_id.index()]
+                        .child_ids
+                        .push(new_rule_id);
                 }
 
-                self.rules_by_id.insert(new_rule_id, new_rule);
+                self.all_rules.push(new_rule);
                 self.current_rule_stack.push(new_rule_id);
             }
             SemanticEvent::RuleEnd => {
-                if let Some(completed_rule) = self.current_rule_stack.pop() {
-                    let completed_rule = &self.rules_by_id[&completed_rule];
-                    let has_parent = self.current_rule_stack.last().is_some();
+                if let Some(completed_rule_id) = self.current_rule_stack.pop() {
+                    let range = self.all_rules[completed_rule_id.index()].range(&self.root);
+                    self.range_to_rule_id.insert(range, completed_rule_id);
 
-                    if has_parent {
-                        self.range_to_rule
-                            .insert(completed_rule.range(&self.root), completed_rule.clone());
-                    } else {
-                        self.range_to_rule
-                            .insert(completed_rule.range(&self.root), completed_rule.clone());
-                        self.rules.push(completed_rule.clone());
+                    if self.current_rule_stack.is_empty() {
+                        self.top_level_rule_ids.push(completed_rule_id);
                     }
                 }
             }
             SemanticEvent::SelectorDeclaration { node, specificity } => {
-                if let Some(current_rule) = self.current_rule_stack.last() {
+                if let Some(&current_rule_id) = self.current_rule_stack.last() {
                     let parent_specificity = if node.has_nesting_selectors() {
                         let nesting_level = node.nesting_level();
                         self.get_parent_selector_at(nesting_level)
@@ -193,18 +188,13 @@ impl SemanticModelBuilder {
                             .unwrap_or_default()
                     };
 
-                    // Collect non-trivia tokens for the current selector node.
-                    // We keep CssSyntaxToken (not TokenText) so we can inspect .kind()
-                    // to detect AMP tokens during resolution.
                     let current_tokens = selector_tokens(&node);
 
-                    // Resolve against parent selectors (one ResolvedSelector per parent).
                     let parent_rule = self.get_last_parent_selector_rule();
                     let resolved_selectors: Vec<ResolvedSelector> =
                         if let Some(parent_rule) = parent_rule {
                             resolve_selector(&current_tokens, &parent_rule.selectors)
                         } else {
-                            // Top-level selector: convert directly to (kind, TokenText) pairs.
                             vec![ResolvedSelector(
                                 current_tokens
                                     .iter()
@@ -213,11 +203,11 @@ impl SemanticModelBuilder {
                             )]
                         };
 
-                    let current_rule = self.rules_by_id.get_mut(current_rule).unwrap();
+                    let current_rule = &mut self.all_rules[current_rule_id.index()];
                     let combined = parent_specificity + specificity;
 
                     for resolved in resolved_selectors {
-                        current_rule.selectors.push(Selector {
+                        current_rule.selectors.push(SelectorData {
                             node: AstPtr::new(&node),
                             resolved,
                             specificity: combined,
@@ -237,23 +227,26 @@ impl SemanticModelBuilder {
                 let is_global_var =
                     self.is_in_root_selector && property.syntax().text_trimmed().starts_with("--");
 
-                if let Some(current_rule) = self.current_rule_stack.last_mut() {
-                    let current_rule = self.rules_by_id.get_mut(current_rule).unwrap();
+                if let Some(&current_rule_id) = self.current_rule_stack.last()
+                    && let Ok(property_name) = property.value()
+                {
                     if is_global_var {
-                        let property_name = property.syntax().text_trimmed().to_string();
                         self.global_custom_variables.insert(
-                            property_name,
-                            CssGlobalCustomVariable::Root(CssModelDeclaration {
+                            property_name.clone(),
+                            CssGlobalCustomVariableData::Root(CssModelDeclarationData {
                                 declaration: AstPtr::new(&node),
                                 property: AstPtr::new(&property),
                                 value: value.clone(),
+                                property_name: property_name.clone(),
                             }),
                         );
                     }
-                    current_rule.declarations.push(CssModelDeclaration {
+                    let current_rule = &mut self.all_rules[current_rule_id.index()];
+                    current_rule.declarations.push(CssModelDeclarationData {
                         declaration: AstPtr::new(&node),
                         property: AstPtr::new(&property),
                         value,
+                        property_name,
                     });
                 }
             }
@@ -270,17 +263,18 @@ impl SemanticModelBuilder {
                 inherits,
                 range,
             } => {
-                let property_name = property.to_trimmed_string();
-                self.global_custom_variables.insert(
-                    property_name,
-                    CssGlobalCustomVariable::AtProperty {
-                        property: AstPtr::new(&property),
-                        initial_value,
-                        syntax,
-                        inherits,
-                        range,
-                    },
-                );
+                if let Ok(property_name) = property.value() {
+                    self.global_custom_variables.insert(
+                        property_name,
+                        CssGlobalCustomVariableData::AtProperty {
+                            _property: AstPtr::new(&property),
+                            initial_value,
+                            syntax,
+                            inherits,
+                            _range: range,
+                        },
+                    );
+                }
             }
         }
     }
@@ -307,7 +301,7 @@ fn space_combinator() -> (CssSyntaxKind, TokenText) {
 ///
 /// Tokens are stored as `(CssSyntaxKind, TokenText)` pairs so that the
 /// `Display` impl can reconstruct canonical whitespace around combinators.
-fn resolve_selector(current: &[CssSyntaxToken], parents: &[Selector]) -> Vec<ResolvedSelector> {
+fn resolve_selector(current: &[CssSyntaxToken], parents: &[SelectorData]) -> Vec<ResolvedSelector> {
     let has_amp = current.iter().any(|t| t.kind() == CssSyntaxKind::AMP);
 
     parents
@@ -315,17 +309,21 @@ fn resolve_selector(current: &[CssSyntaxToken], parents: &[Selector]) -> Vec<Res
         .map(|parent| {
             let parent_tokens = &parent.resolved.0;
             if has_amp {
-                // Replace every AMP token with the full parent token sequence.
-                let tokens = current
+                let amp_count = current
                     .iter()
-                    .flat_map(|t| -> Vec<(CssSyntaxKind, TokenText)> {
-                        if t.kind() == CssSyntaxKind::AMP {
-                            parent_tokens.clone()
-                        } else {
-                            vec![(t.kind(), t.token_text_trimmed())]
-                        }
-                    })
-                    .collect();
+                    .filter(|t| t.kind() == CssSyntaxKind::AMP)
+                    .count();
+                let non_amp_count = current.len() - amp_count;
+                let capacity = amp_count * parent_tokens.len() + non_amp_count;
+
+                let mut tokens = Vec::with_capacity(capacity);
+                for t in current {
+                    if t.kind() == CssSyntaxKind::AMP {
+                        tokens.extend(parent_tokens.iter().cloned());
+                    } else {
+                        tokens.push((t.kind(), t.token_text_trimmed()));
+                    }
+                }
                 ResolvedSelector(tokens)
             } else {
                 // Prepend parent tokens + implicit descendant combinator.

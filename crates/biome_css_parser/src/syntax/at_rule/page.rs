@@ -8,7 +8,8 @@ use crate::syntax::block::{ParseBlockBody, parse_declaration_or_at_rule_list_blo
 use crate::syntax::declaration::parse_declaration_with_semicolon;
 use crate::syntax::parse_error::scss_only_syntax_error;
 use crate::syntax::scss::{
-    is_at_scss_declaration, is_at_scss_nesting_declaration, parse_scss_declaration,
+    is_at_scss_nesting_declaration, is_at_scss_variable_declaration,
+    parse_exclusive_scss_nested_property_declaration, parse_scss_variable_declaration,
     try_parse_scss_nesting_declaration,
 };
 use crate::syntax::{
@@ -188,8 +189,8 @@ impl ParseBlockBody for PageBlock {
     fn is_at_element(&self, p: &mut CssParser) -> bool {
         at_margin_rule(p)
             || is_at_at_rule(p)
-           // SCSS allows variable declarations and nested properties inside any block.
-            || is_at_scss_declaration(p)
+            // SCSS allows variable declarations and nested properties inside any block.
+            || is_at_scss_variable_declaration(p)
             || is_at_scss_nesting_declaration(p)
             || is_at_any_declaration_with_semicolon(p)
             || is_at_qualified_rule(p)
@@ -214,29 +215,36 @@ impl ParseNodeList for PageAtRuleItemList {
             parse_margin_at_rule(p)
         } else if is_at_at_rule(p) {
             parse_at_rule(p)
-        } else if is_at_scss_declaration(p) {
+        } else if is_at_scss_variable_declaration(p) {
             CssSyntaxFeatures::Scss.parse_exclusive_syntax(
                 p,
-                parse_scss_declaration,
+                parse_scss_variable_declaration,
                 |p, marker| {
                     scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
                 },
             )
         } else if is_at_scss_nesting_declaration(p) {
-            if let Ok(declaration) = try_parse_scss_nesting_declaration(p, T!['}']) {
-                return declaration;
-            }
+            if CssSyntaxFeatures::Scss.is_supported(p) {
+                if let Ok(declaration) = try_parse_scss_nesting_declaration(p, T!['}']) {
+                    return declaration;
+                }
 
-            if is_at_qualified_rule(p)
-                && let Present(mut syntax) = parse_qualified_rule(p)
+                if is_at_qualified_rule(p)
+                    && let Present(mut syntax) = parse_qualified_rule(p)
+                {
+                    let range = syntax.range(p);
+                    p.error(expected_any_page_at_rule_item(p, range));
+                    syntax.change_kind(p, CSS_BOGUS);
+                    return Present(syntax);
+                }
+
+                parse_declaration_with_semicolon(p)
+            } else if let Present(declaration) = parse_exclusive_scss_nested_property_declaration(p)
             {
-                let range = syntax.range(p);
-                p.error(expected_any_page_at_rule_item(p, range));
-                syntax.change_kind(p, CSS_BOGUS);
-                return Present(syntax);
+                Present(declaration)
+            } else {
+                parse_any_declaration_with_semicolon(p)
             }
-
-            parse_declaration_with_semicolon(p)
         } else if is_at_any_declaration_with_semicolon(p) {
             parse_any_declaration_with_semicolon(p)
         } else if is_at_qualified_rule(p) {

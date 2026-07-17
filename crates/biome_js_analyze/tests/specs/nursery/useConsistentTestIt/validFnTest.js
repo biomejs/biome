@@ -1,0 +1,12 @@
+/* should not generate diagnostics */
+// function="test": top-level tests using test() are valid
+
+test("foo", () => {});
+test.skip("foo", () => {});
+test.only("foo", () => {});
+test.concurrent("foo", () => {});
+test.each([])(foo, () => {});
+xtest("foo", () => {});
+
+// Non-test calls should not be flagged
+notATest("foo", () => {});

@@ -1,0 +1,43 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: with_options.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"rules": {
+		"array-callback-return": [
+			"error",
+			{ "allowImplicit": true, "checkForEach": false }
+		]
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"suspicious": {
+				"useIterableCallbackReturn": {
+					"level": "error",
+					"options": { "checkForEach": false, "allowImplicit": true }
+				}
+			}
+		}
+	}
+}
+
+```

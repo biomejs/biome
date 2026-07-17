@@ -2,12 +2,13 @@ use biome_configuration::Configuration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css};
-use biome_css_syntax::{CssFileSource, EmbeddingKind};
 use biome_deserialize::json::deserialize_from_str;
 use biome_diagnostics::DiagnosticExt;
 use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::{print_diagnostic_to_string, termcolor};
 use biome_fs::BiomePath;
+use biome_languages::CssFileSource;
+use biome_languages::css::CssEmbeddingKind;
 use biome_rowan::SyntaxKind;
 use biome_service::settings::Settings;
 use biome_test_utils::{has_bogus_nodes_or_empty_slots, validate_eof_token};
@@ -49,7 +50,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let mut options = CssParserOptions::default()
         // it is an internal option that cannot be configured via options.json
         // TODO: find a way to make it configurable
-        .allow_metavariables();
+        .allow_metavariables()
+        .report_scss_exclusive_syntax();
 
     let mut css_modules_enabled = false;
     let mut css_modules_kind = CssModulesKind::Classic;
@@ -102,7 +104,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     };
 
     if file_name.ends_with(".styled.css") {
-        source_type = source_type.with_embedding_kind(EmbeddingKind::Styled);
+        source_type = source_type.with_embedding_kind(CssEmbeddingKind::Styled);
     }
 
     if css_modules_enabled {
@@ -193,10 +195,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
                 panic!("modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}")
             }
         }
-        ExpectedOutcome::Fail => {
-            if parsed.diagnostics().is_empty() {
-                panic!("Failing test must have diagnostics");
-            }
+        ExpectedOutcome::Fail if parsed.diagnostics().is_empty() => {
+            panic!("Failing test must have diagnostics");
         }
         _ => {}
     }

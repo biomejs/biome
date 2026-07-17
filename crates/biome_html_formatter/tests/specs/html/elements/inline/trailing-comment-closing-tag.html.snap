@@ -1,0 +1,22 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: elements/inline/trailing-comment-closing-tag.html
+---
+
+# Input
+
+```html
+<span>really long content that should make the inline element break across multiple lines</span><!-- trailing --><span>next inline sibling</span>
+
+```
+
+
+# Formatted
+
+```html
+<span
+	>really long content that should make the inline element break across multiple
+	lines</span
+><!-- trailing --><span>next inline sibling</span>
+
+```

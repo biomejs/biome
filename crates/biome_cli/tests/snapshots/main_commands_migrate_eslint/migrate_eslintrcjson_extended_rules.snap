@@ -33,7 +33,7 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        2 │ + → "linter":·{
        3 │ + → → "enabled":·true,
        4 │ + → → "rules":·{
-       5 │ + → → → "recommended":·false,
+       5 │ + → → → "preset":·"none",
        6 │ + → → → "complexity":·{·"useLiteralKeys":·"error"·},
        7 │ + → → → "suspicious":·{·"noDuplicateClassMembers":·"error"·}
        8 │ + → → }

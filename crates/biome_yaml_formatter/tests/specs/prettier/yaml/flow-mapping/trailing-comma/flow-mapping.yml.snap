@@ -1,0 +1,81 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/flow-mapping/trailing-comma/flow-mapping.yml
+---
+
+# Input
+
+```yml
+failing:
+  {
+    "object-does-not-fit-within-print-width": "------",
+    "TEST": "comma IS added here"
+  }
+
+expected:
+  {
+    "object-fits-within-print-width": "",
+    "TEST": "comma NOT here"
+  }
+
+---
+
+does not suffice: >
+  {
+    "object-does-not-fit-within-print-width": "------",
+    "TEST": "comma NOT here — but object's now a string due to '>'"
+  }
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,12 +1,17 @@
+ failing:
+   {
+     "object-does-not-fit-within-print-width": "------",
+-    "TEST": "comma IS added here",
++    "TEST": "comma IS added here"
+   }
+ 
+-expected: { "object-fits-within-print-width": "", "TEST": "comma NOT here" }
++expected:
++  {
++    "object-fits-within-print-width": "",
++    "TEST": "comma NOT here"
++  }
+ 
+ ---
++
+ does not suffice: >
+   {
+     "object-does-not-fit-within-print-width": "------",
+```
+
+# Output
+
+```yml
+failing:
+  {
+    "object-does-not-fit-within-print-width": "------",
+    "TEST": "comma IS added here"
+  }
+
+expected:
+  {
+    "object-fits-within-print-width": "",
+    "TEST": "comma NOT here"
+  }
+
+---
+
+does not suffice: >
+  {
+    "object-does-not-fit-within-print-width": "------",
+    "TEST": "comma NOT here — but object's now a string due to '>'"
+  }
+```

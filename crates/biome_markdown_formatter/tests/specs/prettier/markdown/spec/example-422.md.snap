@@ -17,12 +17,12 @@ foo _____
 --- Prettier
 +++ Biome
 @@ -1 +1 @@
--foo **\_**
-+foo _____
+-foo _____
++foo **\_**
 ```
 
 # Output
 
 ```md
-foo _____
+foo **\_**
 ```

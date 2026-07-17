@@ -18,13 +18,18 @@ impl FormatNodeRule<JsWhileStatement> for FormatJsWhileStatement {
             body,
         } = node.as_fields();
 
+        let should_insert_space = f.options().delimiter_spacing().value();
+
         write!(
             f,
             [group(&format_args![
                 while_token.format(),
                 space(),
                 l_paren_token.format(),
-                group(&soft_block_indent(&test.format())),
+                group(&soft_block_indent_with_maybe_space(
+                    &test.format(),
+                    should_insert_space
+                )),
                 r_paren_token.format(),
                 FormatStatementBody::new(&body?)
             ])]

@@ -3,7 +3,11 @@ pub mod class_lexer;
 mod presets;
 mod sort;
 mod sort_config;
+pub mod sort_v4;
 mod tailwind_preset;
+mod tailwind_preset_v4;
+mod tailwind_preset_v4_types;
+mod arbitrary_value_match;
 
 use self::{
     presets::UseSortedClassesPreset, sort::get_sort_class_name_range, sort::sort_class_name,
@@ -44,9 +48,8 @@ declare_lint_rule! {
     /// Notably, keep in mind that the following features are not supported yet:
     ///
     /// - Screen variant sorting (e.g. `md:`, `max-lg:`). Only static, dynamic and arbitrary variants are supported.
-    /// - Custom utilitites and variants (such as ones introduced by Tailwind CSS plugins). Only the default Tailwind CSS configuration is supported.
+    /// - Custom utilities and variants (such as ones introduced by Tailwind CSS plugins). Only the default Tailwind CSS configuration is supported.
     /// - Options such as `prefix` and `separator`.
-    /// - Object properties (e.g. in `clsx` calls).
     ///
     /// Please don't report issues about these features.
     /// :::
@@ -214,8 +217,7 @@ impl Rule for UseSortedClasses {
             AnyClassStringLike::JsStringLiteralExpression(string_literal) => {
                 let is_double_quote = string_literal
                     .value_token()
-                    .map(|token| token.text_trimmed().starts_with('"'))
-                    .unwrap_or(ctx.preferred_quote().is_double());
+                    .map_or(ctx.preferred_quote().is_double(), |token| token.text_trimmed().starts_with('"'));
                 let replacement = js_string_literal_expression(if is_double_quote {
                     js_string_literal(state)
                 } else {
@@ -234,8 +236,7 @@ impl Rule for UseSortedClasses {
             AnyClassStringLike::JsxString(jsx_string_node) => {
                 let is_double_quote = jsx_string_node
                     .value_token()
-                    .map(|token| token.text_trimmed().starts_with('"'))
-                    .unwrap_or(ctx.preferred_jsx_quote().is_double());
+                    .map_or(ctx.preferred_jsx_quote().is_double(), |token| token.text_trimmed().starts_with('"'));
                 let replacement = jsx_string(if is_double_quote {
                     js_string_literal(state)
                 } else {

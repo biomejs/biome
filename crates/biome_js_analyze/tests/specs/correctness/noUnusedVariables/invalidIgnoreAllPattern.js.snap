@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 155
+expression: invalidIgnoreAllPattern.js
+---
+# Input
+```js
+// With ignore: { "*": ["Ignored"] }, variables should be reported that don't match the pattern
+const unusedVariable = 0;
+
+```
+
+# Diagnostics
+```
+invalidIgnoreAllPattern.js:2:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable unusedVariable is unused.
+  
+    1 │ // With ignore: { "*": ["Ignored"] }, variables should be reported that don't match the pattern
+  > 2 │ const unusedVariable = 0;
+      │       ^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend unusedVariable with an underscore.
+  
+    1 1 │   // With ignore: { "*": ["Ignored"] }, variables should be reported that don't match the pattern
+    2   │ - const·unusedVariable·=·0;
+      2 │ + const·_unusedVariable·=·0;
+    3 3 │   
+  
+
+```

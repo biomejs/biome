@@ -6,7 +6,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_graphql_syntax::{
     GraphqlFieldsDefinition, GraphqlInputFieldsDefinition, GraphqlInputObjectTypeDefinition,
-    GraphqlInterfaceTypeDefinition, GraphqlObjectTypeDefinition,
+    GraphqlInputObjectTypeExtension, GraphqlInterfaceTypeDefinition, GraphqlInterfaceTypeExtension,
+    GraphqlObjectTypeDefinition, GraphqlObjectTypeExtension,
 };
 use biome_rowan::{AstNode, TokenText, declare_node_union};
 use biome_rule_options::no_duplicate_field_definition_names::NoDuplicateFieldDefinitionNamesOptions;
@@ -74,7 +75,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoDuplicateFieldDefinitionNames {
-    type Query = Ast<NoDuplicateFieldDefinitionNamesQuery>;
+    type Query = Ast<AnyNoDuplicateFieldDefinitionNamesQuery>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoDuplicateFieldDefinitionNamesOptions;
@@ -83,16 +84,34 @@ impl Rule for NoDuplicateFieldDefinitionNames {
         let node = ctx.query();
 
         match node {
-            NoDuplicateFieldDefinitionNamesQuery::GraphqlObjectTypeDefinition(object_def) => {
+            AnyNoDuplicateFieldDefinitionNamesQuery::GraphqlObjectTypeDefinition(object_def) => {
                 let fields = object_def.fields()?;
                 check_list(fields)
             }
-            NoDuplicateFieldDefinitionNamesQuery::GraphqlInterfaceTypeDefinition(interface_def) => {
+            AnyNoDuplicateFieldDefinitionNamesQuery::GraphqlObjectTypeExtension(object_ext) => {
+                let fields = object_ext.fields()?;
+                check_list(fields)
+            }
+            AnyNoDuplicateFieldDefinitionNamesQuery::GraphqlInterfaceTypeDefinition(
+                interface_def,
+            ) => {
                 let fields = interface_def.fields()?;
                 check_list(fields)
             }
-            NoDuplicateFieldDefinitionNamesQuery::GraphqlInputObjectTypeDefinition(input_def) => {
+            AnyNoDuplicateFieldDefinitionNamesQuery::GraphqlInterfaceTypeExtension(
+                interface_ext,
+            ) => {
+                let fields = interface_ext.fields()?;
+                check_list(fields)
+            }
+            AnyNoDuplicateFieldDefinitionNamesQuery::GraphqlInputObjectTypeDefinition(
+                input_def,
+            ) => {
                 let fields = input_def.input_fields()?;
+                check_input_list(fields)
+            }
+            AnyNoDuplicateFieldDefinitionNamesQuery::GraphqlInputObjectTypeExtension(input_ext) => {
+                let fields = input_ext.input_fields()?;
                 check_input_list(fields)
             }
         }
@@ -154,5 +173,5 @@ fn check_input_list(fields: GraphqlInputFieldsDefinition) -> Option<()> {
 }
 
 declare_node_union! {
-    pub NoDuplicateFieldDefinitionNamesQuery = GraphqlObjectTypeDefinition | GraphqlInterfaceTypeDefinition | GraphqlInputObjectTypeDefinition
+    pub AnyNoDuplicateFieldDefinitionNamesQuery = GraphqlObjectTypeDefinition | GraphqlObjectTypeExtension | GraphqlInterfaceTypeDefinition | GraphqlInterfaceTypeExtension | GraphqlInputObjectTypeDefinition | GraphqlInputObjectTypeExtension
 }

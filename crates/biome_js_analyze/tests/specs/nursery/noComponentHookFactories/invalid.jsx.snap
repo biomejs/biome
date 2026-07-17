@@ -1,0 +1,606 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+
+// Factory function with return function Component() pattern
+function createComponent(defaultValue) {
+  return function Component() {
+    return <div>{defaultValue}</div>;
+  };
+}
+
+// Factory with const arrow component
+function createButton(color) {
+  const Button = () => {
+    return <button style={{ color }}></button>;
+  };
+  return Button;
+}
+
+// Arrow factory with return function Button() pattern
+const createColoredButton = (color) => {
+  return function Button({ children }) {
+    return <button style={{ backgroundColor: color }}>{children}</button>;
+  };
+};
+
+// Arrow factory with const arrow component
+const createArrowButton = (color) => {
+  const Button = ({ children }) => {
+    return <button style={{ backgroundColor: color }}>{children}</button>;
+  };
+  return Button;
+};
+
+// Component defined inside component (function declaration)
+function Parent() {
+  function Child() {
+    return <div />;
+  }
+  return <Child />;
+}
+
+// Component defined inside component (arrow)
+function ParentArrow() {
+  const Child = () => {
+    return <div />;
+  };
+  return <Child />;
+}
+
+// Hook factory with return function useHook() pattern
+function createCustomHook(endpoint) {
+  return function useData() {
+    const [data, setData] = useState(null);
+    useEffect(() => {
+      fetch(endpoint).then(r => r.json()).then(setData);
+    }, []);
+    return data;
+  };
+}
+
+// Arrow hook factory with const arrow hook
+const createArrowHook = (endpoint) => {
+  const useData = () => {
+    const [data, setData] = useState(null);
+    return data;
+  };
+  return useData;
+};
+
+// Hook defined inside a component
+function MyComponent() {
+  function useLocalState() {
+    return useState(0);
+  }
+  const [count, setCount] = useLocalState();
+  return <div>{count}</div>;
+}
+
+// Hook defined inside another hook
+function useOuter() {
+  function useInner() {
+    return useState(0);
+  }
+  return useInner();
+}
+
+// Factory creating multiple components
+function createComponents(theme) {
+  function Header() {
+    return <header style={{ color: theme.primary }} />;
+  }
+  function Footer() {
+    return <footer style={{ color: theme.secondary }} />;
+  }
+  return { Header, Footer };
+}
+
+// Factory returning both a component and a hook
+function createFeature(config) {
+  function useFeatureData() {
+    return useState(config.defaultValue);
+  }
+  function FeatureComponent() {
+    const [data] = useFeatureData();
+    return <div>{data}</div>;
+  }
+  return { useFeatureData, FeatureComponent };
+}
+
+// Deeply nested component
+function outer() {
+  function inner() {
+    function DeeplyNested() {
+      return <div />;
+    }
+    return DeeplyNested;
+  }
+  return inner;
+}
+
+// makeButton factory pattern (return function X() {})
+function makeButton(color) {
+  return function Button({ children }) {
+    return (
+      <button style={{ backgroundColor: color }}>
+        {children}
+      </button>
+    );
+  };
+}
+
+// Hook factory with closure over config (return function useHook() {})
+function createUseAuth(config) {
+  return function useAuth() {
+    const [user, setUser] = useState(null);
+    useEffect(() => {
+      config.authProvider.onAuthStateChanged(setUser);
+    }, []);
+    return user;
+  };
+}
+
+// IIFE-like factory pattern
+const MyIIFEComponent = (function() {
+  return function Inner() {
+    return <div />;
+  };
+})();
+
+// Generic factory (lowercase param, NOT an HOC)
+function withTheme(theme) {
+  function ThemedComponent({ children }) {
+    return <div style={{ color: theme }}>{children}</div>;
+  }
+  return ThemedComponent;
+}
+
+// Hook defined inside factory function (function declaration)
+function makeHook(key) {
+  function useMyHook() {
+    return useState(key);
+  }
+  return useMyHook;
+}
+
+// Arrow hook inside factory function
+function createHook(initialValue) {
+  const useCounter = () => {
+    return useState(initialValue);
+  };
+  return useCounter;
+}
+
+// Component nested inside a regular utility function
+function setup() {
+  function Tooltip() {
+    return <span>tooltip</span>;
+  }
+  return Tooltip;
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:5:19 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define component Component inside a function.
+  
+    3 │ // Factory function with return function Component() pattern
+    4 │ function createComponent(defaultValue) {
+  > 5 │   return function Component() {
+      │                   ^^^^^^^^^
+    6 │     return <div>{defaultValue}</div>;
+    7 │   };
+  
+  i React treats components defined inside functions as completely different on each call, destroying the entire subtree and losing all state. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:12:9 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define component Button inside a function.
+  
+    10 │ // Factory with const arrow component
+    11 │ function createButton(color) {
+  > 12 │   const Button = () => {
+       │         ^^^^^^
+    13 │     return <button style={{ color }}></button>;
+    14 │   };
+  
+  i React treats components defined inside functions as completely different on each call, destroying the entire subtree and losing all state. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:20:19 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define component Button inside a function.
+  
+    18 │ // Arrow factory with return function Button() pattern
+    19 │ const createColoredButton = (color) => {
+  > 20 │   return function Button({ children }) {
+       │                   ^^^^^^
+    21 │     return <button style={{ backgroundColor: color }}>{children}</button>;
+    22 │   };
+  
+  i React treats components defined inside functions as completely different on each call, destroying the entire subtree and losing all state. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:27:9 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define component Button inside a function.
+  
+    25 │ // Arrow factory with const arrow component
+    26 │ const createArrowButton = (color) => {
+  > 27 │   const Button = ({ children }) => {
+       │         ^^^^^^
+    28 │     return <button style={{ backgroundColor: color }}>{children}</button>;
+    29 │   };
+  
+  i React treats components defined inside functions as completely different on each call, destroying the entire subtree and losing all state. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:35:12 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define component Child inside a function.
+  
+    33 │ // Component defined inside component (function declaration)
+    34 │ function Parent() {
+  > 35 │   function Child() {
+       │            ^^^^^
+    36 │     return <div />;
+    37 │   }
+  
+  i React treats components defined inside functions as completely different on each call, destroying the entire subtree and losing all state. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:43:9 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define component Child inside a function.
+  
+    41 │ // Component defined inside component (arrow)
+    42 │ function ParentArrow() {
+  > 43 │   const Child = () => {
+       │         ^^^^^
+    44 │     return <div />;
+    45 │   };
+  
+  i React treats components defined inside functions as completely different on each call, destroying the entire subtree and losing all state. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:51:19 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define hook useData inside a function.
+  
+    49 │ // Hook factory with return function useHook() pattern
+    50 │ function createCustomHook(endpoint) {
+  > 51 │   return function useData() {
+       │                   ^^^^^^^
+    52 │     const [data, setData] = useState(null);
+    53 │     useEffect(() => {
+  
+  i Each call creates a new hook identity, causing React to lose its state across renders. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:62:9 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define hook useData inside a function.
+  
+    60 │ // Arrow hook factory with const arrow hook
+    61 │ const createArrowHook = (endpoint) => {
+  > 62 │   const useData = () => {
+       │         ^^^^^^^
+    63 │     const [data, setData] = useState(null);
+    64 │     return data;
+  
+  i Each call creates a new hook identity, causing React to lose its state across renders. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:71:12 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define hook useLocalState inside a function.
+  
+    69 │ // Hook defined inside a component
+    70 │ function MyComponent() {
+  > 71 │   function useLocalState() {
+       │            ^^^^^^^^^^^^^
+    72 │     return useState(0);
+    73 │   }
+  
+  i Each call creates a new hook identity, causing React to lose its state across renders. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:80:12 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define hook useInner inside a function.
+  
+    78 │ // Hook defined inside another hook
+    79 │ function useOuter() {
+  > 80 │   function useInner() {
+       │            ^^^^^^^^
+    81 │     return useState(0);
+    82 │   }
+  
+  i Each call creates a new hook identity, causing React to lose its state across renders. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:88:12 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define component Header inside a function.
+  
+    86 │ // Factory creating multiple components
+    87 │ function createComponents(theme) {
+  > 88 │   function Header() {
+       │            ^^^^^^
+    89 │     return <header style={{ color: theme.primary }} />;
+    90 │   }
+  
+  i React treats components defined inside functions as completely different on each call, destroying the entire subtree and losing all state. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:91:12 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define component Footer inside a function.
+  
+    89 │     return <header style={{ color: theme.primary }} />;
+    90 │   }
+  > 91 │   function Footer() {
+       │            ^^^^^^
+    92 │     return <footer style={{ color: theme.secondary }} />;
+    93 │   }
+  
+  i React treats components defined inside functions as completely different on each call, destroying the entire subtree and losing all state. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:99:12 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define hook useFeatureData inside a function.
+  
+     97 │ // Factory returning both a component and a hook
+     98 │ function createFeature(config) {
+   > 99 │   function useFeatureData() {
+        │            ^^^^^^^^^^^^^^
+    100 │     return useState(config.defaultValue);
+    101 │   }
+  
+  i Each call creates a new hook identity, causing React to lose its state across renders. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:102:12 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define component FeatureComponent inside a function.
+  
+    100 │     return useState(config.defaultValue);
+    101 │   }
+  > 102 │   function FeatureComponent() {
+        │            ^^^^^^^^^^^^^^^^
+    103 │     const [data] = useFeatureData();
+    104 │     return <div>{data}</div>;
+  
+  i React treats components defined inside functions as completely different on each call, destroying the entire subtree and losing all state. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:112:14 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define component DeeplyNested inside a function.
+  
+    110 │ function outer() {
+    111 │   function inner() {
+  > 112 │     function DeeplyNested() {
+        │              ^^^^^^^^^^^^
+    113 │       return <div />;
+    114 │     }
+  
+  i React treats components defined inside functions as completely different on each call, destroying the entire subtree and losing all state. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:122:19 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define component Button inside a function.
+  
+    120 │ // makeButton factory pattern (return function X() {})
+    121 │ function makeButton(color) {
+  > 122 │   return function Button({ children }) {
+        │                   ^^^^^^
+    123 │     return (
+    124 │       <button style={{ backgroundColor: color }}>
+  
+  i React treats components defined inside functions as completely different on each call, destroying the entire subtree and losing all state. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:133:19 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define hook useAuth inside a function.
+  
+    131 │ // Hook factory with closure over config (return function useHook() {})
+    132 │ function createUseAuth(config) {
+  > 133 │   return function useAuth() {
+        │                   ^^^^^^^
+    134 │     const [user, setUser] = useState(null);
+    135 │     useEffect(() => {
+  
+  i Each call creates a new hook identity, causing React to lose its state across renders. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:144:19 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define component Inner inside a function.
+  
+    142 │ // IIFE-like factory pattern
+    143 │ const MyIIFEComponent = (function() {
+  > 144 │   return function Inner() {
+        │                   ^^^^^
+    145 │     return <div />;
+    146 │   };
+  
+  i React treats components defined inside functions as completely different on each call, destroying the entire subtree and losing all state. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:151:12 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define component ThemedComponent inside a function.
+  
+    149 │ // Generic factory (lowercase param, NOT an HOC)
+    150 │ function withTheme(theme) {
+  > 151 │   function ThemedComponent({ children }) {
+        │            ^^^^^^^^^^^^^^^
+    152 │     return <div style={{ color: theme }}>{children}</div>;
+    153 │   }
+  
+  i React treats components defined inside functions as completely different on each call, destroying the entire subtree and losing all state. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:159:12 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define hook useMyHook inside a function.
+  
+    157 │ // Hook defined inside factory function (function declaration)
+    158 │ function makeHook(key) {
+  > 159 │   function useMyHook() {
+        │            ^^^^^^^^^
+    160 │     return useState(key);
+    161 │   }
+  
+  i Each call creates a new hook identity, causing React to lose its state across renders. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:167:9 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define hook useCounter inside a function.
+  
+    165 │ // Arrow hook inside factory function
+    166 │ function createHook(initialValue) {
+  > 167 │   const useCounter = () => {
+        │         ^^^^^^^^^^
+    168 │     return useState(initialValue);
+    169 │   };
+  
+  i Each call creates a new hook identity, causing React to lose its state across renders. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:175:12 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define component Tooltip inside a function.
+  
+    173 │ // Component nested inside a regular utility function
+    174 │ function setup() {
+  > 175 │   function Tooltip() {
+        │            ^^^^^^^
+    176 │     return <span>tooltip</span>;
+    177 │   }
+  
+  i React treats components defined inside functions as completely different on each call, destroying the entire subtree and losing all state. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,9 @@
+query DemoQuery {
+	user(
+		# biome-ignore format: preserve the nested argument formatting
+		filter: { id: $id,  active: true } # keep this trailing comment after the suppressed argument
+		status: ACTIVE
+	) {
+		id
+	}
+}

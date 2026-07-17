@@ -137,9 +137,9 @@ HtmlRoot {
             clauses: SvelteAwaitClausesList [
                 SvelteAwaitThenBlock {
                     sv_curly_colon_token: SV_CURLY_COLON@133..136 "{:" [Newline("\n")] [],
-                    then_token: THEN_KW@136..140 "then" [] [],
+                    then_token: THEN_KW@136..141 "then" [] [Whitespace(" ")],
                     name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@140..145 " data" [] [],
+                        html_literal_token: HTML_LITERAL@141..145 "data" [] [],
                     },
                     r_curly_token: R_CURLY@145..146 "}" [] [],
                     children: HtmlElementList [
@@ -198,8 +198,12 @@ HtmlRoot {
                                         r_angle_token: R_ANGLE@201..202 ">" [] [],
                                     },
                                     children: HtmlElementList [
-                                        HtmlEmbeddedContent {
-                                            value_token: HTML_LITERAL@202..233 "{JSON.stringify(data, null, 2)}" [] [],
+                                        HtmlSingleTextExpression {
+                                            l_curly_token: L_CURLY@202..203 "{" [] [],
+                                            expression: HtmlTextExpression {
+                                                html_literal_token: HTML_LITERAL@203..232 "JSON.stringify(data, null, 2)" [] [],
+                                            },
+                                            r_curly_token: R_CURLY@232..233 "}" [] [],
                                         },
                                     ],
                                     closing_element: HtmlClosingElement {
@@ -225,9 +229,9 @@ HtmlRoot {
                 },
                 SvelteAwaitCatchBlock {
                     sv_curly_colon_token: SV_CURLY_COLON@248..251 "{:" [Newline("\n")] [],
-                    catch_token: CATCH_KW@251..256 "catch" [] [],
+                    catch_token: CATCH_KW@251..257 "catch" [] [Whitespace(" ")],
                     name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@256..262 " error" [] [],
+                        html_literal_token: HTML_LITERAL@257..262 "error" [] [],
                     },
                     r_curly_token: R_CURLY@262..263 "}" [] [],
                     children: HtmlElementList [
@@ -445,9 +449,9 @@ HtmlRoot {
       1: SVELTE_AWAIT_CLAUSES_LIST@133..384
         0: SVELTE_AWAIT_THEN_BLOCK@133..248
           0: SV_CURLY_COLON@133..136 "{:" [Newline("\n")] []
-          1: THEN_KW@136..140 "then" [] []
-          2: HTML_TEXT_EXPRESSION@140..145
-            0: HTML_LITERAL@140..145 " data" [] []
+          1: THEN_KW@136..141 "then" [] [Whitespace(" ")]
+          2: HTML_TEXT_EXPRESSION@141..145
+            0: HTML_LITERAL@141..145 "data" [] []
           3: R_CURLY@145..146 "}" [] []
           4: HTML_ELEMENT_LIST@146..248
             0: HTML_ELEMENT@146..248
@@ -489,8 +493,11 @@ HtmlRoot {
                     2: HTML_ATTRIBUTE_LIST@201..201
                     3: R_ANGLE@201..202 ">" [] []
                   1: HTML_ELEMENT_LIST@202..233
-                    0: HTML_EMBEDDED_CONTENT@202..233
-                      0: HTML_LITERAL@202..233 "{JSON.stringify(data, null, 2)}" [] []
+                    0: HTML_SINGLE_TEXT_EXPRESSION@202..233
+                      0: L_CURLY@202..203 "{" [] []
+                      1: HTML_TEXT_EXPRESSION@203..232
+                        0: HTML_LITERAL@203..232 "JSON.stringify(data, null, 2)" [] []
+                      2: R_CURLY@232..233 "}" [] []
                   2: HTML_CLOSING_ELEMENT@233..239
                     0: L_ANGLE@233..234 "<" [] []
                     1: SLASH@234..235 "/" [] []
@@ -505,9 +512,9 @@ HtmlRoot {
                 3: R_ANGLE@247..248 ">" [] []
         1: SVELTE_AWAIT_CATCH_BLOCK@248..384
           0: SV_CURLY_COLON@248..251 "{:" [Newline("\n")] []
-          1: CATCH_KW@251..256 "catch" [] []
-          2: HTML_TEXT_EXPRESSION@256..262
-            0: HTML_LITERAL@256..262 " error" [] []
+          1: CATCH_KW@251..257 "catch" [] [Whitespace(" ")]
+          2: HTML_TEXT_EXPRESSION@257..262
+            0: HTML_LITERAL@257..262 "error" [] []
           3: R_CURLY@262..263 "}" [] []
           4: HTML_ELEMENT_LIST@263..384
             0: HTML_ELEMENT@263..384

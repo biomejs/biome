@@ -1,0 +1,4 @@
+or {
+  CssDeclaration(property = $property),
+  CssGenericProperty(name = $name, value = $value),
+}

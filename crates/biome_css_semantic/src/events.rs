@@ -1,13 +1,14 @@
 use biome_css_syntax::{
-    AnyCssDeclarationName, AnyCssGenericPropertyValueOrExpression, AnyCssProperty, AnyCssSelector,
-    CssDeclaration, CssPropertyAtRule, CssRelativeSelector, CssSyntaxKind::*,
+    AnyCssDashedIdentifier, AnyCssDeclarationName, AnyCssGenericPropertyValueOrExpression,
+    AnyCssProperty, AnyCssSelector, CssDeclaration, CssPropertyAtRule, CssRelativeSelector,
+    CssSyntaxKind::*,
 };
-use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeOptionExt, TextRange};
 use std::collections::VecDeque;
 
 use crate::model::{AnyCssSelectorLike, AnyRuleStart};
 use crate::{
-    model::{CssProperty, CssPropertyInitialValue},
+    model::{CssProperty, CssPropertyInitialValueKind},
     semantic_model::model::Specificity,
     specificity::{evaluate_complex_selector, evaluate_compound_selector},
 };
@@ -25,7 +26,7 @@ pub enum SemanticEvent {
     PropertyDeclaration {
         node: CssDeclaration,
         property: CssProperty,
-        value: CssPropertyInitialValue,
+        value: CssPropertyInitialValueKind,
     },
     /// Indicates the start of a `:root` selector
     RootSelectorStart,
@@ -34,7 +35,7 @@ pub enum SemanticEvent {
     /// Indicates the start of an `@property` rule
     AtProperty {
         property: CssProperty,
-        initial_value: Option<CssPropertyInitialValue>,
+        initial_value: Option<CssPropertyInitialValueKind>,
         syntax: Option<String>,
         inherits: Option<bool>,
         range: TextRange,
@@ -65,6 +66,7 @@ impl SemanticEventExtractor {
                 || kind == CSS_NESTED_QUALIFIED_RULE
                 || kind == CSS_CONTAINER_AT_RULE
                 || kind == CSS_MEDIA_AT_RULE
+                || kind == CSS_SCOPE_AT_RULE
                 || kind == CSS_STARTING_STYLE_AT_RULE
                 || kind == CSS_SUPPORTS_AT_RULE =>
             {
@@ -108,14 +110,13 @@ impl SemanticEventExtractor {
                             let Ok(property_name) = property.name() else {
                                 return;
                             };
-                            let Ok(property_value) = property.value() else {
-                                return;
-                            };
-                            self.stash.push_back(SemanticEvent::PropertyDeclaration {
-                                node: declaration,
-                                property: property_name.into(),
-                                value: CssPropertyInitialValue::from(property_value),
-                            });
+                            for property_value in property.values().iter().filter_map(Result::ok) {
+                                self.stash.push_back(SemanticEvent::PropertyDeclaration {
+                                    node: declaration.clone(),
+                                    property: property_name.clone().into(),
+                                    value: CssPropertyInitialValueKind::from(property_value),
+                                });
+                            }
                         }
                         AnyCssProperty::CssGenericProperty(generic) => {
                             let Ok(name) = generic.name() else {
@@ -125,17 +126,23 @@ impl SemanticEventExtractor {
                                 Ok(value) => match value {
                                     AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(
                                         list,
-                                    ) => CssPropertyInitialValue::from(list),
+                                    ) => CssPropertyInitialValueKind::from(list),
                                     AnyCssGenericPropertyValueOrExpression::ScssExpression(expr) => {
-                                        CssPropertyInitialValue::from(expr)
+                                        CssPropertyInitialValueKind::from(expr)
                                     }
                                 },
                                 Err(_) => return,
                             };
 
                             let property = match name {
-                                AnyCssDeclarationName::CssDashedIdentifier(name) => {
-                                    CssProperty::from(name)
+                                AnyCssDeclarationName::AnyCssDashedIdentifier(
+                                    AnyCssDashedIdentifier::CssDashedIdentifier(name),
+                                ) => CssProperty::from(name),
+                                AnyCssDeclarationName::AnyCssDashedIdentifier(
+                                    AnyCssDashedIdentifier::ScssInterpolatedDashedIdentifier(_),
+                                )
+                                | AnyCssDeclarationName::ScssInterpolatedIdentifier(_) => {
+                                    return;
                                 }
                                 AnyCssDeclarationName::CssIdentifier(name) => {
                                     CssProperty::from(name)
@@ -145,9 +152,6 @@ impl SemanticEventExtractor {
                                         return;
                                     };
                                     CssProperty::from(ident)
-                                }
-                                AnyCssDeclarationName::ScssInterpolatedIdentifier(_) => {
-                                    return;
                                 }
                             };
 
@@ -234,9 +238,9 @@ impl SemanticEventExtractor {
                         initial_value = Some(match value {
                             AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(
                                 list,
-                            ) => CssPropertyInitialValue::from(list),
+                            ) => CssPropertyInitialValueKind::from(list),
                             AnyCssGenericPropertyValueOrExpression::ScssExpression(expr) => {
-                                CssPropertyInitialValue::from(expr)
+                                CssPropertyInitialValueKind::from(expr)
                             }
                         });
                     }
@@ -278,6 +282,7 @@ impl SemanticEventExtractor {
                 | CSS_NESTED_QUALIFIED_RULE
                 | CSS_CONTAINER_AT_RULE
                 | CSS_MEDIA_AT_RULE
+                | CSS_SCOPE_AT_RULE
                 | CSS_STARTING_STYLE_AT_RULE
                 | CSS_SUPPORTS_AT_RULE
         ) {

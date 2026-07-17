@@ -1,0 +1,235 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Function declarations still require return types
+function test() {
+  return;
+}
+
+// Variable-assigned functions still require return types with allowExpressions
+const foo = () => {};
+const bar = function () {};
+
+// Export default without return type
+export default function () {}
+
+// Class property functions still require return types
+class Foo {
+  public a = () => {};
+  public b = function () {};
+  public c = function test() {};
+
+  static d = () => {};
+  static e = function () {};
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:1 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    3 │ // Function declarations still require return types
+  > 4 │ function test() {
+      │ ^^^^^^^^^^^^^
+    5 │   return;
+    6 │ }
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:9:13 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+     8 │ // Variable-assigned functions still require return types with allowExpressions
+   > 9 │ const foo = () => {};
+       │             ^^^^^^^^
+    10 │ const bar = function () {};
+    11 │ 
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:10:13 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+     8 │ // Variable-assigned functions still require return types with allowExpressions
+     9 │ const foo = () => {};
+  > 10 │ const bar = function () {};
+       │             ^^^^^^^^^^^^^^
+    11 │ 
+    12 │ // Export default without return type
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:13:16 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    12 │ // Export default without return type
+  > 13 │ export default function () {}
+       │                ^^^^^^^^^^^^^^
+    14 │ 
+    15 │ // Class property functions still require return types
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:14 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    15 │ // Class property functions still require return types
+    16 │ class Foo {
+  > 17 │   public a = () => {};
+       │              ^^^^^^^^
+    18 │   public b = function () {};
+    19 │   public c = function test() {};
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:18:14 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    16 │ class Foo {
+    17 │   public a = () => {};
+  > 18 │   public b = function () {};
+       │              ^^^^^^^^^^^^^^
+    19 │   public c = function test() {};
+    20 │ 
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:19:14 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    17 │   public a = () => {};
+    18 │   public b = function () {};
+  > 19 │   public c = function test() {};
+       │              ^^^^^^^^^^^^^
+    20 │ 
+    21 │   static d = () => {};
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:21:14 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    19 │   public c = function test() {};
+    20 │ 
+  > 21 │   static d = () => {};
+       │              ^^^^^^^^
+    22 │   static e = function () {};
+    23 │ }
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:22:14 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    21 │   static d = () => {};
+  > 22 │   static e = function () {};
+       │              ^^^^^^^^^^^^^^
+    23 │ }
+    24 │ 
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

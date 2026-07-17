@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validStoreDereference.svelte.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+const store = 1;
+$store;
+
+```

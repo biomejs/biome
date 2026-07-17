@@ -1,0 +1,25 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<div aria-hidden="true"></div>
+<span aria-hidden="true"></span>
+<p aria-hidden="true">decorative text</p>
+<button aria-hidden="true" tabindex="-1"></button>
+<a href="/" aria-hidden="false">link</a>
+<input type="text" />
+<button>Click me</button>
+<a href="/">link</a>
+<a aria-hidden="true">no href, not focusable</a>
+<div tabindex="-1" aria-hidden="true"></div>
+<input type="hidden" aria-hidden="true" />
+<div contenteditable="false" aria-hidden="true">not editable</div>
+<BUTTON aria-hidden="true" tabindex="-1"></BUTTON>
+<MyButton aria-hidden="true">click</MyButton>
+<div aria-hidden="false" tabindex="0"></div>
+<area aria-hidden="true" />
+
+```

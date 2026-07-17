@@ -4,12 +4,13 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExportNamedSpecifier, AnyJsFunction, AnyJsIdentifierUsage, JsClassDeclaration,
-    JsConstructorClassMember, JsFileSource, JsGetterClassMember, JsGetterObjectMember,
-    JsMethodClassMember, JsMethodObjectMember, JsModule, JsScript, JsSetterClassMember,
-    JsSetterObjectMember, JsStaticInitializationBlockClassMember, JsVariableDeclarationClause,
-    TsDeclareStatement, TsModuleDeclaration, TsPropertySignatureTypeMember,
+    JsConstructorClassMember, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
+    JsMethodObjectMember, JsModule, JsScript, JsSetterClassMember, JsSetterObjectMember,
+    JsStaticInitializationBlockClassMember, JsVariableDeclarationClause, TsDeclareStatement,
+    TsModuleDeclaration, TsPropertySignatureTypeMember,
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange, declare_node_union};
 use biome_rule_options::no_invalid_use_before_declaration::NoInvalidUseBeforeDeclarationOptions;
 
@@ -147,9 +148,7 @@ impl Rule for NoInvalidUseBeforeDeclaration {
                     // ```
                     if reference_syntax
                         .parent()
-                        .kind()
-                        .filter(|parent_kind| AnyJsExportNamedSpecifier::can_cast(*parent_kind))
-                        .is_none()
+                        .kind().as_ref().is_none_or(|parent_kind| !AnyJsExportNamedSpecifier::can_cast(*parent_kind))
                         // Don't report variables used in another control flow root (function, classes, ...)
                         // For example:
                         //
@@ -203,10 +202,16 @@ impl Rule for NoInvalidUseBeforeDeclaration {
                 reference_range,
                 markup! { "This "{declaration_kind_text}" is used before its declaration." },
             )
+            .note(markup! {
+                "Using a "{declaration_kind_text}" before it is declared makes the code depend on declaration order and hoisting behavior."
+            })
             .detail(
                 declaration_range,
                 markup! { "The "{declaration_kind_text}" is declared here:" },
-            ),
+            )
+            .note(markup! {
+                "Move this use after the declaration, or move the declaration earlier."
+            }),
         )
     }
 }

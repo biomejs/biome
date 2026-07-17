@@ -15,14 +15,16 @@ import { A } from "a";
 ```
 issue6211.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these imports.
   
   > 1 │ import { B } from "bc";
       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ import { C } from "bc";
-    3 │ import { A } from "a";
+  > 2 │ import { C } from "bc";
+  > 3 │ import { A } from "a";
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1   │ - import·{·B·}·from·"bc";
     2   │ - import·{·C·}·from·"bc";

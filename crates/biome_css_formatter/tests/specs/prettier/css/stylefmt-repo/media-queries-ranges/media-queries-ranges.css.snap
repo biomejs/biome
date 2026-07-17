@@ -1,0 +1,55 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: css/stylefmt-repo/media-queries-ranges/media-queries-ranges.css
+---
+
+# Input
+
+```css
+@media (width >= 500px) and (width <= 1200px) {
+  .rule {color:red;}
+}
+@custom-media --only-medium-screen (    width    >=500px     ) and (width<=    1200px    ) ;
+@media (       --only-medium-screen ){
+  .rule{color:blue;}}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -3,7 +3,7 @@
+     color: red;
+   }
+ }
+-@custom-media --only-medium-screen (width >=500px) and (width<= 1200px);
++@custom-media --only-medium-screen (    width    >=500px     ) and (width<=    1200px    );
+ @media (--only-medium-screen) {
+   .rule {
+     color: blue;
+```
+
+# Output
+
+```css
+@media (width >= 500px) and (width <= 1200px) {
+  .rule {
+    color: red;
+  }
+}
+@custom-media --only-medium-screen (    width    >=500px     ) and (width<=    1200px    );
+@media (--only-medium-screen) {
+  .rule {
+    color: blue;
+  }
+}
+```
+
+# Lines exceeding max width of 80 characters
+```
+    6: @custom-media --only-medium-screen (    width    >=500px     ) and (width<=    1200px    );
+```

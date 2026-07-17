@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::utils::scss_statement_at_rule::format_scss_statement_at_rule_semicolon;
 use biome_css_syntax::{ScssReturnAtRule, ScssReturnAtRuleFields};
 use biome_formatter::write;
 
@@ -19,7 +20,7 @@ impl FormatNodeRule<ScssReturnAtRule> for FormatScssReturnAtRule {
                 return_token.format(),
                 space(),
                 value.format(),
-                semicolon_token.format()
+                format_scss_statement_at_rule_semicolon(semicolon_token)
             ]
         )
     }

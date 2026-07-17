@@ -1,0 +1,44 @@
+<!-- should not generate diagnostics -->
+<input onclick="()=> void 0" />
+<input type="button" onclick="()=> void 0" />
+<input type="checkbox" onclick="()=> void 0" />
+<input type="color" onclick="()=> void 0" />
+
+<!-- Interactive element -->
+<a onclick="()=> void 0"></a>
+<area onclick="() => { }" />
+<button onclick="()=> void 0"></button>
+<Button onclick="()=> void 0"></Button>
+<BUTTON onclick="()=> void 0"></BUTTON>
+<menuitem onclick="() => { }">
+</menuitem>
+<option onclick="()=> void 0" class="foo"></option>
+<select onclick="()=> void 0" class="foo"></select>
+<textarea onclick="()=> void 0" class="foo"></textarea>
+<tr onclick="() => { }"></tr>
+
+<!-- Element attributed with an interactive role -->
+<div role="button" onclick="() => { }"></div>
+<div role="checkbox" onclick="() => { }"></div>
+<div role="combobox" onclick="() => { }"></div>
+<div role="gridcell" onclick="() => { }"></div>
+<div role="link" onclick="() => { }"></div>
+<div role="listbox" onclick="() => { }"></div>
+<div role="menuitem" onclick="() => { }"></div>
+<div role="menuitemcheckbox" onclick="() => { }"></div>
+<div role="menuitemradio" onclick="() => { }"></div>
+<div role="option" onclick="() => { }"></div>
+<div role="radio" onclick="() => { }"></div>
+<div role="row" onclick="() => { }"></div>
+<div role="scrollbar" onclick="() => { }"></div>
+<div role="searchbox" onclick="() => { }"></div>
+<div role="slider" onclick="() => { }"></div>
+<div role="spinbutton" onclick="() => { }"></div>
+<div role="switch" onclick="() => { }"></div>
+<div role="tab" onclick="() => { }"></div>
+<div role="textbox" onclick="() => { }"></div>
+
+<!-- Presentation role -->
+<div role="presentation" onclick="() => { }"></div>
+
+<div onclick="() => { }" aria-hidden="true"></div>

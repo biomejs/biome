@@ -11,6 +11,7 @@ expression: invalid-svelte-template.svelte
 
 <!-- Comma operator in template expression - should be flagged -->
 <p>{(console.log("side effect"), x)}</p>
+<p class={a, b}>real comma operator</p>
 
 ```
 
@@ -23,7 +24,24 @@ invalid-svelte-template.svelte:7:32 lint/complexity/noCommaOperator ━━━━
     6 │ <!-- Comma operator in template expression - should be flagged -->
   > 7 │ <p>{(console.log("side effect"), x)}</p>
       │                                ^
-    8 │ 
+    8 │ <p class={a, b}>real comma operator</p>
+    9 │ 
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+```
+invalid-svelte-template.svelte:8:12 lint/complexity/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+    6 │ <!-- Comma operator in template expression - should be flagged -->
+    7 │ <p>{(console.log("side effect"), x)}</p>
+  > 8 │ <p class={a, b}>real comma operator</p>
+      │            ^
+    9 │ 
   
   i Its use is often confusing and obscures side effects.
   

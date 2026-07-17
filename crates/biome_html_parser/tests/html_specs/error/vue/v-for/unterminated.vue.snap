@@ -1,0 +1,114 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```vue
+<div v-for="item in items>{{ item }}</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    VueDirective {
+                        name_token: IDENT@5..10 "v-for" [] [],
+                        arg: missing (optional),
+                        modifiers: VueModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@10..11 "=" [] [],
+                            value: VueVForValue {
+                                l_quote: DOUBLE_QUOTE@11..12 "\"" [] [],
+                                binding: VueVForIdentifierBinding {
+                                    name_token: IDENT@12..17 "item" [] [Whitespace(" ")],
+                                },
+                                operator: VueVForInOperator {
+                                    in_token: IN_KW@17..19 "in" [] [],
+                                },
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@19..43 " items>{{ item }}</div>\n" [] [],
+                                },
+                                r_quote: missing (required),
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: missing (required),
+            },
+            children: HtmlElementList [],
+            closing_element: missing (required),
+        },
+    ],
+    eof_token: EOF@43..43 "" [] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..43
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..43
+    0: HTML_ELEMENT@0..43
+      0: HTML_OPENING_ELEMENT@0..43
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..43
+          0: VUE_DIRECTIVE@5..43
+            0: IDENT@5..10 "v-for" [] []
+            1: (empty)
+            2: VUE_MODIFIER_LIST@10..10
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@10..43
+              0: EQ@10..11 "=" [] []
+              1: VUE_V_FOR_VALUE@11..43
+                0: DOUBLE_QUOTE@11..12 "\"" [] []
+                1: VUE_V_FOR_IDENTIFIER_BINDING@12..17
+                  0: IDENT@12..17 "item" [] [Whitespace(" ")]
+                2: VUE_V_FOR_IN_OPERATOR@17..19
+                  0: IN_KW@17..19 "in" [] []
+                3: HTML_TEXT_EXPRESSION@19..43
+                  0: HTML_LITERAL@19..43 " items>{{ item }}</div>\n" [] []
+                4: (empty)
+        3: (empty)
+      1: HTML_ELEMENT_LIST@43..43
+      2: (empty)
+  4: EOF@43..43 "" [] []
+
+```
+
+## Diagnostics
+
+```
+unterminated.vue:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `"` but instead the file ends
+  
+    1 │ <div v-for="item in items>{{ item }}</div>
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ <div v-for="item in items>{{ item }}</div>
+  > 2 │ 
+      │ 
+  
+```

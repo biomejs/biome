@@ -1,0 +1,14 @@
+// Biome intentionally normalizes spaces around SCSS binary operators.
+// Prettier preserves some tight forms because of parser token shapes.
+$interpolation-left-tight: #{$width}/2px;
+$interpolation-left-tight-after: #{$width}/ 2px;
+$interpolation-right-tight: 2px/#{$width};
+$interpolation-right-tight-before: 2px /#{$width};
+
+$comparison-tight: 1>$width;
+$comparison-tight-after: 1 >$width;
+$comparison-tight-before: 1> $width;
+
+@if 1>$width {
+color:red;
+}

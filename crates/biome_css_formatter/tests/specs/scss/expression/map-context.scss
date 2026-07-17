@@ -1,0 +1,6 @@
+$nestedValueCall:(key:fn((a,b)),);
+$nestedValueParen:(key:(fn((a,b))),);
+$nestedValueMultiArg:(key:foo((a,b),(c,d)),);
+$doubleParenListValue:(key:((a,b)),);
+$doubleParenMapValue:(key:((a:b)),);
+$doubleParenMapValueBroken:(key:((very-very-very-very-very-very-very-very-long-map-key:very-very-very-very-very-very-very-very-long-map-value,other-key:other-other-value)),);

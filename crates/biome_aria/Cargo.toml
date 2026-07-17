@@ -15,6 +15,7 @@ publish              = true
 
 [dependencies]
 biome_aria_metadata = { workspace = true }
+biome_string_case   = { workspace = true }
 
 [lints]
 workspace = true

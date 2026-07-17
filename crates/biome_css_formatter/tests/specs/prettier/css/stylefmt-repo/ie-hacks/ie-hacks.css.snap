@@ -1,0 +1,385 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: css/stylefmt-repo/ie-hacks/ie-hacks.css
+---
+
+# Input
+
+```css
+* html p {font-size: 5em; }
+.class {
+*zoom: 1;_width: 200px;
++color:red;
+*+color:red;
+color:red\9;
+color:red\0;
+color:red\9\0;
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,11 +2,10 @@
+   font-size: 5em;
+ }
+ .class {
+-  *zoom: 1;
+-  _width: 200px;
+-  +color: red;
+-  *+color: red;
+-  color: red\9;
+-  color: red\0;
+-  color: red\9\0;
++*zoom: 1;_width: 200px;
+++color:red;
++*+color:red;
++color:red\9;
++color:red\0;
++color:red\9\0;
+ }
+```
+
+# Output
+
+```css
+* html p {
+  font-size: 5em;
+}
+.class {
+*zoom: 1;_width: 200px;
++color:red;
+*+color:red;
+color:red\9;
+color:red\0;
+color:red\9\0;
+}
+```
+
+# Errors
+```
+ie-hacks.css:3:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `zoom`
+  
+    1 │ * html p {font-size: 5em; }
+    2 │ .class {
+  > 3 │ *zoom: 1;_width: 200px;
+      │  ^^^^
+    4 │ +color:red;
+    5 │ *+color:red;
+  
+  i Remove zoom
+  
+ie-hacks.css:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ * html p {font-size: 5em; }
+    2 │ .class {
+  > 3 │ *zoom: 1;_width: 200px;
+      │        ^
+    4 │ +color:red;
+    5 │ *+color:red;
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+ie-hacks.css:3:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `_width`
+  
+    1 │ * html p {font-size: 5em; }
+    2 │ .class {
+  > 3 │ *zoom: 1;_width: 200px;
+      │          ^^^^^^
+    4 │ +color:red;
+    5 │ *+color:red;
+  
+  i Remove _width
+  
+ie-hacks.css:3:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ * html p {font-size: 5em; }
+    2 │ .class {
+  > 3 │ *zoom: 1;_width: 200px;
+      │                  ^^^
+    4 │ +color:red;
+    5 │ *+color:red;
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+ie-hacks.css:3:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `px`
+  
+    1 │ * html p {font-size: 5em; }
+    2 │ .class {
+  > 3 │ *zoom: 1;_width: 200px;
+      │                     ^^
+    4 │ +color:red;
+    5 │ *+color:red;
+  
+  i Remove px
+  
+ie-hacks.css:3:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    1 │ * html p {font-size: 5em; }
+    2 │ .class {
+  > 3 │ *zoom: 1;_width: 200px;
+      │                       ^
+    4 │ +color:red;
+    5 │ *+color:red;
+  
+  i Remove ;
+  
+ie-hacks.css:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `+`
+  
+    2 │ .class {
+    3 │ *zoom: 1;_width: 200px;
+  > 4 │ +color:red;
+      │ ^
+    5 │ *+color:red;
+    6 │ color:red\9;
+  
+  i Remove +
+  
+ie-hacks.css:4:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    2 │ .class {
+    3 │ *zoom: 1;_width: 200px;
+  > 4 │ +color:red;
+      │           ^
+    5 │ *+color:red;
+    6 │ color:red\9;
+  
+  i Remove ;
+  
+ie-hacks.css:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `*`
+  
+    3 │ *zoom: 1;_width: 200px;
+    4 │ +color:red;
+  > 5 │ *+color:red;
+      │ ^
+    6 │ color:red\9;
+    7 │ color:red\0;
+  
+  i Remove *
+  
+ie-hacks.css:5:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    3 │ *zoom: 1;_width: 200px;
+    4 │ +color:red;
+  > 5 │ *+color:red;
+      │            ^
+    6 │ color:red\9;
+    7 │ color:red\0;
+  
+  i Remove ;
+  
+ie-hacks.css:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `color`
+  
+    4 │ +color:red;
+    5 │ *+color:red;
+  > 6 │ color:red\9;
+      │ ^^^^^
+    7 │ color:red\0;
+    8 │ color:red\9\0;
+  
+  i Remove color
+  
+ie-hacks.css:6:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    4 │ +color:red;
+    5 │ *+color:red;
+  > 6 │ color:red\9;
+      │            ^
+    7 │ color:red\0;
+    8 │ color:red\9\0;
+  
+  i Remove ;
+  
+ie-hacks.css:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `color`
+  
+    5 │ *+color:red;
+    6 │ color:red\9;
+  > 7 │ color:red\0;
+      │ ^^^^^
+    8 │ color:red\9\0;
+    9 │ }
+  
+  i Remove color
+  
+ie-hacks.css:7:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    5 │ *+color:red;
+    6 │ color:red\9;
+  > 7 │ color:red\0;
+      │            ^
+    8 │ color:red\9\0;
+    9 │ }
+  
+  i Remove ;
+  
+ie-hacks.css:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `color`
+  
+     6 │ color:red\9;
+     7 │ color:red\0;
+   > 8 │ color:red\9\0;
+       │ ^^^^^
+     9 │ }
+    10 │ 
+  
+  i Remove color
+  
+ie-hacks.css:8:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+     6 │ color:red\9;
+     7 │ color:red\0;
+   > 8 │ color:red\9\0;
+       │              ^
+     9 │ }
+    10 │ 
+  
+  i Remove ;
+  
+ie-hacks.css:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead the file ends
+  
+     8 │ color:red\9\0;
+     9 │ }
+  > 10 │ 
+       │ 
+  
+  i the file ends here
+  
+     8 │ color:red\9\0;
+     9 │ }
+  > 10 │ 
+       │ 
+  
+
+```

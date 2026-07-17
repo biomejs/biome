@@ -1,6 +1,7 @@
 use crate::{
     grit_context::GritQueryContext, grit_target_language::GritTargetLanguage,
-    grit_target_node::GritTargetNode, source_location_ext::SourceFileExt, util::TextRangeGritExt,
+    grit_target_node::GritTargetNode, linearization::linearize_binding,
+    source_location_ext::SourceFileExt, util::TextRangeGritExt,
 };
 use biome_diagnostics::{SourceCode, display::SourceFile};
 use biome_rowan::TextRange;
@@ -157,14 +158,45 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
 
     fn linearized_text(
         &self,
-        _language: &GritTargetLanguage,
-        _effects: &[Effect<'a, GritQueryContext>],
-        _files: &FileRegistry<'a, GritQueryContext>,
-        _memo: &mut HashMap<grit_util::CodeRange, Option<String>>,
-        _distributed_indent: Option<usize>,
-        _logs: &mut AnalysisLogs,
+        language: &GritTargetLanguage,
+        effects: &[Effect<'a, GritQueryContext>],
+        files: &FileRegistry<'a, GritQueryContext>,
+        memo: &mut HashMap<grit_util::CodeRange, Option<String>>,
+        distributed_indent: Option<usize>,
+        logs: &mut AnalysisLogs,
     ) -> GritResult<Cow<'a, str>> {
-        Err(GritPatternError::new("Not implemented")) // TODO: Implement rewriting
+        match self {
+            Self::Node(node) => {
+                let source = node.source();
+                let range = node.code_range();
+                linearize_binding(
+                    language,
+                    effects,
+                    files,
+                    memo,
+                    source,
+                    range,
+                    distributed_indent,
+                    logs,
+                )
+            }
+            Self::Range(text_range, source) => {
+                let range = text_range.to_code_range(source);
+                linearize_binding(
+                    language,
+                    effects,
+                    files,
+                    memo,
+                    source,
+                    range,
+                    distributed_indent,
+                    logs,
+                )
+            }
+            Self::Empty(..) => Ok(Cow::Borrowed("")),
+            Self::File(path) => Ok(path.to_string_lossy()),
+            Self::Constant(constant) => Ok(constant.to_string().into()),
+        }
     }
 
     fn text(&self, _language: &GritTargetLanguage) -> GritResult<Cow<'a, str>> {

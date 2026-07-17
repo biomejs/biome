@@ -1,0 +1,21 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/expression/parenthesized-map-key-list-inline.scss
+---
+
+# Input
+
+```scss
+$map:(("a","b"):value);
+
+```
+
+
+# Formatted
+
+```scss
+$map: (
+	("a", "b"): value,
+);
+
+```

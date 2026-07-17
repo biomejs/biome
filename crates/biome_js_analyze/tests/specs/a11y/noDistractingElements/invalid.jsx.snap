@@ -4,6 +4,7 @@ expression: invalid.jsx
 ---
 # Input
 ```jsx
+/* should generate diagnostics */
 <div>
     <div />
     <marquee />
@@ -14,43 +15,43 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:3:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:4:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Don't use the 'marquee' element.
   
-    1 │ <div>
-    2 │     <div />
-  > 3 │     <marquee />
+    2 │ <div>
+    3 │     <div />
+  > 4 │     <marquee />
       │     ^^^^^^^^^^^
-    4 │     <blink />
-    5 │ </div>
+    5 │     <blink />
+    6 │ </div>
   
   i Visually distracting elements can cause accessibility issues and should be avoided.
   
   i Unsafe fix: Remove the 'marquee' element.
   
-    3 │ ····<marquee·/>
+    4 │ ····<marquee·/>
       │     -----------
 
 ```
 
 ```
-invalid.jsx:4:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:5:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Don't use the 'blink' element.
   
-    2 │     <div />
-    3 │     <marquee />
-  > 4 │     <blink />
+    3 │     <div />
+    4 │     <marquee />
+  > 5 │     <blink />
       │     ^^^^^^^^^
-    5 │ </div>
-    6 │ 
+    6 │ </div>
+    7 │ 
   
   i Visually distracting elements can cause accessibility issues and should be avoided.
   
   i Unsafe fix: Remove the 'blink' element.
   
-    4 │ ····<blink·/>
+    5 │ ····<blink·/>
       │     ---------
 
 ```

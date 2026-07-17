@@ -4,6 +4,7 @@ pub(crate) mod attr_name_list;
 pub(crate) mod bracketed_value_list;
 pub(crate) mod component_value_list;
 pub(crate) mod composes_class_list;
+pub(crate) mod composes_property_value_list;
 pub(crate) mod compound_selector_list;
 pub(crate) mod custom_identifier_comma_separated_list;
 pub(crate) mod custom_identifier_space_separated_list;

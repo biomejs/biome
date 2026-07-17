@@ -36,11 +36,11 @@
 
 **Biome** はWebプロジェクトのための高性能なツールチェーンであり、プロジェクトの健全性を維持するための開発者ツールの提供を目的としています。
 
-**Biome は _JavaScript_, _TypeScript_, _JSX_ そして _JSON_ 向けの[高速なFormatter](./benchmark#formatting)**であり、**[_Prettier_ との互換性は97%](https://console.algora.io/challenges/prettier)** を達成しています。
+**Biome は _JavaScript_, _TypeScript_, _JSX_ そして _JSON_ 向けの[高速なFormatter](https://github.com/biomejs/benchmark#formatting)**であり、**[_Prettier_ との互換性は97%](https://algora.io/challenges/prettier)** を達成しています。
 
-**Biome は _JavaScript_, _TypeScript_, _JSX_ のための[高性能なLinter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** であり、ESLint, typescript-eslint, [その他のソース](https://github.com/biomejs/biome/discussions/3)から **[450以上のルール](https://biomejs.dev/ja/linter/javascript/rules/)**を提供しています。Biome は**詳細で文脈に沿った結果を出力**するため、コードを改善し、より良いプログラマになるための手助けをします！
+**Biome は _JavaScript_, _TypeScript_, _JSX_ のための[高性能なLinter](https://github.com/biomejs/benchmark#linting)** であり、ESLint, typescript-eslint, [その他のソース](https://github.com/biomejs/biome/discussions/3)から **[450以上のルール](https://biomejs.dev/ja/linter/javascript/rules/)**を提供しています。Biome は**詳細で文脈に沿った結果を出力**するため、コードを改善し、より良いプログラマになるための手助けをします！
 
-**Biome** は最初から[**エディタ内で対話的に**](https://biomejs.dev/ja/guides/editors/first-party-extensions/)使用できるように設計されています。
+**Biome** は最初から[**エディタ内で対話的に**](https://biomejs.dev/ja/editors/first-party-extensions/)使用できるように設計されています。
 あなたがコードを書いているときに、形の崩れたコードを format と lint することができます。
 
 ### インストール
@@ -113,9 +113,6 @@ Biome についてもっと知るために[ホームページ][biomejs]をチェ
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="middle">
-        <a href="https://l2beat.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/l2beat/c2b2a27/logo/256.png" height="100" alt="L2BEAT logo"></a>
-      </td>
       <td align="center" valign="middle">
         <a href="https://lokalise.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/14294501?s=200&v=4" height="100" alt="Lokalise logo"></a>
       </td>

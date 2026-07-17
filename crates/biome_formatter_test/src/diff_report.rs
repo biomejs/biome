@@ -44,7 +44,7 @@ impl FromStr for ReportType {
 }
 
 struct DiffReportItem {
-    file_name: &'static str,
+    file_name: String,
     biome_formatted_result: String,
     prettier_formatted_result: String,
 }
@@ -84,199 +84,17 @@ impl DiffReport {
 
     pub fn report(
         &self,
-        file_name: &'static str,
+        file_name: &str,
         biome_formatted_result: &str,
         prettier_formatted_result: &str,
     ) {
-        match env::var("REPORT_PRETTIER") {
-            Ok(value) if value == "1" => {
-                if !Self::is_ignored(file_name) {
-                    self.state.lock().unwrap().push(DiffReportItem {
-                        file_name,
-                        biome_formatted_result: biome_formatted_result.to_owned(),
-                        prettier_formatted_result: prettier_formatted_result.to_owned(),
-                    });
-                }
-            }
-            _ => {}
+        if matches!(env::var("REPORT_PRETTIER"), Ok(value) if value == "1") {
+            self.state.lock().unwrap().push(DiffReportItem {
+                file_name: file_name.to_owned(),
+                biome_formatted_result: biome_formatted_result.to_owned(),
+                prettier_formatted_result: prettier_formatted_result.to_owned(),
+            });
         }
-    }
-
-    fn is_ignored(file_name: &str) -> bool {
-        // ignore unstable syntaxes and embedded languages in template literals
-        let patterns = [
-            // v8-specific syntaxes
-            "js/v8_intrinsic",
-            // Babel plugins (mostly experimental syntaxes)
-            "js/babel-plugins/",
-            // Bogus nodes
-            "js/chain-expression/new-expression.js",
-            "js/chain-expression/tagged-template-literals.js",
-            "js/optional-chaining-assignment/valid-parenthesized.js",
-            "typescript/conformance/classes/constructorDeclarations/constructorParameters/readonlyReadonly.ts",
-            "typescript/conformance/parser/ecmascript5/Statements/parserES5ForOfStatement21.ts",
-            "typescript/chain-expression/new-expression.ts",
-            "typescript/chain-expression/tagged-template-literals.ts",
-            // Experimental syntax: `do {}`
-            "js/async-do-expressions/",
-            "js/do/",
-            "jsx/do/",
-            // Experimental syntax: `export X from "mod"`
-            "js/export-default/export-default-from/",
-            "js/export-default/escaped/default-escaped.js",
-            // Experimental syntax: `module <id> {}`
-            "js/module-blocks",
-            "js/explicit-resource-management/valid-module-block-top-level-await-using-binding.js",
-            "js/explicit-resource-management/valid-module-block-top-level-using-binding.js",
-            // Experimental syntax: `#[]` and `#{}`
-            "js/tuple",
-            "js/record",
-            "js/arrays/tuple-and-record.js",
-            "js/arrows/tuple-and-record.js",
-            "js/binary-expressions/tuple-and-record.js",
-            "js/class-extends/tuple-and-record.js",
-            "js/comments-closure-typecast/tuple-and-record.js",
-            "js/comments/tuple-and-record.js",
-            "js/function-single-destructuring/tuple-and-record.js",
-            "js/method-chain/tuple-and-record.js",
-            "jsx/tuple/",
-            // Experimental syntax: pipeline operator `|>`
-            "js/comments-pipeline-own-line",
-            "js/partial-application",
-            "js/pipeline-operator",
-            // Experimental syntax: `::`
-            "js/arrows-bind/",
-            "js/bind-expressions/",
-            "js/objects/expression.js",
-            "js/no-semi-babylon-extensions/no-semi.js",
-            // Experimental syntax: `let { #x: x } = ...`
-            "js/destructuring-private-fields",
-            // Experimental syntax: `import defer`
-            "js/deferred-import-evaluation/",
-            // Experimental syntax: `import source`
-            "js/source-phase-imports/",
-            "js/dynamic-import/import-phase.js",
-            "js/dynamic-import/template-literal.js",
-            // Experimental syntax: `import module`
-            "js/import-reflection/",
-            // Experimental syntax: `throw` expressions
-            "js/throw_expressions/",
-            // Embedded languages in template literals
-            "js/comments-closure-typecast/styled-components.js",
-            "js/multiparser-comments/",
-            "js/multiparser-css/",
-            "js/multiparser-graphql/",
-            "js/multiparser-html/",
-            "js/multiparser-invalid/",
-            "js/multiparser-markdown/",
-            "js/multiparser-text/",
-            "js/template-literals/css-prop.js",
-            "js/template-literals/styled-components-with-expressions.js",
-            "js/template-literals/styled-jsx-with-expressions.js",
-            "js/template-literals/styled-jsx.js",
-            "js/range/issue-7082.js",
-            "js/last-argument-expansion/embed.js",
-            "jsx/template/styled-components.js",
-            "typescript/as/as-const-embedded.ts",
-            "js/last-argument-expansion/embed.js",
-            "typescript/as/as-const-embedded.ts",
-            // Syntax recovery
-            "typescript/error-recovery/",
-            /*// Experimental syntax: property and class decorators
-            "js/decorators",
-            "js/decorator-auto-accessors/",
-            "js/decorators-export/",
-            "js/ignore/class-expression-decorator.js",
-            "js/ignore/decorator.js",
-            // Experimental syntax: `import {} from "" assert {}` and `import {} from "" with {}`
-            "js/import-assertions/",
-            "js/import-attributes/",
-            // Experimental syntax: `using <id> =`
-            "js/explicit-resource-management",
-            // ES2016 syntax: exponentiation operator `**`
-            "js/async/exponentiation.js",
-            "js/binary-expressions/exp.js",
-            // ES2017 syntax: `async function` and `async () =>`
-            "js/async/",
-            "js/arrows/newline-before-arrow/newline-before-arrow.js",
-            "js/assignment/discussion-15196.js",
-            "js/assignment/issue-5610.js",
-            "js/assignment/issue-7091.js",
-            "js/assignment/issue-10218.js",
-            "js/assignment/lone-arg.js",
-            "js/ignore/issue-14404.js",
-            // ES2017 syntax: trailing comma in function call
-            "js/trailing-comma/function-calls.js",
-            "js/arrows/arrow-chain-with-trailing-comments.js",
-            // ES2018 syntax: object spread and rest `{ ...x }`
-            "js/spread",
-            "js/destructuring/",
-            "js/destructuring-ignore/",
-            "js/assignment/destructuring-heuristic.js",
-            "js/assignment/destructuring.js",
-            "js/function-single-destructuring/object.js",
-            "js/last-argument-expansion/assignment-pattern.js",
-            "js/last-argument-expansion/issue-10708.js",
-            "js/last-argument-expansion/issue-7518.js",
-            // ES2018 syntax: async iterator
-            "js/for-await/",
-            // ES2019 syntax: private class field `#field`
-            "js/classes-private-fields",
-            "js/no-semi/private-field.js",
-            // ES2019 syntax: `try {} catch {}`
-            "js/optional-catch-binding",
-            // ES2020 syntax: `a ?? b`
-            "js/nullish-coalescing",
-            "js/arrows/chain-in-logical-expression.js",
-            // ES2020 syntax: `prop?.`
-            "js/optional-chaining/",
-            "js/optional-chaining-assignment/",
-            "js/chain-expression/test.js",
-            // Es2020 syntax: bigint
-            "js/big-int/",
-            "js/objects/bigint-key.js",
-            // ES2021 syntax: numeric separator `1_000`
-            "js/literal-numeric-separator/",
-            "js/quote-props/numeric-separator.js",
-            // ES2021 syntax: `??=`, `&&=`, ...
-            "js/logical-assignment/",
-            // ES2022 syntax: private brand check `#field in`
-            "js/private-in",
-            // ES2022 syntax: private methods
-            "js/classes/keyword-property/private.js",
-            "js/decorator-auto-accessors/private.js",
-            "js/decorator-auto-accessors/static-private.js",
-            // ES2022 syntax: class fields
-            "js/classes/class-fields-features.js",
-            // ES2022 syntax: `static {}`
-            "js/class-static-block/",
-            // ES2022 syntax: top-level await
-            "js/top-level-await/",
-            // ES2022 syntax: `/regex/d`
-            "js/regex/d-flag.js",
-            // ES2023 syntax: shebang `#!/usr/bin/node`
-            "js/shebang/",
-            // ES2024 syntax: `/regex/v`
-            "js/regex/v-flag.js",*/
-            /*// JSX
-            "jsx/",
-            "js/binary-expressions/inline-jsx.js",
-            "js/binary-expressions/jsx_parent.js",
-            "js/call/first-argument-expansion/jsx.js",
-            "js/comments/html-like/",
-            "js/comments/jsx.js",
-            "js/comments/return-statement.js",
-            "js/last-argument-expansion/jsx.js",
-            "js/trailing-comma/jsx.js",
-            "js/throw_statement/jsx.js",
-            "js/unicode/nbsp-jsx.js",
-            "js/yield/jsx-without-parenthesis.js",
-            "js/yield/jsx.js",*/
-            /*// TypeScript
-            "typescript/",*/
-        ];
-
-        patterns.iter().any(|pattern| file_name.contains(pattern))
     }
 
     fn print(&self) {
@@ -326,7 +144,7 @@ impl DiffReport {
         incompatible_only: bool,
     ) {
         let mut state = self.state.lock().unwrap();
-        state.sort_by_key(|DiffReportItem { file_name, .. }| *file_name);
+        state.sort_by(|a, b| a.file_name.cmp(&b.file_name));
 
         let mut report_metric_data = PrettierCompatibilityMetricData::default();
         let mut file_ratio_sum = 0_f64;
@@ -376,7 +194,7 @@ impl DiffReport {
 
             let single_file_metric_data = SingleFileMetricData {
                 diff,
-                filename: (*file_name).to_string(),
+                filename: (*file_name).clone(),
                 single_file_compatibility: ratio,
             };
 

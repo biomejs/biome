@@ -417,6 +417,32 @@ impl HtmlOpeningElement {
         )
     }
 }
+impl HtmlProcessingInstruction {
+    pub fn with_start_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_target(self, element: AnyHtmlTagName) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_attributes(self, element: HtmlAttributeList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_end_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into()))),
+        )
+    }
+}
 impl HtmlRoot {
     pub fn with_bom_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
@@ -624,11 +650,11 @@ impl SvelteAwaitCatchBlock {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: HtmlTextExpression) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
-        )
+    pub fn with_name(self, element: Option<HtmlTextExpression>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            2usize..=2usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
     pub fn with_r_curly_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -650,11 +676,11 @@ impl SvelteAwaitCatchClause {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: HtmlTextExpression) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
-        )
+    pub fn with_name(self, element: Option<HtmlTextExpression>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            1usize..=1usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
 }
 impl SvelteAwaitClosingBlock {
@@ -734,11 +760,11 @@ impl SvelteAwaitThenBlock {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: HtmlTextExpression) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
-        )
+    pub fn with_name(self, element: Option<HtmlTextExpression>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            2usize..=2usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
     pub fn with_r_curly_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -760,11 +786,11 @@ impl SvelteAwaitThenClause {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: HtmlTextExpression) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
-        )
+    pub fn with_name(self, element: Option<HtmlTextExpression>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            1usize..=1usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
 }
 impl SvelteBindDirective {
@@ -775,6 +801,52 @@ impl SvelteBindDirective {
         )
     }
     pub fn with_value(self, element: SvelteDirectiveValue) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl SvelteBindFunctionBindingExpression {
+    pub fn with_l_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_get(self, element: HtmlTextExpression) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_comma_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_set(self, element: HtmlTextExpression) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+        )
+    }
+}
+impl SvelteBindFunctionBindingInitializerClause {
+    pub fn with_eq_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_value(self, element: SvelteBindFunctionBindingExpression) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -900,7 +972,7 @@ impl SvelteDirectiveValue {
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_initializer(self, element: Option<HtmlAttributeInitializerClause>) -> Self {
+    pub fn with_initializer(self, element: Option<AnySvelteDirectiveInitializerClause>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             3usize..=3usize,
             once(element.map(|element| element.into_syntax().into())),
@@ -1309,6 +1381,26 @@ impl SvelteLiteral {
         )
     }
 }
+impl SvelteMemberProperty {
+    pub fn with_object(self, element: AnySvelteMemberObject) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_dot_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_member(self, element: SvelteName) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl SvelteName {
     pub fn with_ident_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -1328,6 +1420,26 @@ impl SvelteOutDirective {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl SvelteRenameBinding {
+    pub fn with_key(self, element: SvelteName) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_colon_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_name(self, element: AnySvelteBindingAssignmentBinding) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
@@ -1471,6 +1583,34 @@ impl SvelteStyleDirective {
         )
     }
 }
+impl SvelteTemplateAttributeValue {
+    pub fn with_l_quote_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_elements(self, element: SvelteTemplateElementList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_quote_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+}
+impl SvelteTemplateChunkElement {
+    pub fn with_html_template_chunk_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl SvelteTransitionDirective {
     pub fn with_transition_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -1599,6 +1739,182 @@ impl VueVBindShorthandDirective {
             2usize..=2usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
+    }
+}
+impl VueVForArrayBinding {
+    pub fn with_l_brack_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_bindings(self, element: VueVForBindingList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_brack_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+}
+impl VueVForIdentifierBinding {
+    pub fn with_name_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl VueVForInOperator {
+    pub fn with_in_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl VueVForObjectBinding {
+    pub fn with_l_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_bindings(self, element: VueVForBindingList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+}
+impl VueVForObjectPropertyBinding {
+    pub fn with_property(self, element: VueVForIdentifierBinding) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_colon_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_binding(self, element: AnyVueVForBinding) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl VueVForOfOperator {
+    pub fn with_of_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl VueVForRestBinding {
+    pub fn with_dotdotdot_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_binding(self, element: VueVForIdentifierBinding) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl VueVForTupleBinding {
+    pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_value(self, element: AnyVueVForBinding) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_second(self, element: Option<VueVForTupleElement>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            2usize..=2usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_third(self, element: Option<VueVForTupleElement>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            3usize..=3usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+        )
+    }
+}
+impl VueVForTupleElement {
+    pub fn with_comma_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_binding(self, element: AnyVueVForBinding) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl VueVForValue {
+    pub fn with_l_quote_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_binding(self, element: AnyVueVForBinding) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_operator(self, element: AnyVueVForOperator) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_expression(self, element: HtmlTextExpression) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_quote_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+        )
     }
 }
 impl VueVOnShorthandDirective {

@@ -1,0 +1,7 @@
+$name: theme;
+
+a {
+  --#{$name}: {
+    color: red;
+  }
+}

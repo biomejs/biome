@@ -296,20 +296,17 @@ fn fix_function_name_pattern(
     match name {
         FDESCRIBE_KEYWORD => {
             // Replace fdescribe with describe
-            let replaced_function = make::js_reference_identifier(make::ident("describe"));
-            mutation.replace_element(function_name.into(), replaced_function.into());
+            mutation.replace_token(function_name, make::ident("describe"));
             Some(())
         }
         FIT_KEYWORD => {
             // Replace fit with it
-            let replaced_function = make::js_reference_identifier(make::ident("it"));
-            mutation.replace_element(function_name.into(), replaced_function.into());
+            mutation.replace_token(function_name, make::ident("it"));
             Some(())
         }
         "ftest" => {
             // Replace ftest with test
-            let replaced_function = make::js_reference_identifier(make::ident("test"));
-            mutation.replace_element(function_name.into(), replaced_function.into());
+            mutation.replace_token(function_name, make::ident("test"));
             Some(())
         }
         _ => None,

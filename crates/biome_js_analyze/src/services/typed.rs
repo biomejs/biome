@@ -2,13 +2,28 @@ use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleDomain, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsLanguage, JsSyntaxNode,
+    AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsClassDeclaration, JsClassExpression,
+    JsLanguage, JsObjectExpression, JsReferenceIdentifier, JsSyntaxNode,
 };
 use biome_js_type_info::Type;
-use biome_module_graph::ModuleResolver;
+use biome_module_graph::{ModuleDb, ModuleInfo, ModuleInfoKind, ModuleResolver};
 use biome_rowan::{AstNode, TextRange};
+use std::rc::Rc;
 use std::sync::Arc;
+
+#[derive(Clone)]
+pub(crate) struct TypedModule {
+    db: Rc<dyn ModuleDb>,
+    module: ModuleInfo,
+}
+
+impl TypedModule {
+    pub(crate) fn new(db: Rc<dyn ModuleDb>, module: ModuleInfo) -> Self {
+        Self { db, module }
+    }
+}
 
 /// Service for use with type inference rules.
 ///
@@ -16,14 +31,33 @@ use std::sync::Arc;
 /// expressions or function definitions from the module graph.
 #[derive(Clone)]
 pub struct TypedService {
-    resolver: Option<Arc<ModuleResolver>>,
+    module: Option<TypedModule>,
+    model: Option<SemanticModel>,
 }
 
 impl TypedService {
+    #[expect(
+        clippy::arc_with_non_send_sync,
+        reason = "The legacy ModuleResolver and Type APIs require Arc while this migration keeps them in place."
+    )]
+    fn resolver(&self) -> Option<Arc<ModuleResolver>> {
+        let typed_module = self.module.as_ref()?;
+        // NOTE: commented, no need to do useless computation. Comment this out once we're ready to migrate to the new engine.
+        // let _ = infer_module_types_bottom_up(typed_module.db.as_ref(), typed_module.module);
+        let ModuleInfoKind::Js(module_info) = typed_module.module.kind(typed_module.db.as_ref())
+        else {
+            return None;
+        };
+
+        Some(Arc::new(ModuleResolver::for_module(
+            module_info.clone(),
+            typed_module.db.clone(),
+        )))
+    }
+
     /// Returns the [`Type`] for the given `expression`.
     pub fn type_of_expression(&self, expression: &AnyJsExpression) -> Type {
-        self.resolver
-            .as_ref()
+        self.resolver()
             .map(|resolver| resolver.resolved_type_of_expression(expression))
             .unwrap_or_default()
     }
@@ -31,8 +65,7 @@ impl TypedService {
     /// Returns the [`Type`] of the value with the given `name`, as defined
     /// in the scope that contains `range`.
     pub fn type_of_named_value(&self, range: TextRange, name: &str) -> Type {
-        self.resolver
-            .as_ref()
+        self.resolver()
             .map(|resolver| resolver.resolved_type_of_named_value(range, name))
             .unwrap_or_default()
     }
@@ -50,20 +83,61 @@ impl TypedService {
                 .and_then(AnyJsBinding::as_js_identifier_binding)
                 .and_then(|identifier| identifier.name_token().ok())
                 .and_then(|name| {
-                    self.resolver.as_ref().map(|resolver| {
+                    self.resolver().map(|resolver| {
                         resolver.resolved_type_of_named_value(function.range(), name.text())
                     })
                 })
                 .unwrap_or_default(),
             AnyJsFunction::JsFunctionExportDefaultDeclaration(_decl) => self
-                .resolver
-                .as_ref()
+                .resolver()
                 .and_then(|resolver| resolver.resolved_type_of_default_export())
                 .unwrap_or_default(),
             AnyJsFunction::JsFunctionExpression(expr) => {
                 self.type_of_expression(&AnyJsExpression::JsFunctionExpression(expr.clone()))
             }
         }
+    }
+
+    /// Returns the [`Type`] for a class/object member by navigating to the
+    /// parent and looking up the member by name.
+    pub fn type_of_member(&self, member_syntax: &JsSyntaxNode, member_name: &str) -> Type {
+        let parent_type = member_syntax
+            .ancestors()
+            .find_map(|ancestor| {
+                if let Some(class) = JsClassDeclaration::cast(ancestor.clone()) {
+                    return class
+                        .id()
+                        .ok()
+                        .and_then(|id| id.as_js_identifier_binding().cloned())
+                        .and_then(|id| id.name_token().ok())
+                        .map(|name| {
+                            let trimmed = name.token_text_trimmed();
+                            self.type_of_named_value(name.text_trimmed_range(), trimmed.text())
+                        });
+                }
+                if let Some(class_expr) = JsClassExpression::cast(ancestor.clone()) {
+                    return Some(
+                        self.type_of_expression(&AnyJsExpression::JsClassExpression(class_expr)),
+                    );
+                }
+                if let Some(obj_expr) = JsObjectExpression::cast(ancestor.clone()) {
+                    return Some(
+                        self.type_of_expression(&AnyJsExpression::JsObjectExpression(obj_expr)),
+                    );
+                }
+                None
+            })
+            .unwrap_or_default();
+
+        parent_type
+            .find_member_type(member_name)
+            .unwrap_or_default()
+    }
+
+    pub fn has_binding(&self, reference: &JsReferenceIdentifier) -> bool {
+        self.model
+            .as_ref()
+            .is_some_and(|model| model.binding(reference).is_some())
     }
 }
 
@@ -83,9 +157,12 @@ impl FromServices for TypedService {
             }
         }
 
-        let resolver: Option<&Option<Arc<ModuleResolver>>> = services.get_service();
-        let resolver = resolver.and_then(|resolver| resolver.as_ref().map(Arc::clone));
-        Ok(Self { resolver })
+        let module = services
+            .get_service::<Option<TypedModule>>()
+            .cloned()
+            .flatten();
+        let model = services.get_service::<SemanticModel>().cloned();
+        Ok(Self { module, model })
     }
 }
 

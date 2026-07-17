@@ -1,0 +1,6 @@
+/* should not generate diagnostics */
+a:nth-child(#{$i}) {}
+a:nth-child(#{$zero}n + 0) {}
+a:nth-child(0n + #{$offset}) {}
+a:nth-child(0n + 0#{$offset}) {}
+a:nth-child(#{$sign}2n + #{$offset}) {}

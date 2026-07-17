@@ -76,7 +76,8 @@ impl Rule for UseArrayLiterals {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let callee = node.callee().ok()?.omit_parentheses();
-        let (reference, name) = global_identifier(&callee)?;
+        let (reference, name) =
+            global_identifier(&callee.as_any_global_identifier_expression()?)?;
         if name.text() != "Array" || ctx.model().binding(&reference).is_some() {
             return None;
         }

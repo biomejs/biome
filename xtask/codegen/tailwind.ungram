@@ -39,8 +39,10 @@ SyntaxElement = SyntaxElement
 TwBogus = SyntaxElement*
 TwBogusCandidate = SyntaxElement*
 TwBogusVariant = SyntaxElement*
+TwBogusVariantSegment = SyntaxElement*
 TwBogusModifier = SyntaxElement*
 TwBogusValue = SyntaxElement*
+CssBogusPropertyValue = SyntaxElement*
 
 // Reference:
 // https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/candidate.ts
@@ -74,7 +76,7 @@ TwArbitraryCandidate =
 	'['
 	property: 'tw_property'
 	':'
-	value: 'tw_value'
+	value: CssGenericComponentValueList
 	']'
 	modifier: AnyTwModifier?
 
@@ -101,9 +103,7 @@ TwVariantList = (AnyTwVariant (':' AnyTwVariant)* ':'?)
 
 // A Variant is a selector that modifies what the Candidate applies to.
 AnyTwVariant = TwArbitraryVariant
-	| TwStaticVariant
-	| TwFunctionalVariant
-	| TwDataAttribute
+	| TwVariantExpression
 	| TwBogusVariant
 
 // Arbitrary variants are variants that take a selector and generate a variant on the fly.
@@ -114,26 +114,43 @@ TwArbitraryVariant =
 	selector: 'tw_selector'
 	']'
 
-// Static variants are variants that don't take any arguments.
+// Non-arbitrary variants are represented as syntax-level segment lists.
 //
 // hover:text-red-500
 // ^^^^^
-TwStaticVariant =
-	base: 'tw_base'
+// group-data-[state=open]:block
+// ^^^^^^^^^^^^^^^^^^^^^^^
+TwVariantExpression =
+	segments: TwVariantSegmentList
 
-// aria-disabled:text-red-500
-// ^^^^^^^^^^^^^
-// aria-[disabled]:text-red-500
-// ^^^^^^^^^^^^^^^
-TwFunctionalVariant =
-	base: 'tw_base'
-	'-'
-	value: AnyTwValue
+TwVariantSegmentList =
+	AnyTwVariantSegment ('-' AnyTwVariantSegment)*
+
+AnyTwVariantSegment =
+	TwNamedVariantSegment
+	| TwArbitraryVariantSegment
+	| TwCssVariableVariantSegment
+	| TwBogusVariantSegment
+
+TwNamedVariantSegment =
+	value: 'tw_variant_segment'
+
+TwArbitraryVariantSegment =
+	'['
+	value: CssGenericComponentValueList
+	']'
+
+TwCssVariableVariantSegment =
+	'('
+	value: 'tw_value'
+	')'
+
 
 AnyTwValue = TwNamedValue
+	| TwNumberValue
+	| TwPercentageValue
 	| TwArbitraryValue
 	| TwCssVariableValue
-	| TwDataAttribute
 	| TwBogusValue
 
 // bg-red-500
@@ -141,11 +158,22 @@ AnyTwValue = TwNamedValue
 TwNamedValue =
 	value: 'tw_value'
 
+// w-3
+//   ^
+TwNumberValue =
+	value: 'tw_number'
+
+// progress-50%
+//          ^^^
+TwPercentageValue =
+	value: 'tw_number'
+	'%'
+
 // bg-[#ff0000]
 //    ^^^^^^^^^
 TwArbitraryValue =
 	'['
-	value: 'tw_value'
+	value: CssGenericComponentValueList
 	']'
 
 // bg-(--brand-primary)
@@ -165,24 +193,102 @@ TwModifier =
 	'/'
 	value: AnyTwValue
 
-// data-[state=open]:hidden
-// ^^^^^^^^^^^^^^^^^
-// group-data-active:hidden
-//       ^^^^^^^^^^^
-TwDataAttribute =
-	'data'
-	'-'
-	value: AnyTwDataAttributeValue
+CssGenericComponentValueList = AnyCssGenericComponentValue*
 
-AnyTwDataAttributeValue =
-	TwNamedValue |
-	TwArbitraryValue |
-	TwBogusValue
+AnyCssGenericComponentValue =
+	AnyCssValue
+	| CssGenericDelimiter
 
-// TODO: replace TwArbitraryValue in AnyTwDataAttributeValue with this
-// TwDataAttributeArbitraryValue =
-//	'['
-//	key: 'tw_value'
-//	'='
-//	value: 'tw_value'
-//	']'
+CssGenericDelimiter =
+	value: (',' | '/' | ':' | '=' | '.')
+
+CssComponentValueList = AnyCssValue*
+
+AnyCssValue =
+	CssIdentifier
+	| CssDashedIdentifier
+	| CssString
+	| CssNumber
+	| AnyCssDimension
+	| CssPercentage
+	| CssRatio
+	| AnyCssFunction
+	| CssColor
+	| CssUnaryExpression
+	| CssBinaryExpression
+	| CssParenthesizedExpression
+
+CssIdentifier = 'ident'
+
+CssDashedIdentifier = 'ident'
+
+CssString = value: 'CSS_STRING_LITERAL'
+
+CssNumber = value: 'CSS_NUMBER_LITERAL'
+
+AnyCssDimension = CssRegularDimension | CssUnknownDimension
+
+CssRegularDimension =
+	value: 'CSS_NUMBER_LITERAL'
+	unit: 'ident'
+
+CssUnknownDimension =
+	value: 'CSS_NUMBER_LITERAL'
+	unit: 'ident'
+
+CssPercentage =
+	value: 'CSS_NUMBER_LITERAL'
+	'%'
+
+CssRatio =
+	left: CssNumber
+	'/'
+	right: CssNumber
+
+AnyCssFunction = CssFunction | CssUrlFunction
+
+CssFunction =
+	name: CssIdentifier
+	'('
+	parameters: CssParameterList
+	')'
+
+CssUrlFunction =
+	'url'
+	'('
+	value: AnyCssUrlValue?
+	')'
+
+AnyCssUrlValue =
+	CssUrlValueRaw
+	| CssString
+	| CssParameterList
+
+CssUrlValueRaw = value: 'CSS_URL_VALUE_RAW_LITERAL'
+
+CssParameterList = AnyCssExpression (',' AnyCssExpression)* ','?
+
+AnyCssExpression =
+	CssListOfComponentValuesExpression
+	| CssComponentValueList
+	| CssBinaryExpression
+	| CssUnaryExpression
+	| CssParenthesizedExpression
+
+CssListOfComponentValuesExpression = CssComponentValueList
+
+CssBinaryExpression =
+	left: AnyCssExpression
+	operator: ('+' | '-' | '*' | '/')
+	right: AnyCssExpression
+
+CssUnaryExpression =
+	operator: ('+' | '-' | '*')
+	argument: AnyCssValue
+
+CssParenthesizedExpression =
+	'('
+	expression: CssComponentValueList
+	')'
+
+CssColor = value: 'CSS_COLOR_LITERAL'

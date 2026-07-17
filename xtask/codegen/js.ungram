@@ -49,7 +49,12 @@ JsBogusNamedImportSpecifier = SyntaxElement*
 TsBogusType = SyntaxElement*
 
 AnyJsRoot =
-	JsScript | JsModule | JsExpressionSnippet | TsDeclarationModule | JsExpressionTemplateRoot
+	JsScript
+	| JsModule
+	| JsExpressionSnippet
+	| TsDeclarationModule
+	| JsExpressionTemplateRoot
+	| JsSvelteSnippetRoot
 
 JsScript =
 	bom: 'UNICODE_BOM'?
@@ -80,6 +85,11 @@ JsExpressionTemplateRoot =
 	expression: AnyJsExpression
 	eof: 'EOF'
 
+// Special root created for Svelte #snippet block
+JsSvelteSnippetRoot =
+		name: AnyJsBinding
+		parameters: JsParameters
+		eof: 'EOF'
 
 JsDirective =
 	value: 'js_string_literal'
@@ -2391,6 +2401,7 @@ JsxAttributeList = AnyJsxAttribute*
 AnyJsxAttribute =
 	JsxAttribute
 	| JsxSpreadAttribute
+	| JsxShorthandAttribute
 	| JsMetavariable
 
 JsxAttribute =
@@ -2421,6 +2432,15 @@ JsxSpreadAttribute =
 	'{'
 	'...'
 	argument: AnyJsExpression // parse_assignment_expression_or_higher
+	'}'
+
+// <a {b} />
+//    ^^^
+// Astro-only shorthand attribute. `{name}` is equivalent to `name={name}`.
+// Only valid when the parser is in an Astro-embedded context.
+JsxShorthandAttribute =
+	'{'
+	name: JsReferenceIdentifier
 	'}'
 
 // ==================================

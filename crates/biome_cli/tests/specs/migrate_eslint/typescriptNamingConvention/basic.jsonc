@@ -1,0 +1,32 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "@typescript-eslint/naming-convention": ["error",
+        {
+          "selector": "property",
+          "leadingUnderscore": "forbid"
+        },
+        {
+          "selector": "property",
+          "modifiers": ["private"],
+          "format": ["strictCamelCase"],
+          "leadingUnderscore": "require"
+        },
+        {
+          "selector": "interface",
+          "prefix": ["I", "IO"]
+        },
+        {
+          "selector": "enumMember",
+          "format": ["UPPER_CASE"]
+        },
+        {
+          "selector": "variable",
+          "types": ["boolean"],
+          "format": ["UPPER_CASE"]
+        }
+      ]
+    }
+  }
+}

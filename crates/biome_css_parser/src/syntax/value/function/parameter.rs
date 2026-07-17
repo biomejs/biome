@@ -88,7 +88,7 @@ fn parse_parameter_with_context(p: &mut CssParser, context: ValueParsingContext)
         return Absent;
     }
 
-    if context.is_scss_parsing_allowed() {
+    if context.is_full_scss_parsing_allowed() {
         parse_scss_expression_in_args_until(p, PARAMETER_RECOVERY_TOKEN_SET)
     } else {
         parse_any_expression_with_context(p, context)

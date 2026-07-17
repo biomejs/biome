@@ -1,7 +1,0 @@
-{
-  "incremental": false,
-  "typescript": {},
-  "includes": ["**/*.{js,jsx,cjs,ts,tsx}"],
-  "excludes": ["**/node_modules"],
-  "plugins": ["https://plugins.dprint.dev/typescript-0.91.6.wasm"]
-}

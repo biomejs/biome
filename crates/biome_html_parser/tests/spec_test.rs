@@ -2,7 +2,8 @@ use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, termcolor};
 use biome_html_parser::{HtmlParserOptions, parse_html};
-use biome_html_syntax::{HtmlFileSource, HtmlVariant};
+use biome_languages::HtmlFileSource;
+use biome_languages::html::HtmlVariant;
 use biome_rowan::SyntaxKind;
 use biome_test_utils::{has_bogus_nodes_or_empty_slots, validate_eof_token};
 use camino::Utf8Path;
@@ -130,10 +131,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
                 panic!("modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}")
             }
         }
-        ExpectedOutcome::Fail => {
-            if parsed.diagnostics().is_empty() {
-                panic!("Failing test must have diagnostics");
-            }
+        ExpectedOutcome::Fail if parsed.diagnostics().is_empty() => {
+            panic!("Failing test must have diagnostics");
         }
         _ => {}
     }

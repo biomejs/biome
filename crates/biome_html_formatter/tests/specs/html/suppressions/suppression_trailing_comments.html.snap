@@ -1,0 +1,32 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: suppressions/suppression_trailing_comments.html
+---
+
+# Input
+
+```html
+<div>
+	<!-- biome-ignore format: preserve the nested element formatting -->
+	<span>one     two</span><!-- keep this trailing comment after the suppressed element -->
+	<p>done</p>
+</div>
+
+```
+
+
+# Formatted
+
+```html
+<div>
+	<!-- biome-ignore format: preserve the nested element formatting -->
+	<span>one     two</span><!-- keep this trailing comment after the suppressed element -->
+	<p>done</p>
+</div>
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    3: 	<span>one     two</span><!-- keep this trailing comment after the suppressed element -->
+```

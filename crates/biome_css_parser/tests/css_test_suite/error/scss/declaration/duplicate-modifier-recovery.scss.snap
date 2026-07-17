@@ -23,7 +23,7 @@ CssRoot {
     items: CssRootItemList [
         CssBogus {
             items: [
-                ScssIdentifier {
+                ScssVariable {
                     dollar_token: DOLLAR@0..124 "$" [Comments("// Duplicate modifier ..."), Newline("\n"), Comments("// without targeted d ..."), Newline("\n")] [],
                     name: CssIdentifier {
                         value_token: IDENT@124..140 "dup-default-junk" [] [],
@@ -61,7 +61,7 @@ CssRoot {
         },
         CssBogus {
             items: [
-                ScssIdentifier {
+                ScssVariable {
                     dollar_token: DOLLAR@166..168 "$" [Newline("\n")] [],
                     name: CssIdentifier {
                         value_token: IDENT@168..183 "dup-global-junk" [] [],
@@ -109,7 +109,7 @@ CssRoot {
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..207
     0: CSS_BOGUS@0..166
-      0: SCSS_IDENTIFIER@0..140
+      0: SCSS_VARIABLE@0..140
         0: DOLLAR@0..124 "$" [Comments("// Duplicate modifier ..."), Newline("\n"), Comments("// without targeted d ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@124..140
           0: IDENT@124..140 "dup-default-junk" [] []
@@ -131,7 +131,7 @@ CssRoot {
           1: DEFAULT_KW@158..165 "default" [] []
       4: SEMICOLON@165..166 ";" [] []
     1: CSS_BOGUS@166..207
-      0: SCSS_IDENTIFIER@166..183
+      0: SCSS_VARIABLE@166..183
         0: DOLLAR@166..168 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@168..183
           0: IDENT@168..183 "dup-global-junk" [] []

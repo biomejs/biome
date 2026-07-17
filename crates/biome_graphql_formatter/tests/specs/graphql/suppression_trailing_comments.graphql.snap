@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: graphql/suppression_trailing_comments.graphql
+---
+
+# Input
+
+```graphql
+query DemoQuery {
+	user(
+		# biome-ignore format: preserve the nested argument formatting
+		filter: { id: $id,  active: true } # keep this trailing comment after the suppressed argument
+		status: ACTIVE
+	) {
+		id
+	}
+}
+
+```
+
+
+# Formatted
+
+```graphql
+query DemoQuery {
+	user(
+		# biome-ignore format: preserve the nested argument formatting
+		filter: { id: $id,  active: true } # keep this trailing comment after the suppressed argument
+		status: ACTIVE
+	) {
+		id
+	}
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    4: 		filter: { id: $id,  active: true } # keep this trailing comment after the suppressed argument
+```

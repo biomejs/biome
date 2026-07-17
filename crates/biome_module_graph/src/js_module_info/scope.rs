@@ -1,27 +1,8 @@
-use std::{iter::FusedIterator, sync::Arc};
-
-use biome_js_semantic::{BindingId, ScopeId, TsBindingReference};
+use super::{JsModuleInfoInner, binding::JsBinding};
+use biome_js_semantic::{BindingId, TsBindingReference};
 use biome_js_syntax::TextRange;
 use biome_js_type_info::TypeReferenceQualifier;
-use biome_rowan::TokenText;
-use rustc_hash::FxHashMap;
-
-use super::{JsModuleInfoInner, binding::JsBinding};
-
-#[derive(Debug)]
-pub struct JsScopeData {
-    // The scope range
-    #[expect(dead_code, reason = "May be used in future for scope analysis")]
-    pub range: TextRange,
-    // The parent scope of this scope
-    pub parent: Option<ScopeId>,
-    // All children scope of this scope
-    pub children: Vec<ScopeId>,
-    // All bindings of this scope (points to SemanticModelData::bindings)
-    pub bindings: Vec<BindingId>,
-    // Map pointing to the [bindings] vec of each bindings by its name
-    pub bindings_by_name: FxHashMap<TokenText, TsBindingReference>,
-}
+use std::{iter::FusedIterator, sync::Arc};
 
 /// Extension trait for `TsBindingReference` that adds methods depending on
 /// `biome_js_type_info` types, which are not available in `biome_js_semantic`.
@@ -173,6 +154,7 @@ impl FusedIterator for ScopeBindingsIter {}
 #[cfg(test)]
 mod tests {
     use super::*;
+    use biome_js_semantic::JsDeclarationKind;
 
     #[test]
     fn binding_reference_merging() {
@@ -230,6 +212,58 @@ mod tests {
             TsBindingReference::ValueType(BindingId::new(0))
                 .union_with(TsBindingReference::NamespaceAndValueType(BindingId::new(0))),
             TsBindingReference::NamespaceAndValueType(BindingId::new(0))
+        );
+    }
+
+    #[test]
+    fn function_declarations_are_plain_value_references() {
+        // Functions are ordinary value references here; same-name overloads are
+        // accumulated separately in the scope's `overloads_by_name` map, so the
+        // `TsBindingReference` itself stays a small, `Copy` POD enum.
+        assert_eq!(
+            TsBindingReference::from_binding_and_declaration_kind(
+                BindingId::new(0),
+                JsDeclarationKind::Function,
+            ),
+            TsBindingReference::ValueType(BindingId::new(0))
+        );
+        assert_eq!(
+            TsBindingReference::from_binding_and_declaration_kind(
+                BindingId::new(0),
+                JsDeclarationKind::HoistedValue,
+            ),
+            TsBindingReference::ValueType(BindingId::new(0))
+        );
+        assert_eq!(
+            TsBindingReference::from_binding_and_declaration_kind(
+                BindingId::new(0),
+                JsDeclarationKind::Value,
+            ),
+            TsBindingReference::ValueType(BindingId::new(0))
+        );
+    }
+
+    #[test]
+    fn same_name_functions_merge_last_wins() {
+        // Two same-name functions collapse to the last (implementation) signature
+        // in `bindings_by_name`; the full overload set lives in `overloads_by_name`.
+        assert_eq!(
+            TsBindingReference::ValueType(BindingId::new(0))
+                .union_with(TsBindingReference::ValueType(BindingId::new(1))),
+            TsBindingReference::ValueType(BindingId::new(1))
+        );
+
+        // A function merging with a same-name type still produces a `Merged`
+        // reference, so name resolution keeps both the value and the type slot
+        // even though the overload set is tracked elsewhere.
+        assert_eq!(
+            TsBindingReference::ValueType(BindingId::new(0))
+                .union_with(TsBindingReference::Type(BindingId::new(1))),
+            TsBindingReference::Merged {
+                ty: Some(BindingId::new(1)),
+                value_ty: Some(BindingId::new(0)),
+                namespace_ty: None,
+            }
         );
     }
 }

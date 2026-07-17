@@ -141,7 +141,7 @@ fn basic_modifier() {
         DASH:1,
         TW_VALUE:7,
         SLASH:1,
-        TW_VALUE:2,
+        TW_NUMBER:2,
     );
 }
 
@@ -153,7 +153,7 @@ fn basic_modifier_important() {
         DASH:1,
         TW_VALUE:7,
         SLASH:1,
-        TW_VALUE:2,
+        TW_NUMBER:2,
         BANG:1,
     );
 }
@@ -199,5 +199,62 @@ fn negative() {
         "-mt",
         DASH:1,
         TW_BASE:2,
+    );
+}
+
+#[test]
+fn arbitrary_css_dimensions_and_percentages() {
+    assert_lex!(
+        TailwindLexContext::CssValue,
+        "12px 100% .5rem -1rem",
+        CSS_DIMENSION_VALUE:2,
+        PX_KW:2,
+        WHITESPACE:1,
+        CSS_PERCENTAGE_VALUE:3,
+        PERCENT:1,
+        WHITESPACE:1,
+        CSS_DIMENSION_VALUE:2,
+        REM_KW:3,
+        WHITESPACE:1,
+        CSS_DIMENSION_VALUE:2,
+        REM_KW:3,
+    );
+}
+
+#[test]
+fn arbitrary_css_numbers_with_exponents() {
+    assert_lex!(
+        TailwindLexContext::CssValue,
+        "1e2px 1E+2% 1e-2 1e 1e+",
+        CSS_DIMENSION_VALUE:3,
+        PX_KW:2,
+        WHITESPACE:1,
+        CSS_PERCENTAGE_VALUE:4,
+        PERCENT:1,
+        WHITESPACE:1,
+        CSS_NUMBER_LITERAL:4,
+        WHITESPACE:1,
+        CSS_DIMENSION_VALUE:1,
+        IDENT:1,
+        WHITESPACE:1,
+        CSS_DIMENSION_VALUE:1,
+        IDENT:1,
+        PLUS:1,
+    );
+}
+
+#[test]
+fn arbitrary_css_underscores_are_whitespace() {
+    assert_lex!(
+        TailwindLexContext::CssValue,
+        "0px_2px_4px",
+        CSS_DIMENSION_VALUE:1,
+        PX_KW:2,
+        WHITESPACE:1,
+        CSS_DIMENSION_VALUE:1,
+        PX_KW:2,
+        WHITESPACE:1,
+        CSS_DIMENSION_VALUE:1,
+        PX_KW:2,
     );
 }

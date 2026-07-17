@@ -1,0 +1,6 @@
+`const value = $value` where {
+	$value =>
+		// biome-ignore format: preserve the nested pattern formatting
+		`call(  foo,  bar )` // keep this trailing comment after the suppressed pattern
+	$done => `ok`
+}

@@ -36,6 +36,24 @@ impl FormatNodeRule<HtmlSingleTextExpression> for FormatHtmlSingleTextExpression
             )
         }
     }
+
+    fn fmt_leading_comments(
+        &self,
+        _node: &HtmlSingleTextExpression,
+        _f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        // handled by element list formatter
+        Ok(())
+    }
+
+    fn fmt_trailing_comments(
+        &self,
+        _node: &HtmlSingleTextExpression,
+        _f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        // handled by element list formatter
+        Ok(())
+    }
 }
 
 impl FormatRuleWithOptions<HtmlSingleTextExpression> for FormatHtmlSingleTextExpression {

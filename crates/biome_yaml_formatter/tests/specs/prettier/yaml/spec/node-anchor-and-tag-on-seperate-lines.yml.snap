@@ -1,0 +1,36 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/node-anchor-and-tag-on-seperate-lines.yml
+---
+
+# Input
+
+```yml
+key: &anchor
+ !!map
+  a: b
+
+```
+
+
+# Errors
+```
+node-anchor-and-tag-on-seperate-lines.yml:3:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found ``
+  
+    1 │ key: &anchor
+    2 │  !!map
+  > 3 │   a: b
+      │       
+    4 │ 
+  
+  i Remove 
+  
+
+```
+
+# Error
+```text
+format: Can't format code because it contains syntax errors
+```

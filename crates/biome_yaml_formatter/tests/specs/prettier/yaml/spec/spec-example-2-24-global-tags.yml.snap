@@ -1,0 +1,66 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-2-24-global-tags.yml
+---
+
+# Input
+
+```yml
+%TAG ! tag:clarkevans.com,2002:
+--- !shape
+  # Use the ! handle for presenting
+  # tag:clarkevans.com,2002:circle
+- !circle
+  center: &ORIGIN {x: 73, y: 129}
+  radius: 7
+- !line
+  start: *ORIGIN
+  finish: { x: 89, y: 102 }
+- !label
+  start: *ORIGIN
+  color: 0xFFEEBB
+  text: Pretty vector drawing.
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,10 +1,9 @@
+ %TAG ! tag:clarkevans.com,2002:
+----
+-!shape
+-# Use the ! handle for presenting
+-# tag:clarkevans.com,2002:circle
++--- !shape
++  # Use the ! handle for presenting
++  # tag:clarkevans.com,2002:circle
+ - !circle
+-  center: &ORIGIN { x: 73, y: 129 }
++  center: &ORIGIN {x: 73, y: 129}
+   radius: 7
+ - !line
+   start: *ORIGIN
+```
+
+# Output
+
+```yml
+%TAG ! tag:clarkevans.com,2002:
+--- !shape
+  # Use the ! handle for presenting
+  # tag:clarkevans.com,2002:circle
+- !circle
+  center: &ORIGIN {x: 73, y: 129}
+  radius: 7
+- !line
+  start: *ORIGIN
+  finish: { x: 89, y: 102 }
+- !label
+  start: *ORIGIN
+  color: 0xFFEEBB
+  text: Pretty vector drawing.
+```

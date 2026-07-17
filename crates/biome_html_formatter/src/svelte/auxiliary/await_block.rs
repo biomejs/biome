@@ -20,4 +20,13 @@ impl FormatNodeRule<SvelteAwaitBlock> for FormatSvelteAwaitBlock {
             ]
         )
     }
+
+    fn fmt_leading_comments(
+        &self,
+        _node: &SvelteAwaitBlock,
+        _f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        // handled by element list formatter
+        Ok(())
+    }
 }

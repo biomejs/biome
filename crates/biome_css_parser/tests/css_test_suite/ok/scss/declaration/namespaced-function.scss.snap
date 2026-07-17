@@ -18,8 +18,8 @@ $scoped-ident: mod.fn(var(--token));
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..1 "$" [] [],
                 name: CssIdentifier {
                     value_token: IDENT@1..10 "scoped-fn" [] [],
@@ -29,7 +29,7 @@ CssRoot {
             value: ScssExpression {
                 items: ScssExpressionItemList [
                     CssFunction {
-                        name: ScssQualifiedName {
+                        name: ScssModuleMemberAccess {
                             module: CssIdentifier {
                                 value_token: IDENT@12..15 "mod" [] [],
                             },
@@ -63,8 +63,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@24..25 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@25..27 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@27..39 "scoped-ident" [] [],
@@ -74,7 +74,7 @@ CssRoot {
             value: ScssExpression {
                 items: ScssExpressionItemList [
                     CssFunction {
-                        name: ScssQualifiedName {
+                        name: ScssModuleMemberAccess {
                             module: CssIdentifier {
                                 value_token: IDENT@41..44 "mod" [] [],
                             },
@@ -124,8 +124,8 @@ CssRoot {
 0: CSS_ROOT@0..63
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..62
-    0: SCSS_DECLARATION@0..25
-      0: SCSS_IDENTIFIER@0..10
+    0: SCSS_VARIABLE_DECLARATION@0..25
+      0: SCSS_VARIABLE@0..10
         0: DOLLAR@0..1 "$" [] []
         1: CSS_IDENTIFIER@1..10
           0: IDENT@1..10 "scoped-fn" [] []
@@ -133,7 +133,7 @@ CssRoot {
       2: SCSS_EXPRESSION@12..24
         0: SCSS_EXPRESSION_ITEM_LIST@12..24
           0: CSS_FUNCTION@12..24
-            0: SCSS_QUALIFIED_NAME@12..18
+            0: SCSS_MODULE_MEMBER_ACCESS@12..18
               0: CSS_IDENTIFIER@12..15
                 0: IDENT@12..15 "mod" [] []
               1: DOT@15..16 "." [] []
@@ -153,8 +153,8 @@ CssRoot {
             3: R_PAREN@23..24 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@24..24
       4: SEMICOLON@24..25 ";" [] []
-    1: SCSS_DECLARATION@25..62
-      0: SCSS_IDENTIFIER@25..39
+    1: SCSS_VARIABLE_DECLARATION@25..62
+      0: SCSS_VARIABLE@25..39
         0: DOLLAR@25..27 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@27..39
           0: IDENT@27..39 "scoped-ident" [] []
@@ -162,7 +162,7 @@ CssRoot {
       2: SCSS_EXPRESSION@41..61
         0: SCSS_EXPRESSION_ITEM_LIST@41..61
           0: CSS_FUNCTION@41..61
-            0: SCSS_QUALIFIED_NAME@41..47
+            0: SCSS_MODULE_MEMBER_ACCESS@41..47
               0: CSS_IDENTIFIER@41..44
                 0: IDENT@41..44 "mod" [] []
               1: DOT@44..45 "." [] []

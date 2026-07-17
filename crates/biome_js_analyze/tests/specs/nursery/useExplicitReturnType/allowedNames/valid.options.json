@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useExplicitReturnType": {
+          "level": "error",
+          "options": {
+            "allowedNames": ["test1", "test1b", "test1c", "test2", "prop", "method", "arrow", "arrowFn", "fn"]
+          }
+        }
+      }
+    }
+  }
+}

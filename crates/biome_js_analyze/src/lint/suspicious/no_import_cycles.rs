@@ -1,4 +1,4 @@
-use crate::services::module_graph::ResolvedImports;
+use crate::services::database::ResolvedImports;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -160,12 +160,12 @@ declare_lint_rule! {
 
 impl Rule for NoImportCycles {
     type Query = ResolvedImports<AnyJsImportLike>;
-    type State = Vec<String>;
+    type State = Box<[ResolvedPath]>;
     type Signals = Option<Self::State>;
     type Options = NoImportCyclesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let module_info = ctx.module_info_for_path(ctx.file_path())?;
+        let module_info = ctx.js_module_info_for_path(ctx.file_path())?;
         let node = ctx.query();
 
         let JsImportPath {
@@ -178,14 +178,14 @@ impl Rule for NoImportCycles {
             return None;
         }
 
-        let resolved_path = resolved_path.as_path()?;
+        let resolved_path_path = resolved_path.as_path()?;
 
         // Don't check for cycles through node_modules imports.
-        if is_node_modules_path(resolved_path) {
+        if is_node_modules_path(resolved_path_path) {
             return None;
         }
 
-        let imports = ctx.module_info_for_path(resolved_path)?;
+        let imports = ctx.js_module_info_for_path(resolved_path_path)?;
 
         find_cycle(ctx, resolved_path, imports)
     }
@@ -205,11 +205,15 @@ impl Rule for NoImportCycles {
                 note.extend_with(markup!("\n    ... which imports "));
             }
 
-            match Utf8Path::new(path).strip_prefix(&cwd) {
+            let Some(path) = path.as_path() else {
+                continue;
+            };
+
+            match path.strip_prefix(&cwd) {
                 Ok(relative_path) => {
                     note.extend_with(markup!(<Info>{relative_path.as_str()}</Info>))
                 }
-                Err(_) => note.extend_with(markup!(<Info>{path}</Info>)),
+                Err(_) => note.extend_with(markup!(<Info>{path.as_str()}</Info>)),
             }
         }
         note.extend_with(markup!("\n    ... which is the file we're importing from."));
@@ -237,9 +241,9 @@ impl Rule for NoImportCycles {
 /// the cycle, starting with `start_path` and ending with `ctx.file_path()`.
 fn find_cycle(
     ctx: &RuleContext<NoImportCycles>,
-    start_path: &Utf8Path,
+    start_path: &ResolvedPath,
     mut module_info: JsModuleInfo,
-) -> Option<Vec<String>> {
+) -> Option<Box<[ResolvedPath]>> {
     let options = ctx.options();
     let mut seen = FxHashSet::default();
     let mut stack: Vec<(ResolvedPath, JsModuleInfo)> = Vec::new();
@@ -270,26 +274,22 @@ fn find_cycle(
             if path == ctx.file_path() {
                 // https://github.com/biomejs/biome/issues/6569
                 // prevent flagging on import cycles when they are isolated to a single file
-                if stack.is_empty() && start_path == path {
+                if stack.is_empty() && start_path.as_path() == Some(path) {
                     continue;
                 }
 
                 // Return all the paths from `start_path` to `resolved_path`:
-                let paths = Some(start_path.to_string())
+                let paths = Some(start_path.clone())
                     .into_iter()
-                    .chain(
-                        stack
-                            .iter()
-                            .filter_map(|(path, _)| path.as_path())
-                            .map(ToString::to_string),
-                    )
-                    .chain(Some(path.to_string()))
-                    .collect();
+                    .chain(stack.iter().map(|(path, _)| path.clone()))
+                    .chain(Some(resolved_path.clone()))
+                    .collect::<Vec<_>>()
+                    .into_boxed_slice();
 
                 return Some(paths);
             }
 
-            if let Some(next_module_info) = ctx.module_info_for_path(path) {
+            if let Some(next_module_info) = ctx.js_module_info_for_path(path) {
                 stack.push((resolved_path.clone(), module_info));
                 module_info = next_module_info;
                 continue 'outer;

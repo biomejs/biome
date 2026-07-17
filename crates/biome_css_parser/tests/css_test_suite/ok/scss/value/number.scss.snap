@@ -51,7 +51,7 @@ CssRoot {
                                     items: ScssExpressionItemList [
                                         ScssUnaryExpression {
                                             operator: MINUS@12..13 "-" [] [],
-                                            expression: ScssIdentifier {
+                                            expression: ScssVariable {
                                                 dollar_token: DOLLAR@13..14 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@14..18 "zero" [] [],
@@ -75,7 +75,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
-                                            left: ScssIdentifier {
+                                            left: ScssVariable {
                                                 dollar_token: DOLLAR@28..29 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@29..34 "zero" [] [Whitespace(" ")],
@@ -130,7 +130,7 @@ CssRoot {
                   0: SCSS_EXPRESSION_ITEM_LIST@12..18
                     0: SCSS_UNARY_EXPRESSION@12..18
                       0: MINUS@12..13 "-" [] []
-                      1: SCSS_IDENTIFIER@13..18
+                      1: SCSS_VARIABLE@13..18
                         0: DOLLAR@13..14 "$" [] []
                         1: CSS_IDENTIFIER@14..18
                           0: IDENT@14..18 "zero" [] []
@@ -145,7 +145,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@28..38
                   0: SCSS_EXPRESSION_ITEM_LIST@28..38
                     0: SCSS_BINARY_EXPRESSION@28..38
-                      0: SCSS_IDENTIFIER@28..34
+                      0: SCSS_VARIABLE@28..34
                         0: DOLLAR@28..29 "$" [] []
                         1: CSS_IDENTIFIER@29..34
                           0: IDENT@29..34 "zero" [] [Whitespace(" ")]

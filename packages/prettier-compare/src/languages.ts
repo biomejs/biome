@@ -60,10 +60,20 @@ export const LANGUAGES: Record<string, LanguageConfig> = {
 		prettierParser: "css",
 		displayName: "CSS",
 	},
+	scss: {
+		biomeFilePath: "file.scss",
+		prettierParser: "scss",
+		displayName: "SCSS",
+	},
 	html: {
 		biomeFilePath: "file.html",
 		prettierParser: "html",
 		displayName: "HTML",
+	},
+	vue: {
+		biomeFilePath: "file.vue",
+		prettierParser: "vue",
+		displayName: "Vue",
 	},
 	graphql: {
 		biomeFilePath: "file.graphql",

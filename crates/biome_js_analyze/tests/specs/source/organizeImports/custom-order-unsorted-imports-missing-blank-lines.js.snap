@@ -14,14 +14,16 @@ import path from "node:path"
 ```
 custom-order-unsorted-imports-missing-blank-lines.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these imports.
   
   > 1 │ import { test as testBun } from "bun:test"
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ import { test as testNode } from "node:test"
-    3 │ import path from "node:path"
+  > 2 │ import { test as testNode } from "node:test"
+  > 3 │ import path from "node:path"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1 1 │   import { test as testBun } from "bun:test"
     2   │ - import·{·test·as·testNode·}·from·"node:test"

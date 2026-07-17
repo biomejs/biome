@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 <>
 	<h1 />
 	<h1>

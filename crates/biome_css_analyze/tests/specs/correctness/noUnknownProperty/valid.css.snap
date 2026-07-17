@@ -87,4 +87,10 @@ view-transition {
 	navigation: auto;
 }
 
+/* Corner shape properties */
+a { corner-shape: squircle; }
+a { corner-top-left-shape: superellipse(4); }
+a { corner-bottom-right-shape: round; }
+a { corner-block-start-shape: bevel; }
+
 ```

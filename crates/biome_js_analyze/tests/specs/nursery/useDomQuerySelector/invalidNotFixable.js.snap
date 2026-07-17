@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNotFixable.js
+---
+# Input
+```js
+/* should generate diagnostics */
+e.getElementById(3);
+document.getElementsByClassName(fn());
+
+```
+
+# Diagnostics
+```
+invalidNotFixable.js:2:3 lint/nursery/useDomQuerySelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This DOM query uses an older DOM query API.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ e.getElementById(3);
+      │   ^^^^^^^^^^^^^^
+    3 │ document.getElementsByClassName(fn());
+    4 │ 
+  
+  i Using the more modern DOM query APIs consistently makes DOM lookups easier to read and easier to refine with more specific selectors.
+  
+  i Use querySelector() or querySelectorAll() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNotFixable.js:3:10 lint/nursery/useDomQuerySelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This DOM query uses an older DOM query API.
+  
+    1 │ /* should generate diagnostics */
+    2 │ e.getElementById(3);
+  > 3 │ document.getElementsByClassName(fn());
+      │          ^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Using the more modern DOM query APIs consistently makes DOM lookups easier to read and easier to refine with more specific selectors.
+  
+  i Use querySelector() or querySelectorAll() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

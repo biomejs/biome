@@ -1,0 +1,30 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/comments/key.svelte
+---
+
+# Input
+
+```svelte
+<!-- 1 -->
+{#key expression}
+	<!-- 2 -->
+	<div></div>
+	<!-- 3 -->
+{/key}
+<!-- 4 -->
+
+```
+
+
+# Formatted
+
+```svelte
+<!-- 1 -->
+{#key expression}
+	<!-- 2 -->
+	<div></div>
+<!-- 3 -->
+{/key}
+<!-- 4 -->
+```

@@ -95,11 +95,14 @@ impl Rule for UseRegexpExec {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Prefer "<Emphasis>"RegExp#exec()"</Emphasis>" over "<Emphasis>"String#match()"</Emphasis>" when searching within a string."
+                    "This call uses "<Emphasis>"String#match()"</Emphasis>" with a regular expression."
                 },
             )
             .note(markup! {
-                "Use "<Emphasis>"RegExp#exec()"</Emphasis>" instead of "<Emphasis>"String#match()"</Emphasis>" for consistent and slightly faster regex matching."
+                <Emphasis>"RegExp#exec()"</Emphasis>" communicates the regex operation more directly and keeps this pattern consistent."
+            })
+            .note(markup! {
+                "Use "<Emphasis>"RegExp#exec()"</Emphasis>" instead."
             }),
         )
     }

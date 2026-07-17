@@ -1,0 +1,25 @@
+a{transition-timing-function:func1(func2(func3("veryVeryVeryVeryVeryLongValue","veryVeryVeryVeryVeryLongValue","veryVeryVeryVeryVeryLongValue","veryVeryVeryVeryVeryLongValue"),"veryVeryVeryVeryVeryLongValue","veryVeryVeryVeryVeryLongValue","veryVeryVeryVeryVeryLongValue"),"veryVeryVeryVeryVeryLongValue","veryVeryVeryVeryVeryLongValue",func3("veryVeryVeryVeryVeryLongValue","veryVeryVeryVeryVeryLongValue","veryVeryVeryVeryVeryLongValue","veryVeryVeryVeryVeryLongValue"));}
+
+a {
+  transition-timing-function: func1(
+      func2(
+          func3(
+              "veryVeryVeryVeryVeryLongValue",
+              "veryVeryVeryVeryVeryLongValue",
+              "veryVeryVeryVeryVeryLongValue",
+              "veryVeryVeryVeryVeryLongValue",
+          ),
+          "veryVeryVeryVeryVeryLongValue",
+          "veryVeryVeryVeryVeryLongValue",
+          "veryVeryVeryVeryVeryLongValue",
+      ),
+      "veryVeryVeryVeryVeryLongValue",
+      "veryVeryVeryVeryVeryLongValue",
+      func3(
+          "veryVeryVeryVeryVeryLongValue",
+          "veryVeryVeryVeryVeryLongValue",
+          "veryVeryVeryVeryVeryLongValue",
+          "veryVeryVeryVeryVeryLongValue"
+      )
+  );
+}

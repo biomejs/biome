@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use biome_markdown_syntax::MdReferenceLinkLabel;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_markdown_syntax::{MdReferenceLinkLabel, MdReferenceLinkLabelFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdReferenceLinkLabel;
 impl FormatNodeRule<MdReferenceLinkLabel> for FormatMdReferenceLinkLabel {
@@ -9,6 +9,19 @@ impl FormatNodeRule<MdReferenceLinkLabel> for FormatMdReferenceLinkLabel {
         node: &MdReferenceLinkLabel,
         f: &mut MarkdownFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let MdReferenceLinkLabelFields {
+            l_brack_token,
+            label,
+            r_brack_token,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [
+                l_brack_token.format(),
+                label.format(),
+                r_brack_token.format()
+            ]
+        )
     }
 }

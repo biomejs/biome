@@ -34,7 +34,7 @@ CssRoot {
                     l_paren_token: L_PAREN@16..17 "(" [] [],
                     items: ScssParameterItemList [
                         ScssParameter {
-                            name: ScssIdentifier {
+                            name: ScssVariable {
                                 dollar_token: DOLLAR@17..18 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@18..23 "value" [] [],
@@ -65,7 +65,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
-                                            left: ScssIdentifier {
+                                            left: ScssVariable {
                                                 dollar_token: DOLLAR@40..41 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@41..47 "value" [] [Whitespace(" ")],
@@ -97,7 +97,7 @@ CssRoot {
                     l_paren_token: L_PAREN@70..71 "(" [] [],
                     items: ScssParameterItemList [
                         ScssParameter {
-                            name: ScssIdentifier {
+                            name: ScssVariable {
                                 dollar_token: DOLLAR@71..72 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@72..77 "value" [] [],
@@ -108,7 +108,7 @@ CssRoot {
                         },
                         COMMA@77..79 "," [] [Whitespace(" ")],
                         ScssParameter {
-                            name: ScssIdentifier {
+                            name: ScssVariable {
                                 dollar_token: DOLLAR@79..80 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@80..85 "ratio" [] [],
@@ -128,7 +128,7 @@ CssRoot {
                         },
                         COMMA@90..92 "," [] [Whitespace(" ")],
                         ScssParameter {
-                            name: ScssIdentifier {
+                            name: ScssVariable {
                                 dollar_token: DOLLAR@92..93 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@93..97 "rest" [] [],
@@ -150,14 +150,14 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
-                                            left: ScssIdentifier {
+                                            left: ScssVariable {
                                                 dollar_token: DOLLAR@114..115 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@115..121 "value" [] [Whitespace(" ")],
                                                 },
                                             },
                                             operator: STAR@121..123 "*" [] [Whitespace(" ")],
-                                            right: ScssIdentifier {
+                                            right: ScssVariable {
                                                 dollar_token: DOLLAR@123..124 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@124..129 "ratio" [] [],
@@ -195,7 +195,7 @@ CssRoot {
           0: L_PAREN@16..17 "(" [] []
           1: SCSS_PARAMETER_ITEM_LIST@17..26
             0: SCSS_PARAMETER@17..26
-              0: SCSS_IDENTIFIER@17..23
+              0: SCSS_VARIABLE@17..23
                 0: DOLLAR@17..18 "$" [] []
                 1: CSS_IDENTIFIER@18..23
                   0: IDENT@18..23 "value" [] []
@@ -217,7 +217,7 @@ CssRoot {
                 1: SCSS_EXPRESSION@40..50
                   0: SCSS_EXPRESSION_ITEM_LIST@40..50
                     0: SCSS_BINARY_EXPRESSION@40..50
-                      0: SCSS_IDENTIFIER@40..47
+                      0: SCSS_VARIABLE@40..47
                         0: DOLLAR@40..41 "$" [] []
                         1: CSS_IDENTIFIER@41..47
                           0: IDENT@41..47 "value" [] [Whitespace(" ")]
@@ -236,7 +236,7 @@ CssRoot {
           0: L_PAREN@70..71 "(" [] []
           1: SCSS_PARAMETER_ITEM_LIST@71..100
             0: SCSS_PARAMETER@71..77
-              0: SCSS_IDENTIFIER@71..77
+              0: SCSS_VARIABLE@71..77
                 0: DOLLAR@71..72 "$" [] []
                 1: CSS_IDENTIFIER@72..77
                   0: IDENT@72..77 "value" [] []
@@ -244,7 +244,7 @@ CssRoot {
               2: (empty)
             1: COMMA@77..79 "," [] [Whitespace(" ")]
             2: SCSS_PARAMETER@79..90
-              0: SCSS_IDENTIFIER@79..85
+              0: SCSS_VARIABLE@79..85
                 0: DOLLAR@79..80 "$" [] []
                 1: CSS_IDENTIFIER@80..85
                   0: IDENT@80..85 "ratio" [] []
@@ -257,7 +257,7 @@ CssRoot {
               2: (empty)
             3: COMMA@90..92 "," [] [Whitespace(" ")]
             4: SCSS_PARAMETER@92..100
-              0: SCSS_IDENTIFIER@92..97
+              0: SCSS_VARIABLE@92..97
                 0: DOLLAR@92..93 "$" [] []
                 1: CSS_IDENTIFIER@93..97
                   0: IDENT@93..97 "rest" [] []
@@ -274,12 +274,12 @@ CssRoot {
                 1: SCSS_EXPRESSION@114..129
                   0: SCSS_EXPRESSION_ITEM_LIST@114..129
                     0: SCSS_BINARY_EXPRESSION@114..129
-                      0: SCSS_IDENTIFIER@114..121
+                      0: SCSS_VARIABLE@114..121
                         0: DOLLAR@114..115 "$" [] []
                         1: CSS_IDENTIFIER@115..121
                           0: IDENT@115..121 "value" [] [Whitespace(" ")]
                       1: STAR@121..123 "*" [] [Whitespace(" ")]
-                      2: SCSS_IDENTIFIER@123..129
+                      2: SCSS_VARIABLE@123..129
                         0: DOLLAR@123..124 "$" [] []
                         1: CSS_IDENTIFIER@124..129
                           0: IDENT@124..129 "ratio" [] []

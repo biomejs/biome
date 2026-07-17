@@ -1,0 +1,157 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidSearch.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+declare const text: string;
+declare const needle: string;
+
+text.indexOf(needle) === 0;
+0 === text.indexOf(needle);
+text.indexOf(needle) !== 0;
+text.lastIndexOf(needle) === text.length - needle.length;
+text.length - needle.length === text.lastIndexOf(needle);
+text.lastIndexOf("bar") !== text.length - 3;
+
+```
+
+# Diagnostics
+```
+invalidSearch.ts:6:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This indexOf() comparison looks like you're checking a string prefix.
+  
+    4 │ declare const needle: string;
+    5 │ 
+  > 6 │ text.indexOf(needle) === 0;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 0 === text.indexOf(needle);
+    8 │ text.indexOf(needle) !== 0;
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use startsWith() instead.
+  
+     4  4 │   declare const needle: string;
+     5  5 │   
+     6    │ - text.indexOf(needle)·===·0;
+        6 │ + text.startsWith(needle);
+     7  7 │   0 === text.indexOf(needle);
+     8  8 │   text.indexOf(needle) !== 0;
+  
+
+```
+
+```
+invalidSearch.ts:7:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This indexOf() comparison looks like you're checking a string prefix.
+  
+    6 │ text.indexOf(needle) === 0;
+  > 7 │ 0 === text.indexOf(needle);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ text.indexOf(needle) !== 0;
+    9 │ text.lastIndexOf(needle) === text.length - needle.length;
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use startsWith() instead.
+  
+     5  5 │   
+     6  6 │   text.indexOf(needle) === 0;
+     7    │ - 0·===·text.indexOf(needle);
+        7 │ + text.startsWith(needle);
+     8  8 │   text.indexOf(needle) !== 0;
+     9  9 │   text.lastIndexOf(needle) === text.length - needle.length;
+  
+
+```
+
+```
+invalidSearch.ts:8:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This indexOf() comparison looks like you're checking a string prefix.
+  
+     6 │ text.indexOf(needle) === 0;
+     7 │ 0 === text.indexOf(needle);
+   > 8 │ text.indexOf(needle) !== 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ text.lastIndexOf(needle) === text.length - needle.length;
+    10 │ text.length - needle.length === text.lastIndexOf(needle);
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use startsWith() instead.
+  
+     6  6 │   text.indexOf(needle) === 0;
+     7  7 │   0 === text.indexOf(needle);
+     8    │ - text.indexOf(needle)·!==·0;
+        8 │ + !text.startsWith(needle);
+     9  9 │   text.lastIndexOf(needle) === text.length - needle.length;
+    10 10 │   text.length - needle.length === text.lastIndexOf(needle);
+  
+
+```
+
+```
+invalidSearch.ts:9:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This lastIndexOf() comparison looks like you're checking a string suffix.
+  
+     7 │ 0 === text.indexOf(needle);
+     8 │ text.indexOf(needle) !== 0;
+   > 9 │ text.lastIndexOf(needle) === text.length - needle.length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ text.length - needle.length === text.lastIndexOf(needle);
+    11 │ text.lastIndexOf("bar") !== text.length - 3;
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use endsWith() instead.
+  
+     7  7 │   0 === text.indexOf(needle);
+     8  8 │   text.indexOf(needle) !== 0;
+     9    │ - text.lastIndexOf(needle)·===·text.length·-·needle.length;
+        9 │ + text.endsWith(needle);
+    10 10 │   text.length - needle.length === text.lastIndexOf(needle);
+    11 11 │   text.lastIndexOf("bar") !== text.length - 3;
+  
+
+```
+
+```
+invalidSearch.ts:11:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This lastIndexOf() comparison looks like you're checking a string suffix.
+  
+     9 │ text.lastIndexOf(needle) === text.length - needle.length;
+    10 │ text.length - needle.length === text.lastIndexOf(needle);
+  > 11 │ text.lastIndexOf("bar") !== text.length - 3;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use endsWith() instead.
+  
+     9  9 │   text.lastIndexOf(needle) === text.length - needle.length;
+    10 10 │   text.length - needle.length === text.lastIndexOf(needle);
+    11    │ - text.lastIndexOf("bar")·!==·text.length·-·3;
+       11 │ + !text.endsWith("bar");
+    12 12 │   
+  
+
+```

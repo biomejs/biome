@@ -9,7 +9,7 @@ expression: redactor(content)
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": false,
+      "preset": "none",
       "complexity": { "noUselessLabel": "error", "useLiteralKeys": "off" },
       "security": { "noGlobalEval": "warn" },
       "style": { "useDefaultParameterLast": "off" },

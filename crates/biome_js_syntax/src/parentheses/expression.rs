@@ -714,8 +714,7 @@ impl NeedsParentheses for TsInstantiationExpression {
             .is_some_and(|member_expr| {
                 member_expr
                     .object()
-                    .map(|object| object.syntax() == self.syntax())
-                    .unwrap_or(false)
+                    .is_ok_and(|object| object.syntax() == self.syntax())
             })
     }
 }
@@ -955,6 +954,7 @@ fn update_or_lower_expression_needs_parens(
         parent.kind(),
         JsSyntaxKind::JS_EXTENDS_CLAUSE
             | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
+            | JsSyntaxKind::TS_INSTANTIATION_EXPRESSION
             // Callee
             | JsSyntaxKind::JS_CALL_EXPRESSION
             | JsSyntaxKind::JS_NEW_EXPRESSION

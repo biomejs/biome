@@ -1,0 +1,130 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNamespaceUnused.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Standalone unused namespace (no merged value declaration)
+namespace Standalone {
+    export type X = string;
+}
+
+// Both namespace and value are unused
+const Both = () => {};
+namespace Both {
+    export type Y = number;
+}
+
+// Same-name binding in a nested scope must NOT suppress the diagnostic
+namespace Shadowed {
+    export type Z = boolean;
+}
+function useShadowed() {
+    const Shadowed = 42;
+    console.log(Shadowed);
+}
+
+```
+
+# Diagnostics
+```
+invalidNamespaceUnused.ts:4:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable Standalone is unused.
+  
+    3 │ // Standalone unused namespace (no merged value declaration)
+  > 4 │ namespace Standalone {
+      │           ^^^^^^^^^^
+    5 │     export type X = string;
+    6 │ }
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+```
+
+```
+invalidNamespaceUnused.ts:9:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable Both is unused.
+  
+     8 │ // Both namespace and value are unused
+   > 9 │ const Both = () => {};
+       │       ^^^^
+    10 │ namespace Both {
+    11 │     export type Y = number;
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend Both with an underscore.
+  
+     7  7 │   
+     8  8 │   // Both namespace and value are unused
+     9    │ - const·Both·=·()·=>·{};
+        9 │ + const·_Both·=·()·=>·{};
+    10 10 │   namespace Both {
+    11 11 │       export type Y = number;
+  
+
+```
+
+```
+invalidNamespaceUnused.ts:10:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable Both is unused.
+  
+     8 │ // Both namespace and value are unused
+     9 │ const Both = () => {};
+  > 10 │ namespace Both {
+       │           ^^^^
+    11 │     export type Y = number;
+    12 │ }
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+```
+
+```
+invalidNamespaceUnused.ts:15:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable Shadowed is unused.
+  
+    14 │ // Same-name binding in a nested scope must NOT suppress the diagnostic
+  > 15 │ namespace Shadowed {
+       │           ^^^^^^^^
+    16 │     export type Z = boolean;
+    17 │ }
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+```
+
+```
+invalidNamespaceUnused.ts:18:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function useShadowed is unused.
+  
+    16 │     export type Z = boolean;
+    17 │ }
+  > 18 │ function useShadowed() {
+       │          ^^^^^^^^^^^
+    19 │     const Shadowed = 42;
+    20 │     console.log(Shadowed);
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend useShadowed with an underscore.
+  
+    16 16 │       export type Z = boolean;
+    17 17 │   }
+    18    │ - function·useShadowed()·{
+       18 │ + function·_useShadowed()·{
+    19 19 │       const Shadowed = 42;
+    20 20 │       console.log(Shadowed);
+  
+
+```

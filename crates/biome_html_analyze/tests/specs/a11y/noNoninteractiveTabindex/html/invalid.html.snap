@@ -1,0 +1,93 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<div tabindex="0"></div>
+<div role="article" tabindex="0"></div>
+<article tabindex="0"></article>
+<span tabindex="1"></span>
+```
+
+# Diagnostics
+```
+invalid.html:2:6 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element div is non-interactive. Do not use tabindex.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div tabindex="0"></div>
+      │      ^^^^^^^^^^^^
+    3 │ <div role="article" tabindex="0"></div>
+    4 │ <article tabindex="0"></article>
+  
+  i Adding non-interactive elements to the keyboard navigation flow can confuse users.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    2 │ <div·tabindex="0"></div>
+      │      ------------       
+
+```
+
+```
+invalid.html:3:21 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element div is non-interactive. Do not use tabindex.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div tabindex="0"></div>
+  > 3 │ <div role="article" tabindex="0"></div>
+      │                     ^^^^^^^^^^^^
+    4 │ <article tabindex="0"></article>
+    5 │ <span tabindex="1"></span>
+  
+  i Adding non-interactive elements to the keyboard navigation flow can confuse users.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    3 │ <div·role="article"·tabindex="0"></div>
+      │                     ------------       
+
+```
+
+```
+invalid.html:4:10 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element article is non-interactive. Do not use tabindex.
+  
+    2 │ <div tabindex="0"></div>
+    3 │ <div role="article" tabindex="0"></div>
+  > 4 │ <article tabindex="0"></article>
+      │          ^^^^^^^^^^^^
+    5 │ <span tabindex="1"></span>
+  
+  i Adding non-interactive elements to the keyboard navigation flow can confuse users.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    4 │ <article·tabindex="0"></article>
+      │          ------------           
+
+```
+
+```
+invalid.html:5:7 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element span is non-interactive. Do not use tabindex.
+  
+    3 │ <div role="article" tabindex="0"></div>
+    4 │ <article tabindex="0"></article>
+  > 5 │ <span tabindex="1"></span>
+      │       ^^^^^^^^^^^^
+  
+  i Adding non-interactive elements to the keyboard navigation flow can confuse users.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    5 │ <span·tabindex="1"></span>
+      │       ------------        
+
+```

@@ -66,15 +66,17 @@ use crate::syntax::at_rule::tailwind::{
     parse_reference_at_rule, parse_slot_at_rule, parse_source_at_rule, parse_theme_at_rule,
     parse_utility_at_rule, parse_variant_at_rule,
 };
-use crate::syntax::at_rule::unknown::{is_at_unknown_at_rule, parse_unknown_at_rule};
+use crate::syntax::at_rule::unknown::{
+    is_at_unknown_at_rule, parse_scss_interpolated_unknown_at_rule, parse_unknown_at_rule,
+};
 use crate::syntax::at_rule::value::parse_value_at_rule;
 use crate::syntax::at_rule::view_transition::{
     parse_view_transition_at_rule, parse_view_transition_at_rule_declarator,
 };
 
-use crate::syntax::CssSyntaxFeatures;
-use crate::syntax::parse_error::{expected_any_at_rule, tailwind_disabled};
+use crate::syntax::parse_error::{expected_any_at_rule, scss_only_syntax_error, tailwind_disabled};
 use crate::syntax::scss::{
+    is_at_scss_interpolation, is_nth_at_scss_interpolated_dashed_identifier,
     parse_bogus_scss_else_at_rule, parse_scss_at_root_at_rule, parse_scss_content_at_rule,
     parse_scss_debug_at_rule, parse_scss_each_at_rule, parse_scss_error_at_rule,
     parse_scss_extend_at_rule, parse_scss_for_at_rule, parse_scss_forward_at_rule,
@@ -82,6 +84,7 @@ use crate::syntax::scss::{
     parse_scss_include_at_rule, parse_scss_mixin_at_rule, parse_scss_return_at_rule,
     parse_scss_use_at_rule, parse_scss_warn_at_rule, parse_scss_while_at_rule,
 };
+use crate::syntax::{CssSyntaxFeatures, is_nth_at_dashed_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 
@@ -133,7 +136,8 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         T![font_feature_values] => parse_font_feature_values_at_rule(p),
         T![font_palette_values] => parse_font_palette_values_at_rule(p),
         T![function] => {
-            if CssSyntaxFeatures::Scss.is_supported(p) {
+            // `@function --highlight()` is plain CSS in SCSS; `double()` stays Sass.
+            if CssSyntaxFeatures::Scss.is_supported(p) && !is_at_css_function_at_rule_name(p) {
                 parse_scss_function_at_rule(p)
             } else {
                 parse_function_at_rule(p)
@@ -256,9 +260,21 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
                 tailwind_disabled(p, m.range(p))
             })
             .or_else(|| parse_unknown_at_rule(p)),
+        _ if is_at_scss_interpolation(p) => CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_interpolated_unknown_at_rule,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated at-rule names", marker.range(p))
+            },
+        ),
         _ if is_at_unknown_at_rule(p) => parse_unknown_at_rule(p),
         _ => Absent,
     }
+}
+
+#[inline]
+fn is_at_css_function_at_rule_name(p: &mut CssParser) -> bool {
+    is_nth_at_dashed_identifier(p, 1) || is_nth_at_scss_interpolated_dashed_identifier(p, 1)
 }
 
 #[inline]

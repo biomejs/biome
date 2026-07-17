@@ -52,6 +52,7 @@ if (binPath) {
 			stdio: "inherit",
 			env: {
 				...env,
+				BIOME_DISTRIBUTION: "npm",
 				JS_RUNTIME_VERSION: version,
 				JS_RUNTIME_NAME: release.name,
 				...(packageManager != null

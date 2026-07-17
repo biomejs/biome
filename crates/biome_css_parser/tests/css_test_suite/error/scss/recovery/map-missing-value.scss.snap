@@ -17,8 +17,8 @@ $map: (a: , b: 2);
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..1 "$" [] [],
                 name: CssIdentifier {
                     value_token: IDENT@1..4 "map" [] [],
@@ -78,8 +78,8 @@ CssRoot {
 0: CSS_ROOT@0..19
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..18
-    0: SCSS_DECLARATION@0..18
-      0: SCSS_IDENTIFIER@0..4
+    0: SCSS_VARIABLE_DECLARATION@0..18
+      0: SCSS_VARIABLE@0..4
         0: DOLLAR@0..1 "$" [] []
         1: CSS_IDENTIFIER@1..4
           0: IDENT@1..4 "map" [] []

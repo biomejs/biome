@@ -3,7 +3,7 @@ use crate::builders::{FillBuilder, JoinBuilder, JoinNodesBuilder, Line};
 use crate::prelude::*;
 use crate::{
     Arguments, Buffer, Comments, CstFormatContext, FormatContext, FormatState, FormatStateSnapshot,
-    GroupId, VecBuffer,
+    GroupId, SourceMapGeneration, VecBuffer,
 };
 
 /// Handles the formatting of a CST and stores the context how the CST should be formatted (user preferences).
@@ -30,6 +30,10 @@ impl<'buf, Context> Formatter<'buf, Context> {
     /// Returns the Context specifying how to format the current CST
     pub fn context(&self) -> &Context {
         self.state().context()
+    }
+
+    pub fn source_map_generation(&self) -> SourceMapGeneration {
+        self.state().source_map_generation()
     }
 
     /// Returns a mutable reference to the context.

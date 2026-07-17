@@ -1,0 +1,64 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/suppression_trailing_comments.js
+---
+
+# Input
+
+```js
+const config = {
+	items:
+		// biome-ignore format: preserve the inner array formatting
+		[foo  , bar], // keep this trailing comment attached after the suppressed value
+	enabled: true,
+};
+
+callExpression(
+	firstArg,
+	// biome-ignore format: preserve the callback body formatting
+	function () { return { a: 1,  b: 2 } }, // keep this trailing comment after the suppressed callback argument
+	lastArg,
+);
+
+const output = wrapper({
+	value:
+		// biome-ignore format: preserve the conditional expression formatting
+		condition?left:right, // keep this trailing comment after the suppressed conditional value
+	label: "done",
+});
+
+```
+
+
+# Formatted
+
+```js
+const config = {
+	items:
+		// biome-ignore format: preserve the inner array formatting
+		[foo  , bar], // keep this trailing comment attached after the suppressed value
+	enabled: true,
+};
+
+callExpression(
+	firstArg,
+	// biome-ignore format: preserve the callback body formatting
+	function () { return { a: 1,  b: 2 } }, // keep this trailing comment after the suppressed callback argument
+	lastArg,
+);
+
+const output = wrapper({
+	value:
+		// biome-ignore format: preserve the conditional expression formatting
+		condition?left:right, // keep this trailing comment after the suppressed conditional value
+	label: "done",
+});
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    4: 		[foo  , bar], // keep this trailing comment attached after the suppressed value
+   11: 	function () { return { a: 1,  b: 2 } }, // keep this trailing comment after the suppressed callback argument
+   18: 		condition?left:right, // keep this trailing comment after the suppressed conditional value
+```

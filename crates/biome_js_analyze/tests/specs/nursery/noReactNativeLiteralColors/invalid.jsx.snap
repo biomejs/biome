@@ -1,0 +1,223 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+
+const Inline = () => <Text style={{ backgroundColor: '#FFFFFF', opacity: 0.5 }}>hello</Text>;
+
+const stylesBasic = StyleSheet.create({
+	text: { fontColor: '#000' },
+});
+
+const MultipleInSheet = StyleSheet.create({
+	primary: { color: 'red' },
+	secondary: { borderBottomColor: 'blue' },
+});
+
+const InArray = () => (
+	<Text style={[styles.text, { backgroundColor: '#FFFFFF' }]}>hello</Text>
+);
+
+const InLogical = ({ active }) => (
+	<Text style={[styles.text, active && { backgroundColor: '#FFFFFF' }]}>hello</Text>
+);
+
+const TernaryBothLiterals = ({ active }) => (
+	<Text style={{ backgroundColor: active ? '#fff' : '#000' }}>hello</Text>
+);
+
+const TernaryOneLiteral = ({ active }) => (
+	<Text style={{ backgroundColor: active ? '#fff' : theme.background }}>hello</Text>
+);
+
+const CustomStyleAttribute = () => (
+	<Text contentContainerStyle={{ color: 'red' }}>hello</Text>
+);
+
+```
+
+# Diagnostics
+```
+invalid.jsx:3:37 lint/nursery/noReactNativeLiteralColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Color literals are not allowed inside styles.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ const Inline = () => <Text style={{ backgroundColor: '#FFFFFF', opacity: 0.5 }}>hello</Text>;
+      │                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ const stylesBasic = StyleSheet.create({
+  
+  i Inline colors are hard to keep consistent across screens and to adapt when the design palette changes.
+  
+  i Extract the color into a named constant or a shared theme module, and reference it from the style.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:6:10 lint/nursery/noReactNativeLiteralColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Color literals are not allowed inside styles.
+  
+    5 │ const stylesBasic = StyleSheet.create({
+  > 6 │ 	text: { fontColor: '#000' },
+      │ 	        ^^^^^^^^^^^^^^^^^
+    7 │ });
+    8 │ 
+  
+  i Inline colors are hard to keep consistent across screens and to adapt when the design palette changes.
+  
+  i Extract the color into a named constant or a shared theme module, and reference it from the style.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:10:13 lint/nursery/noReactNativeLiteralColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Color literals are not allowed inside styles.
+  
+     9 │ const MultipleInSheet = StyleSheet.create({
+  > 10 │ 	primary: { color: 'red' },
+       │ 	           ^^^^^^^^^^^^
+    11 │ 	secondary: { borderBottomColor: 'blue' },
+    12 │ });
+  
+  i Inline colors are hard to keep consistent across screens and to adapt when the design palette changes.
+  
+  i Extract the color into a named constant or a shared theme module, and reference it from the style.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:11:15 lint/nursery/noReactNativeLiteralColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Color literals are not allowed inside styles.
+  
+     9 │ const MultipleInSheet = StyleSheet.create({
+    10 │ 	primary: { color: 'red' },
+  > 11 │ 	secondary: { borderBottomColor: 'blue' },
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ });
+    13 │ 
+  
+  i Inline colors are hard to keep consistent across screens and to adapt when the design palette changes.
+  
+  i Extract the color into a named constant or a shared theme module, and reference it from the style.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:15:31 lint/nursery/noReactNativeLiteralColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Color literals are not allowed inside styles.
+  
+    14 │ const InArray = () => (
+  > 15 │ 	<Text style={[styles.text, { backgroundColor: '#FFFFFF' }]}>hello</Text>
+       │ 	                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ );
+    17 │ 
+  
+  i Inline colors are hard to keep consistent across screens and to adapt when the design palette changes.
+  
+  i Extract the color into a named constant or a shared theme module, and reference it from the style.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:19:41 lint/nursery/noReactNativeLiteralColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Color literals are not allowed inside styles.
+  
+    18 │ const InLogical = ({ active }) => (
+  > 19 │ 	<Text style={[styles.text, active && { backgroundColor: '#FFFFFF' }]}>hello</Text>
+       │ 	                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ );
+    21 │ 
+  
+  i Inline colors are hard to keep consistent across screens and to adapt when the design palette changes.
+  
+  i Extract the color into a named constant or a shared theme module, and reference it from the style.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:23:17 lint/nursery/noReactNativeLiteralColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Color literals are not allowed inside styles.
+  
+    22 │ const TernaryBothLiterals = ({ active }) => (
+  > 23 │ 	<Text style={{ backgroundColor: active ? '#fff' : '#000' }}>hello</Text>
+       │ 	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ );
+    25 │ 
+  
+  i Inline colors are hard to keep consistent across screens and to adapt when the design palette changes.
+  
+  i Extract the color into a named constant or a shared theme module, and reference it from the style.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:27:17 lint/nursery/noReactNativeLiteralColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Color literals are not allowed inside styles.
+  
+    26 │ const TernaryOneLiteral = ({ active }) => (
+  > 27 │ 	<Text style={{ backgroundColor: active ? '#fff' : theme.background }}>hello</Text>
+       │ 	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ );
+    29 │ 
+  
+  i Inline colors are hard to keep consistent across screens and to adapt when the design palette changes.
+  
+  i Extract the color into a named constant or a shared theme module, and reference it from the style.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:31:33 lint/nursery/noReactNativeLiteralColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Color literals are not allowed inside styles.
+  
+    30 │ const CustomStyleAttribute = () => (
+  > 31 │ 	<Text contentContainerStyle={{ color: 'red' }}>hello</Text>
+       │ 	                               ^^^^^^^^^^^^
+    32 │ );
+    33 │ 
+  
+  i Inline colors are hard to keep consistent across screens and to adapt when the design palette changes.
+  
+  i Extract the color into a named constant or a shared theme module, and reference it from the style.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

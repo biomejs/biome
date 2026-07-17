@@ -1,17 +1,18 @@
 use crate::lexer::{MarkdownLexContext, MarkdownLexer, MarkdownReLexContext};
+use crate::syntax::TAB_STOP_SPACES;
 use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::MarkdownSyntaxKind::EOF;
 use biome_parser::lexer::BufferedLexer;
 use biome_parser::prelude::{BumpWithContext, TokenSource};
 use biome_parser::token_source::{TokenSourceWithBufferedLexer, Trivia};
 use biome_parser::{diagnostic::ParseDiagnostic, token_source::TokenSourceCheckpoint};
-use biome_rowan::{TextRange, TriviaPieceKind};
+use biome_rowan::{TextRange, TextSize, TriviaPieceKind};
 
 /// Find the start position of the current line in source text.
 ///
 /// Given a slice of text, finds the byte offset where the current line begins
 /// (after the last newline, handling CRLF).
-fn find_line_start(before: &str) -> usize {
+pub(crate) fn find_line_start(before: &str) -> usize {
     let last_newline_pos = before.rfind(['\n', '\r']);
     match last_newline_pos {
         Some(pos) => {
@@ -105,10 +106,12 @@ impl<'source> MarkdownTokenSource<'source> {
         self.lexer.source()
     }
 
-    /// Count leading indentation on the current line, including whitespace inside the current token.
+    /// Count leading indentation on the current line, including whitespace
+    /// inside the current token.
     ///
-    /// This scans from the start of the current line to the first non-whitespace character.
-    /// Tab characters are counted as 4 spaces per CommonMark spec.
+    /// Scans from the start of the current line to the first non-whitespace
+    /// character. Tabs expand to the next multiple of `TAB_STOP_SPACES`,
+    /// per CommonMark §2.2.
     pub fn line_start_leading_indent(&self) -> usize {
         let range = self.lexer.current_range();
         let start: usize = range.start().into();
@@ -117,15 +120,15 @@ impl<'source> MarkdownTokenSource<'source> {
         let line_start = find_line_start(&source[..start]);
 
         let line = &source[line_start..];
-        let mut count = 0usize;
+        let mut column = 0usize;
         for c in line.chars() {
             match c {
-                ' ' => count += 1,
-                '\t' => count += 4,
+                ' ' => column += 1,
+                '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
                 _ => break,
             }
         }
-        count
+        column
     }
 
     /// Returns true if the current token starts on a line with only whitespace before it.
@@ -160,8 +163,23 @@ impl<'source> MarkdownTokenSource<'source> {
         self.lexer.force_relex_in_context(context)
     }
 
+    /// Re-lex the current token in Regular context, treating the position as
+    /// a line start. This makes the lexer produce line-start-gated tokens
+    /// like `MD_THEMATIC_BREAK_LITERAL`.
+    pub fn force_relex_at_line_start(&mut self) -> MarkdownSyntaxKind {
+        self.lexer
+            .force_relex_at_line_start(MarkdownLexContext::Regular)
+    }
+
     pub fn set_force_ordered_list_marker(&mut self, value: bool) {
         self.lexer.lexer_mut().set_force_ordered_list_marker(value);
+    }
+
+    /// Re-lex from the current token start up to `end` as a single token of
+    /// the given kind.
+    pub fn re_lex_span(&mut self, end: TextSize, kind: MarkdownSyntaxKind) -> MarkdownSyntaxKind {
+        self.lexer.lexer_mut().set_relex_span(end.into(), kind);
+        self.lexer.re_lex(MarkdownReLexContext::Span)
     }
 
     /// Bump the current token using the LinkDefinition context.
@@ -175,6 +193,16 @@ impl<'source> MarkdownTokenSource<'source> {
     /// and whitespace emits as MD_INDENT_CHAR.
     pub fn bump_thematic_break_parts(&mut self) {
         self.bump_with_context(MarkdownLexContext::ThematicBreakParts);
+    }
+
+    /// Re-lex the current token in HeadingContent context and return the new kind.
+    ///
+    /// In this context, trailing spaces before a newline are NOT bundled with the
+    /// newline into MD_HARD_LINE_LITERAL. Instead, the spaces are emitted as
+    /// MD_TEXTUAL_LITERAL and the newline is emitted separately on the next bump.
+    pub fn force_relex_heading_content(&mut self) -> MarkdownSyntaxKind {
+        self.lexer
+            .force_relex_in_context(MarkdownLexContext::HeadingContent)
     }
 
     /// Creates a checkpoint to which it can later return using [Self::rewind].
@@ -241,6 +269,19 @@ impl BumpWithContext for MarkdownTokenSource<'_> {
                 self.current_range(),
                 false,
             ));
+
+            self.next_non_trivia_token(context, true)
+        }
+    }
+
+    fn skip_as_trivia_of_kind_with_context(
+        &mut self,
+        kind: TriviaPieceKind,
+        context: Self::Context,
+    ) {
+        if self.current() != EOF {
+            self.trivia_list
+                .push(Trivia::new(kind, self.current_range(), false));
 
             self.next_non_trivia_token(context, true)
         }

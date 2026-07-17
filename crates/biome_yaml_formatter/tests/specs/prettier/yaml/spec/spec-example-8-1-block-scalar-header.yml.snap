@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-8-1-block-scalar-header.yml
+---
+
+# Input
+
+```yml
+- | # Empty header↓
+ literal
+- >1 # Indentation indicator↓
+  folded
+- |+ # Chomping indicator↓
+ keep
+
+- >1- # Both indicators↓
+  strip
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,9 +1,9 @@
+ - | # Empty header↓
+-  literal
++ literal
+ - >1 # Indentation indicator↓
+   folded
+ - |+ # Chomping indicator↓
+-  keep
++ keep
+ 
+ - >1- # Both indicators↓
+   strip
+```
+
+# Output
+
+```yml
+- | # Empty header↓
+ literal
+- >1 # Indentation indicator↓
+  folded
+- |+ # Chomping indicator↓
+ keep
+
+- >1- # Both indicators↓
+  strip
+```

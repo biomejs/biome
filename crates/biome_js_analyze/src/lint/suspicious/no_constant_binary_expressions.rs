@@ -273,24 +273,22 @@ fn find_binary_expression_constant_operand<'a>(
     b: &'a AnyJsExpression,
 ) -> Option<&'a AnyJsExpression> {
     match operator {
-        JsBinaryOperator::Equality | JsBinaryOperator::Inequality => {
-            if (is_null_or_undefined(model, a).ok()?
+        JsBinaryOperator::Equality | JsBinaryOperator::Inequality
+            if ((is_null_or_undefined(model, a).ok()?
                 && has_constant_nullishness(model, b, false).ok()?)
                 || (is_static_boolean(model, a).ok()?
-                    && has_constant_loose_boolean_comparison(model, b).ok()?)
-            {
+                    && has_constant_loose_boolean_comparison(model, b).ok()?))
+            => {
                 return Some(b);
             }
-        }
-        JsBinaryOperator::StrictEquality | JsBinaryOperator::StrictInequality => {
-            if (is_null_or_undefined(model, a).ok()?
+        JsBinaryOperator::StrictEquality | JsBinaryOperator::StrictInequality
+            if ((is_null_or_undefined(model, a).ok()?
                 && has_constant_nullishness(model, b, false).ok()?)
                 || (is_static_boolean(model, a).ok()?
-                    && has_constant_strict_boolean_comparison(model, b).ok()?)
-            {
+                    && has_constant_strict_boolean_comparison(model, b).ok()?))
+            => {
                 return Some(b);
             }
-        }
         _ => {}
     }
 

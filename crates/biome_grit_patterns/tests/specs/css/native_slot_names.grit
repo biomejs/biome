@@ -1,0 +1,4 @@
+or {
+  CssDeclaration(property = $property),
+  CssFunction(name = $name, items = $items),
+}

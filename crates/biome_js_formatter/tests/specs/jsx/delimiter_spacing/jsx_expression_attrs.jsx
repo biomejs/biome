@@ -1,0 +1,160 @@
+// =====================
+// Expression attribute values (single line - inlined)
+// =====================
+
+// Test 1: object expression - inlined with spaces
+<Foo a={{ b: 1 }} />;
+
+// Test 2: array expression - inlined with spaces
+<Foo a={[b, c]} />;
+
+// Test 3: arrow function - inlined with spaces
+<Foo a={() => b} />;
+
+// Test 4: function call - inlined with spaces
+<Foo a={foo(b)} />;
+
+// Test 5: template literal - inlined with spaces
+<Foo a={`${b}`} />;
+
+// Test 6: multiple attributes
+<Foo a={[b]} c={d} />;
+
+// =====================
+// Expression attribute values (multi-line - non-inlined)
+// =====================
+
+// Test 1: simple variable
+<Foo a={b} />;
+
+// Test 2: numeric literal
+<Foo a={0} />;
+
+// Test 3: binary expression
+<Foo a={b + c + d} />;
+
+// Test 4: conditional expression
+<Foo a={b ? c : d} />;
+
+// Test 5: member expression
+<Foo a={b.c} />;
+
+// Test 6: multiple attributes
+<Foo a={b} c={d} />;
+
+// Test 7: long expression - content breaks (no spaces)
+<Foo a={loooooooooooooooooooooooooooooooooong + loooooooooooooooooooooooooooooooooong} />;
+
+// =====================
+// Spread attributes (with comments)
+// =====================
+
+// Test 1: JSX spread attribute with leading comment
+<Foo {/* a */ ...b} />;
+
+// Test 2: JSX spread attribute with trailing comment
+<Foo {...b /* a */} />;
+
+// Test 3: JSX spread attribute with leading and trailing comments
+<Foo {/* a */ ...b /* c */} />;
+
+// Test 4: JSX spread attribute with comment and member expression
+<Foo {/* a */ ...b.c} />;
+
+// Test 5: JSX spread attribute with comment and nested member expression
+<Foo {/* a */ ...b.c.d} />;
+
+// Test 6: JSX spread attribute with comment and call expression (no args)
+<Foo {/* a */ ...foo()} />;
+
+// Test 7: JSX spread attribute with comment and call expression (single arg)
+<Foo {/* a */ ...foo(b)} />;
+
+// Test 8: JSX spread attribute with comment and call expression (multiple args)
+<Foo {/* a */ ...foo(b, c)} />;
+
+// Test 9: JSX spread attribute with comment - spread before regular attribute
+<Foo {/* a */ ...b} c={d} />;
+
+// Test 10: JSX spread attribute with comment - spread after regular attribute
+<Foo a={b} {/* c */ ...d} />;
+
+// Test 11: JSX spread attribute with comment - spread between regular attributes
+<Foo a={b} {/* c */ ...d} e={f} />;
+
+// Test 12: JSX spread attribute with comment - multiple spreads
+<Foo {/* a */ ...b} {/* c */ ...d} />;
+
+// Test 13: JSX spread attribute with comment - multiple spreads with regular attributes
+<Foo a={b} {/* c */ ...d} e={f} {/* g */ ...h} />;
+
+// Test 14: Line comment (always breaks)
+<Foo {
+	// a
+	...b
+} />;
+
+// =====================
+// Spread attributes (without comments)
+// =====================
+
+// JSX spread attribute: simple variable
+<Foo {...a} />;
+
+// JSX spread attribute: member expression
+<Foo {...a.b} />;
+
+// JSX spread attribute: nested member expression
+<Foo {...a.b.c} />;
+
+// JSX spread attribute: call expression
+<Foo {...foo()} />;
+
+// JSX spread attribute: call expression with argument
+<Foo {...foo(a)} />;
+
+// JSX spread attribute: call expression with multiple arguments
+<Foo {...foo(a, b)} />;
+
+// JSX spread attribute: with other attributes before
+<Foo a={b} {...c} />;
+
+// JSX spread attribute: with other attributes after
+<Foo {...a} b={c} />;
+
+// JSX spread attribute: with other attributes before and after
+<Foo a={b} {...c} d={e} />;
+
+// JSX spread attribute: multiple spread attributes
+<Foo {...a} {...b} />;
+
+// JSX spread attribute: multiple spread attributes with regular attributes
+<Foo a={b} {...c} d={e} {...f} />;
+
+// =====================
+// Spread attributes (complex expressions)
+// =====================
+
+// Conditional expression in spread
+<Foo {...(condition ? a : b)} />;
+
+// Logical AND spread
+<Foo {...(a && b)} />;
+
+// Logical OR spread with default
+<Foo {...(props || defaultProps)} />;
+
+// Nullish coalescing spread
+<Foo {...(props ?? fallbackProps)} />;
+
+// Nested object spread
+<Foo {...{ ...a, extra: true }} />;
+
+// Object spread with override
+<Foo {...{ ...defaults, ...overrides, custom: value }} />;
+
+// Parenthesized member expression
+<Foo {...(obj.nested.props)} />;
+
+// Immediately invoked function expression
+<Foo {...(() => ({ a: 1 }))()} />;

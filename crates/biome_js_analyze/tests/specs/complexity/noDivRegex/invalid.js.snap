@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+var f = function() { return /=foo/; };
+
+```
+
+# Diagnostics
+```
+invalid.js:2:29 lint/complexity/noDivRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using an equal sign directly after the slash at the beginning of a regular expression literal.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ var f = function() { return /=foo/; };
+      │                             ^^^^^^
+    3 │ 
+  
+  i The characters /= can be confused with a division assignment operator. Replace the equal sign (=) with [=] to prevent confusion.
+  
+  i Safe fix: Replace with [=].
+  
+    2 │ var·f·=·function()·{·return·/[=]foo/;·};
+      │                              + +        
+
+```

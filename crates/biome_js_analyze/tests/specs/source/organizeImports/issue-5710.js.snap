@@ -18,7 +18,7 @@ _Note: The parser emitted 2 diagnostics which are not shown here._
 ```
 issue-5710.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort the imported names.
   
     1 │ // The last `inject` specifier is a bogus node.
   > 2 │ import { inject, Injectable, inject } from '@angular/core';
@@ -26,7 +26,7 @@ issue-5710.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━�
     3 │ 
     4 │ // The last `key` attribute is a bogus node.
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1 1 │   // The last `inject` specifier is a bogus node.
     2   │ - import·{·inject,·Injectable,·inject·}·from·'@angular/core';

@@ -1,0 +1,429 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```vue
+<div v-for="{ id, tags: [primary, secondary } ] in members">{{ id }}</div>
+<div v-for="[foo, profile: { username }] in members">{{ foo }}</div>
+<div v-for="([first, { id, profile: { username } }], index in groupedMembers">{{ index }}</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlBogusElement {
+            items: [
+                HtmlBogus {
+                    items: [
+                        L_ANGLE@0..1 "<" [] [],
+                        HtmlTagName {
+                            value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                        },
+                        HtmlBogus {
+                            items: [
+                                VueDirective {
+                                    name_token: IDENT@5..10 "v-for" [] [],
+                                    arg: missing (optional),
+                                    modifiers: VueModifierList [],
+                                    initializer: HtmlAttributeInitializerClause {
+                                        eq_token: EQ@10..11 "=" [] [],
+                                        value: VueVForValue {
+                                            l_quote: DOUBLE_QUOTE@11..12 "\"" [] [],
+                                            binding: VueVForObjectBinding {
+                                                l_curly_token: L_CURLY@12..14 "{" [] [Whitespace(" ")],
+                                                bindings: VueVForBindingList [
+                                                    VueVForIdentifierBinding {
+                                                        name_token: IDENT@14..16 "id" [] [],
+                                                    },
+                                                    COMMA@16..18 "," [] [Whitespace(" ")],
+                                                    VueVForObjectPropertyBinding {
+                                                        property: VueVForIdentifierBinding {
+                                                            name_token: IDENT@18..22 "tags" [] [],
+                                                        },
+                                                        colon_token: COLON@22..24 ":" [] [Whitespace(" ")],
+                                                        binding: VueVForArrayBinding {
+                                                            l_brack_token: L_BRACKET@24..25 "[" [] [],
+                                                            bindings: VueVForBindingList [
+                                                                VueVForIdentifierBinding {
+                                                                    name_token: IDENT@25..32 "primary" [] [],
+                                                                },
+                                                                COMMA@32..34 "," [] [Whitespace(" ")],
+                                                                VueVForIdentifierBinding {
+                                                                    name_token: IDENT@34..44 "secondary" [] [Whitespace(" ")],
+                                                                },
+                                                            ],
+                                                            r_brack_token: missing (required),
+                                                        },
+                                                    },
+                                                ],
+                                                r_curly_token: R_CURLY@44..46 "}" [] [Whitespace(" ")],
+                                            },
+                                            operator: missing (required),
+                                            expression: HtmlTextExpression {
+                                                html_literal_token: HTML_LITERAL@46..47 "]" [] [],
+                                            },
+                                            r_quote: missing (required),
+                                        },
+                                    },
+                                },
+                                HtmlAttribute {
+                                    name: HtmlAttributeName {
+                                        value_token: HTML_LITERAL@47..58 " in members" [] [],
+                                    },
+                                    initializer: missing (optional),
+                                },
+                                HtmlBogusElement {
+                                    items: [
+                                        HTML_STRING_LITERAL@58..87 "\">{{ id }}</div>\n<div v-for=\"" [] [],
+                                        HTML_LITERAL@87..102 "[foo, profile:" [] [Whitespace(" ")],
+                                        L_CURLY@102..104 "{" [] [Whitespace(" ")],
+                                        HTML_LITERAL@104..128 "username }] in members\">" [] [],
+                                        L_DOUBLE_CURLY@128..131 "{{" [] [Whitespace(" ")],
+                                        HTML_LITERAL@131..135 "foo " [] [],
+                                        R_DOUBLE_CURLY@135..137 "}}" [] [],
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                HtmlElementList [],
+                HtmlClosingElement {
+                    l_angle_token: L_ANGLE@137..138 "<" [] [],
+                    slash_token: SLASH@138..139 "/" [] [],
+                    name: HtmlTagName {
+                        value_token: HTML_LITERAL@139..142 "div" [] [],
+                    },
+                    r_angle_token: R_ANGLE@142..143 ">" [] [],
+                },
+            ],
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@143..145 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@145..149 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    VueDirective {
+                        name_token: IDENT@149..154 "v-for" [] [],
+                        arg: missing (optional),
+                        modifiers: VueModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@154..155 "=" [] [],
+                            value: VueVForValue {
+                                l_quote: DOUBLE_QUOTE@155..156 "\"" [] [],
+                                binding: VueVForTupleBinding {
+                                    l_paren_token: L_PAREN@156..157 "(" [] [],
+                                    value: VueVForArrayBinding {
+                                        l_brack_token: L_BRACKET@157..158 "[" [] [],
+                                        bindings: VueVForBindingList [
+                                            VueVForIdentifierBinding {
+                                                name_token: IDENT@158..163 "first" [] [],
+                                            },
+                                            COMMA@163..165 "," [] [Whitespace(" ")],
+                                            VueVForObjectBinding {
+                                                l_curly_token: L_CURLY@165..167 "{" [] [Whitespace(" ")],
+                                                bindings: VueVForBindingList [
+                                                    VueVForIdentifierBinding {
+                                                        name_token: IDENT@167..169 "id" [] [],
+                                                    },
+                                                    COMMA@169..171 "," [] [Whitespace(" ")],
+                                                    VueVForObjectPropertyBinding {
+                                                        property: VueVForIdentifierBinding {
+                                                            name_token: IDENT@171..178 "profile" [] [],
+                                                        },
+                                                        colon_token: COLON@178..180 ":" [] [Whitespace(" ")],
+                                                        binding: VueVForObjectBinding {
+                                                            l_curly_token: L_CURLY@180..182 "{" [] [Whitespace(" ")],
+                                                            bindings: VueVForBindingList [
+                                                                VueVForIdentifierBinding {
+                                                                    name_token: IDENT@182..191 "username" [] [Whitespace(" ")],
+                                                                },
+                                                            ],
+                                                            r_curly_token: R_CURLY@191..193 "}" [] [Whitespace(" ")],
+                                                        },
+                                                    },
+                                                ],
+                                                r_curly_token: R_CURLY@193..194 "}" [] [],
+                                            },
+                                        ],
+                                        r_brack_token: R_BRACKET@194..195 "]" [] [],
+                                    },
+                                    second: VueVForTupleElement {
+                                        comma_token: COMMA@195..197 "," [] [Whitespace(" ")],
+                                        binding: VueVForIdentifierBinding {
+                                            name_token: IDENT@197..203 "index" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    third: missing (optional),
+                                    r_paren_token: missing (required),
+                                },
+                                operator: VueVForInOperator {
+                                    in_token: IN_KW@203..205 "in" [] [],
+                                },
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@205..220 " groupedMembers" [] [],
+                                },
+                                r_quote: DOUBLE_QUOTE@220..221 "\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@221..222 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlDoubleTextExpression {
+                    l_double_curly_token: L_DOUBLE_CURLY@222..224 "{{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@224..231 " index " [] [],
+                    },
+                    r_double_curly_token: R_DOUBLE_CURLY@231..233 "}}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@233..234 "<" [] [],
+                slash_token: SLASH@234..235 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@235..238 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@238..239 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@239..240 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..240
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..239
+    0: HTML_BOGUS_ELEMENT@0..143
+      0: HTML_BOGUS@0..137
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_BOGUS@5..137
+          0: VUE_DIRECTIVE@5..47
+            0: IDENT@5..10 "v-for" [] []
+            1: (empty)
+            2: VUE_MODIFIER_LIST@10..10
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@10..47
+              0: EQ@10..11 "=" [] []
+              1: VUE_V_FOR_VALUE@11..47
+                0: DOUBLE_QUOTE@11..12 "\"" [] []
+                1: VUE_V_FOR_OBJECT_BINDING@12..46
+                  0: L_CURLY@12..14 "{" [] [Whitespace(" ")]
+                  1: VUE_V_FOR_BINDING_LIST@14..44
+                    0: VUE_V_FOR_IDENTIFIER_BINDING@14..16
+                      0: IDENT@14..16 "id" [] []
+                    1: COMMA@16..18 "," [] [Whitespace(" ")]
+                    2: VUE_V_FOR_OBJECT_PROPERTY_BINDING@18..44
+                      0: VUE_V_FOR_IDENTIFIER_BINDING@18..22
+                        0: IDENT@18..22 "tags" [] []
+                      1: COLON@22..24 ":" [] [Whitespace(" ")]
+                      2: VUE_V_FOR_ARRAY_BINDING@24..44
+                        0: L_BRACKET@24..25 "[" [] []
+                        1: VUE_V_FOR_BINDING_LIST@25..44
+                          0: VUE_V_FOR_IDENTIFIER_BINDING@25..32
+                            0: IDENT@25..32 "primary" [] []
+                          1: COMMA@32..34 "," [] [Whitespace(" ")]
+                          2: VUE_V_FOR_IDENTIFIER_BINDING@34..44
+                            0: IDENT@34..44 "secondary" [] [Whitespace(" ")]
+                        2: (empty)
+                  2: R_CURLY@44..46 "}" [] [Whitespace(" ")]
+                2: (empty)
+                3: HTML_TEXT_EXPRESSION@46..47
+                  0: HTML_LITERAL@46..47 "]" [] []
+                4: (empty)
+          1: HTML_ATTRIBUTE@47..58
+            0: HTML_ATTRIBUTE_NAME@47..58
+              0: HTML_LITERAL@47..58 " in members" [] []
+            1: (empty)
+          2: HTML_BOGUS_ELEMENT@58..137
+            0: HTML_STRING_LITERAL@58..87 "\">{{ id }}</div>\n<div v-for=\"" [] []
+            1: HTML_LITERAL@87..102 "[foo, profile:" [] [Whitespace(" ")]
+            2: L_CURLY@102..104 "{" [] [Whitespace(" ")]
+            3: HTML_LITERAL@104..128 "username }] in members\">" [] []
+            4: L_DOUBLE_CURLY@128..131 "{{" [] [Whitespace(" ")]
+            5: HTML_LITERAL@131..135 "foo " [] []
+            6: R_DOUBLE_CURLY@135..137 "}}" [] []
+      1: HTML_ELEMENT_LIST@137..137
+      2: HTML_CLOSING_ELEMENT@137..143
+        0: L_ANGLE@137..138 "<" [] []
+        1: SLASH@138..139 "/" [] []
+        2: HTML_TAG_NAME@139..142
+          0: HTML_LITERAL@139..142 "div" [] []
+        3: R_ANGLE@142..143 ">" [] []
+    1: HTML_ELEMENT@143..239
+      0: HTML_OPENING_ELEMENT@143..222
+        0: L_ANGLE@143..145 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@145..149
+          0: HTML_LITERAL@145..149 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@149..221
+          0: VUE_DIRECTIVE@149..221
+            0: IDENT@149..154 "v-for" [] []
+            1: (empty)
+            2: VUE_MODIFIER_LIST@154..154
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@154..221
+              0: EQ@154..155 "=" [] []
+              1: VUE_V_FOR_VALUE@155..221
+                0: DOUBLE_QUOTE@155..156 "\"" [] []
+                1: VUE_V_FOR_TUPLE_BINDING@156..203
+                  0: L_PAREN@156..157 "(" [] []
+                  1: VUE_V_FOR_ARRAY_BINDING@157..195
+                    0: L_BRACKET@157..158 "[" [] []
+                    1: VUE_V_FOR_BINDING_LIST@158..194
+                      0: VUE_V_FOR_IDENTIFIER_BINDING@158..163
+                        0: IDENT@158..163 "first" [] []
+                      1: COMMA@163..165 "," [] [Whitespace(" ")]
+                      2: VUE_V_FOR_OBJECT_BINDING@165..194
+                        0: L_CURLY@165..167 "{" [] [Whitespace(" ")]
+                        1: VUE_V_FOR_BINDING_LIST@167..193
+                          0: VUE_V_FOR_IDENTIFIER_BINDING@167..169
+                            0: IDENT@167..169 "id" [] []
+                          1: COMMA@169..171 "," [] [Whitespace(" ")]
+                          2: VUE_V_FOR_OBJECT_PROPERTY_BINDING@171..193
+                            0: VUE_V_FOR_IDENTIFIER_BINDING@171..178
+                              0: IDENT@171..178 "profile" [] []
+                            1: COLON@178..180 ":" [] [Whitespace(" ")]
+                            2: VUE_V_FOR_OBJECT_BINDING@180..193
+                              0: L_CURLY@180..182 "{" [] [Whitespace(" ")]
+                              1: VUE_V_FOR_BINDING_LIST@182..191
+                                0: VUE_V_FOR_IDENTIFIER_BINDING@182..191
+                                  0: IDENT@182..191 "username" [] [Whitespace(" ")]
+                              2: R_CURLY@191..193 "}" [] [Whitespace(" ")]
+                        2: R_CURLY@193..194 "}" [] []
+                    2: R_BRACKET@194..195 "]" [] []
+                  2: VUE_V_FOR_TUPLE_ELEMENT@195..203
+                    0: COMMA@195..197 "," [] [Whitespace(" ")]
+                    1: VUE_V_FOR_IDENTIFIER_BINDING@197..203
+                      0: IDENT@197..203 "index" [] [Whitespace(" ")]
+                  3: (empty)
+                  4: (empty)
+                2: VUE_V_FOR_IN_OPERATOR@203..205
+                  0: IN_KW@203..205 "in" [] []
+                3: HTML_TEXT_EXPRESSION@205..220
+                  0: HTML_LITERAL@205..220 " groupedMembers" [] []
+                4: DOUBLE_QUOTE@220..221 "\"" [] []
+        3: R_ANGLE@221..222 ">" [] []
+      1: HTML_ELEMENT_LIST@222..233
+        0: HTML_DOUBLE_TEXT_EXPRESSION@222..233
+          0: L_DOUBLE_CURLY@222..224 "{{" [] []
+          1: HTML_TEXT_EXPRESSION@224..231
+            0: HTML_LITERAL@224..231 " index " [] []
+          2: R_DOUBLE_CURLY@231..233 "}}" [] []
+      2: HTML_CLOSING_ELEMENT@233..239
+        0: L_ANGLE@233..234 "<" [] []
+        1: SLASH@234..235 "/" [] []
+        2: HTML_TAG_NAME@235..238
+          0: HTML_LITERAL@235..238 "div" [] []
+        3: R_ANGLE@238..239 ">" [] []
+  4: EOF@239..240 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+invalid-nested-destructuring.vue:1:45 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `,` or `]` in the v-for destructuring pattern, but found `}`.
+  
+  > 1 │ <div v-for="{ id, tags: [primary, secondary } ] in members">{{ id }}</div>
+      │                                             ^
+    2 │ <div v-for="[foo, profile: { username }] in members">{{ foo }}</div>
+    3 │ <div v-for="([first, { id, profile: { username } }], index in groupedMembers">{{ index }}</div>
+  
+  i Expected one of:
+  
+  - ,
+  - ]
+  
+invalid-nested-destructuring.vue:1:47 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `in` or `of` in the v-for directive.
+  
+  > 1 │ <div v-for="{ id, tags: [primary, secondary } ] in members">{{ id }}</div>
+      │                                               ^
+    2 │ <div v-for="[foo, profile: { username }] in members">{{ foo }}</div>
+    3 │ <div v-for="([first, { id, profile: { username } }], index in groupedMembers">{{ index }}</div>
+  
+  i Use in or of between the binding and iterable expression.
+  
+invalid-nested-destructuring.vue:1:48 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `"` but instead found ` in members`
+  
+  > 1 │ <div v-for="{ id, tags: [primary, secondary } ] in members">{{ id }}</div>
+      │                                                ^^^^^^^^^^^
+    2 │ <div v-for="[foo, profile: { username }] in members">{{ foo }}</div>
+    3 │ <div v-for="([first, { id, profile: { username } }], index in groupedMembers">{{ index }}</div>
+  
+  i Remove  in members
+  
+invalid-nested-destructuring.vue:1:59 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '">{{ id }}</div>
+    <div v-for="[foo, profile: { username }] in members">{{ foo }}'.
+  
+  > 1 │ <div v-for="{ id, tags: [primary, secondary } ] in members">{{ id }}</div>
+      │                                                           ^^^^^^^^^^^^^^^^
+  > 2 │ <div v-for="[foo, profile: { username }] in members">{{ foo }}</div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <div v-for="([first, { id, profile: { username } }], index in groupedMembers">{{ index }}</div>
+    4 │ 
+  
+  i Expected an attribute here.
+  
+  > 1 │ <div v-for="{ id, tags: [primary, secondary } ] in members">{{ id }}</div>
+      │                                                           ^^^^^^^^^^^^^^^^
+  > 2 │ <div v-for="[foo, profile: { username }] in members">{{ foo }}</div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <div v-for="([first, { id, profile: { username } }], index in groupedMembers">{{ index }}</div>
+    4 │ 
+  
+invalid-nested-destructuring.vue:2:63 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+    1 │ <div v-for="{ id, tags: [primary, secondary } ] in members">{{ id }}</div>
+  > 2 │ <div v-for="[foo, profile: { username }] in members">{{ foo }}</div>
+      │                                                               ^
+    3 │ <div v-for="([first, { id, profile: { username } }], index in groupedMembers">{{ index }}</div>
+    4 │ 
+  
+  i Expected an attribute here.
+  
+    1 │ <div v-for="{ id, tags: [primary, secondary } ] in members">{{ id }}</div>
+  > 2 │ <div v-for="[foo, profile: { username }] in members">{{ foo }}</div>
+      │                                                               ^
+    3 │ <div v-for="([first, { id, profile: { username } }], index in groupedMembers">{{ index }}</div>
+    4 │ 
+  
+invalid-nested-destructuring.vue:3:60 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `)` to close the v-for tuple binding before the iterable expression.
+  
+    1 │ <div v-for="{ id, tags: [primary, secondary } ] in members">{{ id }}</div>
+    2 │ <div v-for="[foo, profile: { username }] in members">{{ foo }}</div>
+  > 3 │ <div v-for="([first, { id, profile: { username } }], index in groupedMembers">{{ index }}</div>
+      │                                                            ^^
+    4 │ 
+  
+```

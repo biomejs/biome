@@ -1,13 +1,17 @@
+mod bullet_list;
 mod comments;
 pub mod context;
 mod cst;
 mod generated;
 mod markdown;
 mod prelude;
+mod quote;
+mod shared;
 mod trivia;
 mod verbatim;
+pub(crate) mod words;
 
-pub(crate) use crate::context::MdFormatContext;
+pub(crate) use crate::context::MarkdownFormatContext;
 use crate::prelude::{format_bogus_node, format_suppressed_node};
 pub(crate) use crate::trivia::*;
 use crate::{context::MdFormatOptions, cst::FormatMdSyntaxToken};
@@ -17,7 +21,7 @@ use biome_formatter::{
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode};
 use biome_rowan::AstNode;
 
-pub(crate) type MarkdownFormatter<'buf> = Formatter<'buf, MdFormatContext>;
+pub(crate) type MarkdownFormatter<'buf> = Formatter<'buf, MarkdownFormatContext>;
 
 #[derive(Debug, Clone, Default)]
 pub struct MdFormatLanguage {
@@ -32,7 +36,7 @@ impl MdFormatLanguage {
 
 impl FormatLanguage for MdFormatLanguage {
     type SyntaxLanguage = MarkdownLanguage;
-    type Context = MdFormatContext;
+    type Context = MarkdownFormatContext;
     type FormatRule = FormatMdSyntaxToken;
 
     fn create_context(
@@ -40,8 +44,8 @@ impl FormatLanguage for MdFormatLanguage {
         _root: &MarkdownSyntaxNode,
         source_map: Option<TransformSourceMap>,
         _delegate_fmt_embedded_nodes: bool,
-    ) -> MdFormatContext {
-        MdFormatContext::new(self.options.clone()).with_source_map(source_map)
+    ) -> MarkdownFormatContext {
+        MarkdownFormatContext::new(self.options.clone()).with_source_map(source_map)
     }
 
     fn options(&self) -> &<Self::Context as FormatContext>::Options {
@@ -86,7 +90,7 @@ where
 
 /// Implement [AsFormat] for [Option] when `T` implements [AsFormat]
 ///
-/// Allows to call format on optional AST fields without having to unwrap the field first.
+/// Allows calling format on optional AST fields without having to unwrap the field first.
 impl<T, C> AsFormat<C> for Option<T>
 where
     T: AsFormat<C>,
@@ -123,7 +127,7 @@ where
 
 /// Implement [IntoFormat] for [Option] when `T` implements [IntoFormat]
 ///
-/// Allows to call format on optional AST fields without having to unwrap the field first.
+/// Allows calling format on optional AST fields without having to unwrap the field first.
 impl<T, Context> IntoFormat<Context> for Option<T>
 where
     T: IntoFormat<Context>,
@@ -253,6 +257,6 @@ where
 pub fn format_node(
     options: MdFormatOptions,
     root: &MarkdownSyntaxNode,
-) -> FormatResult<Formatted<MdFormatContext>> {
+) -> FormatResult<Formatted<MarkdownFormatContext>> {
     biome_formatter::format_node(root, MdFormatLanguage::new(options), false)
 }

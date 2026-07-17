@@ -1,11 +1,32 @@
 use crate::{
-    html::lists::attribute_list::FormatHtmlAttributeListOptions, prelude::*,
+    html::lists::attribute_list::FormatHtmlAttributeListOptions,
+    prelude::*,
     utils::metadata::should_lowercase_html_tag,
+    verbatim::{format_html_leading_comments, format_html_trailing_comments},
 };
-use biome_formatter::write;
+use biome_formatter::{FormatRuleWithOptions, write};
 use biome_html_syntax::{HtmlSelfClosingElement, HtmlSelfClosingElementFields};
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatHtmlSelfClosingElement;
+pub(crate) struct FormatHtmlSelfClosingElement {
+    /// Whether comments adjacent to this element are formatted by the containing child list.
+    comments_as_children: bool,
+}
+
+#[derive(Debug, Clone, Default)]
+pub(crate) struct FormatHtmlSelfClosingElementOptions {
+    /// Whether comments adjacent to this element are formatted by the containing child list.
+    pub comments_as_children: bool,
+}
+
+impl FormatRuleWithOptions<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
+    type Options = FormatHtmlSelfClosingElementOptions;
+
+    fn with_options(mut self, options: Self::Options) -> Self {
+        self.comments_as_children = options.comments_as_children;
+        self
+    }
+}
+
 impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
     fn fmt_fields(&self, node: &HtmlSelfClosingElement, f: &mut HtmlFormatter) -> FormatResult<()> {
         let HtmlSelfClosingElementFields {
@@ -92,5 +113,31 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
         )?;
 
         Ok(())
+    }
+
+    fn fmt_leading_comments(
+        &self,
+        _node: &HtmlSelfClosingElement,
+        _f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        if self.comments_as_children {
+            // handled by element list formatter
+            return Ok(());
+        }
+
+        format_html_leading_comments(_node.syntax()).fmt(_f)
+    }
+
+    fn fmt_trailing_comments(
+        &self,
+        _node: &HtmlSelfClosingElement,
+        _f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        if self.comments_as_children {
+            // handled by element list formatter
+            return Ok(());
+        }
+
+        format_html_trailing_comments(_node.syntax()).fmt(_f)
     }
 }

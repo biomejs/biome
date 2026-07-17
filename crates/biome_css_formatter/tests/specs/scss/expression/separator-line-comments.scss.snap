@@ -1,0 +1,44 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: scss/expression/separator-line-comments.scss
+---
+
+# Input
+
+```scss
+$map-after-source-comma: (
+a:1px, // after comma
+b:2px
+);
+
+$list-after-source-comma:
+a, // after comma
+b;
+
+$whitespace-list-line-comment:
+a // after item
+b
+c;
+
+```
+
+
+# Formatted
+
+```scss
+$map-after-source-comma: (
+	a: 1px,
+	// after comma
+	b: 2px,
+);
+
+$list-after-source-comma:
+	a,
+	// after comma
+	b;
+
+$whitespace-list-line-comment: a // after item
+	b c;
+
+```

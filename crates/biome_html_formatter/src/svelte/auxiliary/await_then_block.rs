@@ -15,16 +15,14 @@ impl FormatNodeRule<SvelteAwaitThenBlock> for FormatSvelteAwaitThenBlock {
             then_token,
         } = node.as_fields();
 
-        write!(
-            f,
-            [
-                sv_curly_colon_token.format(),
-                then_token.format(),
-                space(),
-                name.format(),
-                r_curly_token.format()
-            ]
-        )?;
+        write!(f, [sv_curly_colon_token.format(), then_token.format()])?;
+
+        if let Some(name) = name {
+            write!(f, [space(), name.format()])?;
+        }
+
+        write!(f, [r_curly_token.format()])?;
+
         FormatHtmlElementList::default()
             .with_multiline()
             .fmt(&children, f)?;

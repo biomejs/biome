@@ -1,0 +1,14 @@
+{
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noShadow": {
+          "level": "error",
+          "options": {
+            "ignoreTypeValueShadow": false
+          }
+        }
+      }
+    }
+  }
+}

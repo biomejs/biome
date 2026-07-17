@@ -4,11 +4,13 @@ use crate::comments::{FormatJsLeadingComment, JsCommentStyle, JsComments};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::printer::PrinterOptions;
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, CstFormatContext, Expand, FormatContext,
-    FormatElement, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
-    TrailingNewline, TransformSourceMap,
+    AttributePosition, BracketSameLine, BracketSpacing, CstFormatContext, DelimiterSpacing, Expand,
+    FormatContext, FormatElement, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
+    QuoteStyle, TrailingNewline, TransformSourceMap,
 };
-use biome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
+use biome_js_syntax::{AnyJsFunctionBody, JsLanguage};
+use biome_languages::JsFileSource;
+use biome_rowan::TextRange;
 use std::fmt;
 use std::fmt::Debug;
 use std::rc::Rc;
@@ -46,7 +48,10 @@ pub struct JsFormatContext {
 
     source_map: Option<TransformSourceMap>,
 
-    should_delegate_fmt_embedded_nodes: bool,
+    /// Ranges of template chunks whose content was parsed as an embedded
+    /// language. Formatting them is delegated to the corresponding language
+    /// formatter, see [crate::format_node].
+    embedded_node_ranges: Vec<TextRange>,
 }
 
 impl JsFormatContext {
@@ -56,7 +61,7 @@ impl JsFormatContext {
             comments: Rc::new(comments),
             cached_function_body: None,
             source_map: None,
-            should_delegate_fmt_embedded_nodes: false,
+            embedded_node_ranges: Vec::new(),
         }
     }
 
@@ -95,13 +100,16 @@ impl JsFormatContext {
         self
     }
 
-    pub fn with_fmt_embedded_nodes(mut self) -> Self {
-        self.should_delegate_fmt_embedded_nodes = true;
+    pub fn with_embedded_node_ranges(mut self, embedded_node_ranges: Vec<TextRange>) -> Self {
+        self.embedded_node_ranges = embedded_node_ranges;
         self
     }
 
-    pub fn should_delegate_fmt_embedded_nodes(&self) -> bool {
-        self.should_delegate_fmt_embedded_nodes
+    /// Ranges of template chunks whose content was parsed as an embedded
+    /// language, and whose formatting is therefore delegated to the
+    /// corresponding language formatter.
+    pub fn embedded_node_ranges(&self) -> &[TextRange] {
+        &self.embedded_node_ranges
     }
 }
 
@@ -177,6 +185,16 @@ pub struct JsFormatOptions {
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
     bracket_spacing: BracketSpacing,
 
+    /// Whether to insert spaces inside delimiters (after the opening delimiter and before the
+    /// closing delimiter). Only applies when the content fits on a single line. Spaces are not
+    /// added before the opening delimiter (e.g., `function f()` stays `function f()`, not
+    /// `function f ()`), and empty delimiters are not affected (e.g., `fn()` stays `fn()`).
+    /// Affects parentheses (e.g., `foo( a, b )`), square brackets (e.g., `[ a, b ]`), template
+    /// literal interpolations (e.g., `${ expr }`), TypeScript angle brackets (e.g.,
+    /// `foo< T >()`), JSX expression braces (e.g., `{ value }`), and the logical NOT operator
+    /// (e.g., `! x`, but in chains only after the last one: `!! x`). Defaults to false.
+    delimiter_spacing: DelimiterSpacing,
+
     /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
     bracket_same_line: BracketSameLine,
 
@@ -211,6 +229,7 @@ impl JsFormatOptions {
             semicolons: Semicolons::default(),
             arrow_parentheses: ArrowParentheses::default(),
             bracket_spacing: BracketSpacing::default(),
+            delimiter_spacing: DelimiterSpacing::default(),
             bracket_same_line: BracketSameLine::default(),
             attribute_position: AttributePosition::default(),
             expand: Expand::default(),
@@ -226,6 +245,11 @@ impl JsFormatOptions {
 
     pub fn with_bracket_spacing(mut self, bracket_spacing: BracketSpacing) -> Self {
         self.bracket_spacing = bracket_spacing;
+        self
+    }
+
+    pub fn with_delimiter_spacing(mut self, delimiter_spacing: DelimiterSpacing) -> Self {
+        self.delimiter_spacing = delimiter_spacing;
         self
     }
 
@@ -307,6 +331,10 @@ impl JsFormatOptions {
         self.bracket_spacing = bracket_spacing;
     }
 
+    pub fn set_delimiter_spacing(&mut self, delimiter_spacing: DelimiterSpacing) {
+        self.delimiter_spacing = delimiter_spacing;
+    }
+
     pub fn set_bracket_same_line(&mut self, bracket_same_line: BracketSameLine) {
         self.bracket_same_line = bracket_same_line;
     }
@@ -369,6 +397,10 @@ impl JsFormatOptions {
 
     pub fn bracket_spacing(&self) -> BracketSpacing {
         self.bracket_spacing
+    }
+
+    pub fn delimiter_spacing(&self) -> DelimiterSpacing {
+        self.delimiter_spacing
     }
 
     pub fn bracket_same_line(&self) -> BracketSameLine {
@@ -459,6 +491,7 @@ impl fmt::Display for JsFormatOptions {
         writeln!(f, "Semicolons: {}", self.semicolons)?;
         writeln!(f, "Arrow parentheses: {}", self.arrow_parentheses)?;
         writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
+        writeln!(f, "Delimiter spacing: {}", self.delimiter_spacing.value())?;
         writeln!(f, "Bracket same line: {}", self.bracket_same_line.value())?;
         writeln!(f, "Attribute Position: {}", self.attribute_position)?;
         writeln!(f, "Expand lists: {}", self.expand)?;

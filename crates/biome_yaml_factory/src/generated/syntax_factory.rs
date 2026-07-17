@@ -809,7 +809,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 children,
                 AnyYamlFlowSequenceEntry::can_cast,
                 T ! [,],
-                false,
+                true,
             ),
             YAML_PROPERTY_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyYamlProperty::can_cast)

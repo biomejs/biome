@@ -1,16 +1,18 @@
 use super::*;
 use biome_html_parser::parse_html;
-use biome_html_syntax::HtmlRoot;
+use biome_html_syntax::{AnyHtmlElement, HtmlRoot};
 use biome_rowan::AstNode;
 
 /// Helper to parse HTML and extract the first element
-fn parse_first_element(html: &str) -> AnyHtmlElement {
+fn parse_first_element(html: &str) -> AnyHtmlTagElement {
     let parsed = parse_html(html, Default::default());
     let root = HtmlRoot::cast(parsed.syntax()).unwrap();
     root.syntax()
         .descendants()
         .find_map(AnyHtmlElement::cast)
         .expect("No element found in parsed HTML")
+        .as_any_html_tag_element()
+        .expect("No opening or self-closing element found")
 }
 
 // ============================================================================

@@ -1,0 +1,398 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+html[lang=#{$locale ) {}
+
+html[lang=#{}] {}
+
+html[lang=prefix-#{$locale ] {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@0..4 "html" [] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssBogusSubSelector {
+                            items: [
+                                L_BRACK@4..5 "[" [] [],
+                                CssAttributeName {
+                                    namespace: missing (optional),
+                                    name: CssIdentifier {
+                                        value_token: IDENT@5..9 "lang" [] [],
+                                    },
+                                },
+                                CssBogus {
+                                    items: [
+                                        EQ@9..10 "=" [] [],
+                                        CssAttributeMatcherValue {
+                                            name: ScssInterpolatedIdentifier {
+                                                items: ScssInterpolatedIdentifierPartList [
+                                                    ScssInterpolation {
+                                                        hash_token: HASH@10..11 "#" [] [],
+                                                        l_curly_token: L_CURLY@11..12 "{" [] [],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssVariable {
+                                                                    dollar_token: DOLLAR@12..13 "$" [] [],
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@13..20 "locale" [] [Whitespace(" ")],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_curly_token: missing (required),
+                                                    },
+                                                ],
+                                            },
+                                        },
+                                        R_PAREN@20..22 ")" [] [Whitespace(" ")],
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@22..23 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@23..24 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@24..30 "html" [Newline("\n"), Newline("\n")] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssAttributeSelector {
+                            l_brack_token: L_BRACK@30..31 "[" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@31..35 "lang" [] [],
+                                },
+                            },
+                            matcher: CssAttributeMatcher {
+                                operator: EQ@35..36 "=" [] [],
+                                value: CssAttributeMatcherValue {
+                                    name: ScssInterpolatedIdentifier {
+                                        items: ScssInterpolatedIdentifierPartList [
+                                            ScssInterpolation {
+                                                hash_token: HASH@36..37 "#" [] [],
+                                                l_curly_token: L_CURLY@37..38 "{" [] [],
+                                                value: missing (required),
+                                                r_curly_token: R_CURLY@38..39 "}" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                modifier: missing (optional),
+                            },
+                            r_brack_token: R_BRACK@39..41 "]" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@41..42 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@42..43 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@43..49 "html" [Newline("\n"), Newline("\n")] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssBogusSubSelector {
+                            items: [
+                                L_BRACK@49..50 "[" [] [],
+                                CssAttributeName {
+                                    namespace: missing (optional),
+                                    name: CssIdentifier {
+                                        value_token: IDENT@50..54 "lang" [] [],
+                                    },
+                                },
+                                CssBogus {
+                                    items: [
+                                        EQ@54..55 "=" [] [],
+                                        CssBogus {
+                                            items: [
+                                                CssBogusSupportsCondition {
+                                                    items: [
+                                                        CssBogus {
+                                                            items: [
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@55..62 "prefix-" [] [],
+                                                                },
+                                                                CssBogus {
+                                                                    items: [
+                                                                        HASH@62..63 "#" [] [],
+                                                                        L_CURLY@63..64 "{" [] [],
+                                                                        CssBogus {
+                                                                            items: [
+                                                                                CssBogus {
+                                                                                    items: [
+                                                                                        ScssVariable {
+                                                                                            dollar_token: DOLLAR@64..65 "$" [] [],
+                                                                                            name: CssIdentifier {
+                                                                                                value_token: IDENT@65..72 "locale" [] [Whitespace(" ")],
+                                                                                            },
+                                                                                        },
+                                                                                        CssBogusPropertyValue {
+                                                                                            items: [
+                                                                                                R_BRACK@72..74 "]" [] [Whitespace(" ")],
+                                                                                                L_CURLY@74..75 "{" [] [],
+                                                                                            ],
+                                                                                        },
+                                                                                    ],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                        R_CURLY@75..76 "}" [] [],
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+            block: CssBogusBlock {
+                items: [],
+            },
+        },
+    ],
+    eof_token: EOF@76..77 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..77
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..76
+    0: CSS_QUALIFIED_RULE@0..24
+      0: CSS_SELECTOR_LIST@0..22
+        0: CSS_COMPOUND_SELECTOR@0..22
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: CSS_TYPE_SELECTOR@0..4
+            0: (empty)
+            1: CSS_IDENTIFIER@0..4
+              0: IDENT@0..4 "html" [] []
+          2: CSS_SUB_SELECTOR_LIST@4..22
+            0: CSS_BOGUS_SUB_SELECTOR@4..22
+              0: L_BRACK@4..5 "[" [] []
+              1: CSS_ATTRIBUTE_NAME@5..9
+                0: (empty)
+                1: CSS_IDENTIFIER@5..9
+                  0: IDENT@5..9 "lang" [] []
+              2: CSS_BOGUS@9..22
+                0: EQ@9..10 "=" [] []
+                1: CSS_ATTRIBUTE_MATCHER_VALUE@10..20
+                  0: SCSS_INTERPOLATED_IDENTIFIER@10..20
+                    0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@10..20
+                      0: SCSS_INTERPOLATION@10..20
+                        0: HASH@10..11 "#" [] []
+                        1: L_CURLY@11..12 "{" [] []
+                        2: SCSS_EXPRESSION@12..20
+                          0: SCSS_EXPRESSION_ITEM_LIST@12..20
+                            0: SCSS_VARIABLE@12..20
+                              0: DOLLAR@12..13 "$" [] []
+                              1: CSS_IDENTIFIER@13..20
+                                0: IDENT@13..20 "locale" [] [Whitespace(" ")]
+                        3: (empty)
+                2: R_PAREN@20..22 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@22..24
+        0: L_CURLY@22..23 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@23..23
+        2: R_CURLY@23..24 "}" [] []
+    1: CSS_QUALIFIED_RULE@24..43
+      0: CSS_SELECTOR_LIST@24..41
+        0: CSS_COMPOUND_SELECTOR@24..41
+          0: CSS_NESTED_SELECTOR_LIST@24..24
+          1: CSS_TYPE_SELECTOR@24..30
+            0: (empty)
+            1: CSS_IDENTIFIER@24..30
+              0: IDENT@24..30 "html" [Newline("\n"), Newline("\n")] []
+          2: CSS_SUB_SELECTOR_LIST@30..41
+            0: CSS_ATTRIBUTE_SELECTOR@30..41
+              0: L_BRACK@30..31 "[" [] []
+              1: CSS_ATTRIBUTE_NAME@31..35
+                0: (empty)
+                1: CSS_IDENTIFIER@31..35
+                  0: IDENT@31..35 "lang" [] []
+              2: CSS_ATTRIBUTE_MATCHER@35..39
+                0: EQ@35..36 "=" [] []
+                1: CSS_ATTRIBUTE_MATCHER_VALUE@36..39
+                  0: SCSS_INTERPOLATED_IDENTIFIER@36..39
+                    0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@36..39
+                      0: SCSS_INTERPOLATION@36..39
+                        0: HASH@36..37 "#" [] []
+                        1: L_CURLY@37..38 "{" [] []
+                        2: (empty)
+                        3: R_CURLY@38..39 "}" [] []
+                2: (empty)
+              3: R_BRACK@39..41 "]" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@41..43
+        0: L_CURLY@41..42 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@42..42
+        2: R_CURLY@42..43 "}" [] []
+    2: CSS_QUALIFIED_RULE@43..76
+      0: CSS_SELECTOR_LIST@43..76
+        0: CSS_COMPOUND_SELECTOR@43..76
+          0: CSS_NESTED_SELECTOR_LIST@43..43
+          1: CSS_TYPE_SELECTOR@43..49
+            0: (empty)
+            1: CSS_IDENTIFIER@43..49
+              0: IDENT@43..49 "html" [Newline("\n"), Newline("\n")] []
+          2: CSS_SUB_SELECTOR_LIST@49..76
+            0: CSS_BOGUS_SUB_SELECTOR@49..76
+              0: L_BRACK@49..50 "[" [] []
+              1: CSS_ATTRIBUTE_NAME@50..54
+                0: (empty)
+                1: CSS_IDENTIFIER@50..54
+                  0: IDENT@50..54 "lang" [] []
+              2: CSS_BOGUS@54..76
+                0: EQ@54..55 "=" [] []
+                1: CSS_BOGUS@55..76
+                  0: CSS_BOGUS_SUPPORTS_CONDITION@55..76
+                    0: CSS_BOGUS@55..76
+                      0: CSS_IDENTIFIER@55..62
+                        0: IDENT@55..62 "prefix-" [] []
+                      1: CSS_BOGUS@62..76
+                        0: HASH@62..63 "#" [] []
+                        1: L_CURLY@63..64 "{" [] []
+                        2: CSS_BOGUS@64..75
+                          0: CSS_BOGUS@64..75
+                            0: SCSS_VARIABLE@64..72
+                              0: DOLLAR@64..65 "$" [] []
+                              1: CSS_IDENTIFIER@65..72
+                                0: IDENT@65..72 "locale" [] [Whitespace(" ")]
+                            1: CSS_BOGUS_PROPERTY_VALUE@72..75
+                              0: R_BRACK@72..74 "]" [] [Whitespace(" ")]
+                              1: L_CURLY@74..75 "{" [] []
+                        3: R_CURLY@75..76 "}" [] []
+      1: CSS_BOGUS_BLOCK@76..76
+  2: EOF@76..77 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+interpolated-attribute-invalid.scss:1:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `)`
+  
+  > 1 │ html[lang=#{$locale ) {}
+      │                     ^
+    2 │ 
+    3 │ html[lang=#{}] {}
+  
+  i Remove )
+  
+interpolated-attribute-invalid.scss:1:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `]` but instead found `{`
+  
+  > 1 │ html[lang=#{$locale ) {}
+      │                       ^
+    2 │ 
+    3 │ html[lang=#{}] {}
+  
+  i Remove {
+  
+interpolated-attribute-invalid.scss:3:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '}'.
+  
+    1 │ html[lang=#{$locale ) {}
+    2 │ 
+  > 3 │ html[lang=#{}] {}
+      │             ^
+    4 │ 
+    5 │ html[lang=prefix-#{$locale ] {}
+  
+  i Expected a SCSS expression here.
+  
+    1 │ html[lang=#{$locale ) {}
+    2 │ 
+  > 3 │ html[lang=#{}] {}
+      │             ^
+    4 │ 
+    5 │ html[lang=prefix-#{$locale ] {}
+  
+interpolated-attribute-invalid.scss:5:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '] {'.
+  
+    3 │ html[lang=#{}] {}
+    4 │ 
+  > 5 │ html[lang=prefix-#{$locale ] {}
+      │                            ^^^
+    6 │ 
+  
+  i Expected a SCSS expression here.
+  
+    3 │ html[lang=#{}] {}
+    4 │ 
+  > 5 │ html[lang=prefix-#{$locale ] {}
+      │                            ^^^
+    6 │ 
+  
+interpolated-attribute-invalid.scss:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `]` but instead the file ends
+  
+    5 │ html[lang=prefix-#{$locale ] {}
+  > 6 │ 
+      │ 
+  
+  i the file ends here
+  
+    5 │ html[lang=prefix-#{$locale ] {}
+  > 6 │ 
+      │ 
+  
+```

@@ -156,3 +156,5 @@ const wrapped = {
 };
 
 [function () {}, () => {}];
+
+function greetUser(name, greeting = 'Hello'): string { return `${greeting}, ${name}`; }

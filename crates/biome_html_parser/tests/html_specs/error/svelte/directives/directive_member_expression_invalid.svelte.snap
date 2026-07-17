@@ -1,0 +1,287 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<!-- trailing dot, no member -->
+<div in:renderer.></div>
+<!-- leading dot, no object -->
+<div in:.something></div>
+<!-- consecutive dots -->
+<div in:a..b></div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..34 "<" [Comments("<!-- trailing dot, no ..."), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@34..38 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteInDirective {
+                        in_token: IN_KW@38..40 "in" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@40..41 ":" [] [],
+                            property: SvelteMemberProperty {
+                                object: SvelteName {
+                                    ident_token: IDENT@41..49 "renderer" [] [],
+                                },
+                                dot_token: DOT@49..50 "." [] [],
+                                member: missing (required),
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@50..51 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@51..52 "<" [] [],
+                slash_token: SLASH@52..53 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@53..56 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@56..57 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@57..91 "<" [Newline("\n"), Comments("<!-- leading dot, no  ..."), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@91..95 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteInDirective {
+                        in_token: IN_KW@95..97 "in" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@97..98 ":" [] [],
+                            property: missing (required),
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: missing (optional),
+                        },
+                    },
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@98..108 ".something" [] [],
+                        },
+                        initializer: missing (optional),
+                    },
+                ],
+                r_angle_token: R_ANGLE@108..109 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@109..110 "<" [] [],
+                slash_token: SLASH@110..111 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@111..114 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@114..115 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@115..143 "<" [Newline("\n"), Comments("<!-- consecutive dots ..."), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@143..147 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteInDirective {
+                        in_token: IN_KW@147..149 "in" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@149..150 ":" [] [],
+                            property: SvelteMemberProperty {
+                                object: SvelteMemberProperty {
+                                    object: SvelteName {
+                                        ident_token: IDENT@150..151 "a" [] [],
+                                    },
+                                    dot_token: DOT@151..152 "." [] [],
+                                    member: missing (required),
+                                },
+                                dot_token: DOT@152..153 "." [] [],
+                                member: SvelteName {
+                                    ident_token: IDENT@153..154 "b" [] [],
+                                },
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@154..155 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@155..156 "<" [] [],
+                slash_token: SLASH@156..157 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@157..160 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@160..161 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@161..162 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..162
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..161
+    0: HTML_ELEMENT@0..57
+      0: HTML_OPENING_ELEMENT@0..51
+        0: L_ANGLE@0..34 "<" [Comments("<!-- trailing dot, no ..."), Newline("\n")] []
+        1: HTML_TAG_NAME@34..38
+          0: HTML_LITERAL@34..38 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@38..50
+          0: SVELTE_IN_DIRECTIVE@38..50
+            0: IN_KW@38..40 "in" [] []
+            1: SVELTE_DIRECTIVE_VALUE@40..50
+              0: COLON@40..41 ":" [] []
+              1: SVELTE_MEMBER_PROPERTY@41..50
+                0: SVELTE_NAME@41..49
+                  0: IDENT@41..49 "renderer" [] []
+                1: DOT@49..50 "." [] []
+                2: (empty)
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@50..50
+              3: (empty)
+        3: R_ANGLE@50..51 ">" [] []
+      1: HTML_ELEMENT_LIST@51..51
+      2: HTML_CLOSING_ELEMENT@51..57
+        0: L_ANGLE@51..52 "<" [] []
+        1: SLASH@52..53 "/" [] []
+        2: HTML_TAG_NAME@53..56
+          0: HTML_LITERAL@53..56 "div" [] []
+        3: R_ANGLE@56..57 ">" [] []
+    1: HTML_ELEMENT@57..115
+      0: HTML_OPENING_ELEMENT@57..109
+        0: L_ANGLE@57..91 "<" [Newline("\n"), Comments("<!-- leading dot, no  ..."), Newline("\n")] []
+        1: HTML_TAG_NAME@91..95
+          0: HTML_LITERAL@91..95 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@95..108
+          0: SVELTE_IN_DIRECTIVE@95..98
+            0: IN_KW@95..97 "in" [] []
+            1: SVELTE_DIRECTIVE_VALUE@97..98
+              0: COLON@97..98 ":" [] []
+              1: (empty)
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@98..98
+              3: (empty)
+          1: HTML_ATTRIBUTE@98..108
+            0: HTML_ATTRIBUTE_NAME@98..108
+              0: HTML_LITERAL@98..108 ".something" [] []
+            1: (empty)
+        3: R_ANGLE@108..109 ">" [] []
+      1: HTML_ELEMENT_LIST@109..109
+      2: HTML_CLOSING_ELEMENT@109..115
+        0: L_ANGLE@109..110 "<" [] []
+        1: SLASH@110..111 "/" [] []
+        2: HTML_TAG_NAME@111..114
+          0: HTML_LITERAL@111..114 "div" [] []
+        3: R_ANGLE@114..115 ">" [] []
+    2: HTML_ELEMENT@115..161
+      0: HTML_OPENING_ELEMENT@115..155
+        0: L_ANGLE@115..143 "<" [Newline("\n"), Comments("<!-- consecutive dots ..."), Newline("\n")] []
+        1: HTML_TAG_NAME@143..147
+          0: HTML_LITERAL@143..147 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@147..154
+          0: SVELTE_IN_DIRECTIVE@147..154
+            0: IN_KW@147..149 "in" [] []
+            1: SVELTE_DIRECTIVE_VALUE@149..154
+              0: COLON@149..150 ":" [] []
+              1: SVELTE_MEMBER_PROPERTY@150..154
+                0: SVELTE_MEMBER_PROPERTY@150..152
+                  0: SVELTE_NAME@150..151
+                    0: IDENT@150..151 "a" [] []
+                  1: DOT@151..152 "." [] []
+                  2: (empty)
+                1: DOT@152..153 "." [] []
+                2: SVELTE_NAME@153..154
+                  0: IDENT@153..154 "b" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@154..154
+              3: (empty)
+        3: R_ANGLE@154..155 ">" [] []
+      1: HTML_ELEMENT_LIST@155..155
+      2: HTML_CLOSING_ELEMENT@155..161
+        0: L_ANGLE@155..156 "<" [] []
+        1: SLASH@156..157 "/" [] []
+        2: HTML_TAG_NAME@157..160
+          0: HTML_LITERAL@157..160 "div" [] []
+        3: R_ANGLE@160..161 ">" [] []
+  4: EOF@161..162 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+directive_member_expression_invalid.svelte:2:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ <!-- trailing dot, no member -->
+  > 2 │ <div in:renderer.></div>
+      │                  ^^^^^^^
+  > 3 │ <!-- leading dot, no object -->
+  > 4 │ <div in:.something></div>
+  > 5 │ <!-- consecutive dots -->
+  > 6 │ <div in:a..b></div>
+  > 7 │ 
+      │ 
+  
+  i Expected one of:
+  
+  - name
+  - closing block
+  
+directive_member_expression_invalid.svelte:4:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    2 │ <div in:renderer.></div>
+    3 │ <!-- leading dot, no object -->
+  > 4 │ <div in:.something></div>
+      │         ^
+    5 │ <!-- consecutive dots -->
+    6 │ <div in:a..b></div>
+  
+  i Expected one of:
+  
+  - name
+  - closing block
+  
+directive_member_expression_invalid.svelte:6:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    4 │ <div in:.something></div>
+    5 │ <!-- consecutive dots -->
+  > 6 │ <div in:a..b></div>
+      │           ^
+    7 │ 
+  
+  i Expected one of:
+  
+  - name
+  - closing block
+  
+```

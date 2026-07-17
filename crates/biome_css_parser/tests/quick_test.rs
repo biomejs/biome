@@ -1,5 +1,5 @@
 use biome_css_parser::{CssParserOptions, parse_css};
-use biome_css_syntax::CssFileSource;
+use biome_languages::CssFileSource;
 use biome_test_utils::has_bogus_nodes_or_empty_slots;
 
 #[ignore]

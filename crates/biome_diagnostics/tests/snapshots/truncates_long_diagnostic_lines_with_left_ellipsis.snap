@@ -1,0 +1,15 @@
+---
+source: crates/biome_diagnostics/tests/disagnostics.rs
+expression: content
+---
+long-line.js:1:601 check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This is an unexpected use of the debugger statement.
+  
+  > 1 │ ...+;a++;a++;a++;a++;a++;a++;a++;a++;a++;a++;a++;debugger;
+      │                                                  ^^^^^^^^^
+  
+  i Unsafe fix: Remove target
+  
+    1 │ ...+;a++;a++;a++;a++;a++;a++;a++;a++;a++;a++;a++;debugger;
+      │                                                  ---------

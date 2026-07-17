@@ -1,7 +1,8 @@
 use biome_configuration::Configuration;
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
-use biome_js_syntax::{JsFileSource, LanguageVariant, ModuleKind};
-use biome_service::workspace::DocumentFileSource;
+use biome_languages::{
+    DocumentFileSource, JsFileSource, javascript::LanguageVariant, javascript::ModuleKind,
+};
 use camino::Utf8Path;
 
 pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, file_type: &str) {

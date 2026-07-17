@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -547,7 +548,7 @@ at_rule_media_error.css:1:28 parse ━━━━━━━━━━━━━━━
   
 at_rule_media_error.css:3:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `width`
+  × Expected a media condition, or a parenthesized media query but instead found 'width'.
   
     1 │ @media (--umrel-breakpoints$-breakpoint) {}
     2 │ 
@@ -556,7 +557,14 @@ at_rule_media_error.css:3:24 parse ━━━━━━━━━━━━━━━
     4 │ 	.left-block {
     5 │ 		width: 100%;
   
-  i Remove width
+  i Expected a media condition, or a parenthesized media query here.
+  
+    1 │ @media (--umrel-breakpoints$-breakpoint) {}
+    2 │ 
+  > 3 │ @media only screen and width <= 500px {
+      │                        ^^^^^
+    4 │ 	.left-block {
+    5 │ 		width: 100%;
   
 at_rule_media_error.css:3:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -586,7 +594,7 @@ at_rule_media_error.css:9:31 parse ━━━━━━━━━━━━━━━
   
 at_rule_media_error.css:15:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `)` but instead found `>`
+  × Unexpected value or character.
   
     13 │ }
     14 │ 
@@ -595,6 +603,14 @@ at_rule_media_error.css:15:32 parse ━━━━━━━━━━━━━━�
     16 │ .left-block {
     17 │ 	width: 100%;
   
-  i Remove >
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
   
 ```

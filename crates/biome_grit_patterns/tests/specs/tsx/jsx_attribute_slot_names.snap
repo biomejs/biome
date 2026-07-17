@@ -1,0 +1,15 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+assertion_line: 94
+expression: jsx_attribute_slot_names
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "1:22-1:37",
+        "1:38-1:49",
+        "1:50-1:67",
+    ],
+    rewritten_files: [],
+    created_files: [],
+}

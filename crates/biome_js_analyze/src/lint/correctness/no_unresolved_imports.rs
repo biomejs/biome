@@ -1,16 +1,18 @@
+use crate::services::database::ResolvedImports;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsModuleSource};
-use biome_module_graph::{JsImportPath, JsModuleInfo, ModuleGraph, SUPPORTED_EXTENSIONS};
+use biome_module_graph::{
+    JsImportPath, ModuleDb, ModuleInfo, SUPPORTED_EXTENSIONS, SymbolFromModuleInfo,
+    find_js_exported_symbol,
+};
 use biome_resolver::ResolveError;
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
 use biome_rule_options::no_unresolved_imports::NoUnresolvedImportsOptions;
 use camino::{Utf8Path, Utf8PathBuf};
-
-use crate::services::module_graph::ResolvedImports;
 
 declare_lint_rule! {
     /// Warn when importing non-existing exports.
@@ -62,13 +64,13 @@ declare_lint_rule! {
 pub enum NoUnresolvedImportsState {
     UnresolvedPath {
         range: TextRange,
-        specifier: Box<str>,
+        specifier: TokenText,
         resolve_error: ResolveError,
     },
     UnresolvedSymbol {
         range: TextRange,
-        specifier: Box<str>,
-        export_name: Box<str>,
+        specifier: TokenText,
+        export_name: Text,
     },
 }
 
@@ -82,8 +84,8 @@ impl NoUnresolvedImportsState {
 
     fn specifier(&self) -> &str {
         match self {
-            Self::UnresolvedPath { specifier, .. } => specifier,
-            Self::UnresolvedSymbol { specifier, .. } => specifier,
+            Self::UnresolvedPath { specifier, .. } => specifier.text(),
+            Self::UnresolvedSymbol { specifier, .. } => specifier.text(),
         }
     }
 }
@@ -95,7 +97,7 @@ impl Rule for NoUnresolvedImports {
     type Options = NoUnresolvedImportsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let Some(module_info) = ctx.module_info_for_path(ctx.file_path()) else {
+        let Some(module_info) = ctx.js_module_info_for_path(ctx.file_path()) else {
             return Vec::new();
         };
 
@@ -127,7 +129,7 @@ impl Rule for NoUnresolvedImports {
 
                 return vec![NoUnresolvedImportsState::UnresolvedPath {
                     range: node.syntax().text_trimmed_range(),
-                    specifier: specifier.as_ref().into(),
+                    specifier,
                     resolve_error: *resolve_error,
                 }];
             }
@@ -138,7 +140,7 @@ impl Rule for NoUnresolvedImports {
         };
 
         let options = GetUnresolvedImportsOptions {
-            module_graph: ctx.module_graph(),
+            module_db: ctx.db(),
             specifier,
             target_info,
         };
@@ -194,7 +196,7 @@ impl Rule for NoUnresolvedImports {
                 })
             }
             NoUnresolvedImportsState::UnresolvedSymbol { export_name, .. }
-                if export_name.as_ref() == "default" =>
+                if export_name.text() == "default" =>
             {
                 let specifier_kind = if specifier.starts_with('.') {
                     "path"
@@ -222,7 +224,7 @@ impl Rule for NoUnresolvedImports {
                     rule_category!(),
                     range,
                     markup! {
-                        "The "{specifier_kind}" "<Emphasis>{specifier}</Emphasis>" has no export named "<Emphasis>{export_name}</Emphasis>"."
+                        "The "{specifier_kind}" "<Emphasis>{specifier}</Emphasis>" has no export named "<Emphasis>{format_args!("{}", export_name)}</Emphasis>"."
                     },
                 )
                 .note(markup! {
@@ -236,14 +238,14 @@ impl Rule for NoUnresolvedImports {
 }
 
 struct GetUnresolvedImportsOptions<'a> {
-    /// The module graph to use for further lookups.
-    module_graph: &'a ModuleGraph,
+    /// The module database to use for further lookups.
+    module_db: &'a dyn ModuleDb,
 
     /// The path of the module we're importing from.
     specifier: TokenText,
 
     /// Module info of the module we're importing from.
-    target_info: JsModuleInfo,
+    target_info: ModuleInfo,
 }
 
 fn get_unresolved_imports_from_module_source(
@@ -258,16 +260,17 @@ fn get_unresolved_imports_from_module_source(
         (!has_exported_symbol(&imported_name, options)).then(|| {
             NoUnresolvedImportsState::UnresolvedSymbol {
                 range,
-                specifier: options.specifier.as_ref().into(),
-                export_name: imported_name.into(),
+                specifier: options.specifier.clone(),
+                export_name: imported_name,
             }
         })
     })
 }
 
 fn has_exported_symbol(import_name: &Text, options: &GetUnresolvedImportsOptions) -> bool {
-    options
-        .target_info
-        .find_js_exported_symbol(options.module_graph, import_name.text())
-        .is_some()
+    find_js_exported_symbol(
+        options.module_db,
+        SymbolFromModuleInfo::new(options.module_db, import_name.text(), options.target_info),
+    )
+    .is_some()
 }

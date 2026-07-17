@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: inObject.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+React.createElement('button', { "type": foo });
+React.createElement("button", { type: "button" }, "foo")
+
+```

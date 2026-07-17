@@ -1,0 +1,55 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/blockquote_code_block.md
+---
+
+# Input
+
+```md
+> paragraph text
+>
+> ```
+> code
+> ```
+
+> paragraph text
+>
+> ```js
+> const x = 1;
+> ```
+
+> first paragraph
+>
+> second paragraph
+>
+> ```
+> code block
+> ```
+
+```
+
+
+# Formatted
+
+```md
+> paragraph text
+>
+> ```
+> code
+> ```
+
+> paragraph text
+>
+> ```js
+> const x = 1;
+> ```
+
+> first paragraph
+>
+> second paragraph
+>
+> ```
+> code block
+> ```
+
+```

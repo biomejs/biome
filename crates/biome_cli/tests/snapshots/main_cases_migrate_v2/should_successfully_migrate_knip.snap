@@ -22,7 +22,7 @@ expression: redactor(content)
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "correctness": {
         "noUnusedVariables": "error",
         "noUnusedImports": "error"

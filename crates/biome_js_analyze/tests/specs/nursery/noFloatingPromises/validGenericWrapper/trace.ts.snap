@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: trace.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+export function trace<F extends (...args: any) => any>(fn: F): F {
+	return fn;
+}
+
+```

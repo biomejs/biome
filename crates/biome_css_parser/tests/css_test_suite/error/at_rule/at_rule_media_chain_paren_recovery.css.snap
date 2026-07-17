@@ -1,0 +1,189 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
+expression: snapshot
+---
+
+## Input
+
+```css
+@media ((color) and) {}
+
+@media ((color) or) {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@1..7 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssMediaConditionQuery {
+                            condition: CssMediaConditionInParens {
+                                l_paren_token: L_PAREN@7..8 "(" [] [],
+                                condition: CssMediaAndCondition {
+                                    left: CssMediaFeatureInParens {
+                                        l_paren_token: L_PAREN@8..9 "(" [] [],
+                                        feature: CssQueryFeatureBoolean {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@9..14 "color" [] [],
+                                            },
+                                        },
+                                        r_paren_token: R_PAREN@14..16 ")" [] [Whitespace(" ")],
+                                    },
+                                    and_token: AND_KW@16..19 "and" [] [],
+                                    right: missing (required),
+                                },
+                                r_paren_token: R_PAREN@19..21 ")" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@21..22 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@22..23 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@23..26 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@26..32 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssMediaConditionQuery {
+                            condition: CssMediaConditionInParens {
+                                l_paren_token: L_PAREN@32..33 "(" [] [],
+                                condition: CssMediaOrCondition {
+                                    left: CssMediaFeatureInParens {
+                                        l_paren_token: L_PAREN@33..34 "(" [] [],
+                                        feature: CssQueryFeatureBoolean {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@34..39 "color" [] [],
+                                            },
+                                        },
+                                        r_paren_token: R_PAREN@39..41 ")" [] [Whitespace(" ")],
+                                    },
+                                    or_token: OR_KW@41..43 "or" [] [],
+                                    right: missing (required),
+                                },
+                                r_paren_token: R_PAREN@43..45 ")" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@45..46 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@46..47 "}" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@47..48 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..48
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..47
+    0: CSS_AT_RULE@0..23
+      0: AT@0..1 "@" [] []
+      1: CSS_MEDIA_AT_RULE@1..23
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@1..21
+          0: MEDIA_KW@1..7 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@7..21
+            0: CSS_MEDIA_CONDITION_QUERY@7..21
+              0: CSS_MEDIA_CONDITION_IN_PARENS@7..21
+                0: L_PAREN@7..8 "(" [] []
+                1: CSS_MEDIA_AND_CONDITION@8..19
+                  0: CSS_MEDIA_FEATURE_IN_PARENS@8..16
+                    0: L_PAREN@8..9 "(" [] []
+                    1: CSS_QUERY_FEATURE_BOOLEAN@9..14
+                      0: CSS_IDENTIFIER@9..14
+                        0: IDENT@9..14 "color" [] []
+                    2: R_PAREN@14..16 ")" [] [Whitespace(" ")]
+                  1: AND_KW@16..19 "and" [] []
+                  2: (empty)
+                2: R_PAREN@19..21 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@21..23
+          0: L_CURLY@21..22 "{" [] []
+          1: CSS_RULE_LIST@22..22
+          2: R_CURLY@22..23 "}" [] []
+    1: CSS_AT_RULE@23..47
+      0: AT@23..26 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@26..47
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@26..45
+          0: MEDIA_KW@26..32 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@32..45
+            0: CSS_MEDIA_CONDITION_QUERY@32..45
+              0: CSS_MEDIA_CONDITION_IN_PARENS@32..45
+                0: L_PAREN@32..33 "(" [] []
+                1: CSS_MEDIA_OR_CONDITION@33..43
+                  0: CSS_MEDIA_FEATURE_IN_PARENS@33..41
+                    0: L_PAREN@33..34 "(" [] []
+                    1: CSS_QUERY_FEATURE_BOOLEAN@34..39
+                      0: CSS_IDENTIFIER@34..39
+                        0: IDENT@34..39 "color" [] []
+                    2: R_PAREN@39..41 ")" [] [Whitespace(" ")]
+                  1: OR_KW@41..43 "or" [] []
+                  2: (empty)
+                2: R_PAREN@43..45 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@45..47
+          0: L_CURLY@45..46 "{" [] []
+          1: CSS_RULE_LIST@46..46
+          2: R_CURLY@46..47 "}" [] []
+  2: EOF@47..48 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_media_chain_paren_recovery.css:1:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a media condition, or a query feature but instead found ')'.
+  
+  > 1 │ @media ((color) and) {}
+      │                    ^
+    2 │ 
+    3 │ @media ((color) or) {}
+  
+  i Expected a media condition, or a query feature here.
+  
+  > 1 │ @media ((color) and) {}
+      │                    ^
+    2 │ 
+    3 │ @media ((color) or) {}
+  
+at_rule_media_chain_paren_recovery.css:3:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a media condition, or a query feature but instead found ')'.
+  
+    1 │ @media ((color) and) {}
+    2 │ 
+  > 3 │ @media ((color) or) {}
+      │                   ^
+    4 │ 
+  
+  i Expected a media condition, or a query feature here.
+  
+    1 │ @media ((color) and) {}
+    2 │ 
+  > 3 │ @media ((color) or) {}
+      │                   ^
+    4 │ 
+  
+```

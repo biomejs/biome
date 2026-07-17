@@ -14,6 +14,9 @@ on:
       - "Cargo.lock"
       - "rust-toolchain.toml"
       - "rustfmt.toml"
+      - "deny.toml"
+      - "justfile"
+      - ".github/workflows/**"
 
 # Cancel jobs when the PR is updated
 concurrency:
@@ -38,7 +41,7 @@ jobs:
           - os: depot-ubuntu-24.04-arm-16
     steps:
       - name: Checkout PR Branch
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
@@ -54,7 +57,7 @@ jobs:
     runs-on: depot-ubuntu-24.04-arm
     steps:
       - name: Checkout PR Branch
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
@@ -64,7 +67,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Detect unused dependencies using udeps
-        run: cargo +nightly udeps --all-targets
+        run: cargo +nightly udeps --all-targets --all-features
+
+  deny:
+    name: Cargo Deny
+    runs-on: depot-ubuntu-24.04-arm
+    steps:
+      - name: Checkout PR Branch
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - name: Install cargo-deny
+        uses: taiki-e/install-action@c7eb1735f09259a5035e8e5d44b1406b1cddc0fb # v2.83.0
+        with:
+          tool: cargo-deny
+      - run: cargo deny check bans
+      - run: cargo deny check advisories
 
   test:
     name: Test
@@ -76,14 +92,21 @@ jobs:
           - os: depot-ubuntu-24.04-arm-16
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run tests
+      - name: Run tests on ${{ matrix.os }}
+        if: matrix.os == 'depot-windows-2022-16'
+        env:
+          CARGO_PROFILE_TEST_DEBUG: "0"
+          CARGO_INCREMENTAL: "0"
+        run: cargo test --workspace --features=js_plugin
+      - name: Run tests on ${{ matrix.os }}
+        if: matrix.os != 'depot-windows-2022-16'
         run: cargo test --workspace --features=js_plugin
 
   e2e-tests:
@@ -91,7 +114,7 @@ jobs:
     runs-on: depot-ubuntu-24.04-arm-16
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
@@ -110,7 +133,7 @@ jobs:
     runs-on: depot-ubuntu-24.04-arm
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:

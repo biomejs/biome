@@ -37,20 +37,15 @@ info: vue/html-vue/hello-world.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,22 +1,20 @@
+@@ -1,5 +1,5 @@
  <!-- Hello World example from https://github.com/vuejs/vuejs.org/blob/master/src/v2/examples/vue-20-hello-world/index.html -->
 -<!doctype html>
 +<!DOCTYPE html>
  <html>
    <head>
      <title>My first Vue app</title>
-     <script src="https://unpkg.com/vue"></script>
-   </head>
-   <body>
--    <div id="app">
--      {{ message }}
--    </div>
-+    <div id="app">{{ message }}</div>
+@@ -11,12 +11,12 @@
+     </div>
  
      <script>
 -      var app = new Vue({
@@ -82,7 +77,9 @@ info: vue/html-vue/hello-world.html
     <script src="https://unpkg.com/vue"></script>
   </head>
   <body>
-    <div id="app">{{ message }}</div>
+    <div id="app">
+      {{ message }}
+    </div>
 
     <script>
     var app = new Vue({

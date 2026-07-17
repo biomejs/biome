@@ -1,0 +1,213 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- Empty heading -->
+<h1></h1>
+
+<!-- Whitespace-only heading -->
+<h2>   </h2>
+
+<!-- Heading with aria-hidden (hides entire heading from screen readers) -->
+<h1 aria-hidden="true">invisible content</h1>
+
+<!-- Heading with only aria-hidden children -->
+<h1><span aria-hidden="true">hidden</span></h1>
+
+<!-- All heading levels empty -->
+<h3></h3>
+<h4></h4>
+<h5></h5>
+<h6></h6>
+
+<!-- Heading with aria-hidden and aria-label (aria-hidden takes priority) -->
+<h1 aria-label="Screen reader content" aria-hidden="true">invisible content</h1>
+
+<!-- Self-closing heading (void-style, no content) -->
+<h1 />
+
+<!-- PascalCase in HTML is case-insensitive, not a custom component -->
+<h1><Span></Span></h1>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    1 │ <!-- Empty heading -->
+  > 2 │ <h1></h1>
+      │ ^^^^^^^^^
+    3 │ 
+    4 │ <!-- Whitespace-only heading -->
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.html:5:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    4 │ <!-- Whitespace-only heading -->
+  > 5 │ <h2>   </h2>
+      │ ^^^^^^^^^^^^
+    6 │ 
+    7 │ <!-- Heading with aria-hidden (hides entire heading from screen readers) -->
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.html:8:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+     7 │ <!-- Heading with aria-hidden (hides entire heading from screen readers) -->
+   > 8 │ <h1 aria-hidden="true">invisible content</h1>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ <!-- Heading with only aria-hidden children -->
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.html:11:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    10 │ <!-- Heading with only aria-hidden children -->
+  > 11 │ <h1><span aria-hidden="true">hidden</span></h1>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ <!-- All heading levels empty -->
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.html:14:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    13 │ <!-- All heading levels empty -->
+  > 14 │ <h3></h3>
+       │ ^^^^^^^^^
+    15 │ <h4></h4>
+    16 │ <h5></h5>
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.html:15:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    13 │ <!-- All heading levels empty -->
+    14 │ <h3></h3>
+  > 15 │ <h4></h4>
+       │ ^^^^^^^^^
+    16 │ <h5></h5>
+    17 │ <h6></h6>
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.html:16:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    14 │ <h3></h3>
+    15 │ <h4></h4>
+  > 16 │ <h5></h5>
+       │ ^^^^^^^^^
+    17 │ <h6></h6>
+    18 │ 
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.html:17:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    15 │ <h4></h4>
+    16 │ <h5></h5>
+  > 17 │ <h6></h6>
+       │ ^^^^^^^^^
+    18 │ 
+    19 │ <!-- Heading with aria-hidden and aria-label (aria-hidden takes priority) -->
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.html:20:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    19 │ <!-- Heading with aria-hidden and aria-label (aria-hidden takes priority) -->
+  > 20 │ <h1 aria-label="Screen reader content" aria-hidden="true">invisible content</h1>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ <!-- Self-closing heading (void-style, no content) -->
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.html:23:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    22 │ <!-- Self-closing heading (void-style, no content) -->
+  > 23 │ <h1 />
+       │ ^^^^^^
+    24 │ 
+    25 │ <!-- PascalCase in HTML is case-insensitive, not a custom component -->
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.html:26:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    25 │ <!-- PascalCase in HTML is case-insensitive, not a custom component -->
+  > 26 │ <h1><Span></Span></h1>
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```

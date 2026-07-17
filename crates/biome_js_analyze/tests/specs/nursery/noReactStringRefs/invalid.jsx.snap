@@ -1,0 +1,155 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+import React from "react";
+
+class StringRefs extends React.Component {
+	componentDidMount() {
+		this.refs.hello.focus();
+		this.refs["world"]?.focus();
+	}
+
+	render() {
+		return (
+			<section>
+				<div ref="hello">Hello</div>
+				<div ref={"world"}>World</div>
+				<div ref={`template`}>Template</div>
+				<div ref={`template-${id}`}>Template Expression</div>
+			</section>
+		);
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:6:3 lint/nursery/noReactStringRefs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using this.refs is deprecated.
+  
+    4 │ class StringRefs extends React.Component {
+    5 │ 	componentDidMount() {
+  > 6 │ 		this.refs.hello.focus();
+      │ 		^^^^^^^^^
+    7 │ 		this.refs["world"]?.focus();
+    8 │ 	}
+  
+  i Accessing refs through this.refs relies on React's legacy string ref behavior.
+  
+  i Store the ref on an instance field with a callback ref, or switch to createRef() or useRef().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:7:3 lint/nursery/noReactStringRefs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using this.refs is deprecated.
+  
+    5 │ 	componentDidMount() {
+    6 │ 		this.refs.hello.focus();
+  > 7 │ 		this.refs["world"]?.focus();
+      │ 		^^^^^^^^^
+    8 │ 	}
+    9 │ 
+  
+  i Accessing refs through this.refs relies on React's legacy string ref behavior.
+  
+  i Store the ref on an instance field with a callback ref, or switch to createRef() or useRef().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:13:14 lint/nursery/noReactStringRefs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! String refs are deprecated.
+  
+    11 │ 		return (
+    12 │ 			<section>
+  > 13 │ 				<div ref="hello">Hello</div>
+       │ 				         ^^^^^^^
+    14 │ 				<div ref={"world"}>World</div>
+    15 │ 				<div ref={`template`}>Template</div>
+  
+  i String refs are a legacy React feature that can make ref usage harder to follow.
+  
+  i Use a callback ref or an object ref created with createRef() or useRef() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:14:14 lint/nursery/noReactStringRefs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! String refs are deprecated.
+  
+    12 │ 			<section>
+    13 │ 				<div ref="hello">Hello</div>
+  > 14 │ 				<div ref={"world"}>World</div>
+       │ 				         ^^^^^^^^^
+    15 │ 				<div ref={`template`}>Template</div>
+    16 │ 				<div ref={`template-${id}`}>Template Expression</div>
+  
+  i String refs are a legacy React feature that can make ref usage harder to follow.
+  
+  i Use a callback ref or an object ref created with createRef() or useRef() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:15:14 lint/nursery/noReactStringRefs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! String refs are deprecated.
+  
+    13 │ 				<div ref="hello">Hello</div>
+    14 │ 				<div ref={"world"}>World</div>
+  > 15 │ 				<div ref={`template`}>Template</div>
+       │ 				         ^^^^^^^^^^^^
+    16 │ 				<div ref={`template-${id}`}>Template Expression</div>
+    17 │ 			</section>
+  
+  i String refs are a legacy React feature that can make ref usage harder to follow.
+  
+  i Use a callback ref or an object ref created with createRef() or useRef() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:16:14 lint/nursery/noReactStringRefs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! String refs are deprecated.
+  
+    14 │ 				<div ref={"world"}>World</div>
+    15 │ 				<div ref={`template`}>Template</div>
+  > 16 │ 				<div ref={`template-${id}`}>Template Expression</div>
+       │ 				         ^^^^^^^^^^^^^^^^^^
+    17 │ 			</section>
+    18 │ 		);
+  
+  i String refs are a legacy React feature that can make ref usage harder to follow.
+  
+  i Use a callback ref or an object ref created with createRef() or useRef() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,8 +1,6 @@
 use crate::prelude::*;
-use biome_css_syntax::{
-    ScssForwardAtRule, ScssModuleConfigurationList, ScssModuleConfigurationListFields,
-    ScssWithClause,
-};
+use crate::utils::scss_module_configuration::is_source_separated_with_configuration;
+use biome_css_syntax::{ScssModuleConfigurationList, ScssModuleConfigurationListFields};
 use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
@@ -27,23 +25,7 @@ impl FormatNodeRule<ScssModuleConfigurationList> for FormatScssModuleConfigurati
                 soft_block_indent(&items.format()),
                 r_paren_token.format()
             ])
-            .should_expand(should_expand_in_forward_with_clause(node))]
+            .should_expand(is_source_separated_with_configuration(node))]
         )
     }
-}
-
-fn should_expand_in_forward_with_clause(node: &ScssModuleConfigurationList) -> bool {
-    if node.items().len() <= 1 {
-        return false;
-    }
-
-    node.syntax()
-        .parent()
-        .and_then(|parent| ScssWithClause::cast_ref(&parent))
-        .and_then(|with_clause| with_clause.syntax().parent())
-        .and_then(|parent| ScssForwardAtRule::cast_ref(&parent))
-        .is_some_and(|forward| {
-            let fields = forward.as_fields();
-            fields.as_clause.is_none() && fields.visibility_clause.is_none()
-        })
 }

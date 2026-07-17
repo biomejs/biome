@@ -1,0 +1,19 @@
+/* should not generate diagnostics */
+const Valid1 = () => `Hello ${user.name}`
+
+const Valid2 = (props) => {
+	return <div>Hello $</div>;
+};
+
+const Valid3 = (props) => {
+	return <div>Hello {props.name}</div>;
+};
+
+function Valid4({ price }) {
+	// 🟢 Good: This is a legitimate use of the '$' character.
+	return <div>{`$${price}`}</div>;
+}
+
+function Valid5({ price }) {
+	return <div>${price}</div>;
+}

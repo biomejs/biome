@@ -18,6 +18,8 @@ const CSS_FILE_CONTENT: &str = r#"div {
 // existing tests.
 const JS_FILE_CONTENT: &str = r#"const a = 'foo';"#;
 
+const JS_CONDITIONAL_FILE_CONTENT: &str = r#"condition ? consequent : alternate;"#;
+
 const JSON_FILE_CONTENT: &str = r#"{
     "name": "test",
     "version": "1.0.0"
@@ -100,6 +102,38 @@ fn search_js_pattern() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "search_js_pattern",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn search_js_pattern_with_native_field_names() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.js");
+    fs.insert(file_path.into(), JS_CONDITIONAL_FILE_CONTENT.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "search",
+                "JsConditionalExpression(consequent = $cons, alternate = $alt)",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "search_js_pattern_with_native_field_names",
         fs,
         console,
         result,

@@ -1,0 +1,20 @@
+@include own-line-comments(
+1px,
+/* between positional args */
+2px,
+/* before keyword */
+$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:10,
+// before final positional
+2px 4px 6px
+/* before close */
+);
+
+@include own-line-comments(
+$alpha:1px,
+/* before keyword */
+$beta:2px,
+// between keyword args
+$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:2px,
+/* before closing positional */
+3px
+);

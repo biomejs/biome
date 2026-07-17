@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 class Todo {
     done = $unknown(false);
     text = $unknown();

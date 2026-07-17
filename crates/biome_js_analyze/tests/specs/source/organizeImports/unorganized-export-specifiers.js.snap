@@ -13,14 +13,29 @@ export { Y, X } from "x";
 ```
 unorganized-export-specifiers.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Some imports or exports are not organized.
+  
+  > 1 │ export { B, A } from "a";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │ export { Y, X } from "x";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Sort the exported names.
   
   > 1 │ export { B, A } from "a";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ export { Y, X } from "x";
     3 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Sort the exported names.
+  
+    1 │ export { B, A } from "a";
+  > 2 │ export { Y, X } from "x";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Safe fix: Organize imports and exports (Biome)
   
     1   │ - export·{·B,·A·}·from·"a";
     2   │ - export·{·Y,·X·}·from·"x";

@@ -217,9 +217,7 @@ impl Rule for UseUnifiedTypeSignatures {
         // Check if the signature to remove has comments, which we would like to preserve.
         if signature_to_remove_wrapper
             .syntax()
-            .first_leading_trivia()
-            .filter(|trivia| trivia.pieces().any(|piece| piece.is_comments()))
-            .is_some()
+            .first_leading_trivia().as_ref().is_some_and(|trivia| trivia.pieces().any(|piece| piece.is_comments()))
         {
             // Transfer comments and whitespace before removing the signature.
             mutation.remove_node_and_transfer_trivia(

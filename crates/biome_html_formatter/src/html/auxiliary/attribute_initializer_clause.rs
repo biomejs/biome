@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 
 use crate::prelude::*;
+use crate::shared::FmtAnyAttributeInitializer;
 use biome_formatter::{CstFormatContext, FormatRuleWithOptions, write};
 use biome_html_syntax::{
     AnyHtmlAttributeInitializer, HtmlAttributeInitializerClause,
@@ -155,10 +156,11 @@ impl FormatNodeRule<HtmlAttributeInitializerClause> for FormatHtmlAttributeIniti
             CompactKind::Remove => {
                 let eq_token = eq_token.clone()?;
                 let value = value.clone()?;
-                write!(
-                    f,
-                    [format_removed(&eq_token), value.format().with_options(true),]
-                )?;
+                let fmt = FmtAnyAttributeInitializer {
+                    node: value,
+                    compact: true,
+                };
+                write!(f, [format_removed(&eq_token), &fmt,])?;
                 Ok(())
             }
         }

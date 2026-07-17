@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-func-type-param.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+// issue #9482: parameter names in function type annotations should not shadow
+function myFunc(options: unknown, callback: (options: unknown) => void) {}
+
+// Function type in type alias
+const test = 1;
+type Fn = (test: string) => typeof test;
+
+// Constructor type
+const name = "world";
+type Ctor = new (name: string) => object;
+
+// Callback parameter typed with function type
+const item = "test";
+function process(callback: (item: string) => void) {}
+
+// Interface call/construct/method signatures
+const data = {};
+interface Handler {
+    handle(data: string): void;
+    (data: number): boolean;
+    new (data: object): Handler;
+}
+
+```

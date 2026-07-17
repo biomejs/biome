@@ -1,2 +1,4 @@
 # should not generate diagnostics
-// var a = 1;
+query SomeQuery { human }
+mutation SomeMutation { ...Type }
+subscription SomeSubscription {}

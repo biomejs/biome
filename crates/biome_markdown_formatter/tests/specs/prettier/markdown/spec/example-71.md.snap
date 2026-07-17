@@ -20,13 +20,13 @@ baz
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,5 @@
+@@ -1,6 +1,5 @@
  Foo
  
--## bar
--
-+bar
-+---
+-bar
+----
++## bar
+ 
  baz
 ```
 
@@ -35,7 +35,7 @@ baz
 ```md
 Foo
 
-bar
----
+## bar
+
 baz
 ```

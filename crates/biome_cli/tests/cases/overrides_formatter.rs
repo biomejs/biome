@@ -113,6 +113,47 @@ fn does_include_file_with_different_formatting() {
 }
 
 #[test]
+fn does_override_formatter_trailing_commas() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let file_path = Utf8Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+  "overrides": [{ "includes": ["special/**"], "formatter": { "lineWidth": 20, "trailingCommas": "none" } }]
+}
+
+"#
+        .as_bytes(),
+    );
+
+    let test = Utf8Path::new("test.js");
+    fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
+
+    let test2 = Utf8Path::new("special/test2.js");
+    fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test2, "const a = [\n\t\"loreum\",\n\t\"ipsum\"\n];\n");
+    assert_file_contents(&fs, test, FORMATTED_LINE_WIDTH);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_override_formatter_trailing_commas",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn does_include_file_with_different_formatting_and_all_of_them() {
     let mut console = BufferConsole::default();
     let fs = MemoryFileSystem::default();

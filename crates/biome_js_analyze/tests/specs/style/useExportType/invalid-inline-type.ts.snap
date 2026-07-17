@@ -1,0 +1,169 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-inline-type.ts
+---
+# Input
+```ts
+import type { T1, T2 } from "mod";
+export { T1, type T2 };
+
+import type { T3, T4 } from "mod";
+export type { T3, T4 };
+
+import { T5, T6 } from "mod";
+export type { T5, type T6 };
+
+export type { T7, T8 } from "mod";
+
+```
+
+# Diagnostics
+```
+invalid-inline-type.ts:2:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Some exports are only types.
+  
+    1 │ import type { T1, T2 } from "mod";
+  > 2 │ export { T1, type T2 };
+      │        ^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ import type { T3, T4 } from "mod";
+  
+  i This export is a type.
+  
+    1 │ import type { T1, T2 } from "mod";
+  > 2 │ export { T1, type T2 };
+      │          ^^
+    3 │ 
+    4 │ import type { T3, T4 } from "mod";
+  
+  i Using export type allows compilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Add inline type keywords.
+  
+    2 │ export·{·type·T1,·type·T2·};
+      │          +++++              
+
+```
+
+```
+invalid-inline-type.ts:5:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Some exports are only types.
+  
+    4 │ import type { T3, T4 } from "mod";
+  > 5 │ export type { T3, T4 };
+      │        ^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ import { T5, T6 } from "mod";
+  
+  i This export is a type.
+  
+    4 │ import type { T3, T4 } from "mod";
+  > 5 │ export type { T3, T4 };
+      │               ^^
+    6 │ 
+    7 │ import { T5, T6 } from "mod";
+  
+  i This export is a type.
+  
+    4 │ import type { T3, T4 } from "mod";
+  > 5 │ export type { T3, T4 };
+      │                   ^^
+    6 │ 
+    7 │ import { T5, T6 } from "mod";
+  
+  i Using export type allows compilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Add inline type keywords.
+  
+     3  3 │   
+     4  4 │   import type { T3, T4 } from "mod";
+     5    │ - export·type·{·T3,·T4·};
+        5 │ + export·{·type·T3,·type·T4·};
+     6  6 │   
+     7  7 │   import { T5, T6 } from "mod";
+  
+
+```
+
+```
+invalid-inline-type.ts:8:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Some exports are only types.
+  
+     7 │ import { T5, T6 } from "mod";
+   > 8 │ export type { T5, type T6 };
+       │        ^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ export type { T7, T8 } from "mod";
+  
+  i This export is a type.
+  
+     7 │ import { T5, T6 } from "mod";
+   > 8 │ export type { T5, type T6 };
+       │               ^^
+     9 │ 
+    10 │ export type { T7, T8 } from "mod";
+  
+  i This export is a type.
+  
+     7 │ import { T5, T6 } from "mod";
+   > 8 │ export type { T5, type T6 };
+       │                   ^^^^^^^
+     9 │ 
+    10 │ export type { T7, T8 } from "mod";
+  
+  i Using export type allows compilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Add inline type keywords.
+  
+     6  6 │   
+     7  7 │   import { T5, T6 } from "mod";
+     8    │ - export·type·{·T5,·type·T6·};
+        8 │ + export·{·type·T5,·type·T6·};
+     9  9 │   
+    10 10 │   export type { T7, T8 } from "mod";
+  
+
+```
+
+```
+invalid-inline-type.ts:10:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Some exports are only types.
+  
+     8 │ export type { T5, type T6 };
+     9 │ 
+  > 10 │ export type { T7, T8 } from "mod";
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+  
+  i This export is a type.
+  
+     8 │ export type { T5, type T6 };
+     9 │ 
+  > 10 │ export type { T7, T8 } from "mod";
+       │               ^^
+    11 │ 
+  
+  i This export is a type.
+  
+     8 │ export type { T5, type T6 };
+     9 │ 
+  > 10 │ export type { T7, T8 } from "mod";
+       │                   ^^
+    11 │ 
+  
+  i Using export type allows compilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Add inline type keywords.
+  
+     8  8 │   export type { T5, type T6 };
+     9  9 │   
+    10    │ - export·type·{·T7,·T8·}·from·"mod";
+       10 │ + export·{·type·T7,·type·T8·}·from·"mod";
+    11 11 │   
+  
+
+```

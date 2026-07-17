@@ -13,6 +13,9 @@ use biome_rule_options::use_simplified_logic_expression::UseSimplifiedLogicExpre
 declare_lint_rule! {
     /// Discard redundant terms from logical expressions.
     ///
+    /// The rule applies the [De Morgan's Law](https://en.wikipedia.org/wiki/De_Morgan%27s_laws) rule to simplify logical expressions.
+    /// This means that some simplified expressions that are fixed by the rule might seem less intuitive to read, but they are more efficient to evaluate.
+    ///
     /// ## Examples
     ///
     /// ### Invalid

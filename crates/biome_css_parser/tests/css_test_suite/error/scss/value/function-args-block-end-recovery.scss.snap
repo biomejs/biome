@@ -60,7 +60,7 @@ CssRoot {
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
                                                         ScssKeywordArgument {
-                                                            name: ScssIdentifier {
+                                                            name: ScssVariable {
                                                                 dollar_token: DOLLAR@17..18 "$" [] [],
                                                                 name: CssIdentifier {
                                                                     value_token: IDENT@18..19 "x" [] [],
@@ -80,7 +80,7 @@ CssRoot {
                                                 COMMA@22..24 "," [] [Whitespace(" ")],
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@24..25 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@25..26 "y" [] [],
@@ -183,7 +183,7 @@ CssRoot {
                         0: SCSS_EXPRESSION@17..22
                           0: SCSS_EXPRESSION_ITEM_LIST@17..22
                             0: SCSS_KEYWORD_ARGUMENT@17..22
-                              0: SCSS_IDENTIFIER@17..19
+                              0: SCSS_VARIABLE@17..19
                                 0: DOLLAR@17..18 "$" [] []
                                 1: CSS_IDENTIFIER@18..19
                                   0: IDENT@18..19 "x" [] []
@@ -195,7 +195,7 @@ CssRoot {
                         1: COMMA@22..24 "," [] [Whitespace(" ")]
                         2: SCSS_EXPRESSION@24..26
                           0: SCSS_EXPRESSION_ITEM_LIST@24..26
-                            0: SCSS_IDENTIFIER@24..26
+                            0: SCSS_VARIABLE@24..26
                               0: DOLLAR@24..25 "$" [] []
                               1: CSS_IDENTIFIER@25..26
                                 0: IDENT@25..26 "y" [] []

@@ -2,9 +2,11 @@ use crate::html::auxiliary::attribute_initializer_clause::{
     CompactKind, FormatHtmlAttributeInitializerClauseOptions,
 };
 use crate::prelude::*;
+use crate::shared::FmtAnySvelteBindingProperty;
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_html_syntax::{
-    AnySvelteBindingProperty, SvelteDirectiveValue, SvelteDirectiveValueFields,
+    AnySvelteBindingProperty, AnySvelteDirectiveInitializerClause, SvelteDirectiveValue,
+    SvelteDirectiveValueFields,
 };
 
 #[derive(Debug, Clone, Default)]
@@ -51,26 +53,41 @@ impl FormatSvelteDirectiveValue {
             let property = property.clone()?;
             let binding_value = match &property {
                 AnySvelteBindingProperty::SvelteLiteral(literal) => literal.value_token(),
+                AnySvelteBindingProperty::SvelteMemberProperty(_) => return Ok(false),
                 AnySvelteBindingProperty::SvelteName(name) => name.ident_token(),
             }?;
 
-            let Some(initializer) = initializer.clone() else {
-                return Ok(false);
-            };
-            let Some(initializer_value) = initializer.value().ok().and_then(|v| v.string_value())
+            let Some(AnySvelteDirectiveInitializerClause::HtmlAttributeInitializerClause(
+                initializer,
+            )) = initializer.clone()
             else {
                 return Ok(false);
             };
+            let Some(initializer_value) = initializer.value().ok().and_then(|v| {
+                Some(
+                    v.as_html_attribute_single_text_expression()?
+                        .expression()
+                        .ok()?
+                        .to_trimmed_text(),
+                )
+            }) else {
+                return Ok(false);
+            };
 
+            print!("{:?}", initializer_value.text());
             if initializer_value.text() != binding_value.text_trimmed() {
                 return Ok(false);
             }
 
+            let property = FmtAnySvelteBindingProperty {
+                node: property,
+                compact: true,
+            };
             write!(
                 f,
                 [
                     colon_token.format(),
-                    text(initializer_value.text(), initializer.range().start()),
+                    text(initializer_value.text(), Some(initializer.range().start())),
                     initializer.format().with_options(
                         FormatHtmlAttributeInitializerClauseOptions {
                             compact: CompactKind::Remove,
@@ -78,7 +95,7 @@ impl FormatSvelteDirectiveValue {
                             tag_name: None
                         }
                     ),
-                    property.format().with_options(true),
+                    &property,
                     modifiers.format().with_options(true)
                 ]
             )?;

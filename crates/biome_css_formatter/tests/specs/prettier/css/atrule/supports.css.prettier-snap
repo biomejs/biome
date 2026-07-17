@@ -273,3 +273,15 @@
       )
   ) {
 }
+
+/* #8201 */
+@supports (--element(".minwidth", {"minWidth": 300})) {
+  [--self] {
+    background: greenyellow;
+  }
+}
+@supports ({"example": 1}) {
+  * {
+    background: red;
+  }
+}

@@ -3,28 +3,28 @@ mod actions;
 pub use crate::analyzer::assist::actions::*;
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
+#[cfg(feature = "cli")]
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 pub type AssistEnabled = Bool<true>;
-#[derive(
-    Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Deserializable, Merge,
-)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct AssistConfiguration {
     /// Whether Biome should enable assist via LSP and CLI.
-    #[bpaf(long("assist-enabled"), argument("true|false"))]
+    #[cfg_attr(feature = "cli", bpaf(long("assist-enabled"), argument("true|false")))]
     pub enabled: Option<AssistEnabled>,
 
     /// Whether Biome should fail in CLI if the assist were not applied to the code.
-    #[bpaf(pure(Default::default()), optional, hide)]
+    #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), optional, hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub actions: Option<Actions>,
 
     /// A list of glob patterns. Biome will include files/folders that will
     /// match these patterns.
-    #[bpaf(hide, pure(Default::default()))]
+    #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
 }

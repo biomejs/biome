@@ -38,7 +38,7 @@ CssRoot {
                     l_paren_token: L_PAREN@7..8 "(" [] [],
                     items: ScssParameterItemList [
                         ScssParameter {
-                            name: ScssIdentifier {
+                            name: ScssVariable {
                                 dollar_token: DOLLAR@8..9 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@9..15 "radius" [] [],
@@ -62,7 +62,7 @@ CssRoot {
                                     colon_token: COLON@34..36 ":" [] [Whitespace(" ")],
                                     value: ScssExpression {
                                         items: ScssExpressionItemList [
-                                            ScssIdentifier {
+                                            ScssVariable {
                                                 dollar_token: DOLLAR@36..37 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@37..43 "radius" [] [],
@@ -91,7 +91,7 @@ CssRoot {
                     l_paren_token: L_PAREN@61..62 "(" [] [],
                     items: ScssParameterItemList [
                         ScssParameter {
-                            name: ScssIdentifier {
+                            name: ScssVariable {
                                 dollar_token: DOLLAR@62..63 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@63..69 "radius" [] [],
@@ -145,7 +145,7 @@ CssRoot {
                     l_paren_token: L_PAREN@113..114 "(" [] [],
                     items: ScssParameterItemList [
                         ScssParameter {
-                            name: ScssIdentifier {
+                            name: ScssVariable {
                                 dollar_token: DOLLAR@114..115 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@115..121 "radius" [] [],
@@ -158,7 +158,7 @@ CssRoot {
                         missing element,
                         COMMA@123..125 "," [] [Whitespace(" ")],
                         ScssParameter {
-                            name: ScssIdentifier {
+                            name: ScssVariable {
                                 dollar_token: DOLLAR@125..126 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@126..133 "padding" [] [],
@@ -182,7 +182,7 @@ CssRoot {
                                     colon_token: COLON@146..148 ":" [] [Whitespace(" ")],
                                     value: ScssExpression {
                                         items: ScssExpressionItemList [
-                                            ScssIdentifier {
+                                            ScssVariable {
                                                 dollar_token: DOLLAR@148..149 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@149..156 "padding" [] [],
@@ -212,7 +212,7 @@ CssRoot {
                         l_paren_token: L_PAREN@174..175 "(" [] [],
                         items: ScssParameterItemList [
                             ScssParameter {
-                                name: ScssIdentifier {
+                                name: ScssVariable {
                                     dollar_token: DOLLAR@175..176 "$" [] [],
                                     name: CssIdentifier {
                                         value_token: IDENT@176..182 "radius" [] [],
@@ -250,7 +250,7 @@ CssRoot {
           0: L_PAREN@7..8 "(" [] []
           1: SCSS_PARAMETER_ITEM_LIST@8..15
             0: SCSS_PARAMETER@8..15
-              0: SCSS_IDENTIFIER@8..15
+              0: SCSS_VARIABLE@8..15
                 0: DOLLAR@8..9 "$" [] []
                 1: CSS_IDENTIFIER@9..15
                   0: IDENT@9..15 "radius" [] []
@@ -268,7 +268,7 @@ CssRoot {
                   1: COLON@34..36 ":" [] [Whitespace(" ")]
                   2: SCSS_EXPRESSION@36..43
                     0: SCSS_EXPRESSION_ITEM_LIST@36..43
-                      0: SCSS_IDENTIFIER@36..43
+                      0: SCSS_VARIABLE@36..43
                         0: DOLLAR@36..37 "$" [] []
                         1: CSS_IDENTIFIER@37..43
                           0: IDENT@37..43 "radius" [] []
@@ -285,7 +285,7 @@ CssRoot {
           0: L_PAREN@61..62 "(" [] []
           1: SCSS_PARAMETER_ITEM_LIST@62..71
             0: SCSS_PARAMETER@62..71
-              0: SCSS_IDENTIFIER@62..69
+              0: SCSS_VARIABLE@62..69
                 0: DOLLAR@62..63 "$" [] []
                 1: CSS_IDENTIFIER@63..69
                   0: IDENT@63..69 "radius" [] []
@@ -321,7 +321,7 @@ CssRoot {
           0: L_PAREN@113..114 "(" [] []
           1: SCSS_PARAMETER_ITEM_LIST@114..133
             0: SCSS_PARAMETER@114..121
-              0: SCSS_IDENTIFIER@114..121
+              0: SCSS_VARIABLE@114..121
                 0: DOLLAR@114..115 "$" [] []
                 1: CSS_IDENTIFIER@115..121
                   0: IDENT@115..121 "radius" [] []
@@ -331,7 +331,7 @@ CssRoot {
             2: (empty)
             3: COMMA@123..125 "," [] [Whitespace(" ")]
             4: SCSS_PARAMETER@125..133
-              0: SCSS_IDENTIFIER@125..133
+              0: SCSS_VARIABLE@125..133
                 0: DOLLAR@125..126 "$" [] []
                 1: CSS_IDENTIFIER@126..133
                   0: IDENT@126..133 "padding" [] []
@@ -349,7 +349,7 @@ CssRoot {
                   1: COLON@146..148 ":" [] [Whitespace(" ")]
                   2: SCSS_EXPRESSION@148..156
                     0: SCSS_EXPRESSION_ITEM_LIST@148..156
-                      0: SCSS_IDENTIFIER@148..156
+                      0: SCSS_VARIABLE@148..156
                         0: DOLLAR@148..149 "$" [] []
                         1: CSS_IDENTIFIER@149..156
                           0: IDENT@149..156 "padding" [] []
@@ -366,7 +366,7 @@ CssRoot {
           0: L_PAREN@174..175 "(" [] []
           1: SCSS_PARAMETER_ITEM_LIST@175..182
             0: SCSS_PARAMETER@175..182
-              0: SCSS_IDENTIFIER@175..182
+              0: SCSS_VARIABLE@175..182
                 0: DOLLAR@175..176 "$" [] []
                 1: CSS_IDENTIFIER@176..182
                   0: IDENT@176..182 "radius" [] []

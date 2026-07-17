@@ -1,0 +1,10 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "@typescript-eslint/consistent-type-imports": ["error", {
+        "fixStyle": "inline-type-imports"
+      }]
+    }
+  }
+}

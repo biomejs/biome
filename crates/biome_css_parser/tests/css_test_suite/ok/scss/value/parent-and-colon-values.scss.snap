@@ -40,8 +40,8 @@ CssRoot {
             block: CssDeclarationOrRuleBlock {
                 l_curly_token: L_CURLY@8..9 "{" [] [],
                 items: CssDeclarationOrRuleList [
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@9..13 "$" [Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@13..17 "self" [] [],
@@ -64,16 +64,18 @@ CssRoot {
                                 combinator: missing (optional),
                                 selector: CssCompoundSelector {
                                     nesting_selectors: CssNestedSelectorList [
-                                        CssNestedSelector {
+                                        ScssParentSelector {
                                             amp_token: AMP@21..25 "&" [Newline("\n"), Whitespace("  ")] [],
+                                            suffix: ScssParentSelectorSuffix {
+                                                items: ScssParentSelectorSuffixPartList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@25..35 "--primary" [] [Whitespace(" ")],
+                                                    },
+                                                ],
+                                            },
                                         },
                                     ],
-                                    simple_selector: CssTypeSelector {
-                                        namespace: missing (optional),
-                                        ident: CssIdentifier {
-                                            value_token: IDENT@25..35 "--primary" [] [Whitespace(" ")],
-                                        },
-                                    },
+                                    simple_selector: missing (optional),
                                     sub_selectors: CssSubSelectorList [],
                                 },
                             },
@@ -132,8 +134,8 @@ CssRoot {
       1: CSS_DECLARATION_OR_RULE_BLOCK@8..58
         0: L_CURLY@8..9 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@9..56
-          0: SCSS_DECLARATION@9..21
-            0: SCSS_IDENTIFIER@9..17
+          0: SCSS_VARIABLE_DECLARATION@9..21
+            0: SCSS_VARIABLE@9..17
               0: DOLLAR@9..13 "$" [Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@13..17
                 0: IDENT@13..17 "self" [] []
@@ -149,13 +151,14 @@ CssRoot {
               0: CSS_RELATIVE_SELECTOR@21..35
                 0: (empty)
                 1: CSS_COMPOUND_SELECTOR@21..35
-                  0: CSS_NESTED_SELECTOR_LIST@21..25
-                    0: CSS_NESTED_SELECTOR@21..25
+                  0: CSS_NESTED_SELECTOR_LIST@21..35
+                    0: SCSS_PARENT_SELECTOR@21..35
                       0: AMP@21..25 "&" [Newline("\n"), Whitespace("  ")] []
-                  1: CSS_TYPE_SELECTOR@25..35
-                    0: (empty)
-                    1: CSS_IDENTIFIER@25..35
-                      0: IDENT@25..35 "--primary" [] [Whitespace(" ")]
+                      1: SCSS_PARENT_SELECTOR_SUFFIX@25..35
+                        0: SCSS_PARENT_SELECTOR_SUFFIX_PART_LIST@25..35
+                          0: CSS_IDENTIFIER@25..35
+                            0: IDENT@25..35 "--primary" [] [Whitespace(" ")]
+                  1: (empty)
                   2: CSS_SUB_SELECTOR_LIST@35..35
             1: CSS_DECLARATION_OR_RULE_BLOCK@35..56
               0: L_CURLY@35..36 "{" [] []

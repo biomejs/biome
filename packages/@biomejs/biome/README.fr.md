@@ -38,12 +38,12 @@
 
 **Biome** fournit un ensemble d’outils performants conçus pour maintenir des projets web.
 
-**Biome est un [outil de formatage rapide](./benchmark#formatting)** pour _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ et _GraphQL_ qui atteint **[97 % de compatibilité avec _Prettier_](https://console.algora.io/challenges/prettier)**.
+**Biome est un [outil de formatage rapide](https://github.com/biomejs/benchmark#formatting)** pour _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ et _GraphQL_ qui atteint **[97 % de compatibilité avec _Prettier_](https://algora.io/challenges/prettier)**.
 
-**Biome est un [outil de linting performant](https://github.com/biomejs/biome/tree/main/benchmark#linting)** pour _JavaScript_, _TypeScript_, _JSX_, _CSS_ et _GraphQL_ qui comprend **[plus de 450 règles](https://biomejs.dev/fr/linter/javascript/rules/)** d’ESLint, de typescript-eslint, et [d’autres sources](https://github.com/biomejs/biome/discussions/3).
+**Biome est un [outil de linting performant](https://github.com/biomejs/benchmark#linting)** pour _JavaScript_, _TypeScript_, _JSX_, _CSS_ et _GraphQL_ qui comprend **[plus de 500 règles](https://biomejs.dev/fr/linter/javascript/rules/)** d’ESLint, de typescript-eslint, et [d’autres sources](https://github.com/biomejs/biome/discussions/3).
 Il **fournit des diagnostics détaillés et contextualisés** qui vous aident à améliorer votre code et à devenir un meilleur programmeur !
 
-**Biome** est conçu dès le départ pour être utilisé [dans un éditeur de manière interactive](https://biomejs.dev/fr/guides/editors/first-party-extensions/).
+**Biome** est conçu dès le départ pour être utilisé [dans un éditeur de manière interactive](https://biomejs.dev/fr/editors/first-party-extensions/).
 Il peut formater et analyser du code malformé pendant que vous l’écrivez.
 
 ### Installation
@@ -131,9 +131,6 @@ Nous utilisons [Polar.sh](https://polar.sh/biomejs) pour voter pour des fonction
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="middle">
-        <a href="https://l2beat.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/l2beat/c2b2a27/logo/256.png" height="100" alt="L2BEAT logo"></a>
-      </td>
       <td align="center" valign="middle">
         <a href="https://lokalise.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/14294501?s=200&v=4" height="100" alt="Lokalise logo"></a>
       </td>

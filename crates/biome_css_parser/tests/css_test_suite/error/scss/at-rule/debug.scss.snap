@@ -57,7 +57,7 @@ CssRoot {
                                     items: [
                                         CssBogus {
                                             items: [
-                                                ScssIdentifier {
+                                                ScssVariable {
                                                     dollar_token: DOLLAR@25..26 "$" [] [],
                                                     name: CssIdentifier {
                                                         value_token: IDENT@26..31 "value" [] [],
@@ -120,7 +120,7 @@ CssRoot {
               0: DEBUG_KW@19..25 "debug" [] [Whitespace(" ")]
               1: CSS_BOGUS@25..44
                 0: CSS_BOGUS@25..44
-                  0: SCSS_IDENTIFIER@25..31
+                  0: SCSS_VARIABLE@25..31
                     0: DOLLAR@25..26 "$" [] []
                     1: CSS_IDENTIFIER@26..31
                       0: IDENT@26..31 "value" [] []

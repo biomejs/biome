@@ -1,0 +1,16 @@
+/* should not generate diagnostics */
+.ab {}
+.ab.cd {}
+.ab .cd {}
+.ab,
+.cd {}
+.ab.cd,
+.ef.gh {}
+.ab.cd[disabled]:hover {}
+.ab { .cd {} }
+.ab { .cd > & {} }
+.ab, .cd { & > .ef {} }
+.ab { &:hover > .ef.gh {} }
+.ab { @include test { .ef { &:hover .gh {} } } }
+@media print { .ab.cd {} }
+.ab { @media print { .cd {} } }

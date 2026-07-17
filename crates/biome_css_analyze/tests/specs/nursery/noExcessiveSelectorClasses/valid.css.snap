@@ -1,0 +1,15 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 103
+expression: valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+div {}
+.foo {}
+#id[attr]:hover::before {}
+:nth-child(2n) {}
+.foo.bar.baz {}
+
+```

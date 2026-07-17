@@ -43,13 +43,13 @@
 //! be decided with full context.
 
 use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdBulletListMember, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock,
-    MarkdownLanguage, MdAutolink, MdBlockList, MdBullet, MdBulletListItem, MdDocument,
-    MdEntityReference, MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock, MdIndentCodeBlock,
-    MdInlineCode, MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList,
-    MdInlineLink, MdLinkBlock, MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition,
-    MdLinkTitle, MdOrderedListItem, MdParagraph, MdQuote, MdReferenceImage, MdReferenceLink,
-    MdReferenceLinkLabel, MdSetextHeader, MdSoftBreak, MdTextual, MdThematicBreakBlock,
+    AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, MarkdownLanguage, MdAutolink,
+    MdBlockList, MdBullet, MdBulletListItem, MdContinuationIndent, MdDocument, MdEntityReference,
+    MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock, MdIndentCodeBlock, MdInlineCode,
+    MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList, MdInlineLink,
+    MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition, MdLinkTitle, MdNewline,
+    MdOrderedListItem, MdParagraph, MdQuote, MdQuotePrefix, MdReferenceImage, MdReferenceLink,
+    MdReferenceLinkLabel, MdSetextHeader, MdTextual, MdThematicBreakBlock,
 };
 use biome_rowan::{AstNode, AstNodeList, Direction, SyntaxNode, TextRange, WalkEvent};
 use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
@@ -57,7 +57,76 @@ use std::collections::HashMap;
 
 use crate::parser::{ListItemIndent, ListTightness, QuoteIndent};
 use crate::syntax::reference::normalize_reference_label;
-use crate::syntax::{INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES};
+use crate::syntax::{
+    INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES,
+    is_dash_only_thematic_break_text,
+};
+
+/// Compute the absolute column (0-indexed) where `node` begins on its line,
+/// after stripping quote-prefix tokens (which are virtual and not rendered).
+///
+/// Walks the syntax tree from `node`'s line start until `node`'s first token,
+/// expanding tabs to the next `TAB_STOP_SPACES` boundary. Tokens that descend
+/// from an `MD_QUOTE_PREFIX` node contribute zero columns, matching how the
+/// renderer strips those prefixes from emitted content.
+fn line_start_column_of(node: &SyntaxNode<MarkdownLanguage>) -> usize {
+    use biome_markdown_syntax::MarkdownSyntaxKind::{
+        MD_QUOTE_INDENT_LIST, MD_QUOTE_POST_MARKER_SPACE, MD_QUOTE_PREFIX, NEWLINE, R_ANGLE,
+    };
+    let Some(first) = node.first_token() else {
+        return 0;
+    };
+    // Locate the most recent token that contains a line break before `first`.
+    let mut anchor = first.prev_token();
+    while let Some(tok) = anchor.clone() {
+        if tok.kind() == NEWLINE || tok.text().contains('\n') || tok.text().contains('\r') {
+            break;
+        }
+        anchor = tok.prev_token();
+    }
+    // Walk forward from after the anchor to `first`, accumulating columns
+    // contributed by non-prefix tokens. No allocation needed because
+    // `next_token` yields the same sequence in original order.
+    let mut col = 0usize;
+    let mut cursor = match anchor {
+        Some(tok) => tok.next_token(),
+        None => node.first_token().and_then(|t| {
+            let mut c = Some(t);
+            while let Some(tok) = c.clone() {
+                if tok.prev_token().is_none() {
+                    return Some(tok);
+                }
+                c = tok.prev_token();
+            }
+            None
+        }),
+    };
+    while let Some(tok) = cursor {
+        if tok == first {
+            break;
+        }
+        let kind = tok.kind();
+        let in_quote_prefix = tok
+            .parent()
+            .and_then(|p| p.ancestors().find(|n| n.kind() == MD_QUOTE_PREFIX))
+            .is_some();
+        if !in_quote_prefix
+            && !matches!(
+                kind,
+                R_ANGLE | MD_QUOTE_POST_MARKER_SPACE | MD_QUOTE_INDENT_LIST
+            )
+        {
+            for c in tok.text().chars() {
+                match c {
+                    '\t' => col += TAB_STOP_SPACES - (col % TAB_STOP_SPACES),
+                    _ => col += 1,
+                }
+            }
+        }
+        cursor = tok.next_token();
+    }
+    col
+}
 
 /// Compute the column width of an `MdIndentTokenList`.
 fn indent_list_width(list: &biome_markdown_syntax::MdIndentTokenList) -> usize {
@@ -361,35 +430,87 @@ pub fn document_to_html(
 /// Collect link reference definitions from the document.
 fn collect_link_definitions(document: &MdDocument) -> HashMap<String, (String, Option<String>)> {
     let mut definitions = HashMap::new();
+    let link_definitions: Vec<_> = document
+        .syntax()
+        .descendants()
+        .filter_map(MdLinkReferenceDefinition::cast)
+        .collect();
 
-    for node in document.syntax().descendants() {
-        if let Some(def) = MdLinkReferenceDefinition::cast(node)
-            && let (Ok(label), Ok(dest)) = (def.label(), def.destination())
-        {
-            let label_text = collect_inline_text(&label.content());
-            let normalized = normalize_reference_label(&label_text);
-            if normalized.is_empty() {
-                continue;
-            }
+    for def in link_definitions
+        .iter()
+        .filter(|def| link_reference_definition_before_dash_setext_line(def))
+    {
+        insert_link_definition(&mut definitions, def);
+    }
 
-            // Only keep first definition (per CommonMark spec)
-            if definitions.contains_key(normalized.as_ref()) {
-                continue;
-            }
-
-            let url = collect_inline_text(&dest.content());
-            let url = process_link_destination(&url);
-
-            let title = def.title().map(|t| {
-                let text = collect_inline_text(&t.content());
-                process_link_title(&text)
-            });
-
-            definitions.insert(normalized.into_owned(), (url, title));
-        }
+    for def in &link_definitions {
+        insert_link_definition(&mut definitions, def);
     }
 
     definitions
+}
+
+fn insert_link_definition(
+    definitions: &mut HashMap<String, (String, Option<String>)>,
+    def: &MdLinkReferenceDefinition,
+) {
+    let (Ok(label), Ok(dest)) = (def.label(), def.destination()) else {
+        return;
+    };
+
+    let label_text = collect_inline_text(&label.content());
+    let normalized = normalize_reference_label(&label_text);
+    if normalized.is_empty() || definitions.contains_key(normalized.as_ref()) {
+        return;
+    }
+
+    let url = collect_inline_text(&dest.content());
+    let url = process_link_destination(&url);
+
+    let title = def.title().map(|t| {
+        let text = collect_inline_text(&t.content());
+        process_link_title(&text)
+    });
+
+    definitions.insert(normalized.into_owned(), (url, title));
+}
+
+fn link_reference_definition_before_dash_setext_line(def: &MdLinkReferenceDefinition) -> bool {
+    let mut newline_count = 0;
+
+    for element in def.syntax().siblings_with_tokens(Direction::Next).skip(1) {
+        let Some(node) = element.as_node() else {
+            continue;
+        };
+
+        if MdNewline::cast(node.clone()).is_some() {
+            newline_count += 1;
+            if newline_count > 1 {
+                return false;
+            }
+            continue;
+        }
+
+        if MdQuotePrefix::cast(node.clone()).is_some()
+            || MdContinuationIndent::cast(node.clone()).is_some()
+            || is_empty_paragraph(node)
+        {
+            continue;
+        }
+
+        if let Some(thematic) = MdThematicBreakBlock::cast(node.clone()) {
+            return is_dash_only_thematic_break_text(&thematic.syntax().text_trimmed().to_string());
+        }
+
+        return false;
+    }
+
+    false
+}
+
+fn is_empty_paragraph(node: &SyntaxNode<MarkdownLanguage>) -> bool {
+    MdParagraph::cast(node.clone())
+        .is_some_and(|paragraph| paragraph.syntax().text_trimmed().is_empty())
 }
 
 // ============================================================================
@@ -412,6 +533,11 @@ struct HtmlRenderer<'a> {
 struct Buffer {
     kind: BufferKind,
     content: String,
+    /// Byte ranges in `content` that originated from a decoded entity /
+    /// numeric character reference. Whitespace inside these ranges must
+    /// NOT be stripped by the paragraph/header close-time trim, so that
+    /// e.g. `&#9;foo` keeps the decoded tab and `&#1;foo` keeps U+0001.
+    entity_ranges: Vec<std::ops::Range<usize>>,
 }
 
 enum BufferKind {
@@ -464,6 +590,7 @@ impl<'a> HtmlRenderer<'a> {
             buffers: vec![Buffer {
                 kind: BufferKind::Root,
                 content: String::new(),
+                entity_ranges: Vec::new(),
             }],
             list_stack: Vec::new(),
             list_item_stack: Vec::new(),
@@ -526,6 +653,11 @@ impl<'a> HtmlRenderer<'a> {
     }
 
     fn enter(&mut self, node: SyntaxNode<MarkdownLanguage>) {
+        if MdContinuationIndent::cast(node.clone()).is_some() {
+            self.opaque_depth = Some(self.depth);
+            return;
+        }
+
         if MdInlineItemList::cast(node.clone()).is_some()
             && self
                 .suppressed_inline_nodes
@@ -594,10 +726,7 @@ impl<'a> HtmlRenderer<'a> {
             let start = list
                 .md_bullet_list()
                 .iter()
-                .find_map(|member| match member {
-                    AnyMdBulletListMember::MdBullet(bullet) => Some(bullet),
-                    _ => None,
-                })
+                .next()
                 .and_then(|bullet| bullet.prefix().ok())
                 .and_then(|prefix| prefix.marker().ok())
                 .map_or(1, |marker| {
@@ -622,7 +751,16 @@ impl<'a> HtmlRenderer<'a> {
 
         if let Some(bullet) = MdBullet::cast(node.clone()) {
             let list_is_tight = self.list_stack.last().is_some_and(|state| state.is_tight);
-            let blocks: Vec<_> = bullet.content().iter().collect();
+            let blocks: Vec<_> = bullet
+                .content()
+                .iter()
+                .filter(|b| {
+                    !matches!(
+                        b,
+                        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdContinuationIndent(_),)
+                    )
+                })
+                .collect();
             let item_has_blank_line = blocks
                 .windows(2)
                 .any(|pair| is_newline_block(&pair[0]) && is_newline_block(&pair[1]));
@@ -631,12 +769,12 @@ impl<'a> HtmlRenderer<'a> {
 
             let first_is_paragraph = blocks
                 .iter()
-                .find(|b| !is_newline_block(b))
+                .find(|b| !is_transparent_block(b))
                 .is_some_and(is_paragraph_block);
             let last_is_paragraph = blocks
                 .iter()
                 .rev()
-                .find(|b| !is_newline_block(b))
+                .find(|b| !is_transparent_block(b))
                 .is_some_and(is_paragraph_block);
 
             let leading_newline = !is_tight || !first_is_paragraph;
@@ -745,7 +883,7 @@ impl<'a> HtmlRenderer<'a> {
                 .and_then(biome_markdown_syntax::MdInlineItemList::cast)
                 .is_some();
             if is_inline {
-                let content = collect_raw_inline_text(&html.content());
+                let content = collect_html_content_text(&html.content());
                 self.push_str(&content);
             } else {
                 let block_indent = self.block_indent(html.syntax().text_trimmed_range());
@@ -761,9 +899,7 @@ impl<'a> HtmlRenderer<'a> {
             return;
         }
 
-        if MdLinkReferenceDefinition::cast(node.clone()).is_some()
-            || MdLinkBlock::cast(node.clone()).is_some()
-        {
+        if MdLinkReferenceDefinition::cast(node.clone()).is_some() {
             self.opaque_depth = Some(self.depth);
             return;
         }
@@ -913,18 +1049,13 @@ impl<'a> HtmlRenderer<'a> {
             return;
         }
 
-        if MdSoftBreak::cast(node.clone()).is_some() {
-            self.push_str("\n");
-            return;
-        }
-
         if let Some(text) = MdTextual::cast(node.clone()) {
             render_textual(&text, self.out_mut());
             return;
         }
 
         if let Some(entity) = MdEntityReference::cast(node) {
-            render_entity_reference(&entity, self.out_mut());
+            render_entity_reference(&entity, self.buffer_mut());
         }
     }
 
@@ -937,12 +1068,21 @@ impl<'a> HtmlRenderer<'a> {
                     return;
                 }
                 let mut content = buffer.content;
+                let mut entity_ranges = buffer.entity_ranges;
                 if state.quote_indent > 0 {
-                    content = strip_quote_prefixes(&content, state.quote_indent);
+                    let stripped = strip_quote_prefixes(&content, state.quote_indent);
+                    // The byte ranges no longer line up after stripping
+                    // quote prefixes — fall back to the structural trim
+                    // alone for this (rare) case. Entity ranges are kept
+                    // as `Vec::new()` so no preservation applies.
+                    if stripped != content {
+                        entity_ranges = Vec::new();
+                    }
+                    content = stripped;
                 }
-                let content = strip_paragraph_indent(
-                    content.trim_matches(|c| c == ' ' || c == '\n' || c == '\r'),
-                );
+                let trimmed = trim_buffer_preserving_entities(&content, &entity_ranges);
+                let base_offset = trimmed.as_ptr() as usize - content.as_ptr() as usize;
+                let content = strip_paragraph_indent(trimmed, base_offset, &entity_ranges);
 
                 if state.in_tight_list {
                     self.push_str(&content);
@@ -962,7 +1102,17 @@ impl<'a> HtmlRenderer<'a> {
                 self.push_str("<h");
                 self.push_str(&state.level.to_string());
                 self.push_str(">");
-                self.push_str(buffer.content.trim());
+                // Setext headings can span multiple inline lines; leading
+                // whitespace on each continuation line is structural padding
+                // and must be stripped (matching paragraph rendering).
+                let trimmed =
+                    trim_buffer_preserving_entities(&buffer.content, &buffer.entity_ranges);
+                let base_offset = trimmed.as_ptr() as usize - buffer.content.as_ptr() as usize;
+                self.push_str(&strip_paragraph_indent(
+                    trimmed,
+                    base_offset,
+                    &buffer.entity_ranges,
+                ));
                 self.push_str("</h");
                 self.push_str(&state.level.to_string());
                 self.push_str(">\n");
@@ -1073,6 +1223,7 @@ impl<'a> HtmlRenderer<'a> {
         self.buffers.push(Buffer {
             kind,
             content: String::new(),
+            entity_ranges: Vec::new(),
         });
     }
 
@@ -1080,11 +1231,16 @@ impl<'a> HtmlRenderer<'a> {
         self.buffers.pop().unwrap_or(Buffer {
             kind: BufferKind::Root,
             content: String::new(),
+            entity_ranges: Vec::new(),
         })
     }
 
     fn out_mut(&mut self) -> &mut String {
         &mut self.buffers.last_mut().expect("missing buffer").content
+    }
+
+    fn buffer_mut(&mut self) -> &mut Buffer {
+        self.buffers.last_mut().expect("missing buffer")
     }
 
     fn push_str(&mut self, value: &str) {
@@ -1115,18 +1271,56 @@ fn is_last_inline_item(node: &SyntaxNode<MarkdownLanguage>) -> bool {
 /// initial whitespace, and that whitespace is stripped in the output.
 /// The first line keeps its content unchanged; subsequent lines have all
 /// leading spaces and tabs stripped.
-fn strip_paragraph_indent(content: &str) -> String {
+/// Strip leading whitespace from each continuation line, but preserve
+/// whitespace bytes that fall inside `entity_ranges`. `base_offset` is the
+/// byte position of `content` inside the original buffer the entity ranges
+/// refer to (typically the offset produced by
+/// [`trim_buffer_preserving_entities`]).
+fn strip_paragraph_indent(
+    content: &str,
+    base_offset: usize,
+    entity_ranges: &[std::ops::Range<usize>],
+) -> String {
+    let in_entity = |byte: usize| -> bool {
+        entity_ranges
+            .iter()
+            .any(|r| byte >= r.start && byte < r.end)
+    };
+    let mut result = String::with_capacity(content.len());
+    let mut line_start = 0usize;
     let mut first_line = true;
-    map_lines(content, |line, out| {
-        if first_line {
-            // First line: keep as-is
-            first_line = false;
-            out.push_str(line);
-        } else {
-            // Continuation lines: strip ALL leading whitespace
-            out.push_str(line.trim_start());
+    let bytes = content.as_bytes();
+    for line in content.split('\n') {
+        let raw_line_len = line.len();
+        if !first_line {
+            result.push('\n');
         }
-    })
+        let line = line.strip_suffix('\r').unwrap_or(line);
+        if first_line {
+            result.push_str(line);
+            first_line = false;
+        } else {
+            let mut skip = 0usize;
+            for (offset, ch) in line.char_indices() {
+                if !ch.is_whitespace() {
+                    skip = offset;
+                    break;
+                }
+                if in_entity(base_offset + line_start + offset) {
+                    skip = offset;
+                    break;
+                }
+                skip = offset + ch.len_utf8();
+            }
+            result.push_str(&line[skip..]);
+        }
+        line_start += raw_line_len;
+        // `split('\n')` consumed exactly one '\n' between segments.
+        if bytes.get(line_start) == Some(&b'\n') {
+            line_start += 1;
+        }
+    }
+    result
 }
 
 /// Render an ATX header (# style).
@@ -1134,7 +1328,7 @@ fn header_level(header: &MdHeader) -> usize {
     // Count total hash characters in the before list.
     // The lexer emits all consecutive `#` chars as a single HASH token,
     // so we sum the text lengths of all hash tokens.
-    // Use text_trimmed() to exclude any leading trivia (skipped indentation spaces).
+    // Use text_trimmed() to exclude any leading trivia (indentation whitespace).
     header
         .before()
         .iter()
@@ -1175,13 +1369,20 @@ fn render_fenced_code_block(
 ) {
     out.push_str("<pre><code");
 
-    // Determine the fence indentation from the explicit indent slot
+    // Determine the fence indentation from the explicit indent slot.
+    // The indent list only contains the fence's own 0-3 spaces;
+    // list/quote indent is handled separately via container_indent.
     let fence_leading_indent = indent_list_width(&code.indent());
     let container_indent = list_indent + quote_indent;
-    let fence_indent = fence_leading_indent
-        .saturating_sub(container_indent)
-        .min(MAX_BLOCK_PREFIX_INDENT);
-    let content_indent = container_indent + fence_indent;
+    let fence_indent = fence_leading_indent.min(MAX_BLOCK_PREFIX_INDENT);
+    // When a tab spans the boundary between list/quote indent and fence indent,
+    // the tab token gets fully assigned to the surrounding continuation indent
+    // and the fence's own indent slot ends up empty (CST tokens are indivisible).
+    // The actual fence column on the line still includes the post-container
+    // portion of that tab, so we cross-check with the real column position and
+    // use whichever value is larger.
+    let absolute_column = line_start_column_of(code.syntax());
+    let content_indent = (container_indent + fence_indent).max(absolute_column);
 
     // Get info string (language) - process escapes
     let info_string: String = code
@@ -1289,7 +1490,7 @@ fn render_html_block(
 ) {
     // Prepend the block prefix indent (now in explicit slot, not trivia)
     let mut content = indent_list_text(&html.indent());
-    content.push_str(&collect_raw_inline_text(&html.content()));
+    content.push_str(&collect_html_content_text(&html.content()));
     if list_indent > 0 {
         content = strip_indent_preserve_tabs(&content, list_indent);
     }
@@ -1305,7 +1506,7 @@ fn render_html_block(
 /// Render textual content.
 fn render_textual(text: &MdTextual, out: &mut String) {
     if let Ok(token) = text.value_token() {
-        // Use text_trimmed() to exclude skipped trivia (e.g., indentation stripped during parsing)
+        // Use text_trimmed() to exclude trivia (e.g., indentation stripped during parsing)
         let raw = token.text_trimmed();
         // Process backslash escapes and escape HTML
         let processed = process_escapes(raw);
@@ -1384,18 +1585,61 @@ fn render_inline_html(html: &MdInlineHtml, out: &mut String) {
     out.push_str(&content);
 }
 
-/// Render an entity reference.
-fn render_entity_reference(entity: &MdEntityReference, out: &mut String) {
-    if let Ok(token) = entity.value_token() {
-        let text = token.text();
-        // Decode known entities or pass through
-        if let Some(decoded) = decode_entity(text) {
-            out.push_str(&escape_html(&decoded));
-        } else {
-            // Unknown entity - pass through as-is (escaped)
-            out.push_str(&escape_html(text));
-        }
+/// Render an entity reference into the current buffer.
+///
+/// The byte range covered by the rendered output is recorded on the
+/// buffer's `entity_ranges` so that the paragraph/header close-time
+/// trim can preserve whitespace that was produced by decoding a
+/// numeric character reference (e.g. `&#9;` → `\t`, `&#1;` → U+0001).
+fn render_entity_reference(entity: &MdEntityReference, buffer: &mut Buffer) {
+    let Ok(token) = entity.value_token() else {
+        return;
+    };
+    let text = token.text();
+    let rendered = match decode_entity(text) {
+        Some(decoded) => escape_html(&decoded),
+        None => escape_html(text),
+    };
+    let start = buffer.content.len();
+    buffer.content.push_str(&rendered);
+    let end = buffer.content.len();
+    if end > start {
+        buffer.entity_ranges.push(start..end);
     }
+}
+
+/// Trim leading and trailing structural whitespace from `content`, but
+/// preserve whitespace that lives inside any of the byte ranges in
+/// `entity_ranges` (where each range marks output produced by
+/// [`render_entity_reference`]).
+///
+/// The returned slice borrows from `content`.
+fn trim_buffer_preserving_entities<'a>(
+    content: &'a str,
+    entity_ranges: &[std::ops::Range<usize>],
+) -> &'a str {
+    let in_entity = |byte: usize| -> bool {
+        entity_ranges
+            .iter()
+            .any(|r| byte >= r.start && byte < r.end)
+    };
+
+    let bytes = content.as_bytes();
+    let mut start = 0;
+    while start < bytes.len()
+        && matches!(bytes[start], b' ' | b'\t' | b'\n' | b'\r')
+        && !in_entity(start)
+    {
+        start += 1;
+    }
+    let mut end = bytes.len();
+    while end > start
+        && matches!(bytes[end - 1], b' ' | b'\t' | b'\n' | b'\r')
+        && !in_entity(end - 1)
+    {
+        end -= 1;
+    }
+    &content[start..end]
 }
 
 /// Render a link title attribute.
@@ -1426,6 +1670,18 @@ fn collect_inline_text(list: &biome_markdown_syntax::MdInlineItemList) -> String
 }
 
 /// Collect raw inline text without processing escapes.
+/// The raw text of HTML block content: a single literal token holding the
+/// whole content verbatim, container prefixes included.
+fn collect_html_content_text(
+    content: &biome_rowan::SyntaxResult<biome_markdown_syntax::MdHtmlContent>,
+) -> String {
+    content
+        .as_ref()
+        .ok()
+        .and_then(|content| content.value_token().ok())
+        .map_or_else(String::new, |token| token.text().to_string())
+}
+
 fn collect_raw_inline_text(list: &biome_markdown_syntax::MdInlineItemList) -> String {
     let mut text = String::new();
     for item in list.iter() {
@@ -1442,11 +1698,13 @@ fn collect_raw_inline_item(item: &AnyMdInline, out: &mut String) {
                 out.push_str(token.text());
             }
         }
-        AnyMdInline::MdSoftBreak(_) => {
-            out.push('\n');
-        }
         AnyMdInline::MdHardLine(_) => {
             out.push('\n');
+        }
+        AnyMdInline::MdCodeContent(code) => {
+            if let Ok(token) = code.value_token() {
+                out.push_str(token.text());
+            }
         }
         _ => {
             // For other inline elements, collect their tokens
@@ -1692,7 +1950,7 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
             let content = collect_raw_inline_text(&autolink.value());
             out.push_str(&content);
         }
-        AnyMdInline::MdHardLine(_) | AnyMdInline::MdSoftBreak(_) => {
+        AnyMdInline::MdHardLine(_) => {
             out.push(' ');
         }
         AnyMdInline::MdEntityReference(entity) => {
@@ -1715,6 +1973,9 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
         }
         AnyMdInline::MdIndentToken(_) => {
             // Indent tokens don't contribute text to alt attributes
+        }
+        AnyMdInline::MdCodeContent(_) => {
+            // Fenced code content never appears inside link or image text
         }
     }
 }
@@ -1751,17 +2012,34 @@ fn is_paragraph_block(block: &AnyMdBlock) -> bool {
     )
 }
 
-/// Check if a block is a newline (produces no output).
+/// Check if a block is a newline or continuation indent (produces no output).
 fn is_newline_block(block: &AnyMdBlock) -> bool {
     matches!(
         block,
-        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(_))
+        AnyMdBlock::AnyMdLeafBlock(
+            AnyMdLeafBlock::MdNewline(_) | AnyMdLeafBlock::MdContinuationIndent(_),
+        )
+    )
+}
+
+/// Check if a block is structural-only and produces no rendered content.
+/// This includes newline blocks, continuation indents, and quote prefix markers
+/// that can appear as children of list item content when lists are nested
+/// inside blockquotes.
+fn is_transparent_block(block: &AnyMdBlock) -> bool {
+    matches!(
+        block,
+        AnyMdBlock::AnyMdLeafBlock(
+            AnyMdLeafBlock::MdNewline(_)
+                | AnyMdLeafBlock::MdContinuationIndent(_)
+                | AnyMdLeafBlock::MdLinkReferenceDefinition(_),
+        ) | AnyMdBlock::MdQuotePrefix(_)
     )
 }
 
 /// Check if blocks are effectively empty (empty or only newlines).
 fn is_empty_content(blocks: &[AnyMdBlock]) -> bool {
-    blocks.is_empty() || blocks.iter().all(is_newline_block)
+    blocks.is_empty() || blocks.iter().all(is_transparent_block)
 }
 
 fn list_item_required_indent(entry: &ListItemIndent) -> usize {
@@ -1780,6 +2058,16 @@ fn list_item_required_indent(entry: &ListItemIndent) -> usize {
 mod tests {
     use super::*;
     use crate::parse_markdown;
+
+    fn render(input: &str) -> String {
+        let parsed = parse_markdown(input);
+        document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        )
+    }
 
     #[test]
     fn test_tab_expansion() {
@@ -1968,17 +2256,32 @@ mod tests {
 
     #[test]
     fn test_title_with_escaped_closing_quote() {
-        let parsed = parse_markdown("[a](/url \"title with \\\" quote\")\n");
-        let html = document_to_html(
-            &parsed.tree(),
-            parsed.list_tightness(),
-            parsed.list_item_indents(),
-            parsed.quote_indents(),
-        );
+        let html = render("[a](/url \"title with \\\" quote\")\n");
         assert_eq!(
             html,
             "<p><a href=\"/url\" title=\"title with &quot; quote\">a</a></p>\n"
         );
+    }
+
+    #[test]
+    fn test_dash_setext_reference_definition_priority() {
+        let html = render("[x]: /first\n***\n> [x]: /second \"title\"\n> ---\n[x]\n");
+        assert_eq!(
+            html,
+            "<hr />\n<blockquote>\n<p></p>\n<hr />\n</blockquote>\n<p><a href=\"/second\" title=\"title\">x</a></p>\n"
+        );
+    }
+
+    #[test]
+    fn test_spaced_dash_thematic_keeps_document_ordered_reference() {
+        let html = render("[x]: /first\n***\n[x]: /second \"title\"\n - - -\n[x]\n");
+        assert_eq!(html, "<hr />\n<hr />\n<p><a href=\"/first\">x</a></p>\n");
+    }
+
+    #[test]
+    fn test_blank_line_before_dash_keeps_document_ordered_reference() {
+        let html = render("[x]: /first\n***\n[x]: /second \"title\"\n\n---\n[x]\n");
+        assert_eq!(html, "<hr />\n<hr />\n<p><a href=\"/first\">x</a></p>\n");
     }
 
     #[test]
@@ -1991,5 +2294,195 @@ mod tests {
             parsed.quote_indents(),
         );
         assert_eq!(html, "<p>foo\\</p>\n");
+    }
+
+    #[test]
+    fn test_hard_break_in_blockquote() {
+        let parsed = parse_markdown("> foo  \n> bar  \n>\n> baz");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<blockquote>\n<p>foo<br />\nbar</p>\n<p>baz</p>\n</blockquote>\n"
+        );
+    }
+
+    #[test]
+    fn test_hard_break_nested_quote_in_list() {
+        let parsed = parse_markdown("- > quoted  \n  > line  \n  >\n  > next para\n\n- after\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>\n<blockquote>\n<p>quoted<br />\nline</p>\n<p>next para</p>\n</blockquote>\n</li>\n<li>\n<p>after</p>\n</li>\n</ul>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_list_marker_split() {
+        // Two tight lists separated by blank line with different markers
+        let input = "- foo\n- bar\n\n* baz\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>foo</li>\n<li>bar</li>\n</ul>\n<ul>\n<li>baz</li>\n</ul>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_list_basic() {
+        let input = "- foo\n- bar\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(html, "<ul>\n<li>foo</li>\n<li>bar</li>\n</ul>\n");
+    }
+
+    #[test]
+    fn test_loose_list_same_marker() {
+        let input = "- foo\n\n- bar\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>\n<p>foo</p>\n</li>\n<li>\n<p>bar</p>\n</li>\n</ul>\n"
+        );
+    }
+
+    #[test]
+    fn test_ordered_delim_split_tight() {
+        // Different ordered delimiters across blank line → separate tight lists
+        let input = "1. First\n2. Second\n\n1) Third\n2) Fourth\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ol>\n<li>First</li>\n<li>Second</li>\n</ol>\n<ol>\n<li>Third</li>\n<li>Fourth</li>\n</ol>\n"
+        );
+    }
+
+    #[test]
+    fn test_cross_type_split_tight() {
+        // Bullet → ordered across blank line → separate tight lists
+        let input = "- bullet\n\n1. ordered\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>bullet</li>\n</ul>\n<ol>\n<li>ordered</li>\n</ol>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_bullet_list_in_blockquote() {
+        let parsed = parse_markdown("> - a\n> - b\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<blockquote>\n<ul>\n<li>a</li>\n<li>b</li>\n</ul>\n</blockquote>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_ordered_list_in_blockquote() {
+        let parsed = parse_markdown("> 1. a\n> 2. b\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<blockquote>\n<ol>\n<li>a</li>\n<li>b</li>\n</ol>\n</blockquote>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_three_item_bullet_list_in_blockquote() {
+        let parsed = parse_markdown("> - a\n> - b\n> - c\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<blockquote>\n<ul>\n<li>a</li>\n<li>b</li>\n<li>c</li>\n</ul>\n</blockquote>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_list_not_in_blockquote() {
+        let parsed = parse_markdown("- a\n- b\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(html, "<ul>\n<li>a</li>\n<li>b</li>\n</ul>\n");
+    }
+
+    #[test]
+    fn test_entity_tab_on_continuation_line_is_preserved() {
+        // `&#9;` decodes to a tab. On a continuation line the tab is
+        // entity-sourced and must survive the structural indent trim.
+        let html = render("foo\n&#9;bar\n");
+        assert_eq!(html, "<p>foo\n\tbar</p>\n");
+    }
+
+    #[test]
+    fn test_entity_space_on_continuation_line_is_preserved() {
+        // `&#x20;` decodes to a space; preserved even though it is whitespace.
+        let html = render("foo\n&#x20;bar\n");
+        assert_eq!(html, "<p>foo\n bar</p>\n");
+    }
+
+    #[test]
+    fn test_structural_indent_still_stripped_before_entity() {
+        // Literal leading spaces are structural and stripped; the entity-sourced
+        // whitespace that follows is preserved.
+        let html = render("foo\n   &#9;bar\n");
+        assert_eq!(html, "<p>foo\n\tbar</p>\n");
     }
 }

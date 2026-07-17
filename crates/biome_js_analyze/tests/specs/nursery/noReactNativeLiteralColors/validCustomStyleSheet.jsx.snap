@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validCustomStyleSheet.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+
+import { StyleSheet } from 'my-custom-lib';
+
+const FromOtherPackage = StyleSheet.create({
+	box: { backgroundColor: '#fff' },
+});
+
+```

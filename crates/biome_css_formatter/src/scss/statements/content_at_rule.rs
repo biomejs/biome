@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::utils::scss_statement_at_rule::format_scss_statement_at_rule_semicolon;
 use biome_css_syntax::{ScssContentAtRule, ScssContentAtRuleFields};
 use biome_formatter::write;
 
@@ -18,7 +19,7 @@ impl FormatNodeRule<ScssContentAtRule> for FormatScssContentAtRule {
             [
                 content_token.format(),
                 arguments.format(),
-                semicolon_token.format()
+                format_scss_statement_at_rule_semicolon(semicolon_token)
             ]
         )
     }

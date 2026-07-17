@@ -1,14 +1,15 @@
 use crate::format_element::tag::{Condition, Tag};
 use crate::prelude::tag::{DedentMode, GroupMode, LabelId};
 use crate::prelude::*;
-use crate::{Argument, Arguments, GroupId, TextRange, TextSize, write};
+use crate::{
+    Argument, Arguments, FormatContext, FormatOptions, GroupId, TextRange, TextSize, write,
+};
 use crate::{Buffer, VecBuffer};
 use Tag::*;
 use biome_rowan::{Language, SyntaxNode, SyntaxToken, TextLen, TokenText};
 use std::borrow::Cow;
 use std::cell::Cell;
 use std::marker::PhantomData;
-use std::num::NonZeroU8;
 
 /// A line break that only gets printed if the enclosing `Group` doesn't fit on a single line.
 /// It's omitted if the enclosing `Group` fits on a single line.
@@ -136,7 +137,7 @@ pub const fn empty_line() -> Line {
 ///
 /// # Examples
 ///
-/// The line breaks are emitted as spaces if the enclosing `Group` fits on a a single line:
+/// The line breaks are emitted as spaces if the enclosing `Group` fits on a single line:
 /// ```
 /// use biome_formatter::{format, format_args};
 /// use biome_formatter::prelude::*;
@@ -275,8 +276,70 @@ impl std::fmt::Debug for Token {
     }
 }
 
+/// Creates a source map entry from the passed source `position`
+/// to the position in the formatted output.
+///
+/// ## Examples
+///
+/// ```
+/// use biome_formatter::format;
+/// use biome_formatter::prelude::*;
+///
+/// # fn main() -> FormatResult<()> {
+/// use biome_rowan::TextSize;
+/// use biome_formatter::{SourceMapGeneration, SourceMarker};
+///
+///
+/// let elements = format!(SimpleFormatContext::default(), [
+///     source_position(TextSize::from(0)),
+///     token("Hello "),
+///     source_position(TextSize::from(7)),
+///     token("'Biome'"),
+/// ])?;
+///
+/// let printed = elements.print_with_indent(0, SourceMapGeneration::Enabled)?;
+///
+/// assert_eq!(printed.as_code(), r#"Hello 'Biome'"#);
+/// assert_eq!(printed.sourcemap(), [
+///     SourceMarker { source: TextSize::from(0), dest: TextSize::from(0) },
+///     SourceMarker { source: TextSize::from(6), dest: TextSize::from(6) },
+///     SourceMarker { source: TextSize::from(7), dest: TextSize::from(6) },
+///     SourceMarker { source: TextSize::from(14), dest: TextSize::from(13) },
+/// ]);
+///
+/// # Ok(())
+/// # }
+/// ```
+pub const fn source_position(position: TextSize) -> SourcePosition {
+    SourcePosition(position)
+}
+
+#[derive(Eq, PartialEq, Copy, Clone, Debug)]
+pub struct SourcePosition(TextSize);
+
+impl<Context> Format<Context> for SourcePosition
+where
+    Context: FormatContext,
+{
+    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        if f.source_map_generation().is_disabled() {
+            return Ok(());
+        }
+
+        if let Some(FormatElement::SourcePosition(last_position)) = f.buffer.elements().last()
+            && *last_position == self.0
+        {
+            return Ok(());
+        }
+
+        f.write_element(FormatElement::SourcePosition(self.0))?;
+
+        Ok(())
+    }
+}
+
 /// Creates a text from a dynamic string and a range of the input source
-pub fn text(text: &str, position: TextSize) -> Text<'_> {
+pub fn text(text: &str, position: Option<TextSize>) -> Text<'_> {
     debug_assert_no_newlines(text);
 
     Text { text, position }
@@ -285,14 +348,26 @@ pub fn text(text: &str, position: TextSize) -> Text<'_> {
 #[derive(Eq, PartialEq)]
 pub struct Text<'a> {
     text: &'a str,
-    position: TextSize,
+    position: Option<TextSize>,
 }
 
-impl<Context> Format<Context> for Text<'_> {
+impl<Context> Format<Context> for Text<'_>
+where
+    Context: FormatContext,
+{
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        if let Some(position) = self.position
+            && f.source_map_generation().is_enabled()
+        {
+            return f.write_element(FormatElement::MappedText {
+                text: self.text.to_string().into_boxed_str(),
+                source_position: position,
+            });
+        }
+
         f.write_element(FormatElement::Text {
             text: self.text.to_string().into_boxed_str(),
-            source_position: self.position,
+            text_width: TextWidth::from_text(self.text, f.options().indent_width()),
         })
     }
 }
@@ -321,7 +396,10 @@ pub struct SyntaxTokenCowSlice<'a, L: Language> {
     start: TextSize,
 }
 
-impl<L: Language, Context> Format<Context> for SyntaxTokenCowSlice<'_, L> {
+impl<L: Language, Context> Format<Context> for SyntaxTokenCowSlice<'_, L>
+where
+    Context: FormatContext,
+{
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         match &self.text {
             Cow::Borrowed(text) => {
@@ -335,15 +413,31 @@ impl<L: Language, Context> Format<Context> for SyntaxTokenCowSlice<'_, L> {
                 let relative_range = range - self.token.text_range().start();
                 let slice = self.token.token_text().slice(relative_range);
 
-                f.write_element(FormatElement::LocatedTokenText {
-                    slice,
-                    source_position: self.start,
-                })
+                if f.source_map_generation().is_enabled() {
+                    f.write_element(FormatElement::MappedLocatedTokenText {
+                        slice,
+                        source_position: self.start,
+                    })
+                } else {
+                    f.write_element(FormatElement::LocatedTokenText {
+                        slice,
+                        text_width: TextWidth::from_text(text, f.options().indent_width()),
+                    })
+                }
             }
-            Cow::Owned(text) => f.write_element(FormatElement::Text {
-                text: text.clone().into_boxed_str(),
-                source_position: self.start,
-            }),
+            Cow::Owned(text) => {
+                if f.source_map_generation().is_enabled() {
+                    f.write_element(FormatElement::MappedText {
+                        text: text.clone().into_boxed_str(),
+                        source_position: self.start,
+                    })
+                } else {
+                    f.write_element(FormatElement::Text {
+                        text: text.clone().into_boxed_str(),
+                        text_width: TextWidth::from_text(text, f.options().indent_width()),
+                    })
+                }
+            }
         }
     }
 }
@@ -375,12 +469,22 @@ pub struct LocatedTokenText {
     source_position: TextSize,
 }
 
-impl<Context> Format<Context> for LocatedTokenText {
+impl<Context> Format<Context> for LocatedTokenText
+where
+    Context: FormatContext,
+{
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
-        f.write_element(FormatElement::LocatedTokenText {
-            slice: self.text.clone(),
-            source_position: self.source_position,
-        })
+        if f.source_map_generation().is_enabled() {
+            f.write_element(FormatElement::MappedLocatedTokenText {
+                slice: self.text.clone(),
+                source_position: self.source_position,
+            })
+        } else {
+            f.write_element(FormatElement::LocatedTokenText {
+                slice: self.text.clone(),
+                text_width: TextWidth::from_text(&self.text, f.options().indent_width()),
+            })
+        }
     }
 }
 
@@ -586,7 +690,7 @@ impl<Context> std::fmt::Debug for FormatLabelled<'_, Context> {
     }
 }
 
-/// Inserts a single space. Allows to separate different tokens.
+/// Inserts a single space. Allows you to separate different tokens.
 ///
 /// # Examples
 ///
@@ -758,7 +862,7 @@ impl<Context> Format<Context> for HardSpace {
 ///     [
 ///         token("root"),
 ///         indent(&format_args![align(
-///             2,
+///             "  ",
 ///             &format_args![indent(&format_args![
 ///                 hard_line_break(),
 ///                 token("should be 3 tabs"),
@@ -818,7 +922,7 @@ impl<Context> std::fmt::Debug for Indent<'_, Context> {
 /// # fn main() -> FormatResult<()> {
 /// let block = format!(SimpleFormatContext::default(), [
 ///     token("root"),
-///     align(2, &format_args![
+///     align("  ", &format_args![
 ///         hard_line_break(),
 ///         token("aligned"),
 ///         dedent(&format_args![
@@ -862,7 +966,7 @@ impl<Context> std::fmt::Debug for Indent<'_, Context> {
 ///                 hard_line_break(),
 ///                 token("Indented"),
 ///                 align(
-///                     2,
+///                     "  ",
 ///                     &format_args![
 ///                         hard_line_break(),
 ///                         token("Indented and aligned"),
@@ -874,7 +978,7 @@ impl<Context> std::fmt::Debug for Indent<'_, Context> {
 ///                 ),
 ///             ]),
 ///             align(
-///                 2,
+///                 "  ",
 ///                 &format_args![
 ///                     hard_line_break(),
 ///                     token("Aligned"),
@@ -909,9 +1013,9 @@ impl<Context> std::fmt::Debug for Indent<'_, Context> {
 ///     [
 ///         token("root"),
 ///         indent(&format_args![align(
-///             2,
+///             "  ",
 ///             &format_args![align(
-///                 2,
+///                 "  ",
 ///                 &format_args![indent(&format_args![
 ///                     hard_line_break(),
 ///                     token("should be 4 tabs"),
@@ -979,7 +1083,7 @@ impl<Context> std::fmt::Debug for Dedent<'_, Context> {
 ///         indent(&format_args![
 ///             hard_line_break(),
 ///             token("indent level 2"),
-///             align(2, &format_args![
+///             align("  ", &format_args![
 ///                 hard_line_break(),
 ///                 token("two space align"),
 ///                 dedent_to_root(&format_args![
@@ -1028,7 +1132,6 @@ where
 /// ## Tab indention
 ///
 /// ```
-/// use std::num::NonZeroU8;
 /// use biome_formatter::{format, format_args};
 /// use biome_formatter::prelude::*;
 ///
@@ -1038,7 +1141,7 @@ where
 ///     hard_line_break(),
 ///     token("?"),
 ///     space(),
-///     align(2, &format_args![
+///     align("  ", &format_args![
 ///         token("function () {"),
 ///         hard_line_break(),
 ///         token("}"),
@@ -1046,7 +1149,7 @@ where
 ///     hard_line_break(),
 ///     token(":"),
 ///     space(),
-///     align(2, &format_args![
+///     align("  ", &format_args![
 ///         token("function () {"),
 ///         block_indent(&token("console.log('test');")),
 ///         token("}"),
@@ -1073,7 +1176,6 @@ where
 /// ## Spaces indention
 ///
 /// ```
-/// use std::num::NonZeroU8;
 /// use biome_formatter::{format, format_args, IndentStyle, SimpleFormatOptions};
 /// use biome_formatter::prelude::*;
 ///
@@ -1089,7 +1191,7 @@ where
 ///     hard_line_break(),
 ///     token("?"),
 ///     space(),
-///     align(2, &format_args![
+///     align("  ", &format_args![
 ///         token("function () {"),
 ///         hard_line_break(),
 ///         token("}"),
@@ -1097,7 +1199,7 @@ where
 ///     hard_line_break(),
 ///     token(":"),
 ///     space(),
-///     align(2, &format_args![
+///     align("  ", &format_args![
 ///         token("function () {"),
 ///         block_indent(&token("console.log('test');")),
 ///         token("}"),
@@ -1118,25 +1220,79 @@ where
 ///
 /// * tab indention: Printer indents the expression with two tabs because the `align` increases the indention level.
 /// * space indention: Printer indents the expression by 4 spaces (one indention level) **and** 2 spaces for the align.
-pub fn align<Content, Context>(count: u8, content: &Content) -> Align<'_, Context>
+pub fn align<'a, Content, Context>(
+    placeholder: impl Into<AlignedStr>,
+    content: &'a Content,
+) -> Align<'a, Context>
 where
     Content: Format<Context>,
 {
     Align {
-        count: NonZeroU8::new(count).expect("Alignment count must be a non-zero number."),
+        placeholder: placeholder.into(),
         content: Argument::new(content),
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct Align<'a, Context> {
-    count: NonZeroU8,
+    placeholder: AlignedStr,
     content: Argument<'a, Context>,
+}
+
+/// Placeholder text printed as alignment on continuation lines.
+///
+/// The printer clones this value on every line break inside an aligned
+/// region (see `pending_indent`), so the owned variant is reference-counted
+/// to keep those clones allocation-free.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum AlignedStr {
+    Borrowed(&'static str),
+    Owned(std::rc::Rc<str>),
+}
+
+impl AlignedStr {
+    pub fn len(&self) -> usize {
+        self.as_str().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.as_str().is_empty()
+    }
+
+    pub fn as_str(&self) -> &str {
+        match self {
+            Self::Borrowed(s) => s,
+            Self::Owned(s) => s,
+        }
+    }
+
+    pub fn push_str(&mut self, text: &str) {
+        let mut owned = String::with_capacity(self.len() + text.len());
+        owned.push_str(self.as_str());
+        owned.push_str(text);
+        *self = Self::Owned(owned.into());
+    }
+}
+
+impl From<&'static str> for AlignedStr {
+    fn from(s: &'static str) -> Self {
+        Self::Borrowed(s)
+    }
+}
+
+impl From<String> for AlignedStr {
+    fn from(s: String) -> Self {
+        Self::Owned(s.into())
+    }
 }
 
 impl<Context> Format<Context> for Align<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
-        f.write_element(FormatElement::Tag(StartAlign(tag::Align(self.count))))?;
+        // The placeholder is boxed so the `Align` tag payload stays one
+        // pointer wide and `FormatElement` keeps its asserted size.
+        f.write_element(FormatElement::Tag(StartAlign(tag::Align(Box::new(
+            self.placeholder.clone(),
+        )))))?;
         Arguments::from(&self.content).fmt(f)?;
         f.write_element(FormatElement::Tag(EndAlign))
     }
@@ -1145,7 +1301,8 @@ impl<Context> Format<Context> for Align<'_, Context> {
 impl<Context> std::fmt::Debug for Align<'_, Context> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Align")
-            .field("count", &self.count)
+            .field("placeholder", &self.placeholder.as_str())
+            .field("count", &self.placeholder.len())
             .field("content", &"{{content}}")
             .finish()
     }
@@ -2285,7 +2442,7 @@ impl<Context, T> std::fmt::Debug for FormatWith<Context, T> {
 ///                 let mut join = f.join_with(&separator);
 ///
 ///                 for item in &self.items {
-///                     join.entry(&format_with(|f| write!(f, [text(item, TextSize::default())])));
+///                     join.entry(&format_with(|f| write!(f, [text(item, None)])));
 ///                 }
 ///                 join.finish()
 ///             })),

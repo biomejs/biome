@@ -1,0 +1,13 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "unicorn/filename-case": ["error", {
+        "cases": {
+          "camelCase": true,
+          "pascalCase": true
+        }
+      }]
+    }
+  }
+}

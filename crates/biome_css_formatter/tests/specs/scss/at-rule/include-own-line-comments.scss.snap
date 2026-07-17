@@ -1,0 +1,61 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/include-own-line-comments.scss
+---
+
+# Input
+
+```scss
+@include own-line-comments(
+1px,
+/* between positional args */
+2px,
+/* before keyword */
+$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:10,
+// before final positional
+2px 4px 6px
+/* before close */
+);
+
+@include own-line-comments(
+$alpha:1px,
+/* before keyword */
+$beta:2px,
+// between keyword args
+$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:2px,
+/* before closing positional */
+3px
+);
+
+```
+
+
+# Formatted
+
+```scss
+@include own-line-comments(
+	1px,
+	/* between positional args */ 2px,
+	/* before keyword */
+	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:
+		10,
+	// before final positional
+	2px 4px 6px /* before close */
+);
+
+@include own-line-comments(
+	$alpha: 1px,
+	/* before keyword */ $beta: 2px,
+	// between keyword args
+	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:
+		2px,
+	/* before closing positional */ 3px
+);
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    5: 	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:
+   15: 	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:
+```

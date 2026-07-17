@@ -4,6 +4,7 @@ expression: invalid.jsx
 ---
 # Input
 ```jsx
+/* should generate diagnostics */
 <>
 	<h1 />
 	<h1>
@@ -28,35 +29,16 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:2:2 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Provide screen reader accessible content when using heading  elements.
-  
-    1 │ <>
-  > 2 │ 	<h1 />
-      │ 	^^^^^^
-    3 │ 	<h1>
-    4 │ 		<div aria-hidden />
-  
-  i All headings on a page should have content that is accessible to screen readers.
-  
-
-```
-
-```
 invalid.jsx:3:2 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using heading  elements.
   
-    1 │ <>
-    2 │ 	<h1 />
-  > 3 │ 	<h1>
-      │ 	^^^^
-  > 4 │ 		<div aria-hidden />
-  > 5 │ 	</h1>
-      │ 	^^^^^
-    6 │ 	<h1></h1>
-    7 │ 	<h1>
+    1 │ /* should generate diagnostics */
+    2 │ <>
+  > 3 │ 	<h1 />
+      │ 	^^^^^^
+    4 │ 	<h1>
+    5 │ 		<div aria-hidden />
   
   i All headings on a page should have content that is accessible to screen readers.
   
@@ -64,16 +46,19 @@ invalid.jsx:3:2 lint/a11y/useHeadingContent ━━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:6:2 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:4:2 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using heading  elements.
   
-    4 │ 		<div aria-hidden />
-    5 │ 	</h1>
-  > 6 │ 	<h1></h1>
-      │ 	^^^^^^^^^
-    7 │ 	<h1>
-    8 │ 		<></>
+    2 │ <>
+    3 │ 	<h1 />
+  > 4 │ 	<h1>
+      │ 	^^^^
+  > 5 │ 		<div aria-hidden />
+  > 6 │ 	</h1>
+      │ 	^^^^^
+    7 │ 	<h1></h1>
+    8 │ 	<h1>
   
   i All headings on a page should have content that is accessible to screen readers.
   
@@ -85,15 +70,12 @@ invalid.jsx:7:2 lint/a11y/useHeadingContent ━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using heading  elements.
   
-     5 │ 	</h1>
-     6 │ 	<h1></h1>
-   > 7 │ 	<h1>
-       │ 	^^^^
-   > 8 │ 		<></>
-   > 9 │ 	</h1>
-       │ 	^^^^^
-    10 │ 	<h1 aria-hidden="true">content</h1>
-    11 │ 	<h1 aria-hidden="true" dangerouslySetInnerHTML={{ __html: "heading" }} />
+    5 │ 		<div aria-hidden />
+    6 │ 	</h1>
+  > 7 │ 	<h1></h1>
+      │ 	^^^^^^^^^
+    8 │ 	<h1>
+    9 │ 		<></>
   
   i All headings on a page should have content that is accessible to screen readers.
   
@@ -101,16 +83,19 @@ invalid.jsx:7:2 lint/a11y/useHeadingContent ━━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:10:2 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:8:2 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using heading  elements.
   
-     8 │ 		<></>
-     9 │ 	</h1>
-  > 10 │ 	<h1 aria-hidden="true">content</h1>
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    11 │ 	<h1 aria-hidden="true" dangerouslySetInnerHTML={{ __html: "heading" }} />
-    12 │   <h1 aria-label="Screen reader content" aria-hidden>invisible content</h1>
+     6 │ 	</h1>
+     7 │ 	<h1></h1>
+   > 8 │ 	<h1>
+       │ 	^^^^
+   > 9 │ 		<></>
+  > 10 │ 	</h1>
+       │ 	^^^^^
+    11 │ 	<h1 aria-hidden="true">content</h1>
+    12 │ 	<h1 aria-hidden="true" dangerouslySetInnerHTML={{ __html: "heading" }} />
   
   i All headings on a page should have content that is accessible to screen readers.
   
@@ -122,12 +107,29 @@ invalid.jsx:11:2 lint/a11y/useHeadingContent ━━━━━━━━━━━�
 
   × Provide screen reader accessible content when using heading  elements.
   
-     9 │ 	</h1>
-    10 │ 	<h1 aria-hidden="true">content</h1>
-  > 11 │ 	<h1 aria-hidden="true" dangerouslySetInnerHTML={{ __html: "heading" }} />
+     9 │ 		<></>
+    10 │ 	</h1>
+  > 11 │ 	<h1 aria-hidden="true">content</h1>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 	<h1 aria-hidden="true" dangerouslySetInnerHTML={{ __html: "heading" }} />
+    13 │   <h1 aria-label="Screen reader content" aria-hidden>invisible content</h1>
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.jsx:12:2 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading  elements.
+  
+    10 │ 	</h1>
+    11 │ 	<h1 aria-hidden="true">content</h1>
+  > 12 │ 	<h1 aria-hidden="true" dangerouslySetInnerHTML={{ __html: "heading" }} />
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │   <h1 aria-label="Screen reader content" aria-hidden>invisible content</h1>
-    13 │ 	<h1>{undefined}</h1>
+    13 │   <h1 aria-label="Screen reader content" aria-hidden>invisible content</h1>
+    14 │ 	<h1>{undefined}</h1>
   
   i All headings on a page should have content that is accessible to screen readers.
   
@@ -135,33 +137,16 @@ invalid.jsx:11:2 lint/a11y/useHeadingContent ━━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:12:3 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:13:3 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using heading  elements.
   
-    10 │ 	<h1 aria-hidden="true">content</h1>
-    11 │ 	<h1 aria-hidden="true" dangerouslySetInnerHTML={{ __html: "heading" }} />
-  > 12 │   <h1 aria-label="Screen reader content" aria-hidden>invisible content</h1>
+    11 │ 	<h1 aria-hidden="true">content</h1>
+    12 │ 	<h1 aria-hidden="true" dangerouslySetInnerHTML={{ __html: "heading" }} />
+  > 13 │   <h1 aria-label="Screen reader content" aria-hidden>invisible content</h1>
        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    13 │ 	<h1>{undefined}</h1>
-    14 │ 	<h1 children />
-  
-  i All headings on a page should have content that is accessible to screen readers.
-  
-
-```
-
-```
-invalid.jsx:13:2 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Provide screen reader accessible content when using heading  elements.
-  
-    11 │ 	<h1 aria-hidden="true" dangerouslySetInnerHTML={{ __html: "heading" }} />
-    12 │   <h1 aria-label="Screen reader content" aria-hidden>invisible content</h1>
-  > 13 │ 	<h1>{undefined}</h1>
-       │ 	^^^^^^^^^^^^^^^^^^^^
-    14 │ 	<h1 children />
-    15 │ 	<h1 children={""} />
+    14 │ 	<h1>{undefined}</h1>
+    15 │ 	<h1 children />
   
   i All headings on a page should have content that is accessible to screen readers.
   
@@ -173,12 +158,12 @@ invalid.jsx:14:2 lint/a11y/useHeadingContent ━━━━━━━━━━━�
 
   × Provide screen reader accessible content when using heading  elements.
   
-    12 │   <h1 aria-label="Screen reader content" aria-hidden>invisible content</h1>
-    13 │ 	<h1>{undefined}</h1>
-  > 14 │ 	<h1 children />
-       │ 	^^^^^^^^^^^^^^^
-    15 │ 	<h1 children={""} />
-    16 │ 	<h1 children={null} />
+    12 │ 	<h1 aria-hidden="true" dangerouslySetInnerHTML={{ __html: "heading" }} />
+    13 │   <h1 aria-label="Screen reader content" aria-hidden>invisible content</h1>
+  > 14 │ 	<h1>{undefined}</h1>
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    15 │ 	<h1 children />
+    16 │ 	<h1 children={""} />
   
   i All headings on a page should have content that is accessible to screen readers.
   
@@ -190,12 +175,12 @@ invalid.jsx:15:2 lint/a11y/useHeadingContent ━━━━━━━━━━━�
 
   × Provide screen reader accessible content when using heading  elements.
   
-    13 │ 	<h1>{undefined}</h1>
-    14 │ 	<h1 children />
-  > 15 │ 	<h1 children={""} />
-       │ 	^^^^^^^^^^^^^^^^^^^^
-    16 │ 	<h1 children={null} />
-    17 │ 	<h1 children={undefined} />
+    13 │   <h1 aria-label="Screen reader content" aria-hidden>invisible content</h1>
+    14 │ 	<h1>{undefined}</h1>
+  > 15 │ 	<h1 children />
+       │ 	^^^^^^^^^^^^^^^
+    16 │ 	<h1 children={""} />
+    17 │ 	<h1 children={null} />
   
   i All headings on a page should have content that is accessible to screen readers.
   
@@ -207,12 +192,12 @@ invalid.jsx:16:2 lint/a11y/useHeadingContent ━━━━━━━━━━━�
 
   × Provide screen reader accessible content when using heading  elements.
   
-    14 │ 	<h1 children />
-    15 │ 	<h1 children={""} />
-  > 16 │ 	<h1 children={null} />
-       │ 	^^^^^^^^^^^^^^^^^^^^^^
-    17 │ 	<h1 children={undefined} />
-    18 │ 	<h1 {...props} aria-hidden="true" />
+    14 │ 	<h1>{undefined}</h1>
+    15 │ 	<h1 children />
+  > 16 │ 	<h1 children={""} />
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    17 │ 	<h1 children={null} />
+    18 │ 	<h1 children={undefined} />
   
   i All headings on a page should have content that is accessible to screen readers.
   
@@ -224,12 +209,12 @@ invalid.jsx:17:2 lint/a11y/useHeadingContent ━━━━━━━━━━━�
 
   × Provide screen reader accessible content when using heading  elements.
   
-    15 │ 	<h1 children={""} />
-    16 │ 	<h1 children={null} />
-  > 17 │ 	<h1 children={undefined} />
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    18 │ 	<h1 {...props} aria-hidden="true" />
-    19 │ </>;
+    15 │ 	<h1 children />
+    16 │ 	<h1 children={""} />
+  > 17 │ 	<h1 children={null} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 	<h1 children={undefined} />
+    19 │ 	<h1 {...props} aria-hidden="true" />
   
   i All headings on a page should have content that is accessible to screen readers.
   
@@ -241,12 +226,29 @@ invalid.jsx:18:2 lint/a11y/useHeadingContent ━━━━━━━━━━━�
 
   × Provide screen reader accessible content when using heading  elements.
   
-    16 │ 	<h1 children={null} />
-    17 │ 	<h1 children={undefined} />
-  > 18 │ 	<h1 {...props} aria-hidden="true" />
+    16 │ 	<h1 children={""} />
+    17 │ 	<h1 children={null} />
+  > 18 │ 	<h1 children={undefined} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 	<h1 {...props} aria-hidden="true" />
+    20 │ </>;
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.jsx:19:2 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading  elements.
+  
+    17 │ 	<h1 children={null} />
+    18 │ 	<h1 children={undefined} />
+  > 19 │ 	<h1 {...props} aria-hidden="true" />
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    19 │ </>;
-    20 │ 
+    20 │ </>;
+    21 │ 
   
   i All headings on a page should have content that is accessible to screen readers.
   

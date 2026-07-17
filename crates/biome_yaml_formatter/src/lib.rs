@@ -3,10 +3,13 @@ mod context;
 mod cst;
 mod generated;
 mod prelude;
+mod separated;
+mod trivia;
 mod verbatim;
 mod yaml;
 
-pub(crate) use crate::context::YamlFormatContext;
+pub use crate::context::{YamlFormatContext, YamlFormatOptions};
+pub(crate) use crate::trivia::*;
 
 use biome_deserialize::TextRange;
 use biome_formatter::comments::Comments;
@@ -24,7 +27,6 @@ use biome_yaml_syntax::{YamlLanguage, YamlSyntaxNode, YamlSyntaxToken};
 use std::iter::FusedIterator;
 
 use crate::comments::YamlCommentStyle;
-use crate::context::YamlFormatOptions;
 use crate::cst::FormatYamlSyntaxNode;
 use crate::verbatim::{format_bogus_node, format_suppressed_node};
 
@@ -75,7 +77,7 @@ where
 
 /// Implement [AsFormat] for [Option] when `T` implements [AsFormat]
 ///
-/// Allows to call format on optional AST fields without having to unwrap the field first.
+/// Allows calling format on optional AST fields without having to unwrap the field first.
 impl<T, C> AsFormat<C> for Option<T>
 where
     T: AsFormat<C>,
@@ -112,7 +114,7 @@ where
 
 /// Implement [IntoFormat] for [Option] when `T` implements [IntoFormat]
 ///
-/// Allows to call format on optional AST fields without having to unwrap the field first.
+/// Allows calling format on optional AST fields without having to unwrap the field first.
 impl<T, Context> IntoFormat<Context> for Option<T>
 where
     T: IntoFormat<Context>,
@@ -381,6 +383,6 @@ mod tests {
         let options = YamlFormatOptions::default();
         let formatted = format_node(options, &parse.syntax()).unwrap();
 
-        assert_eq!(formatted.print().unwrap().as_code(), "foo: bar");
+        assert_eq!(formatted.print().unwrap().as_code(), "foo: bar\n");
     }
 }

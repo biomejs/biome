@@ -1,0 +1,100 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <input v-on:keyup.13="submit" />
+  <input @keyup.27="cancel" />
+  <input @keydown.27="cancel" />
+  <input @keyup.13.exact="submit" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:21 lint/nursery/noVueVOnNumberValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Number modifiers are deprecated on Vue v-on directives.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <input v-on:keyup.13="submit" />
+      │                     ^^
+    4 │   <input @keyup.27="cancel" />
+    5 │   <input @keydown.27="cancel" />
+  
+  i Vue 3 no longer supports key code modifiers, so this event modifier has no effect.
+  
+  i Use a named key modifier, such as enter, or handle the key code inside the event handler.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:17 lint/nursery/noVueVOnNumberValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Number modifiers are deprecated on Vue v-on directives.
+  
+    2 │ <template>
+    3 │   <input v-on:keyup.13="submit" />
+  > 4 │   <input @keyup.27="cancel" />
+      │                 ^^
+    5 │   <input @keydown.27="cancel" />
+    6 │   <input @keyup.13.exact="submit" />
+  
+  i Vue 3 no longer supports key code modifiers, so this event modifier has no effect.
+  
+  i Use a named key modifier, such as enter, or handle the key code inside the event handler.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:19 lint/nursery/noVueVOnNumberValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Number modifiers are deprecated on Vue v-on directives.
+  
+    3 │   <input v-on:keyup.13="submit" />
+    4 │   <input @keyup.27="cancel" />
+  > 5 │   <input @keydown.27="cancel" />
+      │                   ^^
+    6 │   <input @keyup.13.exact="submit" />
+    7 │ </template>
+  
+  i Vue 3 no longer supports key code modifiers, so this event modifier has no effect.
+  
+  i Use a named key modifier, such as enter, or handle the key code inside the event handler.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:17 lint/nursery/noVueVOnNumberValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Number modifiers are deprecated on Vue v-on directives.
+  
+    4 │   <input @keyup.27="cancel" />
+    5 │   <input @keydown.27="cancel" />
+  > 6 │   <input @keyup.13.exact="submit" />
+      │                 ^^
+    7 │ </template>
+    8 │ 
+  
+  i Vue 3 no longer supports key code modifiers, so this event modifier has no effect.
+  
+  i Use a named key modifier, such as enter, or handle the key code inside the event handler.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

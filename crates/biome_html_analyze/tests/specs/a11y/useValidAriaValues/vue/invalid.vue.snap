@@ -1,0 +1,111 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<template>
+<!-- should generate diagnostics -->
+
+<!-- invalid boolean value -->
+<div aria-hidden="yes">content</div>
+
+<!-- invalid tristate value -->
+<span aria-checked="test">some text</span>
+
+<!-- static Vue bindings with invalid aria values should also be flagged -->
+<div :aria-hidden="'yes'">content</div>
+<span v-bind:aria-checked="'invalid'">some text</span>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:5:6 lint/a11y/useValidAriaValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of the ARIA attribute aria-hidden is not correct.
+  
+    4 │ <!-- invalid boolean value -->
+  > 5 │ <div aria-hidden="yes">content</div>
+      │      ^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ <!-- invalid tristate value -->
+  
+  i Use a valid value for the aria-hidden attribute according to the WAI-ARIA specification.
+  
+  i The only supported values for the aria-hidden property are:
+  
+  - undefined
+  - false
+  - true
+  
+
+```
+
+```
+invalid.vue:8:7 lint/a11y/useValidAriaValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of the ARIA attribute aria-checked is not correct.
+  
+     7 │ <!-- invalid tristate value -->
+   > 8 │ <span aria-checked="test">some text</span>
+       │       ^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ <!-- static Vue bindings with invalid aria values should also be flagged -->
+  
+  i Use a valid value for the aria-checked attribute according to the WAI-ARIA specification.
+  
+  i The only supported values for the aria-checked property are:
+  
+  - false
+  - true
+  - mixed
+  
+
+```
+
+```
+invalid.vue:11:6 lint/a11y/useValidAriaValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of the ARIA attribute aria-hidden is not correct.
+  
+    10 │ <!-- static Vue bindings with invalid aria values should also be flagged -->
+  > 11 │ <div :aria-hidden="'yes'">content</div>
+       │      ^^^^^^^^^^^^^^^^^^^^
+    12 │ <span v-bind:aria-checked="'invalid'">some text</span>
+    13 │ </template>
+  
+  i Use a valid value for the aria-hidden attribute according to the WAI-ARIA specification.
+  
+  i The only supported values for the aria-hidden property are:
+  
+  - undefined
+  - false
+  - true
+  
+
+```
+
+```
+invalid.vue:12:7 lint/a11y/useValidAriaValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of the ARIA attribute aria-checked is not correct.
+  
+    10 │ <!-- static Vue bindings with invalid aria values should also be flagged -->
+    11 │ <div :aria-hidden="'yes'">content</div>
+  > 12 │ <span v-bind:aria-checked="'invalid'">some text</span>
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ </template>
+    14 │ 
+  
+  i Use a valid value for the aria-checked attribute according to the WAI-ARIA specification.
+  
+  i The only supported values for the aria-checked property are:
+  
+  - false
+  - true
+  - mixed
+  
+
+```

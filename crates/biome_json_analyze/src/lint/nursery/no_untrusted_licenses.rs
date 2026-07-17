@@ -233,7 +233,7 @@ impl Rule for NoUntrustedLicenses {
             let Some(name) = member.name().ok() else {
                 continue;
             };
-            let Some(name_text) = name.inner_string_text().and_then(|t| t.ok()) else {
+            let Some(name_text) = name.inner_string_text() else {
                 continue;
             };
             if !DEPENDENCY_GROUPS.contains(&name_text.text()) {
@@ -308,7 +308,7 @@ impl Rule for NoUntrustedLicenses {
                     },
                 )
                 .note(markup! {
-                    "Add the license to the allow list or remove it from from the project."
+                    "Add the license to the allow list or remove it from the project."
                 }),
                 RejectReason::NotFsfLibre => RuleDiagnostic::new(
                     rule_category!(),
@@ -318,7 +318,7 @@ impl Rule for NoUntrustedLicenses {
                     },
                 )
                 .note(markup! {
-                    "Add the license to the allow list or remove it from from the project."
+                    "Add the license to the allow list or remove it from the project."
                 }),
                 RejectReason::Deprecated => RuleDiagnostic::new(
                     rule_category!(),
@@ -346,7 +346,7 @@ fn check_dep(
 ) -> Option<RuleState> {
     let dep_name_node = dep_member.name().ok()?;
     let dep_name_token = dep_name_node.as_json_member_name()?.value_token().ok()?;
-    let dep_name = dep_name_node.inner_string_text()?.ok()?.text().to_string();
+    let dep_name = dep_name_node.inner_string_text()?.text().to_string();
 
     let dep_manifest = project_layout.get_dependency_manifest(project_dir, &dep_name)?;
 

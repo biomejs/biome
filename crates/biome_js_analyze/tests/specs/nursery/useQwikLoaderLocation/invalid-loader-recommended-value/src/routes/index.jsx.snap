@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: index.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+import { routeLoader$ } from '@builder.io/qwik-city';
+
+async function fetcher() {
+	const res = await fetch(`https://.../products/${requestEvent.params.productId}`);
+	const product = await res.json();
+	return product;
+}
+
+export const useProductDetails = routeLoader$(fetcher);
+
+```
+
+# Diagnostics
+```
+index.jsx:10:47 lint/nursery/useQwikLoaderLocation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! It is recommended to inline the arrow function instead of passing a reference. 
+  
+     8 │ }
+     9 │ 
+  > 10 │ export const useProductDetails = routeLoader$(fetcher);
+       │                                               ^^^^^^^
+    11 │ 
+  
+  i An inline arrow function will help the optimizer to make sure that no server code is leaked to the client build. Replace the reference with an inline arrow function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

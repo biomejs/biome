@@ -111,6 +111,7 @@ fn evaluate_any_pseudo_class(class: &AnyCssPseudoClass) -> Specificity {
         AnyCssPseudoClass::CssPseudoClassIdentifier(_) => CLASS_SPECIFICITY,
         AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifier(_) => CLASS_SPECIFICITY,
         AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifierList(_) => CLASS_SPECIFICITY,
+        AnyCssPseudoClass::ScssInterpolatedPseudoClassFunction(_) => CLASS_SPECIFICITY,
     }
 }
 
@@ -129,6 +130,7 @@ fn evaluate_any_subselector(selector: &AnyCssSubSelector) -> Specificity {
         AnyCssSubSelector::CssAttributeSelector(_) => CLASS_SPECIFICITY,
         AnyCssSubSelector::CssPseudoClassSelector(s) => evaluate_pseudo_selector(s),
         AnyCssSubSelector::CssPseudoElementSelector(_) => TYPE_SPECIFICITY,
+        AnyCssSubSelector::CssNestedSelector(_) => ZERO_SPECIFICITY,
         AnyCssSubSelector::CssBogusSubSelector(_) => ZERO_SPECIFICITY,
     }
 }

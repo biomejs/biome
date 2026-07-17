@@ -1,0 +1,138 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<label for="js_id"></label>
+<label for="js_id"><input /></label>
+<label for="js_id"><textarea></textarea></label>
+<label></label>
+<label>A label</label>
+<div><label></label><input /></div>
+<div><label>A label</label><input /></div>
+
+```
+
+# Diagnostics
+```
+invalid.vue:2:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with an input.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <label for="js_id"></label>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <label for="js_id"><input /></label>
+    4 │ <label for="js_id"><textarea></textarea></label>
+  
+  i Consider adding an accessible text content to the label element.
+  
+
+```
+
+```
+invalid.vue:3:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with an input.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <label for="js_id"></label>
+  > 3 │ <label for="js_id"><input /></label>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <label for="js_id"><textarea></textarea></label>
+    5 │ <label></label>
+  
+  i Consider adding an accessible text content to the label element.
+  
+
+```
+
+```
+invalid.vue:4:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with an input.
+  
+    2 │ <label for="js_id"></label>
+    3 │ <label for="js_id"><input /></label>
+  > 4 │ <label for="js_id"><textarea></textarea></label>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <label></label>
+    6 │ <label>A label</label>
+  
+  i Consider adding an accessible text content to the label element.
+  
+
+```
+
+```
+invalid.vue:5:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with an input.
+  
+    3 │ <label for="js_id"><input /></label>
+    4 │ <label for="js_id"><textarea></textarea></label>
+  > 5 │ <label></label>
+      │ ^^^^^^^^^^^^^^^
+    6 │ <label>A label</label>
+    7 │ <div><label></label><input /></div>
+  
+  i Consider adding an accessible text content to the label element.
+  
+  i Consider adding a "for" attribute to the label element or moving the input element to inside the label element.
+  
+
+```
+
+```
+invalid.vue:6:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with an input.
+  
+    4 │ <label for="js_id"><textarea></textarea></label>
+    5 │ <label></label>
+  > 6 │ <label>A label</label>
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <div><label></label><input /></div>
+    8 │ <div><label>A label</label><input /></div>
+  
+  i Consider adding a "for" attribute to the label element or moving the input element to inside the label element.
+  
+
+```
+
+```
+invalid.vue:7:6 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with an input.
+  
+    5 │ <label></label>
+    6 │ <label>A label</label>
+  > 7 │ <div><label></label><input /></div>
+      │      ^^^^^^^^^^^^^^^
+    8 │ <div><label>A label</label><input /></div>
+    9 │ 
+  
+  i Consider adding an accessible text content to the label element.
+  
+  i Consider adding a "for" attribute to the label element or moving the input element to inside the label element.
+  
+
+```
+
+```
+invalid.vue:8:6 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with an input.
+  
+    6 │ <label>A label</label>
+    7 │ <div><label></label><input /></div>
+  > 8 │ <div><label>A label</label><input /></div>
+      │      ^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i Consider adding a "for" attribute to the label element or moving the input element to inside the label element.
+  
+
+```

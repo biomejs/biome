@@ -1,0 +1,20 @@
+.a{
+@for $i from 1 through 3{
+width:$i * 1px;
+}
+}
+
+.b{
+@for
+$step
+from
+$start+1
+to
+$end - 1
+{
+margin:$step;
+}
+}
+
+@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from 1 through 5{
+}

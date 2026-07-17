@@ -8,7 +8,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
-use biome_diagnostics::{Applicability, category};
+use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsObjectMember, JsLanguage, JsObjectExpression, JsObjectMemberList, T,
@@ -176,8 +176,7 @@ fn has_multiline_content(
     members_first_token.map_or_else(
         || {
             closing_token
-                .map(|token| token.has_leading_newline())
-                .unwrap_or(false)
+                .is_ok_and(|token| token.has_leading_newline())
         },
         |token| token.has_leading_newline(),
     )
@@ -278,7 +277,7 @@ impl Rule for UseSortedKeys {
             }
         };
         Some(RuleDiagnostic::new(
-            category!("assist/source/useSortedKeys"),
+            rule_category!(),
             ctx.query().range(),
             message,
         ))

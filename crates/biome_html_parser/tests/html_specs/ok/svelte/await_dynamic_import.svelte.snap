@@ -29,9 +29,9 @@ HtmlRoot {
                     html_literal_token: HTML_LITERAL@7..37 " import('./Component.svelte') " [] [],
                 },
                 then_clause: SvelteAwaitThenClause {
-                    then_token: THEN_KW@37..41 "then" [] [],
+                    then_token: THEN_KW@37..42 "then" [] [Whitespace(" ")],
                     name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@41..64 " { default: Component }" [] [],
+                        html_literal_token: HTML_LITERAL@42..64 "{ default: Component }" [] [],
                     },
                 },
                 catch_clause: missing (optional),
@@ -75,9 +75,9 @@ HtmlRoot {
         2: HTML_TEXT_EXPRESSION@7..37
           0: HTML_LITERAL@7..37 " import('./Component.svelte') " [] []
         3: SVELTE_AWAIT_THEN_CLAUSE@37..64
-          0: THEN_KW@37..41 "then" [] []
-          1: HTML_TEXT_EXPRESSION@41..64
-            0: HTML_LITERAL@41..64 " { default: Component }" [] []
+          0: THEN_KW@37..42 "then" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@42..64
+            0: HTML_LITERAL@42..64 "{ default: Component }" [] []
         4: (empty)
         5: R_CURLY@64..65 "}" [] []
         6: HTML_ELEMENT_LIST@65..81

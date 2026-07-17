@@ -14,6 +14,17 @@ Use `packages/prettier-compare/` to inspect any differences between Biome and Pr
 2. Use `bun` (the CLI is a Bun script) and ensure dependencies have been installed.
 3. Always pass `--rebuild` so the Biome WASM bundle matches your current Rust changes.
 
+## Code Standards
+
+**CRITICAL: No Emojis**
+
+Emojis are BANNED in all Prettier comparison code and output:
+- NO emojis in comparison scripts
+- NO emojis in test files
+- NO emojis in output or diagnostic messages
+
+Keep all code professional and emoji-free.
+
 ## Common workflows
 
 Snippets passed as CLI args:
@@ -47,3 +58,4 @@ echo 'const x = 1' | bun packages/prettier-compare/bin/prettier-compare.js --reb
 - Reference `packages/prettier-compare/README.md` for deeper CLI details; mirror any updates here, keeping the hard requirement that commands include `--rebuild`.
 - Use single quotes for code snippets passed as CLI arguments to avoid shell interpretation issues.
 - "\n" does not get escaped into a newline when passed as a CLI argument. You should write a literal newline or use a file instead.
+- The tool is OK to run in read-only/planning modes even when running it with `--rebuild` since it only rebuilds the Biome WASM bundle and does not modify any source files.

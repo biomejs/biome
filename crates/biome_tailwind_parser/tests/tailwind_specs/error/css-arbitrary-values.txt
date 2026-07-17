@@ -1,0 +1,1 @@
+w-[calc(100%_-)] bg-[rgb(0_0_0/)] bg-[url(/img/mountains.jpg] [width:calc(100%_-)]

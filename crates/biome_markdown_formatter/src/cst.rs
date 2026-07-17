@@ -1,4 +1,4 @@
-use crate::{MdFormatContext, prelude::*};
+use crate::{MarkdownFormatContext, prelude::*};
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult};
 use biome_markdown_syntax::{
@@ -9,7 +9,7 @@ use biome_markdown_syntax::{
 pub struct FormatMdSyntaxToken;
 
 impl FormatRule<MarkdownSyntaxToken> for FormatMdSyntaxToken {
-    type Context = MdFormatContext;
+    type Context = MarkdownFormatContext;
 
     fn fmt(
         &self,
@@ -23,25 +23,25 @@ impl FormatRule<MarkdownSyntaxToken> for FormatMdSyntaxToken {
     }
 }
 
-impl FormatToken<MarkdownLanguage, MdFormatContext> for FormatMdSyntaxToken {
+impl FormatToken<MarkdownLanguage, MarkdownFormatContext> for FormatMdSyntaxToken {
     fn format_skipped_token_trivia(
         &self,
         token: &MarkdownSyntaxToken,
-        f: &mut Formatter<MdFormatContext>,
+        f: &mut Formatter<MarkdownFormatContext>,
     ) -> FormatResult<()> {
         format_skipped_token_trivia(token).fmt(f)
     }
 }
 
 impl FormatRule<MarkdownSyntaxNode> for FormatMdSyntaxToken {
-    type Context = MdFormatContext;
+    type Context = MarkdownFormatContext;
 
     fn fmt(&self, node: &MarkdownSyntaxNode, f: &mut MarkdownFormatter) -> FormatResult<()> {
         map_syntax_node!(node.clone(), node => node.format().fmt(f))
     }
 }
 
-impl AsFormat<MdFormatContext> for MarkdownSyntaxNode {
+impl AsFormat<MarkdownFormatContext> for MarkdownSyntaxNode {
     type Format<'a> = FormatRefWithRule<'a, Self, FormatMdSyntaxToken>;
 
     fn format(&self) -> Self::Format<'_> {
@@ -49,7 +49,7 @@ impl AsFormat<MdFormatContext> for MarkdownSyntaxNode {
     }
 }
 
-impl IntoFormat<MdFormatContext> for MarkdownSyntaxNode {
+impl IntoFormat<MarkdownFormatContext> for MarkdownSyntaxNode {
     type Format = FormatOwnedWithRule<Self, FormatMdSyntaxToken>;
 
     fn into_format(self) -> Self::Format {
@@ -57,7 +57,7 @@ impl IntoFormat<MdFormatContext> for MarkdownSyntaxNode {
     }
 }
 
-impl AsFormat<MdFormatContext> for MarkdownSyntaxToken {
+impl AsFormat<MarkdownFormatContext> for MarkdownSyntaxToken {
     type Format<'a> = FormatRefWithRule<'a, Self, FormatMdSyntaxToken>;
 
     fn format(&self) -> Self::Format<'_> {
@@ -65,7 +65,7 @@ impl AsFormat<MdFormatContext> for MarkdownSyntaxToken {
     }
 }
 
-impl IntoFormat<MdFormatContext> for MarkdownSyntaxToken {
+impl IntoFormat<MarkdownFormatContext> for MarkdownSyntaxToken {
     type Format = FormatOwnedWithRule<Self, FormatMdSyntaxToken>;
 
     fn into_format(self) -> Self::Format {

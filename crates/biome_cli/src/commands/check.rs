@@ -44,14 +44,15 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) css_parser: Option<CssParserConfiguration>,
     pub(crate) only: Vec<AnalyzerSelector>,
     pub(crate) skip: Vec<AnalyzerSelector>,
+    pub(crate) watch: bool,
     pub(crate) profile_rules: bool,
 }
 
 struct CheckExecution {
     /// The type of fixes that should be applied when analyzing a file.
     ///
-    /// It's [None] if the `check` command is called without `--apply` or `--apply-suggested`
-    /// arguments.
+    /// It's [None] if the `check` command is called without `--write` or `--fix`.
+    /// `--unsafe` upgrades the mode when combined with `--write` or `--fix`.
     fix_file_mode: Option<FixFileMode>,
     /// An optional tuple.
     /// 1. The virtual path to the file
@@ -160,6 +161,10 @@ impl TraversalCommand for CheckCommandPayload {
 
     fn command_name(&self) -> &'static str {
         "check"
+    }
+
+    fn is_watch_mode(&self) -> bool {
+        self.watch
     }
 
     fn minimal_scan_kind(&self) -> Option<ScanKind> {
@@ -280,5 +285,27 @@ impl TraversalCommand for CheckCommandPayload {
         .unwrap_or(self.paths.clone());
 
         Ok(paths)
+    }
+
+    fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {
+        if self.is_watch_mode() {
+            if self.fix {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--watch",
+                    "--fix",
+                    "Applying code fixes is not available in watch mode.",
+                ));
+            }
+
+            if self.write {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--watch",
+                    "--write",
+                    "Applying code fixes is not available in watch mode.",
+                ));
+            }
+        }
+
+        Ok(())
     }
 }

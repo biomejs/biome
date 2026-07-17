@@ -8,7 +8,7 @@ impl FormatRule<AnyCssDeclarationName> for FormatAnyCssDeclarationName {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssDeclarationName, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssDeclarationName::CssDashedIdentifier(node) => node.format().fmt(f),
+            AnyCssDeclarationName::AnyCssDashedIdentifier(node) => node.format().fmt(f),
             AnyCssDeclarationName::CssIdentifier(node) => node.format().fmt(f),
             AnyCssDeclarationName::ScssInterpolatedIdentifier(node) => node.format().fmt(f),
             AnyCssDeclarationName::TwValueThemeReference(node) => node.format().fmt(f),

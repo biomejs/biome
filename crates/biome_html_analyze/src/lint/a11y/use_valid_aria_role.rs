@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::AnyHtmlElement;
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_valid_aria_role::UseValidAriaRoleOptions;
 
@@ -73,7 +73,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "useValidAriaRole",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("aria-role").same()],
+        sources: &[RuleSource::EslintJsxA11y("aria-role").inspired(), RuleSource::HtmlEslint("no-invalid-role").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -81,7 +81,7 @@ declare_lint_rule! {
 }
 
 impl Rule for UseValidAriaRole {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Ast<AnyHtmlTagElement>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = UseValidAriaRoleOptions;
@@ -92,10 +92,9 @@ impl Rule for UseValidAriaRole {
 
         let allowed_invalid_roles = &options.allow_invalid_roles;
 
-        let role_attribute = node.find_attribute_by_name("role")?;
-        let role_attribute_static_value =
-            role_attribute.initializer()?.value().ok()?.string_value()?;
-        let role_attribute_value = role_attribute_static_value.trim();
+        let role_attribute = node.find_attribute_or_vue_binding("role")?;
+        let role_attribute_static_value = role_attribute.as_static_value()?;
+        let role_attribute_value = role_attribute_static_value.text().trim();
         if role_attribute_value.is_empty() {
             return Some(());
         }
@@ -135,7 +134,7 @@ impl Rule for UseValidAriaRole {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<HtmlRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
-        let role_attribute = node.find_attribute_by_name("role")?;
+        let role_attribute = node.find_attribute_or_vue_binding("role")?;
         mutation.remove_node(role_attribute);
         Some(HtmlRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),

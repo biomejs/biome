@@ -4690,6 +4690,44 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSuperExpression {
         )
     }
 }
+impl FormatRule<biome_js_syntax::JsSvelteSnippetRoot>
+    for crate::js::auxiliary::svelte_snippet_root::FormatJsSvelteSnippetRoot
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::JsSvelteSnippetRoot,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::JsSvelteSnippetRoot>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsSvelteSnippetRoot {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::JsSvelteSnippetRoot,
+        crate::js::auxiliary::svelte_snippet_root::FormatJsSvelteSnippetRoot,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::js::auxiliary::svelte_snippet_root::FormatJsSvelteSnippetRoot::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSvelteSnippetRoot {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::JsSvelteSnippetRoot,
+        crate::js::auxiliary::svelte_snippet_root::FormatJsSvelteSnippetRoot,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::js::auxiliary::svelte_snippet_root::FormatJsSvelteSnippetRoot::default(),
+        )
+    }
+}
 impl FormatRule<biome_js_syntax::JsSwitchStatement>
     for crate::js::statements::switch_statement::FormatJsSwitchStatement
 {
@@ -5838,6 +5876,44 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxSelfClosingElement {
         FormatOwnedWithRule::new(
             self,
             crate::jsx::tag::self_closing_element::FormatJsxSelfClosingElement::default(),
+        )
+    }
+}
+impl FormatRule<biome_js_syntax::JsxShorthandAttribute>
+    for crate::jsx::attribute::shorthand_attribute::FormatJsxShorthandAttribute
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::JsxShorthandAttribute,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::JsxShorthandAttribute>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsxShorthandAttribute {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::JsxShorthandAttribute,
+        crate::jsx::attribute::shorthand_attribute::FormatJsxShorthandAttribute,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::jsx::attribute::shorthand_attribute::FormatJsxShorthandAttribute::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxShorthandAttribute {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::JsxShorthandAttribute,
+        crate::jsx::attribute::shorthand_attribute::FormatJsxShorthandAttribute,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::jsx::attribute::shorthand_attribute::FormatJsxShorthandAttribute::default(),
         )
     }
 }

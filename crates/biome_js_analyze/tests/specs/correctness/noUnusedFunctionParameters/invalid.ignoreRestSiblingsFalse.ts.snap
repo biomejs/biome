@@ -18,7 +18,7 @@ function withObjectSpreadTwoSiblings({a, b, ...rest}) {
 ```
 invalid.ignoreRestSiblingsFalse.ts:1:38 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━
 
-  ! This parameter is unused.
+  ! This parameter a is unused.
   
   > 1 │ function withObjectSpreadOneSibling({a, ...rest}) {
       │                                      ^
@@ -33,7 +33,7 @@ invalid.ignoreRestSiblingsFalse.ts:1:38 lint/correctness/noUnusedFunctionParamet
 ```
 invalid.ignoreRestSiblingsFalse.ts:5:39 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━
 
-  ! This parameter is unused.
+  ! This parameter a is unused.
   
     3 │ }
     4 │ 
@@ -50,7 +50,7 @@ invalid.ignoreRestSiblingsFalse.ts:5:39 lint/correctness/noUnusedFunctionParamet
 ```
 invalid.ignoreRestSiblingsFalse.ts:5:42 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━
 
-  ! This parameter is unused.
+  ! This parameter b is unused.
   
     3 │ }
     4 │ 

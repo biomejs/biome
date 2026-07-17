@@ -1,4 +1,5 @@
 use crate::parser::TailwindParser;
+use crate::syntax::css_value::parse_css_generic_component_value_list;
 use crate::syntax::parse_error::*;
 use crate::syntax::value::parse_value;
 use crate::syntax::variant::VariantList;
@@ -10,6 +11,7 @@ use biome_parser::{Parser, parse_recovery::ParseRecoveryTokenSet, token_set};
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
 
+mod css_value;
 mod parse_error;
 mod value;
 mod variant;
@@ -169,15 +171,13 @@ fn parse_arbitrary_candidate(p: &mut TailwindParser) -> ParsedSyntax {
         p.rewind(checkpoint);
         return Absent;
     }
-    if !p.expect_with_context(T![:], TailwindLexContext::ArbitraryCandidate) {
+    if !p.expect_with_context(T![:], TailwindLexContext::CssValue) {
         m.abandon(p);
         p.rewind(checkpoint);
         return Absent;
     }
-    if !p.expect_with_context(TW_VALUE, TailwindLexContext::ArbitraryCandidate) {
-        m.abandon(p);
-        p.rewind(checkpoint);
-        return Absent;
+    if !parse_css_generic_component_value_list(p) {
+        p.error(expected_value(p, p.cur_range()));
     }
     if !p.expect(T![']']) {
         m.abandon(p);

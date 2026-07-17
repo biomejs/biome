@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 let a = <h1 role="checkbox"></h1>;
 let a = <h1 role="radio"></h1>;
 let a = <h1 role="button"></h1>;

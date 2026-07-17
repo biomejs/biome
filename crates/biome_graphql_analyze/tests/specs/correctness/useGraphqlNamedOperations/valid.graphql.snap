@@ -5,7 +5,8 @@ expression: valid.graphql
 # Input
 ```graphql
 # should not generate diagnostics
-// var a = 1;
-```
+query SomeQuery { human }
+mutation SomeMutation { ...Type }
+subscription SomeSubscription {}
 
-_Note: The parser emitted 3 diagnostics which are not shown here._
+```

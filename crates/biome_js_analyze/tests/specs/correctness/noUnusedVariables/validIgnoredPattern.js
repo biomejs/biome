@@ -1,0 +1,13 @@
+/* should not generate diagnostics */
+
+// With ignore: { "*": ["ignored"] }, unused variables named ignored should be ignored
+const ignored = 1;
+const secondVar = 2;
+console.log(secondVar);
+
+// With ignore: { "class": ["IgnoredClass"] }, unused classes named IgnoredClass should be ignored
+class IgnoredClass {}
+
+// With ignore: { "function": ["*"] }, all unused functions should be ignored
+function unusedFunction() {}
+function anotherUnusedFunction() {}

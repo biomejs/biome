@@ -27,12 +27,19 @@ pub(crate) enum TailwindLexContext {
     Regular,
     /// The parser just encountered a `-` before a basename, e.g. in `-mt-4`. That meant that the next token should be a basename.
     SawNegative,
-    /// The lexer has encountered a `[` and the parser has yet to encounter the matching `]`.
-    Arbitrary,
     /// Like Arbitrary, but specifically for arbitrary variants.
     ArbitraryVariant,
     /// Like Arbitrary, but specifically for arbitrary candidates.
     ArbitraryCandidate,
+    /// Lexing one segment inside a Tailwind variant expression.
+    ///
+    /// Named segments stop at `-` and `:` so `group-peer-hover`
+    /// becomes `group` / `peer` / `hover`.
+    VariantSegment,
+    /// CSS value lexing inside arbitrary values and arbitrary candidate values.
+    CssValue,
+    /// Raw URL body lexing inside `url(...)`.
+    CssUrlRawValue,
 }
 
 impl LexContext for TailwindLexContext {
@@ -107,6 +114,10 @@ impl<'source> TailwindTokenSource<'source> {
     /// Whether the lexer encountered any trivia between the previous non-trivia token and the current non-trivia token.
     pub fn had_trivia_before(&self) -> bool {
         self.had_trivia_before
+    }
+
+    pub fn re_lex_current_in_context(&mut self, context: TailwindLexContext) -> TailwindSyntaxKind {
+        self.lexer.force_relex_in_context(context)
     }
 }
 

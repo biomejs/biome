@@ -46,7 +46,22 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "This is an unexpected use of the debugger statement."
+      "message": "This is an unexpected use of the debugger statement.",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 9,
+              "line": 1
+            },
+            "start": {
+              "column": 1,
+              "line": 1
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {

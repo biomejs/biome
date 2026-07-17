@@ -16,10 +16,8 @@ use crate::state::{ChangeParserState, ParserStateGuard};
 use crate::token_source::JsTokenSourceCheckpoint;
 use crate::*;
 use crate::{state::JsParserStateCheckpoint, token_source::JsTokenSource};
-use biome_js_syntax::{
-    JsFileSource,
-    JsSyntaxKind::{self},
-};
+use biome_js_syntax::JsSyntaxKind::{self};
+use biome_languages::JsFileSource;
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
 use biome_parser::token_source::Trivia;
@@ -219,7 +217,8 @@ pub struct JsParserCheckpoint {
 mod tests {
     use crate::JsParserOptions;
     use crate::prelude::*;
-    use biome_js_syntax::{JsFileSource, JsSyntaxKind};
+    use biome_js_syntax::JsSyntaxKind;
+    use biome_languages::JsFileSource;
 
     #[test]
     #[should_panic(

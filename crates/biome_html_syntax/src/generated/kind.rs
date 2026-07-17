@@ -20,6 +20,8 @@ pub enum HtmlSyntaxKind {
     MINUS,
     CDATA_START,
     CDATA_END,
+    PI_START,
+    PI_END,
     FENCE,
     L_CURLY,
     R_CURLY,
@@ -40,6 +42,8 @@ pub enum HtmlSyntaxKind {
     R_PAREN,
     DOT3,
     PIPE,
+    DOUBLE_QUOTE,
+    SINGLE_QUOTE,
     NULL_KW,
     TRUE_KW,
     FALSE_KW,
@@ -63,6 +67,7 @@ pub enum HtmlSyntaxKind {
     USE_KW,
     ANIMATE_KW,
     IN_KW,
+    OF_KW,
     OUT_KW,
     STYLE_KW,
     CLASS_KW,
@@ -73,6 +78,7 @@ pub enum HtmlSyntaxKind {
     DEFINE_KW,
     HTML_STRING_LITERAL,
     HTML_LITERAL,
+    HTML_TEMPLATE_CHUNK,
     ERROR_TOKEN,
     NEWLINE,
     WHITESPACE,
@@ -103,6 +109,7 @@ pub enum HtmlSyntaxKind {
     HTML_SPREAD_ATTRIBUTE,
     HTML_ATTRIBUTE_DOUBLE_TEXT_EXPRESSION,
     HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION,
+    HTML_PROCESSING_INSTRUCTION,
     ASTRO_FRONTMATTER_ELEMENT,
     ASTRO_EMBEDDED_CONTENT,
     ASTRO_CLIENT_DIRECTIVE,
@@ -150,6 +157,7 @@ pub enum HtmlSyntaxKind {
     SVELTE_SQUARE_DESTRUCTURED_NAME,
     SVELTE_BINDING_ASSIGNMENT_BINDING_LIST,
     SVELTE_REST_BINDING,
+    SVELTE_RENAME_BINDING,
     SVELTE_BIND_DIRECTIVE,
     SVELTE_TRANSITION_DIRECTIVE,
     SVELTE_IN_DIRECTIVE,
@@ -159,9 +167,15 @@ pub enum HtmlSyntaxKind {
     SVELTE_STYLE_DIRECTIVE,
     SVELTE_CLASS_DIRECTIVE,
     SVELTE_DIRECTIVE_VALUE,
+    SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE,
+    SVELTE_BIND_FUNCTION_BINDING_EXPRESSION,
     SVELTE_DIRECTIVE_MODIFIER,
     SVELTE_DIRECTIVE_MODIFIER_LIST,
     SVELTE_LITERAL,
+    SVELTE_MEMBER_PROPERTY,
+    SVELTE_TEMPLATE_ATTRIBUTE_VALUE,
+    SVELTE_TEMPLATE_ELEMENT_LIST,
+    SVELTE_TEMPLATE_CHUNK_ELEMENT,
     VUE_DIRECTIVE,
     VUE_DIRECTIVE_ARGUMENT,
     VUE_V_BIND_SHORTHAND_DIRECTIVE,
@@ -171,6 +185,17 @@ pub enum HtmlSyntaxKind {
     VUE_DYNAMIC_ARGUMENT,
     VUE_MODIFIER_LIST,
     VUE_MODIFIER,
+    VUE_V_FOR_VALUE,
+    VUE_V_FOR_IN_OPERATOR,
+    VUE_V_FOR_OF_OPERATOR,
+    VUE_V_FOR_IDENTIFIER_BINDING,
+    VUE_V_FOR_OBJECT_PROPERTY_BINDING,
+    VUE_V_FOR_OBJECT_BINDING,
+    VUE_V_FOR_ARRAY_BINDING,
+    VUE_V_FOR_BINDING_LIST,
+    VUE_V_FOR_REST_BINDING,
+    VUE_V_FOR_TUPLE_BINDING,
+    VUE_V_FOR_TUPLE_ELEMENT,
     HTML_BOGUS,
     HTML_BOGUS_ELEMENT,
     HTML_BOGUS_ATTRIBUTE,
@@ -195,6 +220,8 @@ impl HtmlSyntaxKind {
                 | MINUS
                 | CDATA_START
                 | CDATA_END
+                | PI_START
+                | PI_END
                 | FENCE
                 | L_CURLY
                 | R_CURLY
@@ -215,10 +242,15 @@ impl HtmlSyntaxKind {
                 | R_PAREN
                 | DOT3
                 | PIPE
+                | DOUBLE_QUOTE
+                | SINGLE_QUOTE
         )
     }
     pub const fn is_literal(self) -> bool {
-        matches!(self, HTML_STRING_LITERAL | HTML_LITERAL)
+        matches!(
+            self,
+            HTML_STRING_LITERAL | HTML_LITERAL | HTML_TEMPLATE_CHUNK
+        )
     }
     pub const fn is_list(self) -> bool {
         matches!(
@@ -230,7 +262,9 @@ impl HtmlSyntaxKind {
                 | SVELTE_AWAIT_CLAUSES_LIST
                 | SVELTE_BINDING_ASSIGNMENT_BINDING_LIST
                 | SVELTE_DIRECTIVE_MODIFIER_LIST
+                | SVELTE_TEMPLATE_ELEMENT_LIST
                 | VUE_MODIFIER_LIST
+                | VUE_V_FOR_BINDING_LIST
         )
     }
     pub fn from_keyword(ident: &str) -> Option<Self> {
@@ -258,6 +292,7 @@ impl HtmlSyntaxKind {
             "use" => USE_KW,
             "animate" => ANIMATE_KW,
             "in" => IN_KW,
+            "of" => OF_KW,
             "out" => OUT_KW,
             "style" => STYLE_KW,
             "class" => CLASS_KW,
@@ -280,6 +315,8 @@ impl HtmlSyntaxKind {
             MINUS => "-",
             CDATA_START => "<![CDATA[",
             CDATA_END => "]]>",
+            PI_START => "<?",
+            PI_END => "?>",
             FENCE => "---",
             L_CURLY => "{",
             R_CURLY => "}",
@@ -300,6 +337,8 @@ impl HtmlSyntaxKind {
             R_PAREN => ")",
             DOT3 => "...",
             PIPE => "|",
+            DOUBLE_QUOTE => "\"",
+            SINGLE_QUOTE => "'",
             NULL_KW => "null",
             TRUE_KW => "true",
             FALSE_KW => "false",
@@ -323,6 +362,7 @@ impl HtmlSyntaxKind {
             USE_KW => "use",
             ANIMATE_KW => "animate",
             IN_KW => "in",
+            OF_KW => "of",
             OUT_KW => "out",
             STYLE_KW => "style",
             CLASS_KW => "class",
@@ -340,4 +380,4 @@ impl HtmlSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [<] => { $ crate :: HtmlSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: HtmlSyntaxKind :: R_ANGLE } ; [/] => { $ crate :: HtmlSyntaxKind :: SLASH } ; [=] => { $ crate :: HtmlSyntaxKind :: EQ } ; [!] => { $ crate :: HtmlSyntaxKind :: BANG } ; [-] => { $ crate :: HtmlSyntaxKind :: MINUS } ; ["<![CDATA["] => { $ crate :: HtmlSyntaxKind :: CDATA_START } ; ["]]>"] => { $ crate :: HtmlSyntaxKind :: CDATA_END } ; [---] => { $ crate :: HtmlSyntaxKind :: FENCE } ; ['{'] => { $ crate :: HtmlSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: HtmlSyntaxKind :: R_CURLY } ; ["{{"] => { $ crate :: HtmlSyntaxKind :: L_DOUBLE_CURLY } ; ["}}"] => { $ crate :: HtmlSyntaxKind :: R_DOUBLE_CURLY } ; ["{@"] => { $ crate :: HtmlSyntaxKind :: SV_CURLY_AT } ; ["{#"] => { $ crate :: HtmlSyntaxKind :: SV_CURLY_HASH } ; ["{/"] => { $ crate :: HtmlSyntaxKind :: SV_CURLY_SLASH } ; ["{:"] => { $ crate :: HtmlSyntaxKind :: SV_CURLY_COLON } ; [,] => { $ crate :: HtmlSyntaxKind :: COMMA } ; [:] => { $ crate :: HtmlSyntaxKind :: COLON } ; [@] => { $ crate :: HtmlSyntaxKind :: AT } ; [.] => { $ crate :: HtmlSyntaxKind :: DOT } ; ['['] => { $ crate :: HtmlSyntaxKind :: L_BRACKET } ; [']'] => { $ crate :: HtmlSyntaxKind :: R_BRACKET } ; [#] => { $ crate :: HtmlSyntaxKind :: HASH } ; ['('] => { $ crate :: HtmlSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: HtmlSyntaxKind :: R_PAREN } ; [...] => { $ crate :: HtmlSyntaxKind :: DOT3 } ; [|] => { $ crate :: HtmlSyntaxKind :: PIPE } ; [null] => { $ crate :: HtmlSyntaxKind :: NULL_KW } ; [true] => { $ crate :: HtmlSyntaxKind :: TRUE_KW } ; [false] => { $ crate :: HtmlSyntaxKind :: FALSE_KW } ; [doctype] => { $ crate :: HtmlSyntaxKind :: DOCTYPE_KW } ; [html] => { $ crate :: HtmlSyntaxKind :: HTML_KW } ; [debug] => { $ crate :: HtmlSyntaxKind :: DEBUG_KW } ; [key] => { $ crate :: HtmlSyntaxKind :: KEY_KW } ; [render] => { $ crate :: HtmlSyntaxKind :: RENDER_KW } ; [const] => { $ crate :: HtmlSyntaxKind :: CONST_KW } ; [attach] => { $ crate :: HtmlSyntaxKind :: ATTACH_KW } ; [else] => { $ crate :: HtmlSyntaxKind :: ELSE_KW } ; [if] => { $ crate :: HtmlSyntaxKind :: IF_KW } ; [as] => { $ crate :: HtmlSyntaxKind :: AS_KW } ; [each] => { $ crate :: HtmlSyntaxKind :: EACH_KW } ; [then] => { $ crate :: HtmlSyntaxKind :: THEN_KW } ; [await] => { $ crate :: HtmlSyntaxKind :: AWAIT_KW } ; [catch] => { $ crate :: HtmlSyntaxKind :: CATCH_KW } ; [snippet] => { $ crate :: HtmlSyntaxKind :: SNIPPET_KW } ; [bind] => { $ crate :: HtmlSyntaxKind :: BIND_KW } ; [transition] => { $ crate :: HtmlSyntaxKind :: TRANSITION_KW } ; [use] => { $ crate :: HtmlSyntaxKind :: USE_KW } ; [animate] => { $ crate :: HtmlSyntaxKind :: ANIMATE_KW } ; [in] => { $ crate :: HtmlSyntaxKind :: IN_KW } ; [out] => { $ crate :: HtmlSyntaxKind :: OUT_KW } ; [style] => { $ crate :: HtmlSyntaxKind :: STYLE_KW } ; [class] => { $ crate :: HtmlSyntaxKind :: CLASS_KW } ; [client] => { $ crate :: HtmlSyntaxKind :: CLIENT_KW } ; [set] => { $ crate :: HtmlSyntaxKind :: SET_KW } ; [server] => { $ crate :: HtmlSyntaxKind :: SERVER_KW } ; [is] => { $ crate :: HtmlSyntaxKind :: IS_KW } ; [define] => { $ crate :: HtmlSyntaxKind :: DEFINE_KW } ; [ident] => { $ crate :: HtmlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: HtmlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: HtmlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: HtmlSyntaxKind :: HASH } ; }
+macro_rules ! T { [<] => { $ crate :: HtmlSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: HtmlSyntaxKind :: R_ANGLE } ; [/] => { $ crate :: HtmlSyntaxKind :: SLASH } ; [=] => { $ crate :: HtmlSyntaxKind :: EQ } ; [!] => { $ crate :: HtmlSyntaxKind :: BANG } ; [-] => { $ crate :: HtmlSyntaxKind :: MINUS } ; ["<![CDATA["] => { $ crate :: HtmlSyntaxKind :: CDATA_START } ; ["]]>"] => { $ crate :: HtmlSyntaxKind :: CDATA_END } ; [<?] => { $ crate :: HtmlSyntaxKind :: PI_START } ; [?>] => { $ crate :: HtmlSyntaxKind :: PI_END } ; [---] => { $ crate :: HtmlSyntaxKind :: FENCE } ; ['{'] => { $ crate :: HtmlSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: HtmlSyntaxKind :: R_CURLY } ; ["{{"] => { $ crate :: HtmlSyntaxKind :: L_DOUBLE_CURLY } ; ["}}"] => { $ crate :: HtmlSyntaxKind :: R_DOUBLE_CURLY } ; ["{@"] => { $ crate :: HtmlSyntaxKind :: SV_CURLY_AT } ; ["{#"] => { $ crate :: HtmlSyntaxKind :: SV_CURLY_HASH } ; ["{/"] => { $ crate :: HtmlSyntaxKind :: SV_CURLY_SLASH } ; ["{:"] => { $ crate :: HtmlSyntaxKind :: SV_CURLY_COLON } ; [,] => { $ crate :: HtmlSyntaxKind :: COMMA } ; [:] => { $ crate :: HtmlSyntaxKind :: COLON } ; [@] => { $ crate :: HtmlSyntaxKind :: AT } ; [.] => { $ crate :: HtmlSyntaxKind :: DOT } ; ['['] => { $ crate :: HtmlSyntaxKind :: L_BRACKET } ; [']'] => { $ crate :: HtmlSyntaxKind :: R_BRACKET } ; [#] => { $ crate :: HtmlSyntaxKind :: HASH } ; ['('] => { $ crate :: HtmlSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: HtmlSyntaxKind :: R_PAREN } ; [...] => { $ crate :: HtmlSyntaxKind :: DOT3 } ; [|] => { $ crate :: HtmlSyntaxKind :: PIPE } ; ['"'] => { $ crate :: HtmlSyntaxKind :: DOUBLE_QUOTE } ; ["'"] => { $ crate :: HtmlSyntaxKind :: SINGLE_QUOTE } ; [null] => { $ crate :: HtmlSyntaxKind :: NULL_KW } ; [true] => { $ crate :: HtmlSyntaxKind :: TRUE_KW } ; [false] => { $ crate :: HtmlSyntaxKind :: FALSE_KW } ; [doctype] => { $ crate :: HtmlSyntaxKind :: DOCTYPE_KW } ; [html] => { $ crate :: HtmlSyntaxKind :: HTML_KW } ; [debug] => { $ crate :: HtmlSyntaxKind :: DEBUG_KW } ; [key] => { $ crate :: HtmlSyntaxKind :: KEY_KW } ; [render] => { $ crate :: HtmlSyntaxKind :: RENDER_KW } ; [const] => { $ crate :: HtmlSyntaxKind :: CONST_KW } ; [attach] => { $ crate :: HtmlSyntaxKind :: ATTACH_KW } ; [else] => { $ crate :: HtmlSyntaxKind :: ELSE_KW } ; [if] => { $ crate :: HtmlSyntaxKind :: IF_KW } ; [as] => { $ crate :: HtmlSyntaxKind :: AS_KW } ; [each] => { $ crate :: HtmlSyntaxKind :: EACH_KW } ; [then] => { $ crate :: HtmlSyntaxKind :: THEN_KW } ; [await] => { $ crate :: HtmlSyntaxKind :: AWAIT_KW } ; [catch] => { $ crate :: HtmlSyntaxKind :: CATCH_KW } ; [snippet] => { $ crate :: HtmlSyntaxKind :: SNIPPET_KW } ; [bind] => { $ crate :: HtmlSyntaxKind :: BIND_KW } ; [transition] => { $ crate :: HtmlSyntaxKind :: TRANSITION_KW } ; [use] => { $ crate :: HtmlSyntaxKind :: USE_KW } ; [animate] => { $ crate :: HtmlSyntaxKind :: ANIMATE_KW } ; [in] => { $ crate :: HtmlSyntaxKind :: IN_KW } ; [of] => { $ crate :: HtmlSyntaxKind :: OF_KW } ; [out] => { $ crate :: HtmlSyntaxKind :: OUT_KW } ; [style] => { $ crate :: HtmlSyntaxKind :: STYLE_KW } ; [class] => { $ crate :: HtmlSyntaxKind :: CLASS_KW } ; [client] => { $ crate :: HtmlSyntaxKind :: CLIENT_KW } ; [set] => { $ crate :: HtmlSyntaxKind :: SET_KW } ; [server] => { $ crate :: HtmlSyntaxKind :: SERVER_KW } ; [is] => { $ crate :: HtmlSyntaxKind :: IS_KW } ; [define] => { $ crate :: HtmlSyntaxKind :: DEFINE_KW } ; [ident] => { $ crate :: HtmlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: HtmlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: HtmlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: HtmlSyntaxKind :: HASH } ; }

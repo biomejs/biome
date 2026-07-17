@@ -1,0 +1,36 @@
+/* timeline-range-name without percentage is invalid */
+@keyframes missing-percentage-1 {
+	entry {
+		opacity: 0;
+	}
+}
+
+@keyframes missing-percentage-2 {
+	exit {
+		opacity: 0;
+	}
+}
+
+@keyframes missing-percentage-3 {
+	cover {
+		opacity: 0;
+	}
+}
+
+@keyframes missing-percentage-4 {
+	contain {
+		opacity: 0;
+	}
+}
+
+@keyframes missing-percentage-5 {
+	entry-crossing {
+		opacity: 0;
+	}
+}
+
+@keyframes missing-percentage-6 {
+	exit-crossing {
+		opacity: 0;
+	}
+}

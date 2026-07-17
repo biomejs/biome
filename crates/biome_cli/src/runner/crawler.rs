@@ -3,19 +3,25 @@ use crate::runner::collector::Collector;
 use crate::runner::execution::Execution;
 use crate::runner::handler::Handler;
 use crate::runner::process_file::{Message, MessageStat, ProcessFile};
-use biome_diagnostics::Error;
+use biome_diagnostics::{Error, Severity};
 use biome_fs::{BiomePath, FileSystem, PathInterner, TraversalContext, TraversalScope};
 use biome_service::Workspace;
 use biome_service::projects::ProjectKey;
+use biome_service::workspace::FeaturesSupported;
 use camino::Utf8PathBuf;
 use crossbeam::channel::{Sender, unbounded};
-use papaya::{HashSet, HashSetRef, LocalGuard};
+use papaya::{HashMap, HashSet, HashSetRef, LocalGuard};
 use std::hash::RandomState;
 use std::marker::PhantomData;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::thread;
 use std::time::{Duration, Instant};
 use tracing::instrument;
+
+pub enum CrawlPath {
+    String(String),
+    Path(Utf8PathBuf),
+}
 
 pub trait Crawler<Output> {
     type Handler: Handler;
@@ -28,13 +34,16 @@ pub trait Crawler<Output> {
         duration: Duration,
     ) -> Output;
 
+    #[expect(clippy::too_many_arguments)]
     fn crawl(
         execution: &dyn Execution,
         workspace: &dyn Workspace,
         fs: &dyn FileSystem,
         project_key: ProjectKey,
-        inputs: Vec<String>,
+        inputs: Vec<CrawlPath>,
         collector: Self::Collector,
+        max_diagnostics: u32,
+        diagnostic_level: Severity,
     ) -> Result<Output, CliDiagnostic> {
         let (interner, recv_files) = PathInterner::new();
         let (sender, receiver) = unbounded();
@@ -53,7 +62,16 @@ pub trait Crawler<Output> {
                 // Don't move it. If ctx is declared outside of this function, it doesn't
                 // go out of scope, causing a deadlock because the main thread waits for
                 // ctx to be dropped
-                &CrawlerOptions::new(fs, workspace, project_key, interner, sender, execution),
+                &CrawlerOptions::new(
+                    fs,
+                    workspace,
+                    project_key,
+                    interner,
+                    sender,
+                    execution,
+                    max_diagnostics,
+                    diagnostic_level,
+                ),
             );
             // wait for the main thread to finish
             handler.join().unwrap();
@@ -70,13 +88,16 @@ pub trait Crawler<Output> {
     /// run it to completion, returning the duration of the process and the evaluated paths
     fn crawl_inputs<'a>(
         fs: &'a dyn FileSystem,
-        inputs: Vec<String>,
+        inputs: Vec<CrawlPath>,
         ctx: &'a CrawlerOptions<Self::Handler, Self::ProcessFile>,
     ) -> (Duration, Vec<BiomePath>) {
         let start = Instant::now();
         fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
             for input in inputs {
-                scope.evaluate(ctx, Utf8PathBuf::from(input));
+                match input {
+                    CrawlPath::Path(input) => scope.evaluate(ctx, input),
+                    CrawlPath::String(input) => scope.evaluate(ctx, Utf8PathBuf::from(input)),
+                };
             }
         }));
 
@@ -107,6 +128,8 @@ pub trait CrawlerContext: TraversalContext {
     fn workspace(&self) -> &dyn Workspace;
     fn project_key(&self) -> ProjectKey;
     fn execution(&self) -> &dyn Execution;
+    fn insert_file_features(&self, path: BiomePath, features: FeaturesSupported);
+    fn get_file_features(&self, path: &BiomePath) -> Option<FeaturesSupported>;
 }
 
 /// Context object shared between directory traversal tasks
@@ -131,6 +154,12 @@ pub(crate) struct CrawlerOptions<'ctx, 'app, H, P> {
     pub(crate) messages: Sender<Message>,
     /// List of paths that should be processed
     pub(crate) evaluated_paths: papaya::HashSet<BiomePath>,
+    /// File features already computed during path evaluation.
+    pub(crate) file_features: papaya::HashMap<BiomePath, FeaturesSupported>,
+    /// Maximum number of diagnostics to pull from the workspace.
+    pub(crate) max_diagnostics: u32,
+    /// Minimum severity for diagnostics to be included.
+    pub(crate) diagnostic_level: Severity,
 
     execution: &'app dyn Execution,
 
@@ -186,6 +215,14 @@ where
     fn execution(&self) -> &dyn Execution {
         self.execution
     }
+
+    fn insert_file_features(&self, path: BiomePath, features: FeaturesSupported) {
+        self.file_features.pin().insert(path, features);
+    }
+
+    fn get_file_features(&self, path: &BiomePath) -> Option<FeaturesSupported> {
+        self.file_features.pin().get(path).cloned()
+    }
 }
 
 impl<'ctx, 'app, I, P> CrawlerOptions<'ctx, 'app, I, P>
@@ -193,6 +230,7 @@ where
     I: Handler,
     P: ProcessFile,
 {
+    #[expect(clippy::too_many_arguments)]
     pub(crate) fn new(
         fs: &'app dyn FileSystem,
         workspace: &'ctx dyn Workspace,
@@ -200,6 +238,8 @@ where
         interner: PathInterner,
         sender: Sender<Message>,
         execution: &'app dyn Execution,
+        max_diagnostics: u32,
+        diagnostic_level: Severity,
     ) -> Self {
         Self {
             fs,
@@ -208,12 +248,15 @@ where
             interner,
             messages: sender,
             evaluated_paths: HashSet::default(),
+            file_features: HashMap::default(),
             handler: I::default(),
             changed: AtomicUsize::new(0),
             unchanged: AtomicUsize::new(0),
             matches: AtomicUsize::new(0),
             skipped: AtomicUsize::new(0),
             execution,
+            max_diagnostics,
+            diagnostic_level,
             _p: PhantomData::<P>,
         }
     }
@@ -242,7 +285,12 @@ where
     }
 
     fn handle_path(&self, path: BiomePath) {
-        self.handler.handle_path::<P, Self>(&path, self)
+        self.handler.handle_path::<P, Self>(
+            &path,
+            self.max_diagnostics,
+            self.diagnostic_level,
+            self,
+        )
     }
 
     fn store_path(&self, path: BiomePath) {

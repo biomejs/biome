@@ -1,20 +1,22 @@
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
+#[cfg(feature = "cli")]
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
+#[partial(derive(Clone, Deserializable, Eq, Merge, PartialEq))]
+#[partial(cfg_attr(feature = "cli", derive(Bpaf)))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
 pub struct OrganizeImports {
     /// Enables the organization of imports
-    #[partial(bpaf(hide))]
+    #[partial(cfg_attr(feature = "cli", bpaf(hide)))]
     pub enabled: bool,
 
     /// A list of glob patterns. The import organizer will include files/folders that will
     /// match these patterns.
-    #[partial(bpaf(pure(Default::default()), hide))]
+    #[partial(cfg_attr(feature = "cli", bpaf(pure(Default::default()), hide)))]
     pub includes: Vec<biome_glob::NormalizedGlob>,
 }
 

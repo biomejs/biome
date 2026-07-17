@@ -1,0 +1,66 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/expression/interpolated-string-formatting.scss
+---
+
+# Input
+
+```scss
+a{content:"#{".5"}";}
+
+a{content:"#{.5 + .6}";}
+
+a{content:"#{foo(.5, .6)}";}
+
+a{content:"#{".5" + ".6"}";}
+
+a{content:"#{my-fn(  "foo"  ,  "bar"  )}";}
+
+a{content:'#{my-fn("foo")}';}
+
+a{content:'#{my-fn("\\.5")}';}
+
+$media: "only screen and (min-width: #{map-get($grid-breakpoints, "sm")}) and (max-width: #{map-get($grid-breakpoints, "md") - 1})";
+
+```
+
+
+# Formatted
+
+```scss
+a {
+	content: "#{"0.5"}";
+}
+
+a {
+	content: "#{.5 + .6}";
+}
+
+a {
+	content: "#{foo(.5, .6)}";
+}
+
+a {
+	content: "#{"0.5" + "0.6"}";
+}
+
+a {
+	content: "#{my-fn(  "foo"  ,  "bar"  )}";
+}
+
+a {
+	content: '#{my-fn("foo")}';
+}
+
+a {
+	content: '#{my-fn("\\.5")}';
+}
+
+$media: "only screen and (min-width: #{map-get($grid-breakpoints, "sm")}) and (max-width: #{map-get($grid-breakpoints, "md") - 1})";
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   29: $media: "only screen and (min-width: #{map-get($grid-breakpoints, "sm")}) and (max-width: #{map-get($grid-breakpoints, "md") - 1})";
+```

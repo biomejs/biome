@@ -1,0 +1,4 @@
+/* should generate diagnostics */
+.foo .bar {}
+.foo, .bar.baz {}
+div.foo.bar {}

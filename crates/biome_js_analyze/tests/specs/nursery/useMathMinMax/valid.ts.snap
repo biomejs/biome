@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+function bigintAssertion(a, b) {
+    return (a as bigint) > b ? a : b;
+}
+
+function stringAssertion(a, b) {
+    return (a as string) > b ? a : b;
+}
+
+function bigintAngle(a, b) {
+    return (<bigint>a) > b ? a : b;
+}
+
+function stringAngle(a, b) {
+    return (<string>a) > b ? a : b;
+}
+
+function typedStringLeft(a: string, b) {
+    return a > b ? a : b;
+}
+
+function typedStringRight(a, b: string) {
+    return a > b ? a : b;
+}
+
+function typedBigints(a: bigint, b: bigint) {
+    return a > b ? a : b;
+}
+
+function typedDates(a: Date, b: Date) {
+    return a > b ? a : b;
+}
+
+var fooDate: Date;
+var barDate: Date;
+var valueDate = fooDate > barDate ? barDate : fooDate;
+
+var foo = 10;
+var bar = '20';
+var mixedLiteral = foo > bar ? bar : foo;
+
+var fooNumber = 10;
+var barString: string;
+var mixedAnnotation = fooNumber > barString ? barString : fooNumber;
+
+function nonNullString(a, b) {
+    return (a as string)! > b ? (a as string)! : b;
+}
+
+function nonNullAngleString(a, b) {
+    return (<string>a)! > b ? (<string>a)! : b;
+}
+
+```

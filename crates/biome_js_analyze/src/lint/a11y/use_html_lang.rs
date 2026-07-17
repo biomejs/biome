@@ -60,7 +60,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useHtmlLang",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("html-has-lang").same()],
+        sources: &[RuleSource::EslintJsxA11y("html-has-lang").same(), RuleSource::HtmlEslint("require-lang").inspired()],
         recommended: true,
         severity: Severity::Error,
     }

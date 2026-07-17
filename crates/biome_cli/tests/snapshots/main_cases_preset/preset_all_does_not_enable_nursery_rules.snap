@@ -1,0 +1,50 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "preset": "all"
+    }
+  }
+}
+```
+
+## `test.js`
+
+```js
+const queue = [];
+let shared = 0;
+for (let i = 0; i < 10; i += 1) {
+    queue.push(() => shared);
+}
+shared = 100;
+
+```
+
+# Emitted Messages
+
+```block
+test.js:6:10 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    4 │     queue.push(() => shared);
+    5 │ }
+  > 6 │ shared = 100;
+      │          ^^^
+    7 │ 
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 info.
+```

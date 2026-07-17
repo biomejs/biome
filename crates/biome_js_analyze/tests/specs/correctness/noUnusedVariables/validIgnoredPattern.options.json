@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUnusedVariables": {
+          "level": "error",
+          "options": {
+            "ignore": {
+              "*": ["ignored"],
+              "class": ["IgnoredClass"],
+              "function": ["*"]
+            }
+          }
+        }
+      }
+    }
+  }
+}

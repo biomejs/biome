@@ -104,9 +104,15 @@ impl Rule for NoRedeclare {
             rule_category!(),
             redeclaration,
             markup! {
-               "Shouldn't redeclare '"{ name.as_ref() }"'. Consider to delete it or rename it."
+               "'"{ name.as_ref() }"' is redeclared in the same scope."
             },
         )
+        .note(markup! {
+           "Redeclarations make it unclear which variable a reference points to and can hide earlier declarations."
+        })
+        .note(markup! {
+           "Remove the duplicate declaration or rename one of the variables."
+        })
         .detail(
             declaration,
             markup! {

@@ -67,7 +67,7 @@ upper-case-html-tag-2.html:3:10 parse ━━━━━━━━━━━━━━
     4 │ 
     5 │ </div>
   
-  i Remove it or enable the parsing using the html.parser.vue option.
+  i Remove it, change the extension to .vue, or enable the parsing using the html.parser.vue option.
   
 
 ```

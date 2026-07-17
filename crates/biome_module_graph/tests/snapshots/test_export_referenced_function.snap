@@ -34,10 +34,6 @@ Imports {
 ```
 foo => BindingTypeData {
   Types Module(0) TypeId(1),
-  JsDoc(
-    @returns {string}
-  ),
-  Exported Ranges: (118..121)
 }
 ```
 

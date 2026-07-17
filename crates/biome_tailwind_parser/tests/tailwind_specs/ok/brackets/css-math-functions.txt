@@ -1,0 +1,2 @@
+w-[calc(100%_-_1rem)] w-[min(10px,_20px)] w-[max(10px,_20px)] w-[clamp(10px,_5vw,_20px)] w-[mod(10px,_3px)] w-[rem(10px,_3px)] w-[sin(45deg)] w-[cos(45deg)] w-[tan(45deg)] w-[asin(0.5)] w-[acos(0.5)] w-[atan(1)] w-[atan2(1,_1)] w-[pow(2,_3)] w-[sqrt(4)] w-[hypot(3,_4)] w-[log(10)] w-[exp(1)] w-[round(10.5px)]
+w-[calc(min(100%,_20rem)_-_max(1rem,_2vw))] w-[clamp(min(10px,_1vw),_calc(50%_-_2rem),_max(20px,_5vw))] w-[pow(sqrt(4),_round(exp(1)))] w-[hypot(sin(45deg),_cos(45deg))] w-[atan2(tan(45deg),_log(10))] w-[mod(rem(10px,_3px),_2px)]

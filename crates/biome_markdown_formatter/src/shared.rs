@@ -1,0 +1,133 @@
+use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
+use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
+use crate::prelude::*;
+use biome_formatter::write;
+use biome_markdown_syntax::{AnyMdBlock, AnyMdLeafBlock};
+
+#[derive(Debug, Copy, Clone, Default, Eq, PartialEq)]
+pub(crate) enum TextPrintMode {
+    /// Keep the original formatting. Don't attempt to optimize it. This is usually achieved
+    /// by formatting the code as verbatim.
+    #[default]
+    Pristine,
+    /// Usually used inside code blocks. It keeps the original formatting of the content,
+    /// but it removes possible spaces if there's empty hard line.
+    ///
+    /// In the following example, the first line will keep only the newline, as there are only spaces
+    /// ``````md
+    /// ```
+    ///
+    /// ```
+    /// ``````
+    /// However, in the following example, spaces are keep as is because there's text (code):
+    ///
+    /// ``````md
+    /// ```js
+    ///    function f() {}
+    /// ```
+    /// ``````
+    Clean,
+    /// It removes the token/node
+    Remove,
+    /// It cleans the code by using a trimming strategy
+    Trim(TrimMode),
+    /// Split prose into words and emit fill IR for line-width-aware wrapping.
+    Fill,
+}
+
+#[derive(Debug, Copy, Clone, Default, Eq, PartialEq)]
+pub(crate) enum TrimMode {
+    /// Trim the start of the list
+    Start,
+    /// Trim start and end of the list
+    All,
+    /// If the first and last [MdTextual] are `<` and `>` respectively, they are trimmed.
+    /// If no link has been detected, if falls back to [Self::All]
+    AutoLinkLike,
+    /// This mode works similarly to [TrimMode::All], however, text that contains
+    /// words and have more than trailing/leading spaces are normalized to one
+    NormalizeWords,
+    /// Don't trim anything
+    #[default]
+    None,
+}
+
+/// Where the inline text being formatted is located in the document structure.
+#[derive(Debug, Copy, Clone, Default, Eq, PartialEq)]
+pub(crate) enum TextContext {
+    #[default]
+    Neutral,
+    List,
+    Header,
+}
+
+impl TextContext {
+    pub(crate) const fn is_list(&self) -> bool {
+        matches!(self, Self::List)
+    }
+}
+
+impl TextPrintMode {
+    pub(crate) const fn is_trim_start(&self) -> bool {
+        matches!(self, Self::Trim(TrimMode::Start))
+    }
+
+    pub(crate) const fn is_trim_all(&self) -> bool {
+        matches!(self, Self::Trim(TrimMode::All))
+    }
+
+    pub(crate) const fn is_normalize_words(&self) -> bool {
+        matches!(self, Self::Trim(TrimMode::NormalizeWords))
+    }
+
+    pub(crate) const fn is_auto_link_like(&self) -> bool {
+        matches!(self, Self::Trim(TrimMode::AutoLinkLike))
+    }
+
+    pub(crate) const fn is_pristine(&self) -> bool {
+        matches!(self, Self::Pristine)
+    }
+
+    pub(crate) const fn is_clean(&self) -> bool {
+        matches!(self, Self::Clean)
+    }
+
+    pub(crate) const fn is_remove(&self) -> bool {
+        matches!(self, Self::Remove)
+    }
+
+    pub(crate) const fn is_fill(&self) -> bool {
+        matches!(self, Self::Fill)
+    }
+
+    pub(crate) const fn trim_all() -> Self {
+        Self::Trim(TrimMode::All)
+    }
+
+    pub(crate) const fn fill() -> Self {
+        Self::Fill
+    }
+}
+
+pub(crate) fn format_removed_quote_boundary(
+    node: &AnyMdBlock,
+    f: &mut MarkdownFormatter,
+) -> FormatResult<()> {
+    match node {
+        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) => {
+            write!(
+                f,
+                [newline.format().with_options(FormatMdNewlineOptions {
+                    print_mode: TextPrintMode::Remove,
+                })]
+            )
+        }
+        AnyMdBlock::MdQuotePrefix(prefix) => write!(
+            f,
+            [prefix.format().with_options(FormatMdQuotePrefixOptions {
+                should_remove: true,
+            })]
+        ),
+        _ => write!(f, [node.format()]),
+    }
+}

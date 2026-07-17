@@ -5,16 +5,18 @@ use crossbeam::channel::{Receiver, unbounded};
 use tokio::sync::watch;
 
 use crate::projects::ProjectKey;
-use crate::workspace::{OpenProjectParams, OpenProjectResult, ServiceNotification};
-use crate::{WatcherInstruction, Workspace, WorkspaceServer};
+use crate::workspace::{
+    NoopQueryProvider, OpenProjectParams, OpenProjectResult, ServiceNotification,
+};
+use crate::{LocalWorkspace, WatcherInstruction, Workspace};
 
 /// Convenience call for setting up the workspace and opening a project.
 ///
 /// Uses the given `fs` and `project_path`. Does not set up a real watcher.
-pub(super) fn setup_workspace_and_open_project(
+pub fn setup_workspace_and_open_project(
     fs: impl FileSystem + 'static,
     project_path: &str,
-) -> (WorkspaceServer, ProjectKey) {
+) -> (LocalWorkspace, ProjectKey) {
     let (workspace, project_key, ..) =
         setup_workspace_and_open_project_and_get_watcher_instruction_receiver(fs, project_path);
     (workspace, project_key)
@@ -30,10 +32,16 @@ pub(super) fn setup_workspace_and_open_project(
 pub(super) fn setup_workspace_and_open_project_and_get_watcher_instruction_receiver(
     fs: impl FileSystem + 'static,
     project_path: &str,
-) -> (WorkspaceServer, ProjectKey, Receiver<WatcherInstruction>) {
+) -> (LocalWorkspace, ProjectKey, Receiver<WatcherInstruction>) {
     let (watcher_tx, watcher_rx) = unbounded();
     let (service_tx, _) = watch::channel(ServiceNotification::IndexUpdated);
-    let workspace = WorkspaceServer::new(Arc::new(fs), watcher_tx, service_tx, None);
+    let workspace = LocalWorkspace::new(
+        Arc::new(fs),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
     let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new(project_path),

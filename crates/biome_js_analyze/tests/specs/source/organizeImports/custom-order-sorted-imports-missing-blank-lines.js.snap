@@ -12,16 +12,34 @@ import bare from "bare"
 
 # Diagnostics
 ```
-custom-order-sorted-imports-missing-blank-lines.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━
+custom-order-sorted-imports-missing-blank-lines.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Some imports or exports are not organized.
   
-  > 1 │ import { test as testBun } from "bun:test"
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ import { test as testNode } from "node:test"
+    1 │ import { test as testBun } from "bun:test"
+  > 2 │ import { test as testNode } from "node:test"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │ import bare from "bare"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i This statement ends a group that must be preceded by a blank line. Add a newline before this statement.
+  
+    1 │ import { test as testBun } from "bun:test"
+  > 2 │ import { test as testNode } from "node:test"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ import bare from "bare"
+    4 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i This statement ends a group that must be preceded by a blank line. Add a newline before this statement.
+  
+    1 │ import { test as testBun } from "bun:test"
+    2 │ import { test as testNode } from "node:test"
+  > 3 │ import bare from "bare"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Safe fix: Organize imports and exports (Biome)
   
     1 1 │   import { test as testBun } from "bun:test"
       2 │ + 

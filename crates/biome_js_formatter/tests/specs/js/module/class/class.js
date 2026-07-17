@@ -69,3 +69,7 @@ export class Task {
 		this.args = args;
 	}
 }
+
+class Foo22 {
+	set veryLongPropertyNameHere(veryLongParameterNameThatExceedsTheLineWidthLimit) {}
+}

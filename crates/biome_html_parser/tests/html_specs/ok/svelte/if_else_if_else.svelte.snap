@@ -29,9 +29,9 @@ HtmlRoot {
         SvelteIfBlock {
             opening_block: SvelteIfOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..31 "{#" [Comments("<!-- if / else-if / e ..."), Newline("\n")] [],
-                if_token: IF_KW@31..33 "if" [] [],
+                if_token: IF_KW@31..34 "if" [] [Whitespace(" ")],
                 expression: HtmlTextExpression {
-                    html_literal_token: HTML_LITERAL@33..60 " porridge.temperature > 100" [] [],
+                    html_literal_token: HTML_LITERAL@34..60 "porridge.temperature > 100" [] [],
                 },
                 r_curly_token: R_CURLY@60..61 "}" [] [],
                 children: HtmlElementList [
@@ -64,9 +64,9 @@ HtmlRoot {
                 SvelteElseIfClause {
                     sv_curly_colon_token: SV_CURLY_COLON@78..81 "{:" [Newline("\n")] [],
                     else_token: ELSE_KW@81..86 "else" [] [Whitespace(" ")],
-                    if_token: IF_KW@86..88 "if" [] [],
+                    if_token: IF_KW@86..89 "if" [] [Whitespace(" ")],
                     expression: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@88..114 " 80 > porridge.temperature" [] [],
+                        html_literal_token: HTML_LITERAL@89..114 "80 > porridge.temperature" [] [],
                     },
                     r_curly_token: R_CURLY@114..115 "}" [] [],
                     children: HtmlElementList [
@@ -148,9 +148,9 @@ HtmlRoot {
     0: SVELTE_IF_BLOCK@0..167
       0: SVELTE_IF_OPENING_BLOCK@0..78
         0: SV_CURLY_HASH@0..31 "{#" [Comments("<!-- if / else-if / e ..."), Newline("\n")] []
-        1: IF_KW@31..33 "if" [] []
-        2: HTML_TEXT_EXPRESSION@33..60
-          0: HTML_LITERAL@33..60 " porridge.temperature > 100" [] []
+        1: IF_KW@31..34 "if" [] [Whitespace(" ")]
+        2: HTML_TEXT_EXPRESSION@34..60
+          0: HTML_LITERAL@34..60 "porridge.temperature > 100" [] []
         3: R_CURLY@60..61 "}" [] []
         4: HTML_ELEMENT_LIST@61..78
           0: HTML_ELEMENT@61..78
@@ -173,9 +173,9 @@ HtmlRoot {
         0: SVELTE_ELSE_IF_CLAUSE@78..133
           0: SV_CURLY_COLON@78..81 "{:" [Newline("\n")] []
           1: ELSE_KW@81..86 "else" [] [Whitespace(" ")]
-          2: IF_KW@86..88 "if" [] []
-          3: HTML_TEXT_EXPRESSION@88..114
-            0: HTML_LITERAL@88..114 " 80 > porridge.temperature" [] []
+          2: IF_KW@86..89 "if" [] [Whitespace(" ")]
+          3: HTML_TEXT_EXPRESSION@89..114
+            0: HTML_LITERAL@89..114 "80 > porridge.temperature" [] []
           4: R_CURLY@114..115 "}" [] []
           5: HTML_ELEMENT_LIST@115..133
             0: HTML_ELEMENT@115..133

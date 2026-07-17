@@ -130,13 +130,21 @@ impl Rule for NoConstantCondition {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            state,
-            markup! {
-                "Unexpected constant condition."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state,
+                markup! {
+                    "This condition always evaluates to the same value."
+                },
+            )
+            .note(markup! {
+                "Constant conditions make branches and loops harder to reason about because they cannot react to runtime values."
+            })
+            .note(markup! {
+                "Replace it with a condition that depends on changing values, or remove the condition if it is intentional."
+            }),
+        )
     }
 }
 

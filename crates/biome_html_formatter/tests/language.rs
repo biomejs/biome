@@ -3,12 +3,10 @@ use biome_fs::BiomePath;
 use biome_html_formatter::HtmlFormatLanguage;
 use biome_html_formatter::context::HtmlFormatContext;
 use biome_html_parser::{HtmlParserOptions, parse_html};
-use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
+use biome_html_syntax::HtmlLanguage;
+use biome_languages::{DocumentFileSource, HtmlFileSource};
 use biome_parser::AnyParse;
-use biome_service::{
-    settings::{ServiceLanguage, Settings},
-    workspace::DocumentFileSource,
-};
+use biome_service::settings::{ServiceLanguage, Settings};
 
 pub struct HtmlTestFormatLanguage {
     source_type: HtmlFileSource,

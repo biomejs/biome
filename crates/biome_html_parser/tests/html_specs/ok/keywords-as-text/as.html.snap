@@ -1,0 +1,82 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```html
+as text content
+<p>as text content</p>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlContent {
+            value_token: HTML_LITERAL@0..15 "as text content" [] [],
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@15..17 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@17..18 "p" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@18..19 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@19..34 "as text content" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@34..35 "<" [] [],
+                slash_token: SLASH@35..36 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@36..37 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@37..38 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@38..39 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..39
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..38
+    0: HTML_CONTENT@0..15
+      0: HTML_LITERAL@0..15 "as text content" [] []
+    1: HTML_ELEMENT@15..38
+      0: HTML_OPENING_ELEMENT@15..19
+        0: L_ANGLE@15..17 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@17..18
+          0: HTML_LITERAL@17..18 "p" [] []
+        2: HTML_ATTRIBUTE_LIST@18..18
+        3: R_ANGLE@18..19 ">" [] []
+      1: HTML_ELEMENT_LIST@19..34
+        0: HTML_CONTENT@19..34
+          0: HTML_LITERAL@19..34 "as text content" [] []
+      2: HTML_CLOSING_ELEMENT@34..38
+        0: L_ANGLE@34..35 "<" [] []
+        1: SLASH@35..36 "/" [] []
+        2: HTML_TAG_NAME@36..37
+          0: HTML_LITERAL@36..37 "p" [] []
+        3: R_ANGLE@37..38 ">" [] []
+  4: EOF@38..39 "" [Newline("\n")] []
+
+```

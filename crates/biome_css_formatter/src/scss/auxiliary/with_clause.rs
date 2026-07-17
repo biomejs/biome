@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::utils::scss_module_configuration::is_source_separated_with_configuration;
 use biome_css_syntax::{ScssWithClause, ScssWithClauseFields};
 use biome_formatter::write;
 
@@ -12,6 +13,14 @@ impl FormatNodeRule<ScssWithClause> for FormatScssWithClause {
             configurations,
         } = node.as_fields();
 
-        write!(f, [with_token.format(), space(), configurations.format()])
+        let configurations = configurations?;
+
+        write!(f, [with_token.format()])?;
+
+        if is_source_separated_with_configuration(&configurations) {
+            write!(f, [space()])?;
+        }
+
+        write!(f, [configurations.format()])
     }
 }

@@ -20,13 +20,12 @@ info: markdown/spec/example-140.md
 @@ -1,3 +1,2 @@
  <style>p{color:red;}</style>
 -
--_foo_
-+*foo*
+ _foo_
 ```
 
 # Output
 
 ```md
 <style>p{color:red;}</style>
-*foo*
+_foo_
 ```

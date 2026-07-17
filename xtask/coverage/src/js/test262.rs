@@ -2,7 +2,7 @@ use crate::runner::{
     TestCase, TestCaseFiles, TestRunOutcome, TestSuite, create_bogus_node_in_tree_diagnostic,
 };
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::JsFileSource;
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_rowan::syntax::SyntaxKind;
 use regex::Regex;
@@ -96,8 +96,8 @@ impl Test262TestCase {
             .meta
             .negative
             .as_ref()
-            .filter(|neg| neg.phase == Phase::Parse)
-            .is_some();
+            .as_ref()
+            .is_some_and(|neg| neg.phase == Phase::Parse);
 
         let options = JsParserOptions::default().with_parse_class_parameter_decorators();
         let files =

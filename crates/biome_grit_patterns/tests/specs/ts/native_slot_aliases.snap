@@ -1,0 +1,13 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+assertion_line: 94
+expression: native_slot_aliases
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "1:15-1:49",
+    ],
+    rewritten_files: [],
+    created_files: [],
+}

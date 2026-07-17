@@ -12,6 +12,7 @@ impl FormatRule<AnyCssMediaQuery> for FormatAnyCssMediaQuery {
             AnyCssMediaQuery::CssBogusMediaQuery(node) => node.format().fmt(f),
             AnyCssMediaQuery::CssMediaConditionQuery(node) => node.format().fmt(f),
             AnyCssMediaQuery::CssMetavariable(node) => node.format().fmt(f),
+            AnyCssMediaQuery::ScssMediaQuery(node) => node.format().fmt(f),
         }
     }
 }

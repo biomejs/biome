@@ -6,10 +6,11 @@ use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsName, AnyJsObjectMember, JsFileSource, JsIdentifierExpression,
-    JsPropertyObjectMember, JsReferenceIdentifier, JsShorthandPropertyObjectMember,
-    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxToken,
+    AnyJsExpression, AnyJsName, AnyJsObjectMember, JsIdentifierExpression, JsPropertyObjectMember,
+    JsReferenceIdentifier, JsShorthandPropertyObjectMember, JsStaticMemberExpression, JsSyntaxKind,
+    JsSyntaxToken,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
 use biome_rule_options::no_global_dirname_filename::NoGlobalDirnameFilenameOptions;
 
@@ -60,7 +61,7 @@ declare_lint_rule! {
 
 impl Rule for NoGlobalDirnameFilename {
     type Query = Semantic<JsReferenceIdentifier>;
-    type State = (JsSyntaxToken, String);
+    type State = JsSyntaxToken;
     type Signals = Option<Self::State>;
     type Options = NoGlobalDirnameFilenameOptions;
 
@@ -76,7 +77,7 @@ impl Rule for NoGlobalDirnameFilename {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let syntax_token = &state.0;
+        let syntax_token = state;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -94,8 +95,8 @@ impl Rule for NoGlobalDirnameFilename {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
         let node = ctx.query();
-        let syntax_token = &state.0;
-        let dirname_or_filename = state.1.as_str();
+        let syntax_token = state;
+        let dirname_or_filename = maybe_text(syntax_token)?;
 
         if let Some(expr) = node.parent::<JsIdentifierExpression>() {
             mutation.replace_node::<AnyJsExpression>(
@@ -125,23 +126,23 @@ impl Rule for NoGlobalDirnameFilename {
 fn validate_dirname_filename(
     expr: &JsReferenceIdentifier,
     model: &SemanticModel,
-) -> Option<(JsSyntaxToken, String)> {
+) -> Option<JsSyntaxToken> {
     match model.binding(expr) {
         // Some binding exists, not global one
         Some(_) => None,
         // No binding exists, global one
         None => {
             let token = expr.value_token().ok()?;
-            let name = maybe_text(&token)?;
-            Some((token, name))
+            maybe_text(&token)?;
+            Some(token)
         }
     }
 }
 
-fn maybe_text(token: &JsSyntaxToken) -> Option<String> {
+fn maybe_text(token: &JsSyntaxToken) -> Option<&'static str> {
     match token.text_trimmed() {
-        "__dirname" => Some("dirname".to_string()),
-        "__filename" => Some("filename".to_string()),
+        "__dirname" => Some("dirname"),
+        "__filename" => Some("filename"),
         _ => None,
     }
 }

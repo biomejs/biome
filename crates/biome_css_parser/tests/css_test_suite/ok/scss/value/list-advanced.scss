@@ -22,8 +22,8 @@ $mixed: (a b, c d, e f);
 $trailing: (a, b, c,);
 
 // List with interpolation
-// TODO(interpolation support): $interpolated: (a, #{$var}, c);
-// TODO(interpolation support): $interpolated-space: a #{$var} c;
+$interpolated: (a, #{$var}, c);
+$interpolated-space: a #{$var} c;
 // List with calculations
 $calculations: (10px + 5px, 20px * 2, 100px / 4);
 
@@ -148,7 +148,6 @@ $unicode: (émoji, 🎨, 日本語, ключ);
 
 // Escaped characters in lists
 $escaped: (\escaped, "escaped\"quote", 'escaped\'quote');
-
 
 
 

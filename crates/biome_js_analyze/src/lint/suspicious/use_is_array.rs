@@ -58,7 +58,8 @@ impl Rule for UseIsArray {
         let node = ctx.query();
         let model = ctx.model();
         let right = node.right().ok()?.omit_parentheses();
-        let (reference, name) = global_identifier(&right)?;
+        let (reference, name) =
+            global_identifier(&right.as_any_global_identifier_expression()?)?;
         if name.text() != "Array" {
             return None;
         }

@@ -390,7 +390,7 @@ CssRoot {
                                                             items: CssParameterList [
                                                                 ScssExpression {
                                                                     items: ScssExpressionItemList [
-                                                                        ScssIdentifier {
+                                                                        ScssVariable {
                                                                             dollar_token: DOLLAR@341..342 "$" [] [],
                                                                             name: CssIdentifier {
                                                                                 value_token: IDENT@342..346 "size" [] [],
@@ -406,7 +406,7 @@ CssRoot {
                                                 COMMA@347..349 "," [] [Whitespace(" ")],
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@349..350 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@350..354 "size" [] [],
@@ -453,7 +453,7 @@ CssRoot {
                                                         test: ScssExpression {
                                                             items: ScssExpressionItemList [
                                                                 ScssBinaryExpression {
-                                                                    left: ScssIdentifier {
+                                                                    left: ScssVariable {
                                                                         dollar_token: DOLLAR@386..387 "$" [] [],
                                                                         name: CssIdentifier {
                                                                             value_token: IDENT@387..392 "size" [] [Whitespace(" ")],
@@ -765,7 +765,7 @@ CssRoot {
                               2: CSS_PARAMETER_LIST@341..346
                                 0: SCSS_EXPRESSION@341..346
                                   0: SCSS_EXPRESSION_ITEM_LIST@341..346
-                                    0: SCSS_IDENTIFIER@341..346
+                                    0: SCSS_VARIABLE@341..346
                                       0: DOLLAR@341..342 "$" [] []
                                       1: CSS_IDENTIFIER@342..346
                                         0: IDENT@342..346 "size" [] []
@@ -773,7 +773,7 @@ CssRoot {
                         1: COMMA@347..349 "," [] [Whitespace(" ")]
                         2: SCSS_EXPRESSION@349..354
                           0: SCSS_EXPRESSION_ITEM_LIST@349..354
-                            0: SCSS_IDENTIFIER@349..354
+                            0: SCSS_VARIABLE@349..354
                               0: DOLLAR@349..350 "$" [] []
                               1: CSS_IDENTIFIER@350..354
                                 0: IDENT@350..354 "size" [] []
@@ -805,7 +805,7 @@ CssRoot {
                             2: SCSS_EXPRESSION@386..398
                               0: SCSS_EXPRESSION_ITEM_LIST@386..398
                                 0: SCSS_BINARY_EXPRESSION@386..398
-                                  0: SCSS_IDENTIFIER@386..392
+                                  0: SCSS_VARIABLE@386..392
                                     0: DOLLAR@386..387 "$" [] []
                                     1: CSS_IDENTIFIER@387..392
                                       0: IDENT@387..392 "size" [] [Whitespace(" ")]

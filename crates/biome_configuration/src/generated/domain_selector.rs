@@ -11,13 +11,13 @@ static DRIZZLE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 });
 static NEXT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
+        RuleFilter::Rule("correctness", "noBeforeInteractiveScriptOutsideDocument"),
         RuleFilter::Rule("correctness", "noNextAsyncClientComponent"),
         RuleFilter::Rule("correctness", "useExhaustiveDependencies"),
         RuleFilter::Rule("correctness", "useHookAtTopLevel"),
-        RuleFilter::Rule("nursery", "noBeforeInteractiveScriptOutsideDocument"),
-        RuleFilter::Rule("nursery", "noSyncScripts"),
-        RuleFilter::Rule("nursery", "useInlineScriptId"),
+        RuleFilter::Rule("correctness", "useInlineScriptId"),
         RuleFilter::Rule("performance", "noImgElement"),
+        RuleFilter::Rule("performance", "noSyncScripts"),
         RuleFilter::Rule("performance", "noUnwantedPolyfillio"),
         RuleFilter::Rule("performance", "useGoogleFontPreconnect"),
         RuleFilter::Rule("style", "noHeadElement"),
@@ -47,6 +47,7 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "noUnresolvedImports"),
         RuleFilter::Rule("correctness", "useImportExtensions"),
         RuleFilter::Rule("correctness", "useJsonImportAttributes"),
+        RuleFilter::Rule("nursery", "noUndeclaredClasses"),
         RuleFilter::Rule("suspicious", "noDeprecatedImports"),
         RuleFilter::Rule("suspicious", "noImportCycles"),
     ]
@@ -59,6 +60,7 @@ static QWIK_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useQwikClasslist"),
         RuleFilter::Rule("correctness", "useQwikMethodUsage"),
         RuleFilter::Rule("correctness", "useQwikValidLexicalScope"),
+        RuleFilter::Rule("nursery", "useQwikLoaderLocation"),
         RuleFilter::Rule("suspicious", "noReactSpecificProps"),
     ]
 });
@@ -72,32 +74,52 @@ static REACT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useHookAtTopLevel"),
         RuleFilter::Rule("correctness", "useJsxKeyInIterable"),
         RuleFilter::Rule("correctness", "useUniqueElementIds"),
-        RuleFilter::Rule("nursery", "noDuplicatedSpreadProps"),
-        RuleFilter::Rule("nursery", "noJsxPropsBind"),
-        RuleFilter::Rule("nursery", "noLeakedRender"),
-        RuleFilter::Rule("nursery", "noSyncScripts"),
-        RuleFilter::Rule("nursery", "noUnknownAttribute"),
+        RuleFilter::Rule("nursery", "noComponentHookFactories"),
+        RuleFilter::Rule("nursery", "noJsxLeakedDollar"),
+        RuleFilter::Rule("nursery", "noJsxNamespace"),
+        RuleFilter::Rule("nursery", "noReactStringRefs"),
+        RuleFilter::Rule("nursery", "useReactAsyncServerFunction"),
+        RuleFilter::Rule("nursery", "useReactFunctionComponentDefinition"),
+        RuleFilter::Rule("performance", "noJsxPropsBind"),
+        RuleFilter::Rule("performance", "noSyncScripts"),
         RuleFilter::Rule("security", "noDangerouslySetInnerHtml"),
         RuleFilter::Rule("security", "noDangerouslySetInnerHtmlWithChildren"),
         RuleFilter::Rule("style", "useComponentExportOnlyModules"),
         RuleFilter::Rule("style", "useReactFunctionComponents"),
         RuleFilter::Rule("suspicious", "noArrayIndexKey"),
+        RuleFilter::Rule("suspicious", "noDuplicatedSpreadProps"),
+        RuleFilter::Rule("suspicious", "noLeakedRender"),
         RuleFilter::Rule("suspicious", "noReactForwardRef"),
+        RuleFilter::Rule("suspicious", "noUnknownAttribute"),
+    ]
+});
+static REACTNATIVE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
+    vec![
+        RuleFilter::Rule("nursery", "noReactNativeDeepImports"),
+        RuleFilter::Rule("nursery", "noReactNativeLiteralColors"),
+        RuleFilter::Rule("nursery", "noReactNativeRawText"),
+        RuleFilter::Rule("nursery", "useReactNativePlatformComponents"),
     ]
 });
 static SOLID_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("correctness", "noSolidDestructuredProps"),
-        RuleFilter::Rule("nursery", "noDuplicatedSpreadProps"),
         RuleFilter::Rule("performance", "useSolidForComponent"),
+        RuleFilter::Rule("suspicious", "noDuplicatedSpreadProps"),
         RuleFilter::Rule("suspicious", "noReactSpecificProps"),
     ]
 });
+static SVELTE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
+    LazyLock::new(|| vec![RuleFilter::Rule("nursery", "noSvelteUnnecessaryStateWrap")]);
 static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("complexity", "noExcessiveNestedTestSuites"),
         RuleFilter::Rule("nursery", "noConditionalExpect"),
+        RuleFilter::Rule("nursery", "noIdenticalTestTitle"),
+        RuleFilter::Rule("nursery", "useConsistentTestIt"),
         RuleFilter::Rule("nursery", "useExpect"),
+        RuleFilter::Rule("nursery", "useTestHooksInOrder"),
+        RuleFilter::Rule("nursery", "useTestHooksOnTop"),
         RuleFilter::Rule("suspicious", "noDuplicateTestHooks"),
         RuleFilter::Rule("suspicious", "noExportsInTest"),
         RuleFilter::Rule("suspicious", "noFocusedTests"),
@@ -105,19 +127,26 @@ static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     ]
 });
 static TURBOREPO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
-    LazyLock::new(|| vec![RuleFilter::Rule("nursery", "noUndeclaredEnvVars")]);
+    LazyLock::new(|| vec![RuleFilter::Rule("suspicious", "noUndeclaredEnvVars")]);
 static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
+        RuleFilter::Rule("complexity", "useArrayFind"),
+        RuleFilter::Rule("nursery", "noBaseToString"),
         RuleFilter::Rule("nursery", "noFloatingPromises"),
+        RuleFilter::Rule("nursery", "noMisleadingReturnType"),
         RuleFilter::Rule("nursery", "noMisusedPromises"),
-        RuleFilter::Rule("nursery", "noUnnecessaryConditions"),
-        RuleFilter::Rule("nursery", "useArraySortCompare"),
+        RuleFilter::Rule("nursery", "noUnsafePlusOperands"),
+        RuleFilter::Rule("nursery", "noUselessTypeConversion"),
         RuleFilter::Rule("nursery", "useAwaitThenable"),
-        RuleFilter::Rule("nursery", "useConsistentEnumValueType"),
+        RuleFilter::Rule("nursery", "useDisposables"),
         RuleFilter::Rule("nursery", "useExhaustiveSwitchCases"),
-        RuleFilter::Rule("nursery", "useFind"),
+        RuleFilter::Rule("nursery", "useIncludes"),
         RuleFilter::Rule("nursery", "useNullishCoalescing"),
         RuleFilter::Rule("nursery", "useRegexpExec"),
+        RuleFilter::Rule("nursery", "useStringStartsEndsWith"),
+        RuleFilter::Rule("style", "useConsistentEnumValueType"),
+        RuleFilter::Rule("suspicious", "noUnnecessaryConditions"),
+        RuleFilter::Rule("suspicious", "useArraySortCompare"),
     ]
 });
 static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
@@ -127,12 +156,14 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "noVueReservedKeys"),
         RuleFilter::Rule("correctness", "noVueReservedProps"),
         RuleFilter::Rule("correctness", "noVueSetupPropsReactivityLoss"),
-        RuleFilter::Rule("nursery", "noVueArrowFuncInWatch"),
-        RuleFilter::Rule("nursery", "noVueOptionsApi"),
+        RuleFilter::Rule("nursery", "noVueImportCompilerMacros"),
         RuleFilter::Rule("nursery", "noVueRefAsOperand"),
         RuleFilter::Rule("nursery", "useVueConsistentDefinePropsDeclaration"),
-        RuleFilter::Rule("nursery", "useVueDefineMacrosOrder"),
-        RuleFilter::Rule("nursery", "useVueMultiWordComponentNames"),
+        RuleFilter::Rule("nursery", "useVueNextTickPromise"),
+        RuleFilter::Rule("style", "noVueOptionsApi"),
+        RuleFilter::Rule("style", "useVueDefineMacrosOrder"),
+        RuleFilter::Rule("style", "useVueMultiWordComponentNames"),
+        RuleFilter::Rule("suspicious", "noVueArrowFuncInWatch"),
     ]
 });
 impl DomainSelector {
@@ -144,7 +175,9 @@ impl DomainSelector {
             "project" => PROJECT_FILTERS.clone(),
             "qwik" => QWIK_FILTERS.clone(),
             "react" => REACT_FILTERS.clone(),
+            "reactNative" => REACTNATIVE_FILTERS.clone(),
             "solid" => SOLID_FILTERS.clone(),
+            "svelte" => SVELTE_FILTERS.clone(),
             "test" => TEST_FILTERS.clone(),
             "turborepo" => TURBOREPO_FILTERS.clone(),
             "types" => TYPES_FILTERS.clone(),
@@ -169,7 +202,11 @@ impl DomainSelector {
                 .any(|filter| filter.match_rule::<R>()),
             "qwik" => QWIK_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             "react" => REACT_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
+            "reactNative" => REACTNATIVE_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule::<R>()),
             "solid" => SOLID_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
+            "svelte" => SVELTE_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             "test" => TEST_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             "turborepo" => TURBOREPO_FILTERS
                 .iter()

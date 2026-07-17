@@ -1,0 +1,10 @@
+.panel {
+  empty: "#{""}";
+  escaped_quote: "#{"a\\\"b"}";
+  single_inside_double: "#{'bar'}";
+  nested_interpolated_inside_double: "#{'a #{$b}'}";
+  suffix_after_inner: "#{"bar"}-icon";
+  nested_then_interpolation: "#{"bar"}#{$baz}";
+  triple_nested_chain: "#{'alpha #{"beta #{'gamma #{$delta}'}"}'}";
+  quadruple_nested_chain: "#{"root #{'branch #{"leaf #{'twig #{$bud}'}"}'}"}";
+}

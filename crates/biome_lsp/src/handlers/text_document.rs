@@ -3,11 +3,13 @@ use crate::session::ConfigurationStatus;
 use crate::utils::apply_document_changes;
 use crate::{documents::Document, session::Session};
 use biome_configuration::ConfigurationPathHint;
+use biome_languages::DocumentFileSource;
+use biome_service::Workspace;
 use biome_service::workspace::{
-    ChangeFileParams, CloseFileParams, DocumentFileSource, FeaturesBuilder, FileContent,
-    GetFileContentParams, IgnoreKind, OpenFileParams, PathIsIgnoredParams,
+    ChangeFileParams, CloseFileParams, FeaturesBuilder, FileContent, GetFileContentParams,
+    IgnoreKind, OpenFileParams, PathIsIgnoredParams, ProjectKey,
 };
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use std::sync::Arc;
 use tower_lsp_server::ls_types as lsp;
 use tracing::{debug, error, field, info, trace};
@@ -28,93 +30,21 @@ pub(crate) async fn did_open(
     let url = params.text_document.uri;
     let version = params.text_document.version;
     let content = params.text_document.text;
-    let language_hint = DocumentFileSource::from_language_id(&params.text_document.language_id);
-
     let path = session.file_path(&url)?;
+    let language_hint =
+        DocumentFileSource::from_language_id(&params.text_document.language_id, path.extension());
 
-    let project_key = match session.project_for_path(&path) {
-        Some(project_key) => project_key,
-        None => {
-            info!("No open project for path: {path:?}. Opening new project.");
+    let file_path = path.to_path_buf();
+    let config_path = session.resolve_configuration_path(Some(&file_path));
 
-            session.set_configuration_status(ConfigurationStatus::Loading);
-            if !session.has_initialized() {
-                session.load_extension_settings(None).await;
-            }
-
-            let status = if let Some(config_path) = session.resolve_configuration_path(Some(&path))
-            {
-                info!(
-                    "Loading user configuration from text_document {:?}",
-                    &config_path
-                );
-                session
-                    .load_biome_configuration_file(config_path, false)
-                    .await
-            } else {
-                let project_path = path
-                    .parent()
-                    .map(|parent| parent.to_path_buf())
-                    .unwrap_or_default();
-                info!("Loading configuration from text_document {}", &project_path);
-                // First check if the current file belongs to any registered workspace folder.
-                // If so, return that folder; otherwise, use the folder computed by did_open.
-                let project_path = if let Some(workspace_folders) = session.get_workspace_folders()
-                {
-                    if let Some(ws_root) = workspace_folders
-                        .iter()
-                        .filter_map(|folder| {
-                            folder.uri.to_file_path().map(|p| {
-                                Utf8PathBuf::from_path_buf(p.to_path_buf())
-                                    .expect("To have a valid UTF-8 path")
-                            })
-                        })
-                        .find(|ws| project_path.starts_with(ws))
-                    {
-                        ws_root
-                    } else {
-                        project_path.clone()
-                    }
-                } else if let Some(base_path) = session.base_path() {
-                    if project_path.starts_with(&base_path) {
-                        base_path
-                    } else {
-                        project_path.clone()
-                    }
-                } else {
-                    project_path
-                };
-
-                session
-                    .load_biome_configuration_file(
-                        ConfigurationPathHint::FromLsp(project_path),
-                        false,
-                    )
-                    .await
-            };
-
-            session.set_configuration_status(status);
-
-            if status.is_loaded() {
-                match session.project_for_path(&path) {
-                    Some(project_key) => project_key,
-
-                    None => {
-                        error!("Could not find project for {path}");
-
-                        return Ok(());
-                    }
-                }
-            } else {
-                error!("Configuration could not be loaded for {path}");
-
-                return Ok(());
-            }
-        }
+    let Some(project_key) =
+        ensure_project_for_opened_document(session, &path, config_path.as_ref()).await
+    else {
+        return Ok(());
     };
 
     let is_ignored = session
-        .workspace
+        .workspace()
         .is_path_ignored(PathIsIgnoredParams {
             project_key,
             path: path.clone(),
@@ -130,28 +60,132 @@ pub(crate) async fn did_open(
 
     let doc = Document::new(project_key, version, &content);
 
-    session.workspace.open_file(OpenFileParams {
+    session.workspace().open_file(OpenFileParams {
         project_key,
         path,
         content: FileContent::FromClient { content, version },
         document_file_source: Some(language_hint),
         persist_node_cache: true,
         inline_config: session.inline_config(),
+        editor_features: Some(session.extension_settings.read().editor_features()),
     })?;
 
     session.insert_document(url.clone(), doc);
 
-    if let Err(err) = session.update_diagnostics(url).await {
-        error!("Failed to update diagnostics: {}", err);
-    }
+    session.schedule_diagnostics(url, version);
 
     Ok(())
+}
+
+/// Ensure the file is associated with a project and the correct configuration
+/// is loaded before opening the document.
+async fn ensure_project_for_opened_document(
+    session: &Arc<Session>,
+    path: &Utf8Path,
+    config_path: Option<&ConfigurationPathHint>,
+) -> Option<ProjectKey> {
+    let is_relative_config_path = session
+        .get_settings_configuration_path()
+        .is_some_and(|config_path| !config_path.is_absolute());
+
+    let mut load_status = None;
+
+    if let Some(project_key) = session.project_for_path(path) {
+        if is_relative_config_path {
+            // Absolute configurationPath is global; only relative needs per-file resolution.
+            // Use the per-file resolved configurationPath so each workspace folder
+            // uses its own config, even when a project is already open.
+            if let Some(resolved_path) = config_path {
+                let status = session
+                    .load_biome_configuration_file(resolved_path.clone(), false)
+                    .await;
+                session.set_configuration_status(project_key, status);
+                load_status = Some(status);
+            }
+        }
+        if load_status.is_none() {
+            return Some(project_key);
+        }
+    } else {
+        info!("No open project for path: {path:?}. Opening new project.");
+    }
+
+    if load_status.is_none() {
+        if !session.has_initialized() {
+            session.load_extension_settings(None).await;
+        }
+        let status = load_from_workspace_root_for_path(session, path, config_path).await;
+        // On success the project was created during loading, so it can now be
+        // resolved from the path and the status recorded against it.
+        if let Some(project_key) = session.project_for_path(path) {
+            session.set_configuration_status(project_key, status);
+        }
+        load_status = Some(status);
+    }
+    let status = load_status.expect("load_status should be set");
+
+    if status.is_loaded() {
+        session.project_for_path(path).or_else(|| {
+            error!("Could not find project for {path}");
+            None
+        })
+    } else {
+        error!("Configuration could not be loaded for {path}");
+        None
+    }
+}
+
+/// Load configuration anchored to the workspace root that contains `path`.
+async fn load_from_workspace_root_for_path(
+    session: &Arc<Session>,
+    path: &Utf8Path,
+    config_path: Option<&ConfigurationPathHint>,
+) -> ConfigurationStatus {
+    if let Some(path) = config_path {
+        info!("Loading user configuration from text_document {:?}", &path);
+        return session
+            .load_biome_configuration_file(path.clone(), false)
+            .await;
+    }
+
+    let project_path = path
+        .parent()
+        .map(|parent| parent.to_path_buf())
+        .unwrap_or_default();
+    info!("Loading configuration from text_document {}", &project_path);
+    let project_path = resolve_workspace_base_path(session, &project_path);
+
+    session
+        .load_biome_configuration_file(ConfigurationPathHint::FromLsp(project_path), false)
+        .await
+}
+
+fn resolve_workspace_base_path(session: &Session, project_path: &Utf8Path) -> Utf8PathBuf {
+    let workspace_base = || {
+        let workspace_folders = session.get_workspace_folders()?;
+        workspace_folders
+            .iter()
+            .filter_map(|folder| {
+                folder.uri.to_file_path().map(|p| {
+                    Utf8PathBuf::from_path_buf(p.to_path_buf()).expect("To have a valid UTF-8 path")
+                })
+            })
+            .filter(|ws| project_path.starts_with(ws))
+            .max_by_key(|ws| ws.as_str().len())
+    };
+    workspace_base()
+        .or_else(|| {
+            session
+                .base_path()
+                .and_then(|base_path| project_path.starts_with(&base_path).then_some(base_path))
+        })
+        .unwrap_or_else(|| project_path.to_path_buf())
 }
 
 /// Handler for `textDocument/didChange` LSP notification
 #[tracing::instrument(level = "debug", skip_all, fields(url = field::display(&params.text_document.uri.as_str()), version = params.text_document.version), err)]
 pub(crate) async fn did_change(
-    session: &Session,
+    session: &Arc<Session>,
     params: lsp::DidChangeTextDocumentParams,
 ) -> Result<(), LspError> {
     let url = params.text_document.uri;
@@ -161,11 +195,11 @@ pub(crate) async fn did_change(
     let Some(doc) = session.document(&url) else {
         return Ok(());
     };
-    if !session.workspace.file_exists(path.clone().into())? {
+    if !session.workspace().file_exists(path.clone().into())? {
         return Ok(());
     }
     let features = FeaturesBuilder::new().build();
-    if session.workspace.is_path_ignored(PathIsIgnoredParams {
+    if session.workspace().is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
         is_dir: false,
         project_key: doc.project_key,
@@ -175,7 +209,7 @@ pub(crate) async fn did_change(
         return Ok(());
     }
 
-    let old_text = session.workspace.get_file_content(GetFileContentParams {
+    let old_text = session.workspace().get_file_content(GetFileContentParams {
         project_key: doc.project_key,
         path: path.clone(),
     })?;
@@ -190,17 +224,16 @@ pub(crate) async fn did_change(
 
     session.insert_document(url.clone(), Document::new(doc.project_key, version, &text));
 
-    session.workspace.change_file(ChangeFileParams {
+    session.workspace().change_file(ChangeFileParams {
         project_key: doc.project_key,
         path,
         version,
         content: text,
         inline_config: session.inline_config(),
+        editor_features: None,
     })?;
 
-    if let Err(err) = session.update_diagnostics(url).await {
-        error!("Failed to update diagnostics: {}", err);
-    }
+    session.schedule_diagnostics(url, version);
 
     Ok(())
 }
@@ -221,12 +254,13 @@ pub(crate) async fn did_save(
             return Ok(());
         };
 
-        session.workspace.change_file(ChangeFileParams {
+        session.workspace().change_file(ChangeFileParams {
             project_key: doc.project_key,
             path,
             content: text.clone(),
             version: doc.version,
             inline_config: None,
+            editor_features: None,
         })?;
 
         session.insert_document(
@@ -250,6 +284,7 @@ pub(crate) async fn did_close(
     params: lsp::DidCloseTextDocumentParams,
 ) -> Result<(), LspError> {
     let uri = params.text_document.uri;
+    session.close_diagnostics(&uri);
     let path = session.file_path(&uri)?;
     let Some(project_key) = session.remove_document(&uri) else {
         debug!("Document wasn't open: {}", uri.as_str());
@@ -257,7 +292,7 @@ pub(crate) async fn did_close(
     };
 
     session
-        .workspace
+        .workspace()
         .close_file(CloseFileParams { project_key, path })?;
 
     session

@@ -48,7 +48,7 @@ CssRoot {
                                     items: CssParameterList [
                                         ScssExpression {
                                             items: ScssExpressionItemList [
-                                                ScssIdentifier {
+                                                ScssVariable {
                                                     dollar_token: DOLLAR@42..43 "$" [] [],
                                                     name: CssIdentifier {
                                                         value_token: IDENT@43..48 "value" [] [],
@@ -60,7 +60,7 @@ CssRoot {
                                         ScssExpression {
                                             items: ScssExpressionItemList [
                                                 ScssKeywordArgument {
-                                                    name: ScssIdentifier {
+                                                    name: ScssVariable {
                                                         dollar_token: DOLLAR@50..51 "$" [] [],
                                                         name: CssIdentifier {
                                                             value_token: IDENT@51..59 "fallback" [] [],
@@ -125,7 +125,7 @@ CssRoot {
                   1: CSS_PARAMETER_LIST@42..65
                     0: SCSS_EXPRESSION@42..48
                       0: SCSS_EXPRESSION_ITEM_LIST@42..48
-                        0: SCSS_IDENTIFIER@42..48
+                        0: SCSS_VARIABLE@42..48
                           0: DOLLAR@42..43 "$" [] []
                           1: CSS_IDENTIFIER@43..48
                             0: IDENT@43..48 "value" [] []
@@ -133,7 +133,7 @@ CssRoot {
                     2: SCSS_EXPRESSION@50..65
                       0: SCSS_EXPRESSION_ITEM_LIST@50..65
                         0: SCSS_KEYWORD_ARGUMENT@50..65
-                          0: SCSS_IDENTIFIER@50..59
+                          0: SCSS_VARIABLE@50..59
                             0: DOLLAR@50..51 "$" [] []
                             1: CSS_IDENTIFIER@51..59
                               0: IDENT@51..59 "fallback" [] []

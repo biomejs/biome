@@ -1,0 +1,22 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.js`
+
+```js
+condition ? consequent : alternate;
+```
+
+# Emitted Messages
+
+```block
+file.js:1:1 search ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1 │ condition ? consequent : alternate;
+
+```
+
+```block
+Searched 1 file in <TIME>. Found 1 match.
+```

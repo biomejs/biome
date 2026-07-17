@@ -1,3 +1,4 @@
+use super::expect_scss_semicolon_at_rule;
 use super::module_clauses::{expected_scss_module_member, parse_scss_module_member_list};
 use super::use_at_rule::parse_scss_with_clause;
 use crate::parser::CssParser;
@@ -35,7 +36,7 @@ pub(crate) fn parse_scss_forward_at_rule(p: &mut CssParser) -> ParsedSyntax {
     parse_scss_forward_visibility_clause(p).ok();
     // The `with` clause is optional in the grammar.
     parse_scss_with_clause(p).ok();
-    p.expect(T![;]);
+    expect_scss_semicolon_at_rule(p);
 
     Present(m.complete(p, SCSS_FORWARD_AT_RULE))
 }

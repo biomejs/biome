@@ -1,6 +1,6 @@
 use super::{
-    Capabilities, DebugCapabilities, DocumentFileSource, EnabledForPath, ExtensionHandler,
-    FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
+    Capabilities, DebugCapabilities, DocumentFileSource, EditorCapabilities, EnabledForPath,
+    ExtensionHandler, FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
 };
 use crate::WorkspaceError;
 use crate::settings::{
@@ -12,14 +12,16 @@ use biome_analyze::AnalyzerOptions;
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::analyzer::linter::LinterEnabled;
 use biome_configuration::markdown::{MarkdownFormatterConfiguration, MarkdownFormatterEnabled};
+use biome_db::AnyParsedSource;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
 use biome_fs::BiomePath;
 use biome_markdown_formatter::context::MdFormatOptions;
 use biome_markdown_formatter::format_node;
 use biome_markdown_parser::{MarkdownParserOptions, parse_markdown_with_cache};
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdDocument};
-use biome_parser::{AnyParse, NodeParse};
+use biome_parser::NodeParse;
 use biome_rowan::NodeCache;
+use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 use tracing::{debug, error};
 
@@ -237,7 +239,7 @@ impl ExtensionHandler for MarkdownFileHandler {
             debug: DebugCapabilities {
                 debug_syntax_tree: Some(debug_syntax_tree),
                 debug_control_flow: None,
-                debug_formatter_ir: None,
+                debug_formatter_ir: Some(debug_formatter_ir),
                 debug_type_info: None,
                 debug_registered_types: None,
                 debug_semantic_model: None,
@@ -250,6 +252,10 @@ impl ExtensionHandler for MarkdownFileHandler {
                 format_embedded: None,
             },
             search: SearchCapabilities { search: None },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: None,
+            },
         }
     }
 }
@@ -284,24 +290,45 @@ fn parse(
     }
 }
 
-fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
-    let syntax: MarkdownSyntaxNode = parse.syntax();
-    let tree: MdDocument = parse.tree();
+fn debug_syntax_tree(
+    _biome_path: &BiomePath,
+    parse: AnyParsedSource,
+    workspace_db: WorkspaceDb,
+) -> GetSyntaxTreeResult {
+    let syntax: MarkdownSyntaxNode = parse.syntax(&workspace_db);
+    let tree: MdDocument = parse.tree(&workspace_db);
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
     }
 }
 
+fn debug_formatter_ir(
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    parse: AnyParsedSource,
+    settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
+) -> Result<String, WorkspaceError> {
+    let options = settings.format_options::<MarkdownLanguage>(biome_path, document_file_source);
+
+    let tree = parse.syntax(&workspace_db);
+    let formatted = format_node(options, &tree)?;
+
+    let root_element = formatted.into_document();
+    Ok(root_element.to_string())
+}
+
 pub(crate) fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<MarkdownLanguage>(biome_path, document_file_source);
     debug!("{:?}", &options);
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
     match formatted.print() {
         Ok(printed) => Ok(printed),

@@ -12,9 +12,7 @@ expression: valid.jsx
     <div autofocus />
     <input autofocus="true" />
     <MyComponent autoFocus={true} />
-    <div popover><input autoFocus />></div>
-    <dialog><input autoFocus />></dialog>
+    <div popover><input autoFocus /></div>
+    <dialog><input autoFocus /></dialog>
 </>
 ```
-
-_Note: The parser emitted 2 diagnostics which are not shown here._

@@ -557,8 +557,13 @@ impl<'src> JsLexer<'src> {
         }
     }
 
-    // Read a `\u{000...}` escape sequence, this expects the cur char to be the `{`
-    fn read_codepoint_escape_char(&mut self) -> Result<char, ()> {
+    /// Read a `\u{000...}` escape sequence and return the code point value.
+    /// This expects the current char to be the `{`.
+    ///
+    /// This is intended for use in string literal escapes.
+    ///
+    /// This doesn't return `char` intentionally. JS strings allow surrogate code points in unicode escapes, which are not valid unicode scalar values and would cause `char::from_u32` to return None.
+    fn read_codepoint_escape(&mut self) -> Result<u32, ()> {
         let start = self.position + 1;
         self.read_hexnumber();
 
@@ -600,20 +605,7 @@ impl<'src> JsLexer<'src> {
         };
 
         match u32::from_str_radix(digits_str, 16) {
-            Ok(digits) if digits <= 0x10_FFFF => {
-                let res = std::char::from_u32(digits);
-                if let Some(chr) = res {
-                    Ok(chr)
-                } else {
-                    let err = ParseDiagnostic::new(
-                        "invalid codepoint for unicode escape",
-                        start..self.position,
-                    );
-                    self.push_diagnostic(err);
-                    Err(())
-                }
-            }
-
+            Ok(digits) if digits <= 0x10_FFFF => Ok(digits),
             _ => {
                 let err = ParseDiagnostic::new(
                     "out of bounds codepoint for unicode codepoint escape sequence",
@@ -624,6 +616,25 @@ impl<'src> JsLexer<'src> {
                 Err(())
             }
         }
+    }
+
+    // Read a `\u{000...}` escape sequence and convert it to a valid Unicode scalar value.
+    // This expects the current char to be the `{`.
+    //
+    // This is intended for use in identifier escapes, so it will not attempt to match surrogate pairs, since those are not valid characters in JS identifiers.
+    fn read_codepoint_escape_char(&mut self) -> Result<char, ()> {
+        debug_assert!(self.current_byte() == Some(b'{'));
+        let start = self.position + 1;
+
+        self.read_codepoint_escape().and_then(|codepoint| {
+            std::char::from_u32(codepoint).ok_or_else(|| {
+                let err = ParseDiagnostic::new(
+                    "invalid codepoint for unicode escape",
+                    start..self.position,
+                );
+                self.push_diagnostic(err);
+            })
+        })
     }
 
     /// Reads a `\u0000` escape sequence.
@@ -745,8 +756,9 @@ impl<'src> JsLexer<'src> {
                     true
                 }
                 b'u' if self.peek_byte() == Some(b'{') => {
-                    self.advance(1); // eats '{'
-                    self.read_codepoint_escape_char().is_ok()
+                    self.advance(1); // eats 'u'
+
+                    self.read_codepoint_escape().is_ok()
                 }
                 b'u' => self.read_unicode_escape().is_ok(),
                 b'x' => self.validate_hex_escape(),
@@ -1894,39 +1906,29 @@ impl<'src> JsLexer<'src> {
                     self.eat_byte(T![.])
                 }
             }
-            BSL => {
-                if self.peek_byte() == Some(b'u') {
+            BSL if self.peek_byte() == Some(b'u') => {
+                self.next_byte();
+                let res = if self.peek_byte() == Some(b'{') {
                     self.next_byte();
-                    let res = if self.peek_byte() == Some(b'{') {
-                        self.next_byte();
-                        self.read_codepoint_escape_char()
-                    } else {
-                        self.read_unicode_escape_char()
-                    };
-
-                    match res {
-                        Ok(chr) => {
-                            if is_js_id_start(chr) {
-                                self.current_flags |= TokenFlags::UNICODE_ESCAPE;
-                                self.resolve_identifier(chr)
-                            } else {
-                                let err = ParseDiagnostic::new("unexpected unicode escape",
-                                                               start..self.position).with_hint("this escape is unexpected, as it does not designate the start of an identifier");
-                                self.push_diagnostic(err);
-                                self.next_byte();
-                                JsSyntaxKind::ERROR_TOKEN
-                            }
-                        }
-                        Err(_) => JsSyntaxKind::ERROR_TOKEN,
-                    }
+                    self.read_codepoint_escape_char()
                 } else {
-                    let err = ParseDiagnostic::new(
-                        format!("unexpected token `{}`", byte as char),
-                        start..self.position + 1,
-                    );
-                    self.push_diagnostic(err);
-                    self.next_byte();
-                    JsSyntaxKind::ERROR_TOKEN
+                    self.read_unicode_escape_char()
+                };
+
+                match res {
+                    Ok(chr) => {
+                        if is_js_id_start(chr) {
+                            self.current_flags |= TokenFlags::UNICODE_ESCAPE;
+                            self.resolve_identifier(chr)
+                        } else {
+                            let err = ParseDiagnostic::new("unexpected unicode escape",
+                                                               start..self.position).with_hint("this escape is unexpected, as it does not designate the start of an identifier");
+                            self.push_diagnostic(err);
+                            self.next_byte();
+                            JsSyntaxKind::ERROR_TOKEN
+                        }
+                    }
+                    Err(_) => JsSyntaxKind::ERROR_TOKEN,
                 }
             }
             QOT => {

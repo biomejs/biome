@@ -65,7 +65,7 @@ CssRoot {
                 condition: ScssExpression {
                     items: ScssExpressionItemList [
                         ScssBinaryExpression {
-                            left: ScssIdentifier {
+                            left: ScssVariable {
                                 dollar_token: DOLLAR@33..34 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@34..40 "count" [] [Whitespace(" ")],
@@ -111,7 +111,7 @@ CssRoot {
                     ScssExpression {
                         items: ScssExpressionItemList [
                             ScssBinaryExpression {
-                                left: ScssIdentifier {
+                                left: ScssVariable {
                                     dollar_token: DOLLAR@68..69 "$" [] [],
                                     name: CssIdentifier {
                                         value_token: IDENT@69..75 "count" [] [Whitespace(" ")],
@@ -169,7 +169,7 @@ CssRoot {
         1: SCSS_EXPRESSION@33..42
           0: SCSS_EXPRESSION_ITEM_LIST@33..42
             0: SCSS_BINARY_EXPRESSION@33..42
-              0: SCSS_IDENTIFIER@33..40
+              0: SCSS_VARIABLE@33..40
                 0: DOLLAR@33..34 "$" [] []
                 1: CSS_IDENTIFIER@34..40
                   0: IDENT@34..40 "count" [] [Whitespace(" ")]
@@ -198,7 +198,7 @@ CssRoot {
         1: SCSS_EXPRESSION@68..78
           0: SCSS_EXPRESSION_ITEM_LIST@68..78
             0: SCSS_BINARY_EXPRESSION@68..78
-              0: SCSS_IDENTIFIER@68..75
+              0: SCSS_VARIABLE@68..75
                 0: DOLLAR@68..69 "$" [] []
                 1: CSS_IDENTIFIER@69..75
                   0: IDENT@69..75 "count" [] [Whitespace(" ")]

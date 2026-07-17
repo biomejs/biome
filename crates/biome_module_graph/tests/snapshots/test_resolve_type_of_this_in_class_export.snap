@@ -68,7 +68,6 @@ Imports {
 ```
 Foo  => BindingTypeData {
   Types Module(0) TypeId(23),
-  Exported Ranges: (21..24)
 }
 ```
 

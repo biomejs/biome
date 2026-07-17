@@ -289,7 +289,12 @@ fn check_regexp_constructor(
 }
 
 fn is_regexp_object(expr: &AnyJsExpression, model: &SemanticModel) -> bool {
-    match global_identifier(&expr.clone().omit_parentheses()) {
+    match expr
+        .clone()
+        .omit_parentheses()
+        .as_any_global_identifier_expression()
+        .and_then(|e| global_identifier(&e))
+    {
         Some((reference, name)) => match model.binding(&reference) {
             Some(_) if !reference.is_global_this() && !reference.has_name("window") => false,
             _ => name.text() == "RegExp",

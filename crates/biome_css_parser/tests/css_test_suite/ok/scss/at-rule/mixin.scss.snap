@@ -74,7 +74,7 @@ CssRoot {
                     l_paren_token: L_PAREN@52..53 "(" [] [],
                     items: ScssParameterItemList [
                         ScssParameter {
-                            name: ScssIdentifier {
+                            name: ScssVariable {
                                 dollar_token: DOLLAR@53..54 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@54..59 "width" [] [],
@@ -85,7 +85,7 @@ CssRoot {
                         },
                         COMMA@59..61 "," [] [Whitespace(" ")],
                         ScssParameter {
-                            name: ScssIdentifier {
+                            name: ScssVariable {
                                 dollar_token: DOLLAR@61..62 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@62..68 "height" [] [],
@@ -95,7 +95,7 @@ CssRoot {
                                 colon_token: COLON@68..70 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        ScssIdentifier {
+                                        ScssVariable {
                                             dollar_token: DOLLAR@70..71 "$" [] [],
                                             name: CssIdentifier {
                                                 value_token: IDENT@71..76 "width" [] [],
@@ -108,7 +108,7 @@ CssRoot {
                         },
                         COMMA@76..78 "," [] [Whitespace(" ")],
                         ScssParameter {
-                            name: ScssIdentifier {
+                            name: ScssVariable {
                                 dollar_token: DOLLAR@78..79 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@79..83 "args" [] [],
@@ -132,7 +132,7 @@ CssRoot {
                                     colon_token: COLON@97..99 ":" [] [Whitespace(" ")],
                                     value: ScssExpression {
                                         items: ScssExpressionItemList [
-                                            ScssIdentifier {
+                                            ScssVariable {
                                                 dollar_token: DOLLAR@99..100 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@100..105 "width" [] [],
@@ -152,7 +152,7 @@ CssRoot {
                                 condition: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
-                                            left: ScssIdentifier {
+                                            left: ScssVariable {
                                                 dollar_token: DOLLAR@114..115 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@115..122 "height" [] [Whitespace(" ")],
@@ -177,7 +177,7 @@ CssRoot {
                                                     colon_token: COLON@138..140 ":" [] [Whitespace(" ")],
                                                     value: ScssExpression {
                                                         items: ScssExpressionItemList [
-                                                            ScssIdentifier {
+                                                            ScssVariable {
                                                                 dollar_token: DOLLAR@140..141 "$" [] [],
                                                                 name: CssIdentifier {
                                                                     value_token: IDENT@141..147 "height" [] [],
@@ -246,7 +246,7 @@ CssRoot {
           0: L_PAREN@52..53 "(" [] []
           1: SCSS_PARAMETER_ITEM_LIST@53..86
             0: SCSS_PARAMETER@53..59
-              0: SCSS_IDENTIFIER@53..59
+              0: SCSS_VARIABLE@53..59
                 0: DOLLAR@53..54 "$" [] []
                 1: CSS_IDENTIFIER@54..59
                   0: IDENT@54..59 "width" [] []
@@ -254,7 +254,7 @@ CssRoot {
               2: (empty)
             1: COMMA@59..61 "," [] [Whitespace(" ")]
             2: SCSS_PARAMETER@61..76
-              0: SCSS_IDENTIFIER@61..68
+              0: SCSS_VARIABLE@61..68
                 0: DOLLAR@61..62 "$" [] []
                 1: CSS_IDENTIFIER@62..68
                   0: IDENT@62..68 "height" [] []
@@ -262,14 +262,14 @@ CssRoot {
                 0: COLON@68..70 ":" [] [Whitespace(" ")]
                 1: SCSS_EXPRESSION@70..76
                   0: SCSS_EXPRESSION_ITEM_LIST@70..76
-                    0: SCSS_IDENTIFIER@70..76
+                    0: SCSS_VARIABLE@70..76
                       0: DOLLAR@70..71 "$" [] []
                       1: CSS_IDENTIFIER@71..76
                         0: IDENT@71..76 "width" [] []
               2: (empty)
             3: COMMA@76..78 "," [] [Whitespace(" ")]
             4: SCSS_PARAMETER@78..86
-              0: SCSS_IDENTIFIER@78..83
+              0: SCSS_VARIABLE@78..83
                 0: DOLLAR@78..79 "$" [] []
                 1: CSS_IDENTIFIER@79..83
                   0: IDENT@79..83 "args" [] []
@@ -287,7 +287,7 @@ CssRoot {
                   1: COLON@97..99 ":" [] [Whitespace(" ")]
                   2: SCSS_EXPRESSION@99..105
                     0: SCSS_EXPRESSION_ITEM_LIST@99..105
-                      0: SCSS_IDENTIFIER@99..105
+                      0: SCSS_VARIABLE@99..105
                         0: DOLLAR@99..100 "$" [] []
                         1: CSS_IDENTIFIER@100..105
                           0: IDENT@100..105 "width" [] []
@@ -300,7 +300,7 @@ CssRoot {
                 1: SCSS_EXPRESSION@114..126
                   0: SCSS_EXPRESSION_ITEM_LIST@114..126
                     0: SCSS_BINARY_EXPRESSION@114..126
-                      0: SCSS_IDENTIFIER@114..122
+                      0: SCSS_VARIABLE@114..122
                         0: DOLLAR@114..115 "$" [] []
                         1: CSS_IDENTIFIER@115..122
                           0: IDENT@115..122 "height" [] [Whitespace(" ")]
@@ -318,7 +318,7 @@ CssRoot {
                           1: COLON@138..140 ":" [] [Whitespace(" ")]
                           2: SCSS_EXPRESSION@140..147
                             0: SCSS_EXPRESSION_ITEM_LIST@140..147
-                              0: SCSS_IDENTIFIER@140..147
+                              0: SCSS_VARIABLE@140..147
                                 0: DOLLAR@140..141 "$" [] []
                                 1: CSS_IDENTIFIER@141..147
                                   0: IDENT@141..147 "height" [] []

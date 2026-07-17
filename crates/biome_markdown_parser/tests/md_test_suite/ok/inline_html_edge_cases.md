@@ -44,10 +44,10 @@ Unquoted: <div data-x=foo data-y=bar-baz>text</div> end.
 Underscore/colon: <div _x=1 x:y=2>text</div> end.
 Boolean: <div disabled>text</div> end.
 
-## Newline Cases (should parse as inline HTML)
+## Newline Cases
 Allowed: <div
 class="test">ok</div> tag.
-Allowed: <div class="a"
+Not inline HTML (> at line start is blockquote marker): <div class="a"
 >ok</div> tag.
 
 ## Priority - Autolinks Should Win

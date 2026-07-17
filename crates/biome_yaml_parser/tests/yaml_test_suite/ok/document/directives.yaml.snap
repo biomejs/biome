@@ -1,0 +1,98 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+%YAML 1.2 # comment
+%FOO  bar baz
+---
+...
+%YAML1.2
+---
+...
+%TAG ! tag:clarkevans.com,2002:
+---
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [
+                YamlDirective {
+                    value_token: DIRECTIVE_LITERAL@0..19 "%YAML 1.2" [] [Whitespace(" "), Comments("# comment")],
+                },
+                YamlDirective {
+                    value_token: DIRECTIVE_LITERAL@19..33 "%FOO  bar baz" [Newline("\n")] [],
+                },
+            ],
+            dashdashdash_token: DIRECTIVE_END@33..37 "---" [Newline("\n")] [],
+            node: missing (optional),
+            dotdotdot_token: DOC_END@37..41 "..." [Newline("\n")] [],
+        },
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [
+                YamlDirective {
+                    value_token: DIRECTIVE_LITERAL@41..50 "%YAML1.2" [Newline("\n")] [],
+                },
+            ],
+            dashdashdash_token: DIRECTIVE_END@50..54 "---" [Newline("\n")] [],
+            node: missing (optional),
+            dotdotdot_token: DOC_END@54..58 "..." [Newline("\n")] [],
+        },
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [
+                YamlDirective {
+                    value_token: DIRECTIVE_LITERAL@58..90 "%TAG ! tag:clarkevans.com,2002:" [Newline("\n")] [],
+                },
+            ],
+            dashdashdash_token: DIRECTIVE_END@90..94 "---" [Newline("\n")] [],
+            node: missing (optional),
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@94..95 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..95
+  0: YAML_DOCUMENT_LIST@0..94
+    0: YAML_DOCUMENT@0..41
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..33
+        0: YAML_DIRECTIVE@0..19
+          0: DIRECTIVE_LITERAL@0..19 "%YAML 1.2" [] [Whitespace(" "), Comments("# comment")]
+        1: YAML_DIRECTIVE@19..33
+          0: DIRECTIVE_LITERAL@19..33 "%FOO  bar baz" [Newline("\n")] []
+      2: DIRECTIVE_END@33..37 "---" [Newline("\n")] []
+      3: (empty)
+      4: DOC_END@37..41 "..." [Newline("\n")] []
+    1: YAML_DOCUMENT@41..58
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@41..50
+        0: YAML_DIRECTIVE@41..50
+          0: DIRECTIVE_LITERAL@41..50 "%YAML1.2" [Newline("\n")] []
+      2: DIRECTIVE_END@50..54 "---" [Newline("\n")] []
+      3: (empty)
+      4: DOC_END@54..58 "..." [Newline("\n")] []
+    2: YAML_DOCUMENT@58..94
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@58..90
+        0: YAML_DIRECTIVE@58..90
+          0: DIRECTIVE_LITERAL@58..90 "%TAG ! tag:clarkevans.com,2002:" [Newline("\n")] []
+      2: DIRECTIVE_END@90..94 "---" [Newline("\n")] []
+      3: (empty)
+      4: (empty)
+  1: EOF@94..95 "" [Newline("\n")] []
+
+```

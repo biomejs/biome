@@ -2,12 +2,19 @@ use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::{
     expected_keyframes_item, expected_keyframes_item_selector,
+    expected_percentage_after_timeline_range_name,
 };
 use crate::syntax::block::{ParseBlockBody, parse_declaration_block};
 use crate::syntax::css_modules::{
     CSS_MODULES_SCOPE_SET, expected_any_css_module_scope, local_or_global_not_allowed,
 };
-use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
+use crate::syntax::parse_error::{
+    expected_non_css_wide_keyword_identifier, scss_only_syntax_error,
+};
+use crate::syntax::scss::{
+    is_at_scss_keyframes_name, is_at_scss_keyframes_selector, is_at_scss_variable_declaration,
+    parse_scss_keyframes_name, parse_scss_keyframes_selector, parse_scss_variable_declaration,
+};
 use crate::syntax::value::dimension::{is_at_percentage_dimension, parse_percentage_dimension};
 use crate::syntax::{
     CssSyntaxFeatures, is_at_declaration, is_at_identifier, is_at_string, parse_custom_identifier,
@@ -15,6 +22,7 @@ use crate::syntax::{
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
+use biome_parser::SyntaxFeature;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
@@ -77,8 +85,7 @@ pub(crate) fn parse_keyframes_at_rule(p: &mut CssParser) -> ParsedSyntax {
         // is_at_keyframes_scoped_name guaranties that it will parse a keyframes scoped name
         parse_keyframes_scoped_name(p).ok();
     } else {
-        parse_keyframes_identifier(p)
-            .or_add_diagnostic(p, expected_non_css_wide_keyword_identifier);
+        parse_keyframes_name(p).or_add_diagnostic(p, expected_non_css_wide_keyword_identifier);
     };
 
     KeyframesBlock.parse_block_body(p);
@@ -114,7 +121,7 @@ fn parse_keyframes_scoped_name(p: &mut CssParser) -> ParsedSyntax {
 
         // Skip the entire pseudo-class function selector
         // Skip until the next opening curly brace
-        while !p.at(T!['{']) {
+        while !p.at(T!['{']) && !p.at(EOF) {
             p.bump_any();
         }
 
@@ -180,13 +187,27 @@ fn parse_keyframes_identifier(p: &mut CssParser) -> ParsedSyntax {
     }
 }
 
+/// Parses a keyframes name in the top-level `@keyframes` name slot.
+///
+/// This accepts standard CSS names and SCSS dynamic names such as
+/// `@keyframes $name`, `@keyframes #{$name}`, and `@keyframes fade-#{$name}`.
+fn parse_keyframes_name(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_scss_keyframes_name(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_keyframes_name, |p, marker| {
+            scss_only_syntax_error(p, "SCSS keyframes names", marker.range(p))
+        })
+    } else {
+        parse_keyframes_identifier(p)
+    }
+}
+
 struct KeyframesBlock;
 
 impl ParseBlockBody for KeyframesBlock {
     const BLOCK_KIND: CssSyntaxKind = CSS_KEYFRAMES_BLOCK;
 
     fn is_at_element(&self, p: &mut CssParser) -> bool {
-        is_at_keyframes_item_selector(p)
+        is_at_any_keyframes_item(p)
     }
 
     fn parse_list(&mut self, p: &mut CssParser) {
@@ -202,7 +223,7 @@ impl ParseRecovery for KeyframesItemListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS_KEYFRAMES_ITEM;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T!['}']) || is_at_keyframes_item_selector(p)
+        p.at(T!['}']) || is_at_any_keyframes_item(p)
     }
 }
 
@@ -214,7 +235,7 @@ impl ParseNodeList for KeyframesItemList {
     const LIST_KIND: Self::Kind = CSS_KEYFRAMES_ITEM_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_keyframes_item(p)
+        parse_any_keyframes_item(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -228,6 +249,37 @@ impl ParseNodeList for KeyframesItemList {
     ) -> RecoveryResult {
         parsed_element.or_recover(p, &KeyframesItemListParseRecovery, expected_keyframes_item)
     }
+}
+
+#[inline]
+fn is_at_any_keyframes_item(p: &mut CssParser) -> bool {
+    is_at_scss_variable_declaration(p) || is_at_keyframes_item_selector(p)
+}
+
+#[inline]
+fn parse_any_keyframes_item(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_scss_variable_declaration(p) {
+        parse_scss_keyframes_variable_declaration(p)
+    } else {
+        parse_keyframes_item(p)
+    }
+}
+
+#[inline]
+fn parse_scss_keyframes_variable_declaration(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_scss_variable_declaration(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    CssSyntaxFeatures::Scss
+        .parse_exclusive_syntax(p, parse_scss_variable_declaration, |p, marker| {
+            scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
+        })
+        .ok();
+
+    Present(m.complete(p, SCSS_KEYFRAMES_VARIABLE_DECLARATION))
 }
 
 #[inline]
@@ -322,32 +374,107 @@ fn is_at_keyframes_selector_list_end(p: &mut CssParser) -> bool {
 /// A set of tokens representing the keyframes item selectors `from` and `to`.
 const KEYFRAMES_ITEM_SELECTOR_IDENT_SET: TokenSet<CssSyntaxKind> = token_set!(T![from], T![to]);
 
+/// A set of tokens representing timeline-range-name keywords for scroll-driven animations.
+///
+/// Valid timeline-range-names per the CSS Scroll-driven Animations spec:
+/// `cover`, `contain`, `entry`, `exit`, `entry-crossing`, `exit-crossing`.
+const TIMELINE_RANGE_NAME_SET: TokenSet<CssSyntaxKind> = token_set!(
+    T![cover],
+    T![contain],
+    T![entry],
+    T![exit],
+    T![entry_crossing],
+    T![exit_crossing]
+);
+
+/// Checks if the current token is a timeline-range-name keyword.
+fn is_at_timeline_range_name(p: &mut CssParser) -> bool {
+    p.at_ts(TIMELINE_RANGE_NAME_SET)
+}
+
+#[inline]
+fn is_at_keyframes_ident_selector(p: &mut CssParser) -> bool {
+    p.at_ts(KEYFRAMES_ITEM_SELECTOR_IDENT_SET)
+}
+
 /// Checks if the current parser position is at a keyframes item selector.
 ///
 /// This function determines if the parser is currently positioned at the start of a keyframes item selector,
-/// which can be either `from`, `to`, or a percentage dimension.
+/// which can be `from`, `to`, a percentage dimension, or a timeline-range-name followed by a percentage.
 fn is_at_keyframes_item_selector(p: &mut CssParser) -> bool {
-    p.at_ts(KEYFRAMES_ITEM_SELECTOR_IDENT_SET) || is_at_percentage_dimension(p)
+    is_at_keyframes_ident_selector(p)
+        || is_at_percentage_dimension(p)
+        || is_at_timeline_range_name(p)
+        || is_at_scss_keyframes_selector(p)
 }
 
 /// Parses a keyframes item selector in CSS.
 ///
-/// This function parses a keyframes item selector, which can be either `from`, `to`, or a percentage dimension.
+/// This function parses a keyframes item selector, which can be `from`, `to`,
+/// a percentage dimension, or a `<timeline-range-name> <percentage>` selector
+/// for scroll-driven animations. SCSS also accepts whole-selector interpolation
+/// such as `#{50% - $duration}`.
 #[inline]
 fn parse_keyframes_item_selector(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_keyframes_item_selector(p) {
         return Absent;
     }
 
+    if is_at_scss_keyframes_selector(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_keyframes_selector,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated keyframe selectors", marker.range(p))
+            },
+        )
+    } else if is_at_timeline_range_name(p) {
+        parse_keyframes_range_selector(p)
+    } else if is_at_percentage_dimension(p) {
+        parse_keyframes_percentage_selector(p)
+    } else {
+        parse_keyframes_ident_selector(p)
+    }
+}
+
+/// Parses a timeline-range keyframe selector like `entry 100%`.
+#[inline]
+fn parse_keyframes_range_selector(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_timeline_range_name(p) {
+        return Absent;
+    }
+
     let m = p.start();
 
-    let kind = if is_at_percentage_dimension(p) {
-        parse_percentage_dimension(p).ok();
-        CSS_KEYFRAMES_PERCENTAGE_SELECTOR
-    } else {
-        p.bump_ts(KEYFRAMES_ITEM_SELECTOR_IDENT_SET);
-        CSS_KEYFRAMES_IDENT_SELECTOR
-    };
+    p.bump_ts(TIMELINE_RANGE_NAME_SET);
+    parse_percentage_dimension(p)
+        .or_add_diagnostic(p, expected_percentage_after_timeline_range_name);
 
-    Present(m.complete(p, kind))
+    Present(m.complete(p, CSS_KEYFRAMES_RANGE_SELECTOR))
+}
+
+/// Parses a percentage keyframe selector like `50%`.
+#[inline]
+fn parse_keyframes_percentage_selector(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_percentage_dimension(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    parse_percentage_dimension(p).ok();
+
+    Present(m.complete(p, CSS_KEYFRAMES_PERCENTAGE_SELECTOR))
+}
+
+/// Parses a keyword keyframe selector like `from` or `to`.
+#[inline]
+fn parse_keyframes_ident_selector(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_keyframes_ident_selector(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_ts(KEYFRAMES_ITEM_SELECTOR_IDENT_SET);
+
+    Present(m.complete(p, CSS_KEYFRAMES_IDENT_SELECTOR))
 }

@@ -16,3 +16,21 @@ input SomeInputObject {
 	bar: String
 	foo: String
 }
+
+extend type SomeObject {
+	foo: String
+	bar: String
+	foo: String
+}
+
+extend interface SomeInterface {
+	foo: String
+	bar: String
+	foo: String
+}
+
+extend input SomeInputObject {
+	foo: String
+	bar: String
+	foo: String
+}

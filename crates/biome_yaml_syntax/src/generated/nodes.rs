@@ -1426,10 +1426,17 @@ impl AnyYamlJsonContent {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyYamlMappingImplicitKey {
+    YamlAliasNode(YamlAliasNode),
     YamlFlowJsonNode(YamlFlowJsonNode),
     YamlFlowYamlNode(YamlFlowYamlNode),
 }
 impl AnyYamlMappingImplicitKey {
+    pub fn as_yaml_alias_node(&self) -> Option<&YamlAliasNode> {
+        match &self {
+            Self::YamlAliasNode(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_yaml_flow_json_node(&self) -> Option<&YamlFlowJsonNode> {
         match &self {
             Self::YamlFlowJsonNode(item) => Some(item),
@@ -3665,6 +3672,11 @@ impl From<AnyYamlJsonContent> for SyntaxElement {
         node.into()
     }
 }
+impl From<YamlAliasNode> for AnyYamlMappingImplicitKey {
+    fn from(node: YamlAliasNode) -> Self {
+        Self::YamlAliasNode(node)
+    }
+}
 impl From<YamlFlowJsonNode> for AnyYamlMappingImplicitKey {
     fn from(node: YamlFlowJsonNode) -> Self {
         Self::YamlFlowJsonNode(node)
@@ -3677,13 +3689,18 @@ impl From<YamlFlowYamlNode> for AnyYamlMappingImplicitKey {
 }
 impl AstNode for AnyYamlMappingImplicitKey {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        YamlFlowJsonNode::KIND_SET.union(YamlFlowYamlNode::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = YamlAliasNode::KIND_SET
+        .union(YamlFlowJsonNode::KIND_SET)
+        .union(YamlFlowYamlNode::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, YAML_FLOW_JSON_NODE | YAML_FLOW_YAML_NODE)
+        matches!(
+            kind,
+            YAML_ALIAS_NODE | YAML_FLOW_JSON_NODE | YAML_FLOW_YAML_NODE
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            YAML_ALIAS_NODE => Self::YamlAliasNode(YamlAliasNode { syntax }),
             YAML_FLOW_JSON_NODE => Self::YamlFlowJsonNode(YamlFlowJsonNode { syntax }),
             YAML_FLOW_YAML_NODE => Self::YamlFlowYamlNode(YamlFlowYamlNode { syntax }),
             _ => return None,
@@ -3692,12 +3709,14 @@ impl AstNode for AnyYamlMappingImplicitKey {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::YamlAliasNode(it) => it.syntax(),
             Self::YamlFlowJsonNode(it) => it.syntax(),
             Self::YamlFlowYamlNode(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::YamlAliasNode(it) => it.into_syntax(),
             Self::YamlFlowJsonNode(it) => it.into_syntax(),
             Self::YamlFlowYamlNode(it) => it.into_syntax(),
         }
@@ -3706,6 +3725,7 @@ impl AstNode for AnyYamlMappingImplicitKey {
 impl std::fmt::Debug for AnyYamlMappingImplicitKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::YamlAliasNode(it) => std::fmt::Debug::fmt(it, f),
             Self::YamlFlowJsonNode(it) => std::fmt::Debug::fmt(it, f),
             Self::YamlFlowYamlNode(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -3714,6 +3734,7 @@ impl std::fmt::Debug for AnyYamlMappingImplicitKey {
 impl From<AnyYamlMappingImplicitKey> for SyntaxNode {
     fn from(n: AnyYamlMappingImplicitKey) -> Self {
         match n {
+            AnyYamlMappingImplicitKey::YamlAliasNode(it) => it.into_syntax(),
             AnyYamlMappingImplicitKey::YamlFlowJsonNode(it) => it.into_syntax(),
             AnyYamlMappingImplicitKey::YamlFlowYamlNode(it) => it.into_syntax(),
         }

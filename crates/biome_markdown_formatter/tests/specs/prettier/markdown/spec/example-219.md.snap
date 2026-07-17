@@ -23,14 +23,14 @@ info: markdown/spec/example-219.md
 -> >
 -> >     two
 +   > > 1.  one
-+>>
-+>>     two
++
++    two
 ```
 
 # Output
 
 ```md
    > > 1.  one
->>
->>     two
+
+    two
 ```

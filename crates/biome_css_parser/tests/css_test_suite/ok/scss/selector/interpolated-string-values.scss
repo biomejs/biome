@@ -1,0 +1,7 @@
+[data-theme="#{$theme}"] {
+  color: red;
+}
+
+:lang("#{$locale}") {
+  color: blue;
+}

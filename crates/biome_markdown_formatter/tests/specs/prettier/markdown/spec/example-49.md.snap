@@ -20,22 +20,20 @@ Foo *bar*
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,3 +1,5 @@
--# Foo _bar_
-+Foo *bar*
-+=========
+@@ -1,5 +1,3 @@
+-Foo _bar_
+-=========
++# Foo _bar_
  
--## Foo _bar_
-+Foo *bar*
-+---------
+-Foo _bar_
+----------
++## Foo _bar_
 ```
 
 # Output
 
 ```md
-Foo *bar*
-=========
+# Foo _bar_
 
-Foo *bar*
----------
+## Foo _bar_
 ```

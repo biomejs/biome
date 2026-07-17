@@ -1,0 +1,16 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: Page.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+	<div class="page"><Button /></div>
+</template>
+
+<script>
+import Button from "./Button.vue";
+</script>
+
+```

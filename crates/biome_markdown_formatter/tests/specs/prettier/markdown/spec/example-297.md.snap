@@ -20,7 +20,7 @@ foo
 +++ Biome
 @@ -1,3 +1,3 @@
 -```foo+bar
-+``` foo\+bar
++```foo\+bar
  foo
  ```
 ```
@@ -28,7 +28,7 @@ foo
 # Output
 
 ```md
-``` foo\+bar
+```foo\+bar
 foo
 ```
 ```

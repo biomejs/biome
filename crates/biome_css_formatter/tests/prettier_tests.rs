@@ -1,13 +1,19 @@
 use biome_css_formatter::{CssFormatLanguage, context::CssFormatOptions};
-use biome_css_syntax::CssFileSource;
 use biome_formatter::{IndentStyle, IndentWidth};
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
+use biome_languages::CssFileSource;
 use camino::Utf8Path;
 use std::env;
 
 mod language;
 
-tests_macros::gen_tests! {"tests/specs/prettier/{css}/**/*.{css}", crate::test_snapshot, ""}
+mod css {
+    tests_macros::gen_tests! {"tests/specs/prettier/{css}/**/*.{css}", crate::test_snapshot, ""}
+}
+
+mod scss {
+    tests_macros::gen_tests! {"tests/specs/prettier/{scss}/**/*.{scss}", crate::test_snapshot, ""}
+}
 
 fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     countme::enable(true);

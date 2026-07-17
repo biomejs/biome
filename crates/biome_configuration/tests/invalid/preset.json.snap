@@ -1,0 +1,44 @@
+---
+source: crates/biome_configuration/tests/spec_tests.rs
+expression: preset.json
+---
+preset.json:2:13 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+    1 │ {
+  > 2 │   "linter": {
+      │             ^
+  > 3 │     "rules": {
+  > 4 │       "recommended": true,
+  > 5 │       "preset": "recommended"
+  > 6 │     }
+  > 7 │   }
+      │   ^
+    8 │ }
+    9 │ 
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+
+
+preset.json:2:13 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The recommended field and the preset field cannot be used together.
+  
+    1 │ {
+  > 2 │   "linter": {
+      │             ^
+  > 3 │     "rules": {
+  > 4 │       "recommended": true,
+  > 5 │       "preset": "recommended"
+  > 6 │     }
+  > 7 │   }
+      │   ^
+    8 │ }
+    9 │ 
+  
+  i Remove the recommended field.

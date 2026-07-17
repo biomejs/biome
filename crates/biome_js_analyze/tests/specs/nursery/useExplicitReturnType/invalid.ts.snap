@@ -1,0 +1,812 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Function declaration without return type
+function test(a: number, b: number) {
+  return;
+}
+
+// Function declaration without return type and no params
+function test2() {
+  return;
+}
+
+// Function expression without return type
+var fn = function () {
+  return 1;
+};
+
+// Arrow function without return type
+var arrowFn = () => 'test';
+
+// Class with missing return types
+class Test {
+  constructor() {}
+  get prop() {
+    return 1;
+  }
+  set prop(value: number) {}
+  method() {
+    return;
+  }
+  arrow = () => 'arrow';
+  private method2() {
+    return;
+  }
+}
+
+// Untyped arrow (allowTypedFunctionExpressions is true but arrow is untyped)
+var arrowFn2 = () => 'test';
+
+// Untyped nested arrow
+function fooAny(): any {
+  const bar2 = () => () => console.log('aa');
+}
+
+// Assignment to any variable
+let anyValue: any;
+function fooAny2(): any {
+  anyValue = () => () => console.log('aa');
+}
+
+// Class method with untyped inner arrow
+class Foo2 {
+  foo(): any {
+    const bar2 = () => () => {
+      return console.log('foo');
+    };
+  }
+}
+
+// Untyped function expression
+var funcExpr = function () {
+  return 'test';
+};
+
+// Class property with untyped inner arrow
+function fooAny3(): any {
+  class Foo3 {
+    foo = () => () => {
+      return console.log('foo');
+    };
+  }
+}
+
+// Higher-order function returning arrow without return type (allowHigherOrderFunctions hardcoded true)
+var arrowHof = () => () => {};
+var arrowHof2 = () => function () {};
+var arrowHof3 = () => {
+  return () => {};
+};
+var arrowHof4 = () => {
+  return function () {};
+};
+function fn1() {
+  return () => {};
+}
+function fn2() {
+  return function () {};
+}
+
+// Sibling arrow missing type
+function fn3() {
+  const bar = () => (): number => 1;
+  const baz = () => () => 'baz';
+  return function (): void {};
+}
+
+// Not a higher-order function - returns non-function first
+function fn4(arg: boolean) {
+  if (arg) return 'string';
+  return function (): void {};
+}
+
+// Deeply nested higher-order with missing return type at leaf
+function FunctionDeclaration() {
+  return function FunctionExpression_Within_FunctionDeclaration() {
+    return function FunctionExpression_Within_FunctionExpression() {
+      return () => {
+        // ArrowFunctionExpression_Within_FunctionExpression
+        return () =>
+          // ArrowFunctionExpression_Within_ArrowFunctionExpression
+          () =>
+            1; // ArrowFunctionExpression_Within_ArrowFunctionExpression_WithNoBody
+      };
+    };
+  };
+}
+
+// Higher-order but inner function doesn't return a function
+var hof5 = () => () => {
+  return () => {
+    return;
+  };
+};
+
+// as any / as Action are NOT const assertions
+const funcAsAny = (value: number) => ({ type: 'X', value }) as any;
+const funcAsAction = (value: number) => ({ type: 'X', value }) as Action;
+
+// Class property without type - untyped array
+class Bar5 {
+  bar = [
+    {
+      foo: x => x + 1,
+    },
+  ];
+}
+
+// IIFE flagged under default (allowIIFEs: false is default)
+const fooIife = (function () {
+  return 'foo';
+})();
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:1 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    3 │ // Function declaration without return type
+  > 4 │ function test(a: number, b: number) {
+      │ ^^^^^^^^^^^^^
+    5 │   return;
+    6 │ }
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:9:1 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+     8 │ // Function declaration without return type and no params
+   > 9 │ function test2() {
+       │ ^^^^^^^^^^^^^^
+    10 │   return;
+    11 │ }
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:14:10 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    13 │ // Function expression without return type
+  > 14 │ var fn = function () {
+       │          ^^^^^^^^^^^^^
+  > 15 │   return 1;
+  > 16 │ };
+       │ ^
+    17 │ 
+    18 │ // Arrow function without return type
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:19:15 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    18 │ // Arrow function without return type
+  > 19 │ var arrowFn = () => 'test';
+       │               ^^^^^^^^^^^^
+    20 │ 
+    21 │ // Class with missing return types
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:24:3 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    22 │ class Test {
+    23 │   constructor() {}
+  > 24 │   get prop() {
+       │   ^^^^^^^^^^^^
+  > 25 │     return 1;
+  > 26 │   }
+       │   ^
+    27 │   set prop(value: number) {}
+    28 │   method() {
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:28:3 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    26 │   }
+    27 │   set prop(value: number) {}
+  > 28 │   method() {
+       │   ^^^^^^^^^^
+  > 29 │     return;
+  > 30 │   }
+       │   ^
+    31 │   arrow = () => 'arrow';
+    32 │   private method2() {
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:31:11 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    29 │     return;
+    30 │   }
+  > 31 │   arrow = () => 'arrow';
+       │           ^^^^^^^^^^^^^
+    32 │   private method2() {
+    33 │     return;
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:32:3 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    30 │   }
+    31 │   arrow = () => 'arrow';
+  > 32 │   private method2() {
+       │   ^^^^^^^^^^^^^^^^^^^
+  > 33 │     return;
+  > 34 │   }
+       │   ^
+    35 │ }
+    36 │ 
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:38:16 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    37 │ // Untyped arrow (allowTypedFunctionExpressions is true but arrow is untyped)
+  > 38 │ var arrowFn2 = () => 'test';
+       │                ^^^^^^^^^^^^
+    39 │ 
+    40 │ // Untyped nested arrow
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:42:22 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    40 │ // Untyped nested arrow
+    41 │ function fooAny(): any {
+  > 42 │   const bar2 = () => () => console.log('aa');
+       │                      ^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ }
+    44 │ 
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:48:20 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    46 │ let anyValue: any;
+    47 │ function fooAny2(): any {
+  > 48 │   anyValue = () => () => console.log('aa');
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^
+    49 │ }
+    50 │ 
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:54:24 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    52 │ class Foo2 {
+    53 │   foo(): any {
+  > 54 │     const bar2 = () => () => {
+       │                        ^^^^^^^
+  > 55 │       return console.log('foo');
+  > 56 │     };
+       │     ^
+    57 │   }
+    58 │ }
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:61:16 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    60 │ // Untyped function expression
+  > 61 │ var funcExpr = function () {
+       │                ^^^^^^^^^^^^^
+  > 62 │   return 'test';
+  > 63 │ };
+       │ ^
+    64 │ 
+    65 │ // Class property with untyped inner arrow
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:68:17 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    66 │ function fooAny3(): any {
+    67 │   class Foo3 {
+  > 68 │     foo = () => () => {
+       │                 ^^^^^^^
+  > 69 │       return console.log('foo');
+  > 70 │     };
+       │     ^
+    71 │   }
+    72 │ }
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:75:22 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    74 │ // Higher-order function returning arrow without return type (allowHigherOrderFunctions hardcoded true)
+  > 75 │ var arrowHof = () => () => {};
+       │                      ^^^^^^^^
+    76 │ var arrowHof2 = () => function () {};
+    77 │ var arrowHof3 = () => {
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:76:23 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    74 │ // Higher-order function returning arrow without return type (allowHigherOrderFunctions hardcoded true)
+    75 │ var arrowHof = () => () => {};
+  > 76 │ var arrowHof2 = () => function () {};
+       │                       ^^^^^^^^^^^^^^
+    77 │ var arrowHof3 = () => {
+    78 │   return () => {};
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:78:10 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    76 │ var arrowHof2 = () => function () {};
+    77 │ var arrowHof3 = () => {
+  > 78 │   return () => {};
+       │          ^^^^^^^^
+    79 │ };
+    80 │ var arrowHof4 = () => {
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:81:10 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    79 │ };
+    80 │ var arrowHof4 = () => {
+  > 81 │   return function () {};
+       │          ^^^^^^^^^^^^^^
+    82 │ };
+    83 │ function fn1() {
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:84:10 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    82 │ };
+    83 │ function fn1() {
+  > 84 │   return () => {};
+       │          ^^^^^^^^
+    85 │ }
+    86 │ function fn2() {
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:87:10 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    85 │ }
+    86 │ function fn2() {
+  > 87 │   return function () {};
+       │          ^^^^^^^^^^^^^^
+    88 │ }
+    89 │ 
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:93:21 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    91 │ function fn3() {
+    92 │   const bar = () => (): number => 1;
+  > 93 │   const baz = () => () => 'baz';
+       │                     ^^^^^^^^^^^
+    94 │   return function (): void {};
+    95 │ }
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:98:1 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+     97 │ // Not a higher-order function - returns non-function first
+   > 98 │ function fn4(arg: boolean) {
+        │ ^^^^^^^^^^^^
+     99 │   if (arg) return 'string';
+    100 │   return function (): void {};
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:111:11 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    109 │         return () =>
+    110 │           // ArrowFunctionExpression_Within_ArrowFunctionExpression
+  > 111 │           () =>
+        │           ^^^^^
+  > 112 │             1; // ArrowFunctionExpression_Within_ArrowFunctionExpression_WithNoBody
+        │             ^
+    113 │       };
+    114 │     };
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:120:10 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    118 │ // Higher-order but inner function doesn't return a function
+    119 │ var hof5 = () => () => {
+  > 120 │   return () => {
+        │          ^^^^^^^
+  > 121 │     return;
+  > 122 │   };
+        │   ^
+    123 │ };
+    124 │ 
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:126:19 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    125 │ // as any / as Action are NOT const assertions
+  > 126 │ const funcAsAny = (value: number) => ({ type: 'X', value }) as any;
+        │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    127 │ const funcAsAction = (value: number) => ({ type: 'X', value }) as Action;
+    128 │ 
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:127:22 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    125 │ // as any / as Action are NOT const assertions
+    126 │ const funcAsAny = (value: number) => ({ type: 'X', value }) as any;
+  > 127 │ const funcAsAction = (value: number) => ({ type: 'X', value }) as Action;
+        │                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    128 │ 
+    129 │ // Class property without type - untyped array
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:133:12 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    131 │   bar = [
+    132 │     {
+  > 133 │       foo: x => x + 1,
+        │            ^^^^^^^^^^
+    134 │     },
+    135 │   ];
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:139:18 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    138 │ // IIFE flagged under default (allowIIFEs: false is default)
+  > 139 │ const fooIife = (function () {
+        │                  ^^^^^^^^^^^^^
+  > 140 │   return 'foo';
+  > 141 │ })();
+        │ ^
+    142 │ 
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

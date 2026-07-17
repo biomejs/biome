@@ -1,0 +1,182 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+[=#{$value}] {}
+[] {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssAttributeSelector {
+                            l_brack_token: L_BRACK@0..1 "[" [] [],
+                            name: missing (required),
+                            matcher: CssAttributeMatcher {
+                                operator: EQ@1..2 "=" [] [],
+                                value: CssAttributeMatcherValue {
+                                    name: ScssInterpolatedIdentifier {
+                                        items: ScssInterpolatedIdentifierPartList [
+                                            ScssInterpolation {
+                                                hash_token: HASH@2..3 "#" [] [],
+                                                l_curly_token: L_CURLY@3..4 "{" [] [],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        ScssVariable {
+                                                            dollar_token: DOLLAR@4..5 "$" [] [],
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@5..10 "value" [] [],
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                                r_curly_token: R_CURLY@10..11 "}" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                modifier: missing (optional),
+                            },
+                            r_brack_token: R_BRACK@11..13 "]" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@13..14 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@14..15 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssAttributeSelector {
+                            l_brack_token: L_BRACK@15..17 "[" [Newline("\n")] [],
+                            name: missing (required),
+                            matcher: missing (optional),
+                            r_brack_token: R_BRACK@17..19 "]" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@19..20 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@20..21 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@21..22 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..22
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..21
+    0: CSS_QUALIFIED_RULE@0..15
+      0: CSS_SELECTOR_LIST@0..13
+        0: CSS_COMPOUND_SELECTOR@0..13
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..13
+            0: CSS_ATTRIBUTE_SELECTOR@0..13
+              0: L_BRACK@0..1 "[" [] []
+              1: (empty)
+              2: CSS_ATTRIBUTE_MATCHER@1..11
+                0: EQ@1..2 "=" [] []
+                1: CSS_ATTRIBUTE_MATCHER_VALUE@2..11
+                  0: SCSS_INTERPOLATED_IDENTIFIER@2..11
+                    0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@2..11
+                      0: SCSS_INTERPOLATION@2..11
+                        0: HASH@2..3 "#" [] []
+                        1: L_CURLY@3..4 "{" [] []
+                        2: SCSS_EXPRESSION@4..10
+                          0: SCSS_EXPRESSION_ITEM_LIST@4..10
+                            0: SCSS_VARIABLE@4..10
+                              0: DOLLAR@4..5 "$" [] []
+                              1: CSS_IDENTIFIER@5..10
+                                0: IDENT@5..10 "value" [] []
+                        3: R_CURLY@10..11 "}" [] []
+                2: (empty)
+              3: R_BRACK@11..13 "]" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@13..15
+        0: L_CURLY@13..14 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@14..14
+        2: R_CURLY@14..15 "}" [] []
+    1: CSS_QUALIFIED_RULE@15..21
+      0: CSS_SELECTOR_LIST@15..19
+        0: CSS_COMPOUND_SELECTOR@15..19
+          0: CSS_NESTED_SELECTOR_LIST@15..15
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@15..19
+            0: CSS_ATTRIBUTE_SELECTOR@15..19
+              0: L_BRACK@15..17 "[" [Newline("\n")] []
+              1: (empty)
+              2: (empty)
+              3: R_BRACK@17..19 "]" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@19..21
+        0: L_CURLY@19..20 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@20..20
+        2: R_CURLY@20..21 "}" [] []
+  2: EOF@21..22 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+attribute-missing-name.scss:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '='.
+  
+  > 1 │ [=#{$value}] {}
+      │  ^
+    2 │ [] {}
+    3 │ 
+  
+  i Expected an identifier here.
+  
+  > 1 │ [=#{$value}] {}
+      │  ^
+    2 │ [] {}
+    3 │ 
+  
+attribute-missing-name.scss:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found ']'.
+  
+    1 │ [=#{$value}] {}
+  > 2 │ [] {}
+      │  ^
+    3 │ 
+  
+  i Expected an identifier here.
+  
+    1 │ [=#{$value}] {}
+  > 2 │ [] {}
+      │  ^
+    3 │ 
+  
+```

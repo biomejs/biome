@@ -250,6 +250,6 @@ fn as_string_literal_attribute_value(attribute: &AnyJsxAttribute) -> Option<JsxS
                     _ => None,
                 })
         }
-        JsxSpreadAttribute(_) | JsMetavariable(_) => None,
+        JsxSpreadAttribute(_) | JsxShorthandAttribute(_) | JsMetavariable(_) => None,
     }
 }

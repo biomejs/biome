@@ -1,0 +1,160 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: unsorted.astro
+---
+# Input
+```astro
+<Component
+  client:load
+  class:list={classes}
+  set:text={text}
+  is:raw
+  spellcheck="true"
+  tabindex="-1"
+  dir="auto"
+  define:vars={vars}
+  set:html={rawHTMLString}
+  server:defer
+  id="myid"
+/>
+
+<Component
+  client:load
+  class:list={classes}
+  set:text={text}
+  is:raw
+  {...props}
+  spellcheck="true"
+  tabindex="-1"
+  dir="auto"
+  define:vars={vars}
+  set:html={rawHTMLString}
+  server:defer
+  id="myid"
+/>
+
+```
+
+# Diagnostics
+```
+unsorted.astro:1:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+   > 1 │ <Component
+       │ ^^^^^^^^^^
+   > 2 │   client:load
+   > 3 │   class:list={classes}
+   > 4 │   set:text={text}
+        ...
+  > 12 │   id="myid"
+  > 13 │ />
+       │ ^^
+    14 │ 
+    15 │ <Component
+  
+  i Safe fix: Sort the HTML attributes.
+  
+     1  1 │   <Component
+     2    │ - ··client:load
+     3    │ - ··class:list={classes}
+     4    │ - ··set:text={text}
+     5    │ - ··is:raw
+     6    │ - ··spellcheck="true"
+     7    │ - ··tabindex="-1"
+     8    │ - ··dir="auto"
+     9    │ - ··define:vars={vars}
+    10    │ - ··set:html={rawHTMLString}
+    11    │ - ··server:defer
+    12    │ - ··id="myid"
+        2 │ + ··dir="auto"
+        3 │ + ··id="myid"
+        4 │ + ··spellcheck="true"
+        5 │ + ··tabindex="-1"
+        6 │ + ··class:list={classes}
+        7 │ + ··client:load
+        8 │ + ··define:vars={vars}
+        9 │ + ··is:raw
+       10 │ + ··server:defer
+       11 │ + ··set:html={rawHTMLString}
+       12 │ + ··set:text={text}
+    13 13 │   />
+    14 14 │   
+  
+
+```
+
+```
+unsorted.astro:15:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    13 │ />
+    14 │ 
+  > 15 │ <Component
+       │ ^^^^^^^^^^
+  > 16 │   client:load
+        ...
+  > 26 │   server:defer
+  > 27 │   id="myid"
+  > 28 │ />
+       │ ^^
+    29 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    14 14 │   
+    15 15 │   <Component
+    16    │ - ··client:load
+    17    │ - ··class:list={classes}
+    18    │ - ··set:text={text}
+    19    │ - ··is:raw
+       16 │ + ··class:list={classes}
+       17 │ + ··client:load
+       18 │ + ··is:raw
+       19 │ + ··set:text={text}
+    20 20 │     {...props}
+    21 21 │     spellcheck="true"
+  
+
+```
+
+```
+unsorted.astro:15:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    13 │ />
+    14 │ 
+  > 15 │ <Component
+       │ ^^^^^^^^^^
+  > 16 │   client:load
+        ...
+  > 26 │   server:defer
+  > 27 │   id="myid"
+  > 28 │ />
+       │ ^^
+    29 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    19 19 │     is:raw
+    20 20 │     {...props}
+    21    │ - ··spellcheck="true"
+    22    │ - ··tabindex="-1"
+    23    │ - ··dir="auto"
+    24    │ - ··define:vars={vars}
+    25    │ - ··set:html={rawHTMLString}
+       21 │ + ··dir="auto"
+       22 │ + ··id="myid"
+       23 │ + ··spellcheck="true"
+       24 │ + ··tabindex="-1"
+       25 │ + ··define:vars={vars}
+    26 26 │     server:defer
+    27    │ - ··id="myid"
+       27 │ + ··set:html={rawHTMLString}
+    28 28 │   />
+    29 29 │   
+  
+
+```

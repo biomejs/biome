@@ -75,13 +75,12 @@ impl Rule for NoEmptyCharacterClassInRegex {
                     // We eat the next character because it is escaped with `\`
                     enumerated_char_iter.next();
                 }
-                b'[' => {
+                b'['
                     // The `v` flag allows to embed a class in another class.
-                    if class_start_index.is_none() || has_v_flag {
+                    if (class_start_index.is_none() || has_v_flag) => {
                         class_start_index = Some(i);
                         is_negated_class = false;
                     }
-                }
                 b'^' => {
                     if let Some(class_start_index) = class_start_index {
                         is_negated_class = (i - class_start_index) == 1;

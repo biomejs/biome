@@ -1,0 +1,28 @@
+@forward"theme";
+
+@forward "theme"show
+$color,
+button;
+
+@forward
+"theme"
+hide
+$private,
+internal-mixin;
+
+@forward "theme"as
+theme-*;
+
+@forward "theme" with(
+$spacing:4px !default,
+$radius: 2px
+);
+
+@forward "foo.scss" with ($components: red);
+
+@forward "theme" as theme-* show
+$color,
+button
+with(
+$spacing:4px
+);

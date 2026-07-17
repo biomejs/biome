@@ -3,6 +3,49 @@ source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
 
+# `/src/foo.ts` (Module 1)
+
+## Source
+
+```ts
+export function foo(): Type {}
+```
+
+## Module Info
+
+```
+Exports {
+  "foo" => {
+    ExportOwnExport => JsOwnExport::Binding(25..28)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+foo => BindingTypeData {
+  Types Module(0) TypeId(1),
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => unknown
+
+Module TypeId(1) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(0)
+}
+```
+
 # `/src/index.ts` (Not imported by resolver)
 
 ## Source
@@ -38,50 +81,6 @@ Module TypeId(1) => Import Symbol: foo from "/src/foo.ts"
 Module TypeId(2) => Call Module(0) TypeId(1)(No parameters)
 
 Module TypeId(3) => Call Module(0) TypeId(0)(Module(0) TypeId(2))
-```
-
-# `/src/foo.ts` (Module 1)
-
-## Source
-
-```ts
-export function foo(): Type {}
-```
-
-## Module Info
-
-```
-Exports {
-  "foo" => {
-    ExportOwnExport => JsOwnExport::Binding(25..28)
-  }
-}
-Imports {
-  No imports
-}
-```
-
-## Exported Bindings
-
-```
-foo => BindingTypeData {
-  Types Module(0) TypeId(1),
-  Exported Ranges: (25..28)
-}
-```
-
-## Registered types
-
-```
-Module TypeId(0) => unknown
-
-Module TypeId(1) => sync Function "foo" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(0) TypeId(0)
-}
 ```
 
 # Module Resolver

@@ -1,0 +1,79 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+- &anchor
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlBlockInBlockNode {
+                properties: YamlPropertyList [],
+                content: YamlBlockSequence {
+                    sequence_start_token: SEQUENCE_START@0..0 "" [] [],
+                    entries: YamlBlockSequenceEntryList [
+                        YamlBlockSequenceEntry {
+                            minus_token: DASH@0..2 "-" [] [Whitespace(" ")],
+                            value: YamlFlowInBlockNode {
+                                flow_start_token: FLOW_START@2..2 "" [] [],
+                                flow: YamlFlowYamlNode {
+                                    properties: YamlPropertyList [
+                                        YamlAnchorProperty {
+                                            value_token: ANCHOR_PROPERTY_LITERAL@2..9 "&anchor" [] [],
+                                        },
+                                    ],
+                                    content: missing (optional),
+                                },
+                                flow_end_token: FLOW_END@9..9 "" [] [],
+                            },
+                        },
+                    ],
+                    sequence_end_token: SEQUENCE_END@9..9 "" [] [],
+                },
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@9..10 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..10
+  0: YAML_DOCUMENT_LIST@0..9
+    0: YAML_DOCUMENT@0..9
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_BLOCK_IN_BLOCK_NODE@0..9
+        0: YAML_PROPERTY_LIST@0..0
+        1: YAML_BLOCK_SEQUENCE@0..9
+          0: SEQUENCE_START@0..0 "" [] []
+          1: YAML_BLOCK_SEQUENCE_ENTRY_LIST@0..9
+            0: YAML_BLOCK_SEQUENCE_ENTRY@0..9
+              0: DASH@0..2 "-" [] [Whitespace(" ")]
+              1: YAML_FLOW_IN_BLOCK_NODE@2..9
+                0: FLOW_START@2..2 "" [] []
+                1: YAML_FLOW_YAML_NODE@2..9
+                  0: YAML_PROPERTY_LIST@2..9
+                    0: YAML_ANCHOR_PROPERTY@2..9
+                      0: ANCHOR_PROPERTY_LITERAL@2..9 "&anchor" [] []
+                  1: (empty)
+                2: FLOW_END@9..9 "" [] []
+          2: SEQUENCE_END@9..9 "" [] []
+      4: (empty)
+  1: EOF@9..10 "" [Newline("\n")] []
+
+```

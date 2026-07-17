@@ -54,8 +54,18 @@ HtmlRoot {
                         modifiers: VueModifierList [],
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@17..18 "=" [] [],
-                            value: HtmlString {
-                                value_token: HTML_STRING_LITERAL@18..39 "\"episode in episodes\"" [] [],
+                            value: VueVForValue {
+                                l_quote: DOUBLE_QUOTE@18..19 "\"" [] [],
+                                binding: VueVForIdentifierBinding {
+                                    name_token: IDENT@19..27 "episode" [] [Whitespace(" ")],
+                                },
+                                operator: VueVForInOperator {
+                                    in_token: IN_KW@27..29 "in" [] [],
+                                },
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@29..38 " episodes" [] [],
+                                },
+                                r_quote: DOUBLE_QUOTE@38..39 "\"" [] [],
                             },
                         },
                     },
@@ -119,8 +129,18 @@ HtmlRoot {
                         modifiers: VueModifierList [],
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@134..135 "=" [] [],
-                            value: HtmlString {
-                                value_token: HTML_STRING_LITERAL@135..156 "\"episode in episodes\"" [] [],
+                            value: VueVForValue {
+                                l_quote: DOUBLE_QUOTE@135..136 "\"" [] [],
+                                binding: VueVForIdentifierBinding {
+                                    name_token: IDENT@136..144 "episode" [] [Whitespace(" ")],
+                                },
+                                operator: VueVForInOperator {
+                                    in_token: IN_KW@144..146 "in" [] [],
+                                },
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@146..155 " episodes" [] [],
+                                },
+                                r_quote: DOUBLE_QUOTE@155..156 "\"" [] [],
                             },
                         },
                     },
@@ -187,8 +207,18 @@ HtmlRoot {
                         modifiers: VueModifierList [],
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@257..258 "=" [] [],
-                            value: HtmlString {
-                                value_token: HTML_STRING_LITERAL@258..279 "\"episode in episodes\"" [] [],
+                            value: VueVForValue {
+                                l_quote: DOUBLE_QUOTE@258..259 "\"" [] [],
+                                binding: VueVForIdentifierBinding {
+                                    name_token: IDENT@259..267 "episode" [] [Whitespace(" ")],
+                                },
+                                operator: VueVForInOperator {
+                                    in_token: IN_KW@267..269 "in" [] [],
+                                },
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@269..278 " episodes" [] [],
+                                },
+                                r_quote: DOUBLE_QUOTE@278..279 "\"" [] [],
                             },
                         },
                     },
@@ -264,8 +294,15 @@ HtmlRoot {
             2: VUE_MODIFIER_LIST@17..17
             3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@17..39
               0: EQ@17..18 "=" [] []
-              1: HTML_STRING@18..39
-                0: HTML_STRING_LITERAL@18..39 "\"episode in episodes\"" [] []
+              1: VUE_V_FOR_VALUE@18..39
+                0: DOUBLE_QUOTE@18..19 "\"" [] []
+                1: VUE_V_FOR_IDENTIFIER_BINDING@19..27
+                  0: IDENT@19..27 "episode" [] [Whitespace(" ")]
+                2: VUE_V_FOR_IN_OPERATOR@27..29
+                  0: IN_KW@27..29 "in" [] []
+                3: HTML_TEXT_EXPRESSION@29..38
+                  0: HTML_LITERAL@29..38 " episodes" [] []
+                4: DOUBLE_QUOTE@38..39 "\"" [] []
           1: VUE_V_SLOT_SHORTHAND_DIRECTIVE@39..75
             0: HASH@39..43 "#" [Newline("\n"), Whitespace("  ")] []
             1: VUE_DYNAMIC_ARGUMENT@43..65
@@ -309,8 +346,15 @@ HtmlRoot {
             2: VUE_MODIFIER_LIST@134..134
             3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@134..156
               0: EQ@134..135 "=" [] []
-              1: HTML_STRING@135..156
-                0: HTML_STRING_LITERAL@135..156 "\"episode in episodes\"" [] []
+              1: VUE_V_FOR_VALUE@135..156
+                0: DOUBLE_QUOTE@135..136 "\"" [] []
+                1: VUE_V_FOR_IDENTIFIER_BINDING@136..144
+                  0: IDENT@136..144 "episode" [] [Whitespace(" ")]
+                2: VUE_V_FOR_IN_OPERATOR@144..146
+                  0: IN_KW@144..146 "in" [] []
+                3: HTML_TEXT_EXPRESSION@146..155
+                  0: HTML_LITERAL@146..155 " episodes" [] []
+                4: DOUBLE_QUOTE@155..156 "\"" [] []
           1: VUE_DIRECTIVE@156..198
             0: IDENT@156..165 "v-slot" [Newline("\n"), Whitespace("  ")] []
             1: VUE_DIRECTIVE_ARGUMENT@165..188
@@ -356,8 +400,15 @@ HtmlRoot {
             2: VUE_MODIFIER_LIST@257..257
             3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@257..279
               0: EQ@257..258 "=" [] []
-              1: HTML_STRING@258..279
-                0: HTML_STRING_LITERAL@258..279 "\"episode in episodes\"" [] []
+              1: VUE_V_FOR_VALUE@258..279
+                0: DOUBLE_QUOTE@258..259 "\"" [] []
+                1: VUE_V_FOR_IDENTIFIER_BINDING@259..267
+                  0: IDENT@259..267 "episode" [] [Whitespace(" ")]
+                2: VUE_V_FOR_IN_OPERATOR@267..269
+                  0: IN_KW@267..269 "in" [] []
+                3: HTML_TEXT_EXPRESSION@269..278
+                  0: HTML_LITERAL@269..278 " episodes" [] []
+                4: DOUBLE_QUOTE@278..279 "\"" [] []
           1: VUE_V_SLOT_SHORTHAND_DIRECTIVE@279..305
             0: HASH@279..283 "#" [Newline("\n"), Whitespace("  ")] []
             1: VUE_DYNAMIC_ARGUMENT@283..295

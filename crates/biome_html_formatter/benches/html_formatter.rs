@@ -1,7 +1,8 @@
 use biome_formatter::Printed;
 use biome_html_formatter::{HtmlFormatOptions, format_node};
 use biome_html_parser::{HtmlParserOptions, parse_html};
-use biome_html_syntax::{HtmlFileSource, HtmlRoot};
+use biome_html_syntax::HtmlRoot;
+use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
 use biome_string_case::StrLikeExtension;
 use biome_test_utils::BenchCase;

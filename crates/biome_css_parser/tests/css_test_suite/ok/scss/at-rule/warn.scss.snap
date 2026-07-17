@@ -44,7 +44,7 @@ CssRoot {
                                     ScssListExpressionElement {
                                         value: ScssExpression {
                                             items: ScssExpressionItemList [
-                                                ScssIdentifier {
+                                                ScssVariable {
                                                     dollar_token: DOLLAR@21..22 "$" [] [],
                                                     name: CssIdentifier {
                                                         value_token: IDENT@22..26 "name" [] [],
@@ -91,7 +91,7 @@ CssRoot {
                                             ScssListExpressionElement {
                                                 value: ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@46..47 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@47..54 "primary" [] [],
@@ -104,7 +104,7 @@ CssRoot {
                                             ScssListExpressionElement {
                                                 value: ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@56..57 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@57..66 "secondary" [] [],
@@ -154,7 +154,7 @@ CssRoot {
                   2: SCSS_LIST_EXPRESSION_ELEMENT@21..26
                     0: SCSS_EXPRESSION@21..26
                       0: SCSS_EXPRESSION_ITEM_LIST@21..26
-                        0: SCSS_IDENTIFIER@21..26
+                        0: SCSS_VARIABLE@21..26
                           0: DOLLAR@21..22 "$" [] []
                           1: CSS_IDENTIFIER@22..26
                             0: IDENT@22..26 "name" [] []
@@ -184,7 +184,7 @@ CssRoot {
                       0: SCSS_LIST_EXPRESSION_ELEMENT@46..54
                         0: SCSS_EXPRESSION@46..54
                           0: SCSS_EXPRESSION_ITEM_LIST@46..54
-                            0: SCSS_IDENTIFIER@46..54
+                            0: SCSS_VARIABLE@46..54
                               0: DOLLAR@46..47 "$" [] []
                               1: CSS_IDENTIFIER@47..54
                                 0: IDENT@47..54 "primary" [] []
@@ -192,7 +192,7 @@ CssRoot {
                       2: SCSS_LIST_EXPRESSION_ELEMENT@56..66
                         0: SCSS_EXPRESSION@56..66
                           0: SCSS_EXPRESSION_ITEM_LIST@56..66
-                            0: SCSS_IDENTIFIER@56..66
+                            0: SCSS_VARIABLE@56..66
                               0: DOLLAR@56..57 "$" [] []
                               1: CSS_IDENTIFIER@57..66
                                 0: IDENT@57..66 "secondary" [] []

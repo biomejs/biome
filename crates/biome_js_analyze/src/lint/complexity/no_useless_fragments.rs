@@ -69,8 +69,8 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[
             RuleSource::EslintReact("jsx-no-useless-fragment").same(),
-            RuleSource::EslintReactX("no-useless-fragment").same(),
-            RuleSource::EslintReactXyz("no-useless-fragment").same()
+            RuleSource::EslintReactJsx("no-useless-fragment").same(),
+            RuleSource::EslintReactXyz("jsx-no-useless-fragment").same()
         ],
         recommended: true,
         severity: Severity::Information,

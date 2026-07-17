@@ -220,7 +220,13 @@ impl Collector for DefaultCollector {
                     content,
                     diagnostics,
                     skipped_diagnostics,
+                    errors,
+                    warnings,
+                    infos,
                 } => {
+                    let mut actual_errors = errors as u32;
+                    let mut actual_warnings = warnings as u32;
+                    let mut actual_infos = infos as u32;
                     // we transform the file string into a path object so we can correctly strip
                     // the working directory without having leading slash in the file name
                     let file_path = self.to_relative_file_path(&file_path);
@@ -229,16 +235,20 @@ impl Collector for DefaultCollector {
                     for diag in diagnostics {
                         let severity = diag.severity();
                         if self.should_skip_diagnostic(severity, diag.tags()) {
+                            // Adjust workspace counts for diagnostics skipped
+                            // by the verbose filter (diagnostic_level filtering
+                            // is already handled in the workspace).
+                            match severity {
+                                Severity::Error => actual_errors = actual_errors.saturating_sub(1),
+                                Severity::Warning => {
+                                    actual_warnings = actual_warnings.saturating_sub(1)
+                                }
+                                Severity::Information => {
+                                    actual_infos = actual_infos.saturating_sub(1)
+                                }
+                                _ => {}
+                            }
                             continue;
-                        }
-                        if severity == Severity::Error {
-                            self.errors.fetch_add(1, Ordering::Relaxed);
-                        }
-                        if severity == Severity::Warning {
-                            self.warnings.fetch_add(1, Ordering::Relaxed);
-                        }
-                        if severity == Severity::Information {
-                            self.infos.fetch_add(1, Ordering::Relaxed);
                         }
 
                         let should_collect = self.should_collect();
@@ -250,6 +260,9 @@ impl Collector for DefaultCollector {
                             self.push_diagnostic(diag);
                         }
                     }
+                    self.errors.fetch_add(actual_errors, Ordering::Relaxed);
+                    self.warnings.fetch_add(actual_warnings, Ordering::Relaxed);
+                    self.infos.fetch_add(actual_infos, Ordering::Relaxed);
                 }
                 Message::Diff {
                     file_name,

@@ -9,10 +9,14 @@ info: markdown/linkReference/case-and-space/case-and-space.md
 # `linkReference`
 
 [   See   `AsyncGeneratorFunction`   ][   See   `AsyncGeneratorFunction`   ]
+[   See   `AsyncGeneratorFunction` label   ][   See   `AsyncGeneratorFunction`   ]
+[   See   `AsyncGeneratorFunction`   ][]
 
 # `imageReference`
 
 ![   See   `AsyncGeneratorFunction`   ][   See   `AsyncGeneratorFunction`   ]
+![   See   `AsyncGeneratorFunction` alt   ][   See   `AsyncGeneratorFunction`   ]
+![   See   `AsyncGeneratorFunction`   ][]
 
 # `definition`
 
@@ -38,19 +42,22 @@ info: markdown/linkReference/case-and-space/case-and-space.md
  # `linkReference`
  
 -[ See `AsyncGeneratorFunction` ][ See `AsyncGeneratorFunction` ]
-+[   See   `AsyncGeneratorFunction`   ][   See   `AsyncGeneratorFunction`   ]
+-[ See `AsyncGeneratorFunction` label ][ See `AsyncGeneratorFunction` ]
+-[ See `AsyncGeneratorFunction` ][]
++[   See   `AsyncGeneratorFunction`][   See   `AsyncGeneratorFunction`   ]
++[   See   `AsyncGeneratorFunction` label   ][   See   `AsyncGeneratorFunction`   ]
++[   See   `AsyncGeneratorFunction`][]
  
  # `imageReference`
  
 -![   See   `AsyncGeneratorFunction`   ][ See `AsyncGeneratorFunction` ]
+-![   See   `AsyncGeneratorFunction` alt   ][ See `AsyncGeneratorFunction` ]
+-![ See `AsyncGeneratorFunction` ][]
 +![   See   `AsyncGeneratorFunction`   ][   See   `AsyncGeneratorFunction`   ]
++![   See   `AsyncGeneratorFunction` alt   ][   See   `AsyncGeneratorFunction`   ]
++![   See   `AsyncGeneratorFunction`   ][]
  
  # `definition`
- 
--[ See `AsyncGeneratorFunction` ]: ./index.html
-+[   See   `AsyncGeneratorFunction`   ]: ./index.html
- 
- # `footnoteReference`
  
 ```
 
@@ -59,15 +66,19 @@ info: markdown/linkReference/case-and-space/case-and-space.md
 ```md
 # `linkReference`
 
-[   See   `AsyncGeneratorFunction`   ][   See   `AsyncGeneratorFunction`   ]
+[   See   `AsyncGeneratorFunction`][   See   `AsyncGeneratorFunction`   ]
+[   See   `AsyncGeneratorFunction` label   ][   See   `AsyncGeneratorFunction`   ]
+[   See   `AsyncGeneratorFunction`][]
 
 # `imageReference`
 
 ![   See   `AsyncGeneratorFunction`   ][   See   `AsyncGeneratorFunction`   ]
+![   See   `AsyncGeneratorFunction` alt   ][   See   `AsyncGeneratorFunction`   ]
+![   See   `AsyncGeneratorFunction`   ][]
 
 # `definition`
 
-[   See   `AsyncGeneratorFunction`   ]: ./index.html
+[ See `AsyncGeneratorFunction` ]: ./index.html
 
 # `footnoteReference`
 
@@ -76,4 +87,10 @@ info: markdown/linkReference/case-and-space/case-and-space.md
 # `footnoteDefinition`
 
 [^See`AsyncGeneratorFunction`]: ./index.html
+```
+
+# Lines exceeding max width of 80 characters
+```
+    4: [   See   `AsyncGeneratorFunction` label   ][   See   `AsyncGeneratorFunction`   ]
+   10: ![   See   `AsyncGeneratorFunction` alt   ][   See   `AsyncGeneratorFunction`   ]
 ```

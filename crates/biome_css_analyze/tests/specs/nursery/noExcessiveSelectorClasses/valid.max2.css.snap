@@ -1,0 +1,25 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 103
+expression: valid.max2.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+.ab {}
+.ab.cd {}
+.ab .cd {}
+.ab,
+.cd {}
+.ab.cd,
+.ef.gh {}
+.ab.cd[disabled]:hover {}
+.ab { .cd {} }
+.ab { .cd > & {} }
+.ab, .cd { & > .ef {} }
+.ab { &:hover > .ef.gh {} }
+.ab { @include test { .ef { &:hover .gh {} } } }
+@media print { .ab.cd {} }
+.ab { @media print { .cd {} } }
+
+```

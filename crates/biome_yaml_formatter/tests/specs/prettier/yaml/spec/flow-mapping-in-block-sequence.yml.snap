@@ -1,0 +1,28 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/flow-mapping-in-block-sequence.yml
+---
+
+# Input
+
+```yml
+- {a: b}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1 @@
+-- { a: b }
++- {a: b}
+```
+
+# Output
+
+```yml
+- {a: b}
+```

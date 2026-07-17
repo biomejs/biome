@@ -19,6 +19,7 @@ mod grit_resolved_pattern;
 mod grit_target_language;
 mod grit_target_node;
 mod grit_tree;
+mod linearization;
 mod pattern_compiler;
 mod source_location_ext;
 #[doc(hidden)]
@@ -36,7 +37,9 @@ pub use grit_query::{
     CreateFile, GritQuery, GritQueryEffect, GritQueryResult, Message, OutputFile,
 };
 pub use grit_resolved_pattern::GritResolvedPattern;
-pub use grit_target_language::{GritTargetLanguage, JsTargetLanguage, JsonTargetLanguage};
+pub use grit_target_language::{
+    CssTargetLanguage, GritTargetLanguage, JsTargetLanguage, JsonTargetLanguage,
+};
 pub use grit_target_node::{GritTargetLanguageNode, GritTargetNode, GritTargetSyntaxKind};
 
 use biome_grit_parser::parse_grit;

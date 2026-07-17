@@ -16,15 +16,18 @@ import tsconfigPaths from "vite-tsconfig-paths";
 ```
 issue6492.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these imports.
   
     1 │ // some comment
   > 2 │ import react from "@vitejs/plugin-react";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ import svgr from "vite-plugin-svgr";
-    4 │ import { defineConfig } from "vite";
+  > 3 │ import svgr from "vite-plugin-svgr";
+  > 4 │ import { defineConfig } from "vite";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ import tsconfigPaths from "vite-tsconfig-paths";
+    6 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1 1 │   // some comment
     2 2 │   import react from "@vitejs/plugin-react";

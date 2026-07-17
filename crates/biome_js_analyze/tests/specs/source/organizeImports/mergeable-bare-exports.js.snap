@@ -14,14 +14,16 @@ export { b, d };
 ```
 mergeable-bare-exports.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these exports.
   
   > 1 │ export { a };
       │ ^^^^^^^^^^^^^
-    2 │ export { c };
-    3 │ export { b, d };
+  > 2 │ export { c };
+  > 3 │ export { b, d };
+      │ ^^^^^^^^^^^^^^^^
+    4 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1   │ - export·{·a·};
     2   │ - export·{·c·};

@@ -133,6 +133,13 @@ impl Rule for UseOptionalChain {
                 ))
             }
             JsLogicalOperator::NullishCoalescing | JsLogicalOperator::LogicalOr => {
+                if matches!(operator, JsLogicalOperator::LogicalOr)
+                    && let Some(chain_nodes) =
+                        optional_chain_nodes_from_negated_or_inequality(logical, model)
+                {
+                    return Some(UseOptionalChainState::LogicalAnd(chain_nodes));
+                }
+
                 // Check for negated || chains like `!foo || !foo.bar`
                 if matches!(operator, JsLogicalOperator::LogicalOr) && is_negated_or_chain(logical)
                 {
@@ -532,6 +539,62 @@ fn is_negated_or_chain(logical: &JsLogicalExpression) -> bool {
         }
     }
     false
+}
+
+/// Match `!foo || foo.bar !== "value"` and the loose `!=` variant.
+///
+/// This intentionally stays narrower than general binary comparisons:
+/// optional chaining preserves the guard only when the compared value is static
+/// and non-nullish, so comparing `undefined` to that value remains truthy.
+fn optional_chain_nodes_from_negated_or_inequality(
+    logical: &JsLogicalExpression,
+    model: &SemanticModel,
+) -> Option<LogicalAndChainNodes> {
+    let guard = strip_negation(&logical.left().ok()?)?;
+    let binary = logical.right().ok()?.as_js_binary_expression()?.clone();
+    if !matches!(
+        binary.operator().ok()?,
+        JsBinaryOperator::StrictInequality | JsBinaryOperator::Inequality
+    ) {
+        return None;
+    }
+
+    let left = binary.left().ok()?;
+    let right = binary.right().ok()?;
+    let compared_chain = if is_static_non_nullish_value(&right) {
+        left
+    } else if is_static_non_nullish_value(&left) {
+        right
+    } else {
+        return None;
+    };
+
+    let mut chain = LogicalAndChain::from_expression(compared_chain).ok()?;
+    let guard_chain =
+        LogicalAndChain::from_expression(normalized_optional_chain_like(guard, model).ok()?)
+            .ok()?;
+    if !matches!(
+        chain.cmp_chain(&guard_chain).ok()?,
+        LogicalAndChainOrdering::SubChain
+    ) {
+        return None;
+    }
+
+    let mut tail = chain.buf.split_off(guard_chain.buf.len());
+    let optional_node = tail.pop_front()?;
+    Some(LogicalAndChainNodes {
+        nodes: VecDeque::from([optional_node]),
+        prefix: None,
+        negated: false,
+    })
+}
+
+fn is_static_non_nullish_value(expression: &AnyJsExpression) -> bool {
+    expression
+        .clone()
+        .omit_parentheses()
+        .as_static_value()
+        .is_some_and(|value| !value.is_null_or_undefined())
 }
 
 /// `LogicalAndChainOrdering` is the result of a comparison between two logical

@@ -25,6 +25,8 @@ dhat-heap.json
 /crates/biome_css_formatter/report.*
 /crates/biome_graphql_formatter/report.*
 /crates/biome_js_formatter/report.*
+/crates/biome_markdown_formatter/report.*
+/crates/biome_html_formatter/report.*
 /crates/biome_json_formatter/report.*
 /crates/biome_json_formatter/report_incompatible.*
 

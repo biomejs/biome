@@ -11,12 +11,12 @@ import { B } from "b"; import { A } from "a"; function f() {}
 ```
 one-liner.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these imports.
   
   > 1 │ import { B } from "b"; import { A } from "a"; function f() {}
-      │ ^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1   │ - import·{·B·}·from·"b";·import·{·A·}·from·"a";·function·f()·{}
       1 │ + import·{·A·}·from·"a";·

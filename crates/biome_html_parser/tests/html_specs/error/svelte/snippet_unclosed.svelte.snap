@@ -26,9 +26,9 @@ HtmlRoot {
         SvelteSnippetBlock {
             opening_block: SvelteSnippetOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
-                snippet_token: SNIPPET_KW@2..9 "snippet" [] [],
+                snippet_token: SNIPPET_KW@2..10 "snippet" [] [Whitespace(" ")],
                 expression: HtmlTextExpression {
-                    html_literal_token: HTML_LITERAL@9..20 " greeting()" [] [],
+                    html_literal_token: HTML_LITERAL@10..20 "greeting()" [] [],
                 },
                 r_curly_token: R_CURLY@20..21 "}" [] [],
                 children: HtmlElementList [
@@ -65,9 +65,9 @@ HtmlRoot {
         },
         SvelteRenderBlock {
             sv_curly_at_token: SV_CURLY_AT@47..51 "{@" [Newline("\n"), Newline("\n")] [],
-            render_token: RENDER_KW@51..57 "render" [] [],
+            render_token: RENDER_KW@51..58 "render" [] [Whitespace(" ")],
             expression: HtmlTextExpression {
-                html_literal_token: HTML_LITERAL@57..68 " greeting()" [] [],
+                html_literal_token: HTML_LITERAL@58..68 "greeting()" [] [],
             },
             r_curly_token: R_CURLY@68..69 "}" [] [],
         },
@@ -87,9 +87,9 @@ HtmlRoot {
     0: SVELTE_SNIPPET_BLOCK@0..47
       0: SVELTE_SNIPPET_OPENING_BLOCK@0..37
         0: SV_CURLY_HASH@0..2 "{#" [] []
-        1: SNIPPET_KW@2..9 "snippet" [] []
-        2: HTML_TEXT_EXPRESSION@9..20
-          0: HTML_LITERAL@9..20 " greeting()" [] []
+        1: SNIPPET_KW@2..10 "snippet" [] [Whitespace(" ")]
+        2: HTML_TEXT_EXPRESSION@10..20
+          0: HTML_LITERAL@10..20 "greeting()" [] []
         3: R_CURLY@20..21 "}" [] []
         4: HTML_ELEMENT_LIST@21..37
           0: HTML_ELEMENT@21..37
@@ -114,9 +114,9 @@ HtmlRoot {
         2: (empty)
     1: SVELTE_RENDER_BLOCK@47..69
       0: SV_CURLY_AT@47..51 "{@" [Newline("\n"), Newline("\n")] []
-      1: RENDER_KW@51..57 "render" [] []
-      2: HTML_TEXT_EXPRESSION@57..68
-        0: HTML_LITERAL@57..68 " greeting()" [] []
+      1: RENDER_KW@51..58 "render" [] [Whitespace(" ")]
+      2: HTML_TEXT_EXPRESSION@58..68
+        0: HTML_LITERAL@58..68 "greeting()" [] []
       3: R_CURLY@68..69 "}" [] []
   4: EOF@69..70 "" [Newline("\n")] []
 

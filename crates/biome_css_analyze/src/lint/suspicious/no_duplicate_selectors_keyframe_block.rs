@@ -45,7 +45,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources:&[RuleSource::Stylelint("keyframe-block-no-duplicate-selectors").same()],
+        sources:&[RuleSource::Stylelint("keyframe-block-no-duplicate-selectors").same(), RuleSource::EslintCss("no-duplicate-keyframe-selectors").same()],
     }
 }
 
@@ -71,7 +71,8 @@ impl Rule for NoDuplicateSelectorsKeyframeBlock {
                         return Some(keyframe_selector);
                     }
                 }
-                _ => return None,
+                AnyCssKeyframesItem::ScssKeyframesVariableDeclaration(_) => {}
+                AnyCssKeyframesItem::CssBogusKeyframesItem(_) => return None,
             }
         }
         None

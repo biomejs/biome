@@ -1,0 +1,21 @@
+---
+source: crates/biome_service/src/workspace/server.tests.rs
+expression: result.as_code()
+---
+import { graphql, useLazyLoadQuery } from "react-relay";
+
+export const Page = () => {
+	return <div></div>;
+};
+
+const Table = () => {
+	const query = useLazyLoadQuery(
+		graphql`
+			query Q {
+				field
+			}
+		`,
+		{},
+	);
+	return <div></div>;
+};

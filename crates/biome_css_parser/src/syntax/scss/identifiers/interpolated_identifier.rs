@@ -1,12 +1,13 @@
 use crate::parser::CssParser;
-use crate::syntax::scss::{is_at_scss_interpolation, is_nth_at_scss_interpolation};
-use crate::syntax::{CssSyntaxFeatures, is_nth_at_identifier};
+use crate::syntax::is_nth_at_identifier;
+use crate::syntax::scss::is_nth_at_scss_interpolation;
 use biome_css_syntax::CssSyntaxKind::{
-    EOF, SCSS_INTERPOLATED_IDENTIFIER, SCSS_INTERPOLATED_IDENTIFIER_PART_LIST,
+    EOF, SCSS_INTERPOLATED_IDENTIFIER_HYPHEN, SCSS_INTERPOLATED_IDENTIFIER_PART_LIST,
 };
+use biome_css_syntax::T;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, ParserProgress, SyntaxFeature};
+use biome_parser::{CompletedMarker, Parser, ParserProgress};
 
 #[inline]
 pub(crate) fn is_at_scss_interpolated_identifier(p: &mut CssParser) -> bool {
@@ -15,44 +16,92 @@ pub(crate) fn is_at_scss_interpolated_identifier(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn is_nth_at_scss_interpolated_identifier(p: &mut CssParser, n: usize) -> bool {
-    CssSyntaxFeatures::Scss.is_supported(p)
-        && (is_nth_at_identifier(p, n) || is_nth_at_scss_interpolation(p, n))
+    is_nth_at_identifier(p, n) || is_nth_at_scss_interpolation(p, n)
 }
 
-/// Parses an identifier that may be formed by adjacent identifier and
-/// interpolation fragments with no intervening trivia.
+/// Returns `true` when the current token continues an interpolated identifier
+/// with no separating trivia.
 ///
-/// This lower-level helper is reused by selector-specific wrappers that need
-/// different fragment parsing behavior.
-pub(super) fn parse_scss_interpolated_identifier_with(
+/// Examples:
+/// - `foo#{$bar}`
+/// - `#{$a}-#{$b}`
+#[inline]
+pub(super) fn is_at_identifier_continuation(p: &mut CssParser) -> bool {
+    is_at_adjacent_identifier(p) || is_at_identifier_hyphen(p)
+}
+
+/// Parses adjacent identifier parts after the first parsed part.
+///
+/// Examples: `foo#{$bar}`, `#{$a}-#{$b}`.
+pub(super) fn parse_scss_interpolated_identifier_parts(
     p: &mut CssParser,
-    parse_fragment: fn(&mut CssParser) -> ParsedSyntax,
-) -> ParsedSyntax {
-    if !is_at_scss_interpolated_identifier(p) {
-        return Absent;
-    }
-
-    let first_is_interpolation = is_at_scss_interpolation(p);
-    let Present(first_fragment) = parse_fragment(p) else {
-        return Absent;
-    };
-
-    if !first_is_interpolation && !is_at_scss_interpolated_identifier(p) {
-        return Present(first_fragment);
-    }
-
+    first_fragment: CompletedMarker,
+    mut parse_part: impl FnMut(&mut CssParser) -> ParsedSyntax,
+) -> CompletedMarker {
     let list = first_fragment.precede(p);
     let mut progress = ParserProgress::default();
 
-    while !p.at(EOF) && is_at_scss_interpolated_identifier(p) {
+    while !p.at(EOF) && is_at_identifier_continuation(p) {
         progress.assert_progressing(p);
 
-        if parse_fragment(p).is_absent() {
+        if is_at_identifier_hyphen(p) {
+            // Safe: guarded by `is_at_identifier_hyphen`.
+            parse_identifier_hyphen(p).ok();
+        } else if parse_part(p).is_absent() {
             break;
         }
     }
 
-    let list = list.complete(p, SCSS_INTERPOLATED_IDENTIFIER_PART_LIST);
-    let m = list.precede(p);
-    Present(m.complete(p, SCSS_INTERPOLATED_IDENTIFIER))
+    list.complete(p, SCSS_INTERPOLATED_IDENTIFIER_PART_LIST)
+}
+
+#[inline]
+fn is_at_adjacent_identifier(p: &mut CssParser) -> bool {
+    !p.has_preceding_whitespace() && is_nth_at_scss_interpolated_identifier(p, 0)
+}
+
+/// Returns `true` when `-` belongs to the current interpolated identifier,
+/// such as the hyphen in `#{$a}-#{$b}`.
+#[inline]
+pub(super) fn is_at_identifier_hyphen(p: &mut CssParser) -> bool {
+    is_at_identifier_hyphen_part(p)
+        && !p.has_preceding_whitespace()
+        && is_nth_at_scss_interpolated_identifier(p, 1)
+        && !p.has_nth_preceding_whitespace(1)
+}
+
+#[inline]
+pub(super) fn parse_identifier_hyphen(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_identifier_hyphen(p) {
+        return Absent;
+    }
+
+    parse_identifier_hyphen_part(p)
+}
+
+/// Returns whether the token at `n` is a raw interpolated-identifier hyphen.
+///
+/// Callers still own context checks like `#{$a}-#{$b}` or `--#{$prop}`.
+#[inline]
+pub(super) fn is_nth_at_identifier_hyphen_part(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at(n, T![-])
+}
+
+#[inline]
+fn is_at_identifier_hyphen_part(p: &mut CssParser) -> bool {
+    is_nth_at_identifier_hyphen_part(p, 0)
+}
+
+/// Parses a raw `-` as one interpolated-identifier hyphen part.
+///
+/// Call only after a context-specific guard accepts the hyphen.
+#[inline]
+pub(super) fn parse_identifier_hyphen_part(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_identifier_hyphen_part(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![-]);
+    Present(m.complete(p, SCSS_INTERPOLATED_IDENTIFIER_HYPHEN))
 }

@@ -4,6 +4,7 @@ use biome_js_syntax::{
     AnyJsDeclaration, JsImport, JsVariableKind, TextRange, TsTypeParameter, TsTypeParameterName,
     binding_ext::AnyJsIdentifierBinding,
 };
+use biome_jsdoc_comment::JsdocComment;
 use std::fmt::{Display, Formatter};
 use std::sync::Arc;
 
@@ -24,6 +25,11 @@ pub enum JsDeclarationKind {
     /// Declares both a type and a value.
     Enum,
 
+    /// A `function` declaration or a `declare function` overload signature.
+    ///
+    /// Declares only a value, and is hoisted to the function scope.
+    Function,
+
     /// A generic type parameter, declared in angle brackets.
     ///
     /// For example: `<T>`.
@@ -31,7 +37,7 @@ pub enum JsDeclarationKind {
     /// Declares only a type.
     Generic,
 
-    /// A `function` or `var` declaration.
+    /// A `var` declaration.
     ///
     /// Declares only a value, and is hoisted to the function scope.
     HoistedValue,
@@ -109,6 +115,7 @@ impl JsDeclarationKind {
             self,
             Self::Class
                 | Self::Enum
+                | Self::Function
                 | Self::HoistedValue
                 | Self::Import
                 | Self::Namespace
@@ -128,14 +135,14 @@ impl JsDeclarationKind {
             if let Some(declaration) = AnyJsDeclaration::cast_ref(&ancestor) {
                 return match declaration {
                     AnyJsDeclaration::JsClassDeclaration(_) => Self::Class,
-                    AnyJsDeclaration::JsFunctionDeclaration(_) => Self::HoistedValue,
+                    AnyJsDeclaration::JsFunctionDeclaration(_) => Self::Function,
                     AnyJsDeclaration::JsVariableDeclaration(decl) => match decl.variable_kind() {
                         Ok(JsVariableKind::Const | JsVariableKind::Let) => Self::Value,
                         Ok(JsVariableKind::Using) => Self::Using,
                         Ok(JsVariableKind::Var) => Self::HoistedValue,
                         Err(_) => Self::Unknown,
                     },
-                    AnyJsDeclaration::TsDeclareFunctionDeclaration(_) => Self::HoistedValue,
+                    AnyJsDeclaration::TsDeclareFunctionDeclaration(_) => Self::Function,
                     AnyJsDeclaration::TsEnumDeclaration(_) => Self::Enum,
                     AnyJsDeclaration::TsExternalModuleDeclaration(_) => Self::Module,
                     AnyJsDeclaration::TsInterfaceDeclaration(_) => Self::Interface,
@@ -245,7 +252,8 @@ impl TsBindingReference {
         match self {
             Self::ValueType(binding_id)
             | Self::TypeAndValueType(binding_id)
-            | Self::NamespaceAndValueType(binding_id) => binding_id,
+            | Self::NamespaceAndValueType(binding_id)
+            | Self::Type(binding_id) => binding_id,
             Self::Merged {
                 ty,
                 value_ty,
@@ -254,14 +262,15 @@ impl TsBindingReference {
                 .or(namespace_ty)
                 .or(ty)
                 .expect("a merged reference must have at least two fields set to `Some`"),
-            Self::Type(binding_id) => binding_id,
         }
     }
 
     /// Creates a union from this binding reference with another.
     ///
     /// If both bindings refer to the same kind of type, the binding ID(s) from
-    /// `other` takes precedence.
+    /// `other` take precedence. Same-name function overloads are tracked
+    /// separately in the scope's overload map, so here two functions simply
+    /// merge last-wins like any other pair of values.
     pub fn union_with(self, other: Self) -> Self {
         match (self, other) {
             (Self::Type(own_binding_id), Self::ValueType(other_binding_id)) => {
@@ -452,24 +461,26 @@ impl TsBindingReference {
 }
 
 /// Internal type with all the semantic data of a specific binding
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub(crate) struct SemanticModelBindingData {
     pub(crate) range: TextRange,
     pub(crate) references: Vec<SemanticModelReference>,
     // We use a SmallVec because most of the time a binding is expected once.
-    pub(crate) export_by_start: smallvec::SmallVec<[TextSize; 4]>,
+    pub(crate) export_ranges: smallvec::SmallVec<[TextRange; 4]>,
     /// The kind of declaration that introduced this binding.
     pub(crate) declaration_kind: JsDeclarationKind,
+    /// JSDoc comment associated with the binding.
+    pub(crate) jsdoc: Option<JsdocComment>,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum SemanticModelReferenceType {
     Read { hoisted: bool },
     Write { hoisted: bool },
 }
 
 /// Internal type with all the semantic data of a specific reference
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub(crate) struct SemanticModelReference {
     pub(crate) range_start: TextSize,
     pub(crate) ty: SemanticModelReferenceType,
@@ -596,13 +607,38 @@ impl Binding {
     /// itself an `export` statement) or an identifier usage.
     pub fn exports(&self) -> impl Iterator<Item = JsSyntaxNode> + '_ {
         let binding = self.data.binding(self.id);
-        binding.export_by_start.iter().map(|export_start| {
-            self.data.binding_node_by_start[export_start].to_node(self.data.to_root().syntax())
+        binding.export_ranges.iter().filter_map(|export_start| {
+            self.data
+                .binding_node_by_start
+                .get(&export_start.start())
+                .map(|ptr| ptr.to_node(self.data.to_root().syntax()))
         })
     }
 
     pub fn is_imported(&self) -> bool {
         super::is_imported(&self.syntax())
+    }
+
+    pub fn is_exported(&self) -> bool {
+        self.data.is_exported(self.syntax().text_trimmed_range())
+    }
+
+    /// Returns the JSDoc comment associated with this binding, if any.
+    pub fn jsdoc(&self) -> Option<&JsdocComment> {
+        let binding = self.data.binding(self.id);
+        binding.jsdoc.as_ref()
+    }
+
+    /// Returns the formatted JsDoc comment
+    pub fn to_fmt_jsonc(&self) -> Option<String> {
+        let binding = self.data.binding(self.id);
+        binding.jsdoc.clone().map(|jsdoc| jsdoc.to_string())
+    }
+
+    /// Returns the text ranges of all export sites for this binding.
+    pub fn export_ranges(&self) -> &[TextRange] {
+        let binding = self.data.binding(self.id);
+        binding.export_ranges.as_slice()
     }
 }
 

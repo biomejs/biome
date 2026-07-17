@@ -2,8 +2,8 @@ mod constants;
 pub mod generated_mappings;
 
 use super::{
-    DisregardedSlotCondition, GritTargetLanguageImpl, LeafEquivalenceClass, LeafNormalizer,
-    normalize_quoted_string,
+    DisregardedSlotCondition, GritNodePatternSource, GritTargetLanguageImpl, LeafEquivalenceClass,
+    LeafNormalizer, normalize_quoted_string,
 };
 use crate::{
     CompileError,
@@ -13,7 +13,8 @@ use biome_js_syntax::{JsLanguage, JsSyntaxKind};
 use biome_rowan::{RawSyntaxKind, SyntaxKindSet};
 use constants::DISREGARDED_SNIPPET_SLOTS;
 use generated_mappings::{
-    kind_by_name, legacy_treesitter_name_for_kind, legacy_treesitter_slots_for_kind,
+    kind_by_name, legacy_kind_by_name, legacy_treesitter_name_for_kind,
+    legacy_treesitter_slots_for_kind, native_kind_by_name, native_slots_for_name,
 };
 
 const COMMENT_KINDS: SyntaxKindSet<JsLanguage> =
@@ -48,6 +49,14 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
         kind_by_name(node_name)
     }
 
+    fn legacy_kind_by_name(&self, node_name: &str) -> Option<JsSyntaxKind> {
+        legacy_kind_by_name(node_name)
+    }
+
+    fn native_kind_by_name(&self, node_name: &str) -> Option<JsSyntaxKind> {
+        native_kind_by_name(node_name)
+    }
+
     /// Returns the node name for a given syntax kind.
     ///
     /// For compatibility with existing Grit snippets (as well as the online
@@ -65,11 +74,20 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
     /// For compatibility with existing Grit snippets (as well as the online
     /// Grit playground), node names should be aligned with TreeSitter's
     /// `ts_language_field_name_for_id()`.
-    fn named_slots_for_kind(&self, kind: GritTargetSyntaxKind) -> &'static [(&'static str, u32)] {
+    fn named_slots_for_node(
+        &self,
+        node_name: &str,
+        kind: GritTargetSyntaxKind,
+        source: GritNodePatternSource,
+    ) -> &'static [(&'static str, u32)] {
         let Some(kind) = kind.as_js_kind() else {
             return &[];
         };
-        legacy_treesitter_slots_for_kind(kind)
+
+        match source {
+            GritNodePatternSource::LegacyTreeSitter => legacy_treesitter_slots_for_kind(kind),
+            GritNodePatternSource::Native => native_slots_for_name(node_name),
+        }
     }
 
     fn snippet_context_strings(&self) -> &[(&'static str, &'static str)] {

@@ -418,7 +418,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useExhaustiveDependencies",
         language: "jsx",
-        sources: &[RuleSource::EslintReactHooks("exhaustive-deps").same()],
+        sources: &[RuleSource::EslintReactHooks("exhaustive-deps").same(), RuleSource::EslintReactX("exhaustive-deps").same(), RuleSource::EslintReactXyz("exhaustive-deps").same()],
         recommended: true,
         severity: Severity::Error,
         domains: &[RuleDomain::React, RuleDomain::Next],
@@ -800,7 +800,7 @@ fn is_stable_binding(
                     depth + 1,
                 ),
                 GetSinglePatternMemberResult::TooDeep => false,
-                GetSinglePatternMemberResult::Unknown => true,
+                GetSinglePatternMemberResult::Unknown => false,
             }
         }
 
@@ -1075,6 +1075,7 @@ fn get_single_pattern_member(
     }
 }
 
+#[derive(Debug)]
 enum GetSinglePatternMemberResult {
     /// The binding is part of a pattern 1 level deep
     Member(ReactHookResultMember),

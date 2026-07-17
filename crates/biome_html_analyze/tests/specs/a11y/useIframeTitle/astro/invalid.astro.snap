@@ -36,7 +36,7 @@ invalid.astro:3:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━�
     1 │ <!-- should generate diagnostics -->
     2 │ <iframe />
   > 3 │ <iframe></iframe>
-      │ ^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^
     4 │ <iframe title=""></iframe>
     5 │ 
   
@@ -53,7 +53,7 @@ invalid.astro:4:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━�
     2 │ <iframe />
     3 │ <iframe></iframe>
   > 4 │ <iframe title=""></iframe>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^
     5 │ 
   
   i Screen readers rely on the title set on an iframe to describe the content being displayed.

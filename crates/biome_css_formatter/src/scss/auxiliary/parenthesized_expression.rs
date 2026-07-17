@@ -1,28 +1,184 @@
 use crate::prelude::*;
-use biome_css_syntax::{ScssParenthesizedExpression, ScssParenthesizedExpressionFields};
+use crate::utils::comment_trivia::has_inline_trailing_comment;
+use crate::utils::scss_include_keyword_value::is_top_level_include_keyword_parenthesized_value;
+use crate::utils::scss_list_layout::has_scss_list_shape;
+use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
+use biome_css_syntax::{
+    AnyScssExpression, ScssParenthesizedExpression, ScssParenthesizedExpressionFields,
+    is_scss_map_outer_parenthesized_value, is_scss_parenthesized_expression,
+    scss_include_keyword_argument_owner, unwrap_single_expression_item,
+};
 use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssParenthesizedExpression;
+
 impl FormatNodeRule<ScssParenthesizedExpression> for FormatScssParenthesizedExpression {
+    fn fmt_node(
+        &self,
+        node: &ScssParenthesizedExpression,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        self.fmt_node_with_scss_separator_comments(node, f)
+    }
+
     fn fmt_fields(
         &self,
         node: &ScssParenthesizedExpression,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
+        write!(f, [ScssParenthesizedExpressionLayout::new(node)])
+    }
+
+    fn fmt_leading_comments(
+        &self,
+        node: &ScssParenthesizedExpression,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        self.fmt_leading_scss_separator_comments(node, f)
+    }
+}
+
+/// Formats `(...)` after classifying SCSS-only paren roles like `$arg: (a)`.
+#[derive(Debug, Clone, Copy)]
+struct ScssParenthesizedExpressionLayout<'a> {
+    node: &'a ScssParenthesizedExpression,
+}
+
+impl<'a> ScssParenthesizedExpressionLayout<'a> {
+    fn new(node: &'a ScssParenthesizedExpression) -> Self {
+        Self { node }
+    }
+
+    /// Formats the trailing comma inside broken nested map parentheses.
+    ///
+    /// Examples: `@include mix($arg: ((a: b)))`, `key: ((a: b))`.
+    fn write_trailing_comma(&self, f: &mut CssFormatter) -> FormatResult<()> {
+        if self.should_print_trailing_comma() {
+            write!(f, [if_group_breaks(&token(","))])
+        } else {
+            Ok(())
+        }
+    }
+
+    /// Expands parenthesized map values and include keyword lists.
+    ///
+    /// `key: (value)` and `2 * ($bar)` stay inline; `key: (a, b)` expands.
+    fn should_expand(&self) -> bool {
+        self.should_expand_map_value()
+            || self.should_expand_include_value()
+            || self.has_nested_include_parentheses()
+            || self.has_include_trailing_comment()
+    }
+
+    /// Allows a trailing comma for parentheses Prettier treats as lists.
+    ///
+    /// Examples: `@include mix($arg: ((a)))`, `key: (a: b)`.
+    fn should_print_trailing_comma(&self) -> bool {
+        self.should_print_map_trailing_comma()
+            || self.has_nested_include_parentheses()
+            || self.should_print_include_trailing_comma()
+    }
+
+    /// Expands map values with list or map payloads.
+    ///
+    /// `key: (value)` stays inline, but `key: (a, b)` and `key: (a: b)` expand.
+    fn should_expand_map_value(&self) -> bool {
+        is_scss_map_outer_parenthesized_value(self.node) && self.has_list_or_map_payload()
+    }
+
+    /// Expands include keyword values with list or map payloads.
+    ///
+    /// `2 * ($bar)` stays inline, but `$arg: ($bar, $baz)` expands.
+    fn should_expand_include_value(&self) -> bool {
+        is_top_level_include_keyword_parenthesized_value(self.node)
+            && self.has_list_or_map_payload()
+    }
+
+    fn has_list_or_map_payload(&self) -> bool {
+        self.node.expression().ok().is_some_and(|expression| {
+            expression_has_list_shape(&expression) || expression_is_map(&expression)
+        })
+    }
+
+    /// Allows the trailing comma around nested maps such as `key: ((a: b))`.
+    fn should_print_map_trailing_comma(&self) -> bool {
+        is_scss_map_outer_parenthesized_value(self.node)
+            && self
+                .node
+                .expression()
+                .ok()
+                .is_some_and(|expression| expression_is_map(&expression))
+    }
+
+    /// Allows the top-level include comma around nested maps.
+    ///
+    /// Example: `$arg: ((a: b))`.
+    fn should_print_include_trailing_comma(&self) -> bool {
+        is_top_level_include_keyword_parenthesized_value(self.node)
+            && self
+                .node
+                .expression()
+                .ok()
+                .is_some_and(|expression| expression_is_map(&expression))
+    }
+
+    /// Detects the outer include value in `@include mix($arg: ((a)))`.
+    fn has_nested_include_parentheses(&self) -> bool {
+        scss_include_keyword_argument_owner(self.node.syntax()).is_some()
+            && self.has_nested_parenthesized_item()
+    }
+
+    /// Detects include value comments such as `@include mix($arg: (a) /* end */)`.
+    fn has_include_trailing_comment(&self) -> bool {
+        scss_include_keyword_argument_owner(self.node.syntax()).is_some()
+            && has_inline_trailing_comment(self.node.syntax())
+    }
+
+    /// Detects the immediate parenthesized child in `((a))`.
+    fn has_nested_parenthesized_item(&self) -> bool {
+        self.node
+            .expression()
+            .ok()
+            .is_some_and(|expression| is_scss_parenthesized_expression(&expression))
+    }
+}
+
+impl Format<CssFormatContext> for ScssParenthesizedExpressionLayout<'_> {
+    fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
         let ScssParenthesizedExpressionFields {
             l_paren_token,
             expression,
             r_paren_token,
-        } = node.as_fields();
+        } = self.node.as_fields();
+        let trailing_comma = format_with(|f| self.write_trailing_comma(f));
 
         write!(
             f,
             [group(&format_args![
                 l_paren_token.format(),
-                soft_block_indent(&expression.format()),
+                soft_block_indent(&format_args![expression.format(), trailing_comma]),
                 r_paren_token.format()
-            ])]
+            ])
+            .should_expand(self.should_expand())]
         )
     }
+}
+
+/// Returns `true` for list payloads with separators, such as `$arg: (a, b)`.
+fn expression_has_list_shape(expression: &AnyScssExpression) -> bool {
+    expression
+        .as_scss_list_expression()
+        .is_some_and(has_scss_list_shape)
+        || unwrap_single_expression_item(expression).is_some_and(|item| {
+            item.as_scss_list_expression()
+                .is_some_and(has_scss_list_shape)
+        })
+}
+
+/// Returns `true` for map payloads, such as `key: (a: b)`.
+fn expression_is_map(expression: &AnyScssExpression) -> bool {
+    expression.as_scss_map_expression().is_some()
+        || unwrap_single_expression_item(expression)
+            .is_some_and(|item| item.as_scss_map_expression().is_some())
 }

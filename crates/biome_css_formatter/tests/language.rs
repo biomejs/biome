@@ -1,14 +1,12 @@
 use biome_css_formatter::CssFormatLanguage;
 use biome_css_formatter::context::CssFormatContext;
 use biome_css_parser::{CssParserOptions, parse_css};
-use biome_css_syntax::{CssFileSource, CssLanguage};
+use biome_css_syntax::CssLanguage;
 use biome_formatter_test::TestFormatLanguage;
 use biome_fs::BiomePath;
+use biome_languages::{CssFileSource, DocumentFileSource};
 use biome_parser::AnyParse;
-use biome_service::{
-    settings::{ServiceLanguage, Settings},
-    workspace::DocumentFileSource,
-};
+use biome_service::settings::{ServiceLanguage, Settings};
 
 pub struct CssTestFormatLanguage {
     source_type: CssFileSource,
@@ -29,7 +27,8 @@ impl TestFormatLanguage for CssTestFormatLanguage {
         let options = CssParserOptions::default()
             .allow_wrong_line_comments()
             .allow_css_modules()
-            .allow_tailwind_directives();
+            .allow_tailwind_directives()
+            .report_scss_exclusive_syntax();
 
         parse_css(text, self.source_type, options).into()
     }

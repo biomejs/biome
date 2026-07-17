@@ -25,7 +25,20 @@ TwRoot {
                 minus_token: DASH@6..7 "-" [] [],
                 value: TwArbitraryValue {
                     l_brack_token: L_BRACKET@7..8 "[" [] [],
-                    value_token: TW_VALUE@8..19 "0px_2px_4px" [] [],
+                    value: CssGenericComponentValueList [
+                        CssRegularDimension {
+                            value_token: CSS_NUMBER_LITERAL@8..9 "0" [] [],
+                            unit_token: IDENT@9..12 "px" [] [Whitespace("_")],
+                        },
+                        CssRegularDimension {
+                            value_token: CSS_NUMBER_LITERAL@12..13 "2" [] [],
+                            unit_token: IDENT@13..16 "px" [] [Whitespace("_")],
+                        },
+                        CssRegularDimension {
+                            value_token: CSS_NUMBER_LITERAL@16..17 "4" [] [],
+                            unit_token: IDENT@17..19 "px" [] [],
+                        },
+                    ],
                     r_brack_token: R_BRACKET@19..20 "]" [] [],
                 },
                 modifier: missing (optional),
@@ -51,7 +64,16 @@ TwRoot {
         1: DASH@6..7 "-" [] []
         2: TW_ARBITRARY_VALUE@7..20
           0: L_BRACKET@7..8 "[" [] []
-          1: TW_VALUE@8..19 "0px_2px_4px" [] []
+          1: CSS_GENERIC_COMPONENT_VALUE_LIST@8..19
+            0: CSS_REGULAR_DIMENSION@8..12
+              0: CSS_NUMBER_LITERAL@8..9 "0" [] []
+              1: IDENT@9..12 "px" [] [Whitespace("_")]
+            1: CSS_REGULAR_DIMENSION@12..16
+              0: CSS_NUMBER_LITERAL@12..13 "2" [] []
+              1: IDENT@13..16 "px" [] [Whitespace("_")]
+            2: CSS_REGULAR_DIMENSION@16..19
+              0: CSS_NUMBER_LITERAL@16..17 "4" [] []
+              1: IDENT@17..19 "px" [] []
           2: R_BRACKET@19..20 "]" [] []
         3: (empty)
       3: (empty)

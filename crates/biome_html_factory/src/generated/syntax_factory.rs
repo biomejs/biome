@@ -739,6 +739,46 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(HTML_OPENING_ELEMENT, children)
             }
+            HTML_PROCESSING_INSTRUCTION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [<?]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyHtmlTagName::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlAttributeList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [?>]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        HTML_PROCESSING_INSTRUCTION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(HTML_PROCESSING_INSTRUCTION, children)
+            }
             HTML_ROOT => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
@@ -1328,6 +1368,79 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(SVELTE_BIND_DIRECTIVE, children)
             }
+            SVELTE_BIND_FUNCTION_BINDING_EXPRESSION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['{']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlTextExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [,]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlTextExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['}']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SVELTE_BIND_FUNCTION_BINDING_EXPRESSION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SVELTE_BIND_FUNCTION_BINDING_EXPRESSION, children)
+            }
+            SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [=]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && SvelteBindFunctionBindingExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE, children)
+            }
             SVELTE_CLASS_DIRECTIVE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
@@ -1519,7 +1632,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && HtmlAttributeInitializerClause::can_cast(element.kind())
+                    && AnySvelteDirectiveInitializerClause::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -2176,6 +2289,39 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(SVELTE_LITERAL, children)
             }
+            SVELTE_MEMBER_PROPERTY => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && AnySvelteMemberObject::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [.]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && SvelteName::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SVELTE_MEMBER_PROPERTY.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SVELTE_MEMBER_PROPERTY, children)
+            }
             SVELTE_NAME => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -2220,6 +2366,39 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                     );
                 }
                 slots.into_node(SVELTE_OUT_DIRECTIVE, children)
+            }
+            SVELTE_RENAME_BINDING => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && SvelteName::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [:]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnySvelteBindingAssignmentBinding::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SVELTE_RENAME_BINDING.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SVELTE_RENAME_BINDING, children)
             }
             SVELTE_RENDER_BLOCK => {
                 let mut elements = (&children).into_iter();
@@ -2452,6 +2631,58 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(SVELTE_STYLE_DIRECTIVE, children)
             }
+            SVELTE_TEMPLATE_ATTRIBUTE_VALUE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && matches!(element.kind(), T!['"'] | T!["'"])
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && SvelteTemplateElementList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && matches!(element.kind(), T!['"'] | T!["'"])
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SVELTE_TEMPLATE_ATTRIBUTE_VALUE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SVELTE_TEMPLATE_ATTRIBUTE_VALUE, children)
+            }
+            SVELTE_TEMPLATE_CHUNK_ELEMENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_TEMPLATE_CHUNK
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SVELTE_TEMPLATE_CHUNK_ELEMENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SVELTE_TEMPLATE_CHUNK_ELEMENT, children)
+            }
             SVELTE_TRANSITION_DIRECTIVE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
@@ -2681,6 +2912,308 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(VUE_V_BIND_SHORTHAND_DIRECTIVE, children)
             }
+            VUE_V_FOR_ARRAY_BINDING => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['[']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && VueVForBindingList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![']']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        VUE_V_FOR_ARRAY_BINDING.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(VUE_V_FOR_ARRAY_BINDING, children)
+            }
+            VUE_V_FOR_IDENTIFIER_BINDING => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == IDENT
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        VUE_V_FOR_IDENTIFIER_BINDING.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(VUE_V_FOR_IDENTIFIER_BINDING, children)
+            }
+            VUE_V_FOR_IN_OPERATOR => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T![in]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        VUE_V_FOR_IN_OPERATOR.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(VUE_V_FOR_IN_OPERATOR, children)
+            }
+            VUE_V_FOR_OBJECT_BINDING => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['{']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && VueVForBindingList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['}']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        VUE_V_FOR_OBJECT_BINDING.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(VUE_V_FOR_OBJECT_BINDING, children)
+            }
+            VUE_V_FOR_OBJECT_PROPERTY_BINDING => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && VueVForIdentifierBinding::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [:]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyVueVForBinding::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        VUE_V_FOR_OBJECT_PROPERTY_BINDING.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(VUE_V_FOR_OBJECT_PROPERTY_BINDING, children)
+            }
+            VUE_V_FOR_OF_OPERATOR => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T![of]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        VUE_V_FOR_OF_OPERATOR.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(VUE_V_FOR_OF_OPERATOR, children)
+            }
+            VUE_V_FOR_REST_BINDING => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [...]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && VueVForIdentifierBinding::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        VUE_V_FOR_REST_BINDING.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(VUE_V_FOR_REST_BINDING, children)
+            }
+            VUE_V_FOR_TUPLE_BINDING => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['(']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyVueVForBinding::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && VueVForTupleElement::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && VueVForTupleElement::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![')']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        VUE_V_FOR_TUPLE_BINDING.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(VUE_V_FOR_TUPLE_BINDING, children)
+            }
+            VUE_V_FOR_TUPLE_ELEMENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [,]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyVueVForBinding::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        VUE_V_FOR_TUPLE_ELEMENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(VUE_V_FOR_TUPLE_ELEMENT, children)
+            }
+            VUE_V_FOR_VALUE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && matches!(element.kind(), T!['"'] | T!["'"])
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyVueVForBinding::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyVueVForOperator::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlTextExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && matches!(element.kind(), T!['"'] | T!["'"])
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        VUE_V_FOR_VALUE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(VUE_V_FOR_VALUE, children)
+            }
             VUE_V_ON_SHORTHAND_DIRECTIVE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
@@ -2790,7 +3323,17 @@ impl SyntaxFactory for HtmlSyntaxFactory {
             SVELTE_ELSE_IF_CLAUSE_LIST => {
                 Self::make_node_list_syntax(kind, children, SvelteElseIfClause::can_cast)
             }
+            SVELTE_TEMPLATE_ELEMENT_LIST => {
+                Self::make_node_list_syntax(kind, children, AnySvelteTemplateElement::can_cast)
+            }
             VUE_MODIFIER_LIST => Self::make_node_list_syntax(kind, children, VueModifier::can_cast),
+            VUE_V_FOR_BINDING_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                AnyVueVForBindingListElement::can_cast,
+                T ! [,],
+                true,
+            ),
             _ => unreachable!("Is {:?} a token?", kind),
         }
     }

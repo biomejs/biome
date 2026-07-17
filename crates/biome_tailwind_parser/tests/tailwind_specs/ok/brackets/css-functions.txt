@@ -1,0 +1,1 @@
+w-[calc(100%_-_theme(spacing.4))] bg-[rgb(255_0_0/0.5)] bg-[color-mix(in_oklab,_red_50%,_blue)] shadow-[inset_0_1px_2px_rgb(0_0_0/0.25)] grid-cols-[repeat(3,_minmax(0,_1fr))]

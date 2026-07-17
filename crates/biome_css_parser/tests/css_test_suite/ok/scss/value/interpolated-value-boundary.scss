@@ -1,0 +1,21 @@
+a { m: #{1}0; }
+a { m: #{1}+2; }
+a { m: #{$a}+10px; }
+a { m: #{$a}-10%; }
+a { m: 10#{foo}; }
+a { m: 10px#{foo}; }
+a { m: 10%#{foo}; }
+a { m: 10#{p}x; }
+a { m: $v#{x}; }
+a { m: module.$name#{suffix}; }
+a { m: module.$name (1); }
+a { m: module.$name
+(1); }
+a { m: #{x}$v; }
+a { m: foo#{bar}; }
+a { m: #{bar}foo; }
+a { m: #{$fn}0(1); }
+a { --x: 10#fff; }
+a { --x: $v#fff; }
+a { --x: 10#{foo}; }
+a { color: attr(data-x, #{1}0px); }

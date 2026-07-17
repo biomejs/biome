@@ -1,10 +1,11 @@
 use crate::token_source::{
-    HtmlReLexContext, HtmlTokenSource, HtmlTokenSourceCheckpoint, TextExpressionKind,
+    HtmlLexContext, HtmlReLexContext, HtmlTokenSource, HtmlTokenSourceCheckpoint,
+    TextExpressionKind,
 };
 use biome_html_factory::HtmlSyntaxFactory;
-use biome_html_syntax::{
-    HtmlFileSource, HtmlLanguage, HtmlSyntaxKind, HtmlTextExpressions, HtmlVariant,
-};
+use biome_html_syntax::{HtmlLanguage, HtmlSyntaxKind};
+use biome_languages::HtmlFileSource;
+use biome_languages::html::{HtmlTextExpressions, HtmlVariant};
 use biome_parser::diagnostic::{ParseDiagnostic, merge_diagnostics};
 use biome_parser::event::Event;
 use biome_parser::prelude::*;
@@ -68,6 +69,20 @@ impl<'source> HtmlParser<'source> {
         // should be reset manually when the scope of their use is exited.
     }
 
+    /// Execute a lookahead operation without consuming tokens.
+    ///
+    /// Saves a checkpoint, executes the provided closure, then rewinds to
+    /// the checkpoint. The closure's return value is passed through.
+    pub fn lookahead<F, R>(&mut self, op: F) -> R
+    where
+        F: FnOnce(&mut Self) -> R,
+    {
+        let checkpoint = self.checkpoint();
+        let result = op(self);
+        self.rewind(checkpoint);
+        result
+    }
+
     /// Re-lexes the current token in the specified context. Returns the kind
     /// of the re-lexed token (can be the same as before if the context doesn't make a difference for the current token)
     pub fn re_lex(&mut self, context: HtmlReLexContext) -> HtmlSyntaxKind {
@@ -79,6 +94,18 @@ impl<'source> HtmlParser<'source> {
     /// HTML text rather than a `FENCE` token.
     pub(crate) fn set_after_frontmatter(&mut self, value: bool) {
         self.source.set_after_frontmatter(value);
+    }
+
+    /// shorthand for: `self.bump_with_context(kind, HtmlLexContext::VueVForValue);`
+    #[inline(always)]
+    pub fn bump_v_for(&mut self, kind: HtmlSyntaxKind) {
+        self.bump_with_context(kind, HtmlLexContext::VueVForValue);
+    }
+
+    /// shorthand for: `self.expect_with_context(kind, HtmlLexContext::VueVForValue);`
+    #[inline(always)]
+    pub fn expect_v_for(&mut self, kind: HtmlSyntaxKind) -> bool {
+        self.expect_with_context(kind, HtmlLexContext::VueVForValue)
     }
 }
 
@@ -151,6 +178,10 @@ impl HtmlParserOptions {
     pub fn with_vue(mut self) -> Self {
         self.vue = true;
         self
+    }
+
+    pub fn set_vue(&mut self, value: bool) {
+        self.vue = value;
     }
 
     pub fn with_svelte(mut self) -> Self {

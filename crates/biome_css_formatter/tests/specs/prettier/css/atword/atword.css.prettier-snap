@@ -1,4 +1,0 @@
-.test {
-  @color: red;
-  color: @color;
-}

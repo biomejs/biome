@@ -11,16 +11,16 @@ export { A };
 
 # Diagnostics
 ```
-chunk-with-bare-export.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+chunk-with-bare-export.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i This statement must be preceded by a blank line. Add a newline before this statement.
   
-  > 1 │ import { A } from "package";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ export { A };
+    1 │ import { A } from "package";
+  > 2 │ export { A };
+      │ ^^^^^^^^^^^^^
     3 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1 1 │   import { A } from "package";
       2 │ + 

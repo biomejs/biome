@@ -41,6 +41,7 @@ pub struct PrintDiagnostic<'fmt, D: ?Sized> {
     diag: &'fmt D,
     verbose: bool,
     search: bool,
+    concise: bool,
 }
 
 impl<'fmt, D: AsDiagnostic + ?Sized> PrintDiagnostic<'fmt, D> {
@@ -49,6 +50,7 @@ impl<'fmt, D: AsDiagnostic + ?Sized> PrintDiagnostic<'fmt, D> {
             diag,
             verbose: false,
             search: false,
+            concise: false,
         }
     }
 
@@ -57,6 +59,7 @@ impl<'fmt, D: AsDiagnostic + ?Sized> PrintDiagnostic<'fmt, D> {
             diag,
             verbose: true,
             search: false,
+            concise: false,
         }
     }
 
@@ -65,6 +68,16 @@ impl<'fmt, D: AsDiagnostic + ?Sized> PrintDiagnostic<'fmt, D> {
             diag,
             verbose: false,
             search: true,
+            concise: false,
+        }
+    }
+
+    pub fn concise(diag: &'fmt D) -> Self {
+        Self {
+            diag,
+            verbose: false,
+            search: false,
+            concise: true,
         }
     }
 }
@@ -72,6 +85,10 @@ impl<'fmt, D: AsDiagnostic + ?Sized> PrintDiagnostic<'fmt, D> {
 impl<D: AsDiagnostic + ?Sized> fmt::Display for PrintDiagnostic<'_, D> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
         let diagnostic = self.diag.as_diagnostic();
+
+        if self.concise {
+            return print_concise(fmt, diagnostic);
+        }
 
         // Print the header for the diagnostic
         fmt.write_markup(markup! {
@@ -91,6 +108,76 @@ impl<D: AsDiagnostic + ?Sized> fmt::Display for PrintDiagnostic<'_, D> {
     }
 }
 
+/// Print the file location (path with hyperlink + line:col) for a diagnostic.
+///
+/// This is shared between `PrintHeader` (pretty reporter) and `print_concise` (concise reporter).
+fn print_file_location<D: Diagnostic + ?Sized>(
+    fmt: &mut fmt::Formatter<'_>,
+    diagnostic: &D,
+) -> io::Result<()> {
+    let location = diagnostic.location();
+    let file_name = match &location.resource {
+        Some(Resource::File(file)) => Some(file),
+        _ => None,
+    };
+
+    let is_vscode = is_terminal_program("vscode");
+    let is_jetbrains = is_terminal_program("JetBrains-JediTerm");
+
+    if let Some(name) = file_name {
+        if is_vscode {
+            fmt.write_str(name)?;
+        } else {
+            let path_name = Path::new(name);
+            if is_jetbrains {
+                fmt.write_str(&format!(" at {name}"))?;
+            } else if path_name.is_absolute() {
+                let link = format!("file://{name}");
+                fmt.write_markup(markup! {
+                    <Hyperlink href={link}>{name}</Hyperlink>
+                })?;
+            } else if cfg!(debug_assertions) && cfg!(windows) {
+                fmt.write_str(name.replace('\\', "/").as_str())?;
+            } else {
+                fmt.write_str(name)?;
+            }
+        }
+
+        // Print the line and column position if the location has a span and source code
+        // (the source code is necessary to convert a byte offset into a line + column)
+        if let (Some(span), Some(source_code)) = (location.span, location.source_code) {
+            let file = SourceFile::new(source_code);
+            if let Ok(location) = file.location(span.start()) {
+                fmt.write_markup(markup! {
+                    ":"{location.line_number.get()}":"{location.column_number.get()}
+                })?;
+            }
+        }
+    }
+
+    Ok(())
+}
+
+/// Print the category name with a hyperlink to the documentation if available.
+///
+/// This is shared between `PrintHeader` (pretty reporter) and `print_concise` (concise reporter).
+fn print_category<D: Diagnostic + ?Sized>(
+    fmt: &mut fmt::Formatter<'_>,
+    diagnostic: &D,
+) -> io::Result<()> {
+    if let Some(category) = diagnostic.category() {
+        if let Some(link) = category.link() {
+            fmt.write_markup(markup! {
+                <Hyperlink href={link}>{category.name()}</Hyperlink>
+            })?;
+        } else {
+            fmt.write_str(category.name())?;
+        }
+    }
+
+    Ok(())
+}
+
 /// Display struct implementing the formatting of a diagnostic header.
 pub(crate) struct PrintHeader<'fmt, D: ?Sized>(pub(crate) &'fmt D);
 
@@ -103,60 +190,19 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
         let mut fmt = CountWidth::wrap(f, &mut slot);
 
         // Print the diagnostic location if it has a file path
-        let location = diagnostic.location();
-        let file_name = match &location.resource {
-            Some(Resource::File(file)) => Some(file),
-            _ => None,
-        };
+        print_file_location(&mut fmt, diagnostic)?;
 
-        let is_vscode = is_terminal_program("vscode");
-        let is_jetbrains = is_terminal_program("JetBrains-JediTerm");
-
-        if let Some(name) = file_name {
-            if is_vscode {
-                fmt.write_str(name)?;
-            } else {
-                let path_name = Path::new(name);
-                if is_jetbrains {
-                    fmt.write_str(&format!(" at {name}"))?;
-                } else if path_name.is_absolute() {
-                    let link = format!("file://{name}");
-                    fmt.write_markup(markup! {
-                        <Hyperlink href={link}>{name}</Hyperlink>
-                    })?;
-                } else if cfg!(debug_assertions) && cfg!(windows) {
-                    fmt.write_str(name.replace('\\', "/").as_str())?;
-                } else {
-                    fmt.write_str(name)?;
-                }
-            }
-
-            // Print the line and column position if the location has a span and source code
-            // (the source code is necessary to convert a byte offset into a line + column)
-            if let (Some(span), Some(source_code)) = (location.span, location.source_code) {
-                let file = SourceFile::new(source_code);
-                if let Ok(location) = file.location(span.start()) {
-                    fmt.write_markup(markup! {
-                        ":"{location.line_number.get()}":"{location.column_number.get()}
-                    })?;
-                }
-            }
-
+        let has_file = matches!(diagnostic.location().resource, Some(Resource::File(_)));
+        if has_file {
             fmt.write_str(" ")?;
         }
 
         // Print the category of the diagnostic, with a hyperlink if
         // the category has an associated link
-        if let Some(category) = diagnostic.category() {
-            if let Some(link) = category.link() {
-                fmt.write_markup(markup! {
-                    <Hyperlink href={link}>{category.name()}</Hyperlink>" "
-                })?;
-            } else {
-                fmt.write_markup(markup! {
-                    {category.name()}" "
-                })?;
-            }
+        print_category(&mut fmt, diagnostic)?;
+
+        if diagnostic.category().is_some() {
+            fmt.write_str(" ")?;
         }
 
         // Print the internal, fixable and fatal tags
@@ -206,6 +252,44 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
         let line_width = header_width.saturating_sub(text_width).max(MIN_WIDTH);
         HorizontalLine::new(line_width).fmt(f)
     }
+}
+
+/// Print a diagnostic in concise format: a single line with severity icon,
+/// file location, category, and message.
+///
+/// Output format: `{icon} {path}:{line}:{col}: {category}: {message}`
+fn print_concise<D: Diagnostic + ?Sized>(
+    fmt: &mut fmt::Formatter<'_>,
+    diagnostic: &D,
+) -> io::Result<()> {
+    // Print severity icon with appropriate color
+    let (icon, element) = match diagnostic.severity() {
+        Severity::Fatal | Severity::Error => ('\u{2716}', MarkupElement::Error), // ✖
+        Severity::Warning => ('\u{26a0}', MarkupElement::Warn),                  // ⚠
+        Severity::Information | Severity::Hint => ('\u{2139}', MarkupElement::Info), // ℹ
+    };
+
+    fmt.write_markup(Markup(&[MarkupNode {
+        elements: &[MarkupElement::Emphasis, element],
+        content: &icon as &dyn fmt::Display,
+    }]))?;
+
+    fmt.write_str(" ")?;
+
+    // Print file location with hyperlink (only if the diagnostic has a file resource)
+    if matches!(diagnostic.location().resource, Some(Resource::File(_))) {
+        print_file_location(fmt, diagnostic)?;
+        fmt.write_str(": ")?;
+    }
+
+    // Print category with hyperlink (only if the diagnostic has a category)
+    if diagnostic.category().is_some() {
+        print_category(fmt, diagnostic)?;
+        fmt.write_str(": ")?;
+    }
+
+    // Print the diagnostic message
+    diagnostic.message(fmt)
 }
 
 /// Wrapper for a type implementing [fmt::Write] that counts the total width of
@@ -1108,6 +1192,40 @@ mod tests {
             "    none\n"
             "    \n"
         }.to_owned();
+
+        assert_eq!(
+            diag, expected,
+            "\nactual:\n{diag:#?}\nexpected:\n{expected:#?}"
+        );
+    }
+
+    #[test]
+    fn test_concise_with_location() {
+        let diag = TestDiagnostic::<LogAdvices>::with_location();
+
+        let diag = markup!({ PrintDiagnostic::concise(&diag) }).to_owned();
+
+        let expected = markup! {
+            <Emphasis><Error>"✖"</Error></Emphasis>" path:1:1: internalError/io: diagnostic message"
+        }
+        .to_owned();
+
+        assert_eq!(
+            diag, expected,
+            "\nactual:\n{diag:#?}\nexpected:\n{expected:#?}"
+        );
+    }
+
+    #[test]
+    fn test_concise_without_location() {
+        let diag = TestDiagnostic::<LogAdvices>::empty();
+
+        let diag = markup!({ PrintDiagnostic::concise(&diag) }).to_owned();
+
+        let expected = markup! {
+            <Emphasis><Error>"✖"</Error></Emphasis>" internalError/io: diagnostic message"
+        }
+        .to_owned();
 
         assert_eq!(
             diag, expected,

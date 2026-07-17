@@ -4,7 +4,7 @@ expression: invalid.html
 ---
 # Input
 ```html
-<!-- Invalid: exact duplicates -->
+<!-- should generate diagnostics -->
 <div class="flex flex"></div>
 <div class="p-4 text-red-500 p-4 bg-white"></div>
 
@@ -45,7 +45,7 @@ invalid.html:2:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━�
 
   i This class string contains a duplicate class.
   
-    1 │ <!-- Invalid: exact duplicates -->
+    1 │ <!-- should generate diagnostics -->
   > 2 │ <div class="flex flex"></div>
       │      ^^^^^^^^^^^^^^^^^
     3 │ <div class="p-4 text-red-500 p-4 bg-white"></div>
@@ -67,7 +67,7 @@ invalid.html:3:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━�
 
   i This class string contains a duplicate class.
   
-    1 │ <!-- Invalid: exact duplicates -->
+    1 │ <!-- should generate diagnostics -->
     2 │ <div class="flex flex"></div>
   > 3 │ <div class="p-4 text-red-500 p-4 bg-white"></div>
       │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

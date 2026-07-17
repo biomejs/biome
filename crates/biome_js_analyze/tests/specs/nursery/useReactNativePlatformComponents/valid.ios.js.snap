@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ios.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+import { ActivityIndicatorIOS } from "react-native";
+
+const { ActivityIndicatorIOS: Baz } = require("react-native");
+
+```

@@ -26,15 +26,21 @@ import * as ns from "mod";
 ```
 mergeable_imports.ts:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these imports.
   
-    1 │ // Comment 1
-  > 2 │ import type { T4, T2 } from "mod";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ // Comment 2
-    4 │ import type { T3, T1 } from "mod";
+     1 │ // Comment 1
+   > 2 │ import type { T4, T2 } from "mod";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ // Comment 2
+   > 4 │ import type { T3, T1 } from "mod";
+        ...
+  > 13 │ // Comment 7
+  > 14 │ import I from "mod";
+  > 15 │ import * as ns from "mod";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
      1  1 │   // Comment 1
      2    │ - import·type·{·T4,·T2·}·from·"mod";

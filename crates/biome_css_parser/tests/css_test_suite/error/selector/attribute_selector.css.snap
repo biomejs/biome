@@ -107,7 +107,9 @@ CssRoot {
                                         value_token: CSS_STRING_LITERAL@40..46 "\"foo\"" [] [Whitespace(" ")],
                                     },
                                 },
-                                modifier: S_KW@46..48 "s" [] [Whitespace(" ")],
+                                modifier: CssAttributeModifier {
+                                    value: S_KW@46..48 "s" [] [Whitespace(" ")],
+                                },
                             },
                             r_brack_token: missing (required),
                         },
@@ -141,7 +143,9 @@ CssRoot {
                                         value_token: CSS_STRING_LITERAL@58..64 "\"foo\"" [] [Whitespace(" ")],
                                     },
                                 },
-                                modifier: S_KW@64..65 "s" [] [],
+                                modifier: CssAttributeModifier {
+                                    value: S_KW@64..65 "s" [] [],
+                                },
                             },
                             r_brack_token: missing (required),
                         },
@@ -218,7 +222,8 @@ CssRoot {
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@40..46
                   0: CSS_STRING@40..46
                     0: CSS_STRING_LITERAL@40..46 "\"foo\"" [] [Whitespace(" ")]
-                2: S_KW@46..48 "s" [] [Whitespace(" ")]
+                2: CSS_ATTRIBUTE_MODIFIER@46..48
+                  0: S_KW@46..48 "s" [] [Whitespace(" ")]
               3: (empty)
       1: CSS_DECLARATION_OR_RULE_BLOCK@48..50
         0: L_CURLY@48..49 "{" [] []
@@ -241,7 +246,8 @@ CssRoot {
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@58..64
                   0: CSS_STRING@58..64
                     0: CSS_STRING_LITERAL@58..64 "\"foo\"" [] [Whitespace(" ")]
-                2: S_KW@64..65 "s" [] []
+                2: CSS_ATTRIBUTE_MODIFIER@64..65
+                  0: S_KW@64..65 "s" [] []
               3: (empty)
       1: CSS_BOGUS_BLOCK@65..65
   2: EOF@65..66 "" [Newline("\n")] []

@@ -15,13 +15,22 @@ impl FormatNodeRule<JsComputedMemberName> for FormatJsComputedMemberName {
             r_brack_token,
         } = node.as_fields();
 
-        write![
-            f,
-            [
-                l_brack_token.format(),
-                expression.format(),
-                r_brack_token.format(),
-            ]
-        ]
+        let l_brack = format_with(|f: &mut JsFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [l_brack_token.format(), space()])
+            } else {
+                write!(f, [l_brack_token.format()])
+            }
+        });
+
+        let r_brack = format_with(|f: &mut JsFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [space(), r_brack_token.format()])
+            } else {
+                write!(f, [r_brack_token.format()])
+            }
+        });
+
+        write![f, [l_brack, expression.format(), r_brack]]
     }
 }

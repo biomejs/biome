@@ -1,0 +1,11 @@
+.grid:nth-child(#{$numPerRow} n + 1) {
+  width: 1px;
+}
+
+.grid:nth-child(2n + #{}) {
+  width: 2px;
+}
+
+.grid:nth-child(n - #{$offset} of) {
+  width: 3px;
+}

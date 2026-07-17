@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/expression/map-comment-trailing-comma.scss
+---
+
+# Input
+
+```scss
+$map:(/* keep */
+key:(inner:value,),);
+
+```
+
+
+# Formatted
+
+```scss
+$map: (
+	/* keep */
+	key: (
+			inner: value,
+		)
+);
+
+```

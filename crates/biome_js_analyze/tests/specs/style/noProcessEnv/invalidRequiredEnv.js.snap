@@ -1,0 +1,51 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidRequiredEnv.js
+---
+# Input
+```js
+{
+	const { env } = require("process");
+	env.NODE_ENV;
+}
+{
+	const { env } = require("node:process");
+	env.HOME;
+}
+
+```
+
+# Diagnostics
+```
+invalidRequiredEnv.js:3:2 lint/style/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use process.env.
+  
+    1 │ {
+    2 │ 	const { env } = require("process");
+  > 3 │ 	env.NODE_ENV;
+      │ 	^^^^^^^^^^^^
+    4 │ }
+    5 │ {
+  
+  i Use a centralized configuration file instead for better maintainability and deployment consistency.
+  
+
+```
+
+```
+invalidRequiredEnv.js:7:2 lint/style/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use process.env.
+  
+    5 │ {
+    6 │ 	const { env } = require("node:process");
+  > 7 │ 	env.HOME;
+      │ 	^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i Use a centralized configuration file instead for better maintainability and deployment consistency.
+  
+
+```

@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_rowan::AstNode;
-use biome_yaml_syntax::YamlBlockMapImplicitEntry;
+use biome_formatter::format_args;
+use biome_formatter::write;
+use biome_yaml_syntax::{YamlBlockMapImplicitEntry, YamlBlockMapImplicitEntryFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatYamlBlockMapImplicitEntry;
 impl FormatNodeRule<YamlBlockMapImplicitEntry> for FormatYamlBlockMapImplicitEntry {
@@ -9,6 +10,26 @@ impl FormatNodeRule<YamlBlockMapImplicitEntry> for FormatYamlBlockMapImplicitEnt
         node: &YamlBlockMapImplicitEntry,
         f: &mut YamlFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let YamlBlockMapImplicitEntryFields {
+            key,
+            colon_token,
+            value,
+        } = node.as_fields();
+
+        write!(f, [key.format(), colon_token.format()])?;
+
+        if let Some(value) = value {
+            let has_leading_comments = f.comments().has_leading_comments(value.syntax());
+            if has_leading_comments || value.is_nested_block_collection() {
+                return write!(
+                    f,
+                    [indent(&format_args![hard_line_break(), value.format()])]
+                );
+            }
+
+            write!(f, [space(), value.format()])?;
+        }
+
+        Ok(())
     }
 }

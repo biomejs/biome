@@ -1,0 +1,26 @@
+/* should not generate diagnostics */
+
+// not used in a conditional
+const result1 = str.match(/test/);
+const result2 = /test/.exec(str);
+const matches = str.match(/test/g);
+
+// .test() already used
+if (/test/.test(str)) {}
+if (regex.test(str)) {}
+
+// can't resolve to regex without type info or scope analysis
+if (str.match(pattern)) {}
+if (pattern.exec(str)) {}
+const regex = /test/; if (str.match(regex)) {}
+const regex2 = new RegExp('test'); if (str.match(regex2)) {}
+
+// no arguments
+if (str.match()) {}
+
+// multiple arguments
+if (str.match(/test/, 'extra')) {}
+
+// unrelated method calls
+if (str.includes('test')) {}
+if (str.indexOf('test')) {}

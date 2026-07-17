@@ -1,0 +1,727 @@
+[
+  {
+    "testName": "Should sort `peerDependenciesMeta` as object.",
+    "input": {
+      "peerDependenciesMeta": {
+        "z": "z",
+        "e": "e",
+        "ch": "ch",
+        "a": "a"
+      }
+    },
+    "output": {
+      "peerDependenciesMeta": {
+        "a": "a",
+        "ch": "ch",
+        "e": "e",
+        "z": "z"
+      }
+    }
+  },
+  {
+    "testName": "Should sort `dependenciesMeta` as object.",
+    "input": {
+      "dependenciesMeta": {
+        "z": "z",
+        "e": "e",
+        "ch": "ch",
+        "a": "a"
+      }
+    },
+    "output": {
+      "dependenciesMeta": {
+        "a": "a",
+        "ch": "ch",
+        "e": "e",
+        "z": "z"
+      }
+    }
+  },
+  {
+    "testName": "Should sort `dependenciesMeta` as object.",
+    "input": {
+      "dependenciesMeta": {
+        "@z-package/package@1.2.3": "@z-package/package@1.2.3",
+        "c-package@1.2.3": "c-package@1.2.3",
+        "b-package-package@1.2.3": "b-package-package@1.2.3",
+        "@a-package/package@1.2.3": "@a-package/package@1.2.3",
+        "b-package@1.2.3": "b-package@1.2.3",
+        "@b-package/package": "@b-package/package",
+        "@e-package/package@1.2.3": "@e-package/package@1.2.3",
+        "@ch-package/package@1.2.3": "@ch-package/package@1.2.3",
+        "e-package@1.2.3": "e-package@1.2.3",
+        "ch-package@1.2.3": "ch-package@1.2.3"
+      }
+    },
+    "output": {
+      "dependenciesMeta": {
+        "@a-package/package@1.2.3": "@a-package/package@1.2.3",
+        "@b-package/package": "@b-package/package",
+        "@ch-package/package@1.2.3": "@ch-package/package@1.2.3",
+        "@e-package/package@1.2.3": "@e-package/package@1.2.3",
+        "@z-package/package@1.2.3": "@z-package/package@1.2.3",
+        "b-package@1.2.3": "b-package@1.2.3",
+        "b-package-package@1.2.3": "b-package-package@1.2.3",
+        "c-package@1.2.3": "c-package@1.2.3",
+        "ch-package@1.2.3": "ch-package@1.2.3",
+        "e-package@1.2.3": "e-package@1.2.3"
+      }
+    }
+  },
+  {
+    "testName": "Should sort `pnpm.overrides` as object.",
+    "input": {
+      "pnpm": {
+        "overrides": {
+          "@z-package/package@1.2.3": "@z-package/package@1.2.3",
+          "c-package@1.2.3": "c-package@1.2.3",
+          "b-package-package@1.2.3": "b-package-package@1.2.3",
+          "@a-package/package@1.2.3": "@a-package/package@1.2.3",
+          "b-package@1.2.3": "b-package@1.2.3",
+          "@b-package/package": "@b-package/package",
+          "@e-package/package@1.2.3": "@e-package/package@1.2.3",
+          "@ch-package/package@1.2.3": "@ch-package/package@1.2.3",
+          "e-package@1.2.3": "e-package@1.2.3",
+          "ch-package@1.2.3": "ch-package@1.2.3"
+        }
+      }
+    },
+    "output": {
+      "pnpm": {
+        "overrides": {
+          "@a-package/package@1.2.3": "@a-package/package@1.2.3",
+          "@b-package/package": "@b-package/package",
+          "@ch-package/package@1.2.3": "@ch-package/package@1.2.3",
+          "@e-package/package@1.2.3": "@e-package/package@1.2.3",
+          "@z-package/package@1.2.3": "@z-package/package@1.2.3",
+          "b-package@1.2.3": "b-package@1.2.3",
+          "b-package-package@1.2.3": "b-package-package@1.2.3",
+          "c-package@1.2.3": "c-package@1.2.3",
+          "ch-package@1.2.3": "ch-package@1.2.3",
+          "e-package@1.2.3": "e-package@1.2.3"
+        }
+      }
+    }
+  },
+  {
+    "testName": "Should sort `eslintConfig` as object.",
+    "input": {
+      "eslintConfig": {
+        "z": "z",
+        "env": "env",
+        "parser": "parser",
+        "parserOptions": "parserOptions",
+        "settings": "settings",
+        "plugins": "plugins",
+        "extends": "extends",
+        "rules": "rules",
+        "overrides": "overrides",
+        "globals": "globals",
+        "processor": "processor",
+        "noInlineConfig": "noInlineConfig",
+        "reportUnusedDisableDirectives": "reportUnusedDisableDirectives",
+        "a": "a"
+      }
+    },
+    "output": {
+      "eslintConfig": {
+        "env": "env",
+        "parser": "parser",
+        "parserOptions": "parserOptions",
+        "settings": "settings",
+        "plugins": "plugins",
+        "extends": "extends",
+        "rules": "rules",
+        "overrides": "overrides",
+        "globals": "globals",
+        "processor": "processor",
+        "noInlineConfig": "noInlineConfig",
+        "reportUnusedDisableDirectives": "reportUnusedDisableDirectives",
+        "a": "a",
+        "z": "z"
+      }
+    }
+  },
+  {
+    "testName": "Should sort `eslintConfig.rules` as object.",
+    "input": {
+      "eslintConfig": {
+        "rules": {
+          "z": "z",
+          "unknown-plugin/depth-1/depth-2": "unknown-plugin/depth-1/depth-2",
+          "unicorn/new-for-builtins": "unicorn/new-for-builtins",
+          "unicorn/prefer-includes": "unicorn/prefer-includes",
+          "for-direction": "for-direction",
+          "array-callback-return": "array-callback-return",
+          "yoda": "yoda",
+          "prettier/prettier": "prettier/prettier",
+          "react/display-name": "react/display-name",
+          "react/jsx-key": "react/jsx-key",
+          "a": "a"
+        }
+      }
+    },
+    "output": {
+      "eslintConfig": {
+        "rules": {
+          "a": "a",
+          "array-callback-return": "array-callback-return",
+          "for-direction": "for-direction",
+          "yoda": "yoda",
+          "z": "z",
+          "prettier/prettier": "prettier/prettier",
+          "react/display-name": "react/display-name",
+          "react/jsx-key": "react/jsx-key",
+          "unicorn/new-for-builtins": "unicorn/new-for-builtins",
+          "unicorn/prefer-includes": "unicorn/prefer-includes",
+          "unknown-plugin/depth-1/depth-2": "unknown-plugin/depth-1/depth-2"
+        }
+      }
+    }
+  },
+  {
+    "testName": "Should sort `eslintConfig.override[]` same as `eslintConfig`",
+    "input": null,
+    "output": {
+      "eslintConfig": {
+        "overrides": [
+          {
+            "files": "*.js",
+            "excludedFiles": "*.exclude.js",
+            "env": "env",
+            "parser": "parser",
+            "parserOptions": "parserOptions",
+            "settings": "settings",
+            "plugins": "plugins",
+            "extends": "extends",
+            "rules": "rules",
+            "overrides": "overrides",
+            "globals": "globals",
+            "processor": "processor",
+            "noInlineConfig": "noInlineConfig",
+            "reportUnusedDisableDirectives": "reportUnusedDisableDirectives",
+            "_": "this should still be the first element"
+          },
+          {
+            "files": "*.js",
+            "excludedFiles": "*.exclude.js",
+            "env": "env",
+            "parser": "parser",
+            "parserOptions": "parserOptions",
+            "settings": "settings",
+            "plugins": "plugins",
+            "extends": "extends",
+            "rules": "rules",
+            "overrides": "overrides",
+            "globals": "globals",
+            "processor": "processor",
+            "noInlineConfig": "noInlineConfig",
+            "reportUnusedDisableDirectives": "reportUnusedDisableDirectives",
+            "_": "this should still be the second element"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "testName": "Should sort `exports` as object.",
+    "input": {
+      "exports": {
+        "unknown": "./unknown.unknown",
+        "./path-not-really-makes-no-sense": {},
+        "types": "./types.d.ts",
+        "types@<=1": "./v1/types.d.ts"
+      }
+    },
+    "output": {
+      "exports": {
+        "./path-not-really-makes-no-sense": {},
+        "types": "./types.d.ts",
+        "types@<=1": "./v1/types.d.ts",
+        "unknown": "./unknown.unknown"
+      }
+    }
+  },
+  {
+    "testName": "Should sort `exports` as object.",
+    "input": {
+      "exports": {
+        "unknown": "./unknown.unknown",
+        "./path-not-really-makes-no-sense": {},
+        "types@<=1": "./v1/types.d.ts",
+        "types": "./types.d.ts"
+      }
+    },
+    "output": {
+      "exports": {
+        "./path-not-really-makes-no-sense": {},
+        "types@<=1": "./v1/types.d.ts",
+        "types": "./types.d.ts",
+        "unknown": "./unknown.unknown"
+      }
+    }
+  },
+  {
+    "testName": "Should sort `exports` as object.",
+    "input": {
+      "exports": {
+        "unknown": "./unknown.unknown",
+        "./path-not-really-makes-no-sense": {},
+        "default": "./default.js"
+      }
+    },
+    "output": {
+      "exports": {
+        "./path-not-really-makes-no-sense": {},
+        "unknown": "./unknown.unknown",
+        "default": "./default.js"
+      }
+    }
+  },
+  {
+    "testName": "Should sort `exports` as object.",
+    "input": {
+      "exports": {
+        "./deep": {
+          "unknown": "./unknown.unknown",
+          "./path-not-really-makes-no-sense": {},
+          "types": "./types.d.ts",
+          "types@<=1": "./v1/types.d.ts"
+        }
+      }
+    },
+    "output": {
+      "exports": {
+        "./deep": {
+          "./path-not-really-makes-no-sense": {},
+          "types": "./types.d.ts",
+          "types@<=1": "./v1/types.d.ts",
+          "unknown": "./unknown.unknown"
+        }
+      }
+    }
+  },
+  {
+    "testName": "Should sort `exports` as object.",
+    "input": {
+      "exports": {
+        "./deep": {
+          "unknown": "./unknown.unknown",
+          "./path-not-really-makes-no-sense": {},
+          "types@<=1": "./v1/types.d.ts",
+          "types": "./types.d.ts"
+        }
+      }
+    },
+    "output": {
+      "exports": {
+        "./deep": {
+          "./path-not-really-makes-no-sense": {},
+          "types@<=1": "./v1/types.d.ts",
+          "types": "./types.d.ts",
+          "unknown": "./unknown.unknown"
+        }
+      }
+    }
+  },
+  {
+    "testName": "Should sort `exports` as object.",
+    "input": {
+      "exports": {
+        "./deep": {
+          "unknown": "./unknown.unknown",
+          "./path-not-really-makes-no-sense": {},
+          "default": "./default.js"
+        }
+      }
+    },
+    "output": {
+      "exports": {
+        "./deep": {
+          "./path-not-really-makes-no-sense": {},
+          "unknown": "./unknown.unknown",
+          "default": "./default.js"
+        }
+      }
+    }
+  },
+  {
+    "testName": "Should sort `exports` as object.",
+    "input": {
+      "exports": {
+        "types": "./types.d.ts"
+      }
+    },
+    "output": {
+      "exports": {
+        "types": "./types.d.ts"
+      }
+    }
+  },
+  {
+    "testName": "Should sort `exports` as object.",
+    "input": {
+      "exports": {
+        "default": "./default.js"
+      }
+    },
+    "output": {
+      "exports": {
+        "default": "./default.js"
+      }
+    }
+  },
+  {
+    "testName": "Should sort `exports` as object.",
+    "input": {
+      "exports": {
+        "types": "./types.d.ts",
+        "default": "./default.js"
+      }
+    },
+    "output": {
+      "exports": {
+        "types": "./types.d.ts",
+        "default": "./default.js"
+      }
+    }
+  },
+  {
+    "testName": "Should sort `contributors[]` as `PeopleField`",
+    "input": null,
+    "output": {
+      "contributors": [
+        {
+          "name": "Keith Cirkel",
+          "email": "npm@keithcirkel.co.uk",
+          "url": "http://keithcirkel.co.uk/",
+          "_": "this should still be the first element",
+          "a": "a",
+          "z": "z"
+        },
+        {
+          "name": "Keith Cirkel",
+          "email": "npm@keithcirkel.co.uk",
+          "url": "http://keithcirkel.co.uk/",
+          "_": "this should still be the second element",
+          "a": "a",
+          "z": "z"
+        }
+      ]
+    }
+  },
+  {
+    "testName": "Should sort `badges[]`",
+    "input": null,
+    "output": {
+      "badges": [
+        {
+          "description": "sort-package-json build status",
+          "url": "https://travis-ci.com/keithamus/sort-package-json",
+          "href": "https://travis-ci.com/keithamus/sort-package-json.svg",
+          "_": "this should still be the first element",
+          "a": "a",
+          "z": "z"
+        },
+        {
+          "description": "sort-package-json build status",
+          "url": "https://travis-ci.com/keithamus/sort-package-json",
+          "href": "https://travis-ci.com/keithamus/sort-package-json.svg",
+          "_": "this should still be the second element",
+          "a": "a",
+          "z": "z"
+        }
+      ]
+    }
+  },
+  {
+    "testName": "Should sort fields",
+    "input": {
+      "$schema": "$schema",
+      "activationEvents": "activationEvents",
+      "assets": "assets",
+      "author": "author",
+      "ava": "ava",
+      "babel": "babel",
+      "badges": "badges",
+      "betterScripts": "betterScripts",
+      "bin": "bin",
+      "binary": "binary",
+      "browser": "browser",
+      "browserify": "browserify",
+      "browserslist": "browserslist",
+      "bugs": "bugs",
+      "bundleDependencies": "bundleDependencies",
+      "bundledDependencies": "bundledDependencies",
+      "c8": "c8",
+      "categories": "categories",
+      "commitlint": "commitlint",
+      "config": "config",
+      "contributes": "contributes",
+      "contributors": "contributors",
+      "cpu": "cpu",
+      "dependencies": "dependencies",
+      "dependenciesMeta": "dependenciesMeta",
+      "description": "description",
+      "devDependencies": "devDependencies",
+      "devEngines": "devEngines",
+      "directories": "directories",
+      "displayName": "displayName",
+      "engineStrict": "engineStrict",
+      "engines": "engines",
+      "eslintConfig": "eslintConfig",
+      "eslintIgnore": "eslintIgnore",
+      "example": "example",
+      "examplestyle": "examplestyle",
+      "exports": "exports",
+      "extensionDependencies": "extensionDependencies",
+      "extensionPack": "extensionPack",
+      "files": "files",
+      "flat": "flat",
+      "funding": "funding",
+      "galleryBanner": "galleryBanner",
+      "homepage": "homepage",
+      "husky": "husky",
+      "icon": "icon",
+      "imports": "imports",
+      "jest": "jest",
+      "jest-junit": "jest-junit",
+      "jest-stare": "jest-stare",
+      "jsdelivr": "jsdelivr",
+      "jsnext:main": "jsnext:main",
+      "keywords": "keywords",
+      "l10n": "l10n",
+      "languageName": "languageName",
+      "license": "license",
+      "lint-staged": "lint-staged",
+      "main": "main",
+      "maintainers": "maintainers",
+      "man": "man",
+      "markdown": "markdown",
+      "mocha": "mocha",
+      "module": "module",
+      "name": "name",
+      "nano-staged": "nano-staged",
+      "nodemonConfig": "nodemonConfig",
+      "npmPackageJsonLintConfig": "npmPackageJsonLintConfig",
+      "npmpackagejsonlint": "npmpackagejsonlint",
+      "npmpkgjsonlint": "npmpkgjsonlint",
+      "nyc": "nyc",
+      "oclif": "oclif",
+      "optionalDependencies": "optionalDependencies",
+      "os": "os",
+      "overrides": "overrides",
+      "packageManager": "packageManager",
+      "peerDependencies": "peerDependencies",
+      "peerDependenciesMeta": "peerDependenciesMeta",
+      "pnpm": "pnpm",
+      "pre-commit": "pre-commit",
+      "preferGlobal": "preferGlobal",
+      "prettier": "prettier",
+      "preview": "preview",
+      "private": "private",
+      "publishConfig": "publishConfig",
+      "publisher": "publisher",
+      "qna": "qna",
+      "react-native": "react-native",
+      "release": "release",
+      "remarkConfig": "remarkConfig",
+      "repository": "repository",
+      "resolutions": "resolutions",
+      "scripts": "scripts",
+      "sideEffects": "sideEffects",
+      "simple-git-hooks": "simple-git-hooks",
+      "source": "source",
+      "stableVersion": "stableVersion",
+      "style": "style",
+      "stylelint": "stylelint",
+      "svelte": "svelte",
+      "tap": "tap",
+      "type": "type",
+      "types": "types",
+      "typesVersions": "typesVersions",
+      "typings": "typings",
+      "umd:main": "umd:main",
+      "unpkg": "unpkg",
+      "version": "version",
+      "volta": "volta",
+      "workspaces": "workspaces",
+      "xo": "xo"
+    },
+    "output": {
+      "$schema": "$schema",
+      "name": "name",
+      "displayName": "displayName",
+      "version": "version",
+      "stableVersion": "stableVersion",
+      "private": "private",
+      "description": "description",
+      "categories": "categories",
+      "keywords": "keywords",
+      "homepage": "homepage",
+      "bugs": "bugs",
+      "repository": "repository",
+      "funding": "funding",
+      "license": "license",
+      "qna": "qna",
+      "author": "author",
+      "maintainers": "maintainers",
+      "contributors": "contributors",
+      "publisher": "publisher",
+      "sideEffects": "sideEffects",
+      "type": "type",
+      "imports": "imports",
+      "exports": "exports",
+      "main": "main",
+      "svelte": "svelte",
+      "umd:main": "umd:main",
+      "jsdelivr": "jsdelivr",
+      "unpkg": "unpkg",
+      "module": "module",
+      "source": "source",
+      "jsnext:main": "jsnext:main",
+      "browser": "browser",
+      "react-native": "react-native",
+      "types": "types",
+      "typesVersions": "typesVersions",
+      "typings": "typings",
+      "style": "style",
+      "example": "example",
+      "examplestyle": "examplestyle",
+      "assets": "assets",
+      "bin": "bin",
+      "man": "man",
+      "directories": "directories",
+      "files": "files",
+      "workspaces": "workspaces",
+      "binary": "binary",
+      "scripts": "scripts",
+      "betterScripts": "betterScripts",
+      "l10n": "l10n",
+      "contributes": "contributes",
+      "activationEvents": "activationEvents",
+      "husky": "husky",
+      "simple-git-hooks": "simple-git-hooks",
+      "pre-commit": "pre-commit",
+      "commitlint": "commitlint",
+      "lint-staged": "lint-staged",
+      "nano-staged": "nano-staged",
+      "config": "config",
+      "nodemonConfig": "nodemonConfig",
+      "browserify": "browserify",
+      "babel": "babel",
+      "browserslist": "browserslist",
+      "xo": "xo",
+      "prettier": "prettier",
+      "eslintConfig": "eslintConfig",
+      "eslintIgnore": "eslintIgnore",
+      "npmpkgjsonlint": "npmpkgjsonlint",
+      "npmPackageJsonLintConfig": "npmPackageJsonLintConfig",
+      "npmpackagejsonlint": "npmpackagejsonlint",
+      "release": "release",
+      "remarkConfig": "remarkConfig",
+      "stylelint": "stylelint",
+      "ava": "ava",
+      "jest": "jest",
+      "jest-junit": "jest-junit",
+      "jest-stare": "jest-stare",
+      "mocha": "mocha",
+      "nyc": "nyc",
+      "c8": "c8",
+      "tap": "tap",
+      "oclif": "oclif",
+      "resolutions": "resolutions",
+      "overrides": "overrides",
+      "dependencies": "dependencies",
+      "devDependencies": "devDependencies",
+      "dependenciesMeta": "dependenciesMeta",
+      "peerDependencies": "peerDependencies",
+      "peerDependenciesMeta": "peerDependenciesMeta",
+      "optionalDependencies": "optionalDependencies",
+      "bundledDependencies": "bundledDependencies",
+      "bundleDependencies": "bundleDependencies",
+      "extensionPack": "extensionPack",
+      "extensionDependencies": "extensionDependencies",
+      "flat": "flat",
+      "packageManager": "packageManager",
+      "engines": "engines",
+      "engineStrict": "engineStrict",
+      "devEngines": "devEngines",
+      "volta": "volta",
+      "languageName": "languageName",
+      "os": "os",
+      "cpu": "cpu",
+      "preferGlobal": "preferGlobal",
+      "publishConfig": "publishConfig",
+      "icon": "icon",
+      "badges": "badges",
+      "galleryBanner": "galleryBanner",
+      "preview": "preview",
+      "markdown": "markdown",
+      "pnpm": "pnpm"
+    }
+  },
+  {
+    "testName": "Should sort `prettier` as object.",
+    "input": {
+      "prettier": {
+        "overrides": [],
+        "trailingComma": "none",
+        "semi": false,
+        "z": "z",
+        "a": "a"
+      }
+    },
+    "output": {
+      "prettier": {
+        "a": "a",
+        "semi": false,
+        "trailingComma": "none",
+        "z": "z",
+        "overrides": []
+      }
+    }
+  },
+  {
+    "testName": "Should sort `prettier.override[]`",
+    "input": null,
+    "output": {
+      "prettier": {
+        "overrides": [
+          {
+            "_": "this should still the first element",
+            "a": "a",
+            "files": "",
+            "options": {},
+            "z": "z"
+          },
+          {
+            "_": "this should still the seconde element",
+            "a": "a",
+            "files": "",
+            "options": {},
+            "z": "z"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "testName": "Should sort `prettier.overrides[].options`",
+    "input": null,
+    "output": {
+      "prettier": {
+        "overrides": [
+          {
+            "options": {
+              "a": "a",
+              "semi": false,
+              "trailingComma": "none",
+              "z": "z"
+            }
+          }
+        ]
+      }
+    }
+  }
+]

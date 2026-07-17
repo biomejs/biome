@@ -92,23 +92,9 @@ pub fn legacy_treesitter_slots_for_kind(kind: JsonSyntaxKind) -> &'static [(&'st
         .map_or(&[], |p| p.slots)
 }
 
-/// Returns the syntax kind for a legacy or native node name.
-pub fn kind_by_name(node_name: &str) -> Option<JsonSyntaxKind> {
+/// Returns the syntax kind for a legacy TreeSitter node name.
+pub fn legacy_kind_by_name(node_name: &str) -> Option<JsonSyntaxKind> {
     match node_name {
-        // Native Biome AST patterns (PascalCase)
-        "JsonRoot" => lang::JsonRoot::KIND_SET.iter().next(),
-        "JsonObjectValue" => lang::JsonObjectValue::KIND_SET.iter().next(),
-        "JsonArrayValue" => lang::JsonArrayValue::KIND_SET.iter().next(),
-        "JsonMember" => lang::JsonMember::KIND_SET.iter().next(),
-        "JsonMemberName" => lang::JsonMemberName::KIND_SET.iter().next(),
-        "JsonMemberList" => lang::JsonMemberList::KIND_SET.iter().next(),
-        "JsonArrayElementList" => lang::JsonArrayElementList::KIND_SET.iter().next(),
-        "JsonStringValue" => lang::JsonStringValue::KIND_SET.iter().next(),
-        "JsonNumberValue" => lang::JsonNumberValue::KIND_SET.iter().next(),
-        "JsonBooleanValue" => lang::JsonBooleanValue::KIND_SET.iter().next(),
-        "JsonNullValue" => lang::JsonNullValue::KIND_SET.iter().next(),
-        "JsonMetavariable" => Some(JsonSyntaxKind::JSON_METAVARIABLE),
-
         // Legacy TreeSitter patterns (snake_case / lowercase)
         "json_root" | "document" => Some(JsonSyntaxKind::JSON_ROOT),
         "json_object" | "object" => Some(JsonSyntaxKind::JSON_OBJECT_VALUE),
@@ -121,5 +107,40 @@ pub fn kind_by_name(node_name: &str) -> Option<JsonSyntaxKind> {
         "json_null" | "null" => Some(JsonSyntaxKind::JSON_NULL_VALUE),
 
         _ => None,
+    }
+}
+
+/// Returns the syntax kind for a native Biome node name.
+pub fn native_kind_by_name(node_name: &str) -> Option<JsonSyntaxKind> {
+    match node_name {
+        // Native Biome AST patterns (PascalCase)
+        "JsonRoot" => lang::JsonRoot::KIND_SET.iter().next(),
+        "JsonObjectValue" => lang::JsonObjectValue::KIND_SET.iter().next(),
+        "JsonArrayValue" => lang::JsonArrayValue::KIND_SET.iter().next(),
+        "JsonMember" => lang::JsonMember::KIND_SET.iter().next(),
+        "JsonMemberName" => lang::JsonMemberName::KIND_SET.iter().next(),
+        "JsonStringValue" => lang::JsonStringValue::KIND_SET.iter().next(),
+        "JsonNumberValue" => lang::JsonNumberValue::KIND_SET.iter().next(),
+        "JsonBooleanValue" => lang::JsonBooleanValue::KIND_SET.iter().next(),
+        "JsonNullValue" => lang::JsonNullValue::KIND_SET.iter().next(),
+        "JsonMetavariable" => Some(JsonSyntaxKind::JSON_METAVARIABLE),
+
+        _ => None,
+    }
+}
+
+/// Returns the syntax kind for a legacy or native node name.
+pub fn kind_by_name(node_name: &str) -> Option<JsonSyntaxKind> {
+    legacy_kind_by_name(node_name).or_else(|| native_kind_by_name(node_name))
+}
+
+/// Returns the native Biome slot mappings for a node name.
+pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] {
+    match node_name {
+        "JsonRoot" => &[("value", 1)],
+        "JsonObjectValue" => &[("json_member_list", 1)],
+        "JsonArrayValue" => &[("elements", 1)],
+        "JsonMember" => &[("name", 0), ("value", 2)],
+        _ => &[],
     }
 }

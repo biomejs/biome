@@ -18,6 +18,8 @@ impl FormatNodeRule<CssPseudoClassFunctionNth> for FormatCssPseudoClassFunctionN
             r_paren_token,
         } = node.as_fields();
 
+        let should_insert_space = f.options().delimiter_spacing().value();
+
         write!(
             f,
             [
@@ -25,7 +27,7 @@ impl FormatNodeRule<CssPseudoClassFunctionNth> for FormatCssPseudoClassFunctionN
                     .with_options(FormatCssIdentifierOptions::default().with_lowercasing()),
                 group(&format_args![
                     l_paren_token.format(),
-                    soft_block_indent(&selector.format()),
+                    soft_block_indent_with_maybe_space(&selector.format(), should_insert_space),
                     r_paren_token.format()
                 ])
             ]

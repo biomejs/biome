@@ -1,0 +1,135 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: css/stylefmt-repo/nested-mixin-2/nested-mixin-2.css
+---
+
+# Input
+
+```css
+@mixin test() {
+  $values: blue red;
+@each $val   in $values {
+  color  : $val;
+  @for $i   from  2   through    10 {
+   background: $i;
+  }
+}
+@for $i from   2 through 10 {
+  color: $i;
+}
+ @while $k   >   0 {
+  color: $k;
+}
+
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,15 +1,15 @@
+ @mixin test() {
+   $values: blue red;
+-  @each $val in $values {
+-    color: $val;
+-    @for $i from 2 through 10 {
++  @each $val   in $values {
++    color  : $val;
++    @for $i   from  2   through    10 {
+       background: $i;
+     }
+   }
+-  @for $i from 2 through 10 {
++  @for $i from   2 through 10 {
+     color: $i;
+   }
+-  @while $k > 0 {
++  @while $k   >   0 {
+     color: $k;
+   }
+ }
+```
+
+# Output
+
+```css
+@mixin test() {
+  $values: blue red;
+  @each $val   in $values {
+    color  : $val;
+    @for $i   from  2   through    10 {
+      background: $i;
+    }
+  }
+  @for $i from   2 through 10 {
+    color: $i;
+  }
+  @while $k   >   0 {
+    color: $k;
+  }
+}
+```
+
+# Errors
+```
+nested-mixin-2.css:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS variable declarations are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    1 │ @mixin test() {
+  > 2 │   $values: blue red;
+      │   ^^^^^^^^^^^^^^^^^^
+    3 │ @each $val   in $values {
+    4 │   color  : $val;
+  
+nested-mixin-2.css:4:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS variables are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    2 │   $values: blue red;
+    3 │ @each $val   in $values {
+  > 4 │   color  : $val;
+      │            ^^^^
+    5 │   @for $i   from  2   through    10 {
+    6 │    background: $i;
+  
+nested-mixin-2.css:6:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS variables are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    4 │   color  : $val;
+    5 │   @for $i   from  2   through    10 {
+  > 6 │    background: $i;
+      │                ^^
+    7 │   }
+    8 │ }
+  
+nested-mixin-2.css:10:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS variables are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+     8 │ }
+     9 │ @for $i from   2 through 10 {
+  > 10 │   color: $i;
+       │          ^^
+    11 │ }
+    12 │  @while $k   >   0 {
+  
+nested-mixin-2.css:13:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS variables are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    11 │ }
+    12 │  @while $k   >   0 {
+  > 13 │   color: $k;
+       │          ^^
+    14 │ }
+    15 │ 
+  
+
+```

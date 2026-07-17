@@ -1,0 +1,639 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+/* timeline-range-name without percentage is invalid */
+@keyframes missing-percentage-1 {
+	entry {
+		opacity: 0;
+	}
+}
+
+@keyframes missing-percentage-2 {
+	exit {
+		opacity: 0;
+	}
+}
+
+@keyframes missing-percentage-3 {
+	cover {
+		opacity: 0;
+	}
+}
+
+@keyframes missing-percentage-4 {
+	contain {
+		opacity: 0;
+	}
+}
+
+@keyframes missing-percentage-5 {
+	entry-crossing {
+		opacity: 0;
+	}
+}
+
+@keyframes missing-percentage-6 {
+	exit-crossing {
+		opacity: 0;
+	}
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..57 "@" [Comments("/* timeline-range-nam ..."), Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@57..67 "keyframes" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@67..88 "missing-percentage-1" [] [Whitespace(" ")],
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@88..89 "{" [] [],
+                    items: CssKeyframesItemList [
+                        CssKeyframesItem {
+                            selectors: CssKeyframesSelectorList [
+                                CssKeyframesRangeSelector {
+                                    name: ENTRY_KW@89..97 "entry" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                    percentage: missing (required),
+                                },
+                            ],
+                            block: CssDeclarationBlock {
+                                l_curly_token: L_CURLY@97..98 "{" [] [],
+                                declarations: CssDeclarationList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@98..108 "opacity" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@108..110 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@110..111 "0" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@111..112 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@112..115 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@115..117 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@117..120 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@120..130 "keyframes" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@130..151 "missing-percentage-2" [] [Whitespace(" ")],
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@151..152 "{" [] [],
+                    items: CssKeyframesItemList [
+                        CssKeyframesItem {
+                            selectors: CssKeyframesSelectorList [
+                                CssKeyframesRangeSelector {
+                                    name: EXIT_KW@152..159 "exit" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                    percentage: missing (required),
+                                },
+                            ],
+                            block: CssDeclarationBlock {
+                                l_curly_token: L_CURLY@159..160 "{" [] [],
+                                declarations: CssDeclarationList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@160..170 "opacity" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@170..172 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@172..173 "0" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@173..174 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@174..177 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@177..179 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@179..182 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@182..192 "keyframes" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@192..213 "missing-percentage-3" [] [Whitespace(" ")],
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@213..214 "{" [] [],
+                    items: CssKeyframesItemList [
+                        CssKeyframesItem {
+                            selectors: CssKeyframesSelectorList [
+                                CssKeyframesRangeSelector {
+                                    name: COVER_KW@214..222 "cover" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                    percentage: missing (required),
+                                },
+                            ],
+                            block: CssDeclarationBlock {
+                                l_curly_token: L_CURLY@222..223 "{" [] [],
+                                declarations: CssDeclarationList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@223..233 "opacity" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@233..235 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@235..236 "0" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@236..237 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@237..240 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@240..242 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@242..245 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@245..255 "keyframes" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@255..276 "missing-percentage-4" [] [Whitespace(" ")],
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@276..277 "{" [] [],
+                    items: CssKeyframesItemList [
+                        CssKeyframesItem {
+                            selectors: CssKeyframesSelectorList [
+                                CssKeyframesRangeSelector {
+                                    name: CONTAIN_KW@277..287 "contain" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                    percentage: missing (required),
+                                },
+                            ],
+                            block: CssDeclarationBlock {
+                                l_curly_token: L_CURLY@287..288 "{" [] [],
+                                declarations: CssDeclarationList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@288..298 "opacity" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@298..300 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@300..301 "0" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@301..302 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@302..305 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@305..307 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@307..310 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@310..320 "keyframes" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@320..341 "missing-percentage-5" [] [Whitespace(" ")],
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@341..342 "{" [] [],
+                    items: CssKeyframesItemList [
+                        CssKeyframesItem {
+                            selectors: CssKeyframesSelectorList [
+                                CssKeyframesRangeSelector {
+                                    name: ENTRY_CROSSING_KW@342..359 "entry-crossing" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                    percentage: missing (required),
+                                },
+                            ],
+                            block: CssDeclarationBlock {
+                                l_curly_token: L_CURLY@359..360 "{" [] [],
+                                declarations: CssDeclarationList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@360..370 "opacity" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@370..372 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@372..373 "0" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@373..374 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@374..377 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@377..379 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@379..382 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@382..392 "keyframes" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@392..413 "missing-percentage-6" [] [Whitespace(" ")],
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@413..414 "{" [] [],
+                    items: CssKeyframesItemList [
+                        CssKeyframesItem {
+                            selectors: CssKeyframesSelectorList [
+                                CssKeyframesRangeSelector {
+                                    name: EXIT_CROSSING_KW@414..430 "exit-crossing" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                    percentage: missing (required),
+                                },
+                            ],
+                            block: CssDeclarationBlock {
+                                l_curly_token: L_CURLY@430..431 "{" [] [],
+                                declarations: CssDeclarationList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@431..441 "opacity" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@441..443 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@443..444 "0" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@444..445 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@445..448 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@448..450 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@450..451 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..451
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..450
+    0: CSS_AT_RULE@0..117
+      0: AT@0..57 "@" [Comments("/* timeline-range-nam ..."), Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@57..117
+        0: KEYFRAMES_KW@57..67 "keyframes" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@67..88
+          0: IDENT@67..88 "missing-percentage-1" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@88..117
+          0: L_CURLY@88..89 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@89..115
+            0: CSS_KEYFRAMES_ITEM@89..115
+              0: CSS_KEYFRAMES_SELECTOR_LIST@89..97
+                0: CSS_KEYFRAMES_RANGE_SELECTOR@89..97
+                  0: ENTRY_KW@89..97 "entry" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                  1: (empty)
+              1: CSS_DECLARATION_BLOCK@97..115
+                0: L_CURLY@97..98 "{" [] []
+                1: CSS_DECLARATION_LIST@98..112
+                  0: CSS_DECLARATION_WITH_SEMICOLON@98..112
+                    0: CSS_DECLARATION@98..111
+                      0: CSS_GENERIC_PROPERTY@98..111
+                        0: CSS_IDENTIFIER@98..108
+                          0: IDENT@98..108 "opacity" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@108..110 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@110..111
+                          0: CSS_NUMBER@110..111
+                            0: CSS_NUMBER_LITERAL@110..111 "0" [] []
+                      1: (empty)
+                    1: SEMICOLON@111..112 ";" [] []
+                2: R_CURLY@112..115 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@115..117 "}" [Newline("\n")] []
+    1: CSS_AT_RULE@117..179
+      0: AT@117..120 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@120..179
+        0: KEYFRAMES_KW@120..130 "keyframes" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@130..151
+          0: IDENT@130..151 "missing-percentage-2" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@151..179
+          0: L_CURLY@151..152 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@152..177
+            0: CSS_KEYFRAMES_ITEM@152..177
+              0: CSS_KEYFRAMES_SELECTOR_LIST@152..159
+                0: CSS_KEYFRAMES_RANGE_SELECTOR@152..159
+                  0: EXIT_KW@152..159 "exit" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                  1: (empty)
+              1: CSS_DECLARATION_BLOCK@159..177
+                0: L_CURLY@159..160 "{" [] []
+                1: CSS_DECLARATION_LIST@160..174
+                  0: CSS_DECLARATION_WITH_SEMICOLON@160..174
+                    0: CSS_DECLARATION@160..173
+                      0: CSS_GENERIC_PROPERTY@160..173
+                        0: CSS_IDENTIFIER@160..170
+                          0: IDENT@160..170 "opacity" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@170..172 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@172..173
+                          0: CSS_NUMBER@172..173
+                            0: CSS_NUMBER_LITERAL@172..173 "0" [] []
+                      1: (empty)
+                    1: SEMICOLON@173..174 ";" [] []
+                2: R_CURLY@174..177 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@177..179 "}" [Newline("\n")] []
+    2: CSS_AT_RULE@179..242
+      0: AT@179..182 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@182..242
+        0: KEYFRAMES_KW@182..192 "keyframes" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@192..213
+          0: IDENT@192..213 "missing-percentage-3" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@213..242
+          0: L_CURLY@213..214 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@214..240
+            0: CSS_KEYFRAMES_ITEM@214..240
+              0: CSS_KEYFRAMES_SELECTOR_LIST@214..222
+                0: CSS_KEYFRAMES_RANGE_SELECTOR@214..222
+                  0: COVER_KW@214..222 "cover" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                  1: (empty)
+              1: CSS_DECLARATION_BLOCK@222..240
+                0: L_CURLY@222..223 "{" [] []
+                1: CSS_DECLARATION_LIST@223..237
+                  0: CSS_DECLARATION_WITH_SEMICOLON@223..237
+                    0: CSS_DECLARATION@223..236
+                      0: CSS_GENERIC_PROPERTY@223..236
+                        0: CSS_IDENTIFIER@223..233
+                          0: IDENT@223..233 "opacity" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@233..235 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@235..236
+                          0: CSS_NUMBER@235..236
+                            0: CSS_NUMBER_LITERAL@235..236 "0" [] []
+                      1: (empty)
+                    1: SEMICOLON@236..237 ";" [] []
+                2: R_CURLY@237..240 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@240..242 "}" [Newline("\n")] []
+    3: CSS_AT_RULE@242..307
+      0: AT@242..245 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@245..307
+        0: KEYFRAMES_KW@245..255 "keyframes" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@255..276
+          0: IDENT@255..276 "missing-percentage-4" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@276..307
+          0: L_CURLY@276..277 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@277..305
+            0: CSS_KEYFRAMES_ITEM@277..305
+              0: CSS_KEYFRAMES_SELECTOR_LIST@277..287
+                0: CSS_KEYFRAMES_RANGE_SELECTOR@277..287
+                  0: CONTAIN_KW@277..287 "contain" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                  1: (empty)
+              1: CSS_DECLARATION_BLOCK@287..305
+                0: L_CURLY@287..288 "{" [] []
+                1: CSS_DECLARATION_LIST@288..302
+                  0: CSS_DECLARATION_WITH_SEMICOLON@288..302
+                    0: CSS_DECLARATION@288..301
+                      0: CSS_GENERIC_PROPERTY@288..301
+                        0: CSS_IDENTIFIER@288..298
+                          0: IDENT@288..298 "opacity" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@298..300 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@300..301
+                          0: CSS_NUMBER@300..301
+                            0: CSS_NUMBER_LITERAL@300..301 "0" [] []
+                      1: (empty)
+                    1: SEMICOLON@301..302 ";" [] []
+                2: R_CURLY@302..305 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@305..307 "}" [Newline("\n")] []
+    4: CSS_AT_RULE@307..379
+      0: AT@307..310 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@310..379
+        0: KEYFRAMES_KW@310..320 "keyframes" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@320..341
+          0: IDENT@320..341 "missing-percentage-5" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@341..379
+          0: L_CURLY@341..342 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@342..377
+            0: CSS_KEYFRAMES_ITEM@342..377
+              0: CSS_KEYFRAMES_SELECTOR_LIST@342..359
+                0: CSS_KEYFRAMES_RANGE_SELECTOR@342..359
+                  0: ENTRY_CROSSING_KW@342..359 "entry-crossing" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                  1: (empty)
+              1: CSS_DECLARATION_BLOCK@359..377
+                0: L_CURLY@359..360 "{" [] []
+                1: CSS_DECLARATION_LIST@360..374
+                  0: CSS_DECLARATION_WITH_SEMICOLON@360..374
+                    0: CSS_DECLARATION@360..373
+                      0: CSS_GENERIC_PROPERTY@360..373
+                        0: CSS_IDENTIFIER@360..370
+                          0: IDENT@360..370 "opacity" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@370..372 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@372..373
+                          0: CSS_NUMBER@372..373
+                            0: CSS_NUMBER_LITERAL@372..373 "0" [] []
+                      1: (empty)
+                    1: SEMICOLON@373..374 ";" [] []
+                2: R_CURLY@374..377 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@377..379 "}" [Newline("\n")] []
+    5: CSS_AT_RULE@379..450
+      0: AT@379..382 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@382..450
+        0: KEYFRAMES_KW@382..392 "keyframes" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@392..413
+          0: IDENT@392..413 "missing-percentage-6" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@413..450
+          0: L_CURLY@413..414 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@414..448
+            0: CSS_KEYFRAMES_ITEM@414..448
+              0: CSS_KEYFRAMES_SELECTOR_LIST@414..430
+                0: CSS_KEYFRAMES_RANGE_SELECTOR@414..430
+                  0: EXIT_CROSSING_KW@414..430 "exit-crossing" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                  1: (empty)
+              1: CSS_DECLARATION_BLOCK@430..448
+                0: L_CURLY@430..431 "{" [] []
+                1: CSS_DECLARATION_LIST@431..445
+                  0: CSS_DECLARATION_WITH_SEMICOLON@431..445
+                    0: CSS_DECLARATION@431..444
+                      0: CSS_GENERIC_PROPERTY@431..444
+                        0: CSS_IDENTIFIER@431..441
+                          0: IDENT@431..441 "opacity" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@441..443 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@443..444
+                          0: CSS_NUMBER@443..444
+                            0: CSS_NUMBER_LITERAL@443..444 "0" [] []
+                      1: (empty)
+                    1: SEMICOLON@444..445 ";" [] []
+                2: R_CURLY@445..448 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@448..450 "}" [Newline("\n")] []
+  2: EOF@450..451 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_keyframes_range_error.css:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a percentage after timeline-range-name but instead found '{'.
+  
+    1 │ /* timeline-range-name without percentage is invalid */
+    2 │ @keyframes missing-percentage-1 {
+  > 3 │ 	entry {
+      │ 	      ^
+    4 │ 		opacity: 0;
+    5 │ 	}
+  
+  i Expected a percentage after timeline-range-name here.
+  
+    1 │ /* timeline-range-name without percentage is invalid */
+    2 │ @keyframes missing-percentage-1 {
+  > 3 │ 	entry {
+      │ 	      ^
+    4 │ 		opacity: 0;
+    5 │ 	}
+  
+at_rule_keyframes_range_error.css:9:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a percentage after timeline-range-name but instead found '{'.
+  
+     8 │ @keyframes missing-percentage-2 {
+   > 9 │ 	exit {
+       │ 	     ^
+    10 │ 		opacity: 0;
+    11 │ 	}
+  
+  i Expected a percentage after timeline-range-name here.
+  
+     8 │ @keyframes missing-percentage-2 {
+   > 9 │ 	exit {
+       │ 	     ^
+    10 │ 		opacity: 0;
+    11 │ 	}
+  
+at_rule_keyframes_range_error.css:15:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a percentage after timeline-range-name but instead found '{'.
+  
+    14 │ @keyframes missing-percentage-3 {
+  > 15 │ 	cover {
+       │ 	      ^
+    16 │ 		opacity: 0;
+    17 │ 	}
+  
+  i Expected a percentage after timeline-range-name here.
+  
+    14 │ @keyframes missing-percentage-3 {
+  > 15 │ 	cover {
+       │ 	      ^
+    16 │ 		opacity: 0;
+    17 │ 	}
+  
+at_rule_keyframes_range_error.css:21:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a percentage after timeline-range-name but instead found '{'.
+  
+    20 │ @keyframes missing-percentage-4 {
+  > 21 │ 	contain {
+       │ 	        ^
+    22 │ 		opacity: 0;
+    23 │ 	}
+  
+  i Expected a percentage after timeline-range-name here.
+  
+    20 │ @keyframes missing-percentage-4 {
+  > 21 │ 	contain {
+       │ 	        ^
+    22 │ 		opacity: 0;
+    23 │ 	}
+  
+at_rule_keyframes_range_error.css:27:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a percentage after timeline-range-name but instead found '{'.
+  
+    26 │ @keyframes missing-percentage-5 {
+  > 27 │ 	entry-crossing {
+       │ 	               ^
+    28 │ 		opacity: 0;
+    29 │ 	}
+  
+  i Expected a percentage after timeline-range-name here.
+  
+    26 │ @keyframes missing-percentage-5 {
+  > 27 │ 	entry-crossing {
+       │ 	               ^
+    28 │ 		opacity: 0;
+    29 │ 	}
+  
+at_rule_keyframes_range_error.css:33:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a percentage after timeline-range-name but instead found '{'.
+  
+    32 │ @keyframes missing-percentage-6 {
+  > 33 │ 	exit-crossing {
+       │ 	              ^
+    34 │ 		opacity: 0;
+    35 │ 	}
+  
+  i Expected a percentage after timeline-range-name here.
+  
+    32 │ @keyframes missing-percentage-6 {
+  > 33 │ 	exit-crossing {
+       │ 	              ^
+    34 │ 		opacity: 0;
+    35 │ 	}
+  
+```

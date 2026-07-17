@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: css/attribute/quotes.css
 ---
 
@@ -11,6 +12,9 @@ a[id="test"] {}
 a[id='test'] {}
 a[id=func("foo")] {}
 a[class="(╯°□°）╯︵ ┻━┻"]{}
+a[href^="//"] {}
+a[href$="/*"] {}
+a[href="http://example.com"] {}
 input:not([type="radio"]):not([type="checkbox"]) {}
 input:not([type="radio"], [type="checkbox"]) {}
 section:has(:not([type="radio"], [type="checkbox"])) {}
@@ -32,7 +36,7 @@ section:has(:not([type="radio"], [type="checkbox"])) {}
 +a[id=func("foo")] {}
  a[class="(╯°□°）╯︵ ┻━┻"] {
  }
- input:not([type="radio"]):not([type="checkbox"]) {
+ a[href^="//"] {
 ```
 
 # Output
@@ -46,6 +50,12 @@ a[id="test"] {
 }
 a[id=func("foo")] {}
 a[class="(╯°□°）╯︵ ┻━┻"] {
+}
+a[href^="//"] {
+}
+a[href$="/*"] {
+}
+a[href="http://example.com"] {
 }
 input:not([type="radio"]):not([type="checkbox"]) {
 }
@@ -66,7 +76,7 @@ quotes.css:4:10 parse ━━━━━━━━━━━━━━━━━━━�
   > 4 │ a[id=func("foo")] {}
       │          ^
     5 │ a[class="(╯°□°）╯︵ ┻━┻"]{}
-    6 │ input:not([type="radio"]):not([type="checkbox"]) {}
+    6 │ a[href^="//"] {}
   
   i Expected a s, a S, an i, or a I here.
   
@@ -75,7 +85,7 @@ quotes.css:4:10 parse ━━━━━━━━━━━━━━━━━━━�
   > 4 │ a[id=func("foo")] {}
       │          ^
     5 │ a[class="(╯°□°）╯︵ ┻━┻"]{}
-    6 │ input:not([type="radio"]):not([type="checkbox"]) {}
+    6 │ a[href^="//"] {}
   
 quotes.css:4:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -86,7 +96,7 @@ quotes.css:4:16 parse ━━━━━━━━━━━━━━━━━━━�
   > 4 │ a[id=func("foo")] {}
       │                ^
     5 │ a[class="(╯°□°）╯︵ ┻━┻"]{}
-    6 │ input:not([type="radio"]):not([type="checkbox"]) {}
+    6 │ a[href^="//"] {}
   
   i Remove )
   

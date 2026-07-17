@@ -1,0 +1,28 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: ts/suppressions_trailing_comments.ts
+---
+
+# Input
+
+```ts
+interface SuppressionsWithTrailingComments {
+	value:
+		// biome-ignore format: preserve the nested type formatting
+		Array<string|number>; // keep this trailing comment after the suppressed type
+	done: void;
+}
+
+```
+
+
+# Formatted
+
+```ts
+interface SuppressionsWithTrailingComments {
+	value: // biome-ignore format: preserve the nested type formatting
+	Array<string|number>; // keep this trailing comment after the suppressed type
+	done: void;
+}
+
+```

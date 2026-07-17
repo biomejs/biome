@@ -1,5 +1,5 @@
 use biome_js_semantic::SemanticEvent;
-use biome_js_syntax::JsFileSource;
+use biome_languages::JsFileSource;
 use biome_rowan::TextSize;
 
 use super::utils::{parse_separated_list, parse_str, parse_until_chr, parse_whitespace0};

@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validObjectOnly.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+{
+	var foo = array[0];
+}
+{
+	foo = array[0];
+}
+
+```

@@ -33,11 +33,6 @@ Imports {
 ```
 Component => BindingTypeData {
   Types Module(0) TypeId(1),
-  JsDoc(
-    @public
-    @returns {JSX.Element}
-  ),
-  Exported Ranges: (130..139)
 }
 ```
 

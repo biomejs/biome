@@ -1,0 +1,68 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+assertion_line: 145
+expression: snapshot
+---
+
+## Input
+
+```astro
+---
+const RE = /\d{4}/
+---
+
+<div />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: AstroFrontmatterElement {
+        l_fence_token: FENCE@0..3 "---" [] [],
+        content: AstroEmbeddedContent {
+            content_token: HTML_LITERAL@3..23 "const RE = /\\d{4}/\n" [Newline("\n")] [],
+        },
+        r_fence_token: FENCE@23..26 "---" [] [],
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@26..29 "<" [Newline("\n"), Newline("\n")] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@29..33 "div" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [],
+            slash_token: SLASH@33..34 "/" [] [],
+            r_angle_token: R_ANGLE@34..35 ">" [] [],
+        },
+    ],
+    eof_token: EOF@35..36 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..36
+  0: (empty)
+  1: ASTRO_FRONTMATTER_ELEMENT@0..26
+    0: FENCE@0..3 "---" [] []
+    1: ASTRO_EMBEDDED_CONTENT@3..23
+      0: HTML_LITERAL@3..23 "const RE = /\\d{4}/\n" [Newline("\n")] []
+    2: FENCE@23..26 "---" [] []
+  2: (empty)
+  3: HTML_ELEMENT_LIST@26..35
+    0: HTML_SELF_CLOSING_ELEMENT@26..35
+      0: L_ANGLE@26..29 "<" [Newline("\n"), Newline("\n")] []
+      1: HTML_TAG_NAME@29..33
+        0: HTML_LITERAL@29..33 "div" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@33..33
+      3: SLASH@33..34 "/" [] []
+      4: R_ANGLE@34..35 ">" [] []
+  4: EOF@35..36 "" [Newline("\n")] []
+
+```

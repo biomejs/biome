@@ -1,0 +1,29 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/expression/parenthesized-list-indentation.scss
+---
+
+# Input
+
+```scss
+$list:(("very-very-very-very-very-very-long-item-1","very-very-very-very-very-very-long-item-2"),("very-very-very-very-very-very-long-item-3","very-very-very-very-very-very-long-item-4"));
+
+
+```
+
+
+# Formatted
+
+```scss
+$list: (
+	(
+		"very-very-very-very-very-very-long-item-1",
+		"very-very-very-very-very-very-long-item-2"
+	),
+	(
+		"very-very-very-very-very-very-long-item-3",
+		"very-very-very-very-very-very-long-item-4"
+	)
+);
+
+```

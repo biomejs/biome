@@ -1,0 +1,161 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+for (var i = 0; i < 10; i++) {
+    handlers.push(() => i);
+}
+
+var count = 0;
+while (count < 5) {
+    function next() {
+        return count;
+    }
+
+    queue.push(next);
+    count++;
+}
+
+let shared = 0;
+for (let i = 0; i < 10; i++) {
+    queue.push(function () {
+        return shared;
+    });
+}
+shared = 100;
+
+for (var i = 0; i < 5; i++) {
+    queue.push((() => {
+        return () => i;
+    })());
+}
+
+for (var i = 0; i < 5; i++) {
+    (async () => i)();
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:19 lint/nursery/noLoopFunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function declared in a loop contains unsafe references to outer variables.
+  
+    1 │ /* should generate diagnostics */
+    2 │ for (var i = 0; i < 10; i++) {
+  > 3 │     handlers.push(() => i);
+      │                   ^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Loop-created functions often run after the loop continues, but captured outer bindings like var variables are reused instead of copied per iteration.
+  
+  i The following variables were detected: i
+  
+  i Move the function outside the loop, capture only per-iteration bindings, or avoid mutating the captured variable across iterations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:5 lint/nursery/noLoopFunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function declared in a loop contains unsafe references to outer variables.
+  
+     6 │ var count = 0;
+     7 │ while (count < 5) {
+   > 8 │     function next() {
+       │     ^^^^^^^^^^^^^^^^^
+   > 9 │         return count;
+  > 10 │     }
+       │     ^
+    11 │ 
+    12 │     queue.push(next);
+  
+  i Loop-created functions often run after the loop continues, but captured outer bindings like var variables are reused instead of copied per iteration.
+  
+  i The following variables were detected: count
+  
+  i Move the function outside the loop, capture only per-iteration bindings, or avoid mutating the captured variable across iterations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:16 lint/nursery/noLoopFunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function declared in a loop contains unsafe references to outer variables.
+  
+    16 │ let shared = 0;
+    17 │ for (let i = 0; i < 10; i++) {
+  > 18 │     queue.push(function () {
+       │                ^^^^^^^^^^^^^
+  > 19 │         return shared;
+  > 20 │     });
+       │     ^
+    21 │ }
+    22 │ shared = 100;
+  
+  i Loop-created functions often run after the loop continues, but captured outer bindings like var variables are reused instead of copied per iteration.
+  
+  i The following variables were detected: shared
+  
+  i Move the function outside the loop, capture only per-iteration bindings, or avoid mutating the captured variable across iterations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:16 lint/nursery/noLoopFunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function declared in a loop contains unsafe references to outer variables.
+  
+    24 │ for (var i = 0; i < 5; i++) {
+    25 │     queue.push((() => {
+  > 26 │         return () => i;
+       │                ^^^^^^^
+    27 │     })());
+    28 │ }
+  
+  i Loop-created functions often run after the loop continues, but captured outer bindings like var variables are reused instead of copied per iteration.
+  
+  i The following variables were detected: i
+  
+  i Move the function outside the loop, capture only per-iteration bindings, or avoid mutating the captured variable across iterations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:6 lint/nursery/noLoopFunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function declared in a loop contains unsafe references to outer variables.
+  
+    30 │ for (var i = 0; i < 5; i++) {
+  > 31 │     (async () => i)();
+       │      ^^^^^^^^^^^^^
+    32 │ }
+    33 │ 
+  
+  i Loop-created functions often run after the loop continues, but captured outer bindings like var variables are reused instead of copied per iteration.
+  
+  i The following variables were detected: i
+  
+  i Move the function outside the loop, capture only per-iteration bindings, or avoid mutating the captured variable across iterations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

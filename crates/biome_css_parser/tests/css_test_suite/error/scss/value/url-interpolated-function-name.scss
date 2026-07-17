@@ -1,0 +1,11 @@
+div {
+  // Plain `(` branch: regular function heads inside `url(...)` should still
+  // parse as modifier functions even when recovery is needed.
+  plain-branch-missing-close: url(join-url("..", "image.png");
+
+  // UrlBody branch: malformed interpolation inside the function head should
+  // still preserve the interpolated-function shape for recovery.
+  interpolated-start-missing-curly: url(#{name(bar));
+  interpolated-mid-broken-interpolation: url(foo#{1 + }(bar));
+  interpolated-mid-missing-curly: url(foo#{1 + 1(bar));
+}

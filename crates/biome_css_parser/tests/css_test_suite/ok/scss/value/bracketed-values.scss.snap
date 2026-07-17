@@ -22,8 +22,8 @@ $lines: [full-start, main-start, main-end, full-end];
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..1 "$" [] [],
                 name: CssIdentifier {
                     value_token: IDENT@1..9 "brackets" [] [],
@@ -58,8 +58,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@20..21 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@21..23 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@23..28 "lines" [] [],
@@ -170,8 +170,8 @@ CssRoot {
 0: CSS_ROOT@0..127
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..126
-    0: SCSS_DECLARATION@0..21
-      0: SCSS_IDENTIFIER@0..9
+    0: SCSS_VARIABLE_DECLARATION@0..21
+      0: SCSS_VARIABLE@0..9
         0: DOLLAR@0..1 "$" [] []
         1: CSS_IDENTIFIER@1..9
           0: IDENT@1..9 "brackets" [] []
@@ -194,8 +194,8 @@ CssRoot {
             2: R_BRACK@19..20 "]" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@20..20
       4: SEMICOLON@20..21 ";" [] []
-    1: SCSS_DECLARATION@21..75
-      0: SCSS_IDENTIFIER@21..28
+    1: SCSS_VARIABLE_DECLARATION@21..75
+      0: SCSS_VARIABLE@21..28
         0: DOLLAR@21..23 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@23..28
           0: IDENT@23..28 "lines" [] []

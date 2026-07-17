@@ -123,8 +123,8 @@ CssRoot {
                 r_curly_token: R_CURLY@181..182 "}" [] [],
             },
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@182..234 "$" [Newline("\n"), Newline("\n"), Comments("/* Start /* nested /* ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@234..237 "var" [] [],
@@ -245,8 +245,8 @@ CssRoot {
               1: (empty)
             1: SEMICOLON@179..181 ";" [] [Whitespace(" ")]
         2: R_CURLY@181..182 "}" [] []
-    2: SCSS_DECLARATION@182..245
-      0: SCSS_IDENTIFIER@182..237
+    2: SCSS_VARIABLE_DECLARATION@182..245
+      0: SCSS_VARIABLE@182..237
         0: DOLLAR@182..234 "$" [Newline("\n"), Newline("\n"), Comments("/* Start /* nested /* ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@234..237
           0: IDENT@234..237 "var" [] []

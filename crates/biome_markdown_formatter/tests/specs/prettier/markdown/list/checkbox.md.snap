@@ -1,0 +1,37 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list/checkbox.md
+---
+
+# Input
+
+```md
+- [ ] this is a long long long long long long long long long long long long long long paragraph.
+- [x] this is a long long long long long long long long long long long long long long paragraph.
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+-- [ ] this is a long long long long long long long long long long long long long long paragraph.
++- [] this is a long long long long long long long long long long long long long long paragraph.
+ - [x] this is a long long long long long long long long long long long long long long paragraph.
+```
+
+# Output
+
+```md
+- [] this is a long long long long long long long long long long long long long long paragraph.
+- [x] this is a long long long long long long long long long long long long long long paragraph.
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: - [] this is a long long long long long long long long long long long long long long paragraph.
+    2: - [x] this is a long long long long long long long long long long long long long long paragraph.
+```

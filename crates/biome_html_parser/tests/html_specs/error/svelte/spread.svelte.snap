@@ -29,9 +29,7 @@ HtmlRoot {
                 HtmlSpreadAttribute {
                     l_curly_token: L_CURLY@7..8 "{" [] [],
                     dotdotdot_token: DOT3@8..11 "..." [] [],
-                    argument: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@11..11 "" [] [],
-                    },
+                    argument: missing (required),
                     r_curly_token: R_CURLY@11..13 "}" [] [Whitespace(" ")],
                 },
             ],
@@ -80,8 +78,7 @@ HtmlRoot {
         0: HTML_SPREAD_ATTRIBUTE@7..13
           0: L_CURLY@7..8 "{" [] []
           1: DOT3@8..11 "..." [] []
-          2: HTML_TEXT_EXPRESSION@11..11
-            0: HTML_LITERAL@11..11 "" [] []
+          2: (empty)
           3: R_CURLY@11..13 "}" [] [Whitespace(" ")]
       3: SLASH@13..14 "/" [] []
       4: R_ANGLE@14..15 ">" [] []
@@ -107,6 +104,15 @@ HtmlRoot {
 ## Diagnostics
 
 ```
+spread.svelte:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression, instead none was found.
+  
+  > 1 │ <input {...} />
+      │            ^
+    2 │ <Component {...props />
+    3 │ 
+  
 spread.svelte:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `}` but instead the file ends

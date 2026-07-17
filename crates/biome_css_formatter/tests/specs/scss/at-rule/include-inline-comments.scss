@@ -1,0 +1,24 @@
+@include inline-comments(
+1px,/* after positional block */
+$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:1px,// after keyword line
+2px 4px 6px,/* before close */
+);
+
+@include inline-comments(
+1px,// after positional line
+$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:2px,/* after keyword block */
+$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2:10,
+2px 4px 6px// before close line
+);
+
+@include separator-line-comments(
+1px // separator line
+, 2px
+);
+
+@include nested-parameter-separator-line-comments(
+fn(
+1px // nested separator line
+, 2px
+)
+);

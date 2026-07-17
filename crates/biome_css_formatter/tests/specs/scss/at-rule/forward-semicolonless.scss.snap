@@ -1,0 +1,20 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/forward-semicolonless.scss
+---
+
+# Input
+
+```scss
+@forward
+"tokens"
+
+```
+
+
+# Formatted
+
+```scss
+@forward "tokens";
+
+```

@@ -159,11 +159,10 @@ pub fn tokenize_class(class_name: &str) -> Option<ClassStructure> {
                     return None;
                 }
             }
-            b':' => {
-                if arbitrary_block_depth == 0 {
+            b':'
+                if arbitrary_block_depth == 0 => {
                     delimiter_indexes.push(index);
                 }
-            }
             _ => {}
         };
         if at_arbitrary_block_start && !is_start_of_arbitrary_block {

@@ -85,7 +85,7 @@ declare_lint_rule! {
     ///
     /// ### `checkForEach`
     ///
-    /// **Since `v2.4.0**
+    /// **Since `v2.4.0`**
     ///
     /// Default: `true`
     ///
@@ -107,7 +107,39 @@ declare_lint_rule! {
     /// });
     /// ```
     ///
-    /// When `checkForEach` is `false` (default), the above code will not trigger any diagnostic.
+     /// When `checkForEach` is `false`, the above code will not trigger any diagnostic.
+    ///
+    /// ### `allowImplicit`
+    ///
+    /// **Since `v2.5.0`**
+    /// 
+    /// Default: `false`
+    ///
+    /// When set to `true`, allows callbacks to implicitly return `undefined`
+    /// using `return;`. This is useful for patterns like `.filter(Boolean)`
+    /// chaining where some callbacks intentionally return `undefined`.
+    ///
+    /// ### Examples
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "allowImplicit": true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options
+    /// ;[1, 2, 3].map((it) => {
+    ///     if (it % 2 === 0) {
+    ///         return it;
+    ///     }
+    ///     if (it > 2) {
+    ///         return it ** 2;
+    ///     }
+    ///     return;
+    /// }).filter(Boolean);
+    /// ```
     ///
     pub UseIterableCallbackReturn {
         version: "2.0.0",
@@ -172,7 +204,12 @@ impl Rule for UseIterableCallbackReturn {
         }
 
         if let Some(global_name) = method_config.global_name {
-            let (_, name) = global_identifier(&member_expression.object().ok()?)?;
+            let (_, name) = global_identifier(
+                &member_expression
+                    .object()
+                    .ok()?
+                    .as_any_global_identifier_expression()?,
+            )?;
             if name.text() != global_name {
                 return None;
             }
@@ -180,22 +217,33 @@ impl Rule for UseIterableCallbackReturn {
 
         let returns_info = get_function_returns_info(cfg);
 
+        let allow_implicit = ctx.options().allow_implicit();
         let mut problems: Vec<RuleProblemKind> = Vec::new();
         let member_range = member_expression.member().ok()?.range();
         if method_config.return_value_required {
-            if returns_info.has_paths_without_returns {
-                if returns_info.returns_with_value.is_empty() {
-                    problems.push(RuleProblemKind::MissingReturnWithValue);
-                } else {
-                    problems.push(RuleProblemKind::NotAllPathsReturnValue);
-                }
-            } else if !returns_info.returns_without_value.is_empty() {
-                if !returns_info.returns_with_value.is_empty() {
-                    for return_range in returns_info.returns_without_value {
-                        problems.push(RuleProblemKind::UnexpectedEmptyReturn(return_range));
+            if allow_implicit {
+                if returns_info.has_paths_without_returns {
+                    if !returns_info.returns_with_value.is_empty() {
+                        problems.push(RuleProblemKind::NotAllPathsReturnValue);
+                    } else {
+                        problems.push(RuleProblemKind::MissingReturnWithValue);
                     }
-                } else {
-                    problems.push(RuleProblemKind::MissingReturnWithValue);
+                }
+            } else {
+                if returns_info.has_paths_without_returns {
+                    if returns_info.returns_with_value.is_empty() {
+                        problems.push(RuleProblemKind::MissingReturnWithValue);
+                    } else {
+                        problems.push(RuleProblemKind::NotAllPathsReturnValue);
+                    }
+                } else if !returns_info.returns_without_value.is_empty() {
+                    if !returns_info.returns_with_value.is_empty() {
+                        for return_range in returns_info.returns_without_value {
+                            problems.push(RuleProblemKind::UnexpectedEmptyReturn(return_range));
+                        }
+                    } else {
+                        problems.push(RuleProblemKind::MissingReturnWithValue);
+                    }
                 }
             }
         } else {
@@ -367,8 +415,7 @@ fn get_function_returns_info(cfg: &JsControlFlowGraph) -> FunctionReturnsInfo {
                             if let Some(return_stmt) = JsReturnStatement::cast_ref(node) {
                                 let range = return_stmt
                                     .return_token()
-                                    .map(|token| token.text_range())
-                                    .unwrap_or(return_stmt.range());
+                                    .map_or(return_stmt.range(), |token| token.text_range());
                                 if return_stmt.argument().is_none() {
                                     function_returns_info.returns_without_value.push(range);
                                 } else {

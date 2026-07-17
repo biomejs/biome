@@ -324,7 +324,7 @@ CssRoot {
                                             l_curly_token: L_CURLY@234..235 "{" [] [],
                                             value: ScssExpression {
                                                 items: ScssExpressionItemList [
-                                                    ScssIdentifier {
+                                                    ScssVariable {
                                                         dollar_token: DOLLAR@235..236 "$" [] [],
                                                         name: CssIdentifier {
                                                             value_token: IDENT@236..240 "name" [] [],
@@ -352,6 +352,7 @@ CssRoot {
                     value_token: IDENT@253..267 "themed-button" [] [Whitespace(" ")],
                 },
                 arguments: missing (optional),
+                using_clause: missing (optional),
                 block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@267..268 "{" [] [],
                     items: CssDeclarationOrRuleList [
@@ -587,7 +588,7 @@ CssRoot {
                       1: L_CURLY@234..235 "{" [] []
                       2: SCSS_EXPRESSION@235..240
                         0: SCSS_EXPRESSION_ITEM_LIST@235..240
-                          0: SCSS_IDENTIFIER@235..240
+                          0: SCSS_VARIABLE@235..240
                             0: DOLLAR@235..236 "$" [] []
                             1: CSS_IDENTIFIER@236..240
                               0: IDENT@236..240 "name" [] []
@@ -601,7 +602,8 @@ CssRoot {
         1: CSS_IDENTIFIER@253..267
           0: IDENT@253..267 "themed-button" [] [Whitespace(" ")]
         2: (empty)
-        3: CSS_DECLARATION_OR_RULE_BLOCK@267..290
+        3: (empty)
+        4: CSS_DECLARATION_OR_RULE_BLOCK@267..290
           0: L_CURLY@267..268 "{" [] []
           1: CSS_DECLARATION_OR_RULE_LIST@268..288
             0: CSS_AT_RULE@268..288
@@ -620,7 +622,7 @@ CssRoot {
                 2: (empty)
                 3: SEMICOLON@287..288 ";" [] []
           2: R_CURLY@288..290 "}" [Newline("\n")] []
-        4: (empty)
+        5: (empty)
   2: EOF@290..291 "" [Newline("\n")] []
 
 ```

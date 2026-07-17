@@ -32,6 +32,8 @@ info: interpolation/interpolation.html
 # Formatted
 
 ```html
-<div>{{ $interpolation }}</div>
+<div>
+	{{ $interpolation }}
+</div>
 
 ```

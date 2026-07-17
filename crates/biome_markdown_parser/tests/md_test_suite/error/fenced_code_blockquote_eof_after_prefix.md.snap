@@ -39,7 +39,7 @@ MdDocument {
                         },
                     ],
                     r_fence_indent: MdIndentTokenList [],
-                    r_fence: missing (required),
+                    r_fence: missing (optional),
                 },
             ],
         },

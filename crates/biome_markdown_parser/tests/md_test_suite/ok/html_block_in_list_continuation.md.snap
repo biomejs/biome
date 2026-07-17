@@ -1,0 +1,108 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+- item
+
+  <details>
+  <summary>Info</summary>
+  content
+  </details>
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@0..1 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@1..2 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@2..6 "item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@6..7 "\n" [] [],
+                                },
+                            ],
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@7..8 "\n" [] [],
+                        },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@8..10 "  " [] [],
+                                },
+                            ],
+                        },
+                        MdHtmlBlock {
+                            indent: MdIndentTokenList [],
+                            content: MdHtmlContent {
+                                value_token: MD_HTML_LITERAL@10..68 "<details>\n  <summary>Info</summary>\n  content\n  </details>" [] [],
+                            },
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@68..69 "\n" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@69..69 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..69
+  0: (empty)
+  1: MD_BLOCK_LIST@0..69
+    0: MD_BULLET_LIST_ITEM@0..69
+      0: MD_BULLET_LIST@0..69
+        0: MD_BULLET@0..69
+          0: MD_LIST_MARKER_PREFIX@0..2
+            0: MD_INDENT_TOKEN_LIST@0..0
+            1: MINUS@0..1 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@1..2 " " [] []
+            3: MD_INDENT_TOKEN_LIST@2..2
+          1: MD_BLOCK_LIST@2..69
+            0: MD_PARAGRAPH@2..7
+              0: MD_INLINE_ITEM_LIST@2..7
+                0: MD_TEXTUAL@2..6
+                  0: MD_TEXTUAL_LITERAL@2..6 "item" [] []
+                1: MD_TEXTUAL@6..7
+                  0: MD_TEXTUAL_LITERAL@6..7 "\n" [] []
+            1: MD_NEWLINE@7..8
+              0: NEWLINE@7..8 "\n" [] []
+            2: MD_CONTINUATION_INDENT@8..10
+              0: MD_INDENT_TOKEN_LIST@8..10
+                0: MD_INDENT_TOKEN@8..10
+                  0: MD_INDENT_CHAR@8..10 "  " [] []
+            3: MD_HTML_BLOCK@10..68
+              0: MD_INDENT_TOKEN_LIST@10..10
+              1: MD_HTML_CONTENT@10..68
+                0: MD_HTML_LITERAL@10..68 "<details>\n  <summary>Info</summary>\n  content\n  </details>" [] []
+            4: MD_NEWLINE@68..69
+              0: NEWLINE@68..69 "\n" [] []
+  2: EOF@69..69 "" [] []
+
+```

@@ -1,0 +1,23 @@
+name: AgentScan
+
+on:
+  pull_request_target:
+    types: [ opened, reopened ]
+  issues:
+    types: [ opened ]
+
+permissions: { }
+
+jobs:
+  agentscan:
+    if: github.event_name != 'pull_request_target' || github.event.pull_request.user.type != 'Bot'
+    runs-on: ubuntu-slim
+    permissions:
+      pull-requests: write
+      issues: write
+      contents: read
+    steps:
+      - name: AgentScan
+        uses: MatteoGabriele/agentscan-action@d8da234c758c9a195222a68c3ecfe02a603185b6 # v1.15.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}

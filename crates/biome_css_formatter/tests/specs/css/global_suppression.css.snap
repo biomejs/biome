@@ -17,6 +17,13 @@ info: css/global_suppression.css
 #exampleInputEmail1 { color: red;
 }
 
+/* biome-ignore-all format: intentional */
+.code {
+	color: red;
+}
+
+/* Biome format should keep this comment */
+
 ```
 
 
@@ -33,4 +40,12 @@ info: css/global_suppression.css
 
 #exampleInputEmail1 { color: red;
 }
+
+/* biome-ignore-all format: intentional */
+.code {
+	color: red;
+}
+
+/* Biome format should keep this comment */
+
 ```

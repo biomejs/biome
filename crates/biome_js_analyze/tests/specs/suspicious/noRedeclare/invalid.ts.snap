@@ -29,7 +29,7 @@ namespace Ns2 {}
 ```
 invalid.ts:4:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
     2 │ 	static {
     3 │ 		var a;
@@ -47,13 +47,17 @@ invalid.ts:4:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━�
     4 │ 		var a;
     5 │ 	}
   
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
+  
 
 ```
 
 ```
 invalid.ts:8:15 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'T'. Consider to delete it or rename it.
+  × 'T' is redeclared in the same scope.
   
      6 │ }
      7 │ 
@@ -71,13 +75,17 @@ invalid.ts:8:15 lint/suspicious/noRedeclare ━━━━━━━━━━━━
      9 │ 
     10 │ function g<T>() {
   
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
+  
 
 ```
 
 ```
 invalid.ts:11:10 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'T'. Consider to delete it or rename it.
+  × 'T' is redeclared in the same scope.
   
     10 │ function g<T>() {
   > 11 │     type T = number;
@@ -94,13 +102,17 @@ invalid.ts:11:10 lint/suspicious/noRedeclare ━━━━━━━━━━━�
     11 │     type T = number;
     12 │ }
   
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
+  
 
 ```
 
 ```
 invalid.ts:15:11 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'Ns1'. Consider to delete it or rename it.
+  × 'Ns1' is redeclared in the same scope.
   
     14 │ import * as Ns1 from ""
   > 15 │ namespace Ns1 {}
@@ -117,13 +129,17 @@ invalid.ts:15:11 lint/suspicious/noRedeclare ━━━━━━━━━━━�
     15 │ namespace Ns1 {}
     16 │ 
   
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
+  
 
 ```
 
 ```
 invalid.ts:18:11 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'Ns2'. Consider to delete it or rename it.
+  × 'Ns2' is redeclared in the same scope.
   
     17 │ import type * as Ns2 from ""
   > 18 │ namespace Ns2 {}
@@ -138,6 +154,10 @@ invalid.ts:18:11 lint/suspicious/noRedeclare ━━━━━━━━━━━�
        │                  ^^^
     18 │ namespace Ns2 {}
     19 │ 
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```

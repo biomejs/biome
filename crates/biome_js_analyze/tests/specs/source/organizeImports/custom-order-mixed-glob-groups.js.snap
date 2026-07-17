@@ -16,14 +16,18 @@ import path from "./path";
 ```
 custom-order-mixed-glob-groups.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these imports.
   
   > 1 │ import { A } from "@my/lib";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ import { B } from "@my/lib/subpath";
-    3 │ import alias from "@/alias";
+  > 2 │ import { B } from "@my/lib/subpath";
+  > 3 │ import alias from "@/alias";
+  > 4 │ import alias from "@scoped/package";
+  > 5 │ import path from "./path";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1   │ - import·{·A·}·from·"@my/lib";
     2   │ - import·{·B·}·from·"@my/lib/subpath";

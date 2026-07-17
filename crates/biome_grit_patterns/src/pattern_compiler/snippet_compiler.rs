@@ -418,7 +418,7 @@ pub fn split_snippet<'a>(snippet: &'a str, lang: &impl Language) -> Vec<(ByteRan
     }
 
     // Sort ranges in descending order
-    ranges_and_metavars.sort_by(|a, b| b.0.start.cmp(&a.0.start));
+    ranges_and_metavars.sort_by_key(|b| std::cmp::Reverse(b.0.start));
 
     ranges_and_metavars
 }

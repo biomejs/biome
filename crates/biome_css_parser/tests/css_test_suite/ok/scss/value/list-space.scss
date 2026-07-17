@@ -1,4 +1,7 @@
 $space-list: 1 2 3;
+$newline-space-list: 1
+2
+3;
 $space-list-strings: "a" "b" "c";
 $nested-space-list: (1 2) (3 4);
 $mixed-list: 1 2, 3 4;
@@ -7,7 +10,6 @@ $mixed-list: 1 2, 3 4;
   padding: 1px 2px 3px 4px;
   box-shadow: 0 0 2px #000;
 }
-
 
 
 

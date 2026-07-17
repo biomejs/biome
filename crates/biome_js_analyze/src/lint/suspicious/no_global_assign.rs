@@ -63,8 +63,7 @@ impl Rule for NoGlobalAssign {
             let is_write = global_ref.syntax().kind() == JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT;
             if is_write {
                 let identifier = global_ref.syntax().text_trimmed();
-                let text = identifier.to_string();
-                let is_global_var = is_js_global(text.as_str());
+                let is_global_var = is_js_global(identifier.into_text().text());
                 if is_global_var {
                     result.push(global_ref.range());
                 }

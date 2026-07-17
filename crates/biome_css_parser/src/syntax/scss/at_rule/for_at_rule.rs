@@ -1,7 +1,7 @@
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::scss::{
-    expected_scss_expression, parse_scss_expression_until, parse_scss_identifier,
+    expected_scss_expression, parse_scss_expression_until, parse_scss_variable,
 };
 use biome_css_syntax::CssSyntaxKind::{self, SCSS_FOR_AT_RULE};
 use biome_css_syntax::T;
@@ -33,7 +33,7 @@ pub(crate) fn parse_scss_for_at_rule(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![for]);
-    parse_scss_identifier(p).or_add_diagnostic(p, expected_scss_for_binding);
+    parse_scss_variable(p).or_add_diagnostic(p, expected_scss_for_binding);
     p.expect(T![from]);
     parse_scss_expression_until(p, SCSS_FOR_LOWER_BOUND_END_SET)
         .or_add_diagnostic(p, expected_scss_expression);

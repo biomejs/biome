@@ -6,8 +6,8 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsExpression, JsUnaryExpression, JsUnaryOperator, T, global_identifier,
-    static_value::StaticValue,
+    AnyJsExpression, AnyJsMemberExpression, AnyPossibleGlobalIdentifier, JsUnaryExpression,
+    JsUnaryOperator, T, global_identifier, static_value::StaticValue,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_number_namespace::UseNumberNamespaceOptions;
@@ -80,7 +80,7 @@ declare_lint_rule! {
 const GLOBAL_NUMBER_PROPERTIES: [&str; 4] = ["parseInt", "parseFloat", "NaN", "Infinity"];
 
 impl Rule for UseNumberNamespace {
-    type Query = Semantic<AnyJsExpression>;
+    type Query = Semantic<AnyPossibleGlobalIdentifier>;
     type State = StaticValue;
     type Signals = Option<Self::State>;
     type Options = UseNumberNamespaceOptions;
@@ -130,8 +130,9 @@ impl Rule for UseNumberNamespace {
 
     fn action(ctx: &RuleContext<Self>, global_ident: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
+        let node_expr = AnyJsExpression::from(node.clone());
         let (old_node, new_node) = match node {
-            AnyJsExpression::JsIdentifierExpression(expression) => {
+            AnyPossibleGlobalIdentifier::JsIdentifierExpression(expression) => {
                 let name = expression.name().ok()?.to_trimmed_text();
                 if !GLOBAL_NUMBER_PROPERTIES.contains(&name.text()) {
                     return None;
@@ -151,10 +152,10 @@ impl Rule for UseNumberNamespace {
                                 _ => return None,
                             }
                         } else {
-                            (node.clone(), "POSITIVE_INFINITY")
+                            (node_expr, "POSITIVE_INFINITY")
                         }
                     }
-                    _ => (node.clone(), name.text()),
+                    _ => (node_expr, name.text()),
                 };
                 (
                     old_node,
@@ -168,58 +169,59 @@ impl Rule for UseNumberNamespace {
                     ),
                 )
             }
-            AnyJsExpression::JsStaticMemberExpression(expression) => {
-                let name = expression.member().ok()?.to_trimmed_text();
+            AnyPossibleGlobalIdentifier::AnyJsMemberExpression(member) => match member {
+                AnyJsMemberExpression::JsStaticMemberExpression(expression) => {
+                    let name = expression.member().ok()?.to_trimmed_text();
 
-                if !GLOBAL_NUMBER_PROPERTIES.contains(&name.text()) {
-                    return None;
-                }
-                let (old_node, replacement) = match name.text() {
-                    "Infinity" => {
-                        if let Some(parent) = node.parent::<JsUnaryExpression>() {
-                            match parent.operator().ok()? {
-                                JsUnaryOperator::Minus => (
-                                    AnyJsExpression::JsUnaryExpression(parent),
-                                    "NEGATIVE_INFINITY",
-                                ),
-                                JsUnaryOperator::Plus => (
-                                    AnyJsExpression::JsUnaryExpression(parent),
-                                    "POSITIVE_INFINITY",
-                                ),
-                                _ => return None,
-                            }
-                        } else {
-                            (node.clone(), "POSITIVE_INFINITY")
-                        }
+                    if !GLOBAL_NUMBER_PROPERTIES.contains(&name.text()) {
+                        return None;
                     }
-                    _ => (node.clone(), name.text()),
-                };
-                (
-                    old_node,
-                    make::js_static_member_expression(
+                    let (old_node, replacement) = match name.text() {
+                        "Infinity" => {
+                            if let Some(parent) = node.parent::<JsUnaryExpression>() {
+                                match parent.operator().ok()? {
+                                    JsUnaryOperator::Minus => (
+                                        AnyJsExpression::JsUnaryExpression(parent),
+                                        "NEGATIVE_INFINITY",
+                                    ),
+                                    JsUnaryOperator::Plus => (
+                                        AnyJsExpression::JsUnaryExpression(parent),
+                                        "POSITIVE_INFINITY",
+                                    ),
+                                    _ => return None,
+                                }
+                            } else {
+                                (node_expr, "POSITIVE_INFINITY")
+                            }
+                        }
+                        _ => (node_expr, name.text()),
+                    };
+                    (
+                        old_node,
                         make::js_static_member_expression(
-                            expression.object().ok()?,
+                            make::js_static_member_expression(
+                                expression.object().ok()?,
+                                make::token(T![.]),
+                                make::js_name(make::ident("Number")).into(),
+                            )
+                            .into(),
+                            expression.operator_token().ok()?,
+                            make::js_name(make::ident(replacement)).into(),
+                        ),
+                    )
+                }
+                AnyJsMemberExpression::JsComputedMemberExpression(expression) => {
+                    let object = expression.object().ok()?;
+                    (
+                        object.clone(),
+                        make::js_static_member_expression(
+                            object,
                             make::token(T![.]),
                             make::js_name(make::ident("Number")).into(),
-                        )
-                        .into(),
-                        expression.operator_token().ok()?,
-                        make::js_name(make::ident(replacement)).into(),
-                    ),
-                )
-            }
-            AnyJsExpression::JsComputedMemberExpression(expression) => {
-                let object = expression.object().ok()?;
-                (
-                    object.clone(),
-                    make::js_static_member_expression(
-                        object,
-                        make::token(T![.]),
-                        make::js_name(make::ident("Number")).into(),
-                    ),
-                )
-            }
-            _ => return None,
+                        ),
+                    )
+                }
+            },
         };
         let mut mutation = ctx.root().begin();
         mutation.replace_node(old_node, new_node.into());

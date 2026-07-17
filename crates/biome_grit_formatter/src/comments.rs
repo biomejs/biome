@@ -69,7 +69,7 @@ impl FormatRule<SourceComment<GritLanguage>> for FormatGritLeadingComment {
 
             // SAFETY: Safe, `is_doc_comment` only returns `true` for multiline comments
             let first_line = lines.next().unwrap();
-            write!(f, [text(first_line.trim_end(), source_offset)])?;
+            write!(f, [text(first_line.trim_end(), Some(source_offset))])?;
 
             source_offset += first_line.text_len();
 
@@ -77,10 +77,13 @@ impl FormatRule<SourceComment<GritLanguage>> for FormatGritLeadingComment {
             write!(
                 f,
                 [align(
-                    1,
+                    " ",
                     &format_once(|f| {
                         for line in lines {
-                            write!(f, [hard_line_break(), text(line.trim(), source_offset)])?;
+                            write!(
+                                f,
+                                [hard_line_break(), text(line.trim(), Some(source_offset))]
+                            )?;
 
                             source_offset += line.text_len();
                         }

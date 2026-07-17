@@ -4,6 +4,7 @@ expression: invalid.jsx
 ---
 # Input
 ```jsx
+/* should generate diagnostics */
 <>
     <button autoFocus />
     <input autoFocus />
@@ -19,43 +20,26 @@ expression: invalid.jsx
     <div autoFocus={false} />
     <div popover={false}><input autoFocus /></div>
 </>
+
 ```
 
 # Diagnostics
 ```
-invalid.jsx:2:13 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:13 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid the autoFocus attribute.
   
-    1 │ <>
-  > 2 │     <button autoFocus />
+    1 │ /* should generate diagnostics */
+    2 │ <>
+  > 3 │     <button autoFocus />
       │             ^^^^^^^^^
-    3 │     <input autoFocus />
-    4 │     <input autoFocus="true" />
+    4 │     <input autoFocus />
+    5 │     <input autoFocus="true" />
   
   i Unsafe fix: Remove the autoFocus attribute.
   
-    2 │ ····<button·autoFocus·/>
+    3 │ ····<button·autoFocus·/>
       │             ----------  
-
-```
-
-```
-invalid.jsx:3:12 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Avoid the autoFocus attribute.
-  
-    1 │ <>
-    2 │     <button autoFocus />
-  > 3 │     <input autoFocus />
-      │            ^^^^^^^^^
-    4 │     <input autoFocus="true" />
-    5 │     <input autoFocus={undefined} />
-  
-  i Unsafe fix: Remove the autoFocus attribute.
-  
-    3 │ ····<input·autoFocus·/>
-      │            ----------  
 
 ```
 
@@ -64,17 +48,17 @@ invalid.jsx:4:12 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━�
 
   × Avoid the autoFocus attribute.
   
-    2 │     <button autoFocus />
-    3 │     <input autoFocus />
-  > 4 │     <input autoFocus="true" />
-      │            ^^^^^^^^^^^^^^^^
-    5 │     <input autoFocus={undefined} />
-    6 │     <input autoFocus={"false"} />
+    2 │ <>
+    3 │     <button autoFocus />
+  > 4 │     <input autoFocus />
+      │            ^^^^^^^^^
+    5 │     <input autoFocus="true" />
+    6 │     <input autoFocus={undefined} />
   
   i Unsafe fix: Remove the autoFocus attribute.
   
-    4 │ ····<input·autoFocus="true"·/>
-      │            -----------------  
+    4 │ ····<input·autoFocus·/>
+      │            ----------  
 
 ```
 
@@ -83,17 +67,17 @@ invalid.jsx:5:12 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━�
 
   × Avoid the autoFocus attribute.
   
-    3 │     <input autoFocus />
-    4 │     <input autoFocus="true" />
-  > 5 │     <input autoFocus={undefined} />
-      │            ^^^^^^^^^^^^^^^^^^^^^
-    6 │     <input autoFocus={"false"} />
-    7 │     <input autoFocus={"false"} /*comment*/ />
+    3 │     <button autoFocus />
+    4 │     <input autoFocus />
+  > 5 │     <input autoFocus="true" />
+      │            ^^^^^^^^^^^^^^^^
+    6 │     <input autoFocus={undefined} />
+    7 │     <input autoFocus={"false"} />
   
   i Unsafe fix: Remove the autoFocus attribute.
   
-    5 │ ····<input·autoFocus={undefined}·/>
-      │            ----------------------  
+    5 │ ····<input·autoFocus="true"·/>
+      │            -----------------  
 
 ```
 
@@ -102,17 +86,17 @@ invalid.jsx:6:12 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━�
 
   × Avoid the autoFocus attribute.
   
-    4 │     <input autoFocus="true" />
-    5 │     <input autoFocus={undefined} />
-  > 6 │     <input autoFocus={"false"} />
-      │            ^^^^^^^^^^^^^^^^^^^
-    7 │     <input autoFocus={"false"} /*comment*/ />
-    8 │     <input /*comment*/ autoFocus={"false"} />
+    4 │     <input autoFocus />
+    5 │     <input autoFocus="true" />
+  > 6 │     <input autoFocus={undefined} />
+      │            ^^^^^^^^^^^^^^^^^^^^^
+    7 │     <input autoFocus={"false"} />
+    8 │     <input autoFocus={"false"} /*comment*/ />
   
   i Unsafe fix: Remove the autoFocus attribute.
   
-    6 │ ····<input·autoFocus={"false"}·/>
-      │            --------------------  
+    6 │ ····<input·autoFocus={undefined}·/>
+      │            ----------------------  
 
 ```
 
@@ -121,103 +105,103 @@ invalid.jsx:7:12 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━�
 
   × Avoid the autoFocus attribute.
   
-    5 │     <input autoFocus={undefined} />
-    6 │     <input autoFocus={"false"} />
-  > 7 │     <input autoFocus={"false"} /*comment*/ />
+    5 │     <input autoFocus="true" />
+    6 │     <input autoFocus={undefined} />
+  > 7 │     <input autoFocus={"false"} />
       │            ^^^^^^^^^^^^^^^^^^^
-    8 │     <input /*comment*/ autoFocus={"false"} />
-    9 │     <input autoFocus={"false" /*comment*/} />
+    8 │     <input autoFocus={"false"} /*comment*/ />
+    9 │     <input /*comment*/ autoFocus={"false"} />
   
   i Unsafe fix: Remove the autoFocus attribute.
   
-     5  5 │       <input autoFocus={undefined} />
-     6  6 │       <input autoFocus={"false"} />
-     7    │ - ····<input·autoFocus={"false"}·/*comment*/·/>
-        7 │ + ····<input··/*comment*/·/>
-     8  8 │       <input /*comment*/ autoFocus={"false"} />
-     9  9 │       <input autoFocus={"false" /*comment*/} />
-  
+    7 │ ····<input·autoFocus={"false"}·/>
+      │            --------------------  
 
 ```
 
 ```
-invalid.jsx:8:24 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:8:12 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid the autoFocus attribute.
   
-     6 │     <input autoFocus={"false"} />
-     7 │     <input autoFocus={"false"} /*comment*/ />
-   > 8 │     <input /*comment*/ autoFocus={"false"} />
-       │                        ^^^^^^^^^^^^^^^^^^^
-     9 │     <input autoFocus={"false" /*comment*/} />
-    10 │     <input /*comment*/ autoFocus={"false"} /*comment*/ />
+     6 │     <input autoFocus={undefined} />
+     7 │     <input autoFocus={"false"} />
+   > 8 │     <input autoFocus={"false"} /*comment*/ />
+       │            ^^^^^^^^^^^^^^^^^^^
+     9 │     <input /*comment*/ autoFocus={"false"} />
+    10 │     <input autoFocus={"false" /*comment*/} />
   
   i Unsafe fix: Remove the autoFocus attribute.
   
-    8 │ ····<input·/*comment*/·autoFocus={"false"}·/>
+     6  6 │       <input autoFocus={undefined} />
+     7  7 │       <input autoFocus={"false"} />
+     8    │ - ····<input·autoFocus={"false"}·/*comment*/·/>
+        8 │ + ····<input··/*comment*/·/>
+     9  9 │       <input /*comment*/ autoFocus={"false"} />
+    10 10 │       <input autoFocus={"false" /*comment*/} />
+  
+
+```
+
+```
+invalid.jsx:9:24 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the autoFocus attribute.
+  
+     7 │     <input autoFocus={"false"} />
+     8 │     <input autoFocus={"false"} /*comment*/ />
+   > 9 │     <input /*comment*/ autoFocus={"false"} />
+       │                        ^^^^^^^^^^^^^^^^^^^
+    10 │     <input autoFocus={"false" /*comment*/} />
+    11 │     <input /*comment*/ autoFocus={"false"} /*comment*/ />
+  
+  i Unsafe fix: Remove the autoFocus attribute.
+  
+    9 │ ····<input·/*comment*/·autoFocus={"false"}·/>
       │                        --------------------  
 
 ```
 
 ```
-invalid.jsx:9:12 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:10:12 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid the autoFocus attribute.
   
-     7 │     <input autoFocus={"false"} /*comment*/ />
-     8 │     <input /*comment*/ autoFocus={"false"} />
-   > 9 │     <input autoFocus={"false" /*comment*/} />
+     8 │     <input autoFocus={"false"} /*comment*/ />
+     9 │     <input /*comment*/ autoFocus={"false"} />
+  > 10 │     <input autoFocus={"false" /*comment*/} />
        │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    10 │     <input /*comment*/ autoFocus={"false"} /*comment*/ />
-    11 │     <div autoFocus />
+    11 │     <input /*comment*/ autoFocus={"false"} /*comment*/ />
+    12 │     <div autoFocus />
   
   i Unsafe fix: Remove the autoFocus attribute.
   
-    9 │ ····<input·autoFocus={"false"·/*comment*/}·/>
-      │            --------------------------------  
+    10 │ ····<input·autoFocus={"false"·/*comment*/}·/>
+       │            --------------------------------  
 
 ```
 
 ```
-invalid.jsx:10:24 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:11:24 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid the autoFocus attribute.
   
-     8 │     <input /*comment*/ autoFocus={"false"} />
-     9 │     <input autoFocus={"false" /*comment*/} />
-  > 10 │     <input /*comment*/ autoFocus={"false"} /*comment*/ />
+     9 │     <input /*comment*/ autoFocus={"false"} />
+    10 │     <input autoFocus={"false" /*comment*/} />
+  > 11 │     <input /*comment*/ autoFocus={"false"} /*comment*/ />
        │                        ^^^^^^^^^^^^^^^^^^^
-    11 │     <div autoFocus />
-    12 │     <div autoFocus={true} />
+    12 │     <div autoFocus />
+    13 │     <div autoFocus={true} />
   
   i Unsafe fix: Remove the autoFocus attribute.
   
-     8  8 │       <input /*comment*/ autoFocus={"false"} />
-     9  9 │       <input autoFocus={"false" /*comment*/} />
-    10    │ - ····<input·/*comment*/·autoFocus={"false"}·/*comment*/·/>
-       10 │ + ····<input·/*comment*/··/*comment*/·/>
-    11 11 │       <div autoFocus />
-    12 12 │       <div autoFocus={true} />
+     9  9 │       <input /*comment*/ autoFocus={"false"} />
+    10 10 │       <input autoFocus={"false" /*comment*/} />
+    11    │ - ····<input·/*comment*/·autoFocus={"false"}·/*comment*/·/>
+       11 │ + ····<input·/*comment*/··/*comment*/·/>
+    12 12 │       <div autoFocus />
+    13 13 │       <div autoFocus={true} />
   
-
-```
-
-```
-invalid.jsx:11:10 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Avoid the autoFocus attribute.
-  
-     9 │     <input autoFocus={"false" /*comment*/} />
-    10 │     <input /*comment*/ autoFocus={"false"} /*comment*/ />
-  > 11 │     <div autoFocus />
-       │          ^^^^^^^^^
-    12 │     <div autoFocus={true} />
-    13 │     <div autoFocus={false} />
-  
-  i Unsafe fix: Remove the autoFocus attribute.
-  
-    11 │ ····<div·autoFocus·/>
-       │          ----------  
 
 ```
 
@@ -226,17 +210,17 @@ invalid.jsx:12:10 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━
 
   × Avoid the autoFocus attribute.
   
-    10 │     <input /*comment*/ autoFocus={"false"} /*comment*/ />
-    11 │     <div autoFocus />
-  > 12 │     <div autoFocus={true} />
-       │          ^^^^^^^^^^^^^^^^
-    13 │     <div autoFocus={false} />
-    14 │     <div popover={false}><input autoFocus /></div>
+    10 │     <input autoFocus={"false" /*comment*/} />
+    11 │     <input /*comment*/ autoFocus={"false"} /*comment*/ />
+  > 12 │     <div autoFocus />
+       │          ^^^^^^^^^
+    13 │     <div autoFocus={true} />
+    14 │     <div autoFocus={false} />
   
   i Unsafe fix: Remove the autoFocus attribute.
   
-    12 │ ····<div·autoFocus={true}·/>
-       │          -----------------  
+    12 │ ····<div·autoFocus·/>
+       │          ----------  
 
 ```
 
@@ -245,34 +229,54 @@ invalid.jsx:13:10 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━
 
   × Avoid the autoFocus attribute.
   
-    11 │     <div autoFocus />
-    12 │     <div autoFocus={true} />
-  > 13 │     <div autoFocus={false} />
-       │          ^^^^^^^^^^^^^^^^^
-    14 │     <div popover={false}><input autoFocus /></div>
-    15 │ </>
+    11 │     <input /*comment*/ autoFocus={"false"} /*comment*/ />
+    12 │     <div autoFocus />
+  > 13 │     <div autoFocus={true} />
+       │          ^^^^^^^^^^^^^^^^
+    14 │     <div autoFocus={false} />
+    15 │     <div popover={false}><input autoFocus /></div>
   
   i Unsafe fix: Remove the autoFocus attribute.
   
-    13 │ ····<div·autoFocus={false}·/>
+    13 │ ····<div·autoFocus={true}·/>
+       │          -----------------  
+
+```
+
+```
+invalid.jsx:14:10 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the autoFocus attribute.
+  
+    12 │     <div autoFocus />
+    13 │     <div autoFocus={true} />
+  > 14 │     <div autoFocus={false} />
+       │          ^^^^^^^^^^^^^^^^^
+    15 │     <div popover={false}><input autoFocus /></div>
+    16 │ </>
+  
+  i Unsafe fix: Remove the autoFocus attribute.
+  
+    14 │ ····<div·autoFocus={false}·/>
        │          ------------------  
 
 ```
 
 ```
-invalid.jsx:14:33 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:15:33 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid the autoFocus attribute.
   
-    12 │     <div autoFocus={true} />
-    13 │     <div autoFocus={false} />
-  > 14 │     <div popover={false}><input autoFocus /></div>
+    13 │     <div autoFocus={true} />
+    14 │     <div autoFocus={false} />
+  > 15 │     <div popover={false}><input autoFocus /></div>
        │                                 ^^^^^^^^^
-    15 │ </>
+    16 │ </>
+    17 │ 
   
   i Unsafe fix: Remove the autoFocus attribute.
   
-    14 │ ····<div·popover={false}><input·autoFocus·/></div>
+    15 │ ····<div·popover={false}><input·autoFocus·/></div>
        │                                 ----------        
 
 ```

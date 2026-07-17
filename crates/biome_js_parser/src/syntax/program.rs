@@ -4,19 +4,40 @@ use super::module::parse_module_body;
 use super::stmt::parse_statements;
 use crate::JsParser;
 use crate::prelude::*;
-use crate::state::{ChangeParserState, EnableStrictMode};
+use crate::state::{ChangeParserState, EnableStrictMode, SignatureFlags};
+use crate::syntax::binding::parse_binding;
 use crate::syntax::expr::{ExpressionContext, parse_expression};
+use crate::syntax::function::{ParameterContext, parse_parameter_list};
 use crate::syntax::js_parse_error;
 use crate::syntax::stmt::parse_directives;
+use crate::syntax::typescript::TypeContext;
+use biome_js_syntax::JsSyntaxKind;
 use biome_js_syntax::JsSyntaxKind::*;
-use biome_js_syntax::ModuleKind;
+use biome_languages::javascript::ModuleKind;
 // test_err js unterminated_unicode_codepoint
 // let s = "\u{200";
+
+const VUE_EXPRESSION_HANDLER_SET: TokenSet<JsSyntaxKind> = token_set![
+    JS_IDENTIFIER_EXPRESSION,
+    JS_STATIC_MEMBER_EXPRESSION,
+    JS_COMPUTED_MEMBER_EXPRESSION,
+    JS_ARROW_FUNCTION_EXPRESSION,
+    JS_FUNCTION_EXPRESSION
+];
+
+const VUE_FUNCTION_EXPRESSION_HANDLER_SET: TokenSet<JsSyntaxKind> =
+    token_set![JS_ARROW_FUNCTION_EXPRESSION, JS_FUNCTION_EXPRESSION];
 
 pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
     let m = p.start();
     p.eat(UNICODE_BOM);
     p.eat(JS_SHEBANG);
+
+    // Vue event handlers use Vue's own heuristic: member/function expressions
+    // are handlers, and all other expressions are inline statements.
+    if p.source_type().is_vue_event_handler() {
+        return parse_vue_event_handler(p, m);
+    }
 
     // Handle template expressions (Vue {{ }}, Svelte { }, Astro { })
     // These should be parsed as expressions, not as modules with statements
@@ -56,6 +77,12 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
 /// This fixes issues where `{ duration }` was incorrectly parsed as a block statement
 /// instead of as an object literal expression.
 fn parse_template_expression(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    if p.source_type()
+        .as_embedding_kind()
+        .is_svelte_function_signature()
+    {
+        return parse_snippet_signature(p, m);
+    }
     // Parse as a single expression with default context
     // This allows { } to be parsed as object literals, not block statements
     let expr_marker = p.start();
@@ -97,4 +124,81 @@ fn parse_template_expression(p: &mut JsParser, m: Marker) -> CompletedMarker {
     // Always complete as JS_EXPRESSION_TEMPLATE_ROOT
     // The expression child might be bogus, but the root should always be this type
     m.complete(p, JS_EXPRESSION_TEMPLATE_ROOT)
+}
+
+fn parse_vue_event_handler(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    let checkpoint = p.checkpoint();
+    let expr_marker = p.start();
+    let expr_result = parse_expression(p, ExpressionContext::default());
+    let has_expression = !expr_result.is_absent();
+
+    if !has_expression {
+        p.error(js_parse_error::template_expression_expected_expression(
+            p,
+            p.cur_range(),
+        ));
+        expr_marker.complete(p, JS_BOGUS_EXPRESSION);
+        return m.complete(p, JS_EXPRESSION_TEMPLATE_ROOT);
+    }
+
+    let expression = expr_result.unwrap();
+    let expression_kind = expression.kind(p);
+
+    if p.at(EOF) && VUE_EXPRESSION_HANDLER_SET.contains(expression_kind) {
+        expr_marker.abandon(p);
+        return m.complete(p, JS_EXPRESSION_TEMPLATE_ROOT);
+    }
+
+    if VUE_FUNCTION_EXPRESSION_HANDLER_SET.contains(expression_kind) {
+        p.error(js_parse_error::template_expression_trailing_code(
+            p,
+            p.cur_range(),
+        ));
+
+        while !p.at(EOF) {
+            p.bump_any();
+        }
+
+        expr_marker.complete(p, JS_BOGUS_EXPRESSION);
+        return m.complete(p, JS_EXPRESSION_TEMPLATE_ROOT);
+    }
+
+    expr_marker.abandon(p);
+    p.rewind(checkpoint);
+    let (statement_list, strict_snapshot) = parse_directives(p);
+    parse_statements(p, false, statement_list);
+
+    if let Some(strict_snapshot) = strict_snapshot {
+        EnableStrictMode::restore(p.state_mut(), strict_snapshot);
+    }
+
+    m.complete(p, JS_SCRIPT)
+}
+
+/// Parses a Svelte snippet declaration: `add(a: any, b: float)`.
+/// Produces a JsIdentifierBinding for the name and JsParameters for the
+/// parameter list, wrapped in a JsSnippetSignatureTemplateRoot.
+fn parse_snippet_signature(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    parse_binding(p).or_add_diagnostic(p, js_parse_error::expected_binding);
+
+    // These are not mandatory
+    parse_parameter_list(
+        p,
+        ParameterContext::Declaration,
+        TypeContext::default(),
+        SignatureFlags::empty(),
+    )
+    .or_add_diagnostic(p, js_parse_error::expected_class_parameters);
+
+    if !p.at(EOF) {
+        p.error(js_parse_error::template_expression_trailing_code(
+            p,
+            p.cur_range(),
+        ));
+        while !p.at(EOF) {
+            p.bump_any();
+        }
+    }
+
+    m.complete(p, JS_SVELTE_SNIPPET_ROOT)
 }

@@ -39,23 +39,13 @@ info: markdown/spec/example-222.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,6 +4,7 @@
- 
- - foo
- 
-+
-   bar
- 
- - ```
-@@ -14,7 +15,8 @@
+@@ -14,7 +14,6 @@
    ```
  
  - baz
--  - ```
-+
-+  + ```
+-
+   - ```
      foo
- 
  
 ```
 
@@ -68,7 +58,6 @@ info: markdown/spec/example-222.md
 
 - foo
 
-
   bar
 
 - ```
@@ -79,8 +68,7 @@ info: markdown/spec/example-222.md
   ```
 
 - baz
-
-  + ```
+  - ```
     foo
 
 

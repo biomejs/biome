@@ -22,7 +22,12 @@
 //! The opening fence may be followed by an info string (language identifier)
 //! that can be used for syntax highlighting.
 
+use crate::lexer::MarkdownReLexContext;
 use crate::parser::MarkdownParser;
+use crate::syntax::parse_error::unterminated_fenced_code;
+use crate::syntax::quote::try_bump_quote_marker;
+use crate::syntax::{MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES, is_whitespace_only};
+use crate::token_source::find_line_start;
 use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
 use biome_parser::{
     Parser,
@@ -31,10 +36,7 @@ use biome_parser::{
         TokenSource,
     },
 };
-
-use crate::syntax::parse_error::unterminated_fenced_code;
-use crate::syntax::quote::try_bump_quote_marker;
-use crate::syntax::{MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES};
+use biome_rowan::{TextRange, TextSize};
 
 /// Minimum number of fence characters required per CommonMark §4.5.
 const MIN_FENCE_LENGTH: usize = 3;
@@ -108,26 +110,6 @@ fn bump_fence(p: &mut MarkdownParser, is_tilde_fence: bool) {
     }
 }
 
-/// Find the start position of the current line in the source text.
-///
-/// Given a slice of text before the current position, finds the byte offset
-/// where the current line begins (after the last newline, handling CRLF).
-fn find_line_start(before: &str) -> usize {
-    let last_newline_pos = before.rfind(['\n', '\r']);
-    match last_newline_pos {
-        Some(pos) => {
-            let bytes = before.as_bytes();
-            // Handle CRLF: if we found \r and next char is \n, skip both
-            if bytes.get(pos) == Some(&b'\r') && bytes.get(pos + 1) == Some(&b'\n') {
-                pos + 2
-            } else {
-                pos + 1
-            }
-        }
-        None => 0,
-    }
-}
-
 /// Detect a code fence at the start of a string.
 ///
 /// Per CommonMark §4.5: "A code fence is a sequence of at least three
@@ -180,7 +162,7 @@ pub(crate) fn at_fenced_code_block(p: &mut MarkdownParser) -> bool {
 ///   code_list: MdCodeNameList
 ///   content: MdInlineItemList
 ///   r_fence_indent: MdIndentTokenList
-///   r_fence: ('```' | '~~~')
+///   r_fence: ('```' | '~~~')?  // absent for an unterminated fence (§4.5)
 pub(crate) fn parse_fenced_code_block(p: &mut MarkdownParser) -> ParsedSyntax {
     parse_fenced_code_block_impl(p, false)
 }
@@ -227,10 +209,10 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
     let has_closing = at_closing_fence(p, is_tilde_fence, fence_len);
 
     if has_closing {
-        // Closing fence indent: in a list context, strip up to list_item_required_indent;
-        // otherwise strip up to MAX_BLOCK_PREFIX_INDENT (0-3 spaces).
+        // Closing fence indent: strip list continuation indent plus the
+        // CommonMark-allowed 0-3 spaces before the fence itself.
         let max = if p.state().list_item_required_indent > 0 {
-            p.state().list_item_required_indent
+            p.state().list_item_required_indent + MAX_BLOCK_PREFIX_INDENT
         } else {
             MAX_BLOCK_PREFIX_INDENT
         };
@@ -253,6 +235,9 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
 /// The language name is on the same line as the opening fence.
 /// If the current token has a preceding line break or is NEWLINE, the code block has no language.
 fn parse_code_name_list(p: &mut MarkdownParser) {
+    // Relexing
+    p.re_lex(MarkdownReLexContext::CodeInfoString);
+
     let m = p.start();
 
     // If the current token is already on a new line, there's no language name
@@ -282,6 +267,15 @@ fn parse_code_content(
 ) {
     let m = p.start();
     let quote_depth = p.state().block_quote_depth;
+
+    // Document level: no container prefixes can interleave with the content,
+    // so the whole region is stored verbatim in a single MdCodeContent node.
+    if quote_depth == 0 && p.state().list_item_required_indent == 0 {
+        parse_document_code_content(p, is_tilde_fence, fence_len);
+        m.complete(p, MD_INLINE_ITEM_LIST);
+        return;
+    }
+
     let mut at_line_start = false;
 
     // Consume all tokens until we see the matching closing fence or EOF
@@ -297,6 +291,13 @@ fn parse_code_content(
             CodeContentTokenAction::Break => break,
             CodeContentTokenAction::Skip => {}
             CodeContentTokenAction::Consume => {
+                // Code content is literal text: consume the whole rest of
+                // the line as one token instead of one token per character
+                // group. The closing fence always starts on its own line,
+                // so it can never be swallowed.
+                if !p.at(NEWLINE) {
+                    p.re_lex(MarkdownReLexContext::CodeInfoString);
+                }
                 bump_code_textual(p);
                 at_line_start = false;
             }
@@ -304,6 +305,65 @@ fn parse_code_content(
     }
 
     m.complete(p, MD_INLINE_ITEM_LIST);
+}
+
+/// Parse document-level fenced code content as one verbatim token.
+///
+/// The content — everything between the opening-fence line and the closing
+/// fence, leading and trailing newline included — becomes a single
+/// `MD_CODE_LITERAL` token wrapped in `MdCodeContent`, mirroring how HTML
+/// blocks store their content in `md_html_literal`.
+fn parse_document_code_content(p: &mut MarkdownParser, is_tilde_fence: bool, fence_len: usize) {
+    // We are on the newline right after "```lang"; the content starts here.
+    // No newline means the file ends at the opening fence, so there is no
+    // content and no literal to emit.
+    if !p.at(NEWLINE) {
+        return;
+    }
+
+    let end = measure_document_code_content_end(p, is_tilde_fence, fence_len);
+    p.emit_span_as(end, MD_CODE_LITERAL, MD_CODE_CONTENT);
+
+    // The literal ends right after a newline; mark the line start for the
+    // closing-fence indent and fence parsing that follow.
+    if !p.at(T![EOF]) {
+        p.set_virtual_line_start();
+    }
+}
+
+/// Scan raw source from the current NEWLINE token to the start of the
+/// closing-fence line, or to the end of input when the block is unterminated.
+fn measure_document_code_content_end(
+    p: &MarkdownParser,
+    is_tilde_fence: bool,
+    fence_len: usize,
+) -> TextSize {
+    let Some((start, source)) = get_source_context(p) else {
+        return p.cur_range().end();
+    };
+
+    let bytes = source.as_bytes();
+    let mut idx = start;
+    loop {
+        // Advance to the end of the current line.
+        while idx < bytes.len() && !matches!(bytes[idx], b'\n' | b'\r') {
+            idx += 1;
+        }
+        if idx >= bytes.len() {
+            break;
+        }
+        // Consume the line terminator (\n, \r\n, or \r).
+        if bytes[idx] == b'\r' && bytes.get(idx + 1) == Some(&b'\n') {
+            idx += 2;
+        } else {
+            idx += 1;
+        }
+        if closing_fence_from(source, idx, is_tilde_fence, fence_len, 0) {
+            return TextSize::from(idx as u32);
+        }
+    }
+
+    TextSize::from(bytes.len() as u32)
 }
 
 enum CodeContentTokenAction {
@@ -325,6 +385,17 @@ fn prepare_next_code_content_token(
     quote_depth: usize,
     at_line_start: &mut bool,
 ) -> CodeContentTokenAction {
+    // A fenced code block cannot be lazily continued (CommonMark §4.5). When a
+    // content line de-indents below the enclosing list item's required indent
+    // (measured after any blockquote prefixes), it no longer belongs to the
+    // item, so the item — and thus this unterminated block — ends here. This is
+    // decided *before* consuming the line's quote prefix, so on a de-indent the
+    // prefix is handed back to the list/quote parser with the rest of the
+    // sibling line instead of being absorbed into the code block.
+    if *at_line_start && line_below_list_item_indent(p, quote_depth) {
+        return CodeContentTokenAction::Break;
+    }
+
     if *at_line_start && quote_depth > 0 && !consume_quote_prefixes_in_code_content(p, quote_depth)
     {
         return CodeContentTokenAction::Break;
@@ -497,32 +568,150 @@ pub(crate) fn info_string_has_backtick(p: &mut MarkdownParser) -> bool {
     })
 }
 
+/// Locate a stray backtick in a backtick-fenced code block info string.
+///
+/// CommonMark §4.5 forbids backtick characters in the info string of a
+/// backtick fence. When the info string contains a backtick, the line
+/// is not a fenced code block and falls through to paragraph parsing;
+/// this helper returns the byte range of the offending backtick so the
+/// caller can attach a diagnostic.
+///
+/// Concrete behavior:
+/// - Returns `None` unless the current line can start a fence at
+///   indent ≤ `MAX_BLOCK_PREFIX_INDENT`.
+/// - Returns `None` for tilde fences — they may legally contain backticks.
+/// - Returns `Some(range)` for the first `BACKTICK` or triple-backtick
+///   token after the opening fence; otherwise `None`.
+/// - Runs entirely under `lookahead`, so parser state is unchanged on return.
+pub(crate) fn backtick_info_violation(p: &mut MarkdownParser) -> Option<TextRange> {
+    p.lookahead(|p| {
+        if !p.at_start_of_input() && !is_line_start_within_indent(p, MAX_BLOCK_PREFIX_INDENT) {
+            return None;
+        }
+        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
+
+        let rest = p.source_after_current();
+        let (fence_char, _) = detect_fence(rest)?;
+        if fence_char != '`' {
+            return None;
+        }
+
+        if p.at(T!["```"]) {
+            p.bump(T!["```"]);
+        } else if p.at(BACKTICK) {
+            p.bump(BACKTICK);
+        } else {
+            return None;
+        }
+
+        while !p.at_inline_end() {
+            if p.at(BACKTICK) || p.at(T!["```"]) {
+                return Some(p.cur_range());
+            }
+            p.bump(p.cur());
+        }
+
+        None
+    })
+}
+
+/// Skip up to `quote_depth` blockquote prefixes (`>` with optional 0-3 leading
+/// spaces and one trailing space/tab) in raw source starting at `idx`.
+///
+/// Returns the index just past the last prefix, or `None` if fewer than
+/// `quote_depth` prefixes are present — in which case the missing-prefix path
+/// in [`consume_quote_prefixes_in_code_content`] handles ending the block.
+///
+/// The leading-indent run reuses [`consume_indent`]; the marker is a single
+/// ASCII `>` and the one optional trailing separator is space/tab only (per
+/// CommonMark, narrower than `biome_unicode_table`'s `WHS`), so both stay
+/// explicit byte checks.
+fn skip_quote_prefixes_in_source(
+    bytes: &[u8],
+    mut idx: usize,
+    quote_depth: usize,
+) -> Option<usize> {
+    for _ in 0..quote_depth {
+        idx = consume_indent(bytes, idx, MAX_BLOCK_PREFIX_INDENT, false)?;
+        if bytes.get(idx) != Some(&b'>') {
+            return None;
+        }
+        idx += 1;
+        if matches!(bytes.get(idx), Some(b' ' | b'\t')) {
+            idx += 1;
+        }
+    }
+    Some(idx)
+}
+
+/// At a content line start, returns `true` when the line's leading indent —
+/// measured after any blockquote prefixes — is below the enclosing list item's
+/// required indent, i.e. the line belongs to an outer container, not this item.
+///
+/// The current position is the raw start of the line (set by
+/// [`MarkdownParser::set_virtual_line_start`] after the preceding newline), so
+/// indentation is measured from there with [`consume_indent`], the same helper
+/// the closing-fence probe uses. CommonMark block indentation is spaces and
+/// tabs only (tabs to the next [`TAB_STOP_SPACES`] multiple) — deliberately not
+/// `biome_unicode_table`'s `WHS`, which also matches `\n\r\f\v` and would
+/// mis-measure indent. Blank lines (only whitespace before the end of line)
+/// are exempt: they stay inside the code block.
+fn line_below_list_item_indent(p: &MarkdownParser, quote_depth: usize) -> bool {
+    let required = p.state().list_item_required_indent;
+    if required == 0 {
+        return false;
+    }
+
+    let Some((start, source)) = get_source_context(p) else {
+        return false;
+    };
+
+    let bytes = source.as_bytes();
+    let Some(content_start) = skip_quote_prefixes_in_source(bytes, start, quote_depth) else {
+        return false;
+    };
+
+    // Enough indent to keep continuing the item?
+    if consume_indent(bytes, content_start, required, true).is_some() {
+        return false;
+    }
+
+    // Below the required indent: break unless the line is blank, in which case
+    // the remaining (under-required) indent runs straight into the line end.
+    let after_indent =
+        consume_indent(bytes, content_start, required, false).unwrap_or(content_start);
+    !matches!(bytes.get(after_indent), None | Some(b'\n' | b'\r'))
+}
+
 fn at_closing_fence(p: &mut MarkdownParser, is_tilde_fence: bool, fence_len: usize) -> bool {
     p.lookahead(|p| line_has_closing_fence(p, is_tilde_fence, fence_len))
 }
 
 fn skip_fenced_content_indent(p: &mut MarkdownParser, indent: usize) {
+    if !p.at(MD_TEXTUAL_LITERAL) || !is_whitespace_only(p.cur_text()) {
+        return;
+    }
+
+    // Indentation arrives as one whitespace token per character; measure the
+    // run on the source and consume it as a single MdIndentToken.
     let mut consumed = 0usize;
-
-    while consumed < indent && p.at(MD_TEXTUAL_LITERAL) {
-        let text = p.cur_text();
-        if text.is_empty() || !text.chars().all(|c| c == ' ' || c == '\t') {
-            break;
-        }
-
-        let width = text
-            .chars()
-            .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
-            .sum::<usize>();
-
+    let mut len = 0usize;
+    for byte in p.source_after_current().bytes() {
+        let width = match byte {
+            b' ' => 1,
+            b'\t' => TAB_STOP_SPACES,
+            _ => break,
+        };
         if consumed + width > indent {
             break;
         }
-
         consumed += width;
-        let char_m = p.start();
-        p.bump_remap(MD_INDENT_CHAR);
-        char_m.complete(p, MD_INDENT_TOKEN);
+        len += 1;
+    }
+
+    if len > 0 {
+        let end = p.cur_range().start() + TextSize::from(len as u32);
+        p.emit_span_as(end, MD_INDENT_CHAR, MD_INDENT_TOKEN);
     }
 }
 
@@ -531,8 +720,19 @@ fn line_has_closing_fence(p: &MarkdownParser, is_tilde_fence: bool, fence_len: u
         return false;
     };
 
+    // Use virtual_line_start only when it's on the same line as the
+    // current position (e.g., after a blockquote prefix). A stale
+    // virtual_line_start from the opening fence line would point to
+    // a completely different line and break closing fence detection.
     let line_start: usize = match p.state().virtual_line_start {
-        Some(virtual_start) => virtual_start.into(),
+        Some(virtual_start) => {
+            let vs: usize = virtual_start.into();
+            if vs <= start && !source[vs..start].contains(['\n', '\r']) {
+                vs
+            } else {
+                find_line_start(&source[..start])
+            }
+        }
         None => find_line_start(&source[..start]),
     };
 
@@ -541,7 +741,19 @@ fn line_has_closing_fence(p: &MarkdownParser, is_tilde_fence: bool, fence_len: u
     }
 
     let list_indent = p.state().list_item_required_indent;
+    closing_fence_from(source, line_start, is_tilde_fence, fence_len, list_indent)
+}
 
+/// Whether the line starting at `line_start` is a closing fence: optional
+/// list continuation indent, up to 3 extra spaces, at least `fence_len`
+/// fence characters of the right type, and only whitespace after them.
+fn closing_fence_from(
+    source: &str,
+    line_start: usize,
+    is_tilde_fence: bool,
+    fence_len: usize,
+    list_indent: usize,
+) -> bool {
     // Skip required list indent (must have enough whitespace)
     let Some(idx) = consume_indent(source.as_bytes(), line_start, list_indent, true) else {
         return false;
@@ -549,7 +761,7 @@ fn line_has_closing_fence(p: &MarkdownParser, is_tilde_fence: bool, fence_len: u
 
     // Skip optional extra indent (up to 3 spaces per CommonMark)
     // This always succeeds since required=false
-    let idx = consume_indent(source.as_bytes(), idx, MAX_BLOCK_PREFIX_INDENT, false).unwrap();
+    let idx = consume_indent(source.as_bytes(), idx, MAX_BLOCK_PREFIX_INDENT, false).unwrap_or(idx);
 
     let fence_char = if is_tilde_fence { b'~' } else { b'`' };
     let mut fence_count = 0usize;

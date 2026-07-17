@@ -28,7 +28,7 @@ CssRoot {
                 value: ScssExpression {
                     items: ScssExpressionItemList [
                         CssFunction {
-                            name: ScssQualifiedName {
+                            name: ScssModuleMemberAccess {
                                 module: CssIdentifier {
                                     value_token: IDENT@7..12 "color" [] [],
                                 },
@@ -41,7 +41,7 @@ CssRoot {
                             items: CssParameterList [
                                 ScssExpression {
                                     items: ScssExpressionItemList [
-                                        ScssIdentifier {
+                                        ScssVariable {
                                             dollar_token: DOLLAR@20..21 "$" [] [],
                                             name: CssIdentifier {
                                                 value_token: IDENT@21..26 "color" [] [],
@@ -53,7 +53,7 @@ CssRoot {
                                 ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssKeywordArgument {
-                                            name: ScssIdentifier {
+                                            name: ScssVariable {
                                                 dollar_token: DOLLAR@28..29 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@29..38 "lightness" [] [],
@@ -111,7 +111,7 @@ CssRoot {
                                         items: CssParameterList [
                                             ScssExpression {
                                                 items: ScssExpressionItemList [
-                                                    ScssIdentifier {
+                                                    ScssVariable {
                                                         dollar_token: DOLLAR@67..68 "$" [] [],
                                                         name: CssIdentifier {
                                                             value_token: IDENT@68..73 "fatal" [] [],
@@ -165,7 +165,7 @@ CssRoot {
         1: SCSS_EXPRESSION@7..44
           0: SCSS_EXPRESSION_ITEM_LIST@7..44
             0: CSS_FUNCTION@7..44
-              0: SCSS_QUALIFIED_NAME@7..19
+              0: SCSS_MODULE_MEMBER_ACCESS@7..19
                 0: CSS_IDENTIFIER@7..12
                   0: IDENT@7..12 "color" [] []
                 1: DOT@12..13 "." [] []
@@ -175,7 +175,7 @@ CssRoot {
               2: CSS_PARAMETER_LIST@20..43
                 0: SCSS_EXPRESSION@20..26
                   0: SCSS_EXPRESSION_ITEM_LIST@20..26
-                    0: SCSS_IDENTIFIER@20..26
+                    0: SCSS_VARIABLE@20..26
                       0: DOLLAR@20..21 "$" [] []
                       1: CSS_IDENTIFIER@21..26
                         0: IDENT@21..26 "color" [] []
@@ -183,7 +183,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@28..43
                   0: SCSS_EXPRESSION_ITEM_LIST@28..43
                     0: SCSS_KEYWORD_ARGUMENT@28..43
-                      0: SCSS_IDENTIFIER@28..38
+                      0: SCSS_VARIABLE@28..38
                         0: DOLLAR@28..29 "$" [] []
                         1: CSS_IDENTIFIER@29..38
                           0: IDENT@29..38 "lightness" [] []
@@ -221,7 +221,7 @@ CssRoot {
                     2: CSS_PARAMETER_LIST@67..84
                       0: SCSS_EXPRESSION@67..73
                         0: SCSS_EXPRESSION_ITEM_LIST@67..73
-                          0: SCSS_IDENTIFIER@67..73
+                          0: SCSS_VARIABLE@67..73
                             0: DOLLAR@67..68 "$" [] []
                             1: CSS_IDENTIFIER@68..73
                               0: IDENT@68..73 "fatal" [] []

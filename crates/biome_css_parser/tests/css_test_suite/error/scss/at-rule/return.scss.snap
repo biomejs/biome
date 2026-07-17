@@ -31,7 +31,7 @@ CssRoot {
             rule: ScssReturnAtRule {
                 return_token: RETURN_KW@10..16 "return" [] [],
                 value: missing (required),
-                semicolon_token: missing (required),
+                semicolon_token: missing (optional),
             },
         },
     ],

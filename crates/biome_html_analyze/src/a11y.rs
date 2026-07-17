@@ -7,8 +7,10 @@
 //! 2. **Element helpers** (public): Higher-level checks on HTML elements
 //! 3. **Type-specific variants** (public): Optimized versions that avoid cloning
 
+use biome_aria::event_handlers::matches_event_handler;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_html_syntax::{AnyHtmlElement, HtmlAttribute};
+use biome_html_syntax::{AnyHtmlAttribute, AnyVueDirective};
+use biome_rowan::AstNodeList;
 
 // ============================================================================
 // Core attribute value helpers (private)
@@ -21,25 +23,39 @@ use biome_html_syntax::{AnyHtmlElement, HtmlAttribute};
 /// Missing values, empty strings, and whitespace-only values are considered falsy.
 ///
 /// Ref: <https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-hidden>
-fn is_aria_hidden_value_truthy(attribute: &HtmlAttribute) -> bool {
-    attribute.value().is_some_and(|value| {
-        let trimmed = value.trim();
+fn is_aria_hidden_value_truthy(attribute: &AnyHtmlAttribute) -> bool {
+    attribute.as_static_value().is_some_and(|value| {
+        let trimmed = value.text().trim();
         !trimmed.is_empty() && !trimmed.eq_ignore_ascii_case("false")
     })
 }
 
 /// Checks if an attribute value equals `"true"` exactly (case-sensitive).
-fn is_strict_true_value(attribute: &HtmlAttribute) -> bool {
-    attribute.value().is_some_and(|value| value == "true")
+fn is_strict_true_value(attribute: &AnyHtmlAttribute) -> bool {
+    attribute
+        .as_static_value()
+        .is_some_and(|value| value.text() == "true")
 }
 
 /// Checks if an attribute has a non-empty value after trimming whitespace.
 ///
 /// Returns `false` for attributes with no value, empty strings, or whitespace-only values.
-fn has_non_empty_value(attribute: &HtmlAttribute) -> bool {
-    attribute
-        .value()
-        .is_some_and(|value| !value.trim().is_empty())
+fn has_non_empty_value(attribute: &AnyHtmlAttribute) -> bool {
+    match attribute {
+        AnyHtmlAttribute::HtmlAttribute(html_attribute) => {
+            if html_attribute.initializer().is_none() {
+                return false;
+            }
+            if let Some(static_value) = html_attribute.as_static_value()
+                && let Some(static_value) = static_value.as_string_constant()
+            {
+                return !static_value.trim().is_empty();
+            }
+            true
+        }
+        // Vue directives always have a bound expression, so always non-empty
+        _ => true,
+    }
 }
 
 /// Checks if an attribute value matches the expected string (case-insensitive).
@@ -47,12 +63,12 @@ fn has_non_empty_value(attribute: &HtmlAttribute) -> bool {
 /// Useful for checking HTML attribute values like `type="hidden"` or `role="button"`
 /// where the comparison should be case-insensitive per HTML spec.
 pub(crate) fn attribute_value_equals_ignore_case(
-    attribute: &HtmlAttribute,
+    attribute: &AnyHtmlAttribute,
     expected: &str,
 ) -> bool {
     attribute
-        .value()
-        .is_some_and(|value| value.eq_ignore_ascii_case(expected))
+        .as_static_value()
+        .is_some_and(|value| value.text().eq_ignore_ascii_case(expected))
 }
 
 // ============================================================================
@@ -70,17 +86,22 @@ pub(crate) fn attribute_value_equals_ignore_case(
 /// - <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/hidden>
 /// - <https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/v6.10.0/src/util/isHiddenFromScreenReader.js>
 pub(crate) fn is_hidden_from_screen_reader(element: &AnyHtmlTagElement) -> bool {
-    if element
-        .find_attribute_by_name("aria-hidden")
-        .is_some_and(|attr| is_aria_hidden_value_truthy(&attr))
+    if let Some(attr) = element.find_attribute_or_vue_binding("aria-hidden")
+        && is_aria_hidden_value_truthy(&attr)
     {
         return true;
     }
 
     match element.name_value_token() {
-        Some(name) if name.text_trimmed() == "input" => element
-            .find_attribute_by_name("type")
-            .is_some_and(|attr| attribute_value_equals_ignore_case(&attr, "hidden")),
+        Some(name) if name.text_trimmed() == "input" => {
+            if let Some(attr) = element.find_attribute_or_vue_binding("type")
+                && attribute_value_equals_ignore_case(&attr, "hidden")
+            {
+                return true;
+            }
+
+            false
+        }
         _ => false,
     }
 }
@@ -90,10 +111,14 @@ pub(crate) fn is_hidden_from_screen_reader(element: &AnyHtmlTagElement) -> bool 
 /// Unlike [`is_aria_hidden_value_truthy`], this only matches the exact string `"true"`.
 ///
 /// Ref: <https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden>
-pub(crate) fn is_aria_hidden_true(element: &AnyHtmlElement) -> bool {
-    element
-        .find_attribute_by_name("aria-hidden")
-        .is_some_and(|attr| is_strict_true_value(&attr))
+pub(crate) fn is_aria_hidden_true(element: &AnyHtmlTagElement) -> bool {
+    if let Some(attr) = element.find_attribute_or_vue_binding("aria-hidden")
+        && is_strict_true_value(&attr)
+    {
+        return true;
+    }
+
+    false
 }
 
 /// Returns the `aria-hidden` attribute if it has a truthy value.
@@ -102,8 +127,10 @@ pub(crate) fn is_aria_hidden_true(element: &AnyHtmlElement) -> bool {
 /// Useful for code fixes that need to reference the attribute node.
 ///
 /// Ref: <https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden>
-pub(crate) fn get_truthy_aria_hidden_attribute(element: &AnyHtmlElement) -> Option<HtmlAttribute> {
-    let attribute = element.find_attribute_by_name("aria-hidden")?;
+pub(crate) fn get_truthy_aria_hidden_attribute(
+    element: &AnyHtmlTagElement,
+) -> Option<AnyHtmlAttribute> {
+    let attribute = element.find_attribute_or_vue_binding("aria-hidden")?;
     if is_aria_hidden_value_truthy(&attribute) {
         Some(attribute)
     } else {
@@ -114,18 +141,48 @@ pub(crate) fn get_truthy_aria_hidden_attribute(element: &AnyHtmlElement) -> Opti
 /// Returns `true` if the element has the named attribute with a non-empty value.
 ///
 /// Whitespace-only values are considered empty.
-pub(crate) fn has_non_empty_attribute(element: &AnyHtmlElement, name: &str) -> bool {
+pub(crate) fn has_non_empty_attribute(element: &AnyHtmlTagElement, name: &str) -> bool {
+    let Some(attr) = element.find_attribute_or_vue_binding(name) else {
+        return false;
+    };
+
+    match attr {
+        AnyHtmlAttribute::HtmlAttribute(_) => has_non_empty_value(&attr),
+        _ => true,
+    }
+}
+
+/// Returns `true` if the element has all of the named attributes with non-empty values.
+///
+/// Whitespace-only values are considered empty. Returns `false` if any attribute is missing or has an empty value.
+#[expect(dead_code)]
+pub(crate) fn has_multiple_non_empty_attribute<const N: usize>(
+    element: &AnyHtmlTagElement,
+    names: &[&str; N],
+) -> bool {
     element
-        .find_attribute_by_name(name)
-        .is_some_and(|attr| has_non_empty_value(&attr))
+        .find_multiple_attributes_by_name(names)
+        .iter()
+        .all(|attr| attr.as_ref().is_some_and(has_non_empty_value))
+}
+
+/// Returns `true` if the element has **any** of the named attributes with non-empty values.
+///
+/// Whitespace-only values are considered empty.
+pub(crate) fn has_any_non_empty_attribute<const N: usize>(
+    element: &AnyHtmlTagElement,
+    names: &[&str; N],
+) -> bool {
+    element
+        .find_multiple_attributes_by_name(names)
+        .iter()
+        .any(|attr| attr.as_ref().is_some_and(has_non_empty_value))
 }
 
 /// Returns `true` if the element has an accessible name via `aria-label`,
 /// `aria-labelledby`, or `title` attributes.
-pub(crate) fn has_accessible_name(element: &AnyHtmlElement) -> bool {
-    has_non_empty_attribute(element, "aria-label")
-        || has_non_empty_attribute(element, "aria-labelledby")
-        || has_non_empty_attribute(element, "title")
+pub(crate) fn has_accessible_name(element: &AnyHtmlTagElement) -> bool {
+    has_any_non_empty_attribute(element, &["aria-label", "aria-labelledby", "title"])
 }
 
 /// Checks if an [`HtmlElement`] has a truthy `aria-hidden` attribute.
@@ -134,9 +191,13 @@ pub(crate) fn has_accessible_name(element: &AnyHtmlElement) -> bool {
 pub(crate) fn html_element_has_truthy_aria_hidden(
     element: &biome_html_syntax::HtmlElement,
 ) -> bool {
-    element
-        .find_attribute_by_name("aria-hidden")
-        .is_some_and(|attr| is_aria_hidden_value_truthy(&attr))
+    if let Some(attr) = element.find_attribute_or_vue_binding("aria-hidden")
+        && is_aria_hidden_value_truthy(&attr)
+    {
+        return true;
+    }
+
+    false
 }
 
 /// Checks if an [`HtmlSelfClosingElement`] has a truthy `aria-hidden` attribute.
@@ -145,9 +206,13 @@ pub(crate) fn html_element_has_truthy_aria_hidden(
 pub(crate) fn html_self_closing_element_has_truthy_aria_hidden(
     element: &biome_html_syntax::HtmlSelfClosingElement,
 ) -> bool {
-    element
-        .find_attribute_by_name("aria-hidden")
-        .is_some_and(|attr| is_aria_hidden_value_truthy(&attr))
+    if let Some(attr) = element.find_attribute_or_vue_binding("aria-hidden")
+        && is_aria_hidden_value_truthy(&attr)
+    {
+        return true;
+    }
+
+    false
 }
 
 /// Checks if an [`HtmlSelfClosingElement`] has an accessible name via `aria-label`,
@@ -157,16 +222,25 @@ pub(crate) fn html_self_closing_element_has_truthy_aria_hidden(
 pub(crate) fn html_self_closing_element_has_accessible_name(
     element: &biome_html_syntax::HtmlSelfClosingElement,
 ) -> bool {
-    let has_aria_label = element
-        .find_attribute_by_name("aria-label")
-        .is_some_and(|attr| has_non_empty_value(&attr));
-    let has_aria_labelledby = element
-        .find_attribute_by_name("aria-labelledby")
-        .is_some_and(|attr| has_non_empty_value(&attr));
-    let has_title = element
-        .find_attribute_by_name("title")
-        .is_some_and(|attr| has_non_empty_value(&attr));
-    has_aria_label || has_aria_labelledby || has_title
+    if let Some(attr) = element.find_attribute_or_vue_binding("aria-label")
+        && has_non_empty_value(&attr)
+    {
+        return true;
+    }
+
+    if let Some(attr) = element.find_attribute_or_vue_binding("aria-labelledby")
+        && has_non_empty_value(&attr)
+    {
+        return true;
+    }
+
+    if let Some(attr) = element.find_attribute_or_vue_binding("title")
+        && has_non_empty_value(&attr)
+    {
+        return true;
+    }
+
+    false
 }
 
 /// Checks if an [`HtmlSelfClosingElement`] has the named attribute with a non-empty value.
@@ -176,9 +250,69 @@ pub(crate) fn html_self_closing_element_has_non_empty_attribute(
     element: &biome_html_syntax::HtmlSelfClosingElement,
     name: &str,
 ) -> bool {
-    element
-        .find_attribute_by_name(name)
-        .is_some_and(|attr| has_non_empty_value(&attr))
+    if let Some(attr) = element.find_attribute_or_vue_binding(name)
+        && has_non_empty_value(&attr)
+    {
+        return true;
+    }
+
+    false
+}
+
+/// Check if the element is `contentEditable`
+///
+/// Ref:
+/// - https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contenteditable
+/// - https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/v6.10.0/src/util/isContentEditable.js
+pub(crate) fn is_content_editable(element: &AnyHtmlTagElement) -> bool {
+    if let Some(attr) = element.find_attribute_or_vue_binding("contenteditable")
+        && is_strict_true_value(&attr)
+    {
+        return true;
+    }
+
+    false
+}
+
+/// Check if the element contains event handler
+pub fn has_event_handler(handler_types: &[&str], element: &AnyHtmlTagElement) -> bool {
+    element.attributes().iter().any(|attribute| {
+        match attribute {
+            AnyHtmlAttribute::HtmlAttribute(html_attribute) => html_attribute
+                .name()
+                .ok()
+                .and_then(|name| name.value_token().ok())
+                .is_some_and(|value_token| {
+                    matches_event_handler(handler_types, value_token.text_trimmed())
+                }),
+
+            AnyHtmlAttribute::AnyVueDirective(vue) => match vue {
+                // @name="..."
+                AnyVueDirective::VueVOnShorthandDirective(d) => d
+                    .arg()
+                    .ok()
+                    .and_then(|arg| arg.as_vue_static_argument().cloned())
+                    .and_then(|s| s.name_token().ok())
+                    .is_some_and(|t| matches_event_handler(handler_types, t.text_trimmed())),
+
+                // v-on:name="..."
+                AnyVueDirective::VueDirective(d) => {
+                    let is_event_handling = d
+                        .name_token()
+                        .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-on"));
+                    is_event_handling
+                        && d.arg()
+                            .and_then(|arg| arg.arg().ok())
+                            .and_then(|arg| arg.as_vue_static_argument().cloned())
+                            .and_then(|s| s.name_token().ok())
+                            .is_some_and(|t| matches_event_handler(handler_types, t.text_trimmed()))
+                }
+
+                _ => false,
+            },
+            _ => false,
+        }
+    })
 }
 
 #[cfg(test)]

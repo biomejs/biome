@@ -13,12 +13,21 @@ impl FormatNodeRule<CssAttributeSelector> for FormatCssAttributeSelector {
             r_brack_token,
         } = node.as_fields();
 
+        let maybe_space = format_with(|f: &mut CssFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [space()])?;
+            }
+            Ok(())
+        });
+
         write!(
             f,
             [
                 l_brack_token.format(),
+                maybe_space,
                 name.format(),
                 matcher.format(),
+                maybe_space,
                 r_brack_token.format()
             ]
         )

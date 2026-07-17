@@ -1,10 +1,12 @@
 pub mod assist;
 pub mod linter;
+pub mod presets;
 
 use crate::analyzer::assist::Actions;
 pub use crate::analyzer::linter::*;
+use crate::analyzer::presets::PresetConfig;
 use biome_analyze::options::RuleOptions;
-use biome_analyze::{FixKind, Rule, RuleCategory, RuleDomain, RuleFilter};
+use biome_analyze::{FixKind, PLUGIN_GROUP, Rule, RuleCategory, RuleDomain, RuleFilter};
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext, Merge,
 };
@@ -429,6 +431,7 @@ impl Merge for RuleAssistPlainConfiguration {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleAssistWithOptions<T: Default> {
     /// The severity of the emitted diagnostics by the rule
+    #[deserializable(required)]
     pub level: RuleAssistPlainConfiguration,
     /// Rule's options
     pub options: T,
@@ -470,6 +473,7 @@ where
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithOptions<T: Default + Merge> {
     /// The severity of the emitted diagnostics by the rule
+    #[deserializable(required)]
     pub level: RulePlainConfiguration,
     /// Rule's options
     #[serde(default)]
@@ -516,6 +520,7 @@ where
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithFixOptions<T: Default + Merge> {
     /// The severity of the emitted diagnostics by the rule
+    #[deserializable(required)]
     pub level: RulePlainConfiguration,
     /// The kind of the code actions emitted by the rule
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -566,6 +571,7 @@ where
 pub enum AnalyzerSelector {
     Rule(RuleSelector),
     Domain(DomainSelector),
+    Plugin,
 }
 
 impl AnalyzerSelector {
@@ -576,6 +582,7 @@ impl AnalyzerSelector {
         match self {
             Self::Rule(rule) => rule.match_rule::<R>(),
             Self::Domain(domain) => domain.match_rule::<R>(),
+            Self::Plugin => false,
         }
     }
 }
@@ -603,6 +610,7 @@ impl Display for AnalyzerSelector {
         match self {
             Self::Rule(group) => Display::fmt(group, f),
             Self::Domain(domain) => Display::fmt(domain, f),
+            Self::Plugin => f.write_str(PLUGIN_GROUP),
         }
     }
 }
@@ -611,6 +619,23 @@ impl FromStr for AnalyzerSelector {
     type Err = &'static str;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // The reserved `plugin` group selects every analyzer plugin. Accept `plugin` and,
+        // for parity with the rule syntax, the `plugin/plugin` alias (each optionally with
+        // a `lint/` prefix). Plugins have no per-instance identity, so any other
+        // `plugin/<name>` is rejected.
+        let plugin_selector = s.strip_prefix("lint/").unwrap_or(s);
+        if plugin_selector == PLUGIN_GROUP || plugin_selector == "plugin/plugin" {
+            return Ok(Self::Plugin);
+        }
+        if plugin_selector
+            .strip_prefix(PLUGIN_GROUP)
+            .is_some_and(|rest| rest.starts_with('/'))
+        {
+            return Err(
+                "Per-plugin selection is not supported. Use `plugin` to target all plugins.",
+            );
+        }
+
         RuleSelector::from_str(s)
             .map(Self::Rule)
             .or(DomainSelector::from_str(s).map(Self::Domain))
@@ -623,6 +648,7 @@ impl serde::Serialize for AnalyzerSelector {
         match self {
             Self::Rule(rule) => rule.serialize(serializer),
             Self::Domain(domain) => domain.serialize(serializer),
+            Self::Plugin => serializer.serialize_str(PLUGIN_GROUP),
         }
     }
 }
@@ -713,6 +739,22 @@ impl RuleSelector {
         } else {
             None
         }
+    }
+
+    pub fn from_group_and_rule(group: &str, rule: &str) -> Option<Self> {
+        if let Ok(group) = linter::RuleGroup::from_str(group)
+            && let Some(rule) = Rules::has_rule(group, rule)
+        {
+            return Some(Self::Rule(group.as_str(), rule));
+        }
+
+        if let Ok(group) = assist::RuleGroup::from_str(group)
+            && let Some(rule) = Actions::has_rule(group, rule)
+        {
+            return Some(Self::Rule(group.as_str(), rule));
+        }
+
+        None
     }
 
     pub fn match_rule<R>(&self) -> bool
@@ -924,12 +966,14 @@ impl<'de> serde::Deserialize<'de> for DomainSelector {
 
 pub trait RuleGroupExt: Default + Merge + Debug + From<GroupPlainConfiguration> {
     /// Retrieves the recommended rules
-    fn is_recommended_true(&self) -> bool;
+    fn is_preset_recommended(&self) -> bool;
     fn is_recommended_unset(&self) -> bool;
     fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>>;
     fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>>;
     /// Checks if, given a rule name, matches one of the rules contained in this category
     fn has_rule(rule_name: &str) -> Option<&'static str>;
+    /// Returns the rule filters that belong to the given analyzer preset
+    fn preset_as_filters(preset: PresetConfig) -> &'static [RuleFilter<'static>];
     /// Select preset rules
     // Preset rules shouldn't populate disabled rules
     // because that will make specific rules cannot be enabled later.
@@ -940,7 +984,7 @@ pub trait RuleGroupExt: Default + Merge + Debug + From<GroupPlainConfiguration> 
     fn all_rules_as_filters() -> &'static [RuleFilter<'static>];
     fn collect_preset_rules(
         &self,
-        parent_is_recommended: bool,
+        parent_preset: PresetConfig,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     );
     fn get_rule_configuration(
@@ -1101,7 +1145,7 @@ where
 
     pub(crate) fn collect_preset_rules(
         &self,
-        parent_is_recommended: bool,
+        parent_preset: PresetConfig,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         match self {
@@ -1110,7 +1154,7 @@ where
                     enabled_rules.extend(G::non_domain_rules_as_filters());
                 }
             }
-            Self::Group(group) => group.collect_preset_rules(parent_is_recommended, enabled_rules),
+            Self::Group(group) => group.collect_preset_rules(parent_preset, enabled_rules),
         }
     }
 }
@@ -1170,6 +1214,42 @@ mod test {
     use std::str::FromStr;
 
     #[test]
+    fn from_group_and_rule_valid() {
+        let selector = RuleSelector::from_group_and_rule("style", "useConst");
+        assert_eq!(selector, Some(RuleSelector::Rule("style", "useConst")));
+    }
+
+    #[test]
+    fn from_group_and_rule_invalid_rule() {
+        assert_eq!(RuleSelector::from_group_and_rule("style", "notARule"), None);
+    }
+
+    #[test]
+    fn from_group_and_rule_invalid_group() {
+        assert_eq!(
+            RuleSelector::from_group_and_rule("notAGroup", "useConst"),
+            None
+        );
+    }
+
+    #[test]
+    fn from_group_and_rule_assist() {
+        let selector = RuleSelector::from_group_and_rule("source", "organizeImports");
+        assert_eq!(
+            selector,
+            Some(RuleSelector::Rule("source", "organizeImports"))
+        );
+    }
+
+    #[test]
+    fn from_group_and_rule_assist_invalid_rule() {
+        assert_eq!(
+            RuleSelector::from_group_and_rule("source", "notARule"),
+            None
+        );
+    }
+
+    #[test]
     fn lsp_filter_to_rule_selector() {
         let filter = "source.biome.useSortedKeys";
         let selector = RuleSelector::from_lsp_filter(filter).unwrap();
@@ -1201,6 +1281,34 @@ mod test {
         assert_eq!(
             RuleSelector::from_str("assist/source/useSortedKeys").unwrap(),
             RuleSelector::Rule("source", "useSortedKeys")
+        );
+    }
+
+    #[test]
+    fn parses_plugin_selector() {
+        use crate::analyzer::AnalyzerSelector;
+
+        for selector in [
+            "plugin",
+            "lint/plugin",
+            "plugin/plugin",
+            "lint/plugin/plugin",
+        ] {
+            assert_eq!(
+                AnalyzerSelector::from_str(selector).unwrap(),
+                AnalyzerSelector::Plugin,
+                "{selector} should parse as the plugin selector"
+            );
+        }
+    }
+
+    #[test]
+    fn rejects_per_plugin_selector() {
+        use crate::analyzer::AnalyzerSelector;
+
+        assert_eq!(
+            AnalyzerSelector::from_str("plugin/foo"),
+            Err("Per-plugin selection is not supported. Use `plugin` to target all plugins.")
         );
     }
 }

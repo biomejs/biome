@@ -119,7 +119,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@85..86 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@86..87 "\n" [] [],
@@ -147,7 +146,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@119..120 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@120..121 "\n" [] [],
@@ -171,7 +169,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@150..151 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@151..152 "\n" [] [],
@@ -234,7 +231,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@204..205 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@205..206 "\n" [] [],
@@ -263,7 +259,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@231..232 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@232..233 "\n" [] [],
@@ -288,7 +283,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@255..256 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@256..257 "\n" [] [],
@@ -320,7 +314,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@316..317 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@317..318 "\n" [] [],
@@ -328,22 +321,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@318..330 "Empty label " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@330..331 "(" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@331..340 "collapsed" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@340..341 ")" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@341..342 ":" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@342..343 " " [] [],
+                    value_token: MD_TEXTUAL_LITERAL@318..343 "Empty label (collapsed): " [] [],
                 },
                 MdReferenceLink {
                     l_brack_token: L_BRACK@343..344 "[" [] [],
@@ -363,7 +341,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@351..352 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@352..353 "\n" [] [],
@@ -404,10 +381,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@379..410 "Shortcut that looks like text: " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@410..411 "[" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@411..420 "undefined" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@410..420 "[undefined" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@420..421 "]" [] [],
@@ -416,7 +390,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@421..422 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@422..423 "\n" [] [],
@@ -468,7 +441,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@489..490 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@490..491 "\n" [] [],
@@ -503,7 +475,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@570..571 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@571..572 "\n" [] [],
@@ -541,13 +512,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@608..612 "Case" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@612..613 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@613..626 "insensitive: " [] [],
+                    value_token: MD_TEXTUAL_LITERAL@608..626 "Case-insensitive: " [] [],
                 },
                 MdReferenceLink {
                     l_brack_token: L_BRACK@626..627 "[" [] [],
@@ -563,7 +528,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@638..639 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@639..640 "\n" [] [],
@@ -587,7 +551,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@677..678 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@678..679 "\n" [] [],
@@ -655,7 +618,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@756..757 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@757..757 "" [] [],
@@ -711,7 +673,6 @@ MdDocument {
             2: R_BRACK@84..85 "]" [] []
         2: MD_TEXTUAL@85..86
           0: MD_TEXTUAL_LITERAL@85..86 "\n" [] []
-      1: (empty)
     4: MD_NEWLINE@86..87
       0: NEWLINE@86..87 "\n" [] []
     5: MD_PARAGRAPH@87..120
@@ -730,7 +691,6 @@ MdDocument {
             2: R_BRACK@118..119 "]" [] []
         2: MD_TEXTUAL@119..120
           0: MD_TEXTUAL_LITERAL@119..120 "\n" [] []
-      1: (empty)
     6: MD_NEWLINE@120..121
       0: NEWLINE@120..121 "\n" [] []
     7: MD_PARAGRAPH@121..151
@@ -746,7 +706,6 @@ MdDocument {
           3: (empty)
         2: MD_TEXTUAL@150..151
           0: MD_TEXTUAL_LITERAL@150..151 "\n" [] []
-      1: (empty)
     8: MD_NEWLINE@151..152
       0: NEWLINE@151..152 "\n" [] []
     9: MD_LINK_REFERENCE_DEFINITION@152..174
@@ -788,7 +747,6 @@ MdDocument {
             2: R_BRACK@203..204 "]" [] []
         2: MD_TEXTUAL@204..205
           0: MD_TEXTUAL_LITERAL@204..205 "\n" [] []
-      1: (empty)
     13: MD_NEWLINE@205..206
       0: NEWLINE@205..206 "\n" [] []
     14: MD_PARAGRAPH@206..232
@@ -808,7 +766,6 @@ MdDocument {
             2: R_BRACK@230..231 "]" [] []
         2: MD_TEXTUAL@231..232
           0: MD_TEXTUAL_LITERAL@231..232 "\n" [] []
-      1: (empty)
     15: MD_NEWLINE@232..233
       0: NEWLINE@232..233 "\n" [] []
     16: MD_PARAGRAPH@233..256
@@ -825,7 +782,6 @@ MdDocument {
           4: (empty)
         2: MD_TEXTUAL@255..256
           0: MD_TEXTUAL_LITERAL@255..256 "\n" [] []
-      1: (empty)
     17: MD_NEWLINE@256..257
       0: NEWLINE@256..257 "\n" [] []
     18: MD_PARAGRAPH@257..317
@@ -846,24 +802,13 @@ MdDocument {
             2: R_BRACK@315..316 "]" [] []
         2: MD_TEXTUAL@316..317
           0: MD_TEXTUAL_LITERAL@316..317 "\n" [] []
-      1: (empty)
     19: MD_NEWLINE@317..318
       0: NEWLINE@317..318 "\n" [] []
     20: MD_PARAGRAPH@318..352
       0: MD_INLINE_ITEM_LIST@318..352
-        0: MD_TEXTUAL@318..330
-          0: MD_TEXTUAL_LITERAL@318..330 "Empty label " [] []
-        1: MD_TEXTUAL@330..331
-          0: MD_TEXTUAL_LITERAL@330..331 "(" [] []
-        2: MD_TEXTUAL@331..340
-          0: MD_TEXTUAL_LITERAL@331..340 "collapsed" [] []
-        3: MD_TEXTUAL@340..341
-          0: MD_TEXTUAL_LITERAL@340..341 ")" [] []
-        4: MD_TEXTUAL@341..342
-          0: MD_TEXTUAL_LITERAL@341..342 ":" [] []
-        5: MD_TEXTUAL@342..343
-          0: MD_TEXTUAL_LITERAL@342..343 " " [] []
-        6: MD_REFERENCE_LINK@343..351
+        0: MD_TEXTUAL@318..343
+          0: MD_TEXTUAL_LITERAL@318..343 "Empty label (collapsed): " [] []
+        1: MD_REFERENCE_LINK@343..351
           0: L_BRACK@343..344 "[" [] []
           1: MD_INLINE_ITEM_LIST@344..348
             0: MD_TEXTUAL@344..348
@@ -873,9 +818,8 @@ MdDocument {
             0: L_BRACK@349..350 "[" [] []
             1: MD_INLINE_ITEM_LIST@350..350
             2: R_BRACK@350..351 "]" [] []
-        7: MD_TEXTUAL@351..352
+        2: MD_TEXTUAL@351..352
           0: MD_TEXTUAL_LITERAL@351..352 "\n" [] []
-      1: (empty)
     21: MD_NEWLINE@352..353
       0: NEWLINE@352..353 "\n" [] []
     22: MD_LINK_REFERENCE_DEFINITION@353..377
@@ -902,15 +846,12 @@ MdDocument {
       0: MD_INLINE_ITEM_LIST@379..422
         0: MD_TEXTUAL@379..410
           0: MD_TEXTUAL_LITERAL@379..410 "Shortcut that looks like text: " [] []
-        1: MD_TEXTUAL@410..411
-          0: MD_TEXTUAL_LITERAL@410..411 "[" [] []
-        2: MD_TEXTUAL@411..420
-          0: MD_TEXTUAL_LITERAL@411..420 "undefined" [] []
-        3: MD_TEXTUAL@420..421
+        1: MD_TEXTUAL@410..420
+          0: MD_TEXTUAL_LITERAL@410..420 "[undefined" [] []
+        2: MD_TEXTUAL@420..421
           0: MD_TEXTUAL_LITERAL@420..421 "]" [] []
-        4: MD_TEXTUAL@421..422
+        3: MD_TEXTUAL@421..422
           0: MD_TEXTUAL_LITERAL@421..422 "\n" [] []
-      1: (empty)
     26: MD_NEWLINE@422..423
       0: NEWLINE@422..423 "\n" [] []
     27: MD_PARAGRAPH@423..490
@@ -945,7 +886,6 @@ MdDocument {
             2: R_BRACK@488..489 "]" [] []
         4: MD_TEXTUAL@489..490
           0: MD_TEXTUAL_LITERAL@489..490 "\n" [] []
-      1: (empty)
     28: MD_NEWLINE@490..491
       0: NEWLINE@490..491 "\n" [] []
     29: MD_PARAGRAPH@491..571
@@ -968,7 +908,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@555..570 " in the middle." [] []
         3: MD_TEXTUAL@570..571
           0: MD_TEXTUAL_LITERAL@570..571 "\n" [] []
-      1: (empty)
     30: MD_NEWLINE@571..572
       0: NEWLINE@571..572 "\n" [] []
     31: MD_LINK_REFERENCE_DEFINITION@572..606
@@ -993,22 +932,17 @@ MdDocument {
       0: NEWLINE@607..608 "\n" [] []
     34: MD_PARAGRAPH@608..639
       0: MD_INLINE_ITEM_LIST@608..639
-        0: MD_TEXTUAL@608..612
-          0: MD_TEXTUAL_LITERAL@608..612 "Case" [] []
-        1: MD_TEXTUAL@612..613
-          0: MD_TEXTUAL_LITERAL@612..613 "-" [] []
-        2: MD_TEXTUAL@613..626
-          0: MD_TEXTUAL_LITERAL@613..626 "insensitive: " [] []
-        3: MD_REFERENCE_LINK@626..638
+        0: MD_TEXTUAL@608..626
+          0: MD_TEXTUAL_LITERAL@608..626 "Case-insensitive: " [] []
+        1: MD_REFERENCE_LINK@626..638
           0: L_BRACK@626..627 "[" [] []
           1: MD_INLINE_ITEM_LIST@627..637
             0: MD_TEXTUAL@627..637
               0: MD_TEXTUAL_LITERAL@627..637 "case label" [] []
           2: R_BRACK@637..638 "]" [] []
           3: (empty)
-        4: MD_TEXTUAL@638..639
+        2: MD_TEXTUAL@638..639
           0: MD_TEXTUAL_LITERAL@638..639 "\n" [] []
-      1: (empty)
     35: MD_NEWLINE@639..640
       0: NEWLINE@639..640 "\n" [] []
     36: MD_PARAGRAPH@640..678
@@ -1024,7 +958,6 @@ MdDocument {
           3: (empty)
         2: MD_TEXTUAL@677..678
           0: MD_TEXTUAL_LITERAL@677..678 "\n" [] []
-      1: (empty)
     37: MD_NEWLINE@678..679
       0: NEWLINE@678..679 "\n" [] []
     38: MD_LINK_REFERENCE_DEFINITION@679..713
@@ -1069,7 +1002,6 @@ MdDocument {
             2: R_BRACK@755..756 "]" [] []
         2: MD_TEXTUAL@756..757
           0: MD_TEXTUAL_LITERAL@756..757 "\n" [] []
-      1: (empty)
   2: EOF@757..757 "" [] []
 
 ```

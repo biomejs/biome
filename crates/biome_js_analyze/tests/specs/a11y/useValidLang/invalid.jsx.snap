@@ -4,6 +4,7 @@ expression: invalid.jsx
 ---
 # Input
 ```jsx
+/* should generate diagnostics */
 let a = <html lang="lorem" />;
 let a = <html lang="en-babab" />;
 let a = <html lang="en-GB-something" />;
@@ -15,14 +16,15 @@ let a = <html lang="en-US-GB-Extra" />;
 
 # Diagnostics
 ```
-invalid.jsx:1:20 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:2:20 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a valid value for the lang attribute.
   
-  > 1 │ let a = <html lang="lorem" />;
+    1 │ /* should generate diagnostics */
+  > 2 │ let a = <html lang="lorem" />;
       │                    ^^^^^^^
-    2 │ let a = <html lang="en-babab" />;
-    3 │ let a = <html lang="en-GB-something" />;
+    3 │ let a = <html lang="en-babab" />;
+    4 │ let a = <html lang="en-GB-something" />;
   
   i Some of valid languages:
   
@@ -46,48 +48,16 @@ invalid.jsx:1:20 lint/a11y/useValidLang ━━━━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:2:20 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Provide a valid value for the lang attribute.
-  
-    1 │ let a = <html lang="lorem" />;
-  > 2 │ let a = <html lang="en-babab" />;
-      │                    ^^^^^^^^^^
-    3 │ let a = <html lang="en-GB-something" />;
-    4 │ let a = <html lang="zh-Xxxx" />;
-  
-
-```
-
-```
 invalid.jsx:3:20 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a valid value for the lang attribute.
   
-    1 │ let a = <html lang="lorem" />;
-    2 │ let a = <html lang="en-babab" />;
-  > 3 │ let a = <html lang="en-GB-something" />;
-      │                    ^^^^^^^^^^^^^^^^^
-    4 │ let a = <html lang="zh-Xxxx" />;
-    5 │ let a = <html lang="zh-Hans-ZZ" />;
-  
-  i Some of valid scripts:
-  
-  - Arab
-  - Armn
-  - Beng
-  - Cyrl
-  - Deva
-  - Ethi
-  - Grek
-  - Gujr
-  - Guru
-  - Hang
-  - Hani
-  - Hans
-  - Hant
-  - Hebr
-  - Hira
+    1 │ /* should generate diagnostics */
+    2 │ let a = <html lang="lorem" />;
+  > 3 │ let a = <html lang="en-babab" />;
+      │                    ^^^^^^^^^^
+    4 │ let a = <html lang="en-GB-something" />;
+    5 │ let a = <html lang="zh-Xxxx" />;
   
 
 ```
@@ -97,12 +67,12 @@ invalid.jsx:4:20 lint/a11y/useValidLang ━━━━━━━━━━━━━�
 
   × Provide a valid value for the lang attribute.
   
-    2 │ let a = <html lang="en-babab" />;
-    3 │ let a = <html lang="en-GB-something" />;
-  > 4 │ let a = <html lang="zh-Xxxx" />;
-      │                    ^^^^^^^^^
-    5 │ let a = <html lang="zh-Hans-ZZ" />;
-    6 │ let a = <html lang="en-US-GB-Extra" />;
+    2 │ let a = <html lang="lorem" />;
+    3 │ let a = <html lang="en-babab" />;
+  > 4 │ let a = <html lang="en-GB-something" />;
+      │                    ^^^^^^^^^^^^^^^^^
+    5 │ let a = <html lang="zh-Xxxx" />;
+    6 │ let a = <html lang="zh-Hans-ZZ" />;
   
   i Some of valid scripts:
   
@@ -130,12 +100,45 @@ invalid.jsx:5:20 lint/a11y/useValidLang ━━━━━━━━━━━━━�
 
   × Provide a valid value for the lang attribute.
   
-    3 │ let a = <html lang="en-GB-something" />;
-    4 │ let a = <html lang="zh-Xxxx" />;
-  > 5 │ let a = <html lang="zh-Hans-ZZ" />;
+    3 │ let a = <html lang="en-babab" />;
+    4 │ let a = <html lang="en-GB-something" />;
+  > 5 │ let a = <html lang="zh-Xxxx" />;
+      │                    ^^^^^^^^^
+    6 │ let a = <html lang="zh-Hans-ZZ" />;
+    7 │ let a = <html lang="en-US-GB-Extra" />;
+  
+  i Some of valid scripts:
+  
+  - Arab
+  - Armn
+  - Beng
+  - Cyrl
+  - Deva
+  - Ethi
+  - Grek
+  - Gujr
+  - Guru
+  - Hang
+  - Hani
+  - Hans
+  - Hant
+  - Hebr
+  - Hira
+  
+
+```
+
+```
+invalid.jsx:6:20 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the lang attribute.
+  
+    4 │ let a = <html lang="en-GB-something" />;
+    5 │ let a = <html lang="zh-Xxxx" />;
+  > 6 │ let a = <html lang="zh-Hans-ZZ" />;
       │                    ^^^^^^^^^^^^
-    6 │ let a = <html lang="en-US-GB-Extra" />;
-    7 │ 
+    7 │ let a = <html lang="en-US-GB-Extra" />;
+    8 │ 
   
   i Some of valid countries:
   
@@ -159,15 +162,15 @@ invalid.jsx:5:20 lint/a11y/useValidLang ━━━━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:6:20 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:7:20 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a valid value for the lang attribute.
   
-    4 │ let a = <html lang="zh-Xxxx" />;
-    5 │ let a = <html lang="zh-Hans-ZZ" />;
-  > 6 │ let a = <html lang="en-US-GB-Extra" />;
+    5 │ let a = <html lang="zh-Xxxx" />;
+    6 │ let a = <html lang="zh-Hans-ZZ" />;
+  > 7 │ let a = <html lang="en-US-GB-Extra" />;
       │                    ^^^^^^^^^^^^^^^^
-    7 │ 
+    8 │ 
   
 
 ```

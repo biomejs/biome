@@ -92,7 +92,8 @@ impl Rule for UseStaticResponseMethods {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let callee = node.callee().ok()?;
-        let (reference, name) = global_identifier(&callee.omit_parentheses())?;
+        let (reference, name) =
+            global_identifier(&callee.omit_parentheses().as_any_global_identifier_expression()?)?;
 
         if name.text() != "Response" {
             return None;
@@ -318,7 +319,11 @@ fn extract_json_stringify_arg(
     let callee = call_expr.callee().ok()?;
     let callee = callee.as_js_static_member_expression()?;
     let object = callee.object().ok()?;
-    let (reference, object_name) = global_identifier(&object.omit_parentheses())?;
+    let (reference, object_name) = global_identifier(
+        &object
+            .omit_parentheses()
+            .as_any_global_identifier_expression()?,
+    )?;
 
     if object_name.text() != "JSON" {
         return None;

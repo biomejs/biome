@@ -597,6 +597,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsSuperExpression::new_unchecked(node) };
                     $body
                 }
+                $crate::JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT => {
+                    let $pattern = unsafe { $crate::JsSvelteSnippetRoot::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::JS_SWITCH_STATEMENT => {
                     let $pattern = unsafe { $crate::JsSwitchStatement::new_unchecked(node) };
                     $body
@@ -726,6 +730,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT => {
                     let $pattern = unsafe { $crate::JsxSelfClosingElement::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsSyntaxKind::JSX_SHORTHAND_ATTRIBUTE => {
+                    let $pattern = unsafe { $crate::JsxShorthandAttribute::new_unchecked(node) };
                     $body
                 }
                 $crate::JsSyntaxKind::JSX_SPREAD_ATTRIBUTE => {

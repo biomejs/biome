@@ -1,0 +1,89 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/expression/function-arguments-in-values.scss
+---
+
+# Input
+
+```scss
+a{transition-timing-function:func1(func2(func3("veryVeryVeryVeryVeryLongValue","veryVeryVeryVeryVeryLongValue","veryVeryVeryVeryVeryLongValue","veryVeryVeryVeryVeryLongValue"),"veryVeryVeryVeryVeryLongValue","veryVeryVeryVeryVeryLongValue","veryVeryVeryVeryVeryLongValue"),"veryVeryVeryVeryVeryLongValue","veryVeryVeryVeryVeryLongValue",func3("veryVeryVeryVeryVeryLongValue","veryVeryVeryVeryVeryLongValue","veryVeryVeryVeryVeryLongValue","veryVeryVeryVeryVeryLongValue"));}
+
+a {
+  transition-timing-function: func1(
+      func2(
+          func3(
+              "veryVeryVeryVeryVeryLongValue",
+              "veryVeryVeryVeryVeryLongValue",
+              "veryVeryVeryVeryVeryLongValue",
+              "veryVeryVeryVeryVeryLongValue",
+          ),
+          "veryVeryVeryVeryVeryLongValue",
+          "veryVeryVeryVeryVeryLongValue",
+          "veryVeryVeryVeryVeryLongValue",
+      ),
+      "veryVeryVeryVeryVeryLongValue",
+      "veryVeryVeryVeryVeryLongValue",
+      func3(
+          "veryVeryVeryVeryVeryLongValue",
+          "veryVeryVeryVeryVeryLongValue",
+          "veryVeryVeryVeryVeryLongValue",
+          "veryVeryVeryVeryVeryLongValue"
+      )
+  );
+}
+
+```
+
+
+# Formatted
+
+```scss
+a {
+	transition-timing-function: func1(
+		func2(
+			func3(
+				"veryVeryVeryVeryVeryLongValue",
+				"veryVeryVeryVeryVeryLongValue",
+				"veryVeryVeryVeryVeryLongValue",
+				"veryVeryVeryVeryVeryLongValue"
+			),
+			"veryVeryVeryVeryVeryLongValue",
+			"veryVeryVeryVeryVeryLongValue",
+			"veryVeryVeryVeryVeryLongValue"
+		),
+		"veryVeryVeryVeryVeryLongValue",
+		"veryVeryVeryVeryVeryLongValue",
+		func3(
+			"veryVeryVeryVeryVeryLongValue",
+			"veryVeryVeryVeryVeryLongValue",
+			"veryVeryVeryVeryVeryLongValue",
+			"veryVeryVeryVeryVeryLongValue"
+		)
+	);
+}
+
+a {
+	transition-timing-function: func1(
+		func2(
+			func3(
+				"veryVeryVeryVeryVeryLongValue",
+				"veryVeryVeryVeryVeryLongValue",
+				"veryVeryVeryVeryVeryLongValue",
+				"veryVeryVeryVeryVeryLongValue"
+			),
+			"veryVeryVeryVeryVeryLongValue",
+			"veryVeryVeryVeryVeryLongValue",
+			"veryVeryVeryVeryVeryLongValue"
+		),
+		"veryVeryVeryVeryVeryLongValue",
+		"veryVeryVeryVeryVeryLongValue",
+		func3(
+			"veryVeryVeryVeryVeryLongValue",
+			"veryVeryVeryVeryVeryLongValue",
+			"veryVeryVeryVeryVeryLongValue",
+			"veryVeryVeryVeryVeryLongValue"
+		)
+	);
+}
+
+```

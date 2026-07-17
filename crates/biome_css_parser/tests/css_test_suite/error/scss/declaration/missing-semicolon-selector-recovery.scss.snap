@@ -37,8 +37,8 @@ CssRoot {
             block: CssDeclarationOrRuleBlock {
                 l_curly_token: L_CURLY@2..3 "{" [] [],
                 items: CssDeclarationOrRuleList [
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@3..7 "$" [Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@7..8 "x" [] [],
@@ -156,8 +156,8 @@ CssRoot {
       1: CSS_DECLARATION_OR_RULE_BLOCK@2..58
         0: L_CURLY@2..3 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@3..56
-          0: SCSS_DECLARATION@3..20
-            0: SCSS_IDENTIFIER@3..8
+          0: SCSS_VARIABLE_DECLARATION@3..20
+            0: SCSS_VARIABLE@3..8
               0: DOLLAR@3..7 "$" [Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@7..8
                 0: IDENT@7..8 "x" [] []

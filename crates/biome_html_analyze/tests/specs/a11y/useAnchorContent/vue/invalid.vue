@@ -1,5 +1,5 @@
+<!-- should generate diagnostics -->
 <template>
-  <!-- Native anchors without accessible content should trigger -->
   <a></a>
   <a>    </a>
   <a aria-hidden="true">content</a>

@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-07.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+const arg = 0;
+
+interface Test {
+  (arg: string): typeof arg;
+}
+
+```

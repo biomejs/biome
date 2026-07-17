@@ -1,0 +1,75 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: css/no-semicolon/url.css
+---
+
+# Input
+
+```css
+@import ur
+  l(//fonts.googleapis.com/css?family=Open+Sans:400,400italic);
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+ @import ur
+-  l(//fonts.googleapis.com/css?family=Open+Sans:400,400italic);
++  l( //fonts.googleapis.com/css?family=Open+Sans:400,400italic);
+```
+
+# Output
+
+```css
+@import ur
+  l( //fonts.googleapis.com/css?family=Open+Sans:400,400italic);
+```
+
+# Errors
+```
+url.css:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `l`
+  
+    1 │ @import ur
+  > 2 │   l(//fonts.googleapis.com/css?family=Open+Sans:400,400italic);
+      │   ^
+    3 │ 
+  
+  i Remove l
+  
+url.css:2:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `(`
+  
+    1 │ @import ur
+  > 2 │   l(//fonts.googleapis.com/css?family=Open+Sans:400,400italic);
+      │    ^
+    3 │ 
+  
+  i Remove (
+  
+url.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ @import ur
+    2 │   l(//fonts.googleapis.com/css?family=Open+Sans:400,400italic);
+  > 3 │ 
+      │ 
+  
+  i Expected one of:
+  
+  - <mf-plain>
+  - <mf-boolean>
+  - <mf-range>
+  - <query-in-parens> or <query-in-parens>
+  
+
+```

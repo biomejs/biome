@@ -4,7 +4,7 @@ expression: invalid.svelte
 ---
 # Input
 ```svelte
-<!-- Native anchors without accessible content should trigger -->
+<!-- should generate diagnostics -->
 <a></a>
 <a>    </a>
 <a aria-hidden="true">content</a>
@@ -33,7 +33,7 @@ invalid.svelte:2:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
 
   × Provide screen reader accessible content when using a elements.
   
-    1 │ <!-- Native anchors without accessible content should trigger -->
+    1 │ <!-- should generate diagnostics -->
   > 2 │ <a></a>
       │ ^^^^^^^
     3 │ <a>    </a>
@@ -55,7 +55,7 @@ invalid.svelte:3:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
 
   × Provide screen reader accessible content when using a elements.
   
-    1 │ <!-- Native anchors without accessible content should trigger -->
+    1 │ <!-- should generate diagnostics -->
     2 │ <a></a>
   > 3 │ <a>    </a>
       │ ^^^^^^^^^^^

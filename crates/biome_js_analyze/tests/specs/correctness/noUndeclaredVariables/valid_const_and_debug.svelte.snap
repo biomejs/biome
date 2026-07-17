@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_const_and_debug.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script>
+let items = [];
+let total = 0;
+let label = "hello";
+</script>
+
+{#each items as item}
+    {@const price = item.price}
+    {@const tax = price * 0.2}
+    <span>{price} + {tax}</span>
+{/each}
+
+{@debug total}
+{@debug total, label}
+{@debug items, total, label}
+
+```

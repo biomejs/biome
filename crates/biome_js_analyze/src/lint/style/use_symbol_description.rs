@@ -51,7 +51,8 @@ impl Rule for UseSymbolDescription {
         let call_expression = ctx.query();
         let callee = call_expression.callee().ok()?;
         let model = ctx.model();
-        let (reference, name) = global_identifier(&callee)?;
+        let (reference, name) =
+            global_identifier(&callee.as_any_global_identifier_expression()?)?;
 
         if name.text() != "Symbol" || model.binding(&reference).is_some() {
             return None;

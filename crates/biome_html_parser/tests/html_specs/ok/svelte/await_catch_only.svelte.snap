@@ -30,9 +30,9 @@ HtmlRoot {
                 },
                 then_clause: missing (optional),
                 catch_clause: SvelteAwaitCatchClause {
-                    catch_token: CATCH_KW@16..21 "catch" [] [],
+                    catch_token: CATCH_KW@16..22 "catch" [] [Whitespace(" ")],
                     name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@21..27 " error" [] [],
+                        html_literal_token: HTML_LITERAL@22..27 "error" [] [],
                     },
                 },
                 r_curly_token: R_CURLY@27..28 "}" [] [],
@@ -97,9 +97,9 @@ HtmlRoot {
           0: HTML_LITERAL@7..16 " promise " [] []
         3: (empty)
         4: SVELTE_AWAIT_CATCH_CLAUSE@16..27
-          0: CATCH_KW@16..21 "catch" [] []
-          1: HTML_TEXT_EXPRESSION@21..27
-            0: HTML_LITERAL@21..27 " error" [] []
+          0: CATCH_KW@16..22 "catch" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@22..27
+            0: HTML_LITERAL@22..27 "error" [] []
         5: R_CURLY@27..28 "}" [] []
         6: HTML_ELEMENT_LIST@28..60
           0: HTML_ELEMENT@28..60

@@ -18,8 +18,7 @@ pub(crate) fn explain(session: CliSession, doc: Doc) -> Result<(), CliDiagnostic
         }
         Doc::DaemonLogs => {
             let cache_dir = biome_env()
-                .biome_log_path
-                .value()
+                .value_for("BIOME_LOG_PATH")
                 .unwrap_or(default_biome_log_path().to_string());
             session.app.console.error(markup! {
                 <Info>"The daemon logs are available in the directory: \n"</Info>

@@ -1,5 +1,5 @@
+/* should generate diagnostics */
 <>
-	{/* invalid */}
 	<iframe />
 	<iframe></iframe>
 	<iframe title="" />

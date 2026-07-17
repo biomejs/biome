@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validLocalStyleSheet.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+
+const StyleSheet = { create: (value) => value };
+
+const LocalSheet = StyleSheet.create({
+	box: { backgroundColor: '#fff' },
+});
+
+```

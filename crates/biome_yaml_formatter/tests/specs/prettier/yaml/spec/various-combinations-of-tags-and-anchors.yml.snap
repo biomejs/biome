@@ -1,0 +1,109 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/various-combinations-of-tags-and-anchors.yml
+---
+
+# Input
+
+```yml
+---
+&a1
+!!str
+scalar1
+---
+!!str
+&a2
+scalar2
+---
+&a3
+!!str scalar3
+---
+&a4 !!map
+&a5 !!str key5: value4
+---
+a6: 1
+&anchor6 b6: 2
+---
+!!map
+&a8 !!str key8: value7
+---
+!!map
+!!str &a10 key10: value9
+---
+!!str &a11
+value11
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,20 +1,26 @@
+ ---
+-!!str &a1 scalar1
++&a1
++!!str
++scalar1
+ ---
+-!!str &a2 scalar2
++!!str
++&a2
++scalar2
+ ---
+-!!str &a3 scalar3
++&a3
++!!str scalar3
+ ---
+-!!map &a4
+-!!str &a5 key5: value4
++&a4 !!map
++&a5 !!str key5: value4
+ ---
+ a6: 1
+ &anchor6 b6: 2
+ ---
+ !!map
+-!!str &a8 key8: value7
++&a8 !!str key8: value7
+ ---
+ !!map
+ !!str &a10 key10: value9
+ ---
+-!!str &a11 value11
++!!str &a11
++value11
+```
+
+# Output
+
+```yml
+---
+&a1
+!!str
+scalar1
+---
+!!str
+&a2
+scalar2
+---
+&a3
+!!str scalar3
+---
+&a4 !!map
+&a5 !!str key5: value4
+---
+a6: 1
+&anchor6 b6: 2
+---
+!!map
+&a8 !!str key8: value7
+---
+!!map
+!!str &a10 key10: value9
+---
+!!str &a11
+value11
+```

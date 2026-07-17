@@ -1,0 +1,59 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: unsorted-lexicographic.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<input type="text" id="name" name="name" />
+<textarea id="mytextarea" name="textarea" rows="5" cols="20" data-1="" data-2="" data-11="" data-12="">
+Hello, world!</textarea>
+
+```
+
+# Diagnostics
+```
+unsorted-lexicographic.html:2:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <input type="text" id="name" name="name" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <textarea id="mytextarea" name="textarea" rows="5" cols="20" data-1="" data-2="" data-11="" data-12="">
+    4 │ Hello, world!</textarea>
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2   │ - <input·type="text"·id="name"·name="name"·/>
+      2 │ + <input·id="name"·name="name"·type="text"·/>
+    3 3 │   <textarea id="mytextarea" name="textarea" rows="5" cols="20" data-1="" data-2="" data-11="" data-12="">
+    4 4 │   Hello, world!</textarea>
+  
+
+```
+
+```
+unsorted-lexicographic.html:3:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <input type="text" id="name" name="name" />
+  > 3 │ <textarea id="mytextarea" name="textarea" rows="5" cols="20" data-1="" data-2="" data-11="" data-12="">
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ Hello, world!</textarea>
+    5 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2 2 │   <input type="text" id="name" name="name" />
+    3   │ - <textarea·id="mytextarea"·name="textarea"·rows="5"·cols="20"·data-1=""·data-2=""·data-11=""·data-12="">
+      3 │ + <textarea·cols="20"·data-1=""·data-11=""·data-12=""·data-2=""·id="mytextarea"·name="textarea"·rows="5"·>
+    4 4 │   Hello, world!</textarea>
+    5 5 │   
+  
+
+```

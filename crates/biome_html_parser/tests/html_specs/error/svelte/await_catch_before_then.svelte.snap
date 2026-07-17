@@ -64,9 +64,9 @@ HtmlRoot {
             clauses: SvelteAwaitClausesList [
                 SvelteAwaitCatchBlock {
                     sv_curly_colon_token: SV_CURLY_COLON@36..39 "{:" [Newline("\n")] [],
-                    catch_token: CATCH_KW@39..44 "catch" [] [],
+                    catch_token: CATCH_KW@39..45 "catch" [] [Whitespace(" ")],
                     name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@44..50 " error" [] [],
+                        html_literal_token: HTML_LITERAL@45..50 "error" [] [],
                     },
                     r_curly_token: R_CURLY@50..51 "}" [] [],
                     children: HtmlElementList [
@@ -101,9 +101,9 @@ HtmlRoot {
                 },
                 SvelteAwaitThenBlock {
                     sv_curly_colon_token: SV_CURLY_COLON@76..79 "{:" [Newline("\n")] [],
-                    then_token: THEN_KW@79..83 "then" [] [],
+                    then_token: THEN_KW@79..84 "then" [] [Whitespace(" ")],
                     name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@83..89 " value" [] [],
+                        html_literal_token: HTML_LITERAL@84..89 "value" [] [],
                     },
                     r_curly_token: R_CURLY@89..90 "}" [] [],
                     children: HtmlElementList [
@@ -185,9 +185,9 @@ HtmlRoot {
       1: SVELTE_AWAIT_CLAUSES_LIST@36..107
         0: SVELTE_AWAIT_CATCH_BLOCK@36..76
           0: SV_CURLY_COLON@36..39 "{:" [Newline("\n")] []
-          1: CATCH_KW@39..44 "catch" [] []
-          2: HTML_TEXT_EXPRESSION@44..50
-            0: HTML_LITERAL@44..50 " error" [] []
+          1: CATCH_KW@39..45 "catch" [] [Whitespace(" ")]
+          2: HTML_TEXT_EXPRESSION@45..50
+            0: HTML_LITERAL@45..50 "error" [] []
           3: R_CURLY@50..51 "}" [] []
           4: HTML_ELEMENT_LIST@51..76
             0: HTML_ELEMENT@51..76
@@ -211,9 +211,9 @@ HtmlRoot {
                 3: R_ANGLE@75..76 ">" [] []
         1: SVELTE_AWAIT_THEN_BLOCK@76..107
           0: SV_CURLY_COLON@76..79 "{:" [Newline("\n")] []
-          1: THEN_KW@79..83 "then" [] []
-          2: HTML_TEXT_EXPRESSION@83..89
-            0: HTML_LITERAL@83..89 " value" [] []
+          1: THEN_KW@79..84 "then" [] [Whitespace(" ")]
+          2: HTML_TEXT_EXPRESSION@84..89
+            0: HTML_LITERAL@84..89 "value" [] []
           3: R_CURLY@89..90 "}" [] []
           4: HTML_ELEMENT_LIST@90..107
             0: HTML_ELEMENT@90..107

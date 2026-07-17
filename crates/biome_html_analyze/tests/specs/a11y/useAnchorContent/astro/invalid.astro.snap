@@ -4,11 +4,10 @@ expression: invalid.astro
 ---
 # Input
 ```astro
+<!-- should generate diagnostics -->
 ---
 // Astro frontmatter
 ---
-
-<!-- Native anchors without accessible content should trigger -->
 <a></a>
 <a>    </a>
 <a aria-hidden="true">content</a>
@@ -39,38 +38,39 @@ expression: invalid.astro
 
 # Diagnostics
 ```
+invalid.astro:5:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    3 │ // Astro frontmatter
+    4 │ ---
+  > 5 │ <a></a>
+      │ ^^^^^^^
+    6 │ <a>    </a>
+    7 │ <a aria-hidden="true">content</a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
 invalid.astro:6:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
-    5 │ <!-- Native anchors without accessible content should trigger -->
-  > 6 │ <a></a>
-      │ ^^^^^^^
-    7 │ <a>    </a>
-    8 │ <a aria-hidden="true">content</a>
-  
-  i All links on a page should have content that is accessible to screen readers.
-  
-  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
-  
-  i Follow these links for more information,
-     WCAG 2.4.4
-     WCAG 4.1.2
-  
-
-```
-
-```
-invalid.astro:7:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Provide screen reader accessible content when using a elements.
-  
-    5 │ <!-- Native anchors without accessible content should trigger -->
-    6 │ <a></a>
-  > 7 │ <a>    </a>
+    4 │ ---
+    5 │ <a></a>
+  > 6 │ <a>    </a>
       │ ^^^^^^^^^^^
-    8 │ <a aria-hidden="true">content</a>
-    9 │ <a aria-hidden>content</a>
+    7 │ <a aria-hidden="true">content</a>
+    8 │ <a aria-hidden>content</a>
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -84,16 +84,16 @@ invalid.astro:7:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
 ```
 
 ```
-invalid.astro:8:1 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:7:1 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
-     6 │ <a></a>
-     7 │ <a>    </a>
-   > 8 │ <a aria-hidden="true">content</a>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-     9 │ <a aria-hidden>content</a>
-    10 │ <a><span aria-hidden="true">content</span></a>
+    5 │ <a></a>
+    6 │ <a>    </a>
+  > 7 │ <a aria-hidden="true">content</a>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <a aria-hidden>content</a>
+    9 │ <a><span aria-hidden="true">content</span></a>
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -105,8 +105,31 @@ invalid.astro:8:1 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━�
   
   i Unsafe fix: Remove the aria-hidden attribute to allow the anchor element and its content visible to assistive technologies.
   
-    8 │ <a·aria-hidden="true">content</a>
+    7 │ <a·aria-hidden="true">content</a>
       │    ------------------            
+
+```
+
+```
+invalid.astro:9:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+     7 │ <a aria-hidden="true">content</a>
+     8 │ <a aria-hidden>content</a>
+   > 9 │ <a><span aria-hidden="true">content</span></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ <a><div aria-hidden="true"><span>nested content</span></div></a>
+    11 │ 
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
 
 ```
 
@@ -115,35 +138,12 @@ invalid.astro:10:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
 
   × Provide screen reader accessible content when using a elements.
   
-     8 │ <a aria-hidden="true">content</a>
-     9 │ <a aria-hidden>content</a>
-  > 10 │ <a><span aria-hidden="true">content</span></a>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    11 │ <a><div aria-hidden="true"><span>nested content</span></div></a>
-    12 │ 
-  
-  i All links on a page should have content that is accessible to screen readers.
-  
-  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
-  
-  i Follow these links for more information,
-     WCAG 2.4.4
-     WCAG 4.1.2
-  
-
-```
-
-```
-invalid.astro:11:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Provide screen reader accessible content when using a elements.
-  
-     9 │ <a aria-hidden>content</a>
-    10 │ <a><span aria-hidden="true">content</span></a>
-  > 11 │ <a><div aria-hidden="true"><span>nested content</span></div></a>
+     8 │ <a aria-hidden>content</a>
+     9 │ <a><span aria-hidden="true">content</span></a>
+  > 10 │ <a><div aria-hidden="true"><span>nested content</span></div></a>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │ 
-    13 │ <!-- Image without alt attribute -->
+    11 │ 
+    12 │ <!-- Image without alt attribute -->
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -157,15 +157,15 @@ invalid.astro:11:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
 ```
 
 ```
-invalid.astro:14:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:13:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
-    13 │ <!-- Image without alt attribute -->
-  > 14 │ <a><img /></a>
+    12 │ <!-- Image without alt attribute -->
+  > 13 │ <a><img /></a>
        │ ^^^^^^^^^^^^^^
-    15 │ 
-    16 │ <!-- Image with empty alt attribute -->
+    14 │ 
+    15 │ <!-- Image with empty alt attribute -->
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -179,15 +179,15 @@ invalid.astro:14:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
 ```
 
 ```
-invalid.astro:17:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:16:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
-    16 │ <!-- Image with empty alt attribute -->
-  > 17 │ <a><img alt="" /></a>
+    15 │ <!-- Image with empty alt attribute -->
+  > 16 │ <a><img alt="" /></a>
        │ ^^^^^^^^^^^^^^^^^^^^^
-    18 │ 
-    19 │ <!-- Image component without alt attribute -->
+    17 │ 
+    18 │ <!-- Image component without alt attribute -->
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -201,15 +201,15 @@ invalid.astro:17:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
 ```
 
 ```
-invalid.astro:20:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:19:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
-    19 │ <!-- Image component without alt attribute -->
-  > 20 │ <a><Image /></a>
+    18 │ <!-- Image component without alt attribute -->
+  > 19 │ <a><Image /></a>
        │ ^^^^^^^^^^^^^^^^
-    21 │ 
-    22 │ <!-- Image component with empty alt attribute -->
+    20 │ 
+    21 │ <!-- Image component with empty alt attribute -->
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -223,15 +223,37 @@ invalid.astro:20:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
 ```
 
 ```
-invalid.astro:23:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:22:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
-    22 │ <!-- Image component with empty alt attribute -->
-  > 23 │ <a><Image alt="" /></a>
+    21 │ <!-- Image component with empty alt attribute -->
+  > 22 │ <a><Image alt="" /></a>
        │ ^^^^^^^^^^^^^^^^^^^^^^^
-    24 │ 
-    25 │ <!-- Void elements that never provide accessible content -->
+    23 │ 
+    24 │ <!-- Void elements that never provide accessible content -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.astro:25:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    24 │ <!-- Void elements that never provide accessible content -->
+  > 25 │ <a><br /></a>
+       │ ^^^^^^^^^^^^^
+    26 │ <a><hr /></a>
+    27 │ 
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -249,11 +271,12 @@ invalid.astro:26:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
 
   × Provide screen reader accessible content when using a elements.
   
-    25 │ <!-- Void elements that never provide accessible content -->
-  > 26 │ <a><br /></a>
+    24 │ <!-- Void elements that never provide accessible content -->
+    25 │ <a><br /></a>
+  > 26 │ <a><hr /></a>
        │ ^^^^^^^^^^^^^
-    27 │ <a><hr /></a>
-    28 │ 
+    27 │ 
+    28 │ <!-- Hidden input is not accessible -->
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -267,37 +290,14 @@ invalid.astro:26:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
 ```
 
 ```
-invalid.astro:27:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:29:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
-    25 │ <!-- Void elements that never provide accessible content -->
-    26 │ <a><br /></a>
-  > 27 │ <a><hr /></a>
-       │ ^^^^^^^^^^^^^
-    28 │ 
-    29 │ <!-- Hidden input is not accessible -->
-  
-  i All links on a page should have content that is accessible to screen readers.
-  
-  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
-  
-  i Follow these links for more information,
-     WCAG 2.4.4
-     WCAG 4.1.2
-  
-
-```
-
-```
-invalid.astro:30:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Provide screen reader accessible content when using a elements.
-  
-    29 │ <!-- Hidden input is not accessible -->
-  > 30 │ <a><input type="hidden" /></a>
+    28 │ <!-- Hidden input is not accessible -->
+  > 29 │ <a><input type="hidden" /></a>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    31 │ 
+    30 │ 
   
   i All links on a page should have content that is accessible to screen readers.
   

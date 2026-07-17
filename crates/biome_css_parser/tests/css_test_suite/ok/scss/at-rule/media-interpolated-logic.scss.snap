@@ -1,0 +1,890 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@media (a) and #{"(b) and (c)"} {
+  x {
+    y: z;
+  }
+}
+
+@media (a) or #{"(b) or (c)"} {
+  x {
+    y: z;
+  }
+}
+
+@media a and not #{"(b)"} {
+  x {
+    y: z;
+  }
+}
+
+@media #{a} and not (b) {
+  x {
+    y: z;
+  }
+}
+
+@media (#{$query} and not (color)) {
+  x {
+    y: z;
+  }
+}
+
+@media not #{"(a)"} {
+  x {
+    y: z;
+  }
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@1..7 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssMediaConditionQuery {
+                            condition: CssMediaAndCondition {
+                                left: CssMediaFeatureInParens {
+                                    l_paren_token: L_PAREN@7..8 "(" [] [],
+                                    feature: CssQueryFeatureBoolean {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@8..9 "a" [] [],
+                                        },
+                                    },
+                                    r_paren_token: R_PAREN@9..11 ")" [] [Whitespace(" ")],
+                                },
+                                and_token: AND_KW@11..15 "and" [] [Whitespace(" ")],
+                                right: ScssMediaQuery {
+                                    query: ScssInterpolation {
+                                        hash_token: HASH@15..16 "#" [] [],
+                                        l_curly_token: L_CURLY@16..17 "{" [] [],
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                CssString {
+                                                    value_token: CSS_STRING_LITERAL@17..30 "\"(b) and (c)\"" [] [],
+                                                },
+                                            ],
+                                        },
+                                        r_curly_token: R_CURLY@30..32 "}" [] [Whitespace(" ")],
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@32..33 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@33..38 "x" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@38..39 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@39..45 "y" [Newline("\n"), Whitespace("    ")] [],
+                                                },
+                                                colon_token: COLON@45..47 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@47..48 "z" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@48..49 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@49..53 "}" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@53..55 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@55..58 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@58..64 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssMediaConditionQuery {
+                            condition: CssMediaOrCondition {
+                                left: CssMediaFeatureInParens {
+                                    l_paren_token: L_PAREN@64..65 "(" [] [],
+                                    feature: CssQueryFeatureBoolean {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@65..66 "a" [] [],
+                                        },
+                                    },
+                                    r_paren_token: R_PAREN@66..68 ")" [] [Whitespace(" ")],
+                                },
+                                or_token: OR_KW@68..71 "or" [] [Whitespace(" ")],
+                                right: ScssMediaQuery {
+                                    query: ScssInterpolation {
+                                        hash_token: HASH@71..72 "#" [] [],
+                                        l_curly_token: L_CURLY@72..73 "{" [] [],
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                CssString {
+                                                    value_token: CSS_STRING_LITERAL@73..85 "\"(b) or (c)\"" [] [],
+                                                },
+                                            ],
+                                        },
+                                        r_curly_token: R_CURLY@85..87 "}" [] [Whitespace(" ")],
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@87..88 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@88..93 "x" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@93..94 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@94..100 "y" [Newline("\n"), Whitespace("    ")] [],
+                                                },
+                                                colon_token: COLON@100..102 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@102..103 "z" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@103..104 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@104..108 "}" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@108..110 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@110..113 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@113..119 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssMediaAndTypeQuery {
+                            left: CssMediaTypeQuery {
+                                modifier: missing (optional),
+                                ty: CssMediaType {
+                                    value: CssIdentifier {
+                                        value_token: IDENT@119..121 "a" [] [Whitespace(" ")],
+                                    },
+                                },
+                            },
+                            and_token: AND_KW@121..125 "and" [] [Whitespace(" ")],
+                            right: CssMediaNotCondition {
+                                not_token: NOT_KW@125..129 "not" [] [Whitespace(" ")],
+                                condition: ScssMediaQuery {
+                                    query: ScssInterpolation {
+                                        hash_token: HASH@129..130 "#" [] [],
+                                        l_curly_token: L_CURLY@130..131 "{" [] [],
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                CssString {
+                                                    value_token: CSS_STRING_LITERAL@131..136 "\"(b)\"" [] [],
+                                                },
+                                            ],
+                                        },
+                                        r_curly_token: R_CURLY@136..138 "}" [] [Whitespace(" ")],
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@138..139 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@139..144 "x" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@144..145 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@145..151 "y" [Newline("\n"), Whitespace("    ")] [],
+                                                },
+                                                colon_token: COLON@151..153 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@153..154 "z" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@154..155 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@155..159 "}" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@159..161 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@161..164 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@164..170 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssMediaConditionQuery {
+                            condition: CssMediaAndCondition {
+                                left: ScssMediaQuery {
+                                    query: ScssInterpolation {
+                                        hash_token: HASH@170..171 "#" [] [],
+                                        l_curly_token: L_CURLY@171..172 "{" [] [],
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@172..173 "a" [] [],
+                                                },
+                                            ],
+                                        },
+                                        r_curly_token: R_CURLY@173..175 "}" [] [Whitespace(" ")],
+                                    },
+                                },
+                                and_token: AND_KW@175..179 "and" [] [Whitespace(" ")],
+                                right: CssMediaNotCondition {
+                                    not_token: NOT_KW@179..183 "not" [] [Whitespace(" ")],
+                                    condition: CssMediaFeatureInParens {
+                                        l_paren_token: L_PAREN@183..184 "(" [] [],
+                                        feature: CssQueryFeatureBoolean {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@184..185 "b" [] [],
+                                            },
+                                        },
+                                        r_paren_token: R_PAREN@185..187 ")" [] [Whitespace(" ")],
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@187..188 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@188..193 "x" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@193..194 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@194..200 "y" [Newline("\n"), Whitespace("    ")] [],
+                                                },
+                                                colon_token: COLON@200..202 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@202..203 "z" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@203..204 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@204..208 "}" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@208..210 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@210..213 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@213..219 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssMediaConditionQuery {
+                            condition: CssMediaConditionInParens {
+                                l_paren_token: L_PAREN@219..220 "(" [] [],
+                                condition: CssMediaAndCondition {
+                                    left: ScssMediaQuery {
+                                        query: ScssInterpolation {
+                                            hash_token: HASH@220..221 "#" [] [],
+                                            l_curly_token: L_CURLY@221..222 "{" [] [],
+                                            value: ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    ScssVariable {
+                                                        dollar_token: DOLLAR@222..223 "$" [] [],
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@223..228 "query" [] [],
+                                                        },
+                                                    },
+                                                ],
+                                            },
+                                            r_curly_token: R_CURLY@228..230 "}" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    and_token: AND_KW@230..234 "and" [] [Whitespace(" ")],
+                                    right: CssMediaNotCondition {
+                                        not_token: NOT_KW@234..238 "not" [] [Whitespace(" ")],
+                                        condition: CssMediaFeatureInParens {
+                                            l_paren_token: L_PAREN@238..239 "(" [] [],
+                                            feature: CssQueryFeatureBoolean {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@239..244 "color" [] [],
+                                                },
+                                            },
+                                            r_paren_token: R_PAREN@244..245 ")" [] [],
+                                        },
+                                    },
+                                },
+                                r_paren_token: R_PAREN@245..247 ")" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@247..248 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@248..253 "x" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@253..254 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@254..260 "y" [Newline("\n"), Whitespace("    ")] [],
+                                                },
+                                                colon_token: COLON@260..262 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@262..263 "z" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@263..264 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@264..268 "}" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@268..270 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@270..273 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@273..279 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssMediaConditionQuery {
+                            condition: CssMediaNotCondition {
+                                not_token: NOT_KW@279..283 "not" [] [Whitespace(" ")],
+                                condition: ScssMediaQuery {
+                                    query: ScssInterpolation {
+                                        hash_token: HASH@283..284 "#" [] [],
+                                        l_curly_token: L_CURLY@284..285 "{" [] [],
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                CssString {
+                                                    value_token: CSS_STRING_LITERAL@285..290 "\"(a)\"" [] [],
+                                                },
+                                            ],
+                                        },
+                                        r_curly_token: R_CURLY@290..292 "}" [] [Whitespace(" ")],
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@292..293 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@293..298 "x" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@298..299 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@299..305 "y" [Newline("\n"), Whitespace("    ")] [],
+                                                },
+                                                colon_token: COLON@305..307 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@307..308 "z" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@308..309 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@309..313 "}" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@313..315 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@315..316 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..316
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..315
+    0: CSS_AT_RULE@0..55
+      0: AT@0..1 "@" [] []
+      1: CSS_MEDIA_AT_RULE@1..55
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@1..32
+          0: MEDIA_KW@1..7 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@7..32
+            0: CSS_MEDIA_CONDITION_QUERY@7..32
+              0: CSS_MEDIA_AND_CONDITION@7..32
+                0: CSS_MEDIA_FEATURE_IN_PARENS@7..11
+                  0: L_PAREN@7..8 "(" [] []
+                  1: CSS_QUERY_FEATURE_BOOLEAN@8..9
+                    0: CSS_IDENTIFIER@8..9
+                      0: IDENT@8..9 "a" [] []
+                  2: R_PAREN@9..11 ")" [] [Whitespace(" ")]
+                1: AND_KW@11..15 "and" [] [Whitespace(" ")]
+                2: SCSS_MEDIA_QUERY@15..32
+                  0: SCSS_INTERPOLATION@15..32
+                    0: HASH@15..16 "#" [] []
+                    1: L_CURLY@16..17 "{" [] []
+                    2: SCSS_EXPRESSION@17..30
+                      0: SCSS_EXPRESSION_ITEM_LIST@17..30
+                        0: CSS_STRING@17..30
+                          0: CSS_STRING_LITERAL@17..30 "\"(b) and (c)\"" [] []
+                    3: R_CURLY@30..32 "}" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@32..55
+          0: L_CURLY@32..33 "{" [] []
+          1: CSS_RULE_LIST@33..53
+            0: CSS_QUALIFIED_RULE@33..53
+              0: CSS_SELECTOR_LIST@33..38
+                0: CSS_COMPOUND_SELECTOR@33..38
+                  0: CSS_NESTED_SELECTOR_LIST@33..33
+                  1: CSS_TYPE_SELECTOR@33..38
+                    0: (empty)
+                    1: CSS_IDENTIFIER@33..38
+                      0: IDENT@33..38 "x" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@38..38
+              1: CSS_DECLARATION_OR_RULE_BLOCK@38..53
+                0: L_CURLY@38..39 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@39..49
+                  0: CSS_DECLARATION_WITH_SEMICOLON@39..49
+                    0: CSS_DECLARATION@39..48
+                      0: CSS_GENERIC_PROPERTY@39..48
+                        0: CSS_IDENTIFIER@39..45
+                          0: IDENT@39..45 "y" [Newline("\n"), Whitespace("    ")] []
+                        1: COLON@45..47 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@47..48
+                          0: SCSS_EXPRESSION_ITEM_LIST@47..48
+                            0: CSS_IDENTIFIER@47..48
+                              0: IDENT@47..48 "z" [] []
+                      1: (empty)
+                    1: SEMICOLON@48..49 ";" [] []
+                2: R_CURLY@49..53 "}" [Newline("\n"), Whitespace("  ")] []
+          2: R_CURLY@53..55 "}" [Newline("\n")] []
+    1: CSS_AT_RULE@55..110
+      0: AT@55..58 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@58..110
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@58..87
+          0: MEDIA_KW@58..64 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@64..87
+            0: CSS_MEDIA_CONDITION_QUERY@64..87
+              0: CSS_MEDIA_OR_CONDITION@64..87
+                0: CSS_MEDIA_FEATURE_IN_PARENS@64..68
+                  0: L_PAREN@64..65 "(" [] []
+                  1: CSS_QUERY_FEATURE_BOOLEAN@65..66
+                    0: CSS_IDENTIFIER@65..66
+                      0: IDENT@65..66 "a" [] []
+                  2: R_PAREN@66..68 ")" [] [Whitespace(" ")]
+                1: OR_KW@68..71 "or" [] [Whitespace(" ")]
+                2: SCSS_MEDIA_QUERY@71..87
+                  0: SCSS_INTERPOLATION@71..87
+                    0: HASH@71..72 "#" [] []
+                    1: L_CURLY@72..73 "{" [] []
+                    2: SCSS_EXPRESSION@73..85
+                      0: SCSS_EXPRESSION_ITEM_LIST@73..85
+                        0: CSS_STRING@73..85
+                          0: CSS_STRING_LITERAL@73..85 "\"(b) or (c)\"" [] []
+                    3: R_CURLY@85..87 "}" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@87..110
+          0: L_CURLY@87..88 "{" [] []
+          1: CSS_RULE_LIST@88..108
+            0: CSS_QUALIFIED_RULE@88..108
+              0: CSS_SELECTOR_LIST@88..93
+                0: CSS_COMPOUND_SELECTOR@88..93
+                  0: CSS_NESTED_SELECTOR_LIST@88..88
+                  1: CSS_TYPE_SELECTOR@88..93
+                    0: (empty)
+                    1: CSS_IDENTIFIER@88..93
+                      0: IDENT@88..93 "x" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@93..93
+              1: CSS_DECLARATION_OR_RULE_BLOCK@93..108
+                0: L_CURLY@93..94 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@94..104
+                  0: CSS_DECLARATION_WITH_SEMICOLON@94..104
+                    0: CSS_DECLARATION@94..103
+                      0: CSS_GENERIC_PROPERTY@94..103
+                        0: CSS_IDENTIFIER@94..100
+                          0: IDENT@94..100 "y" [Newline("\n"), Whitespace("    ")] []
+                        1: COLON@100..102 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@102..103
+                          0: SCSS_EXPRESSION_ITEM_LIST@102..103
+                            0: CSS_IDENTIFIER@102..103
+                              0: IDENT@102..103 "z" [] []
+                      1: (empty)
+                    1: SEMICOLON@103..104 ";" [] []
+                2: R_CURLY@104..108 "}" [Newline("\n"), Whitespace("  ")] []
+          2: R_CURLY@108..110 "}" [Newline("\n")] []
+    2: CSS_AT_RULE@110..161
+      0: AT@110..113 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@113..161
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@113..138
+          0: MEDIA_KW@113..119 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@119..138
+            0: CSS_MEDIA_AND_TYPE_QUERY@119..138
+              0: CSS_MEDIA_TYPE_QUERY@119..121
+                0: (empty)
+                1: CSS_MEDIA_TYPE@119..121
+                  0: CSS_IDENTIFIER@119..121
+                    0: IDENT@119..121 "a" [] [Whitespace(" ")]
+              1: AND_KW@121..125 "and" [] [Whitespace(" ")]
+              2: CSS_MEDIA_NOT_CONDITION@125..138
+                0: NOT_KW@125..129 "not" [] [Whitespace(" ")]
+                1: SCSS_MEDIA_QUERY@129..138
+                  0: SCSS_INTERPOLATION@129..138
+                    0: HASH@129..130 "#" [] []
+                    1: L_CURLY@130..131 "{" [] []
+                    2: SCSS_EXPRESSION@131..136
+                      0: SCSS_EXPRESSION_ITEM_LIST@131..136
+                        0: CSS_STRING@131..136
+                          0: CSS_STRING_LITERAL@131..136 "\"(b)\"" [] []
+                    3: R_CURLY@136..138 "}" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@138..161
+          0: L_CURLY@138..139 "{" [] []
+          1: CSS_RULE_LIST@139..159
+            0: CSS_QUALIFIED_RULE@139..159
+              0: CSS_SELECTOR_LIST@139..144
+                0: CSS_COMPOUND_SELECTOR@139..144
+                  0: CSS_NESTED_SELECTOR_LIST@139..139
+                  1: CSS_TYPE_SELECTOR@139..144
+                    0: (empty)
+                    1: CSS_IDENTIFIER@139..144
+                      0: IDENT@139..144 "x" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@144..144
+              1: CSS_DECLARATION_OR_RULE_BLOCK@144..159
+                0: L_CURLY@144..145 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@145..155
+                  0: CSS_DECLARATION_WITH_SEMICOLON@145..155
+                    0: CSS_DECLARATION@145..154
+                      0: CSS_GENERIC_PROPERTY@145..154
+                        0: CSS_IDENTIFIER@145..151
+                          0: IDENT@145..151 "y" [Newline("\n"), Whitespace("    ")] []
+                        1: COLON@151..153 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@153..154
+                          0: SCSS_EXPRESSION_ITEM_LIST@153..154
+                            0: CSS_IDENTIFIER@153..154
+                              0: IDENT@153..154 "z" [] []
+                      1: (empty)
+                    1: SEMICOLON@154..155 ";" [] []
+                2: R_CURLY@155..159 "}" [Newline("\n"), Whitespace("  ")] []
+          2: R_CURLY@159..161 "}" [Newline("\n")] []
+    3: CSS_AT_RULE@161..210
+      0: AT@161..164 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@164..210
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@164..187
+          0: MEDIA_KW@164..170 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@170..187
+            0: CSS_MEDIA_CONDITION_QUERY@170..187
+              0: CSS_MEDIA_AND_CONDITION@170..187
+                0: SCSS_MEDIA_QUERY@170..175
+                  0: SCSS_INTERPOLATION@170..175
+                    0: HASH@170..171 "#" [] []
+                    1: L_CURLY@171..172 "{" [] []
+                    2: SCSS_EXPRESSION@172..173
+                      0: SCSS_EXPRESSION_ITEM_LIST@172..173
+                        0: CSS_IDENTIFIER@172..173
+                          0: IDENT@172..173 "a" [] []
+                    3: R_CURLY@173..175 "}" [] [Whitespace(" ")]
+                1: AND_KW@175..179 "and" [] [Whitespace(" ")]
+                2: CSS_MEDIA_NOT_CONDITION@179..187
+                  0: NOT_KW@179..183 "not" [] [Whitespace(" ")]
+                  1: CSS_MEDIA_FEATURE_IN_PARENS@183..187
+                    0: L_PAREN@183..184 "(" [] []
+                    1: CSS_QUERY_FEATURE_BOOLEAN@184..185
+                      0: CSS_IDENTIFIER@184..185
+                        0: IDENT@184..185 "b" [] []
+                    2: R_PAREN@185..187 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@187..210
+          0: L_CURLY@187..188 "{" [] []
+          1: CSS_RULE_LIST@188..208
+            0: CSS_QUALIFIED_RULE@188..208
+              0: CSS_SELECTOR_LIST@188..193
+                0: CSS_COMPOUND_SELECTOR@188..193
+                  0: CSS_NESTED_SELECTOR_LIST@188..188
+                  1: CSS_TYPE_SELECTOR@188..193
+                    0: (empty)
+                    1: CSS_IDENTIFIER@188..193
+                      0: IDENT@188..193 "x" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@193..193
+              1: CSS_DECLARATION_OR_RULE_BLOCK@193..208
+                0: L_CURLY@193..194 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@194..204
+                  0: CSS_DECLARATION_WITH_SEMICOLON@194..204
+                    0: CSS_DECLARATION@194..203
+                      0: CSS_GENERIC_PROPERTY@194..203
+                        0: CSS_IDENTIFIER@194..200
+                          0: IDENT@194..200 "y" [Newline("\n"), Whitespace("    ")] []
+                        1: COLON@200..202 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@202..203
+                          0: SCSS_EXPRESSION_ITEM_LIST@202..203
+                            0: CSS_IDENTIFIER@202..203
+                              0: IDENT@202..203 "z" [] []
+                      1: (empty)
+                    1: SEMICOLON@203..204 ";" [] []
+                2: R_CURLY@204..208 "}" [Newline("\n"), Whitespace("  ")] []
+          2: R_CURLY@208..210 "}" [Newline("\n")] []
+    4: CSS_AT_RULE@210..270
+      0: AT@210..213 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@213..270
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@213..247
+          0: MEDIA_KW@213..219 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@219..247
+            0: CSS_MEDIA_CONDITION_QUERY@219..247
+              0: CSS_MEDIA_CONDITION_IN_PARENS@219..247
+                0: L_PAREN@219..220 "(" [] []
+                1: CSS_MEDIA_AND_CONDITION@220..245
+                  0: SCSS_MEDIA_QUERY@220..230
+                    0: SCSS_INTERPOLATION@220..230
+                      0: HASH@220..221 "#" [] []
+                      1: L_CURLY@221..222 "{" [] []
+                      2: SCSS_EXPRESSION@222..228
+                        0: SCSS_EXPRESSION_ITEM_LIST@222..228
+                          0: SCSS_VARIABLE@222..228
+                            0: DOLLAR@222..223 "$" [] []
+                            1: CSS_IDENTIFIER@223..228
+                              0: IDENT@223..228 "query" [] []
+                      3: R_CURLY@228..230 "}" [] [Whitespace(" ")]
+                  1: AND_KW@230..234 "and" [] [Whitespace(" ")]
+                  2: CSS_MEDIA_NOT_CONDITION@234..245
+                    0: NOT_KW@234..238 "not" [] [Whitespace(" ")]
+                    1: CSS_MEDIA_FEATURE_IN_PARENS@238..245
+                      0: L_PAREN@238..239 "(" [] []
+                      1: CSS_QUERY_FEATURE_BOOLEAN@239..244
+                        0: CSS_IDENTIFIER@239..244
+                          0: IDENT@239..244 "color" [] []
+                      2: R_PAREN@244..245 ")" [] []
+                2: R_PAREN@245..247 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@247..270
+          0: L_CURLY@247..248 "{" [] []
+          1: CSS_RULE_LIST@248..268
+            0: CSS_QUALIFIED_RULE@248..268
+              0: CSS_SELECTOR_LIST@248..253
+                0: CSS_COMPOUND_SELECTOR@248..253
+                  0: CSS_NESTED_SELECTOR_LIST@248..248
+                  1: CSS_TYPE_SELECTOR@248..253
+                    0: (empty)
+                    1: CSS_IDENTIFIER@248..253
+                      0: IDENT@248..253 "x" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@253..253
+              1: CSS_DECLARATION_OR_RULE_BLOCK@253..268
+                0: L_CURLY@253..254 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@254..264
+                  0: CSS_DECLARATION_WITH_SEMICOLON@254..264
+                    0: CSS_DECLARATION@254..263
+                      0: CSS_GENERIC_PROPERTY@254..263
+                        0: CSS_IDENTIFIER@254..260
+                          0: IDENT@254..260 "y" [Newline("\n"), Whitespace("    ")] []
+                        1: COLON@260..262 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@262..263
+                          0: SCSS_EXPRESSION_ITEM_LIST@262..263
+                            0: CSS_IDENTIFIER@262..263
+                              0: IDENT@262..263 "z" [] []
+                      1: (empty)
+                    1: SEMICOLON@263..264 ";" [] []
+                2: R_CURLY@264..268 "}" [Newline("\n"), Whitespace("  ")] []
+          2: R_CURLY@268..270 "}" [Newline("\n")] []
+    5: CSS_AT_RULE@270..315
+      0: AT@270..273 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@273..315
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@273..292
+          0: MEDIA_KW@273..279 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@279..292
+            0: CSS_MEDIA_CONDITION_QUERY@279..292
+              0: CSS_MEDIA_NOT_CONDITION@279..292
+                0: NOT_KW@279..283 "not" [] [Whitespace(" ")]
+                1: SCSS_MEDIA_QUERY@283..292
+                  0: SCSS_INTERPOLATION@283..292
+                    0: HASH@283..284 "#" [] []
+                    1: L_CURLY@284..285 "{" [] []
+                    2: SCSS_EXPRESSION@285..290
+                      0: SCSS_EXPRESSION_ITEM_LIST@285..290
+                        0: CSS_STRING@285..290
+                          0: CSS_STRING_LITERAL@285..290 "\"(a)\"" [] []
+                    3: R_CURLY@290..292 "}" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@292..315
+          0: L_CURLY@292..293 "{" [] []
+          1: CSS_RULE_LIST@293..313
+            0: CSS_QUALIFIED_RULE@293..313
+              0: CSS_SELECTOR_LIST@293..298
+                0: CSS_COMPOUND_SELECTOR@293..298
+                  0: CSS_NESTED_SELECTOR_LIST@293..293
+                  1: CSS_TYPE_SELECTOR@293..298
+                    0: (empty)
+                    1: CSS_IDENTIFIER@293..298
+                      0: IDENT@293..298 "x" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@298..298
+              1: CSS_DECLARATION_OR_RULE_BLOCK@298..313
+                0: L_CURLY@298..299 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@299..309
+                  0: CSS_DECLARATION_WITH_SEMICOLON@299..309
+                    0: CSS_DECLARATION@299..308
+                      0: CSS_GENERIC_PROPERTY@299..308
+                        0: CSS_IDENTIFIER@299..305
+                          0: IDENT@299..305 "y" [Newline("\n"), Whitespace("    ")] []
+                        1: COLON@305..307 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@307..308
+                          0: SCSS_EXPRESSION_ITEM_LIST@307..308
+                            0: CSS_IDENTIFIER@307..308
+                              0: IDENT@307..308 "z" [] []
+                      1: (empty)
+                    1: SEMICOLON@308..309 ";" [] []
+                2: R_CURLY@309..313 "}" [Newline("\n"), Whitespace("  ")] []
+          2: R_CURLY@313..315 "}" [Newline("\n")] []
+  2: EOF@315..316 "" [Newline("\n")] []
+
+```

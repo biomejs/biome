@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::utils::FormatOptionalSemicolon;
 
-use biome_formatter::trivia::FormatLeadingComments;
+use biome_formatter::trivia::format_leading_comments_from_slice;
 use biome_formatter::{format_args, write};
 use biome_js_syntax::{TsMappedType, TsMappedTypeFields};
 use biome_rowan::Direction;
@@ -34,10 +34,12 @@ impl FormatNodeRule<TsMappedType> for FormatTsMappedType {
             .as_ref()
             .is_some_and(|annotation| comments.has_leading_comments(annotation.syntax()));
 
+        let delimiter_spacing = f.options().delimiter_spacing().value();
+
         let format_inner = format_with(|f| {
             write!(
                 f,
-                [FormatLeadingComments::Comments(
+                [format_leading_comments_from_slice(
                     comments.dangling_comments(node.syntax())
                 )]
             )?;
@@ -46,11 +48,11 @@ impl FormatNodeRule<TsMappedType> for FormatTsMappedType {
                 write!(f, [readonly_modifier.format(), space()])?;
             }
 
-            write!(
-                f,
-                [
-                    group(&format_args![
-                        l_brack_token.format(),
+            // Format the bracket content with optional delimiter spacing
+            let format_bracket_content = format_with(|f| {
+                write!(
+                    f,
+                    [
                         property_name.format(),
                         space(),
                         in_token.format(),
@@ -58,14 +60,43 @@ impl FormatNodeRule<TsMappedType> for FormatTsMappedType {
                         keys_type.format(),
                         as_clause.as_ref().map(|_| space()),
                         as_clause.format(),
-                        r_brack_token.format(),
-                    ]),
-                    optional_modifier.format(),
-                    type_annotation_has_leading_comment.then_some(space()),
-                    mapped_type.format(),
-                    if_group_breaks(&FormatOptionalSemicolon::new(semicolon_token.as_ref()))
-                ]
-            )
+                    ]
+                )
+            });
+
+            if delimiter_spacing {
+                write!(
+                    f,
+                    [
+                        group(&format_args![
+                            l_brack_token.format(),
+                            space(),
+                            format_bracket_content,
+                            space(),
+                            r_brack_token.format(),
+                        ]),
+                        optional_modifier.format(),
+                        type_annotation_has_leading_comment.then_some(space()),
+                        mapped_type.format(),
+                        if_group_breaks(&FormatOptionalSemicolon::new(semicolon_token.as_ref()))
+                    ]
+                )
+            } else {
+                write!(
+                    f,
+                    [
+                        group(&format_args![
+                            l_brack_token.format(),
+                            format_bracket_content,
+                            r_brack_token.format(),
+                        ]),
+                        optional_modifier.format(),
+                        type_annotation_has_leading_comment.then_some(space()),
+                        mapped_type.format(),
+                        if_group_breaks(&FormatOptionalSemicolon::new(semicolon_token.as_ref()))
+                    ]
+                )
+            }
         });
 
         let should_insert_space_around_brackets = f.options().bracket_spacing().value();

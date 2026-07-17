@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/directives/directives.scss
+---
+
+# Input
+
+```scss
+@qux .foo
+// .bar 
+
+{}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+-@qux .foo
+-// .bar
+-{
++@// .bar
++
++qux .foo {
+ }
+```
+
+# Output
+
+```scss
+@// .bar
+
+qux .foo {
+}
+```

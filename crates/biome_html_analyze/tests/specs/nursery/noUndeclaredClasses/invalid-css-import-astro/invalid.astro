@@ -1,0 +1,13 @@
+<!-- should generate diagnostics -->
+---
+import "./styles.css";
+---
+
+<!-- class:list: .card is defined, .missing is not -->
+<div class:list={["card", "missing"]}>class:list</div>
+
+<!-- class={expr}: .hero is defined, .missing is not -->
+<div class={"hero missing"}>class expression</div>
+
+<!-- plain class: .container is defined, .unknown is not -->
+<div class="container unknown">plain class</div>

@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 <>
 	<audio><track /></audio>
 	<audio><track kind="subtitles" /></audio>

@@ -1,0 +1,26 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<label label="A label"></label>
+
+```
+
+# Diagnostics
+```
+invalid.vue:2:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with an input.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <label label="A label"></label>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Consider adding a "for" attribute to the label element or moving the input element to inside the label element.
+  
+
+```

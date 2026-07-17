@@ -1,0 +1,19 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.svelte`
+
+```svelte
+<script lang="ts" generics="T extends Record<string, unknown>, U extends FormPath<T>">
+import type { FormPath } from "sveltekit-superforms";
+const hello: string = "world";
+</script>
+<div></div>
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

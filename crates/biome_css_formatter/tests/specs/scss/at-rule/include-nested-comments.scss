@@ -1,0 +1,83 @@
+@include nested-comments(
+$map:(
+outer:(
+inner:1px,/* nested map block */
+keep-with-pair:3px /* keep with pair */,
+next-pair:4px,
+very-very-very-very-very-very-very-very-very-very-very-very-very-long-key:2px,/* nested map tail */
+),/* map end */
+),
+/* between nested groups */
+$list:(
+1px,/* nested list block */
+2px,
+// nested list line
+very-very-very-very-very-very-very-very-very-very-very-very-very-long-item 3px,/* nested list tail */
+),
+/* between nested groups */
+$paren:(
+/* nested paren block */
+(
+1px,/* nested paren inline */
+2px,
+very-very-very-very-very-very-very-very-very-very-very-very-very-long-item 3px,/* nested paren tail */
+)
+),
+);
+
+@include nested-closing-line-comments(
+$map-line-close:(
+key:value,
+// nested map line close
+),
+$list-line-close:(
+1px,
+// nested list line close
+),
+$paren-line-close:(
+(
+1px,
+// nested paren line close
+)
+),
+);
+
+@include nested-outer-closing-comments(
+$outer-list-close:(
+1px,
+2px
+)/* outer list close */,
+$outer-params-close:fn(
+1px,
+2px
+)/* outer params close */,
+);
+
+@include nested-final-outer-closing-comments(
+$outer-list-final:(
+1px,
+2px
+)/* outer list final */,
+$outer-params-final:fn(
+1px,
+2px
+)/* outer params final */
+);
+
+@include direct-final-outer-closing-comments(
+(
+1px,
+2px
+)/* outer positional list final */,
+fn(
+1px,
+2px
+)/* outer positional params final */
+);
+
+@include nested-map-separator-line-comments(
+$map-separator:(
+a:1px // map separator line
+, b:2px
+)
+);

@@ -1,0 +1,98 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: withRenamedImport.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import AwesomeReact, { createElement as awesomeCreateElement } from "react";
+
+AwesomeReact.createElement('button');
+AwesomeReact.createElement('button', {
+    "type": "AwesomeReact"
+});
+
+awesomeCreateElement('button', {
+    "type": "awesomeCreateElement"
+});
+
+awesomeCreateElement('button', {
+    "type": 1
+});
+
+```
+
+# Diagnostics
+```
+withRenamedImport.js:4:28 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    2 │ import AwesomeReact, { createElement as awesomeCreateElement } from "react";
+    3 │ 
+  > 4 │ AwesomeReact.createElement('button');
+      │                            ^^^^^^^^
+    5 │ AwesomeReact.createElement('button', {
+    6 │     "type": "AwesomeReact"
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+withRenamedImport.js:6:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid type prop for the button element.
+  
+    4 │ AwesomeReact.createElement('button');
+    5 │ AwesomeReact.createElement('button', {
+  > 6 │     "type": "AwesomeReact"
+      │             ^^^^^^^^^^^^^^
+    7 │ });
+    8 │ 
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+withRenamedImport.js:10:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid type prop for the button element.
+  
+     9 │ awesomeCreateElement('button', {
+  > 10 │     "type": "awesomeCreateElement"
+       │             ^^^^^^^^^^^^^^^^^^^^^^
+    11 │ });
+    12 │ 
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+withRenamedImport.js:14:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid type prop for the button element.
+  
+    13 │ awesomeCreateElement('button', {
+  > 14 │     "type": 1
+       │             ^
+    15 │ });
+    16 │ 
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```

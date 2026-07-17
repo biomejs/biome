@@ -1,0 +1,68 @@
+# Unsorted ObjectType fields
+type User {
+  name: String
+  age: Int
+  id: ID
+}
+
+# Unsorted InterfaceType fields
+interface Node {
+  name: String
+  id: ID
+}
+
+# Unsorted InputObjectType fields
+input CreateUserInput {
+  name: String
+  age: Int
+}
+
+# Mixed case (case-insensitive: "Zoo" should come after "apple")
+type Mixed {
+  Zoo: String
+  apple: String
+}
+
+# Tiebreaker: lowercase before uppercase when names differ only in case
+type CaseTiebreaker {
+  AField: String
+  aField: String
+}
+
+# localeCompare parity: underscore sorts before digits
+type IdentifierChars {
+  a1: String
+  a_: String
+}
+
+# Unsorted ObjectTypeExtension fields
+extend type User {
+  name: String
+  age: Int
+}
+
+# Unsorted InterfaceTypeExtension fields
+extend interface Node {
+  name: String
+  id: ID
+}
+
+# Unsorted InputObjectTypeExtension fields
+extend input CreateUserInput {
+  name: String
+  age: Int
+}
+
+# Unsorted ObjectType fields with comments & descriptions
+type User {
+	# Name of the user
+  name: String
+  age: Int # Age of the user
+	"""
+  ID of the user
+  """
+  id: ID
+	"City of the user"
+	city: String
+	# Add aditional fields
+}

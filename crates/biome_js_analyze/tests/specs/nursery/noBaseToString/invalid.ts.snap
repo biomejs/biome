@@ -1,0 +1,240 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+String({});
+({}).toString();
+({}).toLocaleString();
+`${{}}`;
+
+declare const objectOrString: {} | string;
+String(objectOrString);
+
+class PlainObject {
+    value: string;
+}
+
+declare const plainInstance: PlainObject;
+plainInstance.toString();
+"prefix: " + plainInstance;
+
+declare const joined: [{}];
+joined.join(",");
+
+declare const stringOrPlainArray: (string | PlainObject)[];
+stringOrPlainArray.join(",");
+
+declare const pair: [string, PlainObject];
+`${pair}`;
+
+declare let sink: string;
+sink += plainInstance;
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:8 lint/nursery/noBaseToString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This expression will use the default object stringification format, such as [object Object], when stringified.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ String({});
+      │        ^^
+    4 │ ({}).toString();
+    5 │ ({}).toLocaleString();
+  
+  i Stringify a primitive value, define a custom stringification method, or serialize the object explicitly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:1 lint/nursery/noBaseToString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This expression will use the default object stringification format, such as [object Object], when stringified.
+  
+    3 │ String({});
+  > 4 │ ({}).toString();
+      │ ^^^^
+    5 │ ({}).toLocaleString();
+    6 │ `${{}}`;
+  
+  i Stringify a primitive value, define a custom stringification method, or serialize the object explicitly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:1 lint/nursery/noBaseToString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This expression will use the default object stringification format, such as [object Object], when stringified.
+  
+    3 │ String({});
+    4 │ ({}).toString();
+  > 5 │ ({}).toLocaleString();
+      │ ^^^^
+    6 │ `${{}}`;
+    7 │ 
+  
+  i Stringify a primitive value, define a custom stringification method, or serialize the object explicitly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:4 lint/nursery/noBaseToString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This expression will use the default object stringification format, such as [object Object], when stringified.
+  
+    4 │ ({}).toString();
+    5 │ ({}).toLocaleString();
+  > 6 │ `${{}}`;
+      │    ^^
+    7 │ 
+    8 │ declare const objectOrString: {} | string;
+  
+  i Stringify a primitive value, define a custom stringification method, or serialize the object explicitly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:9:8 lint/nursery/noBaseToString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This expression may use the default object stringification format, such as [object Object], when stringified.
+  
+     8 │ declare const objectOrString: {} | string;
+   > 9 │ String(objectOrString);
+       │        ^^^^^^^^^^^^^^
+    10 │ 
+    11 │ class PlainObject {
+  
+  i Stringify a primitive value, define a custom stringification method, or serialize the object explicitly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:16:1 lint/nursery/noBaseToString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This expression will use the default object stringification format, such as [object Object], when stringified.
+  
+    15 │ declare const plainInstance: PlainObject;
+  > 16 │ plainInstance.toString();
+       │ ^^^^^^^^^^^^^
+    17 │ "prefix: " + plainInstance;
+    18 │ 
+  
+  i Stringify a primitive value, define a custom stringification method, or serialize the object explicitly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:14 lint/nursery/noBaseToString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This expression will use the default object stringification format, such as [object Object], when stringified.
+  
+    15 │ declare const plainInstance: PlainObject;
+    16 │ plainInstance.toString();
+  > 17 │ "prefix: " + plainInstance;
+       │              ^^^^^^^^^^^^^
+    18 │ 
+    19 │ declare const joined: [{}];
+  
+  i Stringify a primitive value, define a custom stringification method, or serialize the object explicitly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:20:1 lint/nursery/noBaseToString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This join() call will stringify one or more elements with the default object format, such as [object Object].
+  
+    19 │ declare const joined: [{}];
+  > 20 │ joined.join(",");
+       │ ^^^^^^
+    21 │ 
+    22 │ declare const stringOrPlainArray: (string | PlainObject)[];
+  
+  i Ensure every joined element has a useful string representation, or map the values before joining.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:23:1 lint/nursery/noBaseToString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This join() call may stringify one or more elements with the default object format, such as [object Object].
+  
+    22 │ declare const stringOrPlainArray: (string | PlainObject)[];
+  > 23 │ stringOrPlainArray.join(",");
+       │ ^^^^^^^^^^^^^^^^^^
+    24 │ 
+    25 │ declare const pair: [string, PlainObject];
+  
+  i Ensure every joined element has a useful string representation, or map the values before joining.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:26:4 lint/nursery/noBaseToString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This expression will use the default object stringification format, such as [object Object], when stringified.
+  
+    25 │ declare const pair: [string, PlainObject];
+  > 26 │ `${pair}`;
+       │    ^^^^
+    27 │ 
+    28 │ declare let sink: string;
+  
+  i Stringify a primitive value, define a custom stringification method, or serialize the object explicitly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:29:9 lint/nursery/noBaseToString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This expression will use the default object stringification format, such as [object Object], when stringified.
+  
+    28 │ declare let sink: string;
+  > 29 │ sink += plainInstance;
+       │         ^^^^^^^^^^^^^
+    30 │ 
+  
+  i Stringify a primitive value, define a custom stringification method, or serialize the object explicitly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-7-24-flow-nodes.yml
+---
+
+# Input
+
+```yml
+- !!str "a"
+- 'b'
+- &anchor "c"
+- *anchor
+- !!str
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+ - !!str "a"
+-- "b"
++- 'b'
+ - &anchor "c"
+ - *anchor
+ - !!str
+```
+
+# Output
+
+```yml
+- !!str "a"
+- 'b'
+- &anchor "c"
+- *anchor
+- !!str
+```

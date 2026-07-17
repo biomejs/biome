@@ -1,5 +1,7 @@
 mod assertions;
+mod db;
 pub mod declarations;
+mod format;
 mod functions;
 mod infer;
 mod references;

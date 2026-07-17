@@ -13,3 +13,11 @@
 @each $key, in $map {
   color: red;
 }
+
+@each $item in , $list {
+  color: red;
+}
+
+@each $item in puma,, sea-slug {
+  color: red;
+}

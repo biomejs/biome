@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_svelte_snippet_defaults.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script>
+let fallback = {};
+let emptyList = [];
+</script>
+
+{#snippet withArrayDefault([first, second] = emptyList)}
+    <span>{first} - {second}</span>
+{/snippet}
+
+{#snippet withPlainDefault(image = fallback)}
+    <img src={image.src} />
+{/snippet}
+
+```

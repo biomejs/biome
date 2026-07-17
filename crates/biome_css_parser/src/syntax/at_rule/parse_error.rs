@@ -12,7 +12,23 @@ pub(crate) fn expected_keyframes_item(p: &CssParser, range: TextRange) -> ParseD
 }
 
 pub(crate) fn expected_keyframes_item_selector(p: &CssParser, range: TextRange) -> ParseDiagnostic {
-    expect_one_of(&["from", "to", "a percentage"], range).into_diagnostic(p)
+    expect_one_of(
+        &[
+            "from",
+            "to",
+            "a percentage",
+            "a timeline-range-name (cover, contain, entry, exit, entry-crossing, exit-crossing)",
+        ],
+        range,
+    )
+    .into_diagnostic(p)
+}
+
+pub(crate) fn expected_percentage_after_timeline_range_name(
+    p: &CssParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    expected_node("percentage after timeline-range-name", range, p)
 }
 
 pub(crate) fn expected_page_selector(p: &CssParser, range: TextRange) -> ParseDiagnostic {

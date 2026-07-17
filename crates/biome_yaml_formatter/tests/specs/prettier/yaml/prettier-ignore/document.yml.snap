@@ -1,0 +1,46 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/prettier-ignore/document.yml
+---
+
+# Input
+
+```yml
+# prettier-ignore
+---
+aaaaa:
+           bbbbb
+...
+aaaaa:
+           bbbbb
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,5 +2,6 @@
+ ---
+ aaaaa:
+            bbbbb
+----
+-aaaaa: bbbbb
++...
++aaaaa:
++           bbbbb
+```
+
+# Output
+
+```yml
+# prettier-ignore
+---
+aaaaa:
+           bbbbb
+...
+aaaaa:
+           bbbbb
+```

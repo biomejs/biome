@@ -85,9 +85,10 @@ impl Rule for UseDateNow {
 
     fn diagnostic(_: &RuleContext<Self>, (node, kind): &Self::State) -> Option<RuleDiagnostic> {
         let message = match kind {
-            UseDateNowIssueKind::ReplaceMethod(method) => format!("new Date().{method}()"),
-            UseDateNowIssueKind::ReplaceConstructor => "new Date()".to_string(),
-            UseDateNowIssueKind::ReplaceNumberConstructor => "Number(new Date())".to_string(),
+            UseDateNowIssueKind::ReplaceGetTimeMethod => "new Date().getTime()",
+            UseDateNowIssueKind::ReplaceValueOfMethod => "new Date().valueOf()",
+            UseDateNowIssueKind::ReplaceConstructor => "new Date()",
+            UseDateNowIssueKind::ReplaceNumberConstructor => "Number(new Date())",
         };
 
         Some(RuleDiagnostic::new(
@@ -150,7 +151,8 @@ impl Rule for UseDateNow {
 }
 
 pub enum UseDateNowIssueKind {
-    ReplaceMethod(String),
+    ReplaceGetTimeMethod,
+    ReplaceValueOfMethod,
     ReplaceConstructor,
     ReplaceNumberConstructor,
 }
@@ -187,7 +189,11 @@ fn get_date_method_issue(
 
     Some((
         AnyJsExpression::cast_ref(call_expr.syntax())?,
-        UseDateNowIssueKind::ReplaceMethod(member_name.to_string()),
+        match member_name.text() {
+            "getTime" => UseDateNowIssueKind::ReplaceGetTimeMethod,
+            "valueOf" => UseDateNowIssueKind::ReplaceValueOfMethod,
+            _ => return None,
+        },
     ))
 }
 

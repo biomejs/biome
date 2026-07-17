@@ -1,11 +1,11 @@
 // Built-in SCSS modules
-// TODO(scss at-rules): @use "sass:math";
-// TODO(scss at-rules): @use "sass:color";
-// TODO(scss at-rules): @use "sass:string";
-// TODO(scss at-rules): @use "sass:list";
-// TODO(scss at-rules): @use "sass:map";
-// TODO(scss at-rules): @use "sass:selector";
-// TODO(scss at-rules): @use "sass:meta";
+@use "sass:math";
+@use "sass:color";
+@use "sass:string";
+@use "sass:list";
+@use "sass:map";
+@use "sass:selector";
+@use "sass:meta";
 
 // Math module
 .math-test {
@@ -72,6 +72,5 @@ $my-map: (key1: value1, key2: value2);
   unitless: meta.unitless(10);
   comparable: meta.comparable(10px, 10em);
 }
-
 
 

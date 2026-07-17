@@ -1,0 +1,20 @@
+---
+!!str &a1 scalar1
+---
+!!str &a2 scalar2
+---
+!!str &a3 scalar3
+---
+!!map &a4
+!!str &a5 key5: value4
+---
+a6: 1
+&anchor6 b6: 2
+---
+!!map
+!!str &a8 key8: value7
+---
+!!map
+!!str &a10 key10: value9
+---
+!!str &a11 value11

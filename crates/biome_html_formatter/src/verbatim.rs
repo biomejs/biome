@@ -55,6 +55,17 @@ pub struct FormatHtmlVerbatimNode<'node> {
 
 impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
     fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
+        fn source_range<Context>(f: &Formatter<Context>, range: TextRange) -> TextRange
+        where
+            Context: CstFormatContext,
+        {
+            f.context()
+                .source_map()
+                .map_or_else(|| range, |source_map| source_map.source_range(range))
+        }
+
+        let preserve_outer_trivia = self.node.parent().is_none();
+
         for element in self.node.descendants_with_tokens(Direction::Next) {
             match element {
                 SyntaxElement::Token(token) => f.state_mut().track_token(&token),
@@ -72,21 +83,22 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
         // The trimmed range of a node is its range without any of its leading or trailing trivia.
         // Except for nodes that used to be parenthesized, the range than covers the source from the
         // `(` to the `)` (the trimmed range of the parenthesized expression, not the inner expression)
-        let trimmed_source_range = f.context().source_map().map_or_else(
-            || self.node.text_trimmed_range(),
-            |source_map| source_map.trimmed_source_range(self.node),
-        );
+        let verbatim_source_range = if preserve_outer_trivia {
+            source_range(f, self.node.text_range_with_trivia())
+        } else {
+            f.context().source_map().map_or_else(
+                || self.node.text_trimmed_range(),
+                |source_map| source_map.trimmed_source_range(self.node),
+            )
+        };
+
+        let verbatim_text_start = if preserve_outer_trivia {
+            self.node.text_range_with_trivia().start()
+        } else {
+            self.node.text_trimmed_range().start()
+        };
 
         f.write_element(FormatElement::Tag(Tag::StartVerbatim(self.kind)))?;
-
-        fn source_range<Context>(f: &Formatter<Context>, range: TextRange) -> TextRange
-        where
-            Context: CstFormatContext,
-        {
-            f.context()
-                .source_map()
-                .map_or_else(|| range, |source_map| source_map.source_range(range))
-        }
 
         // Format all leading comments that are outside of the node's source range.
         if self.format_comments {
@@ -94,7 +106,7 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
             let leading_comments = comments.leading_comments(self.node);
 
             let outside_trimmed_range = leading_comments.partition_point(|comment| {
-                comment.piece().text_range().end() <= trimmed_source_range.start()
+                comment.piece().text_range().end() <= verbatim_source_range.start()
             });
 
             let (outside_trimmed_range, in_trimmed_range) =
@@ -116,23 +128,29 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
             .flat_map(|trivia| trivia.pieces())
             .filter(|trivia| trivia.is_skipped())
             .map(|trivia| source_range(f, trivia.text_range()).start())
-            .take_while(|start| *start < trimmed_source_range.start())
+            .take_while(|start| *start < verbatim_source_range.start())
             .next()
-            .unwrap_or_else(|| trimmed_source_range.start());
+            .unwrap_or_else(|| verbatim_source_range.start());
 
         let original_source = f.context().source_map().map_or_else(
-            || self.node.text_trimmed().to_string(),
+            || {
+                if preserve_outer_trivia {
+                    self.node.text_with_trivia().to_string()
+                } else {
+                    self.node.text_trimmed().to_string()
+                }
+            },
             |source_map| {
                 source_map
                     .source()
-                    .text_slice(trimmed_source_range.cover_offset(start_source))
+                    .text_slice(verbatim_source_range.cover_offset(start_source))
                     .to_string()
             },
         );
 
         text(
             &normalize_newlines(&original_source, LINE_TERMINATORS),
-            self.node.text_trimmed_range().start(),
+            Some(verbatim_text_start),
         )
         .fmt(f)?;
 
@@ -147,7 +165,7 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
             let trailing_comments = comments.trailing_comments(self.node);
 
             let outside_trimmed_range_start = trailing_comments.partition_point(|comment| {
-                source_range(f, comment.piece().text_range()).end() <= trimmed_source_range.end()
+                source_range(f, comment.piece().text_range()).end() <= verbatim_source_range.end()
             });
 
             let (in_trimmed_range, outside_trimmed_range) =
@@ -261,8 +279,17 @@ fn format_leading_comments_impl(
                         } else if is_block_element {
                             // Block elements always get a line break after leading comments
                             biome_formatter::write!(f, [hard_line_break()])?;
-                        } else {
-                            // Inline elements get a space
+                        } else if comment.piece().text().chars().nth(1) == Some('*') {
+                            // Non-HTML block comments, such as `/* */` in Svelte, still need a
+                            // separator from the following inline element.
+
+                            // The above condition seems unusual at a glance. Clearly it would be more ideal to provide
+                            // this function with more information about the comment, such as whether it's an HTML
+                            // comment or not. However, this is a pragmatic solution to avoid having to thread more
+                            // information through the formatter for now, and it works because `<!--` is the only
+                            // comment syntax in HTML, and because line comments (e.g. `//`) don't match this condition.
+                            //
+                            // Checking the second character lets us only require a single check instead of calling starts_with for every comment, which is more expensive.
                             biome_formatter::write!(f, [space()])?;
                         }
                     }

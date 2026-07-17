@@ -1,4 +1,4 @@
-use crate::MdFormatContext;
+use crate::MarkdownFormatContext;
 use crate::cst::FormatMdSyntaxToken;
 use biome_formatter::formatter::Formatter;
 use biome_formatter::trivia::FormatToken;
@@ -13,20 +13,20 @@ pub(crate) fn format_removed(token: &MarkdownSyntaxToken) -> FormatRemoved<'_> {
     FormatRemoved { token }
 }
 
-impl<'a> Format<MdFormatContext> for FormatRemoved<'a> {
-    fn fmt(&self, f: &mut Formatter<MdFormatContext>) -> FormatResult<()> {
+impl<'a> Format<MarkdownFormatContext> for FormatRemoved<'a> {
+    fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
         FormatMdSyntaxToken.format_removed(self.token, f)
     }
 }
 
 pub(crate) struct FormatReplaced<'a> {
     token: &'a MarkdownSyntaxToken,
-    content: Argument<'a, MdFormatContext>,
+    content: Argument<'a, MarkdownFormatContext>,
 }
 
 pub(crate) fn format_replaced<'a>(
     token: &'a MarkdownSyntaxToken,
-    content: &'a impl Format<MdFormatContext>,
+    content: &'a impl Format<MarkdownFormatContext>,
 ) -> FormatReplaced<'a> {
     FormatReplaced {
         token,
@@ -34,8 +34,8 @@ pub(crate) fn format_replaced<'a>(
     }
 }
 
-impl<'a> Format<MdFormatContext> for FormatReplaced<'a> {
-    fn fmt(&self, f: &mut Formatter<MdFormatContext>) -> FormatResult<()> {
+impl<'a> Format<MarkdownFormatContext> for FormatReplaced<'a> {
+    fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
         FormatMdSyntaxToken.format_replaced(self.token, &self.content, f)
     }
 }

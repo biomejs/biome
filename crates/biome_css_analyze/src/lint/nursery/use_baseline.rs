@@ -218,7 +218,7 @@ declare_lint_rule! {
         name: "useBaseline",
         language: "css",
         recommended: false,
-        sources: &[RuleSource::EslintCss("use-baseline").inspired()],
+        sources: &[RuleSource::EslintCss("use-baseline").inspired(), RuleSource::HtmlEslint("use-baseline").inspired()],
     }
 }
 
@@ -236,13 +236,27 @@ impl Rule for UseBaseline {
             AnyBaselineCheckable::CssGenericProperty(prop) => check_property(prop, options),
             AnyBaselineCheckable::CssFunction(func) => check_function(func, options),
             AnyBaselineCheckable::CssPseudoClassIdentifier(pseudo) => check_pseudo(
-                pseudo.name().ok()?.value_token().ok()?.token_text_trimmed(),
+                // `:foo-#{$name}` cannot be checked until Sass resolves the name.
+                pseudo
+                    .name()
+                    .ok()?
+                    .as_css_identifier()?
+                    .value_token()
+                    .ok()?
+                    .token_text_trimmed(),
                 pseudo.syntax().text_trimmed_range(),
                 "pseudo-class",
                 options,
             ),
             AnyBaselineCheckable::CssPseudoElementIdentifier(pseudo) => check_pseudo(
-                pseudo.name().ok()?.value_token().ok()?.token_text_trimmed(),
+                // `::foo-#{$name}` cannot be checked until Sass resolves the name.
+                pseudo
+                    .name()
+                    .ok()?
+                    .as_css_identifier()?
+                    .value_token()
+                    .ok()?
+                    .token_text_trimmed(),
                 pseudo.syntax().text_trimmed_range(),
                 "pseudo-element",
                 options,
@@ -325,7 +339,7 @@ impl FeatureName {
         match self {
             Self::Token(name) => name.text().to_string(),
             Self::PropertyValue(key, value) => format!("{}: {}", key.text(), value.text()),
-            Self::String(name) => name.to_string(),
+            Self::String(name) => (*name).to_string(),
         }
     }
 
@@ -556,7 +570,7 @@ fn check_media_condition(
     options: &UseBaselineOptions,
 ) -> Option<UseBaselineState> {
     let name_node = feature.name().ok()?;
-    let tok = name_node.value_token().ok()?;
+    let tok = name_node.as_css_identifier()?.value_token().ok()?;
     let name = tok.token_text_trimmed();
 
     if in_allow_list(&name, &options.allow_media_conditions) {

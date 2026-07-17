@@ -41,7 +41,7 @@ impl FormatRule<SourceComment<JsLanguage>> for FormatJsLeadingComment {
 
             // SAFETY: Safe, `is_alignable_comment` only returns `true` for multiline comments
             let first_line = lines.next().unwrap();
-            write!(f, [text(first_line.trim_end(), source_offset)])?;
+            write!(f, [text(first_line.trim_end(), Some(source_offset))])?;
 
             source_offset += first_line.text_len();
 
@@ -55,7 +55,7 @@ impl FormatRule<SourceComment<JsLanguage>> for FormatJsLeadingComment {
                             [
                                 hard_line_break(),
                                 token(" "),
-                                text(line.trim(), source_offset)
+                                text(line.trim(), Some(source_offset))
                             ]
                         )?;
 
@@ -622,6 +622,7 @@ fn handle_root_comments(comment: DecoratedComment<JsLanguage>) -> CommentPlaceme
         let is_blank = match &root {
             AnyJsRoot::JsExpressionSnippet(_) => false,
             AnyJsRoot::JsExpressionTemplateRoot(_) => false,
+            AnyJsRoot::JsSvelteSnippetRoot(_) => false,
             AnyJsRoot::JsModule(module) => {
                 module.directives().is_empty() && module.items().is_empty()
             }
@@ -850,8 +851,11 @@ fn handle_if_statement_comment(
             // ```javascript
             // if (cond1)  /* test */ if (other) { a }
             // ```
-            if let Some(if_statement) = JsIfStatement::cast_ref(following)
-                && let Ok(nested_consequent) = if_statement.consequent()
+            if let Some(nested_if) = JsIfStatement::cast_ref(following)
+                && if_statement
+                    .consequent()
+                    .is_ok_and(|consequent| consequent.syntax() == following)
+                && let Ok(nested_consequent) = nested_if.consequent()
             {
                 return place_leading_statement_comment(nested_consequent, comment);
             }
@@ -1061,16 +1065,15 @@ fn handle_variable_declarator_comment(
 
     let enclosing = comment.enclosing_node();
     match enclosing.kind() {
-        JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION | JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => {
+        JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION | JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION
             // Makes all comments preceding objects/arrays/templates or block comments leading comments of these nodes.
             // ```javascript
             // let a = // comment
             // { };
             // ```
-            if is_complex_value(following) || !comment.kind().is_line() {
+            if (is_complex_value(following) || !comment.kind().is_line()) => {
                 return CommentPlacement::leading(following.clone(), comment);
             }
-        }
         JsSyntaxKind::JS_VARIABLE_DECLARATOR => {
             let variable_declarator = JsVariableDeclarator::unwrap_cast(enclosing.clone());
 

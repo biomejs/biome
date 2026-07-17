@@ -284,7 +284,7 @@ fn handle_any_file<'scope>(
     }
 
     if file_type.is_symlink() {
-        // Here we don't care if it's a file or not. We care only about the the is_symlink flag being true
+        // Here we don't care if it's a file or not. We care only about the is_symlink flag being true
         let path_to_check =
             BiomePath::new_with_kind(path.clone(), PathKind::File { is_symlink: true });
         if !ctx.can_handle(&path_to_check) {

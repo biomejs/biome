@@ -75,6 +75,7 @@ AnyHtmlElement =
 	| HtmlElement
 	| AnyHtmlContent
 	| HtmlCdataSection
+	| HtmlProcessingInstruction
 	| HtmlBogusElement
 
 AnyHtmlContent =
@@ -174,6 +175,14 @@ AstroFrontmatterElement =
 AstroEmbeddedContent =
 	content: 'html_literal'?
 
+// <?something href="something" ?>
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+HtmlProcessingInstruction =
+  start: '<?'
+	target: AnyHtmlTagName
+	attributes: HtmlAttributeList
+  end: '?>'
+
 // ==================================
 // Attributes
 // ==================================
@@ -208,6 +217,8 @@ HtmlAttributeInitializerClause =
 AnyHtmlAttributeInitializer =
 	HtmlString
 	| HtmlAttributeSingleTextExpression
+	| SvelteTemplateAttributeValue
+	| VueVForValue
 
 
 // <a {{ expression }}>
@@ -225,6 +236,21 @@ HtmlAttributeSingleTextExpression =
 	'{'
 	expression: HtmlTextExpression
 	'}'
+
+// <a style="top: {top}px">
+//          ^^^^^^^^^^^^^^
+SvelteTemplateAttributeValue =
+	l_quote: ('"' | '\'')
+	elements: SvelteTemplateElementList
+	r_quote: ('"' | '\'')
+
+SvelteTemplateElementList = AnySvelteTemplateElement*
+
+AnySvelteTemplateElement =
+	SvelteTemplateChunkElement
+	| HtmlAttributeSingleTextExpression
+
+SvelteTemplateChunkElement = 'html_template_chunk'
 
 // ==================================
 // Svelte
@@ -413,13 +439,22 @@ SvelteBindingAssignmentBindingList = (AnySvelteBindingAssignmentBinding (',' Any
 
 AnySvelteBindingAssignmentBinding =
 	SvelteName
+	| AnySvelteDestructuredName
 	| SvelteRestBinding
+	| SvelteRenameBinding
 
 /// { ...rest }
 ///   ^^^^^^^
 SvelteRestBinding =
  '...'
  name: SvelteName
+
+/// { component: Filter }
+///   ^^^^^^^^^^^^^^^^^^
+SvelteRenameBinding =
+ key: SvelteName
+ ':'
+ name: AnySvelteBindingAssignmentBinding
 
 // {#each items, index} ... {/each}
 //             ^^^^^^^^
@@ -476,20 +511,20 @@ AnySvelteAwaitClauses =
 //             ^^^^^^^^^^
 SvelteAwaitThenClause =
 	'then'
-	name: HtmlTextExpression
+	name: HtmlTextExpression?
 
 // {#await ... catch value}
 //             ^^^^^^^^^^^
 SvelteAwaitCatchClause =
 	'catch'
-	name: HtmlTextExpression
+	name: HtmlTextExpression?
 
 // {#await ... } {:then name} .. {:catch} {/await}
 //               ^^^^^^^^^^^^^^^
 SvelteAwaitThenBlock =
 	'{:'
 	'then'
-	name: HtmlTextExpression
+	name: HtmlTextExpression?
 	'}'
 	children: HtmlElementList
 
@@ -499,7 +534,7 @@ SvelteAwaitThenBlock =
 SvelteAwaitCatchBlock =
 	'{:'
 	'catch'
-	name: HtmlTextExpression
+	name: HtmlTextExpression?
 	'}'
 	children: HtmlElementList
 
@@ -596,11 +631,38 @@ SvelteDirectiveValue =
 	':'
 	property: AnySvelteBindingProperty
 	modifiers: SvelteDirectiveModifierList
-	initializer: HtmlAttributeInitializerClause?
+	initializer: AnySvelteDirectiveInitializerClause?
+
+AnySvelteDirectiveInitializerClause =
+	HtmlAttributeInitializerClause
+	| SvelteBindFunctionBindingInitializerClause
+
+SvelteBindFunctionBindingInitializerClause =
+	'='
+	value: SvelteBindFunctionBindingExpression
+
+SvelteBindFunctionBindingExpression =
+	'{'
+	get: HtmlTextExpression
+	','
+	set: HtmlTextExpression
+	'}'
 
 AnySvelteBindingProperty =
 	SvelteName
 	| SvelteLiteral
+	| SvelteMemberProperty
+
+AnySvelteMemberObject =
+	SvelteName
+	| SvelteMemberProperty
+
+// <div in:renderer.in|global >
+//       ^^^^^^^^^^^
+SvelteMemberProperty =
+	object: AnySvelteMemberObject
+	'.'
+	member: SvelteName
 
 SvelteDirectiveModifierList = SvelteDirectiveModifier*
 
@@ -757,3 +819,84 @@ AstroDirectiveValue =
 	colon_token: ':'
 	name: HtmlAttributeName
 	initializer: HtmlAttributeInitializerClause?
+
+// <div v-for="item in items" />
+//            ^^^^^^^^^^^^^^^
+VueVForValue =
+	l_quote: ('"' | '\'')
+	binding: AnyVueVForBinding
+	operator: AnyVueVForOperator
+	expression: HtmlTextExpression
+	r_quote: ('"' | '\'')
+
+AnyVueVForOperator =
+	VueVForInOperator
+	| VueVForOfOperator
+
+VueVForInOperator = 'in'
+
+VueVForOfOperator = 'of'
+
+AnyVueVForBinding =
+	VueVForIdentifierBinding
+	| AnyVueVForDestructuredBinding
+	| VueVForTupleBinding
+
+AnyVueVForDestructuredBinding =
+	VueVForObjectBinding
+	| VueVForArrayBinding
+
+VueVForBindingList = (AnyVueVForBindingListElement (',' AnyVueVForBindingListElement)* ','?)
+
+AnyVueVForBindingListElement =
+	VueVForIdentifierBinding
+	| VueVForObjectPropertyBinding
+	| AnyVueVForDestructuredBinding
+	| VueVForRestBinding
+
+// <div v-for="item in items" />
+//             ^^^^
+VueVForIdentifierBinding =
+	name: 'ident'
+
+// <div v-for="{ foo: bar } in items" />
+//             ^^^^^^^^
+VueVForObjectPropertyBinding =
+	property: VueVForIdentifierBinding
+	':'
+	binding: AnyVueVForBinding
+
+// <div v-for="{ foo, bar } in items" />
+//             ^^^^^^^^^^^^
+VueVForObjectBinding =
+	'{'
+	bindings: VueVForBindingList
+	'}'
+
+// <div v-for="[ foo, bar ] in items" />
+//             ^^^^^^^^^^^^
+VueVForArrayBinding =
+	'['
+	bindings: VueVForBindingList
+	']'
+
+// <div v-for="{ foo, ...rest } in items" />
+//                    ^^^^^^^
+VueVForRestBinding =
+	'...'
+	binding: VueVForIdentifierBinding
+
+// <div v-for="(value, key, index) in obj" />
+//             ^^^^^^^^^^^^^^^^^^^
+VueVForTupleBinding =
+	'('
+	value: AnyVueVForBinding
+	second: VueVForTupleElement?
+	third: VueVForTupleElement?
+	')'
+
+// <div v-for="(value, key, index) in obj" />
+//                   ^^^^^
+VueVForTupleElement =
+	','
+	binding: AnyVueVForBinding

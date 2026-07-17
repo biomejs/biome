@@ -1,0 +1,59 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/include.scss
+---
+
+# Input
+
+```scss
+@include button;
+
+@include clearfix(
+);
+
+@include size(
+$width,
+$height:$width,
+$args...
+);
+
+@include library.button(
+$radius:4px
+);
+
+@include button using($value){color:$value;}
+
+@include card($radius:4px)using($value,$fallback){color:$value;background:$fallback;}
+
+@include hover{
+color:red;
+}
+
+```
+
+
+# Formatted
+
+```scss
+@include button;
+
+@include clearfix();
+
+@include size($width, $height: $width, $args...);
+
+@include library.button($radius: 4px);
+
+@include button using ($value) {
+	color: $value;
+}
+
+@include card($radius: 4px) using ($value, $fallback) {
+	color: $value;
+	background: $fallback;
+}
+
+@include hover {
+	color: red;
+}
+
+```

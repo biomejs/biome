@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use biome_css_syntax::{ScssEachAtRule, ScssEachAtRuleFields};
-use biome_formatter::write;
+use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssEachAtRule;
@@ -9,9 +9,7 @@ impl FormatNodeRule<ScssEachAtRule> for FormatScssEachAtRule {
     fn fmt_fields(&self, node: &ScssEachAtRule, f: &mut CssFormatter) -> FormatResult<()> {
         let ScssEachAtRuleFields {
             each_token,
-            bindings,
-            in_token,
-            iterable,
+            header,
             block,
         } = node.as_fields();
 
@@ -19,13 +17,11 @@ impl FormatNodeRule<ScssEachAtRule> for FormatScssEachAtRule {
             f,
             [
                 each_token.format(),
-                space(),
-                bindings.format(),
-                space(),
-                in_token.format(),
-                space(),
-                iterable.format(),
-                space(),
+                group(&format_args![
+                    space(),
+                    indent(&group(&header.format())),
+                    soft_line_break_or_space()
+                ]),
                 block.format()
             ]
         )

@@ -28,13 +28,17 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
 
   i Configuration file can be updated.
   
-    1   │ - {·"linter":·{·"rules":·{·"recommended":·true,·"suspicious":·{·"noDoubleEquals":·"error"·}·}·}·}
-      1 │ + {
-      2 │ + → "linter":·{
-      3 │ + → → "rules":·{·"recommended":·false,·"suspicious":·{·"noDoubleEquals":·"off"·}·}
-      4 │ + → }
-      5 │ + }
-      6 │ + 
+    1    │ - {·"linter":·{·"rules":·{·"recommended":·true,·"suspicious":·{·"noDoubleEquals":·"error"·}·}·}·}
+       1 │ + {
+       2 │ + → "linter":·{
+       3 │ + → → "rules":·{
+       4 │ + → → → "recommended":·true,
+       5 │ + → → → "preset":·"none",
+       6 │ + → → → "suspicious":·{·"noDoubleEquals":·"off"·}
+       7 │ + → → }
+       8 │ + → }
+       9 │ + }
+      10 │ + 
   
 
 ```

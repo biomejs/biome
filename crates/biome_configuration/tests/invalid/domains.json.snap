@@ -17,10 +17,12 @@ domains.json:4:7 deserialize ━━━━━━━━━━━━━━━━━
   
   - drizzle
   - react
+  - reactNative
   - test
   - solid
   - next
   - qwik
+  - svelte
   - vue
   - project
   - tailwind

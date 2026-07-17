@@ -1,0 +1,100 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+
+// .android.jsx no longer matches the custom android pattern .droid.jsx
+import { ProgressBarAndroid } from "react-native";
+
+// .ios.jsx no longer matches the custom iOS pattern .apple.jsx
+import { ActivityIndicatorIOS } from "react-native";
+
+// require() also affected by custom options
+const { ProgressBarAndroid: Bar } = require("react-native");
+const { ActivityIndicatorIOS: Baz } = require("react-native");
+
+```
+
+# Diagnostics
+```
+invalid.jsx:4:10 lint/nursery/useReactNativePlatformComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Android component ProgressBarAndroid is used outside of an Android-specific file.
+  
+    3 │ // .android.jsx no longer matches the custom android pattern .droid.jsx
+  > 4 │ import { ProgressBarAndroid } from "react-native";
+      │          ^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ // .ios.jsx no longer matches the custom iOS pattern .apple.jsx
+  
+  i Platform-specific components produce incorrect bundles when imported in shared files.
+  
+  i Move this import to a file with an Android-specific suffix (e.g. .android.js).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:7:10 lint/nursery/useReactNativePlatformComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × iOS component ActivityIndicatorIOS is used outside of an iOS-specific file.
+  
+    6 │ // .ios.jsx no longer matches the custom iOS pattern .apple.jsx
+  > 7 │ import { ActivityIndicatorIOS } from "react-native";
+      │          ^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ // require() also affected by custom options
+  
+  i Platform-specific components produce incorrect bundles when imported in shared files.
+  
+  i Move this import to a file with an iOS-specific suffix (e.g. .ios.js).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:10:9 lint/nursery/useReactNativePlatformComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Android component ProgressBarAndroid is used outside of an Android-specific file.
+  
+     9 │ // require() also affected by custom options
+  > 10 │ const { ProgressBarAndroid: Bar } = require("react-native");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ const { ActivityIndicatorIOS: Baz } = require("react-native");
+    12 │ 
+  
+  i Platform-specific components produce incorrect bundles when imported in shared files.
+  
+  i Move this import to a file with an Android-specific suffix (e.g. .android.js).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:11:9 lint/nursery/useReactNativePlatformComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × iOS component ActivityIndicatorIOS is used outside of an iOS-specific file.
+  
+     9 │ // require() also affected by custom options
+    10 │ const { ProgressBarAndroid: Bar } = require("react-native");
+  > 11 │ const { ActivityIndicatorIOS: Baz } = require("react-native");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+  
+  i Platform-specific components produce incorrect bundles when imported in shared files.
+  
+  i Move this import to a file with an iOS-specific suffix (e.g. .ios.js).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

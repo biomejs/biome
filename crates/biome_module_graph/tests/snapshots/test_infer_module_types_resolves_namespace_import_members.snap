@@ -1,0 +1,53 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+import * as source from "./source.ts";
+
+export { source };
+```
+
+## Inferred types
+
+```
+Binding source "source" => namespace Identifier("/src/source.ts") [
+  "alpha":
+    sync Function "alpha" {
+      accepts: {
+        params: []
+        type_args: []
+      }
+      returns: number
+    }
+]
+```
+
+# `/src/source.ts`
+
+## Source
+
+```ts
+export function alpha(): number {
+	return 1;
+}
+```
+
+## Inferred types
+
+```
+Binding alpha "alpha" => sync Function "alpha" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "1" => number: 1
+```

@@ -15,6 +15,10 @@ publish              = false
 [package.metadata.workspaces]
 independent = true
 
+[[bench]]
+harness = false
+name    = "markdown_parser"
+
 [dependencies]
 biome_console          = { workspace = true }
 biome_diagnostics      = { workspace = true }
@@ -36,12 +40,20 @@ unicode-bom            = { workspace = true }
 # so we need to enable the feature here to make to_html available for spec tests.
 biome_markdown_parser = { path = ".", features = ["test_utils"] }
 biome_test_utils      = { path = "../biome_test_utils" }
+criterion             = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta                 = { workspace = true }
 quickcheck            = { workspace = true }
 quickcheck_macros     = { workspace = true }
 serde                 = { workspace = true, features = ["derive"] }
 serde_json            = { workspace = true }
+similar-asserts       = { workspace = true }
 tests_macros          = { path = "../tests_macros" }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
 
 [features]
 # Enables test utilities (to_html module) for CommonMark spec compliance testing.

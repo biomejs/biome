@@ -1,11 +1,11 @@
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleCategoriesBuilder,
 };
 use biome_json_analyze::JsonAnalyzeServices;
 use biome_json_parser::{JsonParserOptions, parse_json};
-use biome_json_syntax::JsonFileSource;
+use biome_languages::JsonFileSource;
 use biome_test_utils::BenchCase;
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use std::collections::HashMap;
@@ -75,7 +75,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
                                 &[],
                                 |event| {
                                     black_box(event.diagnostic());
-                                    black_box(event.actions());
+                                    black_box(event.actions(ActionFilter::all()));
                                     ControlFlow::<Never>::Continue(())
                                 },
                             );

@@ -26,7 +26,7 @@ package.json:4:9 lint/nursery/noUntrustedLicenses ━━━━━━━━━━
     5 │     }
     6 │ }
   
-  i Add the license to the allow list or remove it from from the project.
+  i Add the license to the allow list or remove it from the project.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

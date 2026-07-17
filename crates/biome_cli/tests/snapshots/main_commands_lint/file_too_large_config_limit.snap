@@ -41,7 +41,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 check.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The size of the file is 27 B, which exceeds the configured maximum of 16 B for this project.
+  ! The size of the file is 27 B, which exceeds the configured maximum of 16 B for this project.
     Use the `files.maxSize` configuration to change the maximum size of files processed, or `files.includes` to ignore the file.
   
 
@@ -49,5 +49,5 @@ check.js lint ━━━━━━━━━━━━━━━━━━━━━━
 
 ```block
 Checked 0 files in <TIME>. No fixes applied.
-Found 1 info.
+Found 1 warning.
 ```

@@ -1,0 +1,84 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-config-inexistent-predef-group.js
+---
+# Input
+```js
+
+```
+
+# Diagnostics
+```
+invalid-config-inexistent-predef-group.options:10:15 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The predefined group :ANYthing: doesn't exist. Use a known predefined group.
+  
+     8 │           "options": {
+     9 │             "groups": [
+  > 10 │               ":ANYthing:",
+       │               ^^^^^^^^^^^^
+    11 │               "!:ANYthing:",
+    12 │               {
+  
+
+```
+
+```
+invalid-config-inexistent-predef-group.options:11:15 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The predefined group :ANYthing: doesn't exist. Use a known predefined group.
+  
+     9 │             "groups": [
+    10 │               ":ANYthing:",
+  > 11 │               "!:ANYthing:",
+       │               ^^^^^^^^^^^^^
+    12 │               {
+    13 │                 "source": ":ANYthing:"
+  
+
+```
+
+```
+invalid-config-inexistent-predef-group.options:13:27 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The predefined group :ANYthing: doesn't exist. Use a known predefined group.
+  
+    11 │               "!:ANYthing:",
+    12 │               {
+  > 13 │                 "source": ":ANYthing:"
+       │                           ^^^^^^^^^^^^
+    14 │               },
+    15 │               {
+  
+
+```
+
+```
+invalid-config-inexistent-predef-group.options:16:27 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The predefined group :ANYthing: doesn't exist. Use a known predefined group.
+  
+    14 │               },
+    15 │               {
+  > 16 │                 "source": "!:ANYthing:"
+       │                           ^^^^^^^^^^^^^
+    17 │               },
+    18 │               {
+  
+
+```
+
+```
+invalid-config-inexistent-predef-group.options:21:19 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × :BLANK_LINE: isn't valid in this position. Remove it.
+  
+    19 │                 "source": [
+    20 │                   ":NODE:",
+  > 21 │                   ":BLANK_LINE:"
+       │                   ^^^^^^^^^^^^^^
+    22 │                 ]
+    23 │               }
+  
+
+```

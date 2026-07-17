@@ -1,0 +1,142 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 103
+expression: invalid.max2.css
+---
+# Input
+```css
+/* should generate diagnostics */
+.ab.cd.ef {}
+:not(.ab.cd.ef) {}
+.ab.cd :not(.ef.gh) {}
+.ab .cd .ef {}
+.ab,
+.cd.ef.gh {}
+.ab.cd.ef :not(.gh) {}
+
+```
+
+# Diagnostics
+```
+invalid.max2.css:2:1 lint/nursery/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 2 class selectors, but found 3.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ .ab.cd.ef {}
+      │ ^^^^^^^^^
+    3 │ :not(.ab.cd.ef) {}
+    4 │ .ab.cd :not(.ef.gh) {}
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.max2.css:3:1 lint/nursery/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 2 class selectors, but found 3.
+  
+    1 │ /* should generate diagnostics */
+    2 │ .ab.cd.ef {}
+  > 3 │ :not(.ab.cd.ef) {}
+      │ ^^^^^^^^^^^^^^^
+    4 │ .ab.cd :not(.ef.gh) {}
+    5 │ .ab .cd .ef {}
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.max2.css:4:1 lint/nursery/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 2 class selectors, but found 4.
+  
+    2 │ .ab.cd.ef {}
+    3 │ :not(.ab.cd.ef) {}
+  > 4 │ .ab.cd :not(.ef.gh) {}
+      │ ^^^^^^^^^^^^^^^^^^^
+    5 │ .ab .cd .ef {}
+    6 │ .ab,
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.max2.css:5:1 lint/nursery/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 2 class selectors, but found 3.
+  
+    3 │ :not(.ab.cd.ef) {}
+    4 │ .ab.cd :not(.ef.gh) {}
+  > 5 │ .ab .cd .ef {}
+      │ ^^^^^^^^^^^
+    6 │ .ab,
+    7 │ .cd.ef.gh {}
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.max2.css:7:1 lint/nursery/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 2 class selectors, but found 3.
+  
+    5 │ .ab .cd .ef {}
+    6 │ .ab,
+  > 7 │ .cd.ef.gh {}
+      │ ^^^^^^^^^
+    8 │ .ab.cd.ef :not(.gh) {}
+    9 │ 
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.max2.css:8:1 lint/nursery/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 2 class selectors, but found 4.
+  
+    6 │ .ab,
+    7 │ .cd.ef.gh {}
+  > 8 │ .ab.cd.ef :not(.gh) {}
+      │ ^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

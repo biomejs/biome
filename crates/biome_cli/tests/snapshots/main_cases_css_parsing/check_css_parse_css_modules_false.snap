@@ -5,7 +5,9 @@ expression: redactor(content)
 ## `file.module.css`
 
 ```css
-.className { composes: other from './other.module.css'; }
+.className {
+  composes: other from "./other.module.css";
+}
 ```
 
 # Termination Message
@@ -35,19 +37,6 @@ file.module.css:1:14 parse ━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-file.module.css:1:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × `composes` declaration is not a standard CSS feature.
-  
-  > 1 │ .className { composes: other from './other.module.css'; }
-      │              ^^^^^^^^
-  
-  i You can enable `composes` declaration parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
-  
-
-```
-
-```block
 file.module.css format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
@@ -57,5 +46,5 @@ file.module.css format ━━━━━━━━━━━━━━━━━━━
 
 ```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 3 errors.
+Found 2 errors.
 ```

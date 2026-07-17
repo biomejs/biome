@@ -18,8 +18,8 @@ $inferred-map: ($a: , $b: 1, $c: 2);
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..64 "$" [Comments("// Map inferred from  ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@64..76 "inferred-map" [] [],
@@ -34,7 +34,7 @@ CssRoot {
                             ScssMapExpressionPair {
                                 key: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        ScssIdentifier {
+                                        ScssVariable {
                                             dollar_token: DOLLAR@79..80 "$" [] [],
                                             name: CssIdentifier {
                                                 value_token: IDENT@80..81 "a" [] [],
@@ -49,7 +49,7 @@ CssRoot {
                             ScssMapExpressionPair {
                                 key: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        ScssIdentifier {
+                                        ScssVariable {
                                             dollar_token: DOLLAR@85..86 "$" [] [],
                                             name: CssIdentifier {
                                                 value_token: IDENT@86..87 "b" [] [],
@@ -70,7 +70,7 @@ CssRoot {
                             ScssMapExpressionPair {
                                 key: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        ScssIdentifier {
+                                        ScssVariable {
                                             dollar_token: DOLLAR@92..93 "$" [] [],
                                             name: CssIdentifier {
                                                 value_token: IDENT@93..94 "c" [] [],
@@ -106,8 +106,8 @@ CssRoot {
 0: CSS_ROOT@0..100
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..99
-    0: SCSS_DECLARATION@0..99
-      0: SCSS_IDENTIFIER@0..76
+    0: SCSS_VARIABLE_DECLARATION@0..99
+      0: SCSS_VARIABLE@0..76
         0: DOLLAR@0..64 "$" [Comments("// Map inferred from  ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@64..76
           0: IDENT@64..76 "inferred-map" [] []
@@ -120,7 +120,7 @@ CssRoot {
               0: SCSS_MAP_EXPRESSION_PAIR@79..83
                 0: SCSS_EXPRESSION@79..81
                   0: SCSS_EXPRESSION_ITEM_LIST@79..81
-                    0: SCSS_IDENTIFIER@79..81
+                    0: SCSS_VARIABLE@79..81
                       0: DOLLAR@79..80 "$" [] []
                       1: CSS_IDENTIFIER@80..81
                         0: IDENT@80..81 "a" [] []
@@ -130,7 +130,7 @@ CssRoot {
               2: SCSS_MAP_EXPRESSION_PAIR@85..90
                 0: SCSS_EXPRESSION@85..87
                   0: SCSS_EXPRESSION_ITEM_LIST@85..87
-                    0: SCSS_IDENTIFIER@85..87
+                    0: SCSS_VARIABLE@85..87
                       0: DOLLAR@85..86 "$" [] []
                       1: CSS_IDENTIFIER@86..87
                         0: IDENT@86..87 "b" [] []
@@ -143,7 +143,7 @@ CssRoot {
               4: SCSS_MAP_EXPRESSION_PAIR@92..97
                 0: SCSS_EXPRESSION@92..94
                   0: SCSS_EXPRESSION_ITEM_LIST@92..94
-                    0: SCSS_IDENTIFIER@92..94
+                    0: SCSS_VARIABLE@92..94
                       0: DOLLAR@92..93 "$" [] []
                       1: CSS_IDENTIFIER@93..94
                         0: IDENT@93..94 "c" [] []

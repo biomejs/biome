@@ -8,9 +8,9 @@ use biome_css_syntax::T;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
 
-/// Parses the SCSS `@function` at-rule.
+/// Parses Sass `@function name(...)` at-rules.
 ///
-/// # Example
+/// Dashed `@function --name(...)` is routed to CSS custom-function parsing.
 ///
 /// ```scss
 /// @function double($value: 2) {
@@ -19,6 +19,7 @@ use biome_parser::prelude::*;
 /// ```
 ///
 /// Docs: https://sass-lang.com/documentation/at-rules/function/
+/// Docs: https://sass-lang.com/documentation/breaking-changes/css-function-mixin/
 #[inline]
 pub(crate) fn parse_scss_function_at_rule(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_scss_function_at_rule(p) {

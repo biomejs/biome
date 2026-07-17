@@ -1,0 +1,32 @@
+<!-- should not generate diagnostics -->
+
+<!-- valid boolean values -->
+<div aria-hidden="true">content</div>
+<div aria-hidden="false">content</div>
+
+<!-- valid tristate values -->
+<span aria-checked="true">some text</span>
+<span aria-checked="false">some text</span>
+<span aria-checked="mixed">some text</span>
+
+<!-- valid token values -->
+<span aria-orientation="horizontal">some text</span>
+<span aria-orientation="vertical">some text</span>
+
+<!-- valid IdReferenceList -->
+<span aria-labelledby="fooId barId">some text</span>
+
+<!-- valid number -->
+<span aria-valuemax="100">some text</span>
+<span aria-valuemin="0">some text</span>
+
+<!-- valid integer -->
+<span aria-level="2">some text</span>
+
+<!-- case insensitive attribute name — valid value -->
+<div ARIA-HIDDEN="true">content</div>
+<div Aria-Checked="true">content</div>
+
+<!-- valueless boolean attributes (equivalent to "true" per HTML spec) -->
+<div aria-hidden>content</div>
+<span aria-checked>some text</span>

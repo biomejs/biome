@@ -1,0 +1,355 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+- Added two new options to customise the emitted output of the CLI: `--reporter=json` and `--reporter=json-pretty`. With
+  `--reporter=json`, the diagnostics and the summary will be printed in the **terminal** in JSON format. With
+  `--reporter=json-pretty`, you can print the same information, but formatted using the same options of your configuration.
+
+  NOTE: the shape of the JSON is considered experimental, and the shape of the JSON might change in the future.
+
+  <details>
+  <summary>Example of output when running `biome format` command</summary>
+  ```json
+  {
+    "summary": {
+      "changed": 0,
+      "unchanged": 1,
+      "errors": 1,
+      "warnings": 0,
+      "skipped": 0,
+      "suggestedFixesSkipped": 0,
+      "diagnosticsNotPrinted": 0
+    },
+    "diagnostics": [
+      {
+        "category": "format",
+        "severity": "error",
+        "description": "Formatter would have printed the following content:",
+        "message": [
+          {
+            "elements": [],
+            "content": "Formatter would have printed the following content:"
+          }
+        ],
+        "advices": {
+          "advices": [
+            {
+              "diff": {
+                "dictionary": "  statement();\n",
+                "ops": [
+                  { "diffOp": { "delete": { "range": [0, 2] } } },
+                  { "diffOp": { "equal": { "range": [2, 12] } } },
+                  { "diffOp": { "delete": { "range": [0, 2] } } },
+                  { "diffOp": { "equal": { "range": [12, 13] } } },
+                  { "diffOp": { "delete": { "range": [0, 2] } } },
+                  { "diffOp": { "insert": { "range": [13, 15] } } }
+                ]
+              }
+            }
+          ]
+        },
+        "verboseAdvices": { "advices": [] },
+        "location": {
+          "path": { "file": "format.js" },
+          "span": null,
+          "sourceCode": null
+        },
+        "tags": [],
+        "source": null
+      }
+    ],
+    "command": "format"
+  }
+  ```
+  </details>
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@0..1 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@1..2 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@2..68 "Added two new options to customise the emitted output of the CLI: " [] [],
+                                },
+                                MdInlineCode {
+                                    l_tick_token: BACKTICK@68..69 "`" [] [],
+                                    content: MdInlineItemList [
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@69..70 "-" [] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@70..71 "-" [] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@71..84 "reporter=json" [] [],
+                                        },
+                                    ],
+                                    r_tick_token: BACKTICK@84..85 "`" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@85..90 " and " [] [],
+                                },
+                                MdInlineCode {
+                                    l_tick_token: BACKTICK@90..91 "`" [] [],
+                                    content: MdInlineItemList [
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@91..92 "-" [] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@92..93 "-" [] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@93..113 "reporter=json-pretty" [] [],
+                                        },
+                                    ],
+                                    r_tick_token: BACKTICK@113..114 "`" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@114..120 ". With" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@120..121 "\n" [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@121..123 "  " [] [],
+                                },
+                                MdInlineCode {
+                                    l_tick_token: BACKTICK@123..124 "`" [] [],
+                                    content: MdInlineItemList [
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@124..125 "-" [] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@125..126 "-" [] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@126..139 "reporter=json" [] [],
+                                        },
+                                    ],
+                                    r_tick_token: BACKTICK@139..140 "`" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@140..197 ", the diagnostics and the summary will be printed in the " [] [],
+                                },
+                                MdInlineEmphasis {
+                                    l_fence: DOUBLE_STAR@197..199 "**" [] [],
+                                    content: MdInlineItemList [
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@199..207 "terminal" [] [],
+                                        },
+                                    ],
+                                    r_fence: DOUBLE_STAR@207..209 "**" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@209..230 " in JSON format. With" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@230..231 "\n" [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@231..233 "  " [] [],
+                                },
+                                MdInlineCode {
+                                    l_tick_token: BACKTICK@233..234 "`" [] [],
+                                    content: MdInlineItemList [
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@234..235 "-" [] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@235..236 "-" [] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@236..256 "reporter=json-pretty" [] [],
+                                        },
+                                    ],
+                                    r_tick_token: BACKTICK@256..257 "`" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@257..354 ", you can print the same information, but formatted using the same options of your configuration." [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@354..355 "\n" [] [],
+                                },
+                            ],
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@355..356 "\n" [] [],
+                        },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@356..358 "  " [] [],
+                                },
+                            ],
+                        },
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@358..467 "NOTE: the shape of the JSON is considered experimental, and the shape of the JSON might change in the future." [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@467..468 "\n" [] [],
+                                },
+                            ],
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@468..469 "\n" [] [],
+                        },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@469..471 "  " [] [],
+                                },
+                            ],
+                        },
+                        MdHtmlBlock {
+                            indent: MdIndentTokenList [],
+                            content: MdHtmlContent {
+                                value_token: MD_HTML_LITERAL@471..2000 "<details>\n  <summary>Example of output when running `biome format` command</summary>\n  ```json\n  {\n    \"summary\": {\n      \"changed\": 0,\n      \"unchanged\": 1,\n      \"errors\": 1,\n      \"warnings\": 0,\n      \"skipped\": 0,\n      \"suggestedFixesSkipped\": 0,\n      \"diagnosticsNotPrinted\": 0\n    },\n    \"diagnostics\": [\n      {\n        \"category\": \"format\",\n        \"severity\": \"error\",\n        \"description\": \"Formatter would have printed the following content:\",\n        \"message\": [\n          {\n            \"elements\": [],\n            \"content\": \"Formatter would have printed the following content:\"\n          }\n        ],\n        \"advices\": {\n          \"advices\": [\n            {\n              \"diff\": {\n                \"dictionary\": \"  statement();\\n\",\n                \"ops\": [\n                  { \"diffOp\": { \"delete\": { \"range\": [0, 2] } } },\n                  { \"diffOp\": { \"equal\": { \"range\": [2, 12] } } },\n                  { \"diffOp\": { \"delete\": { \"range\": [0, 2] } } },\n                  { \"diffOp\": { \"equal\": { \"range\": [12, 13] } } },\n                  { \"diffOp\": { \"delete\": { \"range\": [0, 2] } } },\n                  { \"diffOp\": { \"insert\": { \"range\": [13, 15] } } }\n                ]\n              }\n            }\n          ]\n        },\n        \"verboseAdvices\": { \"advices\": [] },\n        \"location\": {\n          \"path\": { \"file\": \"format.js\" },\n          \"span\": null,\n          \"sourceCode\": null\n        },\n        \"tags\": [],\n        \"source\": null\n      }\n    ],\n    \"command\": \"format\"\n  }\n  ```\n  </details>" [] [],
+                            },
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@2000..2001 "\n" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@2001..2001 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..2001
+  0: (empty)
+  1: MD_BLOCK_LIST@0..2001
+    0: MD_BULLET_LIST_ITEM@0..2001
+      0: MD_BULLET_LIST@0..2001
+        0: MD_BULLET@0..2001
+          0: MD_LIST_MARKER_PREFIX@0..2
+            0: MD_INDENT_TOKEN_LIST@0..0
+            1: MINUS@0..1 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@1..2 " " [] []
+            3: MD_INDENT_TOKEN_LIST@2..2
+          1: MD_BLOCK_LIST@2..2001
+            0: MD_PARAGRAPH@2..355
+              0: MD_INLINE_ITEM_LIST@2..355
+                0: MD_TEXTUAL@2..68
+                  0: MD_TEXTUAL_LITERAL@2..68 "Added two new options to customise the emitted output of the CLI: " [] []
+                1: MD_INLINE_CODE@68..85
+                  0: BACKTICK@68..69 "`" [] []
+                  1: MD_INLINE_ITEM_LIST@69..84
+                    0: MD_TEXTUAL@69..70
+                      0: MD_TEXTUAL_LITERAL@69..70 "-" [] []
+                    1: MD_TEXTUAL@70..71
+                      0: MD_TEXTUAL_LITERAL@70..71 "-" [] []
+                    2: MD_TEXTUAL@71..84
+                      0: MD_TEXTUAL_LITERAL@71..84 "reporter=json" [] []
+                  2: BACKTICK@84..85 "`" [] []
+                2: MD_TEXTUAL@85..90
+                  0: MD_TEXTUAL_LITERAL@85..90 " and " [] []
+                3: MD_INLINE_CODE@90..114
+                  0: BACKTICK@90..91 "`" [] []
+                  1: MD_INLINE_ITEM_LIST@91..113
+                    0: MD_TEXTUAL@91..92
+                      0: MD_TEXTUAL_LITERAL@91..92 "-" [] []
+                    1: MD_TEXTUAL@92..93
+                      0: MD_TEXTUAL_LITERAL@92..93 "-" [] []
+                    2: MD_TEXTUAL@93..113
+                      0: MD_TEXTUAL_LITERAL@93..113 "reporter=json-pretty" [] []
+                  2: BACKTICK@113..114 "`" [] []
+                4: MD_TEXTUAL@114..120
+                  0: MD_TEXTUAL_LITERAL@114..120 ". With" [] []
+                5: MD_TEXTUAL@120..121
+                  0: MD_TEXTUAL_LITERAL@120..121 "\n" [] []
+                6: MD_INDENT_TOKEN@121..123
+                  0: MD_INDENT_CHAR@121..123 "  " [] []
+                7: MD_INLINE_CODE@123..140
+                  0: BACKTICK@123..124 "`" [] []
+                  1: MD_INLINE_ITEM_LIST@124..139
+                    0: MD_TEXTUAL@124..125
+                      0: MD_TEXTUAL_LITERAL@124..125 "-" [] []
+                    1: MD_TEXTUAL@125..126
+                      0: MD_TEXTUAL_LITERAL@125..126 "-" [] []
+                    2: MD_TEXTUAL@126..139
+                      0: MD_TEXTUAL_LITERAL@126..139 "reporter=json" [] []
+                  2: BACKTICK@139..140 "`" [] []
+                8: MD_TEXTUAL@140..197
+                  0: MD_TEXTUAL_LITERAL@140..197 ", the diagnostics and the summary will be printed in the " [] []
+                9: MD_INLINE_EMPHASIS@197..209
+                  0: DOUBLE_STAR@197..199 "**" [] []
+                  1: MD_INLINE_ITEM_LIST@199..207
+                    0: MD_TEXTUAL@199..207
+                      0: MD_TEXTUAL_LITERAL@199..207 "terminal" [] []
+                  2: DOUBLE_STAR@207..209 "**" [] []
+                10: MD_TEXTUAL@209..230
+                  0: MD_TEXTUAL_LITERAL@209..230 " in JSON format. With" [] []
+                11: MD_TEXTUAL@230..231
+                  0: MD_TEXTUAL_LITERAL@230..231 "\n" [] []
+                12: MD_INDENT_TOKEN@231..233
+                  0: MD_INDENT_CHAR@231..233 "  " [] []
+                13: MD_INLINE_CODE@233..257
+                  0: BACKTICK@233..234 "`" [] []
+                  1: MD_INLINE_ITEM_LIST@234..256
+                    0: MD_TEXTUAL@234..235
+                      0: MD_TEXTUAL_LITERAL@234..235 "-" [] []
+                    1: MD_TEXTUAL@235..236
+                      0: MD_TEXTUAL_LITERAL@235..236 "-" [] []
+                    2: MD_TEXTUAL@236..256
+                      0: MD_TEXTUAL_LITERAL@236..256 "reporter=json-pretty" [] []
+                  2: BACKTICK@256..257 "`" [] []
+                14: MD_TEXTUAL@257..354
+                  0: MD_TEXTUAL_LITERAL@257..354 ", you can print the same information, but formatted using the same options of your configuration." [] []
+                15: MD_TEXTUAL@354..355
+                  0: MD_TEXTUAL_LITERAL@354..355 "\n" [] []
+            1: MD_NEWLINE@355..356
+              0: NEWLINE@355..356 "\n" [] []
+            2: MD_CONTINUATION_INDENT@356..358
+              0: MD_INDENT_TOKEN_LIST@356..358
+                0: MD_INDENT_TOKEN@356..358
+                  0: MD_INDENT_CHAR@356..358 "  " [] []
+            3: MD_PARAGRAPH@358..468
+              0: MD_INLINE_ITEM_LIST@358..468
+                0: MD_TEXTUAL@358..467
+                  0: MD_TEXTUAL_LITERAL@358..467 "NOTE: the shape of the JSON is considered experimental, and the shape of the JSON might change in the future." [] []
+                1: MD_TEXTUAL@467..468
+                  0: MD_TEXTUAL_LITERAL@467..468 "\n" [] []
+            4: MD_NEWLINE@468..469
+              0: NEWLINE@468..469 "\n" [] []
+            5: MD_CONTINUATION_INDENT@469..471
+              0: MD_INDENT_TOKEN_LIST@469..471
+                0: MD_INDENT_TOKEN@469..471
+                  0: MD_INDENT_CHAR@469..471 "  " [] []
+            6: MD_HTML_BLOCK@471..2000
+              0: MD_INDENT_TOKEN_LIST@471..471
+              1: MD_HTML_CONTENT@471..2000
+                0: MD_HTML_LITERAL@471..2000 "<details>\n  <summary>Example of output when running `biome format` command</summary>\n  ```json\n  {\n    \"summary\": {\n      \"changed\": 0,\n      \"unchanged\": 1,\n      \"errors\": 1,\n      \"warnings\": 0,\n      \"skipped\": 0,\n      \"suggestedFixesSkipped\": 0,\n      \"diagnosticsNotPrinted\": 0\n    },\n    \"diagnostics\": [\n      {\n        \"category\": \"format\",\n        \"severity\": \"error\",\n        \"description\": \"Formatter would have printed the following content:\",\n        \"message\": [\n          {\n            \"elements\": [],\n            \"content\": \"Formatter would have printed the following content:\"\n          }\n        ],\n        \"advices\": {\n          \"advices\": [\n            {\n              \"diff\": {\n                \"dictionary\": \"  statement();\\n\",\n                \"ops\": [\n                  { \"diffOp\": { \"delete\": { \"range\": [0, 2] } } },\n                  { \"diffOp\": { \"equal\": { \"range\": [2, 12] } } },\n                  { \"diffOp\": { \"delete\": { \"range\": [0, 2] } } },\n                  { \"diffOp\": { \"equal\": { \"range\": [12, 13] } } },\n                  { \"diffOp\": { \"delete\": { \"range\": [0, 2] } } },\n                  { \"diffOp\": { \"insert\": { \"range\": [13, 15] } } }\n                ]\n              }\n            }\n          ]\n        },\n        \"verboseAdvices\": { \"advices\": [] },\n        \"location\": {\n          \"path\": { \"file\": \"format.js\" },\n          \"span\": null,\n          \"sourceCode\": null\n        },\n        \"tags\": [],\n        \"source\": null\n      }\n    ],\n    \"command\": \"format\"\n  }\n  ```\n  </details>" [] []
+            7: MD_NEWLINE@2000..2001
+              0: NEWLINE@2000..2001 "\n" [] []
+  2: EOF@2001..2001 "" [] []
+
+```

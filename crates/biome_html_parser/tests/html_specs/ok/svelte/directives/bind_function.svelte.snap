@@ -8,6 +8,12 @@ expression: snapshot
 ```svelte
 <input bind:value={get, set} />
 <input bind:value={null, setter} />
+<Toggle bind:pressed={getToggled, setToggled} />
+<input bind:value={() => [a, b], (v) => set(v)} />
+<input bind:value={
+	() => value,
+	(v) => value = v.toLowerCase()
+} />
 
 ```
 
@@ -34,12 +40,16 @@ HtmlRoot {
                             ident_token: IDENT@12..17 "value" [] [],
                         },
                         modifiers: SvelteDirectiveModifierList [],
-                        initializer: HtmlAttributeInitializerClause {
+                        initializer: SvelteBindFunctionBindingInitializerClause {
                             eq_token: EQ@17..18 "=" [] [],
-                            value: HtmlAttributeSingleTextExpression {
+                            value: SvelteBindFunctionBindingExpression {
                                 l_curly_token: L_CURLY@18..19 "{" [] [],
-                                expression: HtmlTextExpression {
-                                    html_literal_token: HTML_LITERAL@19..27 "get, set" [] [],
+                                get: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@19..22 "get" [] [],
+                                },
+                                comma_token: COMMA@22..24 "," [] [Whitespace(" ")],
+                                set: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@24..27 "set" [] [],
                                 },
                                 r_curly_token: R_CURLY@27..29 "}" [] [Whitespace(" ")],
                             },
@@ -64,12 +74,16 @@ HtmlRoot {
                             ident_token: IDENT@44..49 "value" [] [],
                         },
                         modifiers: SvelteDirectiveModifierList [],
-                        initializer: HtmlAttributeInitializerClause {
+                        initializer: SvelteBindFunctionBindingInitializerClause {
                             eq_token: EQ@49..50 "=" [] [],
-                            value: HtmlAttributeSingleTextExpression {
+                            value: SvelteBindFunctionBindingExpression {
                                 l_curly_token: L_CURLY@50..51 "{" [] [],
-                                expression: HtmlTextExpression {
-                                    html_literal_token: HTML_LITERAL@51..63 "null, setter" [] [],
+                                get: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@51..55 "null" [] [],
+                                },
+                                comma_token: COMMA@55..57 "," [] [Whitespace(" ")],
+                                set: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@57..63 "setter" [] [],
                                 },
                                 r_curly_token: R_CURLY@63..65 "}" [] [Whitespace(" ")],
                             },
@@ -80,19 +94,121 @@ HtmlRoot {
             slash_token: SLASH@65..66 "/" [] [],
             r_angle_token: R_ANGLE@66..67 ">" [] [],
         },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@67..69 "<" [Newline("\n")] [],
+            name: HtmlComponentName {
+                value_token: HTML_LITERAL@69..76 "Toggle" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                SvelteBindDirective {
+                    bind_token: BIND_KW@76..80 "bind" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@80..81 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@81..88 "pressed" [] [],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: SvelteBindFunctionBindingInitializerClause {
+                            eq_token: EQ@88..89 "=" [] [],
+                            value: SvelteBindFunctionBindingExpression {
+                                l_curly_token: L_CURLY@89..90 "{" [] [],
+                                get: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@90..100 "getToggled" [] [],
+                                },
+                                comma_token: COMMA@100..102 "," [] [Whitespace(" ")],
+                                set: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@102..112 "setToggled" [] [],
+                                },
+                                r_curly_token: R_CURLY@112..114 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@114..115 "/" [] [],
+            r_angle_token: R_ANGLE@115..116 ">" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@116..118 "<" [Newline("\n")] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@118..124 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                SvelteBindDirective {
+                    bind_token: BIND_KW@124..128 "bind" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@128..129 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@129..134 "value" [] [],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: SvelteBindFunctionBindingInitializerClause {
+                            eq_token: EQ@134..135 "=" [] [],
+                            value: SvelteBindFunctionBindingExpression {
+                                l_curly_token: L_CURLY@135..136 "{" [] [],
+                                get: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@136..148 "() => [a, b]" [] [],
+                                },
+                                comma_token: COMMA@148..150 "," [] [Whitespace(" ")],
+                                set: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@150..163 "(v) => set(v)" [] [],
+                                },
+                                r_curly_token: R_CURLY@163..165 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@165..166 "/" [] [],
+            r_angle_token: R_ANGLE@166..167 ">" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@167..169 "<" [Newline("\n")] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@169..175 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                SvelteBindDirective {
+                    bind_token: BIND_KW@175..179 "bind" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@179..180 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@180..185 "value" [] [],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: SvelteBindFunctionBindingInitializerClause {
+                            eq_token: EQ@185..186 "=" [] [],
+                            value: SvelteBindFunctionBindingExpression {
+                                l_curly_token: L_CURLY@186..187 "{" [] [],
+                                get: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@187..200 "\n\t() => value" [] [],
+                                },
+                                comma_token: COMMA@200..201 "," [] [],
+                                set: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@201..234 "(v) => value = v.toLowerCase()\n" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                r_curly_token: R_CURLY@234..236 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@236..237 "/" [] [],
+            r_angle_token: R_ANGLE@237..238 ">" [] [],
+        },
     ],
-    eof_token: EOF@67..68 "" [Newline("\n")] [],
+    eof_token: EOF@238..239 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: HTML_ROOT@0..68
+0: HTML_ROOT@0..239
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..67
+  3: HTML_ELEMENT_LIST@0..238
     0: HTML_SELF_CLOSING_ELEMENT@0..31
       0: L_ANGLE@0..1 "<" [] []
       1: HTML_TAG_NAME@1..7
@@ -105,13 +221,16 @@ HtmlRoot {
             1: SVELTE_NAME@12..17
               0: IDENT@12..17 "value" [] []
             2: SVELTE_DIRECTIVE_MODIFIER_LIST@17..17
-            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@17..29
+            3: SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE@17..29
               0: EQ@17..18 "=" [] []
-              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@18..29
+              1: SVELTE_BIND_FUNCTION_BINDING_EXPRESSION@18..29
                 0: L_CURLY@18..19 "{" [] []
-                1: HTML_TEXT_EXPRESSION@19..27
-                  0: HTML_LITERAL@19..27 "get, set" [] []
-                2: R_CURLY@27..29 "}" [] [Whitespace(" ")]
+                1: HTML_TEXT_EXPRESSION@19..22
+                  0: HTML_LITERAL@19..22 "get" [] []
+                2: COMMA@22..24 "," [] [Whitespace(" ")]
+                3: HTML_TEXT_EXPRESSION@24..27
+                  0: HTML_LITERAL@24..27 "set" [] []
+                4: R_CURLY@27..29 "}" [] [Whitespace(" ")]
       3: SLASH@29..30 "/" [] []
       4: R_ANGLE@30..31 ">" [] []
     1: HTML_SELF_CLOSING_ELEMENT@31..67
@@ -126,15 +245,90 @@ HtmlRoot {
             1: SVELTE_NAME@44..49
               0: IDENT@44..49 "value" [] []
             2: SVELTE_DIRECTIVE_MODIFIER_LIST@49..49
-            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@49..65
+            3: SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE@49..65
               0: EQ@49..50 "=" [] []
-              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@50..65
+              1: SVELTE_BIND_FUNCTION_BINDING_EXPRESSION@50..65
                 0: L_CURLY@50..51 "{" [] []
-                1: HTML_TEXT_EXPRESSION@51..63
-                  0: HTML_LITERAL@51..63 "null, setter" [] []
-                2: R_CURLY@63..65 "}" [] [Whitespace(" ")]
+                1: HTML_TEXT_EXPRESSION@51..55
+                  0: HTML_LITERAL@51..55 "null" [] []
+                2: COMMA@55..57 "," [] [Whitespace(" ")]
+                3: HTML_TEXT_EXPRESSION@57..63
+                  0: HTML_LITERAL@57..63 "setter" [] []
+                4: R_CURLY@63..65 "}" [] [Whitespace(" ")]
       3: SLASH@65..66 "/" [] []
       4: R_ANGLE@66..67 ">" [] []
-  4: EOF@67..68 "" [Newline("\n")] []
+    2: HTML_SELF_CLOSING_ELEMENT@67..116
+      0: L_ANGLE@67..69 "<" [Newline("\n")] []
+      1: HTML_COMPONENT_NAME@69..76
+        0: HTML_LITERAL@69..76 "Toggle" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@76..114
+        0: SVELTE_BIND_DIRECTIVE@76..114
+          0: BIND_KW@76..80 "bind" [] []
+          1: SVELTE_DIRECTIVE_VALUE@80..114
+            0: COLON@80..81 ":" [] []
+            1: SVELTE_NAME@81..88
+              0: IDENT@81..88 "pressed" [] []
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@88..88
+            3: SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE@88..114
+              0: EQ@88..89 "=" [] []
+              1: SVELTE_BIND_FUNCTION_BINDING_EXPRESSION@89..114
+                0: L_CURLY@89..90 "{" [] []
+                1: HTML_TEXT_EXPRESSION@90..100
+                  0: HTML_LITERAL@90..100 "getToggled" [] []
+                2: COMMA@100..102 "," [] [Whitespace(" ")]
+                3: HTML_TEXT_EXPRESSION@102..112
+                  0: HTML_LITERAL@102..112 "setToggled" [] []
+                4: R_CURLY@112..114 "}" [] [Whitespace(" ")]
+      3: SLASH@114..115 "/" [] []
+      4: R_ANGLE@115..116 ">" [] []
+    3: HTML_SELF_CLOSING_ELEMENT@116..167
+      0: L_ANGLE@116..118 "<" [Newline("\n")] []
+      1: HTML_TAG_NAME@118..124
+        0: HTML_LITERAL@118..124 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@124..165
+        0: SVELTE_BIND_DIRECTIVE@124..165
+          0: BIND_KW@124..128 "bind" [] []
+          1: SVELTE_DIRECTIVE_VALUE@128..165
+            0: COLON@128..129 ":" [] []
+            1: SVELTE_NAME@129..134
+              0: IDENT@129..134 "value" [] []
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@134..134
+            3: SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE@134..165
+              0: EQ@134..135 "=" [] []
+              1: SVELTE_BIND_FUNCTION_BINDING_EXPRESSION@135..165
+                0: L_CURLY@135..136 "{" [] []
+                1: HTML_TEXT_EXPRESSION@136..148
+                  0: HTML_LITERAL@136..148 "() => [a, b]" [] []
+                2: COMMA@148..150 "," [] [Whitespace(" ")]
+                3: HTML_TEXT_EXPRESSION@150..163
+                  0: HTML_LITERAL@150..163 "(v) => set(v)" [] []
+                4: R_CURLY@163..165 "}" [] [Whitespace(" ")]
+      3: SLASH@165..166 "/" [] []
+      4: R_ANGLE@166..167 ">" [] []
+    4: HTML_SELF_CLOSING_ELEMENT@167..238
+      0: L_ANGLE@167..169 "<" [Newline("\n")] []
+      1: HTML_TAG_NAME@169..175
+        0: HTML_LITERAL@169..175 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@175..236
+        0: SVELTE_BIND_DIRECTIVE@175..236
+          0: BIND_KW@175..179 "bind" [] []
+          1: SVELTE_DIRECTIVE_VALUE@179..236
+            0: COLON@179..180 ":" [] []
+            1: SVELTE_NAME@180..185
+              0: IDENT@180..185 "value" [] []
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@185..185
+            3: SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE@185..236
+              0: EQ@185..186 "=" [] []
+              1: SVELTE_BIND_FUNCTION_BINDING_EXPRESSION@186..236
+                0: L_CURLY@186..187 "{" [] []
+                1: HTML_TEXT_EXPRESSION@187..200
+                  0: HTML_LITERAL@187..200 "\n\t() => value" [] []
+                2: COMMA@200..201 "," [] []
+                3: HTML_TEXT_EXPRESSION@201..234
+                  0: HTML_LITERAL@201..234 "(v) => value = v.toLowerCase()\n" [Newline("\n"), Whitespace("\t")] []
+                4: R_CURLY@234..236 "}" [] [Whitespace(" ")]
+      3: SLASH@236..237 "/" [] []
+      4: R_ANGLE@237..238 ">" [] []
+  4: EOF@238..239 "" [Newline("\n")] []
 
 ```

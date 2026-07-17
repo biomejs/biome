@@ -1,0 +1,26 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+@media (#{$dyn}) and (unknown-feature) {}
+
+```
+
+# Diagnostics
+```
+invalid.scss:1:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use unknown media feature names.
+  
+  > 1 │ @media (#{$dyn}) and (unknown-feature) {}
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Unexpected unknown media feature name.
+  
+  i You should use media feature names defined in the CSS Specifications.
+  
+
+```

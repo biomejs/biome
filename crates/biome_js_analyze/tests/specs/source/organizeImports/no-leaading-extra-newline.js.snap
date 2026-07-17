@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: no-leaading-extra-newline.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import A from "a";
+import "chunked";
+import B from "b";
+
+```

@@ -1,12 +1,16 @@
 use crate::parser::CssParser;
+use crate::syntax::CssSyntaxFeatures;
+use crate::syntax::scss::{is_at_scss_parent_selector_suffix, parse_scss_parent_selector_suffix};
 use crate::syntax::selector::selector_lex_context;
-use biome_css_syntax::CssSyntaxKind::{CSS_NESTED_SELECTOR, CSS_NESTED_SELECTOR_LIST};
+use biome_css_syntax::CssSyntaxKind::{
+    CSS_NESTED_SELECTOR, CSS_NESTED_SELECTOR_LIST, SCSS_PARENT_SELECTOR,
+};
 use biome_css_syntax::{CssSyntaxKind, T};
-use biome_parser::Parser;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
+use biome_parser::{Parser, SyntaxFeature};
 
 pub(crate) struct NestedSelectorList;
 impl ParseNodeList for NestedSelectorList {
@@ -50,5 +54,30 @@ fn parse_nested_selector(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
     let context = selector_lex_context(p);
     p.bump_with_context(T![&], context);
+
+    if CssSyntaxFeatures::Scss.is_supported(p) && is_at_scss_parent_selector_suffix(p) {
+        // Guarded above, so `&-#{$state}` must parse an adjacent suffix.
+        parse_scss_parent_selector_suffix(p).ok();
+        return Present(m.complete(p, SCSS_PARENT_SELECTOR));
+    }
+
+    Present(m.complete(p, CSS_NESTED_SELECTOR))
+}
+
+/// Parses a `&` (nesting selector) appearing as a sub-selector, e.g. the
+/// trailing `&` in `h1&`. Unlike [parse_nested_selector], this never produces
+/// a `ScssParentSelector`, since `AnyCssSubSelector` only allows
+/// `CssNestedSelector`; the SCSS parent-selector suffix syntax (`&-100`,
+/// `&#{$state}`) is only meaningful when `&` opens a compound selector.
+#[inline]
+pub(crate) fn parse_nested_selector_as_sub_selector(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_nested_selector(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    let context = selector_lex_context(p);
+    p.bump_with_context(T![&], context);
+
     Present(m.complete(p, CSS_NESTED_SELECTOR))
 }

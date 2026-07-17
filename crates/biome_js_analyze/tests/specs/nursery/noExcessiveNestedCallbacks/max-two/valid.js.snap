@@ -1,0 +1,27 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+foo1(function () {
+    foo2(function () {});
+});
+
+foo1(() => {
+    foo2(() => {});
+});
+
+foo1(handleFoo1);
+
+function handleFoo1() {
+    foo2(handleFoo2);
+}
+
+function handleFoo2() {
+    foo3();
+}
+
+```

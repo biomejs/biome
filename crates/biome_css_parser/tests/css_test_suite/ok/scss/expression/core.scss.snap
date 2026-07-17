@@ -55,13 +55,13 @@ CssRoot {
                                             items: CssParameterList [
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@20..21 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@21..27 "alpha" [] [Whitespace(" ")],
                                                             },
                                                         },
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@27..28 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@28..32 "beta" [] [],
@@ -160,11 +160,11 @@ CssRoot {
                       2: CSS_PARAMETER_LIST@20..32
                         0: SCSS_EXPRESSION@20..32
                           0: SCSS_EXPRESSION_ITEM_LIST@20..32
-                            0: SCSS_IDENTIFIER@20..27
+                            0: SCSS_VARIABLE@20..27
                               0: DOLLAR@20..21 "$" [] []
                               1: CSS_IDENTIFIER@21..27
                                 0: IDENT@21..27 "alpha" [] [Whitespace(" ")]
-                            1: SCSS_IDENTIFIER@27..32
+                            1: SCSS_VARIABLE@27..32
                               0: DOLLAR@27..28 "$" [] []
                               1: CSS_IDENTIFIER@28..32
                                 0: IDENT@28..32 "beta" [] []

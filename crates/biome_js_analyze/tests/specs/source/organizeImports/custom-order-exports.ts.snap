@@ -14,14 +14,16 @@ export type { T };
 ```
 custom-order-exports.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these exports.
   
   > 1 │ export { O };
       │ ^^^^^^^^^^^^^
-    2 │ export * as path from "node:path";
-    3 │ export type { T };
+  > 2 │ export * as path from "node:path";
+  > 3 │ export type { T };
+      │ ^^^^^^^^^^^^^^^^^^
+    4 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1   │ - export·{·O·};
       1 │ + export·type·{·T·};

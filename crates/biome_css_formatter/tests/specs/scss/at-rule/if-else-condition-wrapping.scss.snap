@@ -1,0 +1,134 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/if-else-condition-wrapping.scss
+---
+
+# Input
+
+```scss
+@if $very-very-very-very-very-very-long-var == 0 and $very-very-very-long-var == 0 {
+}
+
+@if $base-font-size != 16px or $base-line-height != 24px or $base-unit != "em" or $h1-font-size != 2 * $base-font-size or $h2-font-size != 1.5 * $base-font-size {
+}
+
+@if $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables == $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables {
+    color: blue;
+} @else if $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables == $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables {
+    color: red;
+}
+
+@if very-long-control-function-name($first-variable + $second-variable, $third-variable + $fourth-variable, $fifth-variable + $sixth-variable) {
+    color: red;
+}
+
+@if ($very-very-very-very-very-long-variable == $other-very-very-very-very-very-long-variable) {
+    color: red;
+}
+
+@if (($very-very-very-very-very-long-variable == $other-very-very-very-very-very-long-variable)) {
+    color: red;
+}
+
+@if ($first-variable, $second-variable, $third-variable, $fourth-variable, $fifth-variable, $sixth-variable) {
+    color: red;
+}
+
+@if (first: $first-variable, second: $second-variable, third: $third-variable, fourth: $fourth-variable, fifth: $fifth-variable) {
+    color: red;
+}
+
+```
+
+
+# Formatted
+
+```scss
+@if $very-very-very-very-very-very-long-var ==
+	0 and
+	$very-very-very-long-var ==
+	0
+{
+}
+
+@if $base-font-size !=
+	16px or
+	$base-line-height !=
+	24px or
+	$base-unit !=
+	"em" or
+	$h1-font-size !=
+	2 *
+	$base-font-size or
+	$h2-font-size !=
+	1.5 *
+	$base-font-size
+{
+}
+
+@if $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
+	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
+{
+	color: blue;
+} @else if
+	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
+	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
+{
+	color: red;
+}
+
+@if very-long-control-function-name(
+	$first-variable + $second-variable,
+	$third-variable + $fourth-variable,
+	$fifth-variable + $sixth-variable
+)
+{
+	color: red;
+}
+
+@if (
+	$very-very-very-very-very-long-variable ==
+		$other-very-very-very-very-very-long-variable
+) {
+	color: red;
+}
+
+@if (
+	(
+		$very-very-very-very-very-long-variable ==
+			$other-very-very-very-very-very-long-variable
+	)
+) {
+	color: red;
+}
+
+@if (
+	$first-variable,
+	$second-variable,
+	$third-variable,
+	$fourth-variable,
+	$fifth-variable,
+	$sixth-variable
+) {
+	color: red;
+}
+
+@if (
+	first: $first-variable,
+	second: $second-variable,
+	third: $third-variable,
+	fourth: $fourth-variable,
+	fifth: $fifth-variable
+) {
+	color: red;
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   23: @if $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
+   24: 	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
+   28: 	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
+   29: 	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
+```

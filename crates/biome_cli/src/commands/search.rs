@@ -12,12 +12,13 @@ use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{Configuration, FilesConfiguration};
 use biome_console::{Console, MarkupBuf};
 use biome_deserialize::Merge;
+use biome_diagnostics::Severity;
 use biome_diagnostics::{Category, DiagnosticExt, category};
 use biome_fs::FileSystem;
-use biome_grit_patterns::{GritTargetLanguage, JsTargetLanguage};
+use biome_languages::DocumentFileSource;
 use biome_service::workspace::{
-    DocumentFileSource, DropPatternParams, FeatureKind, FeatureName, FeaturesBuilder,
-    FeaturesSupported, ParsePatternParams, PatternId, ScanKind, SupportKind,
+    DropPatternParams, FeatureKind, FeatureName, FeaturesBuilder, FeaturesSupported,
+    ParsePatternParams, PatternId, ScanKind, SearchLanguage, SupportKind,
 };
 use biome_service::{Workspace, WorkspaceError};
 use camino::Utf8PathBuf;
@@ -28,7 +29,7 @@ pub(crate) struct SearchCommandPayload {
     pub(crate) files_configuration: Option<FilesConfiguration>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) pattern: String,
-    pub(crate) language: Option<GritTargetLanguage>,
+    pub(crate) language: Option<SearchLanguage>,
     pub(crate) stdin_file_path: Option<String>,
     pub(crate) vcs_configuration: Option<VcsConfiguration>,
 }
@@ -46,7 +47,7 @@ struct SearchExecution {
     /// to multiple languages at once.
     ///
     /// If none given, the default language is JavaScript.
-    language: Option<GritTargetLanguage>,
+    language: Option<SearchLanguage>,
 
     /// An optional tuple.
     /// 1. The virtual path to the file
@@ -101,7 +102,7 @@ impl Execution for SearchExecution {
         AnalyzerSelectors::default()
     }
 
-    fn search_language(&self) -> Option<GritTargetLanguage> {
+    fn search_language(&self) -> Option<SearchLanguage> {
         self.language.clone()
     }
 
@@ -119,16 +120,16 @@ pub(crate) struct SearchProcessFile;
 impl SearchProcessFile {
     fn is_file_compatible_with_pattern(
         file_source: &DocumentFileSource,
-        pattern_language: &GritTargetLanguage,
+        pattern_language: &SearchLanguage,
     ) -> bool {
         match pattern_language {
-            GritTargetLanguage::JsTargetLanguage(_) => {
+            SearchLanguage::Js => {
                 matches!(file_source, DocumentFileSource::Js(_))
             }
-            GritTargetLanguage::CssTargetLanguage(_) => {
+            SearchLanguage::Css => {
                 matches!(file_source, DocumentFileSource::Css(_))
             }
-            GritTargetLanguage::JsonTargetLanguage(_) => {
+            SearchLanguage::Json => {
                 matches!(file_source, DocumentFileSource::Json(_))
             }
         }
@@ -140,15 +141,15 @@ impl ProcessFile for SearchProcessFile {
         ctx: &Ctx,
         workspace_file: &mut WorkspaceFile,
         _features_supported: &FeaturesSupported,
+        _max_diagnostics: u32,
+        _diagnostic_level: Severity,
     ) -> Result<FileStatus, Message>
     where
         Ctx: CrawlerContext,
     {
         let execution = ctx.execution();
         let file_source = DocumentFileSource::from_path(workspace_file.path.as_path(), false);
-        let pattern_language = execution
-            .search_language()
-            .unwrap_or(GritTargetLanguage::JsTargetLanguage(JsTargetLanguage));
+        let pattern_language = execution.search_language().unwrap_or(SearchLanguage::Js);
         // SAFETY: search_pattern is implemented in this file
         let pattern = execution.search_pattern().unwrap();
 
@@ -175,6 +176,9 @@ impl ProcessFile for SearchProcessFile {
                 .map(|mat| SearchDiagnostic.with_file_span(mat))
                 .collect(),
             skipped_diagnostics: 0,
+            errors: 0,
+            warnings: 0,
+            infos: 0,
         };
 
         Ok(FileStatus::SearchResult(matches_len, search_results))

@@ -1,5 +1,5 @@
 use biome_configuration::markdown::MarkdownFormatterConfiguration;
-use biome_configuration::{Configuration, MarkdownConfiguration};
+use biome_configuration::{Configuration, markdown::MarkdownConfiguration};
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use camino::Utf8Path;
 

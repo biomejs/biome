@@ -66,9 +66,9 @@ HtmlRoot {
             clauses: SvelteAwaitClausesList [
                 SvelteAwaitThenBlock {
                     sv_curly_colon_token: SV_CURLY_COLON@36..39 "{:" [Newline("\n")] [],
-                    then_token: THEN_KW@39..43 "then" [] [],
+                    then_token: THEN_KW@39..44 "then" [] [Whitespace(" ")],
                     name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@43..49 " value" [] [],
+                        html_literal_token: HTML_LITERAL@44..49 "value" [] [],
                     },
                     r_curly_token: R_CURLY@49..50 "}" [] [],
                     children: HtmlElementList [
@@ -103,9 +103,9 @@ HtmlRoot {
                 },
                 SvelteAwaitCatchBlock {
                     sv_curly_colon_token: SV_CURLY_COLON@67..70 "{:" [Newline("\n")] [],
-                    catch_token: CATCH_KW@70..75 "catch" [] [],
+                    catch_token: CATCH_KW@70..76 "catch" [] [Whitespace(" ")],
                     name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@75..81 " error" [] [],
+                        html_literal_token: HTML_LITERAL@76..81 "error" [] [],
                     },
                     r_curly_token: R_CURLY@81..82 "}" [] [],
                     children: HtmlElementList [
@@ -140,9 +140,9 @@ HtmlRoot {
                 },
                 SvelteAwaitCatchBlock {
                     sv_curly_colon_token: SV_CURLY_COLON@107..110 "{:" [Newline("\n")] [],
-                    catch_token: CATCH_KW@110..115 "catch" [] [],
+                    catch_token: CATCH_KW@110..116 "catch" [] [Whitespace(" ")],
                     name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@115..128 " anotherError" [] [],
+                        html_literal_token: HTML_LITERAL@116..128 "anotherError" [] [],
                     },
                     r_curly_token: R_CURLY@128..129 "}" [] [],
                     children: HtmlElementList [
@@ -224,9 +224,9 @@ HtmlRoot {
       1: SVELTE_AWAIT_CLAUSES_LIST@36..161
         0: SVELTE_AWAIT_THEN_BLOCK@36..67
           0: SV_CURLY_COLON@36..39 "{:" [Newline("\n")] []
-          1: THEN_KW@39..43 "then" [] []
-          2: HTML_TEXT_EXPRESSION@43..49
-            0: HTML_LITERAL@43..49 " value" [] []
+          1: THEN_KW@39..44 "then" [] [Whitespace(" ")]
+          2: HTML_TEXT_EXPRESSION@44..49
+            0: HTML_LITERAL@44..49 "value" [] []
           3: R_CURLY@49..50 "}" [] []
           4: HTML_ELEMENT_LIST@50..67
             0: HTML_ELEMENT@50..67
@@ -250,9 +250,9 @@ HtmlRoot {
                 3: R_ANGLE@66..67 ">" [] []
         1: SVELTE_AWAIT_CATCH_BLOCK@67..107
           0: SV_CURLY_COLON@67..70 "{:" [Newline("\n")] []
-          1: CATCH_KW@70..75 "catch" [] []
-          2: HTML_TEXT_EXPRESSION@75..81
-            0: HTML_LITERAL@75..81 " error" [] []
+          1: CATCH_KW@70..76 "catch" [] [Whitespace(" ")]
+          2: HTML_TEXT_EXPRESSION@76..81
+            0: HTML_LITERAL@76..81 "error" [] []
           3: R_CURLY@81..82 "}" [] []
           4: HTML_ELEMENT_LIST@82..107
             0: HTML_ELEMENT@82..107
@@ -276,9 +276,9 @@ HtmlRoot {
                 3: R_ANGLE@106..107 ">" [] []
         2: SVELTE_AWAIT_CATCH_BLOCK@107..161
           0: SV_CURLY_COLON@107..110 "{:" [Newline("\n")] []
-          1: CATCH_KW@110..115 "catch" [] []
-          2: HTML_TEXT_EXPRESSION@115..128
-            0: HTML_LITERAL@115..128 " anotherError" [] []
+          1: CATCH_KW@110..116 "catch" [] [Whitespace(" ")]
+          2: HTML_TEXT_EXPRESSION@116..128
+            0: HTML_LITERAL@116..128 "anotherError" [] []
           3: R_CURLY@128..129 "}" [] []
           4: HTML_ELEMENT_LIST@129..161
             0: HTML_ELEMENT@129..161

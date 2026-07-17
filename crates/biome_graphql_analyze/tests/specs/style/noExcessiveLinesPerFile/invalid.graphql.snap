@@ -1,0 +1,31 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+query Foo { id }
+query Bar { id }
+query Baz { id }
+query Qux { id }
+
+```
+
+# Diagnostics
+```
+invalid.graphql:1:1 lint/style/noExcessiveLinesPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file has too many lines (4). Maximum allowed is 2.
+  
+  > 1 │ query Foo { id }
+      │ ^^^^^^^^^^^^^^^^
+  > 2 │ query Bar { id }
+  > 3 │ query Baz { id }
+  > 4 │ query Qux { id }
+      │ ^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i Consider splitting this file into smaller files.
+  
+
+```

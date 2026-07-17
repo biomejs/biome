@@ -2,3 +2,5 @@
 
 #[expect(clippy::module_inception)]
 pub(crate) mod bogus;
+pub(crate) mod bogus_block;
+pub(crate) mod bogus_bullet;

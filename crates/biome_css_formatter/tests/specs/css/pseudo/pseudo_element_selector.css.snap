@@ -56,19 +56,19 @@ video::cue-region(#scroll > .div) {
 }
 
 ::part(
-		active
-		active
-		active
-		active
-		active
-		active
-		active
-		active
-		active
-		active
-		active
-		active
-	) {
+	active
+	active
+	active
+	active
+	active
+	active
+	active
+	active
+	active
+	active
+	active
+	active
+) {
 }
 
 ```

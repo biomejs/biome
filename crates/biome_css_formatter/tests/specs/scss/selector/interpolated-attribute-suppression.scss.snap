@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/selector/interpolated-attribute-suppression.scss
+---
+
+# Input
+
+```scss
+html[lang=/* biome-ignore format: keep raw */#{$locale}]{color:red;}
+html[lang=#{$locale}/* biome-ignore format: keep raw */]{color:blue;}
+
+```
+
+
+# Formatted
+
+```scss
+html[lang=/* biome-ignore format: keep raw */ #{$locale}] {
+	color: red;
+}
+html[lang=#{$locale} /* biome-ignore format: keep raw */] {
+	color: blue;
+}
+
+```

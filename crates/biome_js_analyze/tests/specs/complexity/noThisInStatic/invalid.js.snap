@@ -44,6 +44,14 @@ const E = class extends f() {
     }
 }
 
+class FactoryCases {
+    static method() {
+        new this(this);
+        new Foo(this);
+        new this.Factory();
+    }
+}
+
 ```
 
 # Diagnostics
@@ -372,6 +380,84 @@ invalid.js:37:32 lint/complexity/noThisInStatic ━━━━━━━━━━�
     39 │ }
   
   i super refers to a parent class.
+  
+
+```
+
+```
+invalid.js:43:18 lint/complexity/noThisInStatic  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using this in a static context can be confusing.
+  
+    41 │ class FactoryCases {
+    42 │     static method() {
+  > 43 │         new this(this);
+       │                  ^^^^
+    44 │         new Foo(this);
+    45 │         new this.Factory();
+  
+  i this refers to the class.
+  
+  i Safe fix: Use the class name instead.
+  
+    41 41 │   class FactoryCases {
+    42 42 │       static method() {
+    43    │ - ········new·this(this);
+       43 │ + ········new·this(FactoryCases);
+    44 44 │           new Foo(this);
+    45 45 │           new this.Factory();
+  
+
+```
+
+```
+invalid.js:44:17 lint/complexity/noThisInStatic  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using this in a static context can be confusing.
+  
+    42 │     static method() {
+    43 │         new this(this);
+  > 44 │         new Foo(this);
+       │                 ^^^^
+    45 │         new this.Factory();
+    46 │     }
+  
+  i this refers to the class.
+  
+  i Safe fix: Use the class name instead.
+  
+    42 42 │       static method() {
+    43 43 │           new this(this);
+    44    │ - ········new·Foo(this);
+       44 │ + ········new·Foo(FactoryCases);
+    45 45 │           new this.Factory();
+    46 46 │       }
+  
+
+```
+
+```
+invalid.js:45:13 lint/complexity/noThisInStatic  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using this in a static context can be confusing.
+  
+    43 │         new this(this);
+    44 │         new Foo(this);
+  > 45 │         new this.Factory();
+       │             ^^^^
+    46 │     }
+    47 │ }
+  
+  i this refers to the class.
+  
+  i Safe fix: Use the class name instead.
+  
+    43 43 │           new this(this);
+    44 44 │           new Foo(this);
+    45    │ - ········new·this.Factory();
+       45 │ + ········new·FactoryCases.Factory();
+    46 46 │       }
+    47 47 │   }
   
 
 ```

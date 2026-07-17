@@ -1,0 +1,13 @@
+<!-- should not generate diagnostics -->
+<!-- Scoped styles apply to the component's own elements.
+     Even though .title and .body are Local (scoped), they are valid here
+     because this is the same file that defines them. -->
+<template>
+	<div class="title">Title</div>
+	<p class="body">Body text</p>
+</template>
+
+<style scoped>
+	.title { font-size: 2rem; }
+	.body { line-height: 1.5; }
+</style>

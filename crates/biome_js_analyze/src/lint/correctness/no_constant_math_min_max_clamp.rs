@@ -157,7 +157,8 @@ fn get_math_min_or_max_call(
     let min_or_max = MinMaxKind::from_str(member_name).ok()?;
 
     let object = member_expr.object().ok()?.omit_parentheses();
-    let (reference, name) = global_identifier(&object)?;
+    let (reference, name) =
+        global_identifier(&object.as_any_global_identifier_expression()?)?;
 
     if name.text() != "Math" || model.binding(&reference).is_some() {
         return None;

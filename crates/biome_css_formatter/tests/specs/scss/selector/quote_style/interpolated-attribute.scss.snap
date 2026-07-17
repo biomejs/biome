@@ -1,0 +1,42 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/selector/quote_style/interpolated-attribute.scss
+---
+
+# Input
+
+```scss
+html[lang=#{$locale}]{color:red;}
+html[lang=prefix-#{$locale}]{color:blue;}
+html[lang="#{$locale}"]{color:green;}
+
+```
+
+
+# Options
+
+```json
+{
+    "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+    "css": {
+        "formatter": {
+            "quoteStyle": "single"
+        }
+    }
+}
+```
+
+# Formatted
+
+```scss
+html[lang='#{$locale}'] {
+	color: red;
+}
+html[lang='prefix-#{$locale}'] {
+	color: blue;
+}
+html[lang='#{$locale}'] {
+	color: green;
+}
+
+```

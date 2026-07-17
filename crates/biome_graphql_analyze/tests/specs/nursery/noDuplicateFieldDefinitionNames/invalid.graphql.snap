@@ -23,6 +23,24 @@ input SomeInputObject {
 	foo: String
 }
 
+extend type SomeObject {
+	foo: String
+	bar: String
+	foo: String
+}
+
+extend interface SomeInterface {
+	foo: String
+	bar: String
+	foo: String
+}
+
+extend input SomeInputObject {
+	foo: String
+	bar: String
+	foo: String
+}
+
 ```
 
 # Diagnostics
@@ -88,6 +106,78 @@ invalid.graphql:14:1 lint/nursery/noDuplicateFieldDefinitionNames ━━━━�
   > 18 │ }
        │ ^
     19 │ 
+    20 │ extend type SomeObject {
+  
+  i A GraphQL complex type is only valid if all its fields are uniquely named. Make sure to name every field differently.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:20:1 lint/nursery/noDuplicateFieldDefinitionNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate field name.
+  
+    18 │ }
+    19 │ 
+  > 20 │ extend type SomeObject {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  > 21 │ 	foo: String
+  > 22 │ 	bar: String
+  > 23 │ 	foo: String
+  > 24 │ }
+       │ ^
+    25 │ 
+    26 │ extend interface SomeInterface {
+  
+  i A GraphQL complex type is only valid if all its fields are uniquely named. Make sure to name every field differently.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:26:1 lint/nursery/noDuplicateFieldDefinitionNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate field name.
+  
+    24 │ }
+    25 │ 
+  > 26 │ extend interface SomeInterface {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 27 │ 	foo: String
+  > 28 │ 	bar: String
+  > 29 │ 	foo: String
+  > 30 │ }
+       │ ^
+    31 │ 
+    32 │ extend input SomeInputObject {
+  
+  i A GraphQL complex type is only valid if all its fields are uniquely named. Make sure to name every field differently.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:32:1 lint/nursery/noDuplicateFieldDefinitionNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate field name.
+  
+    30 │ }
+    31 │ 
+  > 32 │ extend input SomeInputObject {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 33 │ 	foo: String
+  > 34 │ 	bar: String
+  > 35 │ 	foo: String
+  > 36 │ }
+       │ ^
+    37 │ 
   
   i A GraphQL complex type is only valid if all its fields are uniquely named. Make sure to name every field differently.
   

@@ -44,3 +44,24 @@ setTimeout(("alert('Hi!');"), 100);
 setTimeout((("alert('Hi!');")), 100);
 setTimeout(("a" + "b"), 100);
 setTimeout((`alert('Hi!');`), 100);
+
+// Function constructor usage
+Function("b", "c", "return b + c");
+new Function("b", "c", "return b + c");
+Function.call(null, "b", "c", "return b + c");
+Function.apply(null, ["b", "c", "return b + c"]);
+Function.bind(null, "b", "c", "return b + c")();
+Function.bind(null, "b", "c", "return b + c");
+Function["call"](null, "b", "c", "return b + c");
+(Function?.call)(null, "b", "c", "return b + c");
+
+// Global Function after local shadowing ends
+const localClass = () => {
+    class Function {}
+};
+new Function("", "");
+
+var localFunction = function () {
+    function Function() {}
+};
+Function("", "");

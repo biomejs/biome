@@ -57,22 +57,20 @@ reporter/violations ━━━━━━━━━━━━━━━━━━━━
   
 Scanned project folder in <TIME>.
 Checked 3 files in <TIME>. No fixes applied.
-Found 49 errors.
+Found 48 errors.
 Found 16 warnings.
 ```
 
 ## `index.css`
 
 ```css
-
-
-.brokenStyle { color: f( }
-
-.style {
-                color:
-                fakeFunction()
+.brokenStyle {
+  color: f(
 }
 
+.style {
+  color: fakeFunction();
+}
 ```
 
 ## `index.ts`

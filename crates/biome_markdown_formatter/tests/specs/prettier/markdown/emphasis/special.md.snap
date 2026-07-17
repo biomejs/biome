@@ -26,7 +26,7 @@ info: markdown/emphasis/special.md
 
 !_1_2
 
-0_1_! <!-- remark-misparsing, should be formatted as `0_1\_!` -->
+0_1_!
 
 !_1_!
 
@@ -34,7 +34,7 @@ info: markdown/emphasis/special.md
 
 ！_1_2
 
-0_1_！ <!-- remark-misparsing, should be formatted as `0_1\_！` -->
+0_1_！
 
 ！_1_！
 
@@ -50,29 +50,15 @@ info: markdown/emphasis/special.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,7 +4,7 @@
- 
- 0*1*!
- 
--!_1_!
-+!*1*!
- 
- 0*1*2
- 
-@@ -12,24 +12,24 @@
- 
- 0*1*！
- 
--！_1_！
-+！*1*！
+@@ -16,20 +16,20 @@
  
  0_1_2
  
 -!\_1_2
 +!_1_2
  
--0*1*! <!-- remark-misparsing, should be formatted as `0_1\_!` -->
-+0_1_! <!-- remark-misparsing, should be formatted as `0_1\_!` -->
+-0*1*!
++0_1_!
  
  !_1_!
  
@@ -81,15 +67,15 @@ info: markdown/emphasis/special.md
 -！\_1_2
 +！_1_2
  
--0*1*！ <!-- remark-misparsing, should be formatted as `0_1\_！` -->
-+0_1_！ <!-- remark-misparsing, should be formatted as `0_1\_！` -->
+-0*1*！
++0_1_！
  
  ！_1_！
  
  1***2***3
  
 -1 **_2_** 3
-+1 ***2*** 3
++1 _**2**_ 3
 ```
 
 # Output
@@ -101,7 +87,7 @@ info: markdown/emphasis/special.md
 
 0*1*!
 
-!*1*!
+!_1_!
 
 0*1*2
 
@@ -109,13 +95,13 @@ info: markdown/emphasis/special.md
 
 0*1*！
 
-！*1*！
+！_1_！
 
 0_1_2
 
 !_1_2
 
-0_1_! <!-- remark-misparsing, should be formatted as `0_1\_!` -->
+0_1_!
 
 !_1_!
 
@@ -123,11 +109,11 @@ info: markdown/emphasis/special.md
 
 ！_1_2
 
-0_1_！ <!-- remark-misparsing, should be formatted as `0_1\_！` -->
+0_1_！
 
 ！_1_！
 
 1***2***3
 
-1 ***2*** 3
+1 _**2**_ 3
 ```

@@ -1,16 +1,26 @@
 use crate::prelude::*;
+use crate::utils::comment_trivia::{is_leading_comment_on_node, is_trailing_comment_on_node};
+use crate::utils::scss_include_comments::{
+    place_list_trailing_separator_comment, place_map_trailing_separator_comment,
+    place_separated_list_comment,
+};
 use biome_css_syntax::{
-    AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssFunction, CssIdentifier, CssLanguage,
-    CssSyntaxKind, TextLen, TextSize,
+    AnyCssDeclarationName, AnyCssMediaQuery, AnyCssRoot, CssComplexSelector,
+    CssDeclarationOrRuleBlock, CssFunction, CssGenericComponentValueList, CssGenericProperty,
+    CssIdentifier, CssLanguage, CssMediaQueryList, CssSyntaxKind, ScssAtRootAtRule,
+    ScssAtRootSelector, ScssEachHeader, ScssEachValueList, ScssExpression, ScssExpressionItemList,
+    ScssIfAtRule, ScssListExpression, ScssListExpressionElement, ScssMapExpression,
+    ScssMapExpressionPair, ScssVariableDeclaration, T, TextLen, TextSize,
+    is_in_scss_include_arguments,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
-    CommentKind, CommentPlacement, CommentStyle, CommentTextPosition, Comments, DecoratedComment,
-    SourceComment, is_doc_comment,
+    CommentKind, CommentPlacement, CommentStyle, Comments, DecoratedComment, SourceComment,
+    is_doc_comment,
 };
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{FormatResult, FormatRule, write};
-use biome_rowan::SyntaxTriviaPieceComments;
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxTriviaPieceComments};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
 
 pub type CssComments = Comments<CssLanguage>;
@@ -33,7 +43,7 @@ impl FormatRule<SourceComment<CssLanguage>> for FormatCssLeadingComment {
 
             // SAFETY: Safe, `is_doc_comment` only returns `true` for multiline comments
             let first_line = lines.next().unwrap();
-            write!(f, [text(first_line.trim_end(), source_offset)])?;
+            write!(f, [text(first_line.trim_end(), Some(source_offset))])?;
 
             source_offset += first_line.text_len();
 
@@ -41,10 +51,13 @@ impl FormatRule<SourceComment<CssLanguage>> for FormatCssLeadingComment {
             write!(
                 f,
                 [align(
-                    1,
+                    " ",
                     &format_once(|f| {
                         for line in lines {
-                            write!(f, [hard_line_break(), text(line.trim(), source_offset)])?;
+                            write!(
+                                f,
+                                [hard_line_break(), text(line.trim(), Some(source_offset))]
+                            )?;
 
                             source_offset += line.text_len();
                         }
@@ -97,36 +110,192 @@ impl CommentStyle for CssCommentStyle {
         &self,
         comment: DecoratedComment<Self::Language>,
     ) -> CommentPlacement<Self::Language> {
-        match comment.text_position() {
-            CommentTextPosition::EndOfLine => handle_function_comment(comment)
-                .or_else(handle_declaration_name_comment)
-                .or_else(handle_complex_selector_comment)
-                .or_else(handle_global_suppression),
-            CommentTextPosition::OwnLine => handle_function_comment(comment)
-                .or_else(handle_declaration_name_comment)
-                .or_else(handle_complex_selector_comment)
-                .or_else(handle_global_suppression),
-            CommentTextPosition::SameLine => handle_function_comment(comment)
-                .or_else(handle_declaration_name_comment)
-                .or_else(handle_complex_selector_comment)
-                .or_else(handle_global_suppression),
-        }
+        handle_scss_map_trailing_separator_comment(comment)
+            .or_else(place_separated_list_comment)
+            .or_else(handle_scss_list_trailing_separator_comment)
+            .or_else(handle_scss_each_value_list_comment)
+            .or_else(handle_scss_expression_item_trailing_line_comment)
+            .or_else(handle_scss_at_root_selector_comment)
+            .or_else(handle_scss_else_clause_comment)
+            .or_else(handle_function_comment)
+            .or_else(handle_media_separator_comment)
+            // Handle SCSS variable name/colon comments before generic properties.
+            .or_else(handle_scss_variable_declaration_comment)
+            .or_else(handle_generic_property_comment)
+            .or_else(handle_declaration_name_comment)
+            .or_else(handle_complex_selector_comment)
+            .or_else(handle_global_suppression)
     }
 }
 
-fn handle_declaration_name_comment(
+fn handle_scss_map_trailing_separator_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
-    match comment.preceding_node() {
-        Some(following_node) if AnyCssDeclarationName::can_cast(following_node.kind()) => {
-            if following_node
-                .parent()
-                .is_some_and(|p| p.kind() == CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST)
-            {
-                CommentPlacement::Default(comment)
-            } else {
-                CommentPlacement::leading(following_node.clone(), comment)
-            }
+    let Some(preceding_pair) = comment
+        .preceding_node()
+        .and_then(ScssMapExpressionPair::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Some(map_expression) =
+        ScssMapExpression::cast_ref(comment.enclosing_node()).or_else(|| {
+            preceding_pair
+                .syntax()
+                .ancestors()
+                .find_map(ScssMapExpression::cast)
+        })
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    place_map_trailing_separator_comment(&map_expression, &preceding_pair, comment)
+}
+
+fn handle_scss_list_trailing_separator_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(preceding_element) = comment
+        .preceding_node()
+        .and_then(ScssListExpressionElement::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Some(list_expression) = preceding_element
+        .syntax()
+        .ancestors()
+        .find_map(ScssListExpression::cast)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    place_list_trailing_separator_comment(&list_expression, &preceding_element, comment)
+}
+
+/// Keeps `@each ... in /* comment */ a, b` comments after `in`.
+fn handle_scss_each_value_list_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(expression) = comment.following_node().and_then(ScssExpression::cast_ref) else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Some(value_list) = expression.parent::<ScssEachValueList>() else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if value_list.parent::<ScssEachHeader>().is_none() {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(first_value) = value_list.elements().next() else {
+        return CommentPlacement::Default(comment);
+    };
+    let Ok(first_value) = first_value.node() else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if first_value.syntax() == expression.syntax() {
+        CommentPlacement::leading(value_list.into_syntax(), comment)
+    } else {
+        CommentPlacement::Default(comment)
+    }
+}
+
+fn handle_scss_expression_item_trailing_line_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let (Some(preceding_node), Some(following_node)) =
+        (comment.preceding_node(), comment.following_node())
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if !comment.kind().is_line()
+        || !comment.text_position().is_end_of_line()
+        || !is_trailing_comment_on_node(preceding_node, &comment)
+        || is_in_scss_include_arguments(preceding_node)
+    {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(list) = preceding_node
+        .parent()
+        .filter(|parent| ScssExpressionItemList::can_cast(parent.kind()))
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if following_node.parent().as_ref() == Some(&list) {
+        CommentPlacement::trailing(preceding_node.clone(), comment)
+    } else {
+        CommentPlacement::Default(comment)
+    }
+}
+
+fn handle_scss_at_root_selector_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    // Keep selector comments before `{`, matching Prettier's `@at-root` output.
+    if !comment.kind().is_line()
+        || !comment.text_position().is_own_line()
+        || comment
+            .following_token()
+            .is_none_or(|token| token.kind() != T!['{'])
+    {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(selector) = comment
+        .preceding_node()
+        .and_then(ScssAtRootSelector::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Some(at_root) = selector.parent::<ScssAtRootAtRule>() else {
+        return CommentPlacement::Default(comment);
+    };
+
+    match at_root.block() {
+        Ok(block) => CommentPlacement::leading(block.into_syntax(), comment),
+        Err(_) => CommentPlacement::Default(comment),
+    }
+}
+
+fn handle_scss_else_clause_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(following_token_range) = comment
+        .following_token()
+        .filter(|token| token.kind() == T![@])
+        .map(|token| token.text_range())
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if !comment.kind().is_line() || !comment.text_position().is_own_line() {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(block) = comment
+        .preceding_node()
+        .and_then(CssDeclarationOrRuleBlock::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Some(else_clause) = block
+        .parent::<ScssIfAtRule>()
+        .and_then(|if_rule| if_rule.else_clause())
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    match else_clause.at_token() {
+        Ok(at_token) if at_token.text_range() == following_token_range => {
+            CommentPlacement::leading(else_clause.into_syntax(), comment)
         }
         _ => CommentPlacement::Default(comment),
     }
@@ -147,6 +316,239 @@ fn handle_function_comment(
         CommentPlacement::leading(following_node.clone(), comment)
     } else {
         CommentPlacement::Default(comment)
+    }
+}
+
+/// Attaches media-list comma comments to the following query.
+///
+/// ```scss
+/// @media print, // c
+/// screen {}
+/// ```
+fn handle_media_separator_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(preceding_query) = comment
+        .preceding_node()
+        .and_then(AnyCssMediaQuery::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Some(following_query) = comment
+        .following_node()
+        .and_then(AnyCssMediaQuery::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Some(media_list) = preceding_query.parent::<CssMediaQueryList>() else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if following_query
+        .parent::<CssMediaQueryList>()
+        .is_none_or(|following_list| following_list.syntax() != media_list.syntax())
+    {
+        return CommentPlacement::Default(comment);
+    }
+
+    if !is_media_separator_comment(&preceding_query, &following_query, &comment) {
+        return CommentPlacement::Default(comment);
+    }
+
+    CommentPlacement::leading(following_query.syntax().clone(), comment)
+}
+
+/// Returns true for comments in trivia after a media query comma.
+///
+/// ```scss
+/// @media print, // c
+/// screen {}
+/// ```
+fn is_media_separator_comment(
+    preceding_query: &AnyCssMediaQuery,
+    following_query: &AnyCssMediaQuery,
+    comment: &DecoratedComment<CssLanguage>,
+) -> bool {
+    let Some(comma_token) = preceding_query
+        .syntax()
+        .last_token()
+        .and_then(|token| token.next_token())
+        .filter(|token| token.kind() == CssSyntaxKind::COMMA)
+    else {
+        return false;
+    };
+
+    let comment_piece = comment.piece().as_piece();
+
+    if comma_token == comment_piece.token() {
+        return comma_token
+            .trailing_trivia()
+            .text_range()
+            .contains_range(comment_piece.text_range());
+    }
+
+    is_leading_comment_on_node(following_query.syntax(), comment.piece())
+}
+
+/// Attaches comments that belong to SCSS variable boundaries:
+///
+/// ```scss
+/// $color/* c */: red;
+/// $font:
+///   // c
+///   Arial;
+/// ```
+fn handle_scss_variable_declaration_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(variable_declaration) = comment
+        .enclosing_node()
+        .ancestors()
+        .find_map(ScssVariableDeclaration::cast)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Ok(name) = variable_declaration.name() else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let comment_piece = comment.piece();
+
+    if comment
+        .preceding_node()
+        .is_some_and(|preceding| preceding == name.syntax())
+        && is_between_variable_colon_and_value(
+            &variable_declaration,
+            comment_piece.text_range().start(),
+        )
+    {
+        return CommentPlacement::dangling(variable_declaration.into_syntax(), comment);
+    }
+
+    if let Some(name_token) = name.syntax().last_token() {
+        for piece in name_token.trailing_trivia().pieces() {
+            if piece.is_comments() && piece.text_range() == comment_piece.text_range() {
+                // Keep `$color/* comment */: red;` between name and colon.
+                return CommentPlacement::dangling(variable_declaration.into_syntax(), comment);
+            }
+        }
+    }
+
+    CommentPlacement::Default(comment)
+}
+
+/// Returns `true` for comments between `:` and the variable value.
+fn is_between_variable_colon_and_value(
+    variable_declaration: &ScssVariableDeclaration,
+    comment_start: TextSize,
+) -> bool {
+    let Ok(colon) = variable_declaration.colon_token() else {
+        return false;
+    };
+
+    let Some(value_start) = variable_declaration
+        .value()
+        .ok()
+        .and_then(|value| value.syntax().first_token())
+        .map(|token| token.text_trimmed_range().start())
+    else {
+        return false;
+    };
+
+    comment_start >= colon.text_trimmed_range().end() && comment_start < value_start
+}
+
+fn handle_generic_property_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(generic_property) = comment
+        .enclosing_node()
+        .ancestors()
+        .find_map(CssGenericProperty::cast)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Ok(name) = generic_property.name() else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let comment_piece = comment.piece();
+
+    if is_between_property_colon_and_value(&generic_property, comment_piece.text_range().start()) {
+        return CommentPlacement::trailing(generic_property.into_syntax(), comment);
+    }
+
+    if let Some(name_token) = name.syntax().last_token() {
+        for piece in name_token.trailing_trivia().pieces() {
+            if piece.is_comments() && piece.text_range() == comment_piece.text_range() {
+                // Keep `a { color/* comment */: red; }` between name and colon.
+                return CommentPlacement::dangling(generic_property.into_syntax(), comment);
+            }
+        }
+    }
+
+    if let (Some(preceding), Some(following)) = (comment.preceding_node(), comment.following_node())
+        && preceding == name.syntax()
+        && following
+            .parent()
+            .and_then(CssGenericComponentValueList::cast)
+            .is_some()
+    {
+        return CommentPlacement::trailing(generic_property.into_syntax(), comment);
+    }
+
+    CommentPlacement::Default(comment)
+}
+
+fn is_between_property_colon_and_value(
+    property: &CssGenericProperty,
+    comment_start: TextSize,
+) -> bool {
+    // `a { color: /* comment */ red; }` belongs to the colon/value boundary.
+    let Ok(colon) = property.colon_token() else {
+        return false;
+    };
+
+    let Some(value_start) = property
+        .value()
+        .ok()
+        .and_then(|value| value.syntax().first_token())
+        .map(|token| token.text_trimmed_range().start())
+    else {
+        return false;
+    };
+
+    comment_start >= colon.text_trimmed_range().end() && comment_start < value_start
+}
+
+fn handle_declaration_name_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    match comment.preceding_node() {
+        Some(preceding_node) if AnyCssDeclarationName::can_cast(preceding_node.kind()) => {
+            if let Some(generic_property) =
+                preceding_node.parent().and_then(CssGenericProperty::cast)
+            {
+                // SCSS keeps `a { color // comment
+                // : red; }` between name and colon.
+                return CommentPlacement::dangling(generic_property.into_syntax(), comment);
+            }
+
+            if preceding_node
+                .parent()
+                .and_then(CssGenericComponentValueList::cast)
+                .is_some()
+            {
+                CommentPlacement::Default(comment)
+            } else {
+                CommentPlacement::leading(preceding_node.clone(), comment)
+            }
+        }
+        _ => CommentPlacement::Default(comment),
     }
 }
 

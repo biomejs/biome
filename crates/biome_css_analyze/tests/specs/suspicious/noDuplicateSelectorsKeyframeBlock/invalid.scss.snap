@@ -1,0 +1,31 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+@keyframes fade {
+  $stop: 50%;
+
+  from {}
+  from {}
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:5:3 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The duplicate keyframe selector is overwritten by later one.
+  
+    4 │   from {}
+  > 5 │   from {}
+      │   ^^^^
+    6 │ }
+    7 │ 
+  
+  i Consider using a different percentage value or keyword to avoid duplication
+  
+
+```

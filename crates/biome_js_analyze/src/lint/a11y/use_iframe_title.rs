@@ -66,7 +66,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useIframeTitle",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("iframe-has-title").same()],
+        sources: &[RuleSource::EslintJsxA11y("iframe-has-title").same(), RuleSource::HtmlEslint("require-frame-title").inspired()],
         recommended: true,
         severity: Severity::Error,
     }

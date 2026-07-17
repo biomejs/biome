@@ -1,0 +1,24 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: scss/declaration/loose-function-recovery.scss
+---
+
+# Input
+
+```scss
+a {
+    color: rgba   (0, 1, 255, 1);
+}
+
+```
+
+
+# Formatted
+
+```scss
+a {
+	color: rgba(0, 1, 255, 1);
+}
+
+```

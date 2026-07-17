@@ -6,7 +6,6 @@ use biome_analyze::{
 };
 
 use biome_console::markup;
-use biome_diagnostics::category;
 use biome_js_syntax::{
     AnyJsObjectMemberName, AnyTsTypeMember, TsInterfaceDeclaration, TsTypeMemberList,
 };
@@ -72,7 +71,7 @@ declare_source_rule! {
         name: "useSortedInterfaceMembers",
         language: "ts",
         recommended: false,
-        sources: &[RuleSource::EslintPerfectionist("sort-interfaces").inspired()],
+        sources: &[RuleSource::EslintPerfectionist("sort-interfaces").inspired(), RuleSource::EslintTypescriptSortKeys("interface").inspired()],
         fix_kind: FixKind::Safe,
     }
 }
@@ -94,7 +93,7 @@ impl Rule for UseSortedInterfaceMembers {
         let interface = ctx.query();
 
         Some(RuleDiagnostic::new(
-            category!("assist/source/useSortedInterfaceMembers"),
+            rule_category!(),
             interface.range(),
             markup! {
                 "The interface members are not sorted by key."

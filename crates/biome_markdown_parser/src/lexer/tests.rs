@@ -4,7 +4,7 @@
 use super::{MarkdownLexer, TextSize};
 use crate::lexer::MarkdownLexContext;
 use biome_markdown_syntax::MarkdownSyntaxKind::*;
-use biome_parser::lexer::Lexer;
+use biome_parser::lexer::{BufferedLexer, Lexer};
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
 use std::thread;
@@ -13,7 +13,10 @@ use std::time::Duration;
 // Assert the result of lexing a piece of source code,
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
 macro_rules! assert_lex {
-    ($src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
+    ($src:expr, $($kind:ident:$len:expr $(,)?)*) => {
+        assert_lex!(MarkdownLexContext::default(), $src, $($kind:$len,)*)
+    };
+    ($context:expr, $src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
         let mut lexer = MarkdownLexer::from_str($src);
         let mut idx = 0;
         let mut tok_idx = TextSize::default();
@@ -21,7 +24,7 @@ macro_rules! assert_lex {
         let mut new_str = String::with_capacity($src.len());
         let mut tokens = vec![];
 
-        while lexer.next_token(MarkdownLexContext::default()) != EOF {
+        while lexer.next_token($context) != EOF {
             tokens.push((lexer.current(), lexer.current_range()));
         }
 
@@ -262,15 +265,15 @@ fn star_token_single() {
 
 #[test]
 fn brackets() {
-    // Brackets for links - text is grouped into single tokens
+    // Brackets for links - text is grouped into single tokens.
+    // Parens are plain text in Regular context; the parser re-lexes the
+    // link tail in LinkDefinition context to get L_PAREN/R_PAREN tokens.
     assert_lex! {
         "[text](url)",
         L_BRACK:1,
         MD_TEXTUAL_LITERAL:4, // "text" grouped
         R_BRACK:1,
-        L_PAREN:1,
-        MD_TEXTUAL_LITERAL:3, // "url" grouped
-        R_PAREN:1,
+        MD_TEXTUAL_LITERAL:5, // "(url)" grouped
     }
 }
 
@@ -279,22 +282,22 @@ fn bang_token() {
     // Exclamation for images
     assert_lex! {
         "!",
-        BANG:1,
+        MD_TEXTUAL_LITERAL:1,
     }
 }
 
 #[test]
 fn image_syntax() {
-    // Image syntax - text is grouped into single tokens
+    // Image syntax - text is grouped into single tokens.
+    // Parens are plain text in Regular context; the parser re-lexes the
+    // link tail in LinkDefinition context to get L_PAREN/R_PAREN tokens.
     assert_lex! {
         "![alt](src)",
         BANG:1,
         L_BRACK:1,
         MD_TEXTUAL_LITERAL:3, // "alt" grouped
         R_BRACK:1,
-        L_PAREN:1,
-        MD_TEXTUAL_LITERAL:3, // "src" grouped
-        R_PAREN:1,
+        MD_TEXTUAL_LITERAL:5, // "(src)" grouped
     }
 }
 
@@ -449,6 +452,19 @@ fn ordered_list_marker_dot() {
 }
 
 #[test]
+fn ordered_list_marker_only_padding_is_split() {
+    // Marker-only padding belongs to the list prefix, not an inline hard break.
+    assert_lex! {
+        "1.   \n",
+        MD_ORDERED_LIST_MARKER:2,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        NEWLINE:1,
+    }
+}
+
+#[test]
 fn ordered_list_marker_paren() {
     // Ordered list marker with parenthesis
     assert_lex! {
@@ -527,6 +543,23 @@ fn setext_underline_dashes() {
         NEWLINE:1,
     }
 
+    // Trailing whitespace is allowed for setext underlines, but it must remain
+    // separate so a single-dash line can still be parsed as an empty list item.
+    assert_lex! {
+        "-   \n",
+        MD_SETEXT_UNDERLINE_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        NEWLINE:1,
+    }
+
+    assert_lex! {
+        "--  \n",
+        MD_SETEXT_UNDERLINE_LITERAL:2,
+        MD_HARD_LINE_LITERAL:3,
+    }
+
     // Three+ dashes is a thematic break at lexer level
     // (parser will convert to setext if preceded by paragraph)
     assert_lex! {
@@ -573,4 +606,92 @@ fn block_quote_simple() {
         MD_TEXTUAL_LITERAL:15, // "This is a quote"
         NEWLINE:1,
     }
+}
+
+#[test]
+fn vertical_tab_after_block_quote_marker() {
+    // Vertical tab (U+000B) after `>` must not cause an infinite loop.
+    // VT is classified as WHS by the dispatch table but is not a space or tab,
+    // so it must fall through to consume_textual.
+    assert_lex! {
+        ">\u{b}",
+        R_ANGLE:1,
+        MD_TEXTUAL_LITERAL:1,
+    }
+}
+
+#[test]
+fn form_feed_after_block_quote_marker() {
+    // Form feed (U+000C) after `>` — same category as vertical tab in the
+    // dispatch table. Must be consumed as textual, not treated as indentation.
+    assert_lex! {
+        ">\u{c}",
+        R_ANGLE:1,
+        MD_TEXTUAL_LITERAL:1,
+    }
+}
+
+#[test]
+fn vertical_tab_at_line_start() {
+    // VT at line start after a newline must not be treated as indentation
+    // whitespace (only space and tab are valid indentation in CommonMark).
+    assert_lex! {
+        "text\n\u{b}more",
+        MD_TEXTUAL_LITERAL:4,
+        NEWLINE:1,
+        MD_TEXTUAL_LITERAL:5,
+    }
+}
+
+#[test]
+fn parens_are_tokens_in_link_definition_context() {
+    // In Regular context parens are plain text, but inside link destinations
+    // and titles the parser lexes with the LinkDefinition context, where `(`
+    // and `)` are proper bracket tokens as required by the MdInlineLink and
+    // MdLinkReferenceDefinition grammar.
+    assert_lex! {
+        MarkdownLexContext::LinkDefinition,
+        "(url)",
+        L_PAREN:1,
+        MD_TEXTUAL_LITERAL:3, // "url"
+        R_PAREN:1,
+    }
+
+    // The same input in Regular context is a single plain-text token.
+    assert_lex! {
+        MarkdownLexContext::Regular,
+        "(url)",
+        MD_TEXTUAL_LITERAL:5,
+    }
+}
+
+#[test]
+fn force_relex_at_line_start_produces_thematic_break() {
+    // After consuming a blockquote prefix (`> `), `---` is normally lexed as
+    // MINUS tokens because after_newline is false. force_relex_at_line_start
+    // should make the lexer treat the position as a line start, producing
+    // MD_THEMATIC_BREAK_LITERAL instead.
+    let source = "> ---\n";
+    let lexer = MarkdownLexer::from_str(source);
+    let mut buffered = BufferedLexer::new(lexer);
+
+    // Lex first token: `>` (R_ANGLE)
+    buffered.next_token(MarkdownLexContext::Regular);
+    assert_eq!(buffered.current(), R_ANGLE);
+
+    // Lex second token: ` ` (whitespace as MD_TEXTUAL_LITERAL)
+    buffered.next_token(MarkdownLexContext::Regular);
+    assert_eq!(buffered.current(), MD_TEXTUAL_LITERAL);
+
+    // Lex third token: without re-lex, `---` becomes MINUS
+    buffered.next_token(MarkdownLexContext::Regular);
+    assert_eq!(buffered.current(), MINUS, "without re-lex, should be MINUS");
+
+    // Now re-lex at line start — should produce MD_THEMATIC_BREAK_LITERAL
+    let kind = buffered.force_relex_at_line_start(MarkdownLexContext::Regular);
+    assert_eq!(
+        kind, MD_THEMATIC_BREAK_LITERAL,
+        "after force_relex_at_line_start, `---` should be MD_THEMATIC_BREAK_LITERAL"
+    );
+    assert_eq!(buffered.current(), MD_THEMATIC_BREAK_LITERAL);
 }

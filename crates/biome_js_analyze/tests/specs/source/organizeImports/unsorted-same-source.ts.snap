@@ -20,14 +20,22 @@ import type * as types from "source";
 ```
 unsorted-same-source.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these imports.
   
-  > 1 │ import { A, B } from "source";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ import Json from "source" with { "type": "json "};
-    3 │ import G, * as H from "source";
+   > 1 │ import { A, B } from "source";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 2 │ import Json from "source" with { "type": "json "};
+   > 3 │ import G, * as H from "source";
+   > 4 │ import D, { E, F } from "source";
+   > 5 │ import * as N from "source";
+   > 6 │ import { m1, m2 } from "source" with { "type": "macro "};
+   > 7 │ import * as macros from "source" with { "type": "macro "};
+   > 8 │ import type { T1, T2 } from "source";
+   > 9 │ import type * as types from "source";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
      1   │ - import·{·A,·B·}·from·"source";
        1 │ + import·*·as·macros·from·"source"·with·{·"type":·"macro·"};

@@ -144,13 +144,21 @@ impl Rule for UseForOf {
     }
 
     fn diagnostic(node: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            node.query().range(),
-            markup! {
-                "Use "<Emphasis>"for-of"</Emphasis>" loop instead of a "<Emphasis>"for loop"</Emphasis>"."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.query().range(),
+                markup! {
+                    "This "<Emphasis>"for"</Emphasis>" loop only uses its index to read from the iterated array."
+                },
+            )
+            .note(markup! {
+                "A "<Emphasis>"for...of"</Emphasis>" loop expresses that pattern more clearly because it iterates over the array values directly."
+            })
+            .note(markup! {
+                "Use a "<Emphasis>"for...of"</Emphasis>" loop instead."
+            }),
+        )
     }
 }
 

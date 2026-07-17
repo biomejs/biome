@@ -1,0 +1,156 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+a {
+	a: "plain";
+	a: "a\
+b";
+	a: "\41
+b";
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@0..2 "a" [] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@2..3 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@3..6 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@6..8 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssString {
+                                        value_token: CSS_STRING_LITERAL@8..15 "\"plain\"" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@15..16 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@16..19 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@19..21 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssString {
+                                        value_token: CSS_STRING_LITERAL@21..27 "\"a\\\nb\"" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@27..28 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@28..31 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@31..33 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssString {
+                                        value_token: CSS_STRING_LITERAL@33..40 "\"\\41\nb\"" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@40..41 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@41..43 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@43..44 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..44
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..43
+    0: CSS_QUALIFIED_RULE@0..43
+      0: CSS_SELECTOR_LIST@0..2
+        0: CSS_COMPOUND_SELECTOR@0..2
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: CSS_TYPE_SELECTOR@0..2
+            0: (empty)
+            1: CSS_IDENTIFIER@0..2
+              0: IDENT@0..2 "a" [] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@2..2
+      1: CSS_DECLARATION_OR_RULE_BLOCK@2..43
+        0: L_CURLY@2..3 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@3..41
+          0: CSS_DECLARATION_WITH_SEMICOLON@3..16
+            0: CSS_DECLARATION@3..15
+              0: CSS_GENERIC_PROPERTY@3..15
+                0: CSS_IDENTIFIER@3..6
+                  0: IDENT@3..6 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@6..8 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@8..15
+                  0: CSS_STRING@8..15
+                    0: CSS_STRING_LITERAL@8..15 "\"plain\"" [] []
+              1: (empty)
+            1: SEMICOLON@15..16 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@16..28
+            0: CSS_DECLARATION@16..27
+              0: CSS_GENERIC_PROPERTY@16..27
+                0: CSS_IDENTIFIER@16..19
+                  0: IDENT@16..19 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@19..21 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@21..27
+                  0: CSS_STRING@21..27
+                    0: CSS_STRING_LITERAL@21..27 "\"a\\\nb\"" [] []
+              1: (empty)
+            1: SEMICOLON@27..28 ";" [] []
+          2: CSS_DECLARATION_WITH_SEMICOLON@28..41
+            0: CSS_DECLARATION@28..40
+              0: CSS_GENERIC_PROPERTY@28..40
+                0: CSS_IDENTIFIER@28..31
+                  0: IDENT@28..31 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@31..33 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@33..40
+                  0: CSS_STRING@33..40
+                    0: CSS_STRING_LITERAL@33..40 "\"\\41\nb\"" [] []
+              1: (empty)
+            1: SEMICOLON@40..41 ";" [] []
+        2: R_CURLY@41..43 "}" [Newline("\n")] []
+  2: EOF@43..44 "" [Newline("\n")] []
+
+```

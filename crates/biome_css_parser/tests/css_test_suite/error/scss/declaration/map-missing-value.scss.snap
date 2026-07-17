@@ -1,0 +1,146 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
+expression: snapshot
+---
+
+## Input
+
+```css
+a {
+  color: (foo:);
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@0..2 "a" [] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@2..3 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@3..11 "color" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@11..13 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssMapExpression {
+                                            l_paren_token: L_PAREN@13..14 "(" [] [],
+                                            pairs: ScssMapExpressionPairList [
+                                                ScssMapExpressionPair {
+                                                    key: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@14..17 "foo" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                    colon_token: COLON@17..18 ":" [] [],
+                                                    value: missing (required),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@18..19 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@19..20 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@20..22 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@22..23 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..23
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..22
+    0: CSS_QUALIFIED_RULE@0..22
+      0: CSS_SELECTOR_LIST@0..2
+        0: CSS_COMPOUND_SELECTOR@0..2
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: CSS_TYPE_SELECTOR@0..2
+            0: (empty)
+            1: CSS_IDENTIFIER@0..2
+              0: IDENT@0..2 "a" [] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@2..2
+      1: CSS_DECLARATION_OR_RULE_BLOCK@2..22
+        0: L_CURLY@2..3 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@3..20
+          0: CSS_DECLARATION_WITH_SEMICOLON@3..20
+            0: CSS_DECLARATION@3..19
+              0: CSS_GENERIC_PROPERTY@3..19
+                0: CSS_IDENTIFIER@3..11
+                  0: IDENT@3..11 "color" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@11..13 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@13..19
+                  0: SCSS_EXPRESSION_ITEM_LIST@13..19
+                    0: SCSS_MAP_EXPRESSION@13..19
+                      0: L_PAREN@13..14 "(" [] []
+                      1: SCSS_MAP_EXPRESSION_PAIR_LIST@14..18
+                        0: SCSS_MAP_EXPRESSION_PAIR@14..18
+                          0: SCSS_EXPRESSION@14..17
+                            0: SCSS_EXPRESSION_ITEM_LIST@14..17
+                              0: CSS_IDENTIFIER@14..17
+                                0: IDENT@14..17 "foo" [] []
+                          1: COLON@17..18 ":" [] []
+                          2: (empty)
+                      2: R_PAREN@18..19 ")" [] []
+              1: (empty)
+            1: SEMICOLON@19..20 ";" [] []
+        2: R_CURLY@20..22 "}" [Newline("\n")] []
+  2: EOF@22..23 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+map-missing-value.scss:2:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ')'.
+  
+    1 │ a {
+  > 2 │   color: (foo:);
+      │               ^
+    3 │ }
+    4 │ 
+  
+  i Expected a SCSS expression here.
+  
+    1 │ a {
+  > 2 │   color: (foo:);
+      │               ^
+    3 │ }
+    4 │ 
+  
+```

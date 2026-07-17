@@ -1,0 +1,156 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: basic.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+
+export const RawText = () => <View>some text</View>;
+
+export const TemplateLiteralInView = () => {
+	const text = "some text";
+	return <View>{`${text}`}</View>;
+};
+
+export const StringLiteralInView = () => <View>{"some text"}</View>;
+
+export const WhitespaceInView = () => <View>  </View>;
+
+export const TextInsideUnknownComponent = () => (
+	<MyComponent myFunctionProp={() => {}}>my children</MyComponent>
+);
+
+export const AnimatedTextSibling = () => (
+	<View>
+		<Animated.View>some text</Animated.View>
+	</View>
+);
+
+```
+
+# Diagnostics
+```
+basic.jsx:3:36 lint/nursery/noReactNativeRawText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Raw text (some text) cannot be used outside of a <Text> tag.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ export const RawText = () => <View>some text</View>;
+      │                                    ^^^^^^^^^
+    4 │ 
+    5 │ export const TemplateLiteralInView = () => {
+  
+  i In React Native, strings must be rendered within a <Text> component, otherwise the application throws at runtime.
+  
+  i Wrap the text in a <Text> component, or add the containing component to the skip option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+basic.jsx:7:15 lint/nursery/noReactNativeRawText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Raw text (TemplateLiteral: text) cannot be used outside of a <Text> tag.
+  
+    5 │ export const TemplateLiteralInView = () => {
+    6 │ 	const text = "some text";
+  > 7 │ 	return <View>{`${text}`}</View>;
+      │ 	             ^^^^^^^^^^^
+    8 │ };
+    9 │ 
+  
+  i In React Native, strings must be rendered within a <Text> component, otherwise the application throws at runtime.
+  
+  i Wrap the text in a <Text> component, or add the containing component to the skip option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+basic.jsx:10:48 lint/nursery/noReactNativeRawText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Raw text (some text) cannot be used outside of a <Text> tag.
+  
+     8 │ };
+     9 │ 
+  > 10 │ export const StringLiteralInView = () => <View>{"some text"}</View>;
+       │                                                ^^^^^^^^^^^^^
+    11 │ 
+    12 │ export const WhitespaceInView = () => <View>  </View>;
+  
+  i In React Native, strings must be rendered within a <Text> component, otherwise the application throws at runtime.
+  
+  i Wrap the text in a <Text> component, or add the containing component to the skip option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+basic.jsx:12:45 lint/nursery/noReactNativeRawText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Whitespace cannot be used outside of a <Text> tag.
+  
+    10 │ export const StringLiteralInView = () => <View>{"some text"}</View>;
+    11 │ 
+  > 12 │ export const WhitespaceInView = () => <View>  </View>;
+       │                                             ^^
+    13 │ 
+    14 │ export const TextInsideUnknownComponent = () => (
+  
+  i In React Native, strings must be rendered within a <Text> component, otherwise the application throws at runtime.
+  
+  i Wrap the text in a <Text> component, or add the containing component to the skip option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+basic.jsx:15:41 lint/nursery/noReactNativeRawText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Raw text (my children) cannot be used outside of a <Text> tag.
+  
+    14 │ export const TextInsideUnknownComponent = () => (
+  > 15 │ 	<MyComponent myFunctionProp={() => {}}>my children</MyComponent>
+       │ 	                                       ^^^^^^^^^^^
+    16 │ );
+    17 │ 
+  
+  i In React Native, strings must be rendered within a <Text> component, otherwise the application throws at runtime.
+  
+  i Wrap the text in a <Text> component, or add the containing component to the skip option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+basic.jsx:20:18 lint/nursery/noReactNativeRawText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Raw text (some text) cannot be used outside of a <Text> tag.
+  
+    18 │ export const AnimatedTextSibling = () => (
+    19 │ 	<View>
+  > 20 │ 		<Animated.View>some text</Animated.View>
+       │ 		               ^^^^^^^^^
+    21 │ 	</View>
+    22 │ );
+  
+  i In React Native, strings must be rendered within a <Text> component, otherwise the application throws at runtime.
+  
+  i Wrap the text in a <Text> component, or add the containing component to the skip option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

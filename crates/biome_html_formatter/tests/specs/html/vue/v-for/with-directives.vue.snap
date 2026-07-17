@@ -1,0 +1,27 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/v-for/with-directives.vue
+---
+
+# Input
+
+```vue
+<div v-if="ok" v-for=" item   in   items " :key="item.id" @click="select(item)">{{ item }}</div>
+<template v-for="( item , index ) in items" :key="index">
+  <span>{{ item }}</span>
+</template>
+
+```
+
+
+# Formatted
+
+```vue
+<div v-if="ok" v-for="item in items" :key="item.id" @click="select(item)">
+	{{ item }}
+</div>
+<template v-for="(item, index) in items" :key="index">
+	<span>{{ item }}</span>
+</template>
+
+```

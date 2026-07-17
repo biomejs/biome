@@ -1,0 +1,171 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: scss/comments/between-decl.scss
+---
+
+# Input
+
+```scss
+selector {
+prop: // comment
+value;
+
+prop: /* block */ value;
+
+prop
+: value;
+}
+
+// #5603
+.grid {
+        grid-template-areas: //
+          "header header header" //
+          "sidebar content content" //
+          "footer footer footer";
+
+        grid-template-areas:
+          "header header header" //
+          "sidebar content content" //
+          "footer footer footer";
+ }
+
+// #8052
+$font-family-rich:
+  // custom
+  'Noto Sans TC', 'Noto Sans SC', 'Noto Sans JP',
+  // Safari for OS X and iOS (San Francisco)
+  -apple-system, BlinkMacSystemFont,
+  // fallback
+  Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif,
+  // emoji
+  'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol' !default;
+
+// #7109
+.test {
+    background:
+        /////// foo
+        // bar
+
+        radial-gradient(circle farthest-corner at 5% 10%, #000000, transparent 50%);
+}
+
+// TODO: make these pretty
+selector {
+prop:
+/* block */
+value;
+
+prop
+// inline
+:
+value;
+
+prop/* block */:
+value;
+
+prop
+/* block */
+:
+value;
+
+prop/* before */: // after
+value;
+
+
+prop/* before */: /* after*/
+value;
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -42,8 +42,8 @@
+ // #7109
+ .test {
+   background:
+-        /////// foo
+-        // bar
++  /////// foo
++  // bar
+     radial-gradient(circle farthest-corner at 5% 10%, #000000, transparent 50%);
+ }
+ 
+```
+
+# Output
+
+```scss
+selector {
+  prop: // comment
+    value;
+
+  prop: /* block */ value;
+
+  prop: value;
+}
+
+// #5603
+.grid {
+  grid-template-areas: //
+    "header header header" //
+    "sidebar content content" //
+    "footer footer footer";
+
+  grid-template-areas: "header header header" //
+    "sidebar content content" //
+    "footer footer footer";
+}
+
+// #8052
+$font-family-rich:
+  // custom
+  "Noto Sans TC",
+  "Noto Sans SC",
+  "Noto Sans JP",
+  // Safari for OS X and iOS (San Francisco)
+  -apple-system,
+  BlinkMacSystemFont,
+  // fallback
+  Roboto,
+  "Helvetica Neue",
+  Helvetica,
+  Arial,
+  sans-serif,
+  // emoji
+  "Apple Color Emoji",
+  "Segoe UI Emoji",
+  "Segoe UI Symbol" !default;
+
+// #7109
+.test {
+  background:
+  /////// foo
+  // bar
+    radial-gradient(circle farthest-corner at 5% 10%, #000000, transparent 50%);
+}
+
+// TODO: make these pretty
+selector {
+  prop:
+/* block */ value;
+
+  prop // inline
+: value;
+
+  prop/* block */: value;
+
+  prop/* block */
+: value;
+
+  prop/* before */: // after
+    value;
+
+  prop/* before */: /* after*/ value;
+}
+```

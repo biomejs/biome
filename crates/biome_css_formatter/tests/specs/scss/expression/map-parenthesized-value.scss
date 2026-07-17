@@ -1,0 +1,5 @@
+$map:(key:(value),other-key:(nested:value));
+
+$map-with-list:(key:(value,),other-key:(nested:value));
+
+$nested-map:(key:(nested:value),other-key:(value));

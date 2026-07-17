@@ -77,6 +77,10 @@ export class Task {
 		this.args = args;
 	}
 }
+
+class Foo22 {
+	set veryLongPropertyNameHere(veryLongParameterNameThatExceedsTheLineWidthLimit) {}
+}
 ```
 
 
@@ -145,4 +149,13 @@ export class Task {
 	}
 }
 
+class Foo22 {
+	set veryLongPropertyNameHere(veryLongParameterNameThatExceedsTheLineWidthLimit) {}
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   64: 	set veryLongPropertyNameHere(veryLongParameterNameThatExceedsTheLineWidthLimit) {}
 ```

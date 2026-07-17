@@ -56,7 +56,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Warning,
-        sources: &[RuleSource::Stylelint("declaration-no-important").same()],
+        sources: &[RuleSource::Stylelint("declaration-no-important").same(), RuleSource::EslintCss("no-important").same()],
         fix_kind: FixKind::Unsafe,
     }
 }

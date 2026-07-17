@@ -24,6 +24,7 @@ Platform:
   OS:                           **PLACEHOLDER**
 
 Environment:
+  BIOME_DISTRIBUTION:                unset
   BIOME_LOG_PATH:                    **PLACEHOLDER**
   BIOME_LOG_PREFIX_NAME:             unset
   BIOME_LOG_LEVEL:                   unset
@@ -40,7 +41,7 @@ Environment:
 
 Biome Configuration:
   Error:                        Expected an array, an object, or a literal but instead found '}'.
-  Status:                       Loaded with errors
+  Status:                       Loaded with errors.
   Path:                         biome.json
   Formatter enabled:            true
   Linter enabled:               true

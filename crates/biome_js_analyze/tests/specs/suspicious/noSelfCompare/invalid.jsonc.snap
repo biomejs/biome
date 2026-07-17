@@ -11,10 +11,14 @@ if (x === x) { }
 ```
 invalid.jsonc:1:5 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Comparing to itself is potentially pointless.
+  × This comparison uses the same expression on both sides.
   
   > 1 │ if (x === x) { }
       │     ^^^^^^^
+  
+  i Self-comparisons are usually redundant or a sign that the wrong value is being compared.
+  
+  i Compare two different values instead, or use Number.isNaN() if you are checking for NaN.
   
 
 ```
@@ -28,10 +32,14 @@ if (x !== x) { }
 ```
 invalid.jsonc:1:5 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Comparing to itself is potentially pointless.
+  × This comparison uses the same expression on both sides.
   
   > 1 │ if (x !== x) { }
       │     ^^^^^^^
+  
+  i Self-comparisons are usually redundant or a sign that the wrong value is being compared.
+  
+  i Compare two different values instead, or use Number.isNaN() if you are checking for NaN.
   
 
 ```
@@ -45,27 +53,14 @@ if (x > x) { }
 ```
 invalid.jsonc:1:5 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Comparing to itself is potentially pointless.
+  × This comparison uses the same expression on both sides.
   
   > 1 │ if (x > x) { }
       │     ^^^^^
   
-
-```
-
-# Input
-```cjs
-if ('x' > 'x') { }
-```
-
-# Diagnostics
-```
-invalid.jsonc:1:5 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Comparing to itself is potentially pointless.
+  i Self-comparisons are usually redundant or a sign that the wrong value is being compared.
   
-  > 1 │ if ('x' > 'x') { }
-      │     ^^^^^^^^^
+  i Compare two different values instead, or use Number.isNaN() if you are checking for NaN.
   
 
 ```
@@ -79,10 +74,35 @@ if ('x' > 'x') { }
 ```
 invalid.jsonc:1:5 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Comparing to itself is potentially pointless.
+  × This comparison uses the same expression on both sides.
   
   > 1 │ if ('x' > 'x') { }
       │     ^^^^^^^^^
+  
+  i Self-comparisons are usually redundant or a sign that the wrong value is being compared.
+  
+  i Compare two different values instead, or use Number.isNaN() if you are checking for NaN.
+  
+
+```
+
+# Input
+```cjs
+if ('x' > 'x') { }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison uses the same expression on both sides.
+  
+  > 1 │ if ('x' > 'x') { }
+      │     ^^^^^^^^^
+  
+  i Self-comparisons are usually redundant or a sign that the wrong value is being compared.
+  
+  i Compare two different values instead, or use Number.isNaN() if you are checking for NaN.
   
 
 ```
@@ -96,10 +116,14 @@ do {} while (x === x)
 ```
 invalid.jsonc:1:14 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Comparing to itself is potentially pointless.
+  × This comparison uses the same expression on both sides.
   
   > 1 │ do {} while (x === x)
       │              ^^^^^^^
+  
+  i Self-comparisons are usually redundant or a sign that the wrong value is being compared.
+  
+  i Compare two different values instead, or use Number.isNaN() if you are checking for NaN.
   
 
 ```
@@ -113,10 +137,14 @@ x === x
 ```
 invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Comparing to itself is potentially pointless.
+  × This comparison uses the same expression on both sides.
   
   > 1 │ x === x
       │ ^^^^^^^
+  
+  i Self-comparisons are usually redundant or a sign that the wrong value is being compared.
+  
+  i Compare two different values instead, or use Number.isNaN() if you are checking for NaN.
   
 
 ```
@@ -130,10 +158,14 @@ x !== x
 ```
 invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Comparing to itself is potentially pointless.
+  × This comparison uses the same expression on both sides.
   
   > 1 │ x !== x
       │ ^^^^^^^
+  
+  i Self-comparisons are usually redundant or a sign that the wrong value is being compared.
+  
+  i Compare two different values instead, or use Number.isNaN() if you are checking for NaN.
   
 
 ```
@@ -147,10 +179,14 @@ x == x
 ```
 invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Comparing to itself is potentially pointless.
+  × This comparison uses the same expression on both sides.
   
   > 1 │ x == x
       │ ^^^^^^
+  
+  i Self-comparisons are usually redundant or a sign that the wrong value is being compared.
+  
+  i Compare two different values instead, or use Number.isNaN() if you are checking for NaN.
   
 
 ```
@@ -164,10 +200,14 @@ x != x
 ```
 invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Comparing to itself is potentially pointless.
+  × This comparison uses the same expression on both sides.
   
   > 1 │ x != x
       │ ^^^^^^
+  
+  i Self-comparisons are usually redundant or a sign that the wrong value is being compared.
+  
+  i Compare two different values instead, or use Number.isNaN() if you are checking for NaN.
   
 
 ```
@@ -181,10 +221,14 @@ x > x
 ```
 invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Comparing to itself is potentially pointless.
+  × This comparison uses the same expression on both sides.
   
   > 1 │ x > x
       │ ^^^^^
+  
+  i Self-comparisons are usually redundant or a sign that the wrong value is being compared.
+  
+  i Compare two different values instead, or use Number.isNaN() if you are checking for NaN.
   
 
 ```
@@ -198,10 +242,14 @@ x < x
 ```
 invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Comparing to itself is potentially pointless.
+  × This comparison uses the same expression on both sides.
   
   > 1 │ x < x
       │ ^^^^^
+  
+  i Self-comparisons are usually redundant or a sign that the wrong value is being compared.
+  
+  i Compare two different values instead, or use Number.isNaN() if you are checking for NaN.
   
 
 ```
@@ -215,10 +263,14 @@ x >= x
 ```
 invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Comparing to itself is potentially pointless.
+  × This comparison uses the same expression on both sides.
   
   > 1 │ x >= x
       │ ^^^^^^
+  
+  i Self-comparisons are usually redundant or a sign that the wrong value is being compared.
+  
+  i Compare two different values instead, or use Number.isNaN() if you are checking for NaN.
   
 
 ```
@@ -232,10 +284,14 @@ x <= x
 ```
 invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Comparing to itself is potentially pointless.
+  × This comparison uses the same expression on both sides.
   
   > 1 │ x <= x
       │ ^^^^^^
+  
+  i Self-comparisons are usually redundant or a sign that the wrong value is being compared.
+  
+  i Compare two different values instead, or use Number.isNaN() if you are checking for NaN.
   
 
 ```
@@ -249,10 +305,14 @@ foo.bar().baz.qux >= foo.bar ().baz .qux
 ```
 invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Comparing to itself is potentially pointless.
+  × This comparison uses the same expression on both sides.
   
   > 1 │ foo.bar().baz.qux >= foo.bar ().baz .qux
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Self-comparisons are usually redundant or a sign that the wrong value is being compared.
+  
+  i Compare two different values instead, or use Number.isNaN() if you are checking for NaN.
   
 
 ```
@@ -266,10 +326,14 @@ class C { #field; foo() { this.#field === this.#field; } }
 ```
 invalid.jsonc:1:27 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Comparing to itself is potentially pointless.
+  × This comparison uses the same expression on both sides.
   
   > 1 │ class C { #field; foo() { this.#field === this.#field; } }
       │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Self-comparisons are usually redundant or a sign that the wrong value is being compared.
+  
+  i Compare two different values instead, or use Number.isNaN() if you are checking for NaN.
   
 
 ```

@@ -12,8 +12,20 @@ Use this skill for testing and code generation. Covers snapshot testing with
 ## Prerequisites
 
 1. Install required tools: `just install-tools` (installs `cargo-insta`)
-2. Install pnpm: `corepack enable` and `pnpm install` in repo root
+2. Install pnpm: `curl -fsSL https://get.pnpm.io/install.sh | sh -` in repo root
 3. Understand which changes require code generation
+
+## Code Standards
+
+**CRITICAL: No Emojis**
+
+Emojis are BANNED in all test and generated code:
+- NO emojis in test files
+- NO emojis in snapshot files
+- NO emojis in changeset files
+- NO emojis in generated code or scaffolding
+
+Keep all code and documentation professional and emoji-free.
 
 ## Common Workflows
 

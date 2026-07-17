@@ -1,0 +1,3 @@
+# Prettier test files that Biome should completely ignore.
+# One path prefix per line, relative to the prettier/ directory.
+# Ignored files produce no snapshot and are excluded from compatibility reports.

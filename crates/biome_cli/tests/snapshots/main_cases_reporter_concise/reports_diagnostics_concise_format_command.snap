@@ -1,0 +1,57 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `index.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+## `main.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+# Termination Message
+
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+× index.ts: format: Formatter would have printed the following content:
+```
+
+```block
+× main.ts: format: Formatter would have printed the following content:
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 2 errors.
+```

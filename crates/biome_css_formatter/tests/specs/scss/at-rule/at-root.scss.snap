@@ -1,0 +1,76 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/at-root.scss
+---
+
+# Input
+
+```scss
+@at-root(without:media   supports){
+.root-only{
+color:red;
+}
+}
+
+@at-root
+.root-only,
+.another-root
+{
+color:blue;
+}
+
+@mixin card{
+@at-root(with:rule){
+.card{
+display:block;
+}
+}
+}
+
+@at-root .foo
+// .bar
+{
+
+}
+
+@at-root
+// .bar
+.foo
+{
+
+}
+
+```
+
+
+# Formatted
+
+```scss
+@at-root (without: media supports) {
+	.root-only {
+		color: red;
+	}
+}
+
+@at-root .root-only, .another-root {
+	color: blue;
+}
+
+@mixin card {
+	@at-root (with: rule) {
+		.card {
+			display: block;
+		}
+	}
+}
+
+@at-root .foo
+// .bar
+{
+}
+
+@at-root // .bar
+.foo {
+}
+
+```

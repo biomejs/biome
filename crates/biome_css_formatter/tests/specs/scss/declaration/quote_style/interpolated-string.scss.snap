@@ -1,0 +1,38 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/declaration/quote_style/interpolated-string.scss
+---
+
+# Input
+
+```scss
+.box{
+content:'#{$name}';
+mixed:'foo #{$bar} baz';
+}
+
+```
+
+
+# Options
+
+```json
+{
+    "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+    "css": {
+        "formatter": {
+            "quoteStyle": "double"
+        }
+    }
+}
+```
+
+# Formatted
+
+```scss
+.box {
+	content: "#{$name}";
+	mixed: "foo #{$bar} baz";
+}
+
+```

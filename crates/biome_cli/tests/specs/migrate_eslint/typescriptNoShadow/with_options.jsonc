@@ -1,0 +1,11 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "@typescript-eslint/no-shadow": ["warn", {
+        "ignoreTypeValueShadow": false,
+        "ignoreFunctionTypeParameterNameValueShadow": false
+      }]
+    }
+  }
+}

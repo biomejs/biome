@@ -83,7 +83,8 @@ impl Rule for UseExponentiationOperator {
             return None;
         }
         let object = member_expr.object().ok()?.omit_parentheses();
-        let (reference, name) = global_identifier(&object)?;
+        let (reference, name) =
+            global_identifier(&object.as_any_global_identifier_expression()?)?;
         if name.text() != "Math" {
             return None;
         }

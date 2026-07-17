@@ -116,7 +116,7 @@ YamlFlowSequence =
 	']'
 
 // https://yaml.org/spec/1.2.2/#rule-ns-s-flow-seq-entries
-YamlFlowSequenceEntryList = (AnyYamlFlowSequenceEntry (',' AnyYamlFlowSequenceEntry)*)
+YamlFlowSequenceEntryList = (AnyYamlFlowSequenceEntry (',' AnyYamlFlowSequenceEntry)* ','?)
 
 // https://yaml.org/spec/1.2.2/#rule-ns-flow-seq-entry
 AnyYamlFlowSequenceEntry =
@@ -244,6 +244,7 @@ YamlBlockMapImplicitEntry =
 AnyYamlMappingImplicitKey =
 	YamlFlowJsonNode
 	| YamlFlowYamlNode
+	| YamlAliasNode
 
 // Block header
 // |+9

@@ -25,7 +25,12 @@ TwRoot {
                 minus_token: DASH@2..3 "-" [] [],
                 value: TwArbitraryValue {
                     l_brack_token: L_BRACKET@3..4 "[" [] [],
-                    value_token: TW_VALUE@4..8 "16px" [] [],
+                    value: CssGenericComponentValueList [
+                        CssRegularDimension {
+                            value_token: CSS_NUMBER_LITERAL@4..6 "16" [] [],
+                            unit_token: IDENT@6..8 "px" [] [],
+                        },
+                    ],
                     r_brack_token: R_BRACKET@8..9 "]" [] [],
                 },
                 modifier: missing (optional),
@@ -51,7 +56,10 @@ TwRoot {
         1: DASH@2..3 "-" [] []
         2: TW_ARBITRARY_VALUE@3..9
           0: L_BRACKET@3..4 "[" [] []
-          1: TW_VALUE@4..8 "16px" [] []
+          1: CSS_GENERIC_COMPONENT_VALUE_LIST@4..8
+            0: CSS_REGULAR_DIMENSION@4..8
+              0: CSS_NUMBER_LITERAL@4..6 "16" [] []
+              1: IDENT@6..8 "px" [] []
           2: R_BRACKET@8..9 "]" [] []
         3: (empty)
       3: (empty)

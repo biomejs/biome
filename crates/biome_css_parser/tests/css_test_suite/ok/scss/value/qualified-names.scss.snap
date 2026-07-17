@@ -53,7 +53,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@17..21 "math" [] [],
                                                 },
@@ -100,7 +100,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@46..50 "math" [] [],
                                                 },
@@ -139,7 +139,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@73..76 "map" [] [],
                                                 },
@@ -152,7 +152,7 @@ CssRoot {
                                             items: CssParameterList [
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@81..82 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@82..85 "map" [] [],
@@ -187,12 +187,12 @@ CssRoot {
                                 colon_token: COLON@101..103 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        ScssQualifiedName {
+                                        ScssModuleMemberAccess {
                                             module: CssIdentifier {
                                                 value_token: IDENT@103..106 "map" [] [],
                                             },
                                             dot_token: DOT@106..107 "." [] [],
-                                            member: ScssIdentifier {
+                                            member: ScssVariable {
                                                 dollar_token: DOLLAR@107..108 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@108..115 "default" [] [],
@@ -243,7 +243,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@17..34
                   0: SCSS_EXPRESSION_ITEM_LIST@17..34
                     0: CSS_FUNCTION@17..34
-                      0: SCSS_QUALIFIED_NAME@17..25
+                      0: SCSS_MODULE_MEMBER_ACCESS@17..25
                         0: CSS_IDENTIFIER@17..21
                           0: IDENT@17..21 "math" [] []
                         1: DOT@21..22 "." [] []
@@ -273,7 +273,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@46..62
                   0: SCSS_EXPRESSION_ITEM_LIST@46..62
                     0: CSS_FUNCTION@46..62
-                      0: SCSS_QUALIFIED_NAME@46..55
+                      0: SCSS_MODULE_MEMBER_ACCESS@46..55
                         0: CSS_IDENTIFIER@46..50
                           0: IDENT@46..50 "math" [] []
                         1: DOT@50..51 "." [] []
@@ -298,7 +298,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@73..89
                   0: SCSS_EXPRESSION_ITEM_LIST@73..89
                     0: CSS_FUNCTION@73..89
-                      0: SCSS_QUALIFIED_NAME@73..80
+                      0: SCSS_MODULE_MEMBER_ACCESS@73..80
                         0: CSS_IDENTIFIER@73..76
                           0: IDENT@73..76 "map" [] []
                         1: DOT@76..77 "." [] []
@@ -308,7 +308,7 @@ CssRoot {
                       2: CSS_PARAMETER_LIST@81..88
                         0: SCSS_EXPRESSION@81..85
                           0: SCSS_EXPRESSION_ITEM_LIST@81..85
-                            0: SCSS_IDENTIFIER@81..85
+                            0: SCSS_VARIABLE@81..85
                               0: DOLLAR@81..82 "$" [] []
                               1: CSS_IDENTIFIER@82..85
                                 0: IDENT@82..85 "map" [] []
@@ -328,11 +328,11 @@ CssRoot {
                 1: COLON@101..103 ":" [] [Whitespace(" ")]
                 2: SCSS_EXPRESSION@103..115
                   0: SCSS_EXPRESSION_ITEM_LIST@103..115
-                    0: SCSS_QUALIFIED_NAME@103..115
+                    0: SCSS_MODULE_MEMBER_ACCESS@103..115
                       0: CSS_IDENTIFIER@103..106
                         0: IDENT@103..106 "map" [] []
                       1: DOT@106..107 "." [] []
-                      2: SCSS_IDENTIFIER@107..115
+                      2: SCSS_VARIABLE@107..115
                         0: DOLLAR@107..108 "$" [] []
                         1: CSS_IDENTIFIER@108..115
                           0: IDENT@108..115 "default" [] []

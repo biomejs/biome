@@ -151,14 +151,13 @@ impl Rule for NoDuplicateDependencies {
                     .name()
                     .ok()
                     .and_then(|name| name.inner_string_text())
-                    .and_then(|text| text.ok())
                     .is_some_and(|text| DUPLICATE_PROPERTY_KEYS.contains(&text.text()))
             });
 
         // Loop through all the dependency groups to map all dependencies & check for duplicates within the same dependency group
         for dependency_group in groups {
             let dependency_group_name = dependency_group.name().ok()?;
-            let dependency_group_text = dependency_group_name.inner_string_text()?.ok()?;
+            let dependency_group_text = dependency_group_name.inner_string_text()?;
             let dependency_group_value = dependency_group.value().ok()?;
 
             let mut deps = FxHashMap::<String, JsonSyntaxToken>::default();

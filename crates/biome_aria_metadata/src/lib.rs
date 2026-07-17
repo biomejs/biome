@@ -137,7 +137,7 @@ impl AriaValueType {
 /// Browsers allows arbitrary sequence of characters for identifiers.
 /// However, it is commonly accepted that an identifier should not contain
 /// characters recognized as whitespaces by HTML.
-/// Whitespaces are usedd to separate two identifier in a list of identifiers.
+/// Whitespaces are used to separate two identifier in a list of identifiers.
 ///
 /// See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/id#syntax
 fn is_valid_html_id(id: &str) -> bool {
@@ -176,9 +176,9 @@ impl AriaRole {
     pub fn is_non_interactive(self) -> bool {
         // FIXME: could we make `Self""is_non_interactive` the negation of `Self""is_interactive`?
         //
-        // This current asymetry is ported from  ESLint JSX A11y:
+        // This current asymmetry is ported from  ESLint JSX A11y:
         // https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/src/util/isNonInteractiveElement.js#L30
-        // We should assess if this asymetry is intended.
+        // We should assess if this asymmetry is intended.
         //
         // `toolbar` doesn't inherit of `widget`, but it does support  `aria-activedescendant`.
         // So, we treat it as a interactive role.

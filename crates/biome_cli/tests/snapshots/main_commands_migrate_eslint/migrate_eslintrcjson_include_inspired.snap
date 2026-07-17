@@ -24,7 +24,7 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
     1   │ - {}
       1 │ + {
       2 │ + → "linter":·{
-      3 │ + → → "rules":·{·"recommended":·false,·"style":·{·"noUselessElse":·"error"·}·}
+      3 │ + → → "rules":·{·"preset":·"none",·"style":·{·"noUselessElse":·"error"·}·}
       4 │ + → }
       5 │ + }
       6 │ + 

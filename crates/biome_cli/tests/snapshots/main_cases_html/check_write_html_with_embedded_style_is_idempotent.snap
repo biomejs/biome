@@ -1,0 +1,40 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "formatter": {
+      "enabled": true
+    }
+  }
+}
+```
+
+## `file.html`
+
+```html
+<!doctype html>
+<html lang="en">
+	<head>
+		<style>
+		p {
+			color: red;
+		}
+		</style>
+	</head>
+	<body>
+		<p>Hello</p>
+	</body>
+</html>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

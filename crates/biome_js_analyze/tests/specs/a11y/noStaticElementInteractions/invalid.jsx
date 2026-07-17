@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 <>
 	<div onClick={() => void 0} />
 	<div onClick={() => void 0} role={undefined} />
@@ -45,7 +46,7 @@
 	<u onClick={() => {}} />
 	<var onClick={() => {}} />
 	<wbr onClick={() => {}} />
-	
+
 	{/* // Handlers */}
 	<div onKeyDown={() => {}} />
 	<div onKeyPress={() => {}} />

@@ -24,8 +24,8 @@ $height: 50vh !
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..37 "$" [Comments("// Exclamation mark b ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@37..42 "color" [] [],
@@ -47,8 +47,8 @@ CssRoot {
             ],
             semicolon_token: SEMICOLON@49..50 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@50..100 "$" [Newline("\n"), Newline("\n"), Comments("// Exclamation mark w ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@100..105 "width" [] [],
@@ -71,8 +71,8 @@ CssRoot {
             ],
             semicolon_token: SEMICOLON@115..116 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@116..150 "$" [Newline("\n"), Newline("\n"), Comments("// Exclamation mark a ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@150..156 "height" [] [],
@@ -106,8 +106,8 @@ CssRoot {
 0: CSS_ROOT@0..165
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..164
-    0: SCSS_DECLARATION@0..50
-      0: SCSS_IDENTIFIER@0..42
+    0: SCSS_VARIABLE_DECLARATION@0..50
+      0: SCSS_VARIABLE@0..42
         0: DOLLAR@0..37 "$" [Comments("// Exclamation mark b ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@37..42
           0: IDENT@37..42 "color" [] []
@@ -121,8 +121,8 @@ CssRoot {
           0: BANG@48..49 "!" [] []
           1: (empty)
       4: SEMICOLON@49..50 ";" [] []
-    1: SCSS_DECLARATION@50..116
-      0: SCSS_IDENTIFIER@50..105
+    1: SCSS_VARIABLE_DECLARATION@50..116
+      0: SCSS_VARIABLE@50..105
         0: DOLLAR@50..100 "$" [Newline("\n"), Newline("\n"), Comments("// Exclamation mark w ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@100..105
           0: IDENT@100..105 "width" [] []
@@ -137,8 +137,8 @@ CssRoot {
           0: BANG@113..115 "!" [] [Whitespace(" ")]
           1: (empty)
       4: SEMICOLON@115..116 ";" [] []
-    2: SCSS_DECLARATION@116..164
-      0: SCSS_IDENTIFIER@116..156
+    2: SCSS_VARIABLE_DECLARATION@116..164
+      0: SCSS_VARIABLE@116..156
         0: DOLLAR@116..150 "$" [Newline("\n"), Newline("\n"), Comments("// Exclamation mark a ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@150..156
           0: IDENT@150..156 "height" [] []

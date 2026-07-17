@@ -1,4 +1,0 @@
-class C {
-  readonly x: number;
-  constructor(readonly y: number) {}
-}

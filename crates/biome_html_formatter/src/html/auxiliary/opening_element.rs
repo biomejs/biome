@@ -3,8 +3,11 @@ use crate::{
     prelude::*,
     utils::{css_display::get_css_display_from_tag, metadata::should_lowercase_html_tag},
 };
-use biome_formatter::{FormatRuleWithOptions, GroupId, write};
-use biome_html_syntax::{HtmlOpeningElement, HtmlOpeningElementFields, HtmlSyntaxToken};
+use biome_formatter::{FormatRuleWithOptions, GroupId, trivia::format_dangling_comments, write};
+use biome_html_syntax::{
+    HtmlElement, HtmlOpeningElement, HtmlOpeningElementFields, HtmlSyntaxToken,
+};
+use biome_rowan::AstNode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlOpeningElement {
     /// Whether or not the r_angle is borrowed by the children of the element (aka [`HtmlElementList`][HtmlElementList]). See also: [`FormatHtmlElementList`][FormatHtmlElementList]
@@ -47,6 +50,35 @@ impl FormatRuleWithOptions<HtmlOpeningElement> for FormatHtmlOpeningElement {
 }
 
 impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
+    fn fmt_dangling_comments(
+        &self,
+        node: &HtmlOpeningElement,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        if !f.comments().has_dangling_comments(node.syntax()) {
+            return Ok(());
+        }
+
+        // Check if the source had newlines around the dangling comments.
+        // If so, use hard_block_indent to preserve the multiline layout.
+        // This handles: <div>\n  <!-- comment -->\n</div>
+        let has_source_newline = node
+            .parent::<HtmlElement>()
+            .and_then(|el| el.closing_element().ok())
+            .and_then(|c| c.l_angle_token().ok())
+            .is_some_and(|tok| tok.has_leading_whitespace_or_newline());
+
+        if has_source_newline {
+            format_dangling_comments(node.syntax())
+                .with_block_indent()
+                .fmt(f)
+        } else {
+            format_dangling_comments(node.syntax())
+                .with_soft_block_indent()
+                .fmt(f)
+        }
+    }
+
     fn fmt_fields(&self, node: &HtmlOpeningElement, f: &mut HtmlFormatter) -> FormatResult<()> {
         let HtmlOpeningElementFields {
             l_angle_token,

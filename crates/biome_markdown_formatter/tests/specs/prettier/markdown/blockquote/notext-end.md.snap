@@ -34,28 +34,24 @@ info: markdown/blockquote/notext-end.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -2,15 +2,13 @@
+@@ -2,16 +2,14 @@
  > `DOOM`
  
  > _b_
 ->
--> > `A`
--> > `B`
-+>> `A`
-+>> `B`
-+
-+> *a*
-+>> # foo
-+>> `a` > `b`
+ > > `A`
+ > > `B`
  
--> _a_
+ > _a_
 ->
--> > # foo
+ > > # foo
 -> >
--> > `a` > `b`
+ > > `a` > `b`
  
++
  > This is a quote with an italic _across multuple lines
  > which should just work_. So make sure there is no > if we set
+ > proseWrap to `never`
 ```
 
 # Output
@@ -65,12 +61,12 @@ info: markdown/blockquote/notext-end.md
 > `DOOM`
 
 > _b_
->> `A`
->> `B`
+> > `A`
+> > `B`
 
-> *a*
->> # foo
->> `a` > `b`
+> _a_
+> > # foo
+> > `a` > `b`
 
 
 > This is a quote with an italic _across multuple lines

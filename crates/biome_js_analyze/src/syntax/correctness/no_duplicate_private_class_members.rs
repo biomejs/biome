@@ -1,6 +1,7 @@
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_syntax_rule};
+use biome_console::markup;
 use biome_js_syntax::{AnyJsClassMember, JsClassMemberList, TextRange};
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TokenText};
 use rustc_hash::{FxHashMap, FxHashSet};
 
 declare_syntax_rule! {
@@ -30,12 +31,12 @@ enum MemberType {
 
 impl Rule for NoDuplicatePrivateClassMembers {
     type Query = Ast<JsClassMemberList>;
-    type State = (Box<str>, TextRange);
+    type State = (TokenText, TextRange);
     type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let mut defined_members: FxHashMap<Box<str>, FxHashSet<MemberType>> = FxHashMap::default();
+        let mut defined_members: FxHashMap<TokenText, FxHashSet<MemberType>> = FxHashMap::default();
         let node = ctx.query();
         node.into_iter()
             .filter_map(|member| {
@@ -45,9 +46,7 @@ impl Rule for NoDuplicatePrivateClassMembers {
                     .as_js_private_class_member_name()?
                     .id_token()
                     .ok()?
-                    .text_trimmed()
-                    .to_string()
-                    .into_boxed_str();
+                    .token_text_trimmed();
                 let member_type = match member {
                     AnyJsClassMember::JsGetterClassMember(_) => MemberType::Getter,
                     AnyJsClassMember::JsMethodClassMember(_) => MemberType::Normal,
@@ -83,7 +82,7 @@ impl Rule for NoDuplicatePrivateClassMembers {
         Some(RuleDiagnostic::new(
             rule_category!(),
             range,
-            format!("Duplicate private class member \"#{member_name}\""),
+            markup! { "Duplicate private class member \"#"{member_name.text()}"\"" },
         ))
     }
 }

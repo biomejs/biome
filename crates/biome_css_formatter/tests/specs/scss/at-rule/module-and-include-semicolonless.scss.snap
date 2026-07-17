@@ -1,0 +1,35 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/module-and-include-semicolonless.scss
+---
+
+# Input
+
+```scss
+@use "theme" with ($primary: blue,);
+@forward "tokens" with ($radius: 2px,);
+
+@mixin button {}
+
+.button {
+  @include
+  button
+}
+
+```
+
+
+# Formatted
+
+```scss
+@use "theme" with ($primary: blue,);
+@forward "tokens" with ($radius: 2px,);
+
+@mixin button {
+}
+
+.button {
+	@include button;
+}
+
+```

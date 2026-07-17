@@ -10,7 +10,8 @@ use biome_js_syntax::{
     JsInExpression, JsInitializerClause, JsInstanceofExpression, JsLogicalExpression,
     JsLogicalOperator, JsNewExpression, JsObjectAssignmentPatternProperty, JsObjectMemberList,
     JsParenthesizedExpression, JsSequenceExpression, JsSpread, JsStaticMemberExpression,
-    JsTemplateExpression, JsVariableDeclarator, JsWithStatement,
+    JsTemplateExpression, JsVariableDeclarator, JsWithStatement, TsAsExpression,
+    TsInstantiationExpression, TsSatisfiesExpression, TsTypeAssertionExpression,
 };
 use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_unsafe_optional_chaining::NoUnsafeOptionalChainingOptions;
@@ -103,6 +104,12 @@ impl Rule for NoUnsafeOptionalChaining {
                     parent = expression.parent::<RuleNode>()
                 }
                 RuleNode::JsAwaitExpression(expression) => parent = expression.parent::<RuleNode>(),
+                RuleNode::TsAsExpression(_)
+                | RuleNode::TsSatisfiesExpression(_)
+                | RuleNode::TsTypeAssertionExpression(_)
+                | RuleNode::TsInstantiationExpression(_) => {
+                    parent = current_parent.parent::<RuleNode>()
+                }
                 RuleNode::JsExtendsClause(extends) => {
                     // class A extends obj?.foo {}
                     return Some(extends.syntax().text_trimmed_range());
@@ -333,6 +340,10 @@ declare_node_union! {
     | JsExtendsClause
     | JsInExpression
     | JsInstanceofExpression
+    | TsAsExpression
+    | TsSatisfiesExpression
+    | TsTypeAssertionExpression
+    | TsInstantiationExpression
 }
 
 impl From<AnyJsOptionalChainExpression> for RuleNode {

@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 240
+info: css/scss/declaration/url-interpolated-functions.scss
+---
+
+# Input
+
+```scss
+.urls{
+expr3:url( a#{b}"c" );
+expr4:url( foo#{1 + 1}( bar ) );
+expr5:url(
+#{name}( bar )
+);
+expr6:url( #{prefix}-#{suffix}( bar ) );
+modifier-interpolated-mid:url(
+"a.png"   foo#{1 + 1}( bar )
+);
+modifier-interpolated-start:url( "a.png"
+#{format}(  woff2 ) );
+}
+
+```
+
+
+# Formatted
+
+```scss
+.urls {
+	expr3: url(a#{b}"c");
+	expr4: url(foo#{1 + 1}(bar));
+	expr5: url(#{name}(bar));
+	expr6: url(#{prefix}-#{suffix}(bar));
+	modifier-interpolated-mid: url("a.png" foo#{1 + 1}(bar));
+	modifier-interpolated-start: url("a.png" #{format}(woff2));
+}
+
+```

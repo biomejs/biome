@@ -1,0 +1,32 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+---
+---
+<!-- should not generate diagnostics -->
+
+<!-- onclick with keyboard handlers -->
+<div onclick="handleClick()" onkeydown="handleKeyDown()"></div>
+<div onclick="handleClick()" onkeyup="handleKeyUp()"></div>
+
+<!-- inherently keyboard-accessible elements -->
+<button onclick="handleClick()">Submit</button>
+<input onclick="handleClick()" />
+<select onclick="handleClick()"><option>A</option></select>
+<textarea onclick="handleClick()"></textarea>
+<a onclick="handleClick()" href="https://example.com">Link</a>
+
+<!-- hidden from screen reader -->
+<div onclick="handleClick()" aria-hidden="true">content</div>
+
+<!-- presentation role -->
+<div onclick="handleClick()" role="presentation">content</div>
+
+<!-- PascalCase elements are custom components — skip -->
+<MyComponent onclick="handleClick()">content</MyComponent>
+<CustomButton onclick="handleClick()">content</CustomButton>
+
+```

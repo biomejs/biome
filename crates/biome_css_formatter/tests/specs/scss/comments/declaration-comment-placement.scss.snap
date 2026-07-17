@@ -1,0 +1,87 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/comments/declaration-comment-placement.scss
+---
+
+# Input
+
+```scss
+selector{prop:// comment
+value;}
+
+selector{prop:/* block */value;}
+
+selector{prop:
+/* block */value;}
+
+selector{prop
+// inline
+:value;}
+
+selector{prop/* block */:value;}
+
+selector{prop
+/* block */
+:value;}
+
+selector{prop/* before */:// after
+value;}
+
+selector{prop/* before */:/* after */value;}
+
+selector{prop:/* first */ /* second */value;}
+
+selector{prop:/* after */value/* keep */;}
+
+```
+
+
+# Formatted
+
+```scss
+selector {
+	prop:// comment
+		value;
+}
+
+selector {
+	prop:/* block */ value;
+}
+
+selector {
+	prop:
+/* block */ value;
+}
+
+selector {
+	prop // inline
+: value;
+}
+
+selector {
+	prop/* block */: value;
+}
+
+selector {
+	prop/* block */
+: value;
+}
+
+selector {
+	prop/* before */:// after
+		value;
+}
+
+selector {
+	prop/* before */:/* after */ value;
+}
+
+selector {
+	prop:/* first */ /* second */ value;
+}
+
+selector {
+	prop:/* after */ value /* keep */;
+}
+
+```

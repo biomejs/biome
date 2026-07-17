@@ -6,7 +6,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make::js_variable_declarator_list;
 use biome_js_semantic::CanBeImportedExported;
 use biome_js_syntax::{JsLanguage, JsSyntaxToken, JsVariableDeclarator, JsVariableStatement};
-use biome_rowan::{AstNode, BatchMutationExt, TextRange};
+use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rowan::{SyntaxTriviaPiece, chain_trivia_pieces};
 use biome_rule_options::no_useless_undefined_initialization::NoUselessUndefinedInitializationOptions;
 
@@ -75,7 +75,7 @@ declare_lint_rule! {
 
 impl Rule for NoUselessUndefinedInitialization {
     type Query = Semantic<JsVariableStatement>;
-    type State = (Box<str>, TextRange);
+    type State = JsVariableDeclarator;
     type Signals = Box<[Self::State]>;
     type Options = NoUselessUndefinedInitializationOptions;
 
@@ -123,11 +123,7 @@ impl Rule for NoUselessUndefinedInitialization {
                     continue;
                 }
 
-                let decl_range = initializer.range();
-                let Some(binding_name) = decl.id().ok().map(|id| id.to_trimmed_text()) else {
-                    continue;
-                };
-                signals.push((binding_name.text().into(), decl_range));
+                signals.push(decl);
             }
         }
 
@@ -135,11 +131,21 @@ impl Rule for NoUselessUndefinedInitialization {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let range = state.initializer()?.range();
+        let binding_name = state
+            .id()
+            .ok()?
+            .as_any_js_binding()?
+            .as_js_identifier_binding()?
+            .name_token()
+            .ok()?;
+        let binding_name_text = binding_name.text_trimmed();
+
         Some(RuleDiagnostic::new(
             rule_category!(),
-            state.1,
+            range,
             markup! {
-                "It's not necessary to initialize "<Emphasis>{state.0.as_ref()}</Emphasis>" to undefined."
+                "It's not necessary to initialize "<Emphasis>{binding_name_text}</Emphasis>" to undefined."
             }).note("A variable that is declared and not initialized to any value automatically gets the value of undefined.")
         )
     }
@@ -151,21 +157,7 @@ impl Rule for NoUselessUndefinedInitialization {
         let current_declaration_statement = node.clone().declaration().ok()?;
         let declarators = current_declaration_statement.declarators();
 
-        let current_declaration = declarators
-            .clone()
-            .into_iter()
-            .filter_map(|declarator| declarator.ok())
-            .find(|decl| {
-                decl.id()
-                    .ok()
-                    .and_then(|id| {
-                        id.as_any_js_binding()?
-                            .as_js_identifier_binding()?
-                            .name_token()
-                            .ok()
-                    })
-                    .is_some_and(|id| id.text_trimmed() == state.0.as_ref())
-            })?;
+        let current_declaration = state.clone();
 
         let current_initializer = current_declaration.initializer()?;
 

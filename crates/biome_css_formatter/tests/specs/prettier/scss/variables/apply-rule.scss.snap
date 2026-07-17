@@ -1,0 +1,486 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/variables/apply-rule.scss
+---
+
+# Input
+
+```scss
+/* http://tabatkins.github.io/specs/css-apply-rule/#defining */
+
+:root {
+  --toolbar-theme: {
+    background-color: hsl(120, 70%, 95%);
+    border-radius: 4px;
+    border: 1px solid var(--theme-color late);
+  };
+  --toolbar-title-theme: {
+    color: green;
+  };
+}
+
+:root {
+  --without-semi: {color:red;}
+}
+
+:root {
+  --like-a-apply-rule: {
+  color:red;} /* no semi here*/
+  --another-prop: blue;
+}
+
+:root {
+  --like-a-apply-rule: {
+  color:red;} /* no semi here*/
+  --another-one-like-a-apply-rule: {
+    color:red;
+  };
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -5,28 +5,30 @@
+     background-color: hsl(120, 70%, 95%);
+     border-radius: 4px;
+     border: 1px solid var(--theme-color late);
+-  };
++  }
+   --toolbar-title-theme: {
+     color: green;
+-  };
++  }
+ }
+ 
+ :root {
+   --without-semi: {
+     color: red;
+-  };
++  }
+ }
+ 
+ :root {
+   --like-a-apply-rule: {
+-  color:red;} /* no semi here*/
++    color: red;
++  } /* no semi here*/
+   --another-prop: blue;
+ }
+ 
+ :root {
+   --like-a-apply-rule: {
+-  color:red;} /* no semi here*/
++    color: red;
++  } /* no semi here*/
+   --another-one-like-a-apply-rule: {
+-    color:red;
+-  };
++    color: red;
++  }
+ }
+```
+
+# Output
+
+```scss
+/* http://tabatkins.github.io/specs/css-apply-rule/#defining */
+
+:root {
+  --toolbar-theme: {
+    background-color: hsl(120, 70%, 95%);
+    border-radius: 4px;
+    border: 1px solid var(--theme-color late);
+  }
+  --toolbar-title-theme: {
+    color: green;
+  }
+}
+
+:root {
+  --without-semi: {
+    color: red;
+  }
+}
+
+:root {
+  --like-a-apply-rule: {
+    color: red;
+  } /* no semi here*/
+  --another-prop: blue;
+}
+
+:root {
+  --like-a-apply-rule: {
+    color: red;
+  } /* no semi here*/
+  --another-one-like-a-apply-rule: {
+    color: red;
+  }
+}
+```
+
+# Errors
+```
+apply-rule.scss:4:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    3 │ :root {
+  > 4 │   --toolbar-theme: {
+      │                    ^
+    5 │     background-color: hsl(120, 70%, 95%);
+    6 │     border-radius: 4px;
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+apply-rule.scss:9:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+     7 │     border: 1px solid var(--theme-color late);
+     8 │   };
+   > 9 │   --toolbar-title-theme: {
+       │                          ^
+    10 │     color: green;
+    11 │   };
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+apply-rule.scss:15:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    14 │ :root {
+  > 15 │   --without-semi: {color:red;}
+       │                   ^
+    16 │ }
+    17 │ 
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+apply-rule.scss:19:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    18 │ :root {
+  > 19 │   --like-a-apply-rule: {
+       │                        ^
+    20 │   color:red;} /* no semi here*/
+    21 │   --another-prop: blue;
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+apply-rule.scss:25:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    24 │ :root {
+  > 25 │   --like-a-apply-rule: {
+       │                        ^
+    26 │   color:red;} /* no semi here*/
+    27 │   --another-one-like-a-apply-rule: {
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+apply-rule.scss:27:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    25 │   --like-a-apply-rule: {
+    26 │   color:red;} /* no semi here*/
+  > 27 │   --another-one-like-a-apply-rule: {
+       │                                    ^
+    28 │     color:red;
+    29 │   };
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+
+```

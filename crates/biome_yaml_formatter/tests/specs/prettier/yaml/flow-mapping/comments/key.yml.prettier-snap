@@ -1,0 +1,18 @@
+{ "key": value } # 1
+---
+{ ? ["key"] # 2
+  : value }
+---
+{
+  # 3
+  "key": value,
+}
+---
+{ ? & [
+      "key",
+      # 4
+      "",
+    ]
+  : value }
+---
+{ "key": value } # 1

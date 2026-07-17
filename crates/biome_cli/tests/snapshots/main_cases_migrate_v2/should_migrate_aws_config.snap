@@ -19,7 +19,7 @@ expression: redactor(content)
   },
   "linter": {
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "complexity": {
         "noForEach": "off"
       },

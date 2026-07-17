@@ -1,12 +1,13 @@
 use super::{
-    ChangeFileParams, ChangeFileResult, CloseFileParams, FileExitsParams, FixFileParams,
+    ChangeFileParams, ChangeFileResult, CloseFileParams, FileExistsParams, FixFileParams,
     FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
     GetControlFlowGraphParams, GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult,
-    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams,
-    OpenFileResult, PullActionsParams, PullActionsResult, PullDiagnosticsAndActionsParams,
-    PullDiagnosticsAndActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameParams,
-    RenameResult, ScanProjectParams, ScanProjectResult, SearchPatternParams, SearchResults,
-    SupportsFeatureParams, UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
+    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, GoToDefinitionParams,
+    GoToDefinitionResult, OpenFileParams, OpenFileResult, PullActionsParams, PullActionsResult,
+    PullDiagnosticsAndActionsParams, PullDiagnosticsAndActionsResult, PullDiagnosticsParams,
+    PullDiagnosticsResult, RenameParams, RenameResult, ScanProjectParams, ScanProjectResult,
+    SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateModuleGraphParams,
+    UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
@@ -131,7 +132,7 @@ where
         self.request("biome/open_file", params)
     }
 
-    fn file_exists(&self, params: FileExitsParams) -> Result<bool, WorkspaceError> {
+    fn file_exists(&self, params: FileExistsParams) -> Result<bool, WorkspaceError> {
         self.request("biome/file_exists", params)
     }
 
@@ -197,6 +198,13 @@ where
 
     fn rename(&self, params: RenameParams) -> Result<RenameResult, WorkspaceError> {
         self.request("biome/rename", params)
+    }
+
+    fn go_to_definition(
+        &self,
+        params: GoToDefinitionParams,
+    ) -> Result<Option<GoToDefinitionResult>, WorkspaceError> {
+        self.request("biome/go_to_definition", params)
     }
 
     fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {

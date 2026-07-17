@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/document/multiple_documents.yaml
+---
+
+# Input
+
+```yaml
+"first"
+...
+second: doc
+...
+third
+
+```
+
+
+# Formatted
+
+```yaml
+"first"
+...
+second: doc
+...
+third
+
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"\"first\"\n...\nsecond: doc\n...\nthird\n" => 0..34

@@ -1,0 +1,226 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```jsx
+// `{prop}` is an Astro-only shorthand for `prop={prop}`. In a regular .jsx
+// file (no Astro embedding) the parser must reject it.
+const a = <div {prop} />;
+const b = <Component {value} other="ok" />;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@0..138 "const" [Comments("// `{prop}` is an Ast ..."), Newline("\n"), Comments("// file (no Astro emb ..."), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@138..140 "a" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@140..142 "=" [] [Whitespace(" ")],
+                            expression: JsxTagExpression {
+                                tag: JsxSelfClosingElement {
+                                    l_angle_token: L_ANGLE@142..143 "<" [] [],
+                                    name: JsxName {
+                                        value_token: JSX_IDENT@143..147 "div" [] [Whitespace(" ")],
+                                    },
+                                    type_arguments: missing (optional),
+                                    attributes: JsxAttributeList [
+                                        JsxSpreadAttribute {
+                                            l_curly_token: L_CURLY@147..148 "{" [] [],
+                                            dotdotdot_token: missing (required),
+                                            argument: JsIdentifierExpression {
+                                                name: JsReferenceIdentifier {
+                                                    value_token: IDENT@148..152 "prop" [] [],
+                                                },
+                                            },
+                                            r_curly_token: R_CURLY@152..154 "}" [] [Whitespace(" ")],
+                                        },
+                                    ],
+                                    slash_token: SLASH@154..155 "/" [] [],
+                                    r_angle_token: R_ANGLE@155..156 ">" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@156..157 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@157..164 "const" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@164..166 "b" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@166..168 "=" [] [Whitespace(" ")],
+                            expression: JsxTagExpression {
+                                tag: JsxSelfClosingElement {
+                                    l_angle_token: L_ANGLE@168..169 "<" [] [],
+                                    name: JsxReferenceIdentifier {
+                                        value_token: JSX_IDENT@169..179 "Component" [] [Whitespace(" ")],
+                                    },
+                                    type_arguments: missing (optional),
+                                    attributes: JsxAttributeList [
+                                        JsxSpreadAttribute {
+                                            l_curly_token: L_CURLY@179..180 "{" [] [],
+                                            dotdotdot_token: missing (required),
+                                            argument: JsIdentifierExpression {
+                                                name: JsReferenceIdentifier {
+                                                    value_token: IDENT@180..185 "value" [] [],
+                                                },
+                                            },
+                                            r_curly_token: R_CURLY@185..187 "}" [] [Whitespace(" ")],
+                                        },
+                                        JsxAttribute {
+                                            name: JsxName {
+                                                value_token: JSX_IDENT@187..192 "other" [] [],
+                                            },
+                                            initializer: JsxAttributeInitializerClause {
+                                                eq_token: EQ@192..193 "=" [] [],
+                                                value: JsxString {
+                                                    value_token: JSX_STRING_LITERAL@193..198 "\"ok\"" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                    slash_token: SLASH@198..199 "/" [] [],
+                                    r_angle_token: R_ANGLE@199..200 ">" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@200..201 ";" [] [],
+        },
+    ],
+    eof_token: EOF@201..202 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..202
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..201
+    0: JS_VARIABLE_STATEMENT@0..157
+      0: JS_VARIABLE_DECLARATION@0..156
+        0: (empty)
+        1: CONST_KW@0..138 "const" [Comments("// `{prop}` is an Ast ..."), Newline("\n"), Comments("// file (no Astro emb ..."), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@138..156
+          0: JS_VARIABLE_DECLARATOR@138..156
+            0: JS_IDENTIFIER_BINDING@138..140
+              0: IDENT@138..140 "a" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@140..156
+              0: EQ@140..142 "=" [] [Whitespace(" ")]
+              1: JSX_TAG_EXPRESSION@142..156
+                0: JSX_SELF_CLOSING_ELEMENT@142..156
+                  0: L_ANGLE@142..143 "<" [] []
+                  1: JSX_NAME@143..147
+                    0: JSX_IDENT@143..147 "div" [] [Whitespace(" ")]
+                  2: (empty)
+                  3: JSX_ATTRIBUTE_LIST@147..154
+                    0: JSX_SPREAD_ATTRIBUTE@147..154
+                      0: L_CURLY@147..148 "{" [] []
+                      1: (empty)
+                      2: JS_IDENTIFIER_EXPRESSION@148..152
+                        0: JS_REFERENCE_IDENTIFIER@148..152
+                          0: IDENT@148..152 "prop" [] []
+                      3: R_CURLY@152..154 "}" [] [Whitespace(" ")]
+                  4: SLASH@154..155 "/" [] []
+                  5: R_ANGLE@155..156 ">" [] []
+      1: SEMICOLON@156..157 ";" [] []
+    1: JS_VARIABLE_STATEMENT@157..201
+      0: JS_VARIABLE_DECLARATION@157..200
+        0: (empty)
+        1: CONST_KW@157..164 "const" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@164..200
+          0: JS_VARIABLE_DECLARATOR@164..200
+            0: JS_IDENTIFIER_BINDING@164..166
+              0: IDENT@164..166 "b" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@166..200
+              0: EQ@166..168 "=" [] [Whitespace(" ")]
+              1: JSX_TAG_EXPRESSION@168..200
+                0: JSX_SELF_CLOSING_ELEMENT@168..200
+                  0: L_ANGLE@168..169 "<" [] []
+                  1: JSX_REFERENCE_IDENTIFIER@169..179
+                    0: JSX_IDENT@169..179 "Component" [] [Whitespace(" ")]
+                  2: (empty)
+                  3: JSX_ATTRIBUTE_LIST@179..198
+                    0: JSX_SPREAD_ATTRIBUTE@179..187
+                      0: L_CURLY@179..180 "{" [] []
+                      1: (empty)
+                      2: JS_IDENTIFIER_EXPRESSION@180..185
+                        0: JS_REFERENCE_IDENTIFIER@180..185
+                          0: IDENT@180..185 "value" [] []
+                      3: R_CURLY@185..187 "}" [] [Whitespace(" ")]
+                    1: JSX_ATTRIBUTE@187..198
+                      0: JSX_NAME@187..192
+                        0: JSX_IDENT@187..192 "other" [] []
+                      1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@192..198
+                        0: EQ@192..193 "=" [] []
+                        1: JSX_STRING@193..198
+                          0: JSX_STRING_LITERAL@193..198 "\"ok\"" [] [Whitespace(" ")]
+                  4: SLASH@198..199 "/" [] []
+                  5: R_ANGLE@199..200 ">" [] []
+      1: SEMICOLON@200..201 ";" [] []
+  4: EOF@201..202 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+jsx_shorthand_attribute_outside_astro.jsx:3:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `...` but instead found `prop`
+  
+    1 │ // `{prop}` is an Astro-only shorthand for `prop={prop}`. In a regular .jsx
+    2 │ // file (no Astro embedding) the parser must reject it.
+  > 3 │ const a = <div {prop} />;
+      │                 ^^^^
+    4 │ const b = <Component {value} other="ok" />;
+    5 │ 
+  
+  i Remove prop
+  
+jsx_shorthand_attribute_outside_astro.jsx:4:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `...` but instead found `value`
+  
+    2 │ // file (no Astro embedding) the parser must reject it.
+    3 │ const a = <div {prop} />;
+  > 4 │ const b = <Component {value} other="ok" />;
+      │                       ^^^^^
+    5 │ 
+  
+  i Remove value
+  
+```

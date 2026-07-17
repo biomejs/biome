@@ -233,7 +233,7 @@ impl StableReactHookConfiguration {
 }
 
 /// Represents a potentially stable React hook result member.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum ReactHookResultMember {
     Key(TokenText),
     Index(u8),
@@ -296,7 +296,7 @@ mod test {
     use crate::react::hooks::is_react_hook_call;
     use biome_js_parser::JsParserOptions;
     use biome_js_semantic::{SemanticModelOptions, semantic_model};
-    use biome_js_syntax::JsFileSource;
+    use biome_languages::JsFileSource;
 
     #[test]
     fn test_is_react_hook_call() {

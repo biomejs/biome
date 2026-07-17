@@ -48,7 +48,9 @@ impl<'a> Reporter for ConsoleReporter<'a> {
     }
 }
 
-pub(crate) struct ConsoleReporterVisitor;
+pub(crate) struct ConsoleReporterVisitor {
+    pub(crate) concise: bool,
+}
 
 impl ReporterVisitor for ConsoleReporterVisitor {
     fn report_summary(
@@ -153,6 +155,8 @@ impl ReporterVisitor for ConsoleReporterVisitor {
             if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
                 if diagnostic.tags().is_verbose() && verbose {
                     writer.error(markup! {{PrintDiagnostic::verbose(diagnostic)}});
+                } else if self.concise {
+                    writer.error(markup! {{PrintDiagnostic::concise(diagnostic)}});
                 } else {
                     writer.error(markup! {{PrintDiagnostic::simple(diagnostic)}});
                 }

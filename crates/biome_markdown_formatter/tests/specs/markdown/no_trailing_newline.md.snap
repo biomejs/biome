@@ -1,0 +1,18 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/no_trailing_newline.md
+---
+
+# Input
+
+```md
+hello world
+```
+
+
+# Formatted
+
+```md
+hello world
+
+```

@@ -1,0 +1,129 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+w-[1e] w-[1e+]
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..1 "w" [] [],
+                minus_token: DASH@1..2 "-" [] [],
+                value: TwArbitraryValue {
+                    l_brack_token: L_BRACKET@2..3 "[" [] [],
+                    value: CssGenericComponentValueList [
+                        CssUnknownDimension {
+                            value_token: CSS_NUMBER_LITERAL@3..4 "1" [] [],
+                            unit_token: IDENT@4..5 "e" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACKET@5..7 "]" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@7..8 "w" [] [],
+                minus_token: DASH@8..9 "-" [] [],
+                value: TwArbitraryValue {
+                    l_brack_token: L_BRACKET@9..10 "[" [] [],
+                    value: CssGenericComponentValueList [
+                        CssUnknownDimension {
+                            value_token: CSS_NUMBER_LITERAL@10..11 "1" [] [],
+                            unit_token: IDENT@11..12 "e" [] [],
+                        },
+                        CssUnaryExpression {
+                            operator: PLUS@12..13 "+" [] [],
+                            argument: missing (required),
+                        },
+                    ],
+                    r_brack_token: R_BRACKET@13..14 "]" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@14..15 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..15
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..14
+    0: TW_FULL_CANDIDATE@0..7
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@0..7
+        0: TW_BASE@0..1 "w" [] []
+        1: DASH@1..2 "-" [] []
+        2: TW_ARBITRARY_VALUE@2..7
+          0: L_BRACKET@2..3 "[" [] []
+          1: CSS_GENERIC_COMPONENT_VALUE_LIST@3..5
+            0: CSS_UNKNOWN_DIMENSION@3..5
+              0: CSS_NUMBER_LITERAL@3..4 "1" [] []
+              1: IDENT@4..5 "e" [] []
+          2: R_BRACKET@5..7 "]" [] [Whitespace(" ")]
+        3: (empty)
+      3: (empty)
+    1: TW_FULL_CANDIDATE@7..14
+      0: TW_VARIANT_LIST@7..7
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@7..14
+        0: TW_BASE@7..8 "w" [] []
+        1: DASH@8..9 "-" [] []
+        2: TW_ARBITRARY_VALUE@9..14
+          0: L_BRACKET@9..10 "[" [] []
+          1: CSS_GENERIC_COMPONENT_VALUE_LIST@10..13
+            0: CSS_UNKNOWN_DIMENSION@10..12
+              0: CSS_NUMBER_LITERAL@10..11 "1" [] []
+              1: IDENT@11..12 "e" [] []
+            1: CSS_UNARY_EXPRESSION@12..13
+              0: PLUS@12..13 "+" [] []
+              1: (empty)
+          2: R_BRACKET@13..14 "]" [] []
+        3: (empty)
+      3: (empty)
+  2: EOF@14..15 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+css-number-exponents.txt:1:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found ']'.
+  
+  > 1 │ w-[1e] w-[1e+]
+      │              ^
+    2 │ 
+  
+  i Expected a value here.
+  
+  > 1 │ w-[1e] w-[1e+]
+      │              ^
+    2 │ 
+  
+```

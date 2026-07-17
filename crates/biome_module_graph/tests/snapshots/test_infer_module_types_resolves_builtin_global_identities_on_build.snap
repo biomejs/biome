@@ -1,0 +1,122 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function readRegExp(value: RegExp): RegExp {
+	return value;
+}
+
+export function readDate(value: Date): Date {
+	return value;
+}
+
+export function readError(value: Error): Error {
+	return value;
+}
+
+export function readSymbol(value: Symbol): Symbol {
+	return value;
+}
+
+export function readDisposable(value: Disposable): Disposable {
+	return value;
+}
+
+export function readAsyncDisposable(value: AsyncDisposable): AsyncDisposable {
+	return value;
+}
+```
+
+## Inferred types
+
+```
+Binding readRegExp "readRegExp" => sync Function "readRegExp" {
+  accepts: {
+    params: [
+      required value: instanceof RegExp
+    ]
+    type_args: []
+  }
+  returns: instanceof RegExp
+}
+
+Binding value "value" => instanceof RegExp
+
+Expression "value" => instanceof RegExp
+
+Binding readDate "readDate" => sync Function "readDate" {
+  accepts: {
+    params: [
+      required value: instanceof Date
+    ]
+    type_args: []
+  }
+  returns: instanceof Date
+}
+
+Binding value "value" => instanceof Date
+
+Expression "value" => instanceof Date
+
+Binding readError "readError" => sync Function "readError" {
+  accepts: {
+    params: [
+      required value: instanceof Error
+    ]
+    type_args: []
+  }
+  returns: instanceof Error
+}
+
+Binding value "value" => instanceof Error
+
+Expression "value" => instanceof Error
+
+Binding readSymbol "readSymbol" => sync Function "readSymbol" {
+  accepts: {
+    params: [
+      required value: instanceof Symbol
+    ]
+    type_args: []
+  }
+  returns: instanceof Symbol
+}
+
+Binding value "value" => instanceof Symbol
+
+Expression "value" => instanceof Symbol
+
+Binding readDisposable "readDisposable" => sync Function "readDisposable" {
+  accepts: {
+    params: [
+      required value: instanceof Disposable
+    ]
+    type_args: []
+  }
+  returns: instanceof Disposable
+}
+
+Binding value "value" => instanceof Disposable
+
+Expression "value" => instanceof Disposable
+
+Binding readAsyncDisposable "readAsyncDisposable" => sync Function "readAsyncDisposable" {
+  accepts: {
+    params: [
+      required value: instanceof AsyncDisposable
+    ]
+    type_args: []
+  }
+  returns: instanceof AsyncDisposable
+}
+
+Binding value "value" => instanceof AsyncDisposable
+
+Expression "value" => instanceof AsyncDisposable
+```

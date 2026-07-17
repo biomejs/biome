@@ -1,0 +1,39 @@
+/* should not generate diagnostics */
+
+let numeric = 5 + 10;
+let strings = "5.5" + "10";
+let stringAndNumber = "1" + 1;
+let stringAndBigint = "1" + 1n;
+let bigints = 1n + 1n;
+let booleans = true + false;
+
+{
+	let value = "";
+	value += 0;
+}
+
+{
+	let value = 0;
+	value += "";
+}
+
+{
+	let value = 1n;
+	value += 2n;
+}
+
+function stringGeneric<T extends string>(a: T) {
+	return a + "";
+}
+
+function numberGeneric<T extends number>(a: T) {
+	return a + 1;
+}
+
+{
+	declare const regexp: RegExp;
+	declare const text: string;
+	const regexpAndString = regexp + text;
+}
+
+const nested = "hello" + (true ? "a" : "b") + (() => (true ? "c" : "d"))() + "e";

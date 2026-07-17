@@ -17,12 +17,12 @@ ___foo__
 --- Prettier
 +++ Biome
 @@ -1 +1 @@
--**\_foo**
-+___foo__
+-_**foo**
++**\_foo**
 ```
 
 # Output
 
 ```md
-___foo__
+**\_foo**
 ```

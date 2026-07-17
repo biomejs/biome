@@ -137,16 +137,16 @@ impl Rule for NoSkippedTests {
                     )?;
                 }
                 "xdescribe" => {
-                    replaced_function = make::js_reference_identifier(make::ident("describe"));
-                    mutation.replace_element(function_name.into(), replaced_function.into());
+                    replaced_function = make::ident("describe");
+                    mutation.replace_token(function_name, replaced_function);
                 }
                 "xit" => {
-                    replaced_function = make::js_reference_identifier(make::ident("it"));
-                    mutation.replace_element(function_name.into(), replaced_function.into());
+                    replaced_function = make::ident("it");
+                    mutation.replace_token(function_name, replaced_function);
                 }
                 "xtest" => {
-                    replaced_function = make::js_reference_identifier(make::ident("test"));
-                    mutation.replace_element(function_name.into(), replaced_function.into());
+                    replaced_function = make::ident("test");
+                    mutation.replace_token(function_name, replaced_function);
                 }
                 _ => {}
             }

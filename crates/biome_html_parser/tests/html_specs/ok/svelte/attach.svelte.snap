@@ -43,9 +43,9 @@ HtmlRoot {
                 attributes: HtmlAttributeList [
                     SvelteAttachAttribute {
                         sv_curly_at_token: SV_CURLY_AT@5..7 "{@" [] [],
-                        attach_token: ATTACH_KW@7..13 "attach" [] [],
+                        attach_token: ATTACH_KW@7..14 "attach" [] [Whitespace(" ")],
                         expression: HtmlTextExpression {
-                            html_literal_token: HTML_LITERAL@13..26 " myAttachment" [] [],
+                            html_literal_token: HTML_LITERAL@14..26 "myAttachment" [] [],
                         },
                         r_curly_token: R_CURLY@26..27 "}" [] [],
                     },
@@ -75,9 +75,9 @@ HtmlRoot {
                 attributes: HtmlAttributeList [
                     SvelteAttachAttribute {
                         sv_curly_at_token: SV_CURLY_AT@46..48 "{@" [] [],
-                        attach_token: ATTACH_KW@48..54 "attach" [] [],
+                        attach_token: ATTACH_KW@48..55 "attach" [] [Whitespace(" ")],
                         expression: HtmlTextExpression {
-                            html_literal_token: HTML_LITERAL@54..71 " tooltip(content)" [] [],
+                            html_literal_token: HTML_LITERAL@55..71 "tooltip(content)" [] [],
                         },
                         r_curly_token: R_CURLY@71..72 "}" [] [],
                     },
@@ -137,9 +137,9 @@ HtmlRoot {
                     },
                     SvelteAttachAttribute {
                         sv_curly_at_token: SV_CURLY_AT@126..130 "{@" [Newline("\n"), Whitespace("\t")] [],
-                        attach_token: ATTACH_KW@130..136 "attach" [] [],
+                        attach_token: ATTACH_KW@130..137 "attach" [] [Whitespace(" ")],
                         expression: HtmlTextExpression {
-                            html_literal_token: HTML_LITERAL@136..307 " (canvas) => {\n\t\tconst context = canvas.getContext('2d');\n\n\t\t$effect(() => {\n\t\t\tcontext.fillStyle = color;\n\t\t\tcontext.fillRect(0, 0, canvas.width, canvas.height);\n\t\t});\n\t}" [] [],
+                            html_literal_token: HTML_LITERAL@137..307 "(canvas) => {\n\t\tconst context = canvas.getContext('2d');\n\n\t\t$effect(() => {\n\t\t\tcontext.fillStyle = color;\n\t\t\tcontext.fillRect(0, 0, canvas.width, canvas.height);\n\t\t});\n\t}" [] [],
                         },
                         r_curly_token: R_CURLY@307..308 "}" [] [],
                     },
@@ -177,9 +177,9 @@ HtmlRoot {
         2: HTML_ATTRIBUTE_LIST@5..27
           0: SVELTE_ATTACH_ATTRIBUTE@5..27
             0: SV_CURLY_AT@5..7 "{@" [] []
-            1: ATTACH_KW@7..13 "attach" [] []
-            2: HTML_TEXT_EXPRESSION@13..26
-              0: HTML_LITERAL@13..26 " myAttachment" [] []
+            1: ATTACH_KW@7..14 "attach" [] [Whitespace(" ")]
+            2: HTML_TEXT_EXPRESSION@14..26
+              0: HTML_LITERAL@14..26 "myAttachment" [] []
             3: R_CURLY@26..27 "}" [] []
         3: R_ANGLE@27..28 ">" [] []
       1: HTML_ELEMENT_LIST@28..31
@@ -199,9 +199,9 @@ HtmlRoot {
         2: HTML_ATTRIBUTE_LIST@46..72
           0: SVELTE_ATTACH_ATTRIBUTE@46..72
             0: SV_CURLY_AT@46..48 "{@" [] []
-            1: ATTACH_KW@48..54 "attach" [] []
-            2: HTML_TEXT_EXPRESSION@54..71
-              0: HTML_LITERAL@54..71 " tooltip(content)" [] []
+            1: ATTACH_KW@48..55 "attach" [] [Whitespace(" ")]
+            2: HTML_TEXT_EXPRESSION@55..71
+              0: HTML_LITERAL@55..71 "tooltip(content)" [] []
             3: R_CURLY@71..72 "}" [] []
         3: R_ANGLE@72..73 ">" [] []
       1: HTML_ELEMENT_LIST@73..83
@@ -241,9 +241,9 @@ HtmlRoot {
                 2: R_CURLY@125..126 "}" [] []
           2: SVELTE_ATTACH_ATTRIBUTE@126..308
             0: SV_CURLY_AT@126..130 "{@" [Newline("\n"), Whitespace("\t")] []
-            1: ATTACH_KW@130..136 "attach" [] []
-            2: HTML_TEXT_EXPRESSION@136..307
-              0: HTML_LITERAL@136..307 " (canvas) => {\n\t\tconst context = canvas.getContext('2d');\n\n\t\t$effect(() => {\n\t\t\tcontext.fillStyle = color;\n\t\t\tcontext.fillRect(0, 0, canvas.width, canvas.height);\n\t\t});\n\t}" [] []
+            1: ATTACH_KW@130..137 "attach" [] [Whitespace(" ")]
+            2: HTML_TEXT_EXPRESSION@137..307
+              0: HTML_LITERAL@137..307 "(canvas) => {\n\t\tconst context = canvas.getContext('2d');\n\n\t\t$effect(() => {\n\t\t\tcontext.fillStyle = color;\n\t\t\tcontext.fillRect(0, 0, canvas.width, canvas.height);\n\t\t});\n\t}" [] []
             3: R_CURLY@307..308 "}" [] []
         3: R_ANGLE@308..310 ">" [Newline("\n")] []
       1: HTML_ELEMENT_LIST@310..310

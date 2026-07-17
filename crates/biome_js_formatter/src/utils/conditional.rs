@@ -6,10 +6,11 @@ use biome_formatter::{
 
 use crate::{AsFormat, IntoFormat};
 use biome_js_syntax::{
-    AnyJsExpression, AnyTsType, JsAssignmentExpression, JsConditionalExpression, JsFileSource,
+    AnyJsExpression, AnyTsType, JsAssignmentExpression, JsConditionalExpression,
     JsInitializerClause, JsReturnStatement, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
     JsSyntaxToken, JsThrowStatement, JsUnaryExpression, JsYieldArgument, TsConditionalType,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 
 declare_node_union! {
@@ -78,7 +79,7 @@ impl FormatRule<AnyJsConditional> for FormatJsAnyConditionalRule {
             let is_consequent_nested = consequent.syntax().kind() == syntax.kind();
             let consequent = format_with(|f| {
                 if indent_style.is_space() {
-                    write!(f, [align(2, &consequent)])
+                    write!(f, [align("  ", &consequent)])
                 } else {
                     write!(f, [indent(&consequent)])
                 }
@@ -109,7 +110,7 @@ impl FormatRule<AnyJsConditional> for FormatJsAnyConditionalRule {
             )?;
             let alternate = format_with(|f| {
                 if indent_style.is_space() {
-                    write!(f, [align(2, &alternate)])
+                    write!(f, [align("  ", &alternate)])
                 } else {
                     write!(f, [indent(&alternate)])
                 }
@@ -486,7 +487,7 @@ impl Format<JsFormatContext> for FormatConditionalTest<'_> {
 
         if self.layout.is_nested_alternate() {
             if indent_style.is_space() {
-                write!(f, [align(2, &format_inner)])
+                write!(f, [align("  ", &format_inner)])
             } else {
                 write!(f, [indent(&format_inner)])
             }
@@ -573,7 +574,7 @@ enum ConditionalLayout {
     },
 }
 
-/// A [JsConditionalExpression] that itself or any of its parent's [JsConditionalExpression] have a a [JsxTagExpression]
+/// A [JsConditionalExpression] that itself or any of its parent's [JsConditionalExpression] have a [JsxTagExpression]
 /// as its [`test`](JsConditionalExpression::test), [`consequent`](JsConditionalExpression::consequent) or [`alternate`](JsConditionalExpression::alternate).
 ///
 /// Parenthesizes the `consequent` and `alternate` if it the group breaks except if the expressions are

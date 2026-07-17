@@ -2,8 +2,9 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{AnyCssPseudoElement, CssFileSource, CssPseudoElementSelector};
+use biome_css_syntax::{AnyCssPseudoElement, AnyCssSelectorIdentifier, CssPseudoElementSelector};
 use biome_diagnostics::Severity;
+use biome_languages::CssFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::no_unknown_pseudo_element::NoUnknownPseudoElementOptions;
 use biome_string_case::StrLikeExtension;
@@ -110,16 +111,19 @@ impl Rule for NoUnknownPseudoElement {
                 file_source,
                 ctx.options(),
             ),
-            AnyCssPseudoElement::CssPseudoElementIdentifier(ident) => should_not_trigger(
-                ident.name().ok()?.to_trimmed_text().text(),
-                file_source,
-                ctx.options(),
-            ),
+            AnyCssPseudoElement::CssPseudoElementIdentifier(ident) => {
+                should_not_trigger_pseudo_element_name(
+                    ident.name().ok()?,
+                    file_source,
+                    ctx.options(),
+                )
+            }
             AnyCssPseudoElement::CssPseudoElementFunction(ident) => should_not_trigger(
                 ident.name().ok()?.to_trimmed_text().text(),
                 file_source,
                 ctx.options(),
             ),
+            AnyCssPseudoElement::ScssInterpolatedPseudoElementFunction(_) => true,
         };
 
         if should_not_trigger {
@@ -150,6 +154,19 @@ impl Rule for NoUnknownPseudoElement {
             ),
         )
     }
+}
+
+fn should_not_trigger_pseudo_element_name(
+    name: AnyCssSelectorIdentifier,
+    file_source: &CssFileSource,
+    options: &NoUnknownPseudoElementOptions,
+) -> bool {
+    // `::foo-#{$name}` cannot be validated before Sass interpolation is resolved.
+    let Some(name) = name.as_css_identifier() else {
+        return true;
+    };
+
+    should_not_trigger(name.to_trimmed_text().text(), file_source, options)
 }
 
 /// It doesn't trigger the rule if the pseudo-element name isn't a vendor prefix or is a pseudo-element

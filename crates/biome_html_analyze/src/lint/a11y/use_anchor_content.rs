@@ -3,9 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{
-    AnyHtmlContent, AnyHtmlElement, HtmlAttribute, HtmlElementList, HtmlFileSource,
-};
+use biome_html_syntax::{AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, HtmlElementList};
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
 
@@ -16,6 +15,7 @@ use crate::a11y::{
     html_self_closing_element_has_non_empty_attribute,
     html_self_closing_element_has_truthy_aria_hidden,
 };
+use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforce that anchors have content and that the content is accessible to screen readers.
@@ -82,7 +82,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "useAnchorContent",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("anchor-has-content").same()],
+        sources: &[RuleSource::EslintJsxA11y("anchor-has-content").inspired()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -91,7 +91,7 @@ declare_lint_rule! {
 
 /// State to track whether the issue is aria-hidden on the anchor itself
 pub struct UseAnchorContentState {
-    aria_hidden_attribute: Option<HtmlAttribute>,
+    aria_hidden_attribute: Option<AnyHtmlAttribute>,
 }
 
 impl Rule for UseAnchorContent {
@@ -102,30 +102,23 @@ impl Rule for UseAnchorContent {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        let source_type = ctx.source_type::<HtmlFileSource>();
 
         // Check if element is an anchor tag
-        // In HTML files, tag names are case-insensitive
-        // In component frameworks (Vue, Svelte, Astro), only lowercase is checked
-        let element_name = node.name()?;
-        let source_type = ctx.source_type::<HtmlFileSource>();
-        let is_anchor = if source_type.is_html() {
-            element_name.text().eq_ignore_ascii_case("a")
-        } else {
-            element_name.text() == "a"
-        };
-        if !is_anchor {
+        let tag_element = node.clone().as_any_html_tag_element()?;
+        if !is_html_tag(&tag_element, source_type, "a") {
             return None;
         }
 
         // Check if the anchor itself has aria-hidden attribute
-        if let Some(aria_hidden_attr) = get_truthy_aria_hidden_attribute(node) {
+        if let Some(aria_hidden_attr) = get_truthy_aria_hidden_attribute(&tag_element) {
             return Some(UseAnchorContentState {
                 aria_hidden_attribute: Some(aria_hidden_attr),
             });
         }
 
         // Check if anchor has accessible name via aria-label or title
-        if has_accessible_name(node) {
+        if has_accessible_name(&tag_element) {
             return None;
         }
 
@@ -213,10 +206,7 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
             let tag_text = element.name().ok().and_then(|n| n.token_text_trimmed());
 
             match tag_text.as_ref().map(|t| t.as_ref()) {
-                Some(name)
-                    if name.eq_ignore_ascii_case("img")
-                        || (is_astro && name == "Image") =>
-                {
+                Some(name) if name.eq_ignore_ascii_case("img") || (is_astro && name == "Image") => {
                     html_self_closing_element_has_non_empty_attribute(element, "alt")
                 }
                 Some(name)
@@ -231,12 +221,13 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
                     false
                 }
                 Some(name) if name.eq_ignore_ascii_case("input") => {
-                    let is_hidden = element.find_attribute_by_name("type").is_some_and(|attr| {
-                        attr.initializer()
-                            .and_then(|init| init.value().ok())
-                            .and_then(|value| value.string_value())
-                            .is_some_and(|s| s.eq_ignore_ascii_case("hidden"))
-                    });
+                    let is_hidden =
+                        element
+                            .find_attribute_or_vue_binding("type")
+                            .is_some_and(|attr| {
+                                attr.as_static_value()
+                                    .is_some_and(|s| s.text().eq_ignore_ascii_case("hidden"))
+                            });
                     !is_hidden
                 }
                 // Custom components (PascalCase) may render accessible content
@@ -244,7 +235,9 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
                 _ => false,
             }
         }
-        AnyHtmlElement::HtmlBogusElement(_) | AnyHtmlElement::HtmlCdataSection(_) => true,
+        AnyHtmlElement::HtmlBogusElement(_)
+        | AnyHtmlElement::HtmlCdataSection(_)
+        | AnyHtmlElement::HtmlProcessingInstruction(_) => true,
     })
 }
 

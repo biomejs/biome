@@ -8,7 +8,7 @@ use biome_analyze::{
     declare_source_rule,
 };
 use biome_console::markup;
-use biome_diagnostics::{Applicability, category};
+use biome_diagnostics::Applicability;
 use biome_js_factory::make::{
     js_literal_member_name, js_string_literal, js_string_literal_expression,
     js_string_literal_single_quotes, js_template_chunk, js_template_chunk_element, jsx_string,
@@ -85,7 +85,7 @@ impl Rule for NoDuplicateClasses {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(duplicate_classes_diagnostic(
-            category!("assist/source/noDuplicateClasses"),
+            rule_category!(),
             ctx.query().range(),
             &state.duplicates,
         ))
@@ -99,8 +99,7 @@ impl Rule for NoDuplicateClasses {
             AnyClassStringLike::JsStringLiteralExpression(string_literal) => {
                 let is_double_quote = string_literal
                     .value_token()
-                    .map(|token| token.text_trimmed().starts_with('"'))
-                    .unwrap_or(ctx.preferred_quote().is_double());
+                    .map_or(ctx.preferred_quote().is_double(), |token| token.text_trimmed().starts_with('"'));
                 let replacement = js_string_literal_expression(if is_double_quote {
                     js_string_literal(deduplicated)
                 } else {
@@ -111,8 +110,7 @@ impl Rule for NoDuplicateClasses {
             AnyClassStringLike::JsLiteralMemberName(string_literal) => {
                 let is_double_quote = string_literal
                     .value()
-                    .map(|token| token.text_trimmed().starts_with('"'))
-                    .unwrap_or(ctx.preferred_quote().is_double());
+                    .map_or(ctx.preferred_quote().is_double(), |token| token.text_trimmed().starts_with('"'));
                 let replacement = js_literal_member_name(if is_double_quote {
                     js_string_literal(deduplicated)
                 } else {
@@ -123,8 +121,7 @@ impl Rule for NoDuplicateClasses {
             AnyClassStringLike::JsxString(jsx_string_node) => {
                 let is_double_quote = jsx_string_node
                     .value_token()
-                    .map(|token| token.text_trimmed().starts_with('"'))
-                    .unwrap_or(ctx.preferred_jsx_quote().is_double());
+                    .map_or(ctx.preferred_jsx_quote().is_double(), |token| token.text_trimmed().starts_with('"'));
                 let replacement = jsx_string(if is_double_quote {
                     js_string_literal(deduplicated)
                 } else {

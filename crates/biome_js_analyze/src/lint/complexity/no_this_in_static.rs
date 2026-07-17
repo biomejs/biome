@@ -5,8 +5,8 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsClass, AnyJsClassMember, AnyJsExpression, JsArrowFunctionExpression, JsSuperExpression,
-    JsSyntaxToken, JsThisExpression,
+    AnyJsClass, AnyJsClassMember, AnyJsExpression, JsArrowFunctionExpression, JsNewExpression,
+    JsSuperExpression, JsSyntaxToken, JsThisExpression,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxResult, declare_node_union};
 use biome_rule_options::no_this_in_static::NoThisInStaticOptions;
@@ -97,6 +97,10 @@ impl Rule for NoThisInStatic {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let this_super_expression = ctx.query();
+        if this_super_expression.is_new_this_callee() {
+            return None;
+        }
+
         let static_method = this_super_expression
             .syntax()
             .ancestors()
@@ -192,5 +196,18 @@ impl JsThisSuperExpression {
             Self::JsSuperExpression(expr) => expr.super_token(),
             Self::JsThisExpression(expr) => expr.this_token(),
         }
+    }
+
+    fn is_new_this_callee(&self) -> bool {
+        matches!(self, Self::JsThisExpression(_))
+            && self
+                .syntax()
+                .parent()
+                .and_then(JsNewExpression::cast)
+                .is_some_and(|new_expression| {
+                    new_expression.callee().is_ok_and(|callee| {
+                        callee.syntax() == self.syntax()
+                    })
+                })
     }
 }

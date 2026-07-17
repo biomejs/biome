@@ -1,0 +1,14 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useThisInClassMethods": {
+          "level": "error",
+          "options": {
+            "ignoreOverrideMethods": true
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,85 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+
+<!-- Static alt text with redundant words is flagged in Svelte files -->
+<img alt="Photo of friend." />
+<img alt="Image of cool person" aria-hidden="false" />
+<!-- Redundant word in the static portion of a template value -->
+<img alt="image of {person}" />
+<img alt="photo by {photographer}" />
+<img alt="picture: {description}" />
+
+```
+
+# Diagnostics
+```
+invalid.svelte:4:10 lint/a11y/noRedundantAlt ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the words "image", "picture", or "photo" in img element alt text.
+  
+    3 │ <!-- Static alt text with redundant words is flagged in Svelte files -->
+  > 4 │ <img alt="Photo of friend." />
+      │          ^^^^^^^^^^^^^^^^^^
+    5 │ <img alt="Image of cool person" aria-hidden="false" />
+    6 │ <!-- Redundant word in the static portion of a template value -->
+  
+  i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
+  
+
+```
+
+```
+invalid.svelte:5:10 lint/a11y/noRedundantAlt ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the words "image", "picture", or "photo" in img element alt text.
+  
+    3 │ <!-- Static alt text with redundant words is flagged in Svelte files -->
+    4 │ <img alt="Photo of friend." />
+  > 5 │ <img alt="Image of cool person" aria-hidden="false" />
+      │          ^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <!-- Redundant word in the static portion of a template value -->
+    7 │ <img alt="image of {person}" />
+  
+  i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
+  
+
+```
+
+```
+invalid.svelte:7:10 lint/a11y/noRedundantAlt ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the words "image", "picture", or "photo" in img element alt text.
+  
+    5 │ <img alt="Image of cool person" aria-hidden="false" />
+    6 │ <!-- Redundant word in the static portion of a template value -->
+  > 7 │ <img alt="image of {person}" />
+      │          ^^^^^^^^^^^^^^^^^^^
+    8 │ <img alt="photo by {photographer}" />
+    9 │ <img alt="picture: {description}" />
+  
+  i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
+  
+
+```
+
+```
+invalid.svelte:8:10 lint/a11y/noRedundantAlt ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the words "image", "picture", or "photo" in img element alt text.
+  
+     6 │ <!-- Redundant word in the static portion of a template value -->
+     7 │ <img alt="image of {person}" />
+   > 8 │ <img alt="photo by {photographer}" />
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ <img alt="picture: {description}" />
+    10 │ 
+  
+  i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
+  
+
+```

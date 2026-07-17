@@ -1,14 +1,13 @@
-use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::{AnyHtmlElement, HtmlAttribute, HtmlElementList};
+use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::no_svg_without_title::NoSvgWithoutTitleOptions;
-use biome_string_case::StrLikeExtension;
 
-use crate::a11y::is_aria_hidden_true;
-
-const NAME_REQUIRED_ROLES: &[&str] = &["img", "image", "graphics-document", "graphics-symbol"];
+use crate::Aria;
+use crate::{a11y::is_aria_hidden_true, utils::is_html_tag};
 
 declare_lint_rule! {
     /// Enforces the usage of the `title` element for the `svg` element.
@@ -121,19 +120,21 @@ declare_lint_rule! {
 }
 
 impl Rule for NoSvgWithoutTitle {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Aria<AnyHtmlElement>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoSvgWithoutTitleOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        if node.name()? != "svg" {
+        let tag_element = node.clone().as_any_html_tag_element()?;
+        if !is_html_tag(&tag_element, source_type, "svg") {
             return None;
         }
 
-        if is_aria_hidden_true(node) {
+        if is_aria_hidden_true(&tag_element) {
             return None;
         }
 
@@ -146,38 +147,22 @@ impl Rule for NoSvgWithoutTitle {
             }
         }
 
-        // TODO: use `aria_roles.has_name_required_image_role` of aria crate
-        // Checks if a `svg` element has role='img' and title/aria-label/aria-labelledby attribute
-        let Some(role_attribute) = node.find_attribute_by_name("role") else {
-            return Some(());
-        };
+        if ctx.aria_roles().has_name_required_image_role(node) {
+            let aria_label_attribute = node.find_attribute_by_name("aria-label");
+            if aria_label_attribute.is_some() {
+                return None;
+            }
 
-        let role_attribute_value = role_attribute.initializer()?.value().ok()?;
-        let Some(role_attribute_text) = role_attribute_value
-            .as_html_string()?
-            .inner_string_text()
-            .ok()
-        else {
-            return Some(());
-        };
-
-        let role_text = role_attribute_text.to_ascii_lowercase_cow();
-        if role_text.trim().is_empty() {
-            return Some(());
-        }
-
-        // Check if any of the space-separated roles are valid
-        let has_name_required_role = role_text
-            .split_whitespace()
-            .any(|role| NAME_REQUIRED_ROLES.contains(&role));
-
-        if has_name_required_role {
-            let aria_label = node.find_attribute_by_name("aria-label");
-            let aria_labelledby = node.find_attribute_by_name("aria-labelledby");
-            let is_valid_a11y_attribute = aria_label.is_some()
-                || is_valid_attribute_value(aria_labelledby, &html_element.children())
-                    .unwrap_or(false);
-            if is_valid_a11y_attribute {
+            let aria_labelledby_attribute = node.find_attribute_by_name("aria-labelledby");
+            if let Some(aria_labelledby_attribute) = aria_labelledby_attribute
+                && let Some(aria_labelledby_html_attribute) =
+                    aria_labelledby_attribute.as_html_attribute()
+                && is_valid_attribute_value(
+                    aria_labelledby_html_attribute,
+                    &html_element.children(),
+                )
+                .unwrap_or(false)
+            {
                 return None;
             }
             Some(())
@@ -219,17 +204,19 @@ fn has_valid_title_element(html_child_list: &HtmlElementList) -> Option<bool> {
 
 /// Checks if the given attribute is attached to the `svg` element and the attribute value is used by the `id` of the child element.
 fn is_valid_attribute_value(
-    attribute: Option<HtmlAttribute>,
+    attribute: &HtmlAttribute,
     html_child_list: &HtmlElementList,
 ) -> Option<bool> {
-    let attribute_value = attribute?.initializer()?.value().ok()?;
+    let attribute_value = attribute.initializer()?.value().ok()?;
     let is_used_attribute = html_child_list
         .into_iter()
         .filter_map(|child| {
             let html_element = child.as_html_element()?;
-            let maybe_attribute = html_element.find_attribute_by_name("id");
-            let child_attribute_value = maybe_attribute?.initializer()?.value().ok()?;
-            let is_valid = attribute_value.string_value() == child_attribute_value.string_value();
+            let id_attribute = html_element.find_attribute_by_name("id")?;
+            let id_html_attribute = id_attribute.as_html_attribute()?;
+            let child_attribute_value = id_html_attribute.initializer()?.value().ok()?;
+            let is_valid = attribute_value.as_static_value()?.text()
+                == child_attribute_value.as_static_value()?.text();
             Some(is_valid)
         })
         .any(|x| x);

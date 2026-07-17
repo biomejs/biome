@@ -1,0 +1,579 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<!-- simple member expression -->
+<button use:obj.action>action</button>
+<!-- member expression with params -->
+<button use:obj.action={{leet: 1337}}>with params</button>
+<!-- in/out with member expression and modifier -->
+<div in:renderer.in|global out:renderer.out|global></div>
+<!-- transition with member expression, modifier, and params -->
+<div transition:lib.fade|local={{ duration: 200 }}>fading</div>
+<div transition:renderer.slide|global>sliding</div>
+<!-- deep member expression -->
+<div in:a.b.c|global>deep</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..35 "<" [Comments("<!-- simple member ex ..."), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@35..42 "button" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteUseDirective {
+                        use_token: USE_KW@42..45 "use" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@45..46 ":" [] [],
+                            property: SvelteMemberProperty {
+                                object: SvelteName {
+                                    ident_token: IDENT@46..49 "obj" [] [],
+                                },
+                                dot_token: DOT@49..50 "." [] [],
+                                member: SvelteName {
+                                    ident_token: IDENT@50..56 "action" [] [],
+                                },
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@56..57 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@57..63 "action" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@63..64 "<" [] [],
+                slash_token: SLASH@64..65 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@65..71 "button" [] [],
+                },
+                r_angle_token: R_ANGLE@71..72 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@72..113 "<" [Newline("\n"), Comments("<!-- member expressio ..."), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@113..120 "button" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteUseDirective {
+                        use_token: USE_KW@120..123 "use" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@123..124 ":" [] [],
+                            property: SvelteMemberProperty {
+                                object: SvelteName {
+                                    ident_token: IDENT@124..127 "obj" [] [],
+                                },
+                                dot_token: DOT@127..128 "." [] [],
+                                member: SvelteName {
+                                    ident_token: IDENT@128..134 "action" [] [],
+                                },
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@134..135 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@135..136 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@136..148 "{leet: 1337}" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@148..149 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@149..150 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@150..161 "with params" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@161..162 "<" [] [],
+                slash_token: SLASH@162..163 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@163..169 "button" [] [],
+                },
+                r_angle_token: R_ANGLE@169..170 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@170..224 "<" [Newline("\n"), Comments("<!-- in/out with memb ..."), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@224..228 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteInDirective {
+                        in_token: IN_KW@228..230 "in" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@230..231 ":" [] [],
+                            property: SvelteMemberProperty {
+                                object: SvelteName {
+                                    ident_token: IDENT@231..239 "renderer" [] [],
+                                },
+                                dot_token: DOT@239..240 "." [] [],
+                                member: SvelteName {
+                                    ident_token: IDENT@240..242 "in" [] [],
+                                },
+                            },
+                            modifiers: SvelteDirectiveModifierList [
+                                SvelteDirectiveModifier {
+                                    bitwise_or_token: PIPE@242..243 "|" [] [],
+                                    name: SvelteName {
+                                        ident_token: IDENT@243..250 "global" [] [Whitespace(" ")],
+                                    },
+                                },
+                            ],
+                            initializer: missing (optional),
+                        },
+                    },
+                    SvelteOutDirective {
+                        out_token: OUT_KW@250..253 "out" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@253..254 ":" [] [],
+                            property: SvelteMemberProperty {
+                                object: SvelteName {
+                                    ident_token: IDENT@254..262 "renderer" [] [],
+                                },
+                                dot_token: DOT@262..263 "." [] [],
+                                member: SvelteName {
+                                    ident_token: IDENT@263..266 "out" [] [],
+                                },
+                            },
+                            modifiers: SvelteDirectiveModifierList [
+                                SvelteDirectiveModifier {
+                                    bitwise_or_token: PIPE@266..267 "|" [] [],
+                                    name: SvelteName {
+                                        ident_token: IDENT@267..273 "global" [] [],
+                                    },
+                                },
+                            ],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@273..274 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@274..275 "<" [] [],
+                slash_token: SLASH@275..276 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@276..279 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@279..280 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@280..347 "<" [Newline("\n"), Comments("<!-- transition with  ..."), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@347..351 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteTransitionDirective {
+                        transition_token: TRANSITION_KW@351..361 "transition" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@361..362 ":" [] [],
+                            property: SvelteMemberProperty {
+                                object: SvelteName {
+                                    ident_token: IDENT@362..365 "lib" [] [],
+                                },
+                                dot_token: DOT@365..366 "." [] [],
+                                member: SvelteName {
+                                    ident_token: IDENT@366..370 "fade" [] [],
+                                },
+                            },
+                            modifiers: SvelteDirectiveModifierList [
+                                SvelteDirectiveModifier {
+                                    bitwise_or_token: PIPE@370..371 "|" [] [],
+                                    name: SvelteName {
+                                        ident_token: IDENT@371..376 "local" [] [],
+                                    },
+                                },
+                            ],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@376..377 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@377..378 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@378..395 "{ duration: 200 }" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@395..396 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@396..397 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@397..403 "fading" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@403..404 "<" [] [],
+                slash_token: SLASH@404..405 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@405..408 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@408..409 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@409..411 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@411..415 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteTransitionDirective {
+                        transition_token: TRANSITION_KW@415..425 "transition" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@425..426 ":" [] [],
+                            property: SvelteMemberProperty {
+                                object: SvelteName {
+                                    ident_token: IDENT@426..434 "renderer" [] [],
+                                },
+                                dot_token: DOT@434..435 "." [] [],
+                                member: SvelteName {
+                                    ident_token: IDENT@435..440 "slide" [] [],
+                                },
+                            },
+                            modifiers: SvelteDirectiveModifierList [
+                                SvelteDirectiveModifier {
+                                    bitwise_or_token: PIPE@440..441 "|" [] [],
+                                    name: SvelteName {
+                                        ident_token: IDENT@441..447 "global" [] [],
+                                    },
+                                },
+                            ],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@447..448 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@448..455 "sliding" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@455..456 "<" [] [],
+                slash_token: SLASH@456..457 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@457..460 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@460..461 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@461..495 "<" [Newline("\n"), Comments("<!-- deep member expr ..."), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@495..499 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteInDirective {
+                        in_token: IN_KW@499..501 "in" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@501..502 ":" [] [],
+                            property: SvelteMemberProperty {
+                                object: SvelteMemberProperty {
+                                    object: SvelteName {
+                                        ident_token: IDENT@502..503 "a" [] [],
+                                    },
+                                    dot_token: DOT@503..504 "." [] [],
+                                    member: SvelteName {
+                                        ident_token: IDENT@504..505 "b" [] [],
+                                    },
+                                },
+                                dot_token: DOT@505..506 "." [] [],
+                                member: SvelteName {
+                                    ident_token: IDENT@506..507 "c" [] [],
+                                },
+                            },
+                            modifiers: SvelteDirectiveModifierList [
+                                SvelteDirectiveModifier {
+                                    bitwise_or_token: PIPE@507..508 "|" [] [],
+                                    name: SvelteName {
+                                        ident_token: IDENT@508..514 "global" [] [],
+                                    },
+                                },
+                            ],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@514..515 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@515..519 "deep" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@519..520 "<" [] [],
+                slash_token: SLASH@520..521 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@521..524 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@524..525 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@525..526 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..526
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..525
+    0: HTML_ELEMENT@0..72
+      0: HTML_OPENING_ELEMENT@0..57
+        0: L_ANGLE@0..35 "<" [Comments("<!-- simple member ex ..."), Newline("\n")] []
+        1: HTML_TAG_NAME@35..42
+          0: HTML_LITERAL@35..42 "button" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@42..56
+          0: SVELTE_USE_DIRECTIVE@42..56
+            0: USE_KW@42..45 "use" [] []
+            1: SVELTE_DIRECTIVE_VALUE@45..56
+              0: COLON@45..46 ":" [] []
+              1: SVELTE_MEMBER_PROPERTY@46..56
+                0: SVELTE_NAME@46..49
+                  0: IDENT@46..49 "obj" [] []
+                1: DOT@49..50 "." [] []
+                2: SVELTE_NAME@50..56
+                  0: IDENT@50..56 "action" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@56..56
+              3: (empty)
+        3: R_ANGLE@56..57 ">" [] []
+      1: HTML_ELEMENT_LIST@57..63
+        0: HTML_CONTENT@57..63
+          0: HTML_LITERAL@57..63 "action" [] []
+      2: HTML_CLOSING_ELEMENT@63..72
+        0: L_ANGLE@63..64 "<" [] []
+        1: SLASH@64..65 "/" [] []
+        2: HTML_TAG_NAME@65..71
+          0: HTML_LITERAL@65..71 "button" [] []
+        3: R_ANGLE@71..72 ">" [] []
+    1: HTML_ELEMENT@72..170
+      0: HTML_OPENING_ELEMENT@72..150
+        0: L_ANGLE@72..113 "<" [Newline("\n"), Comments("<!-- member expressio ..."), Newline("\n")] []
+        1: HTML_TAG_NAME@113..120
+          0: HTML_LITERAL@113..120 "button" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@120..149
+          0: SVELTE_USE_DIRECTIVE@120..149
+            0: USE_KW@120..123 "use" [] []
+            1: SVELTE_DIRECTIVE_VALUE@123..149
+              0: COLON@123..124 ":" [] []
+              1: SVELTE_MEMBER_PROPERTY@124..134
+                0: SVELTE_NAME@124..127
+                  0: IDENT@124..127 "obj" [] []
+                1: DOT@127..128 "." [] []
+                2: SVELTE_NAME@128..134
+                  0: IDENT@128..134 "action" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@134..134
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@134..149
+                0: EQ@134..135 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@135..149
+                  0: L_CURLY@135..136 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@136..148
+                    0: HTML_LITERAL@136..148 "{leet: 1337}" [] []
+                  2: R_CURLY@148..149 "}" [] []
+        3: R_ANGLE@149..150 ">" [] []
+      1: HTML_ELEMENT_LIST@150..161
+        0: HTML_CONTENT@150..161
+          0: HTML_LITERAL@150..161 "with params" [] []
+      2: HTML_CLOSING_ELEMENT@161..170
+        0: L_ANGLE@161..162 "<" [] []
+        1: SLASH@162..163 "/" [] []
+        2: HTML_TAG_NAME@163..169
+          0: HTML_LITERAL@163..169 "button" [] []
+        3: R_ANGLE@169..170 ">" [] []
+    2: HTML_ELEMENT@170..280
+      0: HTML_OPENING_ELEMENT@170..274
+        0: L_ANGLE@170..224 "<" [Newline("\n"), Comments("<!-- in/out with memb ..."), Newline("\n")] []
+        1: HTML_TAG_NAME@224..228
+          0: HTML_LITERAL@224..228 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@228..273
+          0: SVELTE_IN_DIRECTIVE@228..250
+            0: IN_KW@228..230 "in" [] []
+            1: SVELTE_DIRECTIVE_VALUE@230..250
+              0: COLON@230..231 ":" [] []
+              1: SVELTE_MEMBER_PROPERTY@231..242
+                0: SVELTE_NAME@231..239
+                  0: IDENT@231..239 "renderer" [] []
+                1: DOT@239..240 "." [] []
+                2: SVELTE_NAME@240..242
+                  0: IDENT@240..242 "in" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@242..250
+                0: SVELTE_DIRECTIVE_MODIFIER@242..250
+                  0: PIPE@242..243 "|" [] []
+                  1: SVELTE_NAME@243..250
+                    0: IDENT@243..250 "global" [] [Whitespace(" ")]
+              3: (empty)
+          1: SVELTE_OUT_DIRECTIVE@250..273
+            0: OUT_KW@250..253 "out" [] []
+            1: SVELTE_DIRECTIVE_VALUE@253..273
+              0: COLON@253..254 ":" [] []
+              1: SVELTE_MEMBER_PROPERTY@254..266
+                0: SVELTE_NAME@254..262
+                  0: IDENT@254..262 "renderer" [] []
+                1: DOT@262..263 "." [] []
+                2: SVELTE_NAME@263..266
+                  0: IDENT@263..266 "out" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@266..273
+                0: SVELTE_DIRECTIVE_MODIFIER@266..273
+                  0: PIPE@266..267 "|" [] []
+                  1: SVELTE_NAME@267..273
+                    0: IDENT@267..273 "global" [] []
+              3: (empty)
+        3: R_ANGLE@273..274 ">" [] []
+      1: HTML_ELEMENT_LIST@274..274
+      2: HTML_CLOSING_ELEMENT@274..280
+        0: L_ANGLE@274..275 "<" [] []
+        1: SLASH@275..276 "/" [] []
+        2: HTML_TAG_NAME@276..279
+          0: HTML_LITERAL@276..279 "div" [] []
+        3: R_ANGLE@279..280 ">" [] []
+    3: HTML_ELEMENT@280..409
+      0: HTML_OPENING_ELEMENT@280..397
+        0: L_ANGLE@280..347 "<" [Newline("\n"), Comments("<!-- transition with  ..."), Newline("\n")] []
+        1: HTML_TAG_NAME@347..351
+          0: HTML_LITERAL@347..351 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@351..396
+          0: SVELTE_TRANSITION_DIRECTIVE@351..396
+            0: TRANSITION_KW@351..361 "transition" [] []
+            1: SVELTE_DIRECTIVE_VALUE@361..396
+              0: COLON@361..362 ":" [] []
+              1: SVELTE_MEMBER_PROPERTY@362..370
+                0: SVELTE_NAME@362..365
+                  0: IDENT@362..365 "lib" [] []
+                1: DOT@365..366 "." [] []
+                2: SVELTE_NAME@366..370
+                  0: IDENT@366..370 "fade" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@370..376
+                0: SVELTE_DIRECTIVE_MODIFIER@370..376
+                  0: PIPE@370..371 "|" [] []
+                  1: SVELTE_NAME@371..376
+                    0: IDENT@371..376 "local" [] []
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@376..396
+                0: EQ@376..377 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@377..396
+                  0: L_CURLY@377..378 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@378..395
+                    0: HTML_LITERAL@378..395 "{ duration: 200 }" [] []
+                  2: R_CURLY@395..396 "}" [] []
+        3: R_ANGLE@396..397 ">" [] []
+      1: HTML_ELEMENT_LIST@397..403
+        0: HTML_CONTENT@397..403
+          0: HTML_LITERAL@397..403 "fading" [] []
+      2: HTML_CLOSING_ELEMENT@403..409
+        0: L_ANGLE@403..404 "<" [] []
+        1: SLASH@404..405 "/" [] []
+        2: HTML_TAG_NAME@405..408
+          0: HTML_LITERAL@405..408 "div" [] []
+        3: R_ANGLE@408..409 ">" [] []
+    4: HTML_ELEMENT@409..461
+      0: HTML_OPENING_ELEMENT@409..448
+        0: L_ANGLE@409..411 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@411..415
+          0: HTML_LITERAL@411..415 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@415..447
+          0: SVELTE_TRANSITION_DIRECTIVE@415..447
+            0: TRANSITION_KW@415..425 "transition" [] []
+            1: SVELTE_DIRECTIVE_VALUE@425..447
+              0: COLON@425..426 ":" [] []
+              1: SVELTE_MEMBER_PROPERTY@426..440
+                0: SVELTE_NAME@426..434
+                  0: IDENT@426..434 "renderer" [] []
+                1: DOT@434..435 "." [] []
+                2: SVELTE_NAME@435..440
+                  0: IDENT@435..440 "slide" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@440..447
+                0: SVELTE_DIRECTIVE_MODIFIER@440..447
+                  0: PIPE@440..441 "|" [] []
+                  1: SVELTE_NAME@441..447
+                    0: IDENT@441..447 "global" [] []
+              3: (empty)
+        3: R_ANGLE@447..448 ">" [] []
+      1: HTML_ELEMENT_LIST@448..455
+        0: HTML_CONTENT@448..455
+          0: HTML_LITERAL@448..455 "sliding" [] []
+      2: HTML_CLOSING_ELEMENT@455..461
+        0: L_ANGLE@455..456 "<" [] []
+        1: SLASH@456..457 "/" [] []
+        2: HTML_TAG_NAME@457..460
+          0: HTML_LITERAL@457..460 "div" [] []
+        3: R_ANGLE@460..461 ">" [] []
+    5: HTML_ELEMENT@461..525
+      0: HTML_OPENING_ELEMENT@461..515
+        0: L_ANGLE@461..495 "<" [Newline("\n"), Comments("<!-- deep member expr ..."), Newline("\n")] []
+        1: HTML_TAG_NAME@495..499
+          0: HTML_LITERAL@495..499 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@499..514
+          0: SVELTE_IN_DIRECTIVE@499..514
+            0: IN_KW@499..501 "in" [] []
+            1: SVELTE_DIRECTIVE_VALUE@501..514
+              0: COLON@501..502 ":" [] []
+              1: SVELTE_MEMBER_PROPERTY@502..507
+                0: SVELTE_MEMBER_PROPERTY@502..505
+                  0: SVELTE_NAME@502..503
+                    0: IDENT@502..503 "a" [] []
+                  1: DOT@503..504 "." [] []
+                  2: SVELTE_NAME@504..505
+                    0: IDENT@504..505 "b" [] []
+                1: DOT@505..506 "." [] []
+                2: SVELTE_NAME@506..507
+                  0: IDENT@506..507 "c" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@507..514
+                0: SVELTE_DIRECTIVE_MODIFIER@507..514
+                  0: PIPE@507..508 "|" [] []
+                  1: SVELTE_NAME@508..514
+                    0: IDENT@508..514 "global" [] []
+              3: (empty)
+        3: R_ANGLE@514..515 ">" [] []
+      1: HTML_ELEMENT_LIST@515..519
+        0: HTML_CONTENT@515..519
+          0: HTML_LITERAL@515..519 "deep" [] []
+      2: HTML_CLOSING_ELEMENT@519..525
+        0: L_ANGLE@519..520 "<" [] []
+        1: SLASH@520..521 "/" [] []
+        2: HTML_TAG_NAME@521..524
+          0: HTML_LITERAL@521..524 "div" [] []
+        3: R_ANGLE@524..525 ">" [] []
+  4: EOF@525..526 "" [Newline("\n")] []
+
+```

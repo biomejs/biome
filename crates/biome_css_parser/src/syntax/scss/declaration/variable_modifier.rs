@@ -32,7 +32,7 @@ pub(crate) fn parse_scss_variable_modifiers(p: &mut CssParser) {
 }
 
 #[inline]
-pub(crate) fn is_at_scss_variable_modifier_start(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_scss_variable_modifier(p: &mut CssParser) -> bool {
     p.at(T![!]) && !p.nth_at(1, T![important])
 }
 
@@ -47,7 +47,7 @@ pub(crate) fn is_at_scss_variable_modifier_start(p: &mut CssParser) -> bool {
 /// Docs: https://sass-lang.com/documentation/variables
 #[inline]
 fn parse_scss_variable_modifier(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_variable_modifier_start(p) {
+    if !is_at_scss_variable_modifier(p) {
         return Absent;
     }
 

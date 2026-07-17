@@ -47,3 +47,53 @@ fn lex_doc_end_close_previous_document() {
         NEWLINE:1,
     );
 }
+
+#[test]
+fn lex_directive_end() {
+    assert_lex!(
+        "---",
+        DIRECTIVE_END:3,
+    );
+}
+
+#[test]
+fn lex_directive_end_with_scalar() {
+    assert_lex!(
+        "--- foo",
+        DIRECTIVE_END:3,
+        WHITESPACE:1,
+        FLOW_START:0,
+        PLAIN_LITERAL:3,
+        FLOW_END:0,
+    );
+}
+
+#[test]
+fn lex_directive_end_with_comment() {
+    assert_lex!(
+        "--- # comment",
+        DIRECTIVE_END:3,
+        WHITESPACE:1,
+        COMMENT:9,
+    );
+}
+
+#[test]
+fn lex_dashdashdash_scalar() {
+    assert_lex!(
+        "---foo",
+        FLOW_START:0,
+        PLAIN_LITERAL:6,
+        FLOW_END:0,
+    );
+}
+
+#[test]
+fn lex_doc_end_then_directive_end() {
+    assert_lex!(
+        "...\n---",
+        DOC_END:3,
+        NEWLINE:1,
+        DIRECTIVE_END:3,
+    );
+}

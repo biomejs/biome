@@ -10,7 +10,6 @@ use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::{Dispatch::*, lookup_byte};
-use std::ops::Add;
 
 pub(crate) struct HtmlLexer<'src> {
     /// Source text
@@ -36,6 +35,7 @@ enum IdentifierContext {
     Vue,
     VueDirectiveArgument,
     Astro,
+    VueVForValue,
 }
 
 impl IdentifierContext {
@@ -70,12 +70,14 @@ impl<'src> HtmlLexer<'src> {
         self.after_frontmatter = value;
     }
 
-    /// Consume a token in the [HtmlLexContext::InsideTag] context.
+    /// Consume a token in the [HtmlLexContext::InsideTag] or [HtmlLexContext::InsideProcessingInstruction] context.
+    /// The `inside_processing_instruction` indicates that it's inside a processing instruction
     fn consume_token_inside_tag(&mut self, current: u8) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
 
         match dispatched {
             WHS => self.consume_newline_or_whitespaces(),
+            QST if self.at_pi_end() => self.consume_pi_end(),
             LSS => self.consume_l_angle(),
             MOR => self.consume_byte(T![>]),
             SLH => self.consume_byte(T![/]),
@@ -289,6 +291,51 @@ impl<'src> HtmlLexer<'src> {
         self.consume_token_inside_tag(current)
     }
 
+    fn consume_token_vue_v_for_value(&mut self, current: u8) -> HtmlSyntaxKind {
+        match lookup_byte(current) {
+            WHS => self.consume_newline_or_whitespaces(),
+            QOT if current == b'\'' => self.consume_byte(T!["'"]),
+            QOT => self.consume_byte(T!['"']),
+            PNO => self.consume_byte(T!['(']),
+            PNC => self.consume_byte(T![')']),
+            COM => self.consume_byte(T![,]),
+            COL => self.consume_byte(T![:]),
+            BEO => self.consume_byte(T!['{']),
+            BEC => self.consume_byte(T!['}']),
+            BTO => self.consume_byte(T!['[']),
+            BTC => self.consume_byte(T![']']),
+            PRD if self.is_at_three_dots() => self.consume_dot3(),
+            IDT if self.at_vue_v_for_in_keyword() => self.consume_vue_v_for_in_keyword(),
+            IDT if self.at_vue_v_for_of_keyword() => self.consume_vue_v_for_of_keyword(),
+            _ if is_at_start_identifier(current) => {
+                self.consume_identifier(current, IdentifierContext::VueVForValue)
+            }
+            // Handle numbers in v-for expressions (like "n in 10")
+            ZER | DIG => self.consume_vue_v_for_number(),
+            _ => self.consume_vue_v_for_literal(),
+        }
+    }
+
+    fn consume_token_vue_v_for_expression(
+        &mut self,
+        current: u8,
+        quote: HtmlSyntaxKind,
+    ) -> HtmlSyntaxKind {
+        if (quote == T!['"'] && current == b'"') || (quote == T!["'"] && current == b'\'') {
+            return self.consume_byte(quote);
+        }
+
+        while let Some(byte) = self.current_byte() {
+            if (quote == T!['"'] && byte == b'"') || (quote == T!["'"] && byte == b'\'') {
+                break;
+            }
+
+            self.advance_byte_or_char(byte);
+        }
+
+        HTML_LITERAL
+    }
+
     /// Consume a token in the [HtmlLexContext::Regular] context.
     fn consume_token(&mut self, current: u8) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
@@ -319,10 +366,9 @@ impl<'src> HtmlLexer<'src> {
             LSS => {
                 // if this truly is the start of a tag, it *must* be immediately followed by a tag name. Whitespace is not allowed.
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
-                if self
-                    .peek_byte()
-                    .is_some_and(|b| is_tag_start_byte(b) || b == b'!' || b == b'/' || b == b'>')
-                {
+                if self.peek_byte().is_some_and(|b| {
+                    is_tag_start_byte(b) || b == b'!' || b == b'/' || b == b'>' || b == b'?'
+                }) {
                     self.consume_l_angle()
                 } else {
                     self.push_diagnostic(
@@ -363,6 +409,40 @@ impl<'src> HtmlLexer<'src> {
             QOT => self.consume_string_literal(current),
             _ => self.consume_unquoted_string_literal(),
         }
+    }
+
+    fn consume_token_svelte_attribute_value(&mut self, current: u8) -> HtmlSyntaxKind {
+        match current {
+            b'"' => self.consume_byte(T!['"']),
+            b'\'' => self.consume_byte(T!["'"]),
+            _ => self.consume_token_attribute_value(current),
+        }
+    }
+
+    /// Consume a token in the [HtmlLexContext::SvelteTemplateChunk] context.
+    fn consume_token_svelte_template_chunk(&mut self, current: u8, quote: u8) -> HtmlSyntaxKind {
+        if current == b'{' {
+            self.consume_byte(T!['{'])
+        } else if current == quote {
+            self.advance(1);
+            if quote == b'"' { T!['"'] } else { T!["'"] }
+        } else {
+            self.consume_svelte_template_chunk(quote)
+        }
+    }
+
+    fn consume_svelte_template_chunk(&mut self, quote: u8) -> HtmlSyntaxKind {
+        while let Some(current) = self.current_byte() {
+            if current == b'{' || current == quote {
+                break;
+            }
+            match lookup_byte(current) {
+                UNI => self.advance_char_unchecked(),
+                _ => self.advance(1),
+            }
+        }
+
+        HTML_TEMPLATE_CHUNK
     }
 
     /// Consume a token in the [HtmlLexContext::Doctype] context.
@@ -453,6 +533,13 @@ impl<'src> HtmlLexer<'src> {
     /// Consumes tokens within a single text expression ('{...}') while tracking nested
     /// brackets until the matching closing bracket is found.
     fn consume_single_text_expression(&mut self) -> HtmlSyntaxKind {
+        // emit leading whitespace as trivia so it's not part of the expression literal
+        if let Some(current) = self.current_byte()
+            && lookup_byte(current) == WHS
+        {
+            return self.consume_newline_or_whitespaces();
+        }
+
         let mut brackets_stack = 0;
         while let Some(current) = self.current_byte() {
             match current {
@@ -489,6 +576,9 @@ impl<'src> HtmlLexer<'src> {
     ) -> HtmlSyntaxKind {
         let start_pos = self.position;
         let mut brackets_stack = 0;
+        // For `AsOrCommaSkipFirstAs`: tracks whether the first stop keyword has
+        // already been skipped (i.e., the TypeScript `as` in `as const`).
+        let mut first_stop_keyword_seen = false;
 
         let is_opening_paren = |byte: u8| byte == b'(' || byte == b'[' || byte == b'{';
         let is_closing_paren = |byte: u8| byte == b')' || byte == b']' || byte == b'}';
@@ -501,7 +591,7 @@ impl<'src> HtmlLexer<'src> {
                     brackets_stack += 1;
                     self.advance(1)
                 }
-                _ if is_closing_paren(current) && !kind.matches_punct(current) => {
+                _ if is_closing_paren(current) => {
                     if brackets_stack == 0 {
                         // Reached the closing brace
                         break;
@@ -523,16 +613,25 @@ impl<'src> HtmlLexer<'src> {
                     let checkpoint_pos = self.position;
                     let prev_byte = self.prev_byte();
                     if let Some(keyword_kind) = self.consume_language_identifier(current) {
-                        // Check if this keyword is in our stop list
                         let should_stop =
                             kind.matches_keyword(keyword_kind) && prev_byte == Some(b' ');
 
                         if should_stop {
-                            // Rewind - don't consume the keyword
-                            self.position = checkpoint_pos;
-                            break;
+                            if kind == RestrictedExpressionStopAt::AsOrCommaSkipFirstAs
+                                && !first_stop_keyword_seen
+                            {
+                                // First `as` belongs to a TypeScript `as const` assertion;
+                                // the parser determined this via lookahead. Skip it and
+                                // continue scanning for the Svelte binding `as`.
+                                first_stop_keyword_seen = true;
+                            } else {
+                                // Rewind — don't consume the keyword
+                                self.position = checkpoint_pos;
+                                break;
+                            }
                         }
-                        // Not a stop keyword, continue (position already advanced by consume_language_identifier)
+                        // Not a stop keyword (or skipped), continue
+                        // (position already advanced by consume_language_identifier)
                     } else {
                         // Not a keyword, advance one byte (position was reset by consume_language_identifier)
                         self.advance_byte_or_char(current);
@@ -663,6 +762,7 @@ impl<'src> HtmlLexer<'src> {
             WHS => self.consume_newline_or_whitespaces(),
             BEC => self.consume_byte(T!['}']),
             PRD if self.is_at_three_dots() => self.consume_dot3(),
+            PRD => self.consume_byte(T![.]),
             COM => self.consume_byte(T![,]),
             PNO => self.consume_byte(T!['(']),
             PNC => self.consume_byte(T![')']),
@@ -769,6 +869,8 @@ impl<'src> HtmlLexer<'src> {
             b"else" => ELSE_KW,
             b"each" => EACH_KW,
             b"as" => AS_KW,
+            b"in" => IN_KW,
+            b"of" => OF_KW,
             b"await" => AWAIT_KW,
             b"then" => THEN_KW,
             b"catch" => CATCH_KW,
@@ -776,7 +878,6 @@ impl<'src> HtmlLexer<'src> {
             b"bind" => BIND_KW,
             b"transition" => TRANSITION_KW,
             b"animate" => ANIMATE_KW,
-            b"in" => IN_KW,
             b"out" => OUT_KW,
             b"use" => USE_KW,
             b"style" => STYLE_KW,
@@ -857,6 +958,19 @@ impl<'src> HtmlLexer<'src> {
                         break;
                     }
                 }
+                IdentifierContext::VueVForValue => {
+                    // Stop at comma, parens, space for v-for bindings
+                    if is_vue_v_for_identifier_byte(byte) {
+                        if len < BUFFER_SIZE {
+                            buffer[len] = byte;
+                            len += 1;
+                        }
+
+                        self.advance(1)
+                    } else {
+                        break;
+                    }
+                }
             }
         }
 
@@ -894,8 +1008,8 @@ impl<'src> HtmlLexer<'src> {
         HTML_LITERAL
     }
 
-    /// Consumes a quoted string literal token, handling escaped characters and unicode sequences.
-    /// Returns ERROR_TOKEN if the string is not properly terminated or contains invalid escapes.
+    /// Consumes a quoted string literal token.
+    /// Returns ERROR_TOKEN if the string is not properly terminated.
     fn consume_string_literal(&mut self, quote: u8) -> HtmlSyntaxKind {
         self.assert_current_char_boundary();
         let start = self.text_position();
@@ -914,39 +1028,6 @@ impl<'src> HtmlLexer<'src> {
                         state => state,
                     };
                     break;
-                }
-                // '\t' etc
-                BSL => {
-                    self.advance(1);
-
-                    match self.current_byte() {
-                        Some(b'\n' | b'\r') => self.advance(1),
-
-                        // Handle escaped `'` but only if this is a end quote string.
-                        Some(b'\'') if quote == b'\'' => {
-                            self.advance(1);
-                        }
-
-                        // Handle escaped `'` but only if this is a end quote string.
-                        Some(b'"') if quote == b'"' => {
-                            self.advance(1);
-                        }
-
-                        Some(b'u') => match (self.consume_unicode_escape(), state) {
-                            (Ok(_), _) => {}
-                            (Err(err), LexStringState::InString) => {
-                                self.diagnostics.push(err);
-                                state = LexStringState::InvalidEscapeSequence;
-                            }
-                            (Err(_), _) => {}
-                        },
-
-                        Some(chr) => {
-                            self.advance_byte_or_char(chr);
-                        }
-
-                        None => {}
-                    }
                 }
                 // we don't need to handle IDT because it's always len 1.
                 UNI => self.advance_char_unchecked(),
@@ -968,7 +1049,6 @@ impl<'src> HtmlLexer<'src> {
 
                 ERROR_TOKEN
             }
-            LexStringState::InvalidEscapeSequence => ERROR_TOKEN,
         }
     }
 
@@ -1016,9 +1096,29 @@ impl<'src> HtmlLexer<'src> {
             self.consume_comment()
         } else if self.at_start_cdata() {
             self.consume_cdata_start()
+        } else if self.at_pi_start() {
+            self.consume_pi_start()
         } else {
             self.consume_byte(T![<])
         }
+    }
+
+    /// Consumes `<?`
+    fn consume_pi_start(&mut self) -> HtmlSyntaxKind {
+        self.assert_byte(b'<');
+
+        self.advance(2);
+
+        T![<?]
+    }
+
+    /// Consumes `<?`
+    fn consume_pi_end(&mut self) -> HtmlSyntaxKind {
+        self.assert_byte(b'?');
+
+        self.advance(2);
+
+        T![?>]
     }
 
     /// Consumes an opening double text expression '{{' token used for interpolation.
@@ -1122,6 +1222,16 @@ impl<'src> HtmlLexer<'src> {
     }
 
     #[inline(always)]
+    fn at_pi_start(&self) -> bool {
+        self.current_byte() == Some(b'<') && self.byte_at(1) == Some(b'?')
+    }
+
+    #[inline(always)]
+    fn at_pi_end(&self) -> bool {
+        self.current_byte() == Some(b'?') && self.byte_at(1) == Some(b'>')
+    }
+
+    #[inline(always)]
     fn is_at_three_dots(&self) -> bool {
         self.current_byte() == Some(b'.')
             && self.byte_at(1) == Some(b'.')
@@ -1131,6 +1241,59 @@ impl<'src> HtmlLexer<'src> {
     #[inline(always)]
     fn at_closing_double_text_expression(&self) -> bool {
         self.current_byte() == Some(b'}') && self.byte_at(1) == Some(b'}')
+    }
+
+    #[inline(always)]
+    fn at_vue_v_for_in_keyword(&self) -> bool {
+        self.current_byte() == Some(b'i')
+            && self.byte_at(1) == Some(b'n')
+            && !self.byte_at(2).is_some_and(is_at_continue_identifier)
+    }
+
+    fn consume_vue_v_for_in_keyword(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.at_vue_v_for_in_keyword());
+        self.advance(2);
+        T![in]
+    }
+
+    #[inline(always)]
+    fn at_vue_v_for_of_keyword(&self) -> bool {
+        self.current_byte() == Some(b'o')
+            && self.byte_at(1) == Some(b'f')
+            && !self.byte_at(2).is_some_and(is_at_continue_identifier)
+    }
+
+    fn consume_vue_v_for_of_keyword(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.at_vue_v_for_of_keyword());
+        self.advance(2);
+        T![of]
+    }
+
+    /// Consumes a number in v-for expressions (like "n in 10")
+    fn consume_vue_v_for_number(&mut self) -> HtmlSyntaxKind {
+        while let Some(byte) = self.current_byte() {
+            match lookup_byte(byte) {
+                ZER | DIG => self.advance(1),
+                _ => break,
+            }
+        }
+        HTML_LITERAL
+    }
+
+    fn consume_vue_v_for_literal(&mut self) -> HtmlSyntaxKind {
+        while let Some(byte) = self.current_byte() {
+            let dispatched = lookup_byte(byte);
+            if matches!(
+                dispatched,
+                WHS | QOT | PNO | PNC | COM | BTO | BTC | BEO | BEC | IDT | ZER | DIG
+            ) {
+                break;
+            }
+
+            self.advance_byte_or_char(byte);
+        }
+
+        HTML_LITERAL
     }
 
     /// Consumes the opening CDATA section marker '<![CDATA[' token.
@@ -1147,54 +1310,6 @@ impl<'src> HtmlLexer<'src> {
 
         self.advance(3);
         T!["]]>"]
-    }
-
-    /// Lexes a `\u0000` escape sequence. Assumes that the lexer is positioned at the `u` token.
-    ///
-    /// A unicode escape sequence must consist of 4 hex characters.
-    fn consume_unicode_escape(&mut self) -> Result<(), ParseDiagnostic> {
-        self.assert_byte(b'u');
-        self.assert_current_char_boundary();
-
-        let start = self.text_position();
-
-        let start = start
-            // Subtract 1 to get position of `\`
-            .checked_sub(TextSize::from(1))
-            .unwrap_or(start);
-
-        self.advance(1); // Advance over `u`
-
-        for _ in 0..4 {
-            match self.current_byte() {
-                Some(byte) if byte.is_ascii_hexdigit() => self.advance(1),
-                Some(_) => {
-                    let char = self.current_char_unchecked();
-                    // Reached a non-hex digit which is invalid
-                    return Err(ParseDiagnostic::new(
-
-                        "Invalid unicode sequence",
-                        start..self.text_position(),
-                    )
-                        .with_detail(self.text_position()..self.text_position().add(char.text_len()), "Non hexadecimal number")
-                        .with_hint("A unicode escape sequence must consist of 4 hexadecimal numbers: `\\uXXXX`, e.g. `\\u002F' for '/'."));
-                }
-                None => {
-                    // Reached the end of the file before processing 4 hex digits
-                    return Err(ParseDiagnostic::new(
-                        "Unicode escape sequence with two few hexadecimal numbers.",
-                        start..self.text_position(),
-                    )
-                        .with_detail(
-                            self.text_position()..self.text_position(),
-                            "reached the end of the file",
-                        )
-                        .with_hint("A unicode escape sequence must consist of 4 hexadecimal numbers: `\\uXXXX`, e.g. `\\u002F' for '/'."));
-                }
-            }
-        }
-
-        Ok(())
     }
 
     /// Consume a single block of HTML text outside of tags.
@@ -1353,7 +1468,17 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     HtmlLexContext::VueDirectiveArgument => {
                         self.consume_token_vue_directive_argument()
                     }
+                    HtmlLexContext::VueVForValue => self.consume_token_vue_v_for_value(current),
+                    HtmlLexContext::VueVForExpression(quote) => {
+                        self.consume_token_vue_v_for_expression(current, quote)
+                    }
                     HtmlLexContext::AttributeValue => self.consume_token_attribute_value(current),
+                    HtmlLexContext::SvelteAttributeValue => {
+                        self.consume_token_svelte_attribute_value(current)
+                    }
+                    HtmlLexContext::SvelteTemplateChunk { quote } => {
+                        self.consume_token_svelte_template_chunk(current, quote)
+                    }
                     HtmlLexContext::Doctype => self.consume_token_doctype(current),
                     HtmlLexContext::EmbeddedLanguage(lang) => {
                         self.consume_token_embedded_language(current, lang, context)
@@ -1453,6 +1578,7 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
                 HtmlReLexContext::InsideTag => self.consume_token_inside_tag(current),
                 HtmlReLexContext::InsideTagAstro => self.consume_token_inside_tag_astro(current),
                 HtmlReLexContext::InsideTagSvelte => self.consume_token_inside_tag_svelte(current),
+                HtmlReLexContext::SvelteAttributeString => self.consume_string_literal(current),
             },
             None => EOF,
         };
@@ -1521,6 +1647,12 @@ fn is_linebreak(chr: char) -> bool {
     matches!(chr, '\n' | '\r' | '\u{2028}' | '\u{2029}')
 }
 
+/// For v-for value identifiers: alphanumeric and underscore only
+/// Stops at comma, parens, space, quotes
+fn is_vue_v_for_identifier_byte(byte: u8) -> bool {
+    byte.is_ascii_alphanumeric() || byte == b'_'
+}
+
 /// Identifiers can contain letters, numbers and `_`
 fn is_at_continue_identifier(byte: u8) -> bool {
     byte.is_ascii_alphanumeric() || byte == b'_'
@@ -1533,9 +1665,6 @@ fn is_at_start_identifier(byte: u8) -> bool {
 
 #[derive(Copy, Clone, Debug)]
 enum LexStringState {
-    /// String that contains an invalid escape sequence
-    InvalidEscapeSequence,
-
     /// Between the opening `"` and closing `"` quotes.
     InString,
 
@@ -1674,15 +1803,6 @@ impl QuotesSeen {
             return;
         }
 
-        // Handle escape sequences: a `\` that is not itself escaped toggles the
-        // escape flag for the next character.
-        if byte == b'\\' {
-            self.escaped = !self.escaped;
-            self.prev_byte = Some(byte);
-            self.prev_non_ws_byte = Some(byte);
-            return;
-        }
-
         // If the current byte is escaped, it cannot act as a string delimiter
         // or comment opener.
         let was_escaped = self.escaped;
@@ -1744,6 +1864,15 @@ impl QuotesSeen {
             }
             // It was division; update prev_non_ws_byte to `/` now.
             self.prev_non_ws_byte = Some(b'/');
+        }
+
+        // Handle escape sequences: a `\` that is not itself escaped toggles the
+        // escape flag for the next character.
+        if byte == b'\\' {
+            self.escaped = !self.escaped;
+            self.prev_byte = Some(byte);
+            self.prev_non_ws_byte = Some(byte);
+            return;
         }
 
         // Track string delimiters.
@@ -2099,6 +2228,21 @@ const f = "something" "#;
         assert!(
             quotes_seen.is_empty(),
             "regex literal containing dashes must not confuse the tracker"
+        );
+    }
+
+    /// A regex literal containing an escaped character followed by a quantifier
+    /// must close cleanly. This mirrors `/\d{4}/`, which previously regressed
+    /// in Astro frontmatter scanning.
+    #[test]
+    fn issue_9187_regex_with_escape_and_quantifier() {
+        let source = r"const test = /\d{4}/
+";
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            quotes_seen.is_empty(),
+            "regex literal containing an escape and quantifier must close cleanly"
         );
     }
 }

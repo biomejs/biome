@@ -3,9 +3,11 @@
 
 use super::{JsLexContext, JsLexer, JsReLexContext, TextRange, TextSize};
 use crate::span::Span;
+use crate::{JsParserOptions, parse};
 use biome_js_syntax::JsSyntaxKind::{self, EOF, ERROR_TOKEN};
 use biome_js_syntax::JsSyntaxKind::{JS_NUMBER_LITERAL, NEWLINE, WHITESPACE};
 use biome_js_syntax::T;
+use biome_languages::JsFileSource;
 use biome_parser::lexer::{BufferedLexer, Lexer, ReLexer};
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
@@ -335,6 +337,48 @@ fn string_unicode_escape_surrogates() {
         r#""\uD83D""#,
         JS_STRING_LITERAL:8
     }
+}
+
+#[test]
+fn string_unicode_codepoint_escape_surrogates() {
+    assert_lex! {
+        r#""\u{daff}\u{dfff}""#,
+        JS_STRING_LITERAL:18
+    }
+
+    assert_lex! {
+        r#""\u{D83D}\u{DE0A}""#,
+        JS_STRING_LITERAL:18
+    }
+}
+
+#[test]
+fn parser_accepts_unicode_codepoint_escape_surrogates_in_strings() {
+    let parsed = parse(
+        "const a = \"\\u{daff}\\u{dfff}\";\nconst b = \"\\u{D83D}\\u{DE0A}\";\n",
+        JsFileSource::js_module(),
+        JsParserOptions::default(),
+    );
+
+    assert!(
+        !parsed.has_errors(),
+        "expected no parse errors, found: {:#?}",
+        parsed.diagnostics()
+    );
+}
+
+#[test]
+fn identifier_unicode_codepoint_escape_surrogates() {
+    let parsed = parse(
+        "const \\u{D83D} = 1;\nconst \\u{DC00} = 2;\n",
+        JsFileSource::js_module(),
+        JsParserOptions::default(),
+    );
+
+    assert!(
+        parsed.has_errors(),
+        "expected parse errors for surrogate escapes in identifiers, found none"
+    );
 }
 
 #[test]

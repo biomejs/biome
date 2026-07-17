@@ -4,8 +4,9 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsFunctionBody, JsArrowFunctionExpression, JsAssignmentExpression, JsExpressionStatement,
-    JsFileSource, JsForStatement, JsParenthesizedExpression, JsSequenceExpression,
+    JsForStatement, JsParenthesizedExpression, JsSequenceExpression,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::no_assign_in_expressions::NoAssignInExpressionsOptions;
 
@@ -69,6 +70,12 @@ impl Rule for NoAssignInExpressions {
         // These are idiomatic Vue patterns, not accidental assignments
         let file_source = ctx.source_type::<JsFileSource>();
         if file_source.is_vue_event_handler() {
+            return None;
+        }
+
+        // Skip assignments in Svelte const blocks ({@const name = value})
+        // These are declaration statements, not accidental assignments in expressions
+        if file_source.is_svelte_const_block() {
             return None;
         }
 

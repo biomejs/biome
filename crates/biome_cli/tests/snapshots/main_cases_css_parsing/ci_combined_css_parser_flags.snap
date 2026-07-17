@@ -5,8 +5,10 @@ expression: redactor(content)
 ## `file.module.css`
 
 ```css
-@import 'tailwindcss';
-.className { composes: other from './other.module.css'; }
+@import "tailwindcss";
+.className {
+  composes: other from "./other.module.css";
+}
 ```
 
 # Termination Message

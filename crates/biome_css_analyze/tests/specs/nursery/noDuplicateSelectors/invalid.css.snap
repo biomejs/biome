@@ -89,6 +89,12 @@ h3 {
   .content {}
 }
 
+/* 16. Duplicate inside the same @scope block */
+@scope (.theme-dark) {
+  .card {}
+  .card {}
+}
+
 ```
 
 # Diagnostics
@@ -491,6 +497,34 @@ invalid.css:83:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^
     82 │ #main {
     83 │   .content {}
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:89:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list ".card".
+  
+    87 │ @scope (.theme-dark) {
+    88 │   .card {}
+  > 89 │   .card {}
+       │   ^^^^^^^^
+    90 │ }
+    91 │ 
+  
+  i It was first defined here.
+  
+    86 │ /* 16. Duplicate inside the same @scope block */
+    87 │ @scope (.theme-dark) {
+  > 88 │   .card {}
+       │   ^^^^^^^^
+    89 │   .card {}
+    90 │ }
   
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   

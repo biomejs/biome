@@ -51,4 +51,29 @@ expression: valid.css
 }
 .other .child {}
 
+/* 9. Same selector inside @scope is NOT a duplicate of the one outside:
+   `@scope` defines its own at-rule context. */
+.Example {
+  padding: 0;
+}
+@scope (.theme-dark) {
+  .Example {
+    color: white;
+  }
+}
+
+/* 10. Same selector in different @scope blocks: each block is its own context. */
+@scope (.theme-dark) {
+  .card {}
+}
+@scope (.theme-light) {
+  .card {}
+}
+
+/* 11. @scope with `to`: inner selector is in its own context. */
+.note {}
+@scope (.doc) to (.footnote) {
+  .note {}
+}
+
 ```

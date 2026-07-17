@@ -19,6 +19,11 @@ info: suppressions/global_suppression.html
 
 <html>      </html>
 
+<!-- biome-ignore-all format: intentional -->
+<div>   code   </div>
+
+<!-- Biome format should keep this comment -->
+
 ```
 
 
@@ -37,4 +42,10 @@ info: suppressions/global_suppression.html
 
 
 <html>      </html>
+
+<!-- biome-ignore-all format: intentional -->
+<div>   code   </div>
+
+<!-- Biome format should keep this comment -->
+
 ```

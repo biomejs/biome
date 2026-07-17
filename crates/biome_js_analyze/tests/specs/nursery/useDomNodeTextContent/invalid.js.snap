@@ -1,0 +1,306 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const text = node.innerText;
+const computed = node["innerText"];
+const maybe = node?.innerText;
+const maybeComputed = node?.["innerText"];
+
+node.innerText = "Biome";
+node["innerText"] += "!";
+
+const {innerText} = node;
+const {innerText = ""} = node;
+const {innerText: textValue} = node;
+
+function readNode({innerText}) {
+    return innerText;
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:2:19 lint/nursery/useDomNodeTextContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i innerText is not recommended for reading DOM node text.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const text = node.innerText;
+      │                   ^^^^^^^^^
+    3 │ const computed = node["innerText"];
+    4 │ const maybe = node?.innerText;
+  
+  i innerText depends on rendered layout and CSS, so it can be slower and produce different results from the DOM tree's text content.
+  
+  i Use textContent when you want the node's text without rendered-text behavior.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use textContent instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - const·text·=·node.innerText;
+        2 │ + const·text·=·node.textContent;
+     3  3 │   const computed = node["innerText"];
+     4  4 │   const maybe = node?.innerText;
+  
+
+```
+
+```
+invalid.js:3:23 lint/nursery/useDomNodeTextContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i innerText is not recommended for reading DOM node text.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const text = node.innerText;
+  > 3 │ const computed = node["innerText"];
+      │                       ^^^^^^^^^^^
+    4 │ const maybe = node?.innerText;
+    5 │ const maybeComputed = node?.["innerText"];
+  
+  i innerText depends on rendered layout and CSS, so it can be slower and produce different results from the DOM tree's text content.
+  
+  i Use textContent when you want the node's text without rendered-text behavior.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use textContent instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   const text = node.innerText;
+     3    │ - const·computed·=·node["innerText"];
+        3 │ + const·computed·=·node["textContent"];
+     4  4 │   const maybe = node?.innerText;
+     5  5 │   const maybeComputed = node?.["innerText"];
+  
+
+```
+
+```
+invalid.js:4:21 lint/nursery/useDomNodeTextContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i innerText is not recommended for reading DOM node text.
+  
+    2 │ const text = node.innerText;
+    3 │ const computed = node["innerText"];
+  > 4 │ const maybe = node?.innerText;
+      │                     ^^^^^^^^^
+    5 │ const maybeComputed = node?.["innerText"];
+    6 │ 
+  
+  i innerText depends on rendered layout and CSS, so it can be slower and produce different results from the DOM tree's text content.
+  
+  i Use textContent when you want the node's text without rendered-text behavior.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use textContent instead.
+  
+     2  2 │   const text = node.innerText;
+     3  3 │   const computed = node["innerText"];
+     4    │ - const·maybe·=·node?.innerText;
+        4 │ + const·maybe·=·node?.textContent;
+     5  5 │   const maybeComputed = node?.["innerText"];
+     6  6 │   
+  
+
+```
+
+```
+invalid.js:5:30 lint/nursery/useDomNodeTextContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i innerText is not recommended for reading DOM node text.
+  
+    3 │ const computed = node["innerText"];
+    4 │ const maybe = node?.innerText;
+  > 5 │ const maybeComputed = node?.["innerText"];
+      │                              ^^^^^^^^^^^
+    6 │ 
+    7 │ node.innerText = "Biome";
+  
+  i innerText depends on rendered layout and CSS, so it can be slower and produce different results from the DOM tree's text content.
+  
+  i Use textContent when you want the node's text without rendered-text behavior.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use textContent instead.
+  
+     3  3 │   const computed = node["innerText"];
+     4  4 │   const maybe = node?.innerText;
+     5    │ - const·maybeComputed·=·node?.["innerText"];
+        5 │ + const·maybeComputed·=·node?.["textContent"];
+     6  6 │   
+     7  7 │   node.innerText = "Biome";
+  
+
+```
+
+```
+invalid.js:7:6 lint/nursery/useDomNodeTextContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i innerText is not recommended for reading DOM node text.
+  
+    5 │ const maybeComputed = node?.["innerText"];
+    6 │ 
+  > 7 │ node.innerText = "Biome";
+      │      ^^^^^^^^^
+    8 │ node["innerText"] += "!";
+    9 │ 
+  
+  i innerText depends on rendered layout and CSS, so it can be slower and produce different results from the DOM tree's text content.
+  
+  i Use textContent when you want the node's text without rendered-text behavior.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use textContent instead.
+  
+     5  5 │   const maybeComputed = node?.["innerText"];
+     6  6 │   
+     7    │ - node.innerText·=·"Biome";
+        7 │ + node.textContent·=·"Biome";
+     8  8 │   node["innerText"] += "!";
+     9  9 │   
+  
+
+```
+
+```
+invalid.js:8:6 lint/nursery/useDomNodeTextContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i innerText is not recommended for reading DOM node text.
+  
+     7 │ node.innerText = "Biome";
+   > 8 │ node["innerText"] += "!";
+       │      ^^^^^^^^^^^
+     9 │ 
+    10 │ const {innerText} = node;
+  
+  i innerText depends on rendered layout and CSS, so it can be slower and produce different results from the DOM tree's text content.
+  
+  i Use textContent when you want the node's text without rendered-text behavior.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use textContent instead.
+  
+     6  6 │   
+     7  7 │   node.innerText = "Biome";
+     8    │ - node["innerText"]·+=·"!";
+        8 │ + node["textContent"]·+=·"!";
+     9  9 │   
+    10 10 │   const {innerText} = node;
+  
+
+```
+
+```
+invalid.js:10:8 lint/nursery/useDomNodeTextContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i innerText is not recommended for reading DOM node text.
+  
+     8 │ node["innerText"] += "!";
+     9 │ 
+  > 10 │ const {innerText} = node;
+       │        ^^^^^^^^^
+    11 │ const {innerText = ""} = node;
+    12 │ const {innerText: textValue} = node;
+  
+  i innerText depends on rendered layout and CSS, so it can be slower and produce different results from the DOM tree's text content.
+  
+  i Use textContent when you want the node's text without rendered-text behavior.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use textContent instead.
+  
+    10 │ const·{textContent:·innerText}·=·node;
+       │        +++++++++++++                  
+
+```
+
+```
+invalid.js:11:8 lint/nursery/useDomNodeTextContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i innerText is not recommended for reading DOM node text.
+  
+    10 │ const {innerText} = node;
+  > 11 │ const {innerText = ""} = node;
+       │        ^^^^^^^^^
+    12 │ const {innerText: textValue} = node;
+    13 │ 
+  
+  i innerText depends on rendered layout and CSS, so it can be slower and produce different results from the DOM tree's text content.
+  
+  i Use textContent when you want the node's text without rendered-text behavior.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use textContent instead.
+  
+    11 │ const·{textContent:·innerText·=·""}·=·node;
+       │        +++++++++++++                       
+
+```
+
+```
+invalid.js:12:8 lint/nursery/useDomNodeTextContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i innerText is not recommended for reading DOM node text.
+  
+    10 │ const {innerText} = node;
+    11 │ const {innerText = ""} = node;
+  > 12 │ const {innerText: textValue} = node;
+       │        ^^^^^^^^^
+    13 │ 
+    14 │ function readNode({innerText}) {
+  
+  i innerText depends on rendered layout and CSS, so it can be slower and produce different results from the DOM tree's text content.
+  
+  i Use textContent when you want the node's text without rendered-text behavior.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use textContent instead.
+  
+    10 10 │   const {innerText} = node;
+    11 11 │   const {innerText = ""} = node;
+    12    │ - const·{innerText:·textValue}·=·node;
+       12 │ + const·{textContent:·textValue}·=·node;
+    13 13 │   
+    14 14 │   function readNode({innerText}) {
+  
+
+```
+
+```
+invalid.js:14:20 lint/nursery/useDomNodeTextContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i innerText is not recommended for reading DOM node text.
+  
+    12 │ const {innerText: textValue} = node;
+    13 │ 
+  > 14 │ function readNode({innerText}) {
+       │                    ^^^^^^^^^
+    15 │     return innerText;
+    16 │ }
+  
+  i innerText depends on rendered layout and CSS, so it can be slower and produce different results from the DOM tree's text content.
+  
+  i Use textContent when you want the node's text without rendered-text behavior.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use textContent instead.
+  
+    14 │ function·readNode({textContent:·innerText})·{
+       │                    +++++++++++++             
+
+```

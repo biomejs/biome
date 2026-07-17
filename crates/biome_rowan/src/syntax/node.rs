@@ -904,6 +904,10 @@ impl EmbeddedSendNode {
             offset: self.offset,
         }
     }
+
+    pub fn offset(&self) -> TextSize {
+        self.offset
+    }
 }
 
 #[derive(Debug, Clone)]

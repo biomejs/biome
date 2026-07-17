@@ -1,0 +1,1 @@
+w-[12px] w-[-12px] w-[1.5rem] w-[.5rem] w-[100%] w-[12foo] bg-[#ff0000] shadow-[0px_2px_4px] bg-[rgb(0_0_0/0.5)] w-[calc(100%_-_1rem)] bg-[url(/img/mountains.jpg)] [width:12px] [margin:calc(100%_-_1rem)] [&>*]:mt-2

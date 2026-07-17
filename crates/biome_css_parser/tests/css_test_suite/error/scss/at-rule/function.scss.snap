@@ -34,7 +34,7 @@ CssRoot {
                     l_paren_token: L_PAREN@10..11 "(" [] [],
                     items: ScssParameterItemList [
                         ScssParameter {
-                            name: ScssIdentifier {
+                            name: ScssVariable {
                                 dollar_token: DOLLAR@11..12 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@12..17 "value" [] [],
@@ -55,7 +55,7 @@ CssRoot {
                                 return_token: RETURN_KW@24..31 "return" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        ScssIdentifier {
+                                        ScssVariable {
                                             dollar_token: DOLLAR@31..32 "$" [] [],
                                             name: CssIdentifier {
                                                 value_token: IDENT@32..37 "value" [] [],
@@ -82,7 +82,7 @@ CssRoot {
                     l_paren_token: L_PAREN@58..59 "(" [] [],
                     items: ScssParameterItemList [
                         ScssParameter {
-                            name: ScssIdentifier {
+                            name: ScssVariable {
                                 dollar_token: DOLLAR@59..60 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@60..66 "value" [] [Whitespace(" ")],
@@ -109,7 +109,7 @@ CssRoot {
                                 return_token: RETURN_KW@74..81 "return" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        ScssIdentifier {
+                                        ScssVariable {
                                             dollar_token: DOLLAR@81..82 "$" [] [],
                                             name: CssIdentifier {
                                                 value_token: IDENT@82..87 "value" [] [],
@@ -137,7 +137,7 @@ CssRoot {
                         l_paren_token: L_PAREN@108..109 "(" [] [],
                         items: ScssParameterItemList [
                             ScssParameter {
-                                name: ScssIdentifier {
+                                name: ScssVariable {
                                     dollar_token: DOLLAR@109..110 "$" [] [],
                                     name: CssIdentifier {
                                         value_token: IDENT@110..115 "value" [] [],
@@ -184,7 +184,7 @@ CssRoot {
           0: L_PAREN@10..11 "(" [] []
           1: SCSS_PARAMETER_ITEM_LIST@11..17
             0: SCSS_PARAMETER@11..17
-              0: SCSS_IDENTIFIER@11..17
+              0: SCSS_VARIABLE@11..17
                 0: DOLLAR@11..12 "$" [] []
                 1: CSS_IDENTIFIER@12..17
                   0: IDENT@12..17 "value" [] []
@@ -200,7 +200,7 @@ CssRoot {
                 0: RETURN_KW@24..31 "return" [] [Whitespace(" ")]
                 1: SCSS_EXPRESSION@31..37
                   0: SCSS_EXPRESSION_ITEM_LIST@31..37
-                    0: SCSS_IDENTIFIER@31..37
+                    0: SCSS_VARIABLE@31..37
                       0: DOLLAR@31..32 "$" [] []
                       1: CSS_IDENTIFIER@32..37
                         0: IDENT@32..37 "value" [] []
@@ -216,7 +216,7 @@ CssRoot {
           0: L_PAREN@58..59 "(" [] []
           1: SCSS_PARAMETER_ITEM_LIST@59..67
             0: SCSS_PARAMETER@59..66
-              0: SCSS_IDENTIFIER@59..66
+              0: SCSS_VARIABLE@59..66
                 0: DOLLAR@59..60 "$" [] []
                 1: CSS_IDENTIFIER@60..66
                   0: IDENT@60..66 "value" [] [Whitespace(" ")]
@@ -235,7 +235,7 @@ CssRoot {
                 0: RETURN_KW@74..81 "return" [] [Whitespace(" ")]
                 1: SCSS_EXPRESSION@81..87
                   0: SCSS_EXPRESSION_ITEM_LIST@81..87
-                    0: SCSS_IDENTIFIER@81..87
+                    0: SCSS_VARIABLE@81..87
                       0: DOLLAR@81..82 "$" [] []
                       1: CSS_IDENTIFIER@82..87
                         0: IDENT@82..87 "value" [] []
@@ -251,7 +251,7 @@ CssRoot {
           0: L_PAREN@108..109 "(" [] []
           1: SCSS_PARAMETER_ITEM_LIST@109..118
             0: SCSS_PARAMETER@109..118
-              0: SCSS_IDENTIFIER@109..115
+              0: SCSS_VARIABLE@109..115
                 0: DOLLAR@109..110 "$" [] []
                 1: CSS_IDENTIFIER@110..115
                   0: IDENT@110..115 "value" [] []

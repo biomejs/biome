@@ -1,0 +1,16 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<!doctype html>
+<html>
+<body>
+	<!-- No <style> blocks and no linked stylesheets: the rule must stay silent. -->
+	<div class="anything">Content</div>
+</body>
+</html>
+
+```

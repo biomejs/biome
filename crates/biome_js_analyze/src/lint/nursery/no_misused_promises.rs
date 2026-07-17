@@ -216,15 +216,12 @@ fn find_misused_promise_expression(
 ) -> Option<NoMisusedPromisesState> {
     let parent = expression.syntax().parent()?;
     let state = match parent.kind() {
-        JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => {
+        JsSyntaxKind::JS_CONDITIONAL_EXPRESSION
             if JsConditionalExpression::cast(parent)
                 .is_some_and(|conditional| conditional.test().is_ok_and(|test| test == *expression))
-            {
+            => {
                 NoMisusedPromisesState::Conditional
-            } else {
-                return None; // Promise occurred in the branches.
             }
-        }
         JsSyntaxKind::JS_DO_WHILE_STATEMENT => NoMisusedPromisesState::Conditional,
         JsSyntaxKind::JS_IF_STATEMENT => NoMisusedPromisesState::Conditional,
         JsSyntaxKind::JS_SPREAD => NoMisusedPromisesState::Spread,

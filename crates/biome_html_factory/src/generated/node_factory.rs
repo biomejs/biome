@@ -381,6 +381,22 @@ pub fn html_opening_element(
         ],
     ))
 }
+pub fn html_processing_instruction(
+    start_token: SyntaxToken,
+    target: AnyHtmlTagName,
+    attributes: HtmlAttributeList,
+    end_token: SyntaxToken,
+) -> HtmlProcessingInstruction {
+    HtmlProcessingInstruction::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_PROCESSING_INSTRUCTION,
+        [
+            Some(SyntaxElement::Token(start_token)),
+            Some(SyntaxElement::Node(target.into_syntax())),
+            Some(SyntaxElement::Node(attributes.into_syntax())),
+            Some(SyntaxElement::Token(end_token)),
+        ],
+    ))
+}
 pub fn html_root(html: HtmlElementList, eof_token: SyntaxToken) -> HtmlRootBuilder {
     HtmlRootBuilder {
         html,
@@ -557,32 +573,68 @@ pub fn svelte_await_block(
 pub fn svelte_await_catch_block(
     sv_curly_colon_token: SyntaxToken,
     catch_token: SyntaxToken,
-    name: HtmlTextExpression,
     r_curly_token: SyntaxToken,
     children: HtmlElementList,
-) -> SvelteAwaitCatchBlock {
-    SvelteAwaitCatchBlock::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::SVELTE_AWAIT_CATCH_BLOCK,
-        [
-            Some(SyntaxElement::Token(sv_curly_colon_token)),
-            Some(SyntaxElement::Token(catch_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Token(r_curly_token)),
-            Some(SyntaxElement::Node(children.into_syntax())),
-        ],
-    ))
+) -> SvelteAwaitCatchBlockBuilder {
+    SvelteAwaitCatchBlockBuilder {
+        sv_curly_colon_token,
+        catch_token,
+        r_curly_token,
+        children,
+        name: None,
+    }
 }
-pub fn svelte_await_catch_clause(
+pub struct SvelteAwaitCatchBlockBuilder {
+    sv_curly_colon_token: SyntaxToken,
     catch_token: SyntaxToken,
-    name: HtmlTextExpression,
-) -> SvelteAwaitCatchClause {
-    SvelteAwaitCatchClause::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::SVELTE_AWAIT_CATCH_CLAUSE,
-        [
-            Some(SyntaxElement::Token(catch_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-        ],
-    ))
+    r_curly_token: SyntaxToken,
+    children: HtmlElementList,
+    name: Option<HtmlTextExpression>,
+}
+impl SvelteAwaitCatchBlockBuilder {
+    pub fn with_name(mut self, name: HtmlTextExpression) -> Self {
+        self.name = Some(name);
+        self
+    }
+    pub fn build(self) -> SvelteAwaitCatchBlock {
+        SvelteAwaitCatchBlock::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::SVELTE_AWAIT_CATCH_BLOCK,
+            [
+                Some(SyntaxElement::Token(self.sv_curly_colon_token)),
+                Some(SyntaxElement::Token(self.catch_token)),
+                self.name
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_curly_token)),
+                Some(SyntaxElement::Node(self.children.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn svelte_await_catch_clause(catch_token: SyntaxToken) -> SvelteAwaitCatchClauseBuilder {
+    SvelteAwaitCatchClauseBuilder {
+        catch_token,
+        name: None,
+    }
+}
+pub struct SvelteAwaitCatchClauseBuilder {
+    catch_token: SyntaxToken,
+    name: Option<HtmlTextExpression>,
+}
+impl SvelteAwaitCatchClauseBuilder {
+    pub fn with_name(mut self, name: HtmlTextExpression) -> Self {
+        self.name = Some(name);
+        self
+    }
+    pub fn build(self) -> SvelteAwaitCatchClause {
+        SvelteAwaitCatchClause::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::SVELTE_AWAIT_CATCH_CLAUSE,
+            [
+                Some(SyntaxElement::Token(self.catch_token)),
+                self.name
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn svelte_await_closing_block(
     sv_curly_slash_token: SyntaxToken,
@@ -653,32 +705,68 @@ impl SvelteAwaitOpeningBlockBuilder {
 pub fn svelte_await_then_block(
     sv_curly_colon_token: SyntaxToken,
     then_token: SyntaxToken,
-    name: HtmlTextExpression,
     r_curly_token: SyntaxToken,
     children: HtmlElementList,
-) -> SvelteAwaitThenBlock {
-    SvelteAwaitThenBlock::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::SVELTE_AWAIT_THEN_BLOCK,
-        [
-            Some(SyntaxElement::Token(sv_curly_colon_token)),
-            Some(SyntaxElement::Token(then_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Token(r_curly_token)),
-            Some(SyntaxElement::Node(children.into_syntax())),
-        ],
-    ))
+) -> SvelteAwaitThenBlockBuilder {
+    SvelteAwaitThenBlockBuilder {
+        sv_curly_colon_token,
+        then_token,
+        r_curly_token,
+        children,
+        name: None,
+    }
 }
-pub fn svelte_await_then_clause(
+pub struct SvelteAwaitThenBlockBuilder {
+    sv_curly_colon_token: SyntaxToken,
     then_token: SyntaxToken,
-    name: HtmlTextExpression,
-) -> SvelteAwaitThenClause {
-    SvelteAwaitThenClause::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::SVELTE_AWAIT_THEN_CLAUSE,
-        [
-            Some(SyntaxElement::Token(then_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-        ],
-    ))
+    r_curly_token: SyntaxToken,
+    children: HtmlElementList,
+    name: Option<HtmlTextExpression>,
+}
+impl SvelteAwaitThenBlockBuilder {
+    pub fn with_name(mut self, name: HtmlTextExpression) -> Self {
+        self.name = Some(name);
+        self
+    }
+    pub fn build(self) -> SvelteAwaitThenBlock {
+        SvelteAwaitThenBlock::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::SVELTE_AWAIT_THEN_BLOCK,
+            [
+                Some(SyntaxElement::Token(self.sv_curly_colon_token)),
+                Some(SyntaxElement::Token(self.then_token)),
+                self.name
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_curly_token)),
+                Some(SyntaxElement::Node(self.children.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn svelte_await_then_clause(then_token: SyntaxToken) -> SvelteAwaitThenClauseBuilder {
+    SvelteAwaitThenClauseBuilder {
+        then_token,
+        name: None,
+    }
+}
+pub struct SvelteAwaitThenClauseBuilder {
+    then_token: SyntaxToken,
+    name: Option<HtmlTextExpression>,
+}
+impl SvelteAwaitThenClauseBuilder {
+    pub fn with_name(mut self, name: HtmlTextExpression) -> Self {
+        self.name = Some(name);
+        self
+    }
+    pub fn build(self) -> SvelteAwaitThenClause {
+        SvelteAwaitThenClause::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::SVELTE_AWAIT_THEN_CLAUSE,
+            [
+                Some(SyntaxElement::Token(self.then_token)),
+                self.name
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn svelte_bind_directive(
     bind_token: SyntaxToken,
@@ -688,6 +776,36 @@ pub fn svelte_bind_directive(
         HtmlSyntaxKind::SVELTE_BIND_DIRECTIVE,
         [
             Some(SyntaxElement::Token(bind_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_bind_function_binding_expression(
+    l_curly_token: SyntaxToken,
+    get: HtmlTextExpression,
+    comma_token: SyntaxToken,
+    set: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+) -> SvelteBindFunctionBindingExpression {
+    SvelteBindFunctionBindingExpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_BIND_FUNCTION_BINDING_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(get.into_syntax())),
+            Some(SyntaxElement::Token(comma_token)),
+            Some(SyntaxElement::Node(set.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn svelte_bind_function_binding_initializer_clause(
+    eq_token: SyntaxToken,
+    value: SvelteBindFunctionBindingExpression,
+) -> SvelteBindFunctionBindingInitializerClause {
+    SvelteBindFunctionBindingInitializerClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE,
+        [
+            Some(SyntaxElement::Token(eq_token)),
             Some(SyntaxElement::Node(value.into_syntax())),
         ],
     ))
@@ -778,10 +896,10 @@ pub struct SvelteDirectiveValueBuilder {
     colon_token: SyntaxToken,
     property: AnySvelteBindingProperty,
     modifiers: SvelteDirectiveModifierList,
-    initializer: Option<HtmlAttributeInitializerClause>,
+    initializer: Option<AnySvelteDirectiveInitializerClause>,
 }
 impl SvelteDirectiveValueBuilder {
-    pub fn with_initializer(mut self, initializer: HtmlAttributeInitializerClause) -> Self {
+    pub fn with_initializer(mut self, initializer: AnySvelteDirectiveInitializerClause) -> Self {
         self.initializer = Some(initializer);
         self
     }
@@ -1153,6 +1271,20 @@ pub fn svelte_literal(value_token: SyntaxToken) -> SvelteLiteral {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn svelte_member_property(
+    object: AnySvelteMemberObject,
+    dot_token: SyntaxToken,
+    member: SvelteName,
+) -> SvelteMemberProperty {
+    SvelteMemberProperty::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_MEMBER_PROPERTY,
+        [
+            Some(SyntaxElement::Node(object.into_syntax())),
+            Some(SyntaxElement::Token(dot_token)),
+            Some(SyntaxElement::Node(member.into_syntax())),
+        ],
+    ))
+}
 pub fn svelte_name(ident_token: SyntaxToken) -> SvelteName {
     SvelteName::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::SVELTE_NAME,
@@ -1168,6 +1300,20 @@ pub fn svelte_out_directive(
         [
             Some(SyntaxElement::Token(out_token)),
             Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_rename_binding(
+    key: SvelteName,
+    colon_token: SyntaxToken,
+    name: AnySvelteBindingAssignmentBinding,
+) -> SvelteRenameBinding {
+    SvelteRenameBinding::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_RENAME_BINDING,
+        [
+            Some(SyntaxElement::Node(key.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
         ],
     ))
 }
@@ -1264,6 +1410,28 @@ pub fn svelte_style_directive(
             Some(SyntaxElement::Token(style_token)),
             Some(SyntaxElement::Node(value.into_syntax())),
         ],
+    ))
+}
+pub fn svelte_template_attribute_value(
+    l_quote_token: SyntaxToken,
+    elements: SvelteTemplateElementList,
+    r_quote_token: SyntaxToken,
+) -> SvelteTemplateAttributeValue {
+    SvelteTemplateAttributeValue::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_TEMPLATE_ATTRIBUTE_VALUE,
+        [
+            Some(SyntaxElement::Token(l_quote_token)),
+            Some(SyntaxElement::Node(elements.into_syntax())),
+            Some(SyntaxElement::Token(r_quote_token)),
+        ],
+    ))
+}
+pub fn svelte_template_chunk_element(
+    html_template_chunk_token: SyntaxToken,
+) -> SvelteTemplateChunkElement {
+    SvelteTemplateChunkElement::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_TEMPLATE_CHUNK_ELEMENT,
+        [Some(SyntaxElement::Token(html_template_chunk_token))],
     ))
 }
 pub fn svelte_transition_directive(
@@ -1399,6 +1567,152 @@ impl VueVBindShorthandDirectiveBuilder {
             ],
         ))
     }
+}
+pub fn vue_v_for_array_binding(
+    l_brack_token: SyntaxToken,
+    bindings: VueVForBindingList,
+    r_brack_token: SyntaxToken,
+) -> VueVForArrayBinding {
+    VueVForArrayBinding::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_ARRAY_BINDING,
+        [
+            Some(SyntaxElement::Token(l_brack_token)),
+            Some(SyntaxElement::Node(bindings.into_syntax())),
+            Some(SyntaxElement::Token(r_brack_token)),
+        ],
+    ))
+}
+pub fn vue_v_for_identifier_binding(name_token: SyntaxToken) -> VueVForIdentifierBinding {
+    VueVForIdentifierBinding::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_IDENTIFIER_BINDING,
+        [Some(SyntaxElement::Token(name_token))],
+    ))
+}
+pub fn vue_v_for_in_operator(in_token: SyntaxToken) -> VueVForInOperator {
+    VueVForInOperator::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_IN_OPERATOR,
+        [Some(SyntaxElement::Token(in_token))],
+    ))
+}
+pub fn vue_v_for_object_binding(
+    l_curly_token: SyntaxToken,
+    bindings: VueVForBindingList,
+    r_curly_token: SyntaxToken,
+) -> VueVForObjectBinding {
+    VueVForObjectBinding::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_OBJECT_BINDING,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(bindings.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn vue_v_for_object_property_binding(
+    property: VueVForIdentifierBinding,
+    colon_token: SyntaxToken,
+    binding: AnyVueVForBinding,
+) -> VueVForObjectPropertyBinding {
+    VueVForObjectPropertyBinding::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_OBJECT_PROPERTY_BINDING,
+        [
+            Some(SyntaxElement::Node(property.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(binding.into_syntax())),
+        ],
+    ))
+}
+pub fn vue_v_for_of_operator(of_token: SyntaxToken) -> VueVForOfOperator {
+    VueVForOfOperator::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_OF_OPERATOR,
+        [Some(SyntaxElement::Token(of_token))],
+    ))
+}
+pub fn vue_v_for_rest_binding(
+    dotdotdot_token: SyntaxToken,
+    binding: VueVForIdentifierBinding,
+) -> VueVForRestBinding {
+    VueVForRestBinding::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_REST_BINDING,
+        [
+            Some(SyntaxElement::Token(dotdotdot_token)),
+            Some(SyntaxElement::Node(binding.into_syntax())),
+        ],
+    ))
+}
+pub fn vue_v_for_tuple_binding(
+    l_paren_token: SyntaxToken,
+    value: AnyVueVForBinding,
+    r_paren_token: SyntaxToken,
+) -> VueVForTupleBindingBuilder {
+    VueVForTupleBindingBuilder {
+        l_paren_token,
+        value,
+        r_paren_token,
+        second: None,
+        third: None,
+    }
+}
+pub struct VueVForTupleBindingBuilder {
+    l_paren_token: SyntaxToken,
+    value: AnyVueVForBinding,
+    r_paren_token: SyntaxToken,
+    second: Option<VueVForTupleElement>,
+    third: Option<VueVForTupleElement>,
+}
+impl VueVForTupleBindingBuilder {
+    pub fn with_second(mut self, second: VueVForTupleElement) -> Self {
+        self.second = Some(second);
+        self
+    }
+    pub fn with_third(mut self, third: VueVForTupleElement) -> Self {
+        self.third = Some(third);
+        self
+    }
+    pub fn build(self) -> VueVForTupleBinding {
+        VueVForTupleBinding::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::VUE_V_FOR_TUPLE_BINDING,
+            [
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+                self.second
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.third
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
+pub fn vue_v_for_tuple_element(
+    comma_token: SyntaxToken,
+    binding: AnyVueVForBinding,
+) -> VueVForTupleElement {
+    VueVForTupleElement::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_TUPLE_ELEMENT,
+        [
+            Some(SyntaxElement::Token(comma_token)),
+            Some(SyntaxElement::Node(binding.into_syntax())),
+        ],
+    ))
+}
+pub fn vue_v_for_value(
+    l_quote_token: SyntaxToken,
+    binding: AnyVueVForBinding,
+    operator: AnyVueVForOperator,
+    expression: HtmlTextExpression,
+    r_quote_token: SyntaxToken,
+) -> VueVForValue {
+    VueVForValue::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_VALUE,
+        [
+            Some(SyntaxElement::Token(l_quote_token)),
+            Some(SyntaxElement::Node(binding.into_syntax())),
+            Some(SyntaxElement::Node(operator.into_syntax())),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_quote_token)),
+        ],
+    ))
 }
 pub fn vue_v_on_shorthand_directive(
     at_token: SyntaxToken,
@@ -1577,6 +1891,18 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
+pub fn svelte_template_element_list<I>(items: I) -> SvelteTemplateElementList
+where
+    I: IntoIterator<Item = AnySvelteTemplateElement>,
+    I::IntoIter: ExactSizeIterator,
+{
+    SvelteTemplateElementList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_TEMPLATE_ELEMENT_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn vue_modifier_list<I>(items: I) -> VueModifierList
 where
     I: IntoIterator<Item = VueModifier>,
@@ -1587,6 +1913,27 @@ where
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn vue_v_for_binding_list<I, S>(items: I, separators: S) -> VueVForBindingList
+where
+    I: IntoIterator<Item = AnyVueVForBindingListElement>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = HtmlSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    VueVForBindingList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_BINDING_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn astro_bogus_frontmatter<I>(slots: I) -> AstroBogusFrontmatter

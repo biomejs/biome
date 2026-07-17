@@ -1,0 +1,39 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": ["useLoggerInfo.grit"],
+  "formatter": { "enabled": false }
+}
+```
+
+## `input.js`
+
+```js
+logger.info("hello");
+logger.info("world");
+logger.info("!");
+
+```
+
+## `useLoggerInfo.grit`
+
+```grit
+language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(span = $call, message = "Use logger.info instead of console.log.", severity = "warn"),
+    $call => `logger.info($msg)`
+}
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

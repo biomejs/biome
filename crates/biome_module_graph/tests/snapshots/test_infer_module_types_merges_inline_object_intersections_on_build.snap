@@ -1,0 +1,78 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function readCombined(
+	value: { name: string } & { value: number },
+): { name: string } & { value: number } {
+	return value;
+}
+
+export function readValue(
+	value: { value: string } & { value: number },
+): { value: string } & { value: number } {
+	return value;
+}
+```
+
+## Inferred types
+
+```
+Binding readCombined "readCombined" => sync Function "readCombined" {
+  accepts: {
+    params: [
+      required value: Object {
+        prototype: No prototype
+        members: ["name": string, "value": number]
+      }
+    ]
+    type_args: []
+  }
+  returns: Object {
+    prototype: No prototype
+    members: ["name": string, "value": number]
+  }
+}
+
+Binding value "value" => Object {
+  prototype: No prototype
+  members: ["name": string, "value": number]
+}
+
+Expression "value" => Object {
+  prototype: No prototype
+  members: ["name": string, "value": number]
+}
+
+Binding readValue "readValue" => sync Function "readValue" {
+  accepts: {
+    params: [
+      required value: Object {
+        prototype: No prototype
+        members: ["value": string | number]
+      }
+    ]
+    type_args: []
+  }
+  returns: Object {
+    prototype: No prototype
+    members: ["value": string | number]
+  }
+}
+
+Binding value "value" => Object {
+  prototype: No prototype
+  members: ["value": string | number]
+}
+
+Expression "value" => Object {
+  prototype: No prototype
+  members: ["value": string | number]
+}
+```

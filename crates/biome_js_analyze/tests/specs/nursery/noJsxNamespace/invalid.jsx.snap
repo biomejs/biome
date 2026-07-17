@@ -1,0 +1,116 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+const Invalid = () => {
+	return (
+		<>
+			<ns:testcomponent />
+			<ns:testComponent />
+			<Ns:TestComponent />
+			<ns:TestComponent></ns:TestComponent>
+			<svg:circle cx="50" cy="50" r="40" />
+		</>
+	)
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:5:5 lint/nursery/noJsxNamespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected JSX namespace syntax.
+  
+    3 │ 	return (
+    4 │ 		<>
+  > 5 │ 			<ns:testcomponent />
+      │ 			 ^^^^^^^^^^^^^^^^
+    6 │ 			<ns:testComponent />
+    7 │ 			<Ns:TestComponent />
+  
+  i React does not support namespaced JSX tags. Use a plain element name or a member expression instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:6:5 lint/nursery/noJsxNamespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected JSX namespace syntax.
+  
+    4 │ 		<>
+    5 │ 			<ns:testcomponent />
+  > 6 │ 			<ns:testComponent />
+      │ 			 ^^^^^^^^^^^^^^^^
+    7 │ 			<Ns:TestComponent />
+    8 │ 			<ns:TestComponent></ns:TestComponent>
+  
+  i React does not support namespaced JSX tags. Use a plain element name or a member expression instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:7:5 lint/nursery/noJsxNamespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected JSX namespace syntax.
+  
+    5 │ 			<ns:testcomponent />
+    6 │ 			<ns:testComponent />
+  > 7 │ 			<Ns:TestComponent />
+      │ 			 ^^^^^^^^^^^^^^^^
+    8 │ 			<ns:TestComponent></ns:TestComponent>
+    9 │ 			<svg:circle cx="50" cy="50" r="40" />
+  
+  i React does not support namespaced JSX tags. Use a plain element name or a member expression instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:8:5 lint/nursery/noJsxNamespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected JSX namespace syntax.
+  
+     6 │ 			<ns:testComponent />
+     7 │ 			<Ns:TestComponent />
+   > 8 │ 			<ns:TestComponent></ns:TestComponent>
+       │ 			 ^^^^^^^^^^^^^^^^
+     9 │ 			<svg:circle cx="50" cy="50" r="40" />
+    10 │ 		</>
+  
+  i React does not support namespaced JSX tags. Use a plain element name or a member expression instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:9:5 lint/nursery/noJsxNamespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected JSX namespace syntax.
+  
+     7 │ 			<Ns:TestComponent />
+     8 │ 			<ns:TestComponent></ns:TestComponent>
+   > 9 │ 			<svg:circle cx="50" cy="50" r="40" />
+       │ 			 ^^^^^^^^^^
+    10 │ 		</>
+    11 │ 	)
+  
+  i React does not support namespaced JSX tags. Use a plain element name or a member expression instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

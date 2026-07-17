@@ -1,0 +1,120 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.nested.css
+---
+# Input
+```css
+/* should generate diagnostics */
+.foo {
+  &.bar {}
+}
+
+.foo, .bar {
+  &.baz {}
+}
+
+```
+
+# Diagnostics
+```
+invalid.nested.css:2:1 lint/nursery/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 0 class selectors, but found 1.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ .foo {
+      │ ^^^^
+    3 │   &.bar {}
+    4 │ }
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.nested.css:3:3 lint/nursery/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 0 class selectors, but found 1.
+  
+    1 │ /* should generate diagnostics */
+    2 │ .foo {
+  > 3 │   &.bar {}
+      │   ^^^^^
+    4 │ }
+    5 │ 
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.nested.css:6:1 lint/nursery/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 0 class selectors, but found 1.
+  
+    4 │ }
+    5 │ 
+  > 6 │ .foo, .bar {
+      │ ^^^^
+    7 │   &.baz {}
+    8 │ }
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.nested.css:6:7 lint/nursery/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 0 class selectors, but found 1.
+  
+    4 │ }
+    5 │ 
+  > 6 │ .foo, .bar {
+      │       ^^^^
+    7 │   &.baz {}
+    8 │ }
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.nested.css:7:3 lint/nursery/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 0 class selectors, but found 1.
+  
+    6 │ .foo, .bar {
+  > 7 │   &.baz {}
+      │   ^^^^^
+    8 │ }
+    9 │ 
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

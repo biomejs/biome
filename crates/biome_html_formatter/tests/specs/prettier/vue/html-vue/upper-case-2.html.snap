@@ -74,7 +74,7 @@ upper-case-2.html:5:12 parse ━━━━━━━━━━━━━━━━━
     6 │   
     7 │   </div>
   
-  i Remove it or enable the parsing using the html.parser.vue option.
+  i Remove it, change the extension to .vue, or enable the parsing using the html.parser.vue option.
   
 
 ```

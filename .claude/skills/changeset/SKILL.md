@@ -16,7 +16,16 @@ Use this skill when a PR introduces user-facing changes that require a changeset
 just new-changeset-empty
 ```
 
-The command will create an empty file `.changeset/`. Edit it directly to add detail.
+The command will create a file in `.changeset/`. Edit it directly to add detail.
+
+Note that the file will *not* be literally empty. It will have this content:
+
+```markdown
+---
+---
+```
+
+Do not simply append to the changeset description below the existing content, which creates an invalid changeset.
 
 > Requires `pnpm` — run `pnpm i` from repo root first.
 

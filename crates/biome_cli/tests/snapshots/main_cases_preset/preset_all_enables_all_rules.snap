@@ -1,0 +1,104 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "preset": "all"
+    }
+  }
+}
+```
+
+## `test.js`
+
+```js
+if (!cond) { f(); } else { g(); }
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+test.js:1:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Invert blocks when performing a negation test.
+  
+  > 1 │ if (!cond) { f(); } else { g(); }
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Safe fix: Invert the condition and the blocks.
+  
+    1   │ - if·(!cond)·{·f();·}·else·{·g();·}
+      1 │ + if·(cond)·{·g();·}·else·{·f();·}
+    2 2 │   
+  
+
+```
+
+```block
+test.js:1:6 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The cond variable is undeclared.
+  
+  > 1 │ if (!cond) { f(); } else { g(); }
+      │      ^^^^
+    2 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```block
+test.js:1:14 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The f variable is undeclared.
+  
+  > 1 │ if (!cond) { f(); } else { g(); }
+      │              ^
+    2 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```block
+test.js:1:28 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The g variable is undeclared.
+  
+  > 1 │ if (!cond) { f(); } else { g(); }
+      │                            ^
+    2 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 3 errors.
+Found 1 info.
+```

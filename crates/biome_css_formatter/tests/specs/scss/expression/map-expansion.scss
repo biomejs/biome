@@ -1,0 +1,5 @@
+$compact:(("key":"value"):"hello world");
+$longListKey:(("list","long long long long long long long long long long long long long list"):"hello world");
+$longMapKey:(("key":"value","long long long long long long long long long long long long long map":"value",):"hello world");
+$nestedMapInKey:(fn((a:b)):c,);
+$longPairs:(very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key:very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key:very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,);

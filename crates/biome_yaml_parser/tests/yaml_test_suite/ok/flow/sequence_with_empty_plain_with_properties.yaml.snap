@@ -1,0 +1,151 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+[1, "abc", &x !!x, !foo: abc, !bar : xyz]
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlFlowInBlockNode {
+                flow_start_token: FLOW_START@0..0 "" [] [],
+                flow: YamlFlowJsonNode {
+                    properties: YamlPropertyList [],
+                    content: YamlFlowSequence {
+                        l_brack_token: L_BRACK@0..1 "[" [] [],
+                        entries: YamlFlowSequenceEntryList [
+                            YamlFlowYamlNode {
+                                properties: YamlPropertyList [],
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@1..2 "1" [] [],
+                                },
+                            },
+                            COMMA@2..4 "," [] [Whitespace(" ")],
+                            YamlFlowJsonNode {
+                                properties: YamlPropertyList [],
+                                content: YamlDoubleQuotedScalar {
+                                    value_token: DOUBLE_QUOTED_LITERAL@4..9 "\"abc\"" [] [],
+                                },
+                            },
+                            COMMA@9..11 "," [] [Whitespace(" ")],
+                            YamlFlowYamlNode {
+                                properties: YamlPropertyList [
+                                    YamlAnchorProperty {
+                                        value_token: ANCHOR_PROPERTY_LITERAL@11..14 "&x" [] [Whitespace(" ")],
+                                    },
+                                    YamlTagProperty {
+                                        value_token: TAG_PROPERTY_LITERAL@14..17 "!!x" [] [],
+                                    },
+                                ],
+                                content: missing (optional),
+                            },
+                            COMMA@17..19 "," [] [Whitespace(" ")],
+                            YamlFlowYamlNode {
+                                properties: YamlPropertyList [
+                                    YamlTagProperty {
+                                        value_token: TAG_PROPERTY_LITERAL@19..25 "!foo:" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@25..28 "abc" [] [],
+                                },
+                            },
+                            COMMA@28..30 "," [] [Whitespace(" ")],
+                            YamlFlowMapImplicitEntry {
+                                key: YamlFlowYamlNode {
+                                    properties: YamlPropertyList [
+                                        YamlTagProperty {
+                                            value_token: TAG_PROPERTY_LITERAL@30..35 "!bar" [] [Whitespace(" ")],
+                                        },
+                                    ],
+                                    content: missing (optional),
+                                },
+                                colon_token: COLON@35..37 ":" [] [Whitespace(" ")],
+                                value: YamlFlowYamlNode {
+                                    properties: YamlPropertyList [],
+                                    content: YamlPlainScalar {
+                                        value_token: PLAIN_LITERAL@37..40 "xyz" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_brack_token: R_BRACK@40..41 "]" [] [],
+                    },
+                },
+                flow_end_token: FLOW_END@41..41 "" [] [],
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@41..42 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..42
+  0: YAML_DOCUMENT_LIST@0..41
+    0: YAML_DOCUMENT@0..41
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_FLOW_IN_BLOCK_NODE@0..41
+        0: FLOW_START@0..0 "" [] []
+        1: YAML_FLOW_JSON_NODE@0..41
+          0: YAML_PROPERTY_LIST@0..0
+          1: YAML_FLOW_SEQUENCE@0..41
+            0: L_BRACK@0..1 "[" [] []
+            1: YAML_FLOW_SEQUENCE_ENTRY_LIST@1..40
+              0: YAML_FLOW_YAML_NODE@1..2
+                0: YAML_PROPERTY_LIST@1..1
+                1: YAML_PLAIN_SCALAR@1..2
+                  0: PLAIN_LITERAL@1..2 "1" [] []
+              1: COMMA@2..4 "," [] [Whitespace(" ")]
+              2: YAML_FLOW_JSON_NODE@4..9
+                0: YAML_PROPERTY_LIST@4..4
+                1: YAML_DOUBLE_QUOTED_SCALAR@4..9
+                  0: DOUBLE_QUOTED_LITERAL@4..9 "\"abc\"" [] []
+              3: COMMA@9..11 "," [] [Whitespace(" ")]
+              4: YAML_FLOW_YAML_NODE@11..17
+                0: YAML_PROPERTY_LIST@11..17
+                  0: YAML_ANCHOR_PROPERTY@11..14
+                    0: ANCHOR_PROPERTY_LITERAL@11..14 "&x" [] [Whitespace(" ")]
+                  1: YAML_TAG_PROPERTY@14..17
+                    0: TAG_PROPERTY_LITERAL@14..17 "!!x" [] []
+                1: (empty)
+              5: COMMA@17..19 "," [] [Whitespace(" ")]
+              6: YAML_FLOW_YAML_NODE@19..28
+                0: YAML_PROPERTY_LIST@19..25
+                  0: YAML_TAG_PROPERTY@19..25
+                    0: TAG_PROPERTY_LITERAL@19..25 "!foo:" [] [Whitespace(" ")]
+                1: YAML_PLAIN_SCALAR@25..28
+                  0: PLAIN_LITERAL@25..28 "abc" [] []
+              7: COMMA@28..30 "," [] [Whitespace(" ")]
+              8: YAML_FLOW_MAP_IMPLICIT_ENTRY@30..40
+                0: YAML_FLOW_YAML_NODE@30..35
+                  0: YAML_PROPERTY_LIST@30..35
+                    0: YAML_TAG_PROPERTY@30..35
+                      0: TAG_PROPERTY_LITERAL@30..35 "!bar" [] [Whitespace(" ")]
+                  1: (empty)
+                1: COLON@35..37 ":" [] [Whitespace(" ")]
+                2: YAML_FLOW_YAML_NODE@37..40
+                  0: YAML_PROPERTY_LIST@37..37
+                  1: YAML_PLAIN_SCALAR@37..40
+                    0: PLAIN_LITERAL@37..40 "xyz" [] []
+            2: R_BRACK@40..41 "]" [] []
+        2: FLOW_END@41..41 "" [] []
+      4: (empty)
+  1: EOF@41..42 "" [Newline("\n")] []
+
+```

@@ -20,6 +20,10 @@ pub struct NoUndeclaredDependenciesOptions {
     /// If set to `false`, then the rule will show an error when `optionalDependencies` are imported. Defaults to `true`.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub optional_dependencies: Option<DependencyAvailability>,
+
+    /// If set to `false`, then the rule will show an error when `bundleDependencies` are imported. Defaults to `true`.
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub bundle_dependencies: Option<DependencyAvailability>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, serde::Deserialize, serde::Serialize)]

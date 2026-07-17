@@ -1,0 +1,6 @@
+/* should not generate diagnostics */
+div {}
+.foo {}
+#id[attr]:hover::before {}
+:nth-child(2n) {}
+.foo.bar.baz {}

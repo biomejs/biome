@@ -1,0 +1,90 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```html
+<!-- valid because we don't care about unicode escape sequences in html strings -->
+<div data-test="\u"></div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..85 "<" [Comments("<!-- valid because we ..."), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@85..89 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@89..98 "data-test" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@98..99 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@99..103 "\"\\u\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@103..104 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@104..105 "<" [] [],
+                slash_token: SLASH@105..106 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@106..109 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@109..110 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@110..111 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..111
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..110
+    0: HTML_ELEMENT@0..110
+      0: HTML_OPENING_ELEMENT@0..104
+        0: L_ANGLE@0..85 "<" [Comments("<!-- valid because we ..."), Newline("\n")] []
+        1: HTML_TAG_NAME@85..89
+          0: HTML_LITERAL@85..89 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@89..103
+          0: HTML_ATTRIBUTE@89..103
+            0: HTML_ATTRIBUTE_NAME@89..98
+              0: HTML_LITERAL@89..98 "data-test" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@98..103
+              0: EQ@98..99 "=" [] []
+              1: HTML_STRING@99..103
+                0: HTML_STRING_LITERAL@99..103 "\"\\u\"" [] []
+        3: R_ANGLE@103..104 ">" [] []
+      1: HTML_ELEMENT_LIST@104..104
+      2: HTML_CLOSING_ELEMENT@104..110
+        0: L_ANGLE@104..105 "<" [] []
+        1: SLASH@105..106 "/" [] []
+        2: HTML_TAG_NAME@106..109
+          0: HTML_LITERAL@106..109 "div" [] []
+        3: R_ANGLE@109..110 ">" [] []
+  4: EOF@110..111 "" [Newline("\n")] []
+
+```

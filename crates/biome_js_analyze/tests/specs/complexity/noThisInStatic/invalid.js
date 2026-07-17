@@ -37,3 +37,11 @@ const E = class extends f() {
         return this.CONSTANT + super.ANOTHER_CONSTANT;
     }
 }
+
+class FactoryCases {
+    static method() {
+        new this(this);
+        new Foo(this);
+        new this.Factory();
+    }
+}

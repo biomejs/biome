@@ -8,21 +8,24 @@ impl FormatRule<AnyCssValue> for FormatAnyCssValue {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssValue, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
+            AnyCssValue::AnyCssDashedIdentifier(node) => node.format().fmt(f),
             AnyCssValue::AnyCssDimension(node) => node.format().fmt(f),
             AnyCssValue::AnyCssFunction(node) => node.format().fmt(f),
             AnyCssValue::CssBracketedValue(node) => node.format().fmt(f),
             AnyCssValue::CssColor(node) => node.format().fmt(f),
             AnyCssValue::CssCustomIdentifier(node) => node.format().fmt(f),
-            AnyCssValue::CssDashedIdentifier(node) => node.format().fmt(f),
             AnyCssValue::CssIdentifier(node) => node.format().fmt(f),
             AnyCssValue::CssMetavariable(node) => node.format().fmt(f),
             AnyCssValue::CssNumber(node) => node.format().fmt(f),
             AnyCssValue::CssRatio(node) => node.format().fmt(f),
             AnyCssValue::CssString(node) => node.format().fmt(f),
             AnyCssValue::CssUnicodeRange(node) => node.format().fmt(f),
-            AnyCssValue::ScssIdentifier(node) => node.format().fmt(f),
+            AnyCssValue::ScssInterpolatedIdentifier(node) => node.format().fmt(f),
+            AnyCssValue::ScssInterpolatedString(node) => node.format().fmt(f),
+            AnyCssValue::ScssInterpolatedValue(node) => node.format().fmt(f),
+            AnyCssValue::ScssModuleMemberAccess(node) => node.format().fmt(f),
             AnyCssValue::ScssParentSelectorValue(node) => node.format().fmt(f),
-            AnyCssValue::ScssQualifiedName(node) => node.format().fmt(f),
+            AnyCssValue::ScssVariable(node) => node.format().fmt(f),
             AnyCssValue::TwValueThemeReference(node) => node.format().fmt(f),
         }
     }

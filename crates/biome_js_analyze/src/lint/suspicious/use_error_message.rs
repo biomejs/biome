@@ -61,7 +61,8 @@ impl Rule for UseErrorMessage {
         let node = ctx.query();
         let callee = node.callee().ok()?;
 
-        let (reference, name) = global_identifier(&callee.omit_parentheses())?;
+        let (reference, name) =
+            global_identifier(&callee.omit_parentheses().as_any_global_identifier_expression()?)?;
         let name_text = name.text();
 
         if BUILTIN_ERRORS.binary_search(&name_text).is_err()

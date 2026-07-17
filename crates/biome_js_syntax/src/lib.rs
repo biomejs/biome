@@ -6,15 +6,16 @@
 
 #[macro_use]
 mod generated;
+pub mod accessor_ext;
 pub mod assign_ext;
 pub mod binary_like_expression;
 pub mod binding_ext;
+pub mod cast_ext;
 pub mod declaration_ext;
 pub mod directive_ext;
 pub mod export_ext;
 pub mod expr_ext;
 pub mod expression_left_side;
-pub mod file_source;
 pub mod function_ext;
 pub mod identifier_ext;
 pub mod import_ext;
@@ -32,12 +33,13 @@ mod unescape;
 mod union_ext;
 
 pub use self::generated::*;
+pub use accessor_ext::*;
 pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TokenText, TriviaPieceKind,
     WalkEvent,
 };
+pub use cast_ext::*;
 pub use expr_ext::*;
-pub use file_source::*;
 pub use function_ext::*;
 pub use identifier_ext::*;
 pub use import_ext::*;

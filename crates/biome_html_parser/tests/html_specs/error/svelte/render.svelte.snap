@@ -21,9 +21,9 @@ HtmlRoot {
     html: HtmlElementList [
         SvelteRenderBlock {
             sv_curly_at_token: SV_CURLY_AT@0..2 "{@" [] [],
-            render_token: RENDER_KW@2..8 "render" [] [],
+            render_token: RENDER_KW@2..9 "render" [] [Whitespace(" ")],
             expression: HtmlTextExpression {
-                html_literal_token: HTML_LITERAL@8..19 " sum(1, 2)\n" [] [],
+                html_literal_token: HTML_LITERAL@9..19 "sum(1, 2)\n" [] [],
             },
             r_curly_token: missing (required),
         },
@@ -42,9 +42,9 @@ HtmlRoot {
   3: HTML_ELEMENT_LIST@0..19
     0: SVELTE_RENDER_BLOCK@0..19
       0: SV_CURLY_AT@0..2 "{@" [] []
-      1: RENDER_KW@2..8 "render" [] []
-      2: HTML_TEXT_EXPRESSION@8..19
-        0: HTML_LITERAL@8..19 " sum(1, 2)\n" [] []
+      1: RENDER_KW@2..9 "render" [] [Whitespace(" ")]
+      2: HTML_TEXT_EXPRESSION@9..19
+        0: HTML_LITERAL@9..19 "sum(1, 2)\n" [] []
       3: (empty)
   4: EOF@19..19 "" [] []
 

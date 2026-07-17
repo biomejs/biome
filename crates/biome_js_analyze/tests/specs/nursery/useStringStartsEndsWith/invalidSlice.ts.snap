@@ -1,0 +1,272 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidSlice.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+declare const text: string;
+declare const needle: string;
+
+text.slice(0, 3) === "bar";
+text.slice(0, needle.length) === needle;
+text.slice(-3) === "bar";
+text.slice(-needle.length) === needle;
+text.slice(-needle.length, text.length) === needle;
+text.slice(text.length - needle.length) === needle;
+text.slice(text.length - needle.length, text.length) === needle;
+text.substring(0, 3) === "bar";
+text.substring(text.length - 3, text.length) === "bar";
+
+```
+
+# Diagnostics
+```
+invalidSlice.ts:6:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This slice() comparison looks like you're checking a string prefix.
+  
+    4 │ declare const needle: string;
+    5 │ 
+  > 6 │ text.slice(0, 3) === "bar";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ text.slice(0, needle.length) === needle;
+    8 │ text.slice(-3) === "bar";
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use startsWith() instead.
+  
+     4  4 │   declare const needle: string;
+     5  5 │   
+     6    │ - text.slice(0,·3)·===·"bar";
+        6 │ + text.startsWith("bar");
+     7  7 │   text.slice(0, needle.length) === needle;
+     8  8 │   text.slice(-3) === "bar";
+  
+
+```
+
+```
+invalidSlice.ts:7:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This slice() comparison looks like you're checking a string prefix.
+  
+    6 │ text.slice(0, 3) === "bar";
+  > 7 │ text.slice(0, needle.length) === needle;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ text.slice(-3) === "bar";
+    9 │ text.slice(-needle.length) === needle;
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use startsWith() instead.
+  
+     5  5 │   
+     6  6 │   text.slice(0, 3) === "bar";
+     7    │ - text.slice(0,·needle.length)·===·needle;
+        7 │ + text.startsWith(needle);
+     8  8 │   text.slice(-3) === "bar";
+     9  9 │   text.slice(-needle.length) === needle;
+  
+
+```
+
+```
+invalidSlice.ts:8:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This slice() comparison looks like you're checking a string suffix.
+  
+     6 │ text.slice(0, 3) === "bar";
+     7 │ text.slice(0, needle.length) === needle;
+   > 8 │ text.slice(-3) === "bar";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ text.slice(-needle.length) === needle;
+    10 │ text.slice(-needle.length, text.length) === needle;
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use endsWith() instead.
+  
+     6  6 │   text.slice(0, 3) === "bar";
+     7  7 │   text.slice(0, needle.length) === needle;
+     8    │ - text.slice(-3)·===·"bar";
+        8 │ + text.endsWith("bar");
+     9  9 │   text.slice(-needle.length) === needle;
+    10 10 │   text.slice(-needle.length, text.length) === needle;
+  
+
+```
+
+```
+invalidSlice.ts:9:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This slice() comparison looks like you're checking a string suffix.
+  
+     7 │ text.slice(0, needle.length) === needle;
+     8 │ text.slice(-3) === "bar";
+   > 9 │ text.slice(-needle.length) === needle;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ text.slice(-needle.length, text.length) === needle;
+    11 │ text.slice(text.length - needle.length) === needle;
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use endsWith() instead.
+  
+     7  7 │   text.slice(0, needle.length) === needle;
+     8  8 │   text.slice(-3) === "bar";
+     9    │ - text.slice(-needle.length)·===·needle;
+        9 │ + text.endsWith(needle);
+    10 10 │   text.slice(-needle.length, text.length) === needle;
+    11 11 │   text.slice(text.length - needle.length) === needle;
+  
+
+```
+
+```
+invalidSlice.ts:10:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This slice() comparison looks like you're checking a string suffix.
+  
+     8 │ text.slice(-3) === "bar";
+     9 │ text.slice(-needle.length) === needle;
+  > 10 │ text.slice(-needle.length, text.length) === needle;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ text.slice(text.length - needle.length) === needle;
+    12 │ text.slice(text.length - needle.length, text.length) === needle;
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use endsWith() instead.
+  
+     8  8 │   text.slice(-3) === "bar";
+     9  9 │   text.slice(-needle.length) === needle;
+    10    │ - text.slice(-needle.length,·text.length)·===·needle;
+       10 │ + text.endsWith(needle);
+    11 11 │   text.slice(text.length - needle.length) === needle;
+    12 12 │   text.slice(text.length - needle.length, text.length) === needle;
+  
+
+```
+
+```
+invalidSlice.ts:11:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This slice() comparison looks like you're checking a string suffix.
+  
+     9 │ text.slice(-needle.length) === needle;
+    10 │ text.slice(-needle.length, text.length) === needle;
+  > 11 │ text.slice(text.length - needle.length) === needle;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ text.slice(text.length - needle.length, text.length) === needle;
+    13 │ text.substring(0, 3) === "bar";
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use endsWith() instead.
+  
+     9  9 │   text.slice(-needle.length) === needle;
+    10 10 │   text.slice(-needle.length, text.length) === needle;
+    11    │ - text.slice(text.length·-·needle.length)·===·needle;
+       11 │ + text.endsWith(needle);
+    12 12 │   text.slice(text.length - needle.length, text.length) === needle;
+    13 13 │   text.substring(0, 3) === "bar";
+  
+
+```
+
+```
+invalidSlice.ts:12:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This slice() comparison looks like you're checking a string suffix.
+  
+    10 │ text.slice(-needle.length, text.length) === needle;
+    11 │ text.slice(text.length - needle.length) === needle;
+  > 12 │ text.slice(text.length - needle.length, text.length) === needle;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ text.substring(0, 3) === "bar";
+    14 │ text.substring(text.length - 3, text.length) === "bar";
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use endsWith() instead.
+  
+    10 10 │   text.slice(-needle.length, text.length) === needle;
+    11 11 │   text.slice(text.length - needle.length) === needle;
+    12    │ - text.slice(text.length·-·needle.length,·text.length)·===·needle;
+       12 │ + text.endsWith(needle);
+    13 13 │   text.substring(0, 3) === "bar";
+    14 14 │   text.substring(text.length - 3, text.length) === "bar";
+  
+
+```
+
+```
+invalidSlice.ts:13:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This substring() comparison looks like you're checking a string prefix.
+  
+    11 │ text.slice(text.length - needle.length) === needle;
+    12 │ text.slice(text.length - needle.length, text.length) === needle;
+  > 13 │ text.substring(0, 3) === "bar";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ text.substring(text.length - 3, text.length) === "bar";
+    15 │ 
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use startsWith() instead.
+  
+    11 11 │   text.slice(text.length - needle.length) === needle;
+    12 12 │   text.slice(text.length - needle.length, text.length) === needle;
+    13    │ - text.substring(0,·3)·===·"bar";
+       13 │ + text.startsWith("bar");
+    14 14 │   text.substring(text.length - 3, text.length) === "bar";
+    15 15 │   
+  
+
+```
+
+```
+invalidSlice.ts:14:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This substring() comparison looks like you're checking a string suffix.
+  
+    12 │ text.slice(text.length - needle.length, text.length) === needle;
+    13 │ text.substring(0, 3) === "bar";
+  > 14 │ text.substring(text.length - 3, text.length) === "bar";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use endsWith() instead.
+  
+    12 12 │   text.slice(text.length - needle.length, text.length) === needle;
+    13 13 │   text.substring(0, 3) === "bar";
+    14    │ - text.substring(text.length·-·3,·text.length)·===·"bar";
+       14 │ + text.endsWith("bar");
+    15 15 │   
+  
+
+```

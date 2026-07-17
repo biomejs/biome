@@ -1,0 +1,36 @@
+// should not generate diagnostics
+
+// Already using ??
+declare const x: string | null;
+const a = x ?? 'default';
+
+// Non-nullish comparison
+declare const b: number;
+const c = b > 0 ? b : 1;
+
+// Mismatched consequent
+declare const d: string | null;
+const e = d !== null ? 'something_else' : 'fallback';
+
+// Non-nullish literal comparison
+declare const f: string;
+const g = f === 'foo' ? f : 'bar';
+
+// Typeof check
+declare const t: string | null;
+const h = typeof t === 'string' ? t : 'default';
+
+// Different variables in test and branches
+declare const p: string | null;
+declare const q: string;
+const i = p !== null ? q : 'default';
+
+// Mismatched (loose)
+declare const m: string | null;
+declare const n: string;
+const j = m != null ? n : 'default';
+
+// Compound with different variables
+declare const s1: string | null;
+declare const s2: string | null;
+const k = s1 !== null && s2 !== undefined ? s1 : 'default';

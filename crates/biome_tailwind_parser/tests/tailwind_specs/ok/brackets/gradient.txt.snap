@@ -25,7 +25,19 @@ TwRoot {
                 minus_token: DASH@9..10 "-" [] [],
                 value: TwArbitraryValue {
                     l_brack_token: L_BRACKET@10..11 "[" [] [],
-                    value_token: TW_VALUE@11..21 "at_50%_75%" [] [],
+                    value: CssGenericComponentValueList [
+                        CssIdentifier {
+                            ident_token: IDENT@11..14 "at" [] [Whitespace("_")],
+                        },
+                        CssPercentage {
+                            value_token: CSS_NUMBER_LITERAL@14..16 "50" [] [],
+                            remainder_token: PERCENT@16..18 "%" [] [Whitespace("_")],
+                        },
+                        CssPercentage {
+                            value_token: CSS_NUMBER_LITERAL@18..20 "75" [] [],
+                            remainder_token: PERCENT@20..21 "%" [] [],
+                        },
+                    ],
                     r_brack_token: R_BRACKET@21..23 "]" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
@@ -77,8 +89,9 @@ TwRoot {
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@63..65 "to" [] [],
                 minus_token: DASH@65..66 "-" [] [],
-                value: TwNamedValue {
-                    value_token: TW_VALUE@66..69 "90%" [] [],
+                value: TwPercentageValue {
+                    value_token: TW_NUMBER@66..68 "90" [] [],
+                    remainder_token: PERCENT@68..69 "%" [] [],
                 },
                 modifier: missing (optional),
             },
@@ -103,7 +116,15 @@ TwRoot {
         1: DASH@9..10 "-" [] []
         2: TW_ARBITRARY_VALUE@10..23
           0: L_BRACKET@10..11 "[" [] []
-          1: TW_VALUE@11..21 "at_50%_75%" [] []
+          1: CSS_GENERIC_COMPONENT_VALUE_LIST@11..21
+            0: CSS_IDENTIFIER@11..14
+              0: IDENT@11..14 "at" [] [Whitespace("_")]
+            1: CSS_PERCENTAGE@14..18
+              0: CSS_NUMBER_LITERAL@14..16 "50" [] []
+              1: PERCENT@16..18 "%" [] [Whitespace("_")]
+            2: CSS_PERCENTAGE@18..21
+              0: CSS_NUMBER_LITERAL@18..20 "75" [] []
+              1: PERCENT@20..21 "%" [] []
           2: R_BRACKET@21..23 "]" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
@@ -143,8 +164,9 @@ TwRoot {
       2: TW_FUNCTIONAL_CANDIDATE@63..69
         0: TW_BASE@63..65 "to" [] []
         1: DASH@65..66 "-" [] []
-        2: TW_NAMED_VALUE@66..69
-          0: TW_VALUE@66..69 "90%" [] []
+        2: TW_PERCENTAGE_VALUE@66..69
+          0: TW_NUMBER@66..68 "90" [] []
+          1: PERCENT@68..69 "%" [] []
         3: (empty)
       3: (empty)
   2: EOF@69..70 "" [Newline("\n")] []

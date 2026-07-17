@@ -131,7 +131,6 @@
 <style role="button" />;
 <sub role="button" />;
 <summary role="button" />;
-// <summary role="listitem" />;
 <sup role="button" />;
 <th role="button" />;
 <time role="button" />;
@@ -277,4 +276,10 @@
     src={'/assets/head.png'}
     alt='An ASCII-style headshot'
   />
-</picture>
+</picture>;
+/* Custom elements can have any role or none (https://www.w3.org/TR/html-aria/#el-autonomous-custom-element) */
+<>
+	<my-button role="img" />
+	<my-element role="listitem" />
+	<custom-card role="button" />
+</>;

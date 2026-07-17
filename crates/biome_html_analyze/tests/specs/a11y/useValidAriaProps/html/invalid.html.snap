@@ -1,0 +1,186 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<input type="text" aria-labell="" />
+<div aria-lorem="foobar"></div>
+<div aria-bloop="blop"></div>
+<span aria-foo="bar"></span>
+<div ARIA-LOREM="test"></div>
+<div ArIa-BlOoP="test"></div>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:20 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element contains an invalid ARIA attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <input type="text" aria-labell="" />
+      │                    ^^^^^^^^^^^^^^
+    3 │ <div aria-lorem="foobar"></div>
+    4 │ <div aria-bloop="blop"></div>
+  
+  i aria-labell is not a valid ARIA attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <input type="text" aria-labell="" />
+      │                    ^^^^^^^^^^^^^^
+    3 │ <div aria-lorem="foobar"></div>
+    4 │ <div aria-bloop="blop"></div>
+  
+  i Unsafe fix: Remove the invalid aria-* attribute.
+                    Check the list of all valid aria-* attributes.
+  
+    2 │ <input·type="text"·aria-labell=""·/>
+      │                    ---------------  
+
+```
+
+```
+invalid.html:3:6 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element contains an invalid ARIA attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <input type="text" aria-labell="" />
+  > 3 │ <div aria-lorem="foobar"></div>
+      │      ^^^^^^^^^^^^^^^^^^^
+    4 │ <div aria-bloop="blop"></div>
+    5 │ <span aria-foo="bar"></span>
+  
+  i aria-lorem is not a valid ARIA attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <input type="text" aria-labell="" />
+  > 3 │ <div aria-lorem="foobar"></div>
+      │      ^^^^^^^^^^^^^^^^^^^
+    4 │ <div aria-bloop="blop"></div>
+    5 │ <span aria-foo="bar"></span>
+  
+  i Unsafe fix: Remove the invalid aria-* attribute.
+                    Check the list of all valid aria-* attributes.
+  
+    3 │ <div·aria-lorem="foobar"></div>
+      │      -------------------       
+
+```
+
+```
+invalid.html:4:6 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element contains an invalid ARIA attribute.
+  
+    2 │ <input type="text" aria-labell="" />
+    3 │ <div aria-lorem="foobar"></div>
+  > 4 │ <div aria-bloop="blop"></div>
+      │      ^^^^^^^^^^^^^^^^^
+    5 │ <span aria-foo="bar"></span>
+    6 │ <div ARIA-LOREM="test"></div>
+  
+  i aria-bloop is not a valid ARIA attribute.
+  
+    2 │ <input type="text" aria-labell="" />
+    3 │ <div aria-lorem="foobar"></div>
+  > 4 │ <div aria-bloop="blop"></div>
+      │      ^^^^^^^^^^^^^^^^^
+    5 │ <span aria-foo="bar"></span>
+    6 │ <div ARIA-LOREM="test"></div>
+  
+  i Unsafe fix: Remove the invalid aria-* attribute.
+                    Check the list of all valid aria-* attributes.
+  
+    4 │ <div·aria-bloop="blop"></div>
+      │      -----------------       
+
+```
+
+```
+invalid.html:5:7 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element contains an invalid ARIA attribute.
+  
+    3 │ <div aria-lorem="foobar"></div>
+    4 │ <div aria-bloop="blop"></div>
+  > 5 │ <span aria-foo="bar"></span>
+      │       ^^^^^^^^^^^^^^
+    6 │ <div ARIA-LOREM="test"></div>
+    7 │ <div ArIa-BlOoP="test"></div>
+  
+  i aria-foo is not a valid ARIA attribute.
+  
+    3 │ <div aria-lorem="foobar"></div>
+    4 │ <div aria-bloop="blop"></div>
+  > 5 │ <span aria-foo="bar"></span>
+      │       ^^^^^^^^^^^^^^
+    6 │ <div ARIA-LOREM="test"></div>
+    7 │ <div ArIa-BlOoP="test"></div>
+  
+  i Unsafe fix: Remove the invalid aria-* attribute.
+                    Check the list of all valid aria-* attributes.
+  
+    5 │ <span·aria-foo="bar"></span>
+      │       --------------        
+
+```
+
+```
+invalid.html:6:6 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element contains an invalid ARIA attribute.
+  
+    4 │ <div aria-bloop="blop"></div>
+    5 │ <span aria-foo="bar"></span>
+  > 6 │ <div ARIA-LOREM="test"></div>
+      │      ^^^^^^^^^^^^^^^^^
+    7 │ <div ArIa-BlOoP="test"></div>
+    8 │ 
+  
+  i ARIA-LOREM is not a valid ARIA attribute.
+  
+    4 │ <div aria-bloop="blop"></div>
+    5 │ <span aria-foo="bar"></span>
+  > 6 │ <div ARIA-LOREM="test"></div>
+      │      ^^^^^^^^^^^^^^^^^
+    7 │ <div ArIa-BlOoP="test"></div>
+    8 │ 
+  
+  i Unsafe fix: Remove the invalid aria-* attribute.
+                    Check the list of all valid aria-* attributes.
+  
+    6 │ <div·ARIA-LOREM="test"></div>
+      │      -----------------       
+
+```
+
+```
+invalid.html:7:6 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element contains an invalid ARIA attribute.
+  
+    5 │ <span aria-foo="bar"></span>
+    6 │ <div ARIA-LOREM="test"></div>
+  > 7 │ <div ArIa-BlOoP="test"></div>
+      │      ^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i ArIa-BlOoP is not a valid ARIA attribute.
+  
+    5 │ <span aria-foo="bar"></span>
+    6 │ <div ARIA-LOREM="test"></div>
+  > 7 │ <div ArIa-BlOoP="test"></div>
+      │      ^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Unsafe fix: Remove the invalid aria-* attribute.
+                    Check the list of all valid aria-* attributes.
+  
+    7 │ <div·ArIa-BlOoP="test"></div>
+      │      -----------------       
+
+```

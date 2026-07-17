@@ -37,11 +37,20 @@ impl ParseRecovery for AnyInParensParseRecovery {
 
 pub(crate) struct AnyInParensChainParseRecovery {
     chain_kind: CssSyntaxKind,
+    stop_kind: Option<CssSyntaxKind>,
 }
 
 impl AnyInParensChainParseRecovery {
     pub(crate) fn new(chain_kind: CssSyntaxKind) -> Self {
-        Self { chain_kind }
+        Self {
+            chain_kind,
+            stop_kind: None,
+        }
+    }
+
+    pub(crate) fn with_stop_kind(mut self, stop_kind: CssSyntaxKind) -> Self {
+        self.stop_kind = Some(stop_kind);
+        self
     }
 }
 
@@ -53,8 +62,12 @@ impl ParseRecovery for AnyInParensChainParseRecovery {
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         // Skips malformed or incomplete queries in parentheses until:
         // 1) '{' (start of a declaration block),
-        // 2) 'chain_kind' (another query context), or
-        // 3) a line break (new statement boundary).
-        p.at(T!['{']) || p.at(self.chain_kind) || p.has_preceding_line_break()
+        // 2) an optional stop token for the current query context,
+        // 3) 'chain_kind' (another query context), or
+        // 4) a line break (new statement boundary).
+        p.at(T!['{'])
+            || self.stop_kind.is_some_and(|kind| p.at(kind))
+            || p.at(self.chain_kind)
+            || p.has_preceding_line_break()
     }
 }

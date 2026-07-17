@@ -144,6 +144,12 @@ impl MergedType {
                                         kind: TypeMemberKind::Named(name),
                                         ty: member.ty,
                                     }),
+                                    TypeMemberKind::ConstAssertedNamedStatic(name) => {
+                                        Some(TypeMember {
+                                            kind: TypeMemberKind::ConstAssertedNamed(name),
+                                            ty: member.ty,
+                                        })
+                                    }
                                     _ => None,
                                 })
                                 .collect(),

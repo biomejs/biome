@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 <>
   <div aria-hidden="true" tabIndex="0" />
   <input aria-hidden="true" />

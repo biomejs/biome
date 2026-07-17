@@ -38,13 +38,18 @@ impl FormatNodeRule<JsDoWhileStatement> for FormatJsDoWhileStatement {
             write!(f, [hard_line_break()])?;
         }
 
+        let should_insert_space = f.options().delimiter_spacing().value();
+
         write!(
             f,
             [
                 while_token.format(),
                 space(),
                 l_paren_token.format(),
-                group(&soft_block_indent(&test.format())),
+                group(&soft_block_indent_with_maybe_space(
+                    &test.format(),
+                    should_insert_space
+                )),
                 r_paren_token.format(),
                 FormatStatementSemicolon::new(semicolon_token.as_ref())
             ]

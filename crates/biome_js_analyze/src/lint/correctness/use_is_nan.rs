@@ -233,7 +233,8 @@ fn create_is_nan_expression(nan: AnyJsExpression) -> Option<AnyJsExpression> {
             let is_nan_expression =
                 member_expression.with_member(make::js_name(make::ident("isNaN")).into());
             let member_object = is_nan_expression.object().ok()?.omit_parentheses();
-            let (reference, _) = global_identifier(&member_object)?;
+            let (reference, _) =
+                global_identifier(&member_object.as_any_global_identifier_expression()?)?;
             let number_identifier_exists = is_nan_expression
                 .object()
                 .ok()?
@@ -298,7 +299,10 @@ fn get_literal(
 fn has_nan(expr: AnyJsExpression, model: &SemanticModel) -> bool {
     (|| {
         let expr = expr.omit_parentheses();
-        let reference = if let Some((reference, name)) = global_identifier(&expr) {
+        let reference = if let Some((reference, name)) =
+            expr.as_any_global_identifier_expression()
+                .and_then(|e| global_identifier(&e))
+        {
             if name.text() != "NaN" {
                 return None;
             }
@@ -309,7 +313,11 @@ fn has_nan(expr: AnyJsExpression, model: &SemanticModel) -> bool {
                 return None;
             }
             let member_object = member_expr.object().ok()?.omit_parentheses();
-            let (reference, name) = global_identifier(&member_object.omit_parentheses())?;
+            let (reference, name) = global_identifier(
+                &member_object
+                    .omit_parentheses()
+                    .as_any_global_identifier_expression()?,
+            )?;
             if name.text() != "Number" {
                 return None;
             }

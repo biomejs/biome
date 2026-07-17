@@ -39,10 +39,24 @@ pub(crate) enum HtmlLexContext {
     InsideTagAstro,
     /// Lexes Vue directive arguments inside `[]`.
     VueDirectiveArgument,
+    /// Lexes the binding and operator portions of a Vue `v-for` value.
+    VueVForValue,
+    /// Lexes the iterable expression after a Vue `v-for` `in` or `of` operator.
+    /// The stored syntax kind is the quote that terminates the attribute value.
+    VueVForExpression(HtmlSyntaxKind),
     /// When the parser encounters a `=` token (the beginning of the attribute initializer clause), it switches to this context.
     ///
     /// This is because attribute values can start and end with a `"` or `'` character, or be unquoted, and the lexer needs to know to start lexing a string literal.
     AttributeValue,
+
+    /// Like [AttributeValue] but for quoted values stops at `{` instead of consuming
+    /// the whole string, so the parser can detect interpolations without a pre-scan.
+    SvelteAttributeValue,
+
+    /// Lexes literal chunks of a Svelte template attribute value (e.g. `top: ` and
+    /// `px` in `style="top: {top}px"`). Emits `{` as its own token; everything else
+    /// runs until the next `{` or the closing quote.
+    SvelteTemplateChunk { quote: u8 },
 
     /// Context to be used when parsing the contents of Svelte blocks. Svelte blocks usually start with `{@`, `{:`, `{/` or `{#`.
     /// When lexing using this context, specific tokens are emitted such as `if`, `else`, `debug`, etc.
@@ -99,16 +113,23 @@ pub(crate) enum TextExpressionKind {
 pub(crate) enum RestrictedExpressionStopAt {
     /// Stops at 'as' keyword or ',' (for Svelte #each blocks)
     AsOrComma,
+    /// Stops at `,`
+    Comma,
     /// Stops at `)`
     ClosingParen,
     /// Stops at `then` or `catch` keywords
     ThenOrCatch,
+    /// Like `AsOrComma`, but skips the first occurrence of `as` and stops at
+    /// the second. Used when the parser has determined via lookahead that the
+    /// expression contains a TypeScript `as const` assertion before the Svelte
+    /// binding `as`.
+    AsOrCommaSkipFirstAs,
 }
 
 impl RestrictedExpressionStopAt {
     pub(crate) fn matches_punct(&self, byte: u8) -> bool {
         match self {
-            Self::AsOrComma => byte == b',',
+            Self::AsOrComma | Self::Comma | Self::AsOrCommaSkipFirstAs => byte == b',',
             Self::ClosingParen => byte == b')',
             Self::ThenOrCatch => false,
         }
@@ -116,7 +137,8 @@ impl RestrictedExpressionStopAt {
 
     pub(crate) fn matches_keyword(&self, keyword: HtmlSyntaxKind) -> bool {
         match self {
-            Self::AsOrComma => keyword == AS_KW,
+            Self::AsOrComma | Self::AsOrCommaSkipFirstAs => keyword == AS_KW,
+            Self::Comma => false,
             Self::ClosingParen => false,
             Self::ThenOrCatch => keyword == THEN_KW || keyword == CATCH_KW,
         }
@@ -158,6 +180,11 @@ pub(crate) enum HtmlReLexContext {
     InsideTagAstro,
     /// Relex tokens as if the parser was inside a tag in a Svelte file.
     InsideTagSvelte,
+    /// Re-tokenize the current quote token (`DOUBLE_QUOTE` or `SINGLE_QUOTE`)
+    /// as a full `HTML_STRING_LITERAL`. Used when a Svelte attribute value was
+    /// speculatively parsed as a template but turned out to have no
+    /// interpolations, so it can be parsed as a plain string instead.
+    SvelteAttributeString,
 }
 
 pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind>;

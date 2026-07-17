@@ -1,0 +1,8 @@
+$variable: alpha;
+$a: beta;
+$b: gamma;
+$c: delta;
+
+$test-1: #{something}$variable;
+$test-2: $a#{b}$c;
+$test-3: #{a}$b#{c};

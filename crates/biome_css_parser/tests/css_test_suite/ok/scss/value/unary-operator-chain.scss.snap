@@ -18,8 +18,8 @@ $x: not - -$y;
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..1 "$" [] [],
                 name: CssIdentifier {
                     value_token: IDENT@1..2 "y" [] [],
@@ -36,8 +36,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@5..6 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@6..8 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@8..9 "x" [] [],
@@ -52,7 +52,7 @@ CssRoot {
                             operator: MINUS@15..17 "-" [] [Whitespace(" ")],
                             expression: ScssUnaryExpression {
                                 operator: MINUS@17..18 "-" [] [],
-                                expression: ScssIdentifier {
+                                expression: ScssVariable {
                                     dollar_token: DOLLAR@18..19 "$" [] [],
                                     name: CssIdentifier {
                                         value_token: IDENT@19..20 "y" [] [],
@@ -77,8 +77,8 @@ CssRoot {
 0: CSS_ROOT@0..22
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..21
-    0: SCSS_DECLARATION@0..6
-      0: SCSS_IDENTIFIER@0..2
+    0: SCSS_VARIABLE_DECLARATION@0..6
+      0: SCSS_VARIABLE@0..2
         0: DOLLAR@0..1 "$" [] []
         1: CSS_IDENTIFIER@1..2
           0: IDENT@1..2 "y" [] []
@@ -89,8 +89,8 @@ CssRoot {
             0: CSS_NUMBER_LITERAL@4..5 "1" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@5..5
       4: SEMICOLON@5..6 ";" [] []
-    1: SCSS_DECLARATION@6..21
-      0: SCSS_IDENTIFIER@6..9
+    1: SCSS_VARIABLE_DECLARATION@6..21
+      0: SCSS_VARIABLE@6..9
         0: DOLLAR@6..8 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@8..9
           0: IDENT@8..9 "x" [] []
@@ -103,7 +103,7 @@ CssRoot {
               0: MINUS@15..17 "-" [] [Whitespace(" ")]
               1: SCSS_UNARY_EXPRESSION@17..20
                 0: MINUS@17..18 "-" [] []
-                1: SCSS_IDENTIFIER@18..20
+                1: SCSS_VARIABLE@18..20
                   0: DOLLAR@18..19 "$" [] []
                   1: CSS_IDENTIFIER@19..20
                     0: IDENT@19..20 "y" [] []

@@ -1,6 +1,7 @@
 use super::{
-    AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource, EnabledForPath,
-    ExtensionHandler, ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities, search,
+    AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams, DocumentFileSource,
+    EditorCapabilities, EnabledForPath, ExtensionHandler, ParseResult, ProcessFixAll, ProcessLint,
+    SearchCapabilities, format_on_type_noop, matches_on_type_char,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -12,30 +13,37 @@ use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     Settings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
-use crate::workspace::{CodeAction, FixFileResult, GetSyntaxTreeResult, PullActionsResult};
+use crate::workspace::{
+    CodeAction, FixFileResult, GetSyntaxTreeResult, PatternId, PullActionsResult,
+};
+use crate::workspace::{FixFileMode, SearchQuery};
 use crate::{WorkspaceError, extension_error};
 use biome_analyze::options::PreferredQuote;
-use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
+use biome_analyze::{
+    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+};
 use biome_configuration::Configuration;
 use biome_configuration::json::{
     JsonAllowCommentsEnabled, JsonAllowTrailingCommasEnabled, JsonAssistConfiguration,
     JsonAssistEnabled, JsonFormatterConfiguration, JsonFormatterEnabled, JsonLinterConfiguration,
     JsonLinterEnabled, JsonParserConfiguration,
 };
+use biome_db::AnyParsedSource;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_formatter::{
-    BracketSpacing, Expand, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
-    TrailingNewline,
+    BracketSpacing, DelimiterSpacing, Expand, FormatError, IndentStyle, IndentWidth, LineEnding,
+    LineWidth, Printed, TrailingNewline,
 };
 use biome_fs::{BiomePath, ConfigName};
 use biome_json_analyze::{ExtendedConfigurationProvider, JsonAnalyzeServices, analyze};
 use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
-use biome_json_syntax::{JsonFileSource, JsonLanguage, JsonRoot, JsonSyntaxNode};
-use biome_parser::AnyParse;
-use biome_rowan::{AstNode, NodeCache};
+use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
+use biome_languages::JsonFileSource;
+use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
+use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 use either::Either;
 use std::borrow::Cow;
@@ -51,6 +59,7 @@ pub struct JsonFormatterSettings {
     pub trailing_commas: Option<TrailingCommas>,
     pub expand: Option<Expand>,
     pub bracket_spacing: Option<BracketSpacing>,
+    pub delimiter_spacing: Option<DelimiterSpacing>,
     pub enabled: Option<JsonFormatterEnabled>,
     pub trailing_newline: Option<TrailingNewline>,
 }
@@ -65,6 +74,7 @@ impl From<JsonFormatterConfiguration> for JsonFormatterSettings {
             trailing_commas: configuration.trailing_commas,
             expand: configuration.expand,
             bracket_spacing: configuration.bracket_spacing,
+            delimiter_spacing: configuration.delimiter_spacing,
             enabled: configuration.enabled,
             trailing_newline: configuration.trailing_newline,
         }
@@ -167,7 +177,7 @@ impl ServiceLanguage for JsonLanguage {
         overrides: &OverrideSettings,
         language: &JsonFormatterSettings,
         path: &BiomePath,
-        document_file_source: &DocumentFileSource,
+        _document_file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
         let indent_style = language
             .indent_style
@@ -212,11 +222,12 @@ impl ServiceLanguage for JsonLanguage {
             .or(global.bracket_spacing)
             .unwrap_or_default();
 
-        let file_source = document_file_source
-            .to_json_file_source()
+        let delimiter_spacing = language
+            .delimiter_spacing
+            .or(global.delimiter_spacing)
             .unwrap_or_default();
 
-        let mut options = JsonFormatOptions::new(file_source)
+        let mut options = JsonFormatOptions::new()
             .with_line_ending(line_ending)
             .with_indent_style(indent_style)
             .with_indent_width(indent_width)
@@ -224,6 +235,7 @@ impl ServiceLanguage for JsonLanguage {
             .with_trailing_commas(trailing_commas)
             .with_expand(expand_lists)
             .with_bracket_spacing(bracket_spacing)
+            .with_delimiter_spacing(delimiter_spacing)
             .with_trailing_newline(trailing_newline);
 
         overrides.apply_override_json_format_options(path, &mut options);
@@ -371,6 +383,10 @@ impl ExtensionHandler for JsonFileHandler {
             search: SearchCapabilities {
                 search: Some(search),
             },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: None,
+            },
         }
     }
 }
@@ -408,9 +424,13 @@ fn parse(
     }
 }
 
-fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
-    let syntax: JsonSyntaxNode = parse.syntax();
-    let tree: JsonRoot = parse.tree();
+fn debug_syntax_tree(
+    _biome_path: &BiomePath,
+    parse: AnyParsedSource,
+    workspace_db: WorkspaceDb,
+) -> GetSyntaxTreeResult {
+    let syntax: JsonSyntaxNode = parse.syntax(&workspace_db);
+    let tree: JsonRoot = parse.tree(&workspace_db);
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
@@ -420,28 +440,30 @@ fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeRe
 fn debug_formatter_ir(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<JsonLanguage>(path, document_file_source);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
 
     let root_element = formatted.into_document();
     Ok(root_element.to_string())
 }
 
-#[tracing::instrument(level = "debug", skip(parse, settings))]
+#[tracing::instrument(level = "debug", skip(parse, settings, workspace_db))]
 fn format(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsonLanguage>(path, document_file_source);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
 
     match formatted.print() {
@@ -453,13 +475,14 @@ fn format(
 fn format_range(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsonLanguage>(path, document_file_source);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let printed = biome_json_formatter::format_range(options, &tree, range)?;
     Ok(printed)
 }
@@ -467,13 +490,14 @@ fn format_range(
 fn format_on_type(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsonLanguage>(path, document_file_source);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
 
     let range = tree.text_range_with_trivia();
     if offset < range.start() || offset > range.end() {
@@ -492,12 +516,28 @@ fn format_on_type(
         TokenAtOffset::Between(token, _) => token,
     };
 
+    if token.text_trimmed_range().end() != offset {
+        return Ok(format_on_type_noop(offset));
+    }
+
+    if !matches_on_type_char(token.text_trimmed()) {
+        return Ok(format_on_type_noop(offset));
+    }
+
     let root_node = match token.parent() {
         Some(node) => node,
         None => panic!("found a token with no parent"),
     };
 
-    let printed = biome_json_formatter::format_sub_tree(options, &root_node)?;
+    if root_node
+        .ancestors()
+        .any(|node: JsonSyntaxNode| node.kind().is_bogus())
+    {
+        return Ok(format_on_type_noop(offset));
+    }
+
+    let printed =
+        biome_json_formatter::format_range(options, &tree, root_node.text_trimmed_range())?;
     Ok(printed)
 }
 
@@ -509,28 +549,30 @@ fn lint(params: LintParams) -> LintResults {
         .to_json_file_source()
         .or(JsonFileSource::try_from(params.path.as_path()).ok())
     else {
-        return LintResults {
-            errors: 0,
-            diagnostics: vec![],
-            skipped_diagnostics: 0,
-        };
+        return LintResults::default();
     };
-    let root: JsonRoot = params.parse.tree();
+    let root: JsonRoot = params.parsed_source.tree(&params.workspace_db);
 
     let analyzer_options = params.settings.analyzer_options::<JsonLanguage>(
         params.path,
+        params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
     );
 
-    let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
-            .with_only(params.only)
-            .with_skip(params.skip)
-            .with_path(params.path.as_path())
-            .with_enabled_selectors(params.enabled_selectors)
-            .with_project_layout(params.project_layout.clone())
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        ..
+    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+        .with_only(params.only)
+        .with_skip(params.skip)
+        .with_path(params.path.as_path())
+        .with_enabled_selectors(params.enabled_selectors)
+        .with_project_layout(params.project_layout.clone())
+        .with_cache(params.analyzer_cache)
+        .finish();
 
     let filter = AnalysisFilter {
         categories: params.categories,
@@ -557,9 +599,7 @@ fn lint(params: LintParams) -> LintResults {
         |signal| process_lint.process_signal(signal),
     );
 
-    let mut diagnostics = params
-        .parse
-        .into_serde_diagnostics(params.diagnostic_offset);
+    let mut diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
     // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
     // malformed configuration
     if params.path.ends_with(ConfigName::biome_json())
@@ -580,11 +620,11 @@ fn lint(params: LintParams) -> LintResults {
 
 fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let CodeActionsParams {
-        parse,
+        parsed_source,
         range,
         settings: workspace,
         path,
-        module_graph: _,
+        workspace_db,
         project_layout,
         language,
         skip,
@@ -593,27 +633,34 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         suppression_reason,
         plugins,
         categories,
-        action_offset,
-        document_services: _,
+        working_directory,
+        compute_actions,
+        analyzer_cache,
     } = params;
 
     let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();
-    let tree: JsonRoot = parse.tree();
+    let tree: JsonRoot = parsed_source.tree(&workspace_db);
     let analyzer_options = workspace.analyzer_options::<JsonLanguage>(
         params.path,
+        working_directory,
         &params.language,
         suppression_reason.as_deref(),
     );
     let mut actions = Vec::new();
     let project_layout_for_services = project_layout.clone();
-    let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
-            .with_only(only)
-            .with_skip(skip)
-            .with_path(path.as_path())
-            .with_enabled_selectors(rules)
-            .with_project_layout(project_layout)
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        ..
+    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+        .with_only(only)
+        .with_skip(skip)
+        .with_path(path.as_path())
+        .with_enabled_selectors(rules)
+        .with_project_layout(project_layout)
+        .with_cache(analyzer_cache)
+        .finish();
 
     let filter = AnalysisFilter {
         categories,
@@ -626,6 +673,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         error!("Could not determine the file source of the file");
         return PullActionsResult { actions: vec![] };
     };
+    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
     let services = JsonAnalyzeServices {
         file_source,
         configuration_provider: workspace
@@ -640,16 +688,34 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         services,
         &plugins,
         |signal| {
-            actions.extend(signal.actions().into_code_action_iter().map(|item| {
-                CodeAction {
-                    category: item.category.clone(),
-                    rule_name: item
-                        .rule_name
-                        .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                    suggestion: item.suggestion,
-                    offset: action_offset,
-                }
-            }));
+            if compute_actions {
+                actions.extend(
+                    signal
+                        .actions(ActionFilter::all())
+                        .into_code_action_iter()
+                        .map(|item| CodeAction {
+                            category: item.category.clone(),
+                            rule_name: item
+                                .rule_name
+                                .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                            applicability: Some(item.suggestion.applicability),
+                            suggestion: Some(item.suggestion),
+                            offset: action_offset,
+                        }),
+                );
+            } else {
+                actions.extend(signal.actions_metadata().into_iter().map(|meta| {
+                    CodeAction {
+                        category: meta.category,
+                        rule_name: meta
+                            .rule_name
+                            .map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
+                        applicability: Some(meta.applicability),
+                        suggestion: None,
+                        offset: action_offset,
+                    }
+                }));
+            }
 
             ControlFlow::<Never>::Continue(())
         },
@@ -658,9 +724,9 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     PullActionsResult { actions }
 }
 
-#[instrument(level = "debug", skip(params))]
+#[instrument(level = "debug", skip_all)]
 fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    let mut tree: JsonRoot = params.parse.tree();
+    let mut tree: JsonRoot = params.parsed_source.tree(&params.workspace_db);
 
     // Compute final rules (taking `overrides` into account)
     let rules = params
@@ -669,17 +735,22 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<JsonLanguage>(
         params.biome_path,
+        params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
-    let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
-            .with_only(params.only)
-            .with_skip(params.skip)
-            .with_path(params.biome_path.as_path())
-            .with_enabled_selectors(params.enabled_rules)
-            .with_project_layout(params.project_layout.clone())
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        fixable_rules,
+    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+        .with_only(params.only)
+        .with_skip(params.skip)
+        .with_path(params.biome_path.as_path())
+        .with_enabled_selectors(params.enabled_rules)
+        .with_project_layout(params.project_layout.clone())
+        .finish();
 
     let filter = AnalysisFilter {
         categories: params.rule_categories,
@@ -701,6 +772,65 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         rules,
         tree.syntax().text_range_with_trivia().len().into(),
     );
+
+    if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
+        loop {
+            let services = JsonAnalyzeServices {
+                file_source,
+                configuration_provider: params
+                    .settings
+                    .full_source()
+                    .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+                project_layout: Some(params.project_layout.clone()),
+            };
+            let mut pending_actions = Vec::new();
+
+            let (_, _) = analyze(
+                &tree,
+                filter,
+                &analyzer_options,
+                services,
+                &params.plugins,
+                |signal| process_fix_all.collect_signal(signal, &mut pending_actions),
+            );
+
+            let result = process_fix_all.process_batch_actions(pending_actions, |root| {
+                tree = match JsonRoot::cast(root) {
+                    Some(tree) => tree,
+                    None => return None,
+                };
+                Some(tree.syntax().text_range_with_trivia().len().into())
+            })?;
+
+            if result.is_none() {
+                return process_fix_all.finish(
+                    || {
+                        Ok(if params.should_format {
+                            Either::Left(format_node(
+                                params.settings.format_options::<JsonLanguage>(
+                                    params.biome_path,
+                                    &params.document_file_source,
+                                ),
+                                tree.syntax(),
+                            ))
+                        } else {
+                            Either::Right(tree.syntax().to_string())
+                        })
+                    },
+                    params.embeds_initial_indent,
+                );
+            }
+        }
+    }
+
+    // Phase 1: fix loop with fixable-only rules
+    let fixable_filter = AnalysisFilter {
+        categories: params.rule_categories,
+        enabled_rules: Some(fixable_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
+    };
+
     loop {
         let services = JsonAnalyzeServices {
             file_source,
@@ -710,16 +840,22 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
                 .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
             project_layout: Some(params.project_layout.clone()),
         };
-        let (action, _) = analyze(
+        let mut pending_actions = Vec::new();
+
+        let (_, _) = analyze(
             &tree,
-            filter,
+            fixable_filter,
             &analyzer_options,
             services,
             &params.plugins,
-            |signal| process_fix_all.process_signal(signal),
+            |signal| process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions),
         );
 
-        let result = process_fix_all.process_action(action, |root| {
+        let plugin_text_edit = pending_actions
+            .iter()
+            .find_map(|action| action.text_edit.clone());
+        pending_actions.retain(|action| action.text_edit.is_none());
+        let result = process_fix_all.process_batch_actions(pending_actions, |root| {
             tree = match JsonRoot::cast(root) {
                 Some(tree) => tree,
                 None => return None,
@@ -728,22 +864,69 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         })?;
 
         if result.is_none() {
-            return process_fix_all.finish(
-                || {
-                    Ok(if params.should_format {
-                        Either::Left(format_node(
-                            params.settings.format_options::<JsonLanguage>(
-                                params.biome_path,
-                                &params.document_file_source,
-                            ),
-                            tree.syntax(),
-                        ))
-                    } else {
-                        Either::Right(tree.syntax().to_string())
-                    })
-                },
-                params.embeds_initial_indent,
-            );
+            if let Some(new_text) = process_fix_all
+                .apply_plugin_text_edit(plugin_text_edit, &tree.syntax().to_string())?
+            {
+                let options = params
+                    .settings
+                    .parse_options::<JsonLanguage>(params.biome_path, &params.document_file_source);
+                let parse = biome_json_parser::parse_json(&new_text, options);
+                tree = parse.tree();
+                continue;
+            }
+
+            break;
         }
     }
+
+    // Phase 2: all rules for final diagnostics
+    {
+        let services = JsonAnalyzeServices {
+            file_source,
+            configuration_provider: params
+                .settings
+                .full_source()
+                .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+            project_layout: Some(params.project_layout.clone()),
+        };
+
+        let (_, _) = analyze(
+            &tree,
+            filter,
+            &analyzer_options,
+            services,
+            &params.plugins,
+            |signal| process_fix_all.collect_diagnostic_only(signal),
+        );
+    }
+
+    process_fix_all.finish(
+        || {
+            Ok(if params.should_format {
+                Either::Left(format_node(
+                    params.settings.format_options::<JsonLanguage>(
+                        params.biome_path,
+                        &params.document_file_source,
+                    ),
+                    tree.syntax(),
+                ))
+            } else {
+                Either::Right(tree.syntax().to_string())
+            })
+        },
+        params.embeds_initial_indent,
+    )
+}
+
+fn search(
+    path: &BiomePath,
+    document: &DocumentFileSource,
+    parsed: AnyParsedSource,
+    provider: &dyn SearchQuery,
+    settings: &SettingsWithEditor,
+    pattern_id: PatternId,
+    workspace_db: WorkspaceDb,
+) -> Result<Vec<TextRange>, WorkspaceError> {
+    let any_parse = parsed.any_parse(&workspace_db);
+    provider.search(path, document, any_parse.clone(), settings, pattern_id)
 }

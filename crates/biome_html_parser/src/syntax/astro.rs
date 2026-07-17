@@ -1,7 +1,10 @@
 use crate::parser::HtmlParser;
 use crate::syntax::HtmlSyntaxFeatures::Astro;
 use crate::syntax::parse_error::{expected_closed_fence, expected_expression};
-use crate::syntax::{TextExpression, parse_attribute_initializer, parse_single_text_expression};
+use crate::syntax::{
+    AttrInitializerContext, TextExpression, parse_attribute_initializer,
+    parse_single_text_expression,
+};
 use crate::token_source::{HtmlLexContext, HtmlReLexContext};
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
@@ -148,7 +151,7 @@ fn parse_directive_value(p: &mut HtmlParser) -> ParsedSyntax {
 
     // Parse optional initializer if present (e.g., "={value}")
     if p.at(T![=]) {
-        parse_attribute_initializer(p).ok();
+        parse_attribute_initializer(p, AttrInitializerContext::Regular).ok();
     }
 
     Present(m.complete(p, ASTRO_DIRECTIVE_VALUE))

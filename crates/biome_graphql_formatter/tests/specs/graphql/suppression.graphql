@@ -9,6 +9,11 @@
 	@addExternalFields(source: "profiles")
 }
 
+# biome-ignore-all format: intentional
+query { hero }
+
+# Biome format should keep this comment
+
 
 {
 	hero

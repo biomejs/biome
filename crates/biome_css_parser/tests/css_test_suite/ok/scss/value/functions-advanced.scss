@@ -1,6 +1,4 @@
 // Advanced function tests
-/* TODO(scss at-rules):
-
 // Basic function
 @function simple() {
   @return 42;
@@ -156,7 +154,7 @@
 
 // Function with @debug
 @function debug-value($value) {
-  // TODO(interpolation support): @debug "Value: #{$value}";
+  @debug "Value: #{$value}";
   @return $value;
 }
 
@@ -209,7 +207,7 @@
 
 // Function with interpolation
 @function generate-selector($prefix, $name) {
-  // TODO(interpolation support): @return "#{$prefix}-#{$name}";
+  @return "#{$prefix}-#{$name}";
 }
 
 // Function returning map
@@ -243,7 +241,7 @@
 @function responsive-size($min, $max, $min-vw: 320px, $max-vw: 1200px) {
   $slope: ($max - $min) / ($max-vw - $min-vw);
   $intercept: $min - $slope * $min-vw;
-  // TODO(interpolation support): @return clamp(#{$min}, #{$intercept} + #{$slope * 100}vw, #{$max});
+  @return clamp(#{$min}, #{$intercept} + #{$slope * 100}vw, #{$max});
 }
 
 // Function with @at-root (edge case)
@@ -270,7 +268,6 @@
 @function math-operation() {
   @return math.pow(2, 3);
 }
-*/
 
 // Using functions
 .test {
@@ -302,5 +299,3 @@
   height: if(is-valid-size($size), $size, 100px);
   margin: spacing($top: add(5px, 5px));
 }
-
-

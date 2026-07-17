@@ -1,0 +1,508 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidCommentTrivia.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// Tests that comment trivia is preserved in code actions
+
+// Leading comment before a simple replacement
+document.getElementById("foo");
+
+// Trailing comment after the call should be preserved
+document.getElementsByClassName("foo bar"); // trailing comment
+
+/* Block comment before getElementsByName */
+document.getElementsByName("email");
+
+// Comments around the receiver should be preserved
+window /* receiver comment */.document.getElementById("foo");
+globalThis.document /* member-chain comment */.getElementsByClassName("foo");
+
+// Comments around the argument should be preserved when rewriting selectors
+document.getElementById(
+	/* before id */ "foo" /* after id */,
+);
+document.getElementsByClassName(
+	/* before classes */ "foo bar" /* after classes */,
+);
+document.getElementsByName(
+	/* before name */ "email" /* after name */,
+);
+
+// Template arguments with surrounding comments
+document.getElementById(
+	/* before template */ `foo` /* after template */,
+);
+document.getElementsByClassName(
+	/* before template classes */ `foo bar` /* after template classes */,
+);
+
+// Null should still be fixable without losing comments
+document.getElementById(
+	/* before null */ null /* after null */,
+);
+
+// Nested call chains should preserve nearby comments too
+for (const div of document.body /* body comment */.getElementById("id").getElementsByClassName("class")) {
+	console.log(div /* div comment */.getElementsByTagName("div"));
+}
+
+// Shadowed names are still fixable and should keep comments
+function shadowed(document) {
+	// inside function
+	document.getElementById("foo");
+}
+
+const document = customApi;
+document.getElementById("foo"); // trailing on shadowed document
+
+```
+
+# Diagnostics
+```
+invalidCommentTrivia.js:5:10 lint/nursery/useDomQuerySelector  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This DOM query uses an older DOM query API.
+  
+    4 │ // Leading comment before a simple replacement
+  > 5 │ document.getElementById("foo");
+      │          ^^^^^^^^^^^^^^
+    6 │ 
+    7 │ // Trailing comment after the call should be preserved
+  
+  i Using the more modern DOM query APIs consistently makes DOM lookups easier to read and easier to refine with more specific selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .querySelector() instead.
+  
+     3  3 │   
+     4  4 │   // Leading comment before a simple replacement
+     5    │ - document.getElementById("foo");
+        5 │ + document.querySelector("#foo");
+     6  6 │   
+     7  7 │   // Trailing comment after the call should be preserved
+  
+
+```
+
+```
+invalidCommentTrivia.js:8:10 lint/nursery/useDomQuerySelector  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This DOM query uses an older DOM query API.
+  
+     7 │ // Trailing comment after the call should be preserved
+   > 8 │ document.getElementsByClassName("foo bar"); // trailing comment
+       │          ^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ /* Block comment before getElementsByName */
+  
+  i Using the more modern DOM query APIs consistently makes DOM lookups easier to read and easier to refine with more specific selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .querySelectorAll() instead.
+  
+     6  6 │   
+     7  7 │   // Trailing comment after the call should be preserved
+     8    │ - document.getElementsByClassName("foo·bar");·//·trailing·comment
+        8 │ + document.querySelectorAll(".foo.bar");·//·trailing·comment
+     9  9 │   
+    10 10 │   /* Block comment before getElementsByName */
+  
+
+```
+
+```
+invalidCommentTrivia.js:11:10 lint/nursery/useDomQuerySelector  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This DOM query uses an older DOM query API.
+  
+    10 │ /* Block comment before getElementsByName */
+  > 11 │ document.getElementsByName("email");
+       │          ^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ // Comments around the receiver should be preserved
+  
+  i Using the more modern DOM query APIs consistently makes DOM lookups easier to read and easier to refine with more specific selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .querySelectorAll() instead.
+  
+     9  9 │   
+    10 10 │   /* Block comment before getElementsByName */
+    11    │ - document.getElementsByName("email");
+       11 │ + document.querySelectorAll("[name='email']");
+    12 12 │   
+    13 13 │   // Comments around the receiver should be preserved
+  
+
+```
+
+```
+invalidCommentTrivia.js:14:40 lint/nursery/useDomQuerySelector  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This DOM query uses an older DOM query API.
+  
+    13 │ // Comments around the receiver should be preserved
+  > 14 │ window /* receiver comment */.document.getElementById("foo");
+       │                                        ^^^^^^^^^^^^^^
+    15 │ globalThis.document /* member-chain comment */.getElementsByClassName("foo");
+    16 │ 
+  
+  i Using the more modern DOM query APIs consistently makes DOM lookups easier to read and easier to refine with more specific selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .querySelector() instead.
+  
+    12 12 │   
+    13 13 │   // Comments around the receiver should be preserved
+    14    │ - window·/*·receiver·comment·*/.document.getElementById("foo");
+       14 │ + window·/*·receiver·comment·*/.document.querySelector("#foo");
+    15 15 │   globalThis.document /* member-chain comment */.getElementsByClassName("foo");
+    16 16 │   
+  
+
+```
+
+```
+invalidCommentTrivia.js:15:48 lint/nursery/useDomQuerySelector  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This DOM query uses an older DOM query API.
+  
+    13 │ // Comments around the receiver should be preserved
+    14 │ window /* receiver comment */.document.getElementById("foo");
+  > 15 │ globalThis.document /* member-chain comment */.getElementsByClassName("foo");
+       │                                                ^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ // Comments around the argument should be preserved when rewriting selectors
+  
+  i Using the more modern DOM query APIs consistently makes DOM lookups easier to read and easier to refine with more specific selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .querySelectorAll() instead.
+  
+    13 13 │   // Comments around the receiver should be preserved
+    14 14 │   window /* receiver comment */.document.getElementById("foo");
+    15    │ - globalThis.document·/*·member-chain·comment·*/.getElementsByClassName("foo");
+       15 │ + globalThis.document·/*·member-chain·comment·*/.querySelectorAll(".foo");
+    16 16 │   
+    17 17 │   // Comments around the argument should be preserved when rewriting selectors
+  
+
+```
+
+```
+invalidCommentTrivia.js:18:10 lint/nursery/useDomQuerySelector  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This DOM query uses an older DOM query API.
+  
+    17 │ // Comments around the argument should be preserved when rewriting selectors
+  > 18 │ document.getElementById(
+       │          ^^^^^^^^^^^^^^
+    19 │ 	/* before id */ "foo" /* after id */,
+    20 │ );
+  
+  i Using the more modern DOM query APIs consistently makes DOM lookups easier to read and easier to refine with more specific selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .querySelector() instead.
+  
+    16 16 │   
+    17 17 │   // Comments around the argument should be preserved when rewriting selectors
+    18    │ - document.getElementById(
+    19    │ - → /*·before·id·*/·"foo"·/*·after·id·*/,
+       18 │ + document.querySelector(
+       19 │ + → /*·before·id·*/·"#foo"·/*·after·id·*/,
+    20 20 │   );
+    21 21 │   document.getElementsByClassName(
+  
+
+```
+
+```
+invalidCommentTrivia.js:21:10 lint/nursery/useDomQuerySelector  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This DOM query uses an older DOM query API.
+  
+    19 │ 	/* before id */ "foo" /* after id */,
+    20 │ );
+  > 21 │ document.getElementsByClassName(
+       │          ^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 	/* before classes */ "foo bar" /* after classes */,
+    23 │ );
+  
+  i Using the more modern DOM query APIs consistently makes DOM lookups easier to read and easier to refine with more specific selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .querySelectorAll() instead.
+  
+    19 19 │     /* before id */ "foo" /* after id */,
+    20 20 │   );
+    21    │ - document.getElementsByClassName(
+    22    │ - → /*·before·classes·*/·"foo·bar"·/*·after·classes·*/,
+       21 │ + document.querySelectorAll(
+       22 │ + → /*·before·classes·*/·".foo.bar"·/*·after·classes·*/,
+    23 23 │   );
+    24 24 │   document.getElementsByName(
+  
+
+```
+
+```
+invalidCommentTrivia.js:24:10 lint/nursery/useDomQuerySelector  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This DOM query uses an older DOM query API.
+  
+    22 │ 	/* before classes */ "foo bar" /* after classes */,
+    23 │ );
+  > 24 │ document.getElementsByName(
+       │          ^^^^^^^^^^^^^^^^^
+    25 │ 	/* before name */ "email" /* after name */,
+    26 │ );
+  
+  i Using the more modern DOM query APIs consistently makes DOM lookups easier to read and easier to refine with more specific selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .querySelectorAll() instead.
+  
+    22 22 │     /* before classes */ "foo bar" /* after classes */,
+    23 23 │   );
+    24    │ - document.getElementsByName(
+    25    │ - → /*·before·name·*/·"email"·/*·after·name·*/,
+       24 │ + document.querySelectorAll(
+       25 │ + → /*·before·name·*/·"[name='email']"·/*·after·name·*/,
+    26 26 │   );
+    27 27 │   
+  
+
+```
+
+```
+invalidCommentTrivia.js:29:10 lint/nursery/useDomQuerySelector  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This DOM query uses an older DOM query API.
+  
+    28 │ // Template arguments with surrounding comments
+  > 29 │ document.getElementById(
+       │          ^^^^^^^^^^^^^^
+    30 │ 	/* before template */ `foo` /* after template */,
+    31 │ );
+  
+  i Using the more modern DOM query APIs consistently makes DOM lookups easier to read and easier to refine with more specific selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .querySelector() instead.
+  
+    27 27 │   
+    28 28 │   // Template arguments with surrounding comments
+    29    │ - document.getElementById(
+    30    │ - → /*·before·template·*/·`foo`·/*·after·template·*/,
+       29 │ + document.querySelector(
+       30 │ + → /*·before·template·*/·`#foo`·/*·after·template·*/,
+    31 31 │   );
+    32 32 │   document.getElementsByClassName(
+  
+
+```
+
+```
+invalidCommentTrivia.js:32:10 lint/nursery/useDomQuerySelector  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This DOM query uses an older DOM query API.
+  
+    30 │ 	/* before template */ `foo` /* after template */,
+    31 │ );
+  > 32 │ document.getElementsByClassName(
+       │          ^^^^^^^^^^^^^^^^^^^^^^
+    33 │ 	/* before template classes */ `foo bar` /* after template classes */,
+    34 │ );
+  
+  i Using the more modern DOM query APIs consistently makes DOM lookups easier to read and easier to refine with more specific selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .querySelectorAll() instead.
+  
+    30 30 │     /* before template */ `foo` /* after template */,
+    31 31 │   );
+    32    │ - document.getElementsByClassName(
+    33    │ - → /*·before·template·classes·*/·`foo·bar`·/*·after·template·classes·*/,
+       32 │ + document.querySelectorAll(
+       33 │ + → /*·before·template·classes·*/·`.foo.bar`·/*·after·template·classes·*/,
+    34 34 │   );
+    35 35 │   
+  
+
+```
+
+```
+invalidCommentTrivia.js:37:10 lint/nursery/useDomQuerySelector  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This DOM query uses an older DOM query API.
+  
+    36 │ // Null should still be fixable without losing comments
+  > 37 │ document.getElementById(
+       │          ^^^^^^^^^^^^^^
+    38 │ 	/* before null */ null /* after null */,
+    39 │ );
+  
+  i Using the more modern DOM query APIs consistently makes DOM lookups easier to read and easier to refine with more specific selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .querySelector() instead.
+  
+    35 35 │   
+    36 36 │   // Null should still be fixable without losing comments
+    37    │ - document.getElementById(
+       37 │ + document.querySelector(
+    38 38 │   	/* before null */ null /* after null */,
+    39 39 │   );
+  
+
+```
+
+```
+invalidCommentTrivia.js:42:73 lint/nursery/useDomQuerySelector  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This DOM query uses an older DOM query API.
+  
+    41 │ // Nested call chains should preserve nearby comments too
+  > 42 │ for (const div of document.body /* body comment */.getElementById("id").getElementsByClassName("class")) {
+       │                                                                         ^^^^^^^^^^^^^^^^^^^^^^
+    43 │ 	console.log(div /* div comment */.getElementsByTagName("div"));
+    44 │ }
+  
+  i Using the more modern DOM query APIs consistently makes DOM lookups easier to read and easier to refine with more specific selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .querySelectorAll() instead.
+  
+    40 40 │   
+    41 41 │   // Nested call chains should preserve nearby comments too
+    42    │ - for·(const·div·of·document.body·/*·body·comment·*/.getElementById("id").getElementsByClassName("class"))·{
+       42 │ + for·(const·div·of·document.body·/*·body·comment·*/.getElementById("id").querySelectorAll(".class"))·{
+    43 43 │   	console.log(div /* div comment */.getElementsByTagName("div"));
+    44 44 │   }
+  
+
+```
+
+```
+invalidCommentTrivia.js:42:52 lint/nursery/useDomQuerySelector  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This DOM query uses an older DOM query API.
+  
+    41 │ // Nested call chains should preserve nearby comments too
+  > 42 │ for (const div of document.body /* body comment */.getElementById("id").getElementsByClassName("class")) {
+       │                                                    ^^^^^^^^^^^^^^
+    43 │ 	console.log(div /* div comment */.getElementsByTagName("div"));
+    44 │ }
+  
+  i Using the more modern DOM query APIs consistently makes DOM lookups easier to read and easier to refine with more specific selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .querySelector() instead.
+  
+    40 40 │   
+    41 41 │   // Nested call chains should preserve nearby comments too
+    42    │ - for·(const·div·of·document.body·/*·body·comment·*/.getElementById("id").getElementsByClassName("class"))·{
+       42 │ + for·(const·div·of·document.body·/*·body·comment·*/.querySelector("#id").getElementsByClassName("class"))·{
+    43 43 │   	console.log(div /* div comment */.getElementsByTagName("div"));
+    44 44 │   }
+  
+
+```
+
+```
+invalidCommentTrivia.js:43:36 lint/nursery/useDomQuerySelector  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This DOM query uses an older DOM query API.
+  
+    41 │ // Nested call chains should preserve nearby comments too
+    42 │ for (const div of document.body /* body comment */.getElementById("id").getElementsByClassName("class")) {
+  > 43 │ 	console.log(div /* div comment */.getElementsByTagName("div"));
+       │ 	                                  ^^^^^^^^^^^^^^^^^^^^
+    44 │ }
+    45 │ 
+  
+  i Using the more modern DOM query APIs consistently makes DOM lookups easier to read and easier to refine with more specific selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .querySelectorAll() instead.
+  
+    41 41 │   // Nested call chains should preserve nearby comments too
+    42 42 │   for (const div of document.body /* body comment */.getElementById("id").getElementsByClassName("class")) {
+    43    │ - → console.log(div·/*·div·comment·*/.getElementsByTagName("div"));
+       43 │ + → console.log(div·/*·div·comment·*/.querySelectorAll("div"));
+    44 44 │   }
+    45 45 │   
+  
+
+```
+
+```
+invalidCommentTrivia.js:49:11 lint/nursery/useDomQuerySelector  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This DOM query uses an older DOM query API.
+  
+    47 │ function shadowed(document) {
+    48 │ 	// inside function
+  > 49 │ 	document.getElementById("foo");
+       │ 	         ^^^^^^^^^^^^^^
+    50 │ }
+    51 │ 
+  
+  i Using the more modern DOM query APIs consistently makes DOM lookups easier to read and easier to refine with more specific selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .querySelector() instead.
+  
+    47 47 │   function shadowed(document) {
+    48 48 │     // inside function
+    49    │ - → document.getElementById("foo");
+       49 │ + → document.querySelector("#foo");
+    50 50 │   }
+    51 51 │   
+  
+
+```
+
+```
+invalidCommentTrivia.js:53:10 lint/nursery/useDomQuerySelector  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This DOM query uses an older DOM query API.
+  
+    52 │ const document = customApi;
+  > 53 │ document.getElementById("foo"); // trailing on shadowed document
+       │          ^^^^^^^^^^^^^^
+    54 │ 
+  
+  i Using the more modern DOM query APIs consistently makes DOM lookups easier to read and easier to refine with more specific selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .querySelector() instead.
+  
+    51 51 │   
+    52 52 │   const document = customApi;
+    53    │ - document.getElementById("foo");·//·trailing·on·shadowed·document
+       53 │ + document.querySelector("#foo");·//·trailing·on·shadowed·document
+    54 54 │   
+  
+
+```

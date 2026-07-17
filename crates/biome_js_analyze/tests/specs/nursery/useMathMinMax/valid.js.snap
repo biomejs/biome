@@ -1,0 +1,50 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+height > 10 ? height : 20;
+height > 50 ? Math.min(50, height) : height;
+foo ? foo : bar;
+
+foo > 10n ? 10n : foo;
+foo > BigInt(10) ? BigInt(10) : foo;
+foo > "10" ? "10" : foo;
+foo > true ? true : foo;
+foo > null ? null : foo;
+"10" > foo ? foo : "10";
+false > foo ? foo : false;
+foo > /pattern/ ? /pattern/ : foo;
+
+new Date() > foo ? foo : new Date();
+foo > new Date(0) ? new Date(0) : foo;
+
+var now = new Date();
+var later = new Date();
+var byDate = now > later ? later : now;
+
+const start = new Date();
+var mixedDate = start > foo ? foo : start;
+
+function keepStringDefault(a = 'string', b) {
+    return a > b ? a : b;
+}
+
+function shadowedMath(Math, a, b) {
+    return a > b ? b : a;
+}
+
+{
+    const Math = { min() {}, max() {} };
+    Math;
+    value > limit ? limit : value;
+}
+
+// the operands in these expressions are not idempotent
+// and are guarenteed to have side effects. changing them
+// to use Math.min or Math.max would change the behavior.
+i++ > b ? b : i++;
+
+```

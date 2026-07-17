@@ -10,7 +10,7 @@ impl FormatRule<AnyCssRootItem> for FormatAnyCssRootItem {
         match node {
             AnyCssRootItem::AnyCssRule(node) => node.format().fmt(f),
             AnyCssRootItem::CssBogus(node) => node.format().fmt(f),
-            AnyCssRootItem::ScssDeclaration(node) => node.format().fmt(f),
+            AnyCssRootItem::ScssVariableDeclaration(node) => node.format().fmt(f),
         }
     }
 }

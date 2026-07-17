@@ -1,0 +1,8 @@
+{
+	"items": [
+		// biome-ignore format: preserve the nested object formatting
+		{"a":1,"b":2}, // keep this trailing comment after the suppressed element
+		3,
+	],
+	"done": true
+}

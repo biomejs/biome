@@ -17,3 +17,7 @@
 ) {
   font-size: $size;
 }
+
+@each $tuple in (puma, black), (egret, white) {
+  color: red;
+}

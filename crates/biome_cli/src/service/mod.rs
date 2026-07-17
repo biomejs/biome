@@ -11,7 +11,7 @@ use std::{
     ops::Deref,
     panic::RefUnwindSafe,
     str::{FromStr, from_utf8},
-    sync::Arc,
+    sync::{Arc, Mutex},
     time::Duration,
 };
 
@@ -20,7 +20,7 @@ use biome_service::{
     TransportError,
     workspace::{TransportRequest, WorkspaceTransport},
 };
-use dashmap::DashMap;
+use papaya::HashMap;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use serde_json::{
     Value, from_slice, from_str, to_vec,
@@ -65,6 +65,7 @@ pub fn open_transport(runtime: Runtime) -> io::Result<Option<impl WorkspaceTrans
 }
 
 type JsonRpcResult = Result<Box<RawValue>, TransportError>;
+type PendingChannel = Mutex<Option<oneshot::Sender<JsonRpcResult>>>;
 
 /// Implementation of [WorkspaceTransport] for types implementing [AsyncRead]
 /// and [AsyncWrite]
@@ -110,11 +111,11 @@ pub struct SocketTransport {
 /// automatically when the handle is dropped
 #[derive(Clone, Default)]
 struct PendingRequests {
-    inner: Arc<DashMap<u64, oneshot::Sender<JsonRpcResult>>>,
+    inner: Arc<HashMap<u64, PendingChannel>>,
 }
 
 impl Deref for PendingRequests {
-    type Target = DashMap<u64, oneshot::Sender<JsonRpcResult>>;
+    type Target = HashMap<u64, PendingChannel>;
 
     fn deref(&self) -> &Self::Target {
         self.inner.as_ref()
@@ -131,7 +132,7 @@ impl Deref for PendingRequests {
 /// are cancelled immediately instead of timing out.
 impl Drop for PendingRequests {
     fn drop(&mut self) {
-        self.inner.clear();
+        self.inner.pin().clear();
     }
 }
 
@@ -192,7 +193,9 @@ impl WorkspaceTransport for SocketTransport {
     {
         let (send, recv) = oneshot::channel();
 
-        self.pending_requests.insert(request.id, send);
+        self.pending_requests
+            .pin()
+            .insert(request.id, Mutex::new(Some(send)));
 
         let is_shutdown = request.method == "biome/shutdown";
 
@@ -273,8 +276,12 @@ where
                 break;
             }
         };
+        let channel = pending_requests
+            .pin()
+            .remove(&response.id)
+            .and_then(|ch| ch.lock().ok()?.take());
 
-        if let Some((_, channel)) = pending_requests.remove(&response.id) {
+        if let Some(channel) = channel {
             let response = match (response.result, response.error) {
                 (Some(result), None) => Ok(result),
                 (None, Some(err)) => Err(TransportError::RPCError(err.message)),

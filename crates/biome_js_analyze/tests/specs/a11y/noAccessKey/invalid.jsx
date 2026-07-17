@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 <input type="submit" accessKey="s" value="Submit" />;
 <button accessKey="n">Next</button>;
 <div accessKey="h" {...props} />;

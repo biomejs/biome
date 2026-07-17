@@ -1,0 +1,68 @@
+$configured-spacing: 4px !default;
+
+@forward "tokens" as token-* hide $private-token, private-mixin with (
+  $spacing: $configured-spacing !default
+);
+
+@forward "colors" show $primary, contrast with ($primary: blue);
+
+@use "sass:selector";
+@use "tokens" as t with (
+  $spacing: 4px !default,
+  $radius: 2px
+);
+@use "theme" as *;
+
+@import "reset", "theme";
+@import "#{$theme}.scss";
+@import "print.css" print, "legacy";
+
+%toolbelt {
+  box-sizing: border-box;
+}
+
+@mixin reset_list {
+  margin: 0;
+  padding: 0;
+}
+
+@mixin logical($property, $ltr-value, $rtl-value, $rest...) {
+  #{$property}: $ltr-value;
+
+  [dir="rtl"] & {
+    #{$property}: $rtl-value;
+  }
+
+  @content($property);
+}
+
+@mixin unify-parent($child) {
+  @at-root #{selector.unify(&, $child)} {
+    @content;
+  }
+}
+
+@function spacing($value: 1, $scale...) {
+  @if $value > 0 {
+    @return $value * 1rem;
+  }
+
+  @return 0;
+}
+
+.card {
+  @include reset_list;
+  @include t.button($radius: 4px);
+  @include logical(margin-left, 1rem, 2rem) using ($property) {
+    border-#{$property}: spacing(2);
+  }
+  @include unify-parent("input") {
+    @extend %toolbelt !optional;
+  }
+
+  @at-root (with: media rule) {
+    .card-root {
+      color: $primary;
+    }
+  }
+}

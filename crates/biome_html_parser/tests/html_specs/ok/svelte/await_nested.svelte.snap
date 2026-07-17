@@ -73,9 +73,9 @@ HtmlRoot {
             clauses: SvelteAwaitClausesList [
                 SvelteAwaitThenBlock {
                     sv_curly_colon_token: SV_CURLY_COLON@45..48 "{:" [Newline("\n")] [],
-                    then_token: THEN_KW@48..52 "then" [] [],
+                    then_token: THEN_KW@48..53 "then" [] [Whitespace(" ")],
                     name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@52..57 " user" [] [],
+                        html_literal_token: HTML_LITERAL@53..57 "user" [] [],
                     },
                     r_curly_token: R_CURLY@57..58 "}" [] [],
                     children: HtmlElementList [
@@ -124,9 +124,9 @@ HtmlRoot {
                                             html_literal_token: HTML_LITERAL@103..122 " user.postsPromise " [] [],
                                         },
                                         then_clause: SvelteAwaitThenClause {
-                                            then_token: THEN_KW@122..126 "then" [] [],
+                                            then_token: THEN_KW@122..127 "then" [] [Whitespace(" ")],
                                             name: HtmlTextExpression {
-                                                html_literal_token: HTML_LITERAL@126..132 " posts" [] [],
+                                                html_literal_token: HTML_LITERAL@127..132 "posts" [] [],
                                             },
                                         },
                                         catch_clause: missing (optional),
@@ -228,9 +228,9 @@ HtmlRoot {
                 },
                 SvelteAwaitCatchBlock {
                     sv_curly_colon_token: SV_CURLY_COLON@256..259 "{:" [Newline("\n")] [],
-                    catch_token: CATCH_KW@259..264 "catch" [] [],
+                    catch_token: CATCH_KW@259..265 "catch" [] [Whitespace(" ")],
                     name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@264..270 " error" [] [],
+                        html_literal_token: HTML_LITERAL@265..270 "error" [] [],
                     },
                     r_curly_token: R_CURLY@270..271 "}" [] [],
                     children: HtmlElementList [
@@ -315,9 +315,9 @@ HtmlRoot {
       1: SVELTE_AWAIT_CLAUSES_LIST@45..303
         0: SVELTE_AWAIT_THEN_BLOCK@45..256
           0: SV_CURLY_COLON@45..48 "{:" [Newline("\n")] []
-          1: THEN_KW@48..52 "then" [] []
-          2: HTML_TEXT_EXPRESSION@52..57
-            0: HTML_LITERAL@52..57 " user" [] []
+          1: THEN_KW@48..53 "then" [] [Whitespace(" ")]
+          2: HTML_TEXT_EXPRESSION@53..57
+            0: HTML_LITERAL@53..57 "user" [] []
           3: R_CURLY@57..58 "}" [] []
           4: HTML_ELEMENT_LIST@58..256
             0: HTML_ELEMENT@58..256
@@ -354,9 +354,9 @@ HtmlRoot {
                     2: HTML_TEXT_EXPRESSION@103..122
                       0: HTML_LITERAL@103..122 " user.postsPromise " [] []
                     3: SVELTE_AWAIT_THEN_CLAUSE@122..132
-                      0: THEN_KW@122..126 "then" [] []
-                      1: HTML_TEXT_EXPRESSION@126..132
-                        0: HTML_LITERAL@126..132 " posts" [] []
+                      0: THEN_KW@122..127 "then" [] [Whitespace(" ")]
+                      1: HTML_TEXT_EXPRESSION@127..132
+                        0: HTML_LITERAL@127..132 "posts" [] []
                     4: (empty)
                     5: R_CURLY@132..133 "}" [] []
                     6: HTML_ELEMENT_LIST@133..234
@@ -425,9 +425,9 @@ HtmlRoot {
                 3: R_ANGLE@255..256 ">" [] []
         1: SVELTE_AWAIT_CATCH_BLOCK@256..303
           0: SV_CURLY_COLON@256..259 "{:" [Newline("\n")] []
-          1: CATCH_KW@259..264 "catch" [] []
-          2: HTML_TEXT_EXPRESSION@264..270
-            0: HTML_LITERAL@264..270 " error" [] []
+          1: CATCH_KW@259..265 "catch" [] [Whitespace(" ")]
+          2: HTML_TEXT_EXPRESSION@265..270
+            0: HTML_LITERAL@265..270 "error" [] []
           3: R_CURLY@270..271 "}" [] []
           4: HTML_ELEMENT_LIST@271..303
             0: HTML_ELEMENT@271..303

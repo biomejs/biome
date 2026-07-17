@@ -1,0 +1,68 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/comments/17479.css
+---
+
+# Input
+
+```css
+.foo {
+  background-image:
+    linear-gradient(to top, blue, red 100%),
+    /* texture */
+    repeating-linear-gradient(90deg, pink, yellow 20px, green 20px, pink 40px),
+    repeating-linear-gradient(90deg, pink, yellow 20px, green 20px, pink 40px);
+
+  box-shadow: 2px 2px 4px gray,
+    /* long long long long long long long long long long long long comment */
+    /* long long long long long long long long long long long long comment */
+    1000px /* long long long long long long long long long long long long comment */ 1000px /* long long long long long long long long long comment */ 2px color(srgb 0.555555555 0.555555555 0.555555555),
+    100px -1px 2px lightgray;
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -9,9 +9,7 @@
+     2px 2px 4px gray,
+     /* long long long long long long long long long long long long comment */
+     /* long long long long long long long long long long long long comment */
+-    1000px
+-      /* long long long long long long long long long long long long comment */
+-      1000px /* long long long long long long long long long comment */ 2px
+-      color(srgb 0.555555555 0.555555555 0.555555555),
++    1000px /* long long long long long long long long long long long long comment */ 1000px /* long long long long long long long long long comment */
++    2px color(srgb 0.555555555 0.555555555 0.555555555),
+     100px -1px 2px lightgray;
+ }
+```
+
+# Output
+
+```css
+.foo {
+  background-image:
+    linear-gradient(to top, blue, red 100%),
+    /* texture */
+    repeating-linear-gradient(90deg, pink, yellow 20px, green 20px, pink 40px),
+    repeating-linear-gradient(90deg, pink, yellow 20px, green 20px, pink 40px);
+
+  box-shadow:
+    2px 2px 4px gray,
+    /* long long long long long long long long long long long long comment */
+    /* long long long long long long long long long long long long comment */
+    1000px /* long long long long long long long long long long long long comment */ 1000px /* long long long long long long long long long comment */
+    2px color(srgb 0.555555555 0.555555555 0.555555555),
+    100px -1px 2px lightgray;
+}
+```
+
+# Lines exceeding max width of 80 characters
+```
+   12:     1000px /* long long long long long long long long long long long long comment */ 1000px /* long long long long long long long long long comment */
+```

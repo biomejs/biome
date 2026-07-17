@@ -1,0 +1,23 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-svelte-snippet-params.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script>
+let images = [];
+</script>
+
+{#snippet figure(image)}
+    <figure>
+        <img src={image.src} alt={image.caption} width={image.width} height={image.height} />
+        <figcaption>{image.caption}</figcaption>
+    </figure>
+{/snippet}
+
+{#each images as img}
+    {@render figure(img)}
+{/each}
+
+```

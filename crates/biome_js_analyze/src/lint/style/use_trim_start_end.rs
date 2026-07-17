@@ -6,7 +6,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make::{self};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsName, AnyJsTemplateElement, JsCallExpression,
-    JsComputedMemberExpression, JsLanguage, JsSyntaxKind, JsSyntaxToken, JsTemplateExpression,
+    JsComputedMemberExpression, JsLanguage, JsTemplateExpression,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxToken, TextRange};
 use biome_rule_options::use_trim_start_end::UseTrimStartEndOptions;
@@ -59,7 +59,7 @@ declare_lint_rule! {
 
 #[derive(Debug, Clone)]
 pub struct UseTrimStartEndState {
-    member_name: String,
+    member_name: TrimMethod,
     span: TextRange,
 }
 
@@ -88,13 +88,13 @@ impl Rule for UseTrimStartEnd {
                 let member = callee.member().ok()?;
                 let value = member.as_static_value()?;
                 let span = value.range();
-                let member_name = value.as_string_constant()?.to_string();
+                let member_name = TrimMethod::from_str(value.as_string_constant()?)?;
                 (member_name, span)
             }
             AnyJsExpression::JsStaticMemberExpression(callee) => {
                 let token = callee.member().ok()?.value_token().ok()?;
                 let span = token.text_range();
-                let member_name = token.text_trimmed().to_string();
+                let member_name = TrimMethod::from_str(token.text_trimmed())?;
                 (member_name, span)
             }
             _ => return None,
@@ -104,22 +104,20 @@ impl Rule for UseTrimStartEnd {
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let suggested_name = generate_suggested_name(&state.member_name)?;
-
-        let diagnostic_message = markup! {
-            "Use "{suggested_name}" instead of "{state.member_name}"."
-        }
-        .to_owned();
-        let note_message = {
-            markup! {
-                ""{state.member_name}" is an alias for "{suggested_name}"."
-            }
-            .to_owned()
-        };
+        let suggested_name = state.member_name.suggested_name();
+        let member_name = state.member_name.current_name();
 
         Some(
-            RuleDiagnostic::new(rule_category!(), state.span, diagnostic_message)
-                .note(note_message),
+            RuleDiagnostic::new(
+                rule_category!(),
+                state.span,
+                markup! {
+                    "Use "{suggested_name}" instead of "{member_name}"."
+                },
+            )
+            .note(markup! {
+                {member_name}" is an alias for "{suggested_name}"."
+            }),
         )
     }
 
@@ -145,11 +143,26 @@ impl Rule for UseTrimStartEnd {
         // Need to keep the original token to replace it with the new token.
         // `.as_static_value()` strips the information of tick tokens.
         let token = extract_token_from_expression(callee.clone())?;
-        let replaced_member_name = suggested_name(&token)?;
+        let replaced_member_name = state.member_name.suggested_name();
+        let replaced_member_name_display = if is_template {
+            replaced_member_name
+        } else if token.text_trimmed().starts_with('\'') {
+            match state.member_name {
+                TrimMethod::TrimLeft => "'trimStart'",
+                TrimMethod::TrimRight => "'trimEnd'",
+            }
+        } else if token.text_trimmed().starts_with('"') {
+            match state.member_name {
+                TrimMethod::TrimLeft => "\"trimStart\"",
+                TrimMethod::TrimRight => "\"trimEnd\"",
+            }
+        } else {
+            replaced_member_name
+        };
 
         let mut elements = vec![];
         let template_elements = AnyJsTemplateElement::from(make::js_template_chunk_element(
-            make::js_template_chunk(replaced_member_name.as_str()),
+            make::js_template_chunk(replaced_member_name),
         ));
         elements.push(template_elements);
 
@@ -178,17 +191,19 @@ impl Rule for UseTrimStartEnd {
                 )
                 .build(),
             )
+        } else if token.text_trimmed().starts_with('\'') {
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsStringLiteralExpression(
+                    make::js_string_literal_expression(make::js_string_literal_single_quotes(
+                        replaced_member_name,
+                    )),
+                ),
+            )
         } else {
             AnyJsExpression::AnyJsLiteralExpression(
                 AnyJsLiteralExpression::JsStringLiteralExpression(
-                    make::js_string_literal_expression(JsSyntaxToken::new_detached(
-                        // Need to handle "'text'" and "\"text\"".
-                        // make::js_string_literal() call the function that format the text as below:
-                        // > &format!("\"{text}\"")
-                        JsSyntaxKind::JS_STRING_LITERAL,
-                        &replaced_member_name,
-                        [],
-                        [],
+                    make::js_string_literal_expression(make::js_string_literal(
+                        replaced_member_name,
                     )),
                 ),
             )
@@ -211,7 +226,7 @@ impl Rule for UseTrimStartEnd {
                     .as_js_static_member_expression()?
                     .operator_token()
                     .ok()?,
-                AnyJsName::JsName(make::js_name(make::ident(&replaced_member_name))),
+                AnyJsName::JsName(make::js_name(make::ident(replaced_member_name))),
             ))
         };
 
@@ -221,10 +236,39 @@ impl Rule for UseTrimStartEnd {
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Replace "<Emphasis>{state.member_name}</Emphasis>" with "<Emphasis>{replaced_member_name}</Emphasis>"." }
-                .to_owned(),
+            markup! { "Replace "<Emphasis>{state.member_name.current_name()}</Emphasis>" with "<Emphasis>{replaced_member_name_display}</Emphasis>"." },
             mutation,
         ))
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum TrimMethod {
+    TrimLeft,
+    TrimRight,
+}
+
+impl TrimMethod {
+    const fn current_name(self) -> &'static str {
+        match self {
+            Self::TrimLeft => "trimLeft",
+            Self::TrimRight => "trimRight",
+        }
+    }
+
+    const fn suggested_name(self) -> &'static str {
+        match self {
+            Self::TrimLeft => "trimStart",
+            Self::TrimRight => "trimEnd",
+        }
+    }
+
+    fn from_str(text: &str) -> Option<Self> {
+        match text {
+            "trimLeft" => Some(Self::TrimLeft),
+            "trimRight" => Some(Self::TrimRight),
+            _ => None,
+        }
     }
 }
 
@@ -245,39 +289,5 @@ fn extract_token_from_expression(callee: AnyJsExpression) -> Option<SyntaxToken<
         expression.member().ok()?.value_token().ok()
     } else {
         None
-    }
-}
-
-// Handle "'text'" and "\"text\"" and "text" cases
-fn suggested_name(text: &SyntaxToken<JsLanguage>) -> Option<String> {
-    let trimmed = text.text_trimmed();
-
-    let is_single_quoted = trimmed.starts_with('\'') && trimmed.ends_with('\'');
-    let is_double_quoted = trimmed.starts_with('"') && trimmed.ends_with('"');
-
-    let unquoted = if is_single_quoted {
-        trimmed.trim_matches('\'')
-    } else if is_double_quoted {
-        trimmed.trim_matches('"')
-    } else {
-        trimmed
-    };
-
-    generate_suggested_name(unquoted).map(|suggested_name| {
-        if is_single_quoted {
-            format!("'{suggested_name}'")
-        } else if is_double_quoted {
-            format!("\"{suggested_name}\"")
-        } else {
-            suggested_name.to_string()
-        }
-    })
-}
-
-fn generate_suggested_name(member_name: &str) -> Option<&str> {
-    match member_name {
-        "trimLeft" => Some("trimStart"),
-        "trimRight" => Some("trimEnd"),
-        _ => None,
     }
 }

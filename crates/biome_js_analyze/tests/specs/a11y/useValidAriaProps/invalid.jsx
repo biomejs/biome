@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 var a = <input className="" aria-labell="" />;
 var a = <div aria-="foobar" />;
 var a = <div aria-labeledby="foobar" />;

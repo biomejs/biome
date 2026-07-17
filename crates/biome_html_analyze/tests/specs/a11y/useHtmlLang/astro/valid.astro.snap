@@ -1,0 +1,12 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+<html lang="en"></html>
+<html lang={langValue}></html>
+<html {lang}></html>
+
+```

@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: css/stylefmt-repo/custom-media-queries/custom-media-queries.css
+---
+
+# Input
+
+```css
+@custom-media     --small-viewport ( max-width:30em   )
+
+
+;
+
+@media (      --small-viewport    ){
+.rule{color:blue;}
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+-@custom-media --small-viewport (max-width: 30em);
++@custom-media --small-viewport ( max-width:30em   );
+ 
+ @media (--small-viewport) {
+   .rule {
+```
+
+# Output
+
+```css
+@custom-media --small-viewport ( max-width:30em   );
+
+@media (--small-viewport) {
+  .rule {
+    color: blue;
+  }
+}
+```

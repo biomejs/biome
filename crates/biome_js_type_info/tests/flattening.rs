@@ -1,7 +1,8 @@
 mod utils;
 
 use biome_js_type_info::{
-    GlobalsResolver, ScopeId, TypeData, TypeReference, TypeResolver, TypeofExpression,
+    Function, FunctionParameter, GlobalsResolver, Literal, NamedFunctionParameter, ReturnType,
+    ScopeId, TypeData, TypeMember, TypeMemberKind, TypeReference, TypeResolver, TypeofExpression,
     TypeofStaticMemberExpression,
 };
 
@@ -224,6 +225,85 @@ returnsPromise()"#;
 }
 
 #[test]
+fn infer_flattened_type_from_indexed_function_call() {
+    const CODE: &str = r#"const fns = [() => "value"];
+
+fns[0]()"#;
+
+    let root = parse_ts(CODE);
+    let declaration = get_variable_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(
+        &mut resolver,
+        ScopeId::GLOBAL,
+        &declaration,
+    );
+    resolver.run_inference();
+
+    let [(name, reference)] = bindings.as_ref() else {
+        panic!("expected exactly one binding");
+    };
+    assert_eq!(name.text(), "fns");
+    let function_tuple = resolver
+        .resolve_and_get(reference)
+        .expect("fns should resolve")
+        .to_data();
+
+    let expression = get_expression(&root);
+    let mut resolver = HardcodedSymbolResolver::new("fns", function_tuple, resolver);
+    let expression_type =
+        TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expression);
+    resolver.run_inference();
+    let expression_type = expression_type.inferred(&mut resolver);
+
+    assert_eq!(expression_type.to_string(), "string: value");
+}
+
+#[test]
+fn nested_overloaded_call_replays_inner_overload_selection() {
+    const CODE: &str = r#"makeCallback("sync")()"#;
+
+    let root = parse_ts(CODE);
+    let mut resolver = GlobalsResolver::default();
+
+    let string_reference = resolver.reference_to_owned_data(TypeData::String);
+    let void_reference = resolver.reference_to_owned_data(TypeData::VoidKeyword);
+    let promise_reference = resolver.reference_to_owned_data(TypeData::promise_of(
+        ScopeId::GLOBAL,
+        void_reference.clone(),
+    ));
+    let void_callback_reference = function_reference(&mut resolver, [], void_reference.clone());
+    let promise_callback_reference =
+        function_reference(&mut resolver, [], promise_reference.clone());
+    let returns_promise_callback_reference =
+        function_reference(&mut resolver, [], promise_callback_reference);
+    let returns_void_callback_reference = function_reference(
+        &mut resolver,
+        [named_parameter("mode", string_reference)],
+        void_callback_reference,
+    );
+    let overloads = TypeData::object_with_members(Box::new([
+        TypeMember {
+            kind: TypeMemberKind::CallSignature,
+            ty: returns_promise_callback_reference,
+        },
+        TypeMember {
+            kind: TypeMemberKind::CallSignature,
+            ty: returns_void_callback_reference,
+        },
+    ]));
+
+    let expression = get_expression(&root);
+    let mut resolver = HardcodedSymbolResolver::new("makeCallback", overloads, resolver);
+    let expression_type =
+        TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expression);
+    resolver.run_inference();
+    let expression_type = expression_type.inferred(&mut resolver);
+
+    assert_eq!(expression_type.to_string(), "void");
+}
+
+#[test]
 fn infer_flattened_type_from_chained_invocation_of_promise_returning_function() {
     const CODE: &str = r#"function returnsPromise(): Promise<number> {
     return Promise.resolved(true);
@@ -250,6 +330,29 @@ returnsPromise().then(() => {})"#;
         &resolver,
         "infer_flattened_type_from_chained_invocation_of_promise_returning_function",
     )
+}
+
+fn function_reference<const PARAMETER_COUNT: usize>(
+    resolver: &mut dyn TypeResolver,
+    parameters: [FunctionParameter; PARAMETER_COUNT],
+    return_type: TypeReference,
+) -> TypeReference {
+    resolver.reference_to_owned_data(TypeData::Function(Box::new(Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: None,
+        parameters: Box::new(parameters),
+        return_type: ReturnType::Type(return_type),
+    })))
+}
+
+fn named_parameter(name: &'static str, type_reference: TypeReference) -> FunctionParameter {
+    FunctionParameter::Named(NamedFunctionParameter {
+        name: Text::new_static(name),
+        ty: type_reference,
+        is_optional: false,
+        is_rest: false,
+    })
 }
 
 #[test]
@@ -297,6 +400,122 @@ fn infer_flattened_type_from_direct_promise_instance() {
         &resolver,
         "infer_flattened_type_from_direct_promise_instance",
     )
+}
+
+#[test]
+fn infer_flattened_type_from_direct_builtin_class_instances() {
+    for (code, expected) in [
+        (r#"new Date()"#, "instanceof Date"),
+        (r#"new Map()"#, "instanceof Map"),
+        (r#"new Set()"#, "instanceof Set"),
+        (r#"new WeakMap()"#, "instanceof WeakMap"),
+        (r#"new Error()"#, "instanceof Error"),
+    ] {
+        let root = parse_ts(code);
+        let expr = get_expression(&root);
+        let mut resolver = GlobalsResolver::default();
+        let expr_ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+        let expr_ty = expr_ty.inferred(&mut resolver);
+
+        assert_eq!(expr_ty.to_string(), expected);
+    }
+}
+
+#[test]
+fn infer_flattened_type_from_generated_error_members() {
+    for (code, expected) in [
+        (r#"new Error().message"#, "string"),
+        (r#"new Error("message").name"#, "string"),
+        (r#"new Error().stack"#, "string | undefined"),
+        (r#"Error().message"#, "string"),
+        (r#"Error.prototype.message"#, "string"),
+    ] {
+        let root = parse_ts(code);
+        let expr = get_expression(&root);
+        let mut resolver = GlobalsResolver::default();
+        let expression_type =
+            TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+        let expression_type = expression_type.inferred(&mut resolver);
+
+        assert_eq!(expression_type.to_string(), expected);
+    }
+}
+
+#[test]
+fn generated_error_value_members_do_not_leak_to_instances() {
+    for code in [
+        r#"Error.message"#,
+        r#"Error.constructor"#,
+        r#"new Error()()"#,
+        r#"new Error().prototype"#,
+    ] {
+        let root = parse_ts(code);
+        let expr = get_expression(&root);
+        let mut resolver = GlobalsResolver::default();
+        let expression_type =
+            TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+        let expression_type = expression_type.inferred(&mut resolver);
+
+        assert!(
+            matches!(expression_type, TypeData::TypeofExpression(_)),
+            "expected invalid Error access to stay unresolved, got: {expression_type}",
+        );
+    }
+}
+
+#[test]
+fn infer_flattened_type_of_destructured_error_stack() {
+    const CODE: &str = r#"const { stack } = new Error();"#;
+
+    let root = parse_ts(CODE);
+    let declaration = get_variable_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(
+        &mut resolver,
+        ScopeId::GLOBAL,
+        &declaration,
+    );
+    resolver.run_inference();
+
+    let [(name, reference)] = bindings.as_ref() else {
+        panic!("expected exactly one binding");
+    };
+    assert_eq!(name.text(), "stack");
+    let stack_type = resolver
+        .resolve_and_get(reference)
+        .expect("stack should resolve")
+        .to_data();
+
+    assert_eq!(stack_type.to_string(), "string | undefined");
+}
+
+#[test]
+fn generated_error_constructor_is_not_a_destructured_static_property() {
+    const CODE: &str = r#"const { constructor } = Error;"#;
+
+    let root = parse_ts(CODE);
+    let declaration = get_variable_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(
+        &mut resolver,
+        ScopeId::GLOBAL,
+        &declaration,
+    );
+    resolver.run_inference();
+
+    let [(name, reference)] = bindings.as_ref() else {
+        panic!("expected exactly one binding");
+    };
+    assert_eq!(name.text(), "constructor");
+    let constructor_type = resolver
+        .resolve_and_get(reference)
+        .expect("constructor should resolve")
+        .to_data();
+
+    assert!(
+        matches!(constructor_type, TypeData::TypeofExpression(_)),
+        "expected invalid destructured property to stay unresolved, got: {constructor_type}",
+    );
 }
 
 #[test]
@@ -372,4 +591,129 @@ function bar({ foo }: Foo) {
         &resolver,
         "infer_flattened_type_of_destructured_interface_field",
     )
+}
+
+#[test]
+fn union_of_collapses_true_and_false_to_boolean() {
+    let mut resolver = GlobalsResolver::default();
+    let true_ref = resolver.reference_to_owned_data(TypeData::from(Literal::Boolean(true.into())));
+    let false_ref =
+        resolver.reference_to_owned_data(TypeData::from(Literal::Boolean(false.into())));
+
+    let union_ty = TypeData::union_of(&resolver, [true_ref, false_ref].into());
+    let resolved = resolve_owned(&resolver, &union_ty);
+
+    assert!(
+        matches!(resolved, TypeData::Boolean),
+        "expected boolean keyword, got: {resolved}"
+    );
+}
+
+#[test]
+fn union_of_collapses_true_false_inside_larger_union() {
+    let mut resolver = GlobalsResolver::default();
+    let true_ref = resolver.reference_to_owned_data(TypeData::from(Literal::Boolean(true.into())));
+    let false_ref =
+        resolver.reference_to_owned_data(TypeData::from(Literal::Boolean(false.into())));
+    let null_ref = resolver.reference_to_owned_data(TypeData::Null);
+
+    let union_ty = TypeData::union_of(&resolver, [true_ref, false_ref, null_ref].into());
+
+    let TypeData::Union(union) = union_ty else {
+        panic!("expected union, got: {union_ty}");
+    };
+    let variants: Vec<_> = union
+        .types()
+        .iter()
+        .map(|ty| {
+            resolver
+                .resolve_and_get(ty)
+                .expect("must resolve")
+                .as_raw_data()
+                .clone()
+        })
+        .collect();
+
+    assert!(
+        variants.iter().any(|v| matches!(v, TypeData::Boolean)),
+        "expected boolean keyword in {variants:?}"
+    );
+    assert!(
+        variants.iter().any(|v| matches!(v, TypeData::Null)),
+        "expected null in {variants:?}"
+    );
+    assert!(
+        !variants.iter().any(
+            |v| matches!(v, TypeData::Literal(lit) if matches!(lit.as_ref(), Literal::Boolean(_)))
+        ),
+        "boolean literals should be collapsed, got {variants:?}"
+    );
+}
+
+#[test]
+fn union_of_keeps_lone_boolean_literal() {
+    let mut resolver = GlobalsResolver::default();
+    let true_ref = resolver.reference_to_owned_data(TypeData::from(Literal::Boolean(true.into())));
+    let null_ref = resolver.reference_to_owned_data(TypeData::Null);
+
+    let union_ty = TypeData::union_of(&resolver, [true_ref, null_ref].into());
+
+    let TypeData::Union(union) = union_ty else {
+        panic!("expected union, got: {union_ty}");
+    };
+    let has_true_literal = union.types().iter().any(|ty| {
+        resolver.resolve_and_get(ty).is_some_and(|resolved| {
+            matches!(
+                resolved.as_raw_data(),
+                TypeData::Literal(lit) if matches!(lit.as_ref(), Literal::Boolean(b) if b.as_bool())
+            )
+        })
+    });
+    assert!(
+        has_true_literal,
+        "expected `true` literal to remain when `false` is absent"
+    );
+}
+
+#[test]
+fn union_of_drops_redundant_literals_when_boolean_present() {
+    let mut resolver = GlobalsResolver::default();
+    let true_ref = resolver.reference_to_owned_data(TypeData::from(Literal::Boolean(true.into())));
+    let false_ref =
+        resolver.reference_to_owned_data(TypeData::from(Literal::Boolean(false.into())));
+    let bool_ref = resolver.reference_to_owned_data(TypeData::Boolean);
+
+    let union_ty = TypeData::union_of(&resolver, [true_ref, false_ref, bool_ref].into());
+    let resolved = resolve_owned(&resolver, &union_ty);
+
+    assert!(
+        matches!(resolved, TypeData::Boolean),
+        "expected boolean keyword (literals collapsed onto existing boolean), got: {resolved}"
+    );
+}
+
+#[test]
+fn union_of_drops_boolean_literal_when_boolean_present() {
+    let mut resolver = GlobalsResolver::default();
+    let true_ref = resolver.reference_to_owned_data(TypeData::from(Literal::Boolean(true.into())));
+    let bool_ref = resolver.reference_to_owned_data(TypeData::Boolean);
+
+    let union_ty = TypeData::union_of(&resolver, [bool_ref, true_ref].into());
+    let resolved = resolve_owned(&resolver, &union_ty);
+
+    assert!(
+        matches!(resolved, TypeData::Boolean),
+        "expected boolean keyword (literal subsumed by boolean), got: {resolved}"
+    );
+}
+
+fn resolve_owned(resolver: &dyn TypeResolver, ty: &TypeData) -> TypeData {
+    match ty {
+        TypeData::Reference(r) => resolver
+            .resolve_and_get(r)
+            .expect("must resolve")
+            .as_raw_data()
+            .clone(),
+        other => other.clone(),
+    }
 }

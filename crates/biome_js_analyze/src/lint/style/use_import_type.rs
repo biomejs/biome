@@ -1,12 +1,12 @@
 use crate::{
     JsRuleAction,
     react::{ReactLibrary, is_global_react_import, is_jsx_factory_import},
-    services::embedded_value_references::EmbeddedValueReferences,
+    services::embedded::EmbeddedService,
     services::semantic::Semantic,
 };
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
-    options::JsxRuntime,
+    options::JsxRuntime, utils::split_separated_list,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
@@ -15,10 +15,11 @@ use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsIdentifierUsage, AnyJsImportClause, AnyJsModuleItem,
-    AnyJsModuleSource, AnyJsNamedImportSpecifier, AnyJsRoot, JsFileSource, JsIdentifierBinding,
-    JsImport, JsImportCombinedClause, JsImportDefaultClause, JsLanguage, JsModuleItemList,
+    AnyJsModuleSource, AnyJsNamedImportSpecifier, AnyJsRoot, JsIdentifierBinding, JsImport,
+    JsImportCombinedClause, JsImportDefaultClause, JsLanguage, JsModuleItemList,
     JsNamedImportSpecifierList, JsNamedImportSpecifiers, JsSyntaxNode, JsSyntaxToken, T,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, SyntaxElement, SyntaxResult,
     TriviaPieceKind, chain_trivia_pieces, trim_leading_trivia_pieces, trim_trailing_trivia_pieces,
@@ -39,7 +40,7 @@ declare_lint_rule! {
     /// If you use the TypeScript Compiler (TSC) to compile your code into JavaScript,
     /// then you can disable this rule, as TSC can remove imports only used as types.
     /// However, for consistency and compatibility with other compilers, you may want to enable this rule.
-    /// In that case we recommend to enable TSC's [`verbatimModuleSyntax`](https://www.typescriptlang.org/tsconfig/#verbatimModuleSyntax).
+    /// In that case, it's recommended to enable TSC's [`verbatimModuleSyntax`](https://www.typescriptlang.org/tsconfig/#verbatimModuleSyntax).
     /// This configuration ensures that TSC preserves imports not marked with the `type` keyword.
     ///
     /// You may also want to enable the editor setting [`typescript.preferences.preferTypeOnlyAutoImports`](https://devblogs.microsoft.com/typescript/announcing-typescript-5-3-rc/#settings-to-prefer-type-auto-imports) from the TypeScript LSP.
@@ -120,7 +121,7 @@ declare_lint_rule! {
     ///
     /// - `inlineType`: always use `import { type T }` instead of `import type { T }`
     /// - `separatedType`: always use `import type { T }` instead of `import { type T }`
-    /// - `auto`: use both `import type { T }` and `import { type T }` (default)
+    /// - `auto`: use `import type { T }` or `import { type T, V }` when values are imported alongside types (default)
     ///
     /// ```jsonc,options
     /// {
@@ -188,8 +189,8 @@ impl Rule for UseImportType {
         }
         let model = ctx.model();
         let references = ctx
-            .get_service::<EmbeddedValueReferences>()
-            .expect("embedded value references service");
+            .get_service::<EmbeddedService>()
+            .expect("embedded service");
         let style = ctx.options().style.unwrap_or_default();
         match import_clause {
             AnyJsImportClause::JsImportBareClause(_) => None,
@@ -207,16 +208,14 @@ impl Rule for UseImportType {
                             Some(NamedImportTypeFix::UseImportType(specifiers)) => {
                                 if is_default_used_as_type {
                                     Some(ImportTypeFix::UseImportType)
-                                } else if specifiers.is_empty() {
-                                    // Don't group inline type-imports,
-                                    // when the default import is not only used as a type.
-                                    None
                                 } else if style == Style::SeparatedType {
                                     Some(ImportTypeFix::ExtractCombinedImportType(Box::default()))
-                                } else {
+                                } else if !specifiers.is_empty() {
                                     // Prefer adding type keyword instead of
                                     // splitting the import statement into two import statements
                                     Some(ImportTypeFix::AddTypeQualifiers(specifiers))
+                                } else {
+                                    None
                                 }
                             }
                             Some(NamedImportTypeFix::AddInlineTypeQualifiers(specifiers)) => {
@@ -823,26 +822,36 @@ pub enum ImportTypeFix {
 fn is_only_used_as_type(
     model: &SemanticModel,
     binding: &JsIdentifierBinding,
-    references: &EmbeddedValueReferences,
+    references: &EmbeddedService,
 ) -> bool {
-    // First check if the binding is used as a value in embedded non-source snippets (templates)
-    if let Ok(name_token) = binding.name_token()
-        && references.is_used_as_value(name_token.text_trimmed())
+    let name = binding.name_token().ok().map(|token| token.token_text_trimmed());
+
+    // Used as a value in the template → not type-only.
+    if name
+        .as_ref()
+        .is_some_and(|name| references.is_used_as_value(name.clone()))
     {
         return false;
     }
 
-    // Then check semantic model for type-only usage
-    let mut result = false;
+    let mut has_reference = false;
+    let mut all_type_only = true;
     for reference in binding.all_references(model) {
-        if let Some(reference) = AnyJsIdentifierUsage::cast_ref(&reference.syntax()) {
-            result = reference.is_only_type();
-            if !result {
-                break;
-            }
+        has_reference = true;
+        if let Some(reference) = AnyJsIdentifierUsage::cast_ref(&reference.syntax())
+            && !reference.is_only_type()
+        {
+            all_type_only = false;
+            break;
         }
     }
-    result
+
+    if has_reference {
+        return all_type_only;
+    }
+
+    // No script references: type-only if the template uses it as a type.
+    name.is_some_and(|name| references.is_used_as_type(name))
 }
 
 #[derive(Debug)]
@@ -857,7 +866,7 @@ fn named_import_type_fix(
     model: &SemanticModel,
     named_specifiers: &JsNamedImportSpecifiers,
     has_type_token: bool,
-    value_refs: &EmbeddedValueReferences,
+    value_refs: &EmbeddedService,
 ) -> Option<NamedImportTypeFix> {
     let specifiers = named_specifiers.specifiers();
     if specifiers.is_empty() {
@@ -922,7 +931,7 @@ fn named_import_type_fix(
     }
 }
 
-fn add_module_items(
+pub(crate) fn add_module_items(
     mutation: &mut BatchMutation<JsLanguage>,
     preceding_item: &JsSyntaxNode,
     new_items: impl IntoIterator<Item = AnyJsModuleItem>,
@@ -997,10 +1006,11 @@ fn extract_combined_specifier_in_new_import(
                                 type_token.leading_trivia().pieces(),
                                 trim_leading_trivia_pieces(type_token.trailing_trivia().pieces()),
                             ))?;
-                        new_specifiers = new_specifiers.replace_child(
-                            specifier.clone().into_syntax().into(),
-                            new_specifier.into_syntax().into(),
-                        )?;
+                        let slot_index = specifier.syntax().index();
+                        new_specifiers = new_specifiers.splice_slots(
+                            slot_index..=slot_index,
+                            [Some(new_specifier.into_syntax().into())],
+                        );
                     }
                 }
                 let new_specifiers = JsNamedImportSpecifierList::unwrap_cast(new_specifiers);
@@ -1068,15 +1078,7 @@ fn split_named_import_specifiers(
     specifiers_requiring_type_marker: &[AnyJsNamedImportSpecifier],
 ) -> Option<(JsNamedImportSpecifiers, JsNamedImportSpecifiers)> {
     let specifiers = named_specifiers.specifiers();
-    let mut type_specifiers = Vec::with_capacity(specifiers.len() - 1);
-    let mut type_specifier_separators = Vec::with_capacity(specifiers.len() - 1);
-    let mut value_specifiers =
-        Vec::with_capacity(specifiers.len() - specifiers_requiring_type_marker.len());
-    let mut value_specifier_separators =
-        Vec::with_capacity(specifiers.len() - specifiers_requiring_type_marker.len());
-    for specifier_element in specifiers.elements() {
-        let specifier = specifier_element.node().ok()?.clone();
-        let trailing_sep = specifier_element.into_trailing_separator().ok()?;
+    let (type_specifiers, value_specifiers) = split_separated_list(&specifiers, |specifier| {
         if let Some(type_token) = specifier.type_token() {
             let new_specifier = specifier
                 .with_type_token(None)
@@ -1085,35 +1087,18 @@ fn split_named_import_specifiers(
                     type_token.leading_trivia().pieces(),
                     trim_leading_trivia_pieces(type_token.trailing_trivia().pieces()),
                 ))?;
-            type_specifiers.push(new_specifier);
-            if let Some(trailing_sep) = trailing_sep {
-                type_specifier_separators.push(trailing_sep);
-            }
+            Some(either::Either::Left(new_specifier))
         } else if specifiers_requiring_type_marker
             .iter()
-            .any(|x| x.range().start() == specifier.range().start())
+            .any(|x| x.syntax().index() == specifier.syntax().index())
         {
-            type_specifiers.push(specifier);
-            if let Some(trailing_sep) = trailing_sep {
-                type_specifier_separators.push(trailing_sep);
-            }
+            Some(either::Either::Left(specifier))
         } else {
-            value_specifiers.push(specifier);
-            if let Some(trailing_sep) = trailing_sep {
-                value_specifier_separators.push(trailing_sep);
-            }
+            Some(either::Either::Right(specifier))
         }
-    }
-    let named_type = {
-        let type_specifiers =
-            make::js_named_import_specifier_list(type_specifiers, type_specifier_separators);
-        named_specifiers.clone().with_specifiers(type_specifiers)
-    };
-    let named_value = {
-        let value_specifiers =
-            make::js_named_import_specifier_list(value_specifiers, value_specifier_separators);
-        named_specifiers.with_specifiers(value_specifiers)
-    };
+    })?;
+    let named_type = named_specifiers.clone().with_specifiers(type_specifiers);
+    let named_value = named_specifiers.with_specifiers(value_specifiers);
     Some((named_type, named_value))
 }
 

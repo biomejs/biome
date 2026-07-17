@@ -1,0 +1,82 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+{#snippet }
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteSnippetBlock {
+            opening_block: SvelteSnippetOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                snippet_token: SNIPPET_KW@2..10 "snippet" [] [Whitespace(" ")],
+                expression: missing (required),
+                r_curly_token: R_CURLY@10..11 "}" [] [],
+                children: HtmlElementList [],
+            },
+            closing_block: missing (required),
+        },
+    ],
+    eof_token: EOF@11..12 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..12
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..11
+    0: SVELTE_SNIPPET_BLOCK@0..11
+      0: SVELTE_SNIPPET_OPENING_BLOCK@0..11
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: SNIPPET_KW@2..10 "snippet" [] [Whitespace(" ")]
+        2: (empty)
+        3: R_CURLY@10..11 "}" [] []
+        4: HTML_ELEMENT_LIST@11..11
+      1: (empty)
+  4: EOF@11..12 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+snippet_missing_expression.svelte:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression, instead none was found.
+  
+  > 1 │ {#snippet }
+      │           ^
+    2 │ 
+  
+snippet_missing_expression.svelte:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a closing block, instead found none.
+  
+    1 │ {#snippet }
+  > 2 │ 
+      │ 
+  
+  i This is where the block started.
+  
+    1 │ {#snippet }
+  > 2 │ 
+      │ 
+  
+```

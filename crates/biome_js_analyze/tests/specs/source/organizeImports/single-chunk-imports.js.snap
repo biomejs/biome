@@ -23,14 +23,21 @@ import { ScopedPackage } from "@scope/package";
 ```
 single-chunk-imports.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these imports.
   
-  > 1 │ import { Bun } from "bun:test";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ // URL
-    3 │ import { URL } from "https://example.org";
+   > 1 │ import { Bun } from "bun:test";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 2 │ // URL
+   > 3 │ import { URL } from "https://example.org";
+   > 4 │ import { Relative } from ".";
+        ...
+  > 10 │ import { B } from "b";
+  > 11 │ // This is a scoped package
+  > 12 │ import { ScopedPackage } from "@scope/package";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
      1    │ - import·{·Bun·}·from·"bun:test";
      2    │ - //·URL

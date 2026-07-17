@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 <>
 	<div scope={scope} />
 	<div scope={scope}></div>

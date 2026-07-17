@@ -1,0 +1,103 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 120
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <h1></h1>
+  <h2>   </h2>
+  <h1 aria-hidden="true">invisible content</h1>
+  <h1><span aria-hidden="true">hidden</span></h1>
+  <h3></h3>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:3 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <h1></h1>
+      │   ^^^^^^^^^
+    4 │   <h2>   </h2>
+    5 │   <h1 aria-hidden="true">invisible content</h1>
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.vue:4:3 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    2 │ <template>
+    3 │   <h1></h1>
+  > 4 │   <h2>   </h2>
+      │   ^^^^^^^^^^^^
+    5 │   <h1 aria-hidden="true">invisible content</h1>
+    6 │   <h1><span aria-hidden="true">hidden</span></h1>
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.vue:5:3 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    3 │   <h1></h1>
+    4 │   <h2>   </h2>
+  > 5 │   <h1 aria-hidden="true">invisible content</h1>
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │   <h1><span aria-hidden="true">hidden</span></h1>
+    7 │   <h3></h3>
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.vue:6:3 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    4 │   <h2>   </h2>
+    5 │   <h1 aria-hidden="true">invisible content</h1>
+  > 6 │   <h1><span aria-hidden="true">hidden</span></h1>
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │   <h3></h3>
+    8 │ </template>
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.vue:7:3 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    5 │   <h1 aria-hidden="true">invisible content</h1>
+    6 │   <h1><span aria-hidden="true">hidden</span></h1>
+  > 7 │   <h3></h3>
+      │   ^^^^^^^^^
+    8 │ </template>
+    9 │ 
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```

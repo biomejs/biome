@@ -29,9 +29,9 @@ HtmlRoot {
         SvelteIfBlock {
             opening_block: SvelteIfOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
-                if_token: IF_KW@2..4 "if" [] [],
+                if_token: IF_KW@2..5 "if" [] [Whitespace(" ")],
                 expression: HtmlTextExpression {
-                    html_literal_token: HTML_LITERAL@4..12 " visible" [] [],
+                    html_literal_token: HTML_LITERAL@5..12 "visible" [] [],
                 },
                 r_curly_token: R_CURLY@12..13 "}" [] [],
                 children: HtmlElementList [
@@ -194,9 +194,9 @@ HtmlRoot {
     0: SVELTE_IF_BLOCK@0..187
       0: SVELTE_IF_OPENING_BLOCK@0..181
         0: SV_CURLY_HASH@0..2 "{#" [] []
-        1: IF_KW@2..4 "if" [] []
-        2: HTML_TEXT_EXPRESSION@4..12
-          0: HTML_LITERAL@4..12 " visible" [] []
+        1: IF_KW@2..5 "if" [] [Whitespace(" ")]
+        2: HTML_TEXT_EXPRESSION@5..12
+          0: HTML_LITERAL@5..12 "visible" [] []
         3: R_CURLY@12..13 "}" [] []
         4: HTML_ELEMENT_LIST@13..181
           0: HTML_ELEMENT@13..83

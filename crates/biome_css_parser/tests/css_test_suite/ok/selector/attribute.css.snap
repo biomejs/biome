@@ -417,7 +417,9 @@ CssRoot {
                                         value_token: CSS_STRING_LITERAL@189..203 "\"insensitive\"" [] [Whitespace(" ")],
                                     },
                                 },
-                                modifier: I_KW@203..204 "i" [] [],
+                                modifier: CssAttributeModifier {
+                                    value: I_KW@203..204 "i" [] [],
+                                },
                             },
                             r_brack_token: R_BRACK@204..206 "]" [] [Whitespace(" ")],
                         },
@@ -451,7 +453,9 @@ CssRoot {
                                         value_token: CSS_STRING_LITERAL@216..230 "\"insensitive\"" [] [Whitespace(" ")],
                                     },
                                 },
-                                modifier: I_KW@230..231 "I" [] [],
+                                modifier: CssAttributeModifier {
+                                    value: I_KW@230..231 "I" [] [],
+                                },
                             },
                             r_brack_token: R_BRACK@231..233 "]" [] [Whitespace(" ")],
                         },
@@ -485,7 +489,9 @@ CssRoot {
                                         value_token: CSS_STRING_LITERAL@243..250 "\"cAsE\"" [] [Whitespace(" ")],
                                     },
                                 },
-                                modifier: S_KW@250..251 "s" [] [],
+                                modifier: CssAttributeModifier {
+                                    value: S_KW@250..251 "s" [] [],
+                                },
                             },
                             r_brack_token: R_BRACK@251..253 "]" [] [Whitespace(" ")],
                         },
@@ -519,7 +525,9 @@ CssRoot {
                                         value_token: CSS_STRING_LITERAL@263..270 "\"cAsE\"" [] [Whitespace(" ")],
                                     },
                                 },
-                                modifier: S_KW@270..271 "S" [] [],
+                                modifier: CssAttributeModifier {
+                                    value: S_KW@270..271 "S" [] [],
+                                },
                             },
                             r_brack_token: R_BRACK@271..273 "]" [] [Whitespace(" ")],
                         },
@@ -709,7 +717,9 @@ CssRoot {
                                         value_token: CSS_STRING_LITERAL@372..388 "\"insensitive\"" [] [Whitespace("   ")],
                                     },
                                 },
-                                modifier: I_KW@388..389 "i" [] [],
+                                modifier: CssAttributeModifier {
+                                    value: I_KW@388..389 "i" [] [],
+                                },
                             },
                             r_brack_token: R_BRACK@389..391 "]" [] [Whitespace(" ")],
                         },
@@ -743,7 +753,9 @@ CssRoot {
                                         value_token: CSS_STRING_LITERAL@404..420 "\"insensitive\"" [] [Whitespace("   ")],
                                     },
                                 },
-                                modifier: I_KW@420..424 "i" [] [Whitespace("   ")],
+                                modifier: CssAttributeModifier {
+                                    value: I_KW@420..424 "i" [] [Whitespace("   ")],
+                                },
                             },
                             r_brack_token: R_BRACK@424..426 "]" [] [Whitespace(" ")],
                         },
@@ -777,7 +789,9 @@ CssRoot {
                                         value_token: CSS_STRING_LITERAL@445..461 "\"insensitive\"" [] [Whitespace("   ")],
                                     },
                                 },
-                                modifier: I_KW@461..465 "i" [] [Whitespace("   ")],
+                                modifier: CssAttributeModifier {
+                                    value: I_KW@461..465 "i" [] [Whitespace("   ")],
+                                },
                             },
                             r_brack_token: R_BRACK@465..467 "]" [] [Whitespace(" ")],
                         },
@@ -837,7 +851,9 @@ CssRoot {
                                         value_token: IDENT@493..500 "hsides" [] [Whitespace(" ")],
                                     },
                                 },
-                                modifier: I_KW@500..501 "i" [] [],
+                                modifier: CssAttributeModifier {
+                                    value: I_KW@500..501 "i" [] [],
+                                },
                             },
                             r_brack_token: R_BRACK@501..503 "]" [] [Whitespace(" ")],
                         },
@@ -1925,7 +1941,8 @@ CssRoot {
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@189..203
                   0: CSS_STRING@189..203
                     0: CSS_STRING_LITERAL@189..203 "\"insensitive\"" [] [Whitespace(" ")]
-                2: I_KW@203..204 "i" [] []
+                2: CSS_ATTRIBUTE_MODIFIER@203..204
+                  0: I_KW@203..204 "i" [] []
               3: R_BRACK@204..206 "]" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@206..208
         0: L_CURLY@206..207 "{" [] []
@@ -1948,7 +1965,8 @@ CssRoot {
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@216..230
                   0: CSS_STRING@216..230
                     0: CSS_STRING_LITERAL@216..230 "\"insensitive\"" [] [Whitespace(" ")]
-                2: I_KW@230..231 "I" [] []
+                2: CSS_ATTRIBUTE_MODIFIER@230..231
+                  0: I_KW@230..231 "I" [] []
               3: R_BRACK@231..233 "]" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@233..235
         0: L_CURLY@233..234 "{" [] []
@@ -1971,7 +1989,8 @@ CssRoot {
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@243..250
                   0: CSS_STRING@243..250
                     0: CSS_STRING_LITERAL@243..250 "\"cAsE\"" [] [Whitespace(" ")]
-                2: S_KW@250..251 "s" [] []
+                2: CSS_ATTRIBUTE_MODIFIER@250..251
+                  0: S_KW@250..251 "s" [] []
               3: R_BRACK@251..253 "]" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@253..255
         0: L_CURLY@253..254 "{" [] []
@@ -1994,7 +2013,8 @@ CssRoot {
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@263..270
                   0: CSS_STRING@263..270
                     0: CSS_STRING_LITERAL@263..270 "\"cAsE\"" [] [Whitespace(" ")]
-                2: S_KW@270..271 "S" [] []
+                2: CSS_ATTRIBUTE_MODIFIER@270..271
+                  0: S_KW@270..271 "S" [] []
               3: R_BRACK@271..273 "]" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@273..275
         0: L_CURLY@273..274 "{" [] []
@@ -2123,7 +2143,8 @@ CssRoot {
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@372..388
                   0: CSS_STRING@372..388
                     0: CSS_STRING_LITERAL@372..388 "\"insensitive\"" [] [Whitespace("   ")]
-                2: I_KW@388..389 "i" [] []
+                2: CSS_ATTRIBUTE_MODIFIER@388..389
+                  0: I_KW@388..389 "i" [] []
               3: R_BRACK@389..391 "]" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@391..393
         0: L_CURLY@391..392 "{" [] []
@@ -2146,7 +2167,8 @@ CssRoot {
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@404..420
                   0: CSS_STRING@404..420
                     0: CSS_STRING_LITERAL@404..420 "\"insensitive\"" [] [Whitespace("   ")]
-                2: I_KW@420..424 "i" [] [Whitespace("   ")]
+                2: CSS_ATTRIBUTE_MODIFIER@420..424
+                  0: I_KW@420..424 "i" [] [Whitespace("   ")]
               3: R_BRACK@424..426 "]" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@426..428
         0: L_CURLY@426..427 "{" [] []
@@ -2169,7 +2191,8 @@ CssRoot {
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@445..461
                   0: CSS_STRING@445..461
                     0: CSS_STRING_LITERAL@445..461 "\"insensitive\"" [] [Whitespace("   ")]
-                2: I_KW@461..465 "i" [] [Whitespace("   ")]
+                2: CSS_ATTRIBUTE_MODIFIER@461..465
+                  0: I_KW@461..465 "i" [] [Whitespace("   ")]
               3: R_BRACK@465..467 "]" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@467..469
         0: L_CURLY@467..468 "{" [] []
@@ -2210,7 +2233,8 @@ CssRoot {
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@493..500
                   0: CSS_IDENTIFIER@493..500
                     0: IDENT@493..500 "hsides" [] [Whitespace(" ")]
-                2: I_KW@500..501 "i" [] []
+                2: CSS_ATTRIBUTE_MODIFIER@500..501
+                  0: I_KW@500..501 "i" [] []
               3: R_BRACK@501..503 "]" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@503..505
         0: L_CURLY@503..504 "{" [] []

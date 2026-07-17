@@ -12,17 +12,25 @@ use biome_configuration::editorconfig::EditorConfig;
 use biome_configuration::{BiomeDiagnostic, ConfigurationPathHint, push_to_analyzer_rules};
 use biome_configuration::{Configuration, VERSION, push_to_analyzer_assist};
 use biome_console::markup;
+#[cfg(feature = "lang_css")]
 use biome_css_analyze::METADATA as css_lint_metadata;
+#[cfg(feature = "lang_css")]
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
+#[cfg(feature = "lang_graphql")]
 use biome_graphql_analyze::METADATA as graphql_lint_metadata;
+#[cfg(feature = "lang_graphql")]
 use biome_graphql_syntax::GraphqlLanguage;
+#[cfg(feature = "lang_html")]
 use biome_html_analyze::METADATA as html_lint_metadata;
+#[cfg(feature = "lang_html")]
 use biome_html_syntax::HtmlLanguage;
+#[cfg(feature = "lang_js")]
 use biome_js_analyze::METADATA as js_lint_metadata;
+#[cfg(feature = "lang_js")]
 use biome_js_syntax::JsLanguage;
 use biome_json_analyze::METADATA as json_lint_metadata;
 use biome_json_formatter::context::JsonFormatOptions;
@@ -109,16 +117,19 @@ impl LoadedConfiguration {
                 // Normalize plugin paths relative to the configuration file directory so
                 // merged configurations (e.g. nested configs extending from root) can
                 // still load plugins defined in other configuration files.
-                let config_dir = configuration_file_path
-                    .parent()
-                    .unwrap_or(external_resolution_base_path.as_path());
-                if let Some(plugins) = partial_configuration.plugins.as_mut() {
-                    plugins.normalize_relative_paths(config_dir);
-                }
-                if let Some(overrides) = partial_configuration.overrides.as_mut() {
-                    for pattern in overrides.0.iter_mut() {
-                        if let Some(plugins) = pattern.plugins.as_mut() {
-                            plugins.normalize_relative_paths(config_dir);
+                #[cfg(feature = "plugins")]
+                {
+                    let config_dir = configuration_file_path
+                        .parent()
+                        .unwrap_or(external_resolution_base_path.as_path());
+                    if let Some(plugins) = partial_configuration.plugins.as_mut() {
+                        plugins.normalize_relative_paths(config_dir);
+                    }
+                    if let Some(overrides) = partial_configuration.overrides.as_mut() {
+                        for pattern in overrides.0.iter_mut() {
+                            if let Some(plugins) = pattern.plugins.as_mut() {
+                                plugins.normalize_relative_paths(config_dir);
+                            }
                         }
                     }
                 }
@@ -519,17 +530,25 @@ pub fn create_config(
 pub fn to_analyzer_rules(settings: &Settings, path: &Utf8Path) -> AnalyzerRules {
     let mut analyzer_rules = AnalyzerRules::default();
     if let Some(rules) = settings.linter.rules.as_ref() {
+        #[cfg(feature = "lang_js")]
         push_to_analyzer_rules(rules, js_lint_metadata.deref(), &mut analyzer_rules);
+        #[cfg(feature = "lang_css")]
         push_to_analyzer_rules(rules, css_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_rules(rules, json_lint_metadata.deref(), &mut analyzer_rules);
+        #[cfg(feature = "lang_graphql")]
         push_to_analyzer_rules(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
+        #[cfg(feature = "lang_html")]
         push_to_analyzer_rules(rules, html_lint_metadata.deref(), &mut analyzer_rules);
     }
     if let Some(rules) = settings.assist.actions.as_ref() {
+        #[cfg(feature = "lang_js")]
         push_to_analyzer_assist(rules, js_lint_metadata.deref(), &mut analyzer_rules);
+        #[cfg(feature = "lang_css")]
         push_to_analyzer_assist(rules, css_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_assist(rules, json_lint_metadata.deref(), &mut analyzer_rules);
+        #[cfg(feature = "lang_graphql")]
         push_to_analyzer_assist(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
+        #[cfg(feature = "lang_html")]
         push_to_analyzer_assist(rules, html_lint_metadata.deref(), &mut analyzer_rules);
     }
     let overrides = &settings.override_settings;
@@ -839,10 +858,14 @@ impl<'a> ProjectScanComputer<'a> {
             }
         }
 
+        #[cfg(feature = "lang_graphql")]
         biome_graphql_analyze::visit_registry(&mut self);
+        #[cfg(feature = "lang_css")]
         biome_css_analyze::visit_registry(&mut self);
         biome_json_analyze::visit_registry(&mut self);
+        #[cfg(feature = "lang_js")]
         biome_js_analyze::visit_registry(&mut self);
+        #[cfg(feature = "lang_html")]
         biome_html_analyze::visit_registry(&mut self);
 
         if self.requires_types {
@@ -885,6 +908,7 @@ impl<'a> ProjectScanComputer<'a> {
     }
 }
 
+#[cfg(feature = "lang_js")]
 impl RegistryVisitor<JsLanguage> for ProjectScanComputer<'_> {
     fn record_rule<R>(&mut self)
     where
@@ -904,6 +928,7 @@ impl RegistryVisitor<JsonLanguage> for ProjectScanComputer<'_> {
     }
 }
 
+#[cfg(feature = "lang_css")]
 impl RegistryVisitor<CssLanguage> for ProjectScanComputer<'_> {
     fn record_rule<R>(&mut self)
     where
@@ -913,7 +938,7 @@ impl RegistryVisitor<CssLanguage> for ProjectScanComputer<'_> {
         self.check_rule::<R, CssLanguage>();
     }
 }
-
+#[cfg(feature = "lang_graphql")]
 impl RegistryVisitor<GraphqlLanguage> for ProjectScanComputer<'_> {
     fn record_rule<R>(&mut self)
     where
@@ -924,6 +949,7 @@ impl RegistryVisitor<GraphqlLanguage> for ProjectScanComputer<'_> {
     }
 }
 
+#[cfg(feature = "lang_html")]
 impl RegistryVisitor<HtmlLanguage> for ProjectScanComputer<'_> {
     fn record_rule<R>(&mut self)
     where

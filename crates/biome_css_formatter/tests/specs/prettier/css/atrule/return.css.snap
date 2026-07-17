@@ -1,27 +1,28 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: css/atrule/return.css
 ---
 
 # Input
 
 ```css
-@function --grid-width($n) {
+@function grid-width($n) {
     @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
 }
-@function --grid-width($n) {
+@function grid-width($n) {
 @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
 }
-@function --grid-width($n) {
+@function grid-width($n) {
 @return $n*$grid-width+($n-1)*$gutter-width/10;
 }
-@function --grid-width($n) {
+@function grid-width($n) {
     @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
 }
-@function --grid-width($n) {
+@function grid-width($n) {
     @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
 }
-@function --grid-width($n) {
+@function grid-width($n) {
     @return $n
         *
         $grid-width
@@ -36,7 +37,7 @@ info: css/atrule/return.css
         10
         ;
 }
-@function --grid-width($n) {
+@function grid-width($n) {
     @return
         $n
         *
@@ -53,7 +54,7 @@ info: css/atrule/return.css
         ;
 }
 @function
---grid-width(
+grid-width(
 $n
 )
 {
@@ -75,7 +76,7 @@ $gutter-width
 }
 @function
 
---grid-width(
+grid-width(
 
 $n
 
@@ -114,19 +115,19 @@ $gutter-width
 ;
 
 }
-@function --grid-width($n) {
+@function grid-width($n) {
     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
 }
-@function --extend($obj, $ext-obj) {
+@function extend($obj, $ext-obj) {
     @return map-merge($obj, $ext-obj);
 }
-@function --extend($obj, $ext-obj) {
+@function extend($obj, $ext-obj) {
     @return map-merge( $obj , $ext-obj ) ;
 }
-@function --extend($obj, $ext-obj) {
+@function extend($obj, $ext-obj) {
     @return map-merge($obj,$ext-obj);
 }
-@function --extend($obj, $ext-obj) {
+@function extend($obj, $ext-obj) {
     @return
     map-merge(
     $obj
@@ -144,34 +145,30 @@ $gutter-width
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,45 +1,104 @@
--@function grid-width($n) {
-+@function --grid-width($n) {
-   @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
+@@ -1,45 +1,129 @@
+ @function grid-width($n) {
+-  @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
++    @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
  }
--@function grid-width($n) {
-+@function --grid-width($n) {
-   @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
+ @function grid-width($n) {
+-  @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
++@return $n * $grid-width + ($n - 1) * $gutter-width / 10;
  }
--@function grid-width($n) {
+ @function grid-width($n) {
 -  @return $n * $grid-width + ($n-1) * $gutter-width/10;
-+@function --grid-width($n) {
-+  @return $n*$grid-width+($n-1)*$gutter-width/10;
++@return $n*$grid-width+($n-1)*$gutter-width/10;
  }
--@function grid-width($n) {
+ @function grid-width($n) {
 -  @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
-+@function --grid-width($n) {
-+  @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10;
++    @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
  }
--@function grid-width($n) {
+ @function grid-width($n) {
 -  @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
-+@function --grid-width($n) {
-+  @return $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10;
++    @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
  }
--@function grid-width($n) {
+ @function grid-width($n) {
 -  @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
-+@function --grid-width($n) {
-+  @return $n
++    @return $n
 +        *
 +        $grid-width
 +        + (
@@ -182,12 +179,13 @@ $gutter-width
 +        *
 +        $gutter-width
 +        /
-+        10;
++        10
++        ;
  }
--@function grid-width($n) {
+ @function grid-width($n) {
 -  @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
-+@function --grid-width($n) {
-+  @return $n
++    @return
++        $n
 +        *
 +        $grid-width
 +        + (
@@ -198,12 +196,18 @@ $gutter-width
 +        *
 +        $gutter-width
 +        /
-+        10;
++        10
++        ;
  }
 -@function grid-width($n) {
 -  @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
-+@function --grid-width($n) {
-+  @return $n
++@function
++grid-width(
++$n
++)
++{
++@return
++$n
 +*
 +$grid-width
 ++
@@ -215,12 +219,24 @@ $gutter-width
 +*
 +$gutter-width
 +/
-+10;
++10
++;
  }
 -@function grid-width($n) {
 -  @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
-+@function --grid-width($n) {
-+  @return $n
++@function
++
++grid-width(
++
++$n
++
++)
++
++{
++
++@return
++
++$n
 +
 +*
 +
@@ -244,61 +260,62 @@ $gutter-width
 +
 +/
 +
-+10;
++10
++
++;
++
  }
--@function grid-width($n) {
+ @function grid-width($n) {
 -  @return $very-very-very-very-very-very-vey-long-var *
 -    $very-very-very-very-very-very-vey-long-var +
 -    ($very-very-very-very-very-very-vey-long-var - 1) *
 -    $very-very-very-very-very-very-vey-long-var;
-+@function --grid-width($n) {
-+  @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
++    @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
  }
--@function extend($obj, $ext-obj) {
-+@function --extend($obj, $ext-obj) {
-   @return map-merge($obj, $ext-obj);
- }
--@function extend($obj, $ext-obj) {
+ @function extend($obj, $ext-obj) {
 -  @return map-merge($obj, $ext-obj);
-+@function --extend($obj, $ext-obj) {
-+  @return map-merge( $obj , $ext-obj );
++    @return map-merge($obj, $ext-obj);
  }
--@function extend($obj, $ext-obj) {
+ @function extend($obj, $ext-obj) {
 -  @return map-merge($obj, $ext-obj);
-+@function --extend($obj, $ext-obj) {
-+  @return map-merge($obj,$ext-obj);
++    @return map-merge( $obj , $ext-obj ) ;
  }
--@function extend($obj, $ext-obj) {
+ @function extend($obj, $ext-obj) {
 -  @return map-merge($obj, $ext-obj);
-+@function --extend($obj, $ext-obj) {
-+  @return map-merge(
++    @return map-merge($obj,$ext-obj);
+ }
+ @function extend($obj, $ext-obj) {
+-  @return map-merge($obj, $ext-obj);
++    @return
++    map-merge(
 +    $obj
 +    ,
 +    $ext-obj
-+    );
++    )
++    ;
  }
 ```
 
 # Output
 
 ```css
-@function --grid-width($n) {
-  @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
+@function grid-width($n) {
+    @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
 }
-@function --grid-width($n) {
-  @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
+@function grid-width($n) {
+@return $n * $grid-width + ($n - 1) * $gutter-width / 10;
 }
-@function --grid-width($n) {
-  @return $n*$grid-width+($n-1)*$gutter-width/10;
+@function grid-width($n) {
+@return $n*$grid-width+($n-1)*$gutter-width/10;
 }
-@function --grid-width($n) {
-  @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10;
+@function grid-width($n) {
+    @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
 }
-@function --grid-width($n) {
-  @return $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10;
+@function grid-width($n) {
+    @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
 }
-@function --grid-width($n) {
-  @return $n
+@function grid-width($n) {
+    @return $n
         *
         $grid-width
         + (
@@ -309,10 +326,12 @@ $gutter-width
         *
         $gutter-width
         /
-        10;
+        10
+        ;
 }
-@function --grid-width($n) {
-  @return $n
+@function grid-width($n) {
+    @return
+        $n
         *
         $grid-width
         + (
@@ -323,10 +342,16 @@ $gutter-width
         *
         $gutter-width
         /
-        10;
+        10
+        ;
 }
-@function --grid-width($n) {
-  @return $n
+@function
+grid-width(
+$n
+)
+{
+@return
+$n
 *
 $grid-width
 +
@@ -338,10 +363,22 @@ $n
 *
 $gutter-width
 /
-10;
+10
+;
 }
-@function --grid-width($n) {
-  @return $n
+@function
+
+grid-width(
+
+$n
+
+)
+
+{
+
+@return
+
+$n
 
 *
 
@@ -365,55 +402,96 @@ $gutter-width
 
 /
 
-10;
+10
+
+;
+
 }
-@function --grid-width($n) {
-  @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
+@function grid-width($n) {
+    @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
 }
-@function --extend($obj, $ext-obj) {
-  @return map-merge($obj, $ext-obj);
+@function extend($obj, $ext-obj) {
+    @return map-merge($obj, $ext-obj);
 }
-@function --extend($obj, $ext-obj) {
-  @return map-merge( $obj , $ext-obj );
+@function extend($obj, $ext-obj) {
+    @return map-merge( $obj , $ext-obj ) ;
 }
-@function --extend($obj, $ext-obj) {
-  @return map-merge($obj,$ext-obj);
+@function extend($obj, $ext-obj) {
+    @return map-merge($obj,$ext-obj);
 }
-@function --extend($obj, $ext-obj) {
-  @return map-merge(
+@function extend($obj, $ext-obj) {
+    @return
+    map-merge(
     $obj
     ,
     $ext-obj
-    );
+    )
+    ;
 }
 ```
 
 # Errors
 ```
-return.css:1:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'grid-width'.
+  
+  > 1 │ @function grid-width($n) {
+      │           ^^^^^^^^^^
+    2 │     @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
+    3 │ }
+  
+  i Expected a dashed identifier here.
+  
+  > 1 │ @function grid-width($n) {
+      │           ^^^^^^^^^^
+    2 │     @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
+    3 │ }
+  
+return.css:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '$n'.
   
-  > 1 │ @function --grid-width($n) {
-      │                        ^^
+  > 1 │ @function grid-width($n) {
+      │                      ^^
     2 │     @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
     3 │ }
   
   i Expected a function parameter here.
   
-  > 1 │ @function --grid-width($n) {
-      │                        ^^
+  > 1 │ @function grid-width($n) {
+      │                      ^^
     2 │     @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
     3 │ }
   
-return.css:4:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:4:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'grid-width'.
+  
+    2 │     @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
+    3 │ }
+  > 4 │ @function grid-width($n) {
+      │           ^^^^^^^^^^
+    5 │ @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
+    6 │ }
+  
+  i Expected a dashed identifier here.
+  
+    2 │     @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
+    3 │ }
+  > 4 │ @function grid-width($n) {
+      │           ^^^^^^^^^^
+    5 │ @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
+    6 │ }
+  
+return.css:4:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '$n'.
   
     2 │     @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
     3 │ }
-  > 4 │ @function --grid-width($n) {
-      │                        ^^
+  > 4 │ @function grid-width($n) {
+      │                      ^^
     5 │ @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
     6 │ }
   
@@ -421,19 +499,39 @@ return.css:4:24 parse ━━━━━━━━━━━━━━━━━━━�
   
     2 │     @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
     3 │ }
-  > 4 │ @function --grid-width($n) {
-      │                        ^^
+  > 4 │ @function grid-width($n) {
+      │                      ^^
     5 │ @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
     6 │ }
   
-return.css:7:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:7:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'grid-width'.
+  
+    5 │ @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
+    6 │ }
+  > 7 │ @function grid-width($n) {
+      │           ^^^^^^^^^^
+    8 │ @return $n*$grid-width+($n-1)*$gutter-width/10;
+    9 │ }
+  
+  i Expected a dashed identifier here.
+  
+    5 │ @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
+    6 │ }
+  > 7 │ @function grid-width($n) {
+      │           ^^^^^^^^^^
+    8 │ @return $n*$grid-width+($n-1)*$gutter-width/10;
+    9 │ }
+  
+return.css:7:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '$n'.
   
     5 │ @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
     6 │ }
-  > 7 │ @function --grid-width($n) {
-      │                        ^^
+  > 7 │ @function grid-width($n) {
+      │                      ^^
     8 │ @return $n*$grid-width+($n-1)*$gutter-width/10;
     9 │ }
   
@@ -441,19 +539,39 @@ return.css:7:24 parse ━━━━━━━━━━━━━━━━━━━�
   
     5 │ @return $n * $grid-width + ($n - 1) * $gutter-width / 10;
     6 │ }
-  > 7 │ @function --grid-width($n) {
-      │                        ^^
+  > 7 │ @function grid-width($n) {
+      │                      ^^
     8 │ @return $n*$grid-width+($n-1)*$gutter-width/10;
     9 │ }
   
-return.css:10:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:10:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'grid-width'.
+  
+     8 │ @return $n*$grid-width+($n-1)*$gutter-width/10;
+     9 │ }
+  > 10 │ @function grid-width($n) {
+       │           ^^^^^^^^^^
+    11 │     @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
+    12 │ }
+  
+  i Expected a dashed identifier here.
+  
+     8 │ @return $n*$grid-width+($n-1)*$gutter-width/10;
+     9 │ }
+  > 10 │ @function grid-width($n) {
+       │           ^^^^^^^^^^
+    11 │     @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
+    12 │ }
+  
+return.css:10:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '$n'.
   
      8 │ @return $n*$grid-width+($n-1)*$gutter-width/10;
      9 │ }
-  > 10 │ @function --grid-width($n) {
-       │                        ^^
+  > 10 │ @function grid-width($n) {
+       │                      ^^
     11 │     @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
     12 │ }
   
@@ -461,19 +579,39 @@ return.css:10:24 parse ━━━━━━━━━━━━━━━━━━━
   
      8 │ @return $n*$grid-width+($n-1)*$gutter-width/10;
      9 │ }
-  > 10 │ @function --grid-width($n) {
-       │                        ^^
+  > 10 │ @function grid-width($n) {
+       │                      ^^
     11 │     @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
     12 │ }
   
-return.css:13:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:13:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'grid-width'.
+  
+    11 │     @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
+    12 │ }
+  > 13 │ @function grid-width($n) {
+       │           ^^^^^^^^^^
+    14 │     @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
+    15 │ }
+  
+  i Expected a dashed identifier here.
+  
+    11 │     @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
+    12 │ }
+  > 13 │ @function grid-width($n) {
+       │           ^^^^^^^^^^
+    14 │     @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
+    15 │ }
+  
+return.css:13:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '$n'.
   
     11 │     @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
     12 │ }
-  > 13 │ @function --grid-width($n) {
-       │                        ^^
+  > 13 │ @function grid-width($n) {
+       │                      ^^
     14 │     @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
     15 │ }
   
@@ -481,19 +619,39 @@ return.css:13:24 parse ━━━━━━━━━━━━━━━━━━━
   
     11 │     @return $n * $grid-width + ( $n - 1 ) * $gutter-width / 10 ;
     12 │ }
-  > 13 │ @function --grid-width($n) {
-       │                        ^^
+  > 13 │ @function grid-width($n) {
+       │                      ^^
     14 │     @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
     15 │ }
   
-return.css:16:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:16:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'grid-width'.
+  
+    14 │     @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
+    15 │ }
+  > 16 │ @function grid-width($n) {
+       │           ^^^^^^^^^^
+    17 │     @return $n
+    18 │         *
+  
+  i Expected a dashed identifier here.
+  
+    14 │     @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
+    15 │ }
+  > 16 │ @function grid-width($n) {
+       │           ^^^^^^^^^^
+    17 │     @return $n
+    18 │         *
+  
+return.css:16:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '$n'.
   
     14 │     @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
     15 │ }
-  > 16 │ @function --grid-width($n) {
-       │                        ^^
+  > 16 │ @function grid-width($n) {
+       │                      ^^
     17 │     @return $n
     18 │         *
   
@@ -501,19 +659,39 @@ return.css:16:24 parse ━━━━━━━━━━━━━━━━━━━
   
     14 │     @return  $n   *  $grid-width  +  (  $n  -  1  )  *  $gutter-width  /  10  ;
     15 │ }
-  > 16 │ @function --grid-width($n) {
-       │                        ^^
+  > 16 │ @function grid-width($n) {
+       │                      ^^
     17 │     @return $n
     18 │         *
   
-return.css:31:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:31:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'grid-width'.
+  
+    29 │         ;
+    30 │ }
+  > 31 │ @function grid-width($n) {
+       │           ^^^^^^^^^^
+    32 │     @return
+    33 │         $n
+  
+  i Expected a dashed identifier here.
+  
+    29 │         ;
+    30 │ }
+  > 31 │ @function grid-width($n) {
+       │           ^^^^^^^^^^
+    32 │     @return
+    33 │         $n
+  
+return.css:31:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '$n'.
   
     29 │         ;
     30 │ }
-  > 31 │ @function --grid-width($n) {
-       │                        ^^
+  > 31 │ @function grid-width($n) {
+       │                      ^^
     32 │     @return
     33 │         $n
   
@@ -521,17 +699,37 @@ return.css:31:24 parse ━━━━━━━━━━━━━━━━━━━
   
     29 │         ;
     30 │ }
-  > 31 │ @function --grid-width($n) {
-       │                        ^^
+  > 31 │ @function grid-width($n) {
+       │                      ^^
     32 │     @return
     33 │         $n
+  
+return.css:48:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'grid-width'.
+  
+    46 │ }
+    47 │ @function
+  > 48 │ grid-width(
+       │ ^^^^^^^^^^
+    49 │ $n
+    50 │ )
+  
+  i Expected a dashed identifier here.
+  
+    46 │ }
+    47 │ @function
+  > 48 │ grid-width(
+       │ ^^^^^^^^^^
+    49 │ $n
+    50 │ )
   
 return.css:49:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '$n'.
   
     47 │ @function
-    48 │ --grid-width(
+    48 │ grid-width(
   > 49 │ $n
        │ ^^
     50 │ )
@@ -540,17 +738,37 @@ return.css:49:1 parse ━━━━━━━━━━━━━━━━━━━�
   i Expected a function parameter here.
   
     47 │ @function
-    48 │ --grid-width(
+    48 │ grid-width(
   > 49 │ $n
        │ ^^
     50 │ )
     51 │ {
   
+return.css:70:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'grid-width'.
+  
+    68 │ @function
+    69 │ 
+  > 70 │ grid-width(
+       │ ^^^^^^^^^^
+    71 │ 
+    72 │ $n
+  
+  i Expected a dashed identifier here.
+  
+    68 │ @function
+    69 │ 
+  > 70 │ grid-width(
+       │ ^^^^^^^^^^
+    71 │ 
+    72 │ $n
+  
 return.css:72:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '$n'.
   
-    70 │ --grid-width(
+    70 │ grid-width(
     71 │ 
   > 72 │ $n
        │ ^^
@@ -559,39 +777,77 @@ return.css:72:1 parse ━━━━━━━━━━━━━━━━━━━�
   
   i Expected a function parameter here.
   
-    70 │ --grid-width(
+    70 │ grid-width(
     71 │ 
   > 72 │ $n
        │ ^^
     73 │ 
     74 │ )
   
-return.css:109:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:109:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'grid-width'.
+  
+    108 │ }
+  > 109 │ @function grid-width($n) {
+        │           ^^^^^^^^^^
+    110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
+    111 │ }
+  
+  i Expected a dashed identifier here.
+  
+    108 │ }
+  > 109 │ @function grid-width($n) {
+        │           ^^^^^^^^^^
+    110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
+    111 │ }
+  
+return.css:109:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '$n'.
   
     108 │ }
-  > 109 │ @function --grid-width($n) {
-        │                        ^^
+  > 109 │ @function grid-width($n) {
+        │                      ^^
     110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
     111 │ }
   
   i Expected a function parameter here.
   
     108 │ }
-  > 109 │ @function --grid-width($n) {
-        │                        ^^
+  > 109 │ @function grid-width($n) {
+        │                      ^^
     110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
     111 │ }
   
-return.css:112:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:112:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'extend'.
+  
+    110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
+    111 │ }
+  > 112 │ @function extend($obj, $ext-obj) {
+        │           ^^^^^^
+    113 │     @return map-merge($obj, $ext-obj);
+    114 │ }
+  
+  i Expected a dashed identifier here.
+  
+    110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
+    111 │ }
+  > 112 │ @function extend($obj, $ext-obj) {
+        │           ^^^^^^
+    113 │     @return map-merge($obj, $ext-obj);
+    114 │ }
+  
+return.css:112:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '$obj'.
   
     110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
     111 │ }
-  > 112 │ @function --extend($obj, $ext-obj) {
-        │                    ^^^^
+  > 112 │ @function extend($obj, $ext-obj) {
+        │                  ^^^^
     113 │     @return map-merge($obj, $ext-obj);
     114 │ }
   
@@ -599,19 +855,19 @@ return.css:112:20 parse ━━━━━━━━━━━━━━━━━━�
   
     110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
     111 │ }
-  > 112 │ @function --extend($obj, $ext-obj) {
-        │                    ^^^^
+  > 112 │ @function extend($obj, $ext-obj) {
+        │                  ^^^^
     113 │     @return map-merge($obj, $ext-obj);
     114 │ }
   
-return.css:112:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:112:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '$ext-obj'.
   
     110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
     111 │ }
-  > 112 │ @function --extend($obj, $ext-obj) {
-        │                          ^^^^^^^^
+  > 112 │ @function extend($obj, $ext-obj) {
+        │                        ^^^^^^^^
     113 │     @return map-merge($obj, $ext-obj);
     114 │ }
   
@@ -619,19 +875,39 @@ return.css:112:26 parse ━━━━━━━━━━━━━━━━━━�
   
     110 │     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
     111 │ }
-  > 112 │ @function --extend($obj, $ext-obj) {
-        │                          ^^^^^^^^
+  > 112 │ @function extend($obj, $ext-obj) {
+        │                        ^^^^^^^^
     113 │     @return map-merge($obj, $ext-obj);
     114 │ }
   
-return.css:115:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:115:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'extend'.
+  
+    113 │     @return map-merge($obj, $ext-obj);
+    114 │ }
+  > 115 │ @function extend($obj, $ext-obj) {
+        │           ^^^^^^
+    116 │     @return map-merge( $obj , $ext-obj ) ;
+    117 │ }
+  
+  i Expected a dashed identifier here.
+  
+    113 │     @return map-merge($obj, $ext-obj);
+    114 │ }
+  > 115 │ @function extend($obj, $ext-obj) {
+        │           ^^^^^^
+    116 │     @return map-merge( $obj , $ext-obj ) ;
+    117 │ }
+  
+return.css:115:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '$obj'.
   
     113 │     @return map-merge($obj, $ext-obj);
     114 │ }
-  > 115 │ @function --extend($obj, $ext-obj) {
-        │                    ^^^^
+  > 115 │ @function extend($obj, $ext-obj) {
+        │                  ^^^^
     116 │     @return map-merge( $obj , $ext-obj ) ;
     117 │ }
   
@@ -639,19 +915,19 @@ return.css:115:20 parse ━━━━━━━━━━━━━━━━━━�
   
     113 │     @return map-merge($obj, $ext-obj);
     114 │ }
-  > 115 │ @function --extend($obj, $ext-obj) {
-        │                    ^^^^
+  > 115 │ @function extend($obj, $ext-obj) {
+        │                  ^^^^
     116 │     @return map-merge( $obj , $ext-obj ) ;
     117 │ }
   
-return.css:115:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:115:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '$ext-obj'.
   
     113 │     @return map-merge($obj, $ext-obj);
     114 │ }
-  > 115 │ @function --extend($obj, $ext-obj) {
-        │                          ^^^^^^^^
+  > 115 │ @function extend($obj, $ext-obj) {
+        │                        ^^^^^^^^
     116 │     @return map-merge( $obj , $ext-obj ) ;
     117 │ }
   
@@ -659,19 +935,39 @@ return.css:115:26 parse ━━━━━━━━━━━━━━━━━━�
   
     113 │     @return map-merge($obj, $ext-obj);
     114 │ }
-  > 115 │ @function --extend($obj, $ext-obj) {
-        │                          ^^^^^^^^
+  > 115 │ @function extend($obj, $ext-obj) {
+        │                        ^^^^^^^^
     116 │     @return map-merge( $obj , $ext-obj ) ;
     117 │ }
   
-return.css:118:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:118:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'extend'.
+  
+    116 │     @return map-merge( $obj , $ext-obj ) ;
+    117 │ }
+  > 118 │ @function extend($obj, $ext-obj) {
+        │           ^^^^^^
+    119 │     @return map-merge($obj,$ext-obj);
+    120 │ }
+  
+  i Expected a dashed identifier here.
+  
+    116 │     @return map-merge( $obj , $ext-obj ) ;
+    117 │ }
+  > 118 │ @function extend($obj, $ext-obj) {
+        │           ^^^^^^
+    119 │     @return map-merge($obj,$ext-obj);
+    120 │ }
+  
+return.css:118:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '$obj'.
   
     116 │     @return map-merge( $obj , $ext-obj ) ;
     117 │ }
-  > 118 │ @function --extend($obj, $ext-obj) {
-        │                    ^^^^
+  > 118 │ @function extend($obj, $ext-obj) {
+        │                  ^^^^
     119 │     @return map-merge($obj,$ext-obj);
     120 │ }
   
@@ -679,19 +975,19 @@ return.css:118:20 parse ━━━━━━━━━━━━━━━━━━�
   
     116 │     @return map-merge( $obj , $ext-obj ) ;
     117 │ }
-  > 118 │ @function --extend($obj, $ext-obj) {
-        │                    ^^^^
+  > 118 │ @function extend($obj, $ext-obj) {
+        │                  ^^^^
     119 │     @return map-merge($obj,$ext-obj);
     120 │ }
   
-return.css:118:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:118:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '$ext-obj'.
   
     116 │     @return map-merge( $obj , $ext-obj ) ;
     117 │ }
-  > 118 │ @function --extend($obj, $ext-obj) {
-        │                          ^^^^^^^^
+  > 118 │ @function extend($obj, $ext-obj) {
+        │                        ^^^^^^^^
     119 │     @return map-merge($obj,$ext-obj);
     120 │ }
   
@@ -699,19 +995,39 @@ return.css:118:26 parse ━━━━━━━━━━━━━━━━━━�
   
     116 │     @return map-merge( $obj , $ext-obj ) ;
     117 │ }
-  > 118 │ @function --extend($obj, $ext-obj) {
-        │                          ^^^^^^^^
+  > 118 │ @function extend($obj, $ext-obj) {
+        │                        ^^^^^^^^
     119 │     @return map-merge($obj,$ext-obj);
     120 │ }
   
-return.css:121:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:121:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'extend'.
+  
+    119 │     @return map-merge($obj,$ext-obj);
+    120 │ }
+  > 121 │ @function extend($obj, $ext-obj) {
+        │           ^^^^^^
+    122 │     @return
+    123 │     map-merge(
+  
+  i Expected a dashed identifier here.
+  
+    119 │     @return map-merge($obj,$ext-obj);
+    120 │ }
+  > 121 │ @function extend($obj, $ext-obj) {
+        │           ^^^^^^
+    122 │     @return
+    123 │     map-merge(
+  
+return.css:121:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '$obj'.
   
     119 │     @return map-merge($obj,$ext-obj);
     120 │ }
-  > 121 │ @function --extend($obj, $ext-obj) {
-        │                    ^^^^
+  > 121 │ @function extend($obj, $ext-obj) {
+        │                  ^^^^
     122 │     @return
     123 │     map-merge(
   
@@ -719,19 +1035,19 @@ return.css:121:20 parse ━━━━━━━━━━━━━━━━━━�
   
     119 │     @return map-merge($obj,$ext-obj);
     120 │ }
-  > 121 │ @function --extend($obj, $ext-obj) {
-        │                    ^^^^
+  > 121 │ @function extend($obj, $ext-obj) {
+        │                  ^^^^
     122 │     @return
     123 │     map-merge(
   
-return.css:121:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+return.css:121:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '$ext-obj'.
   
     119 │     @return map-merge($obj,$ext-obj);
     120 │ }
-  > 121 │ @function --extend($obj, $ext-obj) {
-        │                          ^^^^^^^^
+  > 121 │ @function extend($obj, $ext-obj) {
+        │                        ^^^^^^^^
     122 │     @return
     123 │     map-merge(
   
@@ -739,8 +1055,8 @@ return.css:121:26 parse ━━━━━━━━━━━━━━━━━━�
   
     119 │     @return map-merge($obj,$ext-obj);
     120 │ }
-  > 121 │ @function --extend($obj, $ext-obj) {
-        │                          ^^^^^^^^
+  > 121 │ @function extend($obj, $ext-obj) {
+        │                        ^^^^^^^^
     122 │     @return
     123 │     map-merge(
   
@@ -749,5 +1065,5 @@ return.css:121:26 parse ━━━━━━━━━━━━━━━━━━�
 
 # Lines exceeding max width of 80 characters
 ```
-   87:   @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
+  110:     @return $very-very-very-very-very-very-vey-long-var * $very-very-very-very-very-very-vey-long-var + ($very-very-very-very-very-very-vey-long-var - 1) * $very-very-very-very-very-very-vey-long-var;
 ```

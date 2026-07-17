@@ -318,7 +318,7 @@ impl Format<JsFormatContext> for EachTemplateTable {
                             column_text.push(' ');
                         }
 
-                        write!(f, [text(&column_text, column.range.start())])?;
+                        write!(f, [text(&column_text, Some(column.range.start()))])?;
 
                         if !is_last_in_row {
                             write!(f, [EachTemplateSeparator])?;

@@ -1,0 +1,55 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/block-folded/middle-comments.yml
+---
+
+# Input
+
+```yml
+!!str # comment 1
+# comment 2
+>
+  123
+
+```
+
+
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,4 +1,4 @@
+-!!str # comment 2 # comment 2 # comment 1
++!!str # comment 2 # comment 1
+ # comment 2
+ >
+   123
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -1,17 +1,17 @@
+ [
+   source_position(0),
+   "!!str",
+-  line_suffix([" ", source_position(6), "# comment 2 # comment 1"]),
++  line_suffix([" ", source_position(6), "# comment 1"]),
+   expand_parent,
+   " ",
+-  source_position(30),
++  source_position(18),
+   "# comment 2",
+   hard_line_break,
+   verbatim([
+-    source_position(30),
++    source_position(18),
+     "# comment 2",
+     hard_line_break,
+-    source_position(42),
++    source_position(30),
+     ">
+   123
+ "
+
+```

@@ -395,6 +395,10 @@ suppressions.jsx:8:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <button>
+  
   i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
   
       5   5 │   function bothFailing() {
@@ -432,6 +436,10 @@ suppressions.jsx:18:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━━
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <button>
+  
   i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
   
      15  15 │     return (
@@ -468,6 +476,10 @@ suppressions.jsx:28:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━━
     30 │     >Some text</span>
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <button>
   
   i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
   
@@ -585,6 +597,10 @@ suppressions.jsx:107:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <button>
+  
   i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
   
     104 104 │       // biome-ignore lint/a11y/useKeyWithClickEvents: ...
@@ -622,6 +638,10 @@ suppressions.jsx:118:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <button>
+  
   i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
   
     115 115 │       // biome-ignore lint/a11y/useKeyWithClickEvents: ...
@@ -658,6 +678,10 @@ suppressions.jsx:129:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━�
     131 │     >Some text</span>
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <button>
   
   i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
   
@@ -736,6 +760,10 @@ suppressions.jsx:293:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <button>
+  
   i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
   
     290 290 │       biome-ignore lint/security/noBlankTarget: ...
@@ -773,6 +801,10 @@ suppressions.jsx:306:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━�
     308 │     >Some text</span>
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <button>
   
   i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
   
@@ -812,6 +844,10 @@ suppressions.jsx:317:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <button>
+  
   i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
   
     314 314 │       /* biome-ignore lint/security/noBlankTarget: ...
@@ -849,6 +885,10 @@ suppressions.jsx:328:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━�
     330 │     >Some text</span>
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <button>
   
   i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
   

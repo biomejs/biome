@@ -12,15 +12,15 @@ set windows-powershell := true
 # Installs the tools needed to develop
 install-tools:
 	cargo install cargo-binstall
-	cargo binstall cargo-insta wasm-opt
-	cargo binstall wasm-bindgen-cli --version 0.2.105
+	cargo binstall cargo-insta wasm-opt cargo-deny
+	cargo binstall wasm-bindgen-cli --version 0.2.117
 	pnpm install
 
 # Upgrades the tools needed to develop
 upgrade-tools:
 	cargo install cargo-binstall --force
-	cargo binstall cargo-insta wasm-opt --force
-	cargo binstall wasm-bindgen-cli --version 0.2.105 --force
+	cargo binstall cargo-insta wasm-opt cargo-deny --force
+	cargo binstall wasm-bindgen-cli --version 0.2.117 --force
 
 # Generate all files across crates and tools. You rarely want to use it locally.
 gen-all:
@@ -41,7 +41,7 @@ gen-types:
 
 # Generates the JSON Schema of the configuration
 gen-schema:
-  cargo codegen-schema
+  cargo run -p xtask_codegen --features schema -- schema
 
 # Generates code generated files for the linter
 gen-analyzer:
@@ -60,6 +60,10 @@ gen-rules:
 gen-css-baseline:
   cargo run -p xtask_codegen --features xtask_codegen/external_data -- css-baseline
 
+# Generates module-replacements data from e18e
+gen-module-replacements:
+  cargo run -p xtask_codegen --features xtask_codegen/external_data -- module-replacements
+
 gen-configuration:
   cargo run -p xtask_codegen --features configuration -- configuration
 
@@ -70,6 +74,9 @@ gen-migrate:
 # Generates the initial files for all formatter crates
 gen-formatter *args='':
   cargo run -p xtask_codegen -- formatter {{args}}
+
+gen-global-types:
+  cargo run -p xtask_codegen --features global_types -- global-types
 
 # Generates the Tailwind CSS preset for utility class sorting
 [working-directory: 'packages/tailwindcss-config-analyzer']
@@ -128,8 +135,8 @@ build-wasm-web-dev:
     --typescript
 
 # Build WASM for web target (release)
-build-wasm-web:
-  cargo build --lib --target wasm32-unknown-unknown --release -p biome_wasm
+build-wasm-web *args='':
+  cargo build --lib --target wasm32-unknown-unknown --release -p biome_wasm {{args}}
   wasm-bindgen target/wasm32-unknown-unknown/release/biome_wasm.wasm \
     --out-dir packages/@biomejs/wasm-web \
     --no-demangle \
@@ -236,6 +243,25 @@ test-doc:
 # Run CommonMark conformance tests for the markdown parser
 test-markdown-conformance:
 	cargo run -p xtask_coverage -- --suites=markdown/commonmark
+
+# Generate differential fuzz corpus for the markdown parser using commonmark.js
+# Requires `pnpm install` from the repo root (commonmark is a root devDependency).
+fuzz-markdown-generate count="1000" seed="42":
+	node crates/biome_markdown_parser/tests/fuzz_generate_corpus.cjs \
+		--count={{count}} --seed={{seed}} \
+		--output=crates/biome_markdown_parser/tests/fuzz_corpus/corpus.jsonl
+
+# Run differential fuzzer comparing Biome markdown output against commonmark.js
+# Runs the checked-in seed corpus plus any generated corpus.jsonl
+fuzz-markdown-differential:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	CORPUS="$(pwd)/crates/biome_markdown_parser/tests/fuzz_corpus/corpus.jsonl"
+	if [ -f "$CORPUS" ]; then
+		FUZZ_CORPUS="$CORPUS" cargo test -p biome_markdown_parser --test fuzz_differential -- --ignored --nocapture
+	else
+		cargo test -p biome_markdown_parser --test fuzz_differential -- --ignored --nocapture
+	fi
 
 # Update the CommonMark spec.json to a specific version
 update-commonmark-spec version:
