@@ -403,36 +403,8 @@ fn call_argument_type<'db>(
     ty: InferredTypeData<'db>,
     argument_index: usize,
 ) -> Option<InferredTypeData<'db>> {
-    if let Some(function) = ty.callable_function(db) {
-        return function_parameter_type(function.parameters(db), argument_index);
-    }
-
-    match ty {
-        InferredTypeData::Interface(interface) => interface
-            .members(db)
-            .iter()
-            .filter(|member| member.kind.is_call_signature())
-            .find_map(|member| call_argument_type(db, member.ty, argument_index)),
-        InferredTypeData::Object(object) => object
-            .members(db)
-            .iter()
-            .filter(|member| member.kind.is_call_signature())
-            .find_map(|member| call_argument_type(db, member.ty, argument_index)),
-        InferredTypeData::InstanceOf(instance) => {
-            call_argument_type(db, instance.ty(db), argument_index)
-        }
-        InferredTypeData::TypeofType(typeof_type) => {
-            call_argument_type(db, typeof_type.ty(db), argument_index)
-        }
-        InferredTypeData::TypeofValue(typeof_value) => {
-            call_argument_type(db, typeof_value.ty(db), argument_index)
-        }
-        InferredTypeData::Union(union) => union
-            .types(db)
-            .iter()
-            .find_map(|ty| call_argument_type(db, *ty, argument_index)),
-        _ => None,
-    }
+    let function = ty.callable_function(db)?;
+    function_parameter_type(function.parameters(db), argument_index)
 }
 
 fn constructor_argument_type<'db>(

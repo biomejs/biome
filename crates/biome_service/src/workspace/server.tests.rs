@@ -165,7 +165,8 @@ fn change_file_resumes_module_update_after_cancellation() {
         Utf8PathBuf::from(INDEX_PATH),
         b"import { task } from './base';\ntask();",
     );
-    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    let (mut workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace.db_state = db::DbState::lsp();
 
     workspace
         .update_settings(UpdateSettingsParams {

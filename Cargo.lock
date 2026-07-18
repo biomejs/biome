@@ -1992,6 +1992,7 @@ name = "biome_workspace_db"
 version = "0.1.0"
 dependencies = [
  "biome_db",
+ "biome_fs",
  "biome_html_parser",
  "biome_html_syntax",
  "biome_js_parser",
@@ -1999,6 +2000,7 @@ dependencies = [
  "biome_languages",
  "biome_module_graph",
  "biome_parser",
+ "biome_project_layout",
  "biome_rowan",
  "boxcar",
  "camino",

@@ -456,6 +456,7 @@ impl<'db> MergedType<'db> {
                     Box::default(),
                     members.into_boxed_slice(),
                     None,
+                    false,
                 )),
                 Box::default(),
             ),

@@ -87,7 +87,7 @@ body
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,58 +1,57 @@
+@@ -1,8 +1,7 @@
  a {
    /* comment 1 */
 -  /* comment 2 */
@@ -97,11 +97,8 @@ body
 +    10px /* comment 6 */; /* comment 7 */
    /* comment 8 */
    transform: translate(/* comment 9 */ 10px /* comment 10 */);
--  color: /* comment 11 */ red /* comment 12 */ !important /* comment 13 */ ; /* comment 14 */
-+  color: /* comment 11 */ /* comment 12 */ red !important /* comment 13 */ ; /* comment 14 */
-   /* comment 15 */
- }
- 
+   color: /* comment 11 */ red /* comment 12 */ !important /* comment 13 */ ; /* comment 14 */
+@@ -12,47 +11,47 @@
  @font-face {
    font-family: "Prettier";
    src: /* comment 16 */
@@ -190,7 +187,7 @@ a {
     10px /* comment 6 */; /* comment 7 */
   /* comment 8 */
   transform: translate(/* comment 9 */ 10px /* comment 10 */);
-  color: /* comment 11 */ /* comment 12 */ red !important /* comment 13 */ ; /* comment 14 */
+  color: /* comment 11 */ red /* comment 12 */ !important /* comment 13 */ ; /* comment 14 */
   /* comment 15 */
 }
 
@@ -276,7 +273,7 @@ body {
 
 # Lines exceeding max width of 80 characters
 ```
-    7:   color: /* comment 11 */ /* comment 12 */ red !important /* comment 13 */ ; /* comment 14 */
+    7:   color: /* comment 11 */ red /* comment 12 */ !important /* comment 13 */ ; /* comment 14 */
    15:     /* comment 20 */ url("http://prettier.com/font.woff") /* comment 21 */; /* comment 22 */
    19:   /* comment 23 */ color/* comment 24 */:/* comment 25 */ blue /* comment 26 */; /* comment 27 */
    25:   /* comment 34 */ color/* comment 35 */ : /* comment 36 */ blue /* comment 37 */; /* comment 38 */

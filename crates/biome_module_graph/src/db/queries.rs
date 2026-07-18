@@ -14,9 +14,10 @@
 
 use crate::css_module_info::traverse::{CssClassStep, ImportTreeTraversal};
 use crate::db::type_inference::{
-    collected_type_result, infer_module_types_cycle_result, normalize_type_cycle_result,
-    resolve_raw_types,
+    apply_substitutions_to_root_body, collected_type_result, infer_module_types_cycle_result,
+    normalize_type_cycle_result, resolve_raw_types, substitutions_for_instance,
 };
+use crate::module_for_key;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{ImportTreeNode, JsExport, JsOwnExport, ModuleDb, ResolvedPath};
 use biome_css_syntax::{TextRange, TextSize};
@@ -35,7 +36,6 @@ use biome_jsdoc_comment::JsdocComment;
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexMap;
 use rustc_hash::{FxHashMap, FxHashSet};
-use salsa::plumbing::{AsId, FromId};
 use std::collections::VecDeque;
 
 pub use crate::db::type_inference::InferredModuleTypes;
@@ -183,7 +183,7 @@ pub fn infer_call_expression_type<'db>(
     input: CallExpressionTypeInput<'db>,
 ) -> InferredTypeData<'db> {
     let module = input.module(db);
-    let callee = input.callee(db);
+    let callee = normalize_type(db, NormalizeTypeInput::new(db, module, input.callee(db)));
     let args = input.args(db);
     let ty = infer_call_expression_return_type(db, callee, args);
 
@@ -215,11 +215,12 @@ pub(crate) fn infer_call_expression_return_type_from_args<'db>(
             union
                 .types(db)
                 .iter()
-                .filter_map(|callee| match callee {
-                    InferredTypeData::Null | InferredTypeData::Undefined => {
+                .filter_map(|callee| {
+                    if matches!(callee, InferredTypeData::Null | InferredTypeData::Undefined) {
                         Some(InferredTypeData::Undefined)
+                    } else {
+                        infer_function_call_type(db, *callee, args)
                     }
-                    callee => infer_function_call_type(db, *callee, args),
                 })
                 .collect(),
         )
@@ -272,54 +273,13 @@ fn infer_function_call_type<'db>(
 ) -> Option<InferredTypeData<'db>> {
     match callee {
         InferredTypeData::Function(function) => infer_function_return_type(db, function, args),
-        InferredTypeData::InstanceOf(instance) => match instance.ty(db) {
-            InferredTypeData::Function(function) => infer_function_return_type(db, function, args),
-            InferredTypeData::Interface(interface) => {
-                infer_call_signature_type(db, interface.members(db), args)
-            }
-            InferredTypeData::Object(object) => {
-                infer_call_signature_type(db, object.members(db), args)
-            }
-            InferredTypeData::Union(union) => {
-                infer_function_call_type(db, InferredTypeData::Union(union), args)
-            }
-            InferredTypeData::TypeofType(typeof_type) => {
-                infer_function_call_type(db, typeof_type.ty(db), args)
-            }
-            InferredTypeData::TypeofValue(typeof_value) => {
-                infer_function_call_type(db, typeof_value.ty(db), args)
-            }
-            InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
-            | InferredTypeData::Global
-            | InferredTypeData::BigInt
-            | InferredTypeData::Boolean
-            | InferredTypeData::Null
-            | InferredTypeData::Number
-            | InferredTypeData::String
-            | InferredTypeData::Symbol
-            | InferredTypeData::Undefined
-            | InferredTypeData::Conditional
-            | InferredTypeData::Class(_)
-            | InferredTypeData::Constructor(_)
-            | InferredTypeData::Module(_)
-            | InferredTypeData::Namespace(_)
-            | InferredTypeData::Tuple(_)
-            | InferredTypeData::Generic(_)
-            | InferredTypeData::Local(_)
-            | InferredTypeData::Intersection(_)
-            | InferredTypeData::TypeOperator(_)
-            | InferredTypeData::Literal(_)
-            | InferredTypeData::InstanceOf(_)
-            | InferredTypeData::MergedReference(_)
-            | InferredTypeData::TypeofExpression(_)
-            | InferredTypeData::AnyKeyword
-            | InferredTypeData::NeverKeyword
-            | InferredTypeData::ObjectKeyword
-            | InferredTypeData::ThisKeyword
-            | InferredTypeData::UnknownKeyword
-            | InferredTypeData::VoidKeyword => None,
-        },
+        InferredTypeData::InstanceOf(instance) => {
+            let target = instance.ty(db);
+            let substitutions =
+                substitutions_for_instance(db, target, instance.type_parameters(db), &[]);
+            let target = apply_substitutions_to_root_body(db, target, &substitutions);
+            infer_function_call_type(db, target, args)
+        }
         InferredTypeData::Interface(interface) => {
             infer_call_signature_type(db, interface.members(db), args)
         }
@@ -329,11 +289,12 @@ fn infer_function_call_type<'db>(
             union
                 .types(db)
                 .iter()
-                .filter_map(|callee| match callee {
-                    InferredTypeData::Null | InferredTypeData::Undefined => {
+                .filter_map(|callee| {
+                    if matches!(callee, InferredTypeData::Null | InferredTypeData::Undefined) {
                         Some(InferredTypeData::Undefined)
+                    } else {
+                        infer_function_call_type(db, *callee, args)
                     }
-                    callee => infer_function_call_type(db, *callee, args),
                 })
                 .collect(),
         ),
@@ -1199,11 +1160,7 @@ fn raw_local_class_name<'db>(
     local: InferredLocalTypeHandle<'db>,
 ) -> Option<String> {
     let module_key = local.module(db);
-    let module = ModuleInfo::from_id(module_key.as_id());
-    let current = db.module_for_path(module.path(db))?;
-    if InferredModuleKey::new(current.as_id()) != module_key {
-        return None;
-    }
+    let current = module_for_key(db, module_key)?;
     let ModuleInfoKind::Js(js_info) = current.kind(db) else {
         return None;
     };
@@ -1219,11 +1176,7 @@ fn raw_local_class_extends<'db>(
     local: InferredLocalTypeHandle<'db>,
 ) -> Option<InferredLocalTypeHandle<'db>> {
     let module_key = local.module(db);
-    let module = ModuleInfo::from_id(module_key.as_id());
-    let current = db.module_for_path(module.path(db))?;
-    if InferredModuleKey::new(current.as_id()) != module_key {
-        return None;
-    };
+    let current = module_for_key(db, module_key)?;
     let ModuleInfoKind::Js(js_info) = current.kind(db) else {
         return None;
     };
