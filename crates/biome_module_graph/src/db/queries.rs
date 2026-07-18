@@ -15,9 +15,7 @@
 mod css;
 mod type_inference;
 
-use crate::{
-    JsExport, JsExportedSymbolLookup, JsOwnExport, ModuleDb, ModuleInfo, ModuleInfoKind,
-};
+use crate::{JsExport, JsExportedSymbolLookup, JsOwnExport, ModuleDb, ModuleInfo, ModuleInfoKind};
 use biome_js_type_info::ImportSymbol;
 use biome_jsdoc_comment::JsdocComment;
 
