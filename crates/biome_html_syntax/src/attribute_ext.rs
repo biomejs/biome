@@ -100,7 +100,16 @@ impl HtmlAttributeName {
 
 impl Attribute for AnyHtmlAttribute {
     fn name(&self) -> Option<impl AsRef<str>> {
-        self.name()
+        match self {
+            // Shorthand attributes like `{href}` use the expression text as the attribute name.
+            Self::HtmlAttributeSingleTextExpression(expr) => expr
+                .expression()
+                .ok()?
+                .html_literal_token()
+                .ok()
+                .map(|token| token.token_text_trimmed()),
+            _ => self.name(),
+        }
     }
 
     fn value(&self) -> Option<impl AsRef<str>> {
