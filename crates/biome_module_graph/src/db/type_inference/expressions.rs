@@ -32,6 +32,7 @@ const MAX_PROMISE_UNWRAP_STEPS: usize = 64;
 const MAX_REST_MEMBER_STEPS: usize = 1024;
 const MAX_STATIC_MEMBER_LOOKUP_STEPS: usize = 1024;
 const MAX_AWAIT_EXPRESSION_STEPS: usize = 1024;
+const MAX_CALL_CALLEE_STEPS: usize = 64;
 
 impl<'db> ResolutionCtx<'db, '_> {
     pub(in crate::db::type_inference) fn resolve_typeof_expression(
@@ -308,6 +309,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         arguments: &[RawCallArgumentType],
     ) -> InferredTypeData<'db> {
         let args = self.resolve_call_arguments(arguments);
+        let callee = self.resolve_call_callee(callee);
         infer_call_expression_return_type_from_args(self.db, callee, &args)
     }
 
@@ -317,7 +319,29 @@ impl<'db> ResolutionCtx<'db, '_> {
         arguments: &[InferredCallArgumentType<'db>],
     ) -> InferredTypeData<'db> {
         let args = self.resolve_inferred_call_arguments(arguments);
+        let callee = self.resolve_call_callee(callee);
         infer_call_expression_return_type_from_args(self.db, callee, &args)
+    }
+
+    fn resolve_call_callee(&mut self, mut callee: InferredTypeData<'db>) -> InferredTypeData<'db> {
+        let mut instances = Vec::new();
+        for _ in 0..MAX_CALL_CALLEE_STEPS {
+            callee = self.resolve_inferred_type(callee);
+            let InferredTypeData::InstanceOf(instance) = callee else {
+                while let Some(type_parameters) = instances.pop() {
+                    callee = InferredTypeData::instance_of(self.db, callee, type_parameters);
+                }
+                return callee;
+            };
+            instances.push(
+                instance
+                    .type_parameters(self.db)
+                    .to_vec()
+                    .into_boxed_slice(),
+            );
+            callee = instance.ty(self.db);
+        }
+        InferredTypeData::Unknown
     }
 
     fn resolve_call_arguments(

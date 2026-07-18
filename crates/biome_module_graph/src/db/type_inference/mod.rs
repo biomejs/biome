@@ -12,6 +12,7 @@ mod lookup;
 mod qualifiers;
 mod resolver;
 
+pub(in crate::db) use lookup::{apply_substitutions_to_root_body, substitutions_for_instance};
 pub(in crate::db) use resolver::resolve_raw_types;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, salsa::Update)]
