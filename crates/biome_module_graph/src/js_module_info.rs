@@ -508,6 +508,18 @@ pub enum JsOwnExport {
     Namespace(JsReexport),
 }
 
+/// Result of looking up an exported symbol by name, following re-exports.
+#[derive(Clone, Debug, PartialEq, Hash)]
+pub enum JsExportedSymbolLookup {
+    /// The symbol is exported by the module.
+    Found(JsOwnExport),
+    /// Every re-export could be followed and the symbol is not there.
+    Missing,
+    /// A re-export target could not be resolved, so the symbol may still
+    /// exist. Callers must not treat this as proof the export is missing.
+    Unknown,
+}
+
 /// Information about an export statement that re-exports all symbols from
 /// another module.
 #[derive(Clone, Debug, PartialEq, Hash)]
