@@ -23,9 +23,9 @@ use biome_json_value::{JsonObject, JsonString};
 use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
 use biome_languages::{CssFileSource, DocumentFileSource, HtmlFileSource, JsFileSource};
 use biome_module_graph::{
-    HtmlEmbeddedContent, ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase,
-    JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic, ModuleInfo,
-    ModuleInfoKind, ModuleResolver, PathInfoCache, ResolvedPath, SymbolFromModuleInfo,
+    HtmlEmbeddedContent, ImportSymbol, JsExport, JsExportedSymbolLookup, JsImport, JsImportPath,
+    JsImportPhase, JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic,
+    ModuleInfo, ModuleInfoKind, ModuleResolver, PathInfoCache, ResolvedPath, SymbolFromModuleInfo,
     find_js_exported_symbol, is_class_referenced_by_importers, resolve_css_module,
     resolve_html_module, resolve_js_module, transitive_importers_of,
     traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
@@ -2546,15 +2546,16 @@ fn test_aliased_named_reexport_is_found_by_alias() {
     let found =
         find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "renamedSymbol", barrel));
     assert!(
-        found.is_some(),
-        "`renamedSymbol` must be found via the aliased re-export chain; got None"
+        matches!(found, JsExportedSymbolLookup::Found(_)),
+        "`renamedSymbol` must be found via the aliased re-export chain; got {found:?}"
     );
 
     // `originalName` must NOT be visible under the barrel's public API.
     let not_found =
         find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "originalName", barrel));
-    assert!(
-        not_found.is_none(),
+    assert_eq!(
+        not_found,
+        JsExportedSymbolLookup::Missing,
         "`originalName` must not be directly exported from the barrel"
     );
 }
@@ -2602,7 +2603,7 @@ fn test_namespace_reexport_is_own_export() {
     let js_barrel = js_barrel.as_js_module_info().unwrap();
 
     // `MyNs` must be stored as an own export (namespace), not as a forwarding
-    // re-export. Only then will `find_js_exported_symbol` return `Some`.
+    // re-export. Only then will `find_js_exported_symbol` find it.
     assert_eq!(
         js_barrel.exports.get(&Text::new_static("MyNs")),
         Some(&JsExport::Own(JsOwnExport::Namespace(JsReexport {
@@ -2616,12 +2617,116 @@ fn test_namespace_reexport_is_own_export() {
         "`export * as MyNs` must produce JsExport::Own(JsOwnExport::Namespace(JsReexport {{ .. }}))"
     );
 
-    // Confirm `find_js_exported_symbol` returns `Some` as the lint rule sees it.
+    // Confirm `find_js_exported_symbol` finds it as the lint rule sees it.
     let found = find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "MyNs", barrel));
     assert!(
-        found.is_some(),
+        matches!(found, JsExportedSymbolLookup::Found(_)),
         "`MyNs` must be found by find_js_exported_symbol"
     );
+}
+
+/// A package without an `exports` field (like `next`) can re-export symbols
+/// through its own package name: `next/server.d.ts` contains
+/// `export { NextRequest } from 'next/dist/...'`. The re-export must be
+/// followed through the regular `node_modules` lookup.
+/// This regression covers the `next/server` false positive in biome#10870.
+#[test]
+fn test_find_symbol_reexported_through_package_self_reference() {
+    let fs = MemoryFileSystem::default();
+
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"import { NextRequest } from "next/server";"#,
+    );
+    fs.insert(
+        "/node_modules/next/server.d.ts".into(),
+        r#"export { NextRequest } from "next/dist/request";"#,
+    );
+    fs.insert(
+        "/node_modules/next/dist/request.d.ts".into(),
+        r#"export declare class NextRequest {}"#,
+    );
+
+    let project_layout = ProjectLayout::default();
+    project_layout.insert_node_manifest(
+        "/".into(),
+        PackageJson::new("frontend")
+            .with_version("0.0.0")
+            .with_dependencies(Dependencies(Box::new([("next".into(), "16.0.0".into())]))),
+    );
+    project_layout.insert_node_manifest(
+        "/node_modules/next".into(),
+        PackageJson::new("next").with_version("16.0.0"),
+    );
+
+    let added_paths = [
+        BiomePath::new("/src/index.ts"),
+        BiomePath::new("/node_modules/next/server.d.ts"),
+        BiomePath::new("/node_modules/next/dist/request.d.ts"),
+    ];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let db = build_js_db(&fs, &project_layout, &added_paths, false);
+
+    let server = db
+        .module_for_path(Utf8Path::new("/node_modules/next/server.d.ts"))
+        .unwrap();
+
+    let found = find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "NextRequest", server));
+    assert!(
+        matches!(found, JsExportedSymbolLookup::Found(_)),
+        "`NextRequest` must be found through the self-referencing re-export; got {found:?}"
+    );
+}
+
+/// A re-export whose target cannot be resolved must make the lookup report
+/// `Unknown` instead of `Missing`: the symbol may exist in the module we
+/// failed to resolve, so callers must not claim it is absent.
+#[test]
+fn test_find_symbol_behind_unresolvable_reexport_is_unknown() {
+    let fs = MemoryFileSystem::default();
+
+    fs.insert(
+        "/src/barrel.ts".into(),
+        r#"
+            export { fromMissingPackage } from "not-installed";
+            export const own = 1;
+        "#,
+    );
+    fs.insert("/src/star.ts".into(), r#"export * from "not-installed";"#);
+
+    let project_layout = ProjectLayout::default();
+    project_layout.insert_node_manifest(
+        "/".into(),
+        PackageJson::new("test-pkg").with_version("0.0.0"),
+    );
+
+    let added_paths = [
+        BiomePath::new("/src/barrel.ts"),
+        BiomePath::new("/src/star.ts"),
+    ];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let db = build_js_db(&fs, &project_layout, &added_paths, false);
+
+    let barrel = db.module_for_path(Utf8Path::new("/src/barrel.ts")).unwrap();
+
+    let named = find_js_exported_symbol(
+        &db,
+        SymbolFromModuleInfo::new(&db, "fromMissingPackage", barrel),
+    );
+    assert_eq!(named, JsExportedSymbolLookup::Unknown);
+
+    // A symbol that no export statement mentions is still `Missing`.
+    let absent =
+        find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "neverExported", barrel));
+    assert_eq!(absent, JsExportedSymbolLookup::Missing);
+
+    // `export * from` with an unresolvable target may provide any name.
+    let star = db.module_for_path(Utf8Path::new("/src/star.ts")).unwrap();
+    let behind_star =
+        find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "anything", star));
+    assert_eq!(behind_star, JsExportedSymbolLookup::Unknown);
 }
 
 /// `export * as Ns from "./mod"` should also support type inference: when
@@ -3289,7 +3394,7 @@ fn test_export_equals_namespace_without_type_inference() {
         SymbolFromModuleInfo::new(&db, "useState", react_module),
     );
     assert!(
-        use_state.is_some(),
+        matches!(use_state, JsExportedSymbolLookup::Found(_)),
         "`useState` must be visible as a named export from `@types/react` even without type inference"
     );
 
@@ -3298,7 +3403,7 @@ fn test_export_equals_namespace_without_type_inference() {
         SymbolFromModuleInfo::new(&db, "useCallback", react_module),
     );
     assert!(
-        use_callback.is_some(),
+        matches!(use_callback, JsExportedSymbolLookup::Found(_)),
         "`useCallback` must be visible as a named export from `@types/react` even without type inference"
     );
 }

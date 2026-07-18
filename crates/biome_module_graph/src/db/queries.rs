@@ -19,7 +19,9 @@ use crate::db::type_inference::{
 };
 use crate::module_for_key;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
-use crate::{ImportTreeNode, JsExport, JsOwnExport, ModuleDb, ResolvedPath};
+use crate::{
+    ImportTreeNode, JsExport, JsExportedSymbolLookup, JsOwnExport, ModuleDb, ResolvedPath,
+};
 use biome_css_syntax::{TextRange, TextSize};
 use biome_js_type_info::{
     ImportSymbol, RawTypeData, TypeReference, TypeResolverLevel,
@@ -1769,14 +1771,15 @@ pub struct SymbolFromModuleInfo {
     module: ModuleInfo,
 }
 
-/// Finds the default exported symbol.
+/// Finds the exported symbol with the given name, following re-exports.
 #[salsa::tracked]
 pub fn find_js_exported_symbol<'db>(
     db: &'db dyn ModuleDb,
     symbol: SymbolFromModuleInfo<'db>,
-) -> Option<JsOwnExport> {
+) -> JsExportedSymbolLookup {
     let mut seen_paths = std::collections::BTreeSet::new();
     let mut stack = vec![symbol];
+    let mut saw_unresolved_target = false;
 
     while let Some(symbol) = stack.pop() {
         let ModuleInfoKind::Js(module) = symbol.module(db).kind(db) else {
@@ -1784,7 +1787,7 @@ pub fn find_js_exported_symbol<'db>(
         };
         match &module.exports.get(symbol.name(db).as_str()) {
             Some(JsExport::Own(own_export) | JsExport::OwnType(own_export)) => {
-                return Some(own_export.clone());
+                return JsExportedSymbolLookup::Found(own_export.clone());
             }
             Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
                 match &reexport.import.symbol {
@@ -1801,7 +1804,11 @@ pub fn find_js_exported_symbol<'db>(
                                     ));
                                 }
                             }
-                            _ => break,
+                            Ok(_) => break,
+                            Err(_) => {
+                                saw_unresolved_target = true;
+                                break;
+                            }
                         }
                     }
                     ImportSymbol::Default => {
@@ -1816,18 +1823,26 @@ pub fn find_js_exported_symbol<'db>(
             }
             None => {
                 for reexport in module.blanket_reexports.iter() {
-                    if let Ok(path) = reexport.import.resolved_path.as_deref()
-                        && seen_paths.insert(path.to_path_buf())
-                        && let Some(module) = db.module_for_path(path)
-                    {
-                        stack.push(SymbolFromModuleInfo::new(db, symbol.name(db), module));
+                    match reexport.import.resolved_path.as_deref() {
+                        Ok(path) => {
+                            if seen_paths.insert(path.to_path_buf())
+                                && let Some(module) = db.module_for_path(path)
+                            {
+                                stack.push(SymbolFromModuleInfo::new(db, symbol.name(db), module));
+                            }
+                        }
+                        Err(_) => saw_unresolved_target = true,
                     }
                 }
             }
         }
     }
 
-    None
+    if saw_unresolved_target {
+        JsExportedSymbolLookup::Unknown
+    } else {
+        JsExportedSymbolLookup::Missing
+    }
 }
 
 /// Returns `true` if the given CSS `class_name` is referenced in any
