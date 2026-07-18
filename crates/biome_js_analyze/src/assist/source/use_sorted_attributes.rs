@@ -12,7 +12,9 @@ use biome_js_syntax::{
     AnyJsxAttribute, JsLanguage, JsxAttribute, JsxAttributeList, JsxOpeningElement,
     JsxSelfClosingElement,
 };
-use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt, SyntaxToken};
+use biome_rowan::{
+    AstNode, AstNodeExt, AstNodeList, AstNodeListExt, BatchMutationExt, SyntaxToken,
+};
 use biome_rule_options::use_sorted_attributes::{SortOrder, UseSortedAttributesOptions};
 
 use crate::JsRuleAction;
@@ -83,8 +85,8 @@ declare_source_rule! {
 
 impl Rule for UseSortedAttributes {
     type Query = Ast<JsxAttributeList>;
-    type State = AttributeGroup<SortableJsxAttribute>;
-    type Signals = Box<[Self::State]>;
+    type State = UnsortedAttributeGroups;
+    type Signals = Option<Self::State>;
     type Options = UseSortedAttributesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -131,7 +133,11 @@ impl Rule for UseSortedAttributes {
         if !current_prop_group.is_empty() && !current_prop_group.is_sorted(boolean_comparator) {
             prop_groups.push(current_prop_group);
         }
-        prop_groups.into_boxed_slice()
+        if !prop_groups.is_empty() {
+            Some(UnsortedAttributeGroups(prop_groups))
+        } else {
+            None
+        }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -153,7 +159,7 @@ impl Rule for UseSortedAttributes {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        let mut mutation = ctx.root().begin();
+        let list = ctx.query();
         let options = ctx.options();
         let sort_by = options.sort_order.unwrap_or_default();
 
@@ -162,11 +168,26 @@ impl Rule for UseSortedAttributes {
             SortOrder::Lexicographic => SortableJsxAttribute::lexicographic_cmp,
         };
 
-        for (SortableJsxAttribute(attr), SortableJsxAttribute(sorted_attr)) in
-            zip(state.attrs.iter(), state.get_sorted_attributes(comparator)?)
-        {
-            mutation.replace_node_discard_trivia(attr.clone(), sorted_attr);
+        // Build the sorted attribute list once and register a single
+        // list-level replacement. Replacing attributes slot by slot conflicts
+        // during batch commit with mutations propagated up from nested JSX
+        // elements whose own attributes are sorted in the same fix pass,
+        // duplicating one attribute and dropping another (issues #9884 and
+        // #10838).
+        let mut new_attrs: Vec<AnyJsxAttribute> = list.iter().collect();
+        for group in &state.0 {
+            for (SortableJsxAttribute(attr), SortableJsxAttribute(sorted_attr)) in
+                zip(group.attrs.iter(), group.get_sorted_attributes(comparator)?)
+            {
+                new_attrs[attr.syntax().index()] = sorted_attr.into();
+            }
         }
+
+        let range = 0..new_attrs.len();
+        let new_list = list.clone().splice(range, new_attrs);
+
+        let mut mutation = ctx.root().begin();
+        mutation.replace_node_discard_trivia(list.clone(), new_list);
 
         Some(RuleAction::new(
             rule_action_category!(),
@@ -176,6 +197,11 @@ impl Rule for UseSortedAttributes {
         ))
     }
 }
+
+/// All the unsorted attribute groups of a single [JsxAttributeList], so that
+/// the whole list can be sorted with a single action.
+#[derive(Clone)]
+pub struct UnsortedAttributeGroups(Vec<AttributeGroup<SortableJsxAttribute>>);
 
 #[derive(PartialEq, Eq, Clone)]
 pub struct SortableJsxAttribute(JsxAttribute);
