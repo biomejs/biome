@@ -136,26 +136,54 @@ struct SanitizeAdapter<W> {
     error: io::Result<()>,
 }
 
+impl<W> SanitizeAdapter<W>
+where
+    W: WriteColor,
+{
+    /// Writes `bytes` verbatim in a single call. Used both for runs of
+    /// content that need no sanitization and for the (already UTF-8
+    /// encoded) replacement characters.
+    fn write_verbatim(&mut self, bytes: &[u8]) -> fmt::Result {
+        if bytes.is_empty() {
+            return Ok(());
+        }
+
+        if let Err(err) = self.writer.write_all(bytes) {
+            self.error = Err(err);
+            return Err(fmt::Error);
+        }
+
+        Ok(())
+    }
+}
+
 impl<W> fmt::Write for SanitizeAdapter<W>
 where
     W: WriteColor,
 {
     fn write_str(&mut self, content: &str) -> fmt::Result {
         let mut buffer = [0; 4];
+        // Start of the current run of bytes that can be written verbatim
+        // (i.e. need no replacement). Flushed in one `write_all` call
+        // whenever a grapheme needing replacement is found, instead of
+        // writing one character at a time: most content (source code,
+        // punctuation, plain ASCII text) needs no sanitization at all, so
+        // this keeps the common case to a single write per `write_str`
+        // call rather than one per character.
+        let mut run_start = 0;
 
-        for grapheme in content.graphemes(true) {
+        for (offset, grapheme) in content.grapheme_indices(true) {
             let width = UnicodeWidthStr::width(grapheme);
             let is_whitespace = grapheme_is_whitespace(grapheme);
 
             if !is_whitespace && width == 0 {
+                self.write_verbatim(content[run_start..offset].as_bytes())?;
+
                 let char_to_write = char::REPLACEMENT_CHARACTER;
                 char_to_write.encode_utf8(&mut buffer);
+                self.write_verbatim(&buffer[..char_to_write.len_utf8()])?;
 
-                if let Err(err) = self.writer.write_all(&buffer[..char_to_write.len_utf8()]) {
-                    self.error = Err(err);
-                    return Err(fmt::Error);
-                }
-
+                run_start = offset + grapheme.len();
                 continue;
             }
 
@@ -169,15 +197,13 @@ where
             if !is_ascii {
                 if cfg!(windows) {
                     // On Windows, always convert all non-ASCII graphemes due to poor terminal support
+                    self.write_verbatim(content[run_start..offset].as_bytes())?;
+
                     let replacement = unicode_to_ascii(grapheme.chars().nth(0).unwrap());
-
                     replacement.encode_utf8(&mut buffer);
+                    self.write_verbatim(&buffer[..replacement.len_utf8()])?;
 
-                    if let Err(err) = self.writer.write_all(&buffer[..replacement.len_utf8()]) {
-                        self.error = Err(err);
-                        return Err(fmt::Error);
-                    }
-
+                    run_start = offset + grapheme.len();
                     continue;
                 } else if !self.writer.supports_color() {
                     // On non-Windows with colors disabled:
@@ -185,32 +211,24 @@ where
                     // Multi-codepoint graphemes (like emoji with modifiers) are preserved for source code fidelity
                     let chars: Vec<char> = grapheme.chars().collect();
                     if chars.len() == 1 {
+                        self.write_verbatim(content[run_start..offset].as_bytes())?;
+
                         let replacement = unicode_to_ascii(chars[0]);
-
                         replacement.encode_utf8(&mut buffer);
+                        self.write_verbatim(&buffer[..replacement.len_utf8()])?;
 
-                        if let Err(err) = self.writer.write_all(&buffer[..replacement.len_utf8()]) {
-                            self.error = Err(err);
-                            return Err(fmt::Error);
-                        }
-
+                        run_start = offset + grapheme.len();
                         continue;
                     }
                     // Multi-codepoint graphemes fall through to be written as-is below
                 }
             }
 
-            for char in grapheme.chars() {
-                char.encode_utf8(&mut buffer);
-
-                if let Err(err) = self.writer.write_all(&buffer[..char.len_utf8()]) {
-                    self.error = Err(err);
-                    return Err(fmt::Error);
-                }
-            }
+            // ASCII grapheme, or a non-ASCII one that isn't being replaced:
+            // leave it as part of the current verbatim run.
         }
 
-        Ok(())
+        self.write_verbatim(content[run_start..].as_bytes())
     }
 }
 
