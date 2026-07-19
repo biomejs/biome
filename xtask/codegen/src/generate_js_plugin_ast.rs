@@ -1,5 +1,11 @@
-use std::fmt::Write;
-
+use biome_js_factory::make;
+use biome_js_formatter::{context::JsFormatOptions, format_node};
+use biome_js_syntax::{
+    AnyJsDeclarationClause, AnyJsExportClause, AnyJsModuleItem, AnyJsObjectMemberName, AnyTsName,
+    AnyTsType, AnyTsTypeMember, JsSyntaxToken, T, TriviaPieceKind, TsReferenceType,
+};
+use biome_languages::JsFileSource;
+use biome_rowan::AstNode;
 use biome_string_case::Case;
 use quote::{format_ident, quote};
 use xtask_glue::{Mode, Result, project_root};
@@ -112,66 +118,184 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
 }
 
 fn generate_typescript(ast: &AstSrc) -> String {
-    let mut output = String::from(
-        "// Generated file, do not edit by hand, see `xtask/codegen`.\n\n\
-	export interface JsAstNode {\n\
-	\treadonly kind: string;\n\
-	\treadonly text: string;\n\
-	}\n\n",
-    );
+    let leading_comment = [
+        (
+            TriviaPieceKind::SingleLineComment,
+            "// Generated file, do not edit by hand, see `xtask/codegen`.",
+        ),
+        (TriviaPieceKind::Newline, "\n"),
+        (TriviaPieceKind::Newline, "\n"),
+    ];
+
+    let export_token = make::token(T![export]).with_leading_trivia(leading_comment);
+    let mut items = vec![export_interface(
+        export_token,
+        "JsAstNode",
+        None,
+        [
+            property("kind", string_type()),
+            property("text", string_type()),
+        ],
+    )];
 
     for node in &ast.nodes {
         let node_kind = Case::Constant.convert(&node.name);
-        writeln!(
-            output,
-            "export interface {} extends JsAstNode {{",
-            node.name
-        )
-        .unwrap();
-        writeln!(output, "\treadonly kind: \"{node_kind}\";").unwrap();
+        let mut members = vec![property("kind", string_literal_type(&node_kind))];
 
         for field in &node.fields {
             let property_name = property_name(field);
             let field_type = match field {
-                Field::Token { .. } => "string | undefined".to_string(),
-                Field::Node { ty, .. } if ast.is_list(ty) => ty.clone(),
-                Field::Node { ty, .. } => format!("{ty} | undefined"),
+                Field::Token { .. } => union_type([string_type(), undefined_type()]),
+                Field::Node { ty, .. } if ast.is_list(ty) => reference_type(ty).into(),
+                Field::Node { ty, .. } => union_type([reference_type(ty).into(), undefined_type()]),
             };
-            writeln!(output, "\treadonly {property_name}: {field_type};").unwrap();
+            members.push(property(&property_name, field_type));
         }
 
-        output.push_str("}\n\n");
+        items.push(export_interface(
+            make::token(T![export]),
+            &node.name,
+            Some("JsAstNode"),
+            members,
+        ));
     }
 
     for bogus in &ast.bogus {
         let node_kind = Case::Constant.convert(bogus);
-        writeln!(output, "export interface {bogus} extends JsAstNode {{").unwrap();
-        writeln!(output, "\treadonly kind: \"{node_kind}\";").unwrap();
-        output.push_str("}\n\n");
+        items.push(export_interface(
+            make::token(T![export]),
+            bogus,
+            Some("JsAstNode"),
+            [property("kind", string_literal_type(&node_kind))],
+        ));
     }
 
     for union in &ast.unions {
-        writeln!(
-            output,
-            "export type {} = {};",
-            union.name,
-            union.variants.join(" | ")
-        )
-        .unwrap();
+        items.push(export_type_alias(
+            &union.name,
+            union_type(
+                union
+                    .variants
+                    .iter()
+                    .map(|variant| reference_type(variant).into()),
+            ),
+        ));
     }
-
-    output.push('\n');
 
     for (name, list) in ast.lists() {
-        writeln!(
-            output,
-            "export type {name} = readonly {}[];",
-            list.element_name
-        )
-        .unwrap();
+        let array_type = make::ts_array_type(
+            reference_type(&list.element_name).into(),
+            make::token(T!['[']),
+            make::token(T![']']),
+        );
+        let readonly_array_type = make::ts_type_operator_type(
+            make::token(T![readonly]),
+            AnyTsType::TsArrayType(array_type),
+        );
+        items.push(export_type_alias(name, readonly_array_type.into()));
     }
 
-    output
+    let module = make::js_module(
+        make::js_directive_list(None),
+        make::js_module_item_list(items),
+        make::eof(),
+    )
+    .build();
+
+    let formatted = format_node(
+        JsFormatOptions::new(JsFileSource::ts()),
+        module.syntax(),
+        vec![],
+    )
+    .unwrap();
+
+    formatted.print().unwrap().into_code()
+}
+
+fn export_interface(
+    export_token: JsSyntaxToken,
+    name: &str,
+    extends: Option<&str>,
+    members: impl IntoIterator<Item = AnyTsTypeMember>,
+) -> AnyJsModuleItem {
+    let members = members.into_iter().collect::<Vec<_>>();
+    let mut interface = make::ts_interface_declaration(
+        make::token(T![interface]),
+        make::ts_identifier_binding(make::ident(name)).into(),
+        make::token(T!['{']),
+        make::ts_type_member_list(members),
+        make::token(T!['}']),
+    );
+    if let Some(extends) = extends {
+        interface = interface.with_extends_clause(make::ts_extends_clause(
+            make::token(T![extends]),
+            make::ts_type_list([reference_type(extends)], []),
+        ));
+    }
+
+    AnyJsModuleItem::JsExport(make::js_export(
+        make::js_decorator_list([]),
+        export_token,
+        AnyJsExportClause::AnyJsDeclarationClause(AnyJsDeclarationClause::TsInterfaceDeclaration(
+            interface.build(),
+        )),
+    ))
+}
+
+fn export_type_alias(name: &str, ty: AnyTsType) -> AnyJsModuleItem {
+    AnyJsModuleItem::JsExport(make::js_export(
+        make::js_decorator_list([]),
+        make::token(T![export]),
+        AnyJsExportClause::AnyJsDeclarationClause(AnyJsDeclarationClause::TsTypeAliasDeclaration(
+            make::ts_type_alias_declaration(
+                make::token(T![type]),
+                make::ts_identifier_binding(make::ident(name)).into(),
+                make::token(T![=]),
+                ty,
+            )
+            .with_semicolon_token(make::token(T![;]))
+            .build(),
+        )),
+    ))
+}
+
+fn property(name: &str, ty: AnyTsType) -> AnyTsTypeMember {
+    make::ts_property_signature_type_member(AnyJsObjectMemberName::JsLiteralMemberName(
+        make::js_literal_member_name(make::ident(name)),
+    ))
+    .with_readonly_token(make::token(T![readonly]))
+    .with_type_annotation(make::ts_type_annotation(make::token(T![:]), ty))
+    .with_separator_token_token(make::token(T![;]))
+    .build()
+    .into()
+}
+
+fn string_type() -> AnyTsType {
+    make::ts_string_type(make::token(T![string])).into()
+}
+
+fn string_literal_type(value: &str) -> AnyTsType {
+    make::ts_string_literal_type(make::js_string_literal(value)).into()
+}
+
+fn undefined_type() -> AnyTsType {
+    make::ts_undefined_type(make::token(T![undefined])).into()
+}
+
+fn reference_type(name: &str) -> TsReferenceType {
+    make::ts_reference_type(AnyTsName::JsReferenceIdentifier(
+        make::js_reference_identifier(make::ident(name)),
+    ))
+    .build()
+}
+
+fn union_type(types: impl IntoIterator<Item = AnyTsType>) -> AnyTsType {
+    let types = types.into_iter().collect::<Vec<_>>();
+    let separators = (1..types.len()).map(|_| make::token(T![|]));
+
+    make::ts_union_type(make::ts_union_type_variant_list(types, separators))
+        .build()
+        .into()
 }
 
 fn rust_method_name(field: &Field) -> proc_macro2::Ident {
