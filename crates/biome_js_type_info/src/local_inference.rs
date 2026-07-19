@@ -1885,6 +1885,22 @@ impl TypeMember {
                     ty: ty.into(),
                 })
             }
+            AnyJsClassMember::TsConstructorSignatureClassMember(member) => {
+                let constructor = Constructor {
+                    type_parameters: [].into(),
+                    parameters: constructor_params_from_js_constructor_params(
+                        resolver,
+                        scope_id,
+                        member.parameters(),
+                    ),
+                    return_type: None,
+                };
+                let ty = resolver.register_and_resolve(constructor.into());
+                Some(Self {
+                    kind: TypeMemberKind::Constructor,
+                    ty: ty.into(),
+                })
+            }
             AnyJsClassMember::JsMethodClassMember(member) => member.name().ok().and_then(|name| {
                 let is_async = member.async_token().is_some();
                 let function = Function {

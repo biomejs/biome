@@ -199,6 +199,7 @@ fn resolve_global_type_id_with_resolver<'db>(
                         implements.into_boxed_slice(),
                         members.into_boxed_slice(),
                         name,
+                        true,
                     ),
                 )));
             }
@@ -468,6 +469,7 @@ fn global_cycle_placeholder<'db>(
             Box::default(),
             Box::default(),
             class.name.clone(),
+            true,
         )),
         RawTypeData::Interface(interface) => {
             InferredTypeData::Interface(InferredInternedInterface::new(

@@ -12,8 +12,10 @@ use biome_js_parser::{JsParserOptions, parse};
 use biome_js_type_info::{
     InferredType, format_inferred_type,
     interned_types::{
+        CallArgumentType as InferredCallArgumentType,
         FunctionParameter as InferredFunctionParameter, InternedInterface as InferredInterface,
-        InternedMergedReference as InferredMergedReference, InternedUnion as InferredUnion,
+        InternedMergedReference as InferredMergedReference,
+        InternedTypeofType as InferredTypeofType, InternedUnion as InferredUnion,
         Literal as InferredLiteral, LocalTypeId as InferredLocalTypeId,
         ModuleKey as InferredModuleKey, ReturnType as InferredReturnType,
         TypeData as InferredTypeData, TypeMemberKind as InferredTypeMemberKind,
@@ -22,10 +24,11 @@ use biome_js_type_info::{
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_languages::JsFileSource;
 use biome_module_graph::{
-    CallExpressionTypeInput, InferredModuleTypes, JsExport, JsOwnExport, ModuleDb, ModuleInfo,
-    ModuleInfoKind, NormalizeTypeInput, PathInfoCache,
-    infer_call_expression_type as infer_call_expression_type_query, infer_module_types,
-    infer_module_types_bottom_up, normalize_type as normalize_type_query, resolve_js_module,
+    CallArgumentTypeInput, CallExpressionTypeInput, InferredModuleTypes, JsExport, JsOwnExport,
+    ModuleDb, ModuleInfo, ModuleInfoKind, NormalizeTypeInput, PathInfoCache,
+    infer_call_argument_type, infer_call_expression_type as infer_call_expression_type_query,
+    infer_constructor_argument_type, infer_module_types, infer_module_types_bottom_up,
+    module_for_key, normalize_type as normalize_type_query, resolve_js_module,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
@@ -40,6 +43,27 @@ struct TestModuleDb {
     modules: BTreeMap<Utf8PathBuf, ModuleInfo>,
     events: Events,
     storage: Storage<Self>,
+}
+
+#[test]
+fn test_module_keys_reject_stale_handles() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), "export const value = 1;");
+
+    let mut db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let path = Utf8PathBuf::from("/src/index.ts");
+    let original = db.module_for_path(&path).expect("module must exist");
+    let replacement = ModuleInfo::new(&db, path.clone(), original.kind(&db).clone());
+    db.modules.insert(path, replacement);
+
+    assert!(
+        module_for_key(&db, InferredModuleKey::new(original.as_id())).is_none(),
+        "stale module handles must be rejected"
+    );
+    assert_eq!(
+        module_for_key(&db, InferredModuleKey::new(replacement.as_id())),
+        Some(replacement)
+    );
 }
 
 #[test]
@@ -4622,6 +4646,203 @@ fn test_infer_call_expression_type_substitutes_nested_generic_return_type() {
 }
 
 #[test]
+fn test_infer_module_types_calls_generic_function_type_aliases() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type Factory<T> = () => Promise<T>;
+            declare const makeString: Factory<string>;
+            export const result = makeString();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let result_ty = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result type must be inferred");
+
+    let result_ty = inferred.resolve_type(&db, result_ty);
+    assert!(
+        is_inferred_promise_with_type_parameter(&db, result_ty, |ty| is_inferred_string(&db, ty)),
+        "generic alias must return Promise<string>, got {}",
+        format_inferred_type(&db, result_ty)
+    );
+}
+
+#[test]
+fn test_infer_module_types_calls_imported_generic_function_type_aliases() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/factory.ts".into(),
+        r#"
+            type Factory<T> = () => Promise<T>;
+            export declare const makeString: Factory<string>;
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import { makeString } from "./factory";
+            export const result = makeString();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/factory.ts", "/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let result_ty = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result type must be inferred");
+    let result_ty = inferred.resolve_type(&db, result_ty);
+
+    assert!(is_inferred_promise_with_type_parameter(
+        &db,
+        result_ty,
+        |ty| is_inferred_string(&db, ty)
+    ));
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_calls_imported_generic_function_type_aliases",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_calls_nested_generic_callable_aliases() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            interface Callable<T> {
+                (value: T): T;
+            }
+
+            type First<T> = Callable<T>;
+            type Second<T> = First<T>;
+            declare const call: Second<string>;
+            export const result = call("value");
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let result_ty = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result type must be inferred");
+
+    let result_ty = inferred.resolve_type(&db, result_ty);
+    assert!(
+        is_inferred_string(&db, result_ty),
+        "nested generic alias must return string, got {}",
+        format_inferred_type(&db, result_ty)
+    );
+}
+
+#[test]
+fn test_infer_call_expression_type_substitutes_generic_in_function_return_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function wrap<T>(value: T): () => T {
+                return () => value;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let wrap_ty = inferred_binding_ty_by_name(&db, module, &inferred, "wrap")
+        .expect("wrap binding type must be inferred");
+    let call_ty = infer_call_expression_type(
+        &db,
+        module,
+        inferred.resolve_type(&db, wrap_ty),
+        Vec::from([InferredTypeData::Number]),
+    );
+    let InferredTypeData::Function(function) = call_ty else {
+        panic!("wrap must return a function, got {call_ty:?}");
+    };
+    let InferredReturnType::Type(return_ty) = function.return_type(&db) else {
+        panic!("nested function return type must be inferred");
+    };
+
+    assert!(is_inferred_number(&db, *return_ty));
+}
+
+#[test]
+fn test_infer_call_expression_type_preserves_shadowed_nested_function_generic() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function makeIdentity<T>(value: T): <T>(value: T) => T {
+                return value => value;
+            }
+
+            const identity = makeIdentity(1);
+            export const result = identity("value");
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let result_ty = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result type must be inferred");
+
+    assert!(is_inferred_string_literal(
+        &db,
+        inferred.resolve_type(&db, result_ty),
+        "value"
+    ));
+}
+
+#[test]
+fn test_infer_module_types_preserves_shadowed_class_method_generic() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            class Box<T> {
+                map<T>(value: T): T {
+                    return value;
+                }
+            }
+
+            declare const box: Box<number>;
+            export const result = box.map("value");
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let result_ty = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result type must be inferred");
+
+    assert!(is_inferred_string_literal(
+        &db,
+        inferred.resolve_type(&db, result_ty),
+        "value"
+    ));
+}
+
+#[test]
 fn test_infer_call_expression_type_substitutes_generic_inside_promise_union_return_type() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -4837,6 +5058,320 @@ fn test_infer_call_expression_type_substitutes_generic_from_callback_promise_ret
         "test_infer_call_expression_type_substitutes_generic_from_callback_promise_return_type",
         &db,
         &fs,
+    );
+}
+
+#[test]
+fn test_infer_call_expression_type_substitutes_generic_from_callback_promise_union_return_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function unwrap<T>(cb: () => T | Promise<T>): T {
+                return undefined as T;
+            }
+
+            export function readNumber(): Promise<number> {
+                return Promise.resolve(1);
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let unwrap_ty = inferred_binding_ty_by_name(&db, module, &inferred, "unwrap")
+        .expect("unwrap binding type must be inferred");
+    let read_number_ty = inferred_binding_ty_by_name(&db, module, &inferred, "readNumber")
+        .expect("readNumber binding type must be inferred");
+    let call_ty = infer_call_expression_type(
+        &db,
+        module,
+        inferred.resolve_type(&db, unwrap_ty),
+        Vec::from([inferred.resolve_type(&db, read_number_ty)]),
+    );
+
+    assert!(is_inferred_number(&db, call_ty));
+    assert_inferred_type_snapshot(
+        "test_infer_call_expression_type_substitutes_generic_from_callback_promise_union_return_type",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_call_argument_type_handles_deep_typeof_wrappers() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function consume(callback: () => void) {}
+            export const callback = async () => {};
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let mut consume = inferred_binding_ty_by_name(&db, module, &inferred, "consume")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("consume binding type must be inferred");
+    let callback = inferred_binding_ty_by_name(&db, module, &inferred, "callback")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("callback binding type must be inferred");
+
+    for _ in 0..512 {
+        consume = InferredTypeData::TypeofType(InferredTypeofType::new(&db, consume));
+    }
+
+    let input = CallArgumentTypeInput::new(
+        &db,
+        consume,
+        Vec::from([InferredCallArgumentType::Argument(callback)]).into_boxed_slice(),
+        0,
+    );
+    let expected =
+        infer_call_argument_type(&db, input).expect("call expected type must be inferred");
+
+    assert!(
+        InferredType::new(&db, expected).function_returns_void(),
+        "expected void callback, got {expected:?}"
+    );
+}
+
+#[test]
+fn test_infer_call_argument_type_preserves_parameter_mapping_after_spread() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function consume(prefix: number, callback: () => void) {}
+            export const prefixes: number[] = [];
+            export const callback = async () => {};
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let consume = inferred_binding_ty_by_name(&db, module, &inferred, "consume")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("consume binding type must be inferred");
+    let prefixes = inferred_binding_ty_by_name(&db, module, &inferred, "prefixes")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("prefixes binding type must be inferred");
+    let callback = inferred_binding_ty_by_name(&db, module, &inferred, "callback")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("callback binding type must be inferred");
+    let input = CallArgumentTypeInput::new(
+        &db,
+        consume,
+        Vec::from([
+            InferredCallArgumentType::Spread(prefixes),
+            InferredCallArgumentType::Argument(callback),
+        ])
+        .into_boxed_slice(),
+        1,
+    );
+    let expected =
+        infer_call_argument_type(&db, input).expect("call expected type must be inferred");
+
+    assert!(
+        InferredType::new(&db, expected).function_returns_void(),
+        "expected void callback, got {expected:?}"
+    );
+}
+
+#[test]
+fn test_infer_call_argument_type_preserves_parameter_mapping_after_tuple_spread() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function consume(prefix: number, label: string, callback: () => void) {}
+            export const prefixes: [number, string] = [0, "label"];
+            export const callback = async () => {};
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let consume = inferred_binding_ty_by_name(&db, module, &inferred, "consume")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("consume binding type must be inferred");
+    let prefixes = inferred_binding_ty_by_name(&db, module, &inferred, "prefixes")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("prefixes binding type must be inferred");
+    let callback = inferred_binding_ty_by_name(&db, module, &inferred, "callback")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("callback binding type must be inferred");
+    let input = CallArgumentTypeInput::new(
+        &db,
+        consume,
+        Vec::from([
+            InferredCallArgumentType::Spread(prefixes),
+            InferredCallArgumentType::Argument(callback),
+        ])
+        .into_boxed_slice(),
+        1,
+    );
+    let expected =
+        infer_call_argument_type(&db, input).expect("call expected type must be inferred");
+
+    assert!(
+        InferredType::new(&db, expected).function_returns_void(),
+        "expected void callback, got {expected:?}"
+    );
+}
+
+#[test]
+fn test_infer_call_argument_type_substitutes_generic_tuple_spread() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export interface Consumer {
+                (prefix: string, label: string, callback: () => Promise<void>): void;
+                (prefix: number, label: string, callback: () => void): void;
+            }
+            export declare const consume: Consumer;
+            type Prefixes<T> = [T, string];
+            export const prefixes: Prefixes<number> = [0, "label"];
+            export const callback = async () => {};
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let consume = inferred_binding_ty_by_name(&db, module, &inferred, "consume")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("consume binding type must be inferred");
+    let prefixes = inferred_binding_ty_by_name(&db, module, &inferred, "prefixes")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("prefixes binding type must be inferred");
+    let callback = inferred_binding_ty_by_name(&db, module, &inferred, "callback")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("callback binding type must be inferred");
+    let input = CallArgumentTypeInput::new(
+        &db,
+        consume,
+        Vec::from([
+            InferredCallArgumentType::Spread(prefixes),
+            InferredCallArgumentType::Argument(callback),
+        ])
+        .into_boxed_slice(),
+        1,
+    );
+    let expected =
+        infer_call_argument_type(&db, input).expect("call expected type must be inferred");
+
+    assert!(
+        InferredType::new(&db, expected).function_returns_void(),
+        "expected void callback, got {expected:?}"
+    );
+}
+
+#[test]
+fn test_infer_call_argument_type_ignores_missing_later_argument_for_single_signature() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function consume(callback: () => void, marker: number) {}
+            export const callback = async () => {};
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let consume = inferred_binding_ty_by_name(&db, module, &inferred, "consume")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("consume binding type must be inferred");
+    let callback = inferred_binding_ty_by_name(&db, module, &inferred, "callback")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("callback binding type must be inferred");
+    let input = CallArgumentTypeInput::new(
+        &db,
+        consume,
+        Vec::from([InferredCallArgumentType::Argument(callback)]).into_boxed_slice(),
+        0,
+    );
+    let expected =
+        infer_call_argument_type(&db, input).expect("call expected type must be inferred");
+
+    assert!(
+        InferredType::new(&db, expected).function_returns_void(),
+        "expected void callback, got {expected:?}"
+    );
+}
+
+#[test]
+fn test_infer_constructor_argument_type_selects_overload_by_arity() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export class Consumer {
+                constructor(prefix: number, callback: () => void);
+                constructor(prefix: number, callback: () => Promise<void>, marker: number);
+                constructor(
+                    _prefix: number,
+                    _callback: (() => void) | (() => Promise<void>),
+                    _marker?: number,
+                ) {}
+            }
+            export const prefixes: number[] = [];
+            export const callback = async () => {};
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let mut consumer = inferred_binding_ty_by_name(&db, module, &inferred, "Consumer")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("Consumer binding type must be inferred");
+    let prefixes = inferred_binding_ty_by_name(&db, module, &inferred, "prefixes")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("prefixes binding type must be inferred");
+    let callback = inferred_binding_ty_by_name(&db, module, &inferred, "callback")
+        .expect("callback binding type must be inferred");
+    for _ in 0..512 {
+        consumer = InferredTypeData::TypeofType(InferredTypeofType::new(&db, consumer));
+    }
+    let input = CallArgumentTypeInput::new(
+        &db,
+        consumer,
+        Vec::from([
+            InferredCallArgumentType::Spread(prefixes),
+            InferredCallArgumentType::Argument(inferred.resolve_type(&db, callback)),
+        ])
+        .into_boxed_slice(),
+        1,
+    );
+    let expected = infer_constructor_argument_type(&db, input)
+        .expect("constructor expected type must be inferred");
+
+    assert!(
+        InferredType::new(&db, expected).function_returns_void(),
+        "expected void callback, got {expected:?}"
     );
 }
 

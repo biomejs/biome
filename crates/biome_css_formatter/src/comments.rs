@@ -5,13 +5,13 @@ use crate::utils::scss_include_comments::{
     place_separated_list_comment,
 };
 use biome_css_syntax::{
-    AnyCssDeclarationName, AnyCssMediaQuery, AnyCssRoot, CssComplexSelector,
-    CssDeclarationOrRuleBlock, CssFunction, CssGenericComponentValueList, CssGenericProperty,
-    CssIdentifier, CssLanguage, CssMediaQueryList, CssSyntaxKind, ScssAtRootAtRule,
-    ScssAtRootSelector, ScssEachHeader, ScssEachValueList, ScssExpression, ScssExpressionItemList,
-    ScssIfAtRule, ScssListExpression, ScssListExpressionElement, ScssMapExpression,
-    ScssMapExpressionPair, ScssVariableDeclaration, T, TextLen, TextSize,
-    is_in_scss_include_arguments,
+    AnyCssDeclarationName, AnyCssMediaQuery, AnyCssProperty, AnyCssRoot, CssComplexSelector,
+    CssDeclaration, CssDeclarationImportant, CssDeclarationOrRuleBlock, CssFunction,
+    CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssLanguage,
+    CssMediaQueryList, CssSyntaxKind, ScssAtRootAtRule, ScssAtRootSelector, ScssEachHeader,
+    ScssEachValueList, ScssExpression, ScssExpressionItemList, ScssIfAtRule, ScssListExpression,
+    ScssListExpressionElement, ScssMapExpression, ScssMapExpressionPair, ScssVariableDeclaration,
+    T, TextLen, TextSize, is_in_scss_include_arguments,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
@@ -121,6 +121,7 @@ impl CommentStyle for CssCommentStyle {
             .or_else(handle_media_separator_comment)
             // Handle SCSS variable name/colon comments before generic properties.
             .or_else(handle_scss_variable_declaration_comment)
+            .or_else(handle_declaration_important_comment)
             .or_else(handle_generic_property_comment)
             .or_else(handle_declaration_name_comment)
             .or_else(handle_complex_selector_comment)
@@ -459,6 +460,35 @@ fn is_between_variable_colon_and_value(
     };
 
     comment_start >= colon.text_trimmed_range().end() && comment_start < value_start
+}
+
+/// Attaches block comments between a property and `!important` to the declaration.
+///
+/// ```css
+/// a { color: red /* c */ !important; }
+/// ```
+fn handle_declaration_important_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    if comment.kind().is_line() {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(declaration) = CssDeclaration::cast_ref(comment.enclosing_node()) else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if comment
+        .preceding_node()
+        .is_some_and(|node| AnyCssProperty::can_cast(node.kind()))
+        && comment
+            .following_node()
+            .is_some_and(|node| CssDeclarationImportant::can_cast(node.kind()))
+    {
+        CommentPlacement::dangling(declaration.into_syntax(), comment)
+    } else {
+        CommentPlacement::Default(comment)
+    }
 }
 
 fn handle_generic_property_comment(

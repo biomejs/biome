@@ -1,3 +1,5 @@
+#![expect(clippy::disallowed_methods, reason = "This rule compares import media queries that can span multiple tokens.")]
+
 use std::collections::{HashMap, HashSet};
 
 use biome_analyze::{

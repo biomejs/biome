@@ -57,107 +57,6 @@ pub struct TypeSubstitution<'db> {
     pub replacement: TypeData<'db>,
 }
 
-/// Item produced while rebuilding a type after generic substitution.
-///
-/// The iterator emits plain type values first, then a rebuild item once the
-/// values needed by that wrapper have already been emitted.
-#[derive(Clone, Copy, Debug)]
-enum TypeSubstitutionItem<'db> {
-    /// A type that can be pushed directly into the rebuilt result.
-    Type(TypeData<'db>),
-
-    /// Rebuilds an instance type.
-    ///
-    /// The result stack contains the instance target type followed by this many
-    /// type parameters.
-    RebuildInstance(usize),
-
-    /// Rebuilds a union type from this many already-emitted variants.
-    RebuildUnion(usize),
-
-    /// Rebuilds an intersection type from this many already-emitted variants.
-    RebuildIntersection(usize),
-}
-
-/// Iterates over a type without recursion and applies one generic substitution.
-///
-/// This yields enough information for the caller to rebuild the type: plain
-/// types are yielded as-is, and wrapper types yield a rebuild item after their
-/// children have been yielded.
-struct TypeSubstitutionIter<'db> {
-    db: &'db dyn TypeDb,
-    stack: Vec<TypeSubstitutionItem<'db>>,
-    substitution: TypeSubstitution<'db>,
-    remaining_steps: usize,
-    exceeded_step_limit: bool,
-}
-
-impl<'db> TypeSubstitutionIter<'db> {
-    fn new(db: &'db dyn TypeDb, ty: TypeData<'db>, substitution: TypeSubstitution<'db>) -> Self {
-        Self {
-            db,
-            stack: Vec::from([TypeSubstitutionItem::Type(ty)]),
-            substitution,
-            remaining_steps: MAX_TYPE_SUBSTITUTION_STEPS,
-            exceeded_step_limit: false,
-        }
-    }
-}
-
-impl<'db> Iterator for TypeSubstitutionIter<'db> {
-    type Item = TypeSubstitutionItem<'db>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        while let Some(item) = self.stack.pop() {
-            let TypeSubstitutionItem::Type(ty) = item else {
-                return Some(item);
-            };
-
-            if self.remaining_steps == 0 {
-                self.exceeded_step_limit = true;
-                return None;
-            }
-            self.remaining_steps -= 1;
-
-            if ty == self.substitution.generic {
-                return Some(TypeSubstitutionItem::Type(self.substitution.replacement));
-            }
-
-            match ty {
-                TypeData::InstanceOf(instance) => {
-                    self.stack.push(TypeSubstitutionItem::RebuildInstance(
-                        instance.type_parameters(self.db).len(),
-                    ));
-                    for parameter in instance.type_parameters(self.db).iter().rev() {
-                        self.stack.push(TypeSubstitutionItem::Type(*parameter));
-                    }
-                    self.stack
-                        .push(TypeSubstitutionItem::Type(instance.ty(self.db)));
-                }
-                TypeData::Union(union) => {
-                    self.stack.push(TypeSubstitutionItem::RebuildUnion(
-                        union.types(self.db).len(),
-                    ));
-                    for ty in union.types(self.db).iter().rev() {
-                        self.stack.push(TypeSubstitutionItem::Type(*ty));
-                    }
-                }
-                TypeData::Intersection(intersection) => {
-                    self.stack.push(TypeSubstitutionItem::RebuildIntersection(
-                        intersection.types(self.db).len(),
-                    ));
-                    for ty in intersection.types(self.db).iter().rev() {
-                        self.stack.push(TypeSubstitutionItem::Type(*ty));
-                    }
-                }
-                ty => return Some(TypeSubstitutionItem::Type(ty)),
-            }
-        }
-
-        None
-    }
-}
-
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, salsa::Update)]
 pub struct ModuleKey {
     id: salsa::Id,
@@ -493,16 +392,16 @@ impl<'db> TypeData<'db> {
     }
 
     pub fn is_array_class(self, db: &'db dyn TypeDb) -> bool {
-        self.is_class_named(db, "Array")
+        self.is_builtin_class_named(db, "Array")
     }
 
     pub fn is_promise_class(self, db: &'db dyn TypeDb) -> bool {
-        self.is_class_named(db, "Promise")
+        self.is_builtin_class_named(db, "Promise")
     }
 
-    pub fn is_class_named(self, db: &'db dyn TypeDb, expected_name: &str) -> bool {
+    fn is_builtin_class_named(self, db: &'db dyn TypeDb, expected_name: &str) -> bool {
         match self {
-            Self::Class(class) => class
+            Self::Class(class) if class.is_builtin(db) => class
                 .name(db)
                 .as_ref()
                 .is_some_and(|name| name.text() == expected_name),
@@ -584,42 +483,18 @@ impl<'db> TypeData<'db> {
     }
 
     pub fn substitute_type(self, db: &'db dyn TypeDb, substitution: TypeSubstitution<'db>) -> Self {
-        let mut results = Vec::new();
-        let mut items = TypeSubstitutionIter::new(db, self, substitution);
+        let mut remaining_steps = MAX_TYPE_SUBSTITUTION_STEPS;
+        substitute_type(db, self, substitution, false, &mut remaining_steps).unwrap_or(self)
+    }
 
-        for item in items.by_ref() {
-            match item {
-                TypeSubstitutionItem::Type(ty) => results.push(ty),
-                TypeSubstitutionItem::RebuildInstance(type_parameter_count) => {
-                    let Some(start) = results.len().checked_sub(type_parameter_count + 1) else {
-                        return self;
-                    };
-                    let mut parts = results.split_off(start);
-                    let ty = parts.remove(0);
-                    results.push(Self::instance_of(db, ty, parts.into_boxed_slice()));
-                }
-                TypeSubstitutionItem::RebuildUnion(type_count) => {
-                    let Some(start) = results.len().checked_sub(type_count) else {
-                        return self;
-                    };
-                    let types = results.split_off(start);
-                    results.push(Self::union_from_types(db, types));
-                }
-                TypeSubstitutionItem::RebuildIntersection(type_count) => {
-                    let Some(start) = results.len().checked_sub(type_count) else {
-                        return self;
-                    };
-                    let types = results.split_off(start);
-                    results.push(Self::intersection_from_types(db, types));
-                }
-            }
-        }
-
-        if items.exceeded_step_limit {
-            return self;
-        }
-
-        results.pop().unwrap_or(self)
+    /// Substitutes inside the root generic declaration while preserving nested declarations.
+    pub fn substitute_type_in_root_body(
+        self,
+        db: &'db dyn TypeDb,
+        substitution: TypeSubstitution<'db>,
+    ) -> Self {
+        let mut remaining_steps = MAX_TYPE_SUBSTITUTION_STEPS;
+        substitute_type(db, self, substitution, true, &mut remaining_steps).unwrap_or(self)
     }
 
     /// Builds the smallest type that represents a list of union variants.
@@ -676,6 +551,7 @@ impl<'db> TypeData<'db> {
             Box::default(),
             Box::default(),
             Some(Text::new_static(name)),
+            true,
         ))
     }
 
@@ -793,6 +669,7 @@ impl<'db> TypeData<'db> {
                 convert_references(db, &class.implements, resolve_reference),
                 convert_type_members(db, &class.members, resolve_reference),
                 class.name.clone(),
+                false,
             )),
             raw::TypeData::Constructor(constructor) => Self::Constructor(InternedConstructor::new(
                 db,
@@ -1100,6 +977,205 @@ impl<'db> TypeData<'db> {
     ) -> Option<raw::TypeReference> {
         ty.map(Self::to_raw_reference_lossy)
     }
+}
+
+fn substitute_type<'db>(
+    db: &'db dyn TypeDb,
+    ty: TypeData<'db>,
+    substitution: TypeSubstitution<'db>,
+    enter_root_binder: bool,
+    remaining_steps: &mut usize,
+) -> Option<TypeData<'db>> {
+    *remaining_steps = remaining_steps.checked_sub(1)?;
+    if ty == substitution.generic {
+        return Some(substitution.replacement);
+    }
+
+    let binder_generic = match substitution.generic {
+        TypeData::InstanceOf(instance)
+            if instance.type_parameters(db).is_empty()
+                && matches!(instance.ty(db), TypeData::Generic(_)) =>
+        {
+            instance.ty(db)
+        }
+        generic => generic,
+    };
+    let declares_generic = match ty {
+        TypeData::Class(class) => class.type_parameters(db).contains(&binder_generic),
+        TypeData::Constructor(constructor) => {
+            constructor.type_parameters(db).contains(&binder_generic)
+        }
+        TypeData::Function(function) => function.type_parameters(db).contains(&binder_generic),
+        TypeData::Interface(interface) => interface.type_parameters(db).contains(&binder_generic),
+        _ => false,
+    };
+    if declares_generic && !enter_root_binder {
+        return Some(ty);
+    }
+    let mut substitute = |child| substitute_type(db, child, substitution, false, remaining_steps);
+
+    Some(match ty {
+        TypeData::Function(function) => TypeData::Function(InternedFunction::new(
+            db,
+            function.type_parameters(db).to_vec().into_boxed_slice(),
+            function
+                .parameters(db)
+                .iter()
+                .map(|parameter| substitute_function_parameter(parameter, &mut substitute))
+                .collect::<Option<Box<[_]>>>()?,
+            substitute_return_type(function.return_type(db), &mut substitute)?,
+            function.is_async(db),
+            function.name(db).clone(),
+        )),
+        TypeData::Interface(interface) => TypeData::Interface(InternedInterface::new(
+            db,
+            interface.type_parameters(db).to_vec().into_boxed_slice(),
+            interface
+                .extends(db)
+                .iter()
+                .map(|ty| substitute(*ty))
+                .collect::<Option<Box<[_]>>>()?,
+            substitute_members(interface.members(db), &mut substitute)?,
+            interface.name(db).clone(),
+        )),
+        TypeData::Class(class) => TypeData::Class(InternedClass::new(
+            db,
+            class.type_parameters(db).to_vec().into_boxed_slice(),
+            match class.extends(db) {
+                Some(extends) => Some(substitute(extends)?),
+                None => None,
+            },
+            class
+                .implements(db)
+                .iter()
+                .map(|ty| substitute(*ty))
+                .collect::<Option<Box<[_]>>>()?,
+            substitute_members(class.members(db), &mut substitute)?,
+            class.name(db).clone(),
+            class.is_builtin(db),
+        )),
+        TypeData::Object(object) => TypeData::Object(InternedObject::new(
+            db,
+            match object.prototype(db) {
+                Some(prototype) => Some(substitute(prototype)?),
+                None => None,
+            },
+            substitute_members(object.members(db), &mut substitute)?,
+        )),
+        TypeData::Tuple(tuple) => TypeData::Tuple(InternedTuple::new(
+            db,
+            tuple
+                .elements(db)
+                .iter()
+                .map(|element| {
+                    Some(TupleElementType {
+                        ty: substitute(element.ty)?,
+                        name: element.name.clone(),
+                        is_optional: element.is_optional,
+                        is_rest: element.is_rest,
+                    })
+                })
+                .collect::<Option<Box<[_]>>>()?,
+        )),
+        TypeData::InstanceOf(instance) => TypeData::instance_of(
+            db,
+            substitute(instance.ty(db))?,
+            instance
+                .type_parameters(db)
+                .iter()
+                .map(|ty| substitute(*ty))
+                .collect::<Option<Box<[_]>>>()?,
+        ),
+        TypeData::Union(union) => TypeData::union_from_types(
+            db,
+            union
+                .types(db)
+                .iter()
+                .map(|ty| substitute(*ty))
+                .collect::<Option<Vec<_>>>()?,
+        ),
+        TypeData::Intersection(intersection) => TypeData::intersection_from_types(
+            db,
+            intersection
+                .types(db)
+                .iter()
+                .map(|ty| substitute(*ty))
+                .collect::<Option<Vec<_>>>()?,
+        ),
+        TypeData::TypeofType(typeof_type) => {
+            TypeData::TypeofType(InternedTypeofType::new(db, substitute(typeof_type.ty(db))?))
+        }
+        TypeData::TypeofValue(typeof_value) => TypeData::TypeofValue(InternedTypeofValue::new(
+            db,
+            substitute(typeof_value.ty(db))?,
+            typeof_value.identifier(db).clone(),
+            typeof_value.scope_id(db),
+        )),
+        ty => ty,
+    })
+}
+
+fn substitute_function_parameter<'db>(
+    parameter: &FunctionParameter<'db>,
+    substitute: &mut impl FnMut(TypeData<'db>) -> Option<TypeData<'db>>,
+) -> Option<FunctionParameter<'db>> {
+    Some(match parameter {
+        FunctionParameter::Named(parameter) => FunctionParameter::Named(NamedFunctionParameter {
+            name: parameter.name.clone(),
+            ty: substitute(parameter.ty)?,
+            is_optional: parameter.is_optional,
+            is_rest: parameter.is_rest,
+        }),
+        FunctionParameter::Pattern(parameter) => {
+            FunctionParameter::Pattern(PatternFunctionParameter {
+                bindings: parameter
+                    .bindings
+                    .iter()
+                    .map(|binding| {
+                        Some(FunctionParameterBinding {
+                            name: binding.name.clone(),
+                            ty: substitute(binding.ty)?,
+                        })
+                    })
+                    .collect::<Option<Box<[_]>>>()?,
+                ty: substitute(parameter.ty)?,
+                is_optional: parameter.is_optional,
+                is_rest: parameter.is_rest,
+            })
+        }
+    })
+}
+
+fn substitute_return_type<'db>(
+    return_type: &ReturnType<'db>,
+    substitute: &mut impl FnMut(TypeData<'db>) -> Option<TypeData<'db>>,
+) -> Option<ReturnType<'db>> {
+    Some(match return_type {
+        ReturnType::Type(ty) => ReturnType::Type(substitute(*ty)?),
+        ReturnType::Predicate(predicate) => ReturnType::Predicate(PredicateReturnType {
+            parameter_name: predicate.parameter_name.clone(),
+            ty: substitute(predicate.ty)?,
+        }),
+        ReturnType::Asserts(asserts) => ReturnType::Asserts(AssertsReturnType {
+            parameter_name: asserts.parameter_name.clone(),
+            ty: substitute(asserts.ty)?,
+        }),
+    })
+}
+
+fn substitute_members<'db>(
+    members: &[TypeMember<'db>],
+    substitute: &mut impl FnMut(TypeData<'db>) -> Option<TypeData<'db>>,
+) -> Option<Box<[TypeMember<'db>]>> {
+    members
+        .iter()
+        .map(|member| {
+            Some(TypeMember {
+                kind: member.kind.clone(),
+                ty: substitute(member.ty)?,
+            })
+        })
+        .collect()
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
@@ -1525,6 +1601,7 @@ pub struct InternedClass<'db> {
     pub members: Box<[TypeMember<'db>]>,
     #[returns(ref)]
     pub name: Option<Text>,
+    pub is_builtin: bool,
 }
 
 #[salsa::interned]

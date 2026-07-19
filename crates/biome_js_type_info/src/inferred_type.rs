@@ -41,6 +41,14 @@ pub struct ReturnTypeEvidence {
     pub prefer_inferred_suggestion: bool,
 }
 
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct IgnoredPrimitiveTypes {
+    pub string: bool,
+    pub number: bool,
+    pub boolean: bool,
+    pub bigint: bool,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MisleadingReturnType {
     pub suggestion: Option<String>,
@@ -407,28 +415,22 @@ impl<'db> InferredType<'db> {
         })
     }
 
-    pub fn nullish_union_matches_ignored_primitives(
-        self,
-        ignore_string: bool,
-        ignore_number: bool,
-        ignore_boolean: bool,
-        ignore_bigint: bool,
-    ) -> bool {
+    pub fn nullish_union_matches_ignored_primitives(self, ignored: IgnoredPrimitiveTypes) -> bool {
         let TypeData::Union(_) = self.data else {
             return false;
         };
 
         self.all_variants_match(|data| match data {
             TypeData::Null | TypeData::Undefined | TypeData::VoidKeyword => true,
-            TypeData::String => ignore_string,
-            TypeData::Number => ignore_number,
-            TypeData::Boolean => ignore_boolean,
-            TypeData::BigInt => ignore_bigint,
+            TypeData::String => ignored.string,
+            TypeData::Number => ignored.number,
+            TypeData::Boolean => ignored.boolean,
+            TypeData::BigInt => ignored.bigint,
             TypeData::Literal(literal) => match literal.literal(self.db) {
-                Literal::String(_) => ignore_string,
-                Literal::Number(_) => ignore_number,
-                Literal::Boolean(_) => ignore_boolean,
-                Literal::BigInt(_) => ignore_bigint,
+                Literal::String(_) => ignored.string,
+                Literal::Number(_) => ignored.number,
+                Literal::Boolean(_) => ignored.boolean,
+                Literal::BigInt(_) => ignored.bigint,
                 _ => false,
             },
             _ => false,

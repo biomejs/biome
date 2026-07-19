@@ -237,7 +237,7 @@ impl DbState {
     #[cfg(feature = "module_graph")]
     pub(crate) fn contains_module_untracked(&self, path: &Utf8Path) -> bool {
         match &self.storage {
-            DbStorage::Shared(shared_db) => shared_db.fork().get_module(path).is_some(),
+            DbStorage::Shared(shared_db) => shared_db.fork().data().contains_module_untracked(path),
             DbStorage::Owned(db) => db.data.contains_module_untracked(path),
         }
     }
@@ -276,8 +276,8 @@ impl DbState {
 
     pub(crate) fn unload_path(&self, path: &Utf8Path) {
         match &self.storage {
-            DbStorage::Shared(shared_db) => shared_db.fork().unload_path(path),
-            DbStorage::Owned(db) => db.data.unload_path(path),
+            DbStorage::Shared(shared_db) => shared_db.fork().data().unload_path(path),
+            DbStorage::Owned(db) => db.with_setter(|db| db.unload_path(path)),
         }
     }
 
@@ -291,7 +291,7 @@ impl DbState {
             DbStorage::Shared(shared_db) => {
                 let db = shared_db.fork();
                 let module = ModuleInfo::new(&db, path.clone(), kind);
-                db.insert_module(path, module);
+                db.data().insert_module(path, module);
                 module
             }
             DbStorage::Owned(db) => db.with_setter(|db| db.update_or_insert_module(path, kind)),
@@ -301,8 +301,8 @@ impl DbState {
     #[cfg(feature = "module_graph")]
     pub(crate) fn remove_module(&self, path: &Utf8Path) {
         match &self.storage {
-            DbStorage::Shared(shared_db) => shared_db.fork().remove_module(path),
-            DbStorage::Owned(db) => db.data.remove_module(path),
+            DbStorage::Shared(shared_db) => shared_db.fork().data().remove_module(path),
+            DbStorage::Owned(db) => db.with_setter(|db| db.remove_module(path)),
         }
     }
 

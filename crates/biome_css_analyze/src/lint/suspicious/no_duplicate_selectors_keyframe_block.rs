@@ -1,3 +1,5 @@
+#![expect(clippy::disallowed_methods, reason = "This rule compares selectors that can span multiple tokens.")]
+
 use std::collections::HashSet;
 
 use biome_analyze::{

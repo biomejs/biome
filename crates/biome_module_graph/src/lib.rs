@@ -23,13 +23,13 @@ pub use css_module_info::{
     ImportTreeDisplay, ImportTreeNode,
 };
 pub use db::queries::*;
-pub use db::{ModuleDb, TypeDb};
+pub use db::{ModuleDb, ModuleGraphGeneration, TypeDb, module_for_key};
 pub use diagnostics::ModuleDiagnostic;
 pub use html_module_info::{HtmlEmbeddedContent, HtmlModuleInfo, SerializedHtmlModuleInfo};
 pub use js_module_info::{
-    BindingTypeData, JsExport, JsImport, JsImportPath, JsImportPhase, JsModuleInfo,
-    JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleResolver, SerializedJsModuleInfo,
-    TypeInferenceMode,
+    BindingTypeData, JsExport, JsExportedSymbolLookup, JsImport, JsImportPath, JsImportPhase,
+    JsModuleInfo, JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleResolver,
+    SerializedJsModuleInfo, TypeInferenceMode,
 };
 pub use module_graph::{
     ModuleDependencies, ModuleInfo, ModuleInfoKind, SUPPORTED_EXTENSIONS, SerializedModuleInfo,

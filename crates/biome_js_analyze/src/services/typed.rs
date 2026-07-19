@@ -4,21 +4,24 @@ use biome_analyze::{
 };
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsClassDeclaration, JsClassExpression,
-    JsLanguage, JsObjectExpression, JsReferenceIdentifier, JsSyntaxNode,
+    AnyJsBinding, AnyJsCallArgument, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsCallArgumentList,
+    JsClassDeclaration, JsClassExpression, JsLanguage, JsObjectExpression, JsReferenceIdentifier,
+    JsSyntaxNode,
 };
 use biome_js_type_info::{
     InferredType, Type, TypeResolverLevel,
     interned_types::{
+        CallArgumentType as InferredCallArgumentType,
         FunctionParameter as InferredFunctionParameter, LocalTypeHandle, LocalTypeId,
         ReturnType as InferredReturnType, TypeData as InferredTypeData,
     },
 };
 use biome_module_graph::{
-    JsOwnExport, ModuleDb, ModuleInfo, ModuleInfoKind, ModuleResolver, NormalizeTypeInput,
+    CallArgumentTypeInput, JsOwnExport, ModuleDb, ModuleInfo, ModuleInfoKind, ModuleResolver,
+    NormalizeTypeInput, infer_call_argument_type, infer_constructor_argument_type,
     infer_module_types_bottom_up, normalize_type,
 };
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -283,6 +286,55 @@ impl TypedService {
         Some(InferredType::new(db, argument_ty))
     }
 
+    /// Returns the expected type for a call or constructor argument, selecting
+    /// overloads using the other arguments in the same argument list.
+    pub fn inferred_expected_argument_type_for_arguments<'db>(
+        &'db self,
+        callee: &AnyJsExpression,
+        arguments: &JsCallArgumentList,
+        argument_index: usize,
+        is_constructor: bool,
+    ) -> Option<InferredType<'db>> {
+        let typed_module = self.module.as_ref()?;
+        let db = typed_module.db.as_ref();
+        let inferred = infer_module_types_bottom_up(db, typed_module.module)?;
+        let callee_ty = inferred.expressions.get(&callee.range()).copied()?;
+        let callee_ty = normalize_type(
+            db,
+            NormalizeTypeInput::new(db, typed_module.module, callee_ty),
+        );
+        let arguments = arguments
+            .iter()
+            .map(|argument| {
+                let argument = argument.ok()?;
+                let (expression, is_spread) = match argument {
+                    AnyJsCallArgument::AnyJsExpression(expression) => (expression, false),
+                    AnyJsCallArgument::JsSpread(spread) => (spread.argument().ok()?, true),
+                };
+                let ty = inferred.expressions.get(&expression.range()).copied()?;
+                let ty = normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
+                Some(if is_spread {
+                    InferredCallArgumentType::Spread(ty)
+                } else {
+                    InferredCallArgumentType::Argument(ty)
+                })
+            })
+            .collect::<Option<Vec<_>>>()?;
+        let input =
+            CallArgumentTypeInput::new(db, callee_ty, arguments.into_boxed_slice(), argument_index);
+        let argument_ty = if is_constructor {
+            infer_constructor_argument_type(db, input)?
+        } else {
+            infer_call_argument_type(db, input)?
+        };
+        let argument_ty = normalize_type(
+            db,
+            NormalizeTypeInput::new(db, typed_module.module, argument_ty),
+        );
+
+        Some(InferredType::new(db, argument_ty))
+    }
+
     #[expect(
         clippy::arc_with_non_send_sync,
         reason = "The legacy ModuleResolver and Type APIs require Arc while this migration keeps them in place."
@@ -403,36 +455,8 @@ fn call_argument_type<'db>(
     ty: InferredTypeData<'db>,
     argument_index: usize,
 ) -> Option<InferredTypeData<'db>> {
-    if let Some(function) = ty.callable_function(db) {
-        return function_parameter_type(function.parameters(db), argument_index);
-    }
-
-    match ty {
-        InferredTypeData::Interface(interface) => interface
-            .members(db)
-            .iter()
-            .filter(|member| member.kind.is_call_signature())
-            .find_map(|member| call_argument_type(db, member.ty, argument_index)),
-        InferredTypeData::Object(object) => object
-            .members(db)
-            .iter()
-            .filter(|member| member.kind.is_call_signature())
-            .find_map(|member| call_argument_type(db, member.ty, argument_index)),
-        InferredTypeData::InstanceOf(instance) => {
-            call_argument_type(db, instance.ty(db), argument_index)
-        }
-        InferredTypeData::TypeofType(typeof_type) => {
-            call_argument_type(db, typeof_type.ty(db), argument_index)
-        }
-        InferredTypeData::TypeofValue(typeof_value) => {
-            call_argument_type(db, typeof_value.ty(db), argument_index)
-        }
-        InferredTypeData::Union(union) => union
-            .types(db)
-            .iter()
-            .find_map(|ty| call_argument_type(db, *ty, argument_index)),
-        _ => None,
-    }
+    let function = ty.callable_function(db)?;
+    function_parameter_type(function.parameters(db), argument_index)
 }
 
 fn constructor_argument_type<'db>(
