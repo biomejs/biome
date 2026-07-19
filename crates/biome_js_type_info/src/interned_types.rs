@@ -1795,7 +1795,7 @@ impl<'db> TypeMemberKind<'db> {
     }
 
     /// Returns the structural member kind without readonly provenance.
-    pub fn without_readonly(&self) -> Self {
+    pub(crate) fn without_readonly(&self) -> Self {
         match self {
             Self::ReadonlyComputedValue(key_type) => Self::ComputedValue(*key_type),
             Self::ReadonlyComputedValueNamed(name, key_type) => {
@@ -1864,7 +1864,7 @@ impl<'db> TypeMemberKind<'db> {
     }
 
     /// Converts a class-side member kind to its object-side form.
-    pub fn into_non_static(self) -> Option<Self> {
+    pub(crate) fn into_non_static(self) -> Option<Self> {
         match self {
             Self::ComputedValueStatic(key_type) => Some(Self::ComputedValue(key_type)),
             Self::ComputedValueNamedStatic(name, key_type) => {

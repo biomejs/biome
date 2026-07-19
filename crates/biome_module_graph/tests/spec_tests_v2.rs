@@ -1187,7 +1187,7 @@ fn test_infer_module_types_intersection_readonly_is_order_independent() {
 
     for function_name in ["readReadonlyLeft", "readReadonlyRight"] {
         let intersection_type =
-            inferred_function_return_ty_by_name(&db, index_module, &inferred, function_name)
+            inferred_function_return_ty_by_name(&db, index_module, inferred, function_name)
                 .expect("intersection return type must be inferred");
         let intersection_type = normalize_type(&db, index_module, intersection_type);
         let (member_kind, _) = object_member_ty_by_name(&db, intersection_type, "value")
@@ -1196,7 +1196,7 @@ fn test_infer_module_types_intersection_readonly_is_order_independent() {
     }
 
     let intersection_type =
-        inferred_function_return_ty_by_name(&db, index_module, &inferred, "readBothReadonly")
+        inferred_function_return_ty_by_name(&db, index_module, inferred, "readBothReadonly")
             .expect("intersection return type must be inferred");
     let intersection_type = normalize_type(&db, index_module, intersection_type);
     let (member_kind, _) = object_member_ty_by_name(&db, intersection_type, "value")
@@ -3006,7 +3006,7 @@ fn test_infer_module_types_preserves_readonly_computed_member_lookup_qualifiers(
         .expect("module must exist");
     let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
 
-    let static_shared = inferred_binding_ty_by_name(&db, index_module, &inferred, "staticShared")
+    let static_shared = inferred_binding_ty_by_name(&db, index_module, inferred, "staticShared")
         .expect("staticShared binding type must be inferred");
     assert!(is_inferred_string(
         &db,
@@ -3014,14 +3014,14 @@ fn test_infer_module_types_preserves_readonly_computed_member_lookup_qualifiers(
     ));
 
     let instance_shared =
-        inferred_binding_ty_by_name(&db, index_module, &inferred, "instanceShared")
+        inferred_binding_ty_by_name(&db, index_module, inferred, "instanceShared")
             .expect("instanceShared binding type must be inferred");
     assert!(is_inferred_number(
         &db,
         inferred.resolve_type(&db, instance_shared)
     ));
 
-    let optional_value = inferred_binding_ty_by_name(&db, index_module, &inferred, "optionalValue")
+    let optional_value = inferred_binding_ty_by_name(&db, index_module, inferred, "optionalValue")
         .expect("optionalValue binding type must be inferred");
     let optional_value = inferred.resolve_type(&db, optional_value);
     assert!(contains_inferred_string(&db, optional_value));

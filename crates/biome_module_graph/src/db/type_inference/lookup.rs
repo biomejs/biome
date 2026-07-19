@@ -330,7 +330,7 @@ pub(in crate::db::type_inference) enum StaticMemberMode {
 }
 
 impl StaticMemberMode {
-    fn allows_named_member(self, kind: &InferredTypeMemberKind<'_>) -> bool {
+    fn allows_member(self, kind: &InferredTypeMemberKind<'_>) -> bool {
         match self {
             Self::Class => kind.is_static() && !kind.is_constructor(),
             Self::Instance => !kind.is_static(),
@@ -591,7 +591,7 @@ pub(in crate::db::type_inference) fn find_member_in_members_for_mode<'db>(
         db,
         members,
         name,
-        |kind| mode.allows_named_member(kind),
+        |kind| mode.allows_member(kind),
         mode.allows_index_signature(),
     )
 }
