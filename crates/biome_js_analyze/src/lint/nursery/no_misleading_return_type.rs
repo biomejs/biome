@@ -16,9 +16,7 @@ use biome_js_syntax::{
     TsReferenceType, TsTypeAliasDeclaration, TsTypeAssertionExpression,
 };
 use biome_js_semantic::ScopeId;
-use biome_js_type_info::{
-    Class, Literal, Type, TypeData, TypeMemberKind, TypeReferenceQualifier,
-};
+use biome_js_type_info::{Class, Literal, Type, TypeData, TypeMemberKind, TypeReferenceQualifier};
 use biome_rowan::{AstNode, Text, TextRange, declare_node_union};
 use biome_rule_options::no_misleading_return_type::NoMisleadingReturnTypeOptions;
 use smallvec::{SmallVec, smallvec};
@@ -797,12 +795,10 @@ fn is_only_property_literal_widening(annotation: &Type, returns: &[Type]) -> boo
                 return false;
             }
 
-            let annotated_index_signature = annotated_object.members.iter().find(|member| {
-                matches!(
-                    member.kind,
-                    TypeMemberKind::IndexSignature(_)
-                )
-            });
+            let annotated_index_signature = annotated_object
+                .members
+                .iter()
+                .find(|member| member.is_index_signature_with_ty(|_| true));
             if let Some(index_signature_member) = annotated_index_signature
                 && let Some(index_signature_value_type) =
                     annotated.resolve(&index_signature_member.ty)
@@ -831,10 +827,9 @@ fn is_only_property_literal_widening(annotation: &Type, returns: &[Type]) -> boo
             }
 
             for annotated_member in annotated_object.members.iter() {
-                let annotated_name = match &annotated_member.kind {
-                    TypeMemberKind::Named(name)
-                    | TypeMemberKind::NamedOptional(name) => name,
-                    _ => continue,
+                let Some(annotated_name) = named_property_member_name(&annotated_member.kind)
+                else {
+                    continue;
                 };
                 let Some(inferred_member) = inferred_members
                     .iter()
@@ -1765,7 +1760,7 @@ fn is_nonunion_wider(annotated: &Type, inferred: &Type) -> bool {
 
             (TypeData::Object(ann_obj), TypeData::Literal(lit)) => match lit.as_ref() {
                 Literal::Object(inf_lit) => {
-                    if !push_object_literal_pairs(&ann, ann_obj, inf_lit, &mut stack) {
+                    if !push_object_literal_pairs(&ann, ann_obj, &inf, inf_lit, &mut stack) {
                         return false;
                     }
                 }
@@ -1811,9 +1806,10 @@ fn push_object_pairs(
         return false;
     }
 
-    let ann_index_sig = ann_obj.members.iter().find(|m| {
-        matches!(m.kind, TypeMemberKind::IndexSignature(_))
-    });
+    let ann_index_sig = ann_obj
+        .members
+        .iter()
+        .find(|m| m.is_index_signature_with_ty(|_| true));
     if let Some(sig_member) = ann_index_sig
         && let Some(sig_value_ty) = annotated.resolve(&sig_member.ty)
     {
@@ -1827,10 +1823,8 @@ fn push_object_pairs(
     }
 
     for ann_member in ann_obj.members.iter() {
-        let ann_name = match &ann_member.kind {
-            TypeMemberKind::Named(name)
-            | TypeMemberKind::NamedOptional(name) => name,
-            _ => continue,
+        let Some(ann_name) = named_property_member_name(&ann_member.kind) else {
+            continue;
         };
         let inf_member = inf_obj.members.iter().find(|m| m.kind.has_name(ann_name));
         let Some(inf_member) = inf_member else {
@@ -1848,30 +1842,66 @@ fn push_object_pairs(
 fn push_object_literal_pairs(
     annotated: &Type,
     ann_obj: &biome_js_type_info::Object,
-    inf_lit: &biome_js_type_info::ObjectLiteral,
+    inferred: &Type,
+    inferred_literal: &biome_js_type_info::ObjectLiteral,
     stack: &mut Vec<(Type, Type)>,
 ) -> bool {
-    if ann_obj.members.is_empty() || inf_lit.members().is_empty() {
+    if ann_obj.members.is_empty() || inferred_literal.members().is_empty() {
         return false;
     }
 
+    let annotated_index_signature = ann_obj
+        .members
+        .iter()
+        .find(|member| member.is_index_signature_with_ty(|_| true));
+    if let Some(index_signature_member) = annotated_index_signature
+        && let Some(index_signature_value_type) = annotated.resolve(&index_signature_member.ty)
+    {
+        for inferred_member in inferred_literal.members() {
+            match inferred.resolve(&inferred_member.ty) {
+                Some(inferred_type) => stack.push((
+                    index_signature_value_type.clone(),
+                    resolve_generic_chain(&inferred_type),
+                )),
+                None => return false,
+            }
+        }
+        return true;
+    }
+
     for ann_member in ann_obj.members.iter() {
-        let ann_name = match &ann_member.kind {
-            TypeMemberKind::Named(name)
-            | TypeMemberKind::NamedOptional(name) => name,
-            _ => continue,
+        let Some(ann_name) = named_property_member_name(&ann_member.kind) else {
+            continue;
         };
-        let inf_member = inf_lit.members().iter().find(|m| m.kind.has_name(ann_name));
+        let inf_member = inferred_literal
+            .members()
+            .iter()
+            .find(|m| m.kind.has_name(ann_name));
         let Some(inf_member) = inf_member else {
             return false;
         };
-        match (annotated.resolve(&ann_member.ty), annotated.resolve(&inf_member.ty)) {
+        match (
+            annotated.resolve(&ann_member.ty),
+            inferred.resolve(&inf_member.ty),
+        ) {
             (Some(a), Some(b)) => stack.push((a, resolve_generic_chain(&b))),
             _ => return false,
         }
     }
 
     true
+}
+
+fn named_property_member_name(kind: &TypeMemberKind) -> Option<&Text> {
+    match kind {
+        TypeMemberKind::Named(name)
+        | TypeMemberKind::NamedOptional(name)
+        | TypeMemberKind::ReadonlyNamed(name)
+        | TypeMemberKind::ReadonlyNamedOptional(name)
+        | TypeMemberKind::ConstAssertedReadonlyNamed(name)
+        | TypeMemberKind::ConstAssertedReadonlyNamedOptional(name) => Some(name),
+        _ => None,
+    }
 }
 
 /// Checks whether `annotated` is strictly wider than `inferred`.

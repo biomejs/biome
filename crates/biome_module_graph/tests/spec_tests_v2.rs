@@ -1138,8 +1138,9 @@ fn test_infer_module_types_resolves_utility_type_members_on_build() {
     let readonly_ty =
         inferred_function_return_ty_by_name(&db, index_module, inferred, "readReadonly")
             .expect("readReadonly return type must be inferred");
-    let (_, readonly_name_ty) = object_member_ty_by_name(&db, readonly_ty, "name")
+    let (readonly_name_kind, readonly_name_ty) = object_member_ty_by_name(&db, readonly_ty, "name")
         .expect("Readonly<Source> must keep name");
+    assert!(readonly_name_kind.is_readonly());
     assert!(is_inferred_string(&db, readonly_name_ty));
 
     assert_inferred_type_snapshot(
@@ -1147,6 +1148,60 @@ fn test_infer_module_types_resolves_utility_type_members_on_build() {
         &db,
         &fs,
     );
+}
+
+#[test]
+fn test_infer_module_types_intersection_readonly_is_order_independent() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type ReadonlyValue = { readonly value: string };
+            type MutableValue = { value: string };
+
+            export function readReadonlyLeft(
+                value: ReadonlyValue & MutableValue,
+            ): ReadonlyValue & MutableValue {
+                return value;
+            }
+
+            export function readReadonlyRight(
+                value: MutableValue & ReadonlyValue,
+            ): MutableValue & ReadonlyValue {
+                return value;
+            }
+
+            export function readBothReadonly(
+                value: ReadonlyValue & ReadonlyValue,
+            ): ReadonlyValue & ReadonlyValue {
+                return value;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    for function_name in ["readReadonlyLeft", "readReadonlyRight"] {
+        let intersection_type =
+            inferred_function_return_ty_by_name(&db, index_module, &inferred, function_name)
+                .expect("intersection return type must be inferred");
+        let intersection_type = normalize_type(&db, index_module, intersection_type);
+        let (member_kind, _) = object_member_ty_by_name(&db, intersection_type, "value")
+            .expect("intersection must preserve value");
+        assert!(!member_kind.is_readonly());
+    }
+
+    let intersection_type =
+        inferred_function_return_ty_by_name(&db, index_module, &inferred, "readBothReadonly")
+            .expect("intersection return type must be inferred");
+    let intersection_type = normalize_type(&db, index_module, intersection_type);
+    let (member_kind, _) = object_member_ty_by_name(&db, intersection_type, "value")
+        .expect("intersection must preserve value");
+    assert!(member_kind.is_readonly());
 }
 
 #[test]
@@ -2924,6 +2979,53 @@ fn test_infer_module_types_evaluates_static_member_expressions_on_build() {
         &db,
         &fs,
     );
+}
+
+#[test]
+fn test_infer_module_types_preserves_readonly_computed_member_lookup_qualifiers() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            class Box {
+                static readonly ["shared"]: string;
+                readonly ["shared"]: number;
+                readonly ["optional"]?: string;
+            }
+
+            export const staticShared = Box.shared;
+            export const box: Box = {} as Box;
+            export const instanceShared = box.shared;
+            export const optionalValue = box.optional;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let static_shared = inferred_binding_ty_by_name(&db, index_module, &inferred, "staticShared")
+        .expect("staticShared binding type must be inferred");
+    assert!(is_inferred_string(
+        &db,
+        inferred.resolve_type(&db, static_shared)
+    ));
+
+    let instance_shared =
+        inferred_binding_ty_by_name(&db, index_module, &inferred, "instanceShared")
+            .expect("instanceShared binding type must be inferred");
+    assert!(is_inferred_number(
+        &db,
+        inferred.resolve_type(&db, instance_shared)
+    ));
+
+    let optional_value = inferred_binding_ty_by_name(&db, index_module, &inferred, "optionalValue")
+        .expect("optionalValue binding type must be inferred");
+    let optional_value = inferred.resolve_type(&db, optional_value);
+    assert!(contains_inferred_string(&db, optional_value));
+    assert!(contains_inferred_undefined(&db, optional_value));
 }
 
 #[test]
@@ -5817,7 +5919,7 @@ fn test_infer_module_types_backdates_equal_output() {
 }
 
 #[test]
-fn test_infer_module_types_documents_react_export_equals_gap() {
+fn test_infer_module_types_documents_react_export_equals_partial_resolution() {
     let fs = MemoryFileSystem::default();
     fs.insert(
         "/node_modules/@types/react/index.d.ts".into(),
@@ -5827,7 +5929,7 @@ fn test_infer_module_types_documents_react_export_equals_gap() {
         "/src/index.ts".into(),
         r#"import { useCallback } from "react";
 
-        const fn = useCallback(async () => {});
+        const fn = useCallback(async () => {}, []);
         const promise = fn();
         "#,
     );
@@ -5855,14 +5957,13 @@ fn test_infer_module_types_documents_react_export_equals_gap() {
         .expect("module must exist");
     let inferred = infer_module_types_bottom_up(&db, index_module).expect("types must be inferred");
 
-    // React types are exposed through `export = React`, which the new engine
-    // does not resolve yet. Once it does, these assertions must be upgraded to
-    // expect a callable `useCallback` and a `Promise` instance for `promise`.
     let use_callback_ty = inferred_binding_ty_by_name(&db, index_module, inferred, "useCallback")
         .expect("useCallback binding type must be inferred");
     let use_callback_ty = inferred.resolve_type(&db, use_callback_ty);
-    assert!(use_callback_ty.callable_function(&db).is_none());
+    assert!(use_callback_ty.callable_function(&db).is_some());
 
+    // The named import resolves, but its generic callback return type is not
+    // propagated through the call yet.
     let promise_ty = inferred_binding_ty_by_name(&db, index_module, inferred, "promise")
         .expect("promise binding type must be inferred");
     let promise_ty = inferred.resolve_type(&db, promise_ty);

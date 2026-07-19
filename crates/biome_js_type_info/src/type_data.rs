@@ -463,12 +463,28 @@ pub struct Constructor {
 }
 
 /// A constructor parameter.
-#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Resolvable)]
+#[derive(Clone, Default, Eq, Hash, PartialEq, Resolvable)]
 pub struct ConstructorParameter {
     pub parameter: FunctionParameter,
 
     /// Optional visibility, if the parameter declares a class field.
     pub accessibility: Option<TypeMemberAccessibility>,
+
+    /// Whether this parameter declares a readonly class field.
+    pub is_readonly: bool,
+}
+
+impl Debug for ConstructorParameter {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FormatResult {
+        let mut debug_struct = formatter.debug_struct("ConstructorParameter");
+        debug_struct
+            .field("parameter", &self.parameter)
+            .field("accessibility", &self.accessibility);
+        if self.is_readonly {
+            debug_struct.field("is_readonly", &true);
+        }
+        debug_struct.finish()
+    }
 }
 
 /// Tracks two types that are associated with the same name.
@@ -943,10 +959,16 @@ impl Debug for TypeMember {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> FormatResult {
         let mut debug_struct = formatter.debug_struct("TypeMember");
         debug_struct
-            .field("kind", &self.kind.without_const_asserted())
+            .field(
+                "kind",
+                &self.kind.without_const_asserted().without_readonly(),
+            )
             .field("ty", &self.ty);
         if self.is_const_asserted() {
             debug_struct.field("is_const_asserted", &true);
+        }
+        if self.is_readonly() {
+            debug_struct.field("is_readonly", &true);
         }
         debug_struct.finish()
     }
@@ -963,6 +985,12 @@ impl TypeMember {
     #[inline]
     pub fn is_const_asserted(&self) -> bool {
         self.kind.is_const_asserted()
+    }
+
+    /// Returns whether this member is readonly.
+    #[inline]
+    pub fn is_readonly(&self) -> bool {
+        self.kind.is_readonly()
     }
 
     /// Returns a reference to the type of the member if we dereference it.
@@ -998,7 +1026,9 @@ impl TypeMember {
     pub fn is_index_signature_with_ty(&self, predicate: impl Fn(&TypeReference) -> bool) -> bool {
         match &self.kind {
             TypeMemberKind::IndexSignature(index_signature_type)
-            | TypeMemberKind::ConstAssertedIndexSignature(index_signature_type) => {
+            | TypeMemberKind::ConstAssertedIndexSignature(index_signature_type)
+            | TypeMemberKind::ReadonlyIndexSignature(index_signature_type)
+            | TypeMemberKind::ConstAssertedReadonlyIndexSignature(index_signature_type) => {
                 predicate(index_signature_type)
             }
             _ => false,
@@ -1012,8 +1042,26 @@ impl TypeMember {
         match &self.kind {
             TypeMemberKind::IndexSignature(key_type)
             | TypeMemberKind::ConstAssertedIndexSignature(key_type)
+            | TypeMemberKind::ReadonlyIndexSignature(key_type)
+            | TypeMemberKind::ConstAssertedReadonlyIndexSignature(key_type)
             | TypeMemberKind::ComputedValue(key_type)
-            | TypeMemberKind::ConstAssertedComputedValue(key_type) => predicate(key_type),
+            | TypeMemberKind::ComputedValueOptional(key_type)
+            | TypeMemberKind::ComputedValueStatic(key_type)
+            | TypeMemberKind::ComputedValueStaticOptional(key_type)
+            | TypeMemberKind::ConstAssertedComputedValue(key_type)
+            | TypeMemberKind::ConstAssertedComputedValueOptional(key_type)
+            | TypeMemberKind::ConstAssertedComputedValueStatic(key_type)
+            | TypeMemberKind::ConstAssertedComputedValueStaticOptional(key_type)
+            | TypeMemberKind::ReadonlyComputedValue(key_type)
+            | TypeMemberKind::ReadonlyComputedValueOptional(key_type)
+            | TypeMemberKind::ReadonlyComputedValueStatic(key_type)
+            | TypeMemberKind::ReadonlyComputedValueStaticOptional(key_type)
+            | TypeMemberKind::ConstAssertedReadonlyComputedValue(key_type)
+            | TypeMemberKind::ConstAssertedReadonlyComputedValueOptional(key_type)
+            | TypeMemberKind::ConstAssertedReadonlyComputedValueStatic(key_type)
+            | TypeMemberKind::ConstAssertedReadonlyComputedValueStaticOptional(key_type) => {
+                predicate(key_type)
+            }
             _ => false,
         }
     }
@@ -1038,37 +1086,105 @@ impl TypeMember {
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum TypeMemberKind {
     CallSignature,
-    /// A member keyed by a computed value, such as `[Symbol.dispose]`. The reference is the key's
-    /// type. Currently produced by the generated global types; local inference of source objects
-    /// still spells computed keys as [`Self::IndexSignature`], so the two spellings coexist and
-    /// [`TypeMember::is_keyed_member_with_ty`] accepts either.
+    /// A member keyed by a computed value, such as `[Symbol.dispose]`.
+    ///
+    /// Index signatures use separate variants; keyed-member queries accept both.
     ComputedValue(TypeReference),
     ConstAssertedCallSignature,
     /// A [`Self::ComputedValue`] carried through an `as const` assertion.
     ConstAssertedComputedValue(TypeReference),
+    ConstAssertedComputedValueOptional(TypeReference),
+    ConstAssertedComputedValueStatic(TypeReference),
+    ConstAssertedComputedValueStaticOptional(TypeReference),
     ConstAssertedConstructor,
     ConstAssertedGetter(Text),
     ConstAssertedIndexSignature(TypeReference),
     ConstAssertedNamed(Text),
     ConstAssertedNamedOptional(Text),
     ConstAssertedNamedStatic(Text),
+    ConstAssertedNamedStaticOptional(Text),
     Constructor,
+    ComputedValueOptional(TypeReference),
+    ComputedValueStatic(TypeReference),
+    ComputedValueStaticOptional(TypeReference),
     Getter(Text),
     IndexSignature(TypeReference),
     Named(Text),
     NamedOptional(Text),
     NamedStatic(Text),
+    NamedStaticOptional(Text),
+    ReadonlyComputedValue(TypeReference),
+    ReadonlyComputedValueOptional(TypeReference),
+    ReadonlyComputedValueStatic(TypeReference),
+    ReadonlyComputedValueStaticOptional(TypeReference),
+    ReadonlyIndexSignature(TypeReference),
+    ReadonlyNamed(Text),
+    ReadonlyNamedOptional(Text),
+    ReadonlyNamedStatic(Text),
+    ReadonlyNamedStaticOptional(Text),
+    ConstAssertedReadonlyComputedValue(TypeReference),
+    ConstAssertedReadonlyComputedValueOptional(TypeReference),
+    ConstAssertedReadonlyComputedValueStatic(TypeReference),
+    ConstAssertedReadonlyComputedValueStaticOptional(TypeReference),
+    ConstAssertedReadonlyIndexSignature(TypeReference),
+    ConstAssertedReadonlyNamed(Text),
+    ConstAssertedReadonlyNamedOptional(Text),
+    ConstAssertedReadonlyNamedStatic(Text),
+    ConstAssertedReadonlyNamedStaticOptional(Text),
 }
 
 impl TypeMemberKind {
+    /// Returns the type reference used by an index signature or computed member.
+    pub fn key_type(&self) -> Option<&TypeReference> {
+        match self {
+            Self::ComputedValue(key_type)
+            | Self::ComputedValueOptional(key_type)
+            | Self::ComputedValueStatic(key_type)
+            | Self::ComputedValueStaticOptional(key_type)
+            | Self::ConstAssertedComputedValue(key_type)
+            | Self::ConstAssertedComputedValueOptional(key_type)
+            | Self::ConstAssertedComputedValueStatic(key_type)
+            | Self::ConstAssertedComputedValueStaticOptional(key_type)
+            | Self::ReadonlyComputedValue(key_type)
+            | Self::ReadonlyComputedValueOptional(key_type)
+            | Self::ReadonlyComputedValueStatic(key_type)
+            | Self::ReadonlyComputedValueStaticOptional(key_type)
+            | Self::ConstAssertedReadonlyComputedValue(key_type)
+            | Self::ConstAssertedReadonlyComputedValueOptional(key_type)
+            | Self::ConstAssertedReadonlyComputedValueStatic(key_type)
+            | Self::ConstAssertedReadonlyComputedValueStaticOptional(key_type)
+            | Self::IndexSignature(key_type)
+            | Self::ConstAssertedIndexSignature(key_type)
+            | Self::ReadonlyIndexSignature(key_type)
+            | Self::ConstAssertedReadonlyIndexSignature(key_type) => Some(key_type),
+            _ => None,
+        }
+    }
+
     pub fn has_name(&self, name: &str) -> bool {
         match self {
             Self::CallSignature
             | Self::ConstAssertedCallSignature
             | Self::ComputedValue(_)
             | Self::ConstAssertedComputedValue(_)
+            | Self::ComputedValueOptional(_)
+            | Self::ConstAssertedComputedValueOptional(_)
+            | Self::ComputedValueStatic(_)
+            | Self::ConstAssertedComputedValueStatic(_)
+            | Self::ComputedValueStaticOptional(_)
+            | Self::ConstAssertedComputedValueStaticOptional(_)
+            | Self::ReadonlyComputedValue(_)
+            | Self::ReadonlyComputedValueOptional(_)
+            | Self::ReadonlyComputedValueStatic(_)
+            | Self::ReadonlyComputedValueStaticOptional(_)
+            | Self::ConstAssertedReadonlyComputedValue(_)
+            | Self::ConstAssertedReadonlyComputedValueOptional(_)
+            | Self::ConstAssertedReadonlyComputedValueStatic(_)
+            | Self::ConstAssertedReadonlyComputedValueStaticOptional(_)
             | Self::IndexSignature(_)
-            | Self::ConstAssertedIndexSignature(_) => false,
+            | Self::ConstAssertedIndexSignature(_)
+            | Self::ReadonlyIndexSignature(_)
+            | Self::ConstAssertedReadonlyIndexSignature(_) => false,
             Self::Constructor | Self::ConstAssertedConstructor => name == "constructor",
             Self::Getter(own_name)
             | Self::ConstAssertedGetter(own_name)
@@ -1077,7 +1193,17 @@ impl TypeMemberKind {
             | Self::NamedOptional(own_name)
             | Self::ConstAssertedNamedOptional(own_name)
             | Self::NamedStatic(own_name)
-            | Self::ConstAssertedNamedStatic(own_name) => *own_name == name,
+            | Self::ConstAssertedNamedStatic(own_name)
+            | Self::NamedStaticOptional(own_name)
+            | Self::ConstAssertedNamedStaticOptional(own_name)
+            | Self::ReadonlyNamed(own_name)
+            | Self::ConstAssertedReadonlyNamed(own_name)
+            | Self::ReadonlyNamedOptional(own_name)
+            | Self::ConstAssertedReadonlyNamedOptional(own_name)
+            | Self::ReadonlyNamedStatic(own_name)
+            | Self::ConstAssertedReadonlyNamedStatic(own_name)
+            | Self::ReadonlyNamedStaticOptional(own_name)
+            | Self::ConstAssertedReadonlyNamedStaticOptional(own_name) => *own_name == name,
         }
     }
 
@@ -1086,7 +1212,22 @@ impl TypeMemberKind {
     pub fn is_optional(&self) -> bool {
         matches!(
             self,
-            Self::NamedOptional(_) | Self::ConstAssertedNamedOptional(_)
+            Self::NamedOptional(_)
+                | Self::ConstAssertedNamedOptional(_)
+                | Self::ComputedValueOptional(_)
+                | Self::ConstAssertedComputedValueOptional(_)
+                | Self::ReadonlyComputedValueOptional(_)
+                | Self::ConstAssertedReadonlyComputedValueOptional(_)
+                | Self::ComputedValueStaticOptional(_)
+                | Self::ConstAssertedComputedValueStaticOptional(_)
+                | Self::ReadonlyComputedValueStaticOptional(_)
+                | Self::ConstAssertedReadonlyComputedValueStaticOptional(_)
+                | Self::ReadonlyNamedOptional(_)
+                | Self::ConstAssertedReadonlyNamedOptional(_)
+                | Self::NamedStaticOptional(_)
+                | Self::ConstAssertedNamedStaticOptional(_)
+                | Self::ReadonlyNamedStaticOptional(_)
+                | Self::ConstAssertedReadonlyNamedStaticOptional(_)
         )
     }
 
@@ -1111,8 +1252,48 @@ impl TypeMemberKind {
             self,
             Self::Constructor
                 | Self::ConstAssertedConstructor
+                | Self::ComputedValueStatic(_)
+                | Self::ConstAssertedComputedValueStatic(_)
+                | Self::ComputedValueStaticOptional(_)
+                | Self::ConstAssertedComputedValueStaticOptional(_)
+                | Self::ReadonlyComputedValueStatic(_)
+                | Self::ConstAssertedReadonlyComputedValueStatic(_)
+                | Self::ReadonlyComputedValueStaticOptional(_)
+                | Self::ConstAssertedReadonlyComputedValueStaticOptional(_)
                 | Self::NamedStatic(_)
                 | Self::ConstAssertedNamedStatic(_)
+                | Self::NamedStaticOptional(_)
+                | Self::ConstAssertedNamedStaticOptional(_)
+                | Self::ReadonlyNamedStatic(_)
+                | Self::ConstAssertedReadonlyNamedStatic(_)
+                | Self::ReadonlyNamedStaticOptional(_)
+                | Self::ConstAssertedReadonlyNamedStaticOptional(_)
+        )
+    }
+
+    /// Returns whether this member kind represents a readonly member.
+    #[inline]
+    pub fn is_readonly(&self) -> bool {
+        matches!(
+            self,
+            Self::ReadonlyComputedValue(_)
+                | Self::ReadonlyComputedValueOptional(_)
+                | Self::ReadonlyComputedValueStatic(_)
+                | Self::ReadonlyComputedValueStaticOptional(_)
+                | Self::ReadonlyIndexSignature(_)
+                | Self::ReadonlyNamed(_)
+                | Self::ReadonlyNamedOptional(_)
+                | Self::ReadonlyNamedStatic(_)
+                | Self::ReadonlyNamedStaticOptional(_)
+                | Self::ConstAssertedReadonlyComputedValue(_)
+                | Self::ConstAssertedReadonlyComputedValueOptional(_)
+                | Self::ConstAssertedReadonlyComputedValueStatic(_)
+                | Self::ConstAssertedReadonlyComputedValueStaticOptional(_)
+                | Self::ConstAssertedReadonlyIndexSignature(_)
+                | Self::ConstAssertedReadonlyNamed(_)
+                | Self::ConstAssertedReadonlyNamedOptional(_)
+                | Self::ConstAssertedReadonlyNamedStatic(_)
+                | Self::ConstAssertedReadonlyNamedStaticOptional(_)
         )
     }
 
@@ -1122,12 +1303,25 @@ impl TypeMemberKind {
             self,
             Self::ConstAssertedCallSignature
                 | Self::ConstAssertedComputedValue(_)
+                | Self::ConstAssertedComputedValueOptional(_)
+                | Self::ConstAssertedComputedValueStatic(_)
+                | Self::ConstAssertedComputedValueStaticOptional(_)
                 | Self::ConstAssertedConstructor
                 | Self::ConstAssertedGetter(_)
                 | Self::ConstAssertedIndexSignature(_)
                 | Self::ConstAssertedNamed(_)
                 | Self::ConstAssertedNamedOptional(_)
                 | Self::ConstAssertedNamedStatic(_)
+                | Self::ConstAssertedNamedStaticOptional(_)
+                | Self::ConstAssertedReadonlyComputedValue(_)
+                | Self::ConstAssertedReadonlyComputedValueOptional(_)
+                | Self::ConstAssertedReadonlyComputedValueStatic(_)
+                | Self::ConstAssertedReadonlyComputedValueStaticOptional(_)
+                | Self::ConstAssertedReadonlyIndexSignature(_)
+                | Self::ConstAssertedReadonlyNamed(_)
+                | Self::ConstAssertedReadonlyNamedOptional(_)
+                | Self::ConstAssertedReadonlyNamedStatic(_)
+                | Self::ConstAssertedReadonlyNamedStaticOptional(_)
         )
     }
 
@@ -1140,18 +1334,66 @@ impl TypeMemberKind {
             Self::ComputedValue(key_type) | Self::ConstAssertedComputedValue(key_type) => {
                 Self::ConstAssertedComputedValue(key_type)
             }
+            Self::ComputedValueOptional(key_type)
+            | Self::ConstAssertedComputedValueOptional(key_type) => {
+                Self::ConstAssertedComputedValueOptional(key_type)
+            }
+            Self::ComputedValueStatic(key_type)
+            | Self::ConstAssertedComputedValueStatic(key_type) => {
+                Self::ConstAssertedComputedValueStatic(key_type)
+            }
+            Self::ComputedValueStaticOptional(key_type)
+            | Self::ConstAssertedComputedValueStaticOptional(key_type) => {
+                Self::ConstAssertedComputedValueStaticOptional(key_type)
+            }
+            Self::ReadonlyComputedValue(key_type)
+            | Self::ConstAssertedReadonlyComputedValue(key_type) => {
+                Self::ConstAssertedReadonlyComputedValue(key_type)
+            }
+            Self::ReadonlyComputedValueOptional(key_type)
+            | Self::ConstAssertedReadonlyComputedValueOptional(key_type) => {
+                Self::ConstAssertedReadonlyComputedValueOptional(key_type)
+            }
+            Self::ReadonlyComputedValueStatic(key_type)
+            | Self::ConstAssertedReadonlyComputedValueStatic(key_type) => {
+                Self::ConstAssertedReadonlyComputedValueStatic(key_type)
+            }
+            Self::ReadonlyComputedValueStaticOptional(key_type)
+            | Self::ConstAssertedReadonlyComputedValueStaticOptional(key_type) => {
+                Self::ConstAssertedReadonlyComputedValueStaticOptional(key_type)
+            }
             Self::Constructor | Self::ConstAssertedConstructor => Self::ConstAssertedConstructor,
             Self::Getter(name) | Self::ConstAssertedGetter(name) => Self::ConstAssertedGetter(name),
             Self::IndexSignature(index_signature_type)
             | Self::ConstAssertedIndexSignature(index_signature_type) => {
                 Self::ConstAssertedIndexSignature(index_signature_type)
             }
+            Self::ReadonlyIndexSignature(index_signature_type)
+            | Self::ConstAssertedReadonlyIndexSignature(index_signature_type) => {
+                Self::ConstAssertedReadonlyIndexSignature(index_signature_type)
+            }
             Self::Named(name) | Self::ConstAssertedNamed(name) => Self::ConstAssertedNamed(name),
+            Self::ReadonlyNamed(name) | Self::ConstAssertedReadonlyNamed(name) => {
+                Self::ConstAssertedReadonlyNamed(name)
+            }
             Self::NamedOptional(name) | Self::ConstAssertedNamedOptional(name) => {
                 Self::ConstAssertedNamedOptional(name)
             }
+            Self::ReadonlyNamedOptional(name) | Self::ConstAssertedReadonlyNamedOptional(name) => {
+                Self::ConstAssertedReadonlyNamedOptional(name)
+            }
             Self::NamedStatic(name) | Self::ConstAssertedNamedStatic(name) => {
                 Self::ConstAssertedNamedStatic(name)
+            }
+            Self::NamedStaticOptional(name) | Self::ConstAssertedNamedStaticOptional(name) => {
+                Self::ConstAssertedNamedStaticOptional(name)
+            }
+            Self::ReadonlyNamedStatic(name) | Self::ConstAssertedReadonlyNamedStatic(name) => {
+                Self::ConstAssertedReadonlyNamedStatic(name)
+            }
+            Self::ReadonlyNamedStaticOptional(name)
+            | Self::ConstAssertedReadonlyNamedStaticOptional(name) => {
+                Self::ConstAssertedReadonlyNamedStaticOptional(name)
             }
         }
     }
@@ -1161,33 +1403,283 @@ impl TypeMemberKind {
         match self {
             Self::ConstAssertedCallSignature => Self::CallSignature,
             Self::ConstAssertedComputedValue(key_type) => Self::ComputedValue(key_type.clone()),
+            Self::ConstAssertedComputedValueOptional(key_type) => {
+                Self::ComputedValueOptional(key_type.clone())
+            }
+            Self::ConstAssertedComputedValueStatic(key_type) => {
+                Self::ComputedValueStatic(key_type.clone())
+            }
+            Self::ConstAssertedComputedValueStaticOptional(key_type) => {
+                Self::ComputedValueStaticOptional(key_type.clone())
+            }
+            Self::ConstAssertedReadonlyComputedValue(key_type) => {
+                Self::ReadonlyComputedValue(key_type.clone())
+            }
+            Self::ConstAssertedReadonlyComputedValueOptional(key_type) => {
+                Self::ReadonlyComputedValueOptional(key_type.clone())
+            }
+            Self::ConstAssertedReadonlyComputedValueStatic(key_type) => {
+                Self::ReadonlyComputedValueStatic(key_type.clone())
+            }
+            Self::ConstAssertedReadonlyComputedValueStaticOptional(key_type) => {
+                Self::ReadonlyComputedValueStaticOptional(key_type.clone())
+            }
             Self::ConstAssertedConstructor => Self::Constructor,
             Self::ConstAssertedGetter(name) => Self::Getter(name.clone()),
             Self::ConstAssertedIndexSignature(index_signature_type) => {
                 Self::IndexSignature(index_signature_type.clone())
             }
+            Self::ConstAssertedReadonlyIndexSignature(index_signature_type) => {
+                Self::ReadonlyIndexSignature(index_signature_type.clone())
+            }
             Self::ConstAssertedNamed(name) => Self::Named(name.clone()),
             Self::ConstAssertedNamedOptional(name) => Self::NamedOptional(name.clone()),
             Self::ConstAssertedNamedStatic(name) => Self::NamedStatic(name.clone()),
+            Self::ConstAssertedNamedStaticOptional(name) => Self::NamedStaticOptional(name.clone()),
+            Self::ConstAssertedReadonlyNamed(name) => Self::ReadonlyNamed(name.clone()),
+            Self::ConstAssertedReadonlyNamedOptional(name) => {
+                Self::ReadonlyNamedOptional(name.clone())
+            }
+            Self::ConstAssertedReadonlyNamedStatic(name) => Self::ReadonlyNamedStatic(name.clone()),
+            Self::ConstAssertedReadonlyNamedStaticOptional(name) => {
+                Self::ReadonlyNamedStaticOptional(name.clone())
+            }
             other => other.clone(),
         }
     }
 
-    /// Makes named properties optional while preserving `as const` provenance.
-    pub fn with_optional(self) -> Self {
+    /// Marks the member kind as readonly without growing `TypeMember`.
+    pub fn with_readonly(self) -> Self {
         match self {
-            Self::Named(name) => Self::NamedOptional(name),
-            Self::ConstAssertedNamed(name) => Self::ConstAssertedNamedOptional(name),
+            Self::ComputedValue(key_type) | Self::ReadonlyComputedValue(key_type) => {
+                Self::ReadonlyComputedValue(key_type)
+            }
+            Self::ComputedValueOptional(key_type)
+            | Self::ReadonlyComputedValueOptional(key_type) => {
+                Self::ReadonlyComputedValueOptional(key_type)
+            }
+            Self::ComputedValueStatic(key_type) | Self::ReadonlyComputedValueStatic(key_type) => {
+                Self::ReadonlyComputedValueStatic(key_type)
+            }
+            Self::ComputedValueStaticOptional(key_type)
+            | Self::ReadonlyComputedValueStaticOptional(key_type) => {
+                Self::ReadonlyComputedValueStaticOptional(key_type)
+            }
+            Self::ConstAssertedComputedValue(key_type)
+            | Self::ConstAssertedReadonlyComputedValue(key_type) => {
+                Self::ConstAssertedReadonlyComputedValue(key_type)
+            }
+            Self::ConstAssertedComputedValueOptional(key_type)
+            | Self::ConstAssertedReadonlyComputedValueOptional(key_type) => {
+                Self::ConstAssertedReadonlyComputedValueOptional(key_type)
+            }
+            Self::ConstAssertedComputedValueStatic(key_type)
+            | Self::ConstAssertedReadonlyComputedValueStatic(key_type) => {
+                Self::ConstAssertedReadonlyComputedValueStatic(key_type)
+            }
+            Self::ConstAssertedComputedValueStaticOptional(key_type)
+            | Self::ConstAssertedReadonlyComputedValueStaticOptional(key_type) => {
+                Self::ConstAssertedReadonlyComputedValueStaticOptional(key_type)
+            }
+            Self::IndexSignature(index_signature_type)
+            | Self::ReadonlyIndexSignature(index_signature_type) => {
+                Self::ReadonlyIndexSignature(index_signature_type)
+            }
+            Self::ConstAssertedIndexSignature(index_signature_type)
+            | Self::ConstAssertedReadonlyIndexSignature(index_signature_type) => {
+                Self::ConstAssertedReadonlyIndexSignature(index_signature_type)
+            }
+            Self::Named(name) | Self::ReadonlyNamed(name) => Self::ReadonlyNamed(name),
+            Self::ConstAssertedNamed(name) | Self::ConstAssertedReadonlyNamed(name) => {
+                Self::ConstAssertedReadonlyNamed(name)
+            }
+            Self::NamedOptional(name) | Self::ReadonlyNamedOptional(name) => {
+                Self::ReadonlyNamedOptional(name)
+            }
+            Self::ConstAssertedNamedOptional(name)
+            | Self::ConstAssertedReadonlyNamedOptional(name) => {
+                Self::ConstAssertedReadonlyNamedOptional(name)
+            }
+            Self::NamedStatic(name) | Self::ReadonlyNamedStatic(name) => {
+                Self::ReadonlyNamedStatic(name)
+            }
+            Self::ConstAssertedNamedStatic(name) | Self::ConstAssertedReadonlyNamedStatic(name) => {
+                Self::ConstAssertedReadonlyNamedStatic(name)
+            }
+            Self::NamedStaticOptional(name) | Self::ReadonlyNamedStaticOptional(name) => {
+                Self::ReadonlyNamedStaticOptional(name)
+            }
+            Self::ConstAssertedNamedStaticOptional(name)
+            | Self::ConstAssertedReadonlyNamedStaticOptional(name) => {
+                Self::ConstAssertedReadonlyNamedStaticOptional(name)
+            }
             other => other,
         }
     }
 
-    /// Makes optional named properties required while preserving `as const` provenance.
+    /// Returns the structural member kind without readonly provenance.
+    pub fn without_readonly(&self) -> Self {
+        match self {
+            Self::ReadonlyComputedValue(key_type) => Self::ComputedValue(key_type.clone()),
+            Self::ReadonlyComputedValueOptional(key_type) => {
+                Self::ComputedValueOptional(key_type.clone())
+            }
+            Self::ReadonlyComputedValueStatic(key_type) => {
+                Self::ComputedValueStatic(key_type.clone())
+            }
+            Self::ReadonlyComputedValueStaticOptional(key_type) => {
+                Self::ComputedValueStaticOptional(key_type.clone())
+            }
+            Self::ConstAssertedReadonlyComputedValue(key_type) => {
+                Self::ConstAssertedComputedValue(key_type.clone())
+            }
+            Self::ConstAssertedReadonlyComputedValueOptional(key_type) => {
+                Self::ConstAssertedComputedValueOptional(key_type.clone())
+            }
+            Self::ConstAssertedReadonlyComputedValueStatic(key_type) => {
+                Self::ConstAssertedComputedValueStatic(key_type.clone())
+            }
+            Self::ConstAssertedReadonlyComputedValueStaticOptional(key_type) => {
+                Self::ConstAssertedComputedValueStaticOptional(key_type.clone())
+            }
+            Self::ReadonlyIndexSignature(index_signature_type) => {
+                Self::IndexSignature(index_signature_type.clone())
+            }
+            Self::ConstAssertedReadonlyIndexSignature(index_signature_type) => {
+                Self::ConstAssertedIndexSignature(index_signature_type.clone())
+            }
+            Self::ReadonlyNamed(name) => Self::Named(name.clone()),
+            Self::ConstAssertedReadonlyNamed(name) => Self::ConstAssertedNamed(name.clone()),
+            Self::ReadonlyNamedOptional(name) => Self::NamedOptional(name.clone()),
+            Self::ConstAssertedReadonlyNamedOptional(name) => {
+                Self::ConstAssertedNamedOptional(name.clone())
+            }
+            Self::ReadonlyNamedStatic(name) => Self::NamedStatic(name.clone()),
+            Self::ConstAssertedReadonlyNamedStatic(name) => {
+                Self::ConstAssertedNamedStatic(name.clone())
+            }
+            Self::ReadonlyNamedStaticOptional(name) => Self::NamedStaticOptional(name.clone()),
+            Self::ConstAssertedReadonlyNamedStaticOptional(name) => {
+                Self::ConstAssertedNamedStaticOptional(name.clone())
+            }
+            other => other.clone(),
+        }
+    }
+
+    /// Makes property members optional while preserving member provenance.
+    pub fn with_optional(self) -> Self {
+        match self {
+            Self::ComputedValue(key_type) => Self::ComputedValueOptional(key_type),
+            Self::ConstAssertedComputedValue(key_type) => {
+                Self::ConstAssertedComputedValueOptional(key_type)
+            }
+            Self::ReadonlyComputedValue(key_type) => Self::ReadonlyComputedValueOptional(key_type),
+            Self::ConstAssertedReadonlyComputedValue(key_type) => {
+                Self::ConstAssertedReadonlyComputedValueOptional(key_type)
+            }
+            Self::ComputedValueStatic(key_type) => Self::ComputedValueStaticOptional(key_type),
+            Self::ConstAssertedComputedValueStatic(key_type) => {
+                Self::ConstAssertedComputedValueStaticOptional(key_type)
+            }
+            Self::ReadonlyComputedValueStatic(key_type) => {
+                Self::ReadonlyComputedValueStaticOptional(key_type)
+            }
+            Self::ConstAssertedReadonlyComputedValueStatic(key_type) => {
+                Self::ConstAssertedReadonlyComputedValueStaticOptional(key_type)
+            }
+            Self::Named(name) => Self::NamedOptional(name),
+            Self::ConstAssertedNamed(name) => Self::ConstAssertedNamedOptional(name),
+            Self::ReadonlyNamed(name) => Self::ReadonlyNamedOptional(name),
+            Self::ConstAssertedReadonlyNamed(name) => {
+                Self::ConstAssertedReadonlyNamedOptional(name)
+            }
+            Self::NamedStatic(name) => Self::NamedStaticOptional(name),
+            Self::ConstAssertedNamedStatic(name) => Self::ConstAssertedNamedStaticOptional(name),
+            Self::ReadonlyNamedStatic(name) => Self::ReadonlyNamedStaticOptional(name),
+            Self::ConstAssertedReadonlyNamedStatic(name) => {
+                Self::ConstAssertedReadonlyNamedStaticOptional(name)
+            }
+            other => other,
+        }
+    }
+
+    /// Makes optional property members required while preserving member provenance.
     pub fn without_optional(self) -> Self {
         match self {
+            Self::ComputedValueOptional(key_type) => Self::ComputedValue(key_type),
+            Self::ConstAssertedComputedValueOptional(key_type) => {
+                Self::ConstAssertedComputedValue(key_type)
+            }
+            Self::ReadonlyComputedValueOptional(key_type) => Self::ReadonlyComputedValue(key_type),
+            Self::ConstAssertedReadonlyComputedValueOptional(key_type) => {
+                Self::ConstAssertedReadonlyComputedValue(key_type)
+            }
+            Self::ComputedValueStaticOptional(key_type) => Self::ComputedValueStatic(key_type),
+            Self::ConstAssertedComputedValueStaticOptional(key_type) => {
+                Self::ConstAssertedComputedValueStatic(key_type)
+            }
+            Self::ReadonlyComputedValueStaticOptional(key_type) => {
+                Self::ReadonlyComputedValueStatic(key_type)
+            }
+            Self::ConstAssertedReadonlyComputedValueStaticOptional(key_type) => {
+                Self::ConstAssertedReadonlyComputedValueStatic(key_type)
+            }
             Self::NamedOptional(name) => Self::Named(name),
             Self::ConstAssertedNamedOptional(name) => Self::ConstAssertedNamed(name),
+            Self::ReadonlyNamedOptional(name) => Self::ReadonlyNamed(name),
+            Self::ConstAssertedReadonlyNamedOptional(name) => {
+                Self::ConstAssertedReadonlyNamed(name)
+            }
+            Self::NamedStaticOptional(name) => Self::NamedStatic(name),
+            Self::ConstAssertedNamedStaticOptional(name) => Self::ConstAssertedNamedStatic(name),
+            Self::ReadonlyNamedStaticOptional(name) => Self::ReadonlyNamedStatic(name),
+            Self::ConstAssertedReadonlyNamedStaticOptional(name) => {
+                Self::ConstAssertedReadonlyNamedStatic(name)
+            }
             other => other,
+        }
+    }
+
+    /// Converts a class-side member kind to its object-side form.
+    pub fn into_non_static(self) -> Option<Self> {
+        match self {
+            Self::ComputedValueStatic(key_type) => Some(Self::ComputedValue(key_type)),
+            Self::ComputedValueStaticOptional(key_type) => {
+                Some(Self::ComputedValueOptional(key_type))
+            }
+            Self::ConstAssertedComputedValueStatic(key_type) => {
+                Some(Self::ConstAssertedComputedValue(key_type))
+            }
+            Self::ConstAssertedComputedValueStaticOptional(key_type) => {
+                Some(Self::ConstAssertedComputedValueOptional(key_type))
+            }
+            Self::ReadonlyComputedValueStatic(key_type) => {
+                Some(Self::ReadonlyComputedValue(key_type))
+            }
+            Self::ReadonlyComputedValueStaticOptional(key_type) => {
+                Some(Self::ReadonlyComputedValueOptional(key_type))
+            }
+            Self::ConstAssertedReadonlyComputedValueStatic(key_type) => {
+                Some(Self::ConstAssertedReadonlyComputedValue(key_type))
+            }
+            Self::ConstAssertedReadonlyComputedValueStaticOptional(key_type) => {
+                Some(Self::ConstAssertedReadonlyComputedValueOptional(key_type))
+            }
+            Self::NamedStatic(name) => Some(Self::Named(name)),
+            Self::ConstAssertedNamedStatic(name) => Some(Self::ConstAssertedNamed(name)),
+            Self::NamedStaticOptional(name) => Some(Self::NamedOptional(name)),
+            Self::ConstAssertedNamedStaticOptional(name) => {
+                Some(Self::ConstAssertedNamedOptional(name))
+            }
+            Self::ReadonlyNamedStatic(name) => Some(Self::ReadonlyNamed(name)),
+            Self::ConstAssertedReadonlyNamedStatic(name) => {
+                Some(Self::ConstAssertedReadonlyNamed(name))
+            }
+            Self::ReadonlyNamedStaticOptional(name) => Some(Self::ReadonlyNamedOptional(name)),
+            Self::ConstAssertedReadonlyNamedStaticOptional(name) => {
+                Some(Self::ConstAssertedReadonlyNamedOptional(name))
+            }
+            _ => None,
         }
     }
 
@@ -1197,8 +1689,24 @@ impl TypeMemberKind {
             | Self::ConstAssertedCallSignature
             | Self::ComputedValue(_)
             | Self::ConstAssertedComputedValue(_)
+            | Self::ComputedValueOptional(_)
+            | Self::ConstAssertedComputedValueOptional(_)
+            | Self::ComputedValueStatic(_)
+            | Self::ConstAssertedComputedValueStatic(_)
+            | Self::ComputedValueStaticOptional(_)
+            | Self::ConstAssertedComputedValueStaticOptional(_)
+            | Self::ReadonlyComputedValue(_)
+            | Self::ReadonlyComputedValueOptional(_)
+            | Self::ReadonlyComputedValueStatic(_)
+            | Self::ReadonlyComputedValueStaticOptional(_)
+            | Self::ConstAssertedReadonlyComputedValue(_)
+            | Self::ConstAssertedReadonlyComputedValueOptional(_)
+            | Self::ConstAssertedReadonlyComputedValueStatic(_)
+            | Self::ConstAssertedReadonlyComputedValueStaticOptional(_)
             | Self::IndexSignature(_)
-            | Self::ConstAssertedIndexSignature(_) => None,
+            | Self::ConstAssertedIndexSignature(_)
+            | Self::ReadonlyIndexSignature(_)
+            | Self::ConstAssertedReadonlyIndexSignature(_) => None,
             Self::Constructor | Self::ConstAssertedConstructor => {
                 Some(Text::new_static("constructor"))
             }
@@ -1209,7 +1717,17 @@ impl TypeMemberKind {
             | Self::NamedOptional(name)
             | Self::ConstAssertedNamedOptional(name)
             | Self::NamedStatic(name)
-            | Self::ConstAssertedNamedStatic(name) => Some(name.clone()),
+            | Self::ConstAssertedNamedStatic(name)
+            | Self::NamedStaticOptional(name)
+            | Self::ConstAssertedNamedStaticOptional(name)
+            | Self::ReadonlyNamed(name)
+            | Self::ConstAssertedReadonlyNamed(name)
+            | Self::ReadonlyNamedOptional(name)
+            | Self::ConstAssertedReadonlyNamedOptional(name)
+            | Self::ReadonlyNamedStatic(name)
+            | Self::ConstAssertedReadonlyNamedStatic(name)
+            | Self::ReadonlyNamedStaticOptional(name)
+            | Self::ConstAssertedReadonlyNamedStaticOptional(name) => Some(name.clone()),
         }
     }
 }

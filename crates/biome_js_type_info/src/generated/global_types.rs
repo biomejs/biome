@@ -87,7 +87,7 @@ pub(crate) fn set_generated_global_type_data(
                 ty: crate::globals::GLOBAL_ERROR_CALL_ID.into(),
             },
             crate::TypeMember {
-                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static(
+                kind: crate::TypeMemberKind::ReadonlyNamedStatic(biome_rowan::Text::new_static(
                     "prototype",
                 )),
                 ty: crate::globals::GLOBAL_INSTANCEOF_ERROR_ID.into(),
@@ -105,6 +105,7 @@ pub(crate) fn set_generated_global_type_data(
                 is_rest: false,
             }),
             accessibility: None,
+            is_readonly: false,
         }]),
         return_type: Some(crate::globals::GLOBAL_ERROR_ID.into()),
     }));

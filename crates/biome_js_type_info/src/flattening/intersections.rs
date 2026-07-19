@@ -2,7 +2,7 @@ use biome_rowan::Text;
 
 use crate::{
     Class, Function, Interface, Intersection, Literal, Namespace, Object, Path, ResolvedTypeData,
-    ReturnType, TypeData, TypeMember, TypeMemberKind, TypeResolver,
+    ReturnType, TypeData, TypeMember, TypeResolver,
 };
 
 pub(super) fn flattened_intersection(
@@ -139,18 +139,11 @@ impl MergedType {
                             class
                                 .members
                                 .into_iter()
-                                .filter_map(|member| match member.kind {
-                                    TypeMemberKind::NamedStatic(name) => Some(TypeMember {
-                                        kind: TypeMemberKind::Named(name),
+                                .filter_map(|member| {
+                                    member.kind.into_non_static().map(|kind| TypeMember {
+                                        kind,
                                         ty: member.ty,
-                                    }),
-                                    TypeMemberKind::ConstAssertedNamedStatic(name) => {
-                                        Some(TypeMember {
-                                            kind: TypeMemberKind::ConstAssertedNamed(name),
-                                            ty: member.ty,
-                                        })
-                                    }
-                                    _ => None,
+                                    })
                                 })
                                 .collect(),
                         )
@@ -332,6 +325,9 @@ fn member_intersection(
                 .is_some_and(|name| merged_member.has_name(&name))
         }) {
             Some(merged_member) => {
+                if merged_member.is_readonly() && !member.is_readonly() {
+                    merged_member.kind = merged_member.kind.without_readonly();
+                }
                 if member.ty != merged_member.ty {
                     let ty = std::mem::take(&mut merged_member.ty);
                     merged_member.ty = resolver
@@ -346,4 +342,41 @@ fn member_intersection(
     }
 
     merged
+}
+
+#[cfg(test)]
+mod tests {
+    use super::member_intersection;
+    use crate::{GlobalsResolver, TypeMember, TypeMemberKind, TypeReference};
+    use biome_rowan::Text;
+
+    #[test]
+    fn intersection_combines_readonly_independently_of_order() {
+        for (left_is_readonly, right_is_readonly, expected) in [
+            (true, false, false),
+            (false, true, false),
+            (true, true, true),
+        ] {
+            let mut resolver = GlobalsResolver::default();
+            let merged = member_intersection(
+                vec![member(left_is_readonly)],
+                vec![member(right_is_readonly)],
+                &mut resolver,
+            );
+
+            assert_eq!(merged[0].is_readonly(), expected);
+        }
+    }
+
+    fn member(is_readonly: bool) -> TypeMember {
+        let kind = TypeMemberKind::Named(Text::new_static("value"));
+        TypeMember {
+            kind: if is_readonly {
+                kind.with_readonly()
+            } else {
+                kind
+            },
+            ty: TypeReference::unknown(),
+        }
+    }
 }

@@ -1512,10 +1512,12 @@ impl ConstructorParameter {
                     resolver, scope_id, param,
                 ),
                 accessibility: None,
+                is_readonly: false,
             },
             AnyJsConstructorParameter::JsRestParameter(param) => Self {
                 parameter: FunctionParameter::from_js_rest_parameter(resolver, scope_id, param),
                 accessibility: None,
+                is_readonly: false,
             },
             AnyJsConstructorParameter::TsPropertyParameter(param) => param
                 .formal_parameter()
@@ -1528,6 +1530,10 @@ impl ConstructorParameter {
                     accessibility: Some(TypeMemberAccessibility::from_modifier_list(
                         param.modifiers(),
                     )),
+                    is_readonly: param
+                        .modifiers()
+                        .into_iter()
+                        .any(|modifier| modifier.as_ts_readonly_modifier().is_some()),
                 })
                 .unwrap_or_default(),
         }
@@ -1929,7 +1935,15 @@ impl TypeMember {
                     .modifiers()
                     .into_iter()
                     .any(|modifier| modifier.as_js_static_modifier().is_some());
-                Self::from_class_member_info(resolver, scope_id, name, ty.into(), is_static, false)
+                Self::from_class_member_info(
+                    resolver,
+                    scope_id,
+                    name,
+                    ty.into(),
+                    is_static,
+                    false,
+                    false,
+                )
             }),
             AnyJsClassMember::JsPropertyClassMember(member) => {
                 member.name().ok().and_then(|name| {
@@ -1950,6 +1964,10 @@ impl TypeMember {
                         .modifiers()
                         .into_iter()
                         .any(|modifier| modifier.as_js_static_modifier().is_some());
+                    let is_readonly = member
+                        .modifiers()
+                        .into_iter()
+                        .any(|modifier| modifier.as_ts_readonly_modifier().is_some());
                     let is_optional = member
                         .property_annotation()
                         .as_ref()
@@ -1961,6 +1979,7 @@ impl TypeMember {
                         name,
                         ty,
                         is_static,
+                        is_readonly,
                         is_optional,
                     )
                 })
@@ -1996,6 +2015,10 @@ impl TypeMember {
                         .modifiers()
                         .into_iter()
                         .any(|modifier| modifier.as_js_static_modifier().is_some());
+                    let is_readonly = member
+                        .modifiers()
+                        .into_iter()
+                        .any(|modifier| modifier.as_ts_readonly_modifier().is_some());
                     let is_optional = member.question_mark_token().is_some();
                     Self::from_class_member_info(
                         resolver,
@@ -2003,6 +2026,7 @@ impl TypeMember {
                         name,
                         ty,
                         is_static,
+                        is_readonly,
                         is_optional,
                     )
                 })
@@ -2020,6 +2044,10 @@ impl TypeMember {
                         .modifiers()
                         .into_iter()
                         .any(|modifier| modifier.as_js_static_modifier().is_some());
+                    let is_readonly = member
+                        .modifiers()
+                        .into_iter()
+                        .any(|modifier| modifier.as_ts_readonly_modifier().is_some());
                     let is_optional = member
                         .property_annotation()
                         .as_ref()
@@ -2031,6 +2059,7 @@ impl TypeMember {
                         name,
                         ty,
                         is_static,
+                        is_readonly,
                         is_optional,
                     )
                 })
@@ -2252,55 +2281,116 @@ impl TypeMember {
                 })
             }
             AnyTsTypeMember::TsIndexSignatureTypeMember(member) => {
-                let key_ty = member
+                let key_type = member
                     .parameter()
                     .and_then(|parameter| parameter.type_annotation())
                     .and_then(|annotation| annotation.ty())
                     .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
                     .ok()?;
-                let value_ty = member
+                let value_type = member
                     .type_annotation()
                     .and_then(|annotation| annotation.ty())
                     .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
                     .ok()?;
+                let kind = if member.readonly_token().is_some() {
+                    TypeMemberKind::IndexSignature(key_type).with_readonly()
+                } else {
+                    TypeMemberKind::IndexSignature(key_type)
+                };
                 Some(Self {
-                    kind: TypeMemberKind::IndexSignature(key_ty),
-                    ty: value_ty,
+                    kind,
+                    ty: value_type,
                 })
             }
             AnyTsTypeMember::TsMethodSignatureTypeMember(member) => {
-                member.name().ok().and_then(|name| name.name()).map(|name| {
-                    let function = Function {
-                        is_async: false,
-                        type_parameters: generic_params_from_ts_type_params(
+                let name = member.name().ok()?;
+                let is_optional = member.optional_token().is_some();
+                let (kind, function_name) = match name {
+                    AnyJsObjectMemberName::JsComputedMemberName(name) => (
+                        TypeMemberKind::ComputedValue(computed_member_reference(
                             resolver,
                             scope_id,
-                            member.type_parameters(),
-                        ),
-                        name: Some(name.clone().into()),
-                        parameters: function_params_from_js_params(
-                            resolver,
-                            scope_id,
-                            member.parameters(),
-                        ),
-                        return_type: return_type_from_annotation(
-                            resolver,
-                            scope_id,
-                            member.return_type_annotation(),
-                        )
-                        .unwrap_or_default(),
-                    };
-                    let ty = resolver.register_and_resolve(function.into()).into();
-                    let is_optional = member.optional_token().is_some();
-                    Self::from_name_and_optional_type(resolver, name, ty, is_optional)
+                            &name.expression().ok()?,
+                        )),
+                        None,
+                    ),
+                    _ => {
+                        let name = Text::from(name.name()?);
+                        (TypeMemberKind::Named(name.clone()), Some(name))
+                    }
+                };
+                let kind = if is_optional {
+                    kind.with_optional()
+                } else {
+                    kind
+                };
+                let function = Function {
+                    is_async: false,
+                    type_parameters: generic_params_from_ts_type_params(
+                        resolver,
+                        scope_id,
+                        member.type_parameters(),
+                    ),
+                    name: function_name,
+                    parameters: function_params_from_js_params(
+                        resolver,
+                        scope_id,
+                        member.parameters(),
+                    ),
+                    return_type: return_type_from_annotation(
+                        resolver,
+                        scope_id,
+                        member.return_type_annotation(),
+                    )
+                    .unwrap_or_default(),
+                };
+                let type_reference = resolver.register_and_resolve(function.into()).into();
+                Some(Self {
+                    kind,
+                    ty: if is_optional {
+                        ResolvedTypeId::new(resolver.level(), resolver.optional(type_reference))
+                            .into()
+                    } else {
+                        type_reference
+                    },
                 })
             }
             AnyTsTypeMember::TsPropertySignatureTypeMember(member) => {
-                member.name().ok().and_then(|name| name.name()).map(|name| {
-                    let ty = type_from_annotation(resolver, scope_id, member.type_annotation())
+                let name = member.name().ok()?;
+                let type_reference =
+                    type_from_annotation(resolver, scope_id, member.type_annotation())
                         .unwrap_or_default();
-                    let is_optional = member.optional_token().is_some();
-                    Self::from_name_and_optional_type(resolver, name, ty, is_optional)
+                let is_readonly = member.readonly_token().is_some();
+                let is_optional = member.optional_token().is_some();
+                let kind = match name {
+                    AnyJsObjectMemberName::JsComputedMemberName(name) => {
+                        TypeMemberKind::ComputedValue(computed_member_reference(
+                            resolver,
+                            scope_id,
+                            &name.expression().ok()?,
+                        ))
+                    }
+                    other => TypeMemberKind::Named(other.name()?.into()),
+                };
+                let kind = if is_optional {
+                    kind.with_optional()
+                } else {
+                    kind
+                };
+                let kind = if is_readonly {
+                    kind.with_readonly()
+                } else {
+                    kind
+                };
+                Some(Self {
+                    kind,
+                    ty: match is_optional {
+                        true => {
+                            ResolvedTypeId::new(resolver.level(), resolver.optional(type_reference))
+                                .into()
+                        }
+                        false => type_reference,
+                    },
                 })
             }
             AnyTsTypeMember::TsSetterSignatureTypeMember(_member) => {
@@ -2315,57 +2405,50 @@ impl TypeMember {
         resolver: &mut dyn TypeResolver,
         scope_id: ScopeId,
         name: AnyJsClassMemberName,
-        ty: TypeReference,
+        type_reference: TypeReference,
         is_static: bool,
+        is_readonly: bool,
         is_optional: bool,
     ) -> Option<Self> {
         let kind = match name {
-            AnyJsClassMemberName::JsComputedMemberName(name) => TypeMemberKind::ComputedValue(
-                computed_member_reference(resolver, scope_id, &name.expression().ok()?),
-            ),
+            AnyJsClassMemberName::JsComputedMemberName(name) => {
+                let key = computed_member_reference(resolver, scope_id, &name.expression().ok()?);
+                if is_static {
+                    TypeMemberKind::ComputedValueStatic(key)
+                } else {
+                    TypeMemberKind::ComputedValue(key)
+                }
+            }
             _ => {
                 let name = text_from_class_member_name(name.name()?);
                 if is_static {
                     TypeMemberKind::NamedStatic(name)
-                } else if is_optional {
-                    TypeMemberKind::NamedOptional(name)
                 } else {
                     TypeMemberKind::Named(name)
                 }
             }
+        };
+        let kind = if is_optional {
+            kind.with_optional()
+        } else {
+            kind
+        };
+        let kind = if is_readonly {
+            kind.with_readonly()
+        } else {
+            kind
         };
 
         Some(Self {
             kind,
             ty: match is_optional {
                 true => {
-                    let id = resolver.optional(ty);
+                    let id = resolver.optional(type_reference);
                     resolver.reference_to_id(id)
                 }
-                false => ty,
+                false => type_reference,
             },
         })
-    }
-
-    #[inline]
-    fn from_name_and_optional_type(
-        resolver: &mut dyn TypeResolver,
-        name: TokenText,
-        ty: TypeReference,
-        is_optional: bool,
-    ) -> Self {
-        let name: Text = name.into();
-        Self {
-            kind: if is_optional {
-                TypeMemberKind::NamedOptional(name)
-            } else {
-                TypeMemberKind::Named(name)
-            },
-            ty: match is_optional {
-                true => ResolvedTypeId::new(resolver.level(), resolver.optional(ty)).into(),
-                false => ty,
-            },
-        }
     }
 
     fn members_from_class_member_list(
@@ -2391,12 +2474,18 @@ impl TypeMember {
                         && let FunctionParameter::Named(named_param) = &param.parameter
                     {
                         // TODO: Assign accessibility to type members.
+                        let kind = if named_param.is_optional {
+                            TypeMemberKind::NamedOptional(named_param.name.clone())
+                        } else {
+                            TypeMemberKind::Named(named_param.name.clone())
+                        };
+                        let kind = if param.is_readonly {
+                            kind.with_readonly()
+                        } else {
+                            kind
+                        };
                         members.push(Self {
-                            kind: if named_param.is_optional {
-                                TypeMemberKind::NamedOptional(named_param.name.clone())
-                            } else {
-                                TypeMemberKind::Named(named_param.name.clone())
-                            },
+                            kind,
                             ty: param.parameter.ty().clone(),
                         });
                     }
@@ -2762,6 +2851,7 @@ fn constructor_params_from_js_params(
                 .map(|param| ConstructorParameter {
                     parameter: FunctionParameter::from_any_js_parameter(resolver, scope_id, &param),
                     accessibility: None,
+                    is_readonly: false,
                 })
                 .collect()
         })

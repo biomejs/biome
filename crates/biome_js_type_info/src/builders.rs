@@ -3,7 +3,7 @@ use std::hash::Hash;
 use crate::Path;
 use crate::interned_types::{
     InternedClass, InternedFunction, InternedInterface, InternedIntersection, InternedNamespace,
-    InternedObject, InternedUnion, Literal, TypeData, TypeDb, TypeMember, TypeMemberKind,
+    InternedObject, InternedUnion, Literal, TypeData, TypeDb, TypeMember,
 };
 use biome_rowan::Text;
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -511,16 +511,15 @@ fn class_instance_members<'db>(members: &[TypeMember<'db>]) -> Vec<TypeMember<'d
 fn class_static_members<'db>(members: &[TypeMember<'db>]) -> Vec<TypeMember<'db>> {
     members
         .iter()
-        .filter_map(|member| match &member.kind {
-            TypeMemberKind::NamedStatic(name) => Some(TypeMember {
-                kind: TypeMemberKind::Named(name.clone()),
-                ty: member.ty,
-            }),
-            TypeMemberKind::ConstAssertedNamedStatic(name) => Some(TypeMember {
-                kind: TypeMemberKind::ConstAssertedNamed(name.clone()),
-                ty: member.ty,
-            }),
-            _ => None,
+        .filter_map(|member| {
+            member
+                .kind
+                .clone()
+                .into_non_static()
+                .map(|kind| TypeMember {
+                    kind,
+                    ty: member.ty,
+                })
         })
         .collect()
 }
@@ -538,10 +537,15 @@ fn merge_members<'db>(
         });
 
         match existing {
-            Some(existing) if existing.ty != member.ty => {
-                existing.ty = TypeData::union_from_types(db, Vec::from([existing.ty, member.ty]));
+            Some(existing) => {
+                if existing.kind.is_readonly() && !member.kind.is_readonly() {
+                    existing.kind = existing.kind.without_readonly();
+                }
+                if existing.ty != member.ty {
+                    existing.ty =
+                        TypeData::union_from_types(db, Vec::from([existing.ty, member.ty]));
+                }
             }
-            Some(_) => {}
             None => merged.push(member.clone()),
         }
     }

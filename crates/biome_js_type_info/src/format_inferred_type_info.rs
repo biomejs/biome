@@ -350,9 +350,17 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for PatternFunctionParameter<'d
 
 impl<'db> Format<FormatInferredTypeContext<'db>> for TypeMember<'db> {
     fn fmt(&self, f: &mut Formatter<FormatInferredTypeContext<'db>>) -> FormatResult<()> {
+        let readonly = format_with(|formatter| {
+            if self.is_readonly() {
+                write!(formatter, [token("readonly"), space()])
+            } else {
+                Ok(())
+            }
+        });
         write!(
             f,
             [&format_args![
+                readonly,
                 &self.kind,
                 token(":"),
                 space(),
@@ -370,23 +378,117 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeMemberKind<'db> {
             Self::Getter(name) | Self::ConstAssertedGetter(name) => {
                 write!(f, [text(&std::format!("get \"{name}\""), None)])
             }
-            Self::IndexSignature(ty) | Self::ConstAssertedIndexSignature(ty) => {
-                write!(f, [token("["), ty, token("]")])
+            Self::IndexSignature(index_signature_type)
+            | Self::ConstAssertedIndexSignature(index_signature_type)
+            | Self::ReadonlyIndexSignature(index_signature_type)
+            | Self::ConstAssertedReadonlyIndexSignature(index_signature_type) => {
+                write!(f, [token("["), index_signature_type, token("]")])
             }
-            Self::ComputedValue(ty) | Self::ConstAssertedComputedValue(ty) => {
-                write!(f, [token("computed"), space(), token("["), ty, token("]")])
-            }
-            Self::ComputedValueNamed(name, _) | Self::ConstAssertedComputedValueNamed(name, _) => {
+            Self::ComputedValueNamed(name, _)
+            | Self::ConstAssertedComputedValueNamed(name, _)
+            | Self::ReadonlyComputedValueNamed(name, _)
+            | Self::ConstAssertedReadonlyComputedValueNamed(name, _) => {
                 write!(f, [text(&std::format!("computed [{name}]"), None)])
             }
-            Self::Named(name) | Self::ConstAssertedNamed(name) => {
+            Self::ComputedValue(key_type)
+            | Self::ConstAssertedComputedValue(key_type)
+            | Self::ReadonlyComputedValue(key_type)
+            | Self::ConstAssertedReadonlyComputedValue(key_type) => {
+                write!(
+                    f,
+                    [token("computed"), space(), token("["), key_type, token("]")]
+                )
+            }
+            Self::ComputedValueNamedOptional(name, _)
+            | Self::ConstAssertedComputedValueNamedOptional(name, _)
+            | Self::ReadonlyComputedValueNamedOptional(name, _)
+            | Self::ConstAssertedReadonlyComputedValueNamedOptional(name, _) => {
+                write!(f, [text(&std::format!("computed [{name}]?"), None)])
+            }
+            Self::ComputedValueOptional(key_type)
+            | Self::ConstAssertedComputedValueOptional(key_type)
+            | Self::ReadonlyComputedValueOptional(key_type)
+            | Self::ConstAssertedReadonlyComputedValueOptional(key_type) => {
+                write!(
+                    f,
+                    [
+                        token("computed"),
+                        space(),
+                        token("["),
+                        key_type,
+                        token("]?")
+                    ]
+                )
+            }
+            Self::ComputedValueNamedStatic(name, _)
+            | Self::ConstAssertedComputedValueNamedStatic(name, _)
+            | Self::ReadonlyComputedValueNamedStatic(name, _)
+            | Self::ConstAssertedReadonlyComputedValueNamedStatic(name, _) => {
+                write!(f, [text(&std::format!("static computed [{name}]"), None)])
+            }
+            Self::ComputedValueStatic(key_type)
+            | Self::ConstAssertedComputedValueStatic(key_type)
+            | Self::ReadonlyComputedValueStatic(key_type)
+            | Self::ConstAssertedReadonlyComputedValueStatic(key_type) => {
+                write!(
+                    f,
+                    [
+                        token("static"),
+                        space(),
+                        token("computed"),
+                        space(),
+                        token("["),
+                        key_type,
+                        token("]")
+                    ]
+                )
+            }
+            Self::ComputedValueNamedStaticOptional(name, _)
+            | Self::ConstAssertedComputedValueNamedStaticOptional(name, _)
+            | Self::ReadonlyComputedValueNamedStaticOptional(name, _)
+            | Self::ConstAssertedReadonlyComputedValueNamedStaticOptional(name, _) => {
+                write!(f, [text(&std::format!("static computed [{name}]?"), None)])
+            }
+            Self::ComputedValueStaticOptional(key_type)
+            | Self::ConstAssertedComputedValueStaticOptional(key_type)
+            | Self::ReadonlyComputedValueStaticOptional(key_type)
+            | Self::ConstAssertedReadonlyComputedValueStaticOptional(key_type) => {
+                write!(
+                    f,
+                    [
+                        token("static"),
+                        space(),
+                        token("computed"),
+                        space(),
+                        token("["),
+                        key_type,
+                        token("]?")
+                    ]
+                )
+            }
+            Self::Named(name)
+            | Self::ConstAssertedNamed(name)
+            | Self::ReadonlyNamed(name)
+            | Self::ConstAssertedReadonlyNamed(name) => {
                 write!(f, [text(&std::format!("\"{name}\""), None)])
             }
-            Self::NamedOptional(name) | Self::ConstAssertedNamedOptional(name) => {
+            Self::NamedOptional(name)
+            | Self::ConstAssertedNamedOptional(name)
+            | Self::ReadonlyNamedOptional(name)
+            | Self::ConstAssertedReadonlyNamedOptional(name) => {
                 write!(f, [text(&std::format!("\"{name}\"?"), None)])
             }
-            Self::NamedStatic(name) | Self::ConstAssertedNamedStatic(name) => {
+            Self::NamedStatic(name)
+            | Self::ConstAssertedNamedStatic(name)
+            | Self::ReadonlyNamedStatic(name)
+            | Self::ConstAssertedReadonlyNamedStatic(name) => {
                 write!(f, [text(&std::format!("static \"{name}\""), None)])
+            }
+            Self::NamedStaticOptional(name)
+            | Self::ConstAssertedNamedStaticOptional(name)
+            | Self::ReadonlyNamedStaticOptional(name)
+            | Self::ConstAssertedReadonlyNamedStaticOptional(name) => {
+                write!(f, [text(&std::format!("static \"{name}\"?"), None)])
             }
         }
     }

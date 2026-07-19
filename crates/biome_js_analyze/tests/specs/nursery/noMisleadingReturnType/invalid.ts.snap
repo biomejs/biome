@@ -216,6 +216,10 @@ function satisfiesDoesNotWiden(b: boolean): string { if (b) return "a" satisfies
 function doubleCastNarrows(b: boolean): string { if (b) return "a" as unknown as "a"; return "b" as unknown as "b"; }
 function singleAssertedBooleanLiteral(): boolean { return false as false; }
 
+function readonlyRecordWider(): Readonly<Record<string, string>> {
+    return { key: "value" } as const;
+}
+
 ```
 
 # Diagnostics
@@ -2490,10 +2494,34 @@ invalid.ts:211:40 lint/nursery/noMisleadingReturnType ━━━━━━━━�
   > 211 │ function singleAssertedBooleanLiteral(): boolean { return false as false; }
         │                                        ^^^^^^^^^
     212 │ 
+    213 │ function readonlyRecordWider(): Readonly<Record<string, string>> {
   
   i A wider return type hides the precise types that callers could rely on.
   
   i Consider using false as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:213:31 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    211 │ function singleAssertedBooleanLiteral(): boolean { return false as false; }
+    212 │ 
+  > 213 │ function readonlyRecordWider(): Readonly<Record<string, string>> {
+        │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    214 │     return { key: "value" } as const;
+    215 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
   

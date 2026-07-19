@@ -1,4 +1,5 @@
 use biome_js_type_info::*;
+use biome_rowan::Text;
 
 #[test]
 fn test_resolved_type_id() {
@@ -163,5 +164,57 @@ fn verify_type_sizes() {
         std::mem::size_of::<TypeInstance>(),
         32,
         "The size shouldn't go higher"
+    );
+}
+
+#[test]
+fn readonly_member_kind_preserves_other_provenance() {
+    let kind = TypeMemberKind::Named(Text::new_static("value"))
+        .with_readonly()
+        .with_const_asserted()
+        .with_optional();
+
+    assert!(kind.is_readonly());
+    assert!(kind.is_const_asserted());
+    assert!(kind.is_optional());
+    assert_eq!(
+        kind.clone().without_optional().without_const_asserted(),
+        TypeMemberKind::ReadonlyNamed(Text::new_static("value"))
+    );
+    assert_eq!(
+        kind.without_readonly(),
+        TypeMemberKind::ConstAssertedNamedOptional(Text::new_static("value"))
+    );
+}
+
+#[test]
+fn static_member_kind_converts_to_object_member_kind() {
+    let named = TypeMemberKind::NamedStatic(Text::new_static("value"))
+        .with_readonly()
+        .with_optional()
+        .into_non_static()
+        .expect("static named member should convert");
+
+    assert_eq!(
+        named,
+        TypeMemberKind::ReadonlyNamedOptional(Text::new_static("value"))
+    );
+
+    let computed = TypeMemberKind::ComputedValueStatic(TypeReference::unknown())
+        .with_readonly()
+        .with_const_asserted()
+        .with_optional()
+        .into_non_static()
+        .expect("static computed member should convert");
+
+    assert_eq!(
+        computed,
+        TypeMemberKind::ConstAssertedReadonlyComputedValueOptional(TypeReference::unknown())
+    );
+
+    assert!(
+        TypeMemberKind::Named(Text::new_static("value"))
+            .into_non_static()
+            .is_none()
     );
 }

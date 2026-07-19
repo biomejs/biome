@@ -9,10 +9,13 @@ use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
     AnyJsExpression, JsVariableDeclaration, TsInterfaceDeclaration, TsTypeAliasDeclaration,
 };
-use biome_js_syntax::{AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsFunctionDeclaration};
+use biome_js_syntax::{
+    AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsClassDeclaration, JsFunctionDeclaration,
+};
 use biome_js_type_info::{
-    GlobalsResolver, NUM_PREDEFINED_TYPES, Resolvable, ResolvedTypeData, ResolvedTypeId, ScopeId,
-    TypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+    GlobalsResolver, ModuleId, NUM_PREDEFINED_TYPES, Resolvable, ResolvedTypeData, ResolvedTypeId,
+    ScopeId, TypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolver,
+    TypeResolverLevel,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, Text};
@@ -99,6 +102,8 @@ pub fn assert_typed_bindings_snapshot(
 pub struct HardcodedSymbolResolver {
     name: &'static str,
     globals: GlobalsResolver,
+    resolver_level: TypeResolverLevel,
+    symbol_module_id: ModuleId,
     types: Vec<TypeData>,
 }
 
@@ -107,8 +112,16 @@ impl HardcodedSymbolResolver {
         Self {
             name,
             globals,
+            resolver_level: TypeResolverLevel::Thin,
+            symbol_module_id: ModuleId::new(0),
             types: vec![data],
         }
+    }
+
+    pub fn with_foreign_symbol_module(mut self, module_id: ModuleId) -> Self {
+        self.resolver_level = TypeResolverLevel::Full;
+        self.symbol_module_id = module_id;
+        self
     }
 
     pub fn run_inference(&mut self) {
@@ -139,7 +152,7 @@ impl HardcodedSymbolResolver {
 
 impl TypeResolver for HardcodedSymbolResolver {
     fn level(&self) -> TypeResolverLevel {
-        TypeResolverLevel::Thin
+        self.resolver_level
     }
 
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
@@ -155,9 +168,7 @@ impl TypeResolver for HardcodedSymbolResolver {
 
     fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData<'_>> {
         match id.level() {
-            TypeResolverLevel::Full => {
-                panic!("Ad-hoc references unsupported by resolver")
-            }
+            TypeResolverLevel::Full => Some((id, self.get_by_id(id.id())).into()),
             TypeResolverLevel::Thin => Some((id, self.get_by_id(id.id())).into()),
             TypeResolverLevel::Import => {
                 panic!("Import references unsupported by resolver")
@@ -193,7 +204,10 @@ impl TypeResolver for HardcodedSymbolResolver {
 
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
         if qualifier.path.is_identifier(self.name) {
-            Some(ResolvedTypeId::new(self.level(), TypeId::new(0)))
+            Some(
+                ResolvedTypeId::new(TypeResolverLevel::Thin, TypeId::new(0))
+                    .with_module_id(self.symbol_module_id),
+            )
         } else {
             self.globals.resolve_qualifier(qualifier)
         }
@@ -252,6 +266,22 @@ pub fn get_function_declaration(root: &AnyJsRoot) -> JsFunctionDeclaration {
         .expect("cannot find function declaration")
 }
 
+pub fn get_class_declaration(root: &AnyJsRoot) -> JsClassDeclaration {
+    let module = root.as_js_module().unwrap();
+    module
+        .items()
+        .into_iter()
+        .filter_map(|item| match item {
+            AnyJsModuleItem::AnyJsStatement(statement) => Some(statement),
+            _ => None,
+        })
+        .find_map(|statement| match statement {
+            AnyJsStatement::JsClassDeclaration(decl) => Some(decl),
+            _ => None,
+        })
+        .expect("cannot find class declaration")
+}
+
 pub fn get_interface_declaration(root: &AnyJsRoot) -> TsInterfaceDeclaration {
     let module = root.as_js_module().unwrap();
     module
@@ -266,6 +296,22 @@ pub fn get_interface_declaration(root: &AnyJsRoot) -> TsInterfaceDeclaration {
             _ => None,
         })
         .expect("cannot find interface declaration")
+}
+
+pub fn get_type_alias_declaration(root: &AnyJsRoot) -> TsTypeAliasDeclaration {
+    let module = root.as_js_module().unwrap();
+    module
+        .items()
+        .into_iter()
+        .filter_map(|item| match item {
+            AnyJsModuleItem::AnyJsStatement(statement) => Some(statement),
+            _ => None,
+        })
+        .find_map(|statement| match statement {
+            AnyJsStatement::TsTypeAliasDeclaration(decl) => Some(decl),
+            _ => None,
+        })
+        .expect("cannot find type alias declaration")
 }
 
 pub fn get_variable_declaration(root: &AnyJsRoot) -> JsVariableDeclaration {

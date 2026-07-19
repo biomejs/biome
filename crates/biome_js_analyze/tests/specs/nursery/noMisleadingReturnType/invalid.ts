@@ -209,3 +209,7 @@ function literalAssertionNarrows(b: boolean): string { if (b) return "a" as "a";
 function satisfiesDoesNotWiden(b: boolean): string { if (b) return "a" satisfies string; return "b" satisfies string; }
 function doubleCastNarrows(b: boolean): string { if (b) return "a" as unknown as "a"; return "b" as unknown as "b"; }
 function singleAssertedBooleanLiteral(): boolean { return false as false; }
+
+function readonlyRecordWider(): Readonly<Record<string, string>> {
+    return { key: "value" } as const;
+}

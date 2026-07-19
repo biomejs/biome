@@ -24,7 +24,6 @@ use biome_js_type_info::{
         PredicateReturnType as InferredPredicateReturnType, ReturnType as InferredReturnType,
         TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
         TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
-        well_known_symbol_name,
     },
 };
 use biome_rowan::Text;
@@ -88,7 +87,10 @@ enum GlobalTypeWork<'a> {
         has_namespace_ty: bool,
     },
     RebuildTypeMember(&'a RawTypeMemberKind),
-    RebuildConstructorParameter(Option<TypeMemberAccessibility>),
+    RebuildConstructorParameter {
+        accessibility: Option<TypeMemberAccessibility>,
+        is_readonly: bool,
+    },
     RebuildFunctionParameter(&'a RawFunctionParameter),
     RebuildFunctionParameterBinding(Text),
     RebuildReturnType(&'a RawReturnType),
@@ -348,18 +350,24 @@ fn resolve_global_type_id_with_resolver<'db>(
             }
             GlobalTypeWork::RebuildTypeMember(kind) => {
                 let member_ty = pop_global_type(&mut values);
-                let key_ty = raw_member_kind_reference(kind).map(|_| pop_global_type(&mut values));
+                let key_type = kind
+                    .key_type()
+                    .map_or(InferredTypeData::Unknown, |_| pop_global_type(&mut values));
                 values.push(GlobalTypeValue::Member(InferredTypeMember {
-                    kind: global_member_kind_from_raw(kind, key_ty),
+                    kind: InferredTypeMemberKind::from_raw(kind, &mut |_| key_type),
                     ty: member_ty,
                 }));
             }
-            GlobalTypeWork::RebuildConstructorParameter(accessibility) => {
+            GlobalTypeWork::RebuildConstructorParameter {
+                accessibility,
+                is_readonly,
+            } => {
                 let parameter = pop_global_function_parameter(&mut values);
                 values.push(GlobalTypeValue::ConstructorParameter(
                     InferredConstructorParameter {
                         parameter,
                         accessibility,
+                        is_readonly,
                     },
                 ));
             }
@@ -765,8 +773,8 @@ fn push_raw_members<'a>(stack: &mut Vec<GlobalTypeWork<'a>>, members: &'a [RawTy
     for member in members.iter().rev() {
         stack.push(GlobalTypeWork::RebuildTypeMember(&member.kind));
         stack.push(GlobalTypeWork::Reference(&member.ty));
-        if let Some(key_ty) = raw_member_kind_reference(&member.kind) {
-            stack.push(GlobalTypeWork::Reference(key_ty));
+        if let Some(key_type) = member.kind.key_type() {
+            stack.push(GlobalTypeWork::Reference(key_type));
         }
     }
 }
@@ -776,9 +784,10 @@ fn push_constructor_parameters<'a>(
     parameters: &'a [RawConstructorParameter],
 ) {
     for parameter in parameters.iter().rev() {
-        stack.push(GlobalTypeWork::RebuildConstructorParameter(
-            parameter.accessibility,
-        ));
+        stack.push(GlobalTypeWork::RebuildConstructorParameter {
+            accessibility: parameter.accessibility,
+            is_readonly: parameter.is_readonly,
+        });
         push_function_parameter(stack, &parameter.parameter);
     }
 }
@@ -840,91 +849,6 @@ fn push_tuple_elements<'a>(
             is_rest: element.is_rest,
         });
         stack.push(GlobalTypeWork::Reference(&element.ty));
-    }
-}
-
-fn raw_member_kind_reference(kind: &RawTypeMemberKind) -> Option<&TypeReference> {
-    match kind {
-        RawTypeMemberKind::ComputedValue(ty)
-        | RawTypeMemberKind::ConstAssertedComputedValue(ty)
-        | RawTypeMemberKind::ConstAssertedIndexSignature(ty)
-        | RawTypeMemberKind::IndexSignature(ty) => Some(ty),
-        RawTypeMemberKind::CallSignature
-        | RawTypeMemberKind::ConstAssertedCallSignature
-        | RawTypeMemberKind::ConstAssertedConstructor
-        | RawTypeMemberKind::ConstAssertedGetter(_)
-        | RawTypeMemberKind::ConstAssertedNamed(_)
-        | RawTypeMemberKind::ConstAssertedNamedOptional(_)
-        | RawTypeMemberKind::ConstAssertedNamedStatic(_)
-        | RawTypeMemberKind::Constructor
-        | RawTypeMemberKind::Getter(_)
-        | RawTypeMemberKind::Named(_)
-        | RawTypeMemberKind::NamedOptional(_)
-        | RawTypeMemberKind::NamedStatic(_) => None,
-    }
-}
-
-fn global_member_kind_from_raw<'db>(
-    kind: &RawTypeMemberKind,
-    key_ty: Option<InferredTypeData<'db>>,
-) -> InferredTypeMemberKind<'db> {
-    match kind {
-        RawTypeMemberKind::CallSignature => InferredTypeMemberKind::CallSignature,
-        RawTypeMemberKind::ComputedValue(reference) => well_known_symbol_name(reference).map_or(
-            InferredTypeMemberKind::ComputedValue(key_ty.unwrap_or(InferredTypeData::Unknown)),
-            |name| {
-                InferredTypeMemberKind::ComputedValueNamed(
-                    name,
-                    key_ty.unwrap_or(InferredTypeData::Unknown),
-                )
-            },
-        ),
-        RawTypeMemberKind::ConstAssertedCallSignature => {
-            InferredTypeMemberKind::ConstAssertedCallSignature
-        }
-        RawTypeMemberKind::ConstAssertedComputedValue(reference) => {
-            well_known_symbol_name(reference).map_or(
-                InferredTypeMemberKind::ConstAssertedComputedValue(
-                    key_ty.unwrap_or(InferredTypeData::Unknown),
-                ),
-                |name| {
-                    InferredTypeMemberKind::ConstAssertedComputedValueNamed(
-                        name,
-                        key_ty.unwrap_or(InferredTypeData::Unknown),
-                    )
-                },
-            )
-        }
-        RawTypeMemberKind::ConstAssertedConstructor => {
-            InferredTypeMemberKind::ConstAssertedConstructor
-        }
-        RawTypeMemberKind::ConstAssertedGetter(name) => {
-            InferredTypeMemberKind::ConstAssertedGetter(name.clone())
-        }
-        RawTypeMemberKind::ConstAssertedIndexSignature(_) => {
-            InferredTypeMemberKind::ConstAssertedIndexSignature(
-                key_ty.unwrap_or(InferredTypeData::Unknown),
-            )
-        }
-        RawTypeMemberKind::ConstAssertedNamed(name) => {
-            InferredTypeMemberKind::ConstAssertedNamed(name.clone())
-        }
-        RawTypeMemberKind::ConstAssertedNamedOptional(name) => {
-            InferredTypeMemberKind::ConstAssertedNamedOptional(name.clone())
-        }
-        RawTypeMemberKind::ConstAssertedNamedStatic(name) => {
-            InferredTypeMemberKind::ConstAssertedNamedStatic(name.clone())
-        }
-        RawTypeMemberKind::Constructor => InferredTypeMemberKind::Constructor,
-        RawTypeMemberKind::Getter(name) => InferredTypeMemberKind::Getter(name.clone()),
-        RawTypeMemberKind::IndexSignature(_) => {
-            InferredTypeMemberKind::IndexSignature(key_ty.unwrap_or(InferredTypeData::Unknown))
-        }
-        RawTypeMemberKind::Named(name) => InferredTypeMemberKind::Named(name.clone()),
-        RawTypeMemberKind::NamedOptional(name) => {
-            InferredTypeMemberKind::NamedOptional(name.clone())
-        }
-        RawTypeMemberKind::NamedStatic(name) => InferredTypeMemberKind::NamedStatic(name.clone()),
     }
 }
 
@@ -991,6 +915,7 @@ fn pop_global_constructor_parameters<'db>(
                         },
                     ),
                     accessibility: None,
+                    is_readonly: false,
                 });
             }
         }

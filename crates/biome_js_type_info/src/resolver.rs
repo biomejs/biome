@@ -537,35 +537,36 @@ impl<'a> ResolvedTypeMember<'a> {
     }
 }
 
-/// Applies the module ID of `resolved` to the key reference of index signature
-/// and computed value member kinds. Returns `None` for other kinds.
-fn keyed_member_kind_with_resolved_reference(
-    resolved: ResolvedTypeData,
-    member_kind: &TypeMemberKind,
-) -> Option<TypeMemberKind> {
-    let (key_reference, constructor): (&TypeReference, fn(TypeReference) -> TypeMemberKind) =
-        match member_kind {
-            TypeMemberKind::IndexSignature(key_reference)
-            | TypeMemberKind::ConstAssertedIndexSignature(key_reference) => {
-                (key_reference, TypeMemberKind::IndexSignature)
-            }
-            TypeMemberKind::ComputedValue(key_reference)
-            | TypeMemberKind::ConstAssertedComputedValue(key_reference) => {
-                (key_reference, TypeMemberKind::ComputedValue)
-            }
-            _ => return None,
-        };
-
-    let kind = constructor(
-        resolved
-            .apply_module_id_to_reference(key_reference)
-            .into_owned(),
-    );
-    Some(if member_kind.is_const_asserted() {
-        kind.with_const_asserted()
-    } else {
-        kind
-    })
+/// Collects mapped-type members with their module context applied.
+fn collect_mapped_type_members(
+    resolver: &mut dyn TypeResolver,
+    type_reference: &TypeReference,
+) -> Option<Vec<TypeMember>> {
+    let resolved = resolver.resolve_and_get(type_reference)?;
+    let resolver_id = resolved.resolver_id();
+    match resolved.as_raw_data() {
+        TypeData::Class(_) | TypeData::Global | TypeData::Interface(_) | TypeData::Object(_) => {
+            Some(
+                resolved
+                    .as_raw_data()
+                    .own_members()
+                    .map(|member| ResolvedTypeMember::from((resolver_id, member)).to_member())
+                    .collect(),
+            )
+        }
+        TypeData::InstanceOf(instance) if instance.type_parameters.is_empty() => {
+            let materialized = resolved.to_data().inferred(resolver);
+            matches!(
+                materialized,
+                TypeData::Class(_)
+                    | TypeData::Global
+                    | TypeData::Interface(_)
+                    | TypeData::Object(_)
+            )
+            .then(|| materialized.own_members().cloned().collect())
+        }
+        _ => None,
+    }
 }
 
 /// Trait for implementing type resolution.
@@ -933,52 +934,23 @@ impl Resolvable for TypeReference {
                             let params = self.resolved_params(resolver);
                             let inner_ref = &params[0];
                             let is_partial = qualifier.is_partial();
-                            // Collect members while borrowing resolver immutably,
-                            // then modify them afterwards to avoid borrow conflicts.
-                            let collected: Option<Vec<(TypeMember, bool)>> =
-                                resolver.resolve_and_get(inner_ref).map(|resolved| {
-                                    resolved
-                                        .as_raw_data()
-                                        .own_members()
-                                        .map(|member| {
-                                            let was_optional = member.is_optional();
-                                            let kind = keyed_member_kind_with_resolved_reference(
-                                                resolved,
-                                                &member.kind,
-                                            )
-                                            .unwrap_or_else(|| {
-                                                if is_partial {
-                                                    member.kind.clone().with_optional()
-                                                } else {
-                                                    member.kind.clone().without_optional()
-                                                }
-                                            });
-                                            (
-                                                TypeMember {
-                                                    kind,
-                                                    ty: resolved
-                                                        .apply_module_id_to_reference(&member.ty)
-                                                        .into_owned(),
-                                                },
-                                                was_optional,
-                                            )
-                                        })
-                                        .collect()
-                                });
-                            if let Some(collected_members) = collected {
-                                let members: Vec<TypeMember> = collected_members
-                                    .into_iter()
-                                    .map(|(mut member, was_optional)| {
-                                        if is_partial && !was_optional {
-                                            let optional_type_id =
-                                                resolver.optional(member.ty.clone());
-                                            member.ty = resolver.reference_to_id(optional_type_id);
-                                        } else if !is_partial && was_optional {
-                                            strip_undefined_from_member(resolver, &mut member);
-                                        }
-                                        member
-                                    })
-                                    .collect();
+                            if let Some(mut members) =
+                                collect_mapped_type_members(resolver, inner_ref)
+                            {
+                                for member in &mut members {
+                                    let was_optional = member.is_optional();
+                                    member.kind = if is_partial {
+                                        member.kind.clone().with_optional()
+                                    } else {
+                                        member.kind.clone().without_optional()
+                                    };
+                                    if is_partial && !was_optional {
+                                        let optional_type_id = resolver.optional(member.ty.clone());
+                                        member.ty = resolver.reference_to_id(optional_type_id);
+                                    } else if !is_partial && was_optional {
+                                        strip_undefined_from_member(resolver, member);
+                                    }
+                                }
                                 let resolved_id: ResolvedTypeId = resolver.register_and_resolve(
                                     TypeData::Object(Box::new(Object {
                                         prototype: None,
@@ -998,27 +970,12 @@ impl Resolvable for TypeReference {
                         } else if qualifier.is_readonly() && qualifier.type_parameters.len() == 1 {
                             let params = self.resolved_params(resolver);
                             let inner_ref = &params[0];
-                            let collected: Option<Vec<TypeMember>> =
-                                resolver.resolve_and_get(inner_ref).map(|resolved| {
-                                    resolved
-                                        .as_raw_data()
-                                        .own_members()
-                                        .map(|member| {
-                                            let kind = keyed_member_kind_with_resolved_reference(
-                                                resolved,
-                                                &member.kind,
-                                            )
-                                            .unwrap_or_else(|| member.kind.clone());
-                                            TypeMember {
-                                                kind,
-                                                ty: resolved
-                                                    .apply_module_id_to_reference(&member.ty)
-                                                    .into_owned(),
-                                            }
-                                        })
-                                        .collect()
-                                });
-                            if let Some(members) = collected {
+                            if let Some(mut members) =
+                                collect_mapped_type_members(resolver, inner_ref)
+                            {
+                                for member in &mut members {
+                                    member.kind = member.kind.clone().with_readonly();
+                                }
                                 let resolved_id: ResolvedTypeId = resolver.register_and_resolve(
                                     TypeData::Object(Box::new(Object {
                                         prototype: None,
@@ -1168,19 +1125,16 @@ fn strip_undefined_from_member(resolver: &mut dyn TypeResolver, member: &mut Typ
     let Some(resolved) = resolver.resolve_and_get(&member.ty) else {
         return;
     };
-    let TypeData::Union(union) = resolved.as_raw_data() else {
+    let TypeData::Union(union) = resolved.to_data() else {
         return;
     };
-    let filtered: Vec<_> = union
-        .0
-        .iter()
-        .filter(|v| **v != TypeReference::from(GLOBAL_UNDEFINED_ID))
-        .cloned()
-        .collect();
-    if filtered.len() == 1 {
-        member.ty = filtered[0].clone();
-    } else if filtered.len() < union.0.len() {
-        let id = resolver.register_and_resolve(TypeData::Union(Box::new(Union(filtered.into()))));
+    let original_variant_count = union.0.len();
+    let mut variants = union.0.into_vec();
+    variants.retain(|variant| *variant != TypeReference::from(GLOBAL_UNDEFINED_ID));
+    if variants.len() == 1 {
+        member.ty = variants.remove(0);
+    } else if variants.len() < original_variant_count {
+        let id = resolver.register_and_resolve(TypeData::Union(Box::new(Union(variants.into()))));
         member.ty = TypeReference::from(id);
     }
 }

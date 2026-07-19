@@ -1,7 +1,5 @@
 use crate::TypeDb;
-use crate::interned_types::{
-    ConditionalType, Literal, ReturnType, TypeData, TypeMember, TypeMemberKind,
-};
+use crate::interned_types::{ConditionalType, Literal, ReturnType, TypeData, TypeMember};
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
 
@@ -1260,12 +1258,10 @@ fn push_object_pairs<'db>(
         return false;
     }
 
-    if let Some(index_signature) = annotated_members.iter().find(|member| {
-        matches!(
-            member.kind,
-            TypeMemberKind::IndexSignature(_) | TypeMemberKind::ConstAssertedIndexSignature(_)
-        )
-    }) {
+    if let Some(index_signature) = annotated_members
+        .iter()
+        .find(|member| member.kind.index_signature_type().is_some())
+    {
         stack.extend(
             inferred_members
                 .iter()
