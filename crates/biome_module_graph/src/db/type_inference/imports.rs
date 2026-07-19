@@ -75,7 +75,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         let Some(imported_types) = self.import_types.get(&qualifier.resolved_path) else {
             return infer_module_types(self.db, module)
                 .map_or(InferredTypeData::Unknown, |types| {
-                    self.resolve_import_symbol(module, &types, &qualifier.symbol)
+                    self.resolve_import_symbol(module, types, &qualifier.symbol)
                 });
         };
 
@@ -106,7 +106,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         self.module_for_resolved_path(&import.resolved_path)
             .and_then(|module| {
                 infer_module_types(self.db, module)
-                    .map(|types| self.resolve_import_symbol(module, &types, &import.symbol))
+                    .map(|types| self.resolve_import_symbol(module, types, &import.symbol))
             })
             .unwrap_or(InferredTypeData::Unknown)
     }
@@ -240,7 +240,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 continue;
             };
 
-            match self.resolve_export_name_in_module(module, &inferred_types, &name, &mut stack) {
+            match self.resolve_export_name_in_module(module, inferred_types, &name, &mut stack) {
                 ExportResolutionStep::Continue => {}
                 ExportResolutionStep::Resolved(candidate) => {
                     if let Some(previous) = &resolved {

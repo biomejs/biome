@@ -29,7 +29,7 @@ pub(in crate::db::type_inference) struct ResolutionCtx<'db, 'a> {
     pub(in crate::db::type_inference) module_key: ModuleKey,
     pub(in crate::db::type_inference) js_info: &'a JsModuleInfo,
     pub(in crate::db::type_inference) import_types:
-        &'a FxHashMap<ResolvedPath, InferredModuleTypes<'db>>,
+        &'a FxHashMap<ResolvedPath, &'db InferredModuleTypes<'db>>,
     pub(in crate::db::type_inference) named_type_ids: FxHashSet<TypeId>,
     pub(in crate::db::type_inference) resolved: FxHashMap<TypeId, InferredTypeData<'db>>,
     pub(in crate::db::type_inference) in_progress: FxHashSet<TypeId>,
@@ -41,7 +41,7 @@ pub(in crate::db) fn resolve_raw_types<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
     js_info: &JsModuleInfo,
-    import_types: &FxHashMap<ResolvedPath, InferredModuleTypes<'db>>,
+    import_types: &FxHashMap<ResolvedPath, &'db InferredModuleTypes<'db>>,
 ) -> InferredModuleTypes<'db> {
     let module_key = ModuleKey::new(module.as_id());
     let named_type_ids = named_type_ids(js_info);
