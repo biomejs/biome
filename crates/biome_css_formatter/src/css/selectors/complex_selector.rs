@@ -71,6 +71,7 @@ impl FormatNodeRule<CssComplexSelector> for FormatCssComplexSelector {
         let combinator = combinator?;
         let right = right?;
         let owns_chain_layout = self.layout == SelectorChainLayout::Auto;
+        let is_left_preceded_by_comment = is_left_selector_preceded_by_comment(&left);
         let comments = f.comments().clone();
         let layout = self.layout.resolve(node, &comments)?;
         let boundary = SelectorBoundary::new(
@@ -79,7 +80,7 @@ impl FormatNodeRule<CssComplexSelector> for FormatCssComplexSelector {
             comments.dangling_comments(node.syntax()),
         );
         let fixed_separator = layout == SelectorChainLayout::Flat
-            || is_fixed_selector_separator_required(node, &left);
+            || (!is_selector_list_first_child(node) && is_left_preceded_by_comment);
         let selector_separator = format_once(|f| boundary.fmt_before(fixed_separator, f));
         let formatted_combinator = format_once(|f| {
             // A descendant combinator only requires some whitespace. Removing
@@ -104,7 +105,8 @@ impl FormatNodeRule<CssComplexSelector> for FormatCssComplexSelector {
             )
         });
 
-        if owns_chain_layout && layout == SelectorChainLayout::Flat {
+        if owns_chain_layout && layout == SelectorChainLayout::Flat && !is_left_preceded_by_comment
+        {
             // `CssSelectorList` adds one indent around a complex selector. Hard
             // boundary breaks should align with that selector, so remove the
             // list-only indent once rather than at every recursive child.
@@ -238,12 +240,6 @@ fn format_selector(
     })
 }
 
-/// Returns whether an existing leading-comment break must replace the optional
-/// break before this selector.
-fn is_fixed_selector_separator_required(node: &CssComplexSelector, left: &AnyCssSelector) -> bool {
-    !is_selector_list_first_child(node) && is_left_selector_preceded_by_comment(left)
-}
-
 /// Returns whether this chain is the first selector-list entry.
 fn is_selector_list_first_child(node: &CssComplexSelector) -> bool {
     node.syntax().parent().is_some_and(|parent| {
@@ -252,7 +248,7 @@ fn is_selector_list_first_child(node: &CssComplexSelector) -> bool {
 }
 
 /// Returns whether the left compound selector starts with an attached comment.
-fn is_left_selector_preceded_by_comment(selector: &AnyCssSelector) -> bool {
+pub(crate) fn is_left_selector_preceded_by_comment(selector: &AnyCssSelector) -> bool {
     let Some(compound_selector) = selector.as_css_compound_selector() else {
         return false;
     };

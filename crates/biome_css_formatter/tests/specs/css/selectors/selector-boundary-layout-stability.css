@@ -20,3 +20,17 @@ comment */{color:green}}
 .parent{.nested-block-comment-gap
 
 /* comment */{color:orange}}
+
+.functional-pseudo:is(.other,
+/* leading */
+.a
+/* boundary */
+>
+.b){color:pink}
+
+.parent{.functional-pseudo:is(.other,
+/* leading */
+.a
+/* boundary */
+>
+.b){color:teal}}
