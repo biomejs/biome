@@ -107,7 +107,7 @@ impl JsExecContext {
         namespace.get(js_string!("default"), ctx)
     }
 
-    pub fn create_js_ast(&mut self, node: JsSyntaxNode) -> JsResult<JsValue> {
+    pub fn create_js_ast(&mut self, node: JsSyntaxNode) -> JsValue {
         JsAstNode::from_node(node, &mut self.ctx)
     }
 

@@ -141,22 +141,6 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
         };
 
         let ast = plugin.ctx.create_js_ast(node);
-        let ast = match ast {
-            Ok(ast) => ast,
-            Err(err) => {
-                return PluginEvalResult {
-                    entries: vec![PluginDiagnosticEntry {
-                        diagnostic: RuleDiagnostic::new(
-                            category!("plugin"),
-                            None::<TextRange>,
-                            markup!("Could not pass the AST to the plugin: "<Error>{err.to_string()}</Error>),
-                        ),
-                        action: None,
-                    }],
-                };
-            }
-        };
-
         let diagnostics = plugin
             .ctx
             .call_function(

@@ -39,7 +39,7 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
                         quote! { node.#method_name().ok() }
                     };
 
-                    quote! { Ok(Self::wrap_token(#value)) }
+                    quote! { Self::wrap_token(#value) }
                 }
                 Field::Node {
                     ty, optional: _, ..

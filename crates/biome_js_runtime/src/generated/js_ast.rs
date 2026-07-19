@@ -16,9 +16,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_ACCESSOR_MODIFIER,
                     JsAccessorModifier,
-                    ("modifierToken", |node, context| Ok(Self::wrap_token(
+                    ("modifierToken", |node, context| Self::wrap_token(
                         node.modifier_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN => {
@@ -26,16 +26,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN,
                     JsArrayAssignmentPattern,
-                    ("lBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("lBrackToken", |node, context| Self::wrap_token(
                         node.l_brack_token().ok()
-                    ))),
+                    )),
                     ("elements", |node, context| Self::wrap_node_list(
                         node.elements().into_iter().flatten(),
                         context
                     )),
-                    ("rBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("rBrackToken", |node, context| Self::wrap_token(
                         node.r_brack_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT => {
@@ -58,9 +58,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN_REST_ELEMENT,
                     JsArrayAssignmentPatternRestElement,
-                    ("dotdotdotToken", |node, context| Ok(Self::wrap_token(
+                    ("dotdotdotToken", |node, context| Self::wrap_token(
                         node.dotdotdot_token().ok()
-                    ))),
+                    )),
                     ("pattern", |node, context| Self::wrap_optional_node(
                         node.pattern().ok(),
                         context
@@ -72,16 +72,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_ARRAY_BINDING_PATTERN,
                     JsArrayBindingPattern,
-                    ("lBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("lBrackToken", |node, context| Self::wrap_token(
                         node.l_brack_token().ok()
-                    ))),
+                    )),
                     ("elements", |node, context| Self::wrap_node_list(
                         node.elements().into_iter().flatten(),
                         context
                     )),
-                    ("rBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("rBrackToken", |node, context| Self::wrap_token(
                         node.r_brack_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT => {
@@ -104,9 +104,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_REST_ELEMENT,
                     JsArrayBindingPatternRestElement,
-                    ("dotdotdotToken", |node, context| Ok(Self::wrap_token(
+                    ("dotdotdotToken", |node, context| Self::wrap_token(
                         node.dotdotdot_token().ok()
-                    ))),
+                    )),
                     ("pattern", |node, context| Self::wrap_optional_node(
                         node.pattern().ok(),
                         context
@@ -118,16 +118,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_ARRAY_EXPRESSION,
                     JsArrayExpression,
-                    ("lBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("lBrackToken", |node, context| Self::wrap_token(
                         node.l_brack_token().ok()
-                    ))),
+                    )),
                     ("elements", |node, context| Self::wrap_node_list(
                         node.elements().into_iter().flatten(),
                         context
                     )),
-                    ("rBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("rBrackToken", |node, context| Self::wrap_token(
                         node.r_brack_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_ARRAY_HOLE => {
@@ -138,9 +138,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION,
                     JsArrowFunctionExpression,
-                    ("asyncToken", |node, context| Ok(Self::wrap_token(
+                    ("asyncToken", |node, context| Self::wrap_token(
                         node.async_token()
-                    ))),
+                    )),
                     ("typeParameters", |node, context| Self::wrap_optional_node(
                         node.type_parameters(),
                         context
@@ -152,9 +152,9 @@ impl JsAstNode {
                     ("returnTypeAnnotation", |node, context| {
                         Self::wrap_optional_node(node.return_type_annotation(), context)
                     }),
-                    ("fatArrowToken", |node, context| Ok(Self::wrap_token(
+                    ("fatArrowToken", |node, context| Self::wrap_token(
                         node.fat_arrow_token().ok()
-                    ))),
+                    )),
                     ("body", |node, context| Self::wrap_optional_node(
                         node.body().ok(),
                         context
@@ -170,9 +170,9 @@ impl JsAstNode {
                         node.left().ok(),
                         context
                     )),
-                    ("operatorToken", |node, context| Ok(Self::wrap_token(
+                    ("operatorToken", |node, context| Self::wrap_token(
                         node.operator_token().ok()
-                    ))),
+                    )),
                     ("right", |node, context| Self::wrap_optional_node(
                         node.right().ok(),
                         context
@@ -184,9 +184,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_AWAIT_EXPRESSION,
                     JsAwaitExpression,
-                    ("awaitToken", |node, context| Ok(Self::wrap_token(
+                    ("awaitToken", |node, context| Self::wrap_token(
                         node.await_token().ok()
-                    ))),
+                    )),
                     ("argument", |node, context| Self::wrap_optional_node(
                         node.argument().ok(),
                         context
@@ -198,9 +198,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_BIGINT_LITERAL_EXPRESSION,
                     JsBigintLiteralExpression,
-                    ("valueToken", |node, context| Ok(Self::wrap_token(
+                    ("valueToken", |node, context| Self::wrap_token(
                         node.value_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_BINARY_EXPRESSION => {
@@ -212,9 +212,9 @@ impl JsAstNode {
                         node.left().ok(),
                         context
                     )),
-                    ("operatorToken", |node, context| Ok(Self::wrap_token(
+                    ("operatorToken", |node, context| Self::wrap_token(
                         node.operator_token().ok()
-                    ))),
+                    )),
                     ("right", |node, context| Self::wrap_optional_node(
                         node.right().ok(),
                         context
@@ -226,16 +226,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_BLOCK_STATEMENT,
                     JsBlockStatement,
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("statements", |node, context| Self::wrap_node_list(
                         node.statements(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_BOOLEAN_LITERAL_EXPRESSION => {
@@ -243,9 +243,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_BOOLEAN_LITERAL_EXPRESSION,
                     JsBooleanLiteralExpression,
-                    ("valueToken", |node, context| Ok(Self::wrap_token(
+                    ("valueToken", |node, context| Self::wrap_token(
                         node.value_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_BREAK_STATEMENT => {
@@ -253,16 +253,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_BREAK_STATEMENT,
                     JsBreakStatement,
-                    ("breakToken", |node, context| Ok(Self::wrap_token(
+                    ("breakToken", |node, context| Self::wrap_token(
                         node.break_token().ok()
-                    ))),
+                    )),
                     ("label", |node, context| Self::wrap_optional_node(
                         node.label(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_CALL_ARGUMENTS => {
@@ -270,16 +270,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_CALL_ARGUMENTS,
                     JsCallArguments,
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("args", |node, context| Self::wrap_node_list(
                         node.args().into_iter().flatten(),
                         context
                     )),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_CALL_EXPRESSION => {
@@ -291,9 +291,9 @@ impl JsAstNode {
                         node.callee().ok(),
                         context
                     )),
-                    ("optionalChainToken", |node, context| Ok(Self::wrap_token(
+                    ("optionalChainToken", |node, context| Self::wrap_token(
                         node.optional_chain_token()
-                    ))),
+                    )),
                     ("typeArguments", |node, context| Self::wrap_optional_node(
                         node.type_arguments(),
                         context
@@ -309,16 +309,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_CASE_CLAUSE,
                     JsCaseClause,
-                    ("caseToken", |node, context| Ok(Self::wrap_token(
+                    ("caseToken", |node, context| Self::wrap_token(
                         node.case_token().ok()
-                    ))),
+                    )),
                     ("test", |node, context| Self::wrap_optional_node(
                         node.test().ok(),
                         context
                     )),
-                    ("colonToken", |node, context| Ok(Self::wrap_token(
+                    ("colonToken", |node, context| Self::wrap_token(
                         node.colon_token().ok()
-                    ))),
+                    )),
                     ("consequent", |node, context| Self::wrap_node_list(
                         node.consequent(),
                         context
@@ -330,9 +330,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_CATCH_CLAUSE,
                     JsCatchClause,
-                    ("catchToken", |node, context| Ok(Self::wrap_token(
+                    ("catchToken", |node, context| Self::wrap_token(
                         node.catch_token().ok()
-                    ))),
+                    )),
                     ("declaration", |node, context| Self::wrap_optional_node(
                         node.declaration(),
                         context
@@ -348,9 +348,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_CATCH_DECLARATION,
                     JsCatchDeclaration,
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("binding", |node, context| Self::wrap_optional_node(
                         node.binding().ok(),
                         context
@@ -359,9 +359,9 @@ impl JsAstNode {
                         node.type_annotation(),
                         context
                     )),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_CLASS_DECLARATION => {
@@ -373,12 +373,12 @@ impl JsAstNode {
                         node.decorators(),
                         context
                     )),
-                    ("abstractToken", |node, context| Ok(Self::wrap_token(
+                    ("abstractToken", |node, context| Self::wrap_token(
                         node.abstract_token()
-                    ))),
-                    ("classToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("classToken", |node, context| Self::wrap_token(
                         node.class_token().ok()
-                    ))),
+                    )),
                     ("id", |node, context| Self::wrap_optional_node(
                         node.id().ok(),
                         context
@@ -395,16 +395,16 @@ impl JsAstNode {
                         "implementsClause",
                         |node, context| Self::wrap_optional_node(node.implements_clause(), context)
                     ),
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("members", |node, context| Self::wrap_node_list(
                         node.members(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_CLASS_EXPORT_DEFAULT_DECLARATION => {
@@ -416,12 +416,12 @@ impl JsAstNode {
                         node.decorators(),
                         context
                     )),
-                    ("abstractToken", |node, context| Ok(Self::wrap_token(
+                    ("abstractToken", |node, context| Self::wrap_token(
                         node.abstract_token()
-                    ))),
-                    ("classToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("classToken", |node, context| Self::wrap_token(
                         node.class_token().ok()
-                    ))),
+                    )),
                     ("id", |node, context| Self::wrap_optional_node(
                         node.id(),
                         context
@@ -438,16 +438,16 @@ impl JsAstNode {
                         "implementsClause",
                         |node, context| Self::wrap_optional_node(node.implements_clause(), context)
                     ),
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("members", |node, context| Self::wrap_node_list(
                         node.members(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_CLASS_EXPRESSION => {
@@ -459,9 +459,9 @@ impl JsAstNode {
                         node.decorators(),
                         context
                     )),
-                    ("classToken", |node, context| Ok(Self::wrap_token(
+                    ("classToken", |node, context| Self::wrap_token(
                         node.class_token().ok()
-                    ))),
+                    )),
                     ("id", |node, context| Self::wrap_optional_node(
                         node.id(),
                         context
@@ -478,16 +478,16 @@ impl JsAstNode {
                         "implementsClause",
                         |node, context| Self::wrap_optional_node(node.implements_clause(), context)
                     ),
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("members", |node, context| Self::wrap_node_list(
                         node.members(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT => {
@@ -499,16 +499,16 @@ impl JsAstNode {
                         node.object().ok(),
                         context
                     )),
-                    ("lBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("lBrackToken", |node, context| Self::wrap_token(
                         node.l_brack_token().ok()
-                    ))),
+                    )),
                     ("member", |node, context| Self::wrap_optional_node(
                         node.member().ok(),
                         context
                     )),
-                    ("rBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("rBrackToken", |node, context| Self::wrap_token(
                         node.r_brack_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION => {
@@ -520,19 +520,19 @@ impl JsAstNode {
                         node.object().ok(),
                         context
                     )),
-                    ("optionalChainToken", |node, context| Ok(Self::wrap_token(
+                    ("optionalChainToken", |node, context| Self::wrap_token(
                         node.optional_chain_token()
-                    ))),
-                    ("lBrackToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("lBrackToken", |node, context| Self::wrap_token(
                         node.l_brack_token().ok()
-                    ))),
+                    )),
                     ("member", |node, context| Self::wrap_optional_node(
                         node.member().ok(),
                         context
                     )),
-                    ("rBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("rBrackToken", |node, context| Self::wrap_token(
                         node.r_brack_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_COMPUTED_MEMBER_NAME => {
@@ -540,16 +540,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_COMPUTED_MEMBER_NAME,
                     JsComputedMemberName,
-                    ("lBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("lBrackToken", |node, context| Self::wrap_token(
                         node.l_brack_token().ok()
-                    ))),
+                    )),
                     ("expression", |node, context| Self::wrap_optional_node(
                         node.expression().ok(),
                         context
                     )),
-                    ("rBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("rBrackToken", |node, context| Self::wrap_token(
                         node.r_brack_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => {
@@ -561,16 +561,16 @@ impl JsAstNode {
                         node.test().ok(),
                         context
                     )),
-                    ("questionMarkToken", |node, context| Ok(Self::wrap_token(
+                    ("questionMarkToken", |node, context| Self::wrap_token(
                         node.question_mark_token().ok()
-                    ))),
+                    )),
                     ("consequent", |node, context| Self::wrap_optional_node(
                         node.consequent().ok(),
                         context
                     )),
-                    ("colonToken", |node, context| Ok(Self::wrap_token(
+                    ("colonToken", |node, context| Self::wrap_token(
                         node.colon_token().ok()
-                    ))),
+                    )),
                     ("alternate", |node, context| Self::wrap_optional_node(
                         node.alternate().ok(),
                         context
@@ -605,16 +605,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_CONSTRUCTOR_PARAMETERS,
                     JsConstructorParameters,
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("parameters", |node, context| Self::wrap_node_list(
                         node.parameters().into_iter().flatten(),
                         context
                     )),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_CONTINUE_STATEMENT => {
@@ -622,16 +622,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_CONTINUE_STATEMENT,
                     JsContinueStatement,
-                    ("continueToken", |node, context| Ok(Self::wrap_token(
+                    ("continueToken", |node, context| Self::wrap_token(
                         node.continue_token().ok()
-                    ))),
+                    )),
                     ("label", |node, context| Self::wrap_optional_node(
                         node.label(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_DEBUGGER_STATEMENT => {
@@ -639,12 +639,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_DEBUGGER_STATEMENT,
                     JsDebuggerStatement,
-                    ("debuggerToken", |node, context| Ok(Self::wrap_token(
+                    ("debuggerToken", |node, context| Self::wrap_token(
                         node.debugger_token().ok()
-                    ))),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_DECORATOR => {
@@ -652,9 +652,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_DECORATOR,
                     JsDecorator,
-                    ("atToken", |node, context| Ok(Self::wrap_token(
+                    ("atToken", |node, context| Self::wrap_token(
                         node.at_token().ok()
-                    ))),
+                    )),
                     ("expression", |node, context| Self::wrap_optional_node(
                         node.expression().ok(),
                         context
@@ -666,12 +666,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_DEFAULT_CLAUSE,
                     JsDefaultClause,
-                    ("defaultToken", |node, context| Ok(Self::wrap_token(
+                    ("defaultToken", |node, context| Self::wrap_token(
                         node.default_token().ok()
-                    ))),
-                    ("colonToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("colonToken", |node, context| Self::wrap_token(
                         node.colon_token().ok()
-                    ))),
+                    )),
                     ("consequent", |node, context| Self::wrap_node_list(
                         node.consequent(),
                         context
@@ -694,12 +694,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_DIRECTIVE,
                     JsDirective,
-                    ("valueToken", |node, context| Ok(Self::wrap_token(
+                    ("valueToken", |node, context| Self::wrap_token(
                         node.value_token().ok()
-                    ))),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_DO_WHILE_STATEMENT => {
@@ -707,29 +707,29 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_DO_WHILE_STATEMENT,
                     JsDoWhileStatement,
-                    ("doToken", |node, context| Ok(Self::wrap_token(
+                    ("doToken", |node, context| Self::wrap_token(
                         node.do_token().ok()
-                    ))),
+                    )),
                     ("body", |node, context| Self::wrap_optional_node(
                         node.body().ok(),
                         context
                     )),
-                    ("whileToken", |node, context| Ok(Self::wrap_token(
+                    ("whileToken", |node, context| Self::wrap_token(
                         node.while_token().ok()
-                    ))),
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("test", |node, context| Self::wrap_optional_node(
                         node.test().ok(),
                         context
                     )),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_ELSE_CLAUSE => {
@@ -737,9 +737,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_ELSE_CLAUSE,
                     JsElseClause,
-                    ("elseToken", |node, context| Ok(Self::wrap_token(
+                    ("elseToken", |node, context| Self::wrap_token(
                         node.else_token().ok()
-                    ))),
+                    )),
                     ("alternate", |node, context| Self::wrap_optional_node(
                         node.alternate().ok(),
                         context
@@ -751,9 +751,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_EMPTY_CLASS_MEMBER,
                     JsEmptyClassMember,
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_EMPTY_STATEMENT => {
@@ -761,9 +761,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_EMPTY_STATEMENT,
                     JsEmptyStatement,
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_EXPORT => {
@@ -775,9 +775,9 @@ impl JsAstNode {
                         node.decorators(),
                         context
                     )),
-                    ("exportToken", |node, context| Ok(Self::wrap_token(
+                    ("exportToken", |node, context| Self::wrap_token(
                         node.export_token().ok()
-                    ))),
+                    )),
                     ("exportClause", |node, context| Self::wrap_optional_node(
                         node.export_clause().ok(),
                         context
@@ -789,9 +789,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_EXPORT_AS_CLAUSE,
                     JsExportAsClause,
-                    ("asToken", |node, context| Ok(Self::wrap_token(
+                    ("asToken", |node, context| Self::wrap_token(
                         node.as_token().ok()
-                    ))),
+                    )),
                     ("exportedName", |node, context| Self::wrap_optional_node(
                         node.exported_name().ok(),
                         context
@@ -803,16 +803,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_EXPORT_DEFAULT_DECLARATION_CLAUSE,
                     JsExportDefaultDeclarationClause,
-                    ("defaultToken", |node, context| Ok(Self::wrap_token(
+                    ("defaultToken", |node, context| Self::wrap_token(
                         node.default_token().ok()
-                    ))),
+                    )),
                     ("declaration", |node, context| Self::wrap_optional_node(
                         node.declaration().ok(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE => {
@@ -820,16 +820,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE,
                     JsExportDefaultExpressionClause,
-                    ("defaultToken", |node, context| Ok(Self::wrap_token(
+                    ("defaultToken", |node, context| Self::wrap_token(
                         node.default_token().ok()
-                    ))),
+                    )),
                     ("expression", |node, context| Self::wrap_optional_node(
                         node.expression().ok(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_EXPORT_FROM_CLAUSE => {
@@ -837,19 +837,19 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_EXPORT_FROM_CLAUSE,
                     JsExportFromClause,
-                    ("typeToken", |node, context| Ok(Self::wrap_token(
+                    ("typeToken", |node, context| Self::wrap_token(
                         node.type_token()
-                    ))),
-                    ("starToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("starToken", |node, context| Self::wrap_token(
                         node.star_token().ok()
-                    ))),
+                    )),
                     ("exportAs", |node, context| Self::wrap_optional_node(
                         node.export_as(),
                         context
                     )),
-                    ("fromToken", |node, context| Ok(Self::wrap_token(
+                    ("fromToken", |node, context| Self::wrap_token(
                         node.from_token().ok()
-                    ))),
+                    )),
                     ("source", |node, context| Self::wrap_optional_node(
                         node.source().ok(),
                         context
@@ -858,9 +858,9 @@ impl JsAstNode {
                         node.assertion(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_EXPORT_NAMED_CLAUSE => {
@@ -868,22 +868,22 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_EXPORT_NAMED_CLAUSE,
                     JsExportNamedClause,
-                    ("typeToken", |node, context| Ok(Self::wrap_token(
+                    ("typeToken", |node, context| Self::wrap_token(
                         node.type_token()
-                    ))),
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("specifiers", |node, context| Self::wrap_node_list(
                         node.specifiers().into_iter().flatten(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_EXPORT_NAMED_FROM_CLAUSE => {
@@ -891,22 +891,22 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_EXPORT_NAMED_FROM_CLAUSE,
                     JsExportNamedFromClause,
-                    ("typeToken", |node, context| Ok(Self::wrap_token(
+                    ("typeToken", |node, context| Self::wrap_token(
                         node.type_token()
-                    ))),
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("specifiers", |node, context| Self::wrap_node_list(
                         node.specifiers().into_iter().flatten(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
-                    ("fromToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("fromToken", |node, context| Self::wrap_token(
                         node.from_token().ok()
-                    ))),
+                    )),
                     ("source", |node, context| Self::wrap_optional_node(
                         node.source().ok(),
                         context
@@ -915,9 +915,9 @@ impl JsAstNode {
                         node.assertion(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_EXPORT_NAMED_FROM_SPECIFIER => {
@@ -925,9 +925,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_EXPORT_NAMED_FROM_SPECIFIER,
                     JsExportNamedFromSpecifier,
-                    ("typeToken", |node, context| Ok(Self::wrap_token(
+                    ("typeToken", |node, context| Self::wrap_token(
                         node.type_token()
-                    ))),
+                    )),
                     ("sourceName", |node, context| Self::wrap_optional_node(
                         node.source_name().ok(),
                         context
@@ -943,9 +943,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_EXPORT_NAMED_SHORTHAND_SPECIFIER,
                     JsExportNamedShorthandSpecifier,
-                    ("typeToken", |node, context| Ok(Self::wrap_token(
+                    ("typeToken", |node, context| Self::wrap_token(
                         node.type_token()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
@@ -957,16 +957,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_EXPORT_NAMED_SPECIFIER,
                     JsExportNamedSpecifier,
-                    ("typeToken", |node, context| Ok(Self::wrap_token(
+                    ("typeToken", |node, context| Self::wrap_token(
                         node.type_token()
-                    ))),
+                    )),
                     ("localName", |node, context| Self::wrap_optional_node(
                         node.local_name().ok(),
                         context
                     )),
-                    ("asToken", |node, context| Ok(Self::wrap_token(
+                    ("asToken", |node, context| Self::wrap_token(
                         node.as_token().ok()
-                    ))),
+                    )),
                     ("exportedName", |node, context| Self::wrap_optional_node(
                         node.exported_name().ok(),
                         context
@@ -982,9 +982,9 @@ impl JsAstNode {
                         node.expression().ok(),
                         context
                     )),
-                    ("eofToken", |node, context| Ok(Self::wrap_token(
+                    ("eofToken", |node, context| Self::wrap_token(
                         node.eof_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_EXPRESSION_STATEMENT => {
@@ -996,9 +996,9 @@ impl JsAstNode {
                         node.expression().ok(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_EXPRESSION_TEMPLATE_ROOT => {
@@ -1010,9 +1010,9 @@ impl JsAstNode {
                         node.expression().ok(),
                         context
                     )),
-                    ("eofToken", |node, context| Ok(Self::wrap_token(
+                    ("eofToken", |node, context| Self::wrap_token(
                         node.eof_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_EXTENDS_CLAUSE => {
@@ -1020,9 +1020,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_EXTENDS_CLAUSE,
                     JsExtendsClause,
-                    ("extendsToken", |node, context| Ok(Self::wrap_token(
+                    ("extendsToken", |node, context| Self::wrap_token(
                         node.extends_token().ok()
-                    ))),
+                    )),
                     ("superClass", |node, context| Self::wrap_optional_node(
                         node.super_class().ok(),
                         context
@@ -1038,9 +1038,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_FINALLY_CLAUSE,
                     JsFinallyClause,
-                    ("finallyToken", |node, context| Ok(Self::wrap_token(
+                    ("finallyToken", |node, context| Self::wrap_token(
                         node.finally_token().ok()
-                    ))),
+                    )),
                     ("body", |node, context| Self::wrap_optional_node(
                         node.body().ok(),
                         context
@@ -1052,26 +1052,26 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_FOR_IN_STATEMENT,
                     JsForInStatement,
-                    ("forToken", |node, context| Ok(Self::wrap_token(
+                    ("forToken", |node, context| Self::wrap_token(
                         node.for_token().ok()
-                    ))),
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("initializer", |node, context| Self::wrap_optional_node(
                         node.initializer().ok(),
                         context
                     )),
-                    ("inToken", |node, context| Ok(Self::wrap_token(
+                    ("inToken", |node, context| Self::wrap_token(
                         node.in_token().ok()
-                    ))),
+                    )),
                     ("expression", |node, context| Self::wrap_optional_node(
                         node.expression().ok(),
                         context
                     )),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                     ("body", |node, context| Self::wrap_optional_node(
                         node.body().ok(),
                         context
@@ -1083,29 +1083,29 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_FOR_OF_STATEMENT,
                     JsForOfStatement,
-                    ("forToken", |node, context| Ok(Self::wrap_token(
+                    ("forToken", |node, context| Self::wrap_token(
                         node.for_token().ok()
-                    ))),
-                    ("awaitToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("awaitToken", |node, context| Self::wrap_token(
                         node.await_token()
-                    ))),
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("initializer", |node, context| Self::wrap_optional_node(
                         node.initializer().ok(),
                         context
                     )),
-                    ("ofToken", |node, context| Ok(Self::wrap_token(
+                    ("ofToken", |node, context| Self::wrap_token(
                         node.of_token().ok()
-                    ))),
+                    )),
                     ("expression", |node, context| Self::wrap_optional_node(
                         node.expression().ok(),
                         context
                     )),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                     ("body", |node, context| Self::wrap_optional_node(
                         node.body().ok(),
                         context
@@ -1117,33 +1117,33 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_FOR_STATEMENT,
                     JsForStatement,
-                    ("forToken", |node, context| Ok(Self::wrap_token(
+                    ("forToken", |node, context| Self::wrap_token(
                         node.for_token().ok()
-                    ))),
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("initializer", |node, context| Self::wrap_optional_node(
                         node.initializer(),
                         context
                     )),
-                    ("firstSemiToken", |node, context| Ok(Self::wrap_token(
+                    ("firstSemiToken", |node, context| Self::wrap_token(
                         node.first_semi_token().ok()
-                    ))),
+                    )),
                     ("test", |node, context| Self::wrap_optional_node(
                         node.test(),
                         context
                     )),
-                    ("secondSemiToken", |node, context| Ok(Self::wrap_token(
+                    ("secondSemiToken", |node, context| Self::wrap_token(
                         node.second_semi_token().ok()
-                    ))),
+                    )),
                     ("update", |node, context| Self::wrap_optional_node(
                         node.update(),
                         context
                     )),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                     ("body", |node, context| Self::wrap_optional_node(
                         node.body().ok(),
                         context
@@ -1155,12 +1155,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_FOR_VARIABLE_DECLARATION,
                     JsForVariableDeclaration,
-                    ("awaitToken", |node, context| Ok(Self::wrap_token(
+                    ("awaitToken", |node, context| Self::wrap_token(
                         node.await_token()
-                    ))),
-                    ("kindToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("kindToken", |node, context| Self::wrap_token(
                         node.kind_token().ok()
-                    ))),
+                    )),
                     ("declarator", |node, context| Self::wrap_optional_node(
                         node.declarator().ok(),
                         context
@@ -1180,9 +1180,9 @@ impl JsAstNode {
                         node.binding().ok(),
                         context
                     )),
-                    ("questionMarkToken", |node, context| Ok(Self::wrap_token(
+                    ("questionMarkToken", |node, context| Self::wrap_token(
                         node.question_mark_token()
-                    ))),
+                    )),
                     ("typeAnnotation", |node, context| Self::wrap_optional_node(
                         node.type_annotation(),
                         context
@@ -1198,9 +1198,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_FUNCTION_BODY,
                     JsFunctionBody,
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("directives", |node, context| Self::wrap_node_list(
                         node.directives(),
                         context
@@ -1209,9 +1209,9 @@ impl JsAstNode {
                         node.statements(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_FUNCTION_DECLARATION => {
@@ -1219,15 +1219,15 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_FUNCTION_DECLARATION,
                     JsFunctionDeclaration,
-                    ("asyncToken", |node, context| Ok(Self::wrap_token(
+                    ("asyncToken", |node, context| Self::wrap_token(
                         node.async_token()
-                    ))),
-                    ("functionToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("functionToken", |node, context| Self::wrap_token(
                         node.function_token().ok()
-                    ))),
-                    ("starToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("starToken", |node, context| Self::wrap_token(
                         node.star_token()
-                    ))),
+                    )),
                     ("id", |node, context| Self::wrap_optional_node(
                         node.id().ok(),
                         context
@@ -1254,15 +1254,15 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_FUNCTION_EXPORT_DEFAULT_DECLARATION,
                     JsFunctionExportDefaultDeclaration,
-                    ("asyncToken", |node, context| Ok(Self::wrap_token(
+                    ("asyncToken", |node, context| Self::wrap_token(
                         node.async_token()
-                    ))),
-                    ("functionToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("functionToken", |node, context| Self::wrap_token(
                         node.function_token().ok()
-                    ))),
-                    ("starToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("starToken", |node, context| Self::wrap_token(
                         node.star_token()
-                    ))),
+                    )),
                     ("id", |node, context| Self::wrap_optional_node(
                         node.id(),
                         context
@@ -1289,15 +1289,15 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_FUNCTION_EXPRESSION,
                     JsFunctionExpression,
-                    ("asyncToken", |node, context| Ok(Self::wrap_token(
+                    ("asyncToken", |node, context| Self::wrap_token(
                         node.async_token()
-                    ))),
-                    ("functionToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("functionToken", |node, context| Self::wrap_token(
                         node.function_token().ok()
-                    ))),
-                    ("starToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("starToken", |node, context| Self::wrap_token(
                         node.star_token()
-                    ))),
+                    )),
                     ("id", |node, context| Self::wrap_optional_node(
                         node.id(),
                         context
@@ -1328,19 +1328,19 @@ impl JsAstNode {
                         node.modifiers(),
                         context
                     )),
-                    ("getToken", |node, context| Ok(Self::wrap_token(
+                    ("getToken", |node, context| Self::wrap_token(
                         node.get_token().ok()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
                     )),
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                     ("returnType", |node, context| Self::wrap_optional_node(
                         node.return_type(),
                         context
@@ -1356,19 +1356,19 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_GETTER_OBJECT_MEMBER,
                     JsGetterObjectMember,
-                    ("getToken", |node, context| Ok(Self::wrap_token(
+                    ("getToken", |node, context| Self::wrap_token(
                         node.get_token().ok()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
                     )),
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                     ("returnType", |node, context| Self::wrap_optional_node(
                         node.return_type(),
                         context
@@ -1384,9 +1384,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT,
                     JsIdentifierAssignment,
-                    ("nameToken", |node, context| Ok(Self::wrap_token(
+                    ("nameToken", |node, context| Self::wrap_token(
                         node.name_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_IDENTIFIER_BINDING => {
@@ -1394,9 +1394,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_IDENTIFIER_BINDING,
                     JsIdentifierBinding,
-                    ("nameToken", |node, context| Ok(Self::wrap_token(
+                    ("nameToken", |node, context| Self::wrap_token(
                         node.name_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_IDENTIFIER_EXPRESSION => {
@@ -1415,19 +1415,19 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_IF_STATEMENT,
                     JsIfStatement,
-                    ("ifToken", |node, context| Ok(Self::wrap_token(
+                    ("ifToken", |node, context| Self::wrap_token(
                         node.if_token().ok()
-                    ))),
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("test", |node, context| Self::wrap_optional_node(
                         node.test().ok(),
                         context
                     )),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                     ("consequent", |node, context| Self::wrap_optional_node(
                         node.consequent().ok(),
                         context
@@ -1443,16 +1443,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_IMPORT,
                     JsImport,
-                    ("importToken", |node, context| Ok(Self::wrap_token(
+                    ("importToken", |node, context| Self::wrap_token(
                         node.import_token().ok()
-                    ))),
+                    )),
                     ("importClause", |node, context| Self::wrap_optional_node(
                         node.import_clause().ok(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_IMPORT_ASSERTION => {
@@ -1460,19 +1460,19 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_IMPORT_ASSERTION,
                     JsImportAssertion,
-                    ("withToken", |node, context| Ok(Self::wrap_token(
+                    ("withToken", |node, context| Self::wrap_token(
                         node.with_token().ok()
-                    ))),
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("assertions", |node, context| Self::wrap_node_list(
                         node.assertions().into_iter().flatten(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_IMPORT_ASSERTION_ENTRY => {
@@ -1480,13 +1480,13 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_IMPORT_ASSERTION_ENTRY,
                     JsImportAssertionEntry,
-                    ("key", |node, context| Ok(Self::wrap_token(node.key().ok()))),
-                    ("colonToken", |node, context| Ok(Self::wrap_token(
+                    ("key", |node, context| Self::wrap_token(node.key().ok())),
+                    ("colonToken", |node, context| Self::wrap_token(
                         node.colon_token().ok()
-                    ))),
-                    ("valueToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("valueToken", |node, context| Self::wrap_token(
                         node.value_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_IMPORT_BARE_CLAUSE => {
@@ -1509,13 +1509,13 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_IMPORT_CALL_EXPRESSION,
                     JsImportCallExpression,
-                    ("importToken", |node, context| Ok(Self::wrap_token(
+                    ("importToken", |node, context| Self::wrap_token(
                         node.import_token().ok()
-                    ))),
-                    ("dotToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("dotToken", |node, context| Self::wrap_token(
                         node.dot_token()
-                    ))),
-                    ("phase", |node, context| Ok(Self::wrap_token(node.phase()))),
+                    )),
+                    ("phase", |node, context| Self::wrap_token(node.phase())),
                     ("arguments", |node, context| Self::wrap_optional_node(
                         node.arguments().ok(),
                         context
@@ -1534,16 +1534,16 @@ impl JsAstNode {
                             context
                         )
                     ),
-                    ("commaToken", |node, context| Ok(Self::wrap_token(
+                    ("commaToken", |node, context| Self::wrap_token(
                         node.comma_token().ok()
-                    ))),
+                    )),
                     ("specifier", |node, context| Self::wrap_optional_node(
                         node.specifier().ok(),
                         context
                     )),
-                    ("fromToken", |node, context| Ok(Self::wrap_token(
+                    ("fromToken", |node, context| Self::wrap_token(
                         node.from_token().ok()
-                    ))),
+                    )),
                     ("source", |node, context| Self::wrap_optional_node(
                         node.source().ok(),
                         context
@@ -1559,12 +1559,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_IMPORT_DEFAULT_CLAUSE,
                     JsImportDefaultClause,
-                    ("typeToken", |node, context| Ok(Self::wrap_token(
+                    ("typeToken", |node, context| Self::wrap_token(
                         node.type_token()
-                    ))),
-                    ("phaseToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("phaseToken", |node, context| Self::wrap_token(
                         node.phase_token()
-                    ))),
+                    )),
                     (
                         "defaultSpecifier",
                         |node, context| Self::wrap_optional_node(
@@ -1572,9 +1572,9 @@ impl JsAstNode {
                             context
                         )
                     ),
-                    ("fromToken", |node, context| Ok(Self::wrap_token(
+                    ("fromToken", |node, context| Self::wrap_token(
                         node.from_token().ok()
-                    ))),
+                    )),
                     ("source", |node, context| Self::wrap_optional_node(
                         node.source().ok(),
                         context
@@ -1590,15 +1590,15 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_IMPORT_META_EXPRESSION,
                     JsImportMetaExpression,
-                    ("importToken", |node, context| Ok(Self::wrap_token(
+                    ("importToken", |node, context| Self::wrap_token(
                         node.import_token().ok()
-                    ))),
-                    ("dotToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("dotToken", |node, context| Self::wrap_token(
                         node.dot_token().ok()
-                    ))),
-                    ("metaToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("metaToken", |node, context| Self::wrap_token(
                         node.meta_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_IMPORT_NAMED_CLAUSE => {
@@ -1606,16 +1606,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_IMPORT_NAMED_CLAUSE,
                     JsImportNamedClause,
-                    ("typeToken", |node, context| Ok(Self::wrap_token(
+                    ("typeToken", |node, context| Self::wrap_token(
                         node.type_token()
-                    ))),
+                    )),
                     ("namedSpecifiers", |node, context| Self::wrap_optional_node(
                         node.named_specifiers().ok(),
                         context
                     )),
-                    ("fromToken", |node, context| Ok(Self::wrap_token(
+                    ("fromToken", |node, context| Self::wrap_token(
                         node.from_token().ok()
-                    ))),
+                    )),
                     ("source", |node, context| Self::wrap_optional_node(
                         node.source().ok(),
                         context
@@ -1631,18 +1631,18 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_IMPORT_NAMESPACE_CLAUSE,
                     JsImportNamespaceClause,
-                    ("typeToken", |node, context| Ok(Self::wrap_token(
+                    ("typeToken", |node, context| Self::wrap_token(
                         node.type_token()
-                    ))),
-                    ("phaseToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("phaseToken", |node, context| Self::wrap_token(
                         node.phase_token()
-                    ))),
+                    )),
                     ("namespaceSpecifier", |node, context| {
                         Self::wrap_optional_node(node.namespace_specifier().ok(), context)
                     }),
-                    ("fromToken", |node, context| Ok(Self::wrap_token(
+                    ("fromToken", |node, context| Self::wrap_token(
                         node.from_token().ok()
-                    ))),
+                    )),
                     ("source", |node, context| Self::wrap_optional_node(
                         node.source().ok(),
                         context
@@ -1662,9 +1662,9 @@ impl JsAstNode {
                         node.property().ok(),
                         context
                     )),
-                    ("inToken", |node, context| Ok(Self::wrap_token(
+                    ("inToken", |node, context| Self::wrap_token(
                         node.in_token().ok()
-                    ))),
+                    )),
                     ("object", |node, context| Self::wrap_optional_node(
                         node.object().ok(),
                         context
@@ -1676,9 +1676,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_INITIALIZER_CLAUSE,
                     JsInitializerClause,
-                    ("eqToken", |node, context| Ok(Self::wrap_token(
+                    ("eqToken", |node, context| Self::wrap_token(
                         node.eq_token().ok()
-                    ))),
+                    )),
                     ("expression", |node, context| Self::wrap_optional_node(
                         node.expression().ok(),
                         context
@@ -1694,9 +1694,9 @@ impl JsAstNode {
                         node.left().ok(),
                         context
                     )),
-                    ("instanceofToken", |node, context| Ok(Self::wrap_token(
+                    ("instanceofToken", |node, context| Self::wrap_token(
                         node.instanceof_token().ok()
-                    ))),
+                    )),
                     ("right", |node, context| Self::wrap_optional_node(
                         node.right().ok(),
                         context
@@ -1708,9 +1708,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_LABEL,
                     JsLabel,
-                    ("valueToken", |node, context| Ok(Self::wrap_token(
+                    ("valueToken", |node, context| Self::wrap_token(
                         node.value_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_LABELED_STATEMENT => {
@@ -1722,9 +1722,9 @@ impl JsAstNode {
                         node.label().ok(),
                         context
                     )),
-                    ("colonToken", |node, context| Ok(Self::wrap_token(
+                    ("colonToken", |node, context| Self::wrap_token(
                         node.colon_token().ok()
-                    ))),
+                    )),
                     ("body", |node, context| Self::wrap_optional_node(
                         node.body().ok(),
                         context
@@ -1736,9 +1736,7 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_LITERAL_EXPORT_NAME,
                     JsLiteralExportName,
-                    ("value", |node, context| Ok(Self::wrap_token(
-                        node.value().ok()
-                    ))),
+                    ("value", |node, context| Self::wrap_token(node.value().ok())),
                 );
             }
             JsSyntaxKind::JS_LITERAL_MEMBER_NAME => {
@@ -1746,9 +1744,7 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_LITERAL_MEMBER_NAME,
                     JsLiteralMemberName,
-                    ("value", |node, context| Ok(Self::wrap_token(
-                        node.value().ok()
-                    ))),
+                    ("value", |node, context| Self::wrap_token(node.value().ok())),
                 );
             }
             JsSyntaxKind::JS_LOGICAL_EXPRESSION => {
@@ -1760,9 +1756,9 @@ impl JsAstNode {
                         node.left().ok(),
                         context
                     )),
-                    ("operatorToken", |node, context| Ok(Self::wrap_token(
+                    ("operatorToken", |node, context| Self::wrap_token(
                         node.operator_token().ok()
-                    ))),
+                    )),
                     ("right", |node, context| Self::wrap_optional_node(
                         node.right().ok(),
                         context
@@ -1774,9 +1770,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_METAVARIABLE,
                     JsMetavariable,
-                    ("valueToken", |node, context| Ok(Self::wrap_token(
+                    ("valueToken", |node, context| Self::wrap_token(
                         node.value_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_METHOD_CLASS_MEMBER => {
@@ -1788,19 +1784,19 @@ impl JsAstNode {
                         node.modifiers(),
                         context
                     )),
-                    ("asyncToken", |node, context| Ok(Self::wrap_token(
+                    ("asyncToken", |node, context| Self::wrap_token(
                         node.async_token()
-                    ))),
-                    ("starToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("starToken", |node, context| Self::wrap_token(
                         node.star_token()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
                     )),
-                    ("questionMarkToken", |node, context| Ok(Self::wrap_token(
+                    ("questionMarkToken", |node, context| Self::wrap_token(
                         node.question_mark_token()
-                    ))),
+                    )),
                     ("typeParameters", |node, context| Self::wrap_optional_node(
                         node.type_parameters(),
                         context
@@ -1823,12 +1819,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_METHOD_OBJECT_MEMBER,
                     JsMethodObjectMember,
-                    ("asyncToken", |node, context| Ok(Self::wrap_token(
+                    ("asyncToken", |node, context| Self::wrap_token(
                         node.async_token()
-                    ))),
-                    ("starToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("starToken", |node, context| Self::wrap_token(
                         node.star_token()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
@@ -1855,12 +1851,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_MODULE,
                     JsModule,
-                    ("bomToken", |node, context| Ok(Self::wrap_token(
+                    ("bomToken", |node, context| Self::wrap_token(
                         node.bom_token()
-                    ))),
-                    ("interpreterToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("interpreterToken", |node, context| Self::wrap_token(
                         node.interpreter_token()
-                    ))),
+                    )),
                     ("directives", |node, context| Self::wrap_node_list(
                         node.directives(),
                         context
@@ -1869,9 +1865,9 @@ impl JsAstNode {
                         node.items(),
                         context
                     )),
-                    ("eofToken", |node, context| Ok(Self::wrap_token(
+                    ("eofToken", |node, context| Self::wrap_token(
                         node.eof_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_MODULE_SOURCE => {
@@ -1879,9 +1875,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_MODULE_SOURCE,
                     JsModuleSource,
-                    ("valueToken", |node, context| Ok(Self::wrap_token(
+                    ("valueToken", |node, context| Self::wrap_token(
                         node.value_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_NAME => {
@@ -1889,9 +1885,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_NAME,
                     JsName,
-                    ("valueToken", |node, context| Ok(Self::wrap_token(
+                    ("valueToken", |node, context| Self::wrap_token(
                         node.value_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIER => {
@@ -1899,16 +1895,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIER,
                     JsNamedImportSpecifier,
-                    ("typeToken", |node, context| Ok(Self::wrap_token(
+                    ("typeToken", |node, context| Self::wrap_token(
                         node.type_token()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
                     )),
-                    ("asToken", |node, context| Ok(Self::wrap_token(
+                    ("asToken", |node, context| Self::wrap_token(
                         node.as_token().ok()
-                    ))),
+                    )),
                     ("localName", |node, context| Self::wrap_optional_node(
                         node.local_name().ok(),
                         context
@@ -1920,16 +1916,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIERS,
                     JsNamedImportSpecifiers,
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("specifiers", |node, context| Self::wrap_node_list(
                         node.specifiers().into_iter().flatten(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_NAMESPACE_IMPORT_SPECIFIER => {
@@ -1937,12 +1933,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_NAMESPACE_IMPORT_SPECIFIER,
                     JsNamespaceImportSpecifier,
-                    ("starToken", |node, context| Ok(Self::wrap_token(
+                    ("starToken", |node, context| Self::wrap_token(
                         node.star_token().ok()
-                    ))),
-                    ("asToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("asToken", |node, context| Self::wrap_token(
                         node.as_token().ok()
-                    ))),
+                    )),
                     ("localName", |node, context| Self::wrap_optional_node(
                         node.local_name().ok(),
                         context
@@ -1954,9 +1950,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_NEW_EXPRESSION,
                     JsNewExpression,
-                    ("newToken", |node, context| Ok(Self::wrap_token(
+                    ("newToken", |node, context| Self::wrap_token(
                         node.new_token().ok()
-                    ))),
+                    )),
                     ("callee", |node, context| Self::wrap_optional_node(
                         node.callee().ok(),
                         context
@@ -1976,15 +1972,15 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_NEW_TARGET_EXPRESSION,
                     JsNewTargetExpression,
-                    ("newToken", |node, context| Ok(Self::wrap_token(
+                    ("newToken", |node, context| Self::wrap_token(
                         node.new_token().ok()
-                    ))),
-                    ("dotToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("dotToken", |node, context| Self::wrap_token(
                         node.dot_token().ok()
-                    ))),
-                    ("targetToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("targetToken", |node, context| Self::wrap_token(
                         node.target_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_NULL_LITERAL_EXPRESSION => {
@@ -1992,9 +1988,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_NULL_LITERAL_EXPRESSION,
                     JsNullLiteralExpression,
-                    ("valueToken", |node, context| Ok(Self::wrap_token(
+                    ("valueToken", |node, context| Self::wrap_token(
                         node.value_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_NUMBER_LITERAL_EXPRESSION => {
@@ -2002,9 +1998,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_NUMBER_LITERAL_EXPRESSION,
                     JsNumberLiteralExpression,
-                    ("valueToken", |node, context| Ok(Self::wrap_token(
+                    ("valueToken", |node, context| Self::wrap_token(
                         node.value_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN => {
@@ -2012,16 +2008,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN,
                     JsObjectAssignmentPattern,
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("properties", |node, context| Self::wrap_node_list(
                         node.properties().into_iter().flatten(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY => {
@@ -2033,9 +2029,9 @@ impl JsAstNode {
                         node.member().ok(),
                         context
                     )),
-                    ("colonToken", |node, context| Ok(Self::wrap_token(
+                    ("colonToken", |node, context| Self::wrap_token(
                         node.colon_token().ok()
-                    ))),
+                    )),
                     ("pattern", |node, context| Self::wrap_optional_node(
                         node.pattern().ok(),
                         context
@@ -2051,9 +2047,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_REST,
                     JsObjectAssignmentPatternRest,
-                    ("dotdotdotToken", |node, context| Ok(Self::wrap_token(
+                    ("dotdotdotToken", |node, context| Self::wrap_token(
                         node.dotdotdot_token().ok()
-                    ))),
+                    )),
                     ("target", |node, context| Self::wrap_optional_node(
                         node.target().ok(),
                         context
@@ -2080,16 +2076,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_OBJECT_BINDING_PATTERN,
                     JsObjectBindingPattern,
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("properties", |node, context| Self::wrap_node_list(
                         node.properties().into_iter().flatten(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY => {
@@ -2101,9 +2097,9 @@ impl JsAstNode {
                         node.member().ok(),
                         context
                     )),
-                    ("colonToken", |node, context| Ok(Self::wrap_token(
+                    ("colonToken", |node, context| Self::wrap_token(
                         node.colon_token().ok()
-                    ))),
+                    )),
                     ("pattern", |node, context| Self::wrap_optional_node(
                         node.pattern().ok(),
                         context
@@ -2119,9 +2115,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST,
                     JsObjectBindingPatternRest,
-                    ("dotdotdotToken", |node, context| Ok(Self::wrap_token(
+                    ("dotdotdotToken", |node, context| Self::wrap_token(
                         node.dotdotdot_token().ok()
-                    ))),
+                    )),
                     ("binding", |node, context| Self::wrap_optional_node(
                         node.binding().ok(),
                         context
@@ -2148,16 +2144,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_OBJECT_EXPRESSION,
                     JsObjectExpression,
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("members", |node, context| Self::wrap_node_list(
                         node.members().into_iter().flatten(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_PARAMETERS => {
@@ -2165,16 +2161,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_PARAMETERS,
                     JsParameters,
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("items", |node, context| Self::wrap_node_list(
                         node.items().into_iter().flatten(),
                         context
                     )),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_PARENTHESIZED_ASSIGNMENT => {
@@ -2182,16 +2178,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_PARENTHESIZED_ASSIGNMENT,
                     JsParenthesizedAssignment,
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("assignment", |node, context| Self::wrap_optional_node(
                         node.assignment().ok(),
                         context
                     )),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION => {
@@ -2199,16 +2195,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION,
                     JsParenthesizedExpression,
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("expression", |node, context| Self::wrap_optional_node(
                         node.expression().ok(),
                         context
                     )),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_POST_UPDATE_EXPRESSION => {
@@ -2220,9 +2216,9 @@ impl JsAstNode {
                         node.operand().ok(),
                         context
                     )),
-                    ("operatorToken", |node, context| Ok(Self::wrap_token(
+                    ("operatorToken", |node, context| Self::wrap_token(
                         node.operator_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION => {
@@ -2230,9 +2226,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION,
                     JsPreUpdateExpression,
-                    ("operatorToken", |node, context| Ok(Self::wrap_token(
+                    ("operatorToken", |node, context| Self::wrap_token(
                         node.operator_token().ok()
-                    ))),
+                    )),
                     ("operand", |node, context| Self::wrap_optional_node(
                         node.operand().ok(),
                         context
@@ -2244,12 +2240,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_PRIVATE_CLASS_MEMBER_NAME,
                     JsPrivateClassMemberName,
-                    ("hashToken", |node, context| Ok(Self::wrap_token(
+                    ("hashToken", |node, context| Self::wrap_token(
                         node.hash_token().ok()
-                    ))),
-                    ("idToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("idToken", |node, context| Self::wrap_token(
                         node.id_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_PRIVATE_NAME => {
@@ -2257,12 +2253,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_PRIVATE_NAME,
                     JsPrivateName,
-                    ("hashToken", |node, context| Ok(Self::wrap_token(
+                    ("hashToken", |node, context| Self::wrap_token(
                         node.hash_token().ok()
-                    ))),
-                    ("valueToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("valueToken", |node, context| Self::wrap_token(
                         node.value_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_PROPERTY_CLASS_MEMBER => {
@@ -2285,9 +2281,9 @@ impl JsAstNode {
                         node.value(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER => {
@@ -2299,9 +2295,9 @@ impl JsAstNode {
                         node.name().ok(),
                         context
                     )),
-                    ("colonToken", |node, context| Ok(Self::wrap_token(
+                    ("colonToken", |node, context| Self::wrap_token(
                         node.colon_token().ok()
-                    ))),
+                    )),
                     ("value", |node, context| Self::wrap_optional_node(
                         node.value().ok(),
                         context
@@ -2313,9 +2309,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_REFERENCE_IDENTIFIER,
                     JsReferenceIdentifier,
-                    ("valueToken", |node, context| Ok(Self::wrap_token(
+                    ("valueToken", |node, context| Self::wrap_token(
                         node.value_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_REGEX_LITERAL_EXPRESSION => {
@@ -2323,9 +2319,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_REGEX_LITERAL_EXPRESSION,
                     JsRegexLiteralExpression,
-                    ("valueToken", |node, context| Ok(Self::wrap_token(
+                    ("valueToken", |node, context| Self::wrap_token(
                         node.value_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_REST_PARAMETER => {
@@ -2337,9 +2333,9 @@ impl JsAstNode {
                         node.decorators(),
                         context
                     )),
-                    ("dotdotdotToken", |node, context| Ok(Self::wrap_token(
+                    ("dotdotdotToken", |node, context| Self::wrap_token(
                         node.dotdotdot_token().ok()
-                    ))),
+                    )),
                     ("binding", |node, context| Self::wrap_optional_node(
                         node.binding().ok(),
                         context
@@ -2355,16 +2351,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_RETURN_STATEMENT,
                     JsReturnStatement,
-                    ("returnToken", |node, context| Ok(Self::wrap_token(
+                    ("returnToken", |node, context| Self::wrap_token(
                         node.return_token().ok()
-                    ))),
+                    )),
                     ("argument", |node, context| Self::wrap_optional_node(
                         node.argument(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_SCRIPT => {
@@ -2372,12 +2368,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_SCRIPT,
                     JsScript,
-                    ("bomToken", |node, context| Ok(Self::wrap_token(
+                    ("bomToken", |node, context| Self::wrap_token(
                         node.bom_token()
-                    ))),
-                    ("interpreterToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("interpreterToken", |node, context| Self::wrap_token(
                         node.interpreter_token()
-                    ))),
+                    )),
                     ("directives", |node, context| Self::wrap_node_list(
                         node.directives(),
                         context
@@ -2386,9 +2382,9 @@ impl JsAstNode {
                         node.statements(),
                         context
                     )),
-                    ("eofToken", |node, context| Ok(Self::wrap_token(
+                    ("eofToken", |node, context| Self::wrap_token(
                         node.eof_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_SEQUENCE_EXPRESSION => {
@@ -2400,9 +2396,9 @@ impl JsAstNode {
                         node.left().ok(),
                         context
                     )),
-                    ("commaToken", |node, context| Ok(Self::wrap_token(
+                    ("commaToken", |node, context| Self::wrap_token(
                         node.comma_token().ok()
-                    ))),
+                    )),
                     ("right", |node, context| Self::wrap_optional_node(
                         node.right().ok(),
                         context
@@ -2418,26 +2414,26 @@ impl JsAstNode {
                         node.modifiers(),
                         context
                     )),
-                    ("setToken", |node, context| Ok(Self::wrap_token(
+                    ("setToken", |node, context| Self::wrap_token(
                         node.set_token().ok()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
                     )),
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("parameter", |node, context| Self::wrap_optional_node(
                         node.parameter().ok(),
                         context
                     )),
-                    ("commaToken", |node, context| Ok(Self::wrap_token(
+                    ("commaToken", |node, context| Self::wrap_token(
                         node.comma_token()
-                    ))),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                     ("body", |node, context| Self::wrap_optional_node(
                         node.body().ok(),
                         context
@@ -2449,26 +2445,26 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_SETTER_OBJECT_MEMBER,
                     JsSetterObjectMember,
-                    ("setToken", |node, context| Ok(Self::wrap_token(
+                    ("setToken", |node, context| Self::wrap_token(
                         node.set_token().ok()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
                     )),
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("parameter", |node, context| Self::wrap_optional_node(
                         node.parameter().ok(),
                         context
                     )),
-                    ("commaToken", |node, context| Ok(Self::wrap_token(
+                    ("commaToken", |node, context| Self::wrap_token(
                         node.comma_token()
-                    ))),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                     ("body", |node, context| Self::wrap_optional_node(
                         node.body().ok(),
                         context
@@ -2480,9 +2476,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_SHORTHAND_NAMED_IMPORT_SPECIFIER,
                     JsShorthandNamedImportSpecifier,
-                    ("typeToken", |node, context| Ok(Self::wrap_token(
+                    ("typeToken", |node, context| Self::wrap_token(
                         node.type_token()
-                    ))),
+                    )),
                     ("localName", |node, context| Self::wrap_optional_node(
                         node.local_name().ok(),
                         context
@@ -2505,9 +2501,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_SPREAD,
                     JsSpread,
-                    ("dotdotdotToken", |node, context| Ok(Self::wrap_token(
+                    ("dotdotdotToken", |node, context| Self::wrap_token(
                         node.dotdotdot_token().ok()
-                    ))),
+                    )),
                     ("argument", |node, context| Self::wrap_optional_node(
                         node.argument().ok(),
                         context
@@ -2519,19 +2515,19 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER,
                     JsStaticInitializationBlockClassMember,
-                    ("staticToken", |node, context| Ok(Self::wrap_token(
+                    ("staticToken", |node, context| Self::wrap_token(
                         node.static_token().ok()
-                    ))),
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("statements", |node, context| Self::wrap_node_list(
                         node.statements(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT => {
@@ -2543,9 +2539,9 @@ impl JsAstNode {
                         node.object().ok(),
                         context
                     )),
-                    ("dotToken", |node, context| Ok(Self::wrap_token(
+                    ("dotToken", |node, context| Self::wrap_token(
                         node.dot_token().ok()
-                    ))),
+                    )),
                     ("member", |node, context| Self::wrap_optional_node(
                         node.member().ok(),
                         context
@@ -2561,9 +2557,9 @@ impl JsAstNode {
                         node.object().ok(),
                         context
                     )),
-                    ("operatorToken", |node, context| Ok(Self::wrap_token(
+                    ("operatorToken", |node, context| Self::wrap_token(
                         node.operator_token().ok()
-                    ))),
+                    )),
                     ("member", |node, context| Self::wrap_optional_node(
                         node.member().ok(),
                         context
@@ -2575,9 +2571,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_STATIC_MODIFIER,
                     JsStaticModifier,
-                    ("modifierToken", |node, context| Ok(Self::wrap_token(
+                    ("modifierToken", |node, context| Self::wrap_token(
                         node.modifier_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION => {
@@ -2585,9 +2581,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION,
                     JsStringLiteralExpression,
-                    ("valueToken", |node, context| Ok(Self::wrap_token(
+                    ("valueToken", |node, context| Self::wrap_token(
                         node.value_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_SUPER_EXPRESSION => {
@@ -2595,9 +2591,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_SUPER_EXPRESSION,
                     JsSuperExpression,
-                    ("superToken", |node, context| Ok(Self::wrap_token(
+                    ("superToken", |node, context| Self::wrap_token(
                         node.super_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT => {
@@ -2613,9 +2609,9 @@ impl JsAstNode {
                         node.parameters().ok(),
                         context
                     )),
-                    ("eofToken", |node, context| Ok(Self::wrap_token(
+                    ("eofToken", |node, context| Self::wrap_token(
                         node.eof_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_SWITCH_STATEMENT => {
@@ -2623,29 +2619,29 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_SWITCH_STATEMENT,
                     JsSwitchStatement,
-                    ("switchToken", |node, context| Ok(Self::wrap_token(
+                    ("switchToken", |node, context| Self::wrap_token(
                         node.switch_token().ok()
-                    ))),
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("discriminant", |node, context| Self::wrap_optional_node(
                         node.discriminant().ok(),
                         context
                     )),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("cases", |node, context| Self::wrap_node_list(
                         node.cases(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_TEMPLATE_CHUNK_ELEMENT => {
@@ -2653,9 +2649,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_TEMPLATE_CHUNK_ELEMENT,
                     JsTemplateChunkElement,
-                    ("templateChunkToken", |node, context| Ok(Self::wrap_token(
+                    ("templateChunkToken", |node, context| Self::wrap_token(
                         node.template_chunk_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_TEMPLATE_ELEMENT => {
@@ -2663,16 +2659,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_TEMPLATE_ELEMENT,
                     JsTemplateElement,
-                    ("dollarCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("dollarCurlyToken", |node, context| Self::wrap_token(
                         node.dollar_curly_token().ok()
-                    ))),
+                    )),
                     ("expression", |node, context| Self::wrap_optional_node(
                         node.expression().ok(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_TEMPLATE_EXPRESSION => {
@@ -2688,16 +2684,16 @@ impl JsAstNode {
                         node.type_arguments(),
                         context
                     )),
-                    ("lTickToken", |node, context| Ok(Self::wrap_token(
+                    ("lTickToken", |node, context| Self::wrap_token(
                         node.l_tick_token().ok()
-                    ))),
+                    )),
                     ("elements", |node, context| Self::wrap_node_list(
                         node.elements(),
                         context
                     )),
-                    ("rTickToken", |node, context| Ok(Self::wrap_token(
+                    ("rTickToken", |node, context| Self::wrap_token(
                         node.r_tick_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_THIS_EXPRESSION => {
@@ -2705,9 +2701,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_THIS_EXPRESSION,
                     JsThisExpression,
-                    ("thisToken", |node, context| Ok(Self::wrap_token(
+                    ("thisToken", |node, context| Self::wrap_token(
                         node.this_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_THROW_STATEMENT => {
@@ -2715,16 +2711,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_THROW_STATEMENT,
                     JsThrowStatement,
-                    ("throwToken", |node, context| Ok(Self::wrap_token(
+                    ("throwToken", |node, context| Self::wrap_token(
                         node.throw_token().ok()
-                    ))),
+                    )),
                     ("argument", |node, context| Self::wrap_optional_node(
                         node.argument().ok(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_TRY_FINALLY_STATEMENT => {
@@ -2732,9 +2728,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_TRY_FINALLY_STATEMENT,
                     JsTryFinallyStatement,
-                    ("tryToken", |node, context| Ok(Self::wrap_token(
+                    ("tryToken", |node, context| Self::wrap_token(
                         node.try_token().ok()
-                    ))),
+                    )),
                     ("body", |node, context| Self::wrap_optional_node(
                         node.body().ok(),
                         context
@@ -2754,9 +2750,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_TRY_STATEMENT,
                     JsTryStatement,
-                    ("tryToken", |node, context| Ok(Self::wrap_token(
+                    ("tryToken", |node, context| Self::wrap_token(
                         node.try_token().ok()
-                    ))),
+                    )),
                     ("body", |node, context| Self::wrap_optional_node(
                         node.body().ok(),
                         context
@@ -2772,9 +2768,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_UNARY_EXPRESSION,
                     JsUnaryExpression,
-                    ("operatorToken", |node, context| Ok(Self::wrap_token(
+                    ("operatorToken", |node, context| Self::wrap_token(
                         node.operator_token().ok()
-                    ))),
+                    )),
                     ("argument", |node, context| Self::wrap_optional_node(
                         node.argument().ok(),
                         context
@@ -2786,12 +2782,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_VARIABLE_DECLARATION,
                     JsVariableDeclaration,
-                    ("awaitToken", |node, context| Ok(Self::wrap_token(
+                    ("awaitToken", |node, context| Self::wrap_token(
                         node.await_token()
-                    ))),
-                    ("kindToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("kindToken", |node, context| Self::wrap_token(
                         node.kind().ok()
-                    ))),
+                    )),
                     ("declarators", |node, context| Self::wrap_node_list(
                         node.declarators().into_iter().flatten(),
                         context
@@ -2807,9 +2803,9 @@ impl JsAstNode {
                         node.declaration().ok(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_VARIABLE_DECLARATOR => {
@@ -2839,9 +2835,9 @@ impl JsAstNode {
                         node.declaration().ok(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JS_WHILE_STATEMENT => {
@@ -2849,19 +2845,19 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_WHILE_STATEMENT,
                     JsWhileStatement,
-                    ("whileToken", |node, context| Ok(Self::wrap_token(
+                    ("whileToken", |node, context| Self::wrap_token(
                         node.while_token().ok()
-                    ))),
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("test", |node, context| Self::wrap_optional_node(
                         node.test().ok(),
                         context
                     )),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                     ("body", |node, context| Self::wrap_optional_node(
                         node.body().ok(),
                         context
@@ -2873,19 +2869,19 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_WITH_STATEMENT,
                     JsWithStatement,
-                    ("withToken", |node, context| Ok(Self::wrap_token(
+                    ("withToken", |node, context| Self::wrap_token(
                         node.with_token().ok()
-                    ))),
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("object", |node, context| Self::wrap_optional_node(
                         node.object().ok(),
                         context
                     )),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                     ("body", |node, context| Self::wrap_optional_node(
                         node.body().ok(),
                         context
@@ -2897,9 +2893,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_YIELD_ARGUMENT,
                     JsYieldArgument,
-                    ("starToken", |node, context| Ok(Self::wrap_token(
+                    ("starToken", |node, context| Self::wrap_token(
                         node.star_token()
-                    ))),
+                    )),
                     ("expression", |node, context| Self::wrap_optional_node(
                         node.expression().ok(),
                         context
@@ -2911,9 +2907,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JS_YIELD_EXPRESSION,
                     JsYieldExpression,
-                    ("yieldToken", |node, context| Ok(Self::wrap_token(
+                    ("yieldToken", |node, context| Self::wrap_token(
                         node.yield_token().ok()
-                    ))),
+                    )),
                     ("argument", |node, context| Self::wrap_optional_node(
                         node.argument(),
                         context
@@ -2940,9 +2936,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JSX_ATTRIBUTE_INITIALIZER_CLAUSE,
                     JsxAttributeInitializerClause,
-                    ("eqToken", |node, context| Ok(Self::wrap_token(
+                    ("eqToken", |node, context| Self::wrap_token(
                         node.eq_token().ok()
-                    ))),
+                    )),
                     ("value", |node, context| Self::wrap_optional_node(
                         node.value().ok(),
                         context
@@ -2954,19 +2950,19 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JSX_CLOSING_ELEMENT,
                     JsxClosingElement,
-                    ("lAngleToken", |node, context| Ok(Self::wrap_token(
+                    ("lAngleToken", |node, context| Self::wrap_token(
                         node.l_angle_token().ok()
-                    ))),
-                    ("slashToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("slashToken", |node, context| Self::wrap_token(
                         node.slash_token().ok()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
                     )),
-                    ("rAngleToken", |node, context| Ok(Self::wrap_token(
+                    ("rAngleToken", |node, context| Self::wrap_token(
                         node.r_angle_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JSX_CLOSING_FRAGMENT => {
@@ -2974,15 +2970,15 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JSX_CLOSING_FRAGMENT,
                     JsxClosingFragment,
-                    ("lAngleToken", |node, context| Ok(Self::wrap_token(
+                    ("lAngleToken", |node, context| Self::wrap_token(
                         node.l_angle_token().ok()
-                    ))),
-                    ("slashToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("slashToken", |node, context| Self::wrap_token(
                         node.slash_token().ok()
-                    ))),
-                    ("rAngleToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("rAngleToken", |node, context| Self::wrap_token(
                         node.r_angle_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JSX_ELEMENT => {
@@ -3009,16 +3005,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JSX_EXPRESSION_ATTRIBUTE_VALUE,
                     JsxExpressionAttributeValue,
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("expression", |node, context| Self::wrap_optional_node(
                         node.expression().ok(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JSX_EXPRESSION_CHILD => {
@@ -3026,16 +3022,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JSX_EXPRESSION_CHILD,
                     JsxExpressionChild,
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("expression", |node, context| Self::wrap_optional_node(
                         node.expression(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JSX_FRAGMENT => {
@@ -3066,9 +3062,9 @@ impl JsAstNode {
                         node.object().ok(),
                         context
                     )),
-                    ("dotToken", |node, context| Ok(Self::wrap_token(
+                    ("dotToken", |node, context| Self::wrap_token(
                         node.dot_token().ok()
-                    ))),
+                    )),
                     ("member", |node, context| Self::wrap_optional_node(
                         node.member().ok(),
                         context
@@ -3080,9 +3076,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JSX_NAME,
                     JsxName,
-                    ("valueToken", |node, context| Ok(Self::wrap_token(
+                    ("valueToken", |node, context| Self::wrap_token(
                         node.value_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JSX_NAMESPACE_NAME => {
@@ -3094,9 +3090,9 @@ impl JsAstNode {
                         node.namespace().ok(),
                         context
                     )),
-                    ("colonToken", |node, context| Ok(Self::wrap_token(
+                    ("colonToken", |node, context| Self::wrap_token(
                         node.colon_token().ok()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
@@ -3108,9 +3104,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JSX_OPENING_ELEMENT,
                     JsxOpeningElement,
-                    ("lAngleToken", |node, context| Ok(Self::wrap_token(
+                    ("lAngleToken", |node, context| Self::wrap_token(
                         node.l_angle_token().ok()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
@@ -3123,9 +3119,9 @@ impl JsAstNode {
                         node.attributes(),
                         context
                     )),
-                    ("rAngleToken", |node, context| Ok(Self::wrap_token(
+                    ("rAngleToken", |node, context| Self::wrap_token(
                         node.r_angle_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JSX_OPENING_FRAGMENT => {
@@ -3133,12 +3129,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JSX_OPENING_FRAGMENT,
                     JsxOpeningFragment,
-                    ("lAngleToken", |node, context| Ok(Self::wrap_token(
+                    ("lAngleToken", |node, context| Self::wrap_token(
                         node.l_angle_token().ok()
-                    ))),
-                    ("rAngleToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("rAngleToken", |node, context| Self::wrap_token(
                         node.r_angle_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JSX_REFERENCE_IDENTIFIER => {
@@ -3146,9 +3142,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JSX_REFERENCE_IDENTIFIER,
                     JsxReferenceIdentifier,
-                    ("valueToken", |node, context| Ok(Self::wrap_token(
+                    ("valueToken", |node, context| Self::wrap_token(
                         node.value_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT => {
@@ -3156,9 +3152,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT,
                     JsxSelfClosingElement,
-                    ("lAngleToken", |node, context| Ok(Self::wrap_token(
+                    ("lAngleToken", |node, context| Self::wrap_token(
                         node.l_angle_token().ok()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
@@ -3171,12 +3167,12 @@ impl JsAstNode {
                         node.attributes(),
                         context
                     )),
-                    ("slashToken", |node, context| Ok(Self::wrap_token(
+                    ("slashToken", |node, context| Self::wrap_token(
                         node.slash_token().ok()
-                    ))),
-                    ("rAngleToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("rAngleToken", |node, context| Self::wrap_token(
                         node.r_angle_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JSX_SHORTHAND_ATTRIBUTE => {
@@ -3184,16 +3180,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JSX_SHORTHAND_ATTRIBUTE,
                     JsxShorthandAttribute,
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JSX_SPREAD_ATTRIBUTE => {
@@ -3201,19 +3197,19 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JSX_SPREAD_ATTRIBUTE,
                     JsxSpreadAttribute,
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
-                    ("dotdotdotToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("dotdotdotToken", |node, context| Self::wrap_token(
                         node.dotdotdot_token().ok()
-                    ))),
+                    )),
                     ("argument", |node, context| Self::wrap_optional_node(
                         node.argument().ok(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JSX_SPREAD_CHILD => {
@@ -3221,19 +3217,19 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JSX_SPREAD_CHILD,
                     JsxSpreadChild,
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
-                    ("dotdotdotToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("dotdotdotToken", |node, context| Self::wrap_token(
                         node.dotdotdot_token().ok()
-                    ))),
+                    )),
                     ("expression", |node, context| Self::wrap_optional_node(
                         node.expression().ok(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JSX_STRING => {
@@ -3241,9 +3237,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JSX_STRING,
                     JsxString,
-                    ("valueToken", |node, context| Ok(Self::wrap_token(
+                    ("valueToken", |node, context| Self::wrap_token(
                         node.value_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::JSX_TAG_EXPRESSION => {
@@ -3262,9 +3258,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::JSX_TEXT,
                     JsxText,
-                    ("valueToken", |node, context| Ok(Self::wrap_token(
+                    ("valueToken", |node, context| Self::wrap_token(
                         node.value_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_ABSTRACT_MODIFIER => {
@@ -3272,9 +3268,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_ABSTRACT_MODIFIER,
                     TsAbstractModifier,
-                    ("modifierToken", |node, context| Ok(Self::wrap_token(
+                    ("modifierToken", |node, context| Self::wrap_token(
                         node.modifier_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_ACCESSIBILITY_MODIFIER => {
@@ -3282,9 +3278,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_ACCESSIBILITY_MODIFIER,
                     TsAccessibilityModifier,
-                    ("modifierToken", |node, context| Ok(Self::wrap_token(
+                    ("modifierToken", |node, context| Self::wrap_token(
                         node.modifier_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_ANY_TYPE => {
@@ -3292,9 +3288,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_ANY_TYPE,
                     TsAnyType,
-                    ("anyToken", |node, context| Ok(Self::wrap_token(
+                    ("anyToken", |node, context| Self::wrap_token(
                         node.any_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_ARRAY_TYPE => {
@@ -3306,12 +3302,12 @@ impl JsAstNode {
                         node.element_type().ok(),
                         context
                     )),
-                    ("lBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("lBrackToken", |node, context| Self::wrap_token(
                         node.l_brack_token().ok()
-                    ))),
-                    ("rBrackToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("rBrackToken", |node, context| Self::wrap_token(
                         node.r_brack_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_AS_ASSIGNMENT => {
@@ -3323,9 +3319,9 @@ impl JsAstNode {
                         node.assignment().ok(),
                         context
                     )),
-                    ("asToken", |node, context| Ok(Self::wrap_token(
+                    ("asToken", |node, context| Self::wrap_token(
                         node.as_token().ok()
-                    ))),
+                    )),
                     ("ty", |node, context| Self::wrap_optional_node(
                         node.ty().ok(),
                         context
@@ -3341,9 +3337,9 @@ impl JsAstNode {
                         node.expression().ok(),
                         context
                     )),
-                    ("asToken", |node, context| Ok(Self::wrap_token(
+                    ("asToken", |node, context| Self::wrap_token(
                         node.as_token().ok()
-                    ))),
+                    )),
                     ("ty", |node, context| Self::wrap_optional_node(
                         node.ty().ok(),
                         context
@@ -3355,9 +3351,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_ASSERTS_CONDITION,
                     TsAssertsCondition,
-                    ("isToken", |node, context| Ok(Self::wrap_token(
+                    ("isToken", |node, context| Self::wrap_token(
                         node.is_token().ok()
-                    ))),
+                    )),
                     ("ty", |node, context| Self::wrap_optional_node(
                         node.ty().ok(),
                         context
@@ -3369,9 +3365,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_ASSERTS_RETURN_TYPE,
                     TsAssertsReturnType,
-                    ("assertsToken", |node, context| Ok(Self::wrap_token(
+                    ("assertsToken", |node, context| Self::wrap_token(
                         node.asserts_token().ok()
-                    ))),
+                    )),
                     ("parameterName", |node, context| Self::wrap_optional_node(
                         node.parameter_name().ok(),
                         context
@@ -3387,12 +3383,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_BIGINT_LITERAL_TYPE,
                     TsBigintLiteralType,
-                    ("minusToken", |node, context| Ok(Self::wrap_token(
+                    ("minusToken", |node, context| Self::wrap_token(
                         node.minus_token()
-                    ))),
-                    ("literalToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("literalToken", |node, context| Self::wrap_token(
                         node.literal_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_BIGINT_TYPE => {
@@ -3400,9 +3396,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_BIGINT_TYPE,
                     TsBigintType,
-                    ("bigintToken", |node, context| Ok(Self::wrap_token(
+                    ("bigintToken", |node, context| Self::wrap_token(
                         node.bigint_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_BOOLEAN_LITERAL_TYPE => {
@@ -3410,9 +3406,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_BOOLEAN_LITERAL_TYPE,
                     TsBooleanLiteralType,
-                    ("literal", |node, context| Ok(Self::wrap_token(
+                    ("literal", |node, context| Self::wrap_token(
                         node.literal().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_BOOLEAN_TYPE => {
@@ -3420,9 +3416,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_BOOLEAN_TYPE,
                     TsBooleanType,
-                    ("booleanToken", |node, context| Ok(Self::wrap_token(
+                    ("booleanToken", |node, context| Self::wrap_token(
                         node.boolean_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_CALL_SIGNATURE_TYPE_MEMBER => {
@@ -3441,9 +3437,9 @@ impl JsAstNode {
                     ("returnTypeAnnotation", |node, context| {
                         Self::wrap_optional_node(node.return_type_annotation(), context)
                     }),
-                    ("separatorToken", |node, context| Ok(Self::wrap_token(
+                    ("separatorToken", |node, context| Self::wrap_token(
                         node.separator_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_CONDITIONAL_TYPE => {
@@ -3455,23 +3451,23 @@ impl JsAstNode {
                         node.check_type().ok(),
                         context
                     )),
-                    ("extendsToken", |node, context| Ok(Self::wrap_token(
+                    ("extendsToken", |node, context| Self::wrap_token(
                         node.extends_token().ok()
-                    ))),
+                    )),
                     ("extendsType", |node, context| Self::wrap_optional_node(
                         node.extends_type().ok(),
                         context
                     )),
-                    ("questionMarkToken", |node, context| Ok(Self::wrap_token(
+                    ("questionMarkToken", |node, context| Self::wrap_token(
                         node.question_mark_token().ok()
-                    ))),
+                    )),
                     ("trueType", |node, context| Self::wrap_optional_node(
                         node.true_type().ok(),
                         context
                     )),
-                    ("colonToken", |node, context| Ok(Self::wrap_token(
+                    ("colonToken", |node, context| Self::wrap_token(
                         node.colon_token().ok()
-                    ))),
+                    )),
                     ("falseType", |node, context| Self::wrap_optional_node(
                         node.false_type().ok(),
                         context
@@ -3483,9 +3479,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_CONST_MODIFIER,
                     TsConstModifier,
-                    ("modifierToken", |node, context| Ok(Self::wrap_token(
+                    ("modifierToken", |node, context| Self::wrap_token(
                         node.modifier_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER => {
@@ -3493,9 +3489,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER,
                     TsConstructSignatureTypeMember,
-                    ("newToken", |node, context| Ok(Self::wrap_token(
+                    ("newToken", |node, context| Self::wrap_token(
                         node.new_token().ok()
-                    ))),
+                    )),
                     ("typeParameters", |node, context| Self::wrap_optional_node(
                         node.type_parameters(),
                         context
@@ -3508,9 +3504,9 @@ impl JsAstNode {
                         node.type_annotation(),
                         context
                     )),
-                    ("separatorToken", |node, context| Ok(Self::wrap_token(
+                    ("separatorToken", |node, context| Self::wrap_token(
                         node.separator_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER => {
@@ -3530,9 +3526,9 @@ impl JsAstNode {
                         node.parameters().ok(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_CONSTRUCTOR_TYPE => {
@@ -3540,12 +3536,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_CONSTRUCTOR_TYPE,
                     TsConstructorType,
-                    ("abstractToken", |node, context| Ok(Self::wrap_token(
+                    ("abstractToken", |node, context| Self::wrap_token(
                         node.abstract_token()
-                    ))),
-                    ("newToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("newToken", |node, context| Self::wrap_token(
                         node.new_token().ok()
-                    ))),
+                    )),
                     ("typeParameters", |node, context| Self::wrap_optional_node(
                         node.type_parameters(),
                         context
@@ -3554,9 +3550,9 @@ impl JsAstNode {
                         node.parameters().ok(),
                         context
                     )),
-                    ("fatArrowToken", |node, context| Ok(Self::wrap_token(
+                    ("fatArrowToken", |node, context| Self::wrap_token(
                         node.fat_arrow_token().ok()
-                    ))),
+                    )),
                     ("returnType", |node, context| Self::wrap_optional_node(
                         node.return_type().ok(),
                         context
@@ -3568,12 +3564,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_DECLARATION_MODULE,
                     TsDeclarationModule,
-                    ("bomToken", |node, context| Ok(Self::wrap_token(
+                    ("bomToken", |node, context| Self::wrap_token(
                         node.bom_token()
-                    ))),
-                    ("interpreterToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("interpreterToken", |node, context| Self::wrap_token(
                         node.interpreter_token()
-                    ))),
+                    )),
                     ("directives", |node, context| Self::wrap_node_list(
                         node.directives(),
                         context
@@ -3582,9 +3578,9 @@ impl JsAstNode {
                         node.items(),
                         context
                     )),
-                    ("eofToken", |node, context| Ok(Self::wrap_token(
+                    ("eofToken", |node, context| Self::wrap_token(
                         node.eof_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_DECLARE_FUNCTION_DECLARATION => {
@@ -3592,12 +3588,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_DECLARE_FUNCTION_DECLARATION,
                     TsDeclareFunctionDeclaration,
-                    ("asyncToken", |node, context| Ok(Self::wrap_token(
+                    ("asyncToken", |node, context| Self::wrap_token(
                         node.async_token()
-                    ))),
-                    ("functionToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("functionToken", |node, context| Self::wrap_token(
                         node.function_token().ok()
-                    ))),
+                    )),
                     ("id", |node, context| Self::wrap_optional_node(
                         node.id().ok(),
                         context
@@ -3613,9 +3609,9 @@ impl JsAstNode {
                     ("returnTypeAnnotation", |node, context| {
                         Self::wrap_optional_node(node.return_type_annotation(), context)
                     }),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION => {
@@ -3623,12 +3619,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION,
                     TsDeclareFunctionExportDefaultDeclaration,
-                    ("asyncToken", |node, context| Ok(Self::wrap_token(
+                    ("asyncToken", |node, context| Self::wrap_token(
                         node.async_token()
-                    ))),
-                    ("functionToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("functionToken", |node, context| Self::wrap_token(
                         node.function_token().ok()
-                    ))),
+                    )),
                     ("id", |node, context| Self::wrap_optional_node(
                         node.id(),
                         context
@@ -3644,9 +3640,9 @@ impl JsAstNode {
                     ("returnTypeAnnotation", |node, context| {
                         Self::wrap_optional_node(node.return_type_annotation(), context)
                     }),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_DECLARE_MODIFIER => {
@@ -3654,9 +3650,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_DECLARE_MODIFIER,
                     TsDeclareModifier,
-                    ("modifierToken", |node, context| Ok(Self::wrap_token(
+                    ("modifierToken", |node, context| Self::wrap_token(
                         node.modifier_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_DECLARE_STATEMENT => {
@@ -3664,9 +3660,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_DECLARE_STATEMENT,
                     TsDeclareStatement,
-                    ("declareToken", |node, context| Ok(Self::wrap_token(
+                    ("declareToken", |node, context| Self::wrap_token(
                         node.declare_token().ok()
-                    ))),
+                    )),
                     ("declaration", |node, context| Self::wrap_optional_node(
                         node.declaration().ok(),
                         context
@@ -3678,9 +3674,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_DEFAULT_TYPE_CLAUSE,
                     TsDefaultTypeClause,
-                    ("eqToken", |node, context| Ok(Self::wrap_token(
+                    ("eqToken", |node, context| Self::wrap_token(
                         node.eq_token().ok()
-                    ))),
+                    )),
                     ("ty", |node, context| Self::wrap_optional_node(
                         node.ty().ok(),
                         context
@@ -3692,9 +3688,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_DEFINITE_PROPERTY_ANNOTATION,
                     TsDefinitePropertyAnnotation,
-                    ("exclToken", |node, context| Ok(Self::wrap_token(
+                    ("exclToken", |node, context| Self::wrap_token(
                         node.excl_token().ok()
-                    ))),
+                    )),
                     ("typeAnnotation", |node, context| Self::wrap_optional_node(
                         node.type_annotation().ok(),
                         context
@@ -3706,9 +3702,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_DEFINITE_VARIABLE_ANNOTATION,
                     TsDefiniteVariableAnnotation,
-                    ("exclToken", |node, context| Ok(Self::wrap_token(
+                    ("exclToken", |node, context| Self::wrap_token(
                         node.excl_token().ok()
-                    ))),
+                    )),
                     ("typeAnnotation", |node, context| Self::wrap_optional_node(
                         node.type_annotation().ok(),
                         context
@@ -3720,9 +3716,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_EMPTY_EXTERNAL_MODULE_DECLARATION_BODY,
                     TsEmptyExternalModuleDeclarationBody,
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_ENUM_DECLARATION => {
@@ -3730,26 +3726,26 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_ENUM_DECLARATION,
                     TsEnumDeclaration,
-                    ("constToken", |node, context| Ok(Self::wrap_token(
+                    ("constToken", |node, context| Self::wrap_token(
                         node.const_token()
-                    ))),
-                    ("enumToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("enumToken", |node, context| Self::wrap_token(
                         node.enum_token().ok()
-                    ))),
+                    )),
                     ("id", |node, context| Self::wrap_optional_node(
                         node.id().ok(),
                         context
                     )),
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("members", |node, context| Self::wrap_node_list(
                         node.members().into_iter().flatten(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_ENUM_MEMBER => {
@@ -3772,19 +3768,19 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_EXPORT_AS_NAMESPACE_CLAUSE,
                     TsExportAsNamespaceClause,
-                    ("asToken", |node, context| Ok(Self::wrap_token(
+                    ("asToken", |node, context| Self::wrap_token(
                         node.as_token().ok()
-                    ))),
-                    ("namespaceToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("namespaceToken", |node, context| Self::wrap_token(
                         node.namespace_token().ok()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_EXPORT_ASSIGNMENT_CLAUSE => {
@@ -3792,16 +3788,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_EXPORT_ASSIGNMENT_CLAUSE,
                     TsExportAssignmentClause,
-                    ("eqToken", |node, context| Ok(Self::wrap_token(
+                    ("eqToken", |node, context| Self::wrap_token(
                         node.eq_token().ok()
-                    ))),
+                    )),
                     ("expression", |node, context| Self::wrap_optional_node(
                         node.expression().ok(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_EXPORT_DECLARE_CLAUSE => {
@@ -3809,9 +3805,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_EXPORT_DECLARE_CLAUSE,
                     TsExportDeclareClause,
-                    ("declareToken", |node, context| Ok(Self::wrap_token(
+                    ("declareToken", |node, context| Self::wrap_token(
                         node.declare_token().ok()
-                    ))),
+                    )),
                     ("declaration", |node, context| Self::wrap_optional_node(
                         node.declaration().ok(),
                         context
@@ -3823,9 +3819,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_EXTENDS_CLAUSE,
                     TsExtendsClause,
-                    ("extendsToken", |node, context| Ok(Self::wrap_token(
+                    ("extendsToken", |node, context| Self::wrap_token(
                         node.extends_token().ok()
-                    ))),
+                    )),
                     ("types", |node, context| Self::wrap_node_list(
                         node.types().into_iter().flatten(),
                         context
@@ -3837,9 +3833,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION,
                     TsExternalModuleDeclaration,
-                    ("moduleToken", |node, context| Ok(Self::wrap_token(
+                    ("moduleToken", |node, context| Self::wrap_token(
                         node.module_token().ok()
-                    ))),
+                    )),
                     ("source", |node, context| Self::wrap_optional_node(
                         node.source().ok(),
                         context
@@ -3855,19 +3851,19 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_EXTERNAL_MODULE_REFERENCE,
                     TsExternalModuleReference,
-                    ("requireToken", |node, context| Ok(Self::wrap_token(
+                    ("requireToken", |node, context| Self::wrap_token(
                         node.require_token().ok()
-                    ))),
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("source", |node, context| Self::wrap_optional_node(
                         node.source().ok(),
                         context
                     )),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_FUNCTION_TYPE => {
@@ -3883,9 +3879,9 @@ impl JsAstNode {
                         node.parameters().ok(),
                         context
                     )),
-                    ("fatArrowToken", |node, context| Ok(Self::wrap_token(
+                    ("fatArrowToken", |node, context| Self::wrap_token(
                         node.fat_arrow_token().ok()
-                    ))),
+                    )),
                     ("returnType", |node, context| Self::wrap_optional_node(
                         node.return_type().ok(),
                         context
@@ -3901,26 +3897,26 @@ impl JsAstNode {
                         node.modifiers(),
                         context
                     )),
-                    ("getToken", |node, context| Ok(Self::wrap_token(
+                    ("getToken", |node, context| Self::wrap_token(
                         node.get_token().ok()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
                     )),
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                     ("returnType", |node, context| Self::wrap_optional_node(
                         node.return_type(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_GETTER_SIGNATURE_TYPE_MEMBER => {
@@ -3928,26 +3924,26 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_GETTER_SIGNATURE_TYPE_MEMBER,
                     TsGetterSignatureTypeMember,
-                    ("getToken", |node, context| Ok(Self::wrap_token(
+                    ("getToken", |node, context| Self::wrap_token(
                         node.get_token().ok()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
                     )),
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                     ("typeAnnotation", |node, context| Self::wrap_optional_node(
                         node.type_annotation(),
                         context
                     )),
-                    ("separatorToken", |node, context| Ok(Self::wrap_token(
+                    ("separatorToken", |node, context| Self::wrap_token(
                         node.separator_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_GLOBAL_DECLARATION => {
@@ -3955,9 +3951,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_GLOBAL_DECLARATION,
                     TsGlobalDeclaration,
-                    ("globalToken", |node, context| Ok(Self::wrap_token(
+                    ("globalToken", |node, context| Self::wrap_token(
                         node.global_token().ok()
-                    ))),
+                    )),
                     ("body", |node, context| Self::wrap_optional_node(
                         node.body().ok(),
                         context
@@ -3969,9 +3965,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_IDENTIFIER_BINDING,
                     TsIdentifierBinding,
-                    ("nameToken", |node, context| Ok(Self::wrap_token(
+                    ("nameToken", |node, context| Self::wrap_token(
                         node.name_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_IMPLEMENTS_CLAUSE => {
@@ -3979,9 +3975,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_IMPLEMENTS_CLAUSE,
                     TsImplementsClause,
-                    ("implementsToken", |node, context| Ok(Self::wrap_token(
+                    ("implementsToken", |node, context| Self::wrap_token(
                         node.implements_token().ok()
-                    ))),
+                    )),
                     ("types", |node, context| Self::wrap_node_list(
                         node.types().into_iter().flatten(),
                         context
@@ -3993,26 +3989,26 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_IMPORT_EQUALS_DECLARATION,
                     TsImportEqualsDeclaration,
-                    ("importToken", |node, context| Ok(Self::wrap_token(
+                    ("importToken", |node, context| Self::wrap_token(
                         node.import_token().ok()
-                    ))),
-                    ("typeToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("typeToken", |node, context| Self::wrap_token(
                         node.type_token()
-                    ))),
+                    )),
                     ("id", |node, context| Self::wrap_optional_node(
                         node.id().ok(),
                         context
                     )),
-                    ("eqToken", |node, context| Ok(Self::wrap_token(
+                    ("eqToken", |node, context| Self::wrap_token(
                         node.eq_token().ok()
-                    ))),
+                    )),
                     ("moduleReference", |node, context| Self::wrap_optional_node(
                         node.module_reference().ok(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_IMPORT_TYPE => {
@@ -4020,12 +4016,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_IMPORT_TYPE,
                     TsImportType,
-                    ("typeofToken", |node, context| Ok(Self::wrap_token(
+                    ("typeofToken", |node, context| Self::wrap_token(
                         node.typeof_token()
-                    ))),
-                    ("importToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("importToken", |node, context| Self::wrap_token(
                         node.import_token().ok()
-                    ))),
+                    )),
                     ("arguments", |node, context| Self::wrap_optional_node(
                         node.arguments().ok(),
                         context
@@ -4045,22 +4041,22 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_IMPORT_TYPE_ARGUMENTS,
                     TsImportTypeArguments,
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("argument", |node, context| Self::wrap_optional_node(
                         node.argument().ok(),
                         context
                     )),
-                    ("commaToken", |node, context| Ok(Self::wrap_token(
+                    ("commaToken", |node, context| Self::wrap_token(
                         node.comma_token()
-                    ))),
+                    )),
                     ("tsImportTypeAssertionBlock", |node, context| {
                         Self::wrap_optional_node(node.ts_import_type_assertion_block(), context)
                     }),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION => {
@@ -4068,22 +4064,22 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION,
                     TsImportTypeAssertion,
-                    ("withToken", |node, context| Ok(Self::wrap_token(
+                    ("withToken", |node, context| Self::wrap_token(
                         node.with_token().ok()
-                    ))),
-                    ("colonToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("colonToken", |node, context| Self::wrap_token(
                         node.colon_token().ok()
-                    ))),
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("assertions", |node, context| Self::wrap_node_list(
                         node.assertions().into_iter().flatten(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION_BLOCK => {
@@ -4091,16 +4087,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION_BLOCK,
                     TsImportTypeAssertionBlock,
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("typeAssertion", |node, context| Self::wrap_optional_node(
                         node.type_assertion().ok(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_IMPORT_TYPE_QUALIFIER => {
@@ -4108,9 +4104,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_IMPORT_TYPE_QUALIFIER,
                     TsImportTypeQualifier,
-                    ("dotToken", |node, context| Ok(Self::wrap_token(
+                    ("dotToken", |node, context| Self::wrap_token(
                         node.dot_token().ok()
-                    ))),
+                    )),
                     ("right", |node, context| Self::wrap_optional_node(
                         node.right().ok(),
                         context
@@ -4122,9 +4118,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_IN_MODIFIER,
                     TsInModifier,
-                    ("modifierToken", |node, context| Ok(Self::wrap_token(
+                    ("modifierToken", |node, context| Self::wrap_token(
                         node.modifier_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_INDEX_SIGNATURE_CLASS_MEMBER => {
@@ -4136,23 +4132,23 @@ impl JsAstNode {
                         node.modifiers(),
                         context
                     )),
-                    ("lBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("lBrackToken", |node, context| Self::wrap_token(
                         node.l_brack_token().ok()
-                    ))),
+                    )),
                     ("parameter", |node, context| Self::wrap_optional_node(
                         node.parameter().ok(),
                         context
                     )),
-                    ("rBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("rBrackToken", |node, context| Self::wrap_token(
                         node.r_brack_token().ok()
-                    ))),
+                    )),
                     ("typeAnnotation", |node, context| Self::wrap_optional_node(
                         node.type_annotation().ok(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_INDEX_SIGNATURE_PARAMETER => {
@@ -4175,26 +4171,26 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_INDEX_SIGNATURE_TYPE_MEMBER,
                     TsIndexSignatureTypeMember,
-                    ("readonlyToken", |node, context| Ok(Self::wrap_token(
+                    ("readonlyToken", |node, context| Self::wrap_token(
                         node.readonly_token()
-                    ))),
-                    ("lBrackToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("lBrackToken", |node, context| Self::wrap_token(
                         node.l_brack_token().ok()
-                    ))),
+                    )),
                     ("parameter", |node, context| Self::wrap_optional_node(
                         node.parameter().ok(),
                         context
                     )),
-                    ("rBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("rBrackToken", |node, context| Self::wrap_token(
                         node.r_brack_token().ok()
-                    ))),
+                    )),
                     ("typeAnnotation", |node, context| Self::wrap_optional_node(
                         node.type_annotation().ok(),
                         context
                     )),
-                    ("separatorToken", |node, context| Ok(Self::wrap_token(
+                    ("separatorToken", |node, context| Self::wrap_token(
                         node.separator_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_INDEXED_ACCESS_TYPE => {
@@ -4206,16 +4202,16 @@ impl JsAstNode {
                         node.object_type().ok(),
                         context
                     )),
-                    ("lBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("lBrackToken", |node, context| Self::wrap_token(
                         node.l_brack_token().ok()
-                    ))),
+                    )),
                     ("indexType", |node, context| Self::wrap_optional_node(
                         node.index_type().ok(),
                         context
                     )),
-                    ("rBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("rBrackToken", |node, context| Self::wrap_token(
                         node.r_brack_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_INFER_TYPE => {
@@ -4223,9 +4219,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_INFER_TYPE,
                     TsInferType,
-                    ("inferToken", |node, context| Ok(Self::wrap_token(
+                    ("inferToken", |node, context| Self::wrap_token(
                         node.infer_token().ok()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
@@ -4249,16 +4245,16 @@ impl JsAstNode {
                         node.name().ok(),
                         context
                     )),
-                    ("questionMarkToken", |node, context| Ok(Self::wrap_token(
+                    ("questionMarkToken", |node, context| Self::wrap_token(
                         node.question_mark_token()
-                    ))),
+                    )),
                     ("value", |node, context| Self::wrap_optional_node(
                         node.value().ok(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_INSTANTIATION_EXPRESSION => {
@@ -4281,9 +4277,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_INTERFACE_DECLARATION,
                     TsInterfaceDeclaration,
-                    ("interfaceToken", |node, context| Ok(Self::wrap_token(
+                    ("interfaceToken", |node, context| Self::wrap_token(
                         node.interface_token().ok()
-                    ))),
+                    )),
                     ("id", |node, context| Self::wrap_optional_node(
                         node.id().ok(),
                         context
@@ -4296,16 +4292,16 @@ impl JsAstNode {
                         node.extends_clause(),
                         context
                     )),
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("members", |node, context| Self::wrap_node_list(
                         node.members(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_INTERSECTION_TYPE => {
@@ -4313,8 +4309,8 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_INTERSECTION_TYPE,
                     TsIntersectionType,
-                    ("leadingSeparatorToken", |node, context| Ok(
-                        Self::wrap_token(node.leading_separator_token())
+                    ("leadingSeparatorToken", |node, context| Self::wrap_token(
+                        node.leading_separator_token()
                     )),
                     ("types", |node, context| Self::wrap_node_list(
                         node.types().into_iter().flatten(),
@@ -4327,9 +4323,7 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_LITERAL_ENUM_MEMBER_NAME,
                     TsLiteralEnumMemberName,
-                    ("value", |node, context| Ok(Self::wrap_token(
-                        node.value().ok()
-                    ))),
+                    ("value", |node, context| Self::wrap_token(node.value().ok())),
                 );
             }
             JsSyntaxKind::TS_MAPPED_TYPE => {
@@ -4337,23 +4331,23 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_MAPPED_TYPE,
                     TsMappedType,
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     (
                         "readonlyModifier",
                         |node, context| Self::wrap_optional_node(node.readonly_modifier(), context)
                     ),
-                    ("lBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("lBrackToken", |node, context| Self::wrap_token(
                         node.l_brack_token().ok()
-                    ))),
+                    )),
                     ("propertyName", |node, context| Self::wrap_optional_node(
                         node.property_name().ok(),
                         context
                     )),
-                    ("inToken", |node, context| Ok(Self::wrap_token(
+                    ("inToken", |node, context| Self::wrap_token(
                         node.in_token().ok()
-                    ))),
+                    )),
                     ("keysType", |node, context| Self::wrap_optional_node(
                         node.keys_type().ok(),
                         context
@@ -4362,9 +4356,9 @@ impl JsAstNode {
                         node.as_clause(),
                         context
                     )),
-                    ("rBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("rBrackToken", |node, context| Self::wrap_token(
                         node.r_brack_token().ok()
-                    ))),
+                    )),
                     (
                         "optionalModifier",
                         |node, context| Self::wrap_optional_node(node.optional_modifier(), context)
@@ -4373,12 +4367,12 @@ impl JsAstNode {
                         node.mapped_type(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_MAPPED_TYPE_AS_CLAUSE => {
@@ -4386,9 +4380,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_MAPPED_TYPE_AS_CLAUSE,
                     TsMappedTypeAsClause,
-                    ("asToken", |node, context| Ok(Self::wrap_token(
+                    ("asToken", |node, context| Self::wrap_token(
                         node.as_token().ok()
-                    ))),
+                    )),
                     ("ty", |node, context| Self::wrap_optional_node(
                         node.ty().ok(),
                         context
@@ -4400,12 +4394,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_MAPPED_TYPE_OPTIONAL_MODIFIER_CLAUSE,
                     TsMappedTypeOptionalModifierClause,
-                    ("operatorToken", |node, context| Ok(Self::wrap_token(
+                    ("operatorToken", |node, context| Self::wrap_token(
                         node.operator_token()
-                    ))),
-                    ("questionMarkToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("questionMarkToken", |node, context| Self::wrap_token(
                         node.question_mark_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_MAPPED_TYPE_READONLY_MODIFIER_CLAUSE => {
@@ -4413,12 +4407,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_MAPPED_TYPE_READONLY_MODIFIER_CLAUSE,
                     TsMappedTypeReadonlyModifierClause,
-                    ("operatorToken", |node, context| Ok(Self::wrap_token(
+                    ("operatorToken", |node, context| Self::wrap_token(
                         node.operator_token()
-                    ))),
-                    ("readonlyToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("readonlyToken", |node, context| Self::wrap_token(
                         node.readonly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_METHOD_SIGNATURE_CLASS_MEMBER => {
@@ -4430,16 +4424,16 @@ impl JsAstNode {
                         node.modifiers(),
                         context
                     )),
-                    ("asyncToken", |node, context| Ok(Self::wrap_token(
+                    ("asyncToken", |node, context| Self::wrap_token(
                         node.async_token()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
                     )),
-                    ("questionMarkToken", |node, context| Ok(Self::wrap_token(
+                    ("questionMarkToken", |node, context| Self::wrap_token(
                         node.question_mark_token()
-                    ))),
+                    )),
                     ("typeParameters", |node, context| Self::wrap_optional_node(
                         node.type_parameters(),
                         context
@@ -4451,9 +4445,9 @@ impl JsAstNode {
                     ("returnTypeAnnotation", |node, context| {
                         Self::wrap_optional_node(node.return_type_annotation(), context)
                     }),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_METHOD_SIGNATURE_TYPE_MEMBER => {
@@ -4465,9 +4459,9 @@ impl JsAstNode {
                         node.name().ok(),
                         context
                     )),
-                    ("optionalToken", |node, context| Ok(Self::wrap_token(
+                    ("optionalToken", |node, context| Self::wrap_token(
                         node.optional_token()
-                    ))),
+                    )),
                     ("typeParameters", |node, context| Self::wrap_optional_node(
                         node.type_parameters(),
                         context
@@ -4479,9 +4473,9 @@ impl JsAstNode {
                     ("returnTypeAnnotation", |node, context| {
                         Self::wrap_optional_node(node.return_type_annotation(), context)
                     }),
-                    ("separatorToken", |node, context| Ok(Self::wrap_token(
+                    ("separatorToken", |node, context| Self::wrap_token(
                         node.separator_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_MODULE_BLOCK => {
@@ -4489,16 +4483,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_MODULE_BLOCK,
                     TsModuleBlock,
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("items", |node, context| Self::wrap_node_list(
                         node.items(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_MODULE_DECLARATION => {
@@ -4506,9 +4500,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_MODULE_DECLARATION,
                     TsModuleDeclaration,
-                    ("moduleOrNamespace", |node, context| Ok(Self::wrap_token(
+                    ("moduleOrNamespace", |node, context| Self::wrap_token(
                         node.module_or_namespace().ok()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
@@ -4524,19 +4518,19 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_NAMED_TUPLE_TYPE_ELEMENT,
                     TsNamedTupleTypeElement,
-                    ("dotdotdotToken", |node, context| Ok(Self::wrap_token(
+                    ("dotdotdotToken", |node, context| Self::wrap_token(
                         node.dotdotdot_token()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
                     )),
-                    ("questionMarkToken", |node, context| Ok(Self::wrap_token(
+                    ("questionMarkToken", |node, context| Self::wrap_token(
                         node.question_mark_token()
-                    ))),
-                    ("colonToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("colonToken", |node, context| Self::wrap_token(
                         node.colon_token().ok()
-                    ))),
+                    )),
                     ("ty", |node, context| Self::wrap_optional_node(
                         node.ty().ok(),
                         context
@@ -4548,9 +4542,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_NEVER_TYPE,
                     TsNeverType,
-                    ("neverToken", |node, context| Ok(Self::wrap_token(
+                    ("neverToken", |node, context| Self::wrap_token(
                         node.never_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_NON_NULL_ASSERTION_ASSIGNMENT => {
@@ -4562,9 +4556,9 @@ impl JsAstNode {
                         node.assignment().ok(),
                         context
                     )),
-                    ("exclToken", |node, context| Ok(Self::wrap_token(
+                    ("exclToken", |node, context| Self::wrap_token(
                         node.excl_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION => {
@@ -4576,9 +4570,9 @@ impl JsAstNode {
                         node.expression().ok(),
                         context
                     )),
-                    ("exclToken", |node, context| Ok(Self::wrap_token(
+                    ("exclToken", |node, context| Self::wrap_token(
                         node.excl_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_NON_PRIMITIVE_TYPE => {
@@ -4586,9 +4580,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_NON_PRIMITIVE_TYPE,
                     TsNonPrimitiveType,
-                    ("objectToken", |node, context| Ok(Self::wrap_token(
+                    ("objectToken", |node, context| Self::wrap_token(
                         node.object_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_NULL_LITERAL_TYPE => {
@@ -4596,9 +4590,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_NULL_LITERAL_TYPE,
                     TsNullLiteralType,
-                    ("literalToken", |node, context| Ok(Self::wrap_token(
+                    ("literalToken", |node, context| Self::wrap_token(
                         node.literal_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_NUMBER_LITERAL_TYPE => {
@@ -4606,12 +4600,12 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_NUMBER_LITERAL_TYPE,
                     TsNumberLiteralType,
-                    ("minusToken", |node, context| Ok(Self::wrap_token(
+                    ("minusToken", |node, context| Self::wrap_token(
                         node.minus_token()
-                    ))),
-                    ("literalToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("literalToken", |node, context| Self::wrap_token(
                         node.literal_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_NUMBER_TYPE => {
@@ -4619,9 +4613,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_NUMBER_TYPE,
                     TsNumberType,
-                    ("numberToken", |node, context| Ok(Self::wrap_token(
+                    ("numberToken", |node, context| Self::wrap_token(
                         node.number_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_OBJECT_TYPE => {
@@ -4629,16 +4623,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_OBJECT_TYPE,
                     TsObjectType,
-                    ("lCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("lCurlyToken", |node, context| Self::wrap_token(
                         node.l_curly_token().ok()
-                    ))),
+                    )),
                     ("members", |node, context| Self::wrap_node_list(
                         node.members(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_OPTIONAL_PROPERTY_ANNOTATION => {
@@ -4646,9 +4640,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_OPTIONAL_PROPERTY_ANNOTATION,
                     TsOptionalPropertyAnnotation,
-                    ("questionMarkToken", |node, context| Ok(Self::wrap_token(
+                    ("questionMarkToken", |node, context| Self::wrap_token(
                         node.question_mark_token().ok()
-                    ))),
+                    )),
                     ("typeAnnotation", |node, context| Self::wrap_optional_node(
                         node.type_annotation(),
                         context
@@ -4664,9 +4658,9 @@ impl JsAstNode {
                         node.ty().ok(),
                         context
                     )),
-                    ("questionMarkToken", |node, context| Ok(Self::wrap_token(
+                    ("questionMarkToken", |node, context| Self::wrap_token(
                         node.question_mark_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_OUT_MODIFIER => {
@@ -4674,9 +4668,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_OUT_MODIFIER,
                     TsOutModifier,
-                    ("modifierToken", |node, context| Ok(Self::wrap_token(
+                    ("modifierToken", |node, context| Self::wrap_token(
                         node.modifier_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_OVERRIDE_MODIFIER => {
@@ -4684,9 +4678,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_OVERRIDE_MODIFIER,
                     TsOverrideModifier,
-                    ("modifierToken", |node, context| Ok(Self::wrap_token(
+                    ("modifierToken", |node, context| Self::wrap_token(
                         node.modifier_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_PARENTHESIZED_TYPE => {
@@ -4694,16 +4688,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_PARENTHESIZED_TYPE,
                     TsParenthesizedType,
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("ty", |node, context| Self::wrap_optional_node(
                         node.ty().ok(),
                         context
                     )),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_PREDICATE_RETURN_TYPE => {
@@ -4715,9 +4709,9 @@ impl JsAstNode {
                         node.parameter_name().ok(),
                         context
                     )),
-                    ("isToken", |node, context| Ok(Self::wrap_token(
+                    ("isToken", |node, context| Self::wrap_token(
                         node.is_token().ok()
-                    ))),
+                    )),
                     ("ty", |node, context| Self::wrap_optional_node(
                         node.ty().ok(),
                         context
@@ -4759,9 +4753,9 @@ impl JsAstNode {
                     ("propertyAnnotation", |node, context| {
                         Self::wrap_optional_node(node.property_annotation(), context)
                     }),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_PROPERTY_SIGNATURE_TYPE_MEMBER => {
@@ -4769,23 +4763,23 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_PROPERTY_SIGNATURE_TYPE_MEMBER,
                     TsPropertySignatureTypeMember,
-                    ("readonlyToken", |node, context| Ok(Self::wrap_token(
+                    ("readonlyToken", |node, context| Self::wrap_token(
                         node.readonly_token()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
                     )),
-                    ("optionalToken", |node, context| Ok(Self::wrap_token(
+                    ("optionalToken", |node, context| Self::wrap_token(
                         node.optional_token()
-                    ))),
+                    )),
                     ("typeAnnotation", |node, context| Self::wrap_optional_node(
                         node.type_annotation(),
                         context
                     )),
-                    ("separatorToken", |node, context| Ok(Self::wrap_token(
+                    ("separatorToken", |node, context| Self::wrap_token(
                         node.separator_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_QUALIFIED_MODULE_NAME => {
@@ -4797,9 +4791,9 @@ impl JsAstNode {
                         node.left().ok(),
                         context
                     )),
-                    ("dotToken", |node, context| Ok(Self::wrap_token(
+                    ("dotToken", |node, context| Self::wrap_token(
                         node.dot_token().ok()
-                    ))),
+                    )),
                     ("right", |node, context| Self::wrap_optional_node(
                         node.right().ok(),
                         context
@@ -4815,9 +4809,9 @@ impl JsAstNode {
                         node.left().ok(),
                         context
                     )),
-                    ("dotToken", |node, context| Ok(Self::wrap_token(
+                    ("dotToken", |node, context| Self::wrap_token(
                         node.dot_token().ok()
-                    ))),
+                    )),
                     ("right", |node, context| Self::wrap_optional_node(
                         node.right().ok(),
                         context
@@ -4829,9 +4823,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_READONLY_MODIFIER,
                     TsReadonlyModifier,
-                    ("modifierToken", |node, context| Ok(Self::wrap_token(
+                    ("modifierToken", |node, context| Self::wrap_token(
                         node.modifier_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_REFERENCE_TYPE => {
@@ -4854,9 +4848,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_REST_TUPLE_TYPE_ELEMENT,
                     TsRestTupleTypeElement,
-                    ("dotdotdotToken", |node, context| Ok(Self::wrap_token(
+                    ("dotdotdotToken", |node, context| Self::wrap_token(
                         node.dotdotdot_token().ok()
-                    ))),
+                    )),
                     ("ty", |node, context| Self::wrap_optional_node(
                         node.ty().ok(),
                         context
@@ -4868,9 +4862,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_RETURN_TYPE_ANNOTATION,
                     TsReturnTypeAnnotation,
-                    ("colonToken", |node, context| Ok(Self::wrap_token(
+                    ("colonToken", |node, context| Self::wrap_token(
                         node.colon_token().ok()
-                    ))),
+                    )),
                     ("ty", |node, context| Self::wrap_optional_node(
                         node.ty().ok(),
                         context
@@ -4886,9 +4880,9 @@ impl JsAstNode {
                         node.assignment().ok(),
                         context
                     )),
-                    ("satisfiesToken", |node, context| Ok(Self::wrap_token(
+                    ("satisfiesToken", |node, context| Self::wrap_token(
                         node.satisfies_token().ok()
-                    ))),
+                    )),
                     ("ty", |node, context| Self::wrap_optional_node(
                         node.ty().ok(),
                         context
@@ -4904,9 +4898,9 @@ impl JsAstNode {
                         node.expression().ok(),
                         context
                     )),
-                    ("satisfiesToken", |node, context| Ok(Self::wrap_token(
+                    ("satisfiesToken", |node, context| Self::wrap_token(
                         node.satisfies_token().ok()
-                    ))),
+                    )),
                     ("ty", |node, context| Self::wrap_optional_node(
                         node.ty().ok(),
                         context
@@ -4922,29 +4916,29 @@ impl JsAstNode {
                         node.modifiers(),
                         context
                     )),
-                    ("setToken", |node, context| Ok(Self::wrap_token(
+                    ("setToken", |node, context| Self::wrap_token(
                         node.set_token().ok()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
                     )),
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("parameter", |node, context| Self::wrap_optional_node(
                         node.parameter().ok(),
                         context
                     )),
-                    ("commaToken", |node, context| Ok(Self::wrap_token(
+                    ("commaToken", |node, context| Self::wrap_token(
                         node.comma_token()
-                    ))),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_SETTER_SIGNATURE_TYPE_MEMBER => {
@@ -4952,29 +4946,29 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_SETTER_SIGNATURE_TYPE_MEMBER,
                     TsSetterSignatureTypeMember,
-                    ("setToken", |node, context| Ok(Self::wrap_token(
+                    ("setToken", |node, context| Self::wrap_token(
                         node.set_token().ok()
-                    ))),
+                    )),
                     ("name", |node, context| Self::wrap_optional_node(
                         node.name().ok(),
                         context
                     )),
-                    ("lParenToken", |node, context| Ok(Self::wrap_token(
+                    ("lParenToken", |node, context| Self::wrap_token(
                         node.l_paren_token().ok()
-                    ))),
+                    )),
                     ("parameter", |node, context| Self::wrap_optional_node(
                         node.parameter().ok(),
                         context
                     )),
-                    ("commaToken", |node, context| Ok(Self::wrap_token(
+                    ("commaToken", |node, context| Self::wrap_token(
                         node.comma_token()
-                    ))),
-                    ("rParenToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("rParenToken", |node, context| Self::wrap_token(
                         node.r_paren_token().ok()
-                    ))),
-                    ("separatorToken", |node, context| Ok(Self::wrap_token(
+                    )),
+                    ("separatorToken", |node, context| Self::wrap_token(
                         node.separator_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_STRING_LITERAL_TYPE => {
@@ -4982,9 +4976,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_STRING_LITERAL_TYPE,
                     TsStringLiteralType,
-                    ("literalToken", |node, context| Ok(Self::wrap_token(
+                    ("literalToken", |node, context| Self::wrap_token(
                         node.literal_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_STRING_TYPE => {
@@ -4992,9 +4986,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_STRING_TYPE,
                     TsStringType,
-                    ("stringToken", |node, context| Ok(Self::wrap_token(
+                    ("stringToken", |node, context| Self::wrap_token(
                         node.string_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_SYMBOL_TYPE => {
@@ -5002,9 +4996,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_SYMBOL_TYPE,
                     TsSymbolType,
-                    ("symbolToken", |node, context| Ok(Self::wrap_token(
+                    ("symbolToken", |node, context| Self::wrap_token(
                         node.symbol_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_TEMPLATE_CHUNK_ELEMENT => {
@@ -5012,9 +5006,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_TEMPLATE_CHUNK_ELEMENT,
                     TsTemplateChunkElement,
-                    ("templateChunkToken", |node, context| Ok(Self::wrap_token(
+                    ("templateChunkToken", |node, context| Self::wrap_token(
                         node.template_chunk_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_TEMPLATE_ELEMENT => {
@@ -5022,16 +5016,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_TEMPLATE_ELEMENT,
                     TsTemplateElement,
-                    ("dollarCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("dollarCurlyToken", |node, context| Self::wrap_token(
                         node.dollar_curly_token().ok()
-                    ))),
+                    )),
                     ("ty", |node, context| Self::wrap_optional_node(
                         node.ty().ok(),
                         context
                     )),
-                    ("rCurlyToken", |node, context| Ok(Self::wrap_token(
+                    ("rCurlyToken", |node, context| Self::wrap_token(
                         node.r_curly_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_TEMPLATE_LITERAL_TYPE => {
@@ -5039,16 +5033,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_TEMPLATE_LITERAL_TYPE,
                     TsTemplateLiteralType,
-                    ("lTickToken", |node, context| Ok(Self::wrap_token(
+                    ("lTickToken", |node, context| Self::wrap_token(
                         node.l_tick_token().ok()
-                    ))),
+                    )),
                     ("elements", |node, context| Self::wrap_node_list(
                         node.elements(),
                         context
                     )),
-                    ("rTickToken", |node, context| Ok(Self::wrap_token(
+                    ("rTickToken", |node, context| Self::wrap_token(
                         node.r_tick_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_THIS_PARAMETER => {
@@ -5056,9 +5050,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_THIS_PARAMETER,
                     TsThisParameter,
-                    ("thisToken", |node, context| Ok(Self::wrap_token(
+                    ("thisToken", |node, context| Self::wrap_token(
                         node.this_token().ok()
-                    ))),
+                    )),
                     ("typeAnnotation", |node, context| Self::wrap_optional_node(
                         node.type_annotation(),
                         context
@@ -5070,9 +5064,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_THIS_TYPE,
                     TsThisType,
-                    ("thisToken", |node, context| Ok(Self::wrap_token(
+                    ("thisToken", |node, context| Self::wrap_token(
                         node.this_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_TUPLE_TYPE => {
@@ -5080,16 +5074,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_TUPLE_TYPE,
                     TsTupleType,
-                    ("lBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("lBrackToken", |node, context| Self::wrap_token(
                         node.l_brack_token().ok()
-                    ))),
+                    )),
                     ("elements", |node, context| Self::wrap_node_list(
                         node.elements().into_iter().flatten(),
                         context
                     )),
-                    ("rBrackToken", |node, context| Ok(Self::wrap_token(
+                    ("rBrackToken", |node, context| Self::wrap_token(
                         node.r_brack_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => {
@@ -5097,9 +5091,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION,
                     TsTypeAliasDeclaration,
-                    ("typeToken", |node, context| Ok(Self::wrap_token(
+                    ("typeToken", |node, context| Self::wrap_token(
                         node.type_token().ok()
-                    ))),
+                    )),
                     ("bindingIdentifier", |node, context| {
                         Self::wrap_optional_node(node.binding_identifier().ok(), context)
                     }),
@@ -5107,16 +5101,16 @@ impl JsAstNode {
                         node.type_parameters(),
                         context
                     )),
-                    ("eqToken", |node, context| Ok(Self::wrap_token(
+                    ("eqToken", |node, context| Self::wrap_token(
                         node.eq_token().ok()
-                    ))),
+                    )),
                     ("ty", |node, context| Self::wrap_optional_node(
                         node.ty().ok(),
                         context
                     )),
-                    ("semicolonToken", |node, context| Ok(Self::wrap_token(
+                    ("semicolonToken", |node, context| Self::wrap_token(
                         node.semicolon_token()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_TYPE_ANNOTATION => {
@@ -5124,9 +5118,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_TYPE_ANNOTATION,
                     TsTypeAnnotation,
-                    ("colonToken", |node, context| Ok(Self::wrap_token(
+                    ("colonToken", |node, context| Self::wrap_token(
                         node.colon_token().ok()
-                    ))),
+                    )),
                     ("ty", |node, context| Self::wrap_optional_node(
                         node.ty().ok(),
                         context
@@ -5138,16 +5132,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_TYPE_ARGUMENTS,
                     TsTypeArguments,
-                    ("lAngleToken", |node, context| Ok(Self::wrap_token(
+                    ("lAngleToken", |node, context| Self::wrap_token(
                         node.l_angle_token().ok()
-                    ))),
+                    )),
                     ("tsTypeArgumentList", |node, context| Self::wrap_node_list(
                         node.ts_type_argument_list().into_iter().flatten(),
                         context
                     )),
-                    ("rAngleToken", |node, context| Ok(Self::wrap_token(
+                    ("rAngleToken", |node, context| Self::wrap_token(
                         node.r_angle_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_TYPE_ASSERTION_ASSIGNMENT => {
@@ -5155,16 +5149,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_TYPE_ASSERTION_ASSIGNMENT,
                     TsTypeAssertionAssignment,
-                    ("lAngleToken", |node, context| Ok(Self::wrap_token(
+                    ("lAngleToken", |node, context| Self::wrap_token(
                         node.l_angle_token().ok()
-                    ))),
+                    )),
                     ("ty", |node, context| Self::wrap_optional_node(
                         node.ty().ok(),
                         context
                     )),
-                    ("rAngleToken", |node, context| Ok(Self::wrap_token(
+                    ("rAngleToken", |node, context| Self::wrap_token(
                         node.r_angle_token().ok()
-                    ))),
+                    )),
                     ("assignment", |node, context| Self::wrap_optional_node(
                         node.assignment().ok(),
                         context
@@ -5176,16 +5170,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION,
                     TsTypeAssertionExpression,
-                    ("lAngleToken", |node, context| Ok(Self::wrap_token(
+                    ("lAngleToken", |node, context| Self::wrap_token(
                         node.l_angle_token().ok()
-                    ))),
+                    )),
                     ("ty", |node, context| Self::wrap_optional_node(
                         node.ty().ok(),
                         context
                     )),
-                    ("rAngleToken", |node, context| Ok(Self::wrap_token(
+                    ("rAngleToken", |node, context| Self::wrap_token(
                         node.r_angle_token().ok()
-                    ))),
+                    )),
                     ("expression", |node, context| Self::wrap_optional_node(
                         node.expression().ok(),
                         context
@@ -5197,9 +5191,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_TYPE_CONSTRAINT_CLAUSE,
                     TsTypeConstraintClause,
-                    ("extendsToken", |node, context| Ok(Self::wrap_token(
+                    ("extendsToken", |node, context| Self::wrap_token(
                         node.extends_token().ok()
-                    ))),
+                    )),
                     ("ty", |node, context| Self::wrap_optional_node(
                         node.ty().ok(),
                         context
@@ -5211,9 +5205,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_TYPE_OPERATOR_TYPE,
                     TsTypeOperatorType,
-                    ("operatorToken", |node, context| Ok(Self::wrap_token(
+                    ("operatorToken", |node, context| Self::wrap_token(
                         node.operator_token().ok()
-                    ))),
+                    )),
                     ("ty", |node, context| Self::wrap_optional_node(
                         node.ty().ok(),
                         context
@@ -5248,9 +5242,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_TYPE_PARAMETER_NAME,
                     TsTypeParameterName,
-                    ("identToken", |node, context| Ok(Self::wrap_token(
+                    ("identToken", |node, context| Self::wrap_token(
                         node.ident_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_TYPE_PARAMETERS => {
@@ -5258,16 +5252,16 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_TYPE_PARAMETERS,
                     TsTypeParameters,
-                    ("lAngleToken", |node, context| Ok(Self::wrap_token(
+                    ("lAngleToken", |node, context| Self::wrap_token(
                         node.l_angle_token().ok()
-                    ))),
+                    )),
                     ("items", |node, context| Self::wrap_node_list(
                         node.items().into_iter().flatten(),
                         context
                     )),
-                    ("rAngleToken", |node, context| Ok(Self::wrap_token(
+                    ("rAngleToken", |node, context| Self::wrap_token(
                         node.r_angle_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_TYPEOF_TYPE => {
@@ -5275,9 +5269,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_TYPEOF_TYPE,
                     TsTypeofType,
-                    ("typeofToken", |node, context| Ok(Self::wrap_token(
+                    ("typeofToken", |node, context| Self::wrap_token(
                         node.typeof_token().ok()
-                    ))),
+                    )),
                     ("expressionName", |node, context| Self::wrap_optional_node(
                         node.expression_name().ok(),
                         context
@@ -5293,9 +5287,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_UNDEFINED_TYPE,
                     TsUndefinedType,
-                    ("undefinedToken", |node, context| Ok(Self::wrap_token(
+                    ("undefinedToken", |node, context| Self::wrap_token(
                         node.undefined_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_UNION_TYPE => {
@@ -5303,8 +5297,8 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_UNION_TYPE,
                     TsUnionType,
-                    ("leadingSeparatorToken", |node, context| Ok(
-                        Self::wrap_token(node.leading_separator_token())
+                    ("leadingSeparatorToken", |node, context| Self::wrap_token(
+                        node.leading_separator_token()
                     )),
                     ("types", |node, context| Self::wrap_node_list(
                         node.types().into_iter().flatten(),
@@ -5317,9 +5311,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_UNKNOWN_TYPE,
                     TsUnknownType,
-                    ("unknownToken", |node, context| Ok(Self::wrap_token(
+                    ("unknownToken", |node, context| Self::wrap_token(
                         node.unknown_token().ok()
-                    ))),
+                    )),
                 );
             }
             JsSyntaxKind::TS_VOID_TYPE => {
@@ -5327,9 +5321,9 @@ impl JsAstNode {
                     prototype,
                     JsSyntaxKind::TS_VOID_TYPE,
                     TsVoidType,
-                    ("voidToken", |node, context| Ok(Self::wrap_token(
+                    ("voidToken", |node, context| Self::wrap_token(
                         node.void_token().ok()
-                    ))),
+                    )),
                 );
             }
             _ => {}

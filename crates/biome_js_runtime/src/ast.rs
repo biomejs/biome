@@ -54,65 +54,64 @@ impl JsAstNode {
         Ok(())
     }
 
-    pub(crate) fn from_node(node: JsSyntaxNode, context: &mut Context) -> JsResult<JsValue> {
+    pub(crate) fn from_node(node: JsSyntaxNode, context: &mut Context) -> JsValue {
         let base_prototype = context
             .get_global_class::<Self>()
-            .ok_or_else(|| {
-                JsNativeError::typ().with_message("JavaScript AST class is not registered")
-            })?
+            .expect("the JsAstNode class must be registered before loading the plugin")
             .prototype();
 
         let prototype = Self::prototype_for_kind(node.kind(), base_prototype, context);
 
-        Ok(
-            ObjectInitializer::with_native_data_and_proto(Self { node }, prototype, context)
-                .build()
-                .into(),
-        )
+        ObjectInitializer::with_native_data_and_proto(Self { node }, prototype, context)
+            .build()
+            .into()
     }
 
     pub(crate) fn text_range(value: &JsValue) -> Option<TextRange> {
         let object = value.as_object()?;
         let node = object.downcast_ref::<Self>()?;
+
         Some(node.node.text_trimmed_range())
     }
 
-    fn from_this(this: &JsValue) -> JsResult<JsSyntaxNode> {
-        let Some(object) = this.as_object() else {
-            return Err(JsNativeError::typ()
-                .with_message("AST getter called with an invalid receiver")
-                .into());
-        };
-        let Some(node) = object.downcast_ref::<Self>() else {
-            return Err(JsNativeError::typ()
-                .with_message("AST getter called with an invalid receiver")
-                .into());
-        };
+    fn from_this(this: &JsValue) -> Option<JsSyntaxNode> {
+        let object = this.as_object()?;
+        let node = object.downcast_ref::<Self>()?;
 
-        Ok(node.node.clone())
+        Some(node.node.clone())
     }
 
     fn get_kind(this: &JsValue, _args: &[JsValue], _context: &mut Context) -> JsResult<JsValue> {
-        let node = Self::from_this(this)?;
+        let Some(node) = Self::from_this(this) else {
+            return Err(JsNativeError::typ()
+                .with_message("AST getter called with an invalid receiver")
+                .into());
+        };
+
         Ok(JsString::from(format!("{:?}", node.kind())).into())
     }
 
     fn get_text(this: &JsValue, _args: &[JsValue], _context: &mut Context) -> JsResult<JsValue> {
-        let node = Self::from_this(this)?;
+        let Some(node) = Self::from_this(this) else {
+            return Err(JsNativeError::typ()
+                .with_message("AST getter called with an invalid receiver")
+                .into());
+        };
+
         Ok(JsString::from(node.text_trimmed().to_string()).into())
     }
 
-    fn wrap_optional_node<N>(node: Option<N>, context: &mut Context) -> JsResult<JsValue>
+    fn wrap_optional_node<N>(node: Option<N>, context: &mut Context) -> JsValue
     where
         N: AstNode<Language = JsLanguage>,
     {
         match node {
             Some(node) => Self::from_node(node.into_syntax(), context),
-            None => Ok(JsValue::undefined()),
+            None => JsValue::undefined(),
         }
     }
 
-    fn wrap_node_list<I, N>(nodes: I, context: &mut Context) -> JsResult<JsValue>
+    fn wrap_node_list<I, N>(nodes: I, context: &mut Context) -> JsValue
     where
         I: IntoIterator<Item = N>,
         N: AstNode<Language = JsLanguage>,
@@ -120,9 +119,9 @@ impl JsAstNode {
         let nodes = nodes
             .into_iter()
             .map(|node| Self::from_node(node.into_syntax(), context))
-            .collect::<JsResult<Vec<_>>>()?;
+            .collect::<Vec<_>>();
 
-        Ok(JsArray::from_iter(nodes, context).into())
+        JsArray::from_iter(nodes, context).into()
     }
 
     fn wrap_token(token: Option<JsSyntaxToken>) -> JsValue {
@@ -181,12 +180,14 @@ macro_rules! register_js_ast_fields {
                 |this: &JsValue, _args: &[JsValue], js_context: &mut Context| {
                     let $context = js_context;
                     let _ = &$context;
-                    let syntax = Self::from_this(this)?;
+                    let Some(syntax) = Self::from_this(this) else {
+                        return Ok(JsValue::undefined());
+                    };
                     if syntax.kind() != $node_kind {
                         return Ok(JsValue::undefined());
                     }
                     let $node = cast_js_ast_node!(syntax, $node_type);
-                    $value
+                    Ok($value)
                 },
             )
             .to_js_function($prototype.context().realm());
