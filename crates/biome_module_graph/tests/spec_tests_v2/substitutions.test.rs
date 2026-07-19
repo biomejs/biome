@@ -73,6 +73,47 @@ fn test_infer_module_types_substitutes_generic_members_through_lookup_traversal(
 }
 
 #[test]
+fn test_infer_module_types_collects_members_from_an_imported_generic_union() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/types.ts".into(),
+        r#"
+            export namespace Types {
+                export type Result<T> =
+                    | { success: true; data: T }
+                    | { success: false; error: string };
+            }
+
+            export default Types;
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import type Types from "./types";
+
+            declare function parse(): Types.Result<string>;
+            export const success = parse().success;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/types.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let success_ty = inferred_binding_ty_by_name(&db, index_module, inferred, "success")
+        .expect("success binding type must be inferred");
+    let success_ty = normalize_type(&db, index_module, success_ty);
+
+    assert!(
+        is_inferred_boolean(&db, success_ty),
+        "success must include both boolean variants, got {}",
+        format_inferred_type(&db, success_ty)
+    );
+}
+
+#[test]
 fn test_infer_call_expression_type_substitutes_direct_generic_return_type() {
     let fs = MemoryFileSystem::default();
     fs.insert(
