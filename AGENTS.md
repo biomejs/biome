@@ -218,6 +218,17 @@ cargo test
 
 Read files in full before making wide-ranging changes, before editing files you have not already fully inspected, and when the user asks you to investigate or audit something. Do not rely only on search snippets for broad changes.
 
+### 7. Comments and Doc Comments
+
+These rules apply to **every** comment you write, including ones added incidentally while fixing a bug. Full guidance with examples: [`.claude/skills/doc-comments/SKILL.md`](./.claude/skills/doc-comments/SKILL.md).
+
+- Write for a contributor reading the code at HEAD, months later, with no access to this conversation, the PR, or the diff.
+- Never narrate change history ("now", "previously", "no longer") and never address the reviewer ("this correctly handles..."). State how the code works, not how it came to be or why the change is right.
+- Deletion test: a comment must state something the reader cannot recover from the code. If names or types already carry it, don't write it.
+- `///` docs state the contract (behavior, invariants, panics); `//!` docs explain why the module exists and its terminology; `//` comments carry rationale only.
+- When your change alters documented behavior, extend or correct the existing prose — never replace specific docs with generic text.
+- Exception: rustdoc inside `declare_lint_rule!` is end-user documentation for the website; these rules don't apply there.
+
 ## Available Resources
 
 ### Skills (Procedural Knowledge)
@@ -226,6 +237,7 @@ Located in `.claude/skills/`, these provide step-by-step workflows:
 
 - **biome-developer** - General development best practices and common gotchas
 - **changeset** - Creating and writing proper changesets
+- **doc-comments** - Writing comments and rustdoc addressed to developers
 - **eslint-migrate-options** - Implementing ESLint-to-Biome rule option migrators
 - **lint-rule-development** - Creating and testing lint rules
 - **formatter-development** - Implementing formatters
