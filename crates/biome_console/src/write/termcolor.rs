@@ -140,9 +140,7 @@ impl<W> SanitizeAdapter<W>
 where
     W: WriteColor,
 {
-    /// Writes `bytes` verbatim in a single call. Used both for runs of
-    /// content that need no sanitization and for the (already UTF-8
-    /// encoded) replacement characters.
+    /// Writes `bytes` verbatim.
     fn write_verbatim(&mut self, bytes: &[u8]) -> fmt::Result {
         if bytes.is_empty() {
             return Ok(());
@@ -163,27 +161,27 @@ where
 {
     fn write_str(&mut self, content: &str) -> fmt::Result {
         let mut buffer = [0; 4];
-        // Start of the current run of bytes that can be written verbatim
+        // Start of the current stretch of bytes that can be written verbatim
         // (i.e. need no replacement). Flushed in one `write_all` call
         // whenever a grapheme needing replacement is found, instead of
         // writing one character at a time: most content (source code,
         // punctuation, plain ASCII text) needs no sanitization at all, so
         // this keeps the common case to a single write per `write_str`
         // call rather than one per character.
-        let mut run_start = 0;
+        let mut segment_start = 0;
 
         for (offset, grapheme) in content.grapheme_indices(true) {
             let width = UnicodeWidthStr::width(grapheme);
             let is_whitespace = grapheme_is_whitespace(grapheme);
 
             if !is_whitespace && width == 0 {
-                self.write_verbatim(content[run_start..offset].as_bytes())?;
+                self.write_verbatim(&content.as_bytes()[segment_start..offset])?;
 
                 let char_to_write = char::REPLACEMENT_CHARACTER;
                 char_to_write.encode_utf8(&mut buffer);
                 self.write_verbatim(&buffer[..char_to_write.len_utf8()])?;
 
-                run_start = offset + grapheme.len();
+                segment_start = offset + grapheme.len();
                 continue;
             }
 
@@ -197,38 +195,37 @@ where
             if !is_ascii {
                 if cfg!(windows) {
                     // On Windows, always convert all non-ASCII graphemes due to poor terminal support
-                    self.write_verbatim(content[run_start..offset].as_bytes())?;
+                    self.write_verbatim(&content.as_bytes()[segment_start..offset])?;
 
                     let replacement = unicode_to_ascii(grapheme.chars().nth(0).unwrap());
                     replacement.encode_utf8(&mut buffer);
                     self.write_verbatim(&buffer[..replacement.len_utf8()])?;
 
-                    run_start = offset + grapheme.len();
-                    continue;
+                    segment_start = offset + grapheme.len();
                 } else if !self.writer.supports_color() {
                     // On non-Windows with colors disabled:
                     // Only convert single-codepoint graphemes (diagnostic symbols)
                     // Multi-codepoint graphemes (like emoji with modifiers) are preserved for source code fidelity
-                    let chars: Vec<char> = grapheme.chars().collect();
-                    if chars.len() == 1 {
-                        self.write_verbatim(content[run_start..offset].as_bytes())?;
+                    let mut chars = grapheme.chars();
+                    let first = chars.next();
+                    if let (Some(character), None) = (first, chars.next()) {
+                        self.write_verbatim(&content.as_bytes()[segment_start..offset])?;
 
-                        let replacement = unicode_to_ascii(chars[0]);
+                        let replacement = unicode_to_ascii(character);
                         replacement.encode_utf8(&mut buffer);
                         self.write_verbatim(&buffer[..replacement.len_utf8()])?;
 
-                        run_start = offset + grapheme.len();
-                        continue;
+                        segment_start = offset + grapheme.len();
                     }
                     // Multi-codepoint graphemes fall through to be written as-is below
                 }
             }
 
             // ASCII grapheme, or a non-ASCII one that isn't being replaced:
-            // leave it as part of the current verbatim run.
+            // leave it as part of the current verbatim stretch.
         }
 
-        self.write_verbatim(content[run_start..].as_bytes())
+        self.write_verbatim(&content.as_bytes()[segment_start..])
     }
 }
 
@@ -376,16 +373,14 @@ mod tests {
         }
     }
 
-    /// Wraps a [Vec<u8>] and counts how many times [io::Write::write] is
-    /// called on it, so tests can assert on the number of underlying writes
-    /// `SanitizeAdapter` performs, not just the bytes it eventually produces.
+    /// Counts how many times [io::Write::write] is called.
     #[derive(Default)]
-    struct CountingWriter {
+    struct TestWriter {
         buffer: Vec<u8>,
         write_count: usize,
     }
 
-    impl IoWrite for CountingWriter {
+    impl IoWrite for TestWriter {
         fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
             self.write_count += 1;
             self.buffer.write(buf)
@@ -396,14 +391,11 @@ mod tests {
         }
     }
 
-    /// Content that needs no sanitization at all -- the overwhelmingly common
-    /// case -- should reach the underlying writer in a single call, not one
-    /// call per character.
     #[test]
     fn test_clean_content_is_written_in_a_single_call() {
         const INPUT: &str = "the quick brown fox jumps over the lazy dog, 42 times.";
 
-        let mut counting = CountingWriter::default();
+        let mut counting = TestWriter::default();
 
         {
             let writer = termcolor::Ansi::new(&mut counting);
@@ -423,9 +415,6 @@ mod tests {
         );
     }
 
-    /// Content with a handful of characters needing replacement should still
-    /// only pay for a write per *replacement*, not per character: the clean
-    /// runs between replacements must still be batched.
     #[test]
     fn test_mixed_content_batches_clean_runs() {
         // Two zero-width characters (replaced) surrounded by three runs of
@@ -433,7 +422,7 @@ mod tests {
         // writes = 5, regardless of how long the surrounding clean runs are.
         const INPUT: &str = "some reasonably long clean run of text\0another fairly long clean run of text\0and a final clean run";
 
-        let mut counting = CountingWriter::default();
+        let mut counting = TestWriter::default();
 
         {
             let writer = termcolor::Ansi::new(&mut counting);
