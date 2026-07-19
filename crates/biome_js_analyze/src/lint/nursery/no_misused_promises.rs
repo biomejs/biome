@@ -108,6 +108,20 @@ impl Rule for NoMisusedPromises {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let expression = ctx.query();
+
+        // Both branches below only ever produce a signal when `expression`
+        // sits in one of a handful of specific syntactic positions (a
+        // conditional/loop test, a spread element, or a call/new argument)
+        // -- see `is_relevant_position`, which mirrors their syntactic
+        // preconditions exactly. Checking that first avoids running type
+        // inference -- comparatively expensive, and previously run
+        // unconditionally for every expression in the file -- on the vast
+        // majority of a typical file's expressions, which cannot match
+        // regardless of their type.
+        if !is_relevant_position(expression) {
+            return None;
+        }
+
         let ty = ctx.inferred_type_of_expression(expression)?;
         if ty.is_function() {
             find_misused_promise_returning_callback(ctx, expression, ty)
@@ -208,6 +222,66 @@ impl Rule for NoMisusedPromises {
             mutation,
         ))
     }
+}
+
+/// Cheap syntactic pre-check for [NoMisusedPromises]: only expressions in
+/// one of these positions can possibly trigger the rule, regardless of
+/// their inferred type. Mirrors the parent-kind match in
+/// `find_misused_promise_expression` (for the conditional/spread case) and
+/// the full argument/call-or-new-expression chain checked by
+/// `find_misused_promise_returning_callback` (for the callback-argument
+/// case) -- *not* just its first `AnyJsCallArgument::cast` step, which by
+/// itself matches almost any nested expression (`AnyJsCallArgument` is just
+/// `{AnyJsExpression | JsSpread}`) and so barely narrows anything down on
+/// its own, especially in JSX-heavy code where most expressions sit inside
+/// some call somewhere.
+fn is_relevant_position(expression: &AnyJsExpression) -> bool {
+    if let Some(parent) = expression.syntax().parent() {
+        let is_conditional_test = || {
+            JsConditionalExpression::cast(parent.clone()).is_some_and(|conditional| {
+                conditional.test().is_ok_and(|test| test == *expression)
+            })
+        };
+        match parent.kind() {
+            JsSyntaxKind::JS_CONDITIONAL_EXPRESSION if is_conditional_test() => return true,
+            JsSyntaxKind::JS_DO_WHILE_STATEMENT
+            | JsSyntaxKind::JS_IF_STATEMENT
+            | JsSyntaxKind::JS_SPREAD
+            | JsSyntaxKind::JS_WHILE_STATEMENT => return true,
+            _ => {}
+        }
+    }
+
+    is_relevant_argument_position(expression)
+}
+
+/// Purely syntactic precondition for
+/// `find_misused_promise_returning_callback`: `expression` must be a direct
+/// call/new argument, whose argument list is itself owned by a call or new
+/// expression. None of this requires type information.
+fn is_relevant_argument_position(expression: &AnyJsExpression) -> bool {
+    let Some(argument) = expression
+        .syntax()
+        .ancestors()
+        .find_map(AnyJsCallArgument::cast)
+    else {
+        return false;
+    };
+    let Some(argument_list) = argument.parent::<JsCallArgumentList>() else {
+        return false;
+    };
+    argument_list
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find_map(JsCallExpression::cast)
+        .is_some()
+        || argument_list
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .find_map(JsNewExpression::cast)
+            .is_some()
 }
 
 fn find_misused_promise_expression(
