@@ -162,12 +162,11 @@ pub fn infer_call_expression_type<'db>(
     db: &'db dyn ModuleDb,
     input: CallExpressionTypeInput<'db>,
 ) -> InferredTypeData<'db> {
-    let module = input.module(db);
-    let callee = normalize_type(db, NormalizeTypeInput::new(db, module, input.callee(db)));
+    let callee = normalize_type(db, NormalizeTypeInput::new(db, input.callee(db)));
     let args = input.args(db);
     let ty = infer_call_expression_return_type(db, callee, args);
 
-    normalize_type(db, NormalizeTypeInput::new(db, module, ty))
+    normalize_type(db, NormalizeTypeInput::new(db, ty))
 }
 
 // #endregion
@@ -1562,11 +1561,7 @@ pub fn normalize_type<'db>(
     db: &'db dyn ModuleDb,
     input: NormalizeTypeInput<'db>,
 ) -> InferredTypeData<'db> {
-    let module = input.module(db);
     let ty = input.ty(db);
-    let Some(inferred) = infer_module_types(db, module) else {
-        return ty;
-    };
 
     let original = ty;
     let mut stack = Vec::from([TypeNormalizationItem::Type(ty)]);
@@ -1592,8 +1587,11 @@ pub fn normalize_type<'db>(
                             continue;
                         }
                         exit_local = Some((module, type_id));
-                        inferred.resolve_type(db, ty)
+                        resolve_local_type(db, ty)
                     }
+                    // Every other variant is returned unchanged below regardless
+                    // of module context (see the second match on `ty`), so there
+                    // is nothing to resolve here.
                     ty @ (InferredTypeData::Unknown
                     | InferredTypeData::Divergent(_)
                     | InferredTypeData::Global
@@ -1628,7 +1626,7 @@ pub fn normalize_type<'db>(
                     | InferredTypeData::ObjectKeyword
                     | InferredTypeData::ThisKeyword
                     | InferredTypeData::UnknownKeyword
-                    | InferredTypeData::VoidKeyword) => inferred.resolve_type(db, ty),
+                    | InferredTypeData::VoidKeyword) => ty,
                 };
 
                 if let Some((module, type_id)) = exit_local {
@@ -1901,7 +1899,6 @@ enum TypeNormalizationItem<'db> {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct CallExpressionTypeInput<'db> {
-    pub module: ModuleInfo,
     pub callee: InferredTypeData<'db>,
     #[returns(ref)]
     pub args: Box<[InferredTypeData<'db>]>,
@@ -1920,7 +1917,6 @@ pub struct CallArgumentTypeInput<'db> {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct NormalizeTypeInput<'db> {
-    pub module: ModuleInfo,
     pub ty: InferredTypeData<'db>,
 }
 

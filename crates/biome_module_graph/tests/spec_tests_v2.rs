@@ -552,22 +552,22 @@ fn local_type_id_of_instance<'db>(
 
 fn infer_call_expression_type<'db>(
     db: &'db dyn ModuleDb,
-    module: ModuleInfo,
+    _module: ModuleInfo,
     callee: InferredTypeData<'db>,
     args: Vec<InferredTypeData<'db>>,
 ) -> InferredTypeData<'db> {
     infer_call_expression_type_query(
         db,
-        CallExpressionTypeInput::new(db, module, callee, args.into_boxed_slice()),
+        CallExpressionTypeInput::new(db, callee, args.into_boxed_slice()),
     )
 }
 
 fn normalize_type<'db>(
     db: &'db dyn ModuleDb,
-    module: ModuleInfo,
+    _module: ModuleInfo,
     ty: InferredTypeData<'db>,
 ) -> InferredTypeData<'db> {
-    normalize_type_query(db, NormalizeTypeInput::new(db, module, ty))
+    normalize_type_query(db, NormalizeTypeInput::new(db, ty))
 }
 
 fn interface_member_ty<'db>(
@@ -4348,6 +4348,78 @@ fn test_infer_call_expression_type_selects_callable_object_overload_by_arity() {
         &db,
         &fs,
     );
+}
+
+#[test]
+fn test_normalize_type_and_call_expression_type_are_shared_across_modules() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/shared.ts".into(),
+        r#"
+            export function wrap(): string {
+                return "value";
+            }
+        "#,
+    );
+    fs.insert(
+        "/src/a.ts".into(),
+        r#"
+            import { wrap } from "./shared.ts";
+            export const a = wrap();
+        "#,
+    );
+    fs.insert(
+        "/src/b.ts".into(),
+        r#"
+            import { wrap } from "./shared.ts";
+            export const b = wrap();
+        "#,
+    );
+
+    let mut db =
+        build_js_test_module_db(&fs, &["/src/shared.ts", "/src/a.ts", "/src/b.ts"], true);
+    let a_module = db
+        .module_for_path(Utf8Path::new("/src/a.ts"))
+        .expect("module a must exist");
+    let b_module = db
+        .module_for_path(Utf8Path::new("/src/b.ts"))
+        .expect("module b must exist");
+
+    let a_inferred = infer_module_types(&db, a_module).expect("a types must be inferred");
+    let wrap_ty_a = inferred_binding_ty_by_name(&db, a_module, &a_inferred, "wrap")
+        .expect("wrap binding must be inferred in a.ts");
+    let resolved_a = a_inferred.resolve_type(&db, wrap_ty_a);
+    let call_ty_a = infer_call_expression_type(&db, a_module, resolved_a, Vec::new());
+    assert!(is_inferred_string(&db, call_ty_a));
+
+    db.clear_salsa_events();
+
+    let b_inferred = infer_module_types(&db, b_module).expect("b types must be inferred");
+    let wrap_ty_b = inferred_binding_ty_by_name(&db, b_module, &b_inferred, "wrap")
+        .expect("wrap binding must be inferred in b.ts");
+    let resolved_b = b_inferred.resolve_type(&db, wrap_ty_b);
+    let call_ty_b = infer_call_expression_type(&db, b_module, resolved_b, Vec::new());
+    assert!(is_inferred_string(&db, call_ty_b));
+
+    // `wrap`'s resolved type and the (empty) argument list are identical from
+    // both modules' perspective, so resolving the call from module B must hit
+    // Salsa's cache rather than recomputing -- these queries no longer key on
+    // the calling module (see NormalizeTypeInput / CallExpressionTypeInput).
+    let events = db.take_salsa_events();
+    for event in &events {
+        if let salsa::EventKind::WillExecute { database_key } = event.kind {
+            let name =
+                salsa::Database::ingredient_debug_name(&db, database_key.ingredient_index());
+            assert_ne!(
+                name, "normalize_type",
+                "normalize_type must be shared across modules for an identical `ty`, not recomputed"
+            );
+            assert_ne!(
+                name, "infer_call_expression_type",
+                "infer_call_expression_type must be shared across modules for an identical (callee, args) pair, not recomputed"
+            );
+        }
+    }
 }
 
 #[test]

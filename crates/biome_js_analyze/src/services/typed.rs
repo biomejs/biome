@@ -22,6 +22,7 @@ use biome_module_graph::{
     infer_module_types_bottom_up, normalize_type,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
+use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -29,11 +30,22 @@ use std::sync::Arc;
 pub(crate) struct TypedModule {
     db: Rc<dyn ModuleDb>,
     module: ModuleInfo,
+    // `TypedModule` is registered once per file in the `ServiceBag`, but
+    // `FromServices::from_services` clones it out fresh for every rule
+    // invocation on every matched node. The `Rc` ensures all of those clones
+    // still share one cache cell, so `ModuleResolver::for_module` -- which
+    // re-resolves the module's entire import graph -- runs at most once per
+    // file instead of once per `type_of_*` call.
+    resolver: Rc<RefCell<Option<Arc<ModuleResolver>>>>,
 }
 
 impl TypedModule {
     pub(crate) fn new(db: Rc<dyn ModuleDb>, module: ModuleInfo) -> Self {
-        Self { db, module }
+        Self {
+            db,
+            module,
+            resolver: Rc::new(RefCell::new(None)),
+        }
     }
 }
 
@@ -54,7 +66,7 @@ impl TypedService {
     ) -> Option<InferredType<'db>> {
         let typed_module = self.module.as_ref()?;
         let db = typed_module.db.as_ref();
-        let ty = normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
+        let ty = normalize_type(db, NormalizeTypeInput::new(db, ty));
         Some(InferredType::new(db, ty))
     }
 
@@ -67,7 +79,7 @@ impl TypedService {
         let db = typed_module.db.as_ref();
         let inferred = infer_module_types_bottom_up(db, typed_module.module)?;
         let ty = inferred.expressions.get(&expression.range()).copied()?;
-        let ty = normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
+        let ty = normalize_type(db, NormalizeTypeInput::new(db, ty));
 
         Some(InferredType::new(db, ty))
     }
@@ -94,7 +106,7 @@ impl TypedService {
             .binding_type_data
             .get(&binding.tree().syntax().text_trimmed_range())?
             .ty;
-        let ty = normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
+        let ty = normalize_type(db, NormalizeTypeInput::new(db, ty));
 
         Some(InferredType::new(db, ty))
     }
@@ -175,7 +187,7 @@ impl TypedService {
         })?;
         let parent_ty = normalize_type(
             db,
-            NormalizeTypeInput::new(db, typed_module.module, parent_ty),
+            NormalizeTypeInput::new(db, parent_ty),
         );
         let member_ty = inferred.find_member_type(db, parent_ty, member_name)?;
         let return_ty = member_ty.callable_function(db).and_then(|function| {
@@ -246,13 +258,13 @@ impl TypedService {
         let Some(ty) = inferred.expressions.get(&expression.range()).copied() else {
             return false;
         };
-        let ty = normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
+        let ty = normalize_type(db, NormalizeTypeInput::new(db, ty));
         let Some(member_ty) = inferred.find_member_type(db, ty, name) else {
             return false;
         };
         let member_ty = normalize_type(
             db,
-            NormalizeTypeInput::new(db, typed_module.module, member_ty),
+            NormalizeTypeInput::new(db, member_ty),
         );
 
         is_callable_inferred_type(db, member_ty)
@@ -271,7 +283,7 @@ impl TypedService {
         let callee_ty = inferred.expressions.get(&callee.range()).copied()?;
         let callee_ty = normalize_type(
             db,
-            NormalizeTypeInput::new(db, typed_module.module, callee_ty),
+            NormalizeTypeInput::new(db, callee_ty),
         );
         let argument_ty = if is_constructor {
             constructor_argument_type(db, callee_ty, argument_index)?
@@ -280,7 +292,7 @@ impl TypedService {
         };
         let argument_ty = normalize_type(
             db,
-            NormalizeTypeInput::new(db, typed_module.module, argument_ty),
+            NormalizeTypeInput::new(db, argument_ty),
         );
 
         Some(InferredType::new(db, argument_ty))
@@ -301,7 +313,7 @@ impl TypedService {
         let callee_ty = inferred.expressions.get(&callee.range()).copied()?;
         let callee_ty = normalize_type(
             db,
-            NormalizeTypeInput::new(db, typed_module.module, callee_ty),
+            NormalizeTypeInput::new(db, callee_ty),
         );
         let arguments = arguments
             .iter()
@@ -312,7 +324,7 @@ impl TypedService {
                     AnyJsCallArgument::JsSpread(spread) => (spread.argument().ok()?, true),
                 };
                 let ty = inferred.expressions.get(&expression.range()).copied()?;
-                let ty = normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
+                let ty = normalize_type(db, NormalizeTypeInput::new(db, ty));
                 Some(if is_spread {
                     InferredCallArgumentType::Spread(ty)
                 } else {
@@ -329,7 +341,7 @@ impl TypedService {
         };
         let argument_ty = normalize_type(
             db,
-            NormalizeTypeInput::new(db, typed_module.module, argument_ty),
+            NormalizeTypeInput::new(db, argument_ty),
         );
 
         Some(InferredType::new(db, argument_ty))
@@ -341,6 +353,11 @@ impl TypedService {
     )]
     fn resolver(&self) -> Option<Arc<ModuleResolver>> {
         let typed_module = self.module.as_ref()?;
+
+        if let Some(resolver) = typed_module.resolver.borrow().as_ref() {
+            return Some(resolver.clone());
+        }
+
         // NOTE: commented, no need to do useless computation. Comment this out once we're ready to migrate to the new engine.
         // let _ = infer_module_types_bottom_up(typed_module.db.as_ref(), typed_module.module);
         let ModuleInfoKind::Js(module_info) = typed_module.module.kind(typed_module.db.as_ref())
@@ -348,10 +365,12 @@ impl TypedService {
             return None;
         };
 
-        Some(Arc::new(ModuleResolver::for_module(
+        let resolver = Arc::new(ModuleResolver::for_module(
             module_info.clone(),
             typed_module.db.clone(),
-        )))
+        ));
+        *typed_module.resolver.borrow_mut() = Some(resolver.clone());
+        Some(resolver)
     }
 
     /// Returns the [`Type`] for the given `expression`.
@@ -561,5 +580,52 @@ where
 
     fn unwrap_match(_: &ServiceBag, node: &Self::Input) -> Self::Output {
         N::unwrap_cast(node.clone())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_project_layout::ProjectLayout;
+    use biome_test_utils::module_graph_for_test_file;
+    use camino::Utf8PathBuf;
+
+    /// `TypedModule` is registered once per file, but `FromServices` clones it
+    /// out of the `ServiceBag` fresh for every rule invocation on every
+    /// matched node -- so `resolver()` must return the *same* `ModuleResolver`
+    /// on repeated calls rather than rebuilding it (which re-resolves the
+    /// module's entire import graph) every time.
+    #[test]
+    fn resolver_is_cached_across_repeated_calls() {
+        let dir = std::env::temp_dir().join("biome_typed_service_resolver_cache_test");
+        std::fs::create_dir_all(&dir).expect("must create temp dir");
+        let file_path = dir.join("fixture.ts");
+        std::fs::write(
+            &file_path,
+            "export async function returnsPromise(): Promise<string> { return 'value'; }\n",
+        )
+        .expect("must write fixture file");
+
+        let input_file =
+            Utf8PathBuf::from_path_buf(file_path).expect("temp path must be valid UTF-8");
+        let project_layout = ProjectLayout::default();
+        let db = module_graph_for_test_file(&input_file, &project_layout);
+        let module = db
+            .module_for_path(&input_file)
+            .expect("module must be registered");
+
+        let service = TypedService {
+            module: Some(TypedModule::new(db.rc_module_db(), module)),
+            model: None,
+        };
+
+        let first = service.resolver().expect("resolver must be constructed");
+        let second = service.resolver().expect("resolver must be constructed");
+        assert!(
+            Arc::ptr_eq(&first, &second),
+            "resolver() must reuse the cached ModuleResolver instead of reconstructing it"
+        );
+
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }
