@@ -252,7 +252,11 @@ fn unicode_to_ascii(c: char) -> char {
 
 #[cfg(test)]
 mod tests {
-    use std::{fmt::Write, str::from_utf8};
+    use std::{
+        fmt::Write,
+        io::{self, Write as IoWrite},
+        str::from_utf8,
+    };
 
     use biome_markup::markup;
     use termcolor::Ansi;
@@ -370,5 +374,81 @@ mod tests {
                 EXPECTED, actual
             );
         }
+    }
+
+    /// Wraps a [Vec<u8>] and counts how many times [io::Write::write] is
+    /// called on it, so tests can assert on the number of underlying writes
+    /// `SanitizeAdapter` performs, not just the bytes it eventually produces.
+    #[derive(Default)]
+    struct CountingWriter {
+        buffer: Vec<u8>,
+        write_count: usize,
+    }
+
+    impl IoWrite for CountingWriter {
+        fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+            self.write_count += 1;
+            self.buffer.write(buf)
+        }
+
+        fn flush(&mut self) -> io::Result<()> {
+            self.buffer.flush()
+        }
+    }
+
+    /// Content that needs no sanitization at all -- the overwhelmingly common
+    /// case -- should reach the underlying writer in a single call, not one
+    /// call per character.
+    #[test]
+    fn test_clean_content_is_written_in_a_single_call() {
+        const INPUT: &str = "the quick brown fox jumps over the lazy dog, 42 times.";
+
+        let mut counting = CountingWriter::default();
+
+        {
+            let writer = termcolor::Ansi::new(&mut counting);
+            let mut adapter = SanitizeAdapter {
+                writer,
+                error: Ok(()),
+            };
+
+            adapter.write_str(INPUT).unwrap();
+            adapter.error.unwrap();
+        }
+
+        assert_eq!(from_utf8(&counting.buffer).unwrap(), INPUT);
+        assert_eq!(
+            counting.write_count, 1,
+            "clean content should be flushed in a single write, not one per character"
+        );
+    }
+
+    /// Content with a handful of characters needing replacement should still
+    /// only pay for a write per *replacement*, not per character: the clean
+    /// runs between replacements must still be batched.
+    #[test]
+    fn test_mixed_content_batches_clean_runs() {
+        // Two zero-width characters (replaced) surrounded by three runs of
+        // plain ASCII text (batched): 3 clean-run writes + 2 replacement
+        // writes = 5, regardless of how long the surrounding clean runs are.
+        const INPUT: &str = "some reasonably long clean run of text\0another fairly long clean run of text\0and a final clean run";
+
+        let mut counting = CountingWriter::default();
+
+        {
+            let writer = termcolor::Ansi::new(&mut counting);
+            let mut adapter = SanitizeAdapter {
+                writer,
+                error: Ok(()),
+            };
+
+            adapter.write_str(INPUT).unwrap();
+            adapter.error.unwrap();
+        }
+
+        assert_eq!(
+            counting.write_count, 5,
+            "expected one write per clean run plus one per replaced character"
+        );
     }
 }
