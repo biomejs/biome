@@ -176,6 +176,17 @@ impl Rule for NoFloatingPromises {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let expression = node.expression().ok()?;
+
+        // `is_handled_promise` (below) always treats a bare assignment
+        // statement as handled, regardless of its type -- so there's no
+        // point paying for type inference just to be told that afterwards.
+        if matches!(
+            expression.clone().omit_parentheses(),
+            AnyJsExpression::JsAssignmentExpression(_)
+        ) {
+            return None;
+        }
+
         let ty = ctx.type_of_expression(&expression);
 
         // Uncomment the following line for debugging convenience:
