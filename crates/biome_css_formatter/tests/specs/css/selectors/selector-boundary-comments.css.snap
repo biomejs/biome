@@ -91,6 +91,20 @@ comment */.middle+.after{color:fuchsia}
  * second
  */{color:purple}
 
+.card:has(.a/* before has */>/* after has */.b){color:red}
+
+.card:has(>/* after relative */.child){color:maroon}
+
+:nth-child(2n of .a/* before nth */>/* after nth */.b,.c){color:blue}
+
+@supports selector(.a/* before supports */>/* after supports */.b){.target{color:green}}
+
+@scope (.a/* before scope */>/* after scope */.b) to (.c/* before limit */+/* after limit */.d){.target{color:black}}
+
+:global(.a/* before global */>/* after global */.b){color:white}
+
+:local(.a/* before local */>/* after local */.b){color:gray}
+
 ```
 
 
@@ -224,6 +238,40 @@ comment */ .middle + .after {
  * second
  */ {
 	color: purple;
+}
+
+.card:has(.a /* before has */ > /* after has */ .b) {
+	color: red;
+}
+
+.card:has(> /* after relative */ .child) {
+	color: maroon;
+}
+
+:nth-child(2n of .a /* before nth */ > /* after nth */ .b, .c) {
+	color: blue;
+}
+
+@supports selector(.a /* before supports */ > /* after supports */ .b) {
+	.target {
+		color: green;
+	}
+}
+
+@scope (.a /* before scope */ > /* after scope */ .b) to (
+	.c /* before limit */ + /* after limit */ .d
+) {
+	.target {
+		color: black;
+	}
+}
+
+:global(.a /* before global */ > /* after global */ .b) {
+	color: white;
+}
+
+:local(.a /* before local */ > /* after local */ .b) {
+	color: gray;
 }
 
 ```

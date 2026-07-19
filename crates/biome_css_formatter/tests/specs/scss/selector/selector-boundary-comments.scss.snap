@@ -69,6 +69,21 @@ info: scss/selector/selector-boundary-comments.scss
 // descendant chain
 .middle+.after{color:purple}
 
+.parent{&/* before parent */>/* after parent */.child{color:red}}
+
+#{foo}/* before interpolation */+/* after interpolation */.child{color:blue}
+
+%foo/* before placeholder */~/* after placeholder */%bar{color:green}
+
+.parent{&>
+// biome-ignore format: reason
+.CHILD:HOVER{color:black}}
+
+.parent{&>
+// normal
+// biome-ignore format: reason
+.CHILD:HOVER{color:white}}
+
 ```
 
 
@@ -162,6 +177,35 @@ info: scss/selector/selector-boundary-comments.scss
 // descendant chain
 .middle + .after {
 	color: purple;
+}
+
+.parent {
+	& /* before parent */ > /* after parent */ .child {
+		color: red;
+	}
+}
+
+#{foo} /* before interpolation */ + /* after interpolation */ .child {
+	color: blue;
+}
+
+%foo /* before placeholder */ ~ /* after placeholder */ %bar {
+	color: green;
+}
+
+.parent {
+	& > // biome-ignore format: reason
+	.CHILD:HOVER {
+		color: black;
+	}
+}
+
+.parent {
+	& > // normal
+	// biome-ignore format: reason
+	.CHILD:HOVER {
+		color: white;
+	}
 }
 
 ```
