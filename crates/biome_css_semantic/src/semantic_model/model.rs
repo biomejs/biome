@@ -771,7 +771,8 @@ impl CssPropertyInitialValueKind {
             (Self::CustomProperty(a), Self::CustomProperty(b)) => {
                 let a = a.to_node(self_root.syntax());
                 let b = b.to_node(other_root.syntax());
-                semantic_value_tokens(a.syntax()) == semantic_value_tokens(b.syntax())
+                semantic_custom_property_tokens(a.syntax())
+                    == semantic_custom_property_tokens(b.syntax())
             }
             (Self::Composes(a), Self::Composes(b)) => {
                 let a = a.to_node(self_root.syntax());
@@ -857,6 +858,74 @@ fn semantic_value_tokens(node: &CssSyntaxNode) -> Vec<(CssSyntaxKind, TokenText)
         .filter(|token| !token.kind().is_trivia())
         .map(|token| (token.kind(), token.token_text_trimmed()))
         .collect()
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+enum CustomPropertyTokenRole {
+    Plain,
+    FunctionOpen,
+    InterpolationStart,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+struct SemanticCustomPropertyToken {
+    kind: CssSyntaxKind,
+    text: TokenText,
+    role: CustomPropertyTokenRole,
+    has_component_gap_before: bool,
+}
+
+/// Returns raw custom-property tokens and marks source-tight constructs.
+///
+/// The role distinguishes `url(foo)` from `url (foo)` and `#{$value}` from
+/// `# {$value}`. Component gaps distinguish `//` from `/ /` while allowing
+/// normalized whitespace at container boundaries.
+fn semantic_custom_property_tokens(node: &CssSyntaxNode) -> Vec<SemanticCustomPropertyToken> {
+    node.descendants_tokens(Direction::Next)
+        .filter(|token| !token.kind().is_trivia())
+        .map(|token| {
+            let role = match (token.kind(), token.parent().map(|parent| parent.kind())) {
+                (biome_css_syntax::T!['('], Some(CssSyntaxKind::CSS_CUSTOM_PROPERTY_FUNCTION)) => {
+                    CustomPropertyTokenRole::FunctionOpen
+                }
+                (biome_css_syntax::T![#], Some(CssSyntaxKind::SCSS_INTERPOLATION)) => {
+                    CustomPropertyTokenRole::InterpolationStart
+                }
+                _ => CustomPropertyTokenRole::Plain,
+            };
+
+            SemanticCustomPropertyToken {
+                kind: token.kind(),
+                text: token.token_text_trimmed(),
+                role,
+                has_component_gap_before: has_custom_property_component_gap_before(&token),
+            }
+        })
+        .collect()
+}
+
+/// Returns whether a raw component starts after source trivia.
+///
+/// Example: the second `/` in `/ /`.
+fn has_custom_property_component_gap_before(token: &CssSyntaxToken) -> bool {
+    let Some(component) = token.ancestors().find(|node| {
+        node.parent().is_some_and(|parent| {
+            parent.kind() == CssSyntaxKind::CSS_CUSTOM_PROPERTY_COMPONENT_LIST
+        })
+    }) else {
+        return false;
+    };
+
+    if component.first_token().as_ref() != Some(token) {
+        return false;
+    }
+
+    component
+        .prev_sibling()
+        .and_then(|previous| previous.last_token())
+        .is_some_and(|previous| {
+            previous.text_trimmed_range().end() < token.text_trimmed_range().start()
+        })
 }
 
 /// Stored data for a CSS global custom variable declaration.
