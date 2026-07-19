@@ -6,7 +6,7 @@ use biome_languages::CssFileSource;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{BufferedLexer, LexerCheckpoint};
 use biome_parser::prelude::{BumpWithContext, TokenSource};
-use biome_parser::token_source::{TokenSourceWithBufferedLexer, Trivia};
+use biome_parser::token_source::{NthToken, TokenSourceWithBufferedLexer, Trivia};
 use biome_rowan::TriviaPieceKind;
 use smallvec::SmallVec;
 
@@ -123,6 +123,22 @@ impl<'src> CssTokenSource<'src> {
     pub(crate) fn is_current_token_followed_by_scss_concatenation_plus(&self) -> bool {
         let start = usize::from(self.current_range().end());
         self.lexer.lexer().is_at_scss_concatenation_plus(start)
+    }
+
+    /// Returns whether the `n`th non-trivia token directly follows the
+    /// preceding token in source text.
+    pub(crate) fn is_nth_source_tight(&mut self, n: usize) -> bool {
+        let Some(previous_n) = n.checked_sub(1) else {
+            return false;
+        };
+        let Some(previous) = <Self as NthToken<CssLexer<'src>>>::nth_range(self, previous_n) else {
+            return false;
+        };
+        let Some(current) = <Self as NthToken<CssLexer<'src>>>::nth_range(self, n) else {
+            return false;
+        };
+
+        previous.end() == current.start()
     }
 
     #[inline]

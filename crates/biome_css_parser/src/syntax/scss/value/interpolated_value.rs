@@ -1,3 +1,4 @@
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::scss::{
     is_at_scss_interpolation, is_at_scss_namespaced_variable, is_at_scss_variable,
@@ -182,7 +183,7 @@ fn parse_scss_interpolated_value_head(p: &mut CssParser) -> ParsedSyntax {
     } else if is_at_scss_variable(p) {
         parse_scss_variable(p)
     } else if is_at_any_dimension(p) {
-        parse_any_dimension(p)
+        parse_any_dimension(p, CssLexContext::Regular)
     } else if p.at(CSS_NUMBER_LITERAL) {
         parse_regular_number(p)
     } else {
@@ -254,7 +255,7 @@ fn parse_scss_interpolated_value_suffix_part(p: &mut CssParser) -> ParsedSyntax 
     } else if is_at_scss_interpolation(p) {
         parse_scss_regular_interpolation(p)
     } else if is_at_any_dimension(p) {
-        parse_any_dimension(p)
+        parse_any_dimension(p, CssLexContext::Regular)
     } else if p.at(CSS_NUMBER_LITERAL) {
         parse_regular_number(p)
     } else if is_at_identifier(p) {

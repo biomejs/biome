@@ -131,7 +131,7 @@ fn is_nth_at_function_with_context(
 /// identifier followed by a parenthesized value.
 #[inline]
 pub(crate) fn is_nth_at_source_tight_l_paren(p: &mut CssParser, n: usize) -> bool {
-    p.nth_at(n, T!['(']) && !p.has_nth_preceding_whitespace(n) && !p.has_nth_preceding_line_break(n)
+    p.nth_at(n, T!['(']) && p.source_mut().is_nth_source_tight(n)
 }
 
 #[inline]
