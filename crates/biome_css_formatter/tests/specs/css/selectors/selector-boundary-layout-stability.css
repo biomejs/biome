@@ -34,3 +34,13 @@ comment */{color:green}}
 /* boundary */
 >
 .b){color:teal}}
+
+.base   .target,
+/* id */
+#target    .child,
+/* attribute */
+[data-target]   .child,
+/* pseudo */
+:hover  .child,
+/* universal */
+*    .child{color:navy}

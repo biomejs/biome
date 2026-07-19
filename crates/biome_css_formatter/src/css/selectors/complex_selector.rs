@@ -249,30 +249,10 @@ fn is_selector_list_first_child(node: &CssComplexSelector) -> bool {
 
 /// Returns whether the left compound selector starts with an attached comment.
 pub(crate) fn is_left_selector_preceded_by_comment(selector: &AnyCssSelector) -> bool {
-    let Some(compound_selector) = selector.as_css_compound_selector() else {
-        return false;
-    };
-
-    let simple_selector_has_leading_comments = compound_selector
-        .simple_selector()
-        .and_then(|simple_selector| simple_selector.as_css_type_selector().cloned())
-        .and_then(|type_selector| {
-            type_selector
-                .ident()
-                .ok()?
-                .as_css_identifier()
-                .and_then(|identifier| identifier.value_token().ok())
-        })
-        .is_some_and(|token| token.has_leading_comments());
-
-    let sub_selector_has_leading_comments = compound_selector
-        .sub_selectors()
-        .first()
-        .and_then(|sub_selector| sub_selector.as_css_class_selector().cloned())
-        .and_then(|class_selector| class_selector.dot_token().ok())
-        .is_some_and(|token| token.has_leading_comments());
-
-    simple_selector_has_leading_comments || sub_selector_has_leading_comments
+    selector
+        .as_css_compound_selector()
+        .and_then(|compound_selector| compound_selector.syntax().first_token())
+        .is_some_and(|token| token.has_leading_comments())
 }
 
 /// Returns whether the following list separator owns a line comment.
