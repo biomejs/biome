@@ -98,7 +98,38 @@ fn infer_types(...)
 
 **Emojis.** Banned everywhere in this repository, comments included.
 
-**Section banners** (`// ----- helpers -----`) around short blocks of code.
+**Ad-hoc section banners** (`// ----- helpers -----`, `// ==== TYPES ====`).
+For grouping in long files, use the region comment pattern below instead.
+
+## Region Comments
+
+Long files group related items with paired region markers:
+
+```rust
+// #region FILE-LEVEL METHODS
+...
+// #endregion
+```
+
+This is an established convention across the codebase (`biome_service`,
+`biome_module_graph`, `biome_rowan`, the parsers). The `Workspace` trait in
+[`crates/biome_service/src/workspace.rs`](../../../crates/biome_service/src/workspace.rs)
+uses it to group its methods (`PROJECT-LEVEL METHODS`, `FILE-LEVEL METHODS`,
+`SEARCH-RELATED METHODS`). Editors fold on these markers, which is the point:
+they exist for navigation, not documentation.
+
+Rules:
+
+- Every `// #region` has a matching `// #endregion`. An unpaired marker breaks
+  editor folding silently.
+- The name states what the group contains. It can be a plain label
+  (`Shared helpers`) or anchored to a function (`#region parse_thematic_break_parts`)
+  when the region holds one entry point and its private support code.
+- Use regions only where they earn their keep: files or `impl`/`trait` blocks
+  long enough that folding helps. A file that fits on two screens does not
+  need them.
+- A region name is organization, not documentation. It never substitutes for
+  rustdoc on the items inside it.
 
 ## Editing Existing Code
 
