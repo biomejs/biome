@@ -269,13 +269,15 @@ mod tests {
         );
 
         let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
-        let content = result
-            .entries
-            .into_iter()
-            .map(|entry| print_diagnostic_to_string(&Error::from(entry.diagnostic)))
-            .collect::<String>();
 
-        assert!(content.contains("/file.js|JS_MODULE|function|false|false"));
+        snap_diagnostics(
+            "passes_ast_as_the_second_argument",
+            result
+                .entries
+                .into_iter()
+                .map(|entry| entry.diagnostic.into())
+                .collect(),
+        );
     }
 
     #[test]
@@ -304,18 +306,15 @@ mod tests {
 
         let plugin = load_test_plugin_from_source(source, None);
         let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
-        assert_eq!(result.entries.len(), 1);
-        assert_eq!(
-            result.entries[0].diagnostic.span(),
-            Some(TextRange::new(0.into(), 15.into()))
-        );
-        let content = result
-            .entries
-            .into_iter()
-            .map(|entry| print_diagnostic_to_string(&Error::from(entry.diagnostic)))
-            .collect::<String>();
 
-        assert!(content.contains("Use let or const instead of a top-level var declaration."));
+        snap_diagnostics(
+            "reports_top_level_var_declarations_using_ast_fields",
+            result
+                .entries
+                .into_iter()
+                .map(|entry| entry.diagnostic.into())
+                .collect(),
+        );
     }
 
     #[test]
