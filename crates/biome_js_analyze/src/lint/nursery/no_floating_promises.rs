@@ -26,6 +26,7 @@ declare_lint_rule! {
     /// - `await`-ing it
     /// - `return`-ing it
     /// - `void`-ing it
+    /// - Assigning it to a variable (the caller is assumed to handle it later)
     ///
     /// ## Examples
     ///
@@ -130,6 +131,10 @@ declare_lint_rule! {
     ///
     /// // Calling .catch() with one argument
     /// returnsPromise().catch(() => {});
+    ///
+    /// // Assigning a floating promise to a variable is considered handled
+    /// let target: Promise<string> | undefined;
+    /// target = returnsPromise();
     ///
     /// await Promise.all([p1, p2, p3])
     ///
