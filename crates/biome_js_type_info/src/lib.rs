@@ -25,6 +25,7 @@ mod resolver;
 mod r#type;
 mod type_data;
 mod type_store;
+mod type_traversal;
 
 pub use conditionals::*;
 pub use flattening::MAX_FLATTEN_DEPTH;

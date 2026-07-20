@@ -4,6 +4,7 @@
 //! for now. This module introduces the interned resolved representation that
 //! later phases will wire into module inference.
 
+use biome_js_syntax::numbers::canonicalize_js_bigint_literal;
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
 
@@ -299,9 +300,10 @@ impl<'db> TypeData<'db> {
             | Self::Symbol
             | Self::Tuple(_) => Some(ConditionalType::Truthy),
             Self::Literal(literal) => Some(match literal.literal(db) {
-                Literal::BigInt(text) => match text.text() {
-                    "0n" | "-0n" => ConditionalType::FalsyButNotNullish,
-                    _ => ConditionalType::Truthy,
+                Literal::BigInt(text) => match canonicalize_js_bigint_literal(text.text()) {
+                    Some(text) if text == "0n" => ConditionalType::FalsyButNotNullish,
+                    Some(_) => ConditionalType::Truthy,
+                    None => ConditionalType::Anything,
                 },
                 Literal::Boolean(boolean) => {
                     if boolean.as_bool() {

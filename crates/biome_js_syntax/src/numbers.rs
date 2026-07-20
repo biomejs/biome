@@ -1,4 +1,4 @@
-//! JS Number parsing.
+//! JavaScript numeric literal parsing.
 
 use std::{borrow::Cow, str::FromStr};
 
@@ -47,9 +47,99 @@ pub fn parse_js_number(num: &str) -> Option<f64> {
     }
 }
 
+/// Converts a possibly signed JavaScript bigint literal to decimal notation.
+///
+/// The returned text has no separators or leading zeroes and uses a lowercase
+/// `n` suffix. Negative zero is represented as `0n`. Returns `None` if `input`
+/// is not a valid decimal, binary, octal, or hexadecimal bigint literal.
+pub fn canonicalize_js_bigint_literal(input: &str) -> Option<Cow<'_, str>> {
+    const LIMB_BASE: u64 = 1_000_000_000;
+
+    let (is_negative, unsigned) = match input.strip_prefix('-') {
+        Some(unsigned) => (true, unsigned),
+        None => (false, input),
+    };
+    let body = unsigned.strip_suffix('n')?;
+    let (radix, digits) =
+        if let Some(digits) = body.strip_prefix("0b").or_else(|| body.strip_prefix("0B")) {
+            (2_u32, digits)
+        } else if let Some(digits) = body.strip_prefix("0o").or_else(|| body.strip_prefix("0O")) {
+            (8, digits)
+        } else if let Some(digits) = body.strip_prefix("0x").or_else(|| body.strip_prefix("0X")) {
+            (16, digits)
+        } else {
+            (10, body)
+        };
+
+    let mut limbs = vec![0_u32];
+    let mut digit_count = 0;
+    let mut first_digit = None;
+    let mut previous_was_separator = false;
+
+    for byte in digits.bytes() {
+        if byte == b'_' {
+            if digit_count == 0 || previous_was_separator {
+                return None;
+            }
+            previous_was_separator = true;
+            continue;
+        }
+
+        let digit = match byte {
+            b'0'..=b'9' => u32::from(byte - b'0'),
+            b'a'..=b'f' => u32::from(byte - b'a') + 10,
+            b'A'..=b'F' => u32::from(byte - b'A') + 10,
+            _ => return None,
+        };
+        if digit >= radix {
+            return None;
+        }
+
+        first_digit.get_or_insert(digit);
+        digit_count += 1;
+        previous_was_separator = false;
+
+        let mut carry = u64::from(digit);
+        for limb in &mut limbs {
+            let value = u64::from(*limb) * u64::from(radix) + carry;
+            *limb = (value % LIMB_BASE) as u32;
+            carry = value / LIMB_BASE;
+        }
+        if carry != 0 {
+            limbs.push(carry as u32);
+        }
+    }
+
+    if digit_count == 0 || previous_was_separator {
+        return None;
+    }
+    if radix == 10 && digit_count > 1 && first_digit == Some(0) {
+        return None;
+    }
+
+    let is_zero = limbs.len() == 1 && limbs[0] == 0;
+    if radix == 10 && !digits.contains('_') && (!is_negative || !is_zero) {
+        return Some(Cow::Borrowed(input));
+    }
+
+    let mut canonical = String::new();
+    if is_negative && !is_zero {
+        canonical.push('-');
+    }
+    let mut limbs = limbs.iter().rev();
+    canonical.push_str(&limbs.next()?.to_string());
+    for limb in limbs {
+        let limb = limb.to_string();
+        canonical.extend(std::iter::repeat_n('0', 9 - limb.len()));
+        canonical.push_str(&limb);
+    }
+    canonical.push('n');
+    Some(Cow::Owned(canonical))
+}
+
 #[cfg(test)]
 mod tests {
-    use super::split_into_radix_and_number;
+    use super::{canonicalize_js_bigint_literal, split_into_radix_and_number};
     use biome_js_factory::JsSyntaxTreeBuilder;
     use biome_js_factory::syntax::{JsNumberLiteralExpression, JsSyntaxKind::*};
     use biome_rowan::AstNode;
@@ -63,6 +153,45 @@ mod tests {
         let node = tree_builder.finish();
         let number_literal = JsNumberLiteralExpression::cast(node).unwrap();
         assert_eq!(number_literal.as_number(), Some(value))
+    }
+
+    #[test]
+    fn canonicalizes_bigint_literals() {
+        let cases = [
+            ("0n", "0n"),
+            ("-0n", "0n"),
+            ("123456789n", "123456789n"),
+            ("-123_456_789n", "-123456789n"),
+            ("0b1010_0101n", "165n"),
+            ("-0B1010n", "-10n"),
+            ("0o777_777n", "262143n"),
+            ("-0O10n", "-8n"),
+            ("0xdead_beefn", "3735928559n"),
+            ("-0XFFn", "-255n"),
+            (
+                "0xffffffffffffffffffffffffffffffffn",
+                "340282366920938463463374607431768211455n",
+            ),
+        ];
+
+        for (input, expected) in cases {
+            assert_eq!(
+                canonicalize_js_bigint_literal(input).as_deref(),
+                Some(expected)
+            );
+        }
+    }
+
+    #[test]
+    fn rejects_invalid_bigint_literals() {
+        let cases = [
+            "", "n", "-n", "+1n", "1", "1N", "01n", "0_0n", "_1n", "1_n", "1__0n", "0bn", "0b2n",
+            "0o8n", "0xgn", "--1n",
+        ];
+
+        for input in cases {
+            assert_eq!(canonicalize_js_bigint_literal(input), None, "{input}");
+        }
     }
 
     #[test]
