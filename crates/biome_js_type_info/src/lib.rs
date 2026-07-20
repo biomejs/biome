@@ -33,7 +33,7 @@ pub use globals::{GLOBAL_RESOLVER, GlobalsResolver};
 pub use globals_ids::{GLOBAL_BOOLEAN_ID, GLOBAL_UNKNOWN_ID, NUM_PREDEFINED_TYPES};
 pub use inferred_type::{
     IgnoredPrimitiveTypes, InferredSwitchCase, InferredType, MisleadingReturnType,
-    ReturnTypeEvidence, StringificationMode, StringificationUsefulness,
+    ReturnTypeEvidence, StringificationMode, StringificationUsefulness, TypeTraversalError,
 };
 pub use interned_types::TypeDb;
 pub use resolver::*;

@@ -6,7 +6,7 @@ use crate::type_traversal::{DepthFirstVisitor, TraversalOutcome, VisitContext};
 use biome_js_syntax::numbers::canonicalize_js_bigint_literal;
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
-use std::{borrow::Cow, collections::VecDeque, ops::ControlFlow};
+use std::{borrow::Cow, collections::VecDeque, fmt, ops::ControlFlow};
 
 const MAX_TYPE_VARIANT_STEPS: usize = 1024;
 const MAX_PROMISE_TYPE_STEPS: usize = 64;
@@ -23,6 +23,29 @@ pub enum InferredSwitchCase {
     Symbol,
     UnsupportedLiteral,
 }
+
+/// Describes why traversing nested types could not produce a result.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TypeTraversalError {
+    /// A type required for the result could not be resolved.
+    UnresolvedType,
+    /// A nested type refers back to a type that is still being visited.
+    RecursiveType,
+    /// The traversal reached its maximum number of visited types.
+    LimitExceeded,
+}
+
+impl fmt::Display for TypeTraversalError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str(match self {
+            Self::UnresolvedType => "a type could not be resolved",
+            Self::RecursiveType => "a recursive type was encountered",
+            Self::LimitExceeded => "the type traversal limit was exceeded",
+        })
+    }
+}
+
+impl std::error::Error for TypeTraversalError {}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum StringificationMode {
@@ -467,6 +490,7 @@ impl<'db> InferredType<'db> {
                 TypeData::Null | TypeData::Undefined | TypeData::VoidKeyword
             )
         })
+        .ok()
     }
 
     /// Returns whether every variant can be replaced safely in a nullish
@@ -484,6 +508,7 @@ impl<'db> InferredType<'db> {
                 Some(ConditionalType::Truthy | ConditionalType::Nullish)
             )
         })
+        .ok()
     }
 
     /// Returns whether every variant of a nullish union is nullish or an ignored
@@ -514,6 +539,7 @@ impl<'db> InferredType<'db> {
             },
             _ => false,
         })
+        .ok()
     }
 
     /// Returns `Some(true)` when any variant is `null`, and `Some(false)` when
@@ -523,6 +549,7 @@ impl<'db> InferredType<'db> {
     /// unresolved or recursive type, or exceeds its limit.
     pub fn has_null_variant(self) -> Option<bool> {
         self.try_any_variant_matches(|data| matches!(data, TypeData::Null))
+            .ok()
     }
 
     /// Returns `Some(true)` when any variant is `undefined` or `void`, and
@@ -534,6 +561,7 @@ impl<'db> InferredType<'db> {
         self.try_any_variant_matches(|data| {
             matches!(data, TypeData::Undefined | TypeData::VoidKeyword)
         })
+        .ok()
     }
 
     pub fn has_invalid_plus_operand_variant(self) -> bool {
@@ -581,10 +609,10 @@ impl<'db> InferredType<'db> {
 
     /// Returns the deduplicated switch-case variants represented by this type.
     ///
-    /// Returns `None` when traversal exceeds the type-variant limit. Literals
-    /// that cannot form supported cases are represented by
+    /// Returns [`TypeTraversalError::LimitExceeded`] when traversal exceeds the
+    /// type-variant limit. Literals that cannot form supported cases are represented by
     /// [`InferredSwitchCase::UnsupportedLiteral`].
-    pub fn try_switch_case_variants(self) -> Option<Vec<InferredSwitchCase>> {
+    pub fn try_switch_case_variants(self) -> Result<Vec<InferredSwitchCase>, TypeTraversalError> {
         let mut cases = Vec::new();
         let mut seen = FxHashSet::default();
         let mut pending = vec![self.data];
@@ -595,7 +623,7 @@ impl<'db> InferredType<'db> {
                 continue;
             }
             if remaining_steps == 0 {
-                return None;
+                return Err(TypeTraversalError::LimitExceeded);
             }
             remaining_steps -= 1;
 
@@ -645,7 +673,7 @@ impl<'db> InferredType<'db> {
 
         let mut unique_cases = FxHashSet::default();
         cases.retain(|case| unique_cases.insert(case.clone()));
-        Some(cases)
+        Ok(cases)
     }
 
     pub fn stringification_usefulness(
@@ -707,7 +735,10 @@ impl<'db> InferredType<'db> {
         matches!(self.data, TypeData::Undefined)
     }
 
-    fn try_all_variants_match(self, predicate: impl FnMut(TypeData<'db>) -> bool) -> Option<bool> {
+    fn try_all_variants_match(
+        self,
+        predicate: impl FnMut(TypeData<'db>) -> bool,
+    ) -> Result<bool, TypeTraversalError> {
         let mut visitor = AllVariantsVisitor {
             db: self.db,
             predicate,
@@ -715,13 +746,17 @@ impl<'db> InferredType<'db> {
             indeterminate: false,
         };
         match visitor.visit(self.data, MAX_TYPE_VARIANT_STEPS) {
-            TraversalOutcome::Break(result) => Some(result),
+            TraversalOutcome::Break(result) => Ok(result),
             TraversalOutcome::Complete { encountered_cycle }
                 if !encountered_cycle && !visitor.indeterminate =>
             {
-                Some(visitor.saw_variant)
+                Ok(visitor.saw_variant)
             }
-            TraversalOutcome::Complete { .. } | TraversalOutcome::LimitExceeded => None,
+            TraversalOutcome::Complete {
+                encountered_cycle: true,
+            } => Err(TypeTraversalError::RecursiveType),
+            TraversalOutcome::Complete { .. } => Err(TypeTraversalError::UnresolvedType),
+            TraversalOutcome::LimitExceeded => Err(TypeTraversalError::LimitExceeded),
         }
     }
 
@@ -824,20 +859,27 @@ impl<'db> InferredType<'db> {
         true
     }
 
-    fn try_any_variant_matches(self, predicate: impl FnMut(TypeData<'db>) -> bool) -> Option<bool> {
+    fn try_any_variant_matches(
+        self,
+        predicate: impl FnMut(TypeData<'db>) -> bool,
+    ) -> Result<bool, TypeTraversalError> {
         let mut visitor = AnyVariantVisitor {
             db: self.db,
             predicate,
             indeterminate: false,
         };
         match visitor.visit(self.data, MAX_TYPE_VARIANT_STEPS) {
-            TraversalOutcome::Break(result) => Some(result),
+            TraversalOutcome::Break(result) => Ok(result),
             TraversalOutcome::Complete { encountered_cycle }
                 if !encountered_cycle && !visitor.indeterminate =>
             {
-                Some(false)
+                Ok(false)
             }
-            TraversalOutcome::Complete { .. } | TraversalOutcome::LimitExceeded => None,
+            TraversalOutcome::Complete {
+                encountered_cycle: true,
+            } => Err(TypeTraversalError::RecursiveType),
+            TraversalOutcome::Complete { .. } => Err(TypeTraversalError::UnresolvedType),
+            TraversalOutcome::LimitExceeded => Err(TypeTraversalError::LimitExceeded),
         }
     }
 
@@ -2473,7 +2515,7 @@ mod tests {
             assert!(bigint.is_always_falsy(), "{text}");
             assert_eq!(
                 bigint.try_switch_case_variants(),
-                Some(vec![InferredSwitchCase::BigInt(Text::new_static("0n"))]),
+                Ok(vec![InferredSwitchCase::BigInt(Text::new_static("0n"))]),
                 "{text}"
             );
         }
@@ -2483,7 +2525,7 @@ mod tests {
         assert!(hexadecimal.is_always_truthy());
         assert_eq!(
             hexadecimal.try_switch_case_variants(),
-            Some(vec![InferredSwitchCase::BigInt(Text::new_static("16n"))])
+            Ok(vec![InferredSwitchCase::BigInt(Text::new_static("16n"))])
         );
     }
 
@@ -2491,6 +2533,15 @@ mod tests {
     fn incomplete_predicates_are_indeterminate() {
         let db = TestDb::default();
         let unknown = InferredType::new(&db, TypeData::Unknown);
+
+        assert_eq!(
+            unknown.try_any_variant_matches(|_| false),
+            Err(TypeTraversalError::UnresolvedType)
+        );
+        assert_eq!(
+            unknown.try_all_variants_match(|_| true),
+            Err(TypeTraversalError::UnresolvedType)
+        );
 
         assert_eq!(unknown.is_promise_instance(), None);
         assert_eq!(unknown.has_nullish_variant(), None);
