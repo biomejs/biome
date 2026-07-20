@@ -13,11 +13,15 @@ use crate::{
     ScopeId,
     builders::{IntersectionBuilder, UnionBuilder},
     globals_ids::{
-        GLOBAL_ARRAY_ID, GLOBAL_ASYNC_DISPOSABLE_ID, GLOBAL_BOOLEAN_ID, GLOBAL_CONDITIONAL_ID,
-        GLOBAL_DATE_ID, GLOBAL_DISPOSABLE_ID, GLOBAL_ERROR_ID, GLOBAL_GLOBAL_ID, GLOBAL_MAP_ID,
-        GLOBAL_NUMBER_ID, GLOBAL_PROMISE_ID, GLOBAL_REGEXP_ID, GLOBAL_SET_ID, GLOBAL_STRING_ID,
+        ARRAY_ID_GLOBAL_TYPE_ID, ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID, DATE_ID_GLOBAL_TYPE_ID,
+        DISPOSABLE_ID_GLOBAL_TYPE_ID, ERROR_ID_GLOBAL_TYPE_ID, GLOBAL_ARRAY_ID,
+        GLOBAL_ASYNC_DISPOSABLE_ID, GLOBAL_BOOLEAN_ID, GLOBAL_CONDITIONAL_ID, GLOBAL_DATE_ID,
+        GLOBAL_DISPOSABLE_ID, GLOBAL_ERROR_ID, GLOBAL_GLOBAL_ID, GLOBAL_MAP_ID, GLOBAL_NUMBER_ID,
+        GLOBAL_PROMISE_ID, GLOBAL_REGEXP_ID, GLOBAL_SET_ID, GLOBAL_STRING_ID,
         GLOBAL_SYMBOL_ASYNC_DISPOSE_ID, GLOBAL_SYMBOL_DISPOSE_ID, GLOBAL_SYMBOL_ID,
-        GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID, GLOBAL_VOID_ID, GLOBAL_WEAK_MAP_ID,
+        GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID, GLOBAL_VOID_ID, GLOBAL_WEAK_MAP_ID, GlobalTypeId,
+        MAP_ID_GLOBAL_TYPE_ID, PROMISE_ID_GLOBAL_TYPE_ID, REGEXP_ID_GLOBAL_TYPE_ID,
+        SET_ID_GLOBAL_TYPE_ID, SYMBOL_ID_GLOBAL_TYPE_ID, WEAK_MAP_ID_GLOBAL_TYPE_ID,
     },
     literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral},
     type_data as raw,
@@ -154,6 +158,7 @@ pub enum TypeData<'db> {
     Tuple(InternedTuple<'db>),
     Generic(InternedGenericTypeParameter<'db>),
     Local(LocalTypeHandle<'db>),
+    GlobalType(GlobalTypeId),
     Intersection(InternedIntersection<'db>),
     Union(InternedUnion<'db>),
     TypeOperator(InternedTypeOperatorType<'db>),
@@ -359,6 +364,7 @@ impl<'db> TypeData<'db> {
             Self::Null | Self::Undefined | Self::VoidKeyword => Some(ConditionalType::Nullish),
             Self::Divergent(_)
             | Self::Generic(_)
+            | Self::GlobalType(_)
             | Self::Local(_)
             | Self::TypeOperator(_)
             | Self::TypeofType(_)
@@ -403,6 +409,7 @@ impl<'db> TypeData<'db> {
             Self::Class(_)
             | Self::Divergent(_)
             | Self::Generic(_)
+            | Self::GlobalType(_)
             | Self::Local(_)
             | Self::MergedReference(_)
             | Self::TypeOperator(_)
@@ -421,11 +428,13 @@ impl<'db> TypeData<'db> {
     }
 
     pub fn is_array_class(self, db: &'db dyn TypeDb) -> bool {
-        self.is_builtin_class_named(db, "Array")
+        self == Self::GlobalType(ARRAY_ID_GLOBAL_TYPE_ID)
+            || self.is_builtin_class_named(db, "Array")
     }
 
     pub fn is_promise_class(self, db: &'db dyn TypeDb) -> bool {
-        self.is_builtin_class_named(db, "Promise")
+        self == Self::GlobalType(PROMISE_ID_GLOBAL_TYPE_ID)
+            || self.is_builtin_class_named(db, "Promise")
     }
 
     fn is_builtin_class_named(self, db: &'db dyn TypeDb, expected_name: &str) -> bool {
@@ -747,70 +756,48 @@ impl<'db> TypeData<'db> {
         crate::builders::with_all_required_members(db, members)
     }
 
-    fn builtin_class(db: &'db dyn TypeDb, name: &'static str) -> Self {
-        Self::Class(InternedClass::new(
-            db,
-            Box::default(),
-            None,
-            Box::default(),
-            Box::default(),
-            Some(Text::new_static(name)),
-            true,
-        ))
+    pub fn array_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(ARRAY_ID_GLOBAL_TYPE_ID)
     }
 
-    fn builtin_interface(db: &'db dyn TypeDb, name: &'static str) -> Self {
-        Self::Interface(InternedInterface::new(
-            db,
-            Box::default(),
-            Box::default(),
-            Box::default(),
-            Text::new_static(name),
-        ))
+    pub fn async_disposable_interface(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn array_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Array")
+    pub fn date_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(DATE_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn async_disposable_interface(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_interface(db, "AsyncDisposable")
+    pub fn disposable_interface(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(DISPOSABLE_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn date_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Date")
+    pub fn error_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(ERROR_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn disposable_interface(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_interface(db, "Disposable")
+    pub fn map_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(MAP_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn error_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Error")
+    pub fn promise_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(PROMISE_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn map_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Map")
+    pub fn regexp_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(REGEXP_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn promise_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Promise")
+    pub fn set_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(SET_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn regexp_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "RegExp")
+    pub fn symbol_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(SYMBOL_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn set_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Set")
-    }
-
-    pub fn symbol_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Symbol")
-    }
-
-    pub fn weak_map_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "WeakMap")
+    pub fn weak_map_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(WEAK_MAP_ID_GLOBAL_TYPE_ID)
     }
 
     pub fn instance_of(db: &'db dyn TypeDb, ty: Self, type_parameters: Box<[Self]>) -> Self {
@@ -846,12 +833,13 @@ impl<'db> TypeData<'db> {
     pub fn from_raw_lossy(db: &'db dyn TypeDb, raw: &RawTypeData) -> Self {
         let mut resolve_reference =
             |reference: &raw::TypeReference| Self::from_raw_reference_lossy(db, reference);
-        Self::from_raw_with_resolver(db, raw, &mut resolve_reference)
+        Self::from_raw_with_resolver(db, raw, false, &mut resolve_reference)
     }
 
     pub fn from_raw_with_resolver(
         db: &'db dyn TypeDb,
         raw: &RawTypeData,
+        is_builtin: bool,
         resolve_reference: &mut ReferenceResolver<'db, '_>,
     ) -> Self {
         match raw {
@@ -873,7 +861,7 @@ impl<'db> TypeData<'db> {
                 convert_references(db, &class.implements, resolve_reference),
                 convert_type_members(db, &class.members, resolve_reference),
                 class.name.clone(),
-                false,
+                is_builtin,
             )),
             raw::TypeData::Constructor(constructor) => Self::Constructor(InternedConstructor::new(
                 db,
@@ -1038,6 +1026,7 @@ impl<'db> TypeData<'db> {
     pub fn to_raw_lossy(self, db: &'db dyn TypeDb) -> RawTypeData {
         match self {
             Self::Unknown | Self::Divergent(_) => raw::TypeData::Unknown,
+            Self::GlobalType(id) => raw::TypeData::Reference(raw::RawTypeId::Global(id).into()),
             Self::Global => raw::TypeData::Global,
             Self::BigInt => raw::TypeData::BigInt,
             Self::Boolean => raw::TypeData::Boolean,
@@ -1335,6 +1324,7 @@ fn structural_type_child_count<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> u
         TypeData::Unknown
         | TypeData::Divergent(_)
         | TypeData::Global
+        | TypeData::GlobalType(_)
         | TypeData::BigInt
         | TypeData::Boolean
         | TypeData::Null
@@ -1422,6 +1412,7 @@ fn structural_type_children<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> Vec<
         TypeData::Unknown
         | TypeData::Divergent(_)
         | TypeData::Global
+        | TypeData::GlobalType(_)
         | TypeData::BigInt
         | TypeData::Boolean
         | TypeData::Null
@@ -1685,6 +1676,7 @@ fn rebuild_structural_type<'db>(
         TypeData::Unknown
         | TypeData::Divergent(_)
         | TypeData::Global
+        | TypeData::GlobalType(_)
         | TypeData::BigInt
         | TypeData::Boolean
         | TypeData::Null

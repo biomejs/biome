@@ -11,6 +11,7 @@ use crate::{
     Resolvable, ResolvedTypeData, ResolvedTypeId, ResolverId, ReturnType, ScopeId, TypeData,
     TypeId, TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
     TypeResolver, TypeResolverLevel, TypeStore, Union, flattening::MAX_FLATTEN_DEPTH,
+    interned_types::TypeData as InferredTypeData,
 };
 
 use super::globals_builder::GlobalsResolverBuilder;
@@ -24,6 +25,10 @@ pub(super) const GLOBAL_RESOLVER_ID: ResolverId = ResolverId::from_level(GLOBAL_
 pub static GLOBAL_RESOLVER: LazyLock<Arc<GlobalsResolver>> =
     LazyLock::new(|| Arc::new(GlobalsResolver::default()));
 
+pub(super) struct RawGlobalTypes {
+    pub(super) types: TypeStore,
+}
+
 /// Resolver that is limited to resolving symbols in the global scope.
 ///
 /// This resolver does not check whether qualifiers that are being resolved have
@@ -33,7 +38,7 @@ pub struct GlobalsResolver {
     pub(crate) types: TypeStore,
 }
 
-impl Default for GlobalsResolver {
+impl Default for RawGlobalTypes {
     /// Generated globals take precedence; manual definitions only fill missing slots.
     fn default() -> Self {
         // Builds a named instance member resolving to `id` in the global resolver.
@@ -415,6 +420,134 @@ impl Default for GlobalsResolver {
     }
 }
 
+impl Default for GlobalsResolver {
+    fn default() -> Self {
+        Self {
+            types: RawGlobalTypes::default().types,
+        }
+    }
+}
+
+static RAW_GLOBAL_TYPES: LazyLock<RawGlobalTypes> = LazyLock::new(RawGlobalTypes::default);
+
+pub(crate) fn raw_global_type(type_id: GlobalTypeId) -> &'static TypeData {
+    RAW_GLOBAL_TYPES.types.get_by_id(type_id.as_type_id())
+}
+
+pub fn global_type_id_for_qualifier(qualifier: &TypeReferenceQualifier) -> Option<GlobalTypeId> {
+    let id = if qualifier.has_known_type_parameters() {
+        return None;
+    } else if qualifier.is_array() {
+        ARRAY_ID_GLOBAL_TYPE_ID
+    } else if qualifier.is_promise() {
+        PROMISE_ID_GLOBAL_TYPE_ID
+    } else if qualifier.is_regex() {
+        REGEXP_ID_GLOBAL_TYPE_ID
+    } else if qualifier.is_symbol() {
+        SYMBOL_ID_GLOBAL_TYPE_ID
+    } else if qualifier.is_date() {
+        DATE_ID_GLOBAL_TYPE_ID
+    } else if qualifier.is_map() {
+        MAP_ID_GLOBAL_TYPE_ID
+    } else if qualifier.is_set() {
+        SET_ID_GLOBAL_TYPE_ID
+    } else if qualifier.is_weak_map() {
+        WEAK_MAP_ID_GLOBAL_TYPE_ID
+    } else if qualifier.is_error() {
+        ERROR_ID_GLOBAL_TYPE_ID
+    } else if qualifier.is_disposable() {
+        DISPOSABLE_ID_GLOBAL_TYPE_ID
+    } else if qualifier.is_async_disposable() {
+        ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID
+    } else {
+        return qualifier
+            .path
+            .identifier()
+            .and_then(|name| global_type_id_for_value(name.text()));
+    };
+    Some(id)
+}
+
+pub fn global_type_id_for_value(name: &str) -> Option<GlobalTypeId> {
+    match name {
+        "fetch" => Some(FETCH_ID_GLOBAL_TYPE_ID),
+        "globalThis" | "window" => Some(GLOBAL_ID_GLOBAL_TYPE_ID),
+        _ => None,
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, salsa::Update)]
+pub struct GlobalTypes<'db> {
+    types: Box<[InferredTypeData<'db>]>,
+}
+
+impl<'db> GlobalTypes<'db> {
+    pub fn get(&self, id: GlobalTypeId) -> InferredTypeData<'db> {
+        self.types[id.index()]
+    }
+
+    pub fn typeof_literal(&self, value: &str) -> InferredTypeData<'db> {
+        let id = match value {
+            "bigint" => BIGINT_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+            "boolean" => BOOLEAN_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+            "function" => FUNCTION_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+            "number" => NUMBER_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+            "object" => OBJECT_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+            "string" => STRING_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+            "symbol" => SYMBOL_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+            "undefined" => UNDEFINED_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+            _ => return InferredTypeData::Unknown,
+        };
+        self.get(id)
+    }
+
+    pub fn typeof_return_union(&self) -> InferredTypeData<'db> {
+        self.get(TYPEOF_OPERATOR_RETURN_UNION_ID_GLOBAL_TYPE_ID)
+    }
+}
+
+#[salsa::tracked(returns(ref))]
+pub fn global_types<'db>(db: &'db dyn crate::TypeDb) -> GlobalTypes<'db> {
+    let mut types: Box<[InferredTypeData<'db>]> = (0..NUM_PREDEFINED_TYPES)
+        .map(|index| {
+            let id = GlobalTypeId::try_from_type_id(TypeId::new(index)).unwrap();
+            InferredTypeData::from_raw_with_resolver(
+                db,
+                raw_global_type(id),
+                true,
+                &mut |reference| match reference {
+                    TypeReference::Resolved(id) if id.level() == TypeResolverLevel::Global => {
+                        InferredTypeData::GlobalType(
+                            GlobalTypeId::try_from_type_id(id.id()).unwrap(),
+                        )
+                    }
+                    TypeReference::Resolved(_)
+                    | TypeReference::Qualifier(_)
+                    | TypeReference::Import(_) => InferredTypeData::Unknown,
+                },
+            )
+        })
+        .collect();
+    types[TYPEOF_OPERATOR_RETURN_UNION_ID_GLOBAL_TYPE_ID.index()] =
+        InferredTypeData::union_from_types(
+            db,
+            [
+                BIGINT_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+                BOOLEAN_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+                FUNCTION_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+                NUMBER_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+                OBJECT_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+                STRING_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+                SYMBOL_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+                UNDEFINED_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+            ]
+            .into_iter()
+            .map(|id| types[id.index()])
+            .collect(),
+        );
+    GlobalTypes { types }
+}
+
 impl GlobalsResolver {
     pub fn run_inference(&mut self) {
         self.resolve_all();
@@ -532,5 +665,56 @@ impl TypeResolver for GlobalsResolver {
 
     fn registered_types(&self) -> Vec<&TypeData> {
         self.types.as_references()[NUM_PREDEFINED_TYPES..].to_vec()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[salsa::db]
+    #[derive(Default)]
+    struct TestDb {
+        storage: salsa::Storage<Self>,
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    #[salsa::db]
+    impl biome_db::Db for TestDb {
+        fn parsed_source_for_path(
+            &self,
+            _path: &camino::Utf8Path,
+        ) -> Option<biome_db::ParsedSource> {
+            None
+        }
+    }
+
+    #[salsa::db]
+    impl crate::TypeDb for TestDb {}
+
+    #[test]
+    fn typeof_literals_use_canonical_global_entries() {
+        let db = TestDb::default();
+        let globals = global_types(&db);
+        assert_eq!(
+            globals.typeof_literal("string"),
+            globals.get(STRING_STRING_LITERAL_ID_GLOBAL_TYPE_ID)
+        );
+        assert_eq!(
+            globals.typeof_return_union(),
+            globals.get(TYPEOF_OPERATOR_RETURN_UNION_ID_GLOBAL_TYPE_ID)
+        );
+    }
+
+    #[test]
+    fn structured_globals_keep_their_members() {
+        let db = TestDb::default();
+        let InferredTypeData::Class(promise) = global_types(&db).get(PROMISE_ID_GLOBAL_TYPE_ID)
+        else {
+            panic!("Promise must be a class");
+        };
+        assert!(!promise.members(&db).is_empty());
     }
 }

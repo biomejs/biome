@@ -1584,6 +1584,7 @@ fn is_promise_instance<'db>(db: &'db dyn TypeDb, data: TypeData<'db>) -> Option<
                 }));
             }
             TypeData::Global
+            | TypeData::GlobalType(_)
             | TypeData::BigInt
             | TypeData::Boolean
             | TypeData::Null
@@ -1694,6 +1695,7 @@ fn type_description<'db>(db: &'db dyn TypeDb, data: TypeData<'db>) -> String {
         | TypeData::TypeofValue(_)
         | TypeData::Conditional
         | TypeData::Global
+        | TypeData::GlobalType(_)
         | TypeData::ThisKeyword => format!("{data:?}"),
     }
 }

@@ -315,6 +315,7 @@ fn renderable_variant(
         InferredTypeData::Unknown
         | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
         | InferredTypeData::Null
         | InferredTypeData::Symbol
         | InferredTypeData::Undefined

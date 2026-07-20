@@ -1,18 +1,19 @@
 use super::{
-    collected_type_result,
+    collected_type_result, expand_canonical_global,
     lookup::{
         MemberLookupMode, MemberLookupResolver, apply_substitutions,
         find_member_type_with_resolver, substitutions_for_instance,
     },
+    normalize_structural_type,
     resolver::ResolutionCtx,
 };
 use crate::db::queries::{ResolvedCallArgument, infer_call_expression_return_type_from_args};
 use biome_js_semantic::ScopeId;
 use biome_js_type_info::{
     CallArgumentType as RawCallArgumentType, DestructureField as RawDestructureField,
-    GLOBAL_RESOLVER, Literal as RawLiteral, Path, RawTypeData, TypeId, TypeReference,
-    TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
-    TypeofExpression as RawTypeofExpression,
+    Literal as RawLiteral, Path, RawTypeData, TypeId, TypeReference, TypeReferenceQualifier,
+    TypeResolverLevel, TypeofExpression as RawTypeofExpression, global_type_id_for_qualifier,
+    global_types,
     interned_types::{
         CallArgumentType as InferredCallArgumentType, ConditionalSubset, ConditionalType,
         InternedClass as InferredClass, InternedConstructor as InferredConstructor,
@@ -79,6 +80,9 @@ impl<'db> MemberLookupResolver<'db> for ResolutionCtx<'db, '_> {
             self.resolve_member_references(ty)
         } else {
             ty
+        };
+        let Ok(ty) = normalize_structural_type(db, ty, |ty| self.resolve_inferred_type(ty)) else {
+            return InferredTypeData::Unknown;
         };
         let ty = apply_substitutions(db, ty, substitutions);
         self.member_type(ty, is_optional)
@@ -433,6 +437,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -480,13 +485,16 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     fn resolve_call_callee(&mut self, mut callee: InferredTypeData<'db>) -> InferredTypeData<'db> {
         let mut instances = Vec::new();
+        let mut resolved = InferredTypeData::Unknown;
         for _ in 0..MAX_CALL_CALLEE_STEPS {
             callee = self.resolve_inferred_type(callee);
+            callee = expand_canonical_global(self.db, callee);
             let InferredTypeData::InstanceOf(instance) = callee else {
                 while let Some(type_parameters) = instances.pop() {
                     callee = InferredTypeData::instance_of(self.db, callee, type_parameters);
                 }
-                return callee;
+                resolved = callee;
+                break;
             };
             let type_parameters = instance.type_parameters(self.db);
             callee = self.resolve_inferred_type(instance.ty(self.db));
@@ -494,7 +502,18 @@ impl<'db> ResolutionCtx<'db, '_> {
                 instances.push(type_parameters.to_vec().into_boxed_slice());
             }
         }
-        InferredTypeData::Unknown
+
+        let db = self.db;
+        normalize_structural_type(db, resolved, |ty| {
+            if let InferredTypeData::Local(local) = ty
+                && local.module(db) == self.module_key
+            {
+                ty
+            } else {
+                self.resolve_inferred_type(ty)
+            }
+        })
+        .unwrap_or(InferredTypeData::Unknown)
     }
 
     fn resolve_call_arguments(
@@ -555,6 +574,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             ty @ (InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -629,6 +649,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -675,6 +696,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Boolean
                 | InferredTypeData::Null
@@ -889,6 +911,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -933,6 +956,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -978,7 +1002,9 @@ impl<'db> ResolutionCtx<'db, '_> {
         {
             return Some(ty);
         }
-        match self.resolve_inferred_type(object) {
+        let object = self.resolve_inferred_type(object);
+        let object = expand_canonical_global(self.db, object);
+        match object {
             ty @ InferredTypeData::Class(_) => {
                 if ty.is_promise_class(self.db) && member_name == "resolve" {
                     return Some(self.promise_resolve_type(ty));
@@ -993,6 +1019,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     return Some(ty);
                 }
                 let mut target = self.resolve_inferred_type(instance_target);
+                target = expand_canonical_global(self.db, target);
                 if target.is_array_class(self.db) {
                     target = self.resolve_global_name("Array").unwrap_or(target);
                 }
@@ -1028,6 +1055,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                         InferredTypeData::Unknown => types.push(InferredTypeData::Unknown),
                         ty @ (InferredTypeData::Divergent(_)
                         | InferredTypeData::Global
+                        | InferredTypeData::GlobalType(_)
                         | InferredTypeData::BigInt
                         | InferredTypeData::Boolean
                         | InferredTypeData::Null
@@ -1097,6 +1125,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             ty @ (InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -1429,12 +1458,11 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     fn resolve_global_name(&mut self, name: &str) -> Option<InferredTypeData<'db>> {
-        GLOBAL_RESOLVER
-            .resolve_qualifier(&TypeReferenceQualifier::from_path(
-                ScopeId::GLOBAL,
-                Path::from(Text::new_owned(name.into())),
-            ))
-            .map(|resolved_id| self.resolve_resolved_id(resolved_id))
+        global_type_id_for_qualifier(&TypeReferenceQualifier::from_path(
+            ScopeId::GLOBAL,
+            Path::from(Text::new_owned(name.into())),
+        ))
+        .map(|id| super::globals::global_type(self.db, id))
     }
 
     fn member_type(
@@ -1475,6 +1503,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -1543,6 +1572,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -1603,6 +1633,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             subject @ (InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -1716,6 +1747,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Boolean
                 | InferredTypeData::Null
@@ -1833,6 +1865,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown => Some(InferredTypeData::Unknown),
             InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::Symbol
             | InferredTypeData::Conditional
             | InferredTypeData::Constructor(_)
@@ -1865,6 +1898,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::Boolean
             | InferredTypeData::Null
             | InferredTypeData::Number
@@ -1930,6 +1964,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::Conditional
             | InferredTypeData::Class(_)
             | InferredTypeData::Constructor(_)
@@ -1956,30 +1991,11 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     fn typeof_return_union(&self) -> InferredTypeData<'db> {
-        InferredTypeData::union_from_types(
-            self.db,
-            [
-                "bigint",
-                "boolean",
-                "function",
-                "number",
-                "object",
-                "string",
-                "symbol",
-                "undefined",
-            ]
-            .into_iter()
-            .map(|value| self.typeof_string_literal(value))
-            .collect(),
-        )
+        global_types(self.db).typeof_return_union()
     }
 
     fn typeof_string_literal(&self, value: &'static str) -> InferredTypeData<'db> {
-        // TODO: Replace this with canonical `global_types(db)` literal entries in Phase 6e.
-        InferredTypeData::Literal(InferredInternedLiteral::new(
-            self.db,
-            InferredLiteral::String(Text::new_static(value).into()),
-        ))
+        global_types(self.db).typeof_literal(value)
     }
 
     fn conditional_type(&mut self, ty: InferredTypeData<'db>) -> ConditionalType {
@@ -2029,6 +2045,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     InferredTypeData::Unknown
                     | InferredTypeData::Divergent(_)
                     | InferredTypeData::Global
+                    | InferredTypeData::GlobalType(_)
                     | InferredTypeData::BigInt
                     | InferredTypeData::Boolean
                     | InferredTypeData::Null
@@ -2107,6 +2124,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     InferredTypeData::Unknown
                     | InferredTypeData::Divergent(_)
                     | InferredTypeData::Global
+                    | InferredTypeData::GlobalType(_)
                     | InferredTypeData::BigInt
                     | InferredTypeData::Boolean
                     | InferredTypeData::Null
@@ -2157,6 +2175,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
                 | InferredTypeData::Null
                 | InferredTypeData::Symbol
                 | InferredTypeData::Undefined
@@ -2201,6 +2220,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Null
                 | InferredTypeData::Number

@@ -31,7 +31,10 @@ mod type_traversal;
 
 pub use conditionals::*;
 pub use flattening::MAX_FLATTEN_DEPTH;
-pub use globals::{GLOBAL_RESOLVER, GlobalsResolver};
+pub use globals::{
+    GLOBAL_RESOLVER, GlobalTypes, GlobalsResolver, global_type_id_for_qualifier,
+    global_type_id_for_value, global_types,
+};
 pub use globals_ids::{GLOBAL_BOOLEAN_ID, GLOBAL_UNKNOWN_ID, GlobalTypeId, NUM_PREDEFINED_TYPES};
 pub use inferred_type::{
     IgnoredPrimitiveTypes, InferredSwitchCase, InferredType, StringificationMode,

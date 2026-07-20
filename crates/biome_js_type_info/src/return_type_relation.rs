@@ -68,6 +68,7 @@ fn union_variants<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> Vec<TypeData<'
         ty @ (TypeData::Unknown
         | TypeData::Divergent(_)
         | TypeData::Global
+        | TypeData::GlobalType(_)
         | TypeData::BigInt
         | TypeData::Boolean
         | TypeData::Null
@@ -165,6 +166,7 @@ fn is_any_contaminated(db: &dyn TypeDb, ty: TypeData<'_>) -> bool {
         TypeData::Unknown
         | TypeData::Divergent(_)
         | TypeData::Global
+        | TypeData::GlobalType(_)
         | TypeData::BigInt
         | TypeData::Boolean
         | TypeData::Null
@@ -219,6 +221,7 @@ fn is_literal_of_primitive(db: &dyn TypeDb, ty: TypeData<'_>) -> bool {
         | TypeData::Unknown
         | TypeData::Divergent(_)
         | TypeData::Global
+        | TypeData::GlobalType(_)
         | TypeData::BigInt
         | TypeData::Boolean
         | TypeData::Null
@@ -324,6 +327,7 @@ fn is_only_property_literal_widening(
                 TypeData::Unknown
                 | TypeData::Divergent(_)
                 | TypeData::Global
+                | TypeData::GlobalType(_)
                 | TypeData::BigInt
                 | TypeData::Boolean
                 | TypeData::Null
@@ -451,6 +455,7 @@ fn type_members<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> Option<&'db [Typ
         TypeData::Unknown
         | TypeData::Divergent(_)
         | TypeData::Global
+        | TypeData::GlobalType(_)
         | TypeData::BigInt
         | TypeData::Boolean
         | TypeData::Null
@@ -495,6 +500,7 @@ fn is_strictly_narrower_than_object_keyword(db: &dyn TypeDb, ty: TypeData<'_>) -
             TypeData::Unknown
             | TypeData::Divergent(_)
             | TypeData::Global
+            | TypeData::GlobalType(_)
             | TypeData::BigInt
             | TypeData::Boolean
             | TypeData::Null
@@ -541,6 +547,7 @@ fn is_strictly_narrower_than_object_keyword(db: &dyn TypeDb, ty: TypeData<'_>) -
         TypeData::Unknown
         | TypeData::Divergent(_)
         | TypeData::Global
+        | TypeData::GlobalType(_)
         | TypeData::BigInt
         | TypeData::Boolean
         | TypeData::Null
@@ -598,6 +605,7 @@ fn class_has_instance_shape<'db>(
                 TypeData::Unknown
                 | TypeData::Divergent(_)
                 | TypeData::Global
+                | TypeData::GlobalType(_)
                 | TypeData::BigInt
                 | TypeData::Boolean
                 | TypeData::Null
@@ -634,6 +642,7 @@ fn class_has_instance_shape<'db>(
             TypeData::Unknown
             | TypeData::Divergent(_)
             | TypeData::Global
+            | TypeData::GlobalType(_)
             | TypeData::BigInt
             | TypeData::Boolean
             | TypeData::Null
