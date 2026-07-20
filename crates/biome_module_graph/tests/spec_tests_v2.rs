@@ -38,6 +38,8 @@ use camino::{Utf8Path, Utf8PathBuf};
 use salsa::Storage;
 use salsa::plumbing::{AsId, FromId};
 
+#[path = "spec_tests_v2/cycles.test.rs"]
+mod cycles;
 #[path = "spec_tests_v2/expected_argument_inference.test.rs"]
 mod expected_argument_inference;
 #[path = "spec_tests_v2/globals.test.rs"]
@@ -1250,42 +1252,6 @@ fn test_infer_module_types_bottom_up_warms_blanket_reexports() {
     assert!(
         leaf_position < mid_position && mid_position < index_position,
         "bottom-up inference must warm blanket re-export dependencies before their importers"
-    );
-}
-
-#[test]
-fn test_infer_module_types_bottom_up_returns_none_for_import_cycles() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/a.ts".into(),
-        r#"
-            import { b } from "./b.ts";
-            export const a = b;
-        "#,
-    );
-    fs.insert(
-        "/src/b.ts".into(),
-        r#"
-            import { a } from "./a.ts";
-            export const b = a;
-        "#,
-    );
-
-    let db = build_js_test_module_db(&fs, &["/src/a.ts", "/src/b.ts"], true);
-    let a_module = db
-        .module_for_path(Utf8Path::new("/src/a.ts"))
-        .expect("a module must exist");
-    let b_module = db
-        .module_for_path(Utf8Path::new("/src/b.ts"))
-        .expect("b module must exist");
-
-    assert!(
-        infer_module_types_bottom_up(&db, a_module).is_none(),
-        "the import cycle must use the documented no-result fallback"
-    );
-    assert!(
-        infer_module_types_bottom_up(&db, b_module).is_none(),
-        "cycle recovery must remain stable from either entry module"
     );
 }
 
