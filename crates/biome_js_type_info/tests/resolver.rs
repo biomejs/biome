@@ -5,14 +5,14 @@ use std::sync::Arc;
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::{AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsExpressionStatement};
 use biome_js_type_info::{
-    GlobalsResolver, Resolvable, Type, TypeData, TypeMemberKind, TypeReference,
-    TypeReferenceQualifier, TypeResolver,
+    GlobalsResolver, ModuleId, Resolvable, ResolvedTypeId, Type, TypeData, TypeId, TypeMember,
+    TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
 };
 use biome_rowan::Text;
 
 use utils::{
     HardcodedSymbolResolver, assert_type_data_snapshot, assert_typed_bindings_snapshot,
-    get_function_declaration, get_variable_declaration, parse_ts,
+    get_function_declaration, get_interface_declaration, get_variable_declaration, parse_ts,
 };
 
 #[test]
@@ -219,6 +219,234 @@ fn infer_resolved_type_of_destructured_array_element() {
 }
 
 #[test]
+fn readonly_utility_marks_members_readonly() {
+    let data = resolved_variable_data(
+        r#"const value: Readonly<{ name: string; [key: string]: number }> = {};"#,
+    );
+    let TypeData::Object(object) = data else {
+        panic!("expected object type");
+    };
+    let name = object
+        .members
+        .iter()
+        .find(|member| member.has_name("name"))
+        .expect("name member");
+    assert!(name.is_readonly());
+    let index = object
+        .members
+        .iter()
+        .find(|member| matches!(member.kind, TypeMemberKind::ReadonlyIndexSignature(_)))
+        .expect("index signature member");
+    assert!(index.is_readonly());
+
+    let data = resolved_variable_data(r#"const value: Readonly<Record<string, string>> = {};"#);
+    let TypeData::Object(object) = data else {
+        panic!("expected object type");
+    };
+    let index = object
+        .members
+        .iter()
+        .find(|member| member.is_index_signature_with_ty(|_| true))
+        .expect("index signature member");
+    assert!(index.is_readonly());
+}
+
+#[test]
+fn readonly_utility_marks_named_type_members_readonly() {
+    const CODE: &str = r#"interface Foo { name: string; }"#;
+
+    let root = parse_ts(CODE);
+    let mut globals = GlobalsResolver::default();
+    let interface = TypeData::from_ts_interface_declaration(
+        &mut globals,
+        ScopeId::GLOBAL,
+        &get_interface_declaration(&root),
+    )
+    .expect("interface should resolve");
+    let mut resolver = HardcodedSymbolResolver::new("Foo", interface, globals);
+    let reference = TypeReference::from(
+        TypeReferenceQualifier::from_path(ScopeId::GLOBAL, Text::new_static("Readonly"))
+            .with_type_parameters([TypeReference::from(TypeReferenceQualifier::from_path(
+                ScopeId::GLOBAL,
+                Text::new_static("Foo"),
+            ))]),
+    );
+    let reference = reference
+        .resolved(&mut resolver)
+        .expect("Readonly<Foo> should resolve");
+    let data = resolver
+        .resolve_and_get(&reference)
+        .expect("resolved Readonly<Foo> should resolve")
+        .to_data();
+    let TypeData::Object(object) = data else {
+        panic!("expected object type");
+    };
+    let name = object
+        .members
+        .iter()
+        .find(|member| member.has_name("name"))
+        .expect("name member");
+    assert!(name.is_readonly());
+}
+
+#[test]
+fn readonly_utility_preserves_foreign_member_context() {
+    let module_id = ModuleId::new(7);
+    let local_reference =
+        TypeReference::Resolved(ResolvedTypeId::new(TypeResolverLevel::Thin, TypeId::new(1)));
+    let object = TypeData::object_with_members(
+        [TypeMember {
+            kind: TypeMemberKind::ComputedValue(local_reference.clone()),
+            ty: local_reference,
+        }]
+        .into(),
+    );
+    let globals = GlobalsResolver::default();
+    let mut resolver =
+        HardcodedSymbolResolver::new("Foo", object, globals).with_foreign_symbol_module(module_id);
+    let reference = TypeReference::from(
+        TypeReferenceQualifier::from_path(ScopeId::GLOBAL, Text::new_static("Readonly"))
+            .with_type_parameters([TypeReference::from(TypeReferenceQualifier::from_path(
+                ScopeId::GLOBAL,
+                Text::new_static("Foo"),
+            ))]),
+    );
+    let reference = reference
+        .resolved(&mut resolver)
+        .expect("Readonly<Foo> should resolve");
+    let data = resolver
+        .resolve_and_get(&reference)
+        .expect("resolved Readonly<Foo> should resolve")
+        .to_data();
+    let TypeData::Object(object) = data else {
+        panic!("expected object type");
+    };
+    let [member] = object.members.as_ref() else {
+        panic!("expected one member");
+    };
+
+    let TypeMemberKind::ReadonlyComputedValue(TypeReference::Resolved(key_type_id)) = &member.kind
+    else {
+        panic!("expected readonly computed member");
+    };
+    let TypeReference::Resolved(value_type_id) = &member.ty else {
+        panic!("expected resolved member type");
+    };
+
+    assert_eq!(key_type_id.module_id(), module_id);
+    assert_eq!(value_type_id.module_id(), module_id);
+}
+
+#[test]
+fn required_utility_preserves_readonly_foreign_union_member_context() {
+    let module_id = ModuleId::new(7);
+    let optional_type_id = TypeId::new(1);
+    let local_reference =
+        TypeReference::Resolved(ResolvedTypeId::new(TypeResolverLevel::Thin, TypeId::new(2)));
+    let object = TypeData::object_with_members(
+        [TypeMember {
+            kind: TypeMemberKind::ReadonlyComputedValueOptional(local_reference.clone()),
+            ty: TypeReference::Resolved(ResolvedTypeId::new(
+                TypeResolverLevel::Thin,
+                optional_type_id,
+            )),
+        }]
+        .into(),
+    );
+    let globals = GlobalsResolver::default();
+    let mut resolver = HardcodedSymbolResolver::new("Foo", object, globals);
+    assert_eq!(resolver.optional(local_reference), optional_type_id);
+    let mut resolver = resolver.with_foreign_symbol_module(module_id);
+    let reference = TypeReference::from(
+        TypeReferenceQualifier::from_path(ScopeId::GLOBAL, Text::new_static("Required"))
+            .with_type_parameters([TypeReference::from(TypeReferenceQualifier::from_path(
+                ScopeId::GLOBAL,
+                Text::new_static("Foo"),
+            ))]),
+    );
+    let reference = reference
+        .resolved(&mut resolver)
+        .expect("Required<Foo> should resolve");
+    let data = resolver
+        .resolve_and_get(&reference)
+        .expect("resolved Required<Foo> should resolve")
+        .to_data();
+    let TypeData::Object(object) = data else {
+        panic!("expected object type");
+    };
+    let [member] = object.members.as_ref() else {
+        panic!("expected one member");
+    };
+
+    let TypeMemberKind::ReadonlyComputedValue(TypeReference::Resolved(key_type_id)) = &member.kind
+    else {
+        panic!("expected required computed member");
+    };
+    let TypeReference::Resolved(value_type_id) = &member.ty else {
+        panic!("expected resolved member type");
+    };
+
+    assert_eq!(key_type_id.module_id(), module_id);
+    assert_eq!(value_type_id.module_id(), module_id);
+}
+
+#[test]
+fn mapped_utilities_preserve_readonly_members() {
+    let data = resolved_variable_data(
+        r#"const value: Partial<{ readonly name: string; readonly [key: string]: number; readonly [Symbol.iterator]: () => string }> = {};"#,
+    );
+    let TypeData::Object(object) = data else {
+        panic!("expected partial object type");
+    };
+    let name = object
+        .members
+        .iter()
+        .find(|member| member.has_name("name"))
+        .expect("name member");
+    assert!(name.is_readonly());
+    assert!(name.is_optional());
+    let index = object
+        .members
+        .iter()
+        .find(|member| matches!(member.kind, TypeMemberKind::ReadonlyIndexSignature(_)))
+        .expect("index signature member");
+    assert!(index.is_readonly());
+    let computed = object
+        .members
+        .iter()
+        .find(|member| {
+            matches!(
+                member.kind,
+                TypeMemberKind::ReadonlyComputedValueOptional(_)
+            )
+        })
+        .expect("computed member");
+    assert!(computed.is_readonly());
+    assert!(computed.is_optional());
+
+    let data = resolved_variable_data(
+        r#"const value: Required<{ readonly name?: string; readonly [Symbol.iterator]?: () => string }> = {};"#,
+    );
+    let TypeData::Object(object) = data else {
+        panic!("expected required object type");
+    };
+    let name = object
+        .members
+        .iter()
+        .find(|member| member.has_name("name"))
+        .expect("name member");
+    assert!(name.is_readonly());
+    assert!(!name.is_optional());
+    let computed = object
+        .members
+        .iter()
+        .find(|member| matches!(member.kind, TypeMemberKind::ReadonlyComputedValue(_)))
+        .expect("computed member");
+    assert!(computed.is_readonly());
+    assert!(!computed.is_optional());
+}
+
+#[test]
 fn infer_resolved_type_of_disposable_object() {
     const CODE: &str = r#"const a = {
         [Symbol.dispose](): void {
@@ -360,6 +588,50 @@ fn assert_global_has_computed_member(resolver: &GlobalsResolver, name: &'static 
         panic!("{name} should have exactly one generated member");
     };
     assert!(matches!(member.kind, TypeMemberKind::ComputedValue(_)));
+}
+
+#[test]
+fn generated_error_prototype_is_readonly() {
+    let resolver = GlobalsResolver::default();
+    let reference = TypeReference::from(
+        TypeReferenceQualifier::from_path(ScopeId::GLOBAL, Text::new_static("Error"))
+            .with_type_only(),
+    );
+    let resolved = resolver
+        .resolve_and_get(&reference)
+        .expect("Error should resolve");
+    let TypeData::Class(class) = resolved.as_raw_data() else {
+        panic!("Error should resolve to generated class data");
+    };
+    let prototype = class
+        .members
+        .iter()
+        .find(|member| member.has_name("prototype"))
+        .expect("prototype member");
+    assert!(prototype.is_static());
+    assert!(prototype.is_readonly());
+}
+
+fn resolved_variable_data(code: &str) -> TypeData {
+    let root = parse_ts(code);
+    let decl = get_variable_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(
+        &mut resolver,
+        ScopeId::GLOBAL,
+        &decl,
+    );
+
+    let [(name, reference)] = bindings.as_ref() else {
+        panic!("expected exactly one binding");
+    };
+    assert_eq!(name.text(), "value");
+
+    resolver
+        .resolve_and_get(reference)
+        .expect("resolved binding should resolve")
+        .to_data()
+        .inferred(&mut resolver)
 }
 
 fn inferred_variable_type(code: &str) -> Type {

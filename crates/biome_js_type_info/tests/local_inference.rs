@@ -1,11 +1,14 @@
 mod utils;
 
 use biome_js_semantic::ScopeId;
-use biome_js_type_info::{GlobalsResolver, TypeData, TypeResolver};
+use biome_js_type_info::{
+    GlobalsResolver, TypeData, TypeMemberKind, TypeResolver, interned_types::well_known_symbol_name,
+};
 
 use utils::{
-    assert_type_data_snapshot, assert_typed_bindings_snapshot, get_expression,
-    get_function_declaration, get_variable_declaration, parse_ts,
+    assert_type_data_snapshot, assert_typed_bindings_snapshot, get_class_declaration,
+    get_expression, get_function_declaration, get_type_alias_declaration, get_variable_declaration,
+    parse_ts,
 };
 
 #[test]
@@ -249,6 +252,165 @@ fn infer_type_of_destructured_array_element() {
         &resolver,
         "infer_type_of_destructured_array_element",
     );
+}
+
+#[test]
+fn infer_readonly_type_members() {
+    const CODE: &str = r#"type Value = { readonly name: string; readonly [key: string]: number };"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_type_alias_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let data = TypeData::from_ts_type_alias_declaration(&mut resolver, ScopeId::GLOBAL, &decl)
+        .expect("type alias should resolve");
+    let TypeData::Object(object) = data else {
+        panic!("expected object type");
+    };
+    let name = object
+        .members
+        .iter()
+        .find(|member| member.has_name("name"))
+        .expect("name member");
+    assert!(name.is_readonly());
+    let index = object
+        .members
+        .iter()
+        .find(|member| matches!(member.kind, TypeMemberKind::ReadonlyIndexSignature(_)))
+        .expect("index signature member");
+    assert!(index.is_readonly());
+}
+
+#[test]
+fn infer_readonly_class_property() {
+    const CODE: &str = r#"class Example { readonly value: string; }"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_class_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let class_data = TypeData::from_js_class_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
+    let TypeData::Class(class) = class_data else {
+        panic!("expected class type");
+    };
+    let value = class
+        .members
+        .iter()
+        .find(|member| member.has_name("value"))
+        .expect("value member");
+    assert!(value.is_readonly());
+}
+
+#[test]
+fn infer_readonly_constructor_parameter_property() {
+    const CODE: &str = r#"class Example { constructor(readonly value: string) {} }"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_class_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let class_data = TypeData::from_js_class_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
+    let TypeData::Class(class) = class_data else {
+        panic!("expected class type");
+    };
+    let value = class
+        .members
+        .iter()
+        .find(|member| member.has_name("value"))
+        .expect("value member");
+    assert!(value.is_readonly());
+}
+
+#[test]
+fn infer_readonly_static_optional_class_property() {
+    const CODE: &str = r#"class Example { static readonly value?: string; }"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_class_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let class_data = TypeData::from_js_class_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
+    let TypeData::Class(class) = class_data else {
+        panic!("expected class type");
+    };
+    let value = class
+        .members
+        .iter()
+        .find(|member| member.has_name("value"))
+        .expect("value member");
+    assert!(value.is_static());
+    assert!(value.is_readonly());
+    assert!(value.is_optional());
+}
+
+#[test]
+fn infer_readonly_static_computed_class_property() {
+    const CODE: &str = r#"class Example { static readonly [Symbol.iterator]: string; }"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_class_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let class_data = TypeData::from_js_class_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
+    let TypeData::Class(class) = class_data else {
+        panic!("expected class type");
+    };
+    let member = class.members.first().expect("computed member");
+    assert!(member.is_static());
+    assert!(member.is_readonly());
+    assert!(member.is_keyed_member_with_ty(|_| true));
+}
+
+#[test]
+fn infer_readonly_computed_type_member() {
+    const CODE: &str = r#"type Value = { readonly [Symbol.iterator]: string; }"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_type_alias_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let data = TypeData::from_ts_type_alias_declaration(&mut resolver, ScopeId::GLOBAL, &decl)
+        .expect("type alias should resolve");
+    let TypeData::Object(object) = data else {
+        panic!("expected object type");
+    };
+    let member = object.members.first().expect("computed member");
+    assert!(member.is_readonly());
+    assert!(member.is_keyed_member_with_ty(|_| true));
+}
+
+#[test]
+fn infer_optional_computed_type_members() {
+    const CODE: &str =
+        r#"type Value = { readonly [Symbol.asyncDispose]?: string; [Symbol.dispose]?(): void; };"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_type_alias_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let data = TypeData::from_ts_type_alias_declaration(&mut resolver, ScopeId::GLOBAL, &decl)
+        .expect("type alias should resolve");
+    let TypeData::Object(object) = data else {
+        panic!("expected object type");
+    };
+    let [property, method] = object.members.as_ref() else {
+        panic!("expected two computed members");
+    };
+
+    assert!(property.is_optional());
+    assert!(property.is_readonly());
+    assert!(method.is_optional());
+    assert!(property.is_keyed_member_with_ty(|key_type| {
+        well_known_symbol_name(key_type).is_some_and(|name| name.text() == "Symbol.asyncDispose")
+    }));
+    assert!(method.is_keyed_member_with_ty(|key_type| {
+        well_known_symbol_name(key_type).is_some_and(|name| name.text() == "Symbol.dispose")
+    }));
+
+    let method_type = resolver
+        .resolve_and_get(&method.ty)
+        .expect("optional method type should resolve");
+    let TypeData::Union(method_type) = method_type.as_raw_data() else {
+        panic!("optional method type should include undefined");
+    };
+    assert!(method_type.types().iter().any(|variant| {
+        resolver
+            .resolve_and_get(variant)
+            .is_some_and(|variant| matches!(variant.as_raw_data(), TypeData::Undefined))
+    }));
 }
 
 #[test]

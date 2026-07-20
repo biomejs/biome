@@ -231,8 +231,8 @@ impl LoweredTypeMember {
 /// Lowered member kind.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LoweredMemberKind {
-    Named { optional: bool },
-    NamedStatic,
+    Named { optional: bool, readonly: bool },
+    NamedStatic { readonly: bool },
     Constructor,
     CallSignature,
     ComputedValue { key_reference: LoweredTypeReference },
@@ -838,6 +838,7 @@ fn lower_error_type_member(member: AnyTsTypeMember) -> Result<Option<LoweredType
         AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
             let name = lower_object_member_name(property.name()?)?;
             let optional = property.optional_token().is_some();
+            let readonly = property.readonly_token().is_some();
             let type_reference = property
                 .type_annotation()
                 .with_context(|| format!("Error member {name} is missing a type annotation"))?
@@ -851,7 +852,7 @@ fn lower_error_type_member(member: AnyTsTypeMember) -> Result<Option<LoweredType
             };
             Ok(Some(LoweredTypeMember {
                 name,
-                kind: LoweredMemberKind::Named { optional },
+                kind: LoweredMemberKind::Named { optional, readonly },
                 type_reference,
             }))
         }
@@ -1038,7 +1039,9 @@ fn lower_error_constructor_property_member(
 
     Ok(LoweredTypeMember {
         name,
-        kind: LoweredMemberKind::NamedStatic,
+        kind: LoweredMemberKind::NamedStatic {
+            readonly: property.readonly_token().is_some(),
+        },
         type_reference,
     })
 }

@@ -321,10 +321,15 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     fn resolve_readonly(&mut self, qualifier: &TypeReferenceQualifier) -> InferredTypeData<'db> {
         let target_ty = self.resolve(&qualifier.type_parameters[0]);
-        self.own_members(target_ty)
-            .map_or(InferredTypeData::Unknown, |members| {
-                InferredTypeData::object_from_members(self.db, members)
-            })
+        let Some(mut members) = self.own_members(target_ty) else {
+            return InferredTypeData::Unknown;
+        };
+
+        for member in &mut members {
+            member.kind = member.kind.clone().with_readonly();
+        }
+
+        InferredTypeData::object_from_members(self.db, members)
     }
 
     fn own_members(&mut self, ty: InferredTypeData<'db>) -> Option<Vec<InferredTypeMember<'db>>> {

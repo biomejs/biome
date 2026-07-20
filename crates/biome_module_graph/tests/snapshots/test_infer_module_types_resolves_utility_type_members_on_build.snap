@@ -227,10 +227,10 @@ Binding readReadonly "readReadonly" => sync Function "readReadonly" {
       required value: instanceof Object {
         prototype: No prototype
         members: [
-          [string]: string | number | undefined,
-          "name": string,
-          "value": number,
-          "optional"?: string | undefined
+          readonly [string]: string | number | undefined,
+          readonly "name": string,
+          readonly "value": number,
+          readonly "optional"?: string | undefined
         ]
       }
     ]
@@ -239,10 +239,10 @@ Binding readReadonly "readReadonly" => sync Function "readReadonly" {
   returns: instanceof Object {
     prototype: No prototype
     members: [
-      [string]: string | number | undefined,
-      "name": string,
-      "value": number,
-      "optional"?: string | undefined
+      readonly [string]: string | number | undefined,
+      readonly "name": string,
+      readonly "value": number,
+      readonly "optional"?: string | undefined
     ]
   }
 }
@@ -250,20 +250,20 @@ Binding readReadonly "readReadonly" => sync Function "readReadonly" {
 Binding value "value" => instanceof Object {
   prototype: No prototype
   members: [
-    [string]: string | number | undefined,
-    "name": string,
-    "value": number,
-    "optional"?: string | undefined
+    readonly [string]: string | number | undefined,
+    readonly "name": string,
+    readonly "value": number,
+    readonly "optional"?: string | undefined
   ]
 }
 
 Expression "value" => instanceof Object {
   prototype: No prototype
   members: [
-    [string]: string | number | undefined,
-    "name": string,
-    "value": number,
-    "optional"?: string | undefined
+    readonly [string]: string | number | undefined,
+    readonly "name": string,
+    readonly "value": number,
+    readonly "optional"?: string | undefined
   ]
 }
 ```

@@ -1259,6 +1259,7 @@ mod tests {
                 is_rest,
             }),
             accessibility: None,
+            is_readonly: false,
         }
     }
 

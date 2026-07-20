@@ -99,6 +99,8 @@ function overloaded(x: "b"): "b";
 function overloaded(x: "a" | "b"): string { if (x === "a") return "a"; return "b"; }
 
 function complexAnnotation(): Record<string, string> { return { a: "b" }; }
+function exactReadonlyProperty(): Readonly<{ key: "value" }> { return { key: "value" } as const; }
+function exactReadonlyRecord(): Readonly<Record<string, "value">> { return { key: "value" } as const; }
 function arrayAnnotation(): string[] { return ["a", "b"]; }
 
 function booleanExhaustive(b: boolean): boolean { if (b) return true; return false; }

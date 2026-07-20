@@ -193,21 +193,51 @@ fn render_member(member: &LoweredTypeMember) -> String {
 /// Builds the `TypeMemberKind` expression for a member.
 fn render_member_kind(member: &LoweredTypeMember) -> String {
     match member.kind() {
-        LoweredMemberKind::Named { optional: false } => {
+        LoweredMemberKind::Named {
+            optional: false,
+            readonly: false,
+        } => {
             format!(
                 "crate::TypeMemberKind::Named(biome_rowan::Text::new_static({}))",
                 rust_string_literal(member.name()),
             )
         }
-        LoweredMemberKind::Named { optional: true } => {
+        LoweredMemberKind::Named {
+            optional: true,
+            readonly: false,
+        } => {
             format!(
                 "crate::TypeMemberKind::NamedOptional(biome_rowan::Text::new_static({}))",
                 rust_string_literal(member.name()),
             )
         }
-        LoweredMemberKind::NamedStatic => {
+        LoweredMemberKind::Named {
+            optional: false,
+            readonly: true,
+        } => {
+            format!(
+                "crate::TypeMemberKind::ReadonlyNamed(biome_rowan::Text::new_static({}))",
+                rust_string_literal(member.name()),
+            )
+        }
+        LoweredMemberKind::Named {
+            optional: true,
+            readonly: true,
+        } => {
+            format!(
+                "crate::TypeMemberKind::ReadonlyNamedOptional(biome_rowan::Text::new_static({}))",
+                rust_string_literal(member.name()),
+            )
+        }
+        LoweredMemberKind::NamedStatic { readonly: false } => {
             format!(
                 "crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static({}))",
+                rust_string_literal(member.name()),
+            )
+        }
+        LoweredMemberKind::NamedStatic { readonly: true } => {
+            format!(
+                "crate::TypeMemberKind::ReadonlyNamedStatic(biome_rowan::Text::new_static({}))",
                 rust_string_literal(member.name()),
             )
         }
@@ -228,7 +258,7 @@ fn render_constructor_parameters(parameters: &[LoweredFunctionParameter]) -> Str
     for parameter in parameters {
         rendered.push_str("crate::ConstructorParameter { parameter: ");
         rendered.push_str(&render_function_parameter(parameter));
-        rendered.push_str(", accessibility: None },");
+        rendered.push_str(", accessibility: None, is_readonly: false },");
     }
     rendered
 }

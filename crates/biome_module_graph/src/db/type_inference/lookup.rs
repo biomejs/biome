@@ -330,7 +330,7 @@ pub(in crate::db::type_inference) enum StaticMemberMode {
 }
 
 impl StaticMemberMode {
-    fn allows_named_member(self, kind: &InferredTypeMemberKind<'_>) -> bool {
+    fn allows_member(self, kind: &InferredTypeMemberKind<'_>) -> bool {
         match self {
             Self::Class => kind.is_static() && !kind.is_constructor(),
             Self::Instance => !kind.is_static(),
@@ -531,23 +531,24 @@ fn find_member_in_members<'db>(
     db: &'db dyn ModuleDb,
     members: &[InferredTypeMember<'db>],
     name: &str,
-    allows_named_member: impl Fn(&InferredTypeMemberKind<'db>) -> bool,
+    allows_member: impl Fn(&InferredTypeMemberKind<'db>) -> bool,
     allow_index_signature: bool,
 ) -> Option<(InferredTypeData<'db>, bool)> {
     let named_member = members
         .iter()
-        .find(|member| allows_named_member(&member.kind) && member.kind.has_name(name))
+        .find(|member| allows_member(&member.kind) && member.kind.has_name(name))
         .map(|member| (member_value_type(db, member), member.kind.is_optional()));
     if named_member.is_some() {
         return named_member;
     }
 
     let computed_member = members.iter().find_map(|member| {
-        member
-            .kind
-            .computed_value_type()
-            .is_some_and(|ty| ty.is_string_literal_key(db, name))
-            .then_some((member.ty, false))
+        (allows_member(&member.kind)
+            && member
+                .kind
+                .computed_value_type()
+                .is_some_and(|ty| ty.is_string_literal_key(db, name)))
+        .then_some((member.ty, member.kind.is_optional()))
     });
     if computed_member.is_some() {
         return computed_member;
@@ -590,7 +591,7 @@ pub(in crate::db::type_inference) fn find_member_in_members_for_mode<'db>(
         db,
         members,
         name,
-        |kind| mode.allows_named_member(kind),
+        |kind| mode.allows_member(kind),
         mode.allows_index_signature(),
     )
 }

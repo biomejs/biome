@@ -257,7 +257,12 @@ fn assert_error_named_string_member(
     let Some(member) = class.member(name) else {
         bail!("missing required Error member {name}");
     };
-    if member.kind() != &(LoweredMemberKind::Named { optional }) {
+    if member.kind()
+        != &(LoweredMemberKind::Named {
+            optional,
+            readonly: false,
+        })
+    {
         bail!(
             "generated Error member {} has unexpected kind",
             member.name()
@@ -278,7 +283,12 @@ fn assert_error_stack_member(lowered: &LoweredGlobalTypes) -> Result<()> {
     let Some(member) = class.member("stack") else {
         bail!("missing required Error member stack");
     };
-    if member.kind() != &(LoweredMemberKind::Named { optional: true }) {
+    if member.kind()
+        != &(LoweredMemberKind::Named {
+            optional: true,
+            readonly: false,
+        })
+    {
         bail!("generated Error member stack has unexpected kind");
     }
     if member.type_reference() != &LoweredTypeReference::Predefined("GLOBAL_STRING_ID") {
@@ -293,7 +303,7 @@ fn assert_error_prototype_member(lowered: &LoweredGlobalTypes) -> Result<()> {
     let Some(member) = class.member("prototype") else {
         bail!("missing required Error prototype member");
     };
-    if member.kind() != &LoweredMemberKind::NamedStatic {
+    if member.kind() != &(LoweredMemberKind::NamedStatic { readonly: true }) {
         bail!("generated Error prototype member has unexpected kind");
     }
     if member.type_reference() != &LoweredTypeReference::Predefined("GLOBAL_INSTANCEOF_ERROR_ID") {

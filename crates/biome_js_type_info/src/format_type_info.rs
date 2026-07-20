@@ -323,9 +323,17 @@ impl Format<FormatTypeContext> for PatternFunctionParameter {
 
 impl Format<FormatTypeContext> for TypeMember {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        let readonly = format_with(|formatter| {
+            if self.is_readonly() {
+                write!(formatter, [token("readonly"), space()])
+            } else {
+                Ok(())
+            }
+        });
         write!(
             f,
             [&format_args![
+                readonly,
                 &self.kind,
                 token(":"),
                 space(),
@@ -349,25 +357,95 @@ impl Format<FormatTypeContext> for TypeMemberKind {
                 write!(formatter, [text(&quoted, None)])
             }
             Self::IndexSignature(index_signature_type)
-            | Self::ConstAssertedIndexSignature(index_signature_type) => {
+            | Self::ConstAssertedIndexSignature(index_signature_type)
+            | Self::ReadonlyIndexSignature(index_signature_type)
+            | Self::ConstAssertedReadonlyIndexSignature(index_signature_type) => {
                 write!(formatter, [token("["), index_signature_type, token("]")])
             }
-            Self::ComputedValue(key_type) | Self::ConstAssertedComputedValue(key_type) => {
+            Self::ComputedValue(key_type)
+            | Self::ConstAssertedComputedValue(key_type)
+            | Self::ReadonlyComputedValue(key_type)
+            | Self::ConstAssertedReadonlyComputedValue(key_type) => {
                 write!(
                     formatter,
                     [token("computed"), space(), token("["), key_type, token("]")]
                 )
             }
-            Self::Named(name) | Self::ConstAssertedNamed(name) => {
+            Self::ComputedValueOptional(key_type)
+            | Self::ConstAssertedComputedValueOptional(key_type)
+            | Self::ReadonlyComputedValueOptional(key_type)
+            | Self::ConstAssertedReadonlyComputedValueOptional(key_type) => {
+                write!(
+                    formatter,
+                    [
+                        token("computed"),
+                        space(),
+                        token("["),
+                        key_type,
+                        token("]?")
+                    ]
+                )
+            }
+            Self::ComputedValueStatic(key_type)
+            | Self::ConstAssertedComputedValueStatic(key_type)
+            | Self::ReadonlyComputedValueStatic(key_type)
+            | Self::ConstAssertedReadonlyComputedValueStatic(key_type) => {
+                write!(
+                    formatter,
+                    [
+                        token("static"),
+                        space(),
+                        token("computed"),
+                        space(),
+                        token("["),
+                        key_type,
+                        token("]")
+                    ]
+                )
+            }
+            Self::ComputedValueStaticOptional(key_type)
+            | Self::ConstAssertedComputedValueStaticOptional(key_type)
+            | Self::ReadonlyComputedValueStaticOptional(key_type)
+            | Self::ConstAssertedReadonlyComputedValueStaticOptional(key_type) => {
+                write!(
+                    formatter,
+                    [
+                        token("static"),
+                        space(),
+                        token("computed"),
+                        space(),
+                        token("["),
+                        key_type,
+                        token("]?")
+                    ]
+                )
+            }
+            Self::Named(name)
+            | Self::ConstAssertedNamed(name)
+            | Self::ReadonlyNamed(name)
+            | Self::ConstAssertedReadonlyNamed(name) => {
                 let quoted = std::format!("\"{name}\"");
                 write!(formatter, [text(&quoted, None)])
             }
-            Self::NamedOptional(name) | Self::ConstAssertedNamedOptional(name) => {
+            Self::NamedOptional(name)
+            | Self::ConstAssertedNamedOptional(name)
+            | Self::ReadonlyNamedOptional(name)
+            | Self::ConstAssertedReadonlyNamedOptional(name) => {
                 let quoted = std::format!("\"{name}\"?");
                 write!(formatter, [text(&quoted, None)])
             }
-            Self::NamedStatic(name) | Self::ConstAssertedNamedStatic(name) => {
+            Self::NamedStatic(name)
+            | Self::ConstAssertedNamedStatic(name)
+            | Self::ReadonlyNamedStatic(name)
+            | Self::ConstAssertedReadonlyNamedStatic(name) => {
                 let quoted = std::format!("static \"{name}\"");
+                write!(formatter, [text(&quoted, None)])
+            }
+            Self::NamedStaticOptional(name)
+            | Self::ConstAssertedNamedStaticOptional(name)
+            | Self::ReadonlyNamedStaticOptional(name)
+            | Self::ConstAssertedReadonlyNamedStaticOptional(name) => {
+                let quoted = std::format!("static \"{name}\"?");
                 write!(formatter, [text(&quoted, None)])
             }
         }
