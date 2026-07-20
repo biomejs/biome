@@ -2,6 +2,7 @@ pub(crate) mod block_like;
 pub(crate) mod case;
 pub(crate) mod comment_trivia;
 pub(crate) mod component_value_list;
+pub(crate) mod custom_property;
 pub(crate) mod import;
 pub(crate) mod media_query_comments;
 pub(crate) mod scss_closing_comments;

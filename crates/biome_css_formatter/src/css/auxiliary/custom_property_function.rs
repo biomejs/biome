@@ -1,7 +1,7 @@
 use crate::prelude::*;
-use crate::verbatim::format_css_verbatim_node;
+use crate::utils::custom_property::CustomPropertyContainer;
 use biome_css_syntax::CssCustomPropertyFunction;
-use biome_rowan::AstNode;
+use biome_formatter::write;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssCustomPropertyFunction;
 impl FormatNodeRule<CssCustomPropertyFunction> for FormatCssCustomPropertyFunction {
@@ -10,6 +10,12 @@ impl FormatNodeRule<CssCustomPropertyFunction> for FormatCssCustomPropertyFuncti
         node: &CssCustomPropertyFunction,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        format_css_verbatim_node(node.syntax()).fmt(f)
+        write!(
+            f,
+            [
+                node.name()?.format(),
+                CustomPropertyContainer::from(node.clone())
+            ]
+        )
     }
 }

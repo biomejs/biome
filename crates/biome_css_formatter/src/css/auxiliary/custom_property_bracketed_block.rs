@@ -1,7 +1,6 @@
 use crate::prelude::*;
-use crate::verbatim::format_css_verbatim_node;
+use crate::utils::custom_property::CustomPropertyContainer;
 use biome_css_syntax::CssCustomPropertyBracketedBlock;
-use biome_rowan::AstNode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssCustomPropertyBracketedBlock;
 impl FormatNodeRule<CssCustomPropertyBracketedBlock> for FormatCssCustomPropertyBracketedBlock {
@@ -10,6 +9,6 @@ impl FormatNodeRule<CssCustomPropertyBracketedBlock> for FormatCssCustomProperty
         node: &CssCustomPropertyBracketedBlock,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        format_css_verbatim_node(node.syntax()).fmt(f)
+        CustomPropertyContainer::from(node.clone()).fmt(f)
     }
 }

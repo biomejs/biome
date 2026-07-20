@@ -2,6 +2,7 @@ use crate::prelude::*;
 use crate::utils::comment_trivia::{
     is_leading_comment_on_node, is_token_boundary_suppressed, is_trailing_comment_on_node,
 };
+use crate::utils::custom_property::CustomPropertyContainer;
 use crate::utils::scss_include_comments::{
     place_list_trailing_separator_comment, place_map_trailing_separator_comment,
     place_separated_list_comment,
@@ -120,6 +121,7 @@ impl CommentStyle for CssCommentStyle {
             .or_else(handle_scss_expression_item_trailing_line_comment)
             .or_else(handle_scss_at_root_selector_comment)
             .or_else(handle_scss_else_clause_comment)
+            .or_else(handle_empty_custom_property_container_comment)
             .or_else(handle_function_comment)
             .or_else(handle_media_separator_comment)
             // Handle SCSS variable name/colon comments before generic properties.
@@ -131,6 +133,21 @@ impl CommentStyle for CssCommentStyle {
             .or_else(handle_complex_selector_comment)
             .or_else(handle_global_suppression)
     }
+}
+
+/// Keeps a comment inside an otherwise empty raw custom-property container.
+///
+/// Example: `--value: fn(/* note */);`.
+fn handle_empty_custom_property_container_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(components) = CustomPropertyContainer::cast_ref(comment.enclosing_node())
+        .and_then(|container| container.empty_components())
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    CommentPlacement::dangling(components.into_syntax(), comment)
 }
 
 fn handle_scss_map_trailing_separator_comment(
