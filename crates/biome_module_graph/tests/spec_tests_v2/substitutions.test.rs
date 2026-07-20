@@ -106,8 +106,9 @@ fn test_infer_module_types_collects_members_from_an_imported_generic_union() {
         .expect("success binding type must be inferred");
     let success_ty = normalize_type(&db, index_module, success_ty);
 
-    assert!(
-        is_inferred_boolean(&db, success_ty),
+    assert_eq!(
+        success_ty,
+        InferredTypeData::Boolean,
         "success must include both boolean variants, got {}",
         format_inferred_type(&db, success_ty)
     );
