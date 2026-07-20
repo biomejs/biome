@@ -466,15 +466,23 @@ where
 ///     })]
 /// )?;
 ///
+/// let document = formatted.document().as_ref();
+/// assert_eq!(document.len(), 5);
 /// assert_eq!(
-///     formatted.document().as_ref(),
+///     &document[..3],
 ///     &[
 ///         FormatElement::Token { text: "The next soft line or space gets replaced by a space" },
 ///         FormatElement::Space,
 ///         FormatElement::Token { text: "and the line here" },
-///         FormatElement::Line(LineMode::Literal),
-///         FormatElement::Token { text: "is removed entirely." }
 ///     ]
+/// );
+/// assert!(matches!(
+///     document[3],
+///     FormatElement::Line(LineMode::Literal { .. })
+/// ));
+/// assert_eq!(
+///     document[4],
+///     FormatElement::Token { text: "is removed entirely." }
 /// );
 ///
 /// # Ok(())

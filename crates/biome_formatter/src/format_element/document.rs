@@ -447,7 +447,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                     LineMode::Empty => {
                         write!(f, [token("empty_line")])?;
                     }
-                    LineMode::Literal => {
+                    LineMode::Literal { .. } => {
                         write!(f, [token("literal_line_break_without_parent")])?;
                     }
                 },
@@ -883,11 +883,18 @@ mod tests {
         let group = tag::Group::new();
         let mut document = Document::from(vec![
             FormatElement::Tag(StartGroup(group.clone())),
-            FormatElement::Line(LineMode::Literal),
+            FormatElement::Line(LineMode::Literal {
+                source_position: None,
+            }),
             FormatElement::Tag(EndGroup),
         ]);
 
-        assert!(!LineMode::Literal.is_hard());
+        assert!(
+            !LineMode::Literal {
+                source_position: None
+            }
+            .is_hard()
+        );
         assert!(document.as_elements().will_break());
 
         document.propagate_expand();
@@ -897,7 +904,9 @@ mod tests {
 
     #[test]
     fn display_literal_line_break() {
-        let document = Document::from(vec![FormatElement::Line(LineMode::Literal)]);
+        let document = Document::from(vec![FormatElement::Line(LineMode::Literal {
+            source_position: None,
+        })]);
 
         assert_eq!(
             &std::format!("{document}"),

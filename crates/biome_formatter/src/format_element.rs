@@ -139,12 +139,28 @@ pub enum LineMode {
     /// See [crate::builders::empty_line] for documentation.
     Empty,
     /// See [crate::builders::literal_line_break_without_parent] for documentation.
-    Literal,
+    Literal {
+        /// Source offset of the represented LF when source maps are enabled.
+        source_position: Option<TextSize>,
+    },
 }
 
 impl LineMode {
     pub const fn is_hard(&self) -> bool {
         matches!(self, Self::Hard)
+    }
+
+    pub(crate) const fn is_literal(&self) -> bool {
+        matches!(self, Self::Literal { .. })
+    }
+
+    pub(crate) const fn literal_source_position(&self) -> Option<TextSize> {
+        match self {
+            Self::Literal {
+                source_position, ..
+            } => *source_position,
+            _ => None,
+        }
     }
 }
 
@@ -295,7 +311,7 @@ impl FormatElements for FormatElement {
             Self::Tag(Tag::StartGroup(group)) => !group.mode().is_flat(),
             Self::Line(line_mode) => matches!(
                 line_mode,
-                LineMode::Hard | LineMode::Empty | LineMode::Literal
+                LineMode::Hard | LineMode::Empty | LineMode::Literal { .. }
             ),
 
             Self::Text { text_width, .. } | Self::LocatedTokenText { text_width, .. } => {

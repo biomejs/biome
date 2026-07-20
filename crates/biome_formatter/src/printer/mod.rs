@@ -134,7 +134,7 @@ impl<'a> Printer<'a> {
                             }
                             return Ok(());
                         }
-                        LineMode::Hard | LineMode::Empty | LineMode::Literal => {
+                        LineMode::Hard | LineMode::Empty | LineMode::Literal { .. } => {
                             self.state.measured_group_fits = false;
                         }
                     }
@@ -145,9 +145,13 @@ impl<'a> Printer<'a> {
                     return Ok(());
                 }
 
-                // Only print a newline if the current line isn't already empty, except literal
-                // lines preserve every occurrence.
-                if line_mode == &LineMode::Literal || self.state.line_width > 0 {
+                let is_literal = line_mode.is_literal();
+
+                if let Some(source_position) = line_mode.literal_source_position() {
+                    self.print_mapped_literal_line_break(source_position);
+                } else if is_literal || self.state.line_width > 0 {
+                    // Literal lines preserve every occurrence, including leading
+                    // and consecutive lines.
                     self.print_char('\n');
                 }
 
@@ -158,7 +162,7 @@ impl<'a> Printer<'a> {
                 }
 
                 self.state.pending_space = false;
-                self.state.pending_indent = if line_mode == &LineMode::Literal {
+                self.state.pending_indent = if is_literal {
                     Indention::default()
                 } else {
                     indent_stack.indention()
@@ -449,6 +453,29 @@ impl<'a> Printer<'a> {
             self.state.source_position += text_str.text_len();
         }
 
+        self.push_marker(SourceMarker {
+            source: self.state.source_position,
+            dest: self.state.buffer.text_len(),
+        });
+    }
+
+    /// Prints one source LF and maps both boundaries to the configured output
+    /// line ending.
+    ///
+    /// Leading, trailing, and consecutive literal lines may have no adjacent
+    /// text element to provide either marker. The marker after the line also
+    /// maps one source byte to a multi-byte output line ending such as CRLF.
+    fn print_mapped_literal_line_break(&mut self, source_position: TextSize) {
+        self.state.pending_source_position = None;
+        self.state.source_position = source_position;
+        self.push_marker(SourceMarker {
+            source: self.state.source_position,
+            dest: self.state.buffer.text_len(),
+        });
+
+        self.print_char('\n');
+
+        self.state.source_position += "\n".text_len();
         self.push_marker(SourceMarker {
             source: self.state.source_position,
             dest: self.state.buffer.text_len(),
@@ -1206,7 +1233,7 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                             self.state.pending_space = true;
                         }
                         LineMode::Soft => {}
-                        LineMode::Literal => {
+                        LineMode::Literal { .. } => {
                             // Literal is a forced fit boundary without parent propagation.
                             return Ok(Fits::Yes);
                         }
