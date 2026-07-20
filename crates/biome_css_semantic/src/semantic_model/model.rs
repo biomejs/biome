@@ -1,9 +1,9 @@
 use biome_css_syntax::{
     AnyCssRoot, CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector,
-    CssContainerAtRule, CssDashedIdentifier, CssDeclaration, CssGenericComponentValueList,
-    CssIdentifier, CssMediaAtRule, CssNestedQualifiedRule, CssQualifiedRule, CssScopeAtRule,
-    CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken,
-    ScssExpression,
+    CssContainerAtRule, CssCustomPropertyValue, CssDashedIdentifier, CssDeclaration,
+    CssGenericComponentValueList, CssIdentifier, CssMediaAtRule, CssNestedQualifiedRule,
+    CssQualifiedRule, CssScopeAtRule, CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind,
+    CssSyntaxNode, CssSyntaxToken, ScssExpression,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, TextRange,
@@ -752,6 +752,7 @@ impl CssProperty {
 #[derive(Debug, Clone)]
 pub enum CssPropertyInitialValueKind {
     GenericComponent(AstPtr<CssGenericComponentValueList>),
+    CustomProperty(AstPtr<CssCustomPropertyValue>),
     Composes(AstPtr<CssComposesPropertyValue>),
     ScssExpression(AstPtr<ScssExpression>),
 }
@@ -763,6 +764,11 @@ impl CssPropertyInitialValueKind {
     fn semantic_eq(&self, other: &Self, self_root: &AnyCssRoot, other_root: &AnyCssRoot) -> bool {
         match (self, other) {
             (Self::GenericComponent(a), Self::GenericComponent(b)) => {
+                let a = a.to_node(self_root.syntax());
+                let b = b.to_node(other_root.syntax());
+                semantic_value_tokens(a.syntax()) == semantic_value_tokens(b.syntax())
+            }
+            (Self::CustomProperty(a), Self::CustomProperty(b)) => {
                 let a = a.to_node(self_root.syntax());
                 let b = b.to_node(other_root.syntax());
                 semantic_value_tokens(a.syntax()) == semantic_value_tokens(b.syntax())
@@ -801,6 +807,10 @@ impl CssPropertyInitialValue {
         matches!(self.kind, CssPropertyInitialValueKind::GenericComponent(_))
     }
 
+    pub fn is_custom_property(&self) -> bool {
+        matches!(self.kind, CssPropertyInitialValueKind::CustomProperty(_))
+    }
+
     pub fn is_scss_expression(&self) -> bool {
         matches!(self.kind, CssPropertyInitialValueKind::ScssExpression(_))
     }
@@ -816,6 +826,12 @@ impl PartialEq for CssPropertyInitialValue {
 impl From<CssGenericComponentValueList> for CssPropertyInitialValueKind {
     fn from(value: CssGenericComponentValueList) -> Self {
         Self::GenericComponent(AstPtr::new(&value))
+    }
+}
+
+impl From<CssCustomPropertyValue> for CssPropertyInitialValueKind {
+    fn from(value: CssCustomPropertyValue) -> Self {
+        Self::CustomProperty(AstPtr::new(&value))
     }
 }
 

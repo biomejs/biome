@@ -314,6 +314,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_SPACE_LITERAL",
         "CSS_URL_VALUE_RAW_LITERAL",
         "CSS_COLOR_LITERAL",
+        "CSS_DELIM_LITERAL",
         // Special literal token to represent a number that is _immediately_
         // followed by an identifier, which means it is a `<dimension>` token
         // according to the spec: https://www.w3.org/TR/css-values-4/#dimensions.
@@ -369,6 +370,13 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_COMPONENT_VALUE_LIST",
         "CSS_GENERIC_COMPONENT_VALUE_LIST",
         "CSS_GENERIC_DELIMITER",
+        "CSS_CUSTOM_PROPERTY_VALUE",
+        "CSS_CUSTOM_PROPERTY_COMPONENT_LIST",
+        "CSS_CUSTOM_PROPERTY_DELIMITER",
+        "CSS_CUSTOM_PROPERTY_FUNCTION",
+        "CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK",
+        "CSS_CUSTOM_PROPERTY_BRACKETED_BLOCK",
+        "CSS_CUSTOM_PROPERTY_BRACED_BLOCK",
         "CSS_GENERIC_PROPERTY",
         "CSS_COMPOSES_PROPERTY",
         "CSS_COMPOSES_PROPERTY_VALUE",
