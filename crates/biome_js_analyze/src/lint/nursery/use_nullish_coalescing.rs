@@ -474,16 +474,16 @@ fn run_logical_or(
     let left = logical.left().ok()?;
     let left_ty = ctx.inferred_type_of_expression(&left)?;
 
-    if !left_ty.has_nullish_variant() {
+    if !left_ty.has_nullish_variant()? {
         return None;
     }
 
-    if options.has_any_ignore_primitives() && should_ignore_for_primitives(options, left_ty) {
+    if options.has_any_ignore_primitives() && should_ignore_for_primitives(options, left_ty)? {
         return None;
     }
 
-    let can_fix =
-        left_ty.is_safe_for_nullish_coalescing() && is_safe_syntax_context_for_replacement(logical);
+    let can_fix = left_ty.is_safe_for_nullish_coalescing()?
+        && is_safe_syntax_context_for_replacement(logical);
 
     Some(UseNullishCoalescingState::LogicalOr {
         operator_range: logical.operator_token().ok()?.text_trimmed_range(),
@@ -524,15 +524,15 @@ fn run_logical_or_assignment(
         _ => return None,
     };
 
-    if !left_ty.has_nullish_variant() {
+    if !left_ty.has_nullish_variant()? {
         return None;
     }
 
-    if options.has_any_ignore_primitives() && should_ignore_for_primitives(options, left_ty) {
+    if options.has_any_ignore_primitives() && should_ignore_for_primitives(options, left_ty)? {
         return None;
     }
 
-    let can_fix = left_ty.is_safe_for_nullish_coalescing();
+    let can_fix = left_ty.is_safe_for_nullish_coalescing()?;
 
     Some(UseNullishCoalescingState::LogicalOrAssignment {
         operator_range: assignment.operator_token().ok()?.text_trimmed_range(),
@@ -547,7 +547,7 @@ fn run_logical_or_assignment(
 fn should_ignore_for_primitives(
     options: &UseNullishCoalescingOptions,
     ty: InferredType,
-) -> bool {
+) -> Option<bool> {
     ty.nullish_union_matches_ignored_primitives(IgnoredPrimitiveTypes {
         string: options.should_ignore_primitive_string(),
         number: options.should_ignore_primitive_number(),
@@ -756,11 +756,11 @@ fn run_ternary(
         check_ternary_nullish_pattern(&test, &consequent, &alternate)?;
 
     let options = ctx.options();
-    if options.has_any_ignore_primitives() {
-        let checked_ty = ctx.inferred_type_of_expression(&checked_expr)?;
-        if should_ignore_for_primitives(options, checked_ty) {
-            return None;
-        }
+    if options.has_any_ignore_primitives()
+        && let Some(ty) = ctx.inferred_type_of_expression(&checked_expr)
+        && should_ignore_for_primitives(options, ty)?
+    {
+        return None;
     }
 
     // The fix is unsafe when the checked expression contains calls or `new`, because
@@ -776,8 +776,8 @@ fn run_ternary(
             NullishCheckKind::StrictSingle(lit) => {
                 let ty = ctx.inferred_type_of_expression(&checked_expr)?;
                 match lit {
-                    NullishLiteral::Null => !ty.has_undefined_variant(),
-                    NullishLiteral::Undefined => !ty.has_null_variant(),
+                    NullishLiteral::Null => !ty.has_undefined_variant()?,
+                    NullishLiteral::Undefined => !ty.has_null_variant()?,
                 }
             }
         };

@@ -78,6 +78,20 @@ impl<'db> InferredModuleTypes<'db> {
     ) -> Option<InferredTypeData<'db>> {
         self.find_member_type_iterative(db, ty, name)
     }
+
+    /// Finds a named member available on a value of `ty`.
+    ///
+    /// Class values expose static members, while instances expose non-static
+    /// members. Type arguments from instances are substituted into the member
+    /// type. Returns `None` when no reachable supported type defines `name`.
+    pub fn find_value_member_type(
+        &self,
+        db: &'db dyn ModuleDb,
+        ty: InferredTypeData<'db>,
+        name: &str,
+    ) -> Option<InferredTypeData<'db>> {
+        self.find_value_member_type_iterative(db, ty, name)
+    }
 }
 
 pub(super) fn collected_type_result<'db>(

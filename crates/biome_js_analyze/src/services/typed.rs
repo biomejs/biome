@@ -230,32 +230,32 @@ impl TypedService {
             .map(|data| data.ty)
     }
 
-    /// Returns whether an expression has a callable member with the given name.
+    /// Determines whether an expression has a callable member with the given name.
+    ///
+    /// Returns `None` when type inference is unavailable or the member's
+    /// callability cannot be determined conclusively.
     pub fn inferred_expression_has_callable_member(
         &self,
         expression: &AnyJsExpression,
         name: &str,
-    ) -> bool {
-        let Some(typed_module) = self.module.as_ref() else {
-            return false;
-        };
+    ) -> Option<bool> {
+        let typed_module = self.module.as_ref()?;
         let db = typed_module.db.as_ref();
-        let Some(inferred) = infer_module_types_bottom_up(db, typed_module.module) else {
-            return false;
-        };
-        let Some(ty) = inferred.expressions.get(&expression.range()).copied() else {
-            return false;
-        };
+        let inferred = infer_module_types_bottom_up(db, typed_module.module)?;
+        let ty = inferred.expressions.get(&expression.range()).copied()?;
         let ty = normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
-        let Some(member_ty) = inferred.find_member_type(db, ty, name) else {
-            return false;
+        if !InferredType::new(db, ty).is_inferred() {
+            return None;
+        }
+        let Some(member_ty) = inferred.find_value_member_type(db, ty, name) else {
+            return Some(false);
         };
         let member_ty = normalize_type(
             db,
             NormalizeTypeInput::new(db, typed_module.module, member_ty),
         );
 
-        is_callable_inferred_type(db, member_ty)
+        InferredType::new(db, member_ty).is_callable()
     }
 
     /// Returns the expected type for a call or constructor argument.
@@ -437,16 +437,6 @@ impl TypedService {
         self.model
             .as_ref()
             .is_some_and(|model| model.binding(reference).is_some())
-    }
-}
-
-fn is_callable_inferred_type(db: &dyn ModuleDb, ty: InferredTypeData) -> bool {
-    match ty {
-        InferredTypeData::Union(union) => union
-            .types(db)
-            .iter()
-            .any(|ty| is_callable_inferred_type(db, *ty)),
-        ty => ty.callable_function(db).is_some(),
     }
 }
 

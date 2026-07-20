@@ -64,6 +64,16 @@ impl<'db> InferredModuleTypes<'db> {
         let mut resolver = self;
         find_member_type_with_resolver(db, &mut resolver, ty, name, MemberLookupMode::Any)
     }
+
+    pub(in crate::db::type_inference) fn find_value_member_type_iterative(
+        &self,
+        db: &'db dyn ModuleDb,
+        ty: InferredTypeData<'db>,
+        name: &str,
+    ) -> Option<InferredTypeData<'db>> {
+        let mut resolver = self;
+        find_member_type_with_resolver(db, &mut resolver, ty, name, MemberLookupMode::Value)
+    }
 }
 
 /// Selects which side of a type participates in member lookup.
@@ -75,6 +85,8 @@ pub(in crate::db::type_inference) enum MemberLookupMode {
     Class,
     /// Accepts non-static members and index signatures.
     Instance,
+    /// Selects class-side or instance-side members from the traversed value type.
+    Value,
 }
 
 impl MemberLookupMode {
@@ -83,11 +95,12 @@ impl MemberLookupMode {
             Self::Any => true,
             Self::Class => kind.is_static() && !kind.is_constructor(),
             Self::Instance => !kind.is_static(),
+            Self::Value => false,
         }
     }
 
     fn allows_index_signature(self) -> bool {
-        !matches!(self, Self::Class)
+        !matches!(self, Self::Class | Self::Value)
     }
 }
 
@@ -248,7 +261,10 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
         match ty {
             InferredTypeData::Class(class) => {
                 if let Some(mut extends) = class.extends(db) {
-                    if matches!(state.mode, MemberLookupMode::Any | MemberLookupMode::Class) {
+                    if matches!(
+                        state.mode,
+                        MemberLookupMode::Any | MemberLookupMode::Class | MemberLookupMode::Value
+                    ) {
                         extends = class_side_type(db, extends);
                     }
                     pending.push(state.child(db, extends, state.collect_result));
@@ -504,16 +520,35 @@ fn find_own_member_type<'db>(
     };
 
     match ty {
-        InferredTypeData::Class(class) => find(
-            class.members(db),
-            mode,
-            matches!(mode, MemberLookupMode::Instance),
-        ),
+        InferredTypeData::Class(class) => {
+            let mode = if matches!(mode, MemberLookupMode::Value) {
+                MemberLookupMode::Class
+            } else {
+                mode
+            };
+            find(
+                class.members(db),
+                mode,
+                matches!(mode, MemberLookupMode::Instance),
+            )
+        }
         InferredTypeData::Interface(interface) => {
+            let mode = if matches!(mode, MemberLookupMode::Value) {
+                MemberLookupMode::Instance
+            } else {
+                mode
+            };
             find(interface.members(db), mode, mode.allows_index_signature())
         }
         InferredTypeData::Literal(literal) => match literal.literal(db) {
-            InferredLiteral::Object(members) => find(members, mode, mode.allows_index_signature()),
+            InferredLiteral::Object(members) => {
+                let mode = if matches!(mode, MemberLookupMode::Value) {
+                    MemberLookupMode::Instance
+                } else {
+                    mode
+                };
+                find(members, mode, mode.allows_index_signature())
+            }
             InferredLiteral::BigInt(_)
             | InferredLiteral::Boolean(_)
             | InferredLiteral::Number(_)
@@ -526,6 +561,11 @@ fn find_own_member_type<'db>(
             find(namespace.members(db), MemberLookupMode::Any, true)
         }
         InferredTypeData::Object(object) => {
+            let mode = if matches!(mode, MemberLookupMode::Value) {
+                MemberLookupMode::Instance
+            } else {
+                mode
+            };
             find(object.members(db), mode, mode.allows_index_signature())
         }
         InferredTypeData::Unknown
