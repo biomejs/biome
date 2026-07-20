@@ -34,7 +34,7 @@ does not suffice: >
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,12 +1,17 @@
+@@ -1,11 +1,14 @@
  failing:
    {
      "object-does-not-fit-within-print-width": "------",
@@ -43,17 +43,15 @@ does not suffice: >
    }
  
 -expected: { "object-fits-within-print-width": "", "TEST": "comma NOT here" }
+-
 +expected:
 +  {
 +    "object-fits-within-print-width": "",
 +    "TEST": "comma NOT here"
 +  }
- 
  ---
-+
  does not suffice: >
    {
-     "object-does-not-fit-within-print-width": "------",
 ```
 
 # Output
@@ -70,9 +68,7 @@ expected:
     "object-fits-within-print-width": "",
     "TEST": "comma NOT here"
   }
-
 ---
-
 does not suffice: >
   {
     "object-does-not-fit-within-print-width": "------",
