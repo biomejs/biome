@@ -23,7 +23,7 @@ use crate::module_for_key;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsExport, JsOwnExport, ModuleDb, ResolvedPath};
 use biome_js_type_info::{
-    RawTypeData, TypeReference, TypeResolverLevel,
+    RawTypeData, TypeReference, TypeResolverLevel, global_types,
     interned_types::{
         CallArgumentType as InferredCallArgumentType,
         FunctionParameter as InferredFunctionParameter, InternedConstructor as InferredConstructor,
@@ -232,7 +232,11 @@ pub fn infer_constructor_argument_type<'db>(
 ) -> Option<InferredTypeData<'db>> {
     let (args, argument_index) =
         resolved_call_arguments(db, input.args(db), input.argument_index(db));
-    infer_constructor_argument_type_inner(db, input.callee(db), &args, argument_index)
+    let ty = infer_constructor_argument_type_inner(db, input.callee(db), &args, argument_index)?;
+    Some(match ty {
+        InferredTypeData::GlobalType(id) => global_types(db).get(id),
+        ty => ty,
+    })
 }
 
 /// Resolves local handles and simplifies structural wrappers in `input`.
@@ -714,6 +718,9 @@ fn infer_argument_type<'db>(
 
         match item {
             ArgumentTypeItem::Type(callee) => match callee {
+                InferredTypeData::GlobalType(id) => {
+                    pending.push(ArgumentTypeItem::Type(global_types(db).get(id)));
+                }
                 InferredTypeData::InstanceOf(instance) => {
                     let target = resolve_local_type(db, instance.ty(db));
                     let substitutions =
@@ -1885,6 +1892,9 @@ impl<'db> ResolvedParameters<'db> {
         ty: InferredTypeData<'db>,
     ) -> Option<Self> {
         match ty {
+            InferredTypeData::GlobalType(id) => {
+                Self::from_constructor_signature(db, global_types(db).get(id))
+            }
             InferredTypeData::Constructor(constructor) => {
                 Some(Self::from_constructor(db, constructor))
             }

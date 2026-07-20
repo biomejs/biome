@@ -177,7 +177,7 @@ fn run_assignment(
     let right = assignment.right().ok()?;
     let left_ty = type_of_assignment_target(ctx, assignment, &left)?;
 
-    let right_ty = ctx.inferred_type_of_expression(&right)?;
+    let right_ty = ctx.type_of_expression(&right)?;
 
     let left = OperandInfo {
         range: left.range(),
@@ -213,7 +213,7 @@ fn type_of_assignment<'a>(
     match target {
         AnyJsAssignment::JsIdentifierAssignment(identifier) => {
             let name = identifier.name_token().ok()?;
-            ctx.inferred_type_of_named_value(assignment.range(), name.text_trimmed())
+            ctx.type_of_named_value(assignment.range(), name.text_trimmed())
         }
         AnyJsAssignment::JsParenthesizedAssignment(parenthesized) => {
             type_of_assignment(ctx, assignment, &parenthesized.assignment().ok()?)
@@ -302,7 +302,7 @@ fn analyze_expression(
 
     let operand = OperandInfo {
         range: expression.range(),
-        ty: ctx.inferred_type_of_expression(&expression)?,
+        ty: ctx.type_of_expression(&expression)?,
     };
 
     if operand.ty.has_invalid_plus_operand_variant() {
@@ -378,7 +378,7 @@ fn type_for_range_in_expression<'a>(
     let expression = expression.omit_parentheses();
 
     if expression.range() == range {
-        return ctx.inferred_type_of_expression(&expression);
+        return ctx.type_of_expression(&expression);
     }
 
     if let AnyJsExpression::JsBinaryExpression(binary) = &expression
@@ -404,7 +404,7 @@ fn type_for_range_in_assignment<'a>(
     }
 
     if right.range() == range {
-        return ctx.inferred_type_of_expression(&right);
+        return ctx.type_of_expression(&right);
     }
 
     None

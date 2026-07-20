@@ -709,6 +709,30 @@ fn test_infer_constructor_argument_type_selects_overload_by_arity() {
 }
 
 #[test]
+fn test_infer_constructor_argument_type_resolves_canonical_global() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), "");
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let input = CallArgumentTypeInput::new(
+        &db,
+        InferredTypeData::promise_class(&db),
+        Vec::from([InferredCallArgumentType::Argument(
+            InferredTypeData::Unknown,
+        )])
+        .into_boxed_slice(),
+        0,
+    );
+    let expected = infer_constructor_argument_type(&db, input)
+        .expect("Promise executor expected type must be inferred");
+
+    assert!(
+        InferredType::new(&db, expected).function_returns_void(),
+        "expected void-returning Promise executor, got {expected:?}"
+    );
+}
+
+#[test]
 fn test_infer_constructor_argument_type_supports_interface_and_object_signatures() {
     let fs = MemoryFileSystem::default();
     fs.insert(

@@ -48,7 +48,7 @@ pub(super) fn run(ctx: &RuleContext<NoMisleadingReturnType>) -> Option<RuleState
                     .name()
                     .ok()?;
                 let return_type =
-                    ctx.inferred_return_type_of_member(method.syntax(), name.text())?;
+                    ctx.return_type_of_member(method.syntax(), name.text())?;
                 run_for_member(
                     ctx,
                     annotation.range(),
@@ -70,7 +70,7 @@ pub(super) fn run(ctx: &RuleContext<NoMisleadingReturnType>) -> Option<RuleState
                     .name()
                     .ok()?;
                 let return_type =
-                    ctx.inferred_return_type_of_member(method.syntax(), name.text())?;
+                    ctx.return_type_of_member(method.syntax(), name.text())?;
                 run_for_member(
                     ctx,
                     annotation.range(),
@@ -88,7 +88,7 @@ pub(super) fn run(ctx: &RuleContext<NoMisleadingReturnType>) -> Option<RuleState
                     return None;
                 }
                 let return_type =
-                    ctx.inferred_return_type_of_member(getter.syntax(), name.text())?;
+                    ctx.return_type_of_member(getter.syntax(), name.text())?;
                 run_for_member(
                     ctx,
                     annotation.range(),
@@ -106,7 +106,7 @@ pub(super) fn run(ctx: &RuleContext<NoMisleadingReturnType>) -> Option<RuleState
                     return None;
                 }
                 let return_type =
-                    ctx.inferred_return_type_of_member(getter.syntax(), name.text())?;
+                    ctx.return_type_of_member(getter.syntax(), name.text())?;
                 run_for_member(
                     ctx,
                     annotation.range(),
@@ -169,7 +169,7 @@ fn run_for_function(
         return None;
     }
 
-    let return_type = ctx.inferred_return_type_of_function(node)?;
+    let return_type = ctx.return_type_of_function(node)?;
     let is_async = node.async_token().is_some();
     let body = node.body().ok()?;
 
@@ -777,7 +777,7 @@ fn cast_target_at_least_object_wide(
     expression: &AnyJsExpression,
     _cast: &AnyTsCastExpression,
 ) -> bool {
-    ctx.inferred_type_of_expression(expression)
+    ctx.type_of_expression(expression)
         .is_none_or(InferredType::is_at_least_as_wide_as_object)
 }
 
@@ -795,7 +795,7 @@ fn infer_expression_type<'db>(
         return Some(init_type);
     }
 
-    ctx.inferred_type_of_expression(&inner)
+    ctx.type_of_expression(&inner)
 }
 
 fn resolve_identifier_initializer_type<'db>(
@@ -807,7 +807,7 @@ fn resolve_identifier_initializer_type<'db>(
         return None;
     }
     let unwrapped = unwrap_type_wrappers(&init_expr);
-    ctx.inferred_type_of_expression(&unwrapped)
+    ctx.type_of_expression(&unwrapped)
 }
 
 fn unwrap_type_wrappers(expr: &AnyJsExpression) -> AnyJsExpression {

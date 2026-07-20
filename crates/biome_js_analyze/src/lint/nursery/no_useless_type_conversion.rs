@@ -242,7 +242,7 @@ fn run_builtin_call(
 
     let first_argument = arguments.first()?.ok()?;
     let argument = first_argument.as_any_js_expression()?;
-    let ty = ctx.inferred_type_of_expression(argument)?;
+    let ty = ctx.type_of_expression(argument)?;
 
     matches_primitive_type(ty, primitive).then_some(RuleState {
         kind: ConversionKind::BuiltinCall,
@@ -281,7 +281,7 @@ fn run_to_string_call(
     }
 
     let object = member_expression.object().ok()?;
-    let ty = ctx.inferred_type_of_expression(&object)?;
+    let ty = ctx.type_of_expression(&object)?;
 
     matches_primitive_type(ty, PrimitiveKind::String).then_some(RuleState {
         kind: ConversionKind::ToString,
@@ -325,7 +325,7 @@ fn run_binary_expression(
         return None;
     };
 
-    let ty = ctx.inferred_type_of_expression(&expression)?;
+    let ty = ctx.type_of_expression(&expression)?;
     matches_primitive_type(ty, PrimitiveKind::String).then_some(RuleState {
         kind: ConversionKind::StringConcatenation,
         primitive: PrimitiveKind::String,
@@ -366,7 +366,7 @@ fn run_assignment_expression(
             // `type_of_expression()` works on expressions, but the left-hand side
             // of `+=` is an assignment target. Resolve the named value instead so
             // we can ask for the variable's current type.
-            ctx.inferred_type_of_named_value(node.range(), name.text_trimmed())?
+            ctx.type_of_named_value(node.range(), name.text_trimmed())?
         }
         _ => return None,
     };
@@ -405,7 +405,7 @@ fn run_unary_expression(
 
     match node.operator().ok()? {
         JsUnaryOperator::Plus => {
-            let ty = ctx.inferred_type_of_expression(&argument)?;
+            let ty = ctx.type_of_expression(&argument)?;
             matches_primitive_type(ty, PrimitiveKind::Number).then_some(RuleState {
                 kind: ConversionKind::UnaryPlus,
                 primitive: PrimitiveKind::Number,
@@ -419,7 +419,7 @@ fn run_unary_expression(
             }
 
             let nested_argument = nested.argument().ok()?;
-            let ty = ctx.inferred_type_of_expression(&nested_argument)?;
+            let ty = ctx.type_of_expression(&nested_argument)?;
             matches_primitive_type(ty, PrimitiveKind::Boolean).then_some(RuleState {
                 kind: ConversionKind::DoubleNegation,
                 primitive: PrimitiveKind::Boolean,
@@ -433,7 +433,7 @@ fn run_unary_expression(
             }
 
             let nested_argument = nested.argument().ok()?;
-            let ty = ctx.inferred_type_of_expression(&nested_argument)?;
+            let ty = ctx.type_of_expression(&nested_argument)?;
             let primitive = if matches_primitive_type(ty, PrimitiveKind::BigInt) {
                 PrimitiveKind::BigInt
             } else if ty.is_all_integer_like() {
