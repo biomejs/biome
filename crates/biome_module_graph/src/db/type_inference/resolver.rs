@@ -1,13 +1,15 @@
 use super::{BindingTypeData, InferredModuleTypes, globals::global_type, lookup::module_for_key};
 use crate::db::queries::infer_module_types;
 use crate::module_graph::ModuleInfo;
-use crate::{JsModuleInfo, ModuleDb, ResolvedPath};
+use crate::{JsModuleInfo, ModuleDb};
 use biome_js_semantic::JsDeclarationKind;
 use biome_js_type_info::{
     GlobalTypeId, RawTypeData, ResolvedTypeId, ScopeId, TypeId, TypeReference,
     TypeReferenceQualifier, TypeResolverLevel,
     interned_types::{
+        InternedModule as InferredModule, InternedNamespace as InferredNamespace,
         InternedTypeofValue, LocalTypeHandle, LocalTypeId, ModuleKey, TypeData as InferredTypeData,
+        TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
     },
 };
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -26,8 +28,6 @@ pub(in crate::db::type_inference) struct ResolutionCtx<'db, 'a> {
     pub(in crate::db::type_inference) db: &'db dyn ModuleDb,
     pub(in crate::db::type_inference) module_key: ModuleKey,
     pub(in crate::db::type_inference) js_info: &'a JsModuleInfo,
-    pub(in crate::db::type_inference) import_types:
-        &'a FxHashMap<ResolvedPath, &'db InferredModuleTypes<'db>>,
     pub(in crate::db::type_inference) named_type_ids: FxHashSet<TypeId>,
     pub(in crate::db::type_inference) resolved: FxHashMap<TypeId, InferredTypeData<'db>>,
     pub(in crate::db::type_inference) in_progress: FxHashSet<TypeId>,
@@ -38,7 +38,6 @@ pub(in crate::db) fn resolve_raw_types<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
     js_info: &JsModuleInfo,
-    import_types: &FxHashMap<ResolvedPath, &'db InferredModuleTypes<'db>>,
 ) -> InferredModuleTypes<'db> {
     let module_key = ModuleKey::new(module.as_id());
     let named_type_ids = named_type_ids(js_info);
@@ -46,7 +45,6 @@ pub(in crate::db) fn resolve_raw_types<'db>(
         db,
         module_key,
         js_info,
-        import_types,
         named_type_ids,
         resolved: FxHashMap::default(),
         in_progress: FxHashSet::default(),
@@ -122,6 +120,13 @@ fn is_named_type_declaration(declaration_kind: JsDeclarationKind) -> bool {
 }
 
 impl<'db> ResolutionCtx<'db, '_> {
+    pub(in crate::db::type_inference) fn infer_imported_module(
+        &self,
+        module: ModuleInfo,
+    ) -> Option<&'db InferredModuleTypes<'db>> {
+        infer_module_types(self.db, module)
+    }
+
     pub(in crate::db::type_inference) fn resolve(
         &mut self,
         reference: &TypeReference,
@@ -185,10 +190,88 @@ impl<'db> ResolutionCtx<'db, '_> {
             .raw_types
             .get(type_id.index())
             .map_or(InferredTypeData::Unknown, |raw| self.resolve_raw_type(raw));
+        let ty = self.with_namespace_members(type_id, ty);
 
         self.in_progress.remove(&type_id);
         self.resolved.insert(type_id, ty);
         ty
+    }
+
+    fn with_namespace_members(
+        &mut self,
+        type_id: TypeId,
+        fallback: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        enum NamespaceMetadata {
+            Module(biome_rowan::Text),
+            Namespace(biome_js_type_info::Path),
+        }
+
+        let metadata = match self.js_info.raw_types.get(type_id.index()) {
+            Some(RawTypeData::Module(module)) => NamespaceMetadata::Module(module.name.clone()),
+            Some(RawTypeData::Namespace(namespace)) => {
+                NamespaceMetadata::Namespace(namespace.path.clone())
+            }
+            _ => return fallback,
+        };
+        let scope_id = self
+            .js_info
+            .semantic_model
+            .all_bindings()
+            .find_map(|binding| {
+                let reference = self
+                    .js_info
+                    .raw_binding_types
+                    .get(&binding.syntax().text_trimmed_range())?;
+                matches!(
+                    reference,
+                    TypeReference::Resolved(id)
+                        if id.level() == TypeResolverLevel::Thin && id.id() == type_id
+                )
+                .then(|| binding.scope().id())
+            });
+        let Some(scope_id) = scope_id else {
+            return fallback;
+        };
+
+        let members = self
+            .js_info
+            .semantic_model
+            .all_bindings()
+            .filter(|binding| {
+                binding
+                    .scope()
+                    .parent()
+                    .is_some_and(|parent| parent.id() == scope_id)
+            })
+            .filter_map(|binding| {
+                let name = binding
+                    .tree()
+                    .name_token()
+                    .ok()?
+                    .token_text_trimmed()
+                    .into();
+                let reference = self
+                    .js_info
+                    .raw_binding_types
+                    .get(&binding.syntax().text_trimmed_range())?
+                    .clone();
+                Some((name, reference))
+            })
+            .map(|(name, reference)| InferredTypeMember {
+                kind: InferredTypeMemberKind::NamedStatic(name),
+                ty: self.resolve(&reference),
+            })
+            .collect::<Box<[_]>>();
+
+        match metadata {
+            NamespaceMetadata::Module(name) => {
+                InferredTypeData::Module(InferredModule::new(self.db, members, name))
+            }
+            NamespaceMetadata::Namespace(path) => {
+                InferredTypeData::Namespace(InferredNamespace::new(self.db, members, path))
+            }
+        }
     }
 
     fn resolve_raw_type(&mut self, raw: &RawTypeData) -> InferredTypeData<'db> {
@@ -316,7 +399,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 self.resolve_raw_type_id(TypeId::new(local_type_id.index()))
             } else {
                 module_for_key(self.db, module_key)
-                    .and_then(|module| infer_module_types(self.db, module))
+                    .and_then(|module| self.infer_imported_module(module))
                     .and_then(|types| types.types.get(local_type_id.index()).copied())
                     .unwrap_or(InferredTypeData::Unknown)
             };

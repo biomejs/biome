@@ -35,7 +35,7 @@ use biome_js_type_info::{
         TypeMember as InferredTypeMember, TypeSubstitution as InferredTypeSubstitution,
     },
 };
-use rustc_hash::{FxHashMap, FxHashSet};
+use rustc_hash::FxHashSet;
 
 /// Inferred type tables for one JavaScript or TypeScript module.
 pub use crate::db::type_inference::InferredModuleTypes;
@@ -68,17 +68,15 @@ pub fn infer_module_types<'db>(
         return None;
     }
 
-    let mut import_types = FxHashMap::default();
     for import_path in js_info.static_import_paths.values() {
         if let Some(path) = import_path.as_path()
             && let Some(target) = db.module_for_path(path)
-            && let Some(target_types) = infer_module_types(db, target)
         {
-            import_types.insert(import_path.resolved_path.clone(), target_types);
+            let _ = infer_module_types(db, target);
         }
     }
 
-    Some(resolve_raw_types(db, module, &js_info, &import_types))
+    Some(resolve_raw_types(db, module, &js_info))
 }
 
 // NOTE: this is the only exception to the rule, it's a public query and not tracked. Keep it here.
@@ -1682,16 +1680,37 @@ fn infer_generic_return_type<'db>(
     }
 
     for type_parameter in function.type_parameters(db) {
-        if let InferredTypeData::Generic(generic) = type_parameter
-            && let Some(default) = generic.default(db)
-        {
+        let Some(type_parameter) = substitutions
+            .iter()
+            .try_fold(*type_parameter, |ty, substitution| {
+                ty.substitute_type(db, *substitution).ok()
+            })
+        else {
+            return InferredTypeData::Unknown;
+        };
+        let (generic, alternate) = match type_parameter {
+            InferredTypeData::Generic(generic) => (
+                Some(generic),
+                Some(InferredTypeData::instance_of(
+                    db,
+                    type_parameter,
+                    Box::default(),
+                )),
+            ),
+            InferredTypeData::InstanceOf(instance) => match instance.ty(db) {
+                ty @ InferredTypeData::Generic(generic) => (Some(generic), Some(ty)),
+                _ => (None, None),
+            },
+            _ => (None, None),
+        };
+        if let Some(default) = generic.and_then(|generic| generic.default(db)) {
             let Some(replacement) = substitutions.iter().try_fold(default, |ty, substitution| {
                 ty.substitute_type(db, *substitution).ok()
             }) else {
                 return InferredTypeData::Unknown;
             };
             let substitution = InferredTypeSubstitution {
-                generic: *type_parameter,
+                generic: type_parameter,
                 replacement,
             };
             let Ok(substituted) = return_ty.substitute_type(db, substitution) else {
@@ -1699,6 +1718,19 @@ fn infer_generic_return_type<'db>(
             };
             return_ty = substituted;
             substitutions.push(substitution);
+            if let Some(alternate) = alternate
+                && alternate != type_parameter
+            {
+                let substitution = InferredTypeSubstitution {
+                    generic: alternate,
+                    replacement,
+                };
+                let Ok(substituted) = return_ty.substitute_type(db, substitution) else {
+                    return InferredTypeData::Unknown;
+                };
+                return_ty = substituted;
+                substitutions.push(substitution);
+            }
         }
     }
 

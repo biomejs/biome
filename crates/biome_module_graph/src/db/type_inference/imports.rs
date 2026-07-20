@@ -1,5 +1,4 @@
 use super::{InferredModuleTypes, globals::global_type, resolver::ResolutionCtx};
-use crate::db::queries::infer_module_types;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsExport, JsImport, JsOwnExport, ModuleDb, ResolvedPath};
 use biome_js_type_info::{
@@ -64,22 +63,14 @@ impl<'db> ResolutionCtx<'db, '_> {
         &mut self,
         qualifier: &TypeImportQualifier,
     ) -> InferredTypeData<'db> {
-        self.resolve_import_qualifier(qualifier)
-    }
-
-    fn resolve_import_qualifier(&self, qualifier: &TypeImportQualifier) -> InferredTypeData<'db> {
         let Some(module) = self.module_for_resolved_path(&qualifier.resolved_path) else {
             return InferredTypeData::Unknown;
         };
 
-        let Some(imported_types) = self.import_types.get(&qualifier.resolved_path) else {
-            return infer_module_types(self.db, module)
-                .map_or(InferredTypeData::Unknown, |types| {
-                    self.resolve_import_symbol(module, types, &qualifier.symbol)
-                });
-        };
-
-        self.resolve_import_symbol(module, imported_types, &qualifier.symbol)
+        self.infer_imported_module(module)
+            .map_or(InferredTypeData::Unknown, |types| {
+                self.resolve_import_symbol(module, types, &qualifier.symbol)
+            })
     }
 
     fn module_for_resolved_path(&self, resolved_path: &ResolvedPath) -> Option<ModuleInfo> {
@@ -105,7 +96,7 @@ impl<'db> ResolutionCtx<'db, '_> {
     fn resolve_js_import(&self, import: &JsImport) -> InferredTypeData<'db> {
         self.module_for_resolved_path(&import.resolved_path)
             .and_then(|module| {
-                infer_module_types(self.db, module)
+                self.infer_imported_module(module)
                     .map(|types| self.resolve_import_symbol(module, types, &import.symbol))
             })
             .unwrap_or(InferredTypeData::Unknown)
@@ -136,7 +127,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             collection.remaining_steps -= 1;
             collection.seen_modules.insert(module_key);
 
-            if infer_module_types(self.db, module).is_none() {
+            if self.infer_imported_module(module).is_none() {
                 return InferredTypeData::Unknown;
             }
 
@@ -174,7 +165,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             return false;
         };
 
-        for (name, _) in js_info.exports.iter() {
+        for (name, _) in js_info.raw_exports.iter() {
             if !include_default && name.text() == "default" {
                 continue;
             }
@@ -236,7 +227,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             remaining_steps -= 1;
 
-            let Some(inferred_types) = infer_module_types(self.db, module) else {
+            let Some(inferred_types) = self.infer_imported_module(module) else {
                 continue;
             };
 
@@ -269,7 +260,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             return ExportResolutionStep::Continue;
         };
 
-        match js_info.exports.get(name) {
+        match js_info.raw_exports.get(name) {
             Some(JsExport::Own(own_export) | JsExport::OwnType(own_export)) => {
                 ExportResolutionStep::Resolved(ResolvedExport {
                     identity: ExportIdentity {
