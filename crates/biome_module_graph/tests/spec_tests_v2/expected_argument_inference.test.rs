@@ -1,8 +1,6 @@
 use super::*;
-use biome_js_type_info::interned_types::{
-    InternedFunction as InferredFunction, InternedTuple as InferredTuple,
-    NamedFunctionParameter as InferredNamedFunctionParameter,
-    TupleElementType as InferredTupleElementType,
+use biome_js_type_info::resolved::{
+    InferredFunction, InferredNamedFunctionParameter, InferredTuple, InferredTupleElementType,
 };
 
 fn inferred_function_type<'db>(
@@ -716,7 +714,7 @@ fn test_infer_constructor_argument_type_resolves_canonical_global() {
     let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
     let input = CallArgumentTypeInput::new(
         &db,
-        InferredTypeData::promise_class(&db),
+        InferredTypeData::promise_class(),
         Vec::from([InferredCallArgumentType::Argument(
             InferredTypeData::Unknown,
         )])

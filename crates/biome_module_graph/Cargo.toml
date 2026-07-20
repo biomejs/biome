@@ -10,6 +10,11 @@ license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
 publish              = true
+autotests            = false
+
+[[test]]
+name = "spec_tests_v2"
+path = "tests/spec_tests_v2.rs"
 
 [[bench]]
 harness = false

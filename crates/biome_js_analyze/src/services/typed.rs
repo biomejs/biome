@@ -9,10 +9,10 @@ use biome_js_syntax::{
     JsSyntaxNode,
 };
 use biome_js_type_info::{
-    InferredType, TypeResolverLevel,
-    interned_types::{
-        CallArgumentType as InferredCallArgumentType, LocalTypeHandle, LocalTypeId,
-        ReturnType as InferredReturnType, TypeData as InferredTypeData,
+    InferredType,
+    resolved::{
+        InferredCallArgumentType, InferredLocalTypeHandle, InferredLocalTypeId, InferredReturnType,
+        InferredTypeData,
     },
 };
 use biome_module_graph::{
@@ -37,8 +37,8 @@ impl TypedModule {
 
 /// Service for use with type inference rules.
 ///
-/// This service retrieves inferred types for arbitrary expressions or function
-/// definitions from the module graph.
+/// This service is used for retrieving [`Type`] instances for arbitrary
+/// expressions or function definitions from the module graph.
 #[derive(Clone)]
 pub struct TypedService {
     module: Option<TypedModule>,
@@ -195,15 +195,19 @@ impl TypedService {
         let own_export = js_info.exports.get("default")?.as_own_export()?;
         let ty = match own_export {
             JsOwnExport::Binding(range) => inferred.binding_type_data.get(range)?.ty,
-            JsOwnExport::Type(resolved) if resolved.level() == TypeResolverLevel::Thin => {
-                let type_id = LocalTypeId::new(resolved.index());
+            JsOwnExport::Type(resolved) => {
+                let type_id = InferredLocalTypeId::new(resolved.index());
                 if inferred.named_type_ids.contains(&type_id) {
-                    InferredTypeData::Local(LocalTypeHandle::new(db, inferred.module_key, type_id))
+                    InferredTypeData::Local(InferredLocalTypeHandle::new(
+                        db,
+                        inferred.module_key,
+                        type_id,
+                    ))
                 } else {
                     *inferred.types.get(resolved.index())?
                 }
             }
-            JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => return None,
+            JsOwnExport::Namespace(_) => return None,
         };
         Some(ty)
     }
@@ -228,10 +232,7 @@ impl TypedService {
             .map(|data| data.ty)
     }
 
-    /// Determines whether an expression has a callable member with the given name.
-    ///
-    /// Returns `None` when type inference is unavailable or the member's
-    /// callability cannot be determined conclusively.
+    /// Returns whether an expression has a callable member with the given name.
     pub fn expression_has_callable_member(
         &self,
         expression: &AnyJsExpression,
@@ -242,10 +243,7 @@ impl TypedService {
         let inferred = infer_module_types_bottom_up(db, typed_module.module)?;
         let ty = inferred.expressions.get(&expression.range()).copied()?;
         let ty = normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
-        if !InferredType::new(db, ty).is_inferred() {
-            return None;
-        }
-        let Some(member_ty) = inferred.find_value_member_type(db, ty, name) else {
+        let Some(member_ty) = inferred.find_member_type(db, ty, name) else {
             return Some(false);
         };
         let member_ty = normalize_type(
@@ -253,7 +251,7 @@ impl TypedService {
             NormalizeTypeInput::new(db, typed_module.module, member_ty),
         );
 
-        InferredType::new(db, member_ty).is_callable()
+        is_callable_inferred_type(db, member_ty)
     }
 
     /// Returns the expected type for a call or constructor argument, selecting
@@ -309,6 +307,60 @@ impl TypedService {
         self.model
             .as_ref()
             .is_some_and(|model| model.binding(reference).is_some())
+    }
+}
+
+fn is_callable_inferred_type(db: &dyn ModuleDb, ty: InferredTypeData) -> Option<bool> {
+    is_callable_inferred_type_inner(db, ty, 0)
+}
+
+fn is_callable_inferred_type_inner(
+    db: &dyn ModuleDb,
+    ty: InferredTypeData,
+    depth: usize,
+) -> Option<bool> {
+    if depth == 64 {
+        return None;
+    }
+
+    match ty {
+        InferredTypeData::Unknown
+        | InferredTypeData::Divergent(_)
+        | InferredTypeData::Local(_)
+        | InferredTypeData::TypeofExpression(_)
+        | InferredTypeData::AnyKeyword
+        | InferredTypeData::NeverKeyword
+        | InferredTypeData::UnknownKeyword => None,
+        InferredTypeData::Interface(interface) => Some(
+            interface
+                .members(db)
+                .iter()
+                .any(|member| member.kind.is_call_signature()),
+        ),
+        InferredTypeData::Object(object) => Some(
+            object
+                .members(db)
+                .iter()
+                .any(|member| member.kind.is_call_signature()),
+        ),
+        InferredTypeData::TypeofType(ty) => {
+            is_callable_inferred_type_inner(db, ty.ty(db), depth + 1)
+        }
+        InferredTypeData::TypeofValue(ty) => {
+            is_callable_inferred_type_inner(db, ty.ty(db), depth + 1)
+        }
+        InferredTypeData::Union(union) => {
+            let mut indeterminate = false;
+            for ty in union.types(db) {
+                match is_callable_inferred_type_inner(db, *ty, depth + 1) {
+                    Some(true) => return Some(true),
+                    Some(false) => {}
+                    None => indeterminate = true,
+                }
+            }
+            (!indeterminate).then_some(false)
+        }
+        ty => Some(ty.callable_function(db).is_some()),
     }
 }
 

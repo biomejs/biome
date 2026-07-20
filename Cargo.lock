@@ -1184,7 +1184,6 @@ dependencies = [
  "biome_js_parser",
  "biome_js_semantic",
  "biome_js_syntax",
- "biome_js_type_info_macros",
  "biome_languages",
  "biome_resolver",
  "biome_rowan",

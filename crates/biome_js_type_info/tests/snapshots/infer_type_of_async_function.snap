@@ -19,12 +19,12 @@ async Function "returnsPromise" {
     params: []
     type_args: []
   }
-  returns: Global TypeId(0)
+  returns: Local TypeId(0)
 }
 ```
 
 ## Registered types
 
 ```
-Global TypeId(0) => instanceof unresolved reference "Promise"<string> (scope ID: 0)
+Module TypeId(0) => instanceof unresolved reference "Promise"<string> (scope ID: 0)
 ```

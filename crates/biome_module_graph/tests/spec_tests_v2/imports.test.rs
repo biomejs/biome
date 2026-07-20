@@ -46,5 +46,5 @@ fn test_infer_module_types_resolves_react_export_equals_namespace() {
     let promise_ty = inferred_binding_ty_by_name(&db, index_module, inferred, "promise")
         .expect("promise binding type must be inferred");
     let promise_ty = inferred.resolve_type(&db, promise_ty);
-    assert!(promise_ty.is_promise_instance(&db));
+    assert!(promise_ty.is_promise_instance(&db) == Some(true));
 }

@@ -1,7 +1,6 @@
 #![allow(unused)]
 
 use std::borrow::Cow;
-use std::sync::Arc;
 
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
@@ -11,45 +10,16 @@ use biome_js_syntax::{
 };
 use biome_js_syntax::{AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsFunctionDeclaration};
 use biome_js_type_info::{
-    GlobalsResolver, NUM_PREDEFINED_TYPES, Resolvable, ResolvedTypeData, ResolvedTypeId, ScopeId,
-    TypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
-    TypeStore,
+    RawTypeCollector, RawTypeId, ScopeId, TypeData, TypeId, TypeReference, TypeStore,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, Text};
-use biome_test_utils::dump_registered_types;
-
-#[derive(Default)]
-pub struct TestTypeCollector {
-    pub types: TypeStore,
-}
-
-impl biome_js_type_info::RawTypeCollector for TestTypeCollector {
-    fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
-        self.types.find(type_data)
-    }
-
-    fn get_by_id(&self, id: TypeId) -> &TypeData {
-        self.types.get_by_id(id)
-    }
-
-    fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
-        self.types.insert_cow(type_data)
-    }
-
-    fn resolve_expression(
-        &mut self,
-        scope_id: ScopeId,
-        expression: &AnyJsExpression,
-    ) -> Cow<'_, TypeData> {
-        Cow::Owned(TypeData::from_any_js_expression(self, scope_id, expression))
-    }
-}
+use biome_test_utils::dump_registered_module_types;
 
 pub fn assert_type_data_snapshot(
     source_code: &str,
     ty: &TypeData,
-    resolver: &dyn TypeResolver,
+    resolver: &TestTypeCollector,
     test_name: &str,
 ) {
     let mut content = String::new();
@@ -71,7 +41,7 @@ pub fn assert_type_data_snapshot(
     content.push_str(&ty.to_string());
     content.push_str("\n```\n\n");
 
-    dump_registered_types(&mut content, resolver);
+    dump_registered_module_types(&mut content, resolver.types.as_slice());
 
     insta::with_settings!({
         snapshot_path => "snapshots",
@@ -84,7 +54,7 @@ pub fn assert_type_data_snapshot(
 pub fn assert_typed_bindings_snapshot(
     source_code: &str,
     typed_bindings: &[(Text, TypeReference)],
-    resolver: &dyn TypeResolver,
+    resolver: &TestTypeCollector,
     test_name: &str,
 ) {
     let mut content = String::new();
@@ -104,15 +74,15 @@ pub fn assert_typed_bindings_snapshot(
     content.push_str("## Result\n\n");
     content.push_str("```\n");
     for (name, ty) in typed_bindings {
-        let ty = resolver
-            .resolve_and_get(ty)
-            .expect("must resolve")
-            .to_data();
+        let ty = match ty {
+            TypeReference::Resolved(RawTypeId::Local(id)) => resolver.get_by_id(*id).clone(),
+            ty => TypeData::reference(ty.clone()),
+        };
         content.push_str(&format!("{name} => {ty}\n"));
     }
     content.push_str("\n```\n\n");
 
-    dump_registered_types(&mut content, resolver);
+    dump_registered_module_types(&mut content, resolver.types.as_slice());
 
     insta::with_settings!({
         snapshot_path => "snapshots",
@@ -122,129 +92,30 @@ pub fn assert_typed_bindings_snapshot(
     });
 }
 
-/// Test resolver that can resolve a single type with a hardcoded name, but
-/// that is still able to register other types and has a fallback for globals.
-pub struct HardcodedSymbolResolver {
-    name: &'static str,
-    globals: GlobalsResolver,
-    types: Vec<TypeData>,
+#[derive(Default)]
+pub struct TestTypeCollector {
+    pub types: TypeStore,
 }
 
-impl HardcodedSymbolResolver {
-    pub fn new(name: &'static str, data: TypeData, globals: GlobalsResolver) -> Self {
-        Self {
-            name,
-            globals,
-            types: vec![data],
-        }
-    }
-
-    pub fn run_inference(&mut self) {
-        self.resolve_all();
-        self.flatten_all();
-    }
-
-    pub fn resolve_all(&mut self) {
-        let mut i = 0;
-        while i < self.types.len() {
-            // First take the type to satisfy the borrow checker:
-            let ty = std::mem::take(&mut self.types[i]);
-            self.types[i] = ty.resolved(self).unwrap_or(ty);
-            i += 1;
-        }
-    }
-
-    fn flatten_all(&mut self) {
-        let mut i = 0;
-        while i < self.types.len() {
-            // First take the type to satisfy the borrow checker:
-            let ty = std::mem::take(&mut self.types[i]);
-            self.types[i] = ty.flattened(self).unwrap_or(ty);
-            i += 1;
-        }
-    }
-}
-
-impl TypeResolver for HardcodedSymbolResolver {
-    fn level(&self) -> TypeResolverLevel {
-        TypeResolverLevel::Thin
-    }
-
+impl RawTypeCollector for TestTypeCollector {
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
-        self.types
-            .iter()
-            .position(|data| data == type_data)
-            .map(TypeId::new)
+        self.types.find(type_data)
     }
 
     fn get_by_id(&self, id: TypeId) -> &TypeData {
-        &self.types[id.index()]
-    }
-
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData<'_>> {
-        match id.level() {
-            TypeResolverLevel::Full => {
-                panic!("Ad-hoc references unsupported by resolver")
-            }
-            TypeResolverLevel::Thin => Some((id, self.get_by_id(id.id())).into()),
-            TypeResolverLevel::Import => {
-                panic!("Import references unsupported by resolver")
-            }
-            TypeResolverLevel::Global => Some((id, self.globals.get_by_id(id.id())).into()),
-        }
+        self.types.get_by_id(id)
     }
 
     fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
-        match self
-            .types
-            .iter()
-            .position(|data| data == type_data.as_ref())
-        {
-            Some(index) => TypeId::new(index),
-            None => {
-                let id = TypeId::new(self.types.len());
-                self.types.push(type_data.into_owned());
-                id
-            }
-        }
-    }
-
-    fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
-        match ty {
-            TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),
-            TypeReference::Resolved(resolved_id) => Some(*resolved_id),
-            TypeReference::Import(_import) => {
-                panic!("Project-level references unsupported by resolver")
-            }
-        }
-    }
-
-    fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
-        if qualifier.path.is_identifier(self.name) {
-            Some(ResolvedTypeId::new(self.level(), TypeId::new(0)))
-        } else {
-            self.globals.resolve_qualifier(qualifier)
-        }
-    }
-
-    fn resolve_type_of(&self, identifier: &Text, scope_id: ScopeId) -> Option<ResolvedTypeId> {
-        self.globals.resolve_type_of(identifier, scope_id)
+        self.types.insert_cow(type_data)
     }
 
     fn resolve_expression(
         &mut self,
         scope_id: ScopeId,
-        expr: &AnyJsExpression,
+        expression: &AnyJsExpression,
     ) -> Cow<'_, TypeData> {
-        Cow::Owned(TypeData::from_any_js_expression(self, scope_id, expr))
-    }
-
-    fn fallback_resolver(&self) -> Option<&dyn TypeResolver> {
-        Some(&self.globals)
-    }
-
-    fn registered_types(&self) -> Vec<&TypeData> {
-        self.types.iter().collect()
+        Cow::Owned(TypeData::from_any_js_expression(self, scope_id, expression))
     }
 }
 

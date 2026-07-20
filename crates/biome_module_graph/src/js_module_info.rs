@@ -1,18 +1,16 @@
 mod binding;
 mod collector;
 mod diagnostics;
-mod module_resolver;
 mod scope;
 pub(crate) use scope::TsBindingReferenceExt;
 mod utils;
 mod visitor;
 
 use crate::css_module_info::CssClassReference;
-use biome_js_semantic::{JsDeclarationKind, ScopeId};
+use biome_js_semantic::JsDeclarationKind;
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{
-    FormatTypeContext, ImportSymbol, RawTypeData, ResolvedTypeId, TypeData, TypeReference,
-    TypeResolverLevel, interned_types::LocalTypeId,
+    ImportSymbol, RawTypeData, RawTypeId, TypeId, TypeReference, resolved::InferredLocalTypeId,
 };
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};
@@ -20,7 +18,6 @@ use camino::Utf8Path;
 use indexmap::IndexMap;
 use rustc_hash::FxHashMap;
 use std::collections::BTreeSet;
-use std::fmt::{Display, Formatter};
 use std::{collections::BTreeMap, ops::Deref, sync::Arc};
 
 use scope::JsScope;
@@ -29,31 +26,7 @@ use crate::diagnostics::ModuleDiagnostic;
 pub(super) use binding::JsBindingData;
 pub use collector::TypeInferenceMode;
 pub use diagnostics::JsModuleInfoDiagnostic;
-pub use module_resolver::ModuleResolver;
 pub(crate) use visitor::JsModuleVisitor;
-
-/// Type augmentation data for a binding from the semantic model.
-///
-/// Stores type inference results and JSDoc comments that enrich the
-/// base binding information from the semantic model.
-#[derive(Debug, Clone)]
-pub struct BindingTypeData {
-    /// The inferred type of this binding.
-    pub ty: TypeReference,
-}
-
-impl Display for BindingTypeData {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let formatted = biome_formatter::format!(FormatTypeContext, [&self])
-            .expect("Formatting not to throw any FormatErrors");
-        f.write_str(
-            formatted
-                .print()
-                .expect("Expected a valid document")
-                .as_code(),
-        )
-    }
-}
 
 /// Information restricted to a single JS/TS module.
 #[derive(Clone, Debug)]
@@ -163,16 +136,14 @@ impl JsModuleInfo {
             })
     }
 
-    pub fn local_type_name(&self, type_id: LocalTypeId) -> Option<Text> {
+    pub fn local_type_name(&self, type_id: InferredLocalTypeId) -> Option<Text> {
         self.raw_binding_types
             .iter()
-            .find_map(|(range, reference)| {
-                let TypeReference::Resolved(resolved_id) = reference else {
+            .filter_map(|(range, reference)| {
+                let TypeReference::Resolved(RawTypeId::Local(resolved_id)) = reference else {
                     return None;
                 };
-                if resolved_id.level() != TypeResolverLevel::Thin
-                    || resolved_id.index() != type_id.index()
-                {
+                if resolved_id.index() != type_id.index() {
                     return None;
                 }
 
@@ -181,12 +152,14 @@ impl JsModuleInfo {
                     return None;
                 }
 
-                Some(binding.syntax().text_trimmed().into_text())
+                Some((*range, binding.syntax().text_trimmed().into_text()))
             })
+            .min_by_key(|(range, _)| *range)
+            .map(|(_, name)| name)
     }
 }
 
-fn is_named_type_declaration(declaration_kind: JsDeclarationKind) -> bool {
+pub(crate) fn is_named_type_declaration(declaration_kind: JsDeclarationKind) -> bool {
     matches!(
         declaration_kind,
         JsDeclarationKind::Class
@@ -245,10 +218,8 @@ pub struct JsModuleInfoInner {
     /// Re-exports are tracked in this map as well. The exception is "blanket"
     /// re-exports, such as `export * from "other-module"`. Those are tracked in
     /// [Self::forwarding_exports] instead.
+    /// Type IDs in this map index [Self::raw_types].
     pub exports: Exports,
-
-    /// Exports whose type IDs index [`Self::raw_types`].
-    pub(crate) raw_exports: Exports,
 
     /// Re-exports that apply to all symbols from another module, without
     /// assigning a name to them.
@@ -260,12 +231,6 @@ pub struct JsModuleInfoInner {
     /// duplicated scope/binding tracking that was built from semantic events.
     pub semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
 
-    /// Type augmentation data: maps binding ranges to their type information and JSDoc.
-    ///
-    /// This enriches the semantic model's bindings with type inference results
-    /// and documentation comments.
-    pub binding_type_data: FxHashMap<TextRange, BindingTypeData>,
-
     /// Raw local type table collected before module-level resolution and flattening.
     pub raw_types: Vec<RawTypeData>,
 
@@ -274,16 +239,6 @@ pub struct JsModuleInfoInner {
 
     /// Raw binding references collected before module-level resolution and flattening.
     pub raw_binding_types: FxHashMap<TextRange, TypeReference>,
-
-    /// Parsed expressions, mapped from their range to their type ID.
-    pub(crate) expressions: FxHashMap<TextRange, ResolvedTypeId>,
-
-    /// Collection of all types in the module.
-    ///
-    /// We do not store these using our `TypeStore`, because once the module
-    /// info is constructed, no new types can be registered in it, and we have
-    /// no use for a hash table anymore.
-    pub(crate) types: Vec<Arc<TypeData>>,
 
     /// Diagnostics emitted during the resolution of the module
     pub(crate) diagnostics: Vec<ModuleDiagnostic>,
@@ -349,65 +304,6 @@ impl JsImportPath {
 static_assertions::assert_impl_all!(JsModuleInfo: Send, Sync);
 
 impl JsModuleInfoInner {
-    /// Returns type augmentation data for a binding by its range.
-    ///
-    /// This is the replacement for the old `binding()` method.
-    #[inline]
-    pub fn binding_type_data(&self, binding_range: TextRange) -> Option<&BindingTypeData> {
-        self.binding_type_data.get(&binding_range)
-    }
-
-    /// Attempts to find a binding by `name` in the scope with the given
-    /// `scope_id`.
-    ///
-    /// Traverses upwards in scope if the binding is not found in the given
-    /// scope.
-    ///
-    /// Returns the binding's text range for looking up type augmentation data.
-    fn find_binding_in_scope(&self, name: &str, scope_id: ScopeId) -> Option<TextRange> {
-        // Start from the specified scope and walk up the scope chain
-        let mut scope = self.semantic_model.scope_from_id(scope_id);
-
-        loop {
-            // Check if this scope has a binding with the given name
-            if let Some(binding) = scope.get_binding(name) {
-                // Return the binding's range for type data lookup
-                return Some(binding.syntax().text_trimmed_range());
-            }
-
-            // Move to parent scope
-            match scope.parent() {
-                Some(parent) => scope = parent,
-                None => break,
-            }
-        }
-
-        None
-    }
-
-    /// Checks if a binding with the given name in the specified scope is imported.
-    ///
-    /// Returns `true` if the binding is an import declaration, `false` otherwise.
-    fn is_binding_imported(&self, name: &str, scope_id: ScopeId) -> bool {
-        // Start from the specified scope and walk up the scope chain
-        let mut scope = self.semantic_model.scope_from_id(scope_id);
-
-        loop {
-            // Check if this scope has a binding with the given name
-            if let Some(binding) = scope.get_binding(name) {
-                return binding.is_imported();
-            }
-
-            // Move to parent scope
-            match scope.parent() {
-                Some(parent) => scope = parent,
-                None => break,
-            }
-        }
-
-        false
-    }
-
     /// Returns the information about a given import by its syntax node.
     pub fn get_import_path_by_js_node(&self, node: &AnyJsImportLike) -> Option<&JsImportPath> {
         let specifier_text = node.inner_string_text()?;
@@ -417,10 +313,6 @@ impl JsModuleInfoInner {
         } else {
             self.dynamic_import_paths.get(specifier)
         }
-    }
-
-    pub fn types(&self) -> Vec<&TypeData> {
-        self.types.iter().map(Arc::as_ref).collect()
     }
 }
 
@@ -497,7 +389,7 @@ pub enum JsOwnExport {
     /// The range can be used to look up type augmentation data.
     Binding(TextRange),
     /// An export that directly references a resolved type.
-    Type(ResolvedTypeId),
+    Type(TypeId),
     /// A namespace export created by `export * as Name from "..."`.
     ///
     /// The entire module namespace of the target is re-exported under `Name`,
