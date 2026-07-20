@@ -1,5 +1,7 @@
 use crate::CssParserOptions;
-use crate::lexer::{CssLexContext, CssLexer, CssReLexContext, CssStringQuote};
+use crate::lexer::{
+    CssCustomPropertyCommentMode, CssLexContext, CssLexer, CssReLexContext, CssStringQuote,
+};
 use biome_css_syntax::CssSyntaxKind::EOF;
 use biome_css_syntax::{CssSyntaxKind, TextRange};
 use biome_languages::CssFileSource;
@@ -123,6 +125,25 @@ impl<'src> CssTokenSource<'src> {
     pub(crate) fn is_current_token_followed_by_scss_concatenation_plus(&self) -> bool {
         let start = usize::from(self.current_range().end());
         self.lexer.lexer().is_at_scss_concatenation_plus(start)
+    }
+
+    /// Returns whether the body after the current `(` uses Sass raw-URL syntax,
+    /// as in `url(//cdn.example/app.css)`.
+    pub(crate) fn is_scss_raw_url_body(&self) -> bool {
+        let start = usize::from(self.current_range().end());
+        self.lexer.lexer().is_scss_raw_url_body(start)
+    }
+
+    /// Returns whether the current token starts a final custom-property
+    /// `!important` under the active raw-value comment policy.
+    pub(crate) fn is_at_final_custom_property_important(
+        &self,
+        comment_mode: CssCustomPropertyCommentMode,
+    ) -> bool {
+        let start = usize::from(self.current_range().start());
+        self.lexer
+            .lexer()
+            .is_at_final_custom_property_important(start, comment_mode)
     }
 
     /// Returns whether the `n`th non-trivia token directly follows the
