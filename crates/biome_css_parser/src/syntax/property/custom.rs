@@ -72,6 +72,20 @@ pub(crate) fn parse_custom_property_value(
     )
 }
 
+/// Parses an SCSS custom-property value in an `@supports` declaration.
+///
+/// Example: `$gap` in `@supports (--space: $gap) {}`.
+pub(crate) fn parse_supports_custom_property_value(
+    p: &mut CssParser,
+    end_set: TokenSet<CssSyntaxKind>,
+) -> CompletedMarker {
+    parse_custom_property_value_with_mode(
+        p,
+        end_set,
+        CssCustomPropertyCommentMode::ScssLineComments,
+    )
+}
+
 /// Parses a raw custom-property value with the caller's `//` policy.
 fn parse_custom_property_value_with_mode(
     p: &mut CssParser,

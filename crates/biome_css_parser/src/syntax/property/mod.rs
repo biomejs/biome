@@ -29,7 +29,7 @@ use biome_parser::parse_recovery::{
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{CompletedMarker, Parser, SyntaxFeature, TokenSet, token_set};
-pub(crate) use custom::parse_custom_property_value;
+pub(crate) use custom::{parse_custom_property_value, parse_supports_custom_property_value};
 
 #[inline]
 pub(crate) fn is_at_any_property(p: &mut CssParser) -> bool {

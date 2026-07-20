@@ -162,6 +162,27 @@ impl<'src> CssTokenSource<'src> {
         previous.end() == current.start()
     }
 
+    /// Returns whether the current token is immediately preceded by a CSS
+    /// block comment and optional surrounding trivia.
+    pub(crate) fn has_preceding_block_comment(&self) -> bool {
+        let mut trivia_end = self.current_range().start();
+
+        for trivia in self.trivia_list.iter().rev() {
+            if trivia.end_offset() != trivia_end {
+                break;
+            }
+
+            trivia_end = trivia.offset();
+            if trivia.kind().is_comment()
+                && self.lexer.source()[trivia.text_range()].starts_with("/*")
+            {
+                return true;
+            }
+        }
+
+        false
+    }
+
     #[inline]
     fn effective_context(&self, context: CssLexContext) -> CssLexContext {
         match (
