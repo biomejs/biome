@@ -20,7 +20,7 @@ use biome_resolver::ResolvedPath;
 use biome_rowan::Text;
 
 use crate::{
-    ModuleId, Resolvable, ResolvedTypeId, ResolverId, TypeResolver,
+    GlobalTypeId, ModuleId, Resolvable, ResolvedTypeId, ResolverId, TypeResolver,
     globals::{GLOBAL_NUMBER_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID},
     literal::RegexpLiteral,
     type_data::literal::{BooleanLiteral, NumberLiteral, StringLiteral},
@@ -35,6 +35,41 @@ pub(super) const UNKNOWN_DATA: TypeData = TypeData::Reference(UNKNOWN_REFERENCE)
 /// this, type IDs are only unique within a single module/resolver.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeId(u32);
+
+/// Identity of a type in a collector's raw type table or the predefined global table.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum RawTypeId {
+    Local(TypeId),
+    Global(GlobalTypeId),
+}
+
+impl RawTypeId {
+    pub const fn index(self) -> usize {
+        match self {
+            Self::Local(id) => id.index(),
+            Self::Global(id) => id.index(),
+        }
+    }
+
+    pub const fn is_unknown(self) -> bool {
+        matches!(self, Self::Global(id) if id.index() == 0)
+    }
+}
+
+impl From<RawTypeId> for ResolvedTypeId {
+    fn from(id: RawTypeId) -> Self {
+        match id {
+            RawTypeId::Local(id) => Self::new(crate::TypeResolverLevel::Thin, id),
+            RawTypeId::Global(id) => Self::new(crate::TypeResolverLevel::Global, id.as_type_id()),
+        }
+    }
+}
+
+impl From<RawTypeId> for TypeReference {
+    fn from(id: RawTypeId) -> Self {
+        Self::Resolved(id.into())
+    }
+}
 
 impl TypeId {
     pub const fn new(index: usize) -> Self {
@@ -1809,5 +1844,22 @@ impl Union {
 
     pub fn with_type(&self, ty: TypeReference) -> Self {
         Self(self.0.iter().cloned().chain(Some(ty)).collect())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{RawTypeId, TypeId};
+    use crate::{ResolvedTypeId, TypeResolverLevel, globals_ids::UNKNOWN_ID_GLOBAL_TYPE_ID};
+
+    #[test]
+    fn raw_type_ids_convert_to_legacy_resolver_levels() {
+        let local: ResolvedTypeId = RawTypeId::Local(TypeId::new(3)).into();
+        let global: ResolvedTypeId = RawTypeId::Global(UNKNOWN_ID_GLOBAL_TYPE_ID).into();
+
+        assert_eq!(local.level(), TypeResolverLevel::Thin);
+        assert_eq!(local.index(), 3);
+        assert_eq!(global.level(), TypeResolverLevel::Global);
+        assert!(global.is_unknown());
     }
 }
