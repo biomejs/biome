@@ -26,7 +26,7 @@ reformat: output mismatch
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -1,9 +1,12 @@
+@@ -1,9 +1,18 @@
  [
    source_position(0),
    "!!map",
@@ -34,10 +34,17 @@ IR differences:
 +  line_suffix([" ", source_position(6), "# comment 1"]),
    expand_parent,
    " ",
+-  group([source_position(30), "{", source_position(31), "}"]),
 +  source_position(18),
 +  "# comment 2",
 +  hard_line_break,
-   verbatim([source_position(30), "{}"]),
++  group(expand: propagated, [
++    source_position(30),
++    "{",
++    expand_parent,
++    source_position(31),
++    "}"
++  ]),
    hard_line_break
  ]
 \ No newline at end of file

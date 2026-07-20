@@ -133,7 +133,7 @@ YamlFlowMapping =
 	'}'
 
 // https://yaml.org/spec/1.2.2/#rule-ns-s-flow-map-entries
-YamlFlowMapEntryList = (AnyYamlFlowMapEntry (',' AnyYamlFlowMapEntry)*)
+YamlFlowMapEntryList = (AnyYamlFlowMapEntry (',' AnyYamlFlowMapEntry)* ','?)
 
 AnyYamlFlowMapEntry =
 	YamlFlowMapExplicitEntry

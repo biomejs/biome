@@ -14,12 +14,6 @@ info: yaml/flow/simple_flow_mapping.yaml
 # Formatted
 
 ```yaml
-{a: b, "x": y, 'z': w}
+{ a: b, "x": y, 'z': w }
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"{a: b, \"x\": y, 'z': w}" => 0..22

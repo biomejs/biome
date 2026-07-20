@@ -1,3 +1,4 @@
+use crate::comments::subtree_has_comments;
 use crate::prelude::*;
 use biome_formatter::format_args;
 use biome_formatter::write;
@@ -36,10 +37,14 @@ impl FormatNodeRule<YamlBlockMapImplicitEntry> for FormatYamlBlockMapImplicitEnt
             }
 
             if value.is_flow_collection() {
-                // A flow collection that fits stays on the key's line; one
-                // that doesn't moves as a whole to its own indented line, so
-                // that its entries and closing bracket stay indented deeper
-                // than the mapping key, as the spec requires
+                // Like Prettier: a collection that a comment forces to break
+                // stays on the key's line, while one that only breaks because
+                // it doesn't fit moves as a whole to its own indented line.
+                // Both keep the collection's entries and closing bracket
+                // indented deeper than the mapping key, as the spec requires
+                if subtree_has_comments(f.comments(), value.syntax()) {
+                    return write!(f, [space(), align("  ", &value.format())]);
+                }
                 return write!(
                     f,
                     [group(&indent(&format_args![
