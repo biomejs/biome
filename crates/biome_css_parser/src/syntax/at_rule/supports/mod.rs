@@ -361,6 +361,7 @@ const END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET: TokenSet<CssSyntaxKind> =
 fn parse_supports_property_value(p: &mut CssParser) {
     parse_property_value_with_end_set(
         p,
+        false,
         END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET,
         END_OF_PROPERTY_VALUE_TOKEN_SET,
     );
