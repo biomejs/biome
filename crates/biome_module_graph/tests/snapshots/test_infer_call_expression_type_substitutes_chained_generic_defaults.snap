@@ -1,0 +1,28 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export declare function fallback<T = string, U = T>(): U;
+```
+
+## Inferred types
+
+```
+Binding fallback "fallback" => sync Function "fallback" {
+  accepts: {
+    params: []
+    type_args: [T = string, U = instanceof T]
+  }
+  returns: instanceof U
+}
+
+Binding T "T" => T = string
+
+Binding U "U" => U = instanceof T
+```

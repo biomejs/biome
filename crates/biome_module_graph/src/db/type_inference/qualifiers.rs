@@ -1,10 +1,11 @@
 use super::resolver::ResolutionCtx;
 use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_type_info::{
-    GLOBAL_RESOLVER, Path, TypeImportQualifier, TypeReferenceQualifier, TypeResolver,
+    GLOBAL_RESOLVER, Path, TypeImportQualifier, TypeReference, TypeReferenceQualifier,
+    TypeResolver, TypeResolverLevel,
     interned_types::{
-        Literal as InferredLiteral, TypeData as InferredTypeData, TypeMember as InferredTypeMember,
-        TypeMemberKind as InferredTypeMemberKind,
+        Literal as InferredLiteral, LocalTypeHandle, LocalTypeId, TypeData as InferredTypeData,
+        TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
     },
 };
 use biome_rowan::Text;
@@ -13,6 +14,56 @@ const MAX_SCOPE_RESOLUTION_STEPS: usize = 1024;
 const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 
 impl<'db> ResolutionCtx<'db, '_> {
+    /// Resolves a qualifier that names a binding whose type is still being
+    /// inferred to a local type handle.
+    ///
+    /// Only single-identifier qualifiers match; the identifier's binding is
+    /// searched upward through the scope chain. Returns `None` when the
+    /// binding is missing, its type reference is not a thin resolved ID, or
+    /// the referenced type is not currently in progress.
+    pub(super) fn resolve_in_progress_this_qualifier(
+        &self,
+        qualifier: &TypeReferenceQualifier,
+    ) -> Option<InferredTypeData<'db>> {
+        let mut path = qualifier.path.iter();
+        let identifier = path.next()?;
+        if path.next().is_some() {
+            return None;
+        }
+
+        let mut scope = self
+            .js_info
+            .semantic_model
+            .scope_from_id(qualifier.scope_id);
+        for _ in 0..MAX_SCOPE_RESOLUTION_STEPS {
+            let binding = scope
+                .get_binding_reference(identifier.text())
+                .and_then(|reference| reference.get_binding_id_for_qualifier(qualifier))
+                .and_then(|id| self.js_info.semantic_model.binding_by_id(id));
+            if let Some(binding) = binding {
+                let TypeReference::Resolved(resolved_id) = self
+                    .js_info
+                    .raw_binding_types
+                    .get(&binding.syntax().text_trimmed_range())?
+                else {
+                    return None;
+                };
+                if resolved_id.level() != TypeResolverLevel::Thin
+                    || !self.in_progress.contains(&resolved_id.id())
+                {
+                    return None;
+                }
+                return Some(InferredTypeData::Local(LocalTypeHandle::new(
+                    self.db,
+                    self.module_key,
+                    LocalTypeId::new(resolved_id.id().index()),
+                )));
+            }
+            scope = scope.parent()?;
+        }
+        None
+    }
+
     pub(in crate::db::type_inference) fn resolve_qualifier(
         &mut self,
         qualifier: &TypeReferenceQualifier,

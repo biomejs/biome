@@ -1,0 +1,32 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export declare function pick<T = string, U = T>(value: T): U;
+```
+
+## Inferred types
+
+```
+Binding pick "pick" => sync Function "pick" {
+  accepts: {
+    params: [
+      required value: instanceof T
+    ]
+    type_args: [T = string, U = instanceof T]
+  }
+  returns: instanceof U
+}
+
+Binding T "T" => T = string
+
+Binding U "U" => U = instanceof T
+
+Binding value "value" => instanceof T
+```

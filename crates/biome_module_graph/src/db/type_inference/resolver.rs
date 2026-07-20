@@ -181,7 +181,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
 
         if !self.in_progress.insert(type_id) {
-            return InferredTypeData::Unknown;
+            // A resolution cycle keeps the reference symbolic: lookups that
+            // are aware of in-progress types can still read the raw
+            // declaration behind the handle, which `Unknown` would rule out.
+            return self.local_type(type_id);
         }
 
         let js_info = self.js_info;

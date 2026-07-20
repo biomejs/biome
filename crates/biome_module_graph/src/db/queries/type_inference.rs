@@ -1802,12 +1802,17 @@ fn infer_function_return_type<'db>(
 }
 
 /// Substitutes generic return references from arguments and callback results.
+/// Type parameters left unsubstituted fall back to their declared defaults;
+/// a default resolves through the substitutions accumulated before it, so a
+/// default referencing an earlier type parameter follows that parameter's
+/// argument binding or default instead of leaving the bare generic behind.
 fn infer_generic_return_type<'db>(
     db: &'db dyn ModuleDb,
     function: InferredFunction<'db>,
     mut return_ty: InferredTypeData<'db>,
     args: &[ResolvedCallArgument<'db>],
 ) -> InferredTypeData<'db> {
+    let mut substitutions: Vec<InferredTypeSubstitution<'db>> = Vec::new();
     for (parameter, arg) in function
         .parameters(db)
         .iter()
@@ -1815,13 +1820,12 @@ fn infer_generic_return_type<'db>(
     {
         let parameter_ty = parameter.ty();
         if parameter_ty.is_generic_reference(db) {
-            return_ty = return_ty.substitute_type(
-                db,
-                InferredTypeSubstitution {
-                    generic: parameter_ty,
-                    replacement: arg,
-                },
-            );
+            let substitution = InferredTypeSubstitution {
+                generic: parameter_ty,
+                replacement: arg,
+            };
+            return_ty = return_ty.substitute_type(db, substitution);
+            substitutions.push(substitution);
             continue;
         }
 
@@ -1842,6 +1846,23 @@ fn infer_generic_return_type<'db>(
             collect_callback_return_replacements(db, *parameter_return_ty, *argument_return_ty)
         {
             return_ty = return_ty.substitute_type(db, substitution);
+            substitutions.push(substitution);
+        }
+    }
+
+    for type_parameter in function.type_parameters(db) {
+        if let InferredTypeData::Generic(generic) = type_parameter
+            && let Some(default) = generic.default(db)
+        {
+            let replacement = substitutions.iter().fold(default, |ty, substitution| {
+                ty.substitute_type(db, *substitution)
+            });
+            let substitution = InferredTypeSubstitution {
+                generic: *type_parameter,
+                replacement,
+            };
+            return_ty = return_ty.substitute_type(db, substitution);
+            substitutions.push(substitution);
         }
     }
 
