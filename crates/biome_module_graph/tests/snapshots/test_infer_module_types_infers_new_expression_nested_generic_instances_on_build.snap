@@ -53,7 +53,7 @@ Binding T "T" => T
 
 Binding value "value" => instanceof T
 
-Expression "this" => instanceof Box
+Expression "this" => instanceof Box<T>
 
 Expression "this.value = value" => unknown
 
@@ -69,7 +69,7 @@ Binding T "T" => T
 
 Binding values "values" => instanceof Array<instanceof T>
 
-Expression "this" => instanceof ArrayBox
+Expression "this" => instanceof ArrayBox<T>
 
 Expression "this.value = values[0] as T" => unknown
 
@@ -97,7 +97,7 @@ Binding read "read" => sync Function {
   returns: instanceof T
 }
 
-Expression "this" => instanceof CallbackBox
+Expression "this" => instanceof CallbackBox<T>
 
 Expression "this.value = read()" => unknown
 

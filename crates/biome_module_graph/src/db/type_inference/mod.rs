@@ -15,17 +15,25 @@ mod resolver;
 pub(in crate::db) use lookup::{apply_substitutions_to_root_body, substitutions_for_instance};
 pub(in crate::db) use resolver::resolve_raw_types;
 
+/// Type information attached to one binding declaration.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, salsa::Update)]
 pub struct BindingTypeData<'db> {
+    /// Inferred type of the declared binding.
     pub ty: InferredTypeData<'db>,
 }
 
+/// Resolved type tables produced for one JavaScript or TypeScript module.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct InferredModuleTypes<'db> {
+    /// Stable key stored in local type handles owned by this module.
     pub module_key: ModuleKey,
+    /// Local type IDs that represent named declarations.
     pub named_type_ids: Box<[LocalTypeId]>,
+    /// Resolved types indexed by [`LocalTypeId`].
     pub types: Box<[InferredTypeData<'db>]>,
+    /// Expression types indexed by their source ranges.
     pub expressions: FxHashMap<TextRange, InferredTypeData<'db>>,
+    /// Binding types indexed by declaration ranges.
     pub binding_type_data: FxHashMap<TextRange, BindingTypeData<'db>>,
 }
 
@@ -46,6 +54,10 @@ unsafe impl salsa::Update for InferredModuleTypes<'_> {
 }
 
 impl<'db> InferredModuleTypes<'db> {
+    /// Resolves a chain of local type handles to its first non-local type.
+    ///
+    /// A cycle leaves the repeated local handle unresolved. A missing local
+    /// type resolves to `Unknown`.
     pub fn resolve_type(
         &self,
         db: &'db dyn ModuleDb,
@@ -54,6 +66,10 @@ impl<'db> InferredModuleTypes<'db> {
         self.resolve_type_iterative(db, ty)
     }
 
+    /// Finds a named member on a type or one of its inherited types.
+    ///
+    /// Type arguments from instances are substituted into the member type.
+    /// Returns `None` when no reachable supported type defines `name`.
     pub fn find_member_type(
         &self,
         db: &'db dyn ModuleDb,
