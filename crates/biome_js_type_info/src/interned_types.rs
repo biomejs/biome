@@ -7,6 +7,7 @@
 use biome_js_syntax::numbers::canonicalize_js_bigint_literal;
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
+use std::iter::FusedIterator;
 
 use crate::{
     ScopeId,
@@ -27,6 +28,7 @@ pub type ReferenceResolver<'db, 'resolver> =
     dyn FnMut(&raw::TypeReference) -> TypeData<'db> + 'resolver;
 const MAX_GENERIC_REPLACEMENT_STEPS: usize = 64;
 const MAX_TYPE_SUBSTITUTION_STEPS: usize = 1024;
+const MAX_OBJECT_RELATION_DEPTH: usize = 50;
 
 pub fn well_known_symbol_name(reference: &raw::TypeReference) -> Option<Text> {
     match reference {
@@ -144,6 +146,39 @@ pub enum TypeData<'db> {
     VoidKeyword,
 }
 
+/// Iterates over a union's variants, or over a non-union type as one variant.
+pub(crate) struct UnionIterator<'db> {
+    variants: &'db [TypeData<'db>],
+    single: Option<TypeData<'db>>,
+    index: usize,
+}
+
+impl<'db> Iterator for UnionIterator<'db> {
+    type Item = TypeData<'db>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(single) = self.single.take() {
+            return Some(single);
+        }
+        let variant = self.variants.get(self.index).copied()?;
+        self.index += 1;
+        Some(variant)
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let len = self.len();
+        (len, Some(len))
+    }
+}
+
+impl ExactSizeIterator for UnionIterator<'_> {
+    fn len(&self) -> usize {
+        usize::from(self.single.is_some()) + self.variants.len().saturating_sub(self.index)
+    }
+}
+
+impl FusedIterator for UnionIterator<'_> {}
+
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum ConditionalType {
     Anything,
@@ -215,6 +250,8 @@ pub enum ConditionalSubset {
 }
 
 impl<'db> TypeData<'db> {
+    // #region Type inspection
+
     pub fn divergent(id: salsa::Id) -> Self {
         Self::Divergent(DivergentType { id })
     }
@@ -255,6 +292,141 @@ impl<'db> TypeData<'db> {
             Literal::String(_) | Literal::Template(_) => Some(Self::String),
             Literal::Object(_) | Literal::RegExp(_) => None,
         }
+    }
+
+    pub(crate) fn is_literal_of_primitive(self, db: &'db dyn TypeDb) -> bool {
+        match self {
+            Self::Literal(literal) => matches!(
+                literal.literal(db),
+                Literal::BigInt(_)
+                    | Literal::Boolean(_)
+                    | Literal::Number(_)
+                    | Literal::String(_)
+                    | Literal::Template(_)
+            ),
+            Self::Union(union) if union.types(db).len() == 1 => {
+                union.types(db)[0].is_literal_of_primitive(db)
+            }
+            _ => false,
+        }
+    }
+
+    /// Returns whether this type is `object` or has `object` as a direct union
+    /// variant.
+    pub(crate) fn includes_object_keyword(self, db: &'db dyn TypeDb) -> bool {
+        matches!(self, Self::ObjectKeyword)
+            || matches!(self, Self::Union(union) if union.types(db).contains(&Self::ObjectKeyword))
+    }
+
+    /// Returns whether this type is `undefined` or `void`, or has either as a
+    /// direct union variant.
+    pub(crate) fn includes_undefined(self, db: &'db dyn TypeDb) -> bool {
+        matches!(self, Self::Undefined | Self::VoidKeyword)
+            || matches!(self, Self::Union(union) if union.types(db).iter().any(|ty| matches!(ty, Self::Undefined | Self::VoidKeyword)))
+    }
+
+    /// Returns whether `any` is this type or a direct constituent of its union
+    /// or intersection.
+    pub(crate) fn is_any_contaminated(self, db: &'db dyn TypeDb) -> bool {
+        match self {
+            Self::AnyKeyword => true,
+            Self::Union(union) => union
+                .types(db)
+                .iter()
+                .any(|ty| matches!(ty, Self::AnyKeyword)),
+            Self::Intersection(intersection) => intersection
+                .types(db)
+                .iter()
+                .any(|ty| matches!(ty, Self::AnyKeyword)),
+            _ => false,
+        }
+    }
+
+    /// Iterates over direct union variants without allocating.
+    ///
+    /// A non-union type is yielded once.
+    pub(crate) fn union_iterator(self, db: &'db dyn TypeDb) -> UnionIterator<'db> {
+        match self {
+            Self::Union(union) => UnionIterator {
+                variants: union.types(db),
+                single: None,
+                index: 0,
+            },
+            ty => UnionIterator {
+                variants: &[],
+                single: Some(ty),
+                index: 0,
+            },
+        }
+    }
+
+    /// Returns the members of an object type or object literal.
+    pub(crate) fn as_type_members(self, db: &'db dyn TypeDb) -> Option<&'db [TypeMember<'db>]> {
+        match self {
+            Self::Object(object) => Some(object.members(db)),
+            Self::Literal(literal) => match literal.literal(db) {
+                Literal::Object(members) => Some(members),
+                _ => None,
+            },
+            _ => None,
+        }
+    }
+
+    /// Returns whether this type exposes structure more specific than
+    /// TypeScript's `object` keyword.
+    ///
+    /// `None` means class inheritance is cyclic or exceeds the traversal limit.
+    pub(crate) fn is_strictly_narrower_than_object_keyword(
+        self,
+        db: &'db dyn TypeDb,
+    ) -> Option<bool> {
+        match self {
+            Self::Object(object) => Some(!object.members(db).is_empty()),
+            Self::InstanceOf(instance) => match instance.ty(db) {
+                Self::Class(class) => Self::class_has_instance_shape(db, class),
+                _ => Some(true),
+            },
+            Self::Tuple(_) | Self::Function(_) => Some(true),
+            Self::Literal(literal) => match literal.literal(db) {
+                Literal::RegExp(_) => Some(true),
+                Literal::Object(members) => Some(!members.is_empty()),
+                Literal::BigInt(_)
+                | Literal::Boolean(_)
+                | Literal::Number(_)
+                | Literal::String(_)
+                | Literal::Template(_) => Some(false),
+            },
+            _ => Some(false),
+        }
+    }
+
+    fn class_has_instance_shape(
+        db: &'db dyn TypeDb,
+        mut class: InternedClass<'db>,
+    ) -> Option<bool> {
+        let mut seen = FxHashSet::default();
+        for _ in 0..MAX_OBJECT_RELATION_DEPTH {
+            if !seen.insert(class) {
+                return None;
+            }
+            if class
+                .members(db)
+                .iter()
+                .any(|member| !member.kind.is_static())
+            {
+                return Some(true);
+            }
+            class = match class.extends(db) {
+                None => return Some(false),
+                Some(Self::Class(base)) => base,
+                Some(Self::InstanceOf(instance)) => match instance.ty(db) {
+                    Self::Class(base) => base,
+                    _ => return Some(true),
+                },
+                Some(_) => return Some(true),
+            };
+        }
+        None
     }
 
     pub(crate) fn is_primitive(self, db: &'db dyn TypeDb) -> bool {
@@ -430,6 +602,10 @@ impl<'db> TypeData<'db> {
         }
     }
 
+    // #endregion
+
+    // #region Generic substitution
+
     /// Compares this type pattern with an actual argument type and returns the
     /// generic replacements needed to make the pattern match the actual type.
     ///
@@ -499,6 +675,10 @@ impl<'db> TypeData<'db> {
         substitute_type(db, self, substitution, true, &mut remaining_steps).unwrap_or(self)
     }
 
+    // #endregion
+
+    // #region Structural construction
+
     /// Builds the smallest type that represents a list of union variants.
     ///
     /// Duplicate variants are removed. An empty list becomes `never`, and a
@@ -544,6 +724,10 @@ impl<'db> TypeData<'db> {
     pub fn with_all_required_members(db: &'db dyn TypeDb, members: Vec<TypeMember<'db>>) -> Self {
         crate::builders::with_all_required_members(db, members)
     }
+
+    // #endregion
+
+    // #region Built-in and instance construction
 
     fn builtin_class(db: &'db dyn TypeDb, name: &'static str) -> Self {
         Self::Class(InternedClass::new(
@@ -640,6 +824,10 @@ impl<'db> TypeData<'db> {
     pub fn weak_map_instance(db: &'db dyn TypeDb, type_parameters: Box<[Self]>) -> Self {
         Self::instance_of(db, Self::weak_map_class(db), type_parameters)
     }
+
+    // #endregion
+
+    // #region Raw type conversion
 
     pub fn from_raw_lossy(db: &'db dyn TypeDb, raw: &RawTypeData) -> Self {
         let mut resolve_reference =
@@ -979,6 +1167,8 @@ impl<'db> TypeData<'db> {
     ) -> Option<raw::TypeReference> {
         ty.map(Self::to_raw_reference_lossy)
     }
+
+    // #endregion
 }
 
 fn substitute_type<'db>(

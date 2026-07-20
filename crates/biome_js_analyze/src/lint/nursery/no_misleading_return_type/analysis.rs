@@ -11,8 +11,8 @@ use biome_js_syntax::{
     JsArrowFunctionExpression, JsConstructorClassMember, JsFunctionBody, JsFunctionDeclaration,
     JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember, JsIdentifierExpression,
     JsLogicalOperator, JsMethodClassMember, JsMethodObjectMember, JsReturnStatement,
-    JsSetterClassMember, JsSetterObjectMember, JsSyntaxNode, JsVariableStatement, TsAsExpression,
-    TsDeclareFunctionDeclaration, TsMethodSignatureClassMember, TsTypeAssertionExpression,
+    JsSetterClassMember, JsSetterObjectMember, JsSyntaxNode, JsVariableStatement,
+    TsDeclareFunctionDeclaration, TsMethodSignatureClassMember,
 };
 use biome_js_type_info::{
     InferredType, NarrowedTypeCandidates, ReturnTypeRelation, ReturnTypeVerdict,
@@ -28,95 +28,93 @@ const MAX_EXPRESSION_TRAVERSAL_ITERATIONS: usize = 200;
 const MAX_RETURN_TYPE_DESCRIPTION_LENGTH: usize = 80;
 const RETURN_TYPE_SEPARATOR: &str = " | ";
 
+/// Evaluates the queried function-like node and returns a diagnostic state only
+/// when its declared return type is provably wider than its returns.
 pub(super) fn run(ctx: &RuleContext<NoMisleadingReturnType>) -> Option<RuleState> {
-        let node = ctx.query();
+    let node = ctx.query();
 
-        match node {
-            AnyFunctionLikeWithReturnType::AnyJsFunction(func) => run_for_function(ctx, func),
-            AnyFunctionLikeWithReturnType::JsMethodClassMember(method) => {
-                if method.star_token().is_some() {
-                    return None;
-                }
-                if is_class_method_overload_implementation(method) {
-                    return None;
-                }
-                let annotation = method.return_type_annotation()?;
-                let name = method
-                    .name()
-                    .ok()?
-                    .as_js_literal_member_name()?
-                    .name()
-                    .ok()?;
-                let return_type =
-                    ctx.inferred_return_type_of_member(method.syntax(), name.text())?;
-                run_for_member(
-                    ctx,
-                    annotation.range(),
-                    return_type,
-                    method.async_token().is_some(),
-                    prefers_inferred_suggestion(annotation.syntax()),
-                    &method.body().ok()?,
-                )
+    match node {
+        AnyFunctionLikeWithReturnType::AnyJsFunction(func) => run_for_function(ctx, func),
+        AnyFunctionLikeWithReturnType::JsMethodClassMember(method) => {
+            if method.star_token().is_some() {
+                return None;
             }
-            AnyFunctionLikeWithReturnType::JsMethodObjectMember(method) => {
-                if method.star_token().is_some() {
-                    return None;
-                }
-                let annotation = method.return_type_annotation()?;
-                let name = method
-                    .name()
-                    .ok()?
-                    .as_js_literal_member_name()?
-                    .name()
-                    .ok()?;
-                let return_type =
-                    ctx.inferred_return_type_of_member(method.syntax(), name.text())?;
-                run_for_member(
-                    ctx,
-                    annotation.range(),
-                    return_type,
-                    method.async_token().is_some(),
-                    prefers_inferred_suggestion(annotation.syntax()),
-                    &method.body().ok()?,
-                )
+            if is_class_method_overload_implementation(method) {
+                return None;
             }
-            AnyFunctionLikeWithReturnType::JsGetterClassMember(getter) => {
-                let annotation = getter.return_type()?;
-                let any_getter = AnyJsGetter::from(getter.clone());
-                let name = any_getter.member_name()?;
-                if any_getter.has_matching_setter(&name) {
-                    return None;
-                }
-                let return_type =
-                    ctx.inferred_return_type_of_member(getter.syntax(), name.text())?;
-                run_for_member(
-                    ctx,
-                    annotation.range(),
-                    return_type,
-                    false,
-                    prefers_inferred_suggestion(annotation.syntax()),
-                    &getter.body().ok()?,
-                )
-            }
-            AnyFunctionLikeWithReturnType::JsGetterObjectMember(getter) => {
-                let annotation = getter.return_type()?;
-                let any_getter = AnyJsGetter::from(getter.clone());
-                let name = any_getter.member_name()?;
-                if any_getter.has_matching_setter(&name) {
-                    return None;
-                }
-                let return_type =
-                    ctx.inferred_return_type_of_member(getter.syntax(), name.text())?;
-                run_for_member(
-                    ctx,
-                    annotation.range(),
-                    return_type,
-                    false,
-                    prefers_inferred_suggestion(annotation.syntax()),
-                    &getter.body().ok()?,
-                )
-            }
+            let annotation = method.return_type_annotation()?;
+            let name = method
+                .name()
+                .ok()?
+                .as_js_literal_member_name()?
+                .name()
+                .ok()?;
+            let return_type = ctx.inferred_return_type_of_member(method.syntax(), name.text())?;
+            run_for_member(
+                ctx,
+                annotation.range(),
+                return_type,
+                method.async_token().is_some(),
+                prefers_inferred_suggestion(annotation.syntax()),
+                &method.body().ok()?,
+            )
         }
+        AnyFunctionLikeWithReturnType::JsMethodObjectMember(method) => {
+            if method.star_token().is_some() {
+                return None;
+            }
+            let annotation = method.return_type_annotation()?;
+            let name = method
+                .name()
+                .ok()?
+                .as_js_literal_member_name()?
+                .name()
+                .ok()?;
+            let return_type = ctx.inferred_return_type_of_member(method.syntax(), name.text())?;
+            run_for_member(
+                ctx,
+                annotation.range(),
+                return_type,
+                method.async_token().is_some(),
+                prefers_inferred_suggestion(annotation.syntax()),
+                &method.body().ok()?,
+            )
+        }
+        AnyFunctionLikeWithReturnType::JsGetterClassMember(getter) => {
+            let annotation = getter.return_type()?;
+            let any_getter = AnyJsGetter::from(getter.clone());
+            let name = any_getter.member_name()?;
+            if any_getter.has_matching_setter(&name) {
+                return None;
+            }
+            let return_type = ctx.inferred_return_type_of_member(getter.syntax(), name.text())?;
+            run_for_member(
+                ctx,
+                annotation.range(),
+                return_type,
+                false,
+                prefers_inferred_suggestion(annotation.syntax()),
+                &getter.body().ok()?,
+            )
+        }
+        AnyFunctionLikeWithReturnType::JsGetterObjectMember(getter) => {
+            let annotation = getter.return_type()?;
+            let any_getter = AnyJsGetter::from(getter.clone());
+            let name = any_getter.member_name()?;
+            if any_getter.has_matching_setter(&name) {
+                return None;
+            }
+            let return_type = ctx.inferred_return_type_of_member(getter.syntax(), name.text())?;
+            run_for_member(
+                ctx,
+                annotation.range(),
+                return_type,
+                false,
+                prefers_inferred_suggestion(annotation.syntax()),
+                &getter.body().ok()?,
+            )
+        }
+    }
 }
 
 /// Looks for sibling function declarations with the same name but no body,
@@ -201,6 +199,11 @@ fn run_for_member<'db>(
     )
 }
 
+/// Compares a member's declared type with the return evidence collected from
+/// its body.
+///
+/// Async declarations compare their `Promise` argument when it is suitable for
+/// relation analysis. Missing inference suppresses the diagnostic.
 fn run_for_member_with_body<'db>(
     ctx: &'db RuleContext<NoMisleadingReturnType>,
     annotation_range: TextRange,
@@ -229,6 +232,11 @@ fn run_for_member_with_body<'db>(
     })
 }
 
+/// Applies diagnostic policy to a computed return-type relation.
+///
+/// The outer `None` suppresses the diagnostic. `Some(None)` emits a diagnostic
+/// without a replacement type, while `Some(Some(_))` includes a rendered
+/// replacement.
 fn misleading_suggestion(
     relation: &ReturnTypeRelation<'_>,
     evidence: &ReturnTypeEvidence<'_>,
@@ -312,37 +320,7 @@ fn renderable_variant(
         InferredTypeData::Boolean => Some("boolean".into()),
         InferredTypeData::BigInt => Some("bigint".into()),
         InferredTypeData::Literal(_) => literal_text(relation, ty),
-        InferredTypeData::Unknown
-        | InferredTypeData::Divergent(_)
-        | InferredTypeData::Global
-        | InferredTypeData::Null
-        | InferredTypeData::Symbol
-        | InferredTypeData::Undefined
-        | InferredTypeData::Conditional
-        | InferredTypeData::Class(_)
-        | InferredTypeData::Constructor(_)
-        | InferredTypeData::Function(_)
-        | InferredTypeData::Interface(_)
-        | InferredTypeData::Module(_)
-        | InferredTypeData::Namespace(_)
-        | InferredTypeData::Object(_)
-        | InferredTypeData::Tuple(_)
-        | InferredTypeData::Generic(_)
-        | InferredTypeData::Local(_)
-        | InferredTypeData::Intersection(_)
-        | InferredTypeData::Union(_)
-        | InferredTypeData::TypeOperator(_)
-        | InferredTypeData::InstanceOf(_)
-        | InferredTypeData::MergedReference(_)
-        | InferredTypeData::TypeofExpression(_)
-        | InferredTypeData::TypeofType(_)
-        | InferredTypeData::TypeofValue(_)
-        | InferredTypeData::AnyKeyword
-        | InferredTypeData::NeverKeyword
-        | InferredTypeData::ObjectKeyword
-        | InferredTypeData::ThisKeyword
-        | InferredTypeData::UnknownKeyword
-        | InferredTypeData::VoidKeyword => None,
+        _ => None,
     }
 }
 
@@ -350,6 +328,8 @@ fn clean_literal_text(text: &str) -> bool {
     !text.contains("...") && !text.contains("__internal") && !text.contains("typeof import(")
 }
 
+/// Joins type fragments only when every fragment is suitable for source text
+/// and the result fits the diagnostic length limit.
 fn join_description(parts: &[String]) -> Option<String> {
     if parts.is_empty() || parts.iter().any(|part| !clean_literal_text(part)) {
         return None;
@@ -358,6 +338,7 @@ fn join_description(parts: &[String]) -> Option<String> {
     (description.len() <= MAX_RETURN_TYPE_DESCRIPTION_LENGTH).then_some(description)
 }
 
+/// Renders inferred returns when every return is a supported literal.
 fn render_inferred(relation: &ReturnTypeRelation<'_>) -> Option<String> {
     let parts = relation
         .inferred()
@@ -367,6 +348,8 @@ fn render_inferred(relation: &ReturnTypeRelation<'_>) -> Option<String> {
     join_description(&parts)
 }
 
+/// Renders narrowed union candidates when every candidate has a stable source
+/// representation.
 fn render_narrowed(
     relation: &ReturnTypeRelation<'_>,
     types: &[InferredTypeData<'_>],
@@ -378,6 +361,11 @@ fn render_narrowed(
     join_description(&parts)
 }
 
+/// Returns whether the annotation mixes a primitive with a literal of the same
+/// primitive family.
+///
+/// Narrowing such an annotation by removing variants would preserve a
+/// redundant primitive, so diagnostics prefer the inferred literal set.
 fn prefers_inferred_suggestion(annotation: &JsSyntaxNode) -> bool {
     let mut primitives = [false; 4];
     let mut literals = [false; 4];
@@ -402,6 +390,8 @@ fn prefers_inferred_suggestion(annotation: &JsSyntaxNode) -> bool {
         .any(|(primitive, literal)| *primitive && literal)
 }
 
+/// Returns whether a class method has a sibling overload signature with the
+/// same literal name.
 fn is_class_method_overload_implementation(method: &JsMethodClassMember) -> bool {
     let name = method
         .name()
@@ -476,6 +466,8 @@ fn collect_return_info<'db>(
     info
 }
 
+/// Adds return evidence from the current function body while pruning nested
+/// function-like nodes.
 fn collect_block_returns<'db>(
     ctx: &'db RuleContext<NoMisleadingReturnType>,
     block: &JsFunctionBody,
@@ -483,7 +475,7 @@ fn collect_block_returns<'db>(
 ) {
     for node in block
         .syntax()
-        .pruned_descendents(|n| !is_nested_function_like(n))
+        .pruned_descendents(|n| !AnyNestedFunctionLike::can_cast(n.kind()))
     {
         let Some(ret) = JsReturnStatement::cast(node) else {
             continue;
@@ -591,6 +583,8 @@ struct NonTransparentLeaves {
 }
 
 impl NonTransparentLeaves {
+    /// Creates a bounded leaf traversal using the requested logical-expression
+    /// policy.
     fn new(expression: &AnyJsExpression, logical_mode: LogicalTraversal) -> Self {
         let mut stack: SmallVec<[AnyJsExpression; 4]> = SmallVec::new();
         stack.push(expression.clone().omit_parentheses());
@@ -797,6 +791,8 @@ fn infer_expression_type<'db>(
     ctx.inferred_type_of_expression(&inner)
 }
 
+/// Returns the initializer's literal type when the identifier resolves to a
+/// visible `const` binding initialized with a direct const assertion.
 fn resolve_identifier_initializer_type<'db>(
     ctx: &'db RuleContext<NoMisleadingReturnType>,
     id_expr: &JsIdentifierExpression,
@@ -809,6 +805,10 @@ fn resolve_identifier_initializer_type<'db>(
     ctx.inferred_type_of_expression(&unwrapped)
 }
 
+/// Removes parentheses and type wrappers that preserve literal inference.
+///
+/// Widening `as T` and angle-bracket assertions remain intact so inference uses
+/// their asserted type.
 fn unwrap_type_wrappers(expr: &AnyJsExpression) -> AnyJsExpression {
     let mut current = expr.clone();
     loop {
@@ -844,13 +844,15 @@ fn is_pinned_by_assertion(expr: &AnyJsExpression) -> bool {
     )
 }
 
+/// Returns whether an expression or its visible const initializer is pinned by
+/// a const assertion.
 fn has_const_assertion(expr: &AnyJsExpression) -> bool {
     let mut current = expr.clone();
     loop {
         match &current {
-            AnyJsExpression::TsAsExpression(e) => return is_const_type_assertion(e),
+            AnyJsExpression::TsAsExpression(e) => return is_const_reference_type(&e.ty().ok()),
             AnyJsExpression::TsTypeAssertionExpression(e) => {
-                return is_const_angle_bracket_assertion(e);
+                return is_const_reference_type(&e.ty().ok());
             }
             AnyJsExpression::JsParenthesizedExpression(e) => match e.expression() {
                 Ok(inner) => current = inner,
@@ -878,9 +880,9 @@ fn init_has_direct_const_assertion(expr: &AnyJsExpression) -> bool {
     let mut current = expr.clone();
     loop {
         match &current {
-            AnyJsExpression::TsAsExpression(e) => return is_const_type_assertion(e),
+            AnyJsExpression::TsAsExpression(e) => return is_const_reference_type(&e.ty().ok()),
             AnyJsExpression::TsTypeAssertionExpression(e) => {
-                return is_const_angle_bracket_assertion(e);
+                return is_const_reference_type(&e.ty().ok());
             }
             AnyJsExpression::JsParenthesizedExpression(e) => match e.expression() {
                 Ok(inner) => current = inner,
@@ -893,14 +895,6 @@ fn init_has_direct_const_assertion(expr: &AnyJsExpression) -> bool {
             _ => return false,
         }
     }
-}
-
-fn is_const_type_assertion(expr: &TsAsExpression) -> bool {
-    is_const_reference_type(&expr.ty().ok())
-}
-
-fn is_const_angle_bracket_assertion(expr: &TsTypeAssertionExpression) -> bool {
-    is_const_reference_type(&expr.ty().ok())
 }
 
 fn is_const_reference_type(ty: &Option<AnyTsType>) -> bool {
@@ -926,8 +920,4 @@ declare_node_union! {
         | JsGetterObjectMember
         | JsSetterClassMember
         | JsSetterObjectMember
-}
-
-fn is_nested_function_like(node: &JsSyntaxNode) -> bool {
-    AnyNestedFunctionLike::can_cast(node.kind())
 }
