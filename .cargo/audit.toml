@@ -1,0 +1,7 @@
+[advisories]
+ignore = [
+	# `quick-xml` is pulled in by `self_update` and `quick-junit`; no released compatible upgrade avoids the advisory yet.
+	"RUSTSEC-2026-0194",
+	# `quick-xml` is pulled in by `self_update` and `quick-junit`; no released compatible upgrade avoids the advisory yet.
+	"RUSTSEC-2026-0195",
+]
