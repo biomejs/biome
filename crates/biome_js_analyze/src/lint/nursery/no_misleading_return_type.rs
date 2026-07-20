@@ -1896,10 +1896,22 @@ fn named_property_member_name(kind: &TypeMemberKind) -> Option<&Text> {
     match kind {
         TypeMemberKind::Named(name)
         | TypeMemberKind::NamedOptional(name)
+        | TypeMemberKind::NamedStatic(name)
+        | TypeMemberKind::NamedStaticOptional(name)
+        | TypeMemberKind::Getter(name)
+        | TypeMemberKind::ConstAssertedGetter(name)
+        | TypeMemberKind::ConstAssertedNamed(name)
+        | TypeMemberKind::ConstAssertedNamedOptional(name)
+        | TypeMemberKind::ConstAssertedNamedStatic(name)
+        | TypeMemberKind::ConstAssertedNamedStaticOptional(name)
         | TypeMemberKind::ReadonlyNamed(name)
         | TypeMemberKind::ReadonlyNamedOptional(name)
+        | TypeMemberKind::ReadonlyNamedStatic(name)
+        | TypeMemberKind::ReadonlyNamedStaticOptional(name)
         | TypeMemberKind::ConstAssertedReadonlyNamed(name)
-        | TypeMemberKind::ConstAssertedReadonlyNamedOptional(name) => Some(name),
+        | TypeMemberKind::ConstAssertedReadonlyNamedOptional(name)
+        | TypeMemberKind::ConstAssertedReadonlyNamedStatic(name)
+        | TypeMemberKind::ConstAssertedReadonlyNamedStaticOptional(name) => Some(name),
         _ => None,
     }
 }
