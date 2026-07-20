@@ -326,5 +326,5 @@ fn ensure_known_includes_type(ctx: &RuleContext<UseIncludes>, call: &JsCallExpre
     };
 
     ctx.type_of_expression(&object)
-        .is_some_and(|ty| ty.is_all_string_array_or_tuple())
+        .is_some_and(|ty| ty.is_all_string_or_array_or_tuple())
 }

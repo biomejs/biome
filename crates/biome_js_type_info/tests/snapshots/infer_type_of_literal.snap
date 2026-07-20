@@ -19,5 +19,5 @@ a => number: 123.45
 ## Registered types
 
 ```
-Global TypeId(0) => number: 123.45
+Module TypeId(0) => number: 123.45
 ```

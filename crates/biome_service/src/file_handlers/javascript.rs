@@ -85,7 +85,7 @@ use biome_js_syntax::{
     AnyJsRoot, JsLanguage, JsSyntaxNode, JsTemplateChunkElement, TextRange, TextSize, TokenAtOffset,
 };
 #[cfg(feature = "type_inference")]
-use biome_js_type_info::{GlobalsResolver, RawTypeCollector, ScopeId, TypeData, TypeId, TypeStore};
+use biome_js_type_info::{RawTypeCollector, ScopeId, TypeData, TypeId, TypeStore};
 #[cfg(feature = "js_embeds")]
 use biome_languages::CssFileSource;
 #[cfg(all(feature = "js_embeds", feature = "lang_graphql"))]
@@ -876,7 +876,7 @@ fn debug_type_info(
         let mut result = String::new();
         let preorder = tree.syntax().preorder();
 
-        let mut resolver = GlobalsResolver::default();
+        let mut resolver = DebugTypeCollector::default();
         let scope_id = ScopeId::GLOBAL;
 
         for event in preorder {
@@ -962,7 +962,7 @@ fn debug_registered_types(
             }
         }
 
-        for (i, ty) in resolver.types.as_references().iter().enumerate() {
+        for (i, ty) in resolver.types.as_slice().iter().enumerate() {
             result.push_str(&format!("\nTypeId({i}) => {ty}\n"));
         }
 

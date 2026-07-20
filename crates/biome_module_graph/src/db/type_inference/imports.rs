@@ -165,7 +165,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             return false;
         };
 
-        for (name, _) in js_info.raw_exports.iter() {
+        for (name, _) in js_info.exports.iter() {
             if !include_default && name.text() == "default" {
                 continue;
             }
@@ -260,7 +260,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             return ExportResolutionStep::Continue;
         };
 
-        match js_info.raw_exports.get(name) {
+        match js_info.exports.get(name) {
             Some(JsExport::Own(own_export) | JsExport::OwnType(own_export)) => {
                 ExportResolutionStep::Resolved(ResolvedExport {
                     identity: ExportIdentity {
@@ -316,9 +316,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                 .binding_type_data
                 .get(range)
                 .map_or(InferredTypeData::Unknown, |data| data.ty),
-            JsOwnExport::Type(resolved_id) => {
-                inferred_type_from_resolved_id(self.db, inferred_types, *resolved_id)
-            }
+            JsOwnExport::Type(resolved_id) => inferred_type_from_resolved_id(
+                self.db,
+                inferred_types,
+                ResolvedTypeId::Local(*resolved_id),
+            ),
             JsOwnExport::Namespace(reexport) => self.resolve_js_import(&reexport.import),
         }
     }

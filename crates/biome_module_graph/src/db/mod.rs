@@ -2,7 +2,7 @@
 
 use crate::{CssModuleInfo, HtmlModuleInfo, JsModuleInfo, ModuleInfo, ModuleInfoKind};
 pub use biome_js_type_info::TypeDb;
-use biome_js_type_info::interned_types::ModuleKey;
+use biome_js_type_info::resolved::InferredModuleKey;
 use camino::{Utf8Path, Utf8PathBuf};
 use salsa::plumbing::{AsId, FromId};
 
@@ -121,8 +121,8 @@ pub trait ModuleDb: TypeDb {
 }
 
 /// Resolves a module key while rejecting stale module handles.
-pub fn module_for_key(db: &dyn ModuleDb, module_key: ModuleKey) -> Option<ModuleInfo> {
+pub fn module_for_key(db: &dyn ModuleDb, module_key: InferredModuleKey) -> Option<ModuleInfo> {
     let module = ModuleInfo::from_id(module_key.as_id());
     let current = db.module_for_path(module.path(db))?;
-    (ModuleKey::new(current.as_id()) == module_key).then_some(current)
+    (InferredModuleKey::new(current.as_id()) == module_key).then_some(current)
 }

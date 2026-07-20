@@ -10,20 +10,24 @@ license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
 publish              = true
+autotests            = false
+
+[[test]]
+name = "local_inference"
+path = "tests/local_inference.rs"
 
 [dependencies]
-biome_db                  = { workspace = true }
-biome_formatter           = { workspace = true }
-biome_js_semantic         = { workspace = true }
-biome_js_syntax           = { workspace = true }
-biome_js_type_info_macros = { workspace = true }
-biome_languages           = { workspace = true, features = ["lang_js"] }
-biome_resolver            = { workspace = true }
-biome_rowan               = { workspace = true }
-camino                    = { workspace = true }
-hashbrown                 = { workspace = true }
-rustc-hash                = { workspace = true }
-salsa                     = { workspace = true }
+biome_db          = { workspace = true }
+biome_formatter   = { workspace = true }
+biome_js_semantic = { workspace = true }
+biome_js_syntax   = { workspace = true }
+biome_languages   = { workspace = true, features = ["lang_js"] }
+biome_resolver    = { workspace = true }
+biome_rowan       = { workspace = true }
+camino            = { workspace = true }
+hashbrown         = { workspace = true }
+rustc-hash        = { workspace = true }
+salsa             = { workspace = true }
 
 [dev-dependencies]
 biome_js_formatter = { path = "../biome_js_formatter" }

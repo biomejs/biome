@@ -313,7 +313,7 @@ fn test_infer_call_expression_type_substitutes_nested_generic_return_type() {
         panic!("wrap must return a Promise instance, got {call_ty:?}");
     };
 
-    assert!(call_ty.is_promise_instance(&db));
+    assert!(call_ty.is_promise_instance(&db) == Some(true));
     assert!(
         instance
             .type_parameters(&db)

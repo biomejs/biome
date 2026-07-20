@@ -11,14 +11,11 @@ use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_type_info::{
     InferredType, format_inferred_type,
-    interned_types::{
-        CallArgumentType as InferredCallArgumentType,
-        FunctionParameter as InferredFunctionParameter, InternedInterface as InferredInterface,
-        InternedMergedReference as InferredMergedReference,
-        InternedTypeofType as InferredTypeofType, InternedUnion as InferredUnion,
-        Literal as InferredLiteral, LocalTypeId as InferredLocalTypeId,
-        ModuleKey as InferredModuleKey, ReturnType as InferredReturnType,
-        TypeData as InferredTypeData, TypeMemberKind as InferredTypeMemberKind,
+    resolved::{
+        InferredCallArgumentType, InferredFunctionParameter, InferredInterface,
+        InferredLiteralValue as InferredLiteral, InferredLocalTypeId, InferredMergedReference,
+        InferredModuleKey, InferredReturnType, InferredTypeData, InferredTypeMemberKind,
+        InferredTypeofType, InferredUnion,
     },
 };
 use biome_json_parser::{JsonParserOptions, parse_json};
@@ -539,7 +536,8 @@ fn is_inferred_promise_with_type_parameter<'db>(
         return false;
     };
 
-    ty.is_promise_instance(db) && instance.type_parameters(db).iter().any(|ty| predicate(*ty))
+    ty.is_promise_instance(db) == Some(true)
+        && instance.type_parameters(db).iter().any(|ty| predicate(*ty))
 }
 
 fn assert_inferred_function_returns_string<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) {
@@ -3914,7 +3912,7 @@ fn test_infer_call_expression_type_selects_function_declaration_overload_by_call
         Vec::from([inferred.resolve_type(&db, read_promise_ty)]),
     );
     assert!(
-        promise_result_ty.is_promise_instance(&db),
+        promise_result_ty.is_promise_instance(&db) == Some(true),
         "promise callback overload must return a Promise, got {promise_result_ty:?}",
     );
     let InferredTypeData::InstanceOf(instance) = promise_result_ty else {
@@ -3936,7 +3934,7 @@ fn test_infer_call_expression_type_selects_function_declaration_overload_by_call
     );
     assert_ne!(sync_result_ty, InferredTypeData::Unknown);
     assert!(
-        !sync_result_ty.is_promise_instance(&db),
+        sync_result_ty.is_promise_instance(&db) == Some(false),
         "sync callback overload must not return a Promise, got {sync_result_ty:?}",
     );
     assert_inferred_type_snapshot(
@@ -3995,7 +3993,7 @@ fn test_infer_call_expression_type_selects_imported_function_declaration_overloa
         Vec::from([inferred.resolve_type(&db, read_promise_ty)]),
     );
     assert!(
-        promise_result_ty.is_promise_instance(&db),
+        promise_result_ty.is_promise_instance(&db) == Some(true),
         "promise callback overload must return a Promise, got {promise_result_ty:?}",
     );
     let InferredTypeData::InstanceOf(instance) = promise_result_ty else {
@@ -4017,7 +4015,7 @@ fn test_infer_call_expression_type_selects_imported_function_declaration_overloa
     );
     assert_ne!(sync_result_ty, InferredTypeData::Unknown);
     assert!(
-        !sync_result_ty.is_promise_instance(&db),
+        sync_result_ty.is_promise_instance(&db) == Some(false),
         "sync callback overload must not return a Promise, got {sync_result_ty:?}",
     );
     assert_inferred_type_snapshot(

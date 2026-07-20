@@ -1829,7 +1829,7 @@ enum TupleExpansionItem<'db> {
 
 /// One entry in an argument sequence after tuple spreads are expanded.
 #[derive(Clone, Copy, Debug)]
-pub(crate) enum ResolvedCallArgument<'db> {
+pub enum ResolvedCallArgument<'db> {
     /// A required argument that consumes one parameter position.
     Argument(InferredTypeData<'db>),
     /// An argument that may be absent and consumes at most one position.
