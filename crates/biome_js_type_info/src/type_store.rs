@@ -8,7 +8,14 @@ use std::{
 use hashbrown::{HashTable, hash_table::Entry};
 use rustc_hash::FxHasher;
 
-use crate::{Resolvable, ResolvedTypeId, TypeData, TypeId, TypeReference, TypeResolverLevel};
+use biome_js_semantic::ScopeId;
+use biome_js_syntax::AnyJsExpression;
+use biome_rowan::Text;
+
+use crate::{
+    Resolvable, ResolvedTypeData, ResolvedTypeId, TypeData, TypeId, TypeReference,
+    TypeReferenceQualifier, TypeResolver, TypeResolverLevel, Union, globals::GLOBAL_UNDEFINED_ID,
+};
 
 /// Type store with efficient lookup mechanism.
 ///
@@ -265,6 +272,157 @@ fn hash_data(data: &TypeData) -> u64 {
     let mut hash = FxHasher::default();
     data.hash(&mut hash);
     hash.finish()
+}
+
+/// Minimal interface needed to collect syntax-local type data.
+pub trait RawTypeCollector {
+    fn find_type(&self, type_data: &TypeData) -> Option<TypeId>;
+    fn get_by_id(&self, id: TypeId) -> &TypeData;
+    fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId;
+    fn resolve_expression(
+        &mut self,
+        scope_id: ScopeId,
+        expression: &AnyJsExpression,
+    ) -> Cow<'_, TypeData>;
+
+    fn get_by_reference(&self, ty: &TypeReference) -> Option<&TypeData> {
+        let TypeReference::Resolved(id) = ty else {
+            return None;
+        };
+        (id.level() == TypeResolverLevel::Thin).then(|| self.get_by_id(id.id()))
+    }
+
+    fn reference_to_id(&self, id: TypeId) -> TypeReference {
+        TypeReference::Resolved(ResolvedTypeId::new(TypeResolverLevel::Thin, id))
+    }
+
+    fn reference_to_data(&self, type_data: &TypeData) -> Option<TypeReference> {
+        match type_data {
+            TypeData::Reference(reference) => Some(reference.clone()),
+            other => self.find_type(other).map(|id| self.reference_to_id(id)),
+        }
+    }
+
+    fn reference_to_registered_data(&mut self, type_data: &TypeData) -> TypeReference {
+        match type_data {
+            TypeData::Reference(reference) => reference.clone(),
+            _ => {
+                let id = self.register_type(Cow::Borrowed(type_data));
+                self.reference_to_id(id)
+            }
+        }
+    }
+
+    fn reference_to_owned_data(&mut self, type_data: TypeData) -> TypeReference {
+        match type_data {
+            TypeData::Reference(reference) => reference,
+            _ => {
+                let id = self.register_type(Cow::Owned(type_data));
+                self.reference_to_id(id)
+            }
+        }
+    }
+
+    fn reference_to_resolved_expression(
+        &mut self,
+        scope_id: ScopeId,
+        expression: &AnyJsExpression,
+    ) -> TypeReference {
+        let data = self.resolve_expression(scope_id, expression).into_owned();
+        self.reference_to_owned_data(data)
+    }
+
+    fn register_and_resolve(&mut self, type_data: TypeData) -> ResolvedTypeId {
+        match type_data {
+            TypeData::Reference(TypeReference::Resolved(id)) => id,
+            type_data => ResolvedTypeId::new(
+                TypeResolverLevel::Thin,
+                self.register_type(Cow::Owned(type_data)),
+            ),
+        }
+    }
+
+    fn optional(&mut self, ty: TypeReference) -> TypeId {
+        self.register_type(Cow::Owned(TypeData::Union(Box::new(Union(Box::new([
+            ty,
+            GLOBAL_UNDEFINED_ID.into(),
+        ]))))))
+    }
+
+    fn union_of(&mut self, types: Box<[TypeReference]>) -> TypeData {
+        TypeData::Union(Box::new(Union(types)))
+    }
+
+    fn is_global_symbol(&self, _scope_id: ScopeId) -> bool {
+        true
+    }
+}
+
+impl<T: TypeResolver> RawTypeCollector for T {
+    fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
+        TypeResolver::find_type(self, type_data)
+    }
+
+    fn get_by_id(&self, id: TypeId) -> &TypeData {
+        TypeResolver::get_by_id(self, id)
+    }
+
+    fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
+        TypeResolver::register_type(self, type_data)
+    }
+
+    fn resolve_expression(
+        &mut self,
+        scope_id: ScopeId,
+        expression: &AnyJsExpression,
+    ) -> Cow<'_, TypeData> {
+        TypeResolver::resolve_expression(self, scope_id, expression)
+    }
+
+    fn get_by_reference(&self, ty: &TypeReference) -> Option<&TypeData> {
+        TypeResolver::resolve_and_get(self, ty).map(ResolvedTypeData::as_raw_data)
+    }
+
+    fn reference_to_id(&self, id: TypeId) -> TypeReference {
+        TypeResolver::reference_to_id(self, id)
+    }
+
+    fn reference_to_data(&self, type_data: &TypeData) -> Option<TypeReference> {
+        TypeResolver::reference_to_data(self, type_data)
+    }
+
+    fn reference_to_registered_data(&mut self, type_data: &TypeData) -> TypeReference {
+        TypeResolver::reference_to_registered_data(self, type_data)
+    }
+
+    fn reference_to_owned_data(&mut self, type_data: TypeData) -> TypeReference {
+        TypeResolver::reference_to_owned_data(self, type_data)
+    }
+
+    fn reference_to_resolved_expression(
+        &mut self,
+        scope_id: ScopeId,
+        expression: &AnyJsExpression,
+    ) -> TypeReference {
+        TypeResolver::reference_to_resolved_expression(self, scope_id, expression)
+    }
+
+    fn register_and_resolve(&mut self, type_data: TypeData) -> ResolvedTypeId {
+        TypeResolver::register_and_resolve(self, type_data)
+    }
+
+    fn optional(&mut self, ty: TypeReference) -> TypeId {
+        TypeResolver::optional(self, ty)
+    }
+
+    fn union_of(&mut self, types: Box<[TypeReference]>) -> TypeData {
+        TypeData::union_of(self, types)
+    }
+
+    fn is_global_symbol(&self, scope_id: ScopeId) -> bool {
+        let qualifier = TypeReferenceQualifier::from_path(scope_id, Text::new_static("Symbol"));
+        TypeResolver::resolve_qualifier(self, &qualifier) == Some(crate::globals::GLOBAL_SYMBOL_ID)
+    }
 }
 
 #[cfg(test)]

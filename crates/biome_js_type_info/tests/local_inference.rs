@@ -1,12 +1,36 @@
 mod utils;
 
 use biome_js_semantic::ScopeId;
-use biome_js_type_info::{GlobalsResolver, TypeData, TypeResolver};
+use biome_js_type_info::{
+    GlobalsResolver, RawTypeCollector, TypeData, TypeReference, TypeResolver, TypeResolverLevel,
+};
 
 use utils::{
-    assert_type_data_snapshot, assert_typed_bindings_snapshot, get_expression,
+    TestTypeCollector, assert_type_data_snapshot, assert_typed_bindings_snapshot, get_expression,
     get_function_declaration, get_variable_declaration, parse_ts,
 };
+
+#[test]
+fn raw_collector_records_local_expression_references() {
+    let root = parse_ts("[1]");
+    let expression = get_expression(&root);
+    let mut collector = TestTypeCollector::default();
+
+    let TypeData::Tuple(tuple) =
+        TypeData::from_any_js_expression(&mut collector, ScopeId::GLOBAL, &expression)
+    else {
+        panic!("expected tuple type");
+    };
+    let TypeReference::Resolved(id) = &tuple.elements()[0].ty else {
+        panic!("expected resolved element type");
+    };
+
+    assert_eq!(id.level(), TypeResolverLevel::Thin);
+    assert!(matches!(
+        collector.get_by_reference(&tuple.elements()[0].ty),
+        Some(TypeData::Literal(_))
+    ));
+}
 
 #[test]
 fn infer_type_of_identifier() {

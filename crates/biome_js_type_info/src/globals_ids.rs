@@ -25,6 +25,16 @@ impl GlobalTypeId {
         Self(id)
     }
 
+    /// Converts a type ID into a predefined global type ID when it indexes the
+    /// global manifest.
+    pub const fn try_from_type_id(id: TypeId) -> Option<Self> {
+        if id.index() < NUM_PREDEFINED_TYPES {
+            Some(Self(id))
+        } else {
+            None
+        }
+    }
+
     /// Test-only constructor for synthesizing `GlobalTypeId` values at
     /// arbitrary indices, including out-of-range indices used by negative-path
     /// tests.
