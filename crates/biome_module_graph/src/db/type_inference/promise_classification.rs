@@ -24,8 +24,8 @@ use crate::js_module_info::TsBindingReferenceExt;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsExport, JsOwnExport, ModuleDb, ResolvedPath, SymbolFromModuleInfo};
 use biome_js_type_info::{
-    GlobalTypeId, ImportSymbol, Literal, RawTypeData, ScopeId, TypeId, TypeMember, TypeReference,
-    TypeReferenceQualifier, TypeResolverLevel, TypeofExpression, global_types,
+    GlobalTypeId, ImportSymbol, Literal, RawTypeData, RawTypeId, ScopeId, TypeId, TypeMember,
+    TypeReference, TypeReferenceQualifier, TypeResolverLevel, TypeofExpression, global_types,
     interned_types::{ReturnType, TypeData as InferredTypeData},
 };
 use biome_rowan::Text;
@@ -910,7 +910,7 @@ fn classify_expression(
                     return Indeterminate;
                 };
                 let Some(JsExport::Own(own_export) | JsExport::OwnType(own_export)) =
-                    js_info.raw_exports.get(name.text())
+                    js_info.exports.get(name.text())
                 else {
                     return Indeterminate;
                 };
@@ -930,7 +930,9 @@ fn classify_expression(
                     }
                     JsOwnExport::Type(resolved) => ClassificationState {
                         module,
-                        target: ClassificationTarget::Reference(TypeReference::Resolved(*resolved)),
+                        target: ClassificationTarget::Reference(TypeReference::Resolved(
+                            RawTypeId::Local(*resolved),
+                        )),
                         mode: state.mode,
                         members: state.members,
                         projection: state.projection,

@@ -16,7 +16,7 @@ use std::collections::VecDeque;
 ///
 /// Tracked: depends on `js_module_info(db, module)` and on the CSS modules it
 /// imports. If any of those change, this recomputes.
-#[salsa::tracked(no_eq, returns(deref))]
+#[salsa::tracked(returns(deref))]
 pub fn css_classes_for_module(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<CssClassStep> {
     let module_kind = module.kind(db);
     let Some(js_info) = module_kind.as_js_module_info() else {
@@ -53,6 +53,8 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
     let mut result = Vec::new();
     let mut visited: FxHashSet<Utf8PathBuf> = FxHashSet::default();
     let mut queue = VecDeque::new();
+    let mut modules = db.all_modules().into_iter().collect::<Vec<_>>();
+    modules.sort_unstable_by(|(left, _), (right, _)| left.cmp(right));
     queue.push_back(module.path(db).to_path_buf());
 
     while let Some(current) = queue.pop_front() {
@@ -60,13 +62,11 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
             continue;
         }
 
-        db.for_each_module(&mut |module| {
-            let file_path = module.path(db);
-            let module_info = module.kind(db);
+        for (file_path, module_info) in &modules {
             if file_path == current.as_path() {
-                return;
+                continue;
             }
-            let imports_current = match &module_info {
+            let imports_current = match module_info {
                 ModuleInfoKind::Js(js_info) => js_info
                     .import_paths
                     .iter()
@@ -87,8 +87,8 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
                 }
             };
 
-            if imports_current && !visited.contains(file_path) {
-                match &module_info {
+            if imports_current && !visited.contains(file_path.as_path()) {
+                match module_info {
                     ModuleInfoKind::Js(_) | ModuleInfoKind::Html(_) => {
                         result.push(file_path.to_path_buf());
                     }
@@ -97,9 +97,11 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
                     }
                 }
             }
-        });
+        }
     }
 
+    result.sort_unstable();
+    result.dedup();
     result
 }
 
@@ -465,12 +467,13 @@ fn search_css_class_transitive<'db>(
     result
 }
 
-pub(crate) fn build_parent_nodes(
+fn build_parent_nodes(
     db: &dyn ModuleDb,
     current_path: &Utf8Path,
     visited: &mut FxHashSet<Utf8PathBuf>,
 ) -> Vec<ImportTreeNode> {
-    let all_modules = db.all_modules();
+    let mut all_modules = db.all_modules().into_iter().collect::<Vec<_>>();
+    all_modules.sort_unstable_by(|(left, _), (right, _)| left.cmp(right));
     let mut parents = Vec::new();
 
     for (file_path, module_info) in &all_modules {

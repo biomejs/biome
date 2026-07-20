@@ -1,8 +1,6 @@
 use super::*;
-use biome_js_type_info::interned_types::{
-    InternedFunction as InferredFunction, InternedTuple as InferredTuple,
-    NamedFunctionParameter as InferredNamedFunctionParameter,
-    TupleElementType as InferredTupleElementType,
+use biome_js_type_info::resolved::{
+    InferredFunction, InferredNamedFunctionParameter, InferredTuple, InferredTupleElementType,
 };
 
 fn inferred_function_type<'db>(
@@ -712,7 +710,7 @@ fn test_infer_constructor_argument_type_selects_overload_by_arity() {
 fn test_infer_constructor_argument_type_resolves_canonical_global_signature() {
     let fs = MemoryFileSystem::default();
     let db = build_js_test_module_db(&fs, &[], true);
-    let InferredTypeData::GlobalType(promise_id) = InferredTypeData::promise_class(&db) else {
+    let InferredTypeData::GlobalType(promise_id) = InferredTypeData::promise_class() else {
         panic!("expected canonical Promise type");
     };
     let promise = biome_js_type_info::global_types(&db).get(promise_id);

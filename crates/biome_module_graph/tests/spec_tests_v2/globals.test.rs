@@ -31,7 +31,7 @@ fn test_infer_module_types_resolves_generic_builtin_instances_on_build() {
     let InferredTypeData::InstanceOf(map_instance) = map_ty else {
         panic!("readMap must return a Map instance, got {map_ty:?}");
     };
-    assert_eq!(map_instance.ty(&db), InferredTypeData::map_class(&db));
+    assert_eq!(map_instance.ty(&db), InferredTypeData::map_class());
     assert_eq!(map_instance.type_parameters(&db).len(), 2);
     assert!(is_inferred_string(
         &db,
@@ -47,7 +47,7 @@ fn test_infer_module_types_resolves_generic_builtin_instances_on_build() {
     let InferredTypeData::InstanceOf(set_instance) = set_ty else {
         panic!("readSet must return a Set instance, got {set_ty:?}");
     };
-    assert_eq!(set_instance.ty(&db), InferredTypeData::set_class(&db));
+    assert_eq!(set_instance.ty(&db), InferredTypeData::set_class());
     assert_eq!(set_instance.type_parameters(&db).len(), 1);
     assert!(is_inferred_string(
         &db,
@@ -62,7 +62,7 @@ fn test_infer_module_types_resolves_generic_builtin_instances_on_build() {
     };
     assert_eq!(
         weak_map_instance.ty(&db),
-        InferredTypeData::weak_map_class(&db)
+        InferredTypeData::weak_map_class()
     );
     assert_eq!(weak_map_instance.type_parameters(&db).len(), 2);
     assert!(is_inferred_string(
