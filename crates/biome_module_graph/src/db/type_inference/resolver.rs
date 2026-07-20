@@ -24,10 +24,17 @@ const MAX_RAW_TYPE_RESOLUTION_DEPTH: usize = 64;
 const MAX_INFERRED_EXPRESSION_WRAPPER_STEPS: usize = 64;
 const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 
+#[derive(Clone, Copy)]
+pub(in crate::db) enum ImportResolution<'a> {
+    Full,
+    CycleFallback(&'a FxHashSet<ModuleInfo>),
+}
+
 pub(in crate::db::type_inference) struct ResolutionCtx<'db, 'a> {
     pub(in crate::db::type_inference) db: &'db dyn ModuleDb,
     pub(in crate::db::type_inference) module_key: ModuleKey,
     pub(in crate::db::type_inference) js_info: &'a JsModuleInfo,
+    pub(in crate::db::type_inference) import_resolution: ImportResolution<'a>,
     pub(in crate::db::type_inference) named_type_ids: FxHashSet<TypeId>,
     pub(in crate::db::type_inference) resolved: FxHashMap<TypeId, InferredTypeData<'db>>,
     pub(in crate::db::type_inference) in_progress: FxHashSet<TypeId>,
@@ -38,6 +45,7 @@ pub(in crate::db) fn resolve_raw_types<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
     js_info: &JsModuleInfo,
+    import_resolution: ImportResolution<'_>,
 ) -> InferredModuleTypes<'db> {
     let module_key = ModuleKey::new(module.as_id());
     let named_type_ids = named_type_ids(js_info);
@@ -45,6 +53,7 @@ pub(in crate::db) fn resolve_raw_types<'db>(
         db,
         module_key,
         js_info,
+        import_resolution,
         named_type_ids,
         resolved: FxHashMap::default(),
         in_progress: FxHashSet::default(),
@@ -124,7 +133,16 @@ impl<'db> ResolutionCtx<'db, '_> {
         &self,
         module: ModuleInfo,
     ) -> Option<&'db InferredModuleTypes<'db>> {
-        infer_module_types(self.db, module)
+        match self.import_resolution {
+            ImportResolution::Full => infer_module_types(self.db, module),
+            ImportResolution::CycleFallback(blocked) => {
+                if blocked.contains(&module) {
+                    None
+                } else {
+                    infer_module_types(self.db, module)
+                }
+            }
+        }
     }
 
     pub(in crate::db::type_inference) fn resolve(
