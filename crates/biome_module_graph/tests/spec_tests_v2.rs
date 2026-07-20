@@ -40,6 +40,12 @@ use salsa::plumbing::{AsId, FromId};
 
 #[path = "spec_tests_v2/expected_argument_inference.test.rs"]
 mod expected_argument_inference;
+#[path = "spec_tests_v2/globals.test.rs"]
+mod globals;
+#[path = "spec_tests_v2/intersections.test.rs"]
+mod intersections;
+#[path = "spec_tests_v2/normalization.test.rs"]
+mod normalization;
 #[path = "spec_tests_v2/promises.test.rs"]
 mod promises;
 #[path = "spec_tests_v2/substitutions.test.rs"]
@@ -843,169 +849,6 @@ fn build_js_test_module_db_with_layout(
         db.modules.insert(Utf8PathBuf::from(*path), module_info);
     }
     db
-}
-
-#[test]
-fn test_infer_module_types_resolves_generic_builtin_instances_on_build() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-            export function readMap(value: Map<string, number>): Map<string, number> {
-                return value;
-            }
-
-            export function readSet(value: Set<string>): Set<string> {
-                return value;
-            }
-
-            export function readWeakMap(value: WeakMap<object, string>): WeakMap<object, string> {
-                return value;
-            }
-        "#,
-    );
-
-    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
-    let index_module = db
-        .module_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
-
-    let map_ty = inferred_function_return_ty_by_name(&db, index_module, inferred, "readMap")
-        .expect("readMap return type must be inferred");
-    let InferredTypeData::InstanceOf(map_instance) = map_ty else {
-        panic!("readMap must return a Map instance, got {map_ty:?}");
-    };
-    let InferredTypeData::Class(map_class) = map_instance.ty(&db) else {
-        panic!("readMap must return a class instance");
-    };
-    assert_eq!(map_class.name(&db).as_ref().map(Text::text), Some("Map"));
-    assert_eq!(map_instance.type_parameters(&db).len(), 2);
-    assert!(is_inferred_string(
-        &db,
-        map_instance.type_parameters(&db)[0]
-    ));
-    assert!(is_inferred_number(
-        &db,
-        map_instance.type_parameters(&db)[1]
-    ));
-
-    let set_ty = inferred_function_return_ty_by_name(&db, index_module, inferred, "readSet")
-        .expect("readSet return type must be inferred");
-    let InferredTypeData::InstanceOf(set_instance) = set_ty else {
-        panic!("readSet must return a Set instance, got {set_ty:?}");
-    };
-    let InferredTypeData::Class(set_class) = set_instance.ty(&db) else {
-        panic!("readSet must return a class instance");
-    };
-    assert_eq!(set_class.name(&db).as_ref().map(Text::text), Some("Set"));
-    assert_eq!(set_instance.type_parameters(&db).len(), 1);
-    assert!(is_inferred_string(
-        &db,
-        set_instance.type_parameters(&db)[0]
-    ));
-
-    let weak_map_ty =
-        inferred_function_return_ty_by_name(&db, index_module, inferred, "readWeakMap")
-            .expect("readWeakMap return type must be inferred");
-    let InferredTypeData::InstanceOf(weak_map_instance) = weak_map_ty else {
-        panic!("readWeakMap must return a WeakMap instance, got {weak_map_ty:?}");
-    };
-    let InferredTypeData::Class(weak_map_class) = weak_map_instance.ty(&db) else {
-        panic!("readWeakMap must return a class instance");
-    };
-    assert_eq!(
-        weak_map_class.name(&db).as_ref().map(Text::text),
-        Some("WeakMap")
-    );
-    assert_eq!(weak_map_instance.type_parameters(&db).len(), 2);
-    assert!(is_inferred_string(
-        &db,
-        weak_map_instance.type_parameters(&db)[1]
-    ));
-
-    assert_inferred_type_snapshot(
-        "test_infer_module_types_resolves_generic_builtin_instances_on_build",
-        &db,
-        &fs,
-    );
-}
-
-#[test]
-fn test_infer_module_types_resolves_builtin_global_identities_on_build() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-            export function readRegExp(value: RegExp): RegExp {
-                return value;
-            }
-
-            export function readDate(value: Date): Date {
-                return value;
-            }
-
-            export function readError(value: Error): Error {
-                return value;
-            }
-
-            export function readSymbol(value: Symbol): Symbol {
-                return value;
-            }
-
-            export function readDisposable(value: Disposable): Disposable {
-                return value;
-            }
-
-            export function readAsyncDisposable(value: AsyncDisposable): AsyncDisposable {
-                return value;
-            }
-        "#,
-    );
-
-    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
-    let index_module = db
-        .module_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
-
-    for (function_name, class_name) in [
-        ("readRegExp", "RegExp"),
-        ("readDate", "Date"),
-        ("readError", "Error"),
-        ("readSymbol", "Symbol"),
-    ] {
-        let ty = inferred_function_return_ty_by_name(&db, index_module, inferred, function_name)
-            .unwrap_or_else(|| panic!("{function_name} return type must be inferred"));
-        let InferredTypeData::InstanceOf(instance) = ty else {
-            panic!("{function_name} must return a {class_name} instance, got {ty:?}");
-        };
-        let InferredTypeData::Class(class) = instance.ty(&db) else {
-            panic!("{function_name} must return a {class_name} instance, got {ty:?}");
-        };
-        assert_eq!(class.name(&db).as_ref().map(Text::text), Some(class_name));
-    }
-
-    for (function_name, interface_name) in [
-        ("readDisposable", "Disposable"),
-        ("readAsyncDisposable", "AsyncDisposable"),
-    ] {
-        let ty = inferred_function_return_ty_by_name(&db, index_module, inferred, function_name)
-            .unwrap_or_else(|| panic!("{function_name} return type must be inferred"));
-        let InferredTypeData::InstanceOf(instance) = ty else {
-            panic!("{function_name} must return an {interface_name} instance, got {ty:?}");
-        };
-        let InferredTypeData::Interface(interface) = instance.ty(&db) else {
-            panic!("{function_name} must return an {interface_name} instance, got {ty:?}");
-        };
-        assert_eq!(interface.name(&db).text(), interface_name);
-    }
-
-    assert_inferred_type_snapshot(
-        "test_infer_module_types_resolves_builtin_global_identities_on_build",
-        &db,
-        &fs,
-    );
 }
 
 #[test]
@@ -2335,76 +2178,6 @@ fn test_normalize_type_preserves_recursive_local_edge() {
 
     assert_inferred_type_snapshot(
         "test_normalize_type_preserves_recursive_local_edge",
-        &db,
-        &fs,
-    );
-}
-
-#[test]
-fn test_normalize_type_preserves_recursive_array_local_edge() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-            type Tree = number | Tree[];
-
-            export function readTree(value: Tree): Tree {
-                return value;
-            }
-        "#,
-    );
-
-    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
-    let index_module = db
-        .module_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
-
-    let tree_ty = inferred_function_return_ty_by_name(&db, index_module, inferred, "readTree")
-        .expect("readTree return type must be inferred");
-    let tree_index = local_type_id_of_instance(&db, tree_ty)
-        .expect("readTree must return an instance of the local Tree type");
-    let normalized_ty = normalize_type(&db, index_module, tree_ty);
-
-    let InferredTypeData::Union(union) = normalized_ty else {
-        panic!("recursive Tree type must normalize to a union, got {normalized_ty:?}");
-    };
-    let normalized_tree = format_inferred_type(&db, normalized_ty);
-    assert!(
-        union
-            .types(&db)
-            .iter()
-            .any(|ty| is_inferred_number(&db, *ty)),
-        "recursive Tree union must keep its number branch"
-    );
-    assert!(
-        union.types(&db).iter().any(|ty| {
-            matches!(
-                ty,
-                InferredTypeData::InstanceOf(instance)
-                    if matches!(
-                        instance.ty(&db),
-                        InferredTypeData::Class(class)
-                            if class
-                                .name(&db)
-                                .as_ref()
-                                .is_some_and(|name| name.text() == "Array")
-                    )
-                    && instance.type_parameters(&db).iter().any(|parameter| {
-                        matches!(
-                            parameter,
-                            InferredTypeData::Local(local)
-                                if local.type_id(&db).index() == tree_index
-                        )
-                        || local_type_id_of_instance(&db, *parameter) == Some(tree_index)
-                    })
-            )
-        }),
-        "recursive Tree union must keep the recursive Array local edge: {normalized_tree}"
-    );
-
-    assert_inferred_type_snapshot(
-        "test_normalize_type_preserves_recursive_array_local_edge",
         &db,
         &fs,
     );
@@ -4857,46 +4630,6 @@ fn test_infer_module_types_merges_mixed_intersections_on_build() {
 
     assert_inferred_type_snapshot(
         "test_infer_module_types_merges_mixed_intersections_on_build",
-        &db,
-        &fs,
-    );
-}
-
-#[test]
-fn test_infer_module_types_merges_class_instance_intersections_on_build() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-            export function readPromiseObject(
-                value: Promise<string> & { value: number },
-            ): Promise<string> & { value: number } {
-                return value;
-            }
-        "#,
-    );
-
-    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
-    let index_module = db
-        .module_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
-
-    let promise_object_ty =
-        inferred_function_return_ty_by_name(&db, index_module, inferred, "readPromiseObject")
-            .expect("readPromiseObject return type must be inferred");
-    let InferredTypeData::InstanceOf(instance) = promise_object_ty else {
-        panic!("readPromiseObject must return a merged class instance, got {promise_object_ty:?}");
-    };
-    assert!(matches!(instance.ty(&db), InferredTypeData::Class(_)));
-
-    let value_ty = inferred
-        .find_member_type(&db, promise_object_ty, "value")
-        .expect("merged class instance must expose value");
-    assert!(is_inferred_number(&db, value_ty));
-
-    assert_inferred_type_snapshot(
-        "test_infer_module_types_merges_class_instance_intersections_on_build",
         &db,
         &fs,
     );

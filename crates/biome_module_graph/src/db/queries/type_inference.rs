@@ -16,7 +16,8 @@
 
 use crate::db::type_inference::{
     apply_substitutions_to_root_body, collected_type_result, infer_module_types_cycle_result,
-    normalize_type_cycle_result, resolve_raw_types, substitutions_for_instance,
+    normalize_structural_type, normalize_type_cycle_result, resolve_raw_types,
+    substitutions_for_instance,
 };
 use crate::module_for_key;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
@@ -40,7 +41,6 @@ use rustc_hash::{FxHashMap, FxHashSet};
 /// Inferred type tables for one JavaScript or TypeScript module.
 pub use crate::db::type_inference::InferredModuleTypes;
 
-const MAX_TYPE_NORMALIZATION_STEPS: usize = 1024;
 const MAX_ARGUMENT_MATCH_STEPS: usize = 1024;
 const MAX_ARGUMENT_SEQUENCE_STEPS: usize = 4096;
 const MAX_ARGUMENT_TYPE_STEPS: usize = 1024;
@@ -233,22 +233,11 @@ pub fn infer_constructor_argument_type<'db>(
     infer_constructor_argument_type_inner(db, input.callee(db), &args, argument_index)
 }
 
-/// Resolves module-local references and simplifies the outer type structure.
+/// Resolves local handles and simplifies structural wrappers in `input`.
 ///
-/// Normalization follows aliases, `typeof` references, type instances, tuples,
-/// unions, and intersections. It flattens and deduplicates unions and
-/// intersections but does not descend into function parameters, object
-/// members, or class members. Recursive aliases preserve the repeated local
-/// reference instead of recursing forever.
-///
-/// ```ts
-/// type Value = string | (number | string);
-/// declare const value: Value;
-/// // Normalizing `typeof value` produces `string | number`.
-/// ```
-///
-/// If module inference is unavailable or the work budget is exhausted, the
-/// original root type is returned. A Salsa query cycle produces `Unknown`.
+/// If module inference is unavailable, the original type is returned. A cycle,
+/// invalid structural rebuild, or exhausted normalization budget returns
+/// [`InferredTypeData::Unknown`].
 #[salsa::tracked(cycle_result=normalize_type_cycle_result)]
 pub fn normalize_type<'db>(
     db: &'db dyn ModuleDb,
@@ -263,191 +252,22 @@ pub fn normalize_type<'db>(
         return ty;
     };
 
-    let original = ty;
-    let mut stack = Vec::from([TypeNormalizationItem::Type(ty)]);
-    let mut results = Vec::new();
-    let mut active_locals = FxHashSet::default();
-    let mut remaining_steps = MAX_TYPE_NORMALIZATION_STEPS;
+    normalize_structural_type(db, ty, |ty| inferred.resolve_type(db, ty))
+        .unwrap_or(InferredTypeData::Unknown)
+}
 
-    while let Some(item) = stack.pop() {
-        match item {
-            TypeNormalizationItem::Type(ty) => {
-                if remaining_steps == 0 {
-                    return original;
-                }
-                remaining_steps -= 1;
-
-                let mut exit_local = None;
-                let ty = match ty {
-                    InferredTypeData::Local(local) => {
-                        let module = local.module(db);
-                        let type_id = local.type_id(db);
-                        if !active_locals.insert((module, type_id)) {
-                            results.push(InferredTypeData::Local(local));
-                            continue;
-                        }
-                        exit_local = Some((module, type_id));
-                        inferred.resolve_type(db, ty)
-                    }
-                    ty => ty,
-                };
-
-                if let Some((module, type_id)) = exit_local {
-                    stack.push(TypeNormalizationItem::ExitLocal { module, type_id });
-                }
-
-                match ty {
-                    InferredTypeData::InstanceOf(instance) => {
-                        stack.push(TypeNormalizationItem::RebuildInstance(
-                            instance.type_parameters(db).len(),
-                        ));
-                        for type_parameter in instance.type_parameters(db).iter().rev() {
-                            stack.push(TypeNormalizationItem::Type(*type_parameter));
-                        }
-                        stack.push(TypeNormalizationItem::Type(instance.ty(db)));
-                    }
-                    InferredTypeData::Intersection(intersection) => {
-                        stack.push(TypeNormalizationItem::RebuildIntersection(
-                            intersection.types(db).len(),
-                        ));
-                        for ty in intersection.types(db).iter().rev() {
-                            stack.push(TypeNormalizationItem::Type(*ty));
-                        }
-                    }
-                    InferredTypeData::MergedReference(reference) => {
-                        let ty = reference.ty(db);
-                        let value_ty = reference.value_ty(db);
-                        let namespace_ty = reference.namespace_ty(db);
-                        stack.push(TypeNormalizationItem::RebuildMergedReference {
-                            has_ty: ty.is_some(),
-                            has_value_ty: value_ty.is_some(),
-                            has_namespace_ty: namespace_ty.is_some(),
-                        });
-                        if let Some(namespace_ty) = namespace_ty {
-                            stack.push(TypeNormalizationItem::Type(namespace_ty));
-                        }
-                        if let Some(value_ty) = value_ty {
-                            stack.push(TypeNormalizationItem::Type(value_ty));
-                        }
-                        if let Some(ty) = ty {
-                            stack.push(TypeNormalizationItem::Type(ty));
-                        }
-                    }
-                    InferredTypeData::TypeofType(ty) => {
-                        stack.push(TypeNormalizationItem::Type(ty.ty(db)));
-                    }
-                    InferredTypeData::TypeofValue(value) => {
-                        let ty = value.ty(db);
-                        if ty == InferredTypeData::Unknown {
-                            results.push(InferredTypeData::TypeofValue(value));
-                        } else {
-                            stack.push(TypeNormalizationItem::Type(ty));
-                        }
-                    }
-                    InferredTypeData::Tuple(tuple) => {
-                        stack.push(TypeNormalizationItem::RebuildTuple(tuple));
-                        for element in tuple.elements(db).iter().rev() {
-                            stack.push(TypeNormalizationItem::Type(element.ty));
-                        }
-                    }
-                    InferredTypeData::Union(union) => {
-                        stack.push(TypeNormalizationItem::RebuildUnion(union.types(db).len()));
-                        for ty in union.types(db).iter().rev() {
-                            stack.push(TypeNormalizationItem::Type(*ty));
-                        }
-                    }
-                    ty => results.push(ty),
-                }
-            }
-            TypeNormalizationItem::ExitLocal { module, type_id } => {
-                active_locals.remove(&(module, type_id));
-            }
-            TypeNormalizationItem::RebuildInstance(type_parameter_count) => {
-                let Some(start) = results.len().checked_sub(type_parameter_count + 1) else {
-                    return original;
-                };
-                let mut parts = results.split_off(start);
-                let ty = parts.remove(0);
-                if ty.should_flatten_instance(&parts) {
-                    results.push(ty);
-                } else {
-                    results.push(InferredTypeData::instance_of(
-                        db,
-                        ty,
-                        parts.into_boxed_slice(),
-                    ));
-                }
-            }
-            TypeNormalizationItem::RebuildIntersection(type_count) => {
-                let Some(start) = results.len().checked_sub(type_count) else {
-                    return original;
-                };
-                let types = results.split_off(start);
-                results.push(InferredTypeData::intersection_from_types(db, types));
-            }
-            TypeNormalizationItem::RebuildMergedReference {
-                has_ty,
-                has_value_ty,
-                has_namespace_ty,
-            } => {
-                let target_count = [has_ty, has_value_ty, has_namespace_ty]
-                    .into_iter()
-                    .filter(|has_target| *has_target)
-                    .count();
-                let Some(start) = results.len().checked_sub(target_count) else {
-                    return original;
-                };
-                let mut targets = results.split_off(start).into_iter();
-                let ty = has_ty.then(|| targets.next().unwrap_or(InferredTypeData::Unknown));
-                let value_ty =
-                    has_value_ty.then(|| targets.next().unwrap_or(InferredTypeData::Unknown));
-                let namespace_ty =
-                    has_namespace_ty.then(|| targets.next().unwrap_or(InferredTypeData::Unknown));
-                let target_values = [ty, value_ty, namespace_ty]
-                    .into_iter()
-                    .flatten()
-                    .collect::<Vec<_>>();
-                if let Some(first) = target_values.first().copied()
-                    && target_values.iter().all(|target| *target == first)
-                {
-                    results.push(first);
-                } else {
-                    results.push(InferredTypeData::MergedReference(
-                        InferredMergedReference::new(db, ty, value_ty, namespace_ty),
-                    ));
-                }
-            }
-            TypeNormalizationItem::RebuildTuple(tuple) => {
-                let Some(start) = results.len().checked_sub(tuple.elements(db).len()) else {
-                    return original;
-                };
-                let types = results.split_off(start);
-                let elements = tuple
-                    .elements(db)
-                    .iter()
-                    .zip(types)
-                    .map(|(element, ty)| {
-                        let mut element = element.clone();
-                        element.ty = ty;
-                        element
-                    })
-                    .collect::<Vec<_>>();
-                results.push(InferredTypeData::Tuple(InferredTuple::new(
-                    db,
-                    elements.into_boxed_slice(),
-                )));
-            }
-            TypeNormalizationItem::RebuildUnion(type_count) => {
-                let Some(start) = results.len().checked_sub(type_count) else {
-                    return original;
-                };
-                let types = results.split_off(start);
-                results.push(InferredTypeData::union_from_types(db, types));
-            }
-        }
-    }
-
-    results.pop().unwrap_or(original)
+fn needs_type_normalization(ty: InferredTypeData<'_>) -> bool {
+    matches!(
+        ty,
+        InferredTypeData::InstanceOf(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::Union(_)
+    )
 }
 
 // #endregion
@@ -1490,6 +1310,7 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                 InferredTypeData::Conditional
                 | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
                 | InferredTypeData::Literal(_)
                 | InferredTypeData::ObjectKeyword
                 | InferredTypeData::TypeOperator(_)
@@ -1501,6 +1322,7 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                 InferredTypeData::Conditional
                 | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
                 | InferredTypeData::Literal(_)
                 | InferredTypeData::ObjectKeyword
                 | InferredTypeData::TypeOperator(_)
@@ -1946,47 +1768,6 @@ fn collect_callback_return_replacements<'db>(
     parameter_return_ty.collect_generic_replacements(db, argument_return_ty)
 }
 
-fn needs_type_normalization(ty: InferredTypeData<'_>) -> bool {
-    match ty {
-        InferredTypeData::InstanceOf(_)
-        | InferredTypeData::Intersection(_)
-        | InferredTypeData::Local(_)
-        | InferredTypeData::MergedReference(_)
-        | InferredTypeData::Tuple(_)
-        | InferredTypeData::TypeofType(_)
-        | InferredTypeData::TypeofValue(_)
-        | InferredTypeData::Union(_) => true,
-        InferredTypeData::Unknown
-        | InferredTypeData::Divergent(_)
-        | InferredTypeData::Global
-        | InferredTypeData::BigInt
-        | InferredTypeData::Boolean
-        | InferredTypeData::Null
-        | InferredTypeData::Number
-        | InferredTypeData::String
-        | InferredTypeData::Symbol
-        | InferredTypeData::Undefined
-        | InferredTypeData::Conditional
-        | InferredTypeData::Class(_)
-        | InferredTypeData::Constructor(_)
-        | InferredTypeData::Function(_)
-        | InferredTypeData::Interface(_)
-        | InferredTypeData::Module(_)
-        | InferredTypeData::Namespace(_)
-        | InferredTypeData::Object(_)
-        | InferredTypeData::Generic(_)
-        | InferredTypeData::TypeOperator(_)
-        | InferredTypeData::Literal(_)
-        | InferredTypeData::TypeofExpression(_)
-        | InferredTypeData::AnyKeyword
-        | InferredTypeData::NeverKeyword
-        | InferredTypeData::ObjectKeyword
-        | InferredTypeData::ThisKeyword
-        | InferredTypeData::UnknownKeyword
-        | InferredTypeData::VoidKeyword => false,
-    }
-}
-
 enum TupleInstanceResolution<'db> {
     Tuple(InferredTuple<'db>),
     NotTuple,
@@ -2255,24 +2036,6 @@ impl<'db> ArgumentMatchAction<'db> {
             }
         }
     }
-}
-
-#[derive(Clone, Copy, Debug)]
-enum TypeNormalizationItem<'db> {
-    Type(InferredTypeData<'db>),
-    ExitLocal {
-        module: InferredModuleKey,
-        type_id: InferredLocalTypeId,
-    },
-    RebuildInstance(usize),
-    RebuildIntersection(usize),
-    RebuildMergedReference {
-        has_ty: bool,
-        has_value_ty: bool,
-        has_namespace_ty: bool,
-    },
-    RebuildTuple(InferredTuple<'db>),
-    RebuildUnion(usize),
 }
 
 // #endregion

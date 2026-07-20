@@ -9,6 +9,7 @@ use crate::interned_types::{TypeData, TypeDataSlotRebuilder, TypeDb};
 use rustc_hash::FxHashSet;
 
 pub(crate) const MAX_TYPE_SUBSTITUTION_STEPS: usize = 1024;
+const MAX_TYPE_NORMALIZATION_STEPS: usize = 1024;
 
 /// A generic type and the type that replaces its references.
 ///
@@ -339,7 +340,66 @@ impl<'db> TypeTransform<'db> for TypeSubstituter<'db> {
     }
 }
 
+struct TypeNormalizer<Resolve> {
+    resolve: Resolve,
+}
+
+impl<'db, Resolve> TypeTransform<'db> for TypeNormalizer<Resolve>
+where
+    Resolve: FnMut(TypeData<'db>) -> TypeData<'db>,
+{
+    fn enter(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeTransformAction<'db> {
+        let ty = (self.resolve)(ty);
+        if let TypeData::TypeofValue(value) = ty
+            && value.ty(db) == TypeData::Unknown
+        {
+            TypeTransformAction::Replace(ty)
+        } else {
+            TypeTransformAction::Descend(ty)
+        }
+    }
+
+    fn leave(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeData<'db> {
+        match ty {
+            TypeData::InstanceOf(instance)
+                if instance
+                    .ty(db)
+                    .should_flatten_instance(instance.type_parameters(db)) =>
+            {
+                instance.ty(db)
+            }
+            TypeData::MergedReference(reference) => {
+                let targets = reference.targets(db).collect::<Vec<_>>();
+                match targets.first().copied() {
+                    Some(first) if targets.iter().all(|target| *target == first) => first,
+                    _ => TypeData::MergedReference(reference),
+                }
+            }
+            TypeData::TypeofType(value) => value.ty(db),
+            TypeData::TypeofValue(value) => value.ty(db),
+            ty => ty,
+        }
+    }
+}
+
 impl<'db> TypeData<'db> {
+    /// Resolves nested type handles and simplifies structural wrappers.
+    ///
+    /// The resolver is invoked before descending into each type. A `typeof`
+    /// value whose resolved type is unknown remains wrapped so its identity can
+    /// be resolved by a later inference pass.
+    pub fn normalize_nested_types(
+        self,
+        db: &'db dyn TypeDb,
+        resolve: impl FnMut(Self) -> Self,
+    ) -> TypeTransformResult<Self> {
+        TypeDataTransformer::new(MAX_TYPE_NORMALIZATION_STEPS).transform(
+            self,
+            db,
+            &mut TypeNormalizer { resolve },
+        )
+    }
+
     /// Replaces references to a generic throughout this type.
     ///
     /// Nested declarations of the same generic remain unchanged. Unmatched

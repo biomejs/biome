@@ -1,13 +1,11 @@
-use super::{
-    BindingTypeData, InferredModuleTypes, globals::resolve_global_type_id, lookup::module_for_key,
-};
+use super::{BindingTypeData, InferredModuleTypes, globals::global_type, lookup::module_for_key};
 use crate::db::queries::infer_module_types;
 use crate::module_graph::ModuleInfo;
 use crate::{JsModuleInfo, ModuleDb, ResolvedPath};
 use biome_js_semantic::JsDeclarationKind;
 use biome_js_type_info::{
-    RawTypeData, ResolvedTypeId, ScopeId, TypeId, TypeReference, TypeReferenceQualifier,
-    TypeResolverLevel,
+    GlobalTypeId, RawTypeData, ResolvedTypeId, ScopeId, TypeId, TypeReference,
+    TypeReferenceQualifier, TypeResolverLevel,
     interned_types::{
         InternedTypeofValue, LocalTypeHandle, LocalTypeId, ModuleKey, TypeData as InferredTypeData,
     },
@@ -33,7 +31,6 @@ pub(in crate::db::type_inference) struct ResolutionCtx<'db, 'a> {
     pub(in crate::db::type_inference) named_type_ids: FxHashSet<TypeId>,
     pub(in crate::db::type_inference) resolved: FxHashMap<TypeId, InferredTypeData<'db>>,
     pub(in crate::db::type_inference) in_progress: FxHashSet<TypeId>,
-    pub(in crate::db::type_inference) resolved_globals: FxHashMap<TypeId, InferredTypeData<'db>>,
     pub(in crate::db::type_inference) resolution_depth: usize,
 }
 
@@ -53,7 +50,6 @@ pub(in crate::db) fn resolve_raw_types<'db>(
         named_type_ids,
         resolved: FxHashMap::default(),
         in_progress: FxHashSet::default(),
-        resolved_globals: FxHashMap::default(),
         resolution_depth: 0,
     };
 
@@ -150,13 +146,10 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> InferredTypeData<'db> {
         match resolved_id.level() {
             TypeResolverLevel::Thin => self.resolve_raw_type_reference(resolved_id.id()),
-            TypeResolverLevel::Global => self.resolve_global_type_id(resolved_id.id()),
+            TypeResolverLevel::Global => GlobalTypeId::try_from_type_id(resolved_id.id())
+                .map_or(InferredTypeData::Unknown, |id| global_type(self.db, id)),
             TypeResolverLevel::Full | TypeResolverLevel::Import => InferredTypeData::Unknown,
         }
-    }
-
-    fn resolve_global_type_id(&mut self, type_id: TypeId) -> InferredTypeData<'db> {
-        resolve_global_type_id(self.db, type_id, &mut self.resolved_globals)
     }
 
     fn resolve_raw_type_reference(&mut self, type_id: TypeId) -> InferredTypeData<'db> {
@@ -223,7 +216,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
 
         let db = self.db;
-        let ty = InferredTypeData::from_raw_with_resolver(db, raw, &mut |reference| {
+        let ty = InferredTypeData::from_raw_with_resolver(db, raw, false, &mut |reference| {
             self.resolve(reference)
         });
         self.resolve_inferred_expression_wrappers(ty)
@@ -264,6 +257,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Boolean
                 | InferredTypeData::Null
