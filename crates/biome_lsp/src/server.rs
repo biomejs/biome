@@ -21,12 +21,15 @@ use futures::future::ready;
 use rustc_hash::FxHashMap;
 use serde_json::json;
 use std::panic::{AssertUnwindSafe, RefUnwindSafe};
+use std::pin::Pin;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
-use tokio::io::{AsyncRead, AsyncWrite};
+use std::task::{Context, Poll};
+use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 use tokio::sync::{Notify, watch};
 use tokio::task::spawn_blocking;
-use tower_lsp_server::jsonrpc::Result as LspResult;
+use tower::Service;
+use tower_lsp_server::jsonrpc::{Request as JsonRpcRequest, Result as LspResult};
 use tower_lsp_server::{ClientSocket, ls_types::*};
 use tower_lsp_server::{LanguageServer, LspService, Server};
 use tracing::{debug, error, info, instrument, warn};
@@ -35,12 +38,7 @@ pub struct LSPServer {
     pub(crate) session: SessionHandle,
     /// Map of all sessions connected to the same [ServerFactory] as this [LSPServer].
     sessions: Sessions,
-    /// If this is true the server will broadcast a shutdown signal once the
-    /// last client disconnected
-    stop_on_disconnect: bool,
-    /// This shared flag is set to true once at least one session has been
-    /// initialized on this server instance
-    is_initialized: Arc<AtomicBool>,
+    lifecycle: Arc<SessionLifecycle>,
 }
 
 impl RefUnwindSafe for LSPServer {}
@@ -55,17 +53,11 @@ where
 }
 
 impl LSPServer {
-    fn new(
-        session: SessionHandle,
-        sessions: Sessions,
-        stop_on_disconnect: bool,
-        is_initialized: Arc<AtomicBool>,
-    ) -> Self {
+    fn new(session: SessionHandle, sessions: Sessions, lifecycle: Arc<SessionLifecycle>) -> Self {
         Self {
             session,
             sessions,
-            stop_on_disconnect,
-            is_initialized,
+            lifecycle,
         }
     }
 
@@ -354,7 +346,7 @@ impl LanguageServer for LSPServer {
     #[tracing::instrument(level = "debug", skip_all)]
     async fn initialize(&self, params: InitializeParams) -> LspResult<InitializeResult> {
         info!("Starting Biome Language Server...");
-        self.is_initialized.store(true, Ordering::Relaxed);
+        self.lifecycle.mark_initialized();
 
         let server_capabilities = server_capabilities(&params.capabilities);
         if params.root_path.is_some() {
@@ -404,9 +396,6 @@ impl LanguageServer for LSPServer {
     }
 
     async fn shutdown(&self) -> LspResult<()> {
-        if self.stop_on_disconnect {
-            self.session.broadcast_shutdown();
-        }
         Ok(())
     }
 
@@ -605,22 +594,125 @@ impl LanguageServer for LSPServer {
 
 impl Drop for LSPServer {
     fn drop(&mut self) {
-        if let Ok(mut sessions) = self.sessions.lock() {
-            let _removed = sessions.remove(&self.session.key);
-            debug_assert!(_removed.is_some(), "Session did not exist.");
-
-            if self.stop_on_disconnect
-                && sessions.is_empty()
-                && self.is_initialized.load(Ordering::Relaxed)
-            {
-                self.session.cancellation.notify_one();
-            }
-        }
+        self.lifecycle.disconnect();
     }
 }
 
 /// Map of active sessions connected to a [ServerFactory].
 type Sessions = Arc<Mutex<FxHashMap<SessionKey, SessionHandle>>>;
+
+struct SessionLifecycle {
+    session_key: SessionKey,
+    sessions: Sessions,
+    cancellation: Arc<Notify>,
+    stop_on_disconnect: bool,
+    is_initialized: Arc<AtomicBool>,
+    is_disconnected: AtomicBool,
+}
+
+impl SessionLifecycle {
+    fn mark_initialized(&self) {
+        self.is_initialized.store(true, Ordering::Release);
+    }
+
+    fn disconnect(&self) {
+        if self.is_disconnected.swap(true, Ordering::AcqRel) {
+            return;
+        }
+
+        let Ok(mut sessions) = self.sessions.lock() else {
+            return;
+        };
+        let removed = sessions.remove(&self.session_key);
+        debug_assert!(removed.is_some(), "Session did not exist.");
+
+        if removed.is_some()
+            && self.stop_on_disconnect
+            && sessions.is_empty()
+            && self.is_initialized.load(Ordering::Acquire)
+        {
+            self.cancellation.notify_one();
+        }
+    }
+}
+
+struct DisconnectOnExit<S> {
+    inner: S,
+    lifecycle: Arc<SessionLifecycle>,
+}
+
+impl<S> DisconnectOnExit<S> {
+    fn new(inner: S, lifecycle: Arc<SessionLifecycle>) -> Self {
+        Self { inner, lifecycle }
+    }
+}
+
+impl<S> Service<JsonRpcRequest> for DisconnectOnExit<S>
+where
+    S: Service<JsonRpcRequest>,
+{
+    type Response = S::Response;
+    type Error = S::Error;
+    type Future = S::Future;
+
+    fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        self.inner.poll_ready(cx)
+    }
+
+    fn call(&mut self, request: JsonRpcRequest) -> Self::Future {
+        let should_disconnect = request.method() == "exit";
+        let response = self.inner.call(request);
+
+        if should_disconnect {
+            self.lifecycle.disconnect();
+        }
+
+        response
+    }
+}
+
+struct DisconnectOnEof<R> {
+    inner: R,
+    lifecycle: Arc<SessionLifecycle>,
+}
+
+impl<R> DisconnectOnEof<R> {
+    fn new(inner: R, lifecycle: Arc<SessionLifecycle>) -> Self {
+        Self { inner, lifecycle }
+    }
+}
+
+impl<R> AsyncRead for DisconnectOnEof<R>
+where
+    R: AsyncRead + Unpin,
+{
+    fn poll_read(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buffer: &mut ReadBuf<'_>,
+    ) -> Poll<std::io::Result<()>> {
+        let this = self.get_mut();
+        let remaining = buffer.remaining();
+        let filled = buffer.filled().len();
+        let result = Pin::new(&mut this.inner).poll_read(cx, buffer);
+
+        match &result {
+            Poll::Ready(Ok(())) if remaining > 0 && buffer.filled().len() == filled => {
+                this.lifecycle.disconnect();
+            }
+            Poll::Ready(Err(_)) => this.lifecycle.disconnect(),
+            Poll::Pending | Poll::Ready(Ok(())) => {}
+        }
+
+        result
+    }
+}
+
+impl<R> Drop for DisconnectOnEof<R> {
+    fn drop(&mut self) {
+        self.lifecycle.disconnect();
+    }
+}
 
 /// Helper method for wrapping a [Workspace] method in a `custom_method` for
 /// the [LSPServer]
@@ -758,6 +850,15 @@ impl ServerFactory {
         let db_state = self.db_state.clone();
 
         let session_key = SessionKey(self.next_session_key.fetch_add(1, Ordering::Relaxed));
+        let lifecycle = Arc::new(SessionLifecycle {
+            session_key,
+            sessions: self.sessions.clone(),
+            cancellation: self.cancellation.clone(),
+            stop_on_disconnect: self.stop_on_disconnect,
+            is_initialized: self.is_initialized.clone(),
+            is_disconnected: AtomicBool::new(false),
+        });
+        let server_lifecycle = lifecycle.clone();
 
         let mut builder = LspService::build(move |client| {
             let session = Session::new(
@@ -773,12 +874,7 @@ impl ServerFactory {
             let mut sessions = self.sessions.lock().unwrap();
             sessions.insert(session_key, handle.clone());
 
-            LSPServer::new(
-                handle,
-                self.sessions.clone(),
-                self.stop_on_disconnect,
-                self.is_initialized.clone(),
-            )
+            LSPServer::new(handle, self.sessions.clone(), server_lifecycle)
         });
 
         builder = builder.custom_method(SYNTAX_TREE_REQUEST, LSPServer::syntax_tree_request);
@@ -823,7 +919,11 @@ impl ServerFactory {
         workspace_method!(builder, drop_pattern);
 
         let (service, socket) = builder.finish();
-        ServerConnection { socket, service }
+        ServerConnection {
+            socket,
+            service,
+            lifecycle,
+        }
     }
 
     /// Return a handle to the cancellation token for this server process
@@ -845,6 +945,7 @@ impl ServerFactory {
 pub struct ServerConnection {
     socket: ClientSocket,
     service: LspService<LSPServer>,
+    lifecycle: Arc<SessionLifecycle>,
 }
 
 impl ServerConnection {
@@ -860,11 +961,15 @@ impl ServerConnection {
         I: AsyncRead + Unpin,
         O: AsyncWrite,
     {
-        Server::new(stdin, stdout, self.socket)
-            .serve(self.service)
-            .await;
+        let stdin = DisconnectOnEof::new(stdin, self.lifecycle.clone());
+        let service = DisconnectOnExit::new(self.service, self.lifecycle);
+        Server::new(stdin, stdout, self.socket).serve(service).await;
     }
 }
+
+#[cfg(test)]
+#[path = "server_lifecycle.tests.rs"]
+mod server_lifecycle;
 
 #[cfg(test)]
 #[path = "server.tests.rs"]
