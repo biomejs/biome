@@ -21,6 +21,9 @@ pub(crate) enum StringLiteralParentKind {
     /// Variants to track tokens that are inside a CssCharsetRule
     /// @charset must always have double quotes: https://www.w3.org/TR/css-syntax-3/#determine-the-fallback-encoding
     CharsetAtRule,
+    /// Attribute values preserve escaped source newlines without expanding the
+    /// surrounding selector group.
+    AttributeMatcherValue,
     /// other types, will add more later
     Others,
 }
@@ -73,6 +76,12 @@ pub(crate) struct CleanedStringLiteralText<'a> {
     text: Cow<'a, str>,
 }
 
+impl CleanedStringLiteralText<'_> {
+    fn is_multiline(&self) -> bool {
+        self.text.bytes().any(|byte| matches!(byte, b'\n' | b'\r'))
+    }
+}
+
 impl Format<CssFormatContext> for CleanedStringLiteralText<'_> {
     fn fmt(&self, f: &mut Formatter<CssFormatContext>) -> FormatResult<()> {
         format_replaced(
@@ -91,7 +100,18 @@ impl Format<CssFormatContext> for FormatLiteralStringToken<'_> {
     fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
         let cleaned = self.clean_text(f.options());
 
-        cleaned.fmt(f)
+        if matches!(
+            self.parent_kind,
+            StringLiteralParentKind::AttributeMatcherValue
+        ) && cleaned.is_multiline()
+        {
+            // TODO: Replace the duplicated variants with a literal-line
+            // primitive that doesn't expand the surrounding selector group.
+            let cleaned = cleaned.memoized();
+            best_fitting!(cleaned, cleaned).fmt(f)
+        } else {
+            cleaned.fmt(f)
+        }
     }
 }
 
@@ -213,7 +233,7 @@ impl<'token> LiteralStringNormaliser<'token> {
                 // However, Prettier preserve single quotes.
                 Cow::Borrowed(self.get_token().text_trimmed())
             }
-            StringLiteralParentKind::Others => {
+            StringLiteralParentKind::AttributeMatcherValue | StringLiteralParentKind::Others => {
                 let string_information = self
                     .token
                     .compute_string_information(self.chosen_quote_style);

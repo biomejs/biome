@@ -53,6 +53,18 @@ comment */{color:green}}
 /* universal */
 *    .child{color:navy}
 
+/* long id */
+#target   .selector-with-a-very-long-name-one    .selector-with-a-very-long-name-two   .selector-with-a-very-long-name-three{color:maroon}
+
+/* long attribute */
+[data-target]    .selector-with-a-very-long-name-one   .selector-with-a-very-long-name-two    .selector-with-a-very-long-name-three{color:maroon}
+
+/* long pseudo */
+:hover   .selector-with-a-very-long-name-one    .selector-with-a-very-long-name-two   .selector-with-a-very-long-name-three{color:maroon}
+
+/* long universal */
+*   .selector-with-a-very-long-name-one    .selector-with-a-very-long-name-two   .selector-with-a-very-long-name-three{color:maroon}
+
 ```
 
 
@@ -134,6 +146,38 @@ comment */ {
 /* universal */
 * .child {
 	color: navy;
+}
+
+/* long id */
+#target
+	.selector-with-a-very-long-name-one
+	.selector-with-a-very-long-name-two
+	.selector-with-a-very-long-name-three {
+	color: maroon;
+}
+
+/* long attribute */
+[data-target]
+	.selector-with-a-very-long-name-one
+	.selector-with-a-very-long-name-two
+	.selector-with-a-very-long-name-three {
+	color: maroon;
+}
+
+/* long pseudo */
+:hover
+	.selector-with-a-very-long-name-one
+	.selector-with-a-very-long-name-two
+	.selector-with-a-very-long-name-three {
+	color: maroon;
+}
+
+/* long universal */
+*
+	.selector-with-a-very-long-name-one
+	.selector-with-a-very-long-name-two
+	.selector-with-a-very-long-name-three {
+	color: maroon;
 }
 
 ```

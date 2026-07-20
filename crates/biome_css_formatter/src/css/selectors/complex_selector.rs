@@ -79,9 +79,6 @@ impl FormatNodeRule<CssComplexSelector> for FormatCssComplexSelector {
             &right,
             comments.dangling_comments(node.syntax()),
         );
-        let fixed_separator = layout == SelectorChainLayout::Flat
-            || (!is_selector_list_first_child(node) && is_left_preceded_by_comment);
-        let selector_separator = format_once(|f| boundary.fmt_before(fixed_separator, f));
         let formatted_combinator = format_once(|f| {
             // A descendant combinator only requires some whitespace. Removing
             // the source token lets the separators choose that whitespace.
@@ -92,6 +89,41 @@ impl FormatNodeRule<CssComplexSelector> for FormatCssComplexSelector {
             }
         });
         let combinator_separator = format_once(|f| boundary.fmt_after(f));
+
+        if owns_chain_layout
+            && layout == SelectorChainLayout::Flexible
+            && is_left_preceded_by_comment
+        {
+            // Keep the selector next to its leading comment when the tail fits,
+            // but retain the normal break opportunity for over-width chains.
+            let formatted_right = format_selector(&right, layout);
+            let formatted_tail = format_with(|f| {
+                write!(
+                    f,
+                    [formatted_combinator, combinator_separator, formatted_right]
+                )
+            })
+            .memoized();
+            let flat = format_with(|f| {
+                boundary.fmt_before(true, f)?;
+                formatted_tail.fmt(f)
+            });
+            let expanded = format_with(|f| {
+                boundary.fmt_before(false, f)?;
+                formatted_tail.fmt(f)
+            });
+
+            return write!(
+                f,
+                [
+                    format_selector(&left, layout),
+                    best_fitting!(flat, expanded)
+                ]
+            );
+        }
+
+        let selector_separator =
+            format_once(|f| boundary.fmt_before(layout == SelectorChainLayout::Flat, f));
         let formatted = format_once(|f| {
             write!(
                 f,
@@ -237,13 +269,6 @@ fn format_selector(
             selector.format().with_options(layout).fmt(f)
         }
         _ => selector.format().fmt(f),
-    })
-}
-
-/// Returns whether this chain is the first selector-list entry.
-fn is_selector_list_first_child(node: &CssComplexSelector) -> bool {
-    node.syntax().parent().is_some_and(|parent| {
-        parent.kind() == CssSyntaxKind::CSS_SELECTOR_LIST && node.syntax().prev_sibling().is_none()
     })
 }
 

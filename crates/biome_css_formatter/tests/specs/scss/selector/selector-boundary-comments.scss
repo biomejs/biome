@@ -75,3 +75,8 @@
 // normal
 // biome-ignore format: reason
 .CHILD:HOVER{color:white}}
+
+.parent{/* parent short */
+&   .child{color:navy}
+/* parent long */
+&   .selector-with-a-very-long-name-one    .selector-with-a-very-long-name-two   .selector-with-a-very-long-name-three{color:maroon}}
