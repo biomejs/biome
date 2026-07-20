@@ -134,7 +134,7 @@ impl<'a> Printer<'a> {
                             }
                             return Ok(());
                         }
-                        LineMode::Hard | LineMode::Empty => {
+                        LineMode::Hard | LineMode::Empty | LineMode::Literal => {
                             self.state.measured_group_fits = false;
                         }
                     }
@@ -145,8 +145,9 @@ impl<'a> Printer<'a> {
                     return Ok(());
                 }
 
-                // Only print a newline if the current line isn't already empty
-                if self.state.line_width > 0 {
+                // Only print a newline if the current line isn't already empty, except literal
+                // lines preserve every occurrence.
+                if line_mode == &LineMode::Literal || self.state.line_width > 0 {
                     self.print_char('\n');
                 }
 
@@ -157,7 +158,11 @@ impl<'a> Printer<'a> {
                 }
 
                 self.state.pending_space = false;
-                self.state.pending_indent = indent_stack.indention();
+                self.state.pending_indent = if line_mode == &LineMode::Literal {
+                    Indention::default()
+                } else {
+                    indent_stack.indention()
+                };
             }
 
             FormatElement::ExpandParent => {
@@ -1201,6 +1206,10 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                             self.state.pending_space = true;
                         }
                         LineMode::Soft => {}
+                        LineMode::Literal => {
+                            // Literal is a forced fit boundary without parent propagation.
+                            return Ok(Fits::Yes);
+                        }
                         LineMode::Hard | LineMode::Empty => {
                             // Even in flat mode, content that _directly_ contains a hard or empty
                             // line is considered to fit when a hard break is reached, since that
@@ -1858,6 +1867,151 @@ two lines`,
         ]);
 
         assert_eq!("a\n\nb", result.as_code())
+    }
+
+    #[test]
+    fn literal_line_break_keeps_the_parent_group_flat() {
+        let result = format(&group(&format_args![
+            token("a"),
+            soft_line_break_or_space(),
+            token("b"),
+            literal_line_break_without_parent(),
+            token("c"),
+        ]));
+        assert_eq!(result.as_code(), "a b\nc");
+    }
+
+    #[test]
+    fn literal_line_break_preserves_leading_consecutive_and_trailing_lines() {
+        let result = format(&format_args![
+            literal_line_break_without_parent(),
+            token("a"),
+            literal_line_break_without_parent(),
+            literal_line_break_without_parent(),
+            token("b"),
+            literal_line_break_without_parent(),
+        ]);
+        assert_eq!(result.as_code(), "\na\n\nb\n");
+    }
+
+    #[test]
+    fn literal_line_break_resets_to_root_indentation() {
+        let options = PrinterOptions {
+            indent_style: IndentStyle::Space,
+            indent_width: 2.try_into().unwrap(),
+            line_ending: LineEnding::Lf,
+            ..PrinterOptions::default()
+        };
+        let result = format_with_options_and_indentation(
+            &format_args![
+                token("{"),
+                block_indent(&format_args![
+                    token("a"),
+                    literal_line_break_without_parent(),
+                    token("b"),
+                ]),
+                token("}"),
+            ],
+            options,
+            1,
+        );
+        assert_eq!(result.as_code(), "  {\n    a\nb\n  }");
+    }
+
+    #[test]
+    fn literal_line_break_at_end_of_align_resets_to_root_indentation() {
+        let options = PrinterOptions {
+            indent_style: IndentStyle::Space,
+            indent_width: 2.try_into().unwrap(),
+            line_ending: LineEnding::Lf,
+            ..PrinterOptions::default()
+        };
+        let result = format_with_options_and_indentation(
+            &format_args![
+                indent(&align(
+                    "  ",
+                    &format_args![token("a"), literal_line_break_without_parent(),],
+                )),
+                token("b"),
+            ],
+            options,
+            1,
+        );
+        assert_eq!(result.as_code(), "  a\nb");
+    }
+
+    #[test]
+    fn hard_line_break_in_nested_dedents_resyncs_at_end_of_align() {
+        let options = PrinterOptions {
+            indent_style: IndentStyle::Space,
+            indent_width: 2.try_into().unwrap(),
+            line_ending: LineEnding::Lf,
+            ..PrinterOptions::default()
+        };
+        let result = format_with_options_and_indentation(
+            &format_args![
+                indent(&align(
+                    "  ",
+                    &format_args![token("a"), dedent(&dedent(&hard_line_break())),],
+                )),
+                token("b"),
+            ],
+            options,
+            1,
+        );
+        assert_eq!(result.as_code(), "  a\n    b");
+    }
+
+    #[test]
+    fn literal_line_break_root_indentation_is_preserved_during_fit_measurement() {
+        let options = PrinterOptions {
+            indent_style: IndentStyle::Space,
+            indent_width: 2.try_into().unwrap(),
+            line_ending: LineEnding::Lf,
+            print_width: PrintWidth::new(5),
+            ..PrinterOptions::default()
+        };
+        let result = format_with_options_and_indentation(
+            &indent(&format_args![
+                align(
+                    "  ",
+                    &format_args![
+                        token("a"),
+                        literal_line_break_without_parent(),
+                        group(&soft_line_break()),
+                    ],
+                ),
+                token("bb"),
+            ]),
+            options,
+            1,
+        );
+        assert_eq!(result.as_code(), "  a\nbb");
+    }
+
+    #[test]
+    fn literal_line_break_uses_the_configured_line_ending() {
+        for (line_ending, expected) in [(LineEnding::Crlf, "a\r\nb"), (LineEnding::Cr, "a\rb")] {
+            let result = format_with_options(
+                &format_args![token("a"), literal_line_break_without_parent(), token("b"),],
+                PrinterOptions {
+                    line_ending,
+                    ..PrinterOptions::default()
+                },
+            );
+            assert_eq!(result.as_code(), expected);
+        }
+    }
+
+    #[test]
+    fn literal_line_break_flushes_line_suffixes() {
+        let result = format(&format_args![
+            token("a"),
+            line_suffix(&format_args![space(), token("// suffix")]),
+            literal_line_break_without_parent(),
+            token("b"),
+        ]);
+        assert_eq!(result.as_code(), "a // suffix\nb");
     }
 
     #[test]

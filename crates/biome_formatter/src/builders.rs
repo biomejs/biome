@@ -101,6 +101,16 @@ pub const fn hard_line_break() -> Line {
     Line::new(LineMode::Hard)
 }
 
+/// A forced line break that doesn't expand enclosing groups.
+///
+/// The printer always emits the configured line ending and resets indentation
+/// to the document root. Compose it with [`expand_parent`] when the enclosing
+/// group must also expand.
+#[inline]
+pub const fn literal_line_break_without_parent() -> Line {
+    Line::new(LineMode::Literal)
+}
+
 /// A forced empty line. An empty line inserts enough line breaks in the output for
 /// the previous and next element to be separated by an empty line.
 ///

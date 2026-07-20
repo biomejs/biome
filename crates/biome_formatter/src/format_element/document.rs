@@ -26,8 +26,10 @@ impl Document {
 
     /// Sets [`expand`](tag::Group::expand) to [`GroupMode::Propagated`] if the group contains any of:
     /// * a group with [`expand`](tag::Group::expand) set to [GroupMode::Propagated] or [GroupMode::Expand].
-    /// * a non-soft [line break](FormatElement::Line) with mode [LineMode::Hard], [LineMode::Empty], or [LineMode::Literal].
+    /// * a [line break](FormatElement::Line) with mode [LineMode::Hard] or [LineMode::Empty].
     /// * a [FormatElement::ExpandParent]
+    ///
+    /// [LineMode::Literal] forces a break without propagating expansion.
     ///
     /// [`BestFitting`] elements act as expand boundaries, meaning that the fact that a
     /// [`BestFitting`]'s content expands is not propagated past the [`BestFitting`] element.
@@ -444,6 +446,9 @@ impl Format<IrFormatContext> for &[FormatElement] {
                     }
                     LineMode::Empty => {
                         write!(f, [token("empty_line")])?;
+                    }
+                    LineMode::Literal => {
+                        write!(f, [token("literal_line_break_without_parent")])?;
                     }
                 },
                 FormatElement::ExpandParent => {
@@ -866,9 +871,39 @@ mod tests {
     use biome_js_syntax::JsSyntaxToken;
 
     use crate::prelude::document::IrFormatOptions;
+    use crate::prelude::tag::GroupMode;
     use crate::prelude::*;
     use crate::{FormatOptions, SimpleFormatContext};
     use crate::{format, format_args, write};
+
+    #[test]
+    fn literal_line_break_is_forced_without_propagating_expand() {
+        use Tag::*;
+
+        let group = tag::Group::new();
+        let mut document = Document::from(vec![
+            FormatElement::Tag(StartGroup(group.clone())),
+            FormatElement::Line(LineMode::Literal),
+            FormatElement::Tag(EndGroup),
+        ]);
+
+        assert!(!LineMode::Literal.is_hard());
+        assert!(document.as_elements().will_break());
+
+        document.propagate_expand();
+
+        assert_eq!(group.mode(), GroupMode::Flat);
+    }
+
+    #[test]
+    fn display_literal_line_break() {
+        let document = Document::from(vec![FormatElement::Line(LineMode::Literal)]);
+
+        assert_eq!(
+            &std::format!("{document}"),
+            "[literal_line_break_without_parent]"
+        );
+    }
 
     #[test]
     fn display_elements() {

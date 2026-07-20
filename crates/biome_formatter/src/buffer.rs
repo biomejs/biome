@@ -459,6 +459,7 @@ where
 ///                 soft_line_break_or_space(),
 ///                 token("and the line here"),
 ///                 soft_line_break(),
+///                 literal_line_break_without_parent(),
 ///                 token("is removed entirely.")
 ///             ]
 ///         )
@@ -471,6 +472,7 @@ where
 ///         FormatElement::Token { text: "The next soft line or space gets replaced by a space" },
 ///         FormatElement::Space,
 ///         FormatElement::Token { text: "and the line here" },
+///         FormatElement::Line(LineMode::Literal),
 ///         FormatElement::Token { text: "is removed entirely." }
 ///     ]
 /// );
