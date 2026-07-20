@@ -100,16 +100,7 @@ impl HtmlAttributeName {
 
 impl Attribute for AnyHtmlAttribute {
     fn name(&self) -> Option<impl AsRef<str>> {
-        match self {
-            // Shorthand attributes like `{href}` use the expression text as the attribute name.
-            Self::HtmlAttributeSingleTextExpression(expr) => expr
-                .expression()
-                .ok()?
-                .html_literal_token()
-                .ok()
-                .map(|token| token.token_text_trimmed()),
-            _ => self.name(),
-        }
+        self.name()
     }
 
     fn value(&self) -> Option<impl AsRef<str>> {
@@ -121,6 +112,11 @@ impl AnyHtmlAttribute {
     pub fn name(&self) -> Option<TokenText> {
         match self {
             Self::HtmlAttribute(attr) => attr.name().ok()?.token_text_trimmed(),
+            Self::HtmlAttributeSingleTextExpression(attr) => attr
+                .expression()
+                .ok()
+                .and_then(|expr| expr.html_literal_token().ok())
+                .map(|html_literal| html_literal.token_text_trimmed()),
             Self::AnyVueDirective(vue) => match vue {
                 // :attr="..." — shorthand Vue binding
                 AnyVueDirective::VueVBindShorthandDirective(d) => d
