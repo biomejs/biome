@@ -131,7 +131,7 @@ impl Rule for UseExhaustiveSwitchCases {
             let Ok(test) = case.test() else {
                 continue;
             };
-            let ty = ctx.inferred_type_of_expression(&test)?;
+            let ty = ctx.type_of_expression(&test)?;
             let variants = ty.try_switch_case_variants().ok()?;
             if let [variant] = variants.as_slice()
                 && *variant != InferredSwitchCase::UnsupportedLiteral
@@ -157,7 +157,7 @@ impl Rule for UseExhaustiveSwitchCases {
         };
 
         let variants = ctx
-            .inferred_type_of_expression(&discriminant)?
+            .type_of_expression(&discriminant)?
             .try_switch_case_variants()
             .ok()?;
 

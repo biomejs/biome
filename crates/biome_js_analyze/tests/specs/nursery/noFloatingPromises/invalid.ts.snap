@@ -372,6 +372,13 @@ getReqP().p;
 declare function getReadonlyP(): Readonly<{p: Promise<void>}>;
 getReadonlyP().p;
 
+type AsyncCallback<T> = () => Promise<T>;
+declare const aliasedCallback: AsyncCallback<void>;
+aliasedCallback();
+
+declare const explicitArray: Array<number>;
+explicitArray.map(async value => value);
+
 ```
 
 # Diagnostics
@@ -1905,8 +1912,45 @@ invalid.ts:367:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   > 367 │ getReadonlyP().p;
         │ ^^^^^^^^^^^^^^^^^
     368 │ 
+    369 │ type AsyncCallback<T> = () => Promise<T>;
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:371:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    369 │ type AsyncCallback<T> = () => Promise<T>;
+    370 │ declare const aliasedCallback: AsyncCallback<void>;
+  > 371 │ aliasedCallback();
+        │ ^^^^^^^^^^^^^^^^^^
+    372 │ 
+    373 │ declare const explicitArray: Array<number>;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:374:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An array of Promises was found, meaning they are not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    373 │ declare const explicitArray: Array<number>;
+  > 374 │ explicitArray.map(async value => value);
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    375 │ 
+  
+  i This happens when an array of Promises is not wrapped with Promise.all() or a similar method, and is not explicitly ignored using the `void` operator.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
