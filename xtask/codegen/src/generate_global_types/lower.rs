@@ -1225,9 +1225,12 @@ fn lower_generic_interface(
                     && let Ok(AnyTsName::JsReferenceIdentifier(ident)) = reference.name()
                 {
                     let constructor_name = ident.value_token()?.token_text_trimmed();
-                    let constructor_group = manifest.global_group(&constructor_name).with_context(|| {
-                        format!("missing constructor group {constructor_name} for {interface_name}")
-                    })?;
+                    let constructor_group =
+                        manifest.global_group(&constructor_name).with_context(|| {
+                            format!(
+                                "missing constructor group {constructor_name} for {interface_name}"
+                            )
+                        })?;
 
                     for constructor_record in constructor_group.declarations() {
                         if constructor_record.kind == DeclarationKind::Interface {
@@ -1236,18 +1239,13 @@ fn lower_generic_interface(
                             })?;
 
                             for member in constructor_decl.members() {
-                                if let Some(mut lowered) = lower_generic_member(
-                                    member,
-                                    interface_name,
-                                    true,
-                                    &[],
-                                )? {
+                                if let Some(mut lowered) =
+                                    lower_generic_member(member, interface_name, true, &[])?
+                                {
                                     // Static members on the value side are NamedStatic on the class side.
                                     // We skip members that are already defined as instance members to avoid collisions,
                                     // although in TS they usually don't collide.
-                                    if members
-                                        .iter()
-                                        .all(|m| m.name.text() != lowered.name.text())
+                                    if members.iter().all(|m| m.name.text() != lowered.name.text())
                                     {
                                         lowered.kind = LoweredMemberKind::NamedStatic;
                                         members.push(lowered);

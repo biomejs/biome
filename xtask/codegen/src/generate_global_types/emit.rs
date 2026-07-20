@@ -298,7 +298,6 @@ fn rust_string_literal(value: &str) -> String {
     format!("{value:?}")
 }
 
-
 /// Returns generated globals in the sorted predefined-ID order.
 fn sorted_globals(lowered: &LoweredGlobalTypes) -> Result<Vec<&LoweredGlobal>> {
     let mut sorted = Vec::new();
