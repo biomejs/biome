@@ -716,7 +716,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             explicit_type_parameters
         } else if constructed_ty == class_ty {
             constructor
-                .map(|constructor| self.infer_constructor_type_parameters(class, constructor, args))
+                .and_then(|constructor| {
+                    self.infer_constructor_type_parameters(class, constructor, args)
+                })
                 .unwrap_or_default()
         } else {
             Box::default()
@@ -734,16 +736,17 @@ impl<'db> ResolutionCtx<'db, '_> {
         class: InferredClass<'db>,
         constructor: InferredConstructor<'db>,
         args: &[InferredTypeData<'db>],
-    ) -> Box<[InferredTypeData<'db>]> {
+    ) -> Option<Box<[InferredTypeData<'db>]>> {
         let declared_parameters = class.type_parameters(self.db);
         if declared_parameters.is_empty() {
-            return Box::default();
+            return Some(Box::default());
         }
 
         let mut inferred_parameters = declared_parameters.to_vec();
         for (parameter, arg) in constructor.parameters(self.db).iter().zip(args) {
             let parameter_ty = parameter.parameter.ty();
-            for substitution in parameter_ty.collect_generic_replacements(self.db, *arg) {
+            let substitutions = parameter_ty.collect_generic_replacements(self.db, *arg)?;
+            for substitution in substitutions {
                 for (index, declared_parameter) in declared_parameters.iter().enumerate() {
                     if substitution.generic == *declared_parameter
                         || substitution.generic
@@ -775,9 +778,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                 continue;
             };
 
-            for substitution in
-                parameter_return_ty.collect_generic_replacements(self.db, *argument_return_ty)
-            {
+            let substitutions =
+                parameter_return_ty.collect_generic_replacements(self.db, *argument_return_ty)?;
+            for substitution in substitutions {
                 for (index, declared_parameter) in declared_parameters.iter().enumerate() {
                     if substitution.generic == *declared_parameter
                         || substitution.generic
@@ -793,7 +796,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
         }
 
-        inferred_parameters.into_boxed_slice()
+        Some(inferred_parameters.into_boxed_slice())
     }
 
     fn resolve_await_expression(

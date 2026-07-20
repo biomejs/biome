@@ -25,7 +25,7 @@ pub use crate::interned_types::{
     NamedFunctionParameter as InferredNamedFunctionParameter,
     PatternFunctionParameter as InferredPatternFunctionParameter,
     PredicateReturnType as InferredPredicateReturnType, ReturnType as InferredReturnType,
-    TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
+    StructuralMapError, TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
     TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
     TypeSubstitution as InferredTypeSubstitution, TypeofExpression as InferredTypeofExpression,
     well_known_symbol_name,
