@@ -431,7 +431,10 @@ pub(in crate::db::type_inference) fn apply_substitutions<'db>(
     substitutions: &[InferredTypeSubstitution<'db>],
 ) -> InferredTypeData<'db> {
     for substitution in substitutions {
-        ty = ty.substitute_type(db, *substitution);
+        let Ok(substituted) = ty.substitute_type(db, *substitution) else {
+            return InferredTypeData::Unknown;
+        };
+        ty = substituted;
     }
     ty
 }
@@ -442,7 +445,10 @@ pub(in crate::db) fn apply_substitutions_to_root_body<'db>(
     substitutions: &[InferredTypeSubstitution<'db>],
 ) -> InferredTypeData<'db> {
     for substitution in substitutions {
-        ty = ty.substitute_type_in_root_body(db, *substitution);
+        let Ok(substituted) = ty.substitute_type_in_root_body(db, *substitution) else {
+            return InferredTypeData::Unknown;
+        };
+        ty = substituted;
     }
     ty
 }
