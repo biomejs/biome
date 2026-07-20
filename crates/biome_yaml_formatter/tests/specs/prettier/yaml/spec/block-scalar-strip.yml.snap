@@ -20,13 +20,11 @@ info: yaml/spec/block-scalar-strip.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,2 +1,5 @@
+@@ -1,3 +1,3 @@
  |-
 -  ab
 + ab
-+ 
-+ 
-+...
+ ...
 ```
 
 # Output
@@ -34,7 +32,5 @@ info: yaml/spec/block-scalar-strip.yml
 ```yml
 |-
  ab
- 
- 
 ...
 ```
