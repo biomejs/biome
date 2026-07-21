@@ -32,8 +32,8 @@ impl FormatNodeRule<SvelteBindFunctionBindingExpression>
                     get.format(),
                     comma_token.format(),
                     soft_line_break_or_space(),
+                    set.format(),
                 ]),
-                set.format(),
                 soft_line_break(),
                 r_curly_token.format(),
             ])]
