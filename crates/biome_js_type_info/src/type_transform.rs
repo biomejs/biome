@@ -1,15 +1,32 @@
-//! Bounded transformations of nested types.
+//! Bounded transformations of interned types.
 //!
-//! A transformation visits each type and its slots. The traversal is private;
-//! callers use operations such as generic substitution.
+//! Each [`TypeData`] value exposes its immediate type-valued fields as slots.
+//! Transformations visit those slots iteratively and rebuild their parent after
+//! the nested types have been transformed. The traversal remains private;
+//! callers use semantic operations such as generic substitution.
 
 use crate::interned_types::{TypeData, TypeDataSlotRebuilder, TypeDb};
 use rustc_hash::FxHashSet;
 
 pub(crate) const MAX_TYPE_SUBSTITUTION_STEPS: usize = 1024;
 
-/// Replaces `generic` with `replacement` outside nested declarations of the
-/// same generic parameter.
+/// A generic type and the type that replaces its references.
+///
+/// Substitution does not cross a declaration that shadows the same generic.
+/// For example, substituting the outer `T` with `string` changes `value`, but
+/// preserves the `T` declared by `map`:
+///
+/// ```ts
+/// type Container<T> = {
+///     value: T;
+///     map: <T>(value: T) => T;
+/// };
+///
+/// type Substituted = {
+///     value: string;
+///     map: <T>(value: T) => T;
+/// };
+/// ```
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
 pub struct TypeSubstitution<'db> {
     /// Type to replace.
@@ -32,6 +49,10 @@ impl<'db> TypeSubstitution<'db> {
     }
 }
 
+/// Failure produced by a bounded type transformation.
+///
+/// [`TypeTransformResult`] retains these cases as variants for direct matching;
+/// [`TypeTransformResult::into_result`] converts them to this error type.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TypeTransformError {
     /// The transformation exceeded its step limit.
@@ -52,6 +73,10 @@ impl std::fmt::Display for TypeTransformError {
 impl std::error::Error for TypeTransformError {}
 
 /// Result of transforming a type and its nested slots.
+///
+/// A transformed value is returned only after every visited parent has been
+/// rebuilt. The failure variants distinguish an exhausted traversal budget
+/// from disagreement between slot extraction and reconstruction.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[must_use = "a type transformation failure must be handled"]
 pub enum TypeTransformResult<T> {
@@ -315,8 +340,11 @@ impl<'db> TypeTransform<'db> for TypeSubstituter<'db> {
 }
 
 impl<'db> TypeData<'db> {
-    /// Substitutes a generic throughout this type, excluding nested types that
-    /// declare the same generic parameter.
+    /// Replaces references to a generic throughout this type.
+    ///
+    /// Nested declarations of the same generic remain unchanged. Unmatched
+    /// generic declarations are also preserved as interned identities rather
+    /// than rebuilt from their constraints or defaults.
     pub fn substitute_type(
         self,
         db: &'db dyn TypeDb,
@@ -326,8 +354,21 @@ impl<'db> TypeData<'db> {
         TypeSubstituter::new(db, substitution).substitute(&mut transformer, db, self)
     }
 
-    /// Substitutes inside the body of this type while preserving generic
-    /// parameters declared by the root and by nested binders.
+    /// Replaces references inside a root generic declaration without replacing
+    /// the root's declared type parameters.
+    ///
+    /// This is used after inference binds a root generic. For example, binding
+    /// `T` to `string` preserves the declaration of `T`, while replacing its
+    /// parameter and return-type references:
+    ///
+    /// ```ts
+    /// declare function identity<T>(value: T): T;
+    ///
+    /// // Internal representation after root-body substitution of T with string:
+    /// declare function identity<T>(value: string): string;
+    /// ```
+    ///
+    /// Nested declarations that shadow `T` remain unchanged.
     pub fn substitute_type_in_root_body(
         self,
         db: &'db dyn TypeDb,

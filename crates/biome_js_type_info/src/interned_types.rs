@@ -661,14 +661,19 @@ impl<'db> TypeData<'db> {
     // #region Structural mapping
 
     /// Extracts this type's immediate `TypeData` fields in reconstruction order.
-    /// Nested slots are not included.
+    ///
+    /// Extraction is not recursive. Given this declaration:
+    ///
+    /// ```ts
+    /// declare function transform<T>(value: T): Promise<T>;
+    /// ```
+    ///
+    /// the immediate slots are the declaration of `T`, the parameter type `T`,
+    /// and the return type `Promise<T>`. The nested `T` inside `Promise<T>` is a
+    /// slot of the `Promise<T>` value and is visited when that value is processed.
     pub(crate) fn type_slots(self, db: &'db dyn TypeDb) -> TypeDataSlots<'db> {
         TypeDataSlots::collect(db, self)
     }
-
-    // #endregion
-
-    // #region Structural construction
 
     // #endregion
 
@@ -1166,14 +1171,22 @@ impl<'db> TypeData<'db> {
     // #endregion
 }
 
-/// Immediate type slots and the parent needed to rebuild them.
+/// Immediate type slots paired with the parent that produced them.
+///
+/// Slot order is the contract between extraction and reconstruction. Replacing
+/// every slot and calling [`Self::rebuild`] writes the replacements into the
+/// same type-valued fields while preserving names, modifiers, and other
+/// non-type data from the parent.
 #[derive(Debug)]
 pub(crate) struct TypeDataSlots<'db> {
     parent: TypeData<'db>,
     slots: Vec<TypeData<'db>>,
 }
 
-/// Retains the parent and slot count produced by one slot extraction.
+/// Rebuilds the parent retained by one [`TypeDataSlots`] extraction.
+///
+/// The parent and slot count cannot be supplied independently, preventing
+/// replacements extracted from one parent from being validated against another.
 pub(crate) struct TypeDataSlotRebuilder<'db> {
     parent: TypeData<'db>,
     slot_count: usize,
