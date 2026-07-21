@@ -133,11 +133,11 @@ impl Rule for UseNumberNamespace {
         let node_expr = AnyJsExpression::from(node.clone());
         let (old_node, new_node) = match node {
             AnyPossibleGlobalIdentifier::JsIdentifierExpression(expression) => {
-                let name = expression.name().ok()?.to_trimmed_text();
-                if !GLOBAL_NUMBER_PROPERTIES.contains(&name.text()) {
+                let name = expression.name().ok()?.value_token().ok()?;
+                if !GLOBAL_NUMBER_PROPERTIES.contains(&name.text_trimmed()) {
                     return None;
                 }
-                let (old_node, replacement) = match name.text() {
+                let (old_node, replacement) = match name.text_trimmed() {
                     "Infinity" => {
                         if let Some(parent) = node.parent::<JsUnaryExpression>() {
                             match parent.operator().ok()? {
@@ -155,7 +155,7 @@ impl Rule for UseNumberNamespace {
                             (node_expr, "POSITIVE_INFINITY")
                         }
                     }
-                    _ => (node_expr, name.text()),
+                    _ => (node_expr, name.text_trimmed()),
                 };
                 (
                     old_node,
@@ -171,12 +171,12 @@ impl Rule for UseNumberNamespace {
             }
             AnyPossibleGlobalIdentifier::AnyJsMemberExpression(member) => match member {
                 AnyJsMemberExpression::JsStaticMemberExpression(expression) => {
-                    let name = expression.member().ok()?.to_trimmed_text();
+                    let name = expression.member().ok()?.as_js_name()?.value_token().ok()?;
 
-                    if !GLOBAL_NUMBER_PROPERTIES.contains(&name.text()) {
+                    if !GLOBAL_NUMBER_PROPERTIES.contains(&name.text_trimmed()) {
                         return None;
                     }
-                    let (old_node, replacement) = match name.text() {
+                    let (old_node, replacement) = match name.text_trimmed() {
                         "Infinity" => {
                             if let Some(parent) = node.parent::<JsUnaryExpression>() {
                                 match parent.operator().ok()? {
@@ -194,7 +194,7 @@ impl Rule for UseNumberNamespace {
                                 (node_expr, "POSITIVE_INFINITY")
                             }
                         }
-                        _ => (node_expr, name.text()),
+                        _ => (node_expr, name.text_trimmed()),
                     };
                     (
                         old_node,

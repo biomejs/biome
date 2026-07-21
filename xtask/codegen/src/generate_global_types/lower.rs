@@ -3,10 +3,11 @@
 use anyhow::{Context, Result, bail};
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
-    AnyJsBindingPattern, AnyJsFormalParameter, AnyJsObjectMemberName, AnyJsParameter, AnyJsRoot,
-    AnyTsReturnType, AnyTsType, AnyTsTypeMember, AnyTsVariableAnnotation, JsParameters,
-    JsVariableDeclarator, TsCallSignatureTypeMember, TsConstructSignatureTypeMember,
-    TsDeclarationModule, TsInterfaceDeclaration, TsPropertySignatureTypeMember,
+    AnyJsBindingPattern, AnyJsExpression, AnyJsFormalParameter, AnyJsName, AnyJsObjectMemberName,
+    AnyJsParameter, AnyJsRoot, AnyTsReturnType, AnyTsType, AnyTsTypeMember,
+    AnyTsVariableAnnotation, JsParameters, JsVariableDeclarator, TsCallSignatureTypeMember,
+    TsConstructSignatureTypeMember, TsDeclarationModule, TsInterfaceDeclaration,
+    TsMethodSignatureTypeMember, TsPropertySignatureTypeMember,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, Text};
@@ -66,6 +67,7 @@ pub enum LoweredTypeData {
     Class(LoweredClass),
     Constructor(LoweredConstructor),
     Function(LoweredFunction),
+    Interface(LoweredInterface),
 }
 
 /// Lowered class-like global.
@@ -82,6 +84,32 @@ impl LoweredClass {
     }
 
     /// Class members in declaration order.
+    pub fn members(&self) -> &[LoweredTypeMember] {
+        &self.members
+    }
+
+    /// Returns the first member with `name`.
+    pub fn member(&self, name: &str) -> Option<&LoweredTypeMember> {
+        self.members
+            .iter()
+            .find(|member| member.name.text() == name)
+    }
+}
+
+/// Lowered interface data.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct LoweredInterface {
+    name: Text,
+    members: Box<[LoweredTypeMember]>,
+}
+
+impl LoweredInterface {
+    /// Interface name.
+    pub fn name(&self) -> &str {
+        self.name.text()
+    }
+
+    /// Interface members in declaration order.
     pub fn members(&self) -> &[LoweredTypeMember] {
         &self.members
     }
@@ -116,12 +144,18 @@ impl LoweredConstructor {
 /// Lowered function helper data.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LoweredFunction {
+    is_async: bool,
     name: Option<Text>,
     parameters: Box<[LoweredFunctionParameter]>,
     return_type: LoweredTypeReference,
 }
 
 impl LoweredFunction {
+    /// Returns whether this function is `async`.
+    pub fn is_async(&self) -> bool {
+        self.is_async
+    }
+
     /// Function name, if present.
     pub fn name(&self) -> Option<&str> {
         self.name.as_ref().map(Text::text)
@@ -201,6 +235,7 @@ pub enum LoweredMemberKind {
     NamedStatic,
     Constructor,
     CallSignature,
+    ComputedValue { key_reference: LoweredTypeReference },
 }
 
 /// Lowered type reference.
@@ -289,27 +324,39 @@ pub fn lower_global_types(
         members.push(prototype);
     }
 
+    let mut globals = Vec::new();
+    globals.push(LoweredGlobal {
+        name: Text::from("Error"),
+        id_constant: "ERROR_ID_GLOBAL_TYPE_ID",
+        data: LoweredTypeData::Class(LoweredClass {
+            name: Text::from("Error"),
+            members: members.into_boxed_slice(),
+        }),
+    });
+    globals.push(LoweredGlobal {
+        name: Text::from("Error.constructor"),
+        id_constant: "ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID",
+        data: LoweredTypeData::Constructor(constructor),
+    });
+    globals.push(LoweredGlobal {
+        name: Text::from("Error.call"),
+        id_constant: "ERROR_CALL_ID_GLOBAL_TYPE_ID",
+        data: LoweredTypeData::Function(call),
+    });
+
+    if let Some(disposable_globals) =
+        lower_disposable_global(manifest, &mut source_cache, DISPOSABLE_GLOBAL)?
+    {
+        globals.extend(disposable_globals);
+    }
+    if let Some(async_disposable_globals) =
+        lower_disposable_global(manifest, &mut source_cache, ASYNC_DISPOSABLE_GLOBAL)?
+    {
+        globals.extend(async_disposable_globals);
+    }
+
     Ok(LoweredGlobalTypes {
-        globals: Box::new([
-            LoweredGlobal {
-                name: Text::from("Error"),
-                id_constant: "ERROR_ID_GLOBAL_TYPE_ID",
-                data: LoweredTypeData::Class(LoweredClass {
-                    name: Text::from("Error"),
-                    members: members.into_boxed_slice(),
-                }),
-            },
-            LoweredGlobal {
-                name: Text::from("Error.constructor"),
-                id_constant: "ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID",
-                data: LoweredTypeData::Constructor(constructor),
-            },
-            LoweredGlobal {
-                name: Text::from("Error.call"),
-                id_constant: "ERROR_CALL_ID_GLOBAL_TYPE_ID",
-                data: LoweredTypeData::Function(call),
-            },
-        ]),
+        globals: globals.into_boxed_slice(),
     })
 }
 
@@ -319,6 +366,74 @@ struct ErrorConstructorSignatures {
     call: LoweredFunction,
     prototype: Option<LoweredTypeMember>,
 }
+
+/// Describes how one disposable interface (`Disposable`/`AsyncDisposable`) and its dispose
+/// helper are lowered. Every field is a static string because it feeds generated Rust source.
+#[derive(Clone, Copy)]
+struct DisposableGlobalSpec {
+    /// Interface name in the `.d.ts` source and the manifest group key.
+    interface_name: &'static str,
+    /// `GlobalTypeId` constant the lowered interface registers into.
+    global_id_constant: &'static str,
+    /// Display name of the single computed member (e.g. `[Symbol.dispose]`).
+    member_name: &'static str,
+    /// `GLOBAL_*` reference the computed member key must resolve to.
+    symbol_id: &'static str,
+    /// Display name of the synthesized dispose helper global.
+    helper_name: &'static str,
+    /// `GlobalTypeId` constant the dispose helper registers into.
+    helper_id_constant: &'static str,
+    /// `GLOBAL_*` reference the member's value type points at (the helper).
+    helper_type_id: &'static str,
+    /// Whether the helper returns `void` or `PromiseLike<void>`.
+    return_kind: DisposableReturnKind,
+}
+
+/// Return shape of a dispose helper, mapping the `.d.ts` signature to the lowered return type.
+#[derive(Clone, Copy)]
+enum DisposableReturnKind {
+    Void,
+    PromiseLikeVoid,
+}
+
+impl DisposableReturnKind {
+    /// Whether the lowered dispose helper is an `async` function.
+    fn helper_is_async(self) -> bool {
+        matches!(self, Self::PromiseLikeVoid)
+    }
+
+    /// Predefined ID constant the lowered return type must resolve to.
+    fn return_type_id(self) -> &'static str {
+        match self {
+            Self::Void => "GLOBAL_VOID_ID",
+            Self::PromiseLikeVoid => "GLOBAL_INSTANCEOF_PROMISE_ID",
+        }
+    }
+}
+
+/// Lowering spec for the `Disposable` interface and its `[Symbol.dispose](): void` helper.
+const DISPOSABLE_GLOBAL: DisposableGlobalSpec = DisposableGlobalSpec {
+    interface_name: "Disposable",
+    global_id_constant: "DISPOSABLE_ID_GLOBAL_TYPE_ID",
+    member_name: "[Symbol.dispose]",
+    symbol_id: "GLOBAL_SYMBOL_DISPOSE_ID",
+    helper_name: "Disposable[Symbol.dispose]",
+    helper_id_constant: "DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID",
+    helper_type_id: "GLOBAL_DISPOSABLE_DISPOSE_ID",
+    return_kind: DisposableReturnKind::Void,
+};
+
+/// Lowering spec for `AsyncDisposable` and its `[Symbol.asyncDispose](): PromiseLike<void>` helper.
+const ASYNC_DISPOSABLE_GLOBAL: DisposableGlobalSpec = DisposableGlobalSpec {
+    interface_name: "AsyncDisposable",
+    global_id_constant: "ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID",
+    member_name: "[Symbol.asyncDispose]",
+    symbol_id: "GLOBAL_SYMBOL_ASYNC_DISPOSE_ID",
+    helper_name: "AsyncDisposable[Symbol.asyncDispose]",
+    helper_id_constant: "ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
+    helper_type_id: "GLOBAL_ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID",
+    return_kind: DisposableReturnKind::PromiseLikeVoid,
+};
 
 struct ParsedSource<'a> {
     repo_relative: &'a str,
@@ -405,6 +520,299 @@ impl<'a> ParsedSourceCache<'a> {
 
         Ok(None)
     }
+}
+
+/// Lowers a disposable interface into its interface global plus the dispose helper global.
+/// Returns `None` when the manifest has no group for `spec.interface_name`.
+fn lower_disposable_global(
+    manifest: &GlobalManifest,
+    source_cache: &mut ParsedSourceCache,
+    spec: DisposableGlobalSpec,
+) -> Result<Option<[LoweredGlobal; 2]>> {
+    let Some(group) = manifest.global_group(spec.interface_name) else {
+        return Ok(None);
+    };
+    if !group.has_role(GlobalDeclarationRole::Type) {
+        bail!(
+            "{} global must have a type-side declaration",
+            spec.interface_name
+        );
+    }
+
+    let mut lowered_member = None;
+    let mut saw_interface = false;
+    for record in group.declarations() {
+        match &record.kind {
+            DeclarationKind::Interface => {
+                saw_interface = true;
+            }
+            DeclarationKind::TypeAlias => {
+                bail!("type aliases are not supported in {}", spec.interface_name)
+            }
+            DeclarationKind::DeclareFunction
+            | DeclarationKind::VariableDeclarator { .. }
+            | DeclarationKind::ImportEquals => {
+                bail!(
+                    "value-side {} declarations are not supported",
+                    spec.interface_name
+                )
+            }
+        }
+
+        let declaration = source_cache
+            .find_interface_declaration(record)?
+            .with_context(|| {
+                format!(
+                    "failed to find interface declaration {} at {:?}",
+                    record.declared_name.text(),
+                    record.text_range
+                )
+            })?;
+        if declaration.extends_clause().is_some() {
+            bail!("{} extends clauses are not supported", spec.interface_name);
+        }
+        if declaration.type_parameters().is_some() {
+            bail!("{} type parameters are not supported", spec.interface_name);
+        }
+
+        for member in declaration.members() {
+            let lowered = lower_disposable_type_member(member, spec)?;
+            if lowered_member.replace(lowered).is_some() {
+                bail!("{} has multiple computed members", spec.interface_name);
+            }
+        }
+    }
+    if !saw_interface {
+        bail!(
+            "{} global must include an interface declaration",
+            spec.interface_name
+        );
+    }
+
+    let lowered_member = lowered_member
+        .with_context(|| format!("{} is missing {}", spec.interface_name, spec.member_name))?;
+
+    Ok(Some([
+        LoweredGlobal {
+            name: Text::from(spec.interface_name),
+            id_constant: spec.global_id_constant,
+            data: LoweredTypeData::Interface(LoweredInterface {
+                name: Text::from(spec.interface_name),
+                members: Box::new([lowered_member]),
+            }),
+        },
+        LoweredGlobal {
+            name: Text::from(spec.helper_name),
+            id_constant: spec.helper_id_constant,
+            data: LoweredTypeData::Function(LoweredFunction {
+                is_async: spec.return_kind.helper_is_async(),
+                name: None,
+                parameters: Box::default(),
+                return_type: LoweredTypeReference::Predefined(spec.return_kind.return_type_id()),
+            }),
+        },
+    ]))
+}
+
+/// Lowers the single member of a disposable interface. Only a computed method signature
+/// (`[Symbol.dispose](): void`) is supported; every other member shape bails.
+fn lower_disposable_type_member(
+    member: AnyTsTypeMember,
+    spec: DisposableGlobalSpec,
+) -> Result<LoweredTypeMember> {
+    match member {
+        AnyTsTypeMember::TsMethodSignatureTypeMember(member) => {
+            lower_disposable_method_signature(&member, spec)
+        }
+        AnyTsTypeMember::TsPropertySignatureTypeMember(_) => {
+            bail!("properties are not supported in {}", spec.interface_name)
+        }
+        AnyTsTypeMember::TsCallSignatureTypeMember(_)
+        | AnyTsTypeMember::TsConstructSignatureTypeMember(_) => {
+            bail!("signatures are not supported in {}", spec.interface_name)
+        }
+        AnyTsTypeMember::JsBogusMember(_) => {
+            bail!("bogus members are not supported in {}", spec.interface_name)
+        }
+        AnyTsTypeMember::TsGetterSignatureTypeMember(_) => {
+            bail!(
+                "getter signatures are not supported in {}",
+                spec.interface_name
+            )
+        }
+        AnyTsTypeMember::TsIndexSignatureTypeMember(_) => {
+            bail!(
+                "index signatures are not supported in {}",
+                spec.interface_name
+            )
+        }
+        AnyTsTypeMember::TsSetterSignatureTypeMember(_) => {
+            bail!(
+                "setter signatures are not supported in {}",
+                spec.interface_name
+            )
+        }
+    }
+}
+
+/// Lowers a `[Symbol.(async)Dispose](): <return>` method into a computed-value member whose
+/// key is the well-known symbol and whose value type is the dispose helper. Bails on any
+/// deviation from that exact shape (optional, generic, parameterized, wrong key, wrong return).
+fn lower_disposable_method_signature(
+    member: &TsMethodSignatureTypeMember,
+    spec: DisposableGlobalSpec,
+) -> Result<LoweredTypeMember> {
+    if member.optional_token().is_some() {
+        bail!("{} must not be optional", spec.member_name);
+    }
+    if member.type_parameters().is_some() {
+        bail!("{} must not be generic", spec.member_name);
+    }
+    if member.parameters()?.items().into_iter().next().is_some() {
+        bail!("{} must not declare parameters", spec.member_name);
+    }
+
+    let computed_member = lower_symbol_computed_member_name(member.name()?)?;
+    if computed_member.name.text() != spec.member_name {
+        bail!(
+            "{} has unsupported computed member {}",
+            spec.interface_name,
+            computed_member.name
+        );
+    }
+    if computed_member.key_reference != LoweredTypeReference::Predefined(spec.symbol_id) {
+        bail!(
+            "{} has unsupported computed key for {}",
+            spec.interface_name,
+            spec.member_name
+        );
+    }
+
+    let return_type = member
+        .return_type_annotation()
+        .with_context(|| format!("{} is missing a return type", spec.member_name))?
+        .ty()
+        .with_context(|| format!("{} has malformed return type", spec.member_name))
+        .and_then(|return_type_node| lower_disposable_return_type(&return_type_node, spec))?;
+    if return_type != LoweredTypeReference::Predefined(spec.return_kind.return_type_id()) {
+        bail!("{} has unsupported return type", spec.member_name);
+    }
+
+    Ok(LoweredTypeMember {
+        name: computed_member.name,
+        kind: LoweredMemberKind::ComputedValue {
+            key_reference: computed_member.key_reference,
+        },
+        type_reference: LoweredTypeReference::Predefined(spec.helper_type_id),
+    })
+}
+
+/// A lowered `[Symbol.<name>]` computed key: its display name and the `GLOBAL_*` symbol reference.
+struct ComputedMemberName {
+    name: Text,
+    key_reference: LoweredTypeReference,
+}
+
+/// Lowers a `[Symbol.dispose]` / `[Symbol.asyncDispose]` computed member name into its display
+/// name and well-known-symbol key reference. Bails on any non-well-known or non-`Symbol` key.
+fn lower_symbol_computed_member_name(name: AnyJsObjectMemberName) -> Result<ComputedMemberName> {
+    let AnyJsObjectMemberName::JsComputedMemberName(name) = name else {
+        bail!("expected computed symbol member name")
+    };
+    let AnyJsExpression::JsStaticMemberExpression(expression) = name.expression()? else {
+        bail!("computed member name must be a static member expression")
+    };
+    let AnyJsExpression::JsIdentifierExpression(object) = expression.object()? else {
+        bail!("computed member object must be Symbol")
+    };
+    if object.name()?.value_token()?.token_text_trimmed().text() != "Symbol" {
+        bail!("computed member object must be Symbol");
+    }
+
+    let AnyJsName::JsName(member_name) = expression.member()? else {
+        bail!("computed Symbol member must be a public name")
+    };
+    let member_name = member_name.value_token()?.token_text_trimmed();
+    match member_name.text() {
+        "dispose" => Ok(ComputedMemberName {
+            name: Text::from("[Symbol.dispose]"),
+            key_reference: LoweredTypeReference::Predefined("GLOBAL_SYMBOL_DISPOSE_ID"),
+        }),
+        "asyncDispose" => Ok(ComputedMemberName {
+            name: Text::from("[Symbol.asyncDispose]"),
+            key_reference: LoweredTypeReference::Predefined("GLOBAL_SYMBOL_ASYNC_DISPOSE_ID"),
+        }),
+        name => bail!("unsupported Symbol computed member {name}"),
+    }
+}
+
+/// Lowers a dispose helper's return type according to `spec.return_kind`: a plain `void`, or
+/// the `PromiseLike<void>` special case handled by [`lower_promise_like_void_reference`].
+fn lower_disposable_return_type(
+    return_type_node: &AnyTsReturnType,
+    spec: DisposableGlobalSpec,
+) -> Result<LoweredTypeReference> {
+    match return_type_node {
+        AnyTsReturnType::AnyTsType(type_node) => match spec.return_kind {
+            DisposableReturnKind::Void => lower_void_reference(type_node, spec),
+            DisposableReturnKind::PromiseLikeVoid => lower_promise_like_void_reference(type_node),
+        },
+        AnyTsReturnType::TsAssertsReturnType(_) | AnyTsReturnType::TsPredicateReturnType(_) => {
+            bail!(
+                "predicate return types are not supported in {}",
+                spec.member_name
+            )
+        }
+    }
+}
+
+/// Lowers the `Disposable` dispose helper's `void` return type to `GLOBAL_VOID_ID`.
+fn lower_void_reference(
+    type_node: &AnyTsType,
+    spec: DisposableGlobalSpec,
+) -> Result<LoweredTypeReference> {
+    if !matches!(type_node, AnyTsType::TsVoidType(_)) {
+        bail!("{} return type must be void", spec.member_name);
+    }
+    Ok(LoweredTypeReference::Predefined("GLOBAL_VOID_ID"))
+}
+
+/// Lowers the `AsyncDisposable` dispose helper's `PromiseLike<void>` return type to
+/// `GLOBAL_INSTANCEOF_PROMISE_ID`. This is a deliberate approximation: `PromiseLike` is not a
+/// migrated global yet, so the helper resolves to `instanceof Promise` exactly like the previous
+/// hand-written data did; the exact-shape check keeps any other return type from being lowered.
+fn lower_promise_like_void_reference(type_node: &AnyTsType) -> Result<LoweredTypeReference> {
+    let AnyTsType::TsReferenceType(reference) = type_node else {
+        bail!("AsyncDisposable return type must be PromiseLike<void>");
+    };
+    let name = reference
+        .name()
+        .context("missing AsyncDisposable return type name")?;
+    let biome_js_syntax::AnyTsName::JsReferenceIdentifier(identifier) = name else {
+        bail!("qualified AsyncDisposable return types are not supported");
+    };
+    if identifier.value_token()?.token_text_trimmed().text() != "PromiseLike" {
+        bail!("AsyncDisposable return type must be PromiseLike<void>");
+    }
+
+    let type_arguments = reference
+        .type_arguments()
+        .context("PromiseLike return type is missing type arguments")?;
+    let mut arguments = type_arguments.ts_type_argument_list().into_iter();
+    let Some(argument) = arguments.next() else {
+        bail!("PromiseLike return type is missing void type argument");
+    };
+    let argument = argument?;
+    if arguments.next().is_some() {
+        bail!("PromiseLike return type must have one type argument");
+    }
+    if !matches!(argument, AnyTsType::TsVoidType(_)) {
+        bail!("PromiseLike return type must be PromiseLike<void>");
+    }
+
+    Ok(LoweredTypeReference::Predefined(
+        "GLOBAL_INSTANCEOF_PROMISE_ID",
+    ))
 }
 
 /// Lowers supported members from `interface Error`.
@@ -668,6 +1076,7 @@ fn lower_call_signature(member: &TsCallSignatureTypeMember) -> Result<LoweredFun
         .and_then(|return_type_node| lower_return_type_reference(&return_type_node))?;
 
     Ok(LoweredFunction {
+        is_async: false,
         name: Some(Text::from("Error")),
         parameters: lower_parameters(member.parameters()?)?,
         return_type: instance_return_reference(return_type),

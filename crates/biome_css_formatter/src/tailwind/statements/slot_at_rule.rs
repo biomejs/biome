@@ -11,6 +11,12 @@ impl FormatNodeRule<TwSlotAtRule> for FormatTwSlotAtRule {
             semicolon_token,
         } = node.as_fields();
 
-        write!(f, [slot_token.format(), semicolon_token.format()])
+        write!(
+            f,
+            [
+                slot_token.format()?.with_text_case(CssCase::Lowercase),
+                semicolon_token.format()
+            ]
+        )
     }
 }

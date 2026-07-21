@@ -27,8 +27,7 @@ info: yaml/spec/spec-example-8-20-block-node-types.yml
 -  Block scalar
 + Block scalar
  - !!map # Block collection
--  foo: bar
-+  foo : bar
+   foo: bar
 ```
 
 # Output
@@ -38,5 +37,5 @@ info: yaml/spec/spec-example-8-20-block-node-types.yml
 - >
  Block scalar
 - !!map # Block collection
-  foo : bar
+  foo: bar
 ```

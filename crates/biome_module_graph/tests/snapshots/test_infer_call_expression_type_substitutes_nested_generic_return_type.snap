@@ -1,0 +1,52 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function wrap<T>(value: T): Promise<T> {
+	return Promise.resolve(value);
+}
+```
+
+## Inferred types
+
+```
+Binding wrap "wrap" => sync Function "wrap" {
+  accepts: {
+    params: [
+      required value: instanceof T
+    ]
+    type_args: [T]
+  }
+  returns: instanceof Promise<instanceof T>
+}
+
+Binding T "T" => T
+
+Binding value "value" => instanceof T
+
+Expression "Promise" => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "Promise.resolve" => sync Function "resolve" {
+  accepts: {
+    params: [
+      required value: TResolveValue
+    ]
+    type_args: [TResolveValue]
+  }
+  returns: instanceof Promise<TResolveValue>
+}
+
+Expression "Promise.resolve(value)" => instanceof Promise<instanceof T>
+
+Expression "value" => instanceof T
+```

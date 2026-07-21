@@ -448,6 +448,41 @@ pub struct CssBinaryExpressionFields {
     pub right: SyntaxResult<AnyCssExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssBooleanMediaQuery {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssBooleanMediaQuery {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssBooleanMediaQueryFields {
+        CssBooleanMediaQueryFields {
+            boolean: self.boolean(),
+        }
+    }
+    pub fn boolean(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssBooleanMediaQuery {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssBooleanMediaQueryFields {
+    pub boolean: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssBracketedValue {
     pub(crate) syntax: SyntaxNode,
 }
@@ -1826,6 +1861,91 @@ impl Serialize for CssCustomIdentifier {
 #[derive(Serialize)]
 pub struct CssCustomIdentifierFields {
     pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssCustomMediaAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssCustomMediaAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssCustomMediaAtRuleFields {
+        CssCustomMediaAtRuleFields {
+            declarator: self.declarator(),
+            semicolon_token: self.semicolon_token(),
+        }
+    }
+    pub fn declarator(&self) -> SyntaxResult<CssCustomMediaAtRuleDeclarator> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for CssCustomMediaAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssCustomMediaAtRuleFields {
+    pub declarator: SyntaxResult<CssCustomMediaAtRuleDeclarator>,
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssCustomMediaAtRuleDeclarator {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssCustomMediaAtRuleDeclarator {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssCustomMediaAtRuleDeclaratorFields {
+        CssCustomMediaAtRuleDeclaratorFields {
+            custom_media_token: self.custom_media_token(),
+            name: self.name(),
+            queries: self.queries(),
+        }
+    }
+    pub fn custom_media_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<AnyCssDashedIdentifier> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn queries(&self) -> SyntaxResult<AnyCssCustomMediaQuery> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for CssCustomMediaAtRuleDeclarator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssCustomMediaAtRuleDeclaratorFields {
+    pub custom_media_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<AnyCssDashedIdentifier>,
+    pub queries: SyntaxResult<AnyCssCustomMediaQuery>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssDashedIdentifier {
@@ -13052,6 +13172,7 @@ pub enum AnyCssAtRule {
     CssColorProfileAtRule(CssColorProfileAtRule),
     CssContainerAtRule(CssContainerAtRule),
     CssCounterStyleAtRule(CssCounterStyleAtRule),
+    CssCustomMediaAtRule(CssCustomMediaAtRule),
     CssDocumentAtRule(CssDocumentAtRule),
     CssFontFaceAtRule(CssFontFaceAtRule),
     CssFontFeatureValuesAtRule(CssFontFeatureValuesAtRule),
@@ -13128,6 +13249,12 @@ impl AnyCssAtRule {
     pub fn as_css_counter_style_at_rule(&self) -> Option<&CssCounterStyleAtRule> {
         match &self {
             Self::CssCounterStyleAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_custom_media_at_rule(&self) -> Option<&CssCustomMediaAtRule> {
+        match &self {
+            Self::CssCustomMediaAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -14098,6 +14225,25 @@ impl AnyCssCustomIdentifier {
     pub fn as_css_custom_identifier(&self) -> Option<&CssCustomIdentifier> {
         match &self {
             Self::CssCustomIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssCustomMediaQuery {
+    CssBooleanMediaQuery(CssBooleanMediaQuery),
+    CssMediaQueryList(CssMediaQueryList),
+}
+impl AnyCssCustomMediaQuery {
+    pub fn as_css_boolean_media_query(&self) -> Option<&CssBooleanMediaQuery> {
+        match &self {
+            Self::CssBooleanMediaQuery(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_media_query_list(&self) -> Option<&CssMediaQueryList> {
+        match &self {
+            Self::CssMediaQueryList(item) => Some(item),
             _ => None,
         }
     }
@@ -15794,11 +15940,18 @@ impl AnyCssQueryFeature {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssQueryFeatureName {
+    CssDashedIdentifier(CssDashedIdentifier),
     CssIdentifier(CssIdentifier),
     ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
     ScssVariable(ScssVariable),
 }
 impl AnyCssQueryFeatureName {
+    pub fn as_css_dashed_identifier(&self) -> Option<&CssDashedIdentifier> {
+        match &self {
+            Self::CssDashedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
         match &self {
             Self::CssIdentifier(item) => Some(item),
@@ -17912,6 +18065,53 @@ impl From<CssBinaryExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssBooleanMediaQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOOLEAN_MEDIA_QUERY as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOOLEAN_MEDIA_QUERY
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBooleanMediaQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssBooleanMediaQuery")
+                .field("boolean", &support::DebugSyntaxResult(self.boolean()))
+                .finish()
+        } else {
+            f.debug_struct("CssBooleanMediaQuery").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssBooleanMediaQuery> for SyntaxNode {
+    fn from(n: CssBooleanMediaQuery) -> Self {
+        n.syntax
+    }
+}
+impl From<CssBooleanMediaQuery> for SyntaxElement {
+    fn from(n: CssBooleanMediaQuery) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssBracketedValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -19548,6 +19748,109 @@ impl From<CssCustomIdentifier> for SyntaxNode {
 }
 impl From<CssCustomIdentifier> for SyntaxElement {
     fn from(n: CssCustomIdentifier) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssCustomMediaAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_CUSTOM_MEDIA_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_CUSTOM_MEDIA_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssCustomMediaAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssCustomMediaAtRule")
+                .field("declarator", &support::DebugSyntaxResult(self.declarator()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssCustomMediaAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssCustomMediaAtRule> for SyntaxNode {
+    fn from(n: CssCustomMediaAtRule) -> Self {
+        n.syntax
+    }
+}
+impl From<CssCustomMediaAtRule> for SyntaxElement {
+    fn from(n: CssCustomMediaAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssCustomMediaAtRuleDeclarator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_CUSTOM_MEDIA_AT_RULE_DECLARATOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_CUSTOM_MEDIA_AT_RULE_DECLARATOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssCustomMediaAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssCustomMediaAtRuleDeclarator")
+                .field(
+                    "custom_media_token",
+                    &support::DebugSyntaxResult(self.custom_media_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("queries", &support::DebugSyntaxResult(self.queries()))
+                .finish()
+        } else {
+            f.debug_struct("CssCustomMediaAtRuleDeclarator").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssCustomMediaAtRuleDeclarator> for SyntaxNode {
+    fn from(n: CssCustomMediaAtRuleDeclarator) -> Self {
+        n.syntax
+    }
+}
+impl From<CssCustomMediaAtRuleDeclarator> for SyntaxElement {
+    fn from(n: CssCustomMediaAtRuleDeclarator) -> Self {
         n.syntax.into()
     }
 }
@@ -33218,6 +33521,11 @@ impl From<CssCounterStyleAtRule> for AnyCssAtRule {
         Self::CssCounterStyleAtRule(node)
     }
 }
+impl From<CssCustomMediaAtRule> for AnyCssAtRule {
+    fn from(node: CssCustomMediaAtRule) -> Self {
+        Self::CssCustomMediaAtRule(node)
+    }
+}
 impl From<CssDocumentAtRule> for AnyCssAtRule {
     fn from(node: CssDocumentAtRule) -> Self {
         Self::CssDocumentAtRule(node)
@@ -33460,6 +33768,7 @@ impl AstNode for AnyCssAtRule {
         .union(CssColorProfileAtRule::KIND_SET)
         .union(CssContainerAtRule::KIND_SET)
         .union(CssCounterStyleAtRule::KIND_SET)
+        .union(CssCustomMediaAtRule::KIND_SET)
         .union(CssDocumentAtRule::KIND_SET)
         .union(CssFontFaceAtRule::KIND_SET)
         .union(CssFontFeatureValuesAtRule::KIND_SET)
@@ -33515,6 +33824,7 @@ impl AstNode for AnyCssAtRule {
                 | CSS_COLOR_PROFILE_AT_RULE
                 | CSS_CONTAINER_AT_RULE
                 | CSS_COUNTER_STYLE_AT_RULE
+                | CSS_CUSTOM_MEDIA_AT_RULE
                 | CSS_DOCUMENT_AT_RULE
                 | CSS_FONT_FACE_AT_RULE
                 | CSS_FONT_FEATURE_VALUES_AT_RULE
@@ -33575,6 +33885,7 @@ impl AstNode for AnyCssAtRule {
             CSS_COUNTER_STYLE_AT_RULE => {
                 Self::CssCounterStyleAtRule(CssCounterStyleAtRule { syntax })
             }
+            CSS_CUSTOM_MEDIA_AT_RULE => Self::CssCustomMediaAtRule(CssCustomMediaAtRule { syntax }),
             CSS_DOCUMENT_AT_RULE => Self::CssDocumentAtRule(CssDocumentAtRule { syntax }),
             CSS_FONT_FACE_AT_RULE => Self::CssFontFaceAtRule(CssFontFaceAtRule { syntax }),
             CSS_FONT_FEATURE_VALUES_AT_RULE => {
@@ -33647,6 +33958,7 @@ impl AstNode for AnyCssAtRule {
             Self::CssColorProfileAtRule(it) => it.syntax(),
             Self::CssContainerAtRule(it) => it.syntax(),
             Self::CssCounterStyleAtRule(it) => it.syntax(),
+            Self::CssCustomMediaAtRule(it) => it.syntax(),
             Self::CssDocumentAtRule(it) => it.syntax(),
             Self::CssFontFaceAtRule(it) => it.syntax(),
             Self::CssFontFeatureValuesAtRule(it) => it.syntax(),
@@ -33703,6 +34015,7 @@ impl AstNode for AnyCssAtRule {
             Self::CssColorProfileAtRule(it) => it.into_syntax(),
             Self::CssContainerAtRule(it) => it.into_syntax(),
             Self::CssCounterStyleAtRule(it) => it.into_syntax(),
+            Self::CssCustomMediaAtRule(it) => it.into_syntax(),
             Self::CssDocumentAtRule(it) => it.into_syntax(),
             Self::CssFontFaceAtRule(it) => it.into_syntax(),
             Self::CssFontFeatureValuesAtRule(it) => it.into_syntax(),
@@ -33761,6 +34074,7 @@ impl std::fmt::Debug for AnyCssAtRule {
             Self::CssColorProfileAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssContainerAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssCounterStyleAtRule(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssCustomMediaAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDocumentAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssFontFaceAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssFontFeatureValuesAtRule(it) => std::fmt::Debug::fmt(it, f),
@@ -33819,6 +34133,7 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssColorProfileAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssContainerAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssCounterStyleAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssCustomMediaAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssDocumentAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssFontFaceAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssFontFeatureValuesAtRule(it) => it.into_syntax(),
@@ -35814,6 +36129,66 @@ impl From<AnyCssCustomIdentifier> for SyntaxNode {
 }
 impl From<AnyCssCustomIdentifier> for SyntaxElement {
     fn from(n: AnyCssCustomIdentifier) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssBooleanMediaQuery> for AnyCssCustomMediaQuery {
+    fn from(node: CssBooleanMediaQuery) -> Self {
+        Self::CssBooleanMediaQuery(node)
+    }
+}
+impl From<CssMediaQueryList> for AnyCssCustomMediaQuery {
+    fn from(node: CssMediaQueryList) -> Self {
+        Self::CssMediaQueryList(node)
+    }
+}
+impl AstNode for AnyCssCustomMediaQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssBooleanMediaQuery::KIND_SET.union(CssMediaQueryList::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_BOOLEAN_MEDIA_QUERY | CSS_MEDIA_QUERY_LIST)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOOLEAN_MEDIA_QUERY => Self::CssBooleanMediaQuery(CssBooleanMediaQuery { syntax }),
+            CSS_MEDIA_QUERY_LIST => Self::CssMediaQueryList(CssMediaQueryList::cast(syntax)?),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssBooleanMediaQuery(it) => it.syntax(),
+            Self::CssMediaQueryList(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssBooleanMediaQuery(it) => it.into_syntax(),
+            Self::CssMediaQueryList(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssCustomMediaQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssBooleanMediaQuery(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssMediaQueryList(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssCustomMediaQuery> for SyntaxNode {
+    fn from(n: AnyCssCustomMediaQuery) -> Self {
+        match n {
+            AnyCssCustomMediaQuery::CssBooleanMediaQuery(it) => it.into_syntax(),
+            AnyCssCustomMediaQuery::CssMediaQueryList(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssCustomMediaQuery> for SyntaxElement {
+    fn from(n: AnyCssCustomMediaQuery) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -40675,6 +41050,11 @@ impl From<AnyCssQueryFeature> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssDashedIdentifier> for AnyCssQueryFeatureName {
+    fn from(node: CssDashedIdentifier) -> Self {
+        Self::CssDashedIdentifier(node)
+    }
+}
 impl From<CssIdentifier> for AnyCssQueryFeatureName {
     fn from(node: CssIdentifier) -> Self {
         Self::CssIdentifier(node)
@@ -40692,17 +41072,19 @@ impl From<ScssVariable> for AnyCssQueryFeatureName {
 }
 impl AstNode for AnyCssQueryFeatureName {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssIdentifier::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssDashedIdentifier::KIND_SET
+        .union(CssIdentifier::KIND_SET)
         .union(ScssInterpolatedIdentifier::KIND_SET)
         .union(ScssVariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER | SCSS_VARIABLE
+            CSS_DASHED_IDENTIFIER | CSS_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER | SCSS_VARIABLE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_DASHED_IDENTIFIER => Self::CssDashedIdentifier(CssDashedIdentifier { syntax }),
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
             SCSS_INTERPOLATED_IDENTIFIER => {
                 Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
@@ -40714,6 +41096,7 @@ impl AstNode for AnyCssQueryFeatureName {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::CssDashedIdentifier(it) => it.syntax(),
             Self::CssIdentifier(it) => it.syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.syntax(),
             Self::ScssVariable(it) => it.syntax(),
@@ -40721,6 +41104,7 @@ impl AstNode for AnyCssQueryFeatureName {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::CssDashedIdentifier(it) => it.into_syntax(),
             Self::CssIdentifier(it) => it.into_syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             Self::ScssVariable(it) => it.into_syntax(),
@@ -40730,6 +41114,7 @@ impl AstNode for AnyCssQueryFeatureName {
 impl std::fmt::Debug for AnyCssQueryFeatureName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::CssDashedIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssVariable(it) => std::fmt::Debug::fmt(it, f),
@@ -40739,6 +41124,7 @@ impl std::fmt::Debug for AnyCssQueryFeatureName {
 impl From<AnyCssQueryFeatureName> for SyntaxNode {
     fn from(n: AnyCssQueryFeatureName) -> Self {
         match n {
+            AnyCssQueryFeatureName::CssDashedIdentifier(it) => it.into_syntax(),
             AnyCssQueryFeatureName::CssIdentifier(it) => it.into_syntax(),
             AnyCssQueryFeatureName::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             AnyCssQueryFeatureName::ScssVariable(it) => it.into_syntax(),
@@ -45237,6 +45623,11 @@ impl std::fmt::Display for AnyCssCustomIdentifier {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssCustomMediaQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssDashedIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -45862,6 +46253,11 @@ impl std::fmt::Display for CssBinaryExpression {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssBooleanMediaQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssBracketedValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -46018,6 +46414,16 @@ impl std::fmt::Display for CssCounterStyleAtRuleDeclarator {
     }
 }
 impl std::fmt::Display for CssCustomIdentifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssCustomMediaAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssCustomMediaAtRuleDeclarator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

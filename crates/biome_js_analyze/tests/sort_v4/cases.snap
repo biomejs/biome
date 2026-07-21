@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/sort_v4_test.rs
+assertion_line: 25
 expression: rendered
 input_file: crates/biome_js_analyze/tests/sort_v4/cases.jsonc
 ---
@@ -173,6 +174,36 @@ sorted: m-2 bg-linear-to-r from-blue-500 to-purple-500 p-4
 ---
 input:  mask-linear-to-75% mask-linear-from-25%
 sorted: mask-linear-from-25% mask-linear-to-75%
+---
+input:  px-2! flex p-4
+sorted: flex p-4 px-2!
+---
+input:  underline flex!
+sorted: flex! underline
+---
+input:  flex! flex
+sorted: flex flex!
+---
+input:  p-4! p-4
+sorted: p-4 p-4!
+---
+input:  w-1/2! flex
+sorted: flex w-1/2!
+---
+input:  bg-red-500! flex p-4
+sorted: flex bg-red-500! p-4
+---
+input:  flex! block
+sorted: block flex!
+---
+input:  [display:block]! [color:red]
+sorted: [display:block]! [color:red]
+---
+input:  mt-4 -mt-2!
+sorted: -mt-2! mt-4
+---
+input:  not-a-class! flex
+sorted: not-a-class! flex
 ---
 input:  shadow-sm text-card-foreground border bg-card gap-6 py-6 rounded-xl flex flex-col
 sorted: text-card-foreground border bg-card flex-col flex gap-6 rounded-xl py-6 shadow-sm

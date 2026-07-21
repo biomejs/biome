@@ -289,14 +289,29 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
     Some(output)
 }
 
+/// A temp-dir path found in snapshot output is only a *real* path occurrence
+/// when it starts at a boundary. If the preceding character is a path/glob/word
+/// character (e.g. the `*` in the glob `**/build`), the match is a coincidental
+/// substring and must be left verbatim. See
+/// <https://github.com/biomejs/biome/issues/5197>.
+fn is_redaction_boundary(prev: Option<char>) -> bool {
+    match prev {
+        None => true,
+        Some(c) => !(c.is_alphanumeric() || matches!(c, '*' | '?' | '_' | '-' | '.' | '/' | '\\')),
+    }
+}
+
 /// Replace the path to the temporary directory with "<TEMP_DIR>"
 /// And normalizes the count of `-` at the end of the diagnostic
 fn replace_temp_dir(input: Cow<str>) -> Cow<str> {
-    let mut result = String::new();
-    let mut rest = input.as_ref();
-
     let temp_dir = temp_dir().display().to_string();
     let temp_dir = temp_dir.trim_end_matches(MAIN_SEPARATOR);
+    replace_temp_dir_impl(input, temp_dir)
+}
+
+fn replace_temp_dir_impl<'a>(input: Cow<'a, str>, temp_dir: &str) -> Cow<'a, str> {
+    let mut result = String::new();
+    let mut rest = input.as_ref();
 
     while let Some(index) = rest.find(temp_dir) {
         let (before, after) = rest.split_at(index);
@@ -304,6 +319,19 @@ fn replace_temp_dir(input: Cow<str>) -> Cow<str> {
         // Normalize /var and /private/var on macOS
         #[cfg(target_os = "macos")]
         let before = before.trim_end_matches("/private");
+
+        // Only redact genuine path occurrences. A short temp dir (e.g. `/build`
+        // in the nixpkgs sandbox) would otherwise clobber legitimate output that
+        // merely contains it, such as the `**/build` glob. See issue #5197.
+        if !is_redaction_boundary(before.chars().next_back()) {
+            // Keep the original text verbatim, including any `/private` prefix
+            // that was stripped above on macOS (that trimming is only meant for
+            // the redaction branch below).
+            let end = index + temp_dir.len();
+            result.push_str(&rest[..end]);
+            rest = &rest[end..];
+            continue;
+        }
 
         result.push_str(before);
         result.push_str("<TEMP_DIR>");
@@ -563,4 +591,31 @@ pub fn assert_file_contents(fs: &MemoryFileSystem, path: &Utf8Path, expected_con
         content, expected_content,
         "file {path} doesn't match the expected content (right)",
     );
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::borrow::Cow;
+
+    /// Regression test for <https://github.com/biomejs/biome/issues/5197>: a
+    /// `/build` temp dir (as used in the nixpkgs build sandbox) must not clobber
+    /// the legitimate `**/build` glob that appears in snapshot output.
+    #[test]
+    fn temp_dir_redaction_keeps_glob_substring() {
+        let input = Cow::Borrowed(r#""includes": ["**", "!**/build"]"#);
+        assert_eq!(
+            replace_temp_dir_impl(input, "/build"),
+            r#""includes": ["**", "!**/build"]"#
+        );
+    }
+
+    #[test]
+    fn temp_dir_redaction_replaces_real_path() {
+        let input = Cow::Borrowed(r#"{"path": "/build/file.js"}"#);
+        assert_eq!(
+            replace_temp_dir_impl(input, "/build"),
+            r#"{"path": "<TEMP_DIR>/file.js"}"#
+        );
+    }
 }

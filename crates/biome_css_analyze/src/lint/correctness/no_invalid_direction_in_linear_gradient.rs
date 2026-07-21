@@ -1,3 +1,5 @@
+#![expect(clippy::disallowed_methods, reason = "This rule compares CSS values that can span multiple tokens.")]
+
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };

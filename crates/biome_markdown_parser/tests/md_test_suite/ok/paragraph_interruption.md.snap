@@ -148,14 +148,8 @@ MdDocument {
             l_fence: TRIPLE_BACKTICK@114..117 "```" [] [],
             code_list: MdCodeNameList [],
             content: MdInlineItemList [
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@117..118 "\n" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@118..134 "Fence interrupts" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@134..135 "\n" [] [],
+                MdCodeContent {
+                    value_token: MD_CODE_LITERAL@117..135 "\nFence interrupts\n" [] [],
                 },
             ],
             r_fence_indent: MdIndentTokenList [],
@@ -278,12 +272,8 @@ MdDocument {
       1: TRIPLE_BACKTICK@114..117 "```" [] []
       2: MD_CODE_NAME_LIST@117..117
       3: MD_INLINE_ITEM_LIST@117..135
-        0: MD_TEXTUAL@117..118
-          0: MD_TEXTUAL_LITERAL@117..118 "\n" [] []
-        1: MD_TEXTUAL@118..134
-          0: MD_TEXTUAL_LITERAL@118..134 "Fence interrupts" [] []
-        2: MD_TEXTUAL@134..135
-          0: MD_TEXTUAL_LITERAL@134..135 "\n" [] []
+        0: MD_CODE_CONTENT@117..135
+          0: MD_CODE_LITERAL@117..135 "\nFence interrupts\n" [] []
       4: MD_INDENT_TOKEN_LIST@135..135
       5: TRIPLE_BACKTICK@135..138 "```" [] []
     12: MD_NEWLINE@138..139

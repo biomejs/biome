@@ -7,7 +7,7 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, JsCallArgumentList, JsCallExpression,
     JsConditionalExpression, JsNewExpression, JsSyntaxKind,
 };
-use biome_js_type_info::{Type, TypeMemberKind};
+use biome_js_type_info::InferredType;
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
 use biome_rule_options::no_misused_promises::NoMisusedPromisesOptions;
 
@@ -108,11 +108,11 @@ impl Rule for NoMisusedPromises {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let expression = ctx.query();
-        let ty = ctx.type_of_expression(expression);
+        let ty = ctx.inferred_type_of_expression(expression)?;
         if ty.is_function() {
-            find_misused_promise_returning_callback(ctx, expression, &ty)
+            find_misused_promise_returning_callback(ctx, expression, ty)
         } else {
-            find_misused_promise_expression(expression, &ty)
+            find_misused_promise_expression(expression, ty)
         }
     }
 
@@ -212,7 +212,7 @@ impl Rule for NoMisusedPromises {
 
 fn find_misused_promise_expression(
     expression: &AnyJsExpression,
-    ty: &Type,
+    ty: InferredType,
 ) -> Option<NoMisusedPromisesState> {
     let parent = expression.syntax().parent()?;
     let state = match parent.kind() {
@@ -231,25 +231,15 @@ fn find_misused_promise_expression(
 
     // Uncomment the following line for debugging convenience:
     //let printed = format!("type of {expression:?} = {ty:?}");
-    let is_promise = ty.is_promise_instance();
-    let is_maybe_promise = ty.has_variant(|ty| ty.is_promise_instance());
-    let should_signal = is_promise || is_maybe_promise;
-    should_signal.then_some(state)
+    (ty.is_promise_instance() == Some(true)).then_some(state)
 }
 
 fn find_misused_promise_returning_callback(
     ctx: &RuleContext<NoMisusedPromises>,
     expression: &AnyJsExpression,
-    ty: &Type,
+    ty: InferredType,
 ) -> Option<NoMisusedPromisesState> {
-    let callback = ty.as_function()?;
-
-    let return_ty = callback.return_type.as_type()?;
-    let return_ty = ty.resolve(return_ty)?;
-
-    let should_signal =
-        return_ty.is_promise_instance() || return_ty.has_variant(|ty| ty.is_promise_instance());
-    if !should_signal {
+    if ty.function_returns_promise() != Some(true) {
         return None;
     }
 
@@ -268,31 +258,31 @@ fn find_misused_promise_returning_callback(
         .skip(1)
         .find_map(JsCallExpression::cast)
     {
-        let callee_ty = ctx.type_of_expression(&call_expression.callee().ok()?);
-        let function = callee_ty.as_function()?;
-        callee_ty.resolve(function.parameters.get(argument_index)?.ty())?
+        ctx.inferred_expected_argument_type_for_arguments(
+            &call_expression.callee().ok()?,
+            &argument_list,
+            argument_index,
+            false,
+        )?
     } else if let Some(new_expression) = argument_list
         .syntax()
         .ancestors()
         .skip(1)
         .find_map(JsNewExpression::cast)
     {
-        let callee_ty = ctx.type_of_expression(&new_expression.callee().ok()?);
-        let class = callee_ty.as_class()?;
-        let constructor = class
-            .members
-            .iter()
-            .find(|member| member.kind == TypeMemberKind::Constructor)?;
-        let constructor_ty = callee_ty.resolve(&constructor.ty)?;
-        let constructor = constructor_ty.as_function()?;
-        constructor_ty.resolve(constructor.parameters.get(argument_index)?.ty())?
+        ctx.inferred_expected_argument_type_for_arguments(
+            &new_expression.callee().ok()?,
+            &argument_list,
+            argument_index,
+            true,
+        )?
     } else {
         return None;
     };
 
-    if argument_ty.is_function_with_return_type(|ty| ty.is_conditional()) {
+    if argument_ty.function_returns_conditional() {
         Some(NoMisusedPromisesState::ConditionalReturn)
-    } else if argument_ty.is_function_with_return_type(|ty| ty.is_void_keyword()) {
+    } else if argument_ty.function_returns_void() {
         Some(NoMisusedPromisesState::VoidReturn)
     } else {
         None

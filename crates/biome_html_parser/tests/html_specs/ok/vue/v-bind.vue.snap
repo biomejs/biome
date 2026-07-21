@@ -25,7 +25,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1..9 "template" [] [],
+                    value_token: TEMPLATE_KW@1..9 "template" [] [],
                 },
                 attributes: HtmlAttributeList [],
                 r_angle_token: R_ANGLE@9..10 ">" [] [],
@@ -35,7 +35,7 @@ HtmlRoot {
                     opening_element: HtmlOpeningElement {
                         l_angle_token: L_ANGLE@10..13 "<" [Newline("\n"), Whitespace("\t")] [],
                         name: HtmlComponentName {
-                            value_token: HTML_LITERAL@13..17 "Foo" [] [Whitespace(" ")],
+                            value_token: HTML_COMPONENT_LITERAL@13..17 "Foo" [] [Whitespace(" ")],
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
@@ -62,7 +62,7 @@ HtmlRoot {
                         l_angle_token: L_ANGLE@33..34 "<" [] [],
                         slash_token: SLASH@34..35 "/" [] [],
                         name: HtmlComponentName {
-                            value_token: HTML_LITERAL@35..38 "Foo" [] [],
+                            value_token: HTML_COMPONENT_LITERAL@35..38 "Foo" [] [],
                         },
                         r_angle_token: R_ANGLE@38..39 ">" [] [],
                     },
@@ -72,7 +72,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@39..41 "<" [Newline("\n")] [],
                 slash_token: SLASH@41..42 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@42..50 "template" [] [],
+                    value_token: TEMPLATE_KW@42..50 "template" [] [],
                 },
                 r_angle_token: R_ANGLE@50..51 ">" [] [],
             },
@@ -94,7 +94,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..10
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..9
-          0: HTML_LITERAL@1..9 "template" [] []
+          0: TEMPLATE_KW@1..9 "template" [] []
         2: HTML_ATTRIBUTE_LIST@9..9
         3: R_ANGLE@9..10 ">" [] []
       1: HTML_ELEMENT_LIST@10..39
@@ -102,7 +102,7 @@ HtmlRoot {
           0: HTML_OPENING_ELEMENT@10..33
             0: L_ANGLE@10..13 "<" [Newline("\n"), Whitespace("\t")] []
             1: HTML_COMPONENT_NAME@13..17
-              0: HTML_LITERAL@13..17 "Foo" [] [Whitespace(" ")]
+              0: HTML_COMPONENT_LITERAL@13..17 "Foo" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@17..32
               0: VUE_DIRECTIVE@17..32
                 0: IDENT@17..23 "v-bind" [] []
@@ -121,13 +121,13 @@ HtmlRoot {
             0: L_ANGLE@33..34 "<" [] []
             1: SLASH@34..35 "/" [] []
             2: HTML_COMPONENT_NAME@35..38
-              0: HTML_LITERAL@35..38 "Foo" [] []
+              0: HTML_COMPONENT_LITERAL@35..38 "Foo" [] []
             3: R_ANGLE@38..39 ">" [] []
       2: HTML_CLOSING_ELEMENT@39..51
         0: L_ANGLE@39..41 "<" [Newline("\n")] []
         1: SLASH@41..42 "/" [] []
         2: HTML_TAG_NAME@42..50
-          0: HTML_LITERAL@42..50 "template" [] []
+          0: TEMPLATE_KW@42..50 "template" [] []
         3: R_ANGLE@50..51 ">" [] []
   4: EOF@51..52 "" [Newline("\n")] []
 

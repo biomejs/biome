@@ -73,12 +73,15 @@ pub enum MarkdownReLexContext {
     /// text together with the plain characters that follow it, producing
     /// one wider text token instead of a one-character token.
     TextualFallback,
-    /// Re-lex the whole content of an HTML block as a single literal
-    /// token, whitespace and newlines included. The parser measures where the
-    /// block ends (terminator line, blank line, or container boundary) and
-    /// passes the end position via [MarkdownLexer::set_html_content_end]
-    /// before re-lexing.
-    HtmlContent,
+    /// Re-lex a parser-measured span as one token of a parser-chosen kind.
+    /// Used for regions whose extent only the parser can decide. For example,
+    /// the whole content of an HTML block becomes a single literal token,
+    /// whitespace and newlines included: the parser measures where the block
+    /// ends (terminator line, blank line, or container boundary) and passes
+    /// the end position via [MarkdownLexer::set_relex_span] before re-lexing.
+    /// Document-level fenced code content and runs of indentation characters
+    /// use the same mechanism.
+    Span,
 }
 
 /// An extremely fast, lookup table based, lossless Markdown lexer
@@ -108,9 +111,10 @@ pub(crate) struct MarkdownLexer<'src> {
     diagnostics: Vec<ParseDiagnostic>,
     force_ordered_list_marker: bool,
 
-    /// End position for the next [MarkdownReLexContext::HtmlContent] re-lex,
-    /// set by the parser after measuring where the HTML block ends.
-    html_content_end: Option<usize>,
+    /// Target of the next [MarkdownReLexContext::Span] re-lex: the end
+    /// position and the token kind, set by the parser after measuring the
+    /// span.
+    relex_span: Option<(usize, MarkdownSyntaxKind)>,
 }
 
 impl<'src> Lexer<'src> for MarkdownLexer<'src> {
@@ -237,7 +241,7 @@ impl<'src> MarkdownLexer<'src> {
             position: 0,
             diagnostics: vec![],
             force_ordered_list_marker: false,
-            html_content_end: None,
+            relex_span: None,
         }
     }
 
@@ -245,10 +249,9 @@ impl<'src> MarkdownLexer<'src> {
         self.force_ordered_list_marker = value;
     }
 
-    /// Sets the end position for the next
-    /// [MarkdownReLexContext::HtmlContent] re-lex.
-    pub fn set_html_content_end(&mut self, end: usize) {
-        self.html_content_end = Some(end);
+    /// Sets the target for the next [MarkdownReLexContext::Span] re-lex.
+    pub fn set_relex_span(&mut self, end: usize, kind: MarkdownSyntaxKind) {
+        self.relex_span = Some((end, kind));
     }
 
     pub(crate) fn consume_token(
@@ -854,6 +857,16 @@ impl<'src> MarkdownLexer<'src> {
         }
 
         let trailing = &prefix[idx..];
+
+        // Padding in marker-only (`-   \n`, `1.   \n`) belongs to the list prefix,
+        // not an inline hard break. Keep it split so the parser can classify the
+        // first space as the list separator and the rest as content indent.
+        if trailing.iter().all(|byte| is_space_or_tab_byte(*byte))
+            && self.current_whitespace_run_ends_line()
+        {
+            return true;
+        }
+
         if trailing.is_empty() {
             let mut saw_tab = current == b'\t';
             let mut next = self.position + 1;
@@ -947,15 +960,12 @@ impl<'src> MarkdownLexer<'src> {
                 self.advance(1);
                 dash_count += 1;
             }
-            // Allow trailing spaces/tabs
-            while matches!(self.current_byte(), Some(b' ' | b'\t')) {
-                self.advance(1);
-            }
             // 1-2 dashes followed by newline/EOF is a setext underline
             // 3+ dashes goes to thematic break logic below
-            if (1..=2).contains(&dash_count)
-                && matches!(self.current_byte(), Some(b'\n' | b'\r') | None)
-            {
+            if (1..=2).contains(&dash_count) && self.current_whitespace_run_ends_line() {
+                // The trailing whitespace is only peeked to validate the setext
+                // underline. Leave it for the parser instead of including it in
+                // MD_SETEXT_UNDERLINE_LITERAL's span.
                 return MD_SETEXT_UNDERLINE_LITERAL;
             }
             // Not a setext underline - restore and try thematic break
@@ -1573,6 +1583,15 @@ impl<'src> MarkdownLexer<'src> {
         false
     }
 
+    fn current_whitespace_run_ends_line(&self) -> bool {
+        let mut offset = 0;
+        while matches!(self.byte_at(offset), Some(b' ' | b'\t')) {
+            offset += 1;
+        }
+
+        matches!(self.byte_at(offset), Some(b'\n' | b'\r') | None)
+    }
+
     /// Bumps the current byte and creates a lexed token of the passed in kind
     fn consume_byte(&mut self, tok: MarkdownSyntaxKind) -> MarkdownSyntaxKind {
         self.advance(1);
@@ -1604,15 +1623,15 @@ impl<'src> ReLexer<'src> for MarkdownLexer<'src> {
                 self.consume_textual(MarkdownLexContext::Regular)
             }
             // Consume everything up to the end position the parser measured
-            // as one literal token, whitespace and newlines included.
-            Some(_) if context == MarkdownReLexContext::HtmlContent => {
-                let end = self
-                    .html_content_end
+            // as one token of the kind the parser chose.
+            Some(_) if context == MarkdownReLexContext::Span => {
+                let (end, kind) = self
+                    .relex_span
                     .take()
-                    .expect("set_html_content_end must be called before an HtmlContent re-lex");
+                    .expect("set_relex_span must be called before a Span re-lex");
                 debug_assert!(end > self.position && end <= self.source.len());
                 self.position = end;
-                MD_HTML_LITERAL
+                kind
             }
             Some(current) => {
                 let lex_context = match context {
@@ -1622,7 +1641,7 @@ impl<'src> ReLexer<'src> for MarkdownLexer<'src> {
                     MarkdownReLexContext::ListPostMarker => MarkdownLexContext::ListPostMarker,
                     // Handled by the arms above; these contexts have no
                     // corresponding lex context.
-                    MarkdownReLexContext::TextualFallback | MarkdownReLexContext::HtmlContent => {
+                    MarkdownReLexContext::TextualFallback | MarkdownReLexContext::Span => {
                         MarkdownLexContext::Regular
                     }
                 };

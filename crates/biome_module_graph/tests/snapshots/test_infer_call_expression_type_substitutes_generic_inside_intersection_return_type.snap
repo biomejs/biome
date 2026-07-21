@@ -1,0 +1,67 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+type WithName = {
+	name: string;
+};
+
+export function withName<T>(value: T): T & WithName {
+	return value as T & WithName;
+}
+
+export function readValue(): { value: number } {
+	return { value: 1 };
+}
+```
+
+## Inferred types
+
+```
+Binding WithName "WithName" => Object {
+  prototype: No prototype
+  members: ["name": string]
+}
+
+Binding withName "withName" => sync Function "withName" {
+  accepts: {
+    params: [
+      required value: instanceof T
+    ]
+    type_args: [T]
+  }
+  returns: instanceof T & instanceof WithName
+}
+
+Binding T "T" => T
+
+Binding value "value" => instanceof T
+
+Expression "value" => instanceof T
+
+Expression "value as T & WithName" => instanceof T & instanceof WithName
+
+Binding readValue "readValue" => sync Function "readValue" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Object {
+    prototype: No prototype
+    members: ["value": number]
+  }
+}
+
+Expression "{ value: 1 }" => Object {
+  prototype: No prototype
+  members: ["value": number: 1]
+}
+
+Expression "1" => number: 1
+```

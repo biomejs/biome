@@ -25,15 +25,17 @@ b ]
 ```yaml
 formatted: [1, 'abc', "xyz", plain]
 unformatted: [1, 'abc', "xyz", plain]
-emptyLineFormatted: [
-  a,
+emptyLineFormatted:
+  [
+    a,
 
-  b,
-]
-emptyLineUnformatted: [
-  a,
+    b,
+  ]
+emptyLineUnformatted:
+  [
+    a,
 
-  b,
-]
+    b,
+  ]
 
 ```

@@ -1,0 +1,71 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list/issue-17746-code-before-list.md
+---
+
+# Input
+
+```md
+-     a
+  - b
+- c
+- d
+
+```
+
+
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,4 +1,4 @@
+ -    a
+-- b
++   - b
+ - c
+ - d
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -1,20 +1,23 @@
+ [
+   source_position(0),
+   "-",
+-  source_position(1),
+-  " ",
+-  source_position(2),
+-  " ",
+-  source_position(3),
+-  " ",
+-  source_position(4),
+-  " ",
+-  align("     ", [source_position(5), "a", hard_line_break, hard_line_break]),
+-  source_position(10),
+-  "-",
+-  source_position(11),
+-  " ",
+-  align("  ", [source_position(12), "b", hard_line_break, hard_line_break]),
++  align("   ", [
++    align("    ", [
++      "    ",
++      source_position(1),
++      "a",
++      source_position(7),
++      "
++"
++    ]),
++    hard_line_break,
++    source_position(10),
++    "-",
++    source_position(11),
++    " ",
++    align("  ", [source_position(12), "b", hard_line_break, hard_line_break]),
++    hard_line_break
++  ]),
+   source_position(14),
+   "-",
+   source_position(15),
+
+```

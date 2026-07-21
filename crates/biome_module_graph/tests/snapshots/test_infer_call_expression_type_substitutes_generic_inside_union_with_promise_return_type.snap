@@ -1,0 +1,34 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function maybePromise<T>(value: T): T | Promise<T> {
+	return value;
+}
+```
+
+## Inferred types
+
+```
+Binding maybePromise "maybePromise" => sync Function "maybePromise" {
+  accepts: {
+    params: [
+      required value: instanceof T
+    ]
+    type_args: [T]
+  }
+  returns: instanceof T | instanceof Promise<instanceof T>
+}
+
+Binding T "T" => T
+
+Binding value "value" => instanceof T
+
+Expression "value" => instanceof T
+```

@@ -1,0 +1,305 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function reader(value: string): string;
+export function reader(value: number): number;
+export function reader(left: number, right: number): boolean;
+export function reader(..._args: [string] | [number] | [number, number]) {
+	return undefined as string | number | boolean;
+}
+
+export const textual = reader("value");
+export const numeric = reader(1);
+export const args = [1, 2];
+export const spread = reader(...args);
+```
+
+## Inferred types
+
+```
+Binding reader "reader" => sync Function "reader" {
+  accepts: {
+    params: [
+      required value: string
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Binding value "value" => string
+
+Binding reader "reader" => sync Function "reader" {
+  accepts: {
+    params: [
+      required value: number
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Binding value "value" => number
+
+Binding reader "reader" => sync Function "reader" {
+  accepts: {
+    params: [
+      required left: number
+      required right: number
+    ]
+    type_args: []
+  }
+  returns: boolean
+}
+
+Binding left "left" => number
+
+Binding right "right" => number
+
+Binding reader "reader" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required value: number
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required left: number
+            required right: number
+          ]
+          type_args: []
+        }
+        returns: boolean
+      }
+    ,
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required ..._args: [string] | [number] | [number,
+            number]
+          ]
+          type_args: []
+        }
+        returns: string | number | boolean
+      }
+  ]
+}
+
+Binding _args "_args" => [string] | [number] | [number,
+number]
+
+Expression "undefined" => undefined
+
+Expression "undefined as string | number | boolean" => string | number | boolean
+
+Binding textual "textual" => string
+
+Expression "reader" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required value: number
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required left: number
+            required right: number
+          ]
+          type_args: []
+        }
+        returns: boolean
+      }
+    ,
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required ..._args: [string] | [number] | [number,
+            number]
+          ]
+          type_args: []
+        }
+        returns: string | number | boolean
+      }
+  ]
+}
+
+Expression "reader(\"value\")" => string
+
+Expression "\"value\"" => string: value
+
+Binding numeric "numeric" => number
+
+Expression "reader" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required value: number
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required left: number
+            required right: number
+          ]
+          type_args: []
+        }
+        returns: boolean
+      }
+    ,
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required ..._args: [string] | [number] | [number,
+            number]
+          ]
+          type_args: []
+        }
+        returns: string | number | boolean
+      }
+  ]
+}
+
+Expression "reader(1)" => number
+
+Expression "1" => number: 1
+
+Binding args "args" => [number: 1,
+number: 2]
+
+Expression "[1, 2]" => [number: 1,
+number: 2]
+
+Expression "1" => number: 1
+
+Expression "2" => number: 2
+
+Binding spread "spread" => boolean
+
+Expression "reader" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required value: number
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required left: number
+            required right: number
+          ]
+          type_args: []
+        }
+        returns: boolean
+      }
+    ,
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required ..._args: [string] | [number] | [number,
+            number]
+          ]
+          type_args: []
+        }
+        returns: string | number | boolean
+      }
+  ]
+}
+
+Expression "reader(...args)" => boolean
+
+Expression "args" => [number: 1,
+number: 2]
+```

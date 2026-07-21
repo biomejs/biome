@@ -528,18 +528,17 @@ fn fixture_git_repo_with_malformed_lib() -> Result<FixtureRepo> {
     })
 }
 
-/// Builds a fixture whose selected lib contains the Error global declarations
-/// used by the generated globals output.
-fn fixture_git_repo_with_error_global() -> Result<FixtureRepo> {
+/// Builds a fixture repo with Error, Disposable, and AsyncDisposable declarations.
+fn fixture_git_repo_with_generated_globals() -> Result<FixtureRepo> {
     let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
     write_profile_root_placeholders(repo.path())?;
     let fixture_path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join(COLLECTOR_FIXTURE_DIR)
-        .join("manifest.error.d.ts");
+        .join("manifest.disposables.d.ts");
     fs::copy(&fixture_path, repo.path().join("lib/lib.es5.d.ts"))
         .with_context(|| format!("failed to copy {}", fixture_path.display()))?;
     run_git(repo.path(), &["add", "."])?;
-    run_git(repo.path(), &["commit", "-m", "add error global"])?;
+    run_git(repo.path(), &["commit", "-m", "add generated globals"])?;
     let head = git_stdout_trimmed(repo.path(), &["rev-parse", "HEAD"])?;
     run_git(repo.path(), &["tag", "-f", repo.tag.as_str()])?;
 
@@ -979,8 +978,8 @@ mod tests {
     }
 
     #[test]
-    fn run_emits_error_global_registration() -> Result<()> {
-        let repo = fixture_git_repo_with_error_global()?;
+    fn run_emits_generated_global_registration() -> Result<()> {
+        let repo = fixture_git_repo_with_generated_globals()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
         let workspace = TempDir::new("bgt-workspace")?;
@@ -998,9 +997,24 @@ mod tests {
         assert!(generated.contains("crate::globals::ERROR_ID_GLOBAL_TYPE_ID"));
         assert!(generated.contains("crate::globals::ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID"));
         assert!(generated.contains("crate::globals::ERROR_CALL_ID_GLOBAL_TYPE_ID"));
+        assert!(generated.contains("crate::globals::DISPOSABLE_ID_GLOBAL_TYPE_ID"));
+        assert!(generated.contains("crate::globals::DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID"));
+        assert!(generated.contains("crate::globals::ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID"));
+        assert!(
+            generated.contains("crate::globals::ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID")
+        );
         assert!(generated.contains("builder.set_type_data("));
+        assert!(generated.contains("crate::TypeData::Interface("));
         assert!(generated.contains("crate::TypeData::Constructor("));
         assert!(generated.contains("crate::TypeData::Function("));
+        assert!(generated.contains("crate::TypeMemberKind::ComputedValue("));
+        // Pin the async flag at the rendered-source level: the `AsyncDisposable` helper must emit
+        // `is_async: true` and the synchronous helpers `is_async: false`, so a regression back to a
+        // hardcoded flag in `render_function` fails here, not only at the lowered-model layer.
+        assert!(generated.contains("is_async: true,"));
+        assert!(generated.contains("is_async: false,"));
+        assert!(generated.contains("crate::globals::GLOBAL_SYMBOL_DISPOSE_ID.into()"));
+        assert!(generated.contains("crate::globals::GLOBAL_SYMBOL_ASYNC_DISPOSE_ID.into()"));
         assert!(generated.contains("biome_rowan::Text::new_static(\"name\")"));
         assert!(generated.contains("biome_rowan::Text::new_static(\"message\")"));
         assert!(generated.contains("crate::TypeMemberKind::NamedOptional("));
@@ -1188,6 +1202,90 @@ mod tests {
     }
 
     #[test]
+    fn lowerer_lowers_disposable_computed_members() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.disposables.d.ts")?;
+
+        let disposable = lowered
+            .global("Disposable")
+            .expect("Disposable should be lowered");
+        assert_eq!(disposable.id_constant(), "DISPOSABLE_ID_GLOBAL_TYPE_ID");
+        let LoweredTypeData::Interface(disposable_interface) = disposable.data() else {
+            bail!("Disposable should lower to interface data");
+        };
+        let dispose = disposable_interface
+            .member("[Symbol.dispose]")
+            .expect("Disposable computed member should be lowered");
+        assert_eq!(
+            dispose.kind(),
+            &LoweredMemberKind::ComputedValue {
+                key_reference: LoweredTypeReference::Predefined("GLOBAL_SYMBOL_DISPOSE_ID")
+            }
+        );
+        assert_eq!(
+            dispose.type_reference(),
+            &LoweredTypeReference::Predefined("GLOBAL_DISPOSABLE_DISPOSE_ID")
+        );
+
+        let async_disposable = lowered
+            .global("AsyncDisposable")
+            .expect("AsyncDisposable should be lowered");
+        assert_eq!(
+            async_disposable.id_constant(),
+            "ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID"
+        );
+        let LoweredTypeData::Interface(async_disposable_interface) = async_disposable.data() else {
+            bail!("AsyncDisposable should lower to interface data");
+        };
+        let async_dispose = async_disposable_interface
+            .member("[Symbol.asyncDispose]")
+            .expect("AsyncDisposable computed member should be lowered");
+        assert_eq!(
+            async_dispose.kind(),
+            &LoweredMemberKind::ComputedValue {
+                key_reference: LoweredTypeReference::Predefined("GLOBAL_SYMBOL_ASYNC_DISPOSE_ID")
+            }
+        );
+        assert_eq!(
+            async_dispose.type_reference(),
+            &LoweredTypeReference::Predefined("GLOBAL_ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID")
+        );
+
+        let dispose_helper = lowered
+            .global("Disposable[Symbol.dispose]")
+            .expect("Disposable dispose helper should be lowered");
+        assert_eq!(
+            dispose_helper.id_constant(),
+            "DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID"
+        );
+        let LoweredTypeData::Function(dispose_function) = dispose_helper.data() else {
+            bail!("Disposable dispose helper should lower to function data");
+        };
+        assert!(!dispose_function.is_async());
+        assert_eq!(
+            dispose_function.return_type(),
+            &LoweredTypeReference::Predefined("GLOBAL_VOID_ID")
+        );
+
+        let async_dispose_helper = lowered
+            .global("AsyncDisposable[Symbol.asyncDispose]")
+            .expect("AsyncDisposable dispose helper should be lowered");
+        assert_eq!(
+            async_dispose_helper.id_constant(),
+            "ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID"
+        );
+        let LoweredTypeData::Function(async_dispose_function) = async_dispose_helper.data() else {
+            bail!("AsyncDisposable dispose helper should lower to function data");
+        };
+        assert!(async_dispose_function.is_async());
+        assert_eq!(
+            async_dispose_function.return_type(),
+            &LoweredTypeReference::Predefined("GLOBAL_INSTANCEOF_PROMISE_ID")
+        );
+
+        Ok(())
+    }
+
+    #[test]
     fn lowerer_rejects_error_interface_extends_clause() -> Result<()> {
         expect_error_contains(
             lowered_from_fixture("manifest.error-extends.d.ts"),
@@ -1220,12 +1318,22 @@ mod tests {
     }
 
     #[test]
-    fn comparator_accepts_error_member_divergence() -> Result<()> {
-        let lowered = lowered_from_fixture("manifest.error.d.ts")?;
+    fn comparator_accepts_generated_global_shapes() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.disposables.d.ts")?;
 
         compare_lowered_globals(&lowered)?;
 
         Ok(())
+    }
+
+    #[test]
+    fn comparator_rejects_missing_disposable_globals() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.error.d.ts")?;
+
+        expect_error_contains(
+            compare_lowered_globals(&lowered),
+            "generated globals contain 3 entries, expected 7",
+        )
     }
 
     #[test]

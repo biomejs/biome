@@ -303,14 +303,8 @@ MdDocument {
             l_fence: TRIPLE_BACKTICK@410..413 "```" [] [],
             code_list: MdCodeNameList [],
             content: MdInlineItemList [
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@413..414 "\n" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@414..424 "code block" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@424..425 "\n" [] [],
+                MdCodeContent {
+                    value_token: MD_CODE_LITERAL@413..425 "\ncode block\n" [] [],
                 },
             ],
             r_fence_indent: MdIndentTokenList [],
@@ -376,16 +370,7 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@509..510 "\n" [] [],
                         },
                         MdIndentToken {
-                            md_indent_char_token: MD_INDENT_CHAR@510..511 " " [] [],
-                        },
-                        MdIndentToken {
-                            md_indent_char_token: MD_INDENT_CHAR@511..512 " " [] [],
-                        },
-                        MdIndentToken {
-                            md_indent_char_token: MD_INDENT_CHAR@512..513 " " [] [],
-                        },
-                        MdIndentToken {
-                            md_indent_char_token: MD_INDENT_CHAR@513..514 " " [] [],
+                            md_indent_char_token: MD_INDENT_CHAR@510..514 "    " [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@514..544 "This is an indented code block" [] [],
@@ -574,12 +559,8 @@ MdDocument {
       1: TRIPLE_BACKTICK@410..413 "```" [] []
       2: MD_CODE_NAME_LIST@413..413
       3: MD_INLINE_ITEM_LIST@413..425
-        0: MD_TEXTUAL@413..414
-          0: MD_TEXTUAL_LITERAL@413..414 "\n" [] []
-        1: MD_TEXTUAL@414..424
-          0: MD_TEXTUAL_LITERAL@414..424 "code block" [] []
-        2: MD_TEXTUAL@424..425
-          0: MD_TEXTUAL_LITERAL@424..425 "\n" [] []
+        0: MD_CODE_CONTENT@413..425
+          0: MD_CODE_LITERAL@413..425 "\ncode block\n" [] []
       4: MD_INDENT_TOKEN_LIST@425..425
       5: TRIPLE_BACKTICK@425..428 "```" [] []
     19: MD_NEWLINE@428..429
@@ -622,17 +603,11 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@475..509 "Quote interrupted by indented code" [] []
             1: MD_TEXTUAL@509..510
               0: MD_TEXTUAL_LITERAL@509..510 "\n" [] []
-            2: MD_INDENT_TOKEN@510..511
-              0: MD_INDENT_CHAR@510..511 " " [] []
-            3: MD_INDENT_TOKEN@511..512
-              0: MD_INDENT_CHAR@511..512 " " [] []
-            4: MD_INDENT_TOKEN@512..513
-              0: MD_INDENT_CHAR@512..513 " " [] []
-            5: MD_INDENT_TOKEN@513..514
-              0: MD_INDENT_CHAR@513..514 " " [] []
-            6: MD_TEXTUAL@514..544
+            2: MD_INDENT_TOKEN@510..514
+              0: MD_INDENT_CHAR@510..514 "    " [] []
+            3: MD_TEXTUAL@514..544
               0: MD_TEXTUAL_LITERAL@514..544 "This is an indented code block" [] []
-            7: MD_TEXTUAL@544..545
+            4: MD_TEXTUAL@544..545
               0: MD_TEXTUAL_LITERAL@544..545 "\n" [] []
   2: EOF@545..545 "" [] []
 

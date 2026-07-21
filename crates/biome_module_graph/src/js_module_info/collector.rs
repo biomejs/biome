@@ -9,7 +9,7 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::{
     FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter, MAX_FLATTEN_DEPTH,
-    Module, Namespace, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeData, TypeId,
+    Module, Namespace, RawTypeData, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeData, TypeId,
     TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
     TypeResolver, TypeResolverLevel, TypeStore, UnionCollector,
 };
@@ -70,8 +70,8 @@ pub(super) struct JsModuleInfoCollector {
     /// Diagnostics emitted during the collection of module graph information
     diagnostics: Vec<JsModuleInfoDiagnostic>,
 
-    /// Whether to enable type inference when finalizing the module info
-    infer_types: bool,
+    /// How much type inference work to perform when finalizing the module info
+    inference_mode: TypeInferenceMode,
 
     /// CSS class references from JSX `className` or `class` attributes
     /// (static string literals only).
@@ -79,6 +79,7 @@ pub(super) struct JsModuleInfoCollector {
 }
 
 /// Intermediary representation for an exported symbol.
+#[derive(Clone)]
 pub(super) enum JsCollectedExport {
     ExportNamedSymbol {
         /// Name under which the symbol will be exported.
@@ -143,7 +144,7 @@ impl JsModuleInfoCollector {
             types: TypeStore::default(),
             static_imports: IndexMap::new(),
             diagnostics: Vec::new(),
-            infer_types: false,
+            inference_mode: TypeInferenceMode::Disabled,
             referenced_classes: Vec::new(),
         }
     }
@@ -334,6 +335,16 @@ impl JsModuleInfoCollector {
         })
     }
 
+    pub fn register_default_export_declaration(
+        &mut self,
+        declaration: &AnyJsExportDefaultDeclaration,
+    ) {
+        let type_data =
+            TypeData::from_any_js_export_default_declaration(self, ScopeId::GLOBAL, declaration);
+        let ty = TypeReference::from(self.register_and_resolve(type_data));
+        self.register_export(JsCollectedExport::ExportDefault { ty });
+    }
+
     pub fn register_blanket_reexport(&mut self, reexport: JsReexport) {
         self.blanket_reexports.push(reexport);
     }
@@ -368,20 +379,20 @@ impl JsModuleInfoCollector {
         );
     }
 
-    fn finalise(
-        &mut self,
-        semantic_model: &SemanticModel,
-    ) -> (
-        IndexMap<Text, JsExport>,
-        FxHashMap<TextRange, super::BindingTypeData>,
-    ) {
-        if self.infer_types {
+    fn finalise(&mut self, semantic_model: &SemanticModel) -> FinalisedModuleTypes {
+        if self.inference_mode != TypeInferenceMode::Disabled {
             self.infer_all_types(semantic_model);
         }
 
         self.populate_namespace_and_module_members();
 
-        if self.infer_types {
+        self.register_export_types();
+
+        let raw_types = self.raw_types();
+        let raw_expressions = self.raw_expressions();
+        let raw_binding_types = self.raw_binding_types();
+
+        if self.inference_mode == TypeInferenceMode::Complete {
             self.resolve_all_and_downgrade_project_references();
 
             // Purging before flattening will save us from duplicate work during
@@ -394,7 +405,31 @@ impl JsModuleInfoCollector {
         let exports = self.collect_exports();
         let binding_type_data = self.build_binding_type_data(semantic_model);
 
-        (exports, binding_type_data)
+        FinalisedModuleTypes {
+            exports,
+            binding_type_data,
+            raw_types,
+            raw_expressions,
+            raw_binding_types,
+        }
+    }
+
+    fn raw_types(&self) -> Vec<RawTypeData> {
+        self.types.as_references().into_iter().cloned().collect()
+    }
+
+    fn raw_expressions(&self) -> FxHashMap<TextRange, TypeReference> {
+        self.parsed_expressions
+            .iter()
+            .map(|(range, resolved_id)| (*range, TypeReference::Resolved(*resolved_id)))
+            .collect()
+    }
+
+    fn raw_binding_types(&self) -> FxHashMap<TextRange, TypeReference> {
+        self.bindings
+            .iter()
+            .map(|binding| (binding.range, binding.ty.clone()))
+            .collect()
     }
 
     fn infer_all_types(&mut self, semantic_model: &biome_js_semantic::SemanticModel) {
@@ -785,10 +820,21 @@ impl JsModuleInfoCollector {
         }
     }
 
+    fn register_export_types(&mut self) {
+        let _ = self.collect_exports_from(self.exports.clone());
+    }
+
     fn collect_exports(&mut self) -> IndexMap<Text, JsExport> {
+        let exports = std::mem::take(&mut self.exports);
+        self.collect_exports_from(exports)
+    }
+
+    fn collect_exports_from(
+        &mut self,
+        exports: Vec<JsCollectedExport>,
+    ) -> IndexMap<Text, JsExport> {
         let mut finalised_exports = IndexMap::new();
 
-        let exports = std::mem::take(&mut self.exports);
         for export in exports {
             match export {
                 JsCollectedExport::ExportNamedSymbol {
@@ -1092,28 +1138,53 @@ impl JsModuleInfoCollector {
     }
 }
 
+/// Selects how much type inference work the collector performs while
+/// finalizing a module.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TypeInferenceMode {
+    /// No type inference at all.
+    Disabled,
+    /// Collects the raw type table for the salsa-backed inference engine,
+    /// without running the legacy resolution and flattening passes.
+    RawTypesOnly,
+    /// Collects the raw type table and runs the legacy resolution and
+    /// flattening passes.
+    Complete,
+}
+
 impl JsModuleInfo {
     pub(super) fn new(
         mut collector: JsModuleInfoCollector,
         semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
-        infer_types: bool,
+        inference_mode: TypeInferenceMode,
     ) -> Self {
-        collector.infer_types = infer_types;
-        let (exports, binding_type_data) = collector.finalise(&semantic_model);
+        collector.inference_mode = inference_mode;
+        let finalised = collector.finalise(&semantic_model);
 
         Self(Arc::new(JsModuleInfoInner {
             static_imports: Imports(collector.static_imports),
             static_import_paths: collector.static_import_paths,
             dynamic_import_paths: collector.dynamic_import_paths,
-            exports: Exports(exports),
+            exports: Exports(finalised.exports),
             blanket_reexports: collector.blanket_reexports,
             semantic_model,
-            binding_type_data,
+            binding_type_data: finalised.binding_type_data,
+            raw_types: finalised.raw_types,
+            raw_expressions: finalised.raw_expressions,
+            raw_binding_types: finalised.raw_binding_types,
             expressions: collector.parsed_expressions,
             types: collector.types.into(),
             diagnostics: collector.diagnostics.into_iter().map(Into::into).collect(),
-            infer_types: collector.infer_types,
+            infer_types: collector.inference_mode != TypeInferenceMode::Disabled,
             referenced_classes: collector.referenced_classes,
         }))
     }
+}
+
+struct FinalisedModuleTypes {
+    exports: IndexMap<Text, JsExport>,
+    binding_type_data: FxHashMap<TextRange, BindingTypeData>,
+    raw_types: Vec<RawTypeData>,
+    raw_expressions: FxHashMap<TextRange, TypeReference>,
+    raw_binding_types: FxHashMap<TextRange, TypeReference>,
 }

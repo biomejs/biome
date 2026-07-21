@@ -1,0 +1,108 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function readValue(
+	value: string | (number | string),
+): string | (number | string) {
+	return value;
+}
+
+export function readBoolean(value: true | false): true | false {
+	return value;
+}
+
+export function readStringLiteral(
+	value: string | "literal",
+): string | "literal" {
+	return value;
+}
+
+export function readNumberLiteral(value: number | 1): number | 1 {
+	return value;
+}
+
+export function readBigIntLiteral(value: bigint | 1n): bigint | 1n {
+	return value;
+}
+```
+
+## Inferred types
+
+```
+Binding readValue "readValue" => sync Function "readValue" {
+  accepts: {
+    params: [
+      required value: string | number
+    ]
+    type_args: []
+  }
+  returns: string | number
+}
+
+Binding value "value" => string | number
+
+Expression "value" => string | number
+
+Binding readBoolean "readBoolean" => sync Function "readBoolean" {
+  accepts: {
+    params: [
+      required value: boolean
+    ]
+    type_args: []
+  }
+  returns: boolean
+}
+
+Binding value "value" => boolean
+
+Expression "value" => boolean
+
+Binding readStringLiteral "readStringLiteral" => sync Function "readStringLiteral" {
+  accepts: {
+    params: [
+      required value: string
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Binding value "value" => string
+
+Expression "value" => string
+
+Binding readNumberLiteral "readNumberLiteral" => sync Function "readNumberLiteral" {
+  accepts: {
+    params: [
+      required value: number
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Binding value "value" => number
+
+Expression "value" => number
+
+Binding readBigIntLiteral "readBigIntLiteral" => sync Function "readBigIntLiteral" {
+  accepts: {
+    params: [
+      required value: BigInt
+    ]
+    type_args: []
+  }
+  returns: BigInt
+}
+
+Binding value "value" => BigInt
+
+Expression "value" => BigInt
+```

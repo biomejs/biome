@@ -249,12 +249,28 @@ impl<'source> MarkdownParser<'source> {
         self.source.re_lex(MarkdownReLexContext::TextualFallback);
     }
 
-    /// Re-lex from the current token start up to `end` as a single
-    /// literal token, whitespace and newlines included. Used for
-    /// HTML block content after the parser has measured where the block
-    /// ends. Must NOT be called inside lookahead.
-    pub(crate) fn re_lex_html_content(&mut self, end: TextSize) {
-        self.source.re_lex_html_content(end);
+    /// Re-lex from the current token start up to `end` as a single token of
+    /// the given kind. Used for regions whose extent only the parser can
+    /// measure, like HTML block content (whitespace and newlines included)
+    /// or a run of indentation characters. Must NOT be called inside
+    /// lookahead.
+    pub(crate) fn re_lex_span(&mut self, end: TextSize, kind: MarkdownSyntaxKind) {
+        self.source.re_lex_span(end, kind);
+    }
+
+    /// Consume the span from the current token start to `end` as one token
+    /// of `kind`, wrapped in a single `wrapper` node. Used to fold runs of
+    /// per-character tokens (like indentation) into one node.
+    pub(crate) fn emit_span_as(
+        &mut self,
+        end: TextSize,
+        kind: MarkdownSyntaxKind,
+        wrapper: MarkdownSyntaxKind,
+    ) {
+        self.re_lex_span(end, kind);
+        let m = self.start();
+        self.bump(kind);
+        m.complete(self, wrapper);
     }
 
     /// Force re-lex the current token in Regular context.
@@ -439,35 +455,47 @@ impl<'source> MarkdownParser<'source> {
         self.emit_indent_tokens_core(max_indent)
     }
 
-    /// Shared core loop: emit `MdIndentToken` nodes for whitespace-only tokens
-    /// up to `max_indent` columns.
+    /// Shared core: emit one `MdIndentToken` holding the whole run of
+    /// whitespace that fits within `max_indent` columns.
+    ///
+    /// Indentation arrives from the lexer as one whitespace token per
+    /// character at line start, so the run is measured directly on the
+    /// source and consumed as a single `MD_INDENT_CHAR` token.
     fn emit_indent_tokens_core(&mut self, max_indent: usize) -> bool {
-        let mut consumed = 0usize;
-        let mut did_emit = false;
-
-        while self.at(MarkdownSyntaxKind::MD_TEXTUAL_LITERAL) {
-            let text = self.cur_text();
-            if text.is_empty() || !text.chars().all(|c| c == ' ' || c == '\t') {
-                break;
-            }
-
-            let indent = text
-                .chars()
-                .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
-                .sum::<usize>();
-
-            if consumed + indent > max_indent {
-                break;
-            }
-
-            consumed += indent;
-            did_emit = true;
-            let token_m = self.start();
-            self.bump_remap(MarkdownSyntaxKind::MD_INDENT_CHAR);
-            token_m.complete(self, MarkdownSyntaxKind::MD_INDENT_TOKEN);
+        if !self.at(MarkdownSyntaxKind::MD_TEXTUAL_LITERAL) {
+            return false;
         }
 
-        did_emit
+        let start: usize = self.cur_range().start().into();
+        let source = self.source.source_text();
+        let mut consumed = 0usize;
+        let mut end = start;
+
+        for byte in source[start..].bytes() {
+            let width = match byte {
+                b' ' => 1,
+                b'\t' => TAB_STOP_SPACES,
+                _ => break,
+            };
+            if consumed + width > max_indent {
+                break;
+            }
+            consumed += width;
+            end += 1;
+        }
+
+        if end == start {
+            return false;
+        }
+
+        self.re_lex_span(
+            TextSize::from(end as u32),
+            MarkdownSyntaxKind::MD_INDENT_CHAR,
+        );
+        let token_m = self.start();
+        self.bump(MarkdownSyntaxKind::MD_INDENT_CHAR);
+        token_m.complete(self, MarkdownSyntaxKind::MD_INDENT_TOKEN);
+        true
     }
 
     /// Consume optional indentation whitespace at line start, up to `max_indent`

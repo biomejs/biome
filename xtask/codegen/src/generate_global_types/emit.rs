@@ -4,7 +4,7 @@ use anyhow::{Result, bail};
 
 use super::lower::{
     LoweredClass, LoweredConstructor, LoweredFunction, LoweredFunctionParameter, LoweredGlobal,
-    LoweredGlobalTypes, LoweredMemberKind, LoweredTypeData, LoweredTypeMember,
+    LoweredGlobalTypes, LoweredInterface, LoweredMemberKind, LoweredTypeData, LoweredTypeMember,
     LoweredTypeReference,
 };
 
@@ -12,7 +12,14 @@ use super::lower::{
 const OUTPUT_RELATIVE_PATH: &str = "crates/biome_js_type_info/src/generated/global_types.rs";
 
 /// Stable generated global emission order for generated globals with fixed IDs.
-const GLOBAL_ID_EMIT_ORDER: [&str; 3] = [
+///
+/// Must stay ordered by ascending `GlobalTypeId` index so the emitted
+/// `MIGRATED_PREDEFINED_IDS` stays sorted for the runtime `binary_search`.
+const GLOBAL_ID_EMIT_ORDER: [&str; 7] = [
+    "DISPOSABLE_ID_GLOBAL_TYPE_ID",
+    "DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID",
+    "ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID",
+    "ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
     "ERROR_ID_GLOBAL_TYPE_ID",
     "ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID",
     "ERROR_CALL_ID_GLOBAL_TYPE_ID",
@@ -85,6 +92,7 @@ fn render_type_data(data: &LoweredTypeData) -> String {
         LoweredTypeData::Class(class) => render_class(class),
         LoweredTypeData::Constructor(constructor) => render_constructor(constructor),
         LoweredTypeData::Function(function) => render_function(function),
+        LoweredTypeData::Interface(interface) => render_interface(interface),
     }
 }
 
@@ -100,6 +108,20 @@ fn render_class(class: &LoweredClass) -> String {
         }}))",
         name = rust_string_literal(class.name()),
         members = render_members(class.members()),
+    )
+}
+
+/// Builds a `TypeData::Interface` expression.
+fn render_interface(interface: &LoweredInterface) -> String {
+    format!(
+        "crate::TypeData::Interface(Box::new(crate::Interface {{
+            name: biome_rowan::Text::new_static({name}),
+            type_parameters: Box::default(),
+            extends: Box::default(),
+            members: Box::new([{members}]),
+        }}))",
+        name = rust_string_literal(interface.name()),
+        members = render_members(interface.members()),
     )
 }
 
@@ -134,12 +156,13 @@ fn render_function(function: &LoweredFunction) -> String {
 
     format!(
         "crate::TypeData::Function(Box::new(crate::Function {{
-            is_async: false,
+            is_async: {is_async},
             type_parameters: Box::default(),
             name: {name},
             parameters: Box::new([{parameters}]),
             return_type: crate::ReturnType::Type({return_type}),
         }}))",
+        is_async = function.is_async(),
         parameters = render_function_parameters(function.parameters()),
         return_type = render_type_reference(function.return_type()),
     )
@@ -190,6 +213,12 @@ fn render_member_kind(member: &LoweredTypeMember) -> String {
         }
         LoweredMemberKind::Constructor => "crate::TypeMemberKind::Constructor".to_string(),
         LoweredMemberKind::CallSignature => "crate::TypeMemberKind::CallSignature".to_string(),
+        LoweredMemberKind::ComputedValue { key_reference } => {
+            format!(
+                "crate::TypeMemberKind::ComputedValue({})",
+                render_type_reference(key_reference)
+            )
+        }
     }
 }
 
@@ -258,7 +287,7 @@ fn global_with_id_constant<'a>(
 }
 
 /// Returns generated globals in the sorted predefined-ID order.
-fn sorted_globals(lowered: &LoweredGlobalTypes) -> Result<[&LoweredGlobal; 3]> {
+fn sorted_globals(lowered: &LoweredGlobalTypes) -> Result<[&LoweredGlobal; 7]> {
     for global in lowered.globals() {
         if !GLOBAL_ID_EMIT_ORDER.contains(&global.id_constant()) {
             bail!(
@@ -273,5 +302,9 @@ fn sorted_globals(lowered: &LoweredGlobalTypes) -> Result<[&LoweredGlobal; 3]> {
         global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[0])?,
         global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[1])?,
         global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[2])?,
+        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[3])?,
+        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[4])?,
+        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[5])?,
+        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[6])?,
     ])
 }

@@ -37,13 +37,7 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@8..9 "\n" [] [],
                                 },
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@9..10 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@10..11 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@11..12 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@9..12 "   " [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@12..14 "2)" [] [],
@@ -86,17 +80,13 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@3..8 "first" [] []
                 1: MD_TEXTUAL@8..9
                   0: MD_TEXTUAL_LITERAL@8..9 "\n" [] []
-                2: MD_INDENT_TOKEN@9..10
-                  0: MD_INDENT_CHAR@9..10 " " [] []
-                3: MD_INDENT_TOKEN@10..11
-                  0: MD_INDENT_CHAR@10..11 " " [] []
-                4: MD_INDENT_TOKEN@11..12
-                  0: MD_INDENT_CHAR@11..12 " " [] []
-                5: MD_TEXTUAL@12..14
+                2: MD_INDENT_TOKEN@9..12
+                  0: MD_INDENT_CHAR@9..12 "   " [] []
+                3: MD_TEXTUAL@12..14
                   0: MD_TEXTUAL_LITERAL@12..14 "2)" [] []
-                6: MD_TEXTUAL@14..19
+                4: MD_TEXTUAL@14..19
                   0: MD_TEXTUAL_LITERAL@14..19 " lazy" [] []
-                7: MD_TEXTUAL@19..20
+                5: MD_TEXTUAL@19..20
                   0: MD_TEXTUAL_LITERAL@19..20 "\n" [] []
   2: EOF@20..20 "" [] []
 

@@ -16,13 +16,23 @@ const PREDEFINED_TYPE_COUNT: usize = 65;
 
 /// Type ID that is known to index the predefined global resolver.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub(crate) struct GlobalTypeId(TypeId);
+pub struct GlobalTypeId(TypeId);
 
 impl GlobalTypeId {
     /// Wraps a `TypeId` that has been verified by the caller to address a
     /// predefined manifest slot. Internal constructor only.
     const fn from_type_id(id: TypeId) -> Self {
         Self(id)
+    }
+
+    /// Converts a type ID into a predefined global type ID when it indexes the
+    /// global manifest.
+    pub const fn try_from_type_id(id: TypeId) -> Option<Self> {
+        if id.index() < NUM_PREDEFINED_TYPES {
+            Some(Self(id))
+        } else {
+            None
+        }
     }
 
     /// Test-only constructor for synthesizing `GlobalTypeId` values at
@@ -461,11 +471,15 @@ mod tests {
     }
 
     #[test]
-    fn error_global_is_migrated() {
+    fn error_and_disposable_globals_are_migrated() {
         let migrated = crate::generated::global_types::MIGRATED_PREDEFINED_IDS;
         assert_eq!(
             migrated,
             &[
+                DISPOSABLE_ID_GLOBAL_TYPE_ID,
+                DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID,
+                ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID,
+                ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
                 ERROR_ID_GLOBAL_TYPE_ID,
                 ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
                 ERROR_CALL_ID_GLOBAL_TYPE_ID,

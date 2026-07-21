@@ -308,7 +308,7 @@ pub(crate) fn parse_html_block(p: &mut MarkdownParser) -> ParsedSyntax {
     });
 
     let content_m = p.start();
-    p.re_lex_html_content(end);
+    p.re_lex_span(end, MD_HTML_LITERAL);
     p.bump(MD_HTML_LITERAL);
     content_m.complete(p, MD_HTML_CONTENT);
 

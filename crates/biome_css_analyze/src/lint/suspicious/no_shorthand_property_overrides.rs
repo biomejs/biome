@@ -1,3 +1,5 @@
+#![expect(clippy::disallowed_methods, reason = "This rule stores property syntax that can span multiple tokens.")]
+
 use crate::utils::{get_longhand_sub_properties, get_reset_to_initial_properties, vender_prefix};
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource, ServiceBag,

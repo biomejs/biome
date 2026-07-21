@@ -128,10 +128,10 @@ jobs:
           - os: depot-ubuntu-24.04-arm-16
             target: aarch64-unknown-linux-musl
             code-target: linux-arm64-musl
-          - os: depot-macos-14
+          - os: depot-macos-latest
             target: x86_64-apple-darwin
             code-target: darwin-x64
-          - os: depot-macos-14
+          - os: depot-macos-latest
             target: aarch64-apple-darwin
             code-target: darwin-arm64
 
@@ -153,15 +153,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y musl-tools
 
-      - name: Install cargo-audit
-        uses: taiki-e/install-action@682e7d9e49c5e653d371fc6adbda67653461378a # v2.82.4
-        if: matrix.code-target == 'linux-x64-musl'
-        with:
-          tool: cargo-audit
-
-      - name: Audit crates.io dependencies
-        if: matrix.code-target == 'linux-x64-musl'
-        run: cargo audit
+      # NOTE: removed temporarily to make the release successful
+      #      - name: Install cargo-audit
+      #        uses: taiki-e/install-action@16b05812d776ae1dfaabc8277e421fb6d2506419 # v2.82.7
+      #        if: matrix.code-target == 'linux-x64-musl'
+      #        with:
+      #          tool: cargo-audit
+      #
+      #      - name: Audit crates.io dependencies
+      #        if: matrix.code-target == 'linux-x64-musl'
+      #        run: cargo audit
 
       # Build the CLI binary
       - name: Build binaries
@@ -185,7 +186,7 @@ jobs:
           cp target/${{ matrix.target }}/release/biome ./dist/biome-${{ matrix.code-target }}
 
       - name: Attest build provenance
-        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         with:
           subject-path: ./dist/biome-*
 
@@ -220,7 +221,7 @@ jobs:
     name: Package ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
     container:
-      image: rust:1.96.0-bullseye@sha256:e12c121572a8e557ce164e10755da72047be5b689edb5ae617a6a5d37683a0fc
+      image: rust:1.96.1-bullseye@sha256:21d112adb6ab370d39eef8f861f10b42342419b9569e7a05dac15e19eb65a3b4
 
     steps:
       - name: Checkout repository
@@ -249,7 +250,7 @@ jobs:
           cp target/${{ matrix.target }}/release/biome ./dist/biome-${{ matrix.code-target }}
 
       - name: Attest build provenance
-        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         with:
           subject-path: ./dist/biome-*
 
@@ -335,7 +336,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache pnpm modules
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}

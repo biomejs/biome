@@ -1,12 +1,13 @@
 use super::{
     AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, EditorCapabilities,
-    EnabledForPath, ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults,
-    ParseResult, ParserCapabilities, SearchCapabilities,
+    EnabledForPath, ExtensionHandler, FixAllParams, FixedFileResult, FormatterCapabilities,
+    LintParams, LintResults, ParseResult, ParserCapabilities, SearchCapabilities,
+    format_on_type_noop, matches_on_type_char,
 };
 use crate::settings::{
     OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
-use crate::workspace::{FixFileResult, GetSyntaxTreeResult};
+use crate::workspace::GetSyntaxTreeResult;
 use crate::{
     WorkspaceError,
     settings::{ServiceLanguage, Settings},
@@ -22,10 +23,10 @@ use biome_formatter::{
     FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline,
 };
 use biome_fs::BiomePath;
-use biome_grit_formatter::{context::GritFormatOptions, format_node, format_sub_tree};
+use biome_grit_formatter::{context::GritFormatOptions, format_node};
 use biome_grit_parser::parse_grit_with_cache;
-use biome_grit_syntax::{GritLanguage, GritRoot, GritSyntaxNode};
-use biome_rowan::{AstNode, NodeCache, TextRange, TextSize, TokenAtOffset};
+use biome_grit_syntax::{GritLanguage, GritRoot, GritSyntaxKind, GritSyntaxNode};
+use biome_rowan::{AstNode, NodeCache, SyntaxKind, TextRange, TextSize, TokenAtOffset};
 use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 use tracing::debug_span;
@@ -358,7 +359,7 @@ fn debug_formatter_ir(
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
@@ -419,12 +420,36 @@ fn format_on_type(
         TokenAtOffset::Between(token, _) => token,
     };
 
+    if token.text_trimmed_range().end() != offset {
+        return Ok(format_on_type_noop(offset));
+    }
+
+    if !matches_on_type_char(token.text_trimmed()) {
+        return Ok(format_on_type_noop(offset));
+    }
+
     let root_node = match token.parent() {
         Some(node) => node,
         None => panic!("found a token with no parent"),
     };
 
-    let printed = format_sub_tree(options, &root_node)?;
+    if root_node
+        .ancestors()
+        .any(|node: GritSyntaxNode| node.kind().is_bogus())
+    {
+        return Ok(format_on_type_noop(offset));
+    }
+
+    let formatting_root = root_node
+        .ancestors()
+        .find(|node: &GritSyntaxNode| {
+            node.parent()
+                .is_some_and(|parent| parent.kind() == GritSyntaxKind::GRIT_ROOT)
+        })
+        .unwrap_or(root_node);
+
+    let printed =
+        biome_grit_formatter::format_range(options, &tree, formatting_root.text_trimmed_range())?;
     Ok(printed)
 }
 
@@ -453,24 +478,12 @@ fn lint(params: LintParams) -> LintResults {
 }
 
 #[tracing::instrument(level = "debug", skip(params))]
-pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     let tree: GritRoot = params.parsed_source.tree(&params.workspace_db);
-    let code = if params.should_format {
-        format_node(
-            params
-                .settings
-                .format_options::<GritLanguage>(params.biome_path, &params.document_file_source),
-            tree.syntax(),
-        )?
-        .print()?
-        .into_code()
-    } else {
-        tree.syntax().to_string()
-    };
-    Ok(FixFileResult {
-        code,
+    Ok(Some(FixedFileResult {
+        root: tree.syntax().as_send().unwrap(),
         skipped_suggested_fixes: 0,
         actions: vec![],
         errors: 0,
-    })
+    }))
 }

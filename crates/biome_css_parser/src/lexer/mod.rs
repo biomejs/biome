@@ -1190,6 +1190,9 @@ impl<'src> CssLexer<'src> {
             b"returns" => RETURNS_KW,
             b"use" => USE_KW,
             b"with" => WITH_KW,
+            b"custom-media" => CUSTOM_MEDIA_KW,
+            b"true" => TRUE_KW,
+            b"false" => FALSE_KW,
             // Tailwind CSS 4.0 keywords
             b"theme" => THEME_KW,
             b"utility" => UTILITY_KW,

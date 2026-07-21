@@ -190,3 +190,7 @@ function useRecursiveHookA() {
 function useRecursiveHookB() {
     useRecursiveHookA();
 }
+
+function NotForwardRefComponent(props, value) {
+    useState();
+}

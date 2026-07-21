@@ -14,7 +14,7 @@ impl FormatNodeRule<CssDocumentAtRule> for FormatCssDocumentAtRule {
         write!(
             f,
             [
-                document_token.format(),
+                document_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
                 matchers.format(),
                 space(),

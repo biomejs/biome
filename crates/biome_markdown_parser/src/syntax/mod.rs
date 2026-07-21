@@ -63,6 +63,7 @@ use quote::{
 use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 
 use crate::MarkdownParser;
+use crate::lexer::MarkdownReLexContext;
 
 /// Check if current token consists only of ASCII spaces and/or tabs.
 ///
@@ -552,7 +553,10 @@ pub(crate) fn parse_indent_code_block(p: &mut MarkdownParser) -> ParsedSyntax {
             }
         }
 
-        // Consume token as code content
+        // Consume token as code content. The content is literal text:
+        // consume the whole rest of the line as one token instead of one
+        // token per character group.
+        p.re_lex(MarkdownReLexContext::CodeInfoString);
         let text_m = p.start();
         p.bump_remap(MD_TEXTUAL_LITERAL);
         text_m.complete(p, MD_TEXTUAL);
@@ -603,20 +607,28 @@ fn consume_indent_prefix(p: &mut MarkdownParser, indent: usize) {
         return;
     }
 
-    let mut consumed = 0usize;
-    while consumed < indent && p.at(MD_TEXTUAL_LITERAL) {
-        let text = p.cur_text();
-        if text == " " {
-            consumed += 1;
-        } else if text == "\t" {
-            consumed += TAB_STOP_SPACES;
-        } else {
-            break;
+    // Indentation arrives as one whitespace token per character; measure the
+    // run on the source and consume it as a single MdIndentToken. A tab that
+    // starts below the budget is included even when its width overshoots it.
+    if p.at(MD_TEXTUAL_LITERAL) {
+        let mut consumed = 0usize;
+        let mut len = 0usize;
+        for byte in p.source_after_current().bytes() {
+            if consumed >= indent {
+                break;
+            }
+            match byte {
+                b' ' => consumed += 1,
+                b'\t' => consumed += TAB_STOP_SPACES,
+                _ => break,
+            }
+            len += 1;
         }
 
-        let token_m = p.start();
-        p.bump_remap(MD_INDENT_CHAR);
-        token_m.complete(p, MD_INDENT_TOKEN);
+        if len > 0 {
+            let end = p.cur_range().start() + TextSize::from(len as u32);
+            p.emit_span_as(end, MD_INDENT_CHAR, MD_INDENT_TOKEN);
+        }
     }
 }
 
@@ -910,17 +922,13 @@ fn classify_quote_break_after_newline(
             if at_setext || at_block_interrupt(p) || textual_looks_like_list_marker(p) {
                 return QuoteBreakKind::Other;
             }
-            // Tab between `>` and a block-level marker (e.g. `> \t- nested`)
-            // leaves the marker token mid-line in the buffer, so the direct
-            // checks miss it. Only enter the lookahead retry when the current
-            // token is a whitespace-only textual run that contains a tab —
-            // otherwise the original checks above are authoritative and the
-            // retry would add lookahead overhead to every quote continuation.
+            // Retry after short space indentation because the marker remains mid-line.
+            // Keep 4+ spaces lazy; tabs need retry because their width depends on position.
             let needs_ws_retry = p.at(MD_TEXTUAL_LITERAL) && {
                 let bytes = p.cur_text().as_bytes();
                 !bytes.is_empty()
                     && bytes.iter().all(|b| matches!(b, b' ' | b'\t'))
-                    && bytes.contains(&b'\t')
+                    && (bytes.contains(&b'\t') || residual_indent < INDENT_CODE_BLOCK_SPACES)
             };
             if !needs_ws_retry {
                 return QuoteBreakKind::None;

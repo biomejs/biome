@@ -1,9 +1,14 @@
 #![deny(clippy::use_self)]
 #![warn(clippy::needless_pass_by_value)]
+#![expect(
+    clippy::disallowed_methods,
+    reason = "Some analyses require complete syntax text that can span multiple tokens."
+)]
 
 pub use crate::registry::visit_registry;
 pub use crate::services::control_flow::ControlFlowGraph;
 use crate::services::embedded::EmbeddedService;
+use crate::services::typed::TypedModule;
 use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
@@ -16,7 +21,7 @@ use biome_diagnostics::Error as DiagnosticError;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
 use biome_languages::{JsFileSource, LanguageDb};
-use biome_module_graph::{ModuleDb, ModuleResolver};
+use biome_module_graph::ModuleDb;
 use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextRange;
@@ -216,9 +221,8 @@ where
         project_layout.find_all_turbo_json_for_path(file_path.as_ref());
 
     let type_resolver = module_db.as_ref().and_then(|db| {
-        db.js_module_info_for_path(file_path.as_ref())
-            .map(|module_info| ModuleResolver::for_module(module_info, db.clone()))
-            .map(Arc::new)
+        db.module_for_path(file_path.as_ref())
+            .map(|module| TypedModule::new(db.clone(), module))
     });
 
     services.insert_service(Arc::new(AriaRoles));

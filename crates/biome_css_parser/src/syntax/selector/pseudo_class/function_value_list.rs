@@ -1,18 +1,20 @@
 use crate::parser::CssParser;
-use crate::syntax::parse_error::expected_identifier;
+use crate::syntax::parse_error::{expected_identifier, scss_only_syntax_error};
 use crate::syntax::scss::{
-    is_at_scss_interpolated_identifier, is_at_scss_interpolated_string,
+    is_at_scss_interpolated_string, is_at_scss_interpolation, is_nth_at_scss_interpolation,
     parse_scss_interpolated_string, parse_scss_interpolation_or_identifier,
 };
 use crate::syntax::selector::eat_or_recover_selector_function_close_token;
-use crate::syntax::{is_at_identifier, is_at_string, parse_regular_identifier, parse_string};
+use crate::syntax::{
+    CssSyntaxFeatures, is_at_identifier, is_at_string, parse_regular_identifier, parse_string,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, TokenSet, token_set};
+use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
 
 const PSEUDO_CLASS_FUNCTION_VALUE_LIST_SET: TokenSet<CssSyntaxKind> = token_set![T![lang]];
 
@@ -86,7 +88,7 @@ impl ParseSeparatedList for PseudoValueList {
 pub(crate) fn is_at_pseudo_value(p: &mut CssParser) -> bool {
     is_at_identifier(p)
         || is_at_string(p)
-        || is_at_scss_interpolated_identifier(p)
+        || is_at_scss_interpolated_pseudo_value_identifier(p)
         || is_at_scss_interpolated_string(p)
 }
 
@@ -98,12 +100,30 @@ fn parse_pseudo_value(p: &mut CssParser) -> ParsedSyntax {
     }
 
     if is_at_scss_interpolated_string(p) {
-        parse_scss_interpolated_string(p)
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_interpolated_string,
+            |p, marker| scss_only_syntax_error(p, "SCSS interpolated strings", marker.range(p)),
+        )
     } else if is_at_string(p) {
         parse_string(p)
-    } else if is_at_scss_interpolated_identifier(p) {
-        parse_scss_interpolation_or_identifier(p)
+    } else if is_at_scss_interpolated_pseudo_value_identifier(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_interpolation_or_identifier,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated pseudo values", marker.range(p))
+            },
+        )
     } else {
         parse_regular_identifier(p)
     }
+}
+
+#[inline]
+fn is_at_scss_interpolated_pseudo_value_identifier(p: &mut CssParser) -> bool {
+    is_at_scss_interpolation(p)
+        || is_at_identifier(p)
+            && is_nth_at_scss_interpolation(p, 1)
+            && !p.has_nth_preceding_whitespace(1)
 }

@@ -10,3 +10,11 @@ interface ErrorConstructor {
 }
 
 declare var Error: ErrorConstructor;
+
+interface Disposable {
+    [Symbol.dispose](): void;
+}
+
+interface AsyncDisposable {
+    [Symbol.asyncDispose](): PromiseLike<void>;
+}

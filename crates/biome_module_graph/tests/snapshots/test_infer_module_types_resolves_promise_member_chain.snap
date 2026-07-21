@@ -1,0 +1,361 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export class Parent {
+	async returnsPromise(): Promise<string> {
+		return "value";
+	}
+}
+
+export class Child extends Parent {}
+
+export const direct = new Child().returnsPromise();
+export const then = direct.then(() => 42);
+export const flattenedResolved = direct.then(() => Promise.resolve(42));
+export const flattenedAsync = direct.then(async () => 42);
+export const passthrough = direct.then();
+export const recovered = direct.catch(() => false);
+export const finalResult = direct.finally(() => {});
+export const awaitedThen = await then;
+export const awaitedResolved = await flattenedResolved;
+export const awaitedAsync = await flattenedAsync;
+export const awaitedFinal = await finalResult;
+export const awaitedRecovered = await recovered;
+```
+
+## Inferred types
+
+```
+Binding Parent "Parent" => class "Parent" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "\"value\"" => string: value
+
+Binding Child "Child" => class "Child" {
+  extends: Parent
+  implements: []
+  type_args: []
+}
+
+Expression "Parent" => class "Parent" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding direct "direct" => instanceof Promise<string>
+
+Expression "new Child()" => instanceof Child
+
+Expression "new Child().returnsPromise" => async Function "returnsPromise" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<string>
+}
+
+Expression "new Child().returnsPromise()" => instanceof Promise<string>
+
+Expression "Child" => class "Child" {
+  extends: Parent
+  implements: []
+  type_args: []
+}
+
+Binding then "then" => instanceof Promise<number: 42>
+
+Expression "direct" => instanceof Promise<string>
+
+Expression "direct.then" => sync Function "then" {
+  accepts: {
+    params: [
+      optional onfulfilled: sync Function "Promise callback" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: TFulfillmentHandlerValue = string | instanceof Promise<TFulfillmentHandlerValue = string>
+      }
+      optional onrejected: sync Function "Promise callback" {
+        accepts: {
+          params: [
+            required reason: any
+          ]
+          type_args: []
+        }
+        returns: TRejectionHandlerValue = never | instanceof Promise<TRejectionHandlerValue = never>
+      }
+    ]
+    type_args: [
+      TFulfillmentHandlerValue = string,
+      TRejectionHandlerValue = never
+    ]
+  }
+  returns: instanceof Promise<TFulfillmentHandlerValue = string | TRejectionHandlerValue = never>
+}
+
+Expression "direct.then(() => 42)" => instanceof Promise<number: 42>
+
+Expression "() => 42" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: number: 42
+}
+
+Expression "42" => number: 42
+
+Binding flattenedResolved "flattenedResolved" => instanceof Promise<number: 42>
+
+Expression "direct" => instanceof Promise<string>
+
+Expression "direct.then" => sync Function "then" {
+  accepts: {
+    params: [
+      optional onfulfilled: sync Function "Promise callback" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: TFulfillmentHandlerValue = string | instanceof Promise<TFulfillmentHandlerValue = string>
+      }
+      optional onrejected: sync Function "Promise callback" {
+        accepts: {
+          params: [
+            required reason: any
+          ]
+          type_args: []
+        }
+        returns: TRejectionHandlerValue = never | instanceof Promise<TRejectionHandlerValue = never>
+      }
+    ]
+    type_args: [
+      TFulfillmentHandlerValue = string,
+      TRejectionHandlerValue = never
+    ]
+  }
+  returns: instanceof Promise<TFulfillmentHandlerValue = string | TRejectionHandlerValue = never>
+}
+
+Expression "direct.then(() => Promise.resolve(42))" => instanceof Promise<number: 42>
+
+Expression "() => Promise.resolve(42)" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<number: 42>
+}
+
+Expression "Promise" => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "Promise.resolve" => sync Function "resolve" {
+  accepts: {
+    params: [
+      required value: TResolveValue
+    ]
+    type_args: [TResolveValue]
+  }
+  returns: instanceof Promise<TResolveValue>
+}
+
+Expression "Promise.resolve(42)" => instanceof Promise<number: 42>
+
+Expression "42" => number: 42
+
+Binding flattenedAsync "flattenedAsync" => instanceof Promise<number: 42>
+
+Expression "direct" => instanceof Promise<string>
+
+Expression "direct.then" => sync Function "then" {
+  accepts: {
+    params: [
+      optional onfulfilled: sync Function "Promise callback" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: TFulfillmentHandlerValue = string | instanceof Promise<TFulfillmentHandlerValue = string>
+      }
+      optional onrejected: sync Function "Promise callback" {
+        accepts: {
+          params: [
+            required reason: any
+          ]
+          type_args: []
+        }
+        returns: TRejectionHandlerValue = never | instanceof Promise<TRejectionHandlerValue = never>
+      }
+    ]
+    type_args: [
+      TFulfillmentHandlerValue = string,
+      TRejectionHandlerValue = never
+    ]
+  }
+  returns: instanceof Promise<TFulfillmentHandlerValue = string | TRejectionHandlerValue = never>
+}
+
+Expression "direct.then(async () => 42)" => instanceof Promise<number: 42>
+
+Expression "async () => 42" => async Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<number: 42>
+}
+
+Expression "42" => number: 42
+
+Binding passthrough "passthrough" => instanceof Promise<string>
+
+Expression "direct" => instanceof Promise<string>
+
+Expression "direct.then" => sync Function "then" {
+  accepts: {
+    params: [
+      optional onfulfilled: sync Function "Promise callback" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: TFulfillmentHandlerValue = string | instanceof Promise<TFulfillmentHandlerValue = string>
+      }
+      optional onrejected: sync Function "Promise callback" {
+        accepts: {
+          params: [
+            required reason: any
+          ]
+          type_args: []
+        }
+        returns: TRejectionHandlerValue = never | instanceof Promise<TRejectionHandlerValue = never>
+      }
+    ]
+    type_args: [
+      TFulfillmentHandlerValue = string,
+      TRejectionHandlerValue = never
+    ]
+  }
+  returns: instanceof Promise<TFulfillmentHandlerValue = string | TRejectionHandlerValue = never>
+}
+
+Expression "direct.then()" => instanceof Promise<string>
+
+Binding recovered "recovered" => instanceof Promise<string | bool: false>
+
+Expression "direct" => instanceof Promise<string>
+
+Expression "direct.catch" => sync Function "catch" {
+  accepts: {
+    params: [
+      optional onrejected: sync Function "Promise callback" {
+        accepts: {
+          params: [
+            required reason: any
+          ]
+          type_args: []
+        }
+        returns: TRejectionHandlerValue = never | instanceof Promise<TRejectionHandlerValue = never>
+      }
+    ]
+    type_args: [TRejectionHandlerValue = never]
+  }
+  returns: instanceof Promise<string | TRejectionHandlerValue = never>
+}
+
+Expression "direct.catch(() => false)" => instanceof Promise<string | bool: false>
+
+Expression "() => false" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: bool: false
+}
+
+Expression "false" => bool: false
+
+Binding finalResult "finalResult" => instanceof Promise<string>
+
+Expression "direct" => instanceof Promise<string>
+
+Expression "direct.finally" => sync Function "finally" {
+  accepts: {
+    params: [
+      optional onfinally: sync Function "Promise callback" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: void
+      }
+    ]
+    type_args: []
+  }
+  returns: instanceof Promise<string>
+}
+
+Expression "direct.finally(() => {})" => instanceof Promise<string>
+
+Expression "() => {}" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Binding awaitedThen "awaitedThen" => number: 42
+
+Expression "await then" => number: 42
+
+Expression "then" => instanceof Promise<number: 42>
+
+Binding awaitedResolved "awaitedResolved" => number: 42
+
+Expression "await flattenedResolved" => number: 42
+
+Expression "flattenedResolved" => instanceof Promise<number: 42>
+
+Binding awaitedAsync "awaitedAsync" => number: 42
+
+Expression "await flattenedAsync" => number: 42
+
+Expression "flattenedAsync" => instanceof Promise<number: 42>
+
+Binding awaitedFinal "awaitedFinal" => string
+
+Expression "await finalResult" => string
+
+Expression "finalResult" => instanceof Promise<string>
+
+Binding awaitedRecovered "awaitedRecovered" => string | bool: false
+
+Expression "await recovered" => string | bool: false
+
+Expression "recovered" => instanceof Promise<string | bool: false>
+```

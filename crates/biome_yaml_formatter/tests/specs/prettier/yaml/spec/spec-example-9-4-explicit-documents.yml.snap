@@ -22,17 +22,16 @@ info: yaml/spec/spec-example-9-4-explicit-documents.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,6 +1,7 @@
+@@ -1,7 +1,6 @@
  ---
 -{ ? matches
 -    %
 -  : 20 }
 +{ matches
 +% : 20 }
-+...
+ ...
  ---
  # Empty
-+...
 ```
 
 # Output

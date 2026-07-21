@@ -1,5 +1,6 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 190
 expression: snapshot
 ---
 
@@ -33,12 +34,16 @@ MdDocument {
                     prefix: MdListMarkerPrefix {
                         pre_marker_indent: MdIndentTokenList [],
                         marker: MD_ORDERED_LIST_MARKER@0..2 "1." [] [],
-                        post_marker_space_token: missing (optional),
-                        content_indent: MdIndentTokenList [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@2..3 " " [] [],
+                        content_indent: MdIndentTokenList [
+                            MdIndentToken {
+                                md_indent_char_token: MD_INDENT_CHAR@3..4 " " [] [],
+                            },
+                        ],
                     },
                     content: MdBlockList [
                         MdNewline {
-                            value_token: NEWLINE@2..5 "  \n" [] [],
+                            value_token: NEWLINE@4..5 "\n" [] [],
                         },
                     ],
                 },
@@ -69,12 +74,16 @@ MdDocument {
                     prefix: MdListMarkerPrefix {
                         pre_marker_indent: MdIndentTokenList [],
                         marker: MD_ORDERED_LIST_MARKER@11..13 "1." [] [],
-                        post_marker_space_token: missing (optional),
-                        content_indent: MdIndentTokenList [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@13..14 " " [] [],
+                        content_indent: MdIndentTokenList [
+                            MdIndentToken {
+                                md_indent_char_token: MD_INDENT_CHAR@14..16 "  " [] [],
+                            },
+                        ],
                     },
                     content: MdBlockList [
                         MdNewline {
-                            value_token: NEWLINE@13..17 "   \n" [] [],
+                            value_token: NEWLINE@16..17 "\n" [] [],
                         },
                     ],
                 },
@@ -108,9 +117,13 @@ MdDocument {
                 MdBullet {
                     prefix: MdListMarkerPrefix {
                         pre_marker_indent: MdIndentTokenList [],
-                        marker: MINUS@23..27 "-   " [] [],
-                        post_marker_space_token: missing (optional),
-                        content_indent: MdIndentTokenList [],
+                        marker: MINUS@23..24 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@24..25 " " [] [],
+                        content_indent: MdIndentTokenList [
+                            MdIndentToken {
+                                md_indent_char_token: MD_INDENT_CHAR@25..27 "  " [] [],
+                            },
+                        ],
                     },
                     content: MdBlockList [
                         MdNewline {
@@ -190,14 +203,16 @@ MdDocument {
     0: MD_ORDERED_LIST_ITEM@0..22
       0: MD_BULLET_LIST@0..22
         0: MD_BULLET@0..5
-          0: MD_LIST_MARKER_PREFIX@0..2
+          0: MD_LIST_MARKER_PREFIX@0..4
             0: MD_INDENT_TOKEN_LIST@0..0
             1: MD_ORDERED_LIST_MARKER@0..2 "1." [] []
-            2: (empty)
-            3: MD_INDENT_TOKEN_LIST@2..2
-          1: MD_BLOCK_LIST@2..5
-            0: MD_NEWLINE@2..5
-              0: NEWLINE@2..5 "  \n" [] []
+            2: MD_LIST_POST_MARKER_SPACE@2..3 " " [] []
+            3: MD_INDENT_TOKEN_LIST@3..4
+              0: MD_INDENT_TOKEN@3..4
+                0: MD_INDENT_CHAR@3..4 " " [] []
+          1: MD_BLOCK_LIST@4..5
+            0: MD_NEWLINE@4..5
+              0: NEWLINE@4..5 "\n" [] []
         1: MD_BULLET@5..11
           0: MD_LIST_MARKER_PREFIX@5..8
             0: MD_INDENT_TOKEN_LIST@5..5
@@ -214,14 +229,16 @@ MdDocument {
             1: MD_NEWLINE@10..11
               0: NEWLINE@10..11 "\n" [] []
         2: MD_BULLET@11..17
-          0: MD_LIST_MARKER_PREFIX@11..13
+          0: MD_LIST_MARKER_PREFIX@11..16
             0: MD_INDENT_TOKEN_LIST@11..11
             1: MD_ORDERED_LIST_MARKER@11..13 "1." [] []
-            2: (empty)
-            3: MD_INDENT_TOKEN_LIST@13..13
-          1: MD_BLOCK_LIST@13..17
-            0: MD_NEWLINE@13..17
-              0: NEWLINE@13..17 "   \n" [] []
+            2: MD_LIST_POST_MARKER_SPACE@13..14 " " [] []
+            3: MD_INDENT_TOKEN_LIST@14..16
+              0: MD_INDENT_TOKEN@14..16
+                0: MD_INDENT_CHAR@14..16 "  " [] []
+          1: MD_BLOCK_LIST@16..17
+            0: MD_NEWLINE@16..17
+              0: NEWLINE@16..17 "\n" [] []
         3: MD_BULLET@17..22
           0: MD_LIST_MARKER_PREFIX@17..20
             0: MD_INDENT_TOKEN_LIST@17..17
@@ -242,9 +259,11 @@ MdDocument {
         0: MD_BULLET@23..28
           0: MD_LIST_MARKER_PREFIX@23..27
             0: MD_INDENT_TOKEN_LIST@23..23
-            1: MINUS@23..27 "-   " [] []
-            2: (empty)
-            3: MD_INDENT_TOKEN_LIST@27..27
+            1: MINUS@23..24 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@24..25 " " [] []
+            3: MD_INDENT_TOKEN_LIST@25..27
+              0: MD_INDENT_TOKEN@25..27
+                0: MD_INDENT_CHAR@25..27 "  " [] []
           1: MD_BLOCK_LIST@27..28
             0: MD_NEWLINE@27..28
               0: NEWLINE@27..28 "\n" [] []

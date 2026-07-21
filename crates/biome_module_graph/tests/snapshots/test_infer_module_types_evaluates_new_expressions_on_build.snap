@@ -1,0 +1,77 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export class Box {
+	value: string;
+
+	constructor(contents: string) {}
+}
+
+export class Empty {
+	count: number;
+}
+
+export const box = new Box("value");
+export const boxValue = box.value;
+export const empty = new Empty();
+export const count = empty.count;
+```
+
+## Inferred types
+
+```
+Binding Box "Box" => class "Box" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding contents "contents" => string
+
+Binding Empty "Empty" => class "Empty" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding box "box" => instanceof Box
+
+Expression "new Box(\"value\")" => instanceof Box
+
+Expression "Box" => class "Box" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "\"value\"" => string: value
+
+Binding boxValue "boxValue" => string
+
+Expression "box" => instanceof Box
+
+Expression "box.value" => string
+
+Binding empty "empty" => instanceof Empty
+
+Expression "new Empty()" => instanceof Empty
+
+Expression "Empty" => class "Empty" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding count "count" => number
+
+Expression "empty" => instanceof Empty
+
+Expression "empty.count" => number
+```

@@ -15,6 +15,10 @@ publish              = true
 harness = false
 name    = "module_graph"
 
+[[bench]]
+harness = false
+name    = "type_inference"
+
 [dependencies]
 biome_console        = { workspace = true }
 biome_css_semantic   = { workspace = true }

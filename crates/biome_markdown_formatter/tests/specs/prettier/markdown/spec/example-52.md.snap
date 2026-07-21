@@ -23,9 +23,14 @@ info: markdown/spec/example-52.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -2,5 +2,4 @@
+@@ -1,8 +1,5 @@
+-Foo
+----
++## Foo
  
- ## Foo
+-Foo
+------
++## Foo
  
 -Foo
 -===
