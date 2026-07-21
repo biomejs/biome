@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{format_args, write};
+use biome_formatter::write;
 use biome_html_syntax::{
     SvelteBindFunctionBindingExpression, SvelteBindFunctionBindingExpressionFields,
 };
@@ -23,18 +23,18 @@ impl FormatNodeRule<SvelteBindFunctionBindingExpression>
             r_curly_token,
         } = node.as_fields();
 
-        // Match Prettier's `surroundWithSoftline` for bind SequenceExpressions:
-        // fits on one line as `{get, set}`, breaks with indented get/set when needed.
         write!(
             f,
-            [group(&format_args![
+            [group(&biome_formatter::format_args![
                 l_curly_token.format(),
-                soft_block_indent(&format_args![
+                indent(&biome_formatter::format_args![
+                    soft_line_break(),
                     get.format(),
                     comma_token.format(),
                     soft_line_break_or_space(),
-                    set.format(),
                 ]),
+                set.format(),
+                soft_line_break(),
                 r_curly_token.format(),
             ])]
         )
