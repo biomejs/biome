@@ -919,7 +919,7 @@ pub(crate) fn parse_const_block(p: &mut HtmlParser, marker: Marker) -> ParsedSyn
     Present(marker.complete(p, SVELTE_CONST_BLOCK))
 }
 
-/// Parses a Svelte markup declaration block: `{let x = ...}` or `{const a = 1, b = 2}`. See https://github.com/sveltejs/svelte/issues/16490.
+/// Parses a Svelte markup declaration block: `{let x = ...}` or `{const a = 1, b = 2}`. See <https://svelte.dev/docs/svelte/declaration-tags>.
 pub(crate) fn parse_svelte_declaration_block(p: &mut HtmlParser) -> ParsedSyntax {
     if !Svelte.is_supported(p) || !p.at(T!['{']) {
         return Absent;

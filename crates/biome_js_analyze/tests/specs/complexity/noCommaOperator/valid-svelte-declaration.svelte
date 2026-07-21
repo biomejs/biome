@@ -10,6 +10,10 @@
 {const { x: objX, y: objY } = obj}
 {let [first, second] = arr}
 
+{ let padded = 1 }
+{ const spaced = 2 }
+{  let  wide  =  3  }
+
 {#each items as item}
 	{const width = item.w, height = item.h}
 	<span>{width} {height}</span>
