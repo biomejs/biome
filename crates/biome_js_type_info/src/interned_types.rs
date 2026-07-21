@@ -3168,6 +3168,67 @@ mod tests {
     }
 
     #[test]
+    fn substitution_descends_into_empty_generic_instance() {
+        let db = TestDb::default();
+        let generic = generic(&db);
+        let reference = TypeData::instance_of(&db, generic, Box::default());
+
+        assert_eq!(
+            reference.substitute_type(
+                &db,
+                TypeSubstitution {
+                    generic,
+                    replacement: TypeData::String,
+                },
+            ),
+            TypeTransformResult::Transformed(TypeData::instance_of(
+                &db,
+                TypeData::String,
+                Box::default(),
+            ))
+        );
+    }
+
+    #[test]
+    fn substitution_preserves_unmatched_generic_declaration_identity() {
+        let db = TestDb::default();
+        let generic_t = generic(&db);
+        let reference_t = TypeData::instance_of(&db, generic_t, Box::default());
+        let generic_u = TypeData::Generic(InternedGenericTypeParameter::new(
+            &db,
+            None,
+            Some(reference_t),
+            text("U"),
+        ));
+        let reference_u = TypeData::instance_of(&db, generic_u, Box::default());
+
+        assert_eq!(
+            reference_u.substitute_type(
+                &db,
+                TypeSubstitution {
+                    generic: generic_t,
+                    replacement: TypeData::String,
+                },
+            ),
+            TypeTransformResult::Transformed(reference_u)
+        );
+        assert_eq!(
+            reference_u.substitute_type(
+                &db,
+                TypeSubstitution {
+                    generic: generic_u,
+                    replacement: TypeData::Number,
+                },
+            ),
+            TypeTransformResult::Transformed(TypeData::instance_of(
+                &db,
+                TypeData::Number,
+                Box::default(),
+            ))
+        );
+    }
+
+    #[test]
     fn substitution_reports_direct_step_boundaries() {
         let db = TestDb::default();
         let generic = generic(&db);
