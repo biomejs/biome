@@ -2390,7 +2390,7 @@ impl TypeMember {
             let member = &members[i];
             if member.is_constructor()
                 && let Some(member_ty) = resolver.get_by_reference(&member.ty)
-                && let TypeData::Constructor(constructor) = member_ty
+                && let TypeData::Constructor(constructor) = member_ty.as_ref()
             {
                 for param in &constructor.parameters {
                     if let Some(_accessibility) = param.accessibility
@@ -3104,7 +3104,10 @@ fn apply_deep_const_reference(
         return type_reference.clone();
     }
 
-    let Some(inner_type) = resolver.get_by_reference(type_reference).cloned() else {
+    let Some(inner_type) = resolver
+        .get_by_reference(type_reference)
+        .map(Cow::into_owned)
+    else {
         return type_reference.clone();
     };
 

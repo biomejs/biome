@@ -52,7 +52,7 @@ impl RawTypeId {
     }
 
     pub const fn is_unknown(self) -> bool {
-        matches!(self, Self::Global(id) if id.index() == 0)
+        matches!(self, Self::Global(id) if id.index() == GLOBAL_UNKNOWN_ID.index())
     }
 }
 
@@ -1850,7 +1850,17 @@ impl Union {
 #[cfg(test)]
 mod tests {
     use super::{RawTypeId, TypeId};
-    use crate::{ResolvedTypeId, TypeResolverLevel, globals_ids::UNKNOWN_ID_GLOBAL_TYPE_ID};
+    use crate::{
+        ResolvedTypeId, TypeResolverLevel,
+        globals_ids::{STRING_ID_GLOBAL_TYPE_ID, UNKNOWN_ID_GLOBAL_TYPE_ID},
+    };
+
+    #[test]
+    fn raw_type_id_identifies_unknown() {
+        assert!(RawTypeId::Global(UNKNOWN_ID_GLOBAL_TYPE_ID).is_unknown());
+        assert!(!RawTypeId::Global(STRING_ID_GLOBAL_TYPE_ID).is_unknown());
+        assert!(!RawTypeId::Local(TypeId::new(0)).is_unknown());
+    }
 
     #[test]
     fn raw_type_ids_convert_to_legacy_resolver_levels() {

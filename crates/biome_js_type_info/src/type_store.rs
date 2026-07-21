@@ -13,8 +13,8 @@ use biome_js_syntax::AnyJsExpression;
 use biome_rowan::Text;
 
 use crate::{
-    Resolvable, ResolvedTypeData, ResolvedTypeId, TypeData, TypeId, TypeReference,
-    TypeReferenceQualifier, TypeResolver, TypeResolverLevel, Union, globals::GLOBAL_UNDEFINED_ID,
+    Resolvable, ResolvedTypeId, TypeData, TypeId, TypeReference, TypeReferenceQualifier,
+    TypeResolver, TypeResolverLevel, Union, globals::GLOBAL_UNDEFINED_ID,
 };
 
 /// Type store with efficient lookup mechanism.
@@ -285,11 +285,11 @@ pub trait RawTypeCollector {
         expression: &AnyJsExpression,
     ) -> Cow<'_, TypeData>;
 
-    fn get_by_reference(&self, ty: &TypeReference) -> Option<&TypeData> {
+    fn get_by_reference(&self, ty: &TypeReference) -> Option<Cow<'_, TypeData>> {
         let TypeReference::Resolved(id) = ty else {
             return None;
         };
-        (id.level() == TypeResolverLevel::Thin).then(|| self.get_by_id(id.id()))
+        (id.level() == TypeResolverLevel::Thin).then(|| Cow::Borrowed(self.get_by_id(id.id())))
     }
 
     fn reference_to_id(&self, id: TypeId) -> TypeReference {
@@ -379,8 +379,8 @@ impl<T: TypeResolver> RawTypeCollector for T {
         TypeResolver::resolve_expression(self, scope_id, expression)
     }
 
-    fn get_by_reference(&self, ty: &TypeReference) -> Option<&TypeData> {
-        TypeResolver::resolve_and_get(self, ty).map(ResolvedTypeData::as_raw_data)
+    fn get_by_reference(&self, ty: &TypeReference) -> Option<Cow<'_, TypeData>> {
+        TypeResolver::resolve_and_get(self, ty).map(|data| Cow::Owned(data.to_data()))
     }
 
     fn reference_to_id(&self, id: TypeId) -> TypeReference {

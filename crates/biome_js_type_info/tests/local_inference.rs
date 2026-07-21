@@ -2,12 +2,14 @@ mod utils;
 
 use biome_js_semantic::ScopeId;
 use biome_js_type_info::{
-    GlobalsResolver, RawTypeCollector, TypeData, TypeReference, TypeResolver, TypeResolverLevel,
+    GLOBAL_BOOLEAN_ID, GlobalsResolver, ModuleId, RawTypeCollector, ResolvedTypeId, TypeData,
+    TypeId, TypeReference, TypeResolver, TypeResolverLevel,
 };
 
 use utils::{
-    TestTypeCollector, assert_type_data_snapshot, assert_typed_bindings_snapshot, get_expression,
-    get_function_declaration, get_variable_declaration, parse_ts,
+    HardcodedSymbolResolver, TestTypeCollector, assert_type_data_snapshot,
+    assert_typed_bindings_snapshot, get_expression, get_function_declaration,
+    get_variable_declaration, parse_ts,
 };
 
 #[test]
@@ -27,9 +29,36 @@ fn raw_collector_records_local_expression_references() {
 
     assert_eq!(id.level(), TypeResolverLevel::Thin);
     assert!(matches!(
-        collector.get_by_reference(&tuple.elements()[0].ty),
+        collector
+            .get_by_reference(&tuple.elements()[0].ty)
+            .as_deref(),
         Some(TypeData::Literal(_))
     ));
+}
+
+#[test]
+fn legacy_resolver_preserves_module_context_for_nested_references() {
+    let nested_id = ResolvedTypeId::new(TypeResolverLevel::Thin, TypeId::new(1));
+    let globals = GlobalsResolver::default();
+    let data = TypeData::union_of(
+        &globals,
+        Box::new([nested_id.into(), GLOBAL_BOOLEAN_ID.into()]),
+    );
+    let resolver = HardcodedSymbolResolver::new("value", data, globals);
+    let module_id = ModuleId::new(5);
+    let outer_id =
+        ResolvedTypeId::new(TypeResolverLevel::Thin, TypeId::new(0)).with_module_id(module_id);
+
+    let resolved =
+        RawTypeCollector::get_by_reference(&resolver, &outer_id.into()).expect("type must resolve");
+    let TypeData::Union(union) = resolved.as_ref() else {
+        panic!("expected union type");
+    };
+    let TypeReference::Resolved(nested_id) = &union.types()[0] else {
+        panic!("expected resolved nested type");
+    };
+
+    assert_eq!(nested_id.module_id(), module_id);
 }
 
 #[test]
