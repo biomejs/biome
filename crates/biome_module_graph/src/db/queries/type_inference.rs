@@ -32,6 +32,7 @@ use biome_js_type_info::{
         LocalTypeId as InferredLocalTypeId, ModuleKey as InferredModuleKey, ReturnType,
         TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
         TypeMember as InferredTypeMember, TypeSubstitution as InferredTypeSubstitution,
+        TypeTransformResult,
     },
 };
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -1824,7 +1825,9 @@ fn infer_generic_return_type<'db>(
                 generic: parameter_ty,
                 replacement: arg,
             };
-            let Ok(substituted) = return_ty.substitute_type(db, substitution) else {
+            let TypeTransformResult::Transformed(substituted) =
+                return_ty.substitute_type(db, substitution)
+            else {
                 return InferredTypeData::Unknown;
             };
             return_ty = substituted;
@@ -1851,7 +1854,9 @@ fn infer_generic_return_type<'db>(
             return InferredTypeData::Unknown;
         };
         for substitution in callback_substitutions {
-            let Ok(substituted) = return_ty.substitute_type(db, substitution) else {
+            let TypeTransformResult::Transformed(substituted) =
+                return_ty.substitute_type(db, substitution)
+            else {
                 return InferredTypeData::Unknown;
             };
             return_ty = substituted;
@@ -1864,7 +1869,7 @@ fn infer_generic_return_type<'db>(
             && let Some(default) = generic.default(db)
         {
             let Some(replacement) = substitutions.iter().try_fold(default, |ty, substitution| {
-                ty.substitute_type(db, *substitution).ok()
+                ty.substitute_type(db, *substitution).map_or(None, Some)
             }) else {
                 return InferredTypeData::Unknown;
             };
@@ -1872,7 +1877,9 @@ fn infer_generic_return_type<'db>(
                 generic: *type_parameter,
                 replacement,
             };
-            let Ok(substituted) = return_ty.substitute_type(db, substitution) else {
+            let TypeTransformResult::Transformed(substituted) =
+                return_ty.substitute_type(db, substitution)
+            else {
                 return InferredTypeData::Unknown;
             };
             return_ty = substituted;

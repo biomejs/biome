@@ -6,6 +6,7 @@ use biome_js_type_info::interned_types::{
     Literal as InferredLiteral, LocalTypeHandle, ModuleKey, ReturnType as InferredReturnType,
     TypeData as InferredTypeData, TypeMember as InferredTypeMember,
     TypeMemberKind as InferredTypeMemberKind, TypeSubstitution as InferredTypeSubstitution,
+    TypeTransformResult,
 };
 use rustc_hash::FxHashSet;
 use salsa::plumbing::{AsId, FromId};
@@ -431,7 +432,8 @@ pub(in crate::db::type_inference) fn apply_substitutions<'db>(
     substitutions: &[InferredTypeSubstitution<'db>],
 ) -> InferredTypeData<'db> {
     for substitution in substitutions {
-        let Ok(substituted) = ty.substitute_type(db, *substitution) else {
+        let TypeTransformResult::Transformed(substituted) = ty.substitute_type(db, *substitution)
+        else {
             return InferredTypeData::Unknown;
         };
         ty = substituted;
@@ -445,7 +447,9 @@ pub(in crate::db) fn apply_substitutions_to_root_body<'db>(
     substitutions: &[InferredTypeSubstitution<'db>],
 ) -> InferredTypeData<'db> {
     for substitution in substitutions {
-        let Ok(substituted) = ty.substitute_type_in_root_body(db, *substitution) else {
+        let TypeTransformResult::Transformed(substituted) =
+            ty.substitute_type_in_root_body(db, *substitution)
+        else {
             return InferredTypeData::Unknown;
         };
         ty = substituted;
