@@ -212,6 +212,10 @@ pub(crate) fn read_most_recent_log_file(
 /// `biome-logs/server.log.yyyy-MM-dd-HH` files inside the system temporary
 /// directory)
 fn setup_tracing_subscriber(log_path: Utf8PathBuf, log_file_name_prefix: String) {
+    if let Err(err) = std::fs::create_dir_all(&log_path) {
+        eprintln!("Failed to create log directory: {err}");
+    }
+
     let appender_builder = tracing_appender::rolling::RollingFileAppender::builder();
     let file_appender = appender_builder
         .filename_prefix(log_file_name_prefix)
