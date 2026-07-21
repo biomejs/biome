@@ -249,7 +249,9 @@ impl ReactComponentInfo {
         // check if it's a function expression.
         if wrappers.is_empty() {
             let function_expression = function_expression?;
-            if !function_expression.has_valid_react_component_params()? {
+            // Unwrapped expressions keep the classic one-parameter limit.
+            // `forwardRef((props, ref) => ...)` skips this check via wrappers.
+            if function_expression.param_count()? > 1 {
                 return None;
             }
             name_hint = function_expression.name();
@@ -432,14 +434,13 @@ impl AnyJsFunctionExpression {
         }
     }
 
-    fn has_valid_react_component_params(&self) -> Option<bool> {
-        let parameters = match self {
-            Self::JsFunctionExpression(expr) => expr.parameters().ok()?.items(),
+    fn param_count(&self) -> Option<usize> {
+        match self {
+            Self::JsFunctionExpression(expr) => Some(expr.parameters().ok()?.items().len()),
             Self::JsArrowFunctionExpression(expr) => {
-                expr.parameters().ok()?.as_js_parameters()?.items()
+                Some(expr.parameters().ok()?.as_js_parameters()?.items().len())
             }
-        };
-        has_valid_react_component_params(parameters.into_iter())
+        }
     }
 
     fn as_any_js_expression(&self) -> AnyJsExpression {
@@ -487,14 +488,14 @@ impl AnyJsFunctionOrMethodDeclaration {
         }
     }
 
-    fn has_valid_react_component_params(&self) -> Option<bool> {
+    fn parameters(&self) -> Option<impl Iterator<Item = SyntaxResult<AnyJsParameter>>> {
         let parameters = match self {
             Self::JsFunctionExportDefaultDeclaration(decl) => decl.parameters(),
             Self::JsFunctionDeclaration(decl) => decl.parameters(),
             Self::JsMethodClassMember(method) => method.parameters(),
             Self::JsMethodObjectMember(method) => method.parameters(),
         };
-        has_valid_react_component_params(parameters.ok()?.items().into_iter())
+        Some(parameters.ok()?.items().into_iter())
     }
 
     fn start_range(&self) -> TextRange {
@@ -552,49 +553,70 @@ impl AnyJsProperty {
     }
 }
 
-/// React function components may have zero or one parameter (`props`).
-/// They may also have a second `ref`-like parameter for named components
-/// passed to `forwardRef()`, for example `forwardRef(MyComponent)`.
-fn has_valid_react_component_params(
-    parameters: impl Iterator<Item = SyntaxResult<AnyJsParameter>>,
-) -> Option<bool> {
-    let mut parameters = parameters;
-    let first = parameters.next().transpose().ok()?;
-    let second = parameters.next().transpose().ok()?;
+/// Shared helpers for recognizing React function components.
+trait ReactComponent {
+    /// Whether this node's parameters are valid for a React function component.
+    ///
+    /// Function components may have zero or one parameter (`props`). Named
+    /// declarations may also have a second `ref`-like parameter for components
+    /// passed to `forwardRef()`, for example `forwardRef(MyComponent)`.
+    fn has_valid_react_component_params(&self) -> Option<bool>;
 
-    if parameters.next().is_some() {
-        return Some(false);
+    fn is_ref_parameter(parameter: &AnyJsParameter) -> bool {
+        let name = match parameter {
+            AnyJsParameter::AnyJsFormalParameter(AnyJsFormalParameter::JsFormalParameter(
+                parameter,
+            )) => parameter.binding().ok().and_then(|binding| {
+                binding
+                    .as_any_js_binding()?
+                    .as_js_identifier_binding()?
+                    .name_token()
+                    .ok()
+            }),
+            AnyJsParameter::AnyJsFormalParameter(
+                AnyJsFormalParameter::JsBogusParameter(_) | AnyJsFormalParameter::JsMetavariable(_),
+            )
+            | AnyJsParameter::JsRestParameter(_)
+            | AnyJsParameter::TsThisParameter(_) => None,
+        };
+
+        name.is_some_and(|name| {
+            let name = name.text_trimmed();
+            name == "ref" || name.ends_with("Ref") || name.ends_with("ref")
+        })
     }
 
-    Some(match (first, second) {
-        (None, None) | (Some(_), None) => true,
-        (Some(_), Some(second)) => is_ref_parameter(&second),
-        (None, Some(_)) => false,
-    })
+    fn check_parameters(
+        parameters: impl Iterator<Item = SyntaxResult<AnyJsParameter>>,
+        allow_ref_parameter: bool,
+    ) -> Option<bool> {
+        let mut parameters = parameters;
+        let first = parameters.next().transpose().ok()?;
+        let second = parameters.next().transpose().ok()?;
+
+        if parameters.next().is_some() {
+            return Some(false);
+        }
+
+        Some(match (first, second) {
+            (None | Some(_), None) => true,
+            (Some(_), Some(second)) => allow_ref_parameter && Self::is_ref_parameter(&second),
+            (None, Some(_)) => false,
+        })
+    }
 }
 
-fn is_ref_parameter(parameter: &AnyJsParameter) -> bool {
-    let name = match parameter {
-        AnyJsParameter::AnyJsFormalParameter(AnyJsFormalParameter::JsFormalParameter(
-            parameter,
-        )) => parameter.binding().ok().and_then(|binding| {
-            binding
-                .as_any_js_binding()?
-                .as_js_identifier_binding()?
-                .name_token()
-                .ok()
-        }),
-        AnyJsParameter::AnyJsFormalParameter(
-            AnyJsFormalParameter::JsBogusParameter(_) | AnyJsFormalParameter::JsMetavariable(_),
-        )
-        | AnyJsParameter::JsRestParameter(_)
-        | AnyJsParameter::TsThisParameter(_) => None,
-    };
+impl ReactComponent for AnyJsFunctionOrMethodDeclaration {
+    fn has_valid_react_component_params(&self) -> Option<bool> {
+        Self::check_parameters(self.parameters()?, true)
+    }
+}
 
-    name.is_some_and(|name| {
-        let name = name.text_trimmed();
-        name == "ref" || name.ends_with("Ref") || name.ends_with("ref")
-    })
+impl ReactComponent for ReactComponentInfo {
+    fn has_valid_react_component_params(&self) -> Option<bool> {
+        // Parameter shapes are validated while constructing the info.
+        Some(true)
+    }
 }
 
 /// Checks whether the given function name belongs to a React component, based
@@ -1912,6 +1934,14 @@ mod test {
                         return <div>Hello, world!</div>;
                     }
 
+                    function MyForwardRefComponent(props, ref) {
+                        return <div>Hello, world!</div>;
+                    }
+
+                    function MyForwardedInput(props, forwardedRef) {
+                        return <div>Hello, world!</div>;
+                    }
+
                     export function MyComponent3(param) {
                         return <div>Hello, world!</div>;
                     }
@@ -1928,7 +1958,7 @@ mod test {
                 .filter_map(AnyJsFunctionOrMethodDeclaration::cast)
                 .collect::<Vec<_>>();
 
-            assert_eq!(funcs.len(), 4);
+            assert_eq!(funcs.len(), 6);
 
             for func in funcs {
                 let component_info = ReactComponentInfo::from_declaration(func.syntax());

@@ -146,27 +146,6 @@ class DemoProperty {
     }
 }
 
-function ForwardRefComponent(props, ref) {
-    const inputRef = useRef(null);
-    useEffect(() => {
-        ref.current = inputRef.current;
-    }, [ref]);
-
-    return <input ref={inputRef} {...props} />;
-}
-
-forwardRef(ForwardRefComponent);
-
-function ForwardedInput(props, forwardedRef) {
-    useImperativeHandle(forwardedRef, () => ({
-        focus() {},
-    }));
-
-    return <input {...props} />;
-}
-
-forwardRef(ForwardedInput);
-
 ```
 
-_Note: The parser emitted 13 diagnostics which are not shown here._
+_Note: The parser emitted 6 diagnostics which are not shown here._
