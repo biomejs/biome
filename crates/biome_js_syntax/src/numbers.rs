@@ -142,6 +142,11 @@ pub fn canonicalize_js_bigint_literal(input: &str) -> Option<Cow<'_, str>> {
         return Some(Cow::Owned(String::from("0n")));
     }
 
+    // Fold this many digits into a single `u64` before each multi-limb
+    // multiply, so the big-integer multiplication runs once per chunk instead
+    // of once per digit. Each bound keeps `radix.pow(digits_per_chunk)` at most
+    // 2^32; combined with limbs below 10^9 that keeps `limb * chunk_multiplier
+    // + carry` within `u64`. Raising any bound reintroduces overflow.
     let digits_per_chunk = match radix {
         2 => 32,
         8 => 10,
