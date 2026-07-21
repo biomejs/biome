@@ -67,6 +67,10 @@ impl<'token> FormatLiteralStringToken<'token> {
         CleanedStringLiteralText {
             text: content,
             token,
+            literal_line_breaks: matches!(
+                self.parent_kind,
+                StringLiteralParentKind::AttributeMatcherValue
+            ),
         }
     }
 }
@@ -74,44 +78,29 @@ impl<'token> FormatLiteralStringToken<'token> {
 pub(crate) struct CleanedStringLiteralText<'a> {
     token: &'a CssSyntaxToken,
     text: Cow<'a, str>,
+    literal_line_breaks: bool,
 }
 
 impl CleanedStringLiteralText<'_> {
-    fn is_multiline(&self) -> bool {
-        self.text.bytes().any(|byte| matches!(byte, b'\n' | b'\r'))
-    }
-}
+    fn fmt(self, f: &mut Formatter<CssFormatContext>) -> FormatResult<()> {
+        let Self {
+            token,
+            text,
+            literal_line_breaks,
+        } = self;
+        let text = syntax_token_cow_slice(text, token, token.text_trimmed_range().start());
 
-impl Format<CssFormatContext> for CleanedStringLiteralText<'_> {
-    fn fmt(&self, f: &mut Formatter<CssFormatContext>) -> FormatResult<()> {
-        format_replaced(
-            self.token,
-            &syntax_token_cow_slice(
-                self.text.clone(),
-                self.token,
-                self.token.text_trimmed_range().start(),
-            ),
-        )
-        .fmt(f)
+        if literal_line_breaks {
+            format_replaced(token, &text.with_literal_line_breaks()).fmt(f)
+        } else {
+            format_replaced(token, &text).fmt(f)
+        }
     }
 }
 
 impl Format<CssFormatContext> for FormatLiteralStringToken<'_> {
     fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
-        let cleaned = self.clean_text(f.options());
-
-        if matches!(
-            self.parent_kind,
-            StringLiteralParentKind::AttributeMatcherValue
-        ) && cleaned.is_multiline()
-        {
-            // TODO: Replace the duplicated variants with a literal-line
-            // primitive that doesn't expand the surrounding selector group.
-            let cleaned = cleaned.memoized();
-            best_fitting!(cleaned, cleaned).fmt(f)
-        } else {
-            cleaned.fmt(f)
-        }
+        self.clean_text(f.options()).fmt(f)
     }
 }
 
