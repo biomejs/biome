@@ -608,7 +608,13 @@ trait ReactComponent {
 
 impl ReactComponent for AnyJsFunctionOrMethodDeclaration {
     fn has_valid_react_component_params(&self) -> Option<bool> {
-        Self::check_parameters(self.parameters()?, true)
+        // Only standalone function declarations can be passed to `forwardRef(...)`.
+        // Class/object methods with a second ref-like param are not render functions.
+        let allow_ref_parameter = matches!(
+            self,
+            Self::JsFunctionDeclaration(_) | Self::JsFunctionExportDefaultDeclaration(_)
+        );
+        Self::check_parameters(self.parameters()?, allow_ref_parameter)
     }
 }
 
