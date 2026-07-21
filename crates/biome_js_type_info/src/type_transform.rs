@@ -301,8 +301,7 @@ impl<'db> TypeTransform<'db> for TypeSubstituter<'db> {
     fn enter(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeTransformAction<'db> {
         if ty == self.substitution.generic {
             TypeTransformAction::Replace(self.substitution.replacement)
-        } else if matches!(ty, TypeData::Generic(_))
-            || ty.declares_generic(db, self.binder_generic)
+        } else if matches!(ty, TypeData::Generic(_)) || ty.declares_generic(db, self.binder_generic)
         {
             TypeTransformAction::Replace(ty)
         } else {
