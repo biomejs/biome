@@ -13,7 +13,7 @@ keywords   = ["formatter", "linter", "parser"]
 categories = ["development-tools", "web-programming"]
 
 [workspace.dependencies]
-anyhow                       = "1.0.103"
+anyhow                       = "1.0.104"
 biome_analyze                = { path = "./crates/biome_analyze", version = "0.5.7" }
 biome_analyze_macros         = { path = "./crates/biome_analyze_macros" }
 biome_aria                   = { path = "./crates/biome_aria", version = "0.5.7" }
