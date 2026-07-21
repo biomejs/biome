@@ -12,6 +12,8 @@
 use std::fmt::Debug;
 use std::{ops::Deref, sync::Arc};
 
+use biome_js_syntax::numbers::canonicalize_js_bigint_literal;
+
 use crate::conditionals::ConditionalType;
 use crate::globals::GLOBAL_REGEXP_ID;
 use crate::{
@@ -263,13 +265,13 @@ impl Type {
 
     /// Returns whether this type is a bigint with the given `value`.
     pub fn is_bigint_literal(&self, value: i64) -> bool {
+        let expected = format!("{value}n");
         self.as_raw_data().is_some_and(|ty| match ty {
             TypeData::Literal(literal) => match literal.as_ref() {
-                Literal::BigInt(literal) => literal
-                    .trim_end_matches('n')
-                    .parse::<i64>()
-                    .ok()
-                    .is_some_and(|literal_value| literal_value == value),
+                Literal::BigInt(literal) => {
+                    canonicalize_js_bigint_literal(literal.text()).as_deref()
+                        == Some(expected.as_str())
+                }
                 _ => false,
             },
             _ => false,
@@ -333,12 +335,9 @@ impl Type {
             return true;
         }
 
-        self.resolved_data().is_some_and(|ty| {
-            ty.find_member(self.resolver.as_ref(), |member| {
-                member.is_index_signature_with_ty(|ty| {
-                    self.resolve(ty)
-                        .is_some_and(|ty| ty.id == GLOBAL_SYMBOL_DISPOSE_ID)
-                })
+        self.resolved_data().is_some_and(|data| {
+            data.find_member(self.resolver.as_ref(), |member| {
+                self.has_symbol_keyed_member(member, GLOBAL_SYMBOL_DISPOSE_ID)
             })
             .is_some()
         })
@@ -349,14 +348,28 @@ impl Type {
             return true;
         }
 
-        self.resolved_data().is_some_and(|ty| {
-            ty.find_member(self.resolver.as_ref(), |member| {
-                member.is_index_signature_with_ty(|ty| {
-                    self.resolve(ty)
-                        .is_some_and(|ty| ty.id == GLOBAL_SYMBOL_ASYNC_DISPOSE_ID)
-                })
+        self.resolved_data().is_some_and(|data| {
+            data.find_member(self.resolver.as_ref(), |member| {
+                self.has_symbol_keyed_member(member, GLOBAL_SYMBOL_ASYNC_DISPOSE_ID)
             })
             .is_some()
+        })
+    }
+
+    /// Returns whether `member` is keyed by the well-known symbol `symbol_id`.
+    ///
+    /// The key is accepted whether it is spelled as an index signature (how
+    /// object and class members are inferred from source) or as a computed
+    /// value (how the generated `Disposable`/`AsyncDisposable` globals encode
+    /// it).
+    fn has_symbol_keyed_member(
+        &self,
+        member: &ResolvedTypeMember,
+        symbol_id: ResolvedTypeId,
+    ) -> bool {
+        member.is_keyed_member_with_ty(|reference| {
+            self.resolve(reference)
+                .is_some_and(|resolved| resolved.id == symbol_id)
         })
     }
 

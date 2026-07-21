@@ -2,11 +2,11 @@ use super::SearchCapabilities;
 use crate::WorkspaceError;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EditorCapabilities,
-    EnabledForPath, ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults,
-    ParseResult, ParserCapabilities, javascript,
+    EnabledForPath, ExtensionHandler, FixAllParams, FixedFileResult, FormatterCapabilities,
+    LintParams, LintResults, ParseResult, ParserCapabilities, javascript,
 };
 use crate::settings::SettingsWithEditor;
-use crate::workspace::{FixFileResult, PullActionsResult};
+use crate::workspace::PullActionsResult;
 use biome_db::AnyParsedSource;
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
@@ -139,7 +139,7 @@ fn parse(
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
@@ -195,6 +195,6 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     javascript::code_actions(params)
 }
 
-fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     javascript::fix_all(params)
 }

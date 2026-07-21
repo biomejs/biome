@@ -1,0 +1,66 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export const object: { a: string; b?: number; c: boolean } = {
+	a: "value",
+	c: true,
+};
+export const { a, b, ...rest } = object;
+
+export const numbers: number[] = [1, 2];
+export const [head, ...tail] = numbers;
+```
+
+## Inferred types
+
+```
+Binding object "object" => instanceof Object {
+  prototype: No prototype
+  members: ["a": string, "b"?: number | undefined, "c": boolean]
+}
+
+Expression "{ a: \"value\", c: true, }" => Object {
+  prototype: No prototype
+  members: ["a": string: value, "c": bool: true]
+}
+
+Expression "\"value\"" => string: value
+
+Expression "true" => bool: true
+
+Binding a "a" => string
+
+Binding b "b" => number | undefined
+
+Binding rest "rest" => Object {
+  prototype: No prototype
+  members: ["c": boolean]
+}
+
+Expression "object" => instanceof Object {
+  prototype: No prototype
+  members: ["a": string, "b"?: number | undefined, "c": boolean]
+}
+
+Binding numbers "numbers" => instanceof Array<number>
+
+Expression "[1, 2]" => [number: 1,
+number: 2]
+
+Expression "1" => number: 1
+
+Expression "2" => number: 2
+
+Binding head "head" => number | undefined
+
+Binding tail "tail" => instanceof Array<number>
+
+Expression "numbers" => instanceof Array<number>
+```

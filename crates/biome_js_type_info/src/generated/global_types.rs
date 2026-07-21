@@ -4,6 +4,10 @@
 
 /// Predefined global IDs whose `TypeData` is supplied by this generated module.
 pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
+    crate::globals::DISPOSABLE_ID_GLOBAL_TYPE_ID,
+    crate::globals::DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID,
+    crate::globals::ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID,
+    crate::globals::ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
     crate::globals::ERROR_ID_GLOBAL_TYPE_ID,
     crate::globals::ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
     crate::globals::ERROR_CALL_ID_GLOBAL_TYPE_ID,
@@ -13,6 +17,49 @@ pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
 pub(crate) fn set_generated_global_type_data(
     builder: &mut crate::globals_builder::GlobalsResolverBuilder,
 ) {
+    let data = crate::TypeData::Interface(Box::new(crate::Interface {
+        name: biome_rowan::Text::new_static("Disposable"),
+        type_parameters: Box::default(),
+        extends: Box::default(),
+        members: Box::new([crate::TypeMember {
+            kind: crate::TypeMemberKind::ComputedValue(
+                crate::globals::GLOBAL_SYMBOL_DISPOSE_ID.into(),
+            ),
+            ty: crate::globals::GLOBAL_DISPOSABLE_DISPOSE_ID.into(),
+        }]),
+    }));
+    builder.set_type_data(crate::globals::DISPOSABLE_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: None,
+        parameters: Box::new([]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_VOID_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Interface(Box::new(crate::Interface {
+        name: biome_rowan::Text::new_static("AsyncDisposable"),
+        type_parameters: Box::default(),
+        extends: Box::default(),
+        members: Box::new([crate::TypeMember {
+            kind: crate::TypeMemberKind::ComputedValue(
+                crate::globals::GLOBAL_SYMBOL_ASYNC_DISPOSE_ID.into(),
+            ),
+            ty: crate::globals::GLOBAL_ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID.into(),
+        }]),
+    }));
+    builder.set_type_data(crate::globals::ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: true,
+        type_parameters: Box::default(),
+        name: None,
+        parameters: Box::new([]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_PROMISE_ID.into()),
+    }));
+    builder.set_type_data(
+        crate::globals::ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
+        data,
+    );
     let data = crate::TypeData::Class(Box::new(crate::Class {
         name: Some(biome_rowan::Text::new_static("Error")),
         type_parameters: Box::default(),

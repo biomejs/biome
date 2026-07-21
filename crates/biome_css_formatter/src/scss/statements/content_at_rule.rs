@@ -17,7 +17,7 @@ impl FormatNodeRule<ScssContentAtRule> for FormatScssContentAtRule {
         write!(
             f,
             [
-                content_token.format(),
+                content_token.format()?.with_text_case(CssCase::Lowercase),
                 arguments.format(),
                 format_scss_statement_at_rule_semicolon(semicolon_token)
             ]

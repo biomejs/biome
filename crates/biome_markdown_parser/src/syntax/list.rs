@@ -862,9 +862,7 @@ fn parse_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankInfo) {
     let marker_width = 1;
 
     // Bump the bullet marker
-    let mut setext_marker = false;
     if p.at(MD_SETEXT_UNDERLINE_LITERAL) && is_single_dash_setext_marker(p.cur_text()) {
-        setext_marker = true;
         p.bump_remap(T![-]);
     } else if p.at(MD_TEXTUAL_LITERAL) && is_textual_bullet_marker(p.cur_text()) {
         let text = p.cur_text();
@@ -884,32 +882,23 @@ fn parse_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankInfo) {
     }
 
     // Count spaces BEFORE consuming (peek from source text)
-    let spaces_after_marker = if setext_marker {
-        0
-    } else {
-        count_spaces_after_marker(p.source_after_current(), marker_indent + marker_width)
-    };
+    let spaces_after_marker =
+        count_spaces_after_marker(p.source_after_current(), marker_indent + marker_width);
 
-    let first_line_empty = if setext_marker {
-        true
-    } else {
-        p.lookahead(|p| {
-            while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-                p.bump(MD_TEXTUAL_LITERAL);
-            }
-            p.at(NEWLINE) || p.at(T![EOF])
-        })
-    };
+    let first_line_empty = p.lookahead(|p| {
+        while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
+        p.at(NEWLINE) || p.at(T![EOF])
+    });
 
     // Post-marker space (first whitespace token after marker)
-    if !setext_marker {
-        emit_list_post_marker_space(p, spaces_after_marker > INDENT_CODE_BLOCK_SPACES);
-    }
+    emit_list_post_marker_space(p, spaces_after_marker > INDENT_CODE_BLOCK_SPACES);
 
     // Content indent (remaining whitespace tokens on first line).
     // For first-line indented code, only the 4-column code indent is consumed
     // here so any additional padding remains in the code content.
-    if !setext_marker && !first_line_empty && spaces_after_marker > 1 {
+    if spaces_after_marker > 1 {
         let max_columns = if spaces_after_marker > INDENT_CODE_BLOCK_SPACES {
             INDENT_CODE_BLOCK_SPACES
         } else {
@@ -928,11 +917,7 @@ fn parse_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankInfo) {
     let prev_required_indent = p.state().list_item_required_indent;
     let prev_marker_indent = p.state().list_item_marker_indent;
 
-    let effective_spaces = if setext_marker {
-        0
-    } else {
-        spaces_after_marker
-    };
+    let effective_spaces = spaces_after_marker;
 
     p.state_mut().list_item_required_indent =
         if effective_spaces > INDENT_CODE_BLOCK_SPACES || first_line_empty {
@@ -1240,7 +1225,7 @@ fn parse_ordered_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankI
     // Content indent.
     // For first-line indented code, only the 4-column code indent is consumed
     // here so any additional padding remains in the code content.
-    if !first_line_empty && spaces_after_marker > 1 {
+    if spaces_after_marker > 1 {
         let max_columns = if spaces_after_marker > INDENT_CODE_BLOCK_SPACES {
             INDENT_CODE_BLOCK_SPACES
         } else {

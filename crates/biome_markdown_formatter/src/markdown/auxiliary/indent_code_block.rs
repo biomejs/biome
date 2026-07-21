@@ -61,7 +61,7 @@ impl FormatNodeRule<MdIndentCodeBlock> for FormatMdIndentCodeBlock {
         write!(
             f,
             [align(
-                4,
+                "    ",
                 &format_with(|f: &mut MarkdownFormatter| {
                     write!(f, [token("    ")])?;
                     let mut stripper = LinePrefixStripper::new(leading_whitespace);

@@ -23,12 +23,10 @@ seq:
 @@ -1,4 +1,5 @@
  ---
 -seq: &anchor
--  - a
--  - b
 +seq:
-+ &anchor
-+- a
-+- b
++  &anchor
+   - a
+   - b
 ```
 
 # Output
@@ -36,7 +34,7 @@ seq:
 ```yml
 ---
 seq:
- &anchor
-- a
-- b
+  &anchor
+  - a
+  - b
 ```

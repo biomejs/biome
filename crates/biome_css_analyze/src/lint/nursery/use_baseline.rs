@@ -612,6 +612,7 @@ fn at_rule_name(rule: &AnyCssAtRule) -> Option<&'static str> {
         AnyCssAtRule::CssSupportsAtRule(_) => Some("supports"),
         AnyCssAtRule::CssViewTransitionAtRule(_) => Some("view-transition"),
         AnyCssAtRule::CssFunctionAtRule(_) => Some("function"),
+        AnyCssAtRule::CssCustomMediaAtRule(_) => Some("custom-media"),
         // Internal/framework at-rules, not CSS spec
         AnyCssAtRule::CssBogusAtRule(_)
         | AnyCssAtRule::CssUnknownBlockAtRule(_)

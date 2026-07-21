@@ -1,16 +1,55 @@
 use crate::parser::CssParser;
+use crate::syntax::is_nth_at_identifier;
 use crate::syntax::scss::expression::parse_scss_selector_interpolation;
 use crate::syntax::scss::identifiers::interpolated_identifier::{
     is_at_identifier_continuation, is_at_scss_interpolated_identifier,
     parse_scss_interpolated_identifier_parts,
 };
-use crate::syntax::scss::is_at_scss_interpolation;
+use crate::syntax::scss::{is_at_scss_interpolation, is_nth_at_scss_interpolation};
 use crate::syntax::selector::{
     parse_selector_custom_identifier_fragment, parse_selector_identifier_fragment,
 };
 use biome_css_syntax::CssSyntaxKind::{SCSS_INTERPOLATED_IDENTIFIER, SCSS_INTERPOLATION};
+use biome_css_syntax::T;
+use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
+
+/// Returns whether the current token can start an SCSS-interpolated selector
+/// identifier.
+///
+/// Examples: `#{$tag}` and `button-#{$variant}`.
+#[inline]
+pub(crate) fn is_at_scss_interpolated_selector_identifier(p: &mut CssParser) -> bool {
+    is_nth_at_scss_interpolated_selector_identifier(p, 0)
+}
+
+/// Returns whether the token at `n` can start an SCSS-interpolated selector
+/// identifier.
+///
+/// This is intentionally selector-specific: selector names may be built from an
+/// interpolation alone (`#{$tag}`) or from a plain identifier followed by an
+/// adjacent interpolation suffix (`button#{$state}` or `button-#{$state}`).
+#[inline]
+pub(crate) fn is_nth_at_scss_interpolated_selector_identifier(p: &mut CssParser, n: usize) -> bool {
+    is_nth_at_scss_interpolation(p, n)
+        || is_nth_at_identifier(p, n) && is_nth_at_scss_selector_identifier_suffix(p, n + 1)
+}
+
+/// Returns whether the token at `n` continues a selector identifier with SCSS
+/// interpolation and no separating whitespace.
+///
+/// The suffix can be a direct interpolation (`#{$state}`) or a hyphen followed
+/// by interpolation (`-#{$state}`), matching selector names such as
+/// `button#{$state}` and `button-#{$state}`.
+#[inline]
+fn is_nth_at_scss_selector_identifier_suffix(p: &mut CssParser, n: usize) -> bool {
+    !p.has_nth_preceding_whitespace(n)
+        && (is_nth_at_scss_interpolation(p, n)
+            || p.nth_at(n, T![-])
+                && !p.has_nth_preceding_whitespace(n + 1)
+                && is_nth_at_scss_interpolation(p, n + 1))
+}
 
 /// Parses SCSS-interpolated selector name slots.
 ///

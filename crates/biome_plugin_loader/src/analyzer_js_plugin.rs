@@ -84,6 +84,11 @@ impl AnalyzerJsPlugin {
 }
 
 impl AnalyzerPlugin for AnalyzerJsPlugin {
+    fn name(&self) -> &str {
+        // JS plugins don't declare a name; fall back to the plugin file stem.
+        self.path.file_stem().unwrap_or("anonymous")
+    }
+
     fn language(&self) -> PluginTargetLanguage {
         PluginTargetLanguage::JavaScript
     }
@@ -188,6 +193,12 @@ mod tests {
         );
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
         AnalyzerJsPlugin::load(fs, "/plugin.js".into(), includes).unwrap()
+    }
+
+    #[test]
+    fn name_is_derived_from_the_plugin_file() {
+        let plugin = load_test_plugin(None);
+        assert_eq!(plugin.name(), "plugin");
     }
 
     #[test]

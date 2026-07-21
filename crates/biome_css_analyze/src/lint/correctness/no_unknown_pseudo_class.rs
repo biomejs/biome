@@ -1,3 +1,5 @@
+#![expect(clippy::disallowed_methods, reason = "This rule needs the complete pseudo-class syntax.")]
+
 use crate::{
     keywords::{WEBKIT_SCROLLBAR_PSEUDO_CLASSES, WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS},
     utils::{

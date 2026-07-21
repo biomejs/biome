@@ -130,6 +130,17 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                     ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
                 }
 
+                // Shorthand attributes: <MyComponent {text} /> (Astro shorthand syntax)
+                if let Some(attr) = HtmlAttributeSingleTextExpression::cast_ref(&element)
+                    && !attr.syntax().parent().is_some_and(|parent| {
+                        HtmlAttributeInitializerClause::can_cast(parent.kind())
+                    })
+                    && let Ok(expression) = attr.expression()
+                    && let Some(candidate) = build_text_expression_candidate(&expression)
+                {
+                    ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
+                }
+
                 // Spread attributes: <input {...props}>
                 if let Some(spread) = HtmlSpreadAttribute::cast_ref(&element)
                     && let Ok(expression) = spread.argument()
@@ -339,6 +350,7 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                     );
                 }
 
+                // Shorthand attributes: <MyComponent {text} /> (Svelte shorthand syntax)
                 if let Some(attr) = HtmlAttributeSingleTextExpression::cast_ref(&element)
                     && !attr.syntax().parent().is_some_and(|parent| {
                         HtmlAttributeInitializerClause::can_cast(parent.kind())
@@ -368,6 +380,8 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 }
             }
         }
+        // TODO: Angular support
+        HtmlVariant::Angular => {}
     }
     ParseEmbedResult { nodes }
 }
@@ -871,6 +885,8 @@ fn embedded_css_file_source(
         HtmlVariant::Svelte => CssEmbeddingKind::Html(EmbeddingHtmlKind::Svelte {
             applicability: EmbeddingStyleApplicability::Local,
         }),
+        // TODO: Angular support
+        HtmlVariant::Angular => CssEmbeddingKind::Html(EmbeddingHtmlKind::Html),
     };
 
     base.with_embedding_kind(embedding_kind)
@@ -1032,6 +1048,8 @@ fn parse_matched_embed(
                                 declaration_block: None,
                             });
                         }
+                        // TODO: Angular support
+                        HtmlVariant::Angular => {}
                     }
 
                     false

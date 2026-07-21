@@ -4,7 +4,9 @@ use biome_yaml_parser::parse_yaml;
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = "foo:\n  bar: baz\n";
+    let source = "!!str #comment
+>
+  123";
     let parse = parse_yaml(source);
 
     let options = YamlFormatOptions::default();
@@ -17,6 +19,7 @@ fn quick_test() {
     let formatted = result.unwrap();
     let first_ir = formatted.document();
     let output = formatted.print().unwrap();
+    eprintln!("CST :\n{:#?}", parse);
     eprintln!("Formatted:\n{}", output.as_code());
     eprintln!("IR:\n{}", first_ir);
 

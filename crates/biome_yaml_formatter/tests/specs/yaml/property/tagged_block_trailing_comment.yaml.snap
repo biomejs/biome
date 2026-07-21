@@ -1,0 +1,26 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/property/tagged_block_trailing_comment.yaml
+---
+
+# Input
+
+```yaml
+planets: !!seq
+  - Mercury   # Rotates
+  - Pluto     # You call this a planet?
+after: value
+
+```
+
+
+# Formatted
+
+```yaml
+planets:
+  !!seq
+  - Mercury # Rotates
+  - Pluto # You call this a planet?
+after: value
+
+```

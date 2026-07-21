@@ -1,0 +1,71 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export const tuple = ["value", 1];
+export const tupleFirst = tuple[0];
+export const numbers: number[] = [1, 2];
+export const arrayFirst = numbers[0];
+export const [destructured] = tuple;
+
+for (const item of numbers) {
+	item;
+}
+```
+
+## Inferred types
+
+```
+Binding tuple "tuple" => [string: value,
+number: 1]
+
+Expression "[\"value\", 1]" => [string: value,
+number: 1]
+
+Expression "\"value\"" => string: value
+
+Expression "1" => number: 1
+
+Binding tupleFirst "tupleFirst" => string: value
+
+Expression "tuple" => [string: value,
+number: 1]
+
+Expression "tuple[0]" => string: value
+
+Expression "0" => number: 0
+
+Binding numbers "numbers" => instanceof Array<number>
+
+Expression "[1, 2]" => [number: 1,
+number: 2]
+
+Expression "1" => number: 1
+
+Expression "2" => number: 2
+
+Binding arrayFirst "arrayFirst" => number | undefined
+
+Expression "numbers" => instanceof Array<number>
+
+Expression "numbers[0]" => number | undefined
+
+Expression "0" => number: 0
+
+Binding destructured "destructured" => string: value
+
+Expression "tuple" => [string: value,
+number: 1]
+
+Binding item "item" => number
+
+Expression "numbers" => instanceof Array<number>
+
+Expression "item" => number
+```

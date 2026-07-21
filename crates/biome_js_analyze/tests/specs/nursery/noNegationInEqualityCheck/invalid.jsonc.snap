@@ -1,0 +1,159 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsonc
+---
+# Input
+```cjs
+!foo === bar
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A negation is used on the left side of this equality check.
+  
+  > 1 │ !foo === bar
+      │ ^^^^^^^^^^^^
+  
+  i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the proper negated comparison operator instead.
+  
+  - !foo·===·bar
+  + foo·!==·bar
+  
+
+```
+
+# Input
+```cjs
+!foo !== bar
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A negation is used on the left side of this equality check.
+  
+  > 1 │ !foo !== bar
+      │ ^^^^^^^^^^^^
+  
+  i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the proper negated comparison operator instead.
+  
+  - !foo·!==·bar
+  + foo·===·bar
+  
+
+```
+
+# Input
+```cjs
+if (!a === b) {}
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A negation is used on the left side of this equality check.
+  
+  > 1 │ if (!a === b) {}
+      │     ^^^^^^^^
+  
+  i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the proper negated comparison operator instead.
+  
+  - if·(!a·===·b)·{}
+  + if·(a·!==·b)·{}
+  
+
+```
+
+# Input
+```cjs
+if (!a !== b) {}
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A negation is used on the left side of this equality check.
+  
+  > 1 │ if (!a !== b) {}
+      │     ^^^^^^^^
+  
+  i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the proper negated comparison operator instead.
+  
+  - if·(!a·!==·b)·{}
+  + if·(a·===·b)·{}
+  
+
+```
+
+# Input
+```cjs
+!a === b ? c : d
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A negation is used on the left side of this equality check.
+  
+  > 1 │ !a === b ? c : d
+      │ ^^^^^^^^
+  
+  i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the proper negated comparison operator instead.
+  
+  - !a·===·b·?·c·:·d
+  + a·!==·b·?·c·:·d
+  
+
+```
+
+# Input
+```cjs
+!result !== expected
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/noNegationInEqualityCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A negation is used on the left side of this equality check.
+  
+  > 1 │ !result !== expected
+      │ ^^^^^^^^^^^^^^^^^^^^
+  
+  i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the proper negated comparison operator instead.
+  
+  - !result·!==·expected
+  + result·===·expected
+  
+
+```

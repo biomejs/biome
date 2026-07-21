@@ -22,14 +22,9 @@ document
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,7 @@
- Bare
- document
-----
-+...
+@@ -4,4 +4,4 @@
  # No document
-----
-+...
+ ...
  |
 -  %!PS-Adobe-2.0 # Not the first line
 +%!PS-Adobe-2.0 # Not the first line

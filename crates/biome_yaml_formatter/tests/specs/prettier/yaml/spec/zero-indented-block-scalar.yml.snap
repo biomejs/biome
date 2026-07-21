@@ -19,13 +19,12 @@ line3
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,4 @@
-----
-->
+@@ -1,5 +1,5 @@
+ ---
+ >
 -  line1
 -  line2
 -  line3
-+--- >
 +line1
 +line2
 +line3
@@ -34,7 +33,8 @@ line3
 # Output
 
 ```yml
---- >
+---
+>
 line1
 line2
 line3

@@ -1,0 +1,60 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+const source = {
+	name: "source",
+} as const;
+
+type Source = typeof source;
+
+export function readSource(value: Source): Source {
+	return value;
+}
+```
+
+## Inferred types
+
+```
+Binding source "source" => Object {
+  prototype: No prototype
+  members: ["name": string: source]
+}
+
+Expression "{ name: \"source\", }" => Object {
+  prototype: No prototype
+  members: ["name": string: source]
+}
+
+Expression "{ name: \"source\", } as const" => Object {
+  prototype: No prototype
+  members: ["name": string: source]
+}
+
+Expression "\"source\"" => string: source
+
+Binding Source "Source" => typeof Object {
+  prototype: No prototype
+  members: ["name": string: source]
+}
+
+Binding readSource "readSource" => sync Function "readSource" {
+  accepts: {
+    params: [
+      required value: instanceof Source
+    ]
+    type_args: []
+  }
+  returns: instanceof Source
+}
+
+Binding value "value" => instanceof Source
+
+Expression "value" => instanceof Source
+```

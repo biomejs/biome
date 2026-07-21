@@ -470,6 +470,8 @@ impl EmbeddedBindingsBuilder {
                             HtmlVariant::Svelte => {
                                 self.visit_svelte_block_call_expressions(&expr, embed_block_kind);
                             }
+                            // TODO: Angular support
+                            HtmlVariant::Angular => {}
                         }
                     } else if let Some(assign) = JsAssignmentExpression::cast_ref(&node)
                         && host_file_source.is_svelte()

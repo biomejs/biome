@@ -12,7 +12,7 @@ use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::DiagnosticExt;
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_analyze::JsAnalyzerServices;
-use biome_js_semantic::semantic_model_from_source;
+use biome_js_semantic::{SemanticModel, semantic_model_from_source};
 use biome_json_factory::make;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonObjectValue};
@@ -35,7 +35,11 @@ use std::sync::Arc;
 /// for multiple code blocks.
 pub struct AnalyzerServicesBuilder {
     module_db: WorkspaceDb,
+    file_system: MemoryFileSystem,
+    path_info_cache: PathInfoCache,
     project_layout: Arc<ProjectLayout>,
+    semantic_model: Option<Arc<SemanticModel>>,
+    enable_type_inference: bool,
 }
 
 impl AnalyzerServicesBuilder {
@@ -47,12 +51,19 @@ impl AnalyzerServicesBuilder {
     /// # Arguments
     ///
     /// * `files` - A map of file paths to their contents.
-    pub fn from_files<S: BuildHasher>(files: HashMap<String, String, S>) -> Self {
+    pub fn from_files<S: BuildHasher>(
+        files: HashMap<String, String, S>,
+        enable_type_inference: bool,
+    ) -> Self {
         if files.is_empty() {
             let db = WorkspaceDb::default();
             return Self {
                 module_db: db,
+                file_system: MemoryFileSystem::default(),
+                path_info_cache: PathInfoCache::default(),
                 project_layout: Default::default(),
+                semantic_model: None,
+                enable_type_inference,
             };
         }
 
@@ -105,7 +116,7 @@ impl AnalyzerServicesBuilder {
             fs.insert(path_buf, src);
         }
 
-        let db = WorkspaceDb::default();
+        let mut db = WorkspaceDb::default();
 
         let js_added_paths = get_added_js_paths(&fs, &js_paths);
         for (path, root, semantic_model) in js_added_paths {
@@ -116,7 +127,7 @@ impl AnalyzerServicesBuilder {
                 &layout,
                 semantic_model,
                 &path_info_cache,
-                true,
+                enable_type_inference,
             );
             let md = biome_module_graph::ModuleInfo::new(
                 &db,
@@ -158,7 +169,11 @@ impl AnalyzerServicesBuilder {
 
         Self {
             module_db: db,
+            file_system: fs,
+            path_info_cache,
             project_layout: Arc::new(layout),
+            semantic_model: None,
+            enable_type_inference,
         }
     }
 
@@ -168,6 +183,7 @@ impl AnalyzerServicesBuilder {
         parse: biome_js_parser::Parse<biome_js_parser::AnyJsRoot>,
         file_source: JsFileSource,
     ) -> JsAnalyzerServices<'_> {
+        let root = parse.tree();
         let source_index = self
             .module_db
             .insert_source(DocumentFileSource::Js(file_source));
@@ -180,13 +196,32 @@ impl AnalyzerServicesBuilder {
         );
         self.module_db.insert_file(&path, parsed_source);
 
+        let semantic_model =
+            Arc::new(semantic_model_from_source(&self.module_db, parsed_source).clone());
+        let (module_info, _, _) = resolve_js_module(
+            root,
+            &BiomePath::new(&path),
+            &self.file_system,
+            &self.project_layout,
+            semantic_model.clone(),
+            &self.path_info_cache,
+            self.enable_type_inference,
+        );
+        self.module_db
+            .update_or_insert_module(path, ModuleInfoKind::Js(module_info));
+        self.semantic_model = Some(semantic_model);
+
         JsAnalyzerServices::from((
             self.module_db.rc_module_db(),
             self.project_layout.clone(),
             file_source,
         ))
         .with_language_db(self.module_db.rc_language_db())
-        .with_semantic_model(semantic_model_from_source(&self.module_db, parsed_source))
+        .with_semantic_model(
+            self.semantic_model
+                .as_deref()
+                .expect("the semantic model was just created"),
+        )
     }
 }
 

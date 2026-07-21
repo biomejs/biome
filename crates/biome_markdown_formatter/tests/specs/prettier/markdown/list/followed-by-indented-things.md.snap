@@ -1,0 +1,1178 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list/followed-by-indented-things.md
+---
+
+# Input
+
+```md
+-    foo
+
+    top level indented code block
+
+---
+
+-    foo
+
+     list item text
+
+---
+
+   -    foo
+
+       top level indented code block
+
+---
+
+ -  foo
+
+        indented code block in bullet
+
+---
+
+1.    foo
+
+     top level indented code block
+
+---
+
+1.    foo
+
+      list item text
+
+---
+
+   1.    foo
+
+        top level indented code block
+
+
+---
+
+  1.  foo
+
+          indented code block in numbered item
+
+---
+
+-    [ ] foo
+
+    top level indented code block
+
+---
+
+   - [ ]    foo
+
+         indented code block in checkbox item
+
+---
+
+ -    item 1
+ -    item 2
+
+     top level indented code block
+
+---
+
+- item 1
+    - item 1-1
+    - item 1-2
+
+    naive paragraph in item 1
+
+---
+
+   -    item 1
+        - item 1-1
+        - item 1-2
+
+    top level indented code block
+
+---
+
+
+   -    item 1
+        - item 1-1
+        - item 1-2
+   -    item 2
+
+       top level indented code block
+
+---
+
+1. item 1
+    1. item 1-1
+    2. item 1-2
+
+   naive paragraph in item 1
+
+---
+
+1. item 1
+    1. item 1-1
+    2. item 1-2
+100. item 1
+
+    top level indented code block
+
+---
+
+   -    item 1
+        > quote
+
+        text
+
+    top level indented code block
+
+---
+
+   -    item 1
+        -    item 1-1
+        -    item 1-2
+
+            indented code block
+
+    top level indented code block
+
+---
+
+ -    one
+
+     two
+
+```
+
+
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -42,7 +42,7 @@
+ 
+   1.  foo
+ 
+-     indented code block in numbered item
++         indented code block in numbered item
+ 
+ ---
+ 
+@@ -54,7 +54,7 @@
+ 
+    - [] foo
+ 
+-   indented code block in checkbox item
++       indented code block in checkbox item
+ 
+ ---
+ 
+@@ -74,16 +74,16 @@
+ ---
+ 
+    -    item 1
+-- item 1-1
+-- item 1-2
++      - item 1-1
++      - item 1-2
+ 
+     top level indented code block
+ 
+ ---
+ 
+    -    item 1
+-- item 1-1
+-- item 1-2
++      - item 1-1
++      - item 1-2
+    -    item 2
+ 
+        top level indented code block
+@@ -103,7 +103,7 @@
+       2. item 1-2
+ 2. item 1
+ 
+-   top level indented code block
++    top level indented code block
+ 
+ ---
+ 
+@@ -117,11 +117,11 @@
+ ---
+ 
+    -    item 1
+-- item 1-1
+-      - item 1-2
++      -    item 1-1
++              -    item 1-2
+ 
+-      indented code block
+-      top level indented code block
++          indented code block
++    top level indented code block
+ 
+ ---
+ 
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -222,229 +222,217 @@
+   "
+ ",
+   empty_line,
+-  source_position(338),
+-  "-",
+   source_position(339),
+   "-",
+   source_position(340),
+   "-",
++  source_position(341),
++  "-",
+   empty_line,
+-  source_position(343),
++  source_position(344),
+   "  ",
+-  source_position(345),
++  source_position(346),
+   "1.",
+-  source_position(347),
++  source_position(348),
+   " ",
+-  source_position(348),
++  source_position(349),
+   " ",
+   align("     ", [
+-    source_position(349),
++    source_position(350),
+     "foo",
+     hard_line_break,
+     empty_line,
+-    " ",
+-    source_position(363),
+-    "indented ",
+-    source_position(372),
+-    "code ",
+-    source_position(377),
+-    "block ",
+-    source_position(383),
+-    "in ",
+-    source_position(386),
+-    "numbered ",
+-    source_position(395),
+-    "item",
+-    hard_line_break,
++    align("    ", [
++      "    ",
++      source_position(355),
++      "indented code block in numbered item",
++      source_position(401),
++      "
++"
++    ]),
+     hard_line_break
+   ]),
+   empty_line,
+-  source_position(401),
++  source_position(403),
+   "-",
+-  source_position(402),
++  source_position(404),
+   "-",
+-  source_position(403),
++  source_position(405),
+   "-",
+   empty_line,
+-  source_position(406),
++  source_position(408),
+   "-",
+-  source_position(407),
++  source_position(409),
+   " ",
+-  source_position(408),
++  source_position(410),
+   " ",
+-  source_position(409),
++  source_position(411),
+   " ",
+-  source_position(410),
++  source_position(412),
+   " ",
+   align("     ", [
+-    source_position(411),
++    source_position(413),
+     "[",
+-    source_position(412),
++    source_position(415),
+     "] ",
+-    source_position(414),
++    source_position(417),
+     "foo",
+     hard_line_break,
+     hard_line_break
+   ]),
+-  source_position(418),
++  source_position(421),
+   "
+ ",
+-  source_position(419),
++  source_position(422),
+   "    ",
+-  source_position(423),
++  source_position(426),
+   "top level indented code block",
+-  source_position(452),
++  source_position(455),
+   "
+ ",
+   empty_line,
+-  source_position(454),
++  source_position(457),
+   "-",
+-  source_position(455),
++  source_position(458),
+   "-",
+-  source_position(456),
++  source_position(459),
+   "-",
+   empty_line,
+-  source_position(459),
++  source_position(462),
+   "   ",
+-  source_position(462),
++  source_position(465),
+   "-",
+-  source_position(463),
++  source_position(466),
+   " ",
+   align("   ", [
+-    source_position(464),
++    source_position(467),
+     "[",
+-    source_position(465),
++    source_position(469),
+     "] ",
+-    source_position(467),
++    source_position(474),
+     "foo",
+     hard_line_break,
+     empty_line,
+-    " ",
+-    source_position(479),
+-    "indented ",
+-    source_position(488),
+-    "code ",
+-    source_position(493),
+-    "block ",
+-    source_position(499),
+-    "in ",
+-    source_position(502),
+-    "checkbox ",
+-    source_position(511),
+-    "item",
+-    hard_line_break,
++    align("    ", [
++      "    ",
++      source_position(479),
++      "indented code block in checkbox item",
++      source_position(524),
++      "
++"
++    ]),
+     hard_line_break
+   ]),
+   empty_line,
+-  source_position(517),
++  source_position(526),
+   "-",
+-  source_position(518),
++  source_position(527),
+   "-",
+-  source_position(519),
++  source_position(528),
+   "-",
+   empty_line,
+-  source_position(522),
++  source_position(531),
+   " ",
+-  source_position(523),
++  source_position(532),
+   "-",
+-  source_position(524),
++  source_position(533),
+   " ",
+-  source_position(525),
++  source_position(534),
+   " ",
+-  source_position(526),
++  source_position(535),
+   " ",
+-  source_position(527),
++  source_position(536),
+   " ",
+   align("      ", [
+-    source_position(528),
++    source_position(537),
+     "item ",
+-    source_position(533),
++    source_position(542),
+     "1",
+     hard_line_break,
+     hard_line_break
+   ]),
+-  source_position(535),
++  source_position(544),
+   " ",
+-  source_position(536),
++  source_position(545),
+   "-",
+-  source_position(537),
++  source_position(546),
+   " ",
+-  source_position(538),
++  source_position(547),
+   " ",
+-  source_position(539),
++  source_position(548),
+   " ",
+-  source_position(540),
++  source_position(549),
+   " ",
+   align("      ", [
+-    source_position(541),
++    source_position(550),
+     "item ",
+-    source_position(546),
++    source_position(555),
+     "2",
+     hard_line_break,
+     hard_line_break
+   ]),
+-  source_position(548),
++  source_position(557),
+   "
+ ",
+-  source_position(549),
++  source_position(558),
+   "    ",
+-  source_position(553),
++  source_position(562),
+   " top level indented code block",
+-  source_position(583),
++  source_position(592),
+   "
+ ",
+   empty_line,
+-  source_position(585),
++  source_position(594),
+   "-",
+-  source_position(586),
++  source_position(595),
+   "-",
+-  source_position(587),
++  source_position(596),
+   "-",
+   empty_line,
+-  source_position(590),
++  source_position(599),
+   "-",
+-  source_position(591),
++  source_position(600),
+   " ",
+   align("  ", [
+-    source_position(592),
++    source_position(601),
+     "item ",
+-    source_position(597),
++    source_position(606),
+     "1",
+     hard_line_break,
+     hard_line_break,
+-    source_position(601),
++    source_position(612),
+     "-",
+-    source_position(602),
++    source_position(613),
+     " ",
+     align("  ", [
+-      source_position(603),
++      source_position(614),
+       "item ",
+-      source_position(608),
++      source_position(619),
+       "1-1",
+       hard_line_break,
+       hard_line_break,
+-      source_position(616),
++      source_position(627),
+       "-",
+-      source_position(617),
++      source_position(628),
+       " ",
+       align("  ", [
+-        source_position(618),
++        source_position(629),
+         "item ",
+-        source_position(623),
++        source_position(634),
+         "1-2",
+         hard_line_break,
+         hard_line_break
+       ]),
+       empty_line,
+-      source_position(632),
++      source_position(643),
+       "naive ",
+-      source_position(638),
++      source_position(649),
+       "paragraph ",
+-      source_position(648),
++      source_position(659),
+       "in ",
+-      source_position(651),
++      source_position(662),
+       "item ",
+-      source_position(656),
++      source_position(667),
+       "1",
+       hard_line_break,
+       hard_line_break
+@@ -452,405 +440,432 @@
+     hard_line_break
+   ]),
+   empty_line,
+-  source_position(659),
++  source_position(670),
+   "-",
+-  source_position(660),
++  source_position(671),
+   "-",
+-  source_position(661),
++  source_position(672),
+   "-",
+   empty_line,
+-  source_position(664),
++  source_position(675),
+   "   ",
+-  source_position(667),
++  source_position(678),
+   "-",
+-  source_position(668),
++  source_position(679),
+   " ",
+-  source_position(669),
++  source_position(680),
+   " ",
+-  source_position(670),
++  source_position(681),
+   " ",
+-  source_position(671),
++  source_position(682),
+   " ",
+   align("      ", [
+-    source_position(672),
++    source_position(683),
+     "item ",
+-    source_position(677),
++    source_position(688),
+     "1",
+-    dedentRoot([
+-      hard_line_break,
+-      source_position(685),
+-      "- ",
+-      source_position(687),
++    hard_line_break,
++    hard_line_break,
++    source_position(698),
++    "-",
++    source_position(699),
++    " ",
++    align("  ", [
++      source_position(700),
+       "item ",
+-      source_position(692),
+-      "1-1"
+-    ]),
+-    dedentRoot([
++      source_position(705),
++      "1-1",
+       hard_line_break,
+-      source_position(702),
+-      "- ",
+-      source_position(704),
++      hard_line_break
++    ]),
++    source_position(717),
++    "-",
++    source_position(718),
++    " ",
++    align("  ", [
++      source_position(719),
+       "item ",
+-      source_position(709),
+-      "1-2"
++      source_position(724),
++      "1-2",
++      hard_line_break,
++      hard_line_break
+     ]),
+-    hard_line_break,
+     hard_line_break
+   ]),
+-  source_position(713),
++  source_position(728),
+   "
+ ",
+-  source_position(714),
++  source_position(729),
+   "    ",
+-  source_position(718),
++  source_position(733),
+   "top level indented code block",
+-  source_position(747),
++  source_position(762),
+   "
+ ",
+   empty_line,
+-  source_position(749),
++  source_position(764),
+   "-",
+-  source_position(750),
++  source_position(765),
+   "-",
+-  source_position(751),
++  source_position(766),
+   "-",
+   empty_line,
+-  source_position(754),
++  source_position(770),
+   "   ",
+-  source_position(757),
++  source_position(773),
+   "-",
+-  source_position(758),
++  source_position(774),
+   " ",
+-  source_position(759),
++  source_position(775),
+   " ",
+-  source_position(760),
++  source_position(776),
+   " ",
+-  source_position(761),
++  source_position(777),
+   " ",
+   align("      ", [
+-    source_position(762),
++    source_position(778),
+     "item ",
+-    source_position(767),
++    source_position(783),
+     "1",
+-    dedentRoot([
+-      hard_line_break,
+-      source_position(775),
+-      "- ",
+-      source_position(777),
++    hard_line_break,
++    hard_line_break,
++    source_position(793),
++    "-",
++    source_position(794),
++    " ",
++    align("  ", [
++      source_position(795),
+       "item ",
+-      source_position(782),
+-      "1-1"
++      source_position(800),
++      "1-1",
++      hard_line_break,
++      hard_line_break
+     ]),
+-    dedentRoot([
+-      hard_line_break,
+-      source_position(792),
+-      "- ",
+-      source_position(794),
++    source_position(812),
++    "-",
++    source_position(813),
++    " ",
++    align("  ", [
++      source_position(814),
+       "item ",
+-      source_position(799),
+-      "1-2"
++      source_position(819),
++      "1-2",
++      hard_line_break,
++      hard_line_break
+     ]),
+-    hard_line_break,
+     hard_line_break
+   ]),
+-  source_position(803),
++  source_position(823),
+   "   ",
+-  source_position(806),
++  source_position(826),
+   "-",
+-  source_position(807),
++  source_position(827),
+   " ",
+-  source_position(808),
++  source_position(828),
+   " ",
+-  source_position(809),
++  source_position(829),
+   " ",
+-  source_position(810),
++  source_position(830),
+   " ",
+   align("      ", [
+-    source_position(811),
++    source_position(831),
+     "item ",
+-    source_position(816),
++    source_position(836),
+     "2",
+     hard_line_break,
+     hard_line_break
+   ]),
+-  source_position(818),
++  source_position(838),
+   "
+ ",
+-  source_position(819),
++  source_position(839),
+   "    ",
+-  source_position(823),
++  source_position(843),
+   "   top level indented code block",
+-  source_position(855),
++  source_position(875),
+   "
+ ",
+   empty_line,
+-  source_position(857),
++  source_position(877),
+   "-",
+-  source_position(858),
++  source_position(878),
+   "-",
+-  source_position(859),
++  source_position(879),
+   "-",
+   empty_line,
+-  source_position(862),
++  source_position(882),
+   "1.",
+-  source_position(864),
++  source_position(884),
+   " ",
+   align("   ", [
+-    source_position(865),
++    source_position(885),
+     "item ",
+-    source_position(870),
++    source_position(890),
+     "1",
+     hard_line_break,
+     hard_line_break,
+-    source_position(875),
++    source_position(896),
+     "1.",
+-    source_position(877),
++    source_position(898),
+     " ",
+     align("   ", [
+-      source_position(878),
++      source_position(899),
+       "item ",
+-      source_position(883),
++      source_position(904),
+       "1-1",
+       hard_line_break,
+-      source_position(893),
++      source_position(912),
+       "2. ",
+-      source_position(896),
++      source_position(915),
+       "item ",
+-      source_position(901),
++      source_position(920),
+       "1-2",
+       hard_line_break,
+       hard_line_break
+     ]),
+     empty_line,
+-    source_position(909),
++    source_position(928),
+     "naive ",
+-    source_position(915),
++    source_position(934),
+     "paragraph ",
+-    source_position(925),
++    source_position(944),
+     "in ",
+-    source_position(928),
++    source_position(947),
+     "item ",
+-    source_position(933),
++    source_position(952),
+     "1",
+     hard_line_break,
+     hard_line_break
+   ]),
+   empty_line,
+-  source_position(936),
++  source_position(955),
+   "-",
+-  source_position(937),
++  source_position(956),
+   "-",
+-  source_position(938),
++  source_position(957),
+   "-",
+   empty_line,
+-  source_position(941),
++  source_position(960),
+   "1.",
+-  source_position(943),
++  source_position(962),
+   " ",
+   align("   ", [
+-    source_position(944),
++    source_position(963),
+     "item ",
+-    source_position(949),
++    source_position(968),
+     "1",
+     hard_line_break,
+     hard_line_break,
+-    source_position(954),
++    source_position(974),
+     "1.",
+-    source_position(956),
++    source_position(976),
+     " ",
+     align("   ", [
+-      source_position(957),
++      source_position(977),
+       "item ",
+-      source_position(962),
++      source_position(982),
+       "1-1",
+       hard_line_break,
+-      source_position(972),
++      source_position(990),
+       "2. ",
+-      source_position(975),
++      source_position(993),
+       "item ",
+-      source_position(980),
++      source_position(998),
+       "1-2",
+       hard_line_break,
+       hard_line_break
+     ]),
+     hard_line_break
+   ]),
+-  source_position(984),
++  source_position(1002),
+   "2.",
+-  source_position(986),
++  source_position(1006),
+   " ",
+   align("   ", [
+-    source_position(987),
++    source_position(1007),
+     "item ",
+-    source_position(992),
++    source_position(1012),
+     "1",
+     hard_line_break,
+-    empty_line,
+-    " ",
+-    source_position(999),
+-    "top ",
+-    source_position(1003),
+-    "level ",
+-    source_position(1009),
+-    "indented ",
+-    source_position(1018),
+-    "code ",
+-    source_position(1023),
+-    "block",
+-    hard_line_break,
+     hard_line_break
+   ]),
++  source_position(1014),
++  "
++",
++  source_position(1015),
++  "    ",
++  source_position(1019),
++  "top level indented code block",
++  source_position(1048),
++  "
++",
+   empty_line,
+-  source_position(1030),
++  source_position(1050),
+   "-",
+-  source_position(1031),
++  source_position(1051),
+   "-",
+-  source_position(1032),
++  source_position(1052),
+   "-",
+   empty_line,
+-  source_position(1035),
++  source_position(1055),
+   "   ",
+-  source_position(1038),
++  source_position(1058),
+   "-",
+-  source_position(1039),
++  source_position(1059),
+   " ",
+-  source_position(1040),
++  source_position(1060),
+   " ",
+-  source_position(1041),
++  source_position(1061),
+   " ",
+-  source_position(1042),
++  source_position(1062),
+   " ",
+   align("      ", [
+-    source_position(1043),
++    source_position(1063),
+     "item ",
+-    source_position(1048),
++    source_position(1068),
+     "1",
+     hard_line_break,
+-    source_position(1056),
+-    "> ",
+-    source_position(1058),
+-    "quote",
+     hard_line_break,
++    source_position(1078),
++    ">",
++    source_position(1079),
++    " quote",
++    source_position(1085),
++    "
++",
++    empty_line,
++    source_position(1095),
++    "text",
++    hard_line_break,
+     hard_line_break
+   ]),
+-  source_position(1064),
++  source_position(1100),
+   "
+ ",
+-  source_position(1065),
++  source_position(1101),
+   "    ",
+-  source_position(1069),
+-  "  text",
+-  source_position(1075),
+-  "
+-",
+-  source_position(1076),
+-  "
+-",
+-  source_position(1077),
+-  "    ",
+-  source_position(1081),
++  source_position(1105),
+   "top level indented code block",
+-  source_position(1110),
++  source_position(1134),
+   "
+ ",
+   empty_line,
+-  source_position(1112),
++  source_position(1136),
+   "-",
+-  source_position(1113),
++  source_position(1137),
+   "-",
+-  source_position(1114),
++  source_position(1138),
+   "-",
+   empty_line,
+-  source_position(1117),
++  source_position(1141),
+   "   ",
+-  source_position(1120),
++  source_position(1144),
+   "-",
+-  source_position(1121),
++  source_position(1145),
+   " ",
+-  source_position(1122),
++  source_position(1146),
+   " ",
+-  source_position(1123),
++  source_position(1147),
+   " ",
+-  source_position(1124),
++  source_position(1148),
+   " ",
+   align("      ", [
+-    source_position(1125),
++    source_position(1149),
+     "item ",
+-    source_position(1130),
++    source_position(1154),
+     "1",
+-    dedentRoot([
++    hard_line_break,
++    hard_line_break,
++    source_position(1164),
++    "-",
++    source_position(1165),
++    " ",
++    source_position(1166),
++    " ",
++    source_position(1167),
++    " ",
++    source_position(1168),
++    " ",
++    align("     ", [
++      source_position(1169),
++      "item ",
++      source_position(1174),
++      "1-1",
+       hard_line_break,
+-      source_position(1138),
+-      "- ",
+-      source_position(1143),
++      hard_line_break
++    ]),
++    source_position(1178),
++    "        ",
++    source_position(1186),
++    "-",
++    source_position(1187),
++    " ",
++    source_position(1188),
++    " ",
++    source_position(1189),
++    " ",
++    source_position(1190),
++    " ",
++    align("      ", [
++      source_position(1191),
+       "item ",
+-      source_position(1148),
+-      "1-1"
++      source_position(1196),
++      "1-2",
++      hard_line_break,
++      hard_line_break
+     ]),
+-    hard_line_break,
+-    source_position(1166),
+-    "- ",
+-    source_position(1171),
+-    "item ",
+-    source_position(1176),
+-    "1-2",
+-    hard_line_break,
+     empty_line,
+-    " ",
+-    source_position(1191),
+-    "indented ",
+-    source_position(1200),
+-    "code ",
+-    source_position(1205),
+-    "block",
+-    hard_line_break,
+-    source_position(1215),
+-    "top ",
+-    source_position(1219),
+-    "level ",
+-    source_position(1225),
+-    "indented ",
+-    source_position(1234),
+-    "code ",
+-    source_position(1239),
+-    "block",
+-    hard_line_break,
++    align("    ", [
++      "    ",
++      source_position(1201),
++      "indented code block",
++      source_position(1232),
++      "
++"
++    ]),
+     hard_line_break
+   ]),
++  source_position(1234),
++  "    ",
++  source_position(1238),
++  "top level indented code block",
++  source_position(1267),
++  "
++",
+   empty_line,
+-  source_position(1246),
++  source_position(1269),
+   "-",
+-  source_position(1247),
++  source_position(1270),
+   "-",
+-  source_position(1248),
++  source_position(1271),
+   "-",
+   empty_line,
+-  source_position(1251),
++  source_position(1274),
+   " ",
+-  source_position(1252),
++  source_position(1275),
+   "-",
+-  source_position(1253),
++  source_position(1276),
+   " ",
+-  source_position(1254),
++  source_position(1277),
+   " ",
+-  source_position(1255),
++  source_position(1278),
+   " ",
+-  source_position(1256),
++  source_position(1279),
+   " ",
+   align("      ", [
+-    source_position(1257),
++    source_position(1280),
+     "one",
+     hard_line_break,
+     hard_line_break
+   ]),
+-  source_position(1261),
++  source_position(1284),
+   "
+ ",
+-  source_position(1262),
++  source_position(1285),
+   "    ",
+-  source_position(1266),
++  source_position(1289),
+   " two",
+-  source_position(1270),
++  source_position(1293),
+   "
+ ",
+   hard_line_break
+
+```

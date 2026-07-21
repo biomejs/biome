@@ -20,23 +20,19 @@ info: yaml/block-folded/block-folded-strip.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,3 +1,5 @@
-----
-->-
+@@ -1,4 +1,4 @@
+ ---
+ >-
 -  ab
-+--- >-
 + ab
-+ 
-+  
-+...
+ ...
 ```
 
 # Output
 
 ```yml
---- >-
+---
+>-
  ab
- 
-  
 ...
 ```
