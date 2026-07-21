@@ -120,23 +120,6 @@ impl Default for GlobalsResolver {
                 type_parameters: [GLOBAL_U_ID.into()].into(),
             })
         });
-        builder.set_manual_type_data(ARRAY_ID_GLOBAL_TYPE_ID, || {
-            TypeData::Class(Box::new(Class {
-                name: Some(Text::new_static("Array")),
-                type_parameters: Box::new([TypeReference::from(GLOBAL_T_ID)]),
-                extends: None,
-                implements: Box::default(),
-                members: Box::new([
-                    member("filter", ARRAY_FILTER_ID),
-                    member("forEach", ARRAY_FOREACH_ID),
-                    member("map", ARRAY_MAP_ID),
-                    TypeMember {
-                        kind: TypeMemberKind::Named(Text::new_static("length")),
-                        ty: GLOBAL_NUMBER_ID.into(),
-                    },
-                ]),
-            }))
-        });
         builder.set_manual_type_data(ARRAY_FILTER_ID_GLOBAL_TYPE_ID, || {
             array_method_definition(
                 ARRAY_FILTER_ID,
@@ -165,31 +148,6 @@ impl Default for GlobalsResolver {
         builder.set_manual_type_data(INSTANCEOF_PROMISE_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_PROMISE_ID))
         });
-        builder.set_manual_type_data(PROMISE_ID_GLOBAL_TYPE_ID, || {
-            TypeData::Class(Box::new(Class {
-                name: Some(Text::new_static("Promise")),
-                type_parameters: Box::new([TypeReference::from(GLOBAL_T_ID)]),
-                extends: None,
-                implements: Box::default(),
-                members: Box::new([
-                    TypeMember {
-                        kind: TypeMemberKind::Constructor,
-                        ty: GLOBAL_PROMISE_CONSTRUCTOR_ID.into(),
-                    },
-                    member("catch", PROMISE_CATCH_ID),
-                    member("finally", PROMISE_FINALLY_ID),
-                    member("then", PROMISE_THEN_ID),
-                    static_member("all", PROMISE_ALL_ID),
-                    static_member("allSettled", PROMISE_ALL_SETTLED_ID),
-                    static_member("any", PROMISE_ANY_ID),
-                    static_member("race", PROMISE_RACE_ID),
-                    static_member("reject", PROMISE_REJECT_ID),
-                    static_member("resolve", PROMISE_RESOLVE_ID),
-                    static_member("try", PROMISE_TRY_ID),
-                ]),
-            }))
-        });
-
         builder.set_manual_type_data(PROMISE_CONSTRUCTOR_ID_GLOBAL_TYPE_ID, || {
             TypeData::from(Function {
                 is_async: false,

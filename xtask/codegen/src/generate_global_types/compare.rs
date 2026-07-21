@@ -10,7 +10,7 @@ use super::lower::{
 /// Number of `Error` class members expected in generated output.
 const ERROR_MEMBER_COUNT: usize = 6;
 /// Expected number of lowered generated globals.
-const GENERATED_GLOBAL_COUNT: usize = 7;
+const GENERATED_GLOBAL_COUNT: usize = 11;
 
 /// Expected shape of one lowered disposable pair (interface + dispose helper), checked by
 /// [`assert_disposable_shape`] against the generated model.

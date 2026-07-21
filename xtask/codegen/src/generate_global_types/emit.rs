@@ -15,11 +15,15 @@ const OUTPUT_RELATIVE_PATH: &str = "crates/biome_js_type_info/src/generated/glob
 ///
 /// Must stay ordered by ascending `GlobalTypeId` index so the emitted
 /// `MIGRATED_PREDEFINED_IDS` stays sorted for the runtime `binary_search`.
-const GLOBAL_ID_EMIT_ORDER: [&str; 7] = [
+const GLOBAL_ID_EMIT_ORDER: [&str; 11] = [
+    "ARRAY_ID_GLOBAL_TYPE_ID",
+    "PROMISE_ID_GLOBAL_TYPE_ID",
     "DISPOSABLE_ID_GLOBAL_TYPE_ID",
     "DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID",
     "ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID",
     "ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
+    "MAP_ID_GLOBAL_TYPE_ID",
+    "SET_ID_GLOBAL_TYPE_ID",
     "ERROR_ID_GLOBAL_TYPE_ID",
     "ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID",
     "ERROR_CALL_ID_GLOBAL_TYPE_ID",
@@ -101,12 +105,13 @@ fn render_class(class: &LoweredClass) -> String {
     format!(
         "crate::TypeData::Class(Box::new(crate::Class {{
             name: Some(biome_rowan::Text::new_static({name})),
-            type_parameters: Box::default(),
+            type_parameters: {type_parameters},
             extends: None,
             implements: Box::default(),
             members: Box::new([{members}]),
         }}))",
         name = rust_string_literal(class.name()),
+        type_parameters = render_type_parameters(class.type_parameters()),
         members = render_members(class.members()),
     )
 }
@@ -116,11 +121,12 @@ fn render_interface(interface: &LoweredInterface) -> String {
     format!(
         "crate::TypeData::Interface(Box::new(crate::Interface {{
             name: biome_rowan::Text::new_static({name}),
-            type_parameters: Box::default(),
+            type_parameters: {type_parameters},
             extends: Box::default(),
             members: Box::new([{members}]),
         }}))",
         name = rust_string_literal(interface.name()),
+        type_parameters = render_type_parameters(interface.type_parameters()),
         members = render_members(interface.members()),
     )
 }
@@ -268,26 +274,39 @@ fn render_type_reference(reference: &LoweredTypeReference) -> String {
     }
 }
 
+/// Builds a type parameters expression.
+fn render_type_parameters(parameters: &[biome_rowan::Text]) -> String {
+    if parameters.is_empty() {
+        return "Box::default()".to_string();
+    }
+    let mut rendered = String::new();
+    for parameter in parameters {
+        let id = match parameter.text() {
+            "T" => "GLOBAL_T_ID",
+            "U" => "GLOBAL_U_ID",
+            "K" => "GLOBAL_T_ID", // We use T for K to simplify
+            "V" => "GLOBAL_U_ID", // We use U for V to simplify
+            _ => "GLOBAL_T_ID",
+        };
+        rendered.push_str(&format!("crate::globals::{id}.into(),",));
+    }
+    format!("Box::new([{rendered}])")
+}
+
 /// Quotes a string for generated Rust source.
 fn rust_string_literal(value: &str) -> String {
     format!("{value:?}")
 }
 
-fn global_with_id_constant<'a>(
-    lowered: &'a LoweredGlobalTypes,
-    id_constant: &str,
-) -> Result<&'a LoweredGlobal> {
-    for global in lowered.globals() {
-        if global.id_constant() == id_constant {
-            return Ok(global);
+/// Returns generated globals in the sorted predefined-ID order.
+fn sorted_globals(lowered: &LoweredGlobalTypes) -> Result<Vec<&LoweredGlobal>> {
+    let mut sorted = Vec::new();
+    for id_constant in GLOBAL_ID_EMIT_ORDER {
+        if let Some(global) = global_with_id_constant_opt(lowered, id_constant) {
+            sorted.push(global);
         }
     }
 
-    bail!("generated global output is missing {id_constant}");
-}
-
-/// Returns generated globals in the sorted predefined-ID order.
-fn sorted_globals(lowered: &LoweredGlobalTypes) -> Result<[&LoweredGlobal; 7]> {
     for global in lowered.globals() {
         if !GLOBAL_ID_EMIT_ORDER.contains(&global.id_constant()) {
             bail!(
@@ -298,13 +317,15 @@ fn sorted_globals(lowered: &LoweredGlobalTypes) -> Result<[&LoweredGlobal; 7]> {
         }
     }
 
-    Ok([
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[0])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[1])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[2])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[3])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[4])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[5])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[6])?,
-    ])
+    Ok(sorted)
+}
+
+fn global_with_id_constant_opt<'a>(
+    lowered: &'a LoweredGlobalTypes,
+    id_constant: &str,
+) -> Option<&'a LoweredGlobal> {
+    lowered
+        .globals()
+        .iter()
+        .find(|&global| global.id_constant() == id_constant)
 }

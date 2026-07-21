@@ -466,10 +466,14 @@ mod tests {
         assert_eq!(
             migrated,
             &[
+                ARRAY_ID_GLOBAL_TYPE_ID,
+                PROMISE_ID_GLOBAL_TYPE_ID,
                 DISPOSABLE_ID_GLOBAL_TYPE_ID,
                 DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID,
                 ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID,
                 ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
+                MAP_ID_GLOBAL_TYPE_ID,
+                SET_ID_GLOBAL_TYPE_ID,
                 ERROR_ID_GLOBAL_TYPE_ID,
                 ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
                 ERROR_CALL_ID_GLOBAL_TYPE_ID,
