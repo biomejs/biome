@@ -81,7 +81,7 @@ impl<'db> MemberLookupResolver<'db> for ResolutionCtx<'db, '_> {
         } else {
             ty
         };
-        let Ok(ty) = normalize_structural_type(db, ty, |ty| self.resolve_inferred_type(ty)) else {
+        let Ok(ty) = normalize_structural_type(db, ty, |ty| ty) else {
             return InferredTypeData::Unknown;
         };
         let ty = apply_substitutions(db, ty, substitutions);
