@@ -119,7 +119,15 @@ impl FormatNodeRule<YamlFlowMapExplicitEntry> for FormatYamlFlowMapExplicitEntry
         _: &YamlFlowMapExplicitEntry,
         _: &mut YamlFormatter,
     ) -> FormatResult<()> {
-        // Printed in `FormatExplicitPair` between the key and the `:`
+        // The dangling comments sit between the explicit key and the `:`:
+        //
+        // ```yaml
+        // {? key # comment
+        //   : value}
+        // ```
+        //
+        // They are printed inside `FormatExplicitPair` on their own lines before the
+        // `:`; the default implementation would print them after the value
         Ok(())
     }
 }

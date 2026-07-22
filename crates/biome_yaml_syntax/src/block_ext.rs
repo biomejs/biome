@@ -16,6 +16,21 @@ impl AnyYamlBlockNode {
         )
     }
 
+    /// Whether this node is a literal (`|`) or folded (`>`) block scalar
+    pub fn is_block_scalar(&self) -> bool {
+        matches!(
+            self,
+            Self::YamlBlockInBlockNode(node)
+                if matches!(
+                    node.content(),
+                    Ok(
+                        AnyYamlBlockInBlockContent::YamlLiteralScalar(_)
+                            | AnyYamlBlockInBlockContent::YamlFoldedScalar(_)
+                    )
+                )
+        )
+    }
+
     /// Whether this node has any tag or anchor properties attached
     pub fn has_properties(&self) -> bool {
         match self {

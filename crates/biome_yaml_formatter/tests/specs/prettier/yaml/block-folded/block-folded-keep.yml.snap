@@ -20,15 +20,12 @@ info: yaml/block-folded/block-folded-keep.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,6 +1,4 @@
- ---
- >+
--  ab
--
--   
+@@ -3,4 +3,4 @@
+   ab
+ 
+    
 -...
 \ No newline at end of file
-+ ab
 +...
 ```
 
@@ -37,6 +34,8 @@ info: yaml/block-folded/block-folded-keep.yml
 ```yml
 ---
 >+
- ab
+  ab
+
+   
 ...
 ```
