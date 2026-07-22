@@ -78,6 +78,10 @@ impl<'token> FormatLiteralStringToken<'token> {
 pub(crate) struct CleanedStringLiteralText<'a> {
     token: &'a CssSyntaxToken,
     text: Cow<'a, str>,
+    /// Whether embedded LF characters use non-propagating literal lines.
+    ///
+    /// Attribute matcher values enable this to preserve escaped newlines
+    /// without expanding the surrounding selector group.
     literal_line_breaks: bool,
 }
 

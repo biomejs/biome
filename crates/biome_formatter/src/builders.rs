@@ -361,7 +361,7 @@ where
 
 /// Creates a text from a dynamic string and a range of the input source
 pub fn text(text: &str, position: Option<TextSize>) -> Text<'_> {
-    debug_assert_no_newlines(text);
+    debug_assert_normalized_newlines(text);
 
     Text { text, position }
 }
@@ -406,7 +406,7 @@ pub fn syntax_token_cow_slice<'a, L: Language>(
     token: &'a SyntaxToken<L>,
     start: TextSize,
 ) -> SyntaxTokenCowSlice<'a, L> {
-    debug_assert_no_newlines(&text);
+    debug_assert_normalized_newlines(&text);
 
     SyntaxTokenCowSlice { text, token, start }
 }
@@ -419,6 +419,11 @@ pub struct SyntaxTokenCowSlice<'a, L: Language> {
 
 impl<'a, L: Language> SyntaxTokenCowSlice<'a, L> {
     /// Splits embedded LF characters into non-propagating literal lines.
+    ///
+    /// The slice must use LF as its only line terminator. Callers normalize
+    /// source line endings before constructing it, for example with
+    /// [`crate::normalize_newlines`]. The printer converts each logical LF to
+    /// the configured output line ending.
     ///
     /// For `before\nafter`, this emits text for `before`, one literal line, and
     /// text for `after`. Printing at zero indentation produces:
@@ -572,7 +577,7 @@ pub fn located_token_text<L: Language>(
     let relative_range = range - token.text_range().start();
     let slice = token.token_text().slice(relative_range);
 
-    debug_assert_no_newlines(&slice);
+    debug_assert_normalized_newlines(&slice);
 
     LocatedTokenText {
         text: slice,
@@ -610,10 +615,10 @@ impl std::fmt::Debug for LocatedTokenText {
     }
 }
 
-fn debug_assert_no_newlines(text: &str) {
+fn debug_assert_normalized_newlines(text: &str) {
     debug_assert!(
         !text.contains('\r'),
-        "The content '{text}' contains an unsupported '\\r' line terminator character but text must only use line feeds '\\n' as line separator. Use '\\n' instead of '\\r' and '\\r\\n' to insert a line break in strings."
+        "The content '{text}' contains a carriage return, but formatter text must use LF line endings. Normalize source text with `normalize_newlines` before constructing formatter text."
     );
 }
 
