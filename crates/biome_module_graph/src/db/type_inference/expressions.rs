@@ -503,17 +503,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
         }
 
-        let db = self.db;
-        normalize_structural_type(db, resolved, |ty| {
-            if let InferredTypeData::Local(local) = ty
-                && local.module(db) == self.module_key
-            {
-                ty
-            } else {
-                self.resolve_inferred_type(ty)
-            }
-        })
-        .unwrap_or(InferredTypeData::Unknown)
+        resolved
     }
 
     fn resolve_call_arguments(
