@@ -40,7 +40,7 @@ info: svelte/each_with_rename_binding.svelte
 	<p>{a} {b}</p>
 {/each}
 
-{#each list as { arr: [ x, y ] }}
+{#each list as { arr: [x, y] }}
 	<p>{x} {y}</p>
 {/each}
 
