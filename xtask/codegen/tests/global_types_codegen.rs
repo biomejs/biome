@@ -997,6 +997,9 @@ mod tests {
         assert!(generated.contains("crate::globals::ERROR_ID_GLOBAL_TYPE_ID"));
         assert!(generated.contains("crate::globals::ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID"));
         assert!(generated.contains("crate::globals::ERROR_CALL_ID_GLOBAL_TYPE_ID"));
+        assert!(generated.contains("crate::globals::SYMBOL_ID_GLOBAL_TYPE_ID"));
+        assert!(generated.contains("crate::globals::SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID"));
+        assert!(generated.contains("crate::globals::SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID"));
         assert!(generated.contains("crate::globals::DISPOSABLE_ID_GLOBAL_TYPE_ID"));
         assert!(generated.contains("crate::globals::DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID"));
         assert!(generated.contains("crate::globals::ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID"));
@@ -1007,6 +1010,7 @@ mod tests {
         assert!(generated.contains("crate::TypeData::Interface("));
         assert!(generated.contains("crate::TypeData::Constructor("));
         assert!(generated.contains("crate::TypeData::Function("));
+        assert!(generated.contains("crate::TypeData::Symbol"));
         assert!(generated.contains("crate::TypeMemberKind::ComputedValue("));
         // Pin the async flag at the rendered-source level: the `AsyncDisposable` helper must emit
         // `is_async: true` and the synchronous helpers `is_async: false`, so a regression back to a
@@ -1286,6 +1290,82 @@ mod tests {
     }
 
     #[test]
+    fn lowerer_lowers_symbol_globals() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.disposables.d.ts")?;
+
+        let symbol = lowered.global("Symbol").expect("Symbol should be lowered");
+        assert_eq!(symbol.id_constant(), "SYMBOL_ID_GLOBAL_TYPE_ID");
+        let LoweredTypeData::Class(symbol_class) = symbol.data() else {
+            bail!("Symbol should lower to class data");
+        };
+        assert_eq!(symbol_class.name(), "Symbol");
+        let dispose = symbol_class
+            .member("dispose")
+            .expect("Symbol.dispose should be lowered");
+        assert_eq!(dispose.kind(), &LoweredMemberKind::NamedStatic);
+        assert_eq!(
+            dispose.type_reference(),
+            &LoweredTypeReference::Predefined("GLOBAL_SYMBOL_DISPOSE_ID")
+        );
+        let async_dispose = symbol_class
+            .member("asyncDispose")
+            .expect("Symbol.asyncDispose should be lowered");
+        assert_eq!(async_dispose.kind(), &LoweredMemberKind::NamedStatic);
+        assert_eq!(
+            async_dispose.type_reference(),
+            &LoweredTypeReference::Predefined("GLOBAL_SYMBOL_ASYNC_DISPOSE_ID")
+        );
+        assert_eq!(symbol_class.members().len(), 2);
+
+        let dispose_helper = lowered
+            .global("Symbol.dispose")
+            .expect("Symbol.dispose helper should be lowered");
+        assert_eq!(
+            dispose_helper.id_constant(),
+            "SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID"
+        );
+        assert!(matches!(dispose_helper.data(), LoweredTypeData::Symbol));
+
+        let async_dispose_helper = lowered
+            .global("Symbol.asyncDispose")
+            .expect("Symbol.asyncDispose helper should be lowered");
+        assert_eq!(
+            async_dispose_helper.id_constant(),
+            "SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID"
+        );
+        assert!(matches!(
+            async_dispose_helper.data(),
+            LoweredTypeData::Symbol
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn lowerer_rejects_missing_symbol_member() -> Result<()> {
+        expect_error_contains(
+            lowered_from_fixture("manifest.symbol-missing-async-dispose.d.ts"),
+            "SymbolConstructor is missing asyncDispose",
+        )
+    }
+
+    #[test]
+    fn lowerer_rejects_non_unique_symbol_member() -> Result<()> {
+        expect_error_contains(
+            lowered_from_fixture("manifest.symbol-wrong-type.d.ts"),
+            "SymbolConstructor.dispose must be unique symbol",
+        )
+    }
+
+    #[test]
+    fn lowerer_rejects_wrong_symbol_constructor_reference() -> Result<()> {
+        expect_error_contains(
+            lowered_from_fixture("manifest.symbol-wrong-constructor.d.ts"),
+            "declare var Symbol must reference SymbolConstructor",
+        )
+    }
+
+    #[test]
     fn lowerer_rejects_error_interface_extends_clause() -> Result<()> {
         expect_error_contains(
             lowered_from_fixture("manifest.error-extends.d.ts"),
@@ -1332,7 +1412,7 @@ mod tests {
 
         expect_error_contains(
             compare_lowered_globals(&lowered),
-            "generated globals contain 3 entries, expected 7",
+            "generated globals contain 3 entries, expected 10",
         )
     }
 

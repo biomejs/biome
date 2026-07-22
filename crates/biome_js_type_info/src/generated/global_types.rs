@@ -4,6 +4,9 @@
 
 /// Predefined global IDs whose `TypeData` is supplied by this generated module.
 pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
+    crate::globals::SYMBOL_ID_GLOBAL_TYPE_ID,
+    crate::globals::SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID,
+    crate::globals::SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
     crate::globals::DISPOSABLE_ID_GLOBAL_TYPE_ID,
     crate::globals::DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID,
     crate::globals::ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID,
@@ -17,6 +20,29 @@ pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
 pub(crate) fn set_generated_global_type_data(
     builder: &mut crate::globals_builder::GlobalsResolverBuilder,
 ) {
+    let data = crate::TypeData::Class(Box::new(crate::Class {
+        name: Some(biome_rowan::Text::new_static("Symbol")),
+        type_parameters: Box::default(),
+        extends: None,
+        implements: Box::default(),
+        members: Box::new([
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("dispose")),
+                ty: crate::globals::GLOBAL_SYMBOL_DISPOSE_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static(
+                    "asyncDispose",
+                )),
+                ty: crate::globals::GLOBAL_SYMBOL_ASYNC_DISPOSE_ID.into(),
+            },
+        ]),
+    }));
+    builder.set_type_data(crate::globals::SYMBOL_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Symbol;
+    builder.set_type_data(crate::globals::SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Symbol;
+    builder.set_type_data(crate::globals::SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID, data);
     let data = crate::TypeData::Interface(Box::new(crate::Interface {
         name: biome_rowan::Text::new_static("Disposable"),
         type_parameters: Box::default(),

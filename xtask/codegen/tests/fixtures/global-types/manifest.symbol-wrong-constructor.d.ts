@@ -1,14 +1,11 @@
 interface Error {
     name: string;
-}
-
-interface Error {
     message: string;
     stack?: string;
 }
 
 interface ErrorConstructor {
-    new(message?: string): void;
+    new(message?: string): Error;
     (message?: string): Error;
     readonly prototype: Error;
 }
@@ -22,12 +19,6 @@ interface SymbolConstructor {
     readonly asyncDispose: unique symbol;
 }
 
-declare var Symbol: SymbolConstructor;
+interface OtherSymbolConstructor {}
 
-interface Disposable {
-    [Symbol.dispose](): void;
-}
-
-interface AsyncDisposable {
-    [Symbol.asyncDispose](): PromiseLike<void>;
-}
+declare var Symbol: OtherSymbolConstructor;
