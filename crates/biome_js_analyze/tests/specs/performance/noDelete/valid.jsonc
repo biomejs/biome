@@ -7,5 +7,6 @@
 	"delete f()",
 	"delete el.dataset.something",
 	// `delete process.env.FOO` is the documented way to remove env vars in Node.js
-	"delete process.env.FOO"
+	"delete process.env.FOO",
+	"delete process.env['FOO']"
 ]

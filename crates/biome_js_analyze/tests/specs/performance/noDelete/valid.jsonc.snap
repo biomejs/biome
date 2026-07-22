@@ -36,3 +36,8 @@ delete el.dataset.something
 ```cjs
 delete process.env.FOO
 ```
+
+# Input
+```cjs
+delete process.env['FOO']
+```

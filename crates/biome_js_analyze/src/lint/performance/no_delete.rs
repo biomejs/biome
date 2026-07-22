@@ -61,6 +61,7 @@ declare_lint_rule! {
     ///
     /// ```js
     /// delete process.env.FOO;
+    /// delete process.env["FOO"];
     ///```
     ///
     pub NoDelete {
@@ -88,11 +89,18 @@ impl Rule for NoDelete {
 
         let should_report = if let Some(computed) = argument.as_js_computed_member_expression() {
             // `delete record[x]` is allowed, but if `x` is a literal value.
-            computed
+            let has_literal_member = computed
                 .member()
                 .ok()?
                 .as_any_js_literal_expression()
-                .is_some()
+                .is_some();
+            // Skip `delete process.env["FOO"]`, like its static counterpart below.
+            has_literal_member
+                && !computed
+                    .object()
+                    .ok()
+                    .and_then(|object| is_process_env(&object))
+                    .unwrap_or_default()
         } else {
             let static_member_expression = argument.as_js_static_member_expression();
             if let Some(static_member_expression) = static_member_expression {
@@ -108,7 +116,12 @@ impl Rule for NoDelete {
                 // Skip `delete process.env.FOO`: Node.js documents `delete` as the way
                 // to remove environment variables.
                 // https://nodejs.org/api/process.html#processenv
-                if is_process_env(static_member_expression).unwrap_or_default() {
+                if static_member_expression
+                    .object()
+                    .ok()
+                    .and_then(|object| is_process_env(&object))
+                    .unwrap_or_default()
+                {
                     return None;
                 }
                 true
@@ -157,10 +170,9 @@ impl Rule for NoDelete {
     }
 }
 
-/// Check if a static member expression targets `process.env.*`.
-fn is_process_env(expr: &biome_js_syntax::JsStaticMemberExpression) -> Option<bool> {
-    let object = expr.object().ok()?;
-    let static_obj = object.as_js_static_member_expression()?;
+/// Check if an expression is exactly `process.env`.
+fn is_process_env(expr: &AnyJsExpression) -> Option<bool> {
+    let static_obj = expr.as_js_static_member_expression()?;
     let member = static_obj.member().ok()?;
     let name = member.as_js_name()?;
     if name
