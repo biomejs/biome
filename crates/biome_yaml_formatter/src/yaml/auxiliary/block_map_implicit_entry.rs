@@ -37,7 +37,7 @@ impl FormatNodeRule<YamlBlockMapImplicitEntry> for FormatYamlBlockMapImplicitEnt
             }
 
             if value.is_flow_collection() {
-                // Like Prettier: a collection that a comment forces to break
+                // A collection that a comment forces to break
                 // stays on the key's line, while one that only breaks because
                 // it doesn't fit moves as a whole to its own indented line.
                 // Both keep the collection's entries and closing bracket

@@ -16,10 +16,10 @@ impl FormatNodeRule<YamlFlowMapping> for FormatYamlFlowMapping {
             f,
             [group(&format_args![
                 l_curly_token.format(),
-                should_expand.then_some(expand_parent()),
                 soft_block_indent_with_maybe_space(&entries.format(), !entries.is_empty()),
                 r_curly_token.format()
-            ])]
+            ])
+            .should_expand(should_expand)]
         )
     }
 }
