@@ -7,9 +7,7 @@ use biome_js_type_info::{
     GlobalTypeId, RawTypeData, ResolvedTypeId, ScopeId, TypeId, TypeReference,
     TypeReferenceQualifier, TypeResolverLevel,
     interned_types::{
-        InternedModule as InferredModule, InternedNamespace as InferredNamespace,
         InternedTypeofValue, LocalTypeHandle, LocalTypeId, ModuleKey, TypeData as InferredTypeData,
-        TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
     },
 };
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -195,118 +193,10 @@ impl<'db> ResolutionCtx<'db, '_> {
             .raw_types
             .get(type_id.index())
             .map_or(InferredTypeData::Unknown, |raw| self.resolve_raw_type(raw));
-        let ty = self.with_namespace_members(type_id, ty);
 
         self.in_progress.remove(&type_id);
         self.resolved.insert(type_id, ty);
         ty
-    }
-
-    /// Rebuilds a raw module or namespace type with the bindings declared
-    /// directly in its semantic scope.
-    ///
-    /// `fallback` is the ordinary inferred conversion of the raw type at
-    /// `type_id`. It retains that inferred representation when the type is not
-    /// a module or namespace, or when the declaration's semantic scope cannot
-    /// be identified. When the scope is available, this function replaces that
-    /// conversion with a module or namespace whose static members correspond
-    /// to the bindings declared directly in the scope.
-    ///
-    /// For example:
-    ///
-    /// ```ts
-    /// namespace Outer {
-    ///     export namespace Inner {
-    ///         export interface Value {
-    ///             field: string;
-    ///         }
-    ///     }
-    /// }
-    ///
-    /// declare const value: Outer.Inner.Value;
-    /// ```
-    ///
-    /// Resolving the raw type for `Outer` uses its binding scope to attach
-    /// `Inner` as a static member. Resolving `Inner` repeats the process and
-    /// attaches `Value`. Member lookup can then consume one segment at a time:
-    /// `Outer` to `Inner`, then `Inner` to `Value`. If either declaration scope
-    /// cannot be found, its existing `fallback` conversion is preserved instead
-    /// of replacing it with a partially reconstructed namespace.
-    fn with_namespace_members(
-        &mut self,
-        type_id: TypeId,
-        fallback: InferredTypeData<'db>,
-    ) -> InferredTypeData<'db> {
-        enum NamespaceMetadata {
-            Module(biome_rowan::Text),
-            Namespace(biome_js_type_info::Path),
-        }
-
-        let metadata = match self.js_info.raw_types.get(type_id.index()) {
-            Some(RawTypeData::Module(module)) => NamespaceMetadata::Module(module.name.clone()),
-            Some(RawTypeData::Namespace(namespace)) => {
-                NamespaceMetadata::Namespace(namespace.path.clone())
-            }
-            _ => return fallback,
-        };
-        let scope_id = self
-            .js_info
-            .semantic_model
-            .all_bindings()
-            .find_map(|binding| {
-                let reference = self
-                    .js_info
-                    .raw_binding_types
-                    .get(&binding.syntax().text_trimmed_range())?;
-                matches!(
-                    reference,
-                    TypeReference::Resolved(id)
-                        if id.level() == TypeResolverLevel::Thin && id.id() == type_id
-                )
-                .then(|| binding.scope().id())
-            });
-        let Some(scope_id) = scope_id else {
-            return fallback;
-        };
-
-        let members = self
-            .js_info
-            .semantic_model
-            .all_bindings()
-            .filter(|binding| {
-                binding
-                    .scope()
-                    .parent()
-                    .is_some_and(|parent| parent.id() == scope_id)
-            })
-            .filter_map(|binding| {
-                let name = binding
-                    .tree()
-                    .name_token()
-                    .ok()?
-                    .token_text_trimmed()
-                    .into();
-                let reference = self
-                    .js_info
-                    .raw_binding_types
-                    .get(&binding.syntax().text_trimmed_range())?
-                    .clone();
-                Some((name, reference))
-            })
-            .map(|(name, reference)| InferredTypeMember {
-                kind: InferredTypeMemberKind::NamedStatic(name),
-                ty: self.resolve(&reference),
-            })
-            .collect::<Box<[_]>>();
-
-        match metadata {
-            NamespaceMetadata::Module(name) => {
-                InferredTypeData::Module(InferredModule::new(self.db, members, name))
-            }
-            NamespaceMetadata::Namespace(path) => {
-                InferredTypeData::Namespace(InferredNamespace::new(self.db, members, path))
-            }
-        }
     }
 
     fn resolve_raw_type(&mut self, raw: &RawTypeData) -> InferredTypeData<'db> {
