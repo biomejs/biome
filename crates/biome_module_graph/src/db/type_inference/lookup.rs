@@ -211,7 +211,9 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
     let mut remaining_steps = MAX_MEMBER_LOOKUP_STEPS;
 
     while let Some(mut state) = pending.pop() {
-        let ty = resolver.resolve_type(db, state.ty);
+        let ty = resolver
+            .resolve_type(db, state.ty)
+            .expand_canonical_global(db);
         if !seen.insert((
             ty,
             state.mode,
@@ -230,7 +232,9 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
         remaining_steps -= 1;
 
         if let InferredTypeData::InstanceOf(instance) = ty {
-            let target = resolver.resolve_type(db, instance.ty(db));
+            let target = resolver
+                .resolve_type(db, instance.ty(db))
+                .expand_canonical_global(db);
             state.substitutions = substitutions_for_instance(
                 db,
                 target,
@@ -317,6 +321,7 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -394,6 +399,7 @@ fn declared_type_parameters<'db>(
         InferredTypeData::Unknown
         | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
         | InferredTypeData::BigInt
         | InferredTypeData::Boolean
         | InferredTypeData::Null
@@ -463,6 +469,7 @@ fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> Inf
         ty @ (InferredTypeData::Unknown
         | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
         | InferredTypeData::BigInt
         | InferredTypeData::Boolean
         | InferredTypeData::Null
@@ -581,6 +588,7 @@ fn find_own_member_type<'db>(
         InferredTypeData::Unknown
         | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
         | InferredTypeData::BigInt
         | InferredTypeData::Boolean
         | InferredTypeData::Null

@@ -13,11 +13,15 @@ use crate::{
     ScopeId,
     builders::{IntersectionBuilder, UnionBuilder},
     globals_ids::{
-        GLOBAL_ARRAY_ID, GLOBAL_ASYNC_DISPOSABLE_ID, GLOBAL_BOOLEAN_ID, GLOBAL_CONDITIONAL_ID,
-        GLOBAL_DATE_ID, GLOBAL_DISPOSABLE_ID, GLOBAL_ERROR_ID, GLOBAL_GLOBAL_ID, GLOBAL_MAP_ID,
-        GLOBAL_NUMBER_ID, GLOBAL_PROMISE_ID, GLOBAL_REGEXP_ID, GLOBAL_SET_ID, GLOBAL_STRING_ID,
+        ARRAY_ID_GLOBAL_TYPE_ID, ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID, DATE_ID_GLOBAL_TYPE_ID,
+        DISPOSABLE_ID_GLOBAL_TYPE_ID, ERROR_ID_GLOBAL_TYPE_ID, GLOBAL_ARRAY_ID,
+        GLOBAL_ASYNC_DISPOSABLE_ID, GLOBAL_BOOLEAN_ID, GLOBAL_CONDITIONAL_ID, GLOBAL_DATE_ID,
+        GLOBAL_DISPOSABLE_ID, GLOBAL_ERROR_ID, GLOBAL_GLOBAL_ID, GLOBAL_MAP_ID, GLOBAL_NUMBER_ID,
+        GLOBAL_PROMISE_ID, GLOBAL_REGEXP_ID, GLOBAL_SET_ID, GLOBAL_STRING_ID,
         GLOBAL_SYMBOL_ASYNC_DISPOSE_ID, GLOBAL_SYMBOL_DISPOSE_ID, GLOBAL_SYMBOL_ID,
-        GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID, GLOBAL_VOID_ID, GLOBAL_WEAK_MAP_ID,
+        GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID, GLOBAL_VOID_ID, GLOBAL_WEAK_MAP_ID, GlobalTypeId,
+        MAP_ID_GLOBAL_TYPE_ID, PROMISE_ID_GLOBAL_TYPE_ID, REGEXP_ID_GLOBAL_TYPE_ID,
+        SET_ID_GLOBAL_TYPE_ID, SYMBOL_ID_GLOBAL_TYPE_ID, WEAK_MAP_ID_GLOBAL_TYPE_ID,
     },
     literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral},
     type_data as raw,
@@ -124,6 +128,7 @@ pub enum TypeData<'db> {
     Tuple(InternedTuple<'db>),
     Generic(InternedGenericTypeParameter<'db>),
     Local(LocalTypeHandle<'db>),
+    GlobalType(GlobalTypeId),
     Intersection(InternedIntersection<'db>),
     Union(InternedUnion<'db>),
     TypeOperator(InternedTypeOperatorType<'db>),
@@ -499,6 +504,7 @@ impl<'db> TypeData<'db> {
             Self::Null | Self::Undefined | Self::VoidKeyword => Some(ConditionalType::Nullish),
             Self::Divergent(_)
             | Self::Generic(_)
+            | Self::GlobalType(_)
             | Self::Local(_)
             | Self::TypeOperator(_)
             | Self::TypeofType(_)
@@ -543,6 +549,7 @@ impl<'db> TypeData<'db> {
             Self::Class(_)
             | Self::Divergent(_)
             | Self::Generic(_)
+            | Self::GlobalType(_)
             | Self::Local(_)
             | Self::MergedReference(_)
             | Self::TypeOperator(_)
@@ -561,11 +568,13 @@ impl<'db> TypeData<'db> {
     }
 
     pub fn is_array_class(self, db: &'db dyn TypeDb) -> bool {
-        self.is_builtin_class_named(db, "Array")
+        self == Self::GlobalType(ARRAY_ID_GLOBAL_TYPE_ID)
+            || self.is_builtin_class_named(db, "Array")
     }
 
     pub fn is_promise_class(self, db: &'db dyn TypeDb) -> bool {
-        self.is_builtin_class_named(db, "Promise")
+        self == Self::GlobalType(PROMISE_ID_GLOBAL_TYPE_ID)
+            || self.is_builtin_class_named(db, "Promise")
     }
 
     fn is_builtin_class_named(self, db: &'db dyn TypeDb, expected_name: &str) -> bool {
@@ -729,70 +738,136 @@ impl<'db> TypeData<'db> {
 
     // #region Built-in and instance construction
 
-    fn builtin_class(db: &'db dyn TypeDb, name: &'static str) -> Self {
-        Self::Class(InternedClass::new(
-            db,
-            Box::default(),
-            None,
-            Box::default(),
-            Box::default(),
-            Some(Text::new_static(name)),
-            true,
-        ))
+    /// Resolves a canonical global handle to its stored definition.
+    ///
+    /// Non-global types are returned unchanged. Nested canonical handles inside
+    /// the definition remain unresolved.
+    ///
+    /// Operations that inspect a definition use this expansion. For example:
+    ///
+    /// ```ts
+    /// Promise.resolve(1);
+    /// ```
+    ///
+    /// Member lookup expands the canonical `Promise` handle to its class
+    /// definition so that it can find the static `resolve` member. Only that
+    /// lookup uses the expanded definition; the canonical handle remains
+    /// unchanged elsewhere.
+    pub fn expand_canonical_global(self, db: &'db dyn TypeDb) -> Self {
+        if let Self::GlobalType(id) = self {
+            crate::global_types(db).get(id)
+        } else {
+            self
+        }
     }
 
-    fn builtin_interface(db: &'db dyn TypeDb, name: &'static str) -> Self {
-        Self::Interface(InternedInterface::new(
-            db,
-            Box::default(),
-            Box::default(),
-            Box::default(),
-            Text::new_static(name),
-        ))
+    /// Resolves a canonical global handle unless doing so would discard an
+    /// identity required by structural operations.
+    ///
+    /// Handles whose definitions are classes, interfaces, modules, namespaces,
+    /// or objects remain canonical. Non-global types are returned unchanged,
+    /// and nested canonical handles inside an expanded definition remain
+    /// unresolved.
+    ///
+    /// For example:
+    ///
+    /// ```ts
+    /// declare const promise: Promise<string>;
+    /// const kind = typeof promise;
+    /// ```
+    ///
+    /// The instance target of `promise` remains the canonical `Promise` handle
+    /// so that callers can recognize the built-in `Promise` by comparing its
+    /// ID. `kind` is represented by an internal global helper whose definition
+    /// carries no identity that structural operations preserve, so the helper
+    /// expands to the union of string literals that `typeof` can return.
+    pub fn expand_structural_global(self, db: &'db dyn TypeDb) -> Self {
+        let Self::GlobalType(id) = self else {
+            return self;
+        };
+        match crate::global_types(db).get(id) {
+            Self::Class(_)
+            | Self::Interface(_)
+            | Self::Module(_)
+            | Self::Namespace(_)
+            | Self::Object(_) => self,
+            expanded @ (Self::Unknown
+            | Self::Divergent(_)
+            | Self::Global
+            | Self::GlobalType(_)
+            | Self::BigInt
+            | Self::Boolean
+            | Self::Null
+            | Self::Number
+            | Self::String
+            | Self::Symbol
+            | Self::Undefined
+            | Self::Conditional
+            | Self::Constructor(_)
+            | Self::Function(_)
+            | Self::Tuple(_)
+            | Self::Generic(_)
+            | Self::Local(_)
+            | Self::Intersection(_)
+            | Self::Union(_)
+            | Self::TypeOperator(_)
+            | Self::Literal(_)
+            | Self::InstanceOf(_)
+            | Self::MergedReference(_)
+            | Self::TypeofExpression(_)
+            | Self::TypeofType(_)
+            | Self::TypeofValue(_)
+            | Self::AnyKeyword
+            | Self::NeverKeyword
+            | Self::ObjectKeyword
+            | Self::ThisKeyword
+            | Self::UnknownKeyword
+            | Self::VoidKeyword) => expanded,
+        }
     }
 
-    pub fn array_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Array")
+    pub fn array_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(ARRAY_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn async_disposable_interface(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_interface(db, "AsyncDisposable")
+    pub fn async_disposable_interface(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn date_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Date")
+    pub fn date_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(DATE_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn disposable_interface(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_interface(db, "Disposable")
+    pub fn disposable_interface(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(DISPOSABLE_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn error_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Error")
+    pub fn error_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(ERROR_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn map_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Map")
+    pub fn map_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(MAP_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn promise_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Promise")
+    pub fn promise_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(PROMISE_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn regexp_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "RegExp")
+    pub fn regexp_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(REGEXP_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn set_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Set")
+    pub fn set_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(SET_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn symbol_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Symbol")
+    pub fn symbol_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(SYMBOL_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn weak_map_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "WeakMap")
+    pub fn weak_map_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(WEAK_MAP_ID_GLOBAL_TYPE_ID)
     }
 
     pub fn instance_of(db: &'db dyn TypeDb, ty: Self, type_parameters: Box<[Self]>) -> Self {
@@ -832,12 +907,13 @@ impl<'db> TypeData<'db> {
     pub fn from_raw_lossy(db: &'db dyn TypeDb, raw: &RawTypeData) -> Self {
         let mut resolve_reference =
             |reference: &raw::TypeReference| Self::from_raw_reference_lossy(db, reference);
-        Self::from_raw_with_resolver(db, raw, &mut resolve_reference)
+        Self::from_raw_with_resolver(db, raw, false, &mut resolve_reference)
     }
 
     pub fn from_raw_with_resolver(
         db: &'db dyn TypeDb,
         raw: &RawTypeData,
+        is_builtin: bool,
         resolve_reference: &mut ReferenceResolver<'db, '_>,
     ) -> Self {
         match raw {
@@ -859,7 +935,7 @@ impl<'db> TypeData<'db> {
                 convert_references(db, &class.implements, resolve_reference),
                 convert_type_members(db, &class.members, resolve_reference),
                 class.name.clone(),
-                false,
+                is_builtin,
             )),
             raw::TypeData::Constructor(constructor) => Self::Constructor(InternedConstructor::new(
                 db,
@@ -1024,6 +1100,7 @@ impl<'db> TypeData<'db> {
     pub fn to_raw_lossy(self, db: &'db dyn TypeDb) -> RawTypeData {
         match self {
             Self::Unknown | Self::Divergent(_) => raw::TypeData::Unknown,
+            Self::GlobalType(id) => raw::TypeData::Reference(raw::RawTypeId::Global(id).into()),
             Self::Global => raw::TypeData::Global,
             Self::BigInt => raw::TypeData::BigInt,
             Self::Boolean => raw::TypeData::Boolean,
@@ -1148,6 +1225,7 @@ impl<'db> TypeData<'db> {
     pub fn to_raw_reference_lossy(self) -> raw::TypeReference {
         match self {
             Self::Unknown | Self::Divergent(_) => raw::TypeReference::Resolved(GLOBAL_UNKNOWN_ID),
+            Self::GlobalType(id) => raw::RawTypeId::Global(id).into(),
             Self::Global => raw::TypeReference::Resolved(GLOBAL_GLOBAL_ID),
             Self::Boolean => raw::TypeReference::Resolved(GLOBAL_BOOLEAN_ID),
             Self::Number => raw::TypeReference::Resolved(GLOBAL_NUMBER_ID),
@@ -3008,6 +3086,28 @@ mod tests {
 
     #[salsa::db]
     impl TypeDb for TestDb {}
+
+    #[test]
+    fn nested_raw_reference_preserves_global_type_id() {
+        let db = TestDb::default();
+        let ty = TypeData::Tuple(InternedTuple::new(
+            &db,
+            boxed([TupleElementType {
+                ty: TypeData::promise_class(&db),
+                name: None,
+                is_optional: false,
+                is_rest: false,
+            }]),
+        ));
+        let raw::TypeData::Tuple(tuple) = ty.to_raw_lossy(&db) else {
+            panic!("expected tuple");
+        };
+
+        assert_eq!(
+            tuple.0[0].ty,
+            raw::RawTypeId::Global(PROMISE_ID_GLOBAL_TYPE_ID).into()
+        );
+    }
 
     #[test]
     fn slot_replacements_require_exact_and_complete_consumption() {

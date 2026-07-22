@@ -2,7 +2,9 @@
 
 use crate::ModuleDb;
 use biome_css_syntax::TextRange;
-use biome_js_type_info::interned_types::{LocalTypeId, ModuleKey, TypeData as InferredTypeData};
+use biome_js_type_info::interned_types::{
+    LocalTypeId, ModuleKey, TypeData as InferredTypeData, TypeTransformError,
+};
 use rustc_hash::FxHashMap;
 
 mod expressions;
@@ -103,6 +105,18 @@ pub(super) fn collected_type_result<'db>(
     } else {
         Some(InferredTypeData::union_from_types(db, types))
     }
+}
+
+pub(in crate::db) fn normalize_structural_type<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    mut resolve_local: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
+) -> Result<InferredTypeData<'db>, TypeTransformError> {
+    ty.normalize_nested_types(db, |ty| {
+        let ty = resolve_local(ty);
+        ty.expand_structural_global(db)
+    })
+    .into_result()
 }
 
 pub(super) fn infer_module_types_cycle_result<'db>(
