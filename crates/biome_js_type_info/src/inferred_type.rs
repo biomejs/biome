@@ -684,6 +684,7 @@ impl<'db> InferredType<'db> {
                         };
                         pending.push(constraint);
                     }
+                    TypeData::GlobalType(id) => pending.push(crate::global_types(self.db).get(id)),
                     TypeData::InstanceOf(instance) => pending.push(instance.ty(self.db)),
                     TypeData::Intersection(intersection) => {
                         pending.extend(intersection.types(self.db).iter().copied());
@@ -781,13 +782,14 @@ impl<'db> InferredType<'db> {
     }
 
     fn function_return_matches(self, predicate: impl Fn(TypeData<'db>) -> bool) -> bool {
-        let Some(function) = self.data.callable_function(self.db) else {
+        let data = self.data.expand_canonical_global(self.db);
+        let Some(function) = data.callable_function(self.db) else {
             return false;
         };
         let ReturnType::Type(return_ty) = function.return_type(self.db) else {
             return false;
         };
-        predicate(*return_ty)
+        predicate(return_ty.expand_canonical_global(self.db))
     }
 
     fn has_computed_member(self, name: &str) -> bool {
@@ -1759,6 +1761,18 @@ mod tests {
             hexadecimal.try_switch_case_variants(),
             Ok(vec![InferredSwitchCase::BigInt(Text::new_static("16n"))])
         );
+    }
+
+    #[test]
+    fn canonical_array_is_truthy_and_non_nullish() {
+        let db = TestDb::default();
+        let array = InferredType::new(
+            &db,
+            TypeData::array_instance(&db, Box::new([TypeData::String])),
+        );
+
+        assert!(array.is_always_truthy());
+        assert!(array.is_non_nullish());
     }
 
     #[test]

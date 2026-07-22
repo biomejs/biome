@@ -1854,7 +1854,7 @@ impl<'db> ResolvedParameters<'db> {
         db: &'db dyn ModuleDb,
         ty: InferredTypeData<'db>,
     ) -> Option<Self> {
-        match ty {
+        match ty.expand_canonical_global(db) {
             InferredTypeData::Constructor(constructor) => {
                 Some(Self::from_constructor(db, constructor))
             }

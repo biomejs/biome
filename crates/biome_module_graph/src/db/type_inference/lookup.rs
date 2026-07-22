@@ -1,4 +1,4 @@
-use super::{InferredModuleTypes, collected_type_result, expand_canonical_global};
+use super::{InferredModuleTypes, collected_type_result};
 use crate::ModuleDb;
 use crate::db::queries::infer_module_types;
 use crate::module_graph::ModuleInfo;
@@ -211,7 +211,9 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
     let mut remaining_steps = MAX_MEMBER_LOOKUP_STEPS;
 
     while let Some(mut state) = pending.pop() {
-        let ty = expand_canonical_global(db, resolver.resolve_type(db, state.ty));
+        let ty = resolver
+            .resolve_type(db, state.ty)
+            .expand_canonical_global(db);
         if !seen.insert((
             ty,
             state.mode,
@@ -230,7 +232,9 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
         remaining_steps -= 1;
 
         if let InferredTypeData::InstanceOf(instance) = ty {
-            let target = expand_canonical_global(db, resolver.resolve_type(db, instance.ty(db)));
+            let target = resolver
+                .resolve_type(db, instance.ty(db))
+                .expand_canonical_global(db);
             state.substitutions = substitutions_for_instance(
                 db,
                 target,

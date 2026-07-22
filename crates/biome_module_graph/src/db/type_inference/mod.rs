@@ -7,8 +7,6 @@ use biome_js_type_info::interned_types::{
 };
 use rustc_hash::FxHashMap;
 
-use self::globals::global_type;
-
 mod expressions;
 mod globals;
 mod imports;
@@ -109,72 +107,6 @@ pub(super) fn collected_type_result<'db>(
     }
 }
 
-/// Expands a canonical global handle to the exact type stored in the database.
-///
-/// Use this for identity-aware operations such as direct member lookup.
-fn expand_canonical_global<'db>(
-    db: &'db dyn ModuleDb,
-    ty: InferredTypeData<'db>,
-) -> InferredTypeData<'db> {
-    if let InferredTypeData::GlobalType(id) = ty {
-        global_type(db, id)
-    } else {
-        ty
-    }
-}
-
-/// Expands only globals whose result is safe to use structurally.
-///
-/// Nominal classes and interfaces remain canonical handles so identity checks,
-/// including Promise-class recognition, continue to observe the global ID.
-fn expand_structural_global<'db>(
-    db: &'db dyn ModuleDb,
-    ty: InferredTypeData<'db>,
-) -> InferredTypeData<'db> {
-    let InferredTypeData::GlobalType(id) = ty else {
-        return ty;
-    };
-    match global_type(db, id) {
-        InferredTypeData::Class(_)
-        | InferredTypeData::Interface(_)
-        | InferredTypeData::Module(_)
-        | InferredTypeData::Namespace(_)
-        | InferredTypeData::Object(_) => ty,
-        expanded @ (InferredTypeData::Unknown
-        | InferredTypeData::Divergent(_)
-        | InferredTypeData::Global
-        | InferredTypeData::GlobalType(_)
-        | InferredTypeData::BigInt
-        | InferredTypeData::Boolean
-        | InferredTypeData::Null
-        | InferredTypeData::Number
-        | InferredTypeData::String
-        | InferredTypeData::Symbol
-        | InferredTypeData::Undefined
-        | InferredTypeData::Conditional
-        | InferredTypeData::Constructor(_)
-        | InferredTypeData::Function(_)
-        | InferredTypeData::Tuple(_)
-        | InferredTypeData::Generic(_)
-        | InferredTypeData::Local(_)
-        | InferredTypeData::Intersection(_)
-        | InferredTypeData::Union(_)
-        | InferredTypeData::TypeOperator(_)
-        | InferredTypeData::Literal(_)
-        | InferredTypeData::InstanceOf(_)
-        | InferredTypeData::MergedReference(_)
-        | InferredTypeData::TypeofExpression(_)
-        | InferredTypeData::TypeofType(_)
-        | InferredTypeData::TypeofValue(_)
-        | InferredTypeData::AnyKeyword
-        | InferredTypeData::NeverKeyword
-        | InferredTypeData::ObjectKeyword
-        | InferredTypeData::ThisKeyword
-        | InferredTypeData::UnknownKeyword
-        | InferredTypeData::VoidKeyword) => expanded,
-    }
-}
-
 pub(in crate::db) fn normalize_structural_type<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
@@ -182,7 +114,7 @@ pub(in crate::db) fn normalize_structural_type<'db>(
 ) -> Result<InferredTypeData<'db>, TypeTransformError> {
     ty.normalize_nested_types(db, |ty| {
         let ty = resolve_local(ty);
-        expand_structural_global(db, ty)
+        ty.expand_structural_global(db)
     })
     .into_result()
 }

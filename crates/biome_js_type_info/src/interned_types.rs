@@ -738,6 +738,94 @@ impl<'db> TypeData<'db> {
 
     // #region Built-in and instance construction
 
+    /// Resolves a canonical global handle to its stored definition.
+    ///
+    /// Non-global types are returned unchanged. Nested canonical handles inside
+    /// the definition remain unresolved.
+    ///
+    /// Operations that inspect a definition use this expansion. For example:
+    ///
+    /// ```ts
+    /// Promise.resolve(1);
+    /// ```
+    ///
+    /// Member lookup expands the canonical `Promise` handle to its class
+    /// definition so that it can find the static `resolve` member. Only that
+    /// lookup uses the expanded definition; the canonical handle remains
+    /// unchanged elsewhere.
+    pub fn expand_canonical_global(self, db: &'db dyn TypeDb) -> Self {
+        if let Self::GlobalType(id) = self {
+            crate::global_types(db).get(id)
+        } else {
+            self
+        }
+    }
+
+    /// Resolves a canonical global handle unless doing so would discard an
+    /// identity required by structural operations.
+    ///
+    /// Handles whose definitions are classes, interfaces, modules, namespaces,
+    /// or objects remain canonical. Non-global types are returned unchanged,
+    /// and nested canonical handles inside an expanded definition remain
+    /// unresolved.
+    ///
+    /// For example:
+    ///
+    /// ```ts
+    /// declare const promise: Promise<string>;
+    /// const kind = typeof promise;
+    /// ```
+    ///
+    /// The instance target of `promise` remains the canonical `Promise` handle
+    /// so that callers can recognize the built-in `Promise` by comparing its
+    /// ID. `kind` is represented by an internal global helper whose definition
+    /// carries no identity that structural operations preserve, so the helper
+    /// expands to the union of string literals that `typeof` can return.
+    pub fn expand_structural_global(self, db: &'db dyn TypeDb) -> Self {
+        let Self::GlobalType(id) = self else {
+            return self;
+        };
+        match crate::global_types(db).get(id) {
+            Self::Class(_)
+            | Self::Interface(_)
+            | Self::Module(_)
+            | Self::Namespace(_)
+            | Self::Object(_) => self,
+            expanded @ (Self::Unknown
+            | Self::Divergent(_)
+            | Self::Global
+            | Self::GlobalType(_)
+            | Self::BigInt
+            | Self::Boolean
+            | Self::Null
+            | Self::Number
+            | Self::String
+            | Self::Symbol
+            | Self::Undefined
+            | Self::Conditional
+            | Self::Constructor(_)
+            | Self::Function(_)
+            | Self::Tuple(_)
+            | Self::Generic(_)
+            | Self::Local(_)
+            | Self::Intersection(_)
+            | Self::Union(_)
+            | Self::TypeOperator(_)
+            | Self::Literal(_)
+            | Self::InstanceOf(_)
+            | Self::MergedReference(_)
+            | Self::TypeofExpression(_)
+            | Self::TypeofType(_)
+            | Self::TypeofValue(_)
+            | Self::AnyKeyword
+            | Self::NeverKeyword
+            | Self::ObjectKeyword
+            | Self::ThisKeyword
+            | Self::UnknownKeyword
+            | Self::VoidKeyword) => expanded,
+        }
+    }
+
     pub fn array_class(_db: &'db dyn TypeDb) -> Self {
         Self::GlobalType(ARRAY_ID_GLOBAL_TYPE_ID)
     }

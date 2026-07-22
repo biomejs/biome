@@ -1,5 +1,5 @@
 use super::{
-    collected_type_result, expand_canonical_global,
+    collected_type_result,
     lookup::{
         MemberLookupMode, MemberLookupResolver, apply_substitutions,
         find_member_type_with_resolver, substitutions_for_instance,
@@ -488,7 +488,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         let mut resolved = InferredTypeData::Unknown;
         for _ in 0..MAX_CALL_CALLEE_STEPS {
             callee = self.resolve_inferred_type(callee);
-            callee = expand_canonical_global(self.db, callee);
+            callee = callee.expand_canonical_global(self.db);
             let InferredTypeData::InstanceOf(instance) = callee else {
                 while let Some(type_parameters) = instances.pop() {
                     callee = InferredTypeData::instance_of(self.db, callee, type_parameters);
@@ -1003,7 +1003,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             return Some(ty);
         }
         let object = self.resolve_inferred_type(object);
-        let object = expand_canonical_global(self.db, object);
+        let object = object.expand_canonical_global(self.db);
         match object {
             ty @ InferredTypeData::Class(_) => {
                 if ty.is_promise_class(self.db) && member_name == "resolve" {
@@ -1019,7 +1019,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     return Some(ty);
                 }
                 let mut target = self.resolve_inferred_type(instance_target);
-                target = expand_canonical_global(self.db, target);
+                target = target.expand_canonical_global(self.db);
                 if target.is_array_class(self.db) {
                     target = self.resolve_global_name("Array").unwrap_or(target);
                 }
