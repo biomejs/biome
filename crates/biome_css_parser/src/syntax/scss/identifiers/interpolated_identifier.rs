@@ -1,3 +1,4 @@
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::is_nth_at_identifier;
 use crate::syntax::scss::is_nth_at_scss_interpolation;
@@ -19,8 +20,14 @@ pub(crate) fn is_nth_at_scss_interpolated_identifier(p: &mut CssParser, n: usize
     is_nth_at_identifier(p, n) || is_nth_at_scss_interpolation(p, n)
 }
 
-/// Parses identifier parts after the first parsed part until whitespace or an
-/// unsupported part ends the identifier.
+/// Parses source-tight identifier parts after `first_part` until whitespace or
+/// unsupported syntax ends the identifier.
+///
+/// Both interpolations and the intervening hyphens belong to one selector
+/// identifier:
+/// ```scss
+/// .#{$block}--#{$modifier} {}
+/// ```
 pub(super) fn parse_scss_interpolated_identifier_parts(
     p: &mut CssParser,
     first_part: CompletedMarker,
@@ -40,8 +47,12 @@ pub(super) fn parse_scss_interpolated_identifier_parts(
     list.complete(p, SCSS_INTERPOLATED_IDENTIFIER_PART_LIST)
 }
 
-/// Returns `true` when `-` belongs to the current interpolated identifier,
-/// such as the hyphen in `#{$a}-#{$b}`.
+/// Returns `true` when `-` belongs to the current interpolated identifier.
+///
+/// Example:
+/// ```scss
+/// .#{$block}-#{$element} {}
+/// ```
 #[inline]
 pub(super) fn is_at_identifier_hyphen(p: &mut CssParser) -> bool {
     is_at_identifier_hyphen_part(p)
@@ -50,18 +61,31 @@ pub(super) fn is_at_identifier_hyphen(p: &mut CssParser) -> bool {
         && !p.has_nth_preceding_whitespace(1)
 }
 
+/// Parses a source-tight hyphen that continues an interpolated identifier.
+///
+/// Example:
+/// ```scss
+/// .#{$block}-#{$element} {}
+/// ```
 #[inline]
 pub(super) fn parse_identifier_hyphen(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_identifier_hyphen(p) {
         return Absent;
     }
 
-    parse_identifier_hyphen_part(p)
+    parse_identifier_hyphen_part(p, CssLexContext::Regular)
 }
 
 /// Returns whether the token at `n` is a raw interpolated-identifier hyphen.
 ///
-/// Callers still own context checks like `#{$a}-#{$b}` or `--#{$prop}`.
+/// Callers still own the context checks used by selectors and declarations:
+/// ```scss
+/// .-#{$name} {}
+///
+/// :root {
+///   --#{$prop}: 10px;
+/// }
+/// ```
 #[inline]
 pub(super) fn is_nth_at_identifier_hyphen_part(p: &mut CssParser, n: usize) -> bool {
     p.nth_at(n, T![-])
@@ -74,14 +98,20 @@ fn is_at_identifier_hyphen_part(p: &mut CssParser) -> bool {
 
 /// Parses a raw `-` as one interpolated-identifier hyphen part.
 ///
-/// Call only after a context-specific guard accepts the hyphen.
+/// Call only after a context-specific guard accepts the hyphen:
+/// ```scss
+/// .-#{$name} {}
+/// ```
 #[inline]
-pub(super) fn parse_identifier_hyphen_part(p: &mut CssParser) -> ParsedSyntax {
+pub(super) fn parse_identifier_hyphen_part(
+    p: &mut CssParser,
+    context: CssLexContext,
+) -> ParsedSyntax {
     if !is_at_identifier_hyphen_part(p) {
         return Absent;
     }
 
     let m = p.start();
-    p.bump(T![-]);
+    p.bump_with_context(T![-], context);
     Present(m.complete(p, SCSS_INTERPOLATED_IDENTIFIER_HYPHEN))
 }

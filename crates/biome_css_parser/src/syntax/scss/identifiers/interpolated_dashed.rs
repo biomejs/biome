@@ -1,3 +1,4 @@
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::scss::expression::parse_scss_regular_interpolation;
 use crate::syntax::scss::identifiers::interpolated_identifier::{
@@ -32,8 +33,10 @@ pub(crate) fn is_nth_at_scss_interpolated_dashed_identifier(p: &mut CssParser, n
 ///
 /// Examples:
 /// ```scss
-/// --#{$prop}: 10px;
-/// --theme-#{$slot}: red;
+/// :root {
+///   --#{$prop}: 10px;
+///   --theme-#{$slot}: red;
+/// }
 /// ```
 ///
 /// Docs: https://sass-lang.com/documentation/interpolation/
@@ -48,7 +51,7 @@ pub(crate) fn parse_scss_interpolated_dashed_identifier(p: &mut CssParser) -> Pa
     let first_part = if is_at_dashed_identifier(p) {
         parse_regular_identifier(p)
     } else {
-        parse_identifier_hyphen_part(p)
+        parse_identifier_hyphen_part(p, CssLexContext::Regular)
     };
 
     let Present(first_part) = first_part else {
@@ -72,6 +75,15 @@ fn is_at_dashed_identifier_with_interpolation_suffix(p: &mut CssParser) -> bool 
         && !p.has_nth_preceding_whitespace(1)
 }
 
+/// Parses one interpolation, source-tight hyphen, or plain identifier part in
+/// an interpolated dashed identifier.
+///
+/// Example:
+/// ```scss
+/// :root {
+///   --#{$prop}: 10px;
+/// }
+/// ```
 #[inline]
 fn parse_dashed_identifier_part(p: &mut CssParser) -> ParsedSyntax {
     if is_at_scss_interpolation(p) {
