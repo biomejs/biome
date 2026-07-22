@@ -1,6 +1,7 @@
 mod comments;
 mod context;
 mod cst;
+mod flow_scalar;
 mod generated;
 mod prelude;
 mod separated;

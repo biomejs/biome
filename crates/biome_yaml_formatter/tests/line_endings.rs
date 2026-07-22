@@ -35,6 +35,11 @@ fn block_scalar_with_carriage_return_line_breaks() {
 }
 
 #[test]
+fn flow_scalar_with_carriage_return_line_breaks() {
+    assert_format("a: \"foo\r\r bar\"\r", "a: \"foo\n\n  bar\"\n");
+}
+
+#[test]
 fn block_scalar_with_carriage_return_line_feed_line_breaks() {
     assert_format("a: |\r\n  foo\r\n  bar\r\n", "a: |\n  foo\n  bar\n");
 }
