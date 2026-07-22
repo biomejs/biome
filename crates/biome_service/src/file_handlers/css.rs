@@ -622,7 +622,12 @@ fn lint(params: LintParams) -> LintResults {
     };
 
     let mut process_lint = ProcessLint::new(&params);
-    let semantic_model = semantic_model(&tree);
+    let semantic_model = match &params.parsed_source {
+        super::ParsedOrigin::Workspace(source) => {
+            css_semantic_model(&params.workspace_db, source).clone()
+        }
+        super::ParsedOrigin::Interned { .. } => semantic_model(&tree),
+    };
     let css_services = CssAnalyzerServices {
         semantic_model: Some(&semantic_model),
         file_source,
