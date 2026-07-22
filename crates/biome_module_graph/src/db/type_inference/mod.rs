@@ -39,9 +39,12 @@ pub struct InferredModuleTypes<'db> {
     pub binding_type_data: FxHashMap<TextRange, BindingTypeData<'db>>,
 }
 
-// SAFETY: This aggregate owns its containers and contains only Salsa handles.
-// Updating every field delegates cross-revision transitions to each field's
-// `Update` implementation.
+// SAFETY: None of the fields contains a Rust reference tied to `'db`.
+// `InferredTypeData<'db>` uses the lifetime only to brand Salsa handles, whose
+// `Update` implementations support comparison across revisions; all containers
+// and map keys are owned. Each field is updated exactly once through its own
+// `Update` implementation, and `maybe_update_range_map` either replaces an
+// owned map or delegates updates to the values under an unchanged set of keys.
 unsafe impl salsa::Update for InferredModuleTypes<'_> {
     unsafe fn maybe_update(old_pointer: *mut Self, new_value: Self) -> bool {
         let Self {

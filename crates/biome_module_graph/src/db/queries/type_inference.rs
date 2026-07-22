@@ -1690,7 +1690,7 @@ fn infer_generic_return_type<'db>(
         let Some(type_parameter) = substitutions
             .iter()
             .try_fold(*type_parameter, |ty, substitution| {
-                ty.substitute_type(db, *substitution).ok()
+                ty.substitute_type(db, *substitution).map_or(None, Some)
             })
         else {
             return InferredTypeData::Unknown;
@@ -1734,7 +1734,9 @@ fn infer_generic_return_type<'db>(
                     generic: alternate,
                     replacement,
                 };
-                let Ok(substituted) = return_ty.substitute_type(db, substitution) else {
+                let TypeTransformResult::Transformed(substituted) =
+                    return_ty.substitute_type(db, substitution)
+                else {
                     return InferredTypeData::Unknown;
                 };
                 return_ty = substituted;
