@@ -1,8 +1,8 @@
 use crate::parser::CssParser;
 use crate::syntax::scss::expression::parse_scss_regular_interpolation;
 use crate::syntax::scss::identifiers::interpolated_identifier::{
-    is_nth_at_identifier_hyphen_part, parse_identifier_hyphen_part,
-    parse_scss_interpolated_identifier_parts,
+    is_at_identifier_hyphen, is_nth_at_identifier_hyphen_part, parse_identifier_hyphen,
+    parse_identifier_hyphen_part, parse_scss_interpolated_identifier_parts,
 };
 use crate::syntax::scss::{
     is_at_scss_interpolation, is_nth_at_scss_interpolated_identifier, is_nth_at_scss_interpolation,
@@ -76,6 +76,8 @@ fn is_at_dashed_identifier_with_interpolation_suffix(p: &mut CssParser) -> bool 
 fn parse_dashed_identifier_part(p: &mut CssParser) -> ParsedSyntax {
     if is_at_scss_interpolation(p) {
         parse_scss_regular_interpolation(p)
+    } else if is_at_identifier_hyphen(p) {
+        parse_identifier_hyphen(p)
     } else {
         parse_regular_identifier(p)
     }

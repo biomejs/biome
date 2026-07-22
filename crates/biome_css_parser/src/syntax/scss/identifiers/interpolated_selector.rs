@@ -2,7 +2,7 @@ use crate::parser::CssParser;
 use crate::syntax::is_nth_at_identifier;
 use crate::syntax::scss::expression::parse_scss_selector_interpolation;
 use crate::syntax::scss::identifiers::interpolated_identifier::{
-    is_at_identifier_continuation, is_at_scss_interpolated_identifier,
+    is_at_identifier_hyphen, is_at_scss_interpolated_identifier, parse_identifier_hyphen,
     parse_scss_interpolated_identifier_parts,
 };
 use crate::syntax::scss::{is_at_scss_interpolation, is_nth_at_scss_interpolation};
@@ -49,6 +49,11 @@ fn is_nth_at_scss_selector_identifier_suffix(p: &mut CssParser, n: usize) -> boo
             || p.nth_at(n, T![-])
                 && !p.has_nth_preceding_whitespace(n + 1)
                 && is_nth_at_scss_interpolation(p, n + 1))
+}
+
+#[inline]
+fn is_at_selector_identifier_part(p: &mut CssParser) -> bool {
+    is_at_scss_interpolated_identifier(p) || is_at_identifier_hyphen(p)
 }
 
 /// Parses SCSS-interpolated selector name slots.
@@ -99,7 +104,9 @@ fn parse_scss_selector_identifier_with_fragment(
 
     // A plain selector identifier only becomes an interpolated identifier when
     // another selector identifier fragment follows with no separating trivia.
-    if first_fragment.kind(p) != SCSS_INTERPOLATION && !is_at_identifier_continuation(p) {
+    if first_fragment.kind(p) != SCSS_INTERPOLATION
+        && (p.has_preceding_whitespace() || !is_at_selector_identifier_part(p))
+    {
         return Present(first_fragment);
     }
 
@@ -117,6 +124,8 @@ fn parse_selector_identifier_part(
 ) -> ParsedSyntax {
     if is_at_scss_interpolation(p) {
         parse_scss_selector_interpolation(p)
+    } else if is_at_identifier_hyphen(p) {
+        parse_identifier_hyphen(p)
     } else {
         parse_selector_fragment(p)
     }
