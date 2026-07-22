@@ -1,7 +1,7 @@
 use super::{BindingTypeData, InferredModuleTypes, globals::global_type, lookup::module_for_key};
 use crate::db::queries::infer_module_types;
 use crate::module_graph::ModuleInfo;
-use crate::{JsModuleInfo, ModuleDb, ResolvedPath};
+use crate::{JsModuleInfo, ModuleDb};
 use biome_js_semantic::JsDeclarationKind;
 use biome_js_type_info::{
     GlobalTypeId, RawTypeData, ResolvedTypeId, ScopeId, TypeId, TypeReference,
@@ -26,8 +26,6 @@ pub(in crate::db::type_inference) struct ResolutionCtx<'db, 'a> {
     pub(in crate::db::type_inference) db: &'db dyn ModuleDb,
     pub(in crate::db::type_inference) module_key: ModuleKey,
     pub(in crate::db::type_inference) js_info: &'a JsModuleInfo,
-    pub(in crate::db::type_inference) import_types:
-        &'a FxHashMap<ResolvedPath, &'db InferredModuleTypes<'db>>,
     pub(in crate::db::type_inference) named_type_ids: FxHashSet<TypeId>,
     pub(in crate::db::type_inference) resolved: FxHashMap<TypeId, InferredTypeData<'db>>,
     pub(in crate::db::type_inference) in_progress: FxHashSet<TypeId>,
@@ -38,7 +36,6 @@ pub(in crate::db) fn resolve_raw_types<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
     js_info: &JsModuleInfo,
-    import_types: &FxHashMap<ResolvedPath, &'db InferredModuleTypes<'db>>,
 ) -> InferredModuleTypes<'db> {
     let module_key = ModuleKey::new(module.as_id());
     let named_type_ids = named_type_ids(js_info);
@@ -46,7 +43,6 @@ pub(in crate::db) fn resolve_raw_types<'db>(
         db,
         module_key,
         js_info,
-        import_types,
         named_type_ids,
         resolved: FxHashMap::default(),
         in_progress: FxHashSet::default(),
@@ -122,6 +118,18 @@ fn is_named_type_declaration(declaration_kind: JsDeclarationKind) -> bool {
 }
 
 impl<'db> ResolutionCtx<'db, '_> {
+    /// Infers `module` as a dependency of the module currently being resolved.
+    ///
+    /// The tracked query records the imported result as a dependency of the
+    /// current inference. Returns `None` for unsupported modules, disabled type
+    /// inference, or an import cycle.
+    pub(in crate::db::type_inference) fn infer_imported_module(
+        &self,
+        module: ModuleInfo,
+    ) -> Option<&'db InferredModuleTypes<'db>> {
+        infer_module_types(self.db, module)
+    }
+
     pub(in crate::db::type_inference) fn resolve(
         &mut self,
         reference: &TypeReference,
@@ -316,7 +324,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 self.resolve_raw_type_id(TypeId::new(local_type_id.index()))
             } else {
                 module_for_key(self.db, module_key)
-                    .and_then(|module| infer_module_types(self.db, module))
+                    .and_then(|module| self.infer_imported_module(module))
                     .and_then(|types| types.types.get(local_type_id.index()).copied())
                     .unwrap_or(InferredTypeData::Unknown)
             };

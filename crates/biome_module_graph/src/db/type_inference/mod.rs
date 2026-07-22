@@ -39,20 +39,55 @@ pub struct InferredModuleTypes<'db> {
     pub binding_type_data: FxHashMap<TextRange, BindingTypeData<'db>>,
 }
 
-// SAFETY: This struct does not borrow from the database. It owns the ranges, and
-// the types are small handles created by Salsa. Comparing the old maps with the
-// new maps is safe; if they differ, replacing the old maps exposes the same data
-// as updating each entry one by one.
+// SAFETY: None of the fields contains a Rust reference tied to `'db`.
+// `InferredTypeData<'db>` uses the lifetime only to brand Salsa handles, whose
+// `Update` implementations support comparison across revisions; all containers
+// and map keys are owned. Each field is updated exactly once through its own
+// `Update` implementation, and `maybe_update_range_map` either replaces an
+// owned map or delegates updates to the values under an unchanged set of keys.
 unsafe impl salsa::Update for InferredModuleTypes<'_> {
     unsafe fn maybe_update(old_pointer: *mut Self, new_value: Self) -> bool {
-        let old_value = unsafe { &mut *old_pointer };
-        if *old_value == new_value {
-            false
-        } else {
-            *old_value = new_value;
-            true
-        }
+        let Self {
+            module_key,
+            named_type_ids,
+            types,
+            expressions,
+            binding_type_data,
+        } = new_value;
+        let mut changed = false;
+        changed |=
+            unsafe { salsa::Update::maybe_update(&raw mut (*old_pointer).module_key, module_key) };
+        changed |= unsafe {
+            salsa::Update::maybe_update(&raw mut (*old_pointer).named_type_ids, named_type_ids)
+        };
+        changed |= unsafe { salsa::Update::maybe_update(&raw mut (*old_pointer).types, types) };
+        changed |=
+            unsafe { maybe_update_range_map(&raw mut (*old_pointer).expressions, expressions) };
+        changed |= unsafe {
+            maybe_update_range_map(&raw mut (*old_pointer).binding_type_data, binding_type_data)
+        };
+        changed
     }
+}
+
+unsafe fn maybe_update_range_map<V: salsa::Update>(
+    old_pointer: *mut FxHashMap<TextRange, V>,
+    new_map: FxHashMap<TextRange, V>,
+) -> bool {
+    let old_map = unsafe { &mut *old_pointer };
+    if old_map.len() != new_map.len() || old_map.keys().any(|key| !new_map.contains_key(key)) {
+        *old_map = new_map;
+        return true;
+    }
+
+    let mut changed = false;
+    for (key, new_value) in new_map {
+        let old_value = old_map
+            .get_mut(&key)
+            .expect("range keys were checked above");
+        changed |= unsafe { V::maybe_update(old_value, new_value) };
+    }
+    changed
 }
 
 impl<'db> InferredModuleTypes<'db> {
