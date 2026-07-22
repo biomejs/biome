@@ -1619,9 +1619,9 @@ fn infer_function_return_type<'db>(
     args: &[ResolvedCallArgument<'db>],
 ) -> Option<InferredTypeData<'db>> {
     match function.return_type(db) {
-        ReturnType::Type(ty) => Some(
-            infer_generic_return_type(db, function, *ty, args).expand_structural_global(db),
-        ),
+        ReturnType::Type(ty) => {
+            Some(infer_generic_return_type(db, function, *ty, args).expand_structural_global(db))
+        }
         ReturnType::Predicate(_) | ReturnType::Asserts(_) => Some(InferredTypeData::Boolean),
     }
 }
