@@ -120,6 +120,11 @@ fn is_named_type_declaration(declaration_kind: JsDeclarationKind) -> bool {
 }
 
 impl<'db> ResolutionCtx<'db, '_> {
+    /// Infers `module` as a dependency of the module currently being resolved.
+    ///
+    /// The tracked query records the imported result as a dependency of the
+    /// current inference. Returns `None` for unsupported modules, disabled type
+    /// inference, or an import cycle.
     pub(in crate::db::type_inference) fn infer_imported_module(
         &self,
         module: ModuleInfo,
@@ -197,6 +202,36 @@ impl<'db> ResolutionCtx<'db, '_> {
         ty
     }
 
+    /// Rebuilds a raw module or namespace type with the bindings declared
+    /// directly in its semantic scope.
+    ///
+    /// `fallback` is the ordinary inferred conversion of the raw type at
+    /// `type_id`. It retains that inferred representation when the type is not
+    /// a module or namespace, or when the declaration's semantic scope cannot
+    /// be identified. When the scope is available, this function replaces that
+    /// conversion with a module or namespace whose static members correspond
+    /// to the bindings declared directly in the scope.
+    ///
+    /// For example:
+    ///
+    /// ```ts
+    /// namespace Outer {
+    ///     export namespace Inner {
+    ///         export interface Value {
+    ///             field: string;
+    ///         }
+    ///     }
+    /// }
+    ///
+    /// declare const value: Outer.Inner.Value;
+    /// ```
+    ///
+    /// Resolving the raw type for `Outer` uses its binding scope to attach
+    /// `Inner` as a static member. Resolving `Inner` repeats the process and
+    /// attaches `Value`. Member lookup can then consume one segment at a time:
+    /// `Outer` to `Inner`, then `Inner` to `Value`. If either declaration scope
+    /// cannot be found, its existing `fallback` conversion is preserved instead
+    /// of replacing it with a partially reconstructed namespace.
     fn with_namespace_members(
         &mut self,
         type_id: TypeId,
