@@ -1137,6 +1137,7 @@ impl<'db> TypeData<'db> {
     pub fn to_raw_reference_lossy(self) -> raw::TypeReference {
         match self {
             Self::Unknown | Self::Divergent(_) => raw::TypeReference::Resolved(GLOBAL_UNKNOWN_ID),
+            Self::GlobalType(id) => raw::RawTypeId::Global(id).into(),
             Self::Global => raw::TypeReference::Resolved(GLOBAL_GLOBAL_ID),
             Self::Boolean => raw::TypeReference::Resolved(GLOBAL_BOOLEAN_ID),
             Self::Number => raw::TypeReference::Resolved(GLOBAL_NUMBER_ID),
@@ -2997,6 +2998,28 @@ mod tests {
 
     #[salsa::db]
     impl TypeDb for TestDb {}
+
+    #[test]
+    fn nested_raw_reference_preserves_global_type_id() {
+        let db = TestDb::default();
+        let ty = TypeData::Tuple(InternedTuple::new(
+            &db,
+            boxed([TupleElementType {
+                ty: TypeData::promise_class(&db),
+                name: None,
+                is_optional: false,
+                is_rest: false,
+            }]),
+        ));
+        let raw::TypeData::Tuple(tuple) = ty.to_raw_lossy(&db) else {
+            panic!("expected tuple");
+        };
+
+        assert_eq!(
+            tuple.0[0].ty,
+            raw::RawTypeId::Global(PROMISE_ID_GLOBAL_TYPE_ID).into()
+        );
+    }
 
     #[test]
     fn slot_replacements_require_exact_and_complete_consumption() {
