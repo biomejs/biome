@@ -1,0 +1,61 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/scalar/multiline.yaml
+---
+
+# Input
+
+```yaml
+plain: one   
+      two   
+        deep	
+      three
+
+      after blank
+
+
+      after two blanks
+seq:
+  - first
+     second
+double: "  
+   folded 
+ 
+   line"
+single: 'a
+   b'
+---
+top
+level  
+  scalar
+
+```
+
+
+# Formatted
+
+```yaml
+plain: one
+  two
+  deep
+  three
+
+  after blank
+
+
+  after two blanks
+seq:
+  - first
+    second
+double: "
+  folded
+
+  line"
+single: 'a
+  b'
+---
+top
+level
+scalar
+
+```

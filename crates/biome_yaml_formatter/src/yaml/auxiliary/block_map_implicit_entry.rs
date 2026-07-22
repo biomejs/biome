@@ -2,7 +2,9 @@ use crate::comments::subtree_has_comments;
 use crate::prelude::*;
 use biome_formatter::format_args;
 use biome_formatter::write;
-use biome_yaml_syntax::{YamlBlockMapImplicitEntry, YamlBlockMapImplicitEntryFields};
+use biome_yaml_syntax::{
+    AnyYamlBlockNode, YamlBlockMapImplicitEntry, YamlBlockMapImplicitEntryFields,
+};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatYamlBlockMapImplicitEntry;
@@ -52,6 +54,17 @@ impl FormatNodeRule<YamlBlockMapImplicitEntry> for FormatYamlBlockMapImplicitEnt
                         value.format()
                     ]))]
                 );
+            }
+
+            // The continuation lines of a multiline flow scalar are indented
+            // past the key:
+            //
+            // ```yaml
+            // key: word
+            //   word
+            // ```
+            if matches!(&value, AnyYamlBlockNode::YamlFlowInBlockNode(_)) {
+                return write!(f, [space(), indent(&value.format())]);
             }
 
             write!(f, [space(), value.format()])?;
