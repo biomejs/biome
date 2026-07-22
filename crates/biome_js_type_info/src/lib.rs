@@ -27,6 +27,7 @@ mod return_type_relation;
 mod r#type;
 mod type_data;
 mod type_store;
+mod type_transform;
 mod type_traversal;
 
 pub use conditionals::*;

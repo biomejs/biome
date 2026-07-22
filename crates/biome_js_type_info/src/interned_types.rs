@@ -23,11 +23,12 @@ use crate::{
     type_data as raw,
 };
 
+pub use crate::type_transform::{TypeSubstitution, TypeTransformError, TypeTransformResult};
+
 pub type RawTypeData = raw::TypeData;
 pub type ReferenceResolver<'db, 'resolver> =
     dyn FnMut(&raw::TypeReference) -> TypeData<'db> + 'resolver;
 const MAX_GENERIC_REPLACEMENT_STEPS: usize = 64;
-const MAX_TYPE_SUBSTITUTION_STEPS: usize = 1024;
 const MAX_OBJECT_RELATION_DEPTH: usize = 50;
 
 pub fn well_known_symbol_name(reference: &raw::TypeReference) -> Option<Text> {
@@ -52,12 +53,6 @@ pub fn well_known_symbol_name(reference: &raw::TypeReference) -> Option<Text> {
         }
         _ => None,
     }
-}
-
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
-pub struct TypeSubstitution<'db> {
-    pub generic: TypeData<'db>,
-    pub replacement: TypeData<'db>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, salsa::Update)]
@@ -613,13 +608,14 @@ impl<'db> TypeData<'db> {
     /// `Promise<string>` returns a replacement where `generic` is `T` and
     /// `replacement` is `string`.
     ///
-    /// The walk is iterative and stops after a fixed number of steps so a bad
-    /// or cyclic type shape cannot loop forever.
+    /// The walk is iterative and returns `None` if it cannot finish within a
+    /// fixed number of steps. Types already being visited do not consume another
+    /// step.
     pub fn collect_generic_replacements(
         self,
         db: &'db dyn TypeDb,
         actual: Self,
-    ) -> Vec<TypeSubstitution<'db>> {
+    ) -> Option<Vec<TypeSubstitution<'db>>> {
         let mut replacements = Vec::new();
         let mut stack = Vec::from([(self, actual)]);
         let mut seen = FxHashSet::default();
@@ -630,7 +626,7 @@ impl<'db> TypeData<'db> {
                 continue;
             }
             if remaining_steps == 0 {
-                break;
+                return None;
             }
             remaining_steps -= 1;
 
@@ -657,22 +653,26 @@ impl<'db> TypeData<'db> {
             stack.push((pattern.ty(db), actual.ty(db)));
         }
 
-        replacements
+        Some(replacements)
     }
 
-    pub fn substitute_type(self, db: &'db dyn TypeDb, substitution: TypeSubstitution<'db>) -> Self {
-        let mut remaining_steps = MAX_TYPE_SUBSTITUTION_STEPS;
-        substitute_type(db, self, substitution, false, &mut remaining_steps).unwrap_or(self)
-    }
+    // #endregion
 
-    /// Substitutes inside the root generic declaration while preserving nested declarations.
-    pub fn substitute_type_in_root_body(
-        self,
-        db: &'db dyn TypeDb,
-        substitution: TypeSubstitution<'db>,
-    ) -> Self {
-        let mut remaining_steps = MAX_TYPE_SUBSTITUTION_STEPS;
-        substitute_type(db, self, substitution, true, &mut remaining_steps).unwrap_or(self)
+    // #region Structural mapping
+
+    /// Extracts this type's immediate `TypeData` fields in reconstruction order.
+    ///
+    /// Extraction is not recursive. Given this declaration:
+    ///
+    /// ```ts
+    /// declare function transform<T>(value: T): Promise<T>;
+    /// ```
+    ///
+    /// the immediate slots are the declaration of `T`, the parameter type `T`,
+    /// and the return type `Promise<T>`. The nested `T` inside `Promise<T>` is a
+    /// slot of the `Promise<T>` value and is visited when that value is processed.
+    pub(crate) fn type_slots(self, db: &'db dyn TypeDb) -> TypeDataSlots<'db> {
+        TypeDataSlots::collect(db, self)
     }
 
     // #endregion
@@ -1171,203 +1171,654 @@ impl<'db> TypeData<'db> {
     // #endregion
 }
 
-fn substitute_type<'db>(
-    db: &'db dyn TypeDb,
-    ty: TypeData<'db>,
-    substitution: TypeSubstitution<'db>,
-    enter_root_binder: bool,
-    remaining_steps: &mut usize,
-) -> Option<TypeData<'db>> {
-    *remaining_steps = remaining_steps.checked_sub(1)?;
-    if ty == substitution.generic {
-        return Some(substitution.replacement);
-    }
-
-    let binder_generic = match substitution.generic {
-        TypeData::InstanceOf(instance)
-            if instance.type_parameters(db).is_empty()
-                && matches!(instance.ty(db), TypeData::Generic(_)) =>
-        {
-            instance.ty(db)
-        }
-        generic => generic,
-    };
-    let declares_generic = match ty {
-        TypeData::Class(class) => class.type_parameters(db).contains(&binder_generic),
-        TypeData::Constructor(constructor) => {
-            constructor.type_parameters(db).contains(&binder_generic)
-        }
-        TypeData::Function(function) => function.type_parameters(db).contains(&binder_generic),
-        TypeData::Interface(interface) => interface.type_parameters(db).contains(&binder_generic),
-        _ => false,
-    };
-    if declares_generic && !enter_root_binder {
-        return Some(ty);
-    }
-    let mut substitute = |child| substitute_type(db, child, substitution, false, remaining_steps);
-
-    Some(match ty {
-        TypeData::Function(function) => TypeData::Function(InternedFunction::new(
-            db,
-            function.type_parameters(db).to_vec().into_boxed_slice(),
-            function
-                .parameters(db)
-                .iter()
-                .map(|parameter| substitute_function_parameter(parameter, &mut substitute))
-                .collect::<Option<Box<[_]>>>()?,
-            substitute_return_type(function.return_type(db), &mut substitute)?,
-            function.is_async(db),
-            function.name(db).clone(),
-        )),
-        TypeData::Interface(interface) => TypeData::Interface(InternedInterface::new(
-            db,
-            interface.type_parameters(db).to_vec().into_boxed_slice(),
-            interface
-                .extends(db)
-                .iter()
-                .map(|ty| substitute(*ty))
-                .collect::<Option<Box<[_]>>>()?,
-            substitute_members(interface.members(db), &mut substitute)?,
-            interface.name(db).clone(),
-        )),
-        TypeData::Class(class) => TypeData::Class(InternedClass::new(
-            db,
-            class.type_parameters(db).to_vec().into_boxed_slice(),
-            match class.extends(db) {
-                Some(extends) => Some(substitute(extends)?),
-                None => None,
-            },
-            class
-                .implements(db)
-                .iter()
-                .map(|ty| substitute(*ty))
-                .collect::<Option<Box<[_]>>>()?,
-            substitute_members(class.members(db), &mut substitute)?,
-            class.name(db).clone(),
-            class.is_builtin(db),
-        )),
-        TypeData::Object(object) => TypeData::Object(InternedObject::new(
-            db,
-            match object.prototype(db) {
-                Some(prototype) => Some(substitute(prototype)?),
-                None => None,
-            },
-            substitute_members(object.members(db), &mut substitute)?,
-        )),
-        TypeData::Tuple(tuple) => TypeData::Tuple(InternedTuple::new(
-            db,
-            tuple
-                .elements(db)
-                .iter()
-                .map(|element| {
-                    Some(TupleElementType {
-                        ty: substitute(element.ty)?,
-                        name: element.name.clone(),
-                        is_optional: element.is_optional,
-                        is_rest: element.is_rest,
-                    })
-                })
-                .collect::<Option<Box<[_]>>>()?,
-        )),
-        TypeData::InstanceOf(instance) => TypeData::instance_of(
-            db,
-            substitute(instance.ty(db))?,
-            instance
-                .type_parameters(db)
-                .iter()
-                .map(|ty| substitute(*ty))
-                .collect::<Option<Box<[_]>>>()?,
-        ),
-        TypeData::Union(union) => TypeData::union_from_types(
-            db,
-            union
-                .types(db)
-                .iter()
-                .map(|ty| substitute(*ty))
-                .collect::<Option<Vec<_>>>()?,
-        ),
-        TypeData::Intersection(intersection) => TypeData::intersection_from_types(
-            db,
-            intersection
-                .types(db)
-                .iter()
-                .map(|ty| substitute(*ty))
-                .collect::<Option<Vec<_>>>()?,
-        ),
-        TypeData::TypeofType(typeof_type) => {
-            TypeData::TypeofType(InternedTypeofType::new(db, substitute(typeof_type.ty(db))?))
-        }
-        TypeData::TypeofValue(typeof_value) => TypeData::TypeofValue(InternedTypeofValue::new(
-            db,
-            substitute(typeof_value.ty(db))?,
-            typeof_value.identifier(db).clone(),
-            typeof_value.scope_id(db),
-        )),
-        ty => ty,
-    })
+/// Immediate type slots paired with the parent that produced them.
+///
+/// Slot order is the contract between extraction and reconstruction. Replacing
+/// every slot and calling [`Self::rebuild`] writes the replacements into the
+/// same type-valued fields while preserving names, modifiers, and other
+/// non-type data from the parent.
+#[derive(Debug)]
+pub(crate) struct TypeDataSlots<'db> {
+    parent: TypeData<'db>,
+    slots: Vec<TypeData<'db>>,
 }
 
-fn substitute_function_parameter<'db>(
-    parameter: &FunctionParameter<'db>,
-    substitute: &mut impl FnMut(TypeData<'db>) -> Option<TypeData<'db>>,
-) -> Option<FunctionParameter<'db>> {
-    Some(match parameter {
-        FunctionParameter::Named(parameter) => FunctionParameter::Named(NamedFunctionParameter {
-            name: parameter.name.clone(),
-            ty: substitute(parameter.ty)?,
-            is_optional: parameter.is_optional,
-            is_rest: parameter.is_rest,
-        }),
-        FunctionParameter::Pattern(parameter) => {
-            FunctionParameter::Pattern(PatternFunctionParameter {
-                bindings: parameter
-                    .bindings
+/// Rebuilds the parent retained by one [`TypeDataSlots`] extraction.
+///
+/// The parent and slot count cannot be supplied independently, preventing
+/// replacements extracted from one parent from being validated against another.
+pub(crate) struct TypeDataSlotRebuilder<'db> {
+    parent: TypeData<'db>,
+    slot_count: usize,
+}
+
+impl<'db> TypeDataSlots<'db> {
+    fn new(parent: TypeData<'db>) -> Self {
+        Self {
+            parent,
+            slots: Vec::new(),
+        }
+    }
+
+    fn collect(db: &'db dyn TypeDb, parent: TypeData<'db>) -> Self {
+        let mut result = Self::new(parent);
+        match parent {
+            TypeData::Class(class) => {
+                result.slots.extend_from_slice(class.type_parameters(db));
+                result.slots.extend(class.extends(db));
+                result.slots.extend_from_slice(class.implements(db));
+                result.push_type_members_slots(class.members(db));
+            }
+            TypeData::Constructor(constructor) => {
+                result
+                    .slots
+                    .extend_from_slice(constructor.type_parameters(db));
+                for parameter in constructor.parameters(db) {
+                    result.push_function_parameter_slots(&parameter.parameter);
+                }
+                result.slots.extend(constructor.return_type(db));
+            }
+            TypeData::Function(function) => {
+                result.slots.extend_from_slice(function.type_parameters(db));
+                for parameter in function.parameters(db) {
+                    result.push_function_parameter_slots(parameter);
+                }
+                result.push_return_type_slot(function.return_type(db));
+            }
+            TypeData::Interface(interface) => {
+                result
+                    .slots
+                    .extend_from_slice(interface.type_parameters(db));
+                result.slots.extend_from_slice(interface.extends(db));
+                result.push_type_members_slots(interface.members(db));
+            }
+            TypeData::Module(module) => result.push_type_members_slots(module.members(db)),
+            TypeData::Namespace(namespace) => {
+                result.push_type_members_slots(namespace.members(db));
+            }
+            TypeData::Object(object) => {
+                result.slots.extend(object.prototype(db));
+                result.push_type_members_slots(object.members(db));
+            }
+            TypeData::Tuple(tuple) => {
+                result
+                    .slots
+                    .extend(tuple.elements(db).iter().map(|element| element.ty));
+            }
+            TypeData::Generic(generic) => {
+                result.slots.extend(generic.constraint(db));
+                result.slots.extend(generic.default(db));
+            }
+            TypeData::Intersection(intersection) => {
+                result.slots.extend_from_slice(intersection.types(db));
+            }
+            TypeData::Union(union) => result.slots.extend_from_slice(union.types(db)),
+            TypeData::TypeOperator(operator) => result.slots.push(operator.ty(db)),
+            TypeData::Literal(literal) => {
+                if let Literal::Object(members) = literal.literal(db) {
+                    result.push_type_members_slots(members);
+                }
+            }
+            TypeData::InstanceOf(instance) => {
+                result.slots.push(instance.ty(db));
+                result.slots.extend_from_slice(instance.type_parameters(db));
+            }
+            TypeData::MergedReference(reference) => {
+                result.slots.extend(reference.ty(db));
+                result.slots.extend(reference.value_ty(db));
+                result.slots.extend(reference.namespace_ty(db));
+            }
+            TypeData::TypeofExpression(expression) => {
+                result.push_typeof_expression_slots(expression.expression(db));
+            }
+            TypeData::TypeofType(ty) => result.slots.push(ty.ty(db)),
+            TypeData::TypeofValue(value) => result.slots.push(value.ty(db)),
+            _ => {}
+        }
+        result
+    }
+
+    pub(crate) fn len(&self) -> usize {
+        self.slots.len()
+    }
+
+    pub(crate) fn iter(
+        &self,
+    ) -> impl ExactSizeIterator<Item = TypeData<'db>> + DoubleEndedIterator + '_ {
+        self.slots.iter().copied()
+    }
+
+    pub(crate) fn into_parts(self) -> (TypeDataSlotRebuilder<'db>, Vec<TypeData<'db>>) {
+        let rebuilder = TypeDataSlotRebuilder {
+            parent: self.parent,
+            slot_count: self.slots.len(),
+        };
+        (rebuilder, self.slots)
+    }
+
+    /// Pattern bindings precede the parameter type during reconstruction.
+    fn push_function_parameter_slots(&mut self, parameter: &FunctionParameter<'db>) {
+        match parameter {
+            FunctionParameter::Named(parameter) => self.slots.push(parameter.ty),
+            FunctionParameter::Pattern(parameter) => {
+                self.slots
+                    .extend(parameter.bindings.iter().map(|binding| binding.ty));
+                self.slots.push(parameter.ty);
+            }
+        }
+    }
+
+    fn push_return_type_slot(&mut self, return_type: &ReturnType<'db>) {
+        self.slots.push(match return_type {
+            ReturnType::Type(ty) => *ty,
+            ReturnType::Predicate(predicate) => predicate.ty,
+            ReturnType::Asserts(asserts) => asserts.ty,
+        });
+    }
+
+    fn push_type_members_slots(&mut self, members: &[TypeMember<'db>]) {
+        for member in members {
+            self.push_type_member_slots(member);
+        }
+    }
+
+    /// Computed and index keys precede the member type during reconstruction.
+    fn push_type_member_slots(&mut self, member: &TypeMember<'db>) {
+        match &member.kind {
+            TypeMemberKind::ComputedValue(ty)
+            | TypeMemberKind::ComputedValueNamed(_, ty)
+            | TypeMemberKind::ConstAssertedComputedValue(ty)
+            | TypeMemberKind::ConstAssertedComputedValueNamed(_, ty)
+            | TypeMemberKind::ConstAssertedIndexSignature(ty)
+            | TypeMemberKind::IndexSignature(ty) => self.slots.push(*ty),
+            TypeMemberKind::CallSignature
+            | TypeMemberKind::ConstAssertedCallSignature
+            | TypeMemberKind::ConstAssertedConstructor
+            | TypeMemberKind::ConstAssertedGetter(_)
+            | TypeMemberKind::ConstAssertedNamed(_)
+            | TypeMemberKind::ConstAssertedNamedOptional(_)
+            | TypeMemberKind::ConstAssertedNamedStatic(_)
+            | TypeMemberKind::Constructor
+            | TypeMemberKind::Getter(_)
+            | TypeMemberKind::Named(_)
+            | TypeMemberKind::NamedOptional(_)
+            | TypeMemberKind::NamedStatic(_) => {}
+        }
+        self.slots.push(member.ty);
+    }
+
+    /// Expression slots follow source evaluation order.
+    fn push_typeof_expression_slots(&mut self, expression: &TypeofExpression<'db>) {
+        match expression {
+            TypeofExpression::Addition(expression) => {
+                self.slots.extend([expression.left, expression.right]);
+            }
+            TypeofExpression::Await(expression) => self.slots.push(expression.argument),
+            TypeofExpression::BitwiseNot(expression) => self.slots.push(expression.argument),
+            TypeofExpression::Call(expression) => {
+                self.slots.push(expression.callee);
+                self.push_call_argument_slots(&expression.arguments);
+            }
+            TypeofExpression::Conditional(expression) => {
+                self.slots
+                    .extend([expression.test, expression.consequent, expression.alternate]);
+            }
+            TypeofExpression::Destructure(expression) => self.slots.push(expression.ty),
+            TypeofExpression::Index(expression) => self.slots.push(expression.object),
+            TypeofExpression::IterableValueOf(expression) => self.slots.push(expression.ty),
+            TypeofExpression::LogicalAnd(expression) => {
+                self.slots.extend([expression.left, expression.right]);
+            }
+            TypeofExpression::LogicalOr(expression) => {
+                self.slots.extend([expression.left, expression.right]);
+            }
+            TypeofExpression::New(expression) => {
+                self.slots.push(expression.callee);
+                self.push_call_argument_slots(&expression.arguments);
+            }
+            TypeofExpression::NullishCoalescing(expression) => {
+                self.slots.extend([expression.left, expression.right]);
+            }
+            TypeofExpression::StaticMember(expression) => {
+                self.slots.push(expression.object);
+            }
+            TypeofExpression::Super(expression) | TypeofExpression::This(expression) => {
+                self.slots.push(expression.parent);
+            }
+            TypeofExpression::Typeof(expression) => self.slots.push(expression.argument),
+            TypeofExpression::UnaryMinus(expression) => self.slots.push(expression.argument),
+        }
+    }
+
+    fn push_call_argument_slots(&mut self, arguments: &[CallArgumentType<'db>]) {
+        self.slots
+            .extend(arguments.iter().map(|argument| match argument {
+                CallArgumentType::Argument(ty) | CallArgumentType::Spread(ty) => *ty,
+            }));
+    }
+
+    /// Rebuilds the parent with replacements in slot order.
+    ///
+    /// Returns [`TypeTransformResult::InvalidRebuild`] if the replacement count
+    /// does not match the slot count.
+    pub(crate) fn rebuild(
+        self,
+        db: &'db dyn TypeDb,
+        replacements: Vec<TypeData<'db>>,
+    ) -> TypeTransformResult<TypeData<'db>> {
+        let (rebuilder, _) = self.into_parts();
+        rebuilder.rebuild(db, replacements)
+    }
+}
+
+impl<'db> IntoIterator for TypeDataSlots<'db> {
+    type Item = TypeData<'db>;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.slots.into_iter()
+    }
+}
+
+impl<'db> TypeDataSlotRebuilder<'db> {
+    pub(crate) fn len(&self) -> usize {
+        self.slot_count
+    }
+
+    pub(crate) fn rebuild(
+        self,
+        db: &'db dyn TypeDb,
+        replacements: Vec<TypeData<'db>>,
+    ) -> TypeTransformResult<TypeData<'db>> {
+        TypeDataSlotReplacements::new(replacements, self.slot_count)
+            .and_then(|replacements| replacements.rebuild(db, self.parent))
+            .map_or(
+                TypeTransformResult::InvalidRebuild,
+                TypeTransformResult::Transformed,
+            )
+    }
+}
+
+/// Replacement types consumed while rebuilding a parent from its slots.
+struct TypeDataSlotReplacements<'db> {
+    replacements: std::vec::IntoIter<TypeData<'db>>,
+}
+
+impl<'db> TypeDataSlotReplacements<'db> {
+    /// Returns `None` unless there is one replacement for every extracted slot.
+    fn new(replacements: Vec<TypeData<'db>>, slot_count: usize) -> Option<Self> {
+        (replacements.len() == slot_count).then(|| Self {
+            replacements: replacements.into_iter(),
+        })
+    }
+
+    fn rebuild(mut self, db: &'db dyn TypeDb, parent: TypeData<'db>) -> Option<TypeData<'db>> {
+        let rebuilt = match parent {
+            TypeData::Class(class) => TypeData::Class(InternedClass::new(
+                db,
+                self.take_types(class.type_parameters(db).len())?,
+                self.take_optional_type(class.extends(db))?,
+                self.take_types(class.implements(db).len())?,
+                self.rebuild_type_members(class.members(db))?,
+                class.name(db).clone(),
+                class.is_builtin(db),
+            )),
+            TypeData::Constructor(constructor) => TypeData::Constructor(InternedConstructor::new(
+                db,
+                self.take_types(constructor.type_parameters(db).len())?,
+                constructor
+                    .parameters(db)
                     .iter()
-                    .map(|binding| {
-                        Some(FunctionParameterBinding {
-                            name: binding.name.clone(),
-                            ty: substitute(binding.ty)?,
+                    .map(|parameter| {
+                        Some(ConstructorParameter {
+                            parameter: self.rebuild_function_parameter(&parameter.parameter)?,
+                            accessibility: parameter.accessibility,
                         })
                     })
                     .collect::<Option<Box<[_]>>>()?,
-                ty: substitute(parameter.ty)?,
-                is_optional: parameter.is_optional,
-                is_rest: parameter.is_rest,
-            })
+                self.take_optional_type(constructor.return_type(db))?,
+            )),
+            TypeData::Function(function) => TypeData::Function(InternedFunction::new(
+                db,
+                self.take_types(function.type_parameters(db).len())?,
+                function
+                    .parameters(db)
+                    .iter()
+                    .map(|parameter| self.rebuild_function_parameter(parameter))
+                    .collect::<Option<Box<[_]>>>()?,
+                self.rebuild_return_type(function.return_type(db))?,
+                function.is_async(db),
+                function.name(db).clone(),
+            )),
+            TypeData::Interface(interface) => TypeData::Interface(InternedInterface::new(
+                db,
+                self.take_types(interface.type_parameters(db).len())?,
+                self.take_types(interface.extends(db).len())?,
+                self.rebuild_type_members(interface.members(db))?,
+                interface.name(db).clone(),
+            )),
+            TypeData::Module(module) => TypeData::Module(InternedModule::new(
+                db,
+                self.rebuild_type_members(module.members(db))?,
+                module.name(db).clone(),
+            )),
+            TypeData::Namespace(namespace) => TypeData::Namespace(InternedNamespace::new(
+                db,
+                self.rebuild_type_members(namespace.members(db))?,
+                namespace.path(db).clone(),
+            )),
+            TypeData::Object(object) => TypeData::Object(InternedObject::new(
+                db,
+                self.take_optional_type(object.prototype(db))?,
+                self.rebuild_type_members(object.members(db))?,
+            )),
+            TypeData::Tuple(tuple) => TypeData::Tuple(InternedTuple::new(
+                db,
+                tuple
+                    .elements(db)
+                    .iter()
+                    .map(|element| {
+                        let mut element = element.clone();
+                        element.ty = self.take_type()?;
+                        Some(element)
+                    })
+                    .collect::<Option<Box<[_]>>>()?,
+            )),
+            TypeData::Generic(generic) => TypeData::Generic(InternedGenericTypeParameter::new(
+                db,
+                self.take_optional_type(generic.constraint(db))?,
+                self.take_optional_type(generic.default(db))?,
+                generic.name(db).clone(),
+            )),
+            TypeData::Intersection(intersection) => TypeData::intersection_from_types(
+                db,
+                self.take_types(intersection.types(db).len())?.into_vec(),
+            ),
+            TypeData::Union(union) => {
+                TypeData::union_from_types(db, self.take_types(union.types(db).len())?.into_vec())
+            }
+            TypeData::TypeOperator(operator) => TypeData::TypeOperator(
+                InternedTypeOperatorType::new(db, self.take_type()?, operator.operator(db)),
+            ),
+            TypeData::Literal(literal) => TypeData::Literal(InternedLiteral::new(
+                db,
+                match literal.literal(db) {
+                    Literal::Object(members) => {
+                        Literal::Object(self.rebuild_type_members(members)?)
+                    }
+                    literal @ (Literal::BigInt(_)
+                    | Literal::Boolean(_)
+                    | Literal::Number(_)
+                    | Literal::RegExp(_)
+                    | Literal::String(_)
+                    | Literal::Template(_)) => literal.clone(),
+                },
+            )),
+            TypeData::InstanceOf(instance) => TypeData::instance_of(
+                db,
+                self.take_type()?,
+                self.take_types(instance.type_parameters(db).len())?,
+            ),
+            TypeData::MergedReference(reference) => {
+                TypeData::MergedReference(InternedMergedReference::new(
+                    db,
+                    self.take_optional_type(reference.ty(db))?,
+                    self.take_optional_type(reference.value_ty(db))?,
+                    self.take_optional_type(reference.namespace_ty(db))?,
+                ))
+            }
+            TypeData::TypeofExpression(expression) => {
+                TypeData::TypeofExpression(InternedTypeofExpression::new(
+                    db,
+                    self.rebuild_typeof_expression(expression.expression(db))?,
+                ))
+            }
+            TypeData::TypeofType(_) => {
+                TypeData::TypeofType(InternedTypeofType::new(db, self.take_type()?))
+            }
+            TypeData::TypeofValue(value) => TypeData::TypeofValue(InternedTypeofValue::new(
+                db,
+                self.take_type()?,
+                value.identifier(db).clone(),
+                value.scope_id(db),
+            )),
+            _ => parent,
+        };
+        self.finish(rebuilt)
+    }
+
+    fn take_type(&mut self) -> Option<TypeData<'db>> {
+        self.replacements.next()
+    }
+
+    fn take_types(&mut self, count: usize) -> Option<Box<[TypeData<'db>]>> {
+        (0..count).map(|_| self.take_type()).collect()
+    }
+
+    fn take_optional_type(
+        &mut self,
+        original: Option<TypeData<'db>>,
+    ) -> Option<Option<TypeData<'db>>> {
+        if original.is_some() {
+            Some(Some(self.take_type()?))
+        } else {
+            Some(None)
         }
-    })
-}
+    }
 
-fn substitute_return_type<'db>(
-    return_type: &ReturnType<'db>,
-    substitute: &mut impl FnMut(TypeData<'db>) -> Option<TypeData<'db>>,
-) -> Option<ReturnType<'db>> {
-    Some(match return_type {
-        ReturnType::Type(ty) => ReturnType::Type(substitute(*ty)?),
-        ReturnType::Predicate(predicate) => ReturnType::Predicate(PredicateReturnType {
-            parameter_name: predicate.parameter_name.clone(),
-            ty: substitute(predicate.ty)?,
-        }),
-        ReturnType::Asserts(asserts) => ReturnType::Asserts(AssertsReturnType {
-            parameter_name: asserts.parameter_name.clone(),
-            ty: substitute(asserts.ty)?,
-        }),
-    })
-}
-
-fn substitute_members<'db>(
-    members: &[TypeMember<'db>],
-    substitute: &mut impl FnMut(TypeData<'db>) -> Option<TypeData<'db>>,
-) -> Option<Box<[TypeMember<'db>]>> {
-    members
-        .iter()
-        .map(|member| {
-            Some(TypeMember {
-                kind: member.kind.clone(),
-                ty: substitute(member.ty)?,
-            })
+    fn rebuild_function_parameter(
+        &mut self,
+        parameter: &FunctionParameter<'db>,
+    ) -> Option<FunctionParameter<'db>> {
+        Some(match parameter {
+            FunctionParameter::Named(parameter) => {
+                FunctionParameter::Named(NamedFunctionParameter {
+                    name: parameter.name.clone(),
+                    ty: self.take_type()?,
+                    is_optional: parameter.is_optional,
+                    is_rest: parameter.is_rest,
+                })
+            }
+            FunctionParameter::Pattern(parameter) => {
+                FunctionParameter::Pattern(PatternFunctionParameter {
+                    bindings: parameter
+                        .bindings
+                        .iter()
+                        .map(|binding| {
+                            Some(FunctionParameterBinding {
+                                name: binding.name.clone(),
+                                ty: self.take_type()?,
+                            })
+                        })
+                        .collect::<Option<Box<[_]>>>()?,
+                    ty: self.take_type()?,
+                    is_optional: parameter.is_optional,
+                    is_rest: parameter.is_rest,
+                })
+            }
         })
-        .collect()
+    }
+
+    fn rebuild_return_type(&mut self, return_type: &ReturnType<'db>) -> Option<ReturnType<'db>> {
+        Some(match return_type {
+            ReturnType::Type(_) => ReturnType::Type(self.take_type()?),
+            ReturnType::Predicate(predicate) => ReturnType::Predicate(PredicateReturnType {
+                parameter_name: predicate.parameter_name.clone(),
+                ty: self.take_type()?,
+            }),
+            ReturnType::Asserts(asserts) => ReturnType::Asserts(AssertsReturnType {
+                parameter_name: asserts.parameter_name.clone(),
+                ty: self.take_type()?,
+            }),
+        })
+    }
+
+    fn rebuild_type_members(
+        &mut self,
+        members: &[TypeMember<'db>],
+    ) -> Option<Box<[TypeMember<'db>]>> {
+        members
+            .iter()
+            .map(|member| {
+                Some(TypeMember {
+                    kind: self.rebuild_type_member_kind(&member.kind)?,
+                    ty: self.take_type()?,
+                })
+            })
+            .collect()
+    }
+
+    fn rebuild_type_member_kind(
+        &mut self,
+        kind: &TypeMemberKind<'db>,
+    ) -> Option<TypeMemberKind<'db>> {
+        Some(match kind {
+            TypeMemberKind::CallSignature => TypeMemberKind::CallSignature,
+            TypeMemberKind::ComputedValue(_) => TypeMemberKind::ComputedValue(self.take_type()?),
+            TypeMemberKind::ComputedValueNamed(name, _) => {
+                TypeMemberKind::ComputedValueNamed(name.clone(), self.take_type()?)
+            }
+            TypeMemberKind::ConstAssertedCallSignature => {
+                TypeMemberKind::ConstAssertedCallSignature
+            }
+            TypeMemberKind::ConstAssertedComputedValue(_) => {
+                TypeMemberKind::ConstAssertedComputedValue(self.take_type()?)
+            }
+            TypeMemberKind::ConstAssertedComputedValueNamed(name, _) => {
+                TypeMemberKind::ConstAssertedComputedValueNamed(name.clone(), self.take_type()?)
+            }
+            TypeMemberKind::ConstAssertedConstructor => TypeMemberKind::ConstAssertedConstructor,
+            TypeMemberKind::ConstAssertedGetter(name) => {
+                TypeMemberKind::ConstAssertedGetter(name.clone())
+            }
+            TypeMemberKind::ConstAssertedIndexSignature(_) => {
+                TypeMemberKind::ConstAssertedIndexSignature(self.take_type()?)
+            }
+            TypeMemberKind::ConstAssertedNamed(name) => {
+                TypeMemberKind::ConstAssertedNamed(name.clone())
+            }
+            TypeMemberKind::ConstAssertedNamedOptional(name) => {
+                TypeMemberKind::ConstAssertedNamedOptional(name.clone())
+            }
+            TypeMemberKind::ConstAssertedNamedStatic(name) => {
+                TypeMemberKind::ConstAssertedNamedStatic(name.clone())
+            }
+            TypeMemberKind::Constructor => TypeMemberKind::Constructor,
+            TypeMemberKind::Getter(name) => TypeMemberKind::Getter(name.clone()),
+            TypeMemberKind::IndexSignature(_) => TypeMemberKind::IndexSignature(self.take_type()?),
+            TypeMemberKind::Named(name) => TypeMemberKind::Named(name.clone()),
+            TypeMemberKind::NamedOptional(name) => TypeMemberKind::NamedOptional(name.clone()),
+            TypeMemberKind::NamedStatic(name) => TypeMemberKind::NamedStatic(name.clone()),
+        })
+    }
+
+    fn rebuild_typeof_expression(
+        &mut self,
+        expression: &TypeofExpression<'db>,
+    ) -> Option<TypeofExpression<'db>> {
+        Some(match expression {
+            TypeofExpression::Addition(_) => TypeofExpression::Addition(TypeofAdditionExpression {
+                left: self.take_type()?,
+                right: self.take_type()?,
+            }),
+            TypeofExpression::Await(_) => TypeofExpression::Await(TypeofAwaitExpression {
+                argument: self.take_type()?,
+            }),
+            TypeofExpression::BitwiseNot(_) => {
+                TypeofExpression::BitwiseNot(TypeofBitwiseNotExpression {
+                    argument: self.take_type()?,
+                })
+            }
+            TypeofExpression::Call(expression) => TypeofExpression::Call(TypeofCallExpression {
+                callee: self.take_type()?,
+                arguments: self.rebuild_call_arguments(&expression.arguments)?,
+            }),
+            TypeofExpression::Conditional(_) => {
+                TypeofExpression::Conditional(TypeofConditionalExpression {
+                    test: self.take_type()?,
+                    consequent: self.take_type()?,
+                    alternate: self.take_type()?,
+                })
+            }
+            TypeofExpression::Destructure(expression) => {
+                TypeofExpression::Destructure(TypeofDestructureExpression {
+                    ty: self.take_type()?,
+                    destructure_field: expression.destructure_field.clone(),
+                })
+            }
+            TypeofExpression::Index(expression) => TypeofExpression::Index(TypeofIndexExpression {
+                object: self.take_type()?,
+                index: expression.index,
+            }),
+            TypeofExpression::IterableValueOf(_) => {
+                TypeofExpression::IterableValueOf(TypeofIterableValueOfExpression {
+                    ty: self.take_type()?,
+                })
+            }
+            TypeofExpression::LogicalAnd(_) => {
+                TypeofExpression::LogicalAnd(TypeofLogicalAndExpression {
+                    left: self.take_type()?,
+                    right: self.take_type()?,
+                })
+            }
+            TypeofExpression::LogicalOr(_) => {
+                TypeofExpression::LogicalOr(TypeofLogicalOrExpression {
+                    left: self.take_type()?,
+                    right: self.take_type()?,
+                })
+            }
+            TypeofExpression::New(expression) => TypeofExpression::New(TypeofNewExpression {
+                callee: self.take_type()?,
+                arguments: self.rebuild_call_arguments(&expression.arguments)?,
+            }),
+            TypeofExpression::NullishCoalescing(_) => {
+                TypeofExpression::NullishCoalescing(TypeofNullishCoalescingExpression {
+                    left: self.take_type()?,
+                    right: self.take_type()?,
+                })
+            }
+            TypeofExpression::StaticMember(expression) => {
+                TypeofExpression::StaticMember(TypeofStaticMemberExpression {
+                    object: self.take_type()?,
+                    member: expression.member.clone(),
+                })
+            }
+            TypeofExpression::Super(_) => TypeofExpression::Super(TypeofThisOrSuperExpression {
+                parent: self.take_type()?,
+            }),
+            TypeofExpression::This(_) => TypeofExpression::This(TypeofThisOrSuperExpression {
+                parent: self.take_type()?,
+            }),
+            TypeofExpression::Typeof(_) => TypeofExpression::Typeof(TypeofTypeofExpression {
+                argument: self.take_type()?,
+            }),
+            TypeofExpression::UnaryMinus(_) => {
+                TypeofExpression::UnaryMinus(TypeofUnaryMinusExpression {
+                    argument: self.take_type()?,
+                })
+            }
+        })
+    }
+
+    fn rebuild_call_arguments(
+        &mut self,
+        arguments: &[CallArgumentType<'db>],
+    ) -> Option<Box<[CallArgumentType<'db>]>> {
+        arguments
+            .iter()
+            .map(|argument| {
+                Some(match argument {
+                    CallArgumentType::Argument(_) => CallArgumentType::Argument(self.take_type()?),
+                    CallArgumentType::Spread(_) => CallArgumentType::Spread(self.take_type()?),
+                })
+            })
+            .collect()
+    }
+
+    /// Returns `rebuilt` only if reconstruction consumed every replacement.
+    fn finish(self, rebuilt: TypeData<'db>) -> Option<TypeData<'db>> {
+        self.replacements.as_slice().is_empty().then_some(rebuilt)
+    }
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
@@ -2526,4 +2977,750 @@ fn raw_call_arguments_from_types<'db>(
             }
         })
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::type_transform::{
+        MAX_TYPE_SUBSTITUTION_STEPS, TypeDataTransformer, TypeSubstituter,
+    };
+    use salsa::plumbing::FromId;
+
+    #[salsa::db]
+    #[derive(Default)]
+    struct TestDb {
+        storage: salsa::Storage<Self>,
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    #[salsa::db]
+    impl biome_db::Db for TestDb {
+        fn parsed_source_for_path(
+            &self,
+            _path: &camino::Utf8Path,
+        ) -> Option<biome_db::ParsedSource> {
+            None
+        }
+    }
+
+    #[salsa::db]
+    impl TypeDb for TestDb {}
+
+    #[test]
+    fn slot_replacements_require_exact_and_complete_consumption() {
+        assert!(TypeDataSlotReplacements::new(Vec::new(), 1).is_none());
+
+        let replacements = TypeDataSlotReplacements::new(vec![TypeData::String], 1).unwrap();
+        assert_eq!(replacements.finish(TypeData::Number), None);
+
+        let mut replacements = TypeDataSlotReplacements::new(vec![TypeData::String], 1).unwrap();
+        assert_eq!(replacements.take_type(), Some(TypeData::String));
+        assert_eq!(
+            replacements.finish(TypeData::Number),
+            Some(TypeData::Number)
+        );
+    }
+
+    #[derive(Default)]
+    struct Sentinels(usize);
+
+    impl Sentinels {
+        fn next<'db>(&mut self) -> TypeData<'db> {
+            let ty = [
+                TypeData::Global,
+                TypeData::BigInt,
+                TypeData::Boolean,
+                TypeData::Null,
+                TypeData::Number,
+                TypeData::String,
+                TypeData::Symbol,
+                TypeData::Undefined,
+                TypeData::Conditional,
+                TypeData::AnyKeyword,
+                TypeData::NeverKeyword,
+                TypeData::ObjectKeyword,
+                TypeData::ThisKeyword,
+                TypeData::UnknownKeyword,
+                TypeData::VoidKeyword,
+                TypeData::Unknown,
+            ][self.0];
+            self.0 += 1;
+            ty
+        }
+    }
+
+    fn text(value: &'static str) -> Text {
+        Text::new_static(value)
+    }
+
+    fn boxed<T, const N: usize>(values: [T; N]) -> Box<[T]> {
+        Box::new(values)
+    }
+
+    fn named_parameter<'db>(sentinels: &mut Sentinels) -> FunctionParameter<'db> {
+        FunctionParameter::Named(NamedFunctionParameter {
+            name: text("named"),
+            ty: sentinels.next(),
+            is_optional: false,
+            is_rest: false,
+        })
+    }
+
+    fn pattern_parameter<'db>(sentinels: &mut Sentinels) -> FunctionParameter<'db> {
+        FunctionParameter::Pattern(PatternFunctionParameter {
+            bindings: [FunctionParameterBinding {
+                name: text("binding"),
+                ty: sentinels.next(),
+            }]
+            .into(),
+            ty: sentinels.next(),
+            is_optional: true,
+            is_rest: true,
+        })
+    }
+
+    fn named_member<'db>(sentinels: &mut Sentinels) -> TypeMember<'db> {
+        TypeMember {
+            kind: TypeMemberKind::Named(text("member")),
+            ty: sentinels.next(),
+        }
+    }
+
+    fn child_bearing_members<'db>(sentinels: &mut Sentinels) -> Box<[TypeMember<'db>]> {
+        [
+            TypeMemberKind::ComputedValue(sentinels.next()),
+            TypeMemberKind::ComputedValueNamed(text("computed"), sentinels.next()),
+            TypeMemberKind::ConstAssertedComputedValue(sentinels.next()),
+            TypeMemberKind::ConstAssertedComputedValueNamed(
+                text("constComputed"),
+                sentinels.next(),
+            ),
+            TypeMemberKind::ConstAssertedIndexSignature(sentinels.next()),
+            TypeMemberKind::IndexSignature(sentinels.next()),
+        ]
+        .into_iter()
+        .map(|kind| TypeMember {
+            kind,
+            ty: sentinels.next(),
+        })
+        .collect()
+    }
+
+    fn typeof_type<'db>(db: &'db TestDb, expression: TypeofExpression<'db>) -> TypeData<'db> {
+        TypeData::TypeofExpression(InternedTypeofExpression::new(db, expression))
+    }
+
+    fn assert_identity<'db>(db: &'db TestDb, build: impl FnOnce(&mut Sentinels) -> TypeData<'db>) {
+        let ty = build(&mut Sentinels::default());
+        let slots = ty.type_slots(db);
+        let slot_types: Vec<_> = slots.iter().collect();
+        assert!(!slot_types.is_empty());
+        assert_eq!(slots.len(), slots.iter().len());
+        assert_eq!(
+            slot_types.iter().copied().collect::<FxHashSet<_>>().len(),
+            slot_types.len(),
+            "test shape must use distinct type slots"
+        );
+
+        assert_eq!(
+            slots.rebuild(db, slot_types.clone()),
+            TypeTransformResult::Transformed(ty)
+        );
+        assert_eq!(
+            ty.type_slots(db)
+                .rebuild(db, slot_types[..slot_types.len() - 1].to_vec()),
+            TypeTransformResult::InvalidRebuild
+        );
+        let mut extra_slots = slot_types;
+        extra_slots.push(TypeData::Unknown);
+        assert_eq!(
+            ty.type_slots(db).rebuild(db, extra_slots),
+            TypeTransformResult::InvalidRebuild
+        );
+    }
+
+    #[test]
+    fn type_substituter_reports_step_limit_exceeded() {
+        let db = TestDb::default();
+        let ty = TypeData::TypeOperator(InternedTypeOperatorType::new(
+            &db,
+            TypeData::String,
+            raw::TypeOperator::Keyof,
+        ));
+        let mut transformer = TypeDataTransformer::new(1);
+        let mut substituter = TypeSubstituter::new(
+            &db,
+            TypeSubstitution {
+                generic: TypeData::Number,
+                replacement: TypeData::Boolean,
+            },
+        );
+
+        assert_eq!(
+            substituter.substitute(&mut transformer, &db, ty),
+            TypeTransformResult::LimitExceeded
+        );
+    }
+
+    fn typeof_chain<'db>(
+        db: &'db TestDb,
+        distinct_types: usize,
+        leaf: TypeData<'db>,
+    ) -> TypeData<'db> {
+        assert!(distinct_types > 0);
+        (1..distinct_types).fold(leaf, |ty, _| {
+            TypeData::TypeofType(InternedTypeofType::new(db, ty))
+        })
+    }
+
+    fn generic<'db>(db: &'db TestDb) -> TypeData<'db> {
+        TypeData::Generic(InternedGenericTypeParameter::new(db, None, None, text("T")))
+    }
+
+    #[test]
+    fn substitution_descends_into_empty_generic_instance() {
+        let db = TestDb::default();
+        let generic = generic(&db);
+        let reference = TypeData::instance_of(&db, generic, Box::default());
+
+        assert_eq!(
+            reference.substitute_type(
+                &db,
+                TypeSubstitution {
+                    generic,
+                    replacement: TypeData::String,
+                },
+            ),
+            TypeTransformResult::Transformed(TypeData::instance_of(
+                &db,
+                TypeData::String,
+                Box::default(),
+            ))
+        );
+    }
+
+    #[test]
+    fn substitution_preserves_unmatched_generic_declaration_identity() {
+        let db = TestDb::default();
+        let generic_t = generic(&db);
+        let reference_t = TypeData::instance_of(&db, generic_t, Box::default());
+        let generic_u = TypeData::Generic(InternedGenericTypeParameter::new(
+            &db,
+            None,
+            Some(reference_t),
+            text("U"),
+        ));
+        let reference_u = TypeData::instance_of(&db, generic_u, Box::default());
+
+        assert_eq!(
+            reference_u.substitute_type(
+                &db,
+                TypeSubstitution {
+                    generic: generic_t,
+                    replacement: TypeData::String,
+                },
+            ),
+            TypeTransformResult::Transformed(reference_u)
+        );
+        assert_eq!(
+            reference_u.substitute_type(
+                &db,
+                TypeSubstitution {
+                    generic: generic_u,
+                    replacement: TypeData::Number,
+                },
+            ),
+            TypeTransformResult::Transformed(TypeData::instance_of(
+                &db,
+                TypeData::Number,
+                Box::default(),
+            ))
+        );
+    }
+
+    #[test]
+    fn substitution_reports_direct_step_boundaries() {
+        let db = TestDb::default();
+        let generic = generic(&db);
+        let substitution = TypeSubstitution {
+            generic,
+            replacement: TypeData::String,
+        };
+
+        for distinct_types in [1023, 1024, 1025] {
+            let result =
+                typeof_chain(&db, distinct_types, generic).substitute_type(&db, substitution);
+            if distinct_types <= MAX_TYPE_SUBSTITUTION_STEPS {
+                assert!(result.is_transformed(), "distinct types {distinct_types}");
+            } else {
+                assert_eq!(
+                    result,
+                    TypeTransformResult::LimitExceeded,
+                    "distinct types {distinct_types}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn root_body_substitution_reports_direct_step_boundaries() {
+        let db = TestDb::default();
+        let generic = generic(&db);
+        let substitution = TypeSubstitution {
+            generic,
+            replacement: TypeData::String,
+        };
+
+        for distinct_types in [1023, 1024, 1025] {
+            let function = TypeData::Function(InternedFunction::new(
+                &db,
+                boxed([generic]),
+                Box::default(),
+                ReturnType::Type(typeof_chain(&db, distinct_types, generic)),
+                false,
+                None,
+            ));
+            let result = function.substitute_type_in_root_body(&db, substitution);
+            if distinct_types <= MAX_TYPE_SUBSTITUTION_STEPS {
+                assert!(result.is_transformed(), "distinct types {distinct_types}");
+            } else {
+                assert_eq!(
+                    result,
+                    TypeTransformResult::LimitExceeded,
+                    "distinct types {distinct_types}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn root_body_substitution_shares_one_budget_across_children() {
+        let db = TestDb::default();
+        let generic = generic(&db);
+        let substitution = TypeSubstitution {
+            generic,
+            replacement: TypeData::String,
+        };
+        let parameter = |name, ty| {
+            FunctionParameter::Named(NamedFunctionParameter {
+                name: text(name),
+                ty,
+                is_optional: false,
+                is_rest: false,
+            })
+        };
+        let function = TypeData::Function(InternedFunction::new(
+            &db,
+            boxed([generic]),
+            Vec::from([
+                parameter("first", typeof_chain(&db, 600, generic)),
+                parameter("second", typeof_chain(&db, 600, generic)),
+            ])
+            .into_boxed_slice(),
+            ReturnType::Type(generic),
+            false,
+            None,
+        ));
+
+        assert_eq!(
+            function.substitute_type_in_root_body(&db, substitution),
+            TypeTransformResult::LimitExceeded
+        );
+    }
+
+    #[test]
+    fn root_body_substitution_preserves_the_root_binder() {
+        let db = TestDb::default();
+        let generic = generic(&db);
+        let function = TypeData::Function(InternedFunction::new(
+            &db,
+            boxed([generic]),
+            boxed([FunctionParameter::Named(NamedFunctionParameter {
+                name: text("value"),
+                ty: generic,
+                is_optional: false,
+                is_rest: false,
+            })]),
+            ReturnType::Type(generic),
+            false,
+            None,
+        ));
+        let TypeTransformResult::Transformed(substituted) = function.substitute_type_in_root_body(
+            &db,
+            TypeSubstitution {
+                generic,
+                replacement: TypeData::String,
+            },
+        ) else {
+            panic!("root body substitution must complete");
+        };
+        let TypeData::Function(substituted) = substituted else {
+            panic!("expected a function");
+        };
+
+        assert_eq!(substituted.type_parameters(&db).as_ref(), &[generic]);
+        assert_eq!(substituted.parameters(&db)[0].ty(), TypeData::String);
+        assert_eq!(
+            substituted.return_type(&db),
+            &ReturnType::Type(TypeData::String)
+        );
+    }
+
+    #[test]
+    fn substitution_reuses_an_active_type_after_budget_is_consumed() {
+        let db = TestDb::default();
+        // IDs 0..1022 build the path. The next interned value receives ID 1023,
+        // which closes the final child back to the root.
+        let root_reference = InternedTypeofType::from_id(unsafe { salsa::Id::from_index(1023) });
+        let child = (0..MAX_TYPE_SUBSTITUTION_STEPS - 1)
+            .fold(TypeData::TypeofType(root_reference), |ty, _| {
+                TypeData::TypeofType(InternedTypeofType::new(&db, ty))
+            });
+        let root = TypeData::TypeofType(InternedTypeofType::new(&db, child));
+
+        assert_eq!(
+            root.substitute_type(
+                &db,
+                TypeSubstitution {
+                    generic: TypeData::Number,
+                    replacement: TypeData::String,
+                }
+            ),
+            TypeTransformResult::Transformed(root)
+        );
+    }
+
+    #[test]
+    fn generic_replacement_collection_reuses_active_types_at_the_limit() {
+        let db = TestDb::default();
+        let generic = TypeData::Generic(InternedGenericTypeParameter::new(
+            &db,
+            None,
+            None,
+            text("T"),
+        ));
+        let pattern = (0..MAX_GENERIC_REPLACEMENT_STEPS - 3).fold(generic, |ty, _| {
+            TypeData::instance_of(&db, TypeData::ObjectKeyword, boxed([ty]))
+        });
+        let actual = (0..MAX_GENERIC_REPLACEMENT_STEPS - 3).fold(TypeData::String, |ty, _| {
+            TypeData::instance_of(&db, TypeData::ObjectKeyword, boxed([ty]))
+        });
+        let pattern =
+            TypeData::instance_of(&db, TypeData::ObjectKeyword, boxed([pattern, pattern]));
+        let actual = TypeData::instance_of(&db, TypeData::ObjectKeyword, boxed([actual, actual]));
+
+        let replacements = pattern
+            .collect_generic_replacements(&db, actual)
+            .expect("an active type must be reused after the budget is consumed");
+
+        assert_eq!(replacements.len(), 1);
+        assert_eq!(replacements[0].replacement, TypeData::String);
+    }
+
+    #[test]
+    fn type_slots_round_trip_all_types_with_slots() {
+        let db = TestDb::default();
+
+        assert_identity(&db, |s| {
+            TypeData::Class(InternedClass::new(
+                &db,
+                boxed([s.next()]),
+                Some(s.next()),
+                boxed([s.next()]),
+                boxed([named_member(s)]),
+                Some(text("Class")),
+                false,
+            ))
+        });
+        assert_identity(&db, |s| {
+            TypeData::Constructor(InternedConstructor::new(
+                &db,
+                boxed([s.next()]),
+                boxed([ConstructorParameter {
+                    parameter: named_parameter(s),
+                    accessibility: None,
+                }]),
+                Some(s.next()),
+            ))
+        });
+        assert_identity(&db, |s| {
+            TypeData::Function(InternedFunction::new(
+                &db,
+                boxed([s.next()]),
+                boxed([named_parameter(s), pattern_parameter(s)]),
+                ReturnType::Type(s.next()),
+                false,
+                Some(text("function")),
+            ))
+        });
+        assert_identity(&db, |s| {
+            TypeData::Function(InternedFunction::new(
+                &db,
+                Box::default(),
+                Box::default(),
+                ReturnType::Predicate(PredicateReturnType {
+                    parameter_name: text("value"),
+                    ty: s.next(),
+                }),
+                false,
+                None,
+            ))
+        });
+        assert_identity(&db, |s| {
+            TypeData::Function(InternedFunction::new(
+                &db,
+                Box::default(),
+                Box::default(),
+                ReturnType::Asserts(AssertsReturnType {
+                    parameter_name: text("value"),
+                    ty: s.next(),
+                }),
+                false,
+                None,
+            ))
+        });
+        assert_identity(&db, |s| {
+            TypeData::Interface(InternedInterface::new(
+                &db,
+                boxed([s.next()]),
+                boxed([s.next()]),
+                boxed([named_member(s)]),
+                text("Interface"),
+            ))
+        });
+        assert_identity(&db, |s| {
+            TypeData::Module(InternedModule::new(
+                &db,
+                child_bearing_members(s),
+                text("module"),
+            ))
+        });
+        assert_identity(&db, |s| {
+            TypeData::Namespace(InternedNamespace::new(
+                &db,
+                boxed([named_member(s)]),
+                raw::Path::from(text("namespace")),
+            ))
+        });
+        assert_identity(&db, |s| {
+            TypeData::Object(InternedObject::new(
+                &db,
+                Some(s.next()),
+                boxed([named_member(s)]),
+            ))
+        });
+        assert_identity(&db, |s| {
+            TypeData::Tuple(InternedTuple::new(
+                &db,
+                boxed([
+                    TupleElementType {
+                        ty: s.next(),
+                        name: Some(text("first")),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                    TupleElementType {
+                        ty: s.next(),
+                        name: None,
+                        is_optional: true,
+                        is_rest: true,
+                    },
+                ]),
+            ))
+        });
+        assert_identity(&db, |s| {
+            TypeData::Generic(InternedGenericTypeParameter::new(
+                &db,
+                Some(s.next()),
+                Some(s.next()),
+                text("T"),
+            ))
+        });
+        assert_identity(&db, |s| {
+            TypeData::Intersection(InternedIntersection::new(&db, boxed([s.next(), s.next()])))
+        });
+        assert_identity(&db, |s| {
+            TypeData::Union(InternedUnion::new(&db, boxed([s.next(), s.next()])))
+        });
+        assert_identity(&db, |s| {
+            TypeData::TypeOperator(InternedTypeOperatorType::new(
+                &db,
+                s.next(),
+                raw::TypeOperator::Readonly,
+            ))
+        });
+        assert_identity(&db, |s| {
+            TypeData::Literal(InternedLiteral::new(
+                &db,
+                Literal::Object([named_member(s)].into()),
+            ))
+        });
+        assert_identity(&db, |s| {
+            TypeData::InstanceOf(InternedTypeInstance::new(
+                &db,
+                s.next(),
+                boxed([s.next(), s.next()]),
+            ))
+        });
+        assert_identity(&db, |s| {
+            TypeData::MergedReference(InternedMergedReference::new(
+                &db,
+                Some(s.next()),
+                Some(s.next()),
+                Some(s.next()),
+            ))
+        });
+
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::Addition(TypeofAdditionExpression {
+                    left: s.next(),
+                    right: s.next(),
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::Await(TypeofAwaitExpression { argument: s.next() }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::BitwiseNot(TypeofBitwiseNotExpression { argument: s.next() }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::Call(TypeofCallExpression {
+                    callee: s.next(),
+                    arguments: [
+                        CallArgumentType::Argument(s.next()),
+                        CallArgumentType::Spread(s.next()),
+                    ]
+                    .into(),
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::Conditional(TypeofConditionalExpression {
+                    test: s.next(),
+                    consequent: s.next(),
+                    alternate: s.next(),
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::Destructure(TypeofDestructureExpression {
+                    ty: s.next(),
+                    destructure_field: raw::DestructureField::Index(0),
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::Index(TypeofIndexExpression {
+                    object: s.next(),
+                    index: 1,
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::IterableValueOf(TypeofIterableValueOfExpression { ty: s.next() }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::LogicalAnd(TypeofLogicalAndExpression {
+                    left: s.next(),
+                    right: s.next(),
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::LogicalOr(TypeofLogicalOrExpression {
+                    left: s.next(),
+                    right: s.next(),
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::New(TypeofNewExpression {
+                    callee: s.next(),
+                    arguments: [
+                        CallArgumentType::Argument(s.next()),
+                        CallArgumentType::Spread(s.next()),
+                    ]
+                    .into(),
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::NullishCoalescing(TypeofNullishCoalescingExpression {
+                    left: s.next(),
+                    right: s.next(),
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::StaticMember(TypeofStaticMemberExpression {
+                    object: s.next(),
+                    member: text("member"),
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::Super(TypeofThisOrSuperExpression { parent: s.next() }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::This(TypeofThisOrSuperExpression { parent: s.next() }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::Typeof(TypeofTypeofExpression { argument: s.next() }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::UnaryMinus(TypeofUnaryMinusExpression { argument: s.next() }),
+            )
+        });
+
+        assert_identity(&db, |s| {
+            TypeData::TypeofType(InternedTypeofType::new(&db, s.next()))
+        });
+        assert_identity(&db, |s| {
+            TypeData::TypeofValue(InternedTypeofValue::new(&db, s.next(), text("value"), None))
+        });
+    }
 }

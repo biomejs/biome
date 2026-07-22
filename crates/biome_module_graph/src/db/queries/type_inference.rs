@@ -32,6 +32,7 @@ use biome_js_type_info::{
         LocalTypeId as InferredLocalTypeId, ModuleKey as InferredModuleKey, ReturnType,
         TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
         TypeMember as InferredTypeMember, TypeSubstitution as InferredTypeSubstitution,
+        TypeTransformResult,
     },
 };
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -1824,7 +1825,12 @@ fn infer_generic_return_type<'db>(
                 generic: parameter_ty,
                 replacement: arg,
             };
-            return_ty = return_ty.substitute_type(db, substitution);
+            let TypeTransformResult::Transformed(substituted) =
+                return_ty.substitute_type(db, substitution)
+            else {
+                return InferredTypeData::Unknown;
+            };
+            return_ty = substituted;
             substitutions.push(substitution);
             continue;
         }
@@ -1842,10 +1848,18 @@ fn infer_generic_return_type<'db>(
             continue;
         };
 
-        for substitution in
+        let Some(callback_substitutions) =
             collect_callback_return_replacements(db, *parameter_return_ty, *argument_return_ty)
-        {
-            return_ty = return_ty.substitute_type(db, substitution);
+        else {
+            return InferredTypeData::Unknown;
+        };
+        for substitution in callback_substitutions {
+            let TypeTransformResult::Transformed(substituted) =
+                return_ty.substitute_type(db, substitution)
+            else {
+                return InferredTypeData::Unknown;
+            };
+            return_ty = substituted;
             substitutions.push(substitution);
         }
     }
@@ -1854,14 +1868,21 @@ fn infer_generic_return_type<'db>(
         if let InferredTypeData::Generic(generic) = type_parameter
             && let Some(default) = generic.default(db)
         {
-            let replacement = substitutions.iter().fold(default, |ty, substitution| {
-                ty.substitute_type(db, *substitution)
-            });
+            let Some(replacement) = substitutions.iter().try_fold(default, |ty, substitution| {
+                ty.substitute_type(db, *substitution).map_or(None, Some)
+            }) else {
+                return InferredTypeData::Unknown;
+            };
             let substitution = InferredTypeSubstitution {
                 generic: *type_parameter,
                 replacement,
             };
-            return_ty = return_ty.substitute_type(db, substitution);
+            let TypeTransformResult::Transformed(substituted) =
+                return_ty.substitute_type(db, substitution)
+            else {
+                return InferredTypeData::Unknown;
+            };
+            return_ty = substituted;
             substitutions.push(substitution);
         }
     }
@@ -1882,7 +1903,7 @@ fn collect_callback_return_replacements<'db>(
     db: &'db dyn ModuleDb,
     parameter_return_ty: InferredTypeData<'db>,
     argument_return_ty: InferredTypeData<'db>,
-) -> Vec<InferredTypeSubstitution<'db>> {
+) -> Option<Vec<InferredTypeSubstitution<'db>>> {
     if let InferredTypeData::Union(union) = parameter_return_ty {
         if let InferredTypeData::InstanceOf(argument) = argument_return_ty {
             for parameter in union.types(db) {
@@ -1894,9 +1915,9 @@ fn collect_callback_return_replacements<'db>(
                         && argument.ty(db).is_promise_class(db)
                 {
                     let replacements =
-                        parameter.collect_generic_replacements(db, argument_return_ty);
+                        parameter.collect_generic_replacements(db, argument_return_ty)?;
                     if !replacements.is_empty() {
-                        return replacements;
+                        return Some(replacements);
                     }
                 }
             }
@@ -1915,10 +1936,10 @@ fn collect_callback_return_replacements<'db>(
                 )
             })
         {
-            return Vec::from([InferredTypeSubstitution {
+            return Some(Vec::from([InferredTypeSubstitution {
                 generic: *generic,
                 replacement: argument_return_ty,
-            }]);
+            }]));
         }
     }
 
