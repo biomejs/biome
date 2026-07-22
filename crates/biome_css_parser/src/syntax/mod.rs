@@ -588,7 +588,7 @@ fn parse_any_non_function_css_value(p: &mut CssParser) -> ParsedSyntax {
     } else if p.at(CSS_STRING_LITERAL) {
         parse_string(p)
     } else if is_at_any_dimension(p) {
-        parse_any_dimension(p)
+        parse_any_dimension(p, CssLexContext::Regular)
     } else if p.at(CSS_NUMBER_LITERAL) {
         parse_regular_number(p)
     } else if is_at_color(p) {
@@ -652,9 +652,11 @@ fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
             |p, m| scss_only_syntax_error(p, "SCSS parent selector values", m.range(p)),
         )
     } else if is_at_scss_interpolated_string(p) {
-        CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_interpolated_string, |p, m| {
-            scss_only_syntax_error(p, "SCSS interpolated strings", m.range(p))
-        })
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            |p| parse_scss_interpolated_string(p, CssLexContext::Regular),
+            |p, m| scss_only_syntax_error(p, "SCSS interpolated strings", m.range(p)),
+        )
     } else {
         Absent
     }

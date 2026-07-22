@@ -107,6 +107,7 @@ impl Rule for UseGenericFontNames {
         // e.g: { font: caption }, { font: inherit }
         let properties = match node.value() {
             Ok(value) => match value {
+                AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(_) => return None,
                 AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(list) => list,
                 AnyCssGenericPropertyValueOrExpression::ScssExpression(_) => return None,
             },
