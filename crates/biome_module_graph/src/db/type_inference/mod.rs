@@ -1,7 +1,7 @@
 #![deny(clippy::wildcard_enum_match_arm)]
 
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
-use crate::{JsExport, JsOwnExport, ModuleDb, ResolvedPath};
+use crate::{JsExport, JsModuleInfo, JsOwnExport, ModuleDb};
 use biome_css_syntax::TextRange;
 use biome_js_type_info::interned_types::{
     LocalTypeId, ModuleKey, TypeData as InferredTypeData, TypeTransformError,
@@ -167,7 +167,7 @@ pub(super) fn infer_module_types_cycle_result<'db>(
         return None;
     }
 
-    let blocked = inference_scc(db, module);
+    let blocked = inference_scc(db, module, &js_info);
     Some(resolve_raw_types(
         db,
         module,
@@ -176,22 +176,71 @@ pub(super) fn infer_module_types_cycle_result<'db>(
     ))
 }
 
-fn inference_scc(db: &dyn ModuleDb, root: ModuleInfo) -> FxHashSet<ModuleInfo> {
+/// Returns the inferable modules in the strongly connected component containing
+/// `root`.
+///
+/// The cycle fallback blocks imports within this set to stop recursive Salsa
+/// queries while continuing to infer dependencies outside the cycle. A module
+/// belongs to the set when it is reachable from `root` and can also reach
+/// `root`.
+fn inference_scc(
+    db: &dyn ModuleDb,
+    root: ModuleInfo,
+    root_info: &JsModuleInfo,
+) -> FxHashSet<ModuleInfo> {
     const MAX_DEPENDENCY_STEPS: usize = 1024;
 
-    // Salsa invokes this from the cycle fallback. The first pass records every
-    // dependency reachable from the root and builds reverse edges; the second
-    // walks predecessors back to the root, retaining only its strongly
-    // connected component for CycleFallback import suppression.
+    // Record every dependency reachable from the root while building the
+    // reverse graph needed to determine which modules can reach it again.
     let mut reachable = FxHashSet::default();
     let mut reverse = FxHashMap::<ModuleInfo, Vec<ModuleInfo>>::default();
-    let mut pending = vec![root];
+    let mut pending = vec![(root, root_info.clone())];
     let mut remaining_dependency_steps = MAX_DEPENDENCY_STEPS;
     reachable.insert(root);
 
-    while let Some(source) = pending.pop() {
+    while let Some((source, source_info)) = pending.pop() {
         db.unwind_if_revision_cancelled();
-        for target in inferable_dependencies(db, source) {
+
+        let dependency_paths = source_info
+            .static_import_paths
+            .values()
+            .map(|import| &import.resolved_path)
+            .chain(
+                source_info
+                    .blanket_reexports
+                    .iter()
+                    .map(|reexport| &reexport.import.resolved_path),
+            )
+            .chain(
+                source_info
+                    .exports
+                    .values()
+                    .filter_map(|export| match export {
+                        JsExport::Reexport(reexport) | JsExport::ReexportType(reexport) => {
+                            Some(&reexport.import.resolved_path)
+                        }
+                        JsExport::Own(JsOwnExport::Namespace(reexport))
+                        | JsExport::OwnType(JsOwnExport::Namespace(reexport)) => {
+                            Some(&reexport.import.resolved_path)
+                        }
+                        JsExport::Own(_) | JsExport::OwnType(_) => None,
+                    }),
+            );
+
+        for resolved_path in dependency_paths {
+            let Some(path) = resolved_path.as_path() else {
+                continue;
+            };
+            let Some(target) = db.module_for_path(path) else {
+                continue;
+            };
+            let ModuleInfoKind::Js(target_info) = target.kind(db) else {
+                continue;
+            };
+            if !target_info.infer_types {
+                continue;
+            }
+
             reverse.entry(target).or_default().push(source);
             if reachable.insert(target) {
                 if remaining_dependency_steps == 0 {
@@ -201,11 +250,14 @@ fn inference_scc(db: &dyn ModuleDb, root: ModuleInfo) -> FxHashSet<ModuleInfo> {
                     return reachable;
                 }
                 remaining_dependency_steps -= 1;
-                pending.push(target);
+                pending.push((target, target_info));
             }
         }
     }
 
+    // Walking predecessors from the root intersects the reachable set with
+    // modules that can reach the root, yielding its strongly connected
+    // component. Acyclic dependencies have no reverse path and remain usable.
     let mut scc = FxHashSet::default();
     let mut pending = vec![root];
     let mut remaining_dependency_steps = MAX_DEPENDENCY_STEPS;
@@ -225,48 +277,6 @@ fn inference_scc(db: &dyn ModuleDb, root: ModuleInfo) -> FxHashSet<ModuleInfo> {
         }
     }
     scc
-}
-
-fn inferable_dependencies(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<ModuleInfo> {
-    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
-        return Vec::new();
-    };
-    if !js_info.infer_types {
-        return Vec::new();
-    }
-
-    let mut dependencies = Vec::new();
-    let mut push = |resolved_path: &ResolvedPath| {
-        let Some(path) = resolved_path.as_path() else {
-            return;
-        };
-        let Some(target) = db.module_for_path(path) else {
-            return;
-        };
-        if matches!(target.kind(db), ModuleInfoKind::Js(info) if info.infer_types) {
-            dependencies.push(target);
-        }
-    };
-
-    for import in js_info.static_import_paths.values() {
-        push(&import.resolved_path);
-    }
-    for reexport in &js_info.blanket_reexports {
-        push(&reexport.import.resolved_path);
-    }
-    for export in js_info.exports.values() {
-        match export {
-            JsExport::Reexport(reexport) | JsExport::ReexportType(reexport) => {
-                push(&reexport.import.resolved_path);
-            }
-            JsExport::Own(JsOwnExport::Namespace(reexport))
-            | JsExport::OwnType(JsOwnExport::Namespace(reexport)) => {
-                push(&reexport.import.resolved_path);
-            }
-            JsExport::Own(_) | JsExport::OwnType(_) => {}
-        }
-    }
-    dependencies
 }
 
 pub(super) fn normalize_type_cycle_result<'db>(
