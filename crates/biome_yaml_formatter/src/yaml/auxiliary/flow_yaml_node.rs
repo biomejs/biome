@@ -1,3 +1,4 @@
+use crate::comments::{FormatCommentsSlice, FormatMiddleComments};
 use crate::prelude::*;
 use crate::utils::FormatProperties;
 use biome_formatter::write;
@@ -30,17 +31,56 @@ impl FormatNodeRule<YamlFlowYamlNode> for FormatYamlFlowYamlNode {
 
         write!(f, [FormatProperties(own_properties)])?;
 
-        if let Some(content) = content {
-            // The content joins the properties' line even when the source
-            // had a line break between them: `!!str\nfoo` becomes
-            // `!!str foo`
-            if has_own_properties {
+        let has_middle_comments = f.comments().has_dangling_comments(node.syntax());
+
+        if let Some(content) = &content {
+            // A middle comment ends the properties' line, so the content
+            // moves to the next one:
+            //
+            // ```yaml
+            // !!str # comment
+            // hello
+            // ```
+            //
+            // Without comments the content joins the properties' line even
+            // when the source had a line break between them: `!!str\nfoo`
+            // becomes `!!str foo`
+            if has_middle_comments {
+                write!(
+                    f,
+                    [FormatMiddleComments::new(node.syntax()), hard_line_break()]
+                )?;
+            } else if has_own_properties {
                 write!(f, [space()])?;
             }
 
             write!(f, [content.format()])?;
         }
 
+        if content.is_none() && has_middle_comments {
+            // With no content to move, the comments stay on the line
+            let comments = f.comments().clone();
+            write!(
+                f,
+                [FormatCommentsSlice {
+                    comments: comments.dangling_comments(node.syntax()),
+                    inline_first: true
+                }]
+            )?;
+        }
+
+        Ok(())
+    }
+
+    fn fmt_dangling_comments(
+        &self,
+        _: &YamlFlowYamlNode,
+        _: &mut YamlFormatter,
+    ) -> FormatResult<()> {
+        // The dangling comments are the node's middle comments, formatted
+        // by `FormatMiddleComments` (or `FormatCommentsSlice` when the node
+        // has no content), which `fmt_fields` calls between the properties
+        // and the content
         Ok(())
     }
 }
