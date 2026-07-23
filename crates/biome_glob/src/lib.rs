@@ -917,9 +917,9 @@ mod tests {
 
         let compile_count = *COMPILE_COUNTS.lock().get(pattern).unwrap_or(&0);
 
-        assert!(
-            compile_count <= 1,
-            "expected the pattern to be compiled at most once across 50 identical parses, \
+        assert_eq!(
+            compile_count, 1,
+            "expected the pattern to be compiled exactly once across 50 identical parses, \
              but it was compiled {compile_count} times"
         );
     }
