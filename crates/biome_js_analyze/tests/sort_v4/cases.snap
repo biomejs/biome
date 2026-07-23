@@ -14,10 +14,19 @@ input:  sr-only block flex absolute relative
 sorted: sr-only absolute relative block flex
 ---
 input:  pointer-events-none collapse static visible
-sorted: pointer-events-none visible collapse static
+sorted: pointer-events-none collapse visible static
 ---
 input:  flex
 sorted: flex
+---
+input:  inline flex block hidden grid table contents
+sorted: block contents flex grid hidden inline table
+---
+input:  visible collapse invisible
+sorted: collapse invisible visible
+---
+input:  sticky static relative fixed absolute
+sorted: absolute fixed relative static sticky
 ---
 input:  bg-red-500 flex p-4
 sorted: flex bg-red-500 p-4
