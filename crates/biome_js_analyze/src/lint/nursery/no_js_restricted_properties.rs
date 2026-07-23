@@ -135,7 +135,7 @@ declare_lint_rule! {
     /// Use this to give context and explain why the property is restricted, and to suggest an alternative.
     ///
     pub NoJsRestrictedProperties {
-        version: "next",
+        version: "2.5.6",
         name: "noJsRestrictedProperties",
         language: "js",
         sources: &[RuleSource::Eslint("no-restricted-properties").same()],
