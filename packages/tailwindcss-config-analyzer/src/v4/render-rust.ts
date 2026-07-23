@@ -65,11 +65,8 @@ function renderStaticUtilities(
 ): string {
 	const lines = utils.static.map((u) => {
 		const idx = propIdx.get(u.sort_property) ?? propCount;
-		const negReg =
-			u.negative_registration_idx === null
-				? "None"
-				: `Some(${u.negative_registration_idx})`;
-		return `    ${rustString(u.name)} => UtilityEntry { property_idx: ${idx}, property_count: ${u.property_count}, registration_idx: ${u.registration_idx}, negative_registration_idx: ${negReg} },`;
+		const hasNegative = u.negative_registration_idx !== null;
+		return `    ${rustString(u.name)} => UtilityEntry { property_idx: ${idx}, property_count: ${u.property_count}, has_negative: ${hasNegative} },`;
 	});
 	return `pub static STATIC_UTILITIES: phf::Map<&'static str, UtilityEntry> = phf_map! {
 ${lines.join("\n")}
@@ -149,7 +146,7 @@ function renderNegative(
 	}
 	switch (u.negative.kind) {
 		case "SameBranches":
-			return `        negative: Some(SameBranches { registration_idx: ${u.negative.registration_idx} }),`;
+			return "        negative: Some(SameBranches),";
 		case "Distinct": {
 			const namedItems = renderNamedBranchList(
 				"                ",
@@ -165,7 +162,6 @@ function renderNegative(
 				propCount,
 			);
 			return `        negative: Some(Distinct {
-            registration_idx: ${u.negative.registration_idx},
 ${renderBranchSlice("            ", "named_branches", namedItems)}
 ${renderBranchSlice("            ", "arbitrary_branches", arbitraryItems)}
         }),`;
@@ -201,7 +197,6 @@ function renderFunctionalUtilities(
 		);
 		const negative = renderNegative(u, propIdx, propCount, keywordIdx);
 		return `    ${rustString(u.basename)} => FunctionalEntry {
-        registration_idx: ${u.registration_idx},
 ${renderBranchSlice("        ", "named_branches", namedItems)}
 ${renderBranchSlice("        ", "arbitrary_branches", arbitraryItems)}
 ${negative}

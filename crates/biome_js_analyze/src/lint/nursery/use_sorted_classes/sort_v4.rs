@@ -11,7 +11,7 @@ use super::tailwind_preset_v4::{
     FUNCTIONAL_UTILITIES, KEYWORD_POOL, PROPERTY_INDEX, STATIC_UTILITIES,
 };
 use super::tailwind_preset_v4_types::{
-    ArbitraryBranch, NamedBranch, NamedValueType, Negative,
+    ArbitraryBranch, NamedBranch, NamedValueType, Negative, UtilityEntry,
 };
 use super::arbitrary_value_match::value_matches_type;
 
@@ -30,7 +30,7 @@ pub fn sort_class_list(root: &TwRoot) -> String {
     }
 
     // `Vec::sort_by` is stable, so Unknown-vs-Unknown comparisons returning
-    // `Equal` keep input order, and Known entries with identical triples
+    // `Equal` keep input order, and Known entries with identical keys
     // also keep input order.
     keyed.sort_by(|a, b| compare(&a.0, &b.0));
 
@@ -54,77 +54,49 @@ enum SortKey {
     Known {
         property_idx: u16,
         property_count: u8,
-        registration_idx: u16,
-        value: ValueKey,
+        name: NameKey,
         important: bool,
     },
 }
 
-/// The value and modifier text of a candidate — `red-500` + `50` for
-/// `bg-red-500/50`, `[13px]` + nothing for `w-[13px]`, `1` + `2` for the
-/// fraction `w-1/2` — held as allocation-free views into the syntax
-/// tree. Candidates with an identical (property, registration) placement
-/// order by natural comparison of these texts, mirroring how Tailwind
-/// orders same-utility candidates in generated CSS.
+/// The candidate's name — the negative sign plus the `base-value/modifier`
+/// text, without variants or the important suffix — held as an
+/// allocation-free view into the syntax tree. Candidates inside one
+/// (property, count) bucket order by natural comparison of this name,
+/// which is the order Tailwind emits utilities in: `getClassOrder` ranks
+/// `m-2 m-4 m-auto m-px` and `block flow-root inline-block` by name, not
+/// by utility registration order.
 // TODO: the derived equality compares text chunk-wise and cannot
 // short-circuit on syntax kind mismatches; switch to a structural node
 // comparison once a generic `is_node_equal` is available.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
-struct ValueKey {
-    value: Option<SyntaxNodeText>,
-    modifier: Option<SyntaxNodeText>,
+struct NameKey {
+    negative: bool,
+    text: Option<SyntaxNodeText>,
 }
 
-impl ValueKey {
-    fn from_candidate(candidate: &AnyTwCandidate) -> Self {
-        match candidate {
-            AnyTwCandidate::TwArbitraryCandidate(arbitrary) => Self {
-                value: Some(arbitrary.value().syntax().text_trimmed()),
-                modifier: modifier_text(arbitrary.modifier().as_ref()),
-            },
-            AnyTwCandidate::TwFunctionalCandidate(functional) => Self {
-                value: functional
-                    .value()
-                    .ok()
-                    .map(|value| value.syntax().text_trimmed()),
-                modifier: modifier_text(functional.modifier().as_ref()),
-            },
-            // Static candidates have no value; ties between distinct
-            // static utilities are broken by `registration_idx`.
-            AnyTwCandidate::TwStaticCandidate(_) | AnyTwCandidate::TwBogusCandidate(_) => {
-                Self::default()
-            }
-        }
-    }
-
+impl NameKey {
     fn compare(&self, other: &Self) -> Ordering {
-        natural_cmp(self.value.as_ref(), other.value.as_ref())
-            .then_with(|| natural_cmp(self.modifier.as_ref(), other.modifier.as_ref()))
+        fn chars(key: &NameKey) -> impl Iterator<Item = char> + '_ {
+            let sign = key.negative.then_some('-');
+            let text = key.text.as_ref().map(|text| text.chars()).into_iter().flatten();
+            sign.into_iter().chain(text)
+        }
+        TwNameCollator.cmp(chars(self), chars(other))
     }
 }
 
-fn modifier_text(modifier: Option<&AnyTwModifier>) -> Option<SyntaxNodeText> {
-    match modifier {
-        Some(AnyTwModifier::TwModifier(modifier)) => modifier
-            .value()
-            .ok()
-            .map(|value| value.syntax().text_trimmed()),
-        Some(AnyTwModifier::TwBogusModifier(bogus)) => Some(bogus.syntax().text_trimmed()),
-        None => None,
-    }
-}
-
-/// Orders candidate value text the way Tailwind's own `compare()` does:
+/// Orders candidate names the way Tailwind's own `compare()` does:
 /// plain code-point order, except that digit sequences compare as
-/// integers (`75` < `700`, `red-50` < `red-100`). Code-point order
-/// places digits before `[` and `[` before letters
-/// (`4` < `[1px]` < `auto`), matching the order Tailwind emits
-/// same-utility candidates in — which is why this does not reuse
+/// integers (`p-75` < `p-700`, `red-50` < `red-100`). Code-point order
+/// places `-` before digits, digits before `[`, and `[` before letters
+/// (`-m-4` < `m-4`, `w-4` < `w-[1px]` < `w-auto`), matching the order
+/// Tailwind emits candidates in — which is why this does not reuse
 /// [biome_string_case::CldrAsciiCollator]: CLDR collation places
 /// punctuation before digits and interleaves letter case.
-struct TwValueCollator;
+struct TwNameCollator;
 
-impl Collator for TwValueCollator {
+impl Collator for TwNameCollator {
     type Char = char;
 
     fn weight(&self, c: &char) -> impl Ord {
@@ -134,14 +106,6 @@ impl Collator for TwValueCollator {
     fn as_digit(&self, c: &char) -> Option<impl Ord> {
         c.is_ascii_digit().then_some(*c)
     }
-}
-
-/// Natural comparison of two optional text views without materializing
-/// either side; a missing text compares as empty, so a bare value
-/// precedes any longer one (`in` < `in-out`).
-fn natural_cmp(a: Option<&SyntaxNodeText>, b: Option<&SyntaxNodeText>) -> Ordering {
-    let chars = |text: Option<&SyntaxNodeText>| text.map(|text| text.chars()).into_iter().flatten();
-    TwValueCollator.cmp(chars(a), chars(b))
 }
 
 impl SortKey {
@@ -166,112 +130,89 @@ impl SortKey {
         let Ok(inner) = node.candidate() else {
             return Self::Unknown;
         };
-        let value = ValueKey::from_candidate(&inner);
-        let base = match inner {
+        let placement = match &inner {
             AnyTwCandidate::TwArbitraryCandidate(a) => {
                 let Ok(property_token) = a.property_token() else {
                     return Self::Unknown;
                 };
-                let property_text = property_token.text_trimmed();
-                let Some(&property_idx) = PROPERTY_INDEX.get(property_text) else {
-                    return Self::Unknown;
-                };
-                Self::Known {
-                    property_idx,
-                    property_count: 1,
-                    registration_idx: 0,
-                    value: ValueKey::default(),
-                    important: false,
-                }
+                PROPERTY_INDEX
+                    .get(property_token.text_trimmed())
+                    .map(|&property_idx| (property_idx, 1))
             }
-            AnyTwCandidate::TwBogusCandidate(_) => Self::Unknown,
+            AnyTwCandidate::TwBogusCandidate(_) => None,
 
             AnyTwCandidate::TwStaticCandidate(s) => {
                 let Ok(name) = s.base_token() else {
                     return Self::Unknown;
                 };
-                let Some(entry) = STATIC_UTILITIES.get(name.text_trimmed()) else {
-                    return Self::Unknown;
-                };
-                let registration_idx = if is_negative {
-                    let Some(neg) = entry.negative_registration_idx else {
-                        return Self::Unknown;
-                    };
-                    neg
-                } else {
-                    entry.registration_idx
-                };
-                Self::Known {
-                    property_idx: entry.property_idx,
-                    property_count: entry.property_count,
-                    registration_idx,
-                    value: ValueKey::default(),
-                    important: false,
-                }
+                STATIC_UTILITIES
+                    .get(name.text_trimmed())
+                    // Tailwind registers negative statics individually
+                    // (`-m-px` exists, `-flex` does not).
+                    .filter(|entry| !is_negative || entry.has_negative)
+                    .map(|entry| (entry.property_idx, entry.property_count))
             }
 
             AnyTwCandidate::TwFunctionalCandidate(f) => {
                 let Ok(base) = f.base_token() else {
                     return Self::Unknown;
                 };
-                let Some(entry) = FUNCTIONAL_UTILITIES.get(base.text_trimmed()) else {
-                    return Self::Unknown;
-                };
-
-                let (registration_idx, named_branches, arbitrary_branches) = if is_negative {
-                    match entry.negative {
-                        None => return Self::Unknown,
-                        Some(Negative::SameBranches { registration_idx }) => (
-                            registration_idx,
-                            entry.named_branches,
-                            entry.arbitrary_branches,
-                        ),
-                        Some(Negative::Distinct {
-                            registration_idx,
-                            named_branches,
-                            arbitrary_branches,
-                        }) => (registration_idx, named_branches, arbitrary_branches),
-                    }
-                } else {
-                    (
-                        entry.registration_idx,
-                        entry.named_branches,
-                        entry.arbitrary_branches,
-                    )
-                };
 
                 let Ok(value) = f.value() else {
                     return Self::Unknown;
                 };
 
-                if let AnyTwValue::TwArbitraryValue(arb) = &value {
-                    resolve_arbitrary_branch(arbitrary_branches, &arb.value(), registration_idx)
-                        .unwrap_or(Self::Unknown)
+                // Tailwind resolves a candidate's full name as a static
+                // utility before trying functional roots: `w-full`,
+                // `m-auto`, and `justify-center` are static
+                // registrations even though the grammar splits them
+                // into base and value. Statics take no modifier, so a
+                // modifier skips the lookup.
+                if f.modifier().is_none()
+                    && let Some(text) = named_text(&value)
+                    && let Some(entry) = joined_static_entry(base.text_trimmed(), text.text())
+                    && (!is_negative || entry.has_negative)
+                {
+                    Some((entry.property_idx, entry.property_count))
                 } else {
-                    let modifier = f.modifier();
-                    resolve_named_branch(
-                        named_branches,
-                        &value,
-                        modifier.as_ref(),
-                        registration_idx,
-                    )
-                    .unwrap_or(Self::Unknown)
+                    let Some(entry) = FUNCTIONAL_UTILITIES.get(base.text_trimmed()) else {
+                        return Self::Unknown;
+                    };
+
+                    let (named_branches, arbitrary_branches) = if is_negative {
+                        match entry.negative {
+                            None => return Self::Unknown,
+                            Some(Negative::SameBranches) => {
+                                (entry.named_branches, entry.arbitrary_branches)
+                            }
+                            Some(Negative::Distinct {
+                                named_branches,
+                                arbitrary_branches,
+                            }) => (named_branches, arbitrary_branches),
+                        }
+                    } else {
+                        (entry.named_branches, entry.arbitrary_branches)
+                    };
+
+                    if let AnyTwValue::TwArbitraryValue(arb) = &value {
+                        resolve_arbitrary_branch(arbitrary_branches, &arb.value())
+                    } else {
+                        let modifier = f.modifier();
+                        resolve_named_branch(named_branches, &value, modifier.as_ref())
+                    }
                 }
             }
         };
 
-        match base {
-            Self::Unknown => Self::Unknown,
-            Self::Known {
+        match placement {
+            None => Self::Unknown,
+            Some((property_idx, property_count)) => Self::Known {
                 property_idx,
                 property_count,
-                registration_idx,
-                ..
-            } => Self::Known {
-                property_idx,
-                property_count,
-                registration_idx,
-                value,
+                name: NameKey {
+                    negative: is_negative,
+                    text: Some(inner.syntax().text_trimmed()),
+                },
                 important: is_important,
             },
         }
@@ -289,15 +230,13 @@ fn compare(a: &SortKey, b: &SortKey) -> Ordering {
             SortKey::Known {
                 property_idx: p1,
                 property_count: c1,
-                registration_idx: r1,
-                value: v1,
+                name: n1,
                 important: i1,
             },
             SortKey::Known {
                 property_idx: p2,
                 property_count: c2,
-                registration_idx: r2,
-                value: v2,
+                name: n2,
                 important: i2,
             },
         ) => p1
@@ -306,11 +245,10 @@ fn compare(a: &SortKey, b: &SortKey) -> Ordering {
             // their property bucket so they sort before single-property
             // utilities in the same bucket.
             .then_with(|| c2.cmp(c1))
-            .then_with(|| r1.cmp(r2))
-            // Same-utility candidates order by their value (`p-2 p-4
-            // p-10`, `bg-red-50 bg-red-100`), then modifier
-            // (`bg-red-500/25 bg-red-500/50`).
-            .then_with(|| v1.compare(v2))
+            // Candidates inside one bucket order by name, the way
+            // Tailwind emits them (`m-2 m-4 m-auto m-px`,
+            // `collapse invisible visible`).
+            .then_with(|| n1.compare(n2))
             // A plain utility precedes its important twin (`flex flex!`).
             .then_with(|| i1.cmp(i2)),
     }
@@ -381,17 +319,33 @@ fn named_value_type_matches(
     )
 }
 
+/// Look up `base-value` in `STATIC_UTILITIES` without allocating,
+/// reassembling the name in a stack buffer sized for the longest static
+/// utility name (`font-stretch-ultra-condensed`, 28 bytes).
+fn joined_static_entry(base: &str, value: &str) -> Option<&'static UtilityEntry> {
+    const LONGEST_STATIC_NAME: usize = 32;
+    let len = base.len() + 1 + value.len();
+    if len > LONGEST_STATIC_NAME {
+        return None;
+    }
+    let mut buf = [0u8; LONGEST_STATIC_NAME];
+    buf[..base.len()].copy_from_slice(base.as_bytes());
+    buf[base.len()] = b'-';
+    buf[base.len() + 1..len].copy_from_slice(value.as_bytes());
+    // Joining two `str`s with an ASCII byte always forms valid UTF-8.
+    let name = str::from_utf8(&buf[..len]).ok()?;
+    STATIC_UTILITIES.get(name)
+}
+
 /// Walk a basename's named branch list and return the first matching
-/// branch as a `SortKey::Known` (value and importance are stamped by
-/// `SortKey::from_candidate`). Branch order in the preset
-/// already reflects the resolution precedence we want
+/// branch's `(property_idx, property_count)` placement. Branch order in
+/// the preset already reflects the resolution precedence we want
 /// (Keyword → Theme → Typed).
 fn resolve_named_branch(
     branches: &[NamedBranch],
     value: &AnyTwValue,
     modifier: Option<&AnyTwModifier>,
-    registration_idx: u16,
-) -> Option<SortKey> {
+) -> Option<(u16, u8)> {
     let has_fraction_modifier = match modifier {
         None => false,
         Some(m) if is_fraction_modifier(value, m, branches) => true,
@@ -433,26 +387,18 @@ fn resolve_named_branch(
                 (p, c)
             }
         };
-        return Some(SortKey::Known {
-            property_idx,
-            property_count,
-            registration_idx,
-            value: ValueKey::default(),
-            important: false,
-        });
+        return Some((property_idx, property_count));
     }
     None
 }
 
 /// Walk a basename's arbitrary branch list and return the first matching
-/// branch as a `SortKey::Known` (value and importance are stamped by
-/// `SortKey::from_candidate`). Typed branches precede the
-/// type-blind fallback in generated preset order.
+/// branch's `(property_idx, property_count)` placement. Typed branches
+/// precede the type-blind fallback in generated preset order.
 fn resolve_arbitrary_branch(
     branches: &[ArbitraryBranch],
     list: &CssGenericComponentValueList,
-    registration_idx: u16,
-) -> Option<SortKey> {
+) -> Option<(u16, u8)> {
     for &branch in branches {
         let (property_idx, property_count) = match branch {
             ArbitraryBranch::Typed(value_type, p, c) => {
@@ -463,13 +409,7 @@ fn resolve_arbitrary_branch(
             }
             ArbitraryBranch::Fallback(p, c) => (p, c),
         };
-        return Some(SortKey::Known {
-            property_idx,
-            property_count,
-            registration_idx,
-            value: ValueKey::default(),
-            important: false,
-        });
+        return Some((property_idx, property_count));
     }
     None
 }
@@ -479,30 +419,33 @@ mod tests {
     use super::*;
     use biome_tailwind_parser::parse_tailwind;
 
-    fn known(property_idx: u16, property_count: u8, registration_idx: u16) -> SortKey {
+    fn known(property_idx: u16, property_count: u8) -> SortKey {
         SortKey::Known {
             property_idx,
             property_count,
-            registration_idx,
-            value: ValueKey::default(),
+            name: NameKey::default(),
             important: false,
         }
     }
 
-    /// The value and modifier text of a known key, materialized for
-    /// assertion messages; a missing text reads as empty.
-    fn value_texts(key: &SortKey) -> (String, String) {
-        let SortKey::Known { value, .. } = key else {
+    /// The name of a known key — sign plus candidate text — materialized
+    /// for assertion messages.
+    fn name_text(key: &SortKey) -> String {
+        let SortKey::Known { name, .. } = key else {
             panic!("expected a known key");
         };
-        let text = |text: Option<&SyntaxNodeText>| {
-            text.map(ToString::to_string).unwrap_or_default()
-        };
-        (text(value.value.as_ref()), text(value.modifier.as_ref()))
+        let mut out = String::new();
+        if name.negative {
+            out.push('-');
+        }
+        if let Some(text) = &name.text {
+            out.push_str(&text.to_string());
+        }
+        out
     }
 
     fn nat_cmp(a: &str, b: &str) -> Ordering {
-        TwValueCollator.cmp(a.chars(), b.chars())
+        TwNameCollator.cmp(a.chars(), b.chars())
     }
 
     fn classify(input: &str) -> SortKey {
@@ -526,11 +469,8 @@ mod tests {
 
     #[test]
     fn compare_unknown_is_less_than_known() {
-        assert_eq!(compare(&SortKey::Unknown, &known(5, 1, 0)), Ordering::Less);
-        assert_eq!(
-            compare(&known(5, 1, 0), &SortKey::Unknown),
-            Ordering::Greater
-        );
+        assert_eq!(compare(&SortKey::Unknown, &known(5, 1)), Ordering::Less);
+        assert_eq!(compare(&known(5, 1), &SortKey::Unknown), Ordering::Greater);
     }
 
     #[test]
@@ -543,37 +483,40 @@ mod tests {
 
     #[test]
     fn compare_orders_by_property_idx_ascending() {
-        assert_eq!(compare(&known(3, 1, 0), &known(5, 1, 0)), Ordering::Less);
+        assert_eq!(compare(&known(3, 1), &known(5, 1)), Ordering::Less);
     }
 
     #[test]
     fn compare_breaks_property_idx_tie_by_property_count_descending() {
         // sr-only-shape utility (count=9) wins over a single-property one.
-        let wider = known(5, 9, 100);
-        let narrow = known(5, 1, 0);
+        let wider = known(5, 9);
+        let narrow = known(5, 1);
         assert_eq!(compare(&wider, &narrow), Ordering::Less);
     }
 
     #[test]
-    fn compare_breaks_full_tie_by_registration_idx_ascending() {
-        let early = known(5, 1, 1);
-        let late = known(5, 1, 9);
-        assert_eq!(compare(&early, &late), Ordering::Less);
+    fn compare_breaks_bucket_tie_by_name() {
+        // Distinct static utilities in one visibility bucket order by
+        // name, the way Tailwind emits them — not by registration order,
+        // which would put `visible` first.
+        let collapse = classify("collapse");
+        let visible = classify("visible");
+        assert_eq!(compare(&collapse, &visible), Ordering::Less);
+        assert_eq!(compare(&visible, &collapse), Ordering::Greater);
     }
 
     #[test]
     fn compare_returns_equal_for_identical_known_keys() {
-        assert_eq!(compare(&known(5, 1, 0), &known(5, 1, 0)), Ordering::Equal);
+        assert_eq!(compare(&known(5, 1), &known(5, 1)), Ordering::Equal);
     }
 
     #[test]
     fn compare_breaks_exact_key_tie_plain_before_important() {
-        let plain = known(5, 1, 0);
+        let plain = known(5, 1);
         let important = SortKey::Known {
             property_idx: 5,
             property_count: 1,
-            registration_idx: 0,
-            value: ValueKey::default(),
+            name: NameKey::default(),
             important: true,
         };
         assert_eq!(compare(&plain, &important), Ordering::Less);
@@ -581,8 +524,8 @@ mod tests {
     }
 
     #[test]
-    fn compare_breaks_registration_tie_by_value_before_importance() {
-        // `p-2! p-4`: the value decides, the important suffix does not
+    fn compare_breaks_bucket_tie_by_name_before_importance() {
+        // `p-2! p-4`: the name decides, the important suffix does not
         // pull `p-4` ahead of `p-2!`.
         let important_two = classify("p-2!");
         let plain_four = classify("p-4");
@@ -595,6 +538,15 @@ mod tests {
         let fifty = classify("bg-red-500/50");
         assert_eq!(compare(&twenty_five, &fifty), Ordering::Less);
         assert_eq!(compare(&fifty, &fifty), Ordering::Equal);
+    }
+
+    #[test]
+    fn compare_puts_negatives_before_positives_in_one_bucket() {
+        // `-m-4 m-2`: the sign participates in the name, and `-`
+        // precedes every letter in code-point order.
+        let negative = classify("-m-4");
+        let positive = classify("m-2");
+        assert_eq!(compare(&negative, &positive), Ordering::Less);
     }
 
     // endregion: compare
@@ -642,8 +594,8 @@ mod tests {
             NamedBranch::Typed(NamedValueType::Number, 20, 1),
         ];
         assert_eq!(
-            resolve_named_branch(branches, &value, modifier.as_ref(), 99),
-            Some(known(10, 1, 99))
+            resolve_named_branch(branches, &value, modifier.as_ref()),
+            Some((10, 1))
         );
     }
 
@@ -653,8 +605,8 @@ mod tests {
         let branches = &[NamedBranch::Typed(NamedValueType::Number, 10, 1)];
 
         assert_eq!(
-            resolve_named_branch(branches, &value, modifier.as_ref(), 99),
-            Some(known(10, 1, 99))
+            resolve_named_branch(branches, &value, modifier.as_ref()),
+            Some((10, 1))
         );
     }
 
@@ -674,8 +626,8 @@ mod tests {
             panic!("expected arbitrary value")
         };
         assert_eq!(
-            resolve_arbitrary_branch(branches, &arbitrary.value(), 99),
-            Some(known(20, 1, 99))
+            resolve_arbitrary_branch(branches, &arbitrary.value()),
+            Some((20, 1))
         );
     }
 
@@ -697,18 +649,8 @@ mod tests {
         };
         let branches = &[ArbitraryBranch::Fallback(20, 1)];
         assert_eq!(
-            resolve_arbitrary_branch(branches, &arbitrary.value(), 99),
-            Some(known(20, 1, 99))
-        );
-    }
-
-    #[test]
-    fn resolve_named_branch_passes_registration_idx_through() {
-        let (value, modifier) = functional_parts("p-0");
-        let branches = &[NamedBranch::Typed(NamedValueType::Number, 1, 1)];
-        assert_eq!(
-            resolve_named_branch(branches, &value, modifier.as_ref(), 42),
-            Some(known(1, 1, 42))
+            resolve_arbitrary_branch(branches, &arbitrary.value()),
+            Some((20, 1))
         );
     }
 
@@ -718,10 +660,7 @@ mod tests {
         // because dispatch is by parser node kind, not text scanning.
         let (value, modifier) = functional_parts("p-abc");
         let branches = &[NamedBranch::Typed(NamedValueType::Number, 1, 1)];
-        assert_eq!(
-            resolve_named_branch(branches, &value, modifier.as_ref(), 0),
-            None
-        );
+        assert_eq!(resolve_named_branch(branches, &value, modifier.as_ref()), None);
     }
 
     #[test]
@@ -729,8 +668,8 @@ mod tests {
         let (value, modifier) = functional_parts("w-1/2");
         let branches = &[NamedBranch::Typed(NamedValueType::Ratio, 7, 1)];
         assert_eq!(
-            resolve_named_branch(branches, &value, modifier.as_ref(), 11),
-            Some(known(7, 1, 11))
+            resolve_named_branch(branches, &value, modifier.as_ref()),
+            Some((7, 1))
         );
     }
 
@@ -742,8 +681,8 @@ mod tests {
             NamedBranch::Typed(NamedValueType::Percentage, 2, 1),
         ];
         assert_eq!(
-            resolve_named_branch(branches, &value, modifier.as_ref(), 0),
-            Some(known(2, 1, 0))
+            resolve_named_branch(branches, &value, modifier.as_ref()),
+            Some((2, 1))
         );
     }
 
@@ -753,8 +692,8 @@ mod tests {
         let branches = &[NamedBranch::Theme(ThemeNamespace::Color, 10, 1)];
 
         assert_eq!(
-            resolve_named_branch(branches, &value, modifier.as_ref(), 99),
-            Some(known(10, 1, 99))
+            resolve_named_branch(branches, &value, modifier.as_ref()),
+            Some((10, 1))
         );
     }
 
@@ -763,7 +702,7 @@ mod tests {
     // region: sort key classification
 
     #[test]
-    fn arbitrary_candidate_uses_registration_idx_zero() {
+    fn arbitrary_candidate_takes_bucket_from_property_index() {
         let parsed = parse_tailwind("[display:block]");
         let full = parsed.tree().candidates().iter().next().unwrap();
         let display_idx = *PROPERTY_INDEX.get("display").unwrap();
@@ -771,7 +710,6 @@ mod tests {
         let SortKey::Known {
             property_idx,
             property_count,
-            registration_idx,
             important: false,
             ..
         } = &key
@@ -780,8 +718,7 @@ mod tests {
         };
         assert_eq!(*property_idx, display_idx);
         assert_eq!(*property_count, 1);
-        assert_eq!(*registration_idx, 0);
-        assert_eq!(value_texts(&key), ("block".to_string(), String::new()));
+        assert_eq!(name_text(&key), "[display:block]");
     }
 
     #[test]
@@ -789,8 +726,7 @@ mod tests {
         let SortKey::Known {
             property_idx,
             property_count,
-            registration_idx,
-            value,
+            name,
             important: false,
         } = classify("flex")
         else {
@@ -801,8 +737,7 @@ mod tests {
             SortKey::Known {
                 property_idx,
                 property_count,
-                registration_idx,
-                value,
+                name,
                 important: true,
             }
         );
@@ -833,19 +768,58 @@ mod tests {
     }
 
     #[test]
-    fn classification_captures_value_and_modifier_text() {
-        let texts_of = |input: &str| value_texts(&classify(input));
-        let pair = |value: &str, modifier: &str| (value.to_string(), modifier.to_string());
-        assert_eq!(texts_of("p-4"), pair("4", ""));
-        // The parser splits a fraction into value and modifier.
-        assert_eq!(texts_of("w-1/2"), pair("1", "2"));
-        assert_eq!(texts_of("bg-red-500/50"), pair("red-500", "50"));
-        // Arbitrary values keep their brackets; arbitrary properties
-        // contribute their value text.
-        assert_eq!(texts_of("w-[13px]"), pair("[13px]", ""));
-        assert_eq!(texts_of("[color:red]/50"), pair("red", "50"));
-        // Static utilities have no value.
-        assert_eq!(texts_of("flex"), pair("", ""));
+    fn functional_shaped_static_names_resolve_through_the_static_table() {
+        // `w-full` parses as functional `w` + `full`; the whole name is
+        // a static registration, and the join must land in the same
+        // width bucket as functional `w` candidates.
+        let SortKey::Known { property_idx, .. } = classify("w-full") else {
+            panic!("expected `w-full` to classify as known");
+        };
+        let SortKey::Known {
+            property_idx: functional_idx,
+            ..
+        } = classify("w-10")
+        else {
+            panic!("expected `w-10` to classify as known");
+        };
+        assert_eq!(property_idx, functional_idx);
+        // Static names whose parsed base is no functional utility at
+        // all resolve too.
+        assert!(matches!(classify("justify-center"), SortKey::Known { .. }));
+        assert!(matches!(classify("inline-block"), SortKey::Known { .. }));
+    }
+
+    #[test]
+    fn joined_static_negatives_require_a_registered_negative_form() {
+        // Tailwind registers `-m-px` but no `-w-full`.
+        assert!(matches!(classify("-m-px"), SortKey::Known { .. }));
+        assert_eq!(classify("-w-full"), SortKey::Unknown);
+    }
+
+    #[test]
+    fn joined_static_lookup_skips_modified_candidates() {
+        // Statics take no modifier; `w-full/50` is not a valid
+        // candidate and resolves through no branch either.
+        assert_eq!(classify("w-full/50"), SortKey::Unknown);
+    }
+
+    #[test]
+    fn classification_captures_name_text() {
+        let text_of = |input: &str| name_text(&classify(input));
+        assert_eq!(text_of("p-4"), "p-4");
+        // Fractions, modifiers, and arbitrary values all ride along in
+        // the candidate text.
+        assert_eq!(text_of("w-1/2"), "w-1/2");
+        assert_eq!(text_of("bg-red-500/50"), "bg-red-500/50");
+        assert_eq!(text_of("w-[13px]"), "w-[13px]");
+        assert_eq!(text_of("[color:red]/50"), "[color:red]/50");
+        assert_eq!(text_of("flex"), "flex");
+        // The sign comes from the full candidate, outside the inner
+        // candidate node.
+        assert_eq!(text_of("-mt-2"), "-mt-2");
+        // The important suffix is not part of the name; it is a separate
+        // final tiebreak.
+        assert_eq!(text_of("p-4!"), "p-4");
     }
 
     // endregion: sort key classification
