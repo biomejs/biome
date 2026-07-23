@@ -9,7 +9,10 @@ Guidelines and design notes:
   spent querying/matching nodes or building the rule context. Integration points
   should start the timer immediately before invoking `R::run` and let it drop
   immediately after `R::run` returns.
-- It is concurrency-safe and aggregates timings across threads and files.
+- It is concurrency-safe and aggregates timings across threads and files. Each
+  thread accumulates into its own instance (no shared lock on the per-rule
+  recording path); `snapshot()`/`drain_sorted_by_total()` merge every thread's
+  data together on demand.
 - Profiling is disabled by default and must be explicitly enabled at runtime.
   When disabled, the overhead is near-zero (a fast boolean check).
 
@@ -36,7 +39,7 @@ use std::cmp;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 #[cfg(not(target_arch = "wasm32"))]
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 #[cfg(not(target_arch = "wasm32"))]
@@ -179,6 +182,17 @@ impl Metric {
         self.max = cmp::max(self.max, delta);
     }
 
+    /// Folds another thread's accumulated metric for the same rule into this one.
+    /// Both operands are expected to already hold at least one recorded sample
+    /// (see `merge_registry_snapshots`), so the `Duration::MAX`/`ZERO` sentinels
+    /// used by `Default` never leak into a merged result.
+    fn merge(&mut self, other: &Metric) {
+        self.total += other.total;
+        self.count = self.count.saturating_add(other.count);
+        self.min = cmp::min(self.min, other.min);
+        self.max = cmp::max(self.max, other.max);
+    }
+
     fn into_profile(self, label: RuleLabel) -> RuleProfile {
         RuleProfile {
             label,
@@ -194,8 +208,8 @@ impl Metric {
     }
 }
 
-/// Global, process-wide profiler state.
-/// Aggregates timings across all threads/files.
+/// Per-thread profiler state; see `LOCAL_PROFILER` for why this is one-per-thread
+/// rather than a single process-wide instance.
 #[derive(Default)]
 struct RuleProfiler {
     metrics: FxHashMap<RuleLabel, Metric>,
@@ -206,33 +220,73 @@ impl RuleProfiler {
         self.metrics.entry(label).or_default().record(delta);
     }
 
-    fn snapshot(&self) -> Vec<RuleProfile> {
-        self.metrics
-            .iter()
-            .map(|(label, metric)| metric.clone().into_profile(label.clone()))
-            .collect()
-    }
-
     fn reset(&mut self) {
         self.metrics.clear();
     }
 }
 
+// Each thread accumulates into its own `RuleProfiler` instance instead of sharing
+// one behind a single lock. `record()` runs on the hot path (once per rule
+// invocation, potentially millions of times across a large lint run) and must
+// never contend with other threads; a shared `Mutex<RuleProfiler>` here previously
+// made every thread serialize on that one lock for every single rule invocation,
+// which both slowed down profiled runs and skewed their own timing output (every
+// rule's `max` picked up occasional lock-wait spikes unrelated to that rule's own
+// cost). The `REGISTRY` mutex is only ever touched once per thread, at thread-local
+// initialization, not on the per-rule recording path.
 #[cfg(not(target_arch = "wasm32"))]
-static PROFILER: Mutex<Option<RuleProfiler>> = Mutex::new(None);
+static REGISTRY: Mutex<Vec<Arc<Mutex<RuleProfiler>>>> = Mutex::new(Vec::new());
+
+#[cfg(not(target_arch = "wasm32"))]
+thread_local! {
+    static LOCAL_PROFILER: Arc<Mutex<RuleProfiler>> = {
+        let profiler = Arc::new(Mutex::new(RuleProfiler::default()));
+        if let Ok(mut registry) = REGISTRY.lock() {
+            registry.push(profiler.clone());
+        }
+        profiler
+    };
+}
+
 #[cfg(not(target_arch = "wasm32"))]
 fn with_profiler<R>(f: impl FnOnce(&mut RuleProfiler) -> R) -> Option<R> {
-    if let Ok(mut guard) = PROFILER.lock() {
-        let profiler = guard.get_or_insert_with(RuleProfiler::default);
-        Some(f(profiler))
-    } else {
-        None
-    }
+    LOCAL_PROFILER.with(|profiler| {
+        let mut guard = profiler.lock().ok()?;
+        Some(f(&mut guard))
+    })
 }
 
 #[cfg(target_arch = "wasm32")]
 fn with_profiler<R>(_f: impl FnOnce(&mut RuleProfiler) -> R) -> Option<R> {
     None
+}
+
+/// Merges every thread's accumulated metrics for a rule into a single combined view.
+#[cfg(not(target_arch = "wasm32"))]
+fn merged_snapshot() -> Vec<RuleProfile> {
+    let mut merged: FxHashMap<RuleLabel, Metric> = FxHashMap::default();
+    if let Ok(registry) = REGISTRY.lock() {
+        for per_thread in registry.iter() {
+            let Ok(guard) = per_thread.lock() else {
+                continue;
+            };
+            for (label, metric) in guard.metrics.iter() {
+                merged
+                    .entry(label.clone())
+                    .and_modify(|existing| existing.merge(metric))
+                    .or_insert_with(|| metric.clone());
+            }
+        }
+    }
+    merged
+        .into_iter()
+        .map(|(label, metric)| metric.into_profile(label))
+        .collect()
+}
+
+#[cfg(target_arch = "wasm32")]
+fn merged_snapshot() -> Vec<RuleProfile> {
+    Vec::new()
 }
 
 static ENABLED: AtomicBool = AtomicBool::new(false);
@@ -328,14 +382,15 @@ pub fn record_rule_time(label: RuleLabel, delta: Duration) {
     with_profiler(|p| p.record(label, delta));
 }
 
-/// Returns a snapshot of all collected profiles in unspecified order.
+/// Returns a snapshot of all collected profiles, merged across every thread that
+/// has recorded at least one measurement, in unspecified order.
 pub fn snapshot() -> Vec<RuleProfile> {
-    with_profiler(|p| p.snapshot()).unwrap_or_default()
+    merged_snapshot()
 }
 
 /// Returns all profiles sorted by total time (descending).
 pub fn drain_sorted_by_total(reset_after: bool) -> Vec<RuleProfile> {
-    let mut profiles = with_profiler(|p| p.snapshot()).unwrap_or_default();
+    let mut profiles = merged_snapshot();
 
     profiles.sort_by_key(|b| std::cmp::Reverse(b.total));
 
@@ -346,9 +401,16 @@ pub fn drain_sorted_by_total(reset_after: bool) -> Vec<RuleProfile> {
     profiles
 }
 
-/// Clears all collected metrics.
+/// Clears all collected metrics across every thread that has recorded one.
 pub fn reset() {
-    with_profiler(|p| p.reset());
+    #[cfg(not(target_arch = "wasm32"))]
+    if let Ok(registry) = REGISTRY.lock() {
+        for per_thread in registry.iter() {
+            if let Ok(mut guard) = per_thread.lock() {
+                guard.reset();
+            }
+        }
+    }
 }
 
 /// Utility for formatting a summary of rule profiles for display purposes.
@@ -514,7 +576,7 @@ impl biome_console::fmt::Display for FmtDuration {
 
 #[cfg(test)]
 mod tests {
-    use super::{DisplayProfiles, RuleLabel, RuleProfile};
+    use super::{DisplayProfiles, RuleLabel, RuleProfile, disable, enable, record_rule_time, reset, snapshot};
     use biome_console::fmt::{Formatter, Termcolor};
     use biome_console::{Markup, markup};
     use biome_diagnostics::termcolor::NoColor;
@@ -593,5 +655,45 @@ mod tests {
         let rendered = render_markup(markup! {{ DisplayProfiles(profiles, None) }});
 
         insta::assert_snapshot!(rendered);
+    }
+
+    /// Regression test for the per-thread-accumulator rework: recordings made
+    /// concurrently from several threads for the *same* rule must still merge
+    /// into a single combined count/total, not get lost or double-attributed.
+    #[test]
+    fn profiler_aggregates_across_threads() {
+        reset();
+        enable();
+
+        let handles: Vec<_> = (0..4)
+            .map(|_| {
+                std::thread::spawn(|| {
+                    for _ in 0..25 {
+                        record_rule_time(
+                            RuleLabel::builtin("lint/test", "concurrentRule"),
+                            Duration::from_micros(10),
+                        );
+                    }
+                })
+            })
+            .collect();
+        for handle in handles {
+            handle.join().unwrap();
+        }
+
+        let profiles = snapshot();
+        let entry = profiles
+            .iter()
+            .find(|p| p.label.to_string() == "lint/test/concurrentRule")
+            .expect("expected a merged profile for concurrentRule across all threads");
+
+        assert_eq!(
+            entry.count, 100,
+            "samples from all 4 threads should merge into one combined count"
+        );
+        assert_eq!(entry.total, Duration::from_micros(10) * 100);
+
+        disable();
+        reset();
     }
 }
