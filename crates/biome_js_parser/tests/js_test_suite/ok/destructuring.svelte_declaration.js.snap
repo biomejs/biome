@@ -1,0 +1,145 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+const { value: renamed = 0, ...rest } = source, [first] = items;
+
+```
+
+
+## AST
+
+```
+JsSvelteDeclarationRoot {
+    declaration: JsVariableDeclaration {
+        await_token: missing (optional),
+        kind: CONST_KW@0..6 "const" [] [Whitespace(" ")],
+        declarators: JsVariableDeclaratorList [
+            JsVariableDeclarator {
+                id: JsObjectBindingPattern {
+                    l_curly_token: L_CURLY@6..8 "{" [] [Whitespace(" ")],
+                    properties: JsObjectBindingPatternPropertyList [
+                        JsObjectBindingPatternProperty {
+                            member: JsLiteralMemberName {
+                                value: IDENT@8..13 "value" [] [],
+                            },
+                            colon_token: COLON@13..15 ":" [] [Whitespace(" ")],
+                            pattern: JsIdentifierBinding {
+                                name_token: IDENT@15..23 "renamed" [] [Whitespace(" ")],
+                            },
+                            init: JsInitializerClause {
+                                eq_token: EQ@23..25 "=" [] [Whitespace(" ")],
+                                expression: JsNumberLiteralExpression {
+                                    value_token: JS_NUMBER_LITERAL@25..26 "0" [] [],
+                                },
+                            },
+                        },
+                        COMMA@26..28 "," [] [Whitespace(" ")],
+                        JsObjectBindingPatternRest {
+                            dotdotdot_token: DOT3@28..31 "..." [] [],
+                            binding: JsIdentifierBinding {
+                                name_token: IDENT@31..36 "rest" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@36..38 "}" [] [Whitespace(" ")],
+                },
+                variable_annotation: missing (optional),
+                initializer: JsInitializerClause {
+                    eq_token: EQ@38..40 "=" [] [Whitespace(" ")],
+                    expression: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@40..46 "source" [] [],
+                        },
+                    },
+                },
+            },
+            COMMA@46..48 "," [] [Whitespace(" ")],
+            JsVariableDeclarator {
+                id: JsArrayBindingPattern {
+                    l_brack_token: L_BRACK@48..49 "[" [] [],
+                    elements: JsArrayBindingPatternElementList [
+                        JsArrayBindingPatternElement {
+                            pattern: JsIdentifierBinding {
+                                name_token: IDENT@49..54 "first" [] [],
+                            },
+                            init: missing (optional),
+                        },
+                    ],
+                    r_brack_token: R_BRACK@54..56 "]" [] [Whitespace(" ")],
+                },
+                variable_annotation: missing (optional),
+                initializer: JsInitializerClause {
+                    eq_token: EQ@56..58 "=" [] [Whitespace(" ")],
+                    expression: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@58..63 "items" [] [],
+                        },
+                    },
+                },
+            },
+        ],
+    },
+    semicolon_token: SEMICOLON@63..64 ";" [] [],
+    eof_token: EOF@64..65 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_DECLARATION_ROOT@0..65
+  0: JS_VARIABLE_DECLARATION@0..63
+    0: (empty)
+    1: CONST_KW@0..6 "const" [] [Whitespace(" ")]
+    2: JS_VARIABLE_DECLARATOR_LIST@6..63
+      0: JS_VARIABLE_DECLARATOR@6..46
+        0: JS_OBJECT_BINDING_PATTERN@6..38
+          0: L_CURLY@6..8 "{" [] [Whitespace(" ")]
+          1: JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST@8..36
+            0: JS_OBJECT_BINDING_PATTERN_PROPERTY@8..26
+              0: JS_LITERAL_MEMBER_NAME@8..13
+                0: IDENT@8..13 "value" [] []
+              1: COLON@13..15 ":" [] [Whitespace(" ")]
+              2: JS_IDENTIFIER_BINDING@15..23
+                0: IDENT@15..23 "renamed" [] [Whitespace(" ")]
+              3: JS_INITIALIZER_CLAUSE@23..26
+                0: EQ@23..25 "=" [] [Whitespace(" ")]
+                1: JS_NUMBER_LITERAL_EXPRESSION@25..26
+                  0: JS_NUMBER_LITERAL@25..26 "0" [] []
+            1: COMMA@26..28 "," [] [Whitespace(" ")]
+            2: JS_OBJECT_BINDING_PATTERN_REST@28..36
+              0: DOT3@28..31 "..." [] []
+              1: JS_IDENTIFIER_BINDING@31..36
+                0: IDENT@31..36 "rest" [] [Whitespace(" ")]
+          2: R_CURLY@36..38 "}" [] [Whitespace(" ")]
+        1: (empty)
+        2: JS_INITIALIZER_CLAUSE@38..46
+          0: EQ@38..40 "=" [] [Whitespace(" ")]
+          1: JS_IDENTIFIER_EXPRESSION@40..46
+            0: JS_REFERENCE_IDENTIFIER@40..46
+              0: IDENT@40..46 "source" [] []
+      1: COMMA@46..48 "," [] [Whitespace(" ")]
+      2: JS_VARIABLE_DECLARATOR@48..63
+        0: JS_ARRAY_BINDING_PATTERN@48..56
+          0: L_BRACK@48..49 "[" [] []
+          1: JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST@49..54
+            0: JS_ARRAY_BINDING_PATTERN_ELEMENT@49..54
+              0: JS_IDENTIFIER_BINDING@49..54
+                0: IDENT@49..54 "first" [] []
+              1: (empty)
+          2: R_BRACK@54..56 "]" [] [Whitespace(" ")]
+        1: (empty)
+        2: JS_INITIALIZER_CLAUSE@56..63
+          0: EQ@56..58 "=" [] [Whitespace(" ")]
+          1: JS_IDENTIFIER_EXPRESSION@58..63
+            0: JS_REFERENCE_IDENTIFIER@58..63
+              0: IDENT@58..63 "items" [] []
+  1: SEMICOLON@63..64 ";" [] []
+  2: EOF@64..65 "" [Newline("\n")] []
+
+```

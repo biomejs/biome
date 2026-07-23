@@ -137,6 +137,19 @@ pub enum SvelteFileKind {
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
+pub enum SvelteEmbeddingKind {
+    #[default]
+    Source,
+    Expression,
+    SnippetSignature,
+    LegacyConst,
+    Declaration,
+}
+
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
 pub enum JsEmbeddingKind {
     Astro {
         /// Whether the script is inside Astro frontmatter
@@ -158,19 +171,12 @@ pub enum JsEmbeddingKind {
         allow_statements: bool,
     },
     Svelte {
-        /// Where the bindings are defined
-        is_source: bool,
-        /// `kind` models whether the Svelte file is a component document or a
+        /// `file_kind` models whether the Svelte file is a component document or a
         /// source module. That distinction controls whether downstream code
         /// extracts `<script>` content or treats the file as a standalone JS/TS
-        /// module, while `is_source` still tracks where bindings come from.
-        kind: SvelteFileKind,
-
-        /// Whether this is the declaration of a function, usually declared in `#snippet`
-        is_function_signature: bool,
-
-        /// Whether this is a `{@const name = value}` block.
-        is_const_block: bool,
+        /// module.
+        file_kind: SvelteFileKind,
+        embedding_kind: SvelteEmbeddingKind,
     },
     #[default]
     None,
@@ -220,7 +226,7 @@ impl JsEmbeddingKind {
         matches!(
             self,
             Self::Svelte {
-                is_function_signature: true,
+                embedding_kind: SvelteEmbeddingKind::SnippetSignature,
                 ..
             }
         )
@@ -229,7 +235,7 @@ impl JsEmbeddingKind {
         matches!(
             self,
             Self::Svelte {
-                kind: SvelteFileKind::Component,
+                file_kind: SvelteFileKind::Component,
                 ..
             }
         )
@@ -238,7 +244,7 @@ impl JsEmbeddingKind {
         matches!(
             self,
             Self::Svelte {
-                kind: SvelteFileKind::SourceModule,
+                file_kind: SvelteFileKind::SourceModule,
                 ..
             }
         )
@@ -247,7 +253,17 @@ impl JsEmbeddingKind {
         matches!(
             self,
             Self::Svelte {
-                is_const_block: true,
+                embedding_kind: SvelteEmbeddingKind::LegacyConst,
+                ..
+            }
+        )
+    }
+
+    pub const fn is_svelte_declaration(&self) -> bool {
+        matches!(
+            self,
+            Self::Svelte {
+                embedding_kind: SvelteEmbeddingKind::Declaration,
                 ..
             }
         )
@@ -345,10 +361,8 @@ impl JsFileSource {
     /// Svelte file definition
     pub fn svelte() -> Self {
         Self::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
-            is_source: true,
-            is_function_signature: false,
-            kind: SvelteFileKind::Component,
-            is_const_block: false,
+            file_kind: SvelteFileKind::Component,
+            embedding_kind: SvelteEmbeddingKind::Source,
         })
     }
 
@@ -426,7 +440,7 @@ impl JsFileSource {
         matches!(
             self.embedding_kind,
             JsEmbeddingKind::Svelte {
-                is_source: true,
+                embedding_kind: SvelteEmbeddingKind::Source,
                 ..
             } | JsEmbeddingKind::Vue {
                 is_source: true,
@@ -446,7 +460,9 @@ impl JsFileSource {
         matches!(
             self.embedding_kind,
             JsEmbeddingKind::Svelte {
-                is_source: false,
+                embedding_kind: SvelteEmbeddingKind::Expression
+                    | SvelteEmbeddingKind::SnippetSignature
+                    | SvelteEmbeddingKind::LegacyConst,
                 ..
             } | JsEmbeddingKind::Vue {
                 allow_statements: false,
@@ -466,6 +482,10 @@ impl JsFileSource {
     /// Returns true if this is a Svelte `{@const}` block
     pub const fn is_svelte_const_block(&self) -> bool {
         self.embedding_kind.is_svelte_const_block()
+    }
+
+    pub const fn is_svelte_declaration(&self) -> bool {
+        self.embedding_kind.is_svelte_declaration()
     }
 
     pub const fn as_embedding_kind(&self) -> &JsEmbeddingKind {
@@ -554,10 +574,8 @@ impl JsFileSource {
             };
 
             return Ok(source.with_embedding_kind(JsEmbeddingKind::Svelte {
-                is_source: true,
-                is_function_signature: false,
-                kind: SvelteFileKind::SourceModule,
-                is_const_block: false,
+                file_kind: SvelteFileKind::SourceModule,
+                embedding_kind: SvelteEmbeddingKind::Source,
             }));
         }
 

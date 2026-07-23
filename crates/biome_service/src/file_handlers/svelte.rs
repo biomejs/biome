@@ -17,7 +17,7 @@ use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{JsLanguage, TextRange, TextSize};
-use biome_languages::javascript::{JsEmbeddingKind, SvelteFileKind};
+use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
 use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_rowan::NodeCache;
 use biome_workspace_db::WorkspaceDb;
@@ -83,10 +83,8 @@ impl SvelteFileHandler {
                     JsFileSource::from(language)
                         .with_variant(variant)
                         .with_embedding_kind(JsEmbeddingKind::Svelte {
-                            is_source: true,
-                            is_function_signature: false,
-                            kind: SvelteFileKind::Component,
-                            is_const_block: false,
+                            file_kind: SvelteFileKind::Component,
+                            embedding_kind: SvelteEmbeddingKind::Source,
                         }),
                 )
             })

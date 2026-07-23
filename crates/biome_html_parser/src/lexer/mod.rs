@@ -649,25 +649,24 @@ impl<'src> HtmlLexer<'src> {
         }
 
         let mut brackets_stack = 0;
+        let mut quotes_seen = QuotesSeen::new();
         while let Some(current) = self.current_byte() {
-            match current {
-                b'}' => {
-                    if brackets_stack == 0 {
-                        break;
-                    } else {
+            if quotes_seen.is_empty() {
+                match current {
+                    b'}' => {
+                        if brackets_stack == 0 {
+                            break;
+                        }
                         brackets_stack -= 1;
-                        self.advance(1);
                     }
-                }
-                b'{' => {
-                    brackets_stack += 1;
-                    self.advance(1);
-                }
-
-                _ => {
-                    self.advance(1);
+                    b'{' => {
+                        brackets_stack += 1;
+                    }
+                    _ => {}
                 }
             }
+            quotes_seen.check_byte(current);
+            self.advance(1);
         }
 
         HTML_LITERAL
@@ -1914,9 +1913,9 @@ impl<'src> LexerWithCheckpoint<'src> for HtmlLexer<'src> {
 }
 
 /// Tracks whether the lexer is currently inside an open string literal, regex
-/// literal, or comment while scanning Astro frontmatter. Used to determine
-/// whether a `---` sequence is a genuine closing fence or merely three dashes
-/// that appear inside a string or regex.
+/// literal, or comment while scanning embedded JavaScript. This distinguishes
+/// Astro closing fences and Svelte expression braces from the same characters
+/// inside JavaScript literals or comments.
 ///
 /// ## Design
 ///

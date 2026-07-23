@@ -404,6 +404,34 @@ pub(crate) fn parse_svelte_spread_or_expression(p: &mut HtmlParser) -> ParsedSyn
     }
 }
 
+pub(crate) fn parse_svelte_declaration_or_expression(p: &mut HtmlParser) -> ParsedSyntax {
+    if !Svelte.is_supported(p) || !p.at(T!['{']) {
+        return parse_single_text_expression(p, HtmlLexContext::Regular);
+    }
+
+    let checkpoint = p.checkpoint();
+    let m = p.start();
+    p.bump_with_context(T!['{'], HtmlLexContext::single_expression());
+
+    let is_declaration = ["let", "const"].into_iter().any(|keyword| {
+        p.cur_text().strip_prefix(keyword).is_some_and(|rest| {
+            rest.as_bytes()
+                .first()
+                .is_none_or(|byte| !byte.is_ascii_alphanumeric() && *byte != b'_')
+        })
+    });
+
+    if is_declaration {
+        parse_single_text_expression_content(p).or_add_diagnostic(p, expected_text_expression);
+        p.expect_with_context(T!['}'], HtmlLexContext::Regular);
+        Present(m.complete(p, SVELTE_DECLARATION_BLOCK))
+    } else {
+        p.rewind(checkpoint);
+        m.abandon(p);
+        parse_single_text_expression(p, HtmlLexContext::Regular)
+    }
+}
+
 // #region await parse functions
 
 fn parse_await_block(p: &mut HtmlParser, parent_marker: Marker) -> ParsedSyntax {

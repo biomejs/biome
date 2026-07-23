@@ -1229,17 +1229,17 @@ impl Features {
                 // `.svelte.ts` / `.svelte.js` are full JS/TS modules with Svelte
                 // semantics; `.svelte` component documents still use the Svelte handler.
                 JsEmbeddingKind::Svelte {
-                    kind: SvelteFileKind::SourceModule,
+                    file_kind: SvelteFileKind::SourceModule,
                     ..
                 } => self.js.capabilities(),
                 #[cfg(feature = "lang_html")]
                 JsEmbeddingKind::Svelte {
-                    kind: SvelteFileKind::Component,
+                    file_kind: SvelteFileKind::Component,
                     ..
                 } => self.svelte.capabilities(),
                 #[cfg(not(feature = "lang_html"))]
                 JsEmbeddingKind::Svelte {
-                    kind: SvelteFileKind::Component,
+                    file_kind: SvelteFileKind::Component,
                     ..
                 } => self.js.capabilities(),
                 JsEmbeddingKind::None => self.js.capabilities(),
