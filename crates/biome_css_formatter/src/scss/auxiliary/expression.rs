@@ -10,12 +10,18 @@ use biome_formatter::{FormatResult, write};
 pub(crate) struct FormatScssExpression;
 impl FormatNodeRule<ScssExpression> for FormatScssExpression {
     fn fmt_node(&self, node: &ScssExpression, f: &mut CssFormatter) -> FormatResult<()> {
-        if is_commented_function_argument(node, f) {
-            // The leading-comment hook emits its break before `fmt_node` runs.
-            // Starting the indent here keeps the first token aligned with the
-            // comment while nested breaks retain the argument indent.
-            let formatted = format_with(|f| self.fmt_fields(node, f));
-            write!(f, [indent(&formatted)])
+        if is_function_argument_with_leading_comments(node, f) {
+            // Keep the comment and function aligned. Only breaks inside the
+            // function inherit the additional argument-body indent.
+            write!(
+                f,
+                [
+                    format_leading_comments(node.syntax()).with_following_content(|f| {
+                        let formatted = format_with(|f| self.fmt_fields(node, f));
+                        write!(f, [indent(&formatted)])
+                    })
+                ]
+            )
         } else {
             self.fmt_node_with_scss_separator_comments(node, f)
         }
@@ -32,11 +38,15 @@ impl FormatNodeRule<ScssExpression> for FormatScssExpression {
         node: &ScssExpression,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        self.fmt_leading_scss_separator_comments(node, f)
+        if is_function_argument_with_leading_comments(node, f) {
+            Ok(())
+        } else {
+            self.fmt_leading_scss_separator_comments(node, f)
+        }
     }
 }
 
-fn is_commented_function_argument(node: &ScssExpression, f: &CssFormatter) -> bool {
+fn is_function_argument_with_leading_comments(node: &ScssExpression, f: &CssFormatter) -> bool {
     node.parent::<CssParameterList>().is_some()
         && f.comments().has_leading_comments(node.syntax())
         && single_expression_item(node).is_some_and(|item| {
