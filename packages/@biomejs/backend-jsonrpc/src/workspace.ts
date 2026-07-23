@@ -1080,7 +1080,8 @@ Can be either a plain path string or an object with path and options:
 {
   "plugins": [
     "simple-plugin.grit",
-    { "path": "scoped-plugin.grit", "includes": ["src/**\/*.ts"] }
+    { "path": "scoped-plugin.grit", "includes": ["src/**\/*.ts"] },
+    { "path": "./local-plugin.grit", "includes": ["src/**\/*.ts"], "resolutionKind": "config" }
   ]
 }
 ``` 
@@ -1348,6 +1349,16 @@ these patterns. Use negated globs (e.g., `!**\/*.test.ts`) for exclusions.
 	 * The path to the plugin.
 	 */
 	path: string;
+	/**
+	* Controls how the plugin is resolved.
+
+This only affects plugin resolution. It does not change how `includes`
+are interpreted.
+
+When omitted, relative plugin paths are resolved from the consuming
+project. 
+	 */
+	resolutionKind?: PluginResolvePath;
 }
 export type NoDuplicateClassesConfiguration =
 	| RuleAssistPlainConfiguration
@@ -4035,6 +4046,7 @@ See https://biomejs.dev/linter/rules/use-strict-mode
 	useStrictMode?: UseStrictModeConfiguration;
 }
 export type Glob = string;
+export type PluginResolvePath = "project" | "config";
 export type RuleAssistPlainConfiguration = "off" | "on";
 export interface RuleAssistWithNoDuplicateClassesOptions {
 	level: RuleAssistPlainConfiguration;
