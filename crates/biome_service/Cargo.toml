@@ -11,10 +11,14 @@ keywords.workspace   = true
 categories.workspace = true
 publish              = false
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [package.metadata.cargo-udeps.ignore]
 development = ["biome_service"]
+
+[[bench]]
+harness = false
+name    = "pull_diagnostics"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 biome_analyze            = { workspace = true, features = ["serde"] }
@@ -97,9 +101,16 @@ web-time                 = { workspace = true }
 
 [dev-dependencies]
 biome_configuration = { path = "../biome_configuration", features = ["test-utils"] }
-biome_service       = { path = ".", features = ["testing"] }
+biome_service       = { path = ".", features = ["testing", "type_inference"] }
+divan               = { package = "codspeed-divan-compat", version = "=4.4.1" }
 insta               = { workspace = true }
 static_assertions   = { workspace = true }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
 
 [features]
 # To parse snippets and embeds inside HTML files

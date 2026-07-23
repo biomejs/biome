@@ -62,6 +62,8 @@ jobs:
               - 'crates/biome_js_formatter/**/*.rs'
               - 'crates/biome_js_parser/**/*.rs'
               - 'crates/biome_js_*/**/*.rs'
+              - 'crates/biome_service/Cargo.toml'
+              - 'crates/biome_service/**/*.rs'
               - 'crates/biome_formatter/**/*.rs'
               - 'crates/biome_rowan/**/*.rs'
               - 'crates/biome_parser/**/*.rs'
@@ -203,6 +205,7 @@ jobs:
           - biome_js_parser
           - biome_js_formatter
           - biome_js_analyze
+          - biome_service
     steps: &bench_steps
       - name: Checkout PR Branch
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
