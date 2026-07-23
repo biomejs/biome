@@ -34,7 +34,7 @@ biome_string_case    = { workspace = true }
 camino               = { workspace = true }
 grit-pattern-matcher = { workspace = true }
 grit-util            = { workspace = true }
-path-absolutize      = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
+path-absolutize      = { version = "4.0.1", features = ["use_unix_paths_on_wasm"], optional = false }
 rand                 = { version = "=0.8.5" }
 regex                = { workspace = true }
 rustc-hash           = { workspace = true }
@@ -44,7 +44,7 @@ serde_json           = { workspace = true, optional = true }
 
 [dev-dependencies]
 biome_test_utils = { path = "../biome_test_utils" }
-criterion        = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+criterion        = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 insta            = { workspace = true }
 tests_macros     = { path = "../tests_macros" }
 
