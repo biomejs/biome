@@ -15,7 +15,7 @@ impl FormatNodeRule<CssIfSassTest> for FormatCssIfSassTest {
         write!(
             f,
             [
-                sass_token.format(),
+                sass_token.format()?.with_text_case(CssCase::Preserve),
                 group(&format_args![
                     l_paren_token.format(),
                     soft_block_indent(&test.format()),

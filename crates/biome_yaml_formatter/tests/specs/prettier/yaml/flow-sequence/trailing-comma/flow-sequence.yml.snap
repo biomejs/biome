@@ -34,29 +34,14 @@ does not suffice: >
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,14 +1,17 @@
- failing:
-   [
--    "object-does-not-fit-within-print-width",
--    "------",
--    "TEST",
--    "comma IS added here",
-+    "object-does-not-fit-within-print-width", "------",
-+    "TEST", "comma IS added here"
+@@ -7,7 +7,6 @@
    ]
  
--expected: ["object-fits-within-print-width", "", "TEST", "comma NOT here"]
-+expected:
-+  [
-+    "object-fits-within-print-width", "",
-+    "TEST", "comma NOT here"
-+  ]
- 
+ expected: ["object-fits-within-print-width", "", "TEST", "comma NOT here"]
+-
  ---
-+
  does not suffice: >
    [
-     "object-does-not-fit-within-print-width", "------",
 ```
 
 # Output
@@ -64,18 +49,14 @@ does not suffice: >
 ```yml
 failing:
   [
-    "object-does-not-fit-within-print-width", "------",
-    "TEST", "comma IS added here"
+    "object-does-not-fit-within-print-width",
+    "------",
+    "TEST",
+    "comma IS added here",
   ]
 
-expected:
-  [
-    "object-fits-within-print-width", "",
-    "TEST", "comma NOT here"
-  ]
-
+expected: ["object-fits-within-print-width", "", "TEST", "comma NOT here"]
 ---
-
 does not suffice: >
   [
     "object-does-not-fit-within-print-width", "------",

@@ -107,7 +107,7 @@ build-wasm-bundler:
 
 # Build WASM for Node.js target (development)
 build-wasm-node-dev:
-  cargo build --lib --target wasm32-unknown-unknown -p biome_wasm
+  cargo build --lib --target wasm32-unknown-unknown -p biome_wasm --features unstable
   wasm-bindgen target/wasm32-unknown-unknown/debug/biome_wasm.wasm \
     --out-dir packages/@biomejs/wasm-nodejs \
     --target nodejs \

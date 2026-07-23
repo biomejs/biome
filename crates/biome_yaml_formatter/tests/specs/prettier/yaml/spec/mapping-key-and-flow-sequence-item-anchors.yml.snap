@@ -18,17 +18,16 @@ info: yaml/spec/mapping-key-and-flow-sequence-item-anchors.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,3 +1,3 @@
+@@ -1,3 +1,2 @@
  ---
- &mapping
+-&mapping
 -&key [&item a, b, c]: value
-+&key [ &item a, b, c ]: value
++&mapping &key [&item a, b, c]: value
 ```
 
 # Output
 
 ```yml
 ---
-&mapping
-&key [ &item a, b, c ]: value
+&mapping &key [&item a, b, c]: value
 ```

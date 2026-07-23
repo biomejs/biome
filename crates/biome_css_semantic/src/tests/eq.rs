@@ -10,6 +10,12 @@ fn build_model(source: &str) -> SemanticModel {
     semantic_model(&root)
 }
 
+fn build_scss_model(source: &str) -> SemanticModel {
+    let parse = parse_css(source, CssFileSource::scss(), CssParserOptions::default());
+    let root = parse.tree();
+    semantic_model(&root)
+}
+
 #[test]
 fn whitespace_change_is_eq() {
     assert_eq!(
@@ -97,6 +103,48 @@ fn global_variable_count_change_is_not_eq() {
         build_model(":root { --color: red; }"),
         build_model(":root { --color: red; --size: 20px; }"),
         "different custom property counts should produce different models"
+    );
+}
+
+#[test]
+fn scss_custom_property_function_boundary_is_not_eq() {
+    assert_ne!(
+        build_scss_model(":root { --value: url(foo); }"),
+        build_scss_model(":root { --value: url (foo); }"),
+        "source-tight functions and identifier-plus-block values should differ"
+    );
+}
+
+#[test]
+fn scss_custom_property_interpolation_boundary_is_not_eq() {
+    assert_ne!(
+        build_scss_model(":root { --value: #{$value}; }"),
+        build_scss_model(":root { --value: # {$value}; }"),
+        "interpolation and a literal hash-plus-block value should differ"
+    );
+}
+
+#[test]
+fn scss_custom_property_component_whitespace_is_not_eq() {
+    assert_ne!(
+        build_scss_model(":root { --value: //; }"),
+        build_scss_model(":root { --value: / /; }"),
+        "whitespace between raw components should affect equality"
+    );
+}
+
+#[test]
+fn scss_custom_property_container_whitespace_is_eq() {
+    assert_eq!(
+        build_scss_model(":root { --value: fn( value ) [ value ]; }"),
+        build_scss_model(":root { --value: fn(value) [value]; }"),
+        "formatter-normalized container whitespace should not affect equality"
+    );
+
+    assert_eq!(
+        build_scss_model(":root { --value: fn(/* note */); }"),
+        build_scss_model(":root { --value: fn(); }"),
+        "comments should not affect custom-property value equality"
     );
 }
 

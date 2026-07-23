@@ -120,3 +120,8 @@ function exhaustiveSwitchOnAsConstStringDiscriminant(): void {
 	switch (wrappedSwitch.kind) {
 	}
 }
+declare const bigintUnion: 1n | 2n;
+switch (bigintUnion) {
+	case 1n:
+		break;
+}

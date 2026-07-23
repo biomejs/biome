@@ -39,13 +39,14 @@ salsa                = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }
 tokio                = { workspace = true, features = ["io-std", "rt", "time"] }
+tower                = { workspace = true }
 tower-lsp-server     = { workspace = true }
 tracing              = { workspace = true, features = ["attributes"] }
 url                  = { workspace = true }
 uuid                 = { workspace = true, features = ["v4"] }
 
 [dev-dependencies]
-tokio = { workspace = true, features = ["macros", "rt", "rt-multi-thread"] }
+tokio = { workspace = true, features = ["io-util", "macros", "rt", "rt-multi-thread"] }
 tower = { workspace = true, features = ["timeout"] }
 
 [lints]

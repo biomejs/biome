@@ -250,8 +250,8 @@ CssRoot {
                                     value_token: IDENT@178..186 "--gap" [Newline("\n"), Whitespace("  ")] [],
                                 },
                                 colon_token: COLON@186..188 ":" [] [Whitespace(" ")],
-                                value: ScssExpression {
-                                    items: ScssExpressionItemList [
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
                                         CssRegularDimension {
                                             value_token: CSS_NUMBER_LITERAL@188..190 "10" [] [],
                                             unit_token: IDENT@190..192 "px" [] [],
@@ -292,8 +292,8 @@ CssRoot {
                                     ],
                                 },
                                 colon_token: COLON@206..208 ":" [] [Whitespace(" ")],
-                                value: ScssExpression {
-                                    items: ScssExpressionItemList [
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
                                         CssRegularDimension {
                                             value_token: CSS_NUMBER_LITERAL@208..210 "10" [] [],
                                             unit_token: IDENT@210..212 "px" [] [],
@@ -331,48 +331,40 @@ CssRoot {
                                     ],
                                 },
                                 colon_token: COLON@232..234 ":" [] [Whitespace(" ")],
-                                value: ScssExpression {
-                                    items: ScssExpressionItemList [
-                                        CssFunction {
-                                            name: ScssModuleMemberAccess {
-                                                module: CssIdentifier {
-                                                    value_token: IDENT@234..239 "color" [] [],
-                                                },
-                                                dot_token: DOT@239..240 "." [] [],
-                                                member: CssIdentifier {
-                                                    value_token: IDENT@240..246 "adjust" [] [],
-                                                },
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssCustomIdentifier {
+                                            value_token: IDENT@234..239 "color" [] [],
+                                        },
+                                        CssCustomPropertyDelimiter {
+                                            value: DOT@239..240 "." [] [],
+                                        },
+                                        CssCustomPropertyFunction {
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@240..246 "adjust" [] [],
                                             },
                                             l_paren_token: L_PAREN@246..247 "(" [] [],
-                                            items: CssParameterList [
-                                                ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        CssColor {
-                                                            hash_token: HASH@247..248 "#" [] [],
-                                                            value_token: CSS_COLOR_LITERAL@248..251 "fff" [] [],
-                                                        },
-                                                    ],
+                                            components: CssCustomPropertyComponentList [
+                                                CssCustomPropertyDelimiter {
+                                                    value: HASH@247..248 "#" [] [],
                                                 },
-                                                COMMA@251..253 "," [] [Whitespace(" ")],
-                                                ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        ScssKeywordArgument {
-                                                            name: ScssVariable {
-                                                                dollar_token: DOLLAR@253..254 "$" [] [],
-                                                                name: CssIdentifier {
-                                                                    value_token: IDENT@254..259 "alpha" [] [],
-                                                                },
-                                                            },
-                                                            colon_token: COLON@259..261 ":" [] [Whitespace(" ")],
-                                                            value: ScssExpression {
-                                                                items: ScssExpressionItemList [
-                                                                    CssNumber {
-                                                                        value_token: CSS_NUMBER_LITERAL@261..265 "-0.2" [] [],
-                                                                    },
-                                                                ],
-                                                            },
-                                                        },
-                                                    ],
+                                                CssCustomIdentifier {
+                                                    value_token: IDENT@248..251 "fff" [] [],
+                                                },
+                                                CssCustomPropertyDelimiter {
+                                                    value: COMMA@251..253 "," [] [Whitespace(" ")],
+                                                },
+                                                CssCustomPropertyDelimiter {
+                                                    value: DOLLAR@253..254 "$" [] [],
+                                                },
+                                                CssCustomIdentifier {
+                                                    value_token: IDENT@254..259 "alpha" [] [],
+                                                },
+                                                CssCustomPropertyDelimiter {
+                                                    value: COLON@259..261 ":" [] [Whitespace(" ")],
+                                                },
+                                                CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@261..265 "-0.2" [] [],
                                                 },
                                             ],
                                             r_paren_token: R_PAREN@265..266 ")" [] [],
@@ -1374,8 +1366,8 @@ CssRoot {
                 0: CSS_DASHED_IDENTIFIER@178..186
                   0: IDENT@178..186 "--gap" [Newline("\n"), Whitespace("  ")] []
                 1: COLON@186..188 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@188..192
-                  0: SCSS_EXPRESSION_ITEM_LIST@188..192
+                2: CSS_CUSTOM_PROPERTY_VALUE@188..192
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@188..192
                     0: CSS_REGULAR_DIMENSION@188..192
                       0: CSS_NUMBER_LITERAL@188..190 "10" [] []
                       1: IDENT@190..192 "px" [] []
@@ -1401,8 +1393,8 @@ CssRoot {
                               0: IDENT@201..205 "prop" [] []
                       3: R_CURLY@205..206 "}" [] []
                 1: COLON@206..208 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@208..212
-                  0: SCSS_EXPRESSION_ITEM_LIST@208..212
+                2: CSS_CUSTOM_PROPERTY_VALUE@208..212
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@208..212
                     0: CSS_REGULAR_DIMENSION@208..212
                       0: CSS_NUMBER_LITERAL@208..210 "10" [] []
                       1: IDENT@210..212 "px" [] []
@@ -1426,35 +1418,31 @@ CssRoot {
                               0: IDENT@227..231 "slot" [] []
                       3: R_CURLY@231..232 "}" [] []
                 1: COLON@232..234 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@234..266
-                  0: SCSS_EXPRESSION_ITEM_LIST@234..266
-                    0: CSS_FUNCTION@234..266
-                      0: SCSS_MODULE_MEMBER_ACCESS@234..246
-                        0: CSS_IDENTIFIER@234..239
-                          0: IDENT@234..239 "color" [] []
-                        1: DOT@239..240 "." [] []
-                        2: CSS_IDENTIFIER@240..246
-                          0: IDENT@240..246 "adjust" [] []
+                2: CSS_CUSTOM_PROPERTY_VALUE@234..266
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@234..266
+                    0: CSS_CUSTOM_IDENTIFIER@234..239
+                      0: IDENT@234..239 "color" [] []
+                    1: CSS_CUSTOM_PROPERTY_DELIMITER@239..240
+                      0: DOT@239..240 "." [] []
+                    2: CSS_CUSTOM_PROPERTY_FUNCTION@240..266
+                      0: CSS_CUSTOM_IDENTIFIER@240..246
+                        0: IDENT@240..246 "adjust" [] []
                       1: L_PAREN@246..247 "(" [] []
-                      2: CSS_PARAMETER_LIST@247..265
-                        0: SCSS_EXPRESSION@247..251
-                          0: SCSS_EXPRESSION_ITEM_LIST@247..251
-                            0: CSS_COLOR@247..251
-                              0: HASH@247..248 "#" [] []
-                              1: CSS_COLOR_LITERAL@248..251 "fff" [] []
-                        1: COMMA@251..253 "," [] [Whitespace(" ")]
-                        2: SCSS_EXPRESSION@253..265
-                          0: SCSS_EXPRESSION_ITEM_LIST@253..265
-                            0: SCSS_KEYWORD_ARGUMENT@253..265
-                              0: SCSS_VARIABLE@253..259
-                                0: DOLLAR@253..254 "$" [] []
-                                1: CSS_IDENTIFIER@254..259
-                                  0: IDENT@254..259 "alpha" [] []
-                              1: COLON@259..261 ":" [] [Whitespace(" ")]
-                              2: SCSS_EXPRESSION@261..265
-                                0: SCSS_EXPRESSION_ITEM_LIST@261..265
-                                  0: CSS_NUMBER@261..265
-                                    0: CSS_NUMBER_LITERAL@261..265 "-0.2" [] []
+                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@247..265
+                        0: CSS_CUSTOM_PROPERTY_DELIMITER@247..248
+                          0: HASH@247..248 "#" [] []
+                        1: CSS_CUSTOM_IDENTIFIER@248..251
+                          0: IDENT@248..251 "fff" [] []
+                        2: CSS_CUSTOM_PROPERTY_DELIMITER@251..253
+                          0: COMMA@251..253 "," [] [Whitespace(" ")]
+                        3: CSS_CUSTOM_PROPERTY_DELIMITER@253..254
+                          0: DOLLAR@253..254 "$" [] []
+                        4: CSS_CUSTOM_IDENTIFIER@254..259
+                          0: IDENT@254..259 "alpha" [] []
+                        5: CSS_CUSTOM_PROPERTY_DELIMITER@259..261
+                          0: COLON@259..261 ":" [] [Whitespace(" ")]
+                        6: CSS_NUMBER@261..265
+                          0: CSS_NUMBER_LITERAL@261..265 "-0.2" [] []
                       3: R_PAREN@265..266 ")" [] []
               1: (empty)
             1: SEMICOLON@266..267 ";" [] []

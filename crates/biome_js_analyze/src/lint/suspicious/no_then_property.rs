@@ -3,7 +3,8 @@ use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rul
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsAssignment, AnyJsAssignmentPattern, AnyJsCallArgument,
+    AnyJsArrayElement, AnyJsAssignment, AnyJsAssignmentPattern, AnyJsBinding,
+    AnyJsBindingPattern, AnyJsCallArgument,
     AnyJsDeclarationClause, AnyJsExportClause, AnyJsExportNamedSpecifier, AnyJsExpression,
     AnyJsObjectMemberName, AnyJsTemplateElement, ClassMemberName, JsMethodObjectMember,
 };
@@ -95,7 +96,7 @@ declare_lint_rule! {
 }
 
 declare_node_union! {
-    pub NoThenPropertyQuery =
+    pub AnyNoThenPropertyQuery =
         AnyJsObjectMember |
         JsComputedMemberName |
         AnyJsClassMember |
@@ -116,7 +117,7 @@ pub struct RuleState {
 }
 
 impl Rule for NoThenProperty {
-    type Query = Ast<NoThenPropertyQuery>;
+    type Query = Ast<AnyNoThenPropertyQuery>;
     type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = NoThenPropertyOptions;
@@ -124,14 +125,16 @@ impl Rule for NoThenProperty {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binding = ctx.query();
         match binding {
-            NoThenPropertyQuery::AnyJsObjectMember(node) => process_js_object_member(node),
-            NoThenPropertyQuery::AnyJsClassMember(node) => process_js_class_member(node),
-            NoThenPropertyQuery::JsComputedMemberName(node) => {
+            AnyNoThenPropertyQuery::AnyJsObjectMember(node) => process_js_object_member(node),
+            AnyNoThenPropertyQuery::AnyJsClassMember(node) => process_js_class_member(node),
+            AnyNoThenPropertyQuery::JsComputedMemberName(node) => {
                 process_js_computed_member_name(node)
             }
-            NoThenPropertyQuery::JsAssignmentExpression(node) => process_js_assignment_expr(node),
-            NoThenPropertyQuery::JsCallExpression(node) => process_js_call_expr(node),
-            NoThenPropertyQuery::JsExport(node) => process_js_export_named_clause(node),
+            AnyNoThenPropertyQuery::JsAssignmentExpression(node) => {
+                process_js_assignment_expr(node)
+            }
+            AnyNoThenPropertyQuery::JsCallExpression(node) => process_js_call_expr(node),
+            AnyNoThenPropertyQuery::JsExport(node) => process_js_export_named_clause(node),
         }
     }
 
@@ -275,9 +278,7 @@ fn process_js_assignment_expr(node: &JsAssignmentExpression) -> Option<RuleState
     match node.left().ok()? {
         AnyJsAssignmentPattern::AnyJsAssignment(assignment) => match assignment {
             AnyJsAssignment::JsComputedMemberAssignment(c) => {
-                if c.member().ok()?.to_trimmed_text().text() == "\"then\""
-                    || c.member().ok()?.to_trimmed_text().text() == "`then`"
-                {
+                if is_then_property_expression(&c.member().ok()?) {
                     return Some(RuleState {
                         range: node.left().ok()?.range(),
                         message: NoThenPropertyMessage::Object,
@@ -285,7 +286,7 @@ fn process_js_assignment_expr(node: &JsAssignmentExpression) -> Option<RuleState
                 }
             }
             AnyJsAssignment::JsStaticMemberAssignment(m) => {
-                if m.member().ok()?.to_trimmed_text().text() == "then" {
+                if m.member().ok()?.as_js_name()?.value_token().ok()?.text_trimmed() == "then" {
                     return Some(RuleState {
                         range: node.left().ok()?.range(),
                         message: NoThenPropertyMessage::Object,
@@ -309,8 +310,15 @@ fn process_js_call_expr(node: &JsCallExpression) -> Option<RuleState> {
                 return None;
             }
 
-            let callee = m.object().ok()?.to_trimmed_text();
-            let member = m.member().ok()?.to_trimmed_text();
+            let callee = m
+                .object()
+                .ok()?
+                .as_js_identifier_expression()?
+                .name()
+                .ok()?
+                .value_token()
+                .ok()?;
+            let member = m.member().ok()?.as_js_name()?.value_token().ok()?;
 
             let args = node.arguments().ok()?.args();
             let first = args.iter().next()?.ok()?;
@@ -319,7 +327,8 @@ fn process_js_call_expr(node: &JsCallExpression) -> Option<RuleState> {
             // ex)
             //   Object.fromEntries([["then", 1]])
             //   Object.fromEntries([['foo', 'foo'], ['then', 32],['bar', 'bar']]);
-            if callee.text() == "Object" && member.text() == "fromEntries" {
+            if callee.text_trimmed() == "Object" && member.text_trimmed() == "fromEntries"
+            {
                 if args.len() != 1 {
                     return None;
                 }
@@ -331,8 +340,8 @@ fn process_js_call_expr(node: &JsCallExpression) -> Option<RuleState> {
                             ) = arr.ok()?
                             {
                                 let key = arg.elements().first()?.ok()?;
-                                if key.to_trimmed_text().text() == "\"then\""
-                                    || key.to_trimmed_text().text() == "`then`"
+                                if let AnyJsArrayElement::AnyJsExpression(key) = key
+                                    && is_then_property_expression(&key)
                                 {
                                     return Some(RuleState {
                                         range: key.range(),
@@ -348,7 +357,9 @@ fn process_js_call_expr(node: &JsCallExpression) -> Option<RuleState> {
             }
 
             // Handle `Object.defineProperty({}, "then", {})`
-            if (callee == "Object" || callee == "Reflect") && member == "defineProperty" {
+            if (callee.text_trimmed() == "Object" || callee.text_trimmed() == "Reflect")
+                && member.text_trimmed() == "defineProperty"
+            {
                 if args.len() < 3 {
                     return None;
                 }
@@ -356,8 +367,8 @@ fn process_js_call_expr(node: &JsCallExpression) -> Option<RuleState> {
                     return None;
                 }
                 let second = args.iter().nth(1)?.ok()?;
-                if second.to_trimmed_text().text() == "\"then\""
-                    || second.to_trimmed_text().text() == "`then`"
+                if let AnyJsCallArgument::AnyJsExpression(second) = second
+                    && is_then_property_expression(&second)
                 {
                     return Some(RuleState {
                         range: second.range(),
@@ -386,7 +397,15 @@ fn process_js_export_named_clause(node: &JsExport) -> Option<RuleState> {
                         }
                     }
                     AnyJsExportNamedSpecifier::JsExportNamedSpecifier(name) => {
-                        if name.exported_name().ok()?.syntax().text_trimmed() == "then" {
+                        if name
+                            .exported_name()
+                            .ok()?
+                            .as_js_literal_export_name()?
+                            .value()
+                            .ok()?
+                            .text_trimmed()
+                            == "then"
+                        {
                             return Some(RuleState {
                                 range: name.exported_name().ok()?.range(),
                                 message: NoThenPropertyMessage::Export,
@@ -402,7 +421,9 @@ fn process_js_export_named_clause(node: &JsExport) -> Option<RuleState> {
             let decls = node.declaration().ok()?;
             for d in decls.declarators().iter() {
                 let id = d.ok()?.id().ok()?;
-                if id.syntax().text_trimmed() == "then" {
+                if let AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(id)) = id
+                    && id.name_token().ok()?.text_trimmed() == "then"
+                {
                     return Some(RuleState {
                         range: id.range(),
                         message: NoThenPropertyMessage::Export,
@@ -413,4 +434,23 @@ fn process_js_export_named_clause(node: &JsExport) -> Option<RuleState> {
         _ => return None,
     }
     None
+}
+
+fn is_then_property_expression(expression: &AnyJsExpression) -> bool {
+    match expression {
+        AnyJsExpression::AnyJsLiteralExpression(
+            biome_js_syntax::AnyJsLiteralExpression::JsStringLiteralExpression(expression),
+        ) => expression
+            .value_token()
+            .is_ok_and(|token| token.text_trimmed() == "\"then\""),
+        AnyJsExpression::JsTemplateExpression(expression) => {
+            let mut elements = expression.elements().into_iter();
+            matches!(
+                elements.next(),
+                Some(AnyJsTemplateElement::JsTemplateChunkElement(chunk))
+                    if chunk.template_chunk_token().is_ok_and(|token| token.text_trimmed() == "then")
+            ) && elements.next().is_none()
+        }
+        _ => false,
+    }
 }

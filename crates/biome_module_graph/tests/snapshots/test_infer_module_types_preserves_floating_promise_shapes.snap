@@ -1,0 +1,444 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+type Cheating<T extends 1> = T extends 1 ? Promise<string> : Promise<string>;
+
+async function promiseLike(): Cheating<1> {
+	return "value";
+}
+
+const sneakyObject = {
+	get something() {
+		return new Promise((_, reject) => reject("value"));
+	},
+};
+
+function wrapper<F extends (...args: any) => any>(fn: F): F {
+	return fn;
+}
+
+async function doWork(): Promise<void> {}
+
+export const mappedAsync = [1, 2, 3].map(async (value) => value + 1);
+export const mappedPromise = [1, 2, 3].map((value) =>
+	Promise.resolve(value + 1),
+);
+export const conditional = promiseLike();
+export const getter = sneakyObject.something;
+export const wrapped = wrapper(doWork)();
+export const maybeDoWork: typeof doWork | undefined = doWork;
+export const optional = maybeDoWork?.();
+export const globalChain = globalThis.Promise.reject("value").finally();
+
+await new Promise((resolve) => resolve("value"));
+```
+
+## Inferred types
+
+```
+Binding Cheating "Cheating" => instanceof instanceof Promise<string><T extends number: 1>
+
+Binding T "T" => T extends number: 1
+
+Binding promiseLike "promiseLike" => async Function "promiseLike" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Cheating<number: 1>
+}
+
+Expression "\"value\"" => string: value
+
+Binding sneakyObject "sneakyObject" => Object {
+  prototype: No prototype
+  members: [
+    get "something":
+      sync Function "something" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: instanceof Promise
+      }
+  ]
+}
+
+Expression "{ get something() { return new Promise((_, reject) => reject(\"value\")); }, }" => Object {
+  prototype: No prototype
+  members: [
+    get "something":
+      sync Function "something" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: instanceof Promise
+      }
+  ]
+}
+
+Expression "new Promise((_, reject) => reject(\"value\"))" => instanceof Promise
+
+Expression "Promise" => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "(_, reject) => reject(\"value\")" => sync Function {
+  accepts: {
+    params: [
+      required _: unknown
+      required reject: unknown
+    ]
+    type_args: []
+  }
+  returns: unknown
+}
+
+Binding _ "_" => unknown
+
+Binding reject "reject" => unknown
+
+Expression "reject" => unknown
+
+Expression "reject(\"value\")" => unknown
+
+Expression "\"value\"" => string: value
+
+Binding wrapper "wrapper" => sync Function "wrapper" {
+  accepts: {
+    params: [
+      required fn: instanceof F
+    ]
+    type_args: [
+      F extends sync Function {
+        accepts: {
+          params: [
+            required ...args: any
+          ]
+          type_args: []
+        }
+        returns: any
+      }
+    ]
+  }
+  returns: instanceof F
+}
+
+Binding F "F" => F extends sync Function {
+  accepts: {
+    params: [
+      required ...args: any
+    ]
+    type_args: []
+  }
+  returns: any
+}
+
+Binding args "args" => any
+
+Binding fn "fn" => instanceof F
+
+Expression "fn" => instanceof F
+
+Binding doWork "doWork" => async Function "doWork" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<void>
+}
+
+Binding mappedAsync "mappedAsync" => instanceof Array<instanceof Promise<unknown>>
+
+Expression "[1, 2, 3]" => [number: 1,
+number: 2,
+number: 3]
+
+Expression "[1, 2, 3].map" => sync Function "Array.prototype.map" {
+  accepts: {
+    params: [
+      : sync Function "<U>(item: T) => U" {
+        accepts: {
+          params: [
+            : U
+          ]
+          type_args: []
+        }
+        returns: U
+      }
+    ]
+    type_args: [U]
+  }
+  returns: instanceof Array<U>
+}
+
+Expression "[1, 2, 3].map(async (value) => value + 1)" => instanceof Array<instanceof Promise<unknown>>
+
+Expression "1" => number: 1
+
+Expression "2" => number: 2
+
+Expression "3" => number: 3
+
+Expression "async (value) => value + 1" => async Function {
+  accepts: {
+    params: [
+      required value: unknown
+    ]
+    type_args: []
+  }
+  returns: instanceof Promise<unknown>
+}
+
+Binding value "value" => unknown
+
+Expression "value" => unknown
+
+Expression "value + 1" => unknown
+
+Expression "1" => number: 1
+
+Binding mappedPromise "mappedPromise" => instanceof Array<instanceof Promise<unknown>>
+
+Expression "[1, 2, 3]" => [number: 1,
+number: 2,
+number: 3]
+
+Expression "[1, 2, 3].map" => sync Function "Array.prototype.map" {
+  accepts: {
+    params: [
+      : sync Function "<U>(item: T) => U" {
+        accepts: {
+          params: [
+            : U
+          ]
+          type_args: []
+        }
+        returns: U
+      }
+    ]
+    type_args: [U]
+  }
+  returns: instanceof Array<U>
+}
+
+Expression "[1, 2, 3].map((value) => Promise.resolve(value + 1))" => instanceof Array<instanceof Promise<unknown>>
+
+Expression "1" => number: 1
+
+Expression "2" => number: 2
+
+Expression "3" => number: 3
+
+Expression "(value) => Promise.resolve(value + 1)" => sync Function {
+  accepts: {
+    params: [
+      required value: unknown
+    ]
+    type_args: []
+  }
+  returns: instanceof Promise<unknown>
+}
+
+Binding value "value" => unknown
+
+Expression "Promise" => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "Promise.resolve" => sync Function "resolve" {
+  accepts: {
+    params: [
+      required value: TResolveValue
+    ]
+    type_args: [TResolveValue]
+  }
+  returns: instanceof Promise<TResolveValue>
+}
+
+Expression "Promise.resolve(value + 1)" => instanceof Promise<unknown>
+
+Expression "value" => unknown
+
+Expression "value + 1" => unknown
+
+Expression "1" => number: 1
+
+Binding conditional "conditional" => instanceof Cheating<number: 1>
+
+Expression "promiseLike" => async Function "promiseLike" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Cheating<number: 1>
+}
+
+Expression "promiseLike()" => instanceof Cheating<number: 1>
+
+Binding getter "getter" => instanceof Promise
+
+Expression "sneakyObject" => Object {
+  prototype: No prototype
+  members: [
+    get "something":
+      sync Function "something" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: instanceof Promise
+      }
+  ]
+}
+
+Expression "sneakyObject.something" => instanceof Promise
+
+Binding wrapped "wrapped" => instanceof Promise<void>
+
+Expression "wrapper" => sync Function "wrapper" {
+  accepts: {
+    params: [
+      required fn: instanceof F
+    ]
+    type_args: [
+      F extends sync Function {
+        accepts: {
+          params: [
+            required ...args: any
+          ]
+          type_args: []
+        }
+        returns: any
+      }
+    ]
+  }
+  returns: instanceof F
+}
+
+Expression "wrapper(doWork)" => async Function "doWork" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<void>
+}
+
+Expression "wrapper(doWork)()" => instanceof Promise<void>
+
+Expression "doWork" => async Function "doWork" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<void>
+}
+
+Binding maybeDoWork "maybeDoWork" => instanceof typeof async Function "doWork" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<void>
+} | undefined
+
+Expression "doWork" => async Function "doWork" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<void>
+}
+
+Binding optional "optional" => instanceof Promise<void> | undefined
+
+Expression "maybeDoWork" => instanceof typeof async Function "doWork" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<void>
+} | undefined
+
+Expression "maybeDoWork?.()" => instanceof Promise<void> | undefined
+
+Binding globalChain "globalChain" => instanceof Promise<unknown>
+
+Expression "globalThis" => globalThis
+
+Expression "globalThis.Promise" => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "globalThis.Promise.reject" => sync Function "Promise.reject" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise
+}
+
+Expression "globalThis.Promise.reject(\"value\")" => instanceof Promise
+
+Expression "globalThis.Promise.reject(\"value\").finally" => sync Function "finally" {
+  accepts: {
+    params: [
+      optional onfinally: sync Function "Promise callback" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: void
+      }
+    ]
+    type_args: []
+  }
+  returns: instanceof Promise<unknown>
+}
+
+Expression "globalThis.Promise.reject(\"value\").finally()" => instanceof Promise<unknown>
+
+Expression "\"value\"" => string: value
+
+Expression "await new Promise((resolve) => resolve(\"value\"))" => unknown
+
+Expression "new Promise((resolve) => resolve(\"value\"))" => instanceof Promise
+
+Expression "Promise" => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "(resolve) => resolve(\"value\")" => sync Function {
+  accepts: {
+    params: [
+      required resolve: unknown
+    ]
+    type_args: []
+  }
+  returns: unknown
+}
+
+Binding resolve "resolve" => unknown
+
+Expression "resolve" => unknown
+
+Expression "resolve(\"value\")" => unknown
+
+Expression "\"value\"" => string: value
+```

@@ -4746,6 +4746,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoNegationInEqualityCheckConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoNegationInEqualityCheckOptions" }
+			]
+		},
+		"NoNegationInEqualityCheckOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoNestedComponentDefinitionsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6707,6 +6717,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noNegationInEqualityCheck": {
+					"description": "Disallow negated expressions on the left side of an equality check.\nSee https://biomejs.dev/linter/rules/no-negation-in-equality-check",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoNegationInEqualityCheckConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noPlaywrightElementHandle": {
 					"description": "Disallow usage of element handles (page.$() and page.$$()).\nSee https://biomejs.dev/linter/rules/no-playwright-element-handle",
 					"anyOf": [
@@ -7567,12 +7584,26 @@
 			"additionalProperties": false
 		},
 		"PluginConfiguration": {
-			"description": "Configuration for a single plugin entry.\n\nCan be either a plain path string or an object with path and options:\n\n```json\n{\n  \"plugins\": [\n    \"simple-plugin.grit\",\n    { \"path\": \"scoped-plugin.grit\", \"includes\": [\"src/**/*.ts\"] }\n  ]\n}\n```",
+			"description": "Configuration for a single plugin entry.\n\nCan be either a plain path string or an object with path and options:\n\n```json\n{\n  \"plugins\": [\n    \"simple-plugin.grit\",\n    { \"path\": \"scoped-plugin.grit\", \"includes\": [\"src/**/*.ts\"] },\n    { \"path\": \"./local-plugin.grit\", \"includes\": [\"src/**/*.ts\"], \"resolutionKind\": \"config\" }\n  ]\n}\n```",
 			"anyOf": [
 				{ "description": "A plain path to the plugin.", "type": "string" },
 				{
 					"description": "A path with additional options.",
 					"$ref": "#/$defs/PluginWithOptions"
+				}
+			]
+		},
+		"PluginResolvePath": {
+			"oneOf": [
+				{
+					"description": "Resolve relative paths from the consuming project.",
+					"type": "string",
+					"const": "project"
+				},
+				{
+					"description": "Resolve relative paths from the configuration file that declared the plugin.",
+					"type": "string",
+					"const": "config"
 				}
 			]
 		},
@@ -7585,7 +7616,11 @@
 					"type": ["array", "null"],
 					"items": { "$ref": "#/$defs/NormalizedGlob" }
 				},
-				"path": { "description": "The path to the plugin.", "type": "string" }
+				"path": { "description": "The path to the plugin.", "type": "string" },
+				"resolutionKind": {
+					"description": "Controls how the plugin is resolved.\n\nThis only affects plugin resolution. It does not change how `includes`\nare interpreted.\n\nWhen omitted, relative plugin paths are resolved from the consuming\nproject.",
+					"anyOf": [{ "$ref": "#/$defs/PluginResolvePath" }, { "type": "null" }]
+				}
 			},
 			"additionalProperties": false,
 			"required": ["path"]
@@ -9357,6 +9392,16 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoNegationElseOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoNegationInEqualityCheckOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoNegationInEqualityCheckOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -10,7 +10,8 @@ use biome_js_syntax::{
 };
 #[cfg(feature = "module_graph")]
 use biome_module_graph::{
-    JsOwnExport, ModuleDb, ModuleInfoKind, SymbolFromModuleInfo, find_js_exported_symbol,
+    JsExportedSymbolLookup, JsOwnExport, ModuleDb, ModuleInfoKind, SymbolFromModuleInfo,
+    find_js_exported_symbol,
 };
 #[cfg(feature = "module_graph")]
 use biome_rowan::TextRange;
@@ -232,21 +233,24 @@ fn resolve_import_definition(
 
             let target_module = module_db.module_for_path(target_path)?;
 
-            match find_js_exported_symbol(
+            let mut lookup = find_js_exported_symbol(
                 module_db,
                 SymbolFromModuleInfo::new(module_db, local_name, target_module),
-            )
-            .or(find_js_exported_symbol(
-                module_db,
-                SymbolFromModuleInfo::new(module_db, "default", target_module),
-            )) {
-                None => {
+            );
+            if !matches!(lookup, JsExportedSymbolLookup::Found(_)) {
+                lookup = find_js_exported_symbol(
+                    module_db,
+                    SymbolFromModuleInfo::new(module_db, "default", target_module),
+                );
+            }
+            match lookup {
+                JsExportedSymbolLookup::Missing | JsExportedSymbolLookup::Unknown => {
                     result.store(
                         BiomePath::new(target_path),
                         TextRange::new(TextSize::from(0), TextSize::from(0)),
                     );
                 }
-                Some(own_export) => match own_export {
+                JsExportedSymbolLookup::Found(own_export) => match own_export {
                     JsOwnExport::Binding(range) => result.store(BiomePath::new(target_path), range),
                     JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => {}
                 },
@@ -272,13 +276,13 @@ fn resolve_import_definition(
                     module_db,
                     SymbolFromModuleInfo::new(module_db, local_name, module),
                 ) {
-                    None => {
+                    JsExportedSymbolLookup::Missing | JsExportedSymbolLookup::Unknown => {
                         result.store(
                             BiomePath::new(target_path),
                             TextRange::new(TextSize::from(0), TextSize::from(0)),
                         );
                     }
-                    Some(own_export) => match own_export {
+                    JsExportedSymbolLookup::Found(own_export) => match own_export {
                         JsOwnExport::Binding(range) => {
                             result.store(BiomePath::new(target_path), range)
                         }

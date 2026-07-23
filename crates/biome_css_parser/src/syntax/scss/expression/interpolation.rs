@@ -70,5 +70,5 @@ pub(crate) fn is_at_scss_interpolation(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn is_nth_at_scss_interpolation(p: &mut CssParser, n: usize) -> bool {
-    p.nth_at(n, T![#]) && p.nth_at(n + 1, T!['{']) && !p.has_nth_preceding_whitespace(n + 1)
+    p.nth_at(n, T![#]) && p.nth_at(n + 1, T!['{']) && p.source_mut().is_nth_source_tight(n + 1)
 }

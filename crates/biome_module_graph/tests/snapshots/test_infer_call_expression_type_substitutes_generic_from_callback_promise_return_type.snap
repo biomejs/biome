@@ -64,15 +64,17 @@ Expression "Promise" => class "Promise" {
   type_args: [T]
 }
 
-Expression "Promise.resolve" => sync Function "Promise.resolve" {
+Expression "Promise.resolve" => sync Function "resolve" {
   accepts: {
-    params: []
-    type_args: []
+    params: [
+      required value: TResolveValue
+    ]
+    type_args: [TResolveValue]
   }
-  returns: instanceof Promise
+  returns: instanceof Promise<TResolveValue>
 }
 
-Expression "Promise.resolve(1)" => instanceof Promise
+Expression "Promise.resolve(1)" => instanceof Promise<number: 1>
 
 Expression "1" => number: 1
 ```

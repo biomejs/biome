@@ -1,4 +1,5 @@
 use crate::CssCommentStyle;
+use crate::utils::case::CssCase;
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TrailingNewline, TransformSourceMap,
@@ -17,6 +18,7 @@ pub struct CssFormatContext {
     /// The comments of the nodes and tokens in the program.
     comments: Rc<CssComments>,
     source_map: Option<TransformSourceMap>,
+    identifier_case: CssCase,
 }
 
 impl CssFormatContext {
@@ -25,12 +27,21 @@ impl CssFormatContext {
             options,
             comments: Rc::new(comments),
             source_map: None,
+            identifier_case: CssCase::Auto,
         }
     }
 
     pub fn with_source_map(mut self, source_map: Option<TransformSourceMap>) -> Self {
         self.source_map = source_map;
         self
+    }
+
+    pub(crate) fn identifier_case(&self) -> CssCase {
+        self.identifier_case
+    }
+
+    pub(crate) fn replace_identifier_case(&mut self, case: CssCase) -> CssCase {
+        std::mem::replace(&mut self.identifier_case, case)
     }
 }
 

@@ -1,16 +1,20 @@
 use crate::prelude::*;
-use crate::utils::comment_trivia::{is_leading_comment_on_node, is_trailing_comment_on_node};
+use crate::utils::comment_trivia::{
+    is_leading_comment_on_node, is_token_boundary_suppressed, is_trailing_comment_on_node,
+};
+use crate::utils::custom_property::CustomPropertyContainer;
 use crate::utils::scss_include_comments::{
     place_list_trailing_separator_comment, place_map_trailing_separator_comment,
     place_separated_list_comment,
 };
 use biome_css_syntax::{
-    AnyCssDeclarationName, AnyCssMediaQuery, AnyCssRoot, CssComplexSelector,
-    CssDeclarationOrRuleBlock, CssFunction, CssGenericComponentValueList, CssGenericProperty,
-    CssIdentifier, CssLanguage, CssMediaQueryList, CssSyntaxKind, ScssAtRootAtRule,
-    ScssAtRootSelector, ScssEachHeader, ScssEachValueList, ScssExpression, ScssExpressionItemList,
-    ScssIfAtRule, ScssListExpression, ScssListExpressionElement, ScssMapExpression,
-    ScssMapExpressionPair, ScssVariableDeclaration, T, TextLen, TextSize,
+    AnyCssDeclarationName, AnyCssMediaQuery, AnyCssProperty, AnyCssRoot, AnyCssSelector,
+    CssComplexSelector, CssDeclaration, CssDeclarationImportant, CssDeclarationOrRuleBlock,
+    CssFunction, CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssLanguage,
+    CssMediaQueryList, CssNestedQualifiedRule, CssQualifiedRule, CssSyntaxKind, CssSyntaxToken,
+    ScssAtRootAtRule, ScssAtRootSelector, ScssEachHeader, ScssEachValueList, ScssExpression,
+    ScssExpressionItemList, ScssIfAtRule, ScssListExpression, ScssListExpressionElement,
+    ScssMapExpression, ScssMapExpressionPair, ScssVariableDeclaration, T, TextLen, TextSize,
     is_in_scss_include_arguments,
 };
 use biome_diagnostics::category;
@@ -117,15 +121,33 @@ impl CommentStyle for CssCommentStyle {
             .or_else(handle_scss_expression_item_trailing_line_comment)
             .or_else(handle_scss_at_root_selector_comment)
             .or_else(handle_scss_else_clause_comment)
+            .or_else(handle_empty_custom_property_container_comment)
             .or_else(handle_function_comment)
             .or_else(handle_media_separator_comment)
             // Handle SCSS variable name/colon comments before generic properties.
             .or_else(handle_scss_variable_declaration_comment)
+            .or_else(handle_declaration_important_comment)
             .or_else(handle_generic_property_comment)
             .or_else(handle_declaration_name_comment)
+            .or_else(handle_selector_block_comment)
             .or_else(handle_complex_selector_comment)
             .or_else(handle_global_suppression)
     }
+}
+
+/// Keeps a comment inside an otherwise empty raw custom-property container.
+///
+/// Example: `--value: fn(/* note */);`.
+fn handle_empty_custom_property_container_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(components) = CustomPropertyContainer::cast_ref(comment.enclosing_node())
+        .and_then(|container| container.empty_components())
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    CommentPlacement::dangling(components.into_syntax(), comment)
 }
 
 fn handle_scss_map_trailing_separator_comment(
@@ -461,6 +483,35 @@ fn is_between_variable_colon_and_value(
     comment_start >= colon.text_trimmed_range().end() && comment_start < value_start
 }
 
+/// Attaches block comments between a property and `!important` to the declaration.
+///
+/// ```css
+/// a { color: red /* c */ !important; }
+/// ```
+fn handle_declaration_important_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    if comment.kind().is_line() {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(declaration) = CssDeclaration::cast_ref(comment.enclosing_node()) else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if comment
+        .preceding_node()
+        .is_some_and(|node| AnyCssProperty::can_cast(node.kind()))
+        && comment
+            .following_node()
+            .is_some_and(|node| CssDeclarationImportant::can_cast(node.kind()))
+    {
+        CommentPlacement::dangling(declaration.into_syntax(), comment)
+    } else {
+        CommentPlacement::Default(comment)
+    }
+}
+
 fn handle_generic_property_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
@@ -555,12 +606,89 @@ fn handle_declaration_name_comment(
 fn handle_complex_selector_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
-    if let Some(complex) = CssComplexSelector::cast_ref(comment.enclosing_node())
-        && let Ok(right) = complex.right()
-    {
+    let Some(complex) = CssComplexSelector::cast_ref(comment.enclosing_node()) else {
+        return CommentPlacement::Default(comment);
+    };
+    let (Ok(left), Ok(combinator), Ok(right)) =
+        (complex.left(), complex.combinator(), complex.right())
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let comment_range = comment.piece().text_range();
+    let left_end = left.syntax().text_trimmed_range().end();
+    let right_start = right.syntax().text_trimmed_range().start();
+
+    if comment_range.start() < left_end || comment_range.end() > right_start {
+        return CommentPlacement::Default(comment);
+    }
+
+    if is_selector_boundary_suppressed(&left, &combinator, &right) {
         return CommentPlacement::leading(right.into_syntax(), comment);
     }
-    CommentPlacement::Default(comment)
+
+    let combinator_range = combinator.text_trimmed_range();
+
+    if comment_range.end() <= combinator_range.start()
+        || comment_range.start() >= combinator_range.end()
+    {
+        CommentPlacement::dangling(complex.syntax().clone(), comment)
+    } else {
+        CommentPlacement::Default(comment)
+    }
+}
+
+/// Returns whether a selector boundary such as
+/// `.a > /* biome-ignore format: reason */ .b` contains a format suppression.
+pub(crate) fn is_selector_boundary_suppressed(
+    left: &AnyCssSelector,
+    combinator: &CssSyntaxToken,
+    right: &AnyCssSelector,
+) -> bool {
+    let (Some(left_token), Some(right_token)) =
+        (left.syntax().last_token(), right.syntax().first_token())
+    else {
+        return false;
+    };
+
+    is_token_boundary_suppressed(&left_token, combinator)
+        || is_token_boundary_suppressed(combinator, &right_token)
+}
+
+/// Attaches comments between a selector and `{` to the qualified-rule boundary.
+///
+/// Suppressed boundaries keep the default placement because making a
+/// suppression dangling on the rule would suppress the complete rule.
+fn handle_selector_block_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(l_curly) = comment
+        .following_token()
+        .filter(|token| token.kind() == T!['{'])
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Some(block) = l_curly.parent().and_then(CssDeclarationOrRuleBlock::cast) else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if l_curly
+        .prev_token()
+        .is_some_and(|preceding| is_token_boundary_suppressed(&preceding, l_curly))
+    {
+        return CommentPlacement::Default(comment);
+    }
+
+    let owner = if let Some(rule) = block.parent::<CssQualifiedRule>() {
+        rule.into_syntax()
+    } else if let Some(rule) = block.parent::<CssNestedQualifiedRule>() {
+        rule.into_syntax()
+    } else {
+        return CommentPlacement::Default(comment);
+    };
+
+    CommentPlacement::dangling(owner, comment)
 }
 
 fn handle_global_suppression(

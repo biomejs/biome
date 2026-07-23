@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use crate::utils::string_utils::FormatTokenAsLowercase;
 use biome_css_syntax::{CssColor, CssColorFields};
 use biome_formatter::write;
 
@@ -16,7 +15,7 @@ impl FormatNodeRule<CssColor> for FormatCssColor {
             f,
             [
                 hash_token.format(),
-                FormatTokenAsLowercase::from(value_token?)
+                value_token.format()?.with_text_case(CssCase::Lowercase)
             ]
         )
     }

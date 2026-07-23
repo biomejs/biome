@@ -15,7 +15,7 @@ impl FormatNodeRule<TwConfigAtRule> for FormatTwConfigAtRule {
         write!(
             f,
             [
-                config_token.format(),
+                config_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
                 path.format(),
                 semicolon_token.format()

@@ -5,6 +5,10 @@ pub(crate) struct FormatScssInterpolatedValuePartList;
 impl FormatRule<ScssInterpolatedValuePartList> for FormatScssInterpolatedValuePartList {
     type Context = CssFormatContext;
     fn fmt(&self, node: &ScssInterpolatedValuePartList, f: &mut CssFormatter) -> FormatResult<()> {
-        f.join().entries(node.iter().formatted()).finish()
+        for item in node {
+            item.format().with_text_case(CssCase::Preserve).fmt(f)?;
+        }
+
+        Ok(())
     }
 }

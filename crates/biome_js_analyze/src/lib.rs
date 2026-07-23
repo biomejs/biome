@@ -1,5 +1,9 @@
 #![deny(clippy::use_self)]
 #![warn(clippy::needless_pass_by_value)]
+#![expect(
+    clippy::disallowed_methods,
+    reason = "Some analyses require complete syntax text that can span multiple tokens."
+)]
 
 pub use crate::registry::visit_registry;
 pub use crate::services::control_flow::ControlFlowGraph;
