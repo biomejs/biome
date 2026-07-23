@@ -1,5 +1,51 @@
 # @biomejs/biome
 
+## 2.5.6
+
+### Patch Changes
+
+- [#11035](https://github.com/biomejs/biome/pull/11035) [`0e4b03b`](https://github.com/biomejs/biome/commit/0e4b03be71b32120c6326e58e046260bcf5d3231) Thanks [@ematipico](https://github.com/ematipico)! - Fixed a performance regression in [`noMisusedPromises`](https://biomejs.dev/linter/rules/no-misused-promises/) that caused type inference to run repeatedly while linting a file.
+
+- [#11043](https://github.com/biomejs/biome/pull/11043) [`22ec076`](https://github.com/biomejs/biome/commit/22ec076462d4590ea7c95f7693b69040c32a38aa) Thanks [@denbezrukov](https://github.com/denbezrukov)! - Fixed CSS formatting for multiline function arguments preceded by comments:
+
+  ```diff
+   .example {
+     value: outer(
+       1,
+       /* comment */
+       nested(
+  -      first,
+  -      second
+  -    )
+  +        first,
+  +        second
+  +      )
+     );
+   }
+  ```
+
+- [#11007](https://github.com/biomejs/biome/pull/11007) [`c9acb25`](https://github.com/biomejs/biome/commit/c9acb25acbce7a6f632b5041ec546a604aea4343) Thanks [@BTF-Kabir-2020](https://github.com/BTF-Kabir-2020)! - Fixed [#9195](https://github.com/biomejs/biome/issues/9195): [`useHookAtTopLevel`](https://biomejs.dev/linter/rules/use-hook-at-top-level/) no longer reports hooks in named `forwardRef` components that receive a `ref` parameter.
+
+- [#10152](https://github.com/biomejs/biome/pull/10152) [`50a9bd8`](https://github.com/biomejs/biome/commit/50a9bd84df852de305e94a91fb57f6b3b1378187) Thanks [@Zelys-DFKH](https://github.com/Zelys-DFKH)! - Fixed [#10131](https://github.com/biomejs/biome/issues/10131): Biome now correctly parses curried arrow functions in ternary consequents when the inner arrow's parameters use a destructuring pattern, e.g. `cond ? (x) => ({ a, b }) => body : alt`.
+
+- [#11040](https://github.com/biomejs/biome/pull/11040) [`0abb620`](https://github.com/biomejs/biome/commit/0abb620b2f0bd748bf272a2bc56aa02f5a6d0fee) Thanks [@Mokto](https://github.com/Mokto)! - Fixed an issue where the HTML formatter would duplicate a comment placed directly before a Svelte `{@const ...}` or `{@debug ...}` block. The duplication compounded on every subsequent `--write`, causing the file to grow exponentially.
+
+- [#10858](https://github.com/biomejs/biome/pull/10858) [`6d18204`](https://github.com/biomejs/biome/commit/6d182043b1de76f8668464bfa5c295161135ee0e) Thanks [@ruidosujeira](https://github.com/ruidosujeira)! - Fixed [#10839](https://github.com/biomejs/biome/issues/10839): Svelte `{#each}` array destructuring no longer includes spaces inside square brackets, and multiline bind function expressions now indent their getter, setter, and function body correctly.
+
+- [#10973](https://github.com/biomejs/biome/pull/10973) [`9cb044c`](https://github.com/biomejs/biome/commit/9cb044cf2c8971642942c302a6d2b0000964c2f0) Thanks [@ematipico](https://github.com/ematipico)! - Fixed false positives in [`noMisleadingReturnType`](https://biomejs.dev/linter/rules/no-misleading-return-type/) when generic-constraint, normalization, substitution, or structural return-type comparison cannot complete. The rule now suppresses diagnostics rather than suggesting a return type derived from partial information. For example, this unresolved return type is no longer reported:
+
+  ```ts
+  function unresolvedReturnType(): MissingType {
+    return "value" as const;
+  }
+  ```
+
+- [#11030](https://github.com/biomejs/biome/pull/11030) [`cc90e65`](https://github.com/biomejs/biome/commit/cc90e65a6b14388a5fab1d893f782055fac34f91) Thanks [@marschattha](https://github.com/marschattha)! - The `rdjson` reporter now populates the [severity](https://github.com/reviewdog/reviewdog/blob/master/proto/rdf/reviewdog.proto) field of each diagnostic (`ERROR`, `WARNING`, or `INFO`), so tools consuming Reviewdog Diagnostic Format output no longer need to assume a default severity.
+
+- [#11045](https://github.com/biomejs/biome/pull/11045) [`89c27c6`](https://github.com/biomejs/biome/commit/89c27c62541d2b628247563441e48f2303e53f4b) Thanks [@ematipico](https://github.com/ematipico)! - Improved the performance of Biome formatter up to ~7% across the board.
+
+- [#9806](https://github.com/biomejs/biome/pull/9806) [`781d68d`](https://github.com/biomejs/biome/commit/781d68dae5df6ad188efc8afb0972112654614fe) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule [`noJsRestrictedProperties`](https://biomejs.dev/linter/rules/no-js-restricted-properties/), which ports ESLint's `no-restricted-properties` rule. Biome now flags restricted member access and object destructuring, and `biome migrate eslint` preserves the rule's options.
+
 ## 2.5.5
 
 ### Patch Changes
