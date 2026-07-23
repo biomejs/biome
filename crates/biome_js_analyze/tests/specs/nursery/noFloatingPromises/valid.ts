@@ -254,3 +254,13 @@ void [1, 2, 3].map(async (x) => x + 1);
 async function floatingArray() {
   await Promise.all([1, 2, 3].map((x) => Promise.resolve(x + 1)));
 }
+
+declare function maybeAsync(): string | Promise<string>;
+
+async function wrapsMaybeAsync() {
+  return maybeAsync();
+}
+
+async function awaitsWrappedMaybeAsync() {
+  await wrapsMaybeAsync();
+}

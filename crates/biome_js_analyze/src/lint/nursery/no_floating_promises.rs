@@ -176,6 +176,18 @@ impl Rule for NoFloatingPromises {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let expression = node.expression().ok()?;
+
+        if let AnyJsExpression::JsAwaitExpression(await_expression) = &expression
+            && let Ok(argument) = await_expression.argument()
+        {
+            let argument_ty = ctx.type_of_expression(&argument);
+            if argument_ty.is_promise_instance()
+                || argument_ty.has_variant(|ty| ty.is_promise_instance())
+            {
+                return None;
+            }
+        }
+
         let ty = ctx.type_of_expression(&expression);
 
         // Uncomment the following line for debugging convenience:
