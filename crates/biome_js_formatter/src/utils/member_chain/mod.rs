@@ -396,11 +396,25 @@ impl Format<JsFormatContext> for MemberChain {
                     .first()
                     .is_some_and(|group| group.needs_empty_line_before());
 
-                if has_empty_line_before_tail || self.last_group().will_break(f)? {
+                if has_empty_line_before_tail {
                     write!(f, [expand_parent()])?;
+                    write!(f, [best_fitting!(format_one_line, format_expanded)])
+                } else if self.last_group().will_break(f)? {
+                    // Force expanded layout when the last group breaks to
+                    // ensure idempotent formatting. The last group's
+                    // will_break() result can differ between formatting passes
+                    // when the final call argument is an object literal: on a
+                    // first pass the object group uses GroupMode::Flat, but on
+                    // a second pass (after expansion added leading newlines)
+                    // it uses GroupMode::Expand. This causes BestFitting's
+                    // fits check to short-circuit differently, making the
+                    // formatter produce different output on consecutive runs.
+                    // Forcing the expanded layout here produces a stable result
+                    // on the first pass. See biome#10531.
+                    write!(f, [group(&format_expanded)])
+                } else {
+                    write!(f, [best_fitting!(format_one_line, format_expanded)])
                 }
-
-                write!(f, [best_fitting!(format_one_line, format_expanded)])
             }
         });
 
