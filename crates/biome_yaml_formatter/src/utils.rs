@@ -83,10 +83,7 @@ pub(crate) fn multiline_plain_key_token(
         return None;
     }
     let token = node.content()?.value_token().ok()?;
-    token
-        .text_trimmed()
-        .contains(['\n', '\r'])
-        .then_some(token)
+    token.text_trimmed().contains(['\n', '\r']).then_some(token)
 }
 
 /// Formats a flow mapping entry whose key is a multiline plain scalar in the
@@ -132,10 +129,7 @@ impl Format<YamlFormatContext> for FormatMultilineKeyEntry<'_> {
                     write!(f, [text(line.trim_end(), None)])?;
                 } else {
                     let line = std::format!("    {}", line.trim());
-                    write!(
-                        f,
-                        [literal_line_break_without_parent(), text(&line, None)]
-                    )?;
+                    write!(f, [literal_line_break_without_parent(), text(&line, None)])?;
                 }
             }
             Ok(())
