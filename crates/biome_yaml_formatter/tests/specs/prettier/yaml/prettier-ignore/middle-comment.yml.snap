@@ -15,6 +15,30 @@ def:  !!str #   hello
 ```
 
 
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+ abc: !!str #   hello
+-  123
++123
+ # prettier-ignore
+ def:  !!str #   hello
+    456
+```
+
+# Output
+
+```yml
+abc: !!str #   hello
+123
+# prettier-ignore
+def:  !!str #   hello
+   456
+```
+
 # Errors
 ```
 middle-comment.yml:2:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -45,9 +69,4 @@ middle-comment.yml:2:4 parse ━━━━━━━━━━━━━━━━━
     6 │ 
   
 
-```
-
-# Error
-```text
-format: Can't format code because it contains syntax errors
 ```

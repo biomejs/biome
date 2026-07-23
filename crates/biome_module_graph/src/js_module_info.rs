@@ -247,6 +247,9 @@ pub struct JsModuleInfoInner {
     /// [Self::forwarding_exports] instead.
     pub exports: Exports,
 
+    /// Exports whose type IDs index [`Self::raw_types`].
+    pub(crate) raw_exports: Exports,
+
     /// Re-exports that apply to all symbols from another module, without
     /// assigning a name to them.
     pub blanket_reexports: Vec<JsReexport>,

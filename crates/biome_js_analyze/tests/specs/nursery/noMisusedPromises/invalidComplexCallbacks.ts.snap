@@ -1,0 +1,111 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidComplexCallbacks.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+type Prefix<T> = [T];
+
+declare function consumeTuple(
+  ...args: [...Prefix<number>, () => void]
+): void;
+const tuplePrefix: Prefix<number> = [1];
+consumeTuple(...tuplePrefix, async () => {});
+
+type Recursive<T> = [...Recursive<T>];
+
+declare function consumeRecursive(
+  ...args: [...Recursive<number>, () => void]
+): void;
+consumeRecursive(async () => {});
+
+interface InterfaceConstructor {
+  new (callback: () => void): object;
+}
+declare const InterfaceConsumer: InterfaceConstructor;
+new InterfaceConsumer(async () => {});
+
+declare const ObjectConsumer: {
+  new (callback: () => void): object;
+};
+new ObjectConsumer(async () => {});
+
+```
+
+# Diagnostics
+```
+invalidComplexCallbacks.ts:9:30 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a Promise, but no return value was expected.
+  
+     7 │ ): void;
+     8 │ const tuplePrefix: Prefix<number> = [1];
+   > 9 │ consumeTuple(...tuplePrefix, async () => {});
+       │                              ^^^^^^^^^^^^^^
+    10 │ 
+    11 │ type Recursive<T> = [...Recursive<T>];
+  
+  i This may not have the desired result if you expect the Promise to be `await`-ed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComplexCallbacks.ts:16:18 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a Promise, but no return value was expected.
+  
+    14 │   ...args: [...Recursive<number>, () => void]
+    15 │ ): void;
+  > 16 │ consumeRecursive(async () => {});
+       │                  ^^^^^^^^^^^^^^
+    17 │ 
+    18 │ interface InterfaceConstructor {
+  
+  i This may not have the desired result if you expect the Promise to be `await`-ed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComplexCallbacks.ts:22:23 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a Promise, but no return value was expected.
+  
+    20 │ }
+    21 │ declare const InterfaceConsumer: InterfaceConstructor;
+  > 22 │ new InterfaceConsumer(async () => {});
+       │                       ^^^^^^^^^^^^^^
+    23 │ 
+    24 │ declare const ObjectConsumer: {
+  
+  i This may not have the desired result if you expect the Promise to be `await`-ed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComplexCallbacks.ts:27:20 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a Promise, but no return value was expected.
+  
+    25 │   new (callback: () => void): object;
+    26 │ };
+  > 27 │ new ObjectConsumer(async () => {});
+       │                    ^^^^^^^^^^^^^^
+    28 │ 
+  
+  i This may not have the desired result if you expect the Promise to be `await`-ed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

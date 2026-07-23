@@ -112,6 +112,11 @@ impl AnyHtmlAttribute {
     pub fn name(&self) -> Option<TokenText> {
         match self {
             Self::HtmlAttribute(attr) => attr.name().ok()?.token_text_trimmed(),
+            Self::HtmlAttributeSingleTextExpression(attr) => attr
+                .expression()
+                .ok()
+                .and_then(|expr| expr.html_literal_token().ok())
+                .map(|html_literal| html_literal.token_text_trimmed()),
             Self::AnyVueDirective(vue) => match vue {
                 // :attr="..." — shorthand Vue binding
                 AnyVueDirective::VueVBindShorthandDirective(d) => d

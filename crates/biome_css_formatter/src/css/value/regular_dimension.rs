@@ -1,6 +1,9 @@
 use crate::{
     prelude::*,
-    utils::{case::is_supports_test_declaration, string_utils::FormatDimensionUnit},
+    utils::{
+        case::is_supports_test_declaration, custom_property::is_raw_custom_property_component,
+        string_utils::FormatDimensionUnit,
+    },
 };
 use biome_css_syntax::{
     AnyCssDeclarationName, CssDeclaration, CssGenericProperty, CssRegularDimension,
@@ -17,6 +20,11 @@ impl FormatNodeRule<CssRegularDimension> for FormatCssRegularDimension {
             value_token,
             unit_token,
         } = node.as_fields();
+
+        if is_raw_custom_property_component(node) {
+            return write!(f, [value_token.format(), unit_token.format()]);
+        }
+
         let unit_token = unit_token?;
         let unit = if is_in_interpolated_property_name(node) {
             FormatDimensionUnit::preserve_source_case(unit_token)

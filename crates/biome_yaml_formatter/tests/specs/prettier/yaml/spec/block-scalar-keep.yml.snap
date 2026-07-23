@@ -20,25 +20,23 @@ info: yaml/spec/block-scalar-keep.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,5 @@
-----
--|+
+@@ -1,6 +1,4 @@
+ ---
+ |+
 -  ab
 -
 -   
-+--- |+
+-...
+\ No newline at end of file
 + ab
-+ 
-+  
 +...
 ```
 
 # Output
 
 ```yml
---- |+
+---
+|+
  ab
- 
-  
 ...
 ```

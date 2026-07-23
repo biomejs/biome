@@ -17,23 +17,67 @@ use biome_js_type_info::{
     },
 };
 use biome_module_graph::{
-    CallArgumentTypeInput, JsOwnExport, ModuleDb, ModuleInfo, ModuleInfoKind, ModuleResolver,
-    NormalizeTypeInput, infer_call_argument_type, infer_constructor_argument_type,
-    infer_module_types_bottom_up, normalize_type,
+    CallArgumentTypeInput, InferredModuleTypes, JsOwnExport, ModuleDb, ModuleInfo, ModuleInfoKind,
+    ModuleResolver, NormalizeTypeInput, infer_call_argument_type, infer_constructor_argument_type,
+    infer_module_types, infer_module_types_bottom_up, normalize_type,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
+use std::cell::OnceCell;
 use std::rc::Rc;
 use std::sync::Arc;
+
+#[derive(Default)]
+struct TypedModuleState {
+    inference_available: OnceCell<bool>,
+    legacy_resolver: OnceCell<Option<Arc<ModuleResolver>>>,
+}
 
 #[derive(Clone)]
 pub(crate) struct TypedModule {
     db: Rc<dyn ModuleDb>,
     module: ModuleInfo,
+    state: Rc<TypedModuleState>,
 }
 
 impl TypedModule {
     pub(crate) fn new(db: Rc<dyn ModuleDb>, module: ModuleInfo) -> Self {
-        Self { db, module }
+        Self {
+            db,
+            module,
+            state: Rc::new(TypedModuleState::default()),
+        }
+    }
+
+    fn inferred_types<'db>(&'db self) -> Option<&'db InferredModuleTypes<'db>> {
+        let db = self.db.as_ref();
+        if let Some(is_available) = self.state.inference_available.get() {
+            return is_available
+                .then(|| infer_module_types(db, self.module))
+                .flatten();
+        }
+
+        let inferred = infer_module_types_bottom_up(db, self.module);
+        let _ = self.state.inference_available.set(inferred.is_some());
+        inferred
+    }
+
+    #[expect(
+        clippy::arc_with_non_send_sync,
+        reason = "The legacy ModuleResolver and Type APIs require Arc while this migration keeps them in place."
+    )]
+    fn legacy_resolver(&self) -> Option<Arc<ModuleResolver>> {
+        self.state
+            .legacy_resolver
+            .get_or_init(|| {
+                let ModuleInfoKind::Js(module_info) = self.module.kind(self.db.as_ref()) else {
+                    return None;
+                };
+                Some(Arc::new(ModuleResolver::for_module(
+                    module_info,
+                    self.db.clone(),
+                )))
+            })
+            .clone()
     }
 }
 
@@ -65,7 +109,7 @@ impl TypedService {
     ) -> Option<InferredType<'db>> {
         let typed_module = self.module.as_ref()?;
         let db = typed_module.db.as_ref();
-        let inferred = infer_module_types_bottom_up(db, typed_module.module)?;
+        let inferred = typed_module.inferred_types()?;
         let ty = inferred.expressions.get(&expression.range()).copied()?;
         let ty = normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
 
@@ -89,7 +133,7 @@ impl TypedService {
         };
 
         let db = typed_module.db.as_ref();
-        let inferred = infer_module_types_bottom_up(db, typed_module.module)?;
+        let inferred = typed_module.inferred_types()?;
         let ty = inferred
             .binding_type_data
             .get(&binding.tree().syntax().text_trimmed_range())?
@@ -106,7 +150,7 @@ impl TypedService {
     ) -> Option<InferredType<'db>> {
         let typed_module = self.module.as_ref()?;
         let db = typed_module.db.as_ref();
-        let inferred = infer_module_types_bottom_up(db, typed_module.module)?;
+        let inferred = typed_module.inferred_types()?;
         let function_ty = match function {
             AnyJsFunction::JsArrowFunctionExpression(expression) => {
                 inferred.expressions.get(&expression.range()).copied()
@@ -150,7 +194,7 @@ impl TypedService {
     ) -> Option<InferredType<'db>> {
         let typed_module = self.module.as_ref()?;
         let db = typed_module.db.as_ref();
-        let inferred = infer_module_types_bottom_up(db, typed_module.module)?;
+        let inferred = typed_module.inferred_types()?;
         let parent_ty = member_syntax.ancestors().find_map(|ancestor| {
             if let Some(class) = JsClassDeclaration::cast(ancestor.clone()) {
                 let binding_range = class
@@ -190,7 +234,7 @@ impl TypedService {
     fn inferred_default_export_data<'db>(&'db self) -> Option<InferredTypeData<'db>> {
         let typed_module = self.module.as_ref()?;
         let db = typed_module.db.as_ref();
-        let inferred = infer_module_types_bottom_up(db, typed_module.module)?;
+        let inferred = typed_module.inferred_types()?;
         let ModuleInfoKind::Js(js_info) = typed_module.module.kind(db) else {
             return None;
         };
@@ -224,38 +268,39 @@ impl TypedService {
             }
             scope = scope.parent()?;
         };
-        infer_module_types_bottom_up(typed_module.db.as_ref(), typed_module.module)?
+        typed_module
+            .inferred_types()?
             .binding_type_data
             .get(&binding.tree().syntax().text_trimmed_range())
             .map(|data| data.ty)
     }
 
-    /// Returns whether an expression has a callable member with the given name.
+    /// Determines whether an expression has a callable member with the given name.
+    ///
+    /// Returns `None` when type inference is unavailable or the member's
+    /// callability cannot be determined conclusively.
     pub fn inferred_expression_has_callable_member(
         &self,
         expression: &AnyJsExpression,
         name: &str,
-    ) -> bool {
-        let Some(typed_module) = self.module.as_ref() else {
-            return false;
-        };
+    ) -> Option<bool> {
+        let typed_module = self.module.as_ref()?;
         let db = typed_module.db.as_ref();
-        let Some(inferred) = infer_module_types_bottom_up(db, typed_module.module) else {
-            return false;
-        };
-        let Some(ty) = inferred.expressions.get(&expression.range()).copied() else {
-            return false;
-        };
+        let inferred = typed_module.inferred_types()?;
+        let ty = inferred.expressions.get(&expression.range()).copied()?;
         let ty = normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
-        let Some(member_ty) = inferred.find_member_type(db, ty, name) else {
-            return false;
+        if !InferredType::new(db, ty).is_inferred() {
+            return None;
+        }
+        let Some(member_ty) = inferred.find_value_member_type(db, ty, name) else {
+            return Some(false);
         };
         let member_ty = normalize_type(
             db,
             NormalizeTypeInput::new(db, typed_module.module, member_ty),
         );
 
-        is_callable_inferred_type(db, member_ty)
+        InferredType::new(db, member_ty).is_callable()
     }
 
     /// Returns the expected type for a call or constructor argument.
@@ -267,7 +312,7 @@ impl TypedService {
     ) -> Option<InferredType<'db>> {
         let typed_module = self.module.as_ref()?;
         let db = typed_module.db.as_ref();
-        let inferred = infer_module_types_bottom_up(db, typed_module.module)?;
+        let inferred = typed_module.inferred_types()?;
         let callee_ty = inferred.expressions.get(&callee.range()).copied()?;
         let callee_ty = normalize_type(
             db,
@@ -297,7 +342,7 @@ impl TypedService {
     ) -> Option<InferredType<'db>> {
         let typed_module = self.module.as_ref()?;
         let db = typed_module.db.as_ref();
-        let inferred = infer_module_types_bottom_up(db, typed_module.module)?;
+        let inferred = typed_module.inferred_types()?;
         let callee_ty = inferred.expressions.get(&callee.range()).copied()?;
         let callee_ty = normalize_type(
             db,
@@ -335,23 +380,8 @@ impl TypedService {
         Some(InferredType::new(db, argument_ty))
     }
 
-    #[expect(
-        clippy::arc_with_non_send_sync,
-        reason = "The legacy ModuleResolver and Type APIs require Arc while this migration keeps them in place."
-    )]
     fn resolver(&self) -> Option<Arc<ModuleResolver>> {
-        let typed_module = self.module.as_ref()?;
-        // NOTE: commented, no need to do useless computation. Comment this out once we're ready to migrate to the new engine.
-        // let _ = infer_module_types_bottom_up(typed_module.db.as_ref(), typed_module.module);
-        let ModuleInfoKind::Js(module_info) = typed_module.module.kind(typed_module.db.as_ref())
-        else {
-            return None;
-        };
-
-        Some(Arc::new(ModuleResolver::for_module(
-            module_info.clone(),
-            typed_module.db.clone(),
-        )))
+        self.module.as_ref()?.legacy_resolver()
     }
 
     /// Returns the [`Type`] for the given `expression`.
@@ -437,16 +467,6 @@ impl TypedService {
         self.model
             .as_ref()
             .is_some_and(|model| model.binding(reference).is_some())
-    }
-}
-
-fn is_callable_inferred_type(db: &dyn ModuleDb, ty: InferredTypeData) -> bool {
-    match ty {
-        InferredTypeData::Union(union) => union
-            .types(db)
-            .iter()
-            .any(|ty| is_callable_inferred_type(db, *ty)),
-        ty => ty.callable_function(db).is_some(),
     }
 }
 

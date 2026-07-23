@@ -11,7 +11,7 @@ use biome_css_syntax::{
 use biome_formatter::comments::SourceComment;
 use biome_formatter::trivia::format_dangling_comment;
 use biome_formatter::{format_args, write};
-use biome_rowan::SyntaxResult;
+use biome_rowan::{AstNodeList, SyntaxResult};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssGenericProperty;
@@ -200,7 +200,17 @@ impl<'a> CssPropertyColonComments<'a> {
         let value_boundary_comments = comments.trailing_comments(self.node.syntax());
 
         if value_boundary_comments.is_empty() {
-            return write!(f, [space(), value.format()]);
+            return if is_empty_custom_property_value(&value) {
+                write!(
+                    f,
+                    [
+                        maybe_space(self.has_source_gap_after_colon_token()),
+                        value.format()
+                    ]
+                )
+            } else {
+                write!(f, [space(), value.format()])
+            };
         }
 
         for (index, comment) in value_boundary_comments.iter().enumerate() {
@@ -271,6 +281,26 @@ impl<'a> CssPropertyColonComments<'a> {
             .take_while(|piece| piece.text_range().end() <= comment_start)
             .any(|piece| piece.is_whitespace() || piece.is_newline())
     }
+
+    /// Returns whether an empty custom-property value contains whitespace.
+    fn has_source_gap_after_colon_token(&self) -> bool {
+        self.node.colon_token().is_ok_and(|colon| {
+            colon
+                .trailing_trivia()
+                .pieces()
+                .any(|piece| piece.is_whitespace() || piece.is_newline())
+        })
+    }
+}
+
+fn is_empty_custom_property_value(
+    value: &SyntaxResult<AnyCssGenericPropertyValueOrExpression>,
+) -> bool {
+    value
+        .as_ref()
+        .ok()
+        .and_then(|value| value.as_css_custom_property_value())
+        .is_some_and(|value| value.components().is_empty())
 }
 
 /// Returns `true` when `a { font-family: /* note */ Hiragino Sans, sans-serif; }` breaks.

@@ -208,7 +208,7 @@ Expression "value + 1" => unknown
 
 Expression "1" => number: 1
 
-Binding mappedPromise "mappedPromise" => instanceof Array<instanceof Promise>
+Binding mappedPromise "mappedPromise" => instanceof Array<instanceof Promise<unknown>>
 
 Expression "[1, 2, 3]" => [number: 1,
 number: 2,
@@ -232,7 +232,7 @@ Expression "[1, 2, 3].map" => sync Function "Array.prototype.map" {
   returns: instanceof Array<U>
 }
 
-Expression "[1, 2, 3].map((value) => Promise.resolve(value + 1))" => instanceof Array<instanceof Promise>
+Expression "[1, 2, 3].map((value) => Promise.resolve(value + 1))" => instanceof Array<instanceof Promise<unknown>>
 
 Expression "1" => number: 1
 
@@ -247,7 +247,7 @@ Expression "(value) => Promise.resolve(value + 1)" => sync Function {
     ]
     type_args: []
   }
-  returns: instanceof Promise
+  returns: instanceof Promise<unknown>
 }
 
 Binding value "value" => unknown
@@ -258,15 +258,17 @@ Expression "Promise" => class "Promise" {
   type_args: [T]
 }
 
-Expression "Promise.resolve" => sync Function "Promise.resolve" {
+Expression "Promise.resolve" => sync Function "resolve" {
   accepts: {
-    params: []
-    type_args: []
+    params: [
+      required value: TResolveValue
+    ]
+    type_args: [TResolveValue]
   }
-  returns: instanceof Promise
+  returns: instanceof Promise<TResolveValue>
 }
 
-Expression "Promise.resolve(value + 1)" => instanceof Promise
+Expression "Promise.resolve(value + 1)" => instanceof Promise<unknown>
 
 Expression "value" => unknown
 
@@ -372,7 +374,7 @@ Expression "maybeDoWork" => instanceof typeof async Function "doWork" {
 
 Expression "maybeDoWork?.()" => instanceof Promise<void> | undefined
 
-Binding globalChain "globalChain" => instanceof Promise
+Binding globalChain "globalChain" => instanceof Promise<unknown>
 
 Expression "globalThis" => globalThis
 
@@ -392,15 +394,23 @@ Expression "globalThis.Promise.reject" => sync Function "Promise.reject" {
 
 Expression "globalThis.Promise.reject(\"value\")" => instanceof Promise
 
-Expression "globalThis.Promise.reject(\"value\").finally" => sync Function {
+Expression "globalThis.Promise.reject(\"value\").finally" => sync Function "finally" {
   accepts: {
-    params: []
+    params: [
+      optional onfinally: sync Function "Promise callback" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: void
+      }
+    ]
     type_args: []
   }
-  returns: instanceof Promise
+  returns: instanceof Promise<unknown>
 }
 
-Expression "globalThis.Promise.reject(\"value\").finally()" => instanceof Promise
+Expression "globalThis.Promise.reject(\"value\").finally()" => instanceof Promise<unknown>
 
 Expression "\"value\"" => string: value
 

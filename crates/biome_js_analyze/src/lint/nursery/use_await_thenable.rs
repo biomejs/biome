@@ -11,12 +11,7 @@ use crate::services::typed::Typed;
 declare_lint_rule! {
     /// Enforce that `await` is _only_ used on `Promise` values.
     ///
-    /// :::caution
-    /// At the moment, this rule only checks for instances of the global
-    /// `Promise` class. This is a major shortcoming compared to the ESLint
-    /// rule if you are using custom `Promise`-like implementations such as
-    /// [Bluebird](http://bluebirdjs.com/) or in-house solutions.
-    /// :::
+    /// Values with a callable `then` member are treated as thenable.
     ///
     /// ## Examples
     ///
@@ -64,10 +59,12 @@ impl Rule for UseAwaitThenable {
         // Uncomment the following line for debugging convenience:
         //let printed = format!("type of {expression:?} = {ty:?}");
 
-        let is_maybe_promise = ty.is_promise_instance()
-            || ty.has_promise_variant()
-            || ctx.inferred_expression_has_callable_member(&expression, "then");
-        (ty.is_inferred() && !is_maybe_promise).then_some(())
+        match ty.is_promise_instance() {
+            Some(true) | None => return None,
+            Some(false) => {}
+        }
+
+        (!ctx.inferred_expression_has_callable_member(&expression, "then")?).then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {

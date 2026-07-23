@@ -630,7 +630,9 @@ impl biome_aria::Element for AnyHtmlTagElement {
         Self::attributes(self).into_iter().filter(|attr| {
             matches!(
                 attr,
-                AnyHtmlAttribute::HtmlAttribute(_) | AnyHtmlAttribute::AnyVueDirective(_)
+                AnyHtmlAttribute::HtmlAttribute(_)
+                    | AnyHtmlAttribute::AnyVueDirective(_)
+                    | AnyHtmlAttribute::HtmlAttributeSingleTextExpression(_)
             )
         })
     }

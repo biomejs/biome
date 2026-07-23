@@ -1,0 +1,75 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/flow/collection_key.yaml
+---
+
+# Input
+
+```yaml
+short: { [a, b]: v }
+long:
+  { [a, key, that, is, way, too, long, to, fit, on, a, single, eighty, column, line]: v }
+comment: { [a, # forces the explicit form
+    b]: v }
+value:
+  { [a, b]: [a, value, that, is, way, too, long, to, fit, on, a, single, eighty, column] }
+pair: [{ a: b }: adjacent]
+
+```
+
+
+# Formatted
+
+```yaml
+short: { [a, b]: v }
+long:
+  {
+    ? [
+        a,
+        key,
+        that,
+        is,
+        way,
+        too,
+        long,
+        to,
+        fit,
+        on,
+        a,
+        single,
+        eighty,
+        column,
+        line,
+      ]
+    : v,
+  }
+comment: {
+    ? [
+        a, # forces the explicit form
+        b,
+      ]
+    : v,
+  }
+value:
+  {
+    [a, b]:
+      [
+        a,
+        value,
+        that,
+        is,
+        way,
+        too,
+        long,
+        to,
+        fit,
+        on,
+        a,
+        single,
+        eighty,
+        column,
+      ],
+  }
+pair: [{ a: b }: adjacent]
+
+```

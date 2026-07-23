@@ -21,21 +21,31 @@ mod helpers;
 mod inferred_type;
 pub mod interned_types;
 mod local_inference;
+pub mod resolved;
 mod resolver;
+mod return_type_relation;
 mod r#type;
 mod type_data;
 mod type_store;
+mod type_transform;
+mod type_traversal;
 
 pub use conditionals::*;
 pub use flattening::MAX_FLATTEN_DEPTH;
-pub use globals::{GLOBAL_RESOLVER, GlobalsResolver};
-pub use globals_ids::{GLOBAL_BOOLEAN_ID, GLOBAL_UNKNOWN_ID, NUM_PREDEFINED_TYPES};
+pub use globals::{
+    GLOBAL_RESOLVER, GlobalTypes, GlobalsResolver, global_type_id_for_qualifier,
+    global_type_id_for_value, global_types,
+};
+pub use globals_ids::{GLOBAL_BOOLEAN_ID, GLOBAL_UNKNOWN_ID, GlobalTypeId, NUM_PREDEFINED_TYPES};
 pub use inferred_type::{
-    IgnoredPrimitiveTypes, InferredSwitchCase, InferredType, MisleadingReturnType,
-    ReturnTypeEvidence, StringificationMode, StringificationUsefulness,
+    IgnoredPrimitiveTypes, InferredSwitchCase, InferredType, StringificationMode,
+    StringificationUsefulness, TypeTraversalError,
 };
 pub use interned_types::TypeDb;
 pub use resolver::*;
+pub use return_type_relation::{
+    NarrowedTypeCandidates, ReturnTypeRelation, ReturnTypeVerdict, compare_declared_return_type,
+};
 pub use r#type::Type;
 pub use type_data::TypeData as RawTypeData;
 pub use type_data::*;

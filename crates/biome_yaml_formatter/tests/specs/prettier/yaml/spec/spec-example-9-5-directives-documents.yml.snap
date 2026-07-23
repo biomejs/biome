@@ -23,25 +23,23 @@ info: yaml/spec/spec-example-9-5-directives-documents.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,8 @@
+@@ -1,7 +1,7 @@
  %YAML 1.2
-----
--|
+ ---
+ |
 -  %!PS-Adobe-2.0
-+--- |
 +%!PS-Adobe-2.0
  ...
  %YAML1.2
  ---
- # Empty
-+...
 ```
 
 # Output
 
 ```yml
 %YAML 1.2
---- |
+---
+|
 %!PS-Adobe-2.0
 ...
 %YAML1.2
