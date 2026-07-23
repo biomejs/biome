@@ -1,14 +1,14 @@
 use crate::css_module_info::{CssClassDefinition, CssClassReference};
 use crate::html_module_info::{HtmlEmbeddedContent, HtmlModuleInfo};
 use crate::module_graph::ModuleGraphFsProxy;
-use biome_css_syntax::{
-    AnyCssRoot, CssClassSelector, CssFileSource, CssPseudoClassFunctionSelector,
-    EmbeddingStyleApplicability,
-};
+use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
+use biome_css_syntax::{AnyCssRoot, CssClassSelector};
 use biome_html_syntax::{
     AnyHtmlAttributeInitializer, HtmlElement, HtmlRoot, HtmlSelfClosingElement,
 };
 use biome_js_syntax::{AnyJsImportLike, AnyJsRoot};
+use biome_languages::CssFileSource;
+use biome_languages::css::EmbeddingStyleApplicability;
 use biome_resolver::{ResolveOptions, ResolvedPath, resolve};
 use biome_rowan::{AstNode, AstSeparatedList, Text, TextSize, TokenText, WalkEvent};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -71,11 +71,7 @@ impl<'a> HtmlModuleVisitor<'a> {
                 continue;
             };
             if let Some(element) = HtmlElement::cast(node.clone()) {
-                self.visit_html_element(
-                    element,
-                    &mut referenced_classes,
-                    &mut imported_stylesheets,
-                );
+                self.visit_html_element(element, &mut referenced_classes);
             } else if let Some(element) = HtmlSelfClosingElement::cast(node) {
                 self.visit_self_closing_element(
                     element,
@@ -172,7 +168,6 @@ impl<'a> HtmlModuleVisitor<'a> {
         &self,
         element: HtmlElement,
         referenced_classes: &mut Vec<CssClassReference>,
-        _imported_stylesheets: &mut Vec<ResolvedPath>,
     ) {
         let Ok(opening) = element.opening_element() else {
             return;
@@ -241,7 +236,7 @@ impl<'a> HtmlModuleVisitor<'a> {
 
         let is_stylesheet = element
             .find_attribute_by_name("rel")
-            .and_then(|rel_attr| rel_attr.value())
+            .and_then(|rel_attr| rel_attr.as_static_value())
             .is_some_and(|rel_val| rel_val.text().eq_ignore_ascii_case("stylesheet"));
         if !is_stylesheet {
             return;
@@ -249,7 +244,7 @@ impl<'a> HtmlModuleVisitor<'a> {
 
         if let Some(href_value) = element
             .find_attribute_by_name("href")
-            .and_then(|href_attr| href_attr.value())
+            .and_then(|href_attr| href_attr.as_static_value())
         {
             let resolved = self.resolved_path_from_specifier(href_value.text());
             imported_stylesheets.push(resolved);
@@ -320,7 +315,7 @@ pub(crate) fn collect_css_classes(
     for event in css_root.syntax().preorder() {
         match event {
             WalkEvent::Enter(node) => {
-                if let Some(pseudo_fn) = CssPseudoClassFunctionSelector::cast(node.clone()) {
+                if let Some(pseudo_fn) = AnyCssPseudoClassFunctionSelector::cast(node.clone()) {
                     if pseudo_fn.is_global_pseudo() {
                         global_depth += 1;
                     }
@@ -345,7 +340,7 @@ pub(crate) fn collect_css_classes(
                 }
             }
             WalkEvent::Leave(node) => {
-                if let Some(pseudo_fn) = CssPseudoClassFunctionSelector::cast(node)
+                if let Some(pseudo_fn) = AnyCssPseudoClassFunctionSelector::cast(node)
                     && pseudo_fn.is_global_pseudo()
                 {
                     global_depth = global_depth.saturating_sub(1);

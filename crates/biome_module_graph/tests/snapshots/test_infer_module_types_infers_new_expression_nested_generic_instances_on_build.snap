@@ -1,0 +1,169 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export class Box<T> {
+	value: T;
+
+	constructor(value: T) {
+		this.value = value;
+	}
+}
+
+export class ArrayBox<T> {
+	value: T;
+
+	constructor(values: Array<T>) {
+		this.value = values[0] as T;
+	}
+}
+
+export class CallbackBox<T> {
+	value: T;
+
+	constructor(read: () => T) {
+		this.value = read();
+	}
+}
+
+export const directValue = new Box("text").value;
+
+export const values: Array<number> = [1];
+export const arrayValue = new ArrayBox(values).value;
+
+export const callbackValue = new CallbackBox(() => true).value;
+```
+
+## Inferred types
+
+```
+Binding Box "Box" => class "Box" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Binding T "T" => T
+
+Binding value "value" => instanceof T
+
+Expression "this" => instanceof Box<T>
+
+Expression "this.value = value" => unknown
+
+Expression "value" => instanceof T
+
+Binding ArrayBox "ArrayBox" => class "ArrayBox" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Binding T "T" => T
+
+Binding values "values" => instanceof Array<instanceof T>
+
+Expression "this" => instanceof ArrayBox<T>
+
+Expression "this.value = values[0] as T" => unknown
+
+Expression "values" => instanceof Array<instanceof T>
+
+Expression "values[0]" => instanceof T | undefined
+
+Expression "values[0] as T" => instanceof T
+
+Expression "0" => number: 0
+
+Binding CallbackBox "CallbackBox" => class "CallbackBox" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Binding T "T" => T
+
+Binding read "read" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof T
+}
+
+Expression "this" => instanceof CallbackBox<T>
+
+Expression "this.value = read()" => unknown
+
+Expression "read" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof T
+}
+
+Expression "read()" => instanceof T
+
+Binding directValue "directValue" => string: text
+
+Expression "new Box(\"text\")" => instanceof Box<string: text>
+
+Expression "new Box(\"text\").value" => string: text
+
+Expression "Box" => class "Box" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "\"text\"" => string: text
+
+Binding values "values" => instanceof Array<number>
+
+Expression "[1]" => [number: 1]
+
+Expression "1" => number: 1
+
+Binding arrayValue "arrayValue" => number
+
+Expression "new ArrayBox(values)" => instanceof ArrayBox<number>
+
+Expression "new ArrayBox(values).value" => number
+
+Expression "ArrayBox" => class "ArrayBox" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "values" => instanceof Array<number>
+
+Binding callbackValue "callbackValue" => bool: true
+
+Expression "new CallbackBox(() => true)" => instanceof CallbackBox<bool: true>
+
+Expression "new CallbackBox(() => true).value" => bool: true
+
+Expression "CallbackBox" => class "CallbackBox" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "() => true" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: bool: true
+}
+
+Expression "true" => bool: true
+```

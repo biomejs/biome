@@ -75,12 +75,13 @@ impl Diagnostic {
         }
     }
 
-    pub fn with_offset(mut self, offset: TextSize) -> Self {
-        self.location.span = self
-            .location
-            .span
-            .map(|span| TextRange::new(span.start() + offset, span.end() + offset));
-        self
+    pub fn offset_by(&mut self, offset: TextSize) {
+        self.location.offset_by(offset);
+        self.advices.offset_by(offset);
+        self.verbose_advices.offset_by(offset);
+        if let Some(source) = &mut self.source {
+            source.offset_by(offset);
+        }
     }
 }
 
@@ -148,6 +149,15 @@ struct Location {
     source_code: Option<String>,
 }
 
+impl Location {
+    /// Offset the location span by `offset`.
+    fn offset_by(&mut self, offset: TextSize) {
+        if let Some(span) = &mut self.span {
+            self.span = Some(TextRange::new(span.start() + offset, span.end() + offset));
+        }
+    }
+}
+
 impl From<super::Location<'_>> for Location {
     fn from(loc: super::Location<'_>) -> Self {
         Self {
@@ -175,6 +185,12 @@ impl Advices {
             advices: Vec::new(),
         }
     }
+
+    fn offset_by(&mut self, offset: TextSize) {
+        for advicde in &mut self.advices {
+            advicde.offset_by(offset);
+        }
+    }
 }
 
 impl Visit for Advices {
@@ -200,6 +216,16 @@ impl Visit for Advices {
 
     fn record_diff(&mut self, diff: &TextEdit) -> io::Result<()> {
         self.advices.push(Advice::Diff(diff.clone()));
+        Ok(())
+    }
+
+    fn record_code_suggestion(
+        &mut self,
+        location: super::Location<'_>,
+        diff: &TextEdit,
+    ) -> io::Result<()> {
+        self.advices
+            .push(Advice::CodeSuggestion(location.into(), diff.clone()));
         Ok(())
     }
 
@@ -257,9 +283,29 @@ enum Advice {
     List(Vec<MarkupBuf>),
     Frame(Location),
     Diff(TextEdit),
+    CodeSuggestion(Location, TextEdit),
     Backtrace(MarkupBuf, Backtrace),
     Command(String),
     Group(MarkupBuf, Advices),
+}
+
+impl Advice {
+    fn offset_by(&mut self, offset: TextSize) {
+        match self {
+            Self::Log(_, _)
+            | Self::List(_)
+            | Self::Backtrace(_, _)
+            | Self::Command(_)
+            | Self::Diff(_) => {}
+            Self::Frame(location) | Self::CodeSuggestion(location, _) => {
+                // CodeSuggestion locations are span-less today; offset the TextEdit too if that changes.
+                location.offset_by(offset);
+            }
+            Self::Group(_, advices) => {
+                advices.offset_by(offset);
+            }
+        }
+    }
 }
 
 impl super::Advices for Advice {
@@ -280,6 +326,17 @@ impl super::Advices for Advice {
                 }),
             }),
             Self::Diff(diff) => visitor.record_diff(diff),
+            Self::CodeSuggestion(location, diff) => visitor.record_code_suggestion(
+                super::Location {
+                    resource: location.path.as_ref().map(super::Resource::as_deref),
+                    span: location.span,
+                    source_code: location.source_code.as_deref().map(|text| SourceCode {
+                        text,
+                        line_starts: None,
+                    }),
+                },
+                diff,
+            ),
             Self::Backtrace(title, backtrace) => visitor.record_backtrace(title, backtrace),
             Self::Command(command) => visitor.record_command(command),
             Self::Group(title, advice) => visitor.record_group(title, advice),
@@ -374,11 +431,12 @@ impl schemars::JsonSchema for DiagnosticTags {
 mod tests {
     use std::io;
 
+    use biome_text_edit::TextEdit;
     use biome_text_size::{TextRange, TextSize};
     use serde_json::{Value, from_value, json, to_value};
 
     use crate::{
-        self as biome_diagnostics, {Advices, LogCategory, Visit},
+        self as biome_diagnostics, {Advices, LogCategory, Resource, Visit},
     };
     use biome_diagnostics_macros::Diagnostic;
 
@@ -496,5 +554,24 @@ mod tests {
         let expected = super::Diagnostic::new(expected);
 
         assert_eq!(diag, expected);
+    }
+
+    #[test]
+    fn test_code_suggestion_advice_round_trip() {
+        let advice = super::Advices {
+            advices: vec![super::Advice::CodeSuggestion(
+                super::Location {
+                    path: Some(Resource::File("path".to_string())),
+                    span: Some(TextRange::new(TextSize::from(0), TextSize::from(3))),
+                    source_code: Some("let".to_string()),
+                },
+                TextEdit::from_unicode_words("let", "const"),
+            )],
+        };
+
+        let json = to_value(&advice).unwrap();
+        let round_trip: super::Advices = from_value(json).unwrap();
+
+        assert_eq!(round_trip, advice);
     }
 }

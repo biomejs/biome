@@ -32,47 +32,55 @@ top7:
 ```diff
 --- Prettier
 +++ Biome
-@@ -5,9 +5,13 @@
+@@ -1,13 +1,17 @@
+ ---
+-top1: &node1
+-  &k1 key1: one
+-top2: &node2 # comment
++top1:
++  &node1 &k1 key1: one
++top2:
++  &node2 # comment
    key2: two
  top3:
    &k3 key3: three
 -top4: &node4
-+top4:
-+  &node4
-   &k4 key4: four
+-  &k4 key4: four
 -top5: &node5
++top4:
++  &node4 &k4 key4: four
 +top5:
 +  &node5
    key5: five
 -top6: &val6 six
 -top7: &val7 seven
 +top6: &val6
-+  six
++six
 +top7:
 +  &val7 seven
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
 ---
-top1: &node1
-  &k1 key1: one
-top2: &node2 # comment
+top1:
+  &node1 &k1 key1: one
+top2:
+  &node2 # comment
   key2: two
 top3:
   &k3 key3: three
 top4:
-  &node4
-  &k4 key4: four
+  &node4 &k4 key4: four
 top5:
   &node5
   key5: five
 top6: &val6
-  six
+six
 top7:
-  &val7 seven```
+  &val7 seven
+```
 
 # Errors
 ```

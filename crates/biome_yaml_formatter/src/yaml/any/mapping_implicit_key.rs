@@ -8,6 +8,7 @@ impl FormatRule<AnyYamlMappingImplicitKey> for FormatAnyYamlMappingImplicitKey {
     type Context = YamlFormatContext;
     fn fmt(&self, node: &AnyYamlMappingImplicitKey, f: &mut YamlFormatter) -> FormatResult<()> {
         match node {
+            AnyYamlMappingImplicitKey::YamlAliasNode(node) => node.format().fmt(f),
             AnyYamlMappingImplicitKey::YamlFlowJsonNode(node) => node.format().fmt(f),
             AnyYamlMappingImplicitKey::YamlFlowYamlNode(node) => node.format().fmt(f),
         }

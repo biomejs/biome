@@ -138,7 +138,7 @@ Scope {
       Scope: ScopeId(5)
       Imported: false
       Exported: true
-      Kind: HoistedValue
+      Kind: Function
       ident: greet
       JsDoc Comments: Creates a greeting.
 @param cfg - the configuration

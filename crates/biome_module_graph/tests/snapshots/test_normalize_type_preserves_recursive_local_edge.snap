@@ -1,0 +1,36 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+type Tree = number | Promise<Tree>;
+
+export function readTree(value: Tree): Tree {
+	return value;
+}
+```
+
+## Inferred types
+
+```
+Binding Tree "Tree" => number | instanceof Promise<instanceof Tree>
+
+Binding readTree "readTree" => sync Function "readTree" {
+  accepts: {
+    params: [
+      required value: instanceof Tree
+    ]
+    type_args: []
+  }
+  returns: instanceof Tree
+}
+
+Binding value "value" => instanceof Tree
+
+Expression "value" => instanceof Tree
+```

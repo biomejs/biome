@@ -1,3 +1,1 @@
-$value: if(
-  sass(false): 1; else: -1,
-);
+$value: if(sass(false): 1; else: -1);

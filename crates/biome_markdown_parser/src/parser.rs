@@ -5,6 +5,7 @@ use biome_parser::prelude::*;
 use biome_parser::token_source::Trivia;
 use biome_parser::{ParserContextCheckpoint, diagnostic::merge_diagnostics};
 use biome_rowan::{TextRange, TextSize};
+use std::cell::Cell;
 use std::collections::HashSet;
 
 use crate::lexer::{MarkdownLexContext, MarkdownReLexContext};
@@ -125,6 +126,11 @@ pub(crate) struct MarkdownParser<'source> {
     source: MarkdownTokenSource<'source>,
     options: MarkdownParserOptions,
     state: MarkdownParserState,
+    /// Single-entry memo for `absolute_column_at` queries. Most callers ask
+    /// for the column of the current token offset many times in a row while
+    /// the parser does not advance, so caching the last computed pair avoids
+    /// repeated O(line-length) scans for the preceding newline.
+    abs_col_cache: Cell<Option<(u32, usize)>>,
 }
 
 impl<'source> MarkdownParser<'source> {
@@ -134,7 +140,25 @@ impl<'source> MarkdownParser<'source> {
             source: MarkdownTokenSource::from_str(source),
             options,
             state: MarkdownParserState::default(),
+            abs_col_cache: Cell::new(None),
         }
+    }
+
+    /// Cached wrapper around [`absolute_column_at`]. Returns the column of
+    /// `offset` in the parser source, reusing the previous result when the
+    /// offset matches. Callers like `line_start_leading_indent` and
+    /// `line_indent_from_current` hit the same offset repeatedly while no
+    /// tokens are consumed.
+    pub(crate) fn cached_absolute_column_at(&self, offset: usize) -> usize {
+        let key = offset as u32;
+        if let Some((cached_key, cached_col)) = self.abs_col_cache.get()
+            && cached_key == key
+        {
+            return cached_col;
+        }
+        let col = absolute_column_at(self.source.source_text(), offset);
+        self.abs_col_cache.set(Some((key, col)));
+        col
     }
 
     /// Returns parser options. Reserved for GFM extensions.
@@ -215,6 +239,38 @@ impl<'source> MarkdownParser<'source> {
     /// This makes whitespace produce separate tokens for destination/title parsing.
     pub(crate) fn re_lex_link_definition(&mut self) {
         self.source.re_lex(MarkdownReLexContext::LinkDefinition);
+    }
+
+    /// Re-lex the current token as plain text, merging it with the plain
+    /// characters that follow. Used when a construct token (failed emphasis
+    /// marker, unmatched bracket, ...) falls back to being ordinary text,
+    /// so it becomes one text node instead of a one-character node.
+    pub(crate) fn re_lex_textual_fallback(&mut self) {
+        self.source.re_lex(MarkdownReLexContext::TextualFallback);
+    }
+
+    /// Re-lex from the current token start up to `end` as a single token of
+    /// the given kind. Used for regions whose extent only the parser can
+    /// measure, like HTML block content (whitespace and newlines included)
+    /// or a run of indentation characters. Must NOT be called inside
+    /// lookahead.
+    pub(crate) fn re_lex_span(&mut self, end: TextSize, kind: MarkdownSyntaxKind) {
+        self.source.re_lex_span(end, kind);
+    }
+
+    /// Consume the span from the current token start to `end` as one token
+    /// of `kind`, wrapped in a single `wrapper` node. Used to fold runs of
+    /// per-character tokens (like indentation) into one node.
+    pub(crate) fn emit_span_as(
+        &mut self,
+        end: TextSize,
+        kind: MarkdownSyntaxKind,
+        wrapper: MarkdownSyntaxKind,
+    ) {
+        self.re_lex_span(end, kind);
+        let m = self.start();
+        self.bump(kind);
+        m.complete(self, wrapper);
     }
 
     /// Force re-lex the current token in Regular context.
@@ -321,7 +377,20 @@ impl<'source> MarkdownParser<'source> {
         if self.state.virtual_line_start == Some(self.cur_range().start()) {
             let source = self.source.source_text();
             let start: usize = self.cur_range().start().into();
-            return count_leading_indent(&source[start..]);
+            let rest = &source[start..];
+            // Fast path: when the leading whitespace contains no tabs, the
+            // column-aware count is identical to a plain space count and we
+            // can avoid the O(line-length) scan to find the line start.
+            if !rest
+                .as_bytes()
+                .iter()
+                .take_while(|b| matches!(b, b' ' | b'\t'))
+                .any(|b| *b == b'\t')
+            {
+                return rest.bytes().take_while(|b| *b == b' ').count();
+            }
+            let start_col = self.cached_absolute_column_at(start);
+            return count_leading_indent_from_column(rest, start_col);
         }
 
         self.source.line_start_leading_indent()
@@ -386,35 +455,47 @@ impl<'source> MarkdownParser<'source> {
         self.emit_indent_tokens_core(max_indent)
     }
 
-    /// Shared core loop: emit `MdIndentToken` nodes for whitespace-only tokens
-    /// up to `max_indent` columns.
+    /// Shared core: emit one `MdIndentToken` holding the whole run of
+    /// whitespace that fits within `max_indent` columns.
+    ///
+    /// Indentation arrives from the lexer as one whitespace token per
+    /// character at line start, so the run is measured directly on the
+    /// source and consumed as a single `MD_INDENT_CHAR` token.
     fn emit_indent_tokens_core(&mut self, max_indent: usize) -> bool {
-        let mut consumed = 0usize;
-        let mut did_emit = false;
-
-        while self.at(MarkdownSyntaxKind::MD_TEXTUAL_LITERAL) {
-            let text = self.cur_text();
-            if text.is_empty() || !text.chars().all(|c| c == ' ' || c == '\t') {
-                break;
-            }
-
-            let indent = text
-                .chars()
-                .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
-                .sum::<usize>();
-
-            if consumed + indent > max_indent {
-                break;
-            }
-
-            consumed += indent;
-            did_emit = true;
-            let token_m = self.start();
-            self.bump_remap(MarkdownSyntaxKind::MD_INDENT_CHAR);
-            token_m.complete(self, MarkdownSyntaxKind::MD_INDENT_TOKEN);
+        if !self.at(MarkdownSyntaxKind::MD_TEXTUAL_LITERAL) {
+            return false;
         }
 
-        did_emit
+        let start: usize = self.cur_range().start().into();
+        let source = self.source.source_text();
+        let mut consumed = 0usize;
+        let mut end = start;
+
+        for byte in source[start..].bytes() {
+            let width = match byte {
+                b' ' => 1,
+                b'\t' => TAB_STOP_SPACES,
+                _ => break,
+            };
+            if consumed + width > max_indent {
+                break;
+            }
+            consumed += width;
+            end += 1;
+        }
+
+        if end == start {
+            return false;
+        }
+
+        self.re_lex_span(
+            TextSize::from(end as u32),
+            MarkdownSyntaxKind::MD_INDENT_CHAR,
+        );
+        let token_m = self.start();
+        self.bump(MarkdownSyntaxKind::MD_INDENT_CHAR);
+        token_m.complete(self, MarkdownSyntaxKind::MD_INDENT_TOKEN);
+        true
     }
 
     /// Consume optional indentation whitespace at line start, up to `max_indent`
@@ -579,16 +660,37 @@ impl<'source> MarkdownParser<'source> {
     }
 }
 
-fn count_leading_indent(text: &str) -> usize {
-    let mut count = 0usize;
+/// Compute the absolute column position (0-indexed) of `offset` in `source`,
+/// honoring CommonMark tab expansion to the next multiple of `TAB_STOP_SPACES`.
+pub(crate) fn absolute_column_at(source: &str, offset: usize) -> usize {
+    let bytes = source.as_bytes();
+    let line_start = bytes[..offset]
+        .iter()
+        .rposition(|&b| b == b'\n' || b == b'\r')
+        .map_or(0, |idx| idx + 1);
+    let mut col = 0usize;
+    for c in source[line_start..offset].chars() {
+        match c {
+            '\t' => col += TAB_STOP_SPACES - (col % TAB_STOP_SPACES),
+            _ => col += 1,
+        }
+    }
+    col
+}
+
+/// Count the number of indent columns consumed by leading spaces/tabs in
+/// `text`, starting from `start_col`. Tabs expand to the next multiple of
+/// `TAB_STOP_SPACES` relative to the absolute column position.
+pub(crate) fn count_leading_indent_from_column(text: &str, start_col: usize) -> usize {
+    let mut col = start_col;
     for c in text.chars() {
         match c {
-            ' ' => count += 1,
-            '\t' => count += TAB_STOP_SPACES,
+            ' ' => col += 1,
+            '\t' => col += TAB_STOP_SPACES - (col % TAB_STOP_SPACES),
             _ => break,
         }
     }
-    count
+    col - start_col
 }
 
 impl<'source> Parser for MarkdownParser<'source> {

@@ -37,7 +37,9 @@ pub use grit_query::{
     CreateFile, GritQuery, GritQueryEffect, GritQueryResult, Message, OutputFile,
 };
 pub use grit_resolved_pattern::GritResolvedPattern;
-pub use grit_target_language::{GritTargetLanguage, JsTargetLanguage, JsonTargetLanguage};
+pub use grit_target_language::{
+    CssTargetLanguage, GritTargetLanguage, JsTargetLanguage, JsonTargetLanguage,
+};
 pub use grit_target_node::{GritTargetLanguageNode, GritTargetNode, GritTargetSyntaxKind};
 
 use biome_grit_parser::parse_grit;

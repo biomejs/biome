@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/comment/issue-16074.yml
 ---
+
 # Input
 
 ```yml
@@ -32,14 +33,31 @@ myOtherList:
 ```diff
 --- Prettier
 +++ Biome
-@@ -14,5 +14,4 @@
+@@ -1,18 +1,18 @@
+ ---
+ myDict: {}
+-  # exampleKey1: value
+-  # exampleKey2: value
++# exampleKey1: value
++# exampleKey2: value
+ 
+ myList: []
+-  # - name: example
+-  #   value: example
++# - name: example
++#   value: example
+ 
+ myOtherMap:
+   1: example
+   2: example
+-  # 3: example
++# 3: example
  
  myOtherList:
    - example1
--  - example2
+   - example2
 -  # - example3
-+  - example2
-\ No newline at end of file
++# - example3
 ```
 
 # Output
@@ -47,18 +65,20 @@ myOtherList:
 ```yml
 ---
 myDict: {}
-  # exampleKey1: value
-  # exampleKey2: value
+# exampleKey1: value
+# exampleKey2: value
 
 myList: []
-  # - name: example
-  #   value: example
+# - name: example
+#   value: example
 
 myOtherMap:
   1: example
   2: example
-  # 3: example
+# 3: example
 
 myOtherList:
   - example1
-  - example2```
+  - example2
+# - example3
+```

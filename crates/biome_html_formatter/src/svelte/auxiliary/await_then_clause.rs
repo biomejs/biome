@@ -7,6 +7,12 @@ impl FormatNodeRule<SvelteAwaitThenClause> for FormatSvelteAwaitThenClause {
     fn fmt_fields(&self, node: &SvelteAwaitThenClause, f: &mut HtmlFormatter) -> FormatResult<()> {
         let SvelteAwaitThenClauseFields { name, then_token } = node.as_fields();
 
-        write!(f, [then_token.format(), space(), name.format()])
+        write!(f, [then_token.format()])?;
+
+        if let Some(name) = name {
+            write!(f, [space(), name.format()])?;
+        }
+
+        Ok(())
     }
 }

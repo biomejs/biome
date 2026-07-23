@@ -6,6 +6,7 @@ info: scss/atrule/if-else.scss
 # Input
 
 ```scss
+// Biome intentionally normalizes SCSS comparison operator spacing.
 @if $media == phonePortrait {
     $k: .15625;
 } @else if $media == phoneLandscape {
@@ -160,7 +161,12 @@ p {
 ```diff
 --- Prettier
 +++ Biome
-@@ -8,7 +8,7 @@
+@@ -1,3 +1,4 @@
++// Biome intentionally normalizes SCSS comparison operator spacing.
+ @if $media == phonePortrait {
+   $k: 0.15625;
+ } @else if $media == phoneLandscape {
+@@ -8,7 +9,7 @@
  p {
    @if $type == ocean {
    }
@@ -169,7 +175,7 @@ p {
    }
    @if $type == ocean {
    }
-@@ -20,7 +20,7 @@
+@@ -20,7 +21,7 @@
    }
    @if (($type) == (ocean)) {
    }
@@ -178,7 +184,7 @@ p {
    }
    @if (($type) == (ocean)) {
    }
-@@ -42,8 +42,8 @@
+@@ -42,8 +43,8 @@
    @if $type == ocean {
    } @else if $type == matador {
    }
@@ -194,6 +200,7 @@ p {
 # Output
 
 ```scss
+// Biome intentionally normalizes SCSS comparison operator spacing.
 @if $media == phonePortrait {
   $k: 0.15625;
 } @else if $media == phoneLandscape {
@@ -328,10 +335,10 @@ p {
 
 # Lines exceeding max width of 80 characters
 ```
-   63:   @if $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
-   64:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
-   68:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
-   69:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
-   73:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
-   74:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
+   64:   @if $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
+   65:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
+   69:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
+   70:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
+   74:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
+   75:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
 ```

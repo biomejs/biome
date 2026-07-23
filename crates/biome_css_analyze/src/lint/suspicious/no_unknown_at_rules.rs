@@ -2,7 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{CssUnknownBlockAtRule, CssUnknownValueAtRule};
+use biome_css_syntax::{AnyCssUnknownAtRuleName, CssUnknownBlockAtRule, CssUnknownValueAtRule};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_unknown_at_rules::NoUnknownAtRulesOptions;
@@ -79,6 +79,16 @@ declare_node_union! {
   pub AnyUnknownAtRule = CssUnknownBlockAtRule | CssUnknownValueAtRule
 }
 
+/// Returns a static name for rules like `@unknown`; dynamic Sass names such as
+/// `@#{$rule-name}` are not comparable with the configured ignore list.
+fn static_unknown_at_rule_name(name: AnyCssUnknownAtRuleName) -> Option<(TextRange, String)> {
+    let identifier = name.as_css_identifier()?;
+    Some((
+        identifier.range(),
+        identifier.value_token().ok()?.text_trimmed().to_string(),
+    ))
+}
+
 /// Determines if the given unknown at-rule name should be ignored.
 fn should_ignore(name: &str, options: &NoUnknownAtRulesOptions) -> bool {
     for ignore_pattern in &options.ignore {
@@ -106,7 +116,7 @@ impl Rule for NoUnknownAtRules {
             AnyUnknownAtRule::CssUnknownBlockAtRule(rule) => rule.name().ok()?,
             AnyUnknownAtRule::CssUnknownValueAtRule(rule) => rule.name().ok()?,
         };
-        let name = rule.value_token().ok()?.text_trimmed().to_string();
+        let (range, name) = static_unknown_at_rule_name(rule)?;
 
         // Check if this unknown at-rule should be ignored
         if should_ignore(&name, ctx.options()) {
@@ -114,7 +124,7 @@ impl Rule for NoUnknownAtRules {
         }
 
         Some(NoUnknownAtRuleState {
-            range: rule.range(),
+            range,
             name,
         })
     }

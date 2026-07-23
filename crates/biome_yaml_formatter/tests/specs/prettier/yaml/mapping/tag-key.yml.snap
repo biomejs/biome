@@ -21,11 +21,11 @@ info: yaml/mapping/tag-key.yml
 -!!tag key: value
 +? !!tag key
 +: value
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
 ? !!tag key
-: value```
+: value
+```

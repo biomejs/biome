@@ -25,6 +25,8 @@ debugger
 let f;
 		let f;"#;
 
+const FIXABLE_USE_CONST: &str = "let value = 1;\nconsole.log(value);\n";
+
 #[test]
 fn reports_diagnostics_rdjson_check_command() {
     let fs = MemoryFileSystem::default();
@@ -55,6 +57,40 @@ fn reports_diagnostics_rdjson_check_command() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "reports_diagnostics_rdjson_check_command",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn reports_code_suggestions_rdjson_check_command() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("main.js");
+    fs.insert(file_path.into(), FIXABLE_USE_CONST.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--reporter=rdjson",
+                "--only=style/useConst",
+                "--error-on-warnings",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "reports_code_suggestions_rdjson_check_command",
         fs,
         console,
         result,

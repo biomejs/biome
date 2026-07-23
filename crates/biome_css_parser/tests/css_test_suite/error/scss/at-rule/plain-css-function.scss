@@ -1,0 +1,7 @@
+@function --missing-parens {
+  result: red;
+}
+
+@function --bad-param(param) {
+  result: red;
+}

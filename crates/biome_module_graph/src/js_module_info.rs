@@ -3,17 +3,17 @@ mod collector;
 mod diagnostics;
 mod module_resolver;
 mod scope;
+pub(crate) use scope::TsBindingReferenceExt;
 mod utils;
 mod visitor;
 
-use crate::ModuleGraph;
 use crate::css_module_info::CssClassReference;
-use biome_js_semantic::ScopeId;
+use biome_js_semantic::{JsDeclarationKind, ScopeId};
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{
-    FormatTypeContext, ImportSymbol, ResolvedTypeId, TypeData, TypeReference,
+    FormatTypeContext, ImportSymbol, RawTypeData, ResolvedTypeId, TypeData, TypeReference,
+    TypeResolverLevel, interned_types::LocalTypeId,
 };
-use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};
 use camino::Utf8Path;
@@ -27,6 +27,7 @@ use scope::JsScope;
 
 use crate::diagnostics::ModuleDiagnostic;
 pub(super) use binding::JsBindingData;
+pub use collector::TypeInferenceMode;
 pub use diagnostics::JsModuleInfoDiagnostic;
 pub use module_resolver::ModuleResolver;
 pub(crate) use visitor::JsModuleVisitor;
@@ -54,7 +55,7 @@ impl Display for BindingTypeData {
     }
 }
 
-/// Information restricted to a single module in the [ModuleGraph].
+/// Information restricted to a single JS/TS module.
 #[derive(Clone, Debug)]
 pub struct JsModuleInfo(pub(super) Arc<JsModuleInfoInner>);
 
@@ -78,34 +79,6 @@ impl JsModuleInfo {
 
     pub fn diagnostics(&self) -> &[ModuleDiagnostic] {
         self.diagnostics.as_slice()
-    }
-
-    /// Finds an exported symbol by `name`, using the `module_graph` to
-    /// lookup re-exports if necessary.
-    #[inline]
-    pub fn find_js_exported_symbol(
-        &self,
-        module_graph: &ModuleGraph,
-        name: &str,
-    ) -> Option<JsOwnExport> {
-        module_graph.find_exported_symbol(self, name)
-    }
-
-    /// Finds the default exported symbol
-    #[inline]
-    pub fn find_js_default_export_symbol(&self, module_graph: &ModuleGraph) -> Option<JsOwnExport> {
-        module_graph.find_exported_symbol(self, "default")
-    }
-
-    /// Finds an exported symbol by `name`, using the `module_graph` to
-    /// lookup re-exports if necessary.
-    #[inline]
-    pub fn find_jsdoc_for_exported_symbol(
-        &self,
-        module_graph: &ModuleGraph,
-        name: &str,
-    ) -> Option<JsdocComment> {
-        module_graph.find_jsdoc_for_exported_symbol(self, name)
     }
 
     /// Returns the module's global scope.
@@ -189,6 +162,40 @@ impl JsModuleInfo {
                     .and_then(|import| import.resolved_path.as_path())
             })
     }
+
+    pub fn local_type_name(&self, type_id: LocalTypeId) -> Option<Text> {
+        self.raw_binding_types
+            .iter()
+            .find_map(|(range, reference)| {
+                let TypeReference::Resolved(resolved_id) = reference else {
+                    return None;
+                };
+                if resolved_id.level() != TypeResolverLevel::Thin
+                    || resolved_id.index() != type_id.index()
+                {
+                    return None;
+                }
+
+                let binding = self.semantic_model.as_binding_by_range(*range)?;
+                if !is_named_type_declaration(binding.declaration_kind()) {
+                    return None;
+                }
+
+                Some(binding.syntax().text_trimmed().into_text())
+            })
+    }
+}
+
+fn is_named_type_declaration(declaration_kind: JsDeclarationKind) -> bool {
+    matches!(
+        declaration_kind,
+        JsDeclarationKind::Class
+            | JsDeclarationKind::Enum
+            | JsDeclarationKind::Interface
+            | JsDeclarationKind::Module
+            | JsDeclarationKind::Namespace
+            | JsDeclarationKind::Type
+    )
 }
 
 #[derive(Debug)]
@@ -197,7 +204,7 @@ pub struct JsModuleInfoInner {
     ///
     /// Maps from the local imported name to a [JsImport] with the absolute path
     /// it resolves to. The resolved path may be looked up as key in the
-    /// [ModuleGraph::data] map, although it is not required to exist
+    /// [ModuleDb] map, although it is not required to exist
     /// (for instance, if the path is outside the project's scope).
     ///
     /// Note that re-exports may introduce additional dependencies, because they
@@ -210,7 +217,7 @@ pub struct JsModuleInfoInner {
     ///
     /// Maps from the source specifier name to a [JsImportPath] with the
     /// absolute path it resolves to. The resolved path may be looked up as key
-    /// in the [ModuleGraph::data] map, although it is not required to exist
+    /// in the [ModuleDb] map, although it is not required to exist
     /// (for instance, if the path is outside the project's scope).
     pub static_import_paths: IndexMap<Text, JsImportPath>,
 
@@ -223,7 +230,7 @@ pub struct JsModuleInfoInner {
     ///
     /// Maps from the source specifier name to a [JsImportPath] with the
     /// absolute path it resolves to. The resolved path may be looked up as key
-    /// in the [ModuleGraph::data] map, although it is not required to exist
+    /// in the [ModuleDb] map, although it is not required to exist
     /// (for instance, if the path is outside the project's scope).
     ///
     /// Paths found in `require()` expressions in CommonJS sources are also
@@ -240,6 +247,9 @@ pub struct JsModuleInfoInner {
     /// [Self::forwarding_exports] instead.
     pub exports: Exports,
 
+    /// Exports whose type IDs index [`Self::raw_types`].
+    pub(crate) raw_exports: Exports,
+
     /// Re-exports that apply to all symbols from another module, without
     /// assigning a name to them.
     pub blanket_reexports: Vec<JsReexport>,
@@ -255,6 +265,15 @@ pub struct JsModuleInfoInner {
     /// This enriches the semantic model's bindings with type inference results
     /// and documentation comments.
     pub binding_type_data: FxHashMap<TextRange, BindingTypeData>,
+
+    /// Raw local type table collected before module-level resolution and flattening.
+    pub raw_types: Vec<RawTypeData>,
+
+    /// Raw expression references collected before module-level resolution and flattening.
+    pub raw_expressions: FxHashMap<TextRange, TypeReference>,
+
+    /// Raw binding references collected before module-level resolution and flattening.
+    pub raw_binding_types: FxHashMap<TextRange, TypeReference>,
 
     /// Parsed expressions, mapped from their range to their type ID.
     pub(crate) expressions: FxHashMap<TextRange, ResolvedTypeId>,
@@ -410,7 +429,7 @@ impl JsModuleInfoInner {
 /// Exports come in three varieties: "own" exports that are defined in the
 /// module itself, re-exports for named exports, and re-exports that apply to
 /// all symbols from another module.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Hash)]
 pub enum JsExport {
     /// An export that is defined in this module.
     Own(JsOwnExport),
@@ -451,7 +470,7 @@ impl JsExport {
 ///
 /// It could point to any kind of resource, such as JavaScript files, CSS files,
 /// images, and so on.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct JsImport {
     /// The specifier for the imported as it appeared in the source text.
     pub specifier: Text,
@@ -472,7 +491,7 @@ pub struct JsImport {
 ///
 /// Exports can reference bindings, types of expressions or other references for
 /// which no binding exists, or namespaces defined by exports of another module.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Hash)]
 pub enum JsOwnExport {
     /// An export that references a binding by its text range.
     /// The range can be used to look up type augmentation data.
@@ -492,9 +511,21 @@ pub enum JsOwnExport {
     Namespace(JsReexport),
 }
 
+/// Result of looking up an exported symbol by name, following re-exports.
+#[derive(Clone, Debug, PartialEq, Hash)]
+pub enum JsExportedSymbolLookup {
+    /// The symbol is exported by the module.
+    Found(JsOwnExport),
+    /// Every re-export could be followed and the symbol is not there.
+    Missing,
+    /// A re-export target could not be resolved, so the symbol may still
+    /// exist. Callers must not treat this as proof the export is missing.
+    Unknown,
+}
+
 /// Information about an export statement that re-exports all symbols from
 /// another module.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Hash)]
 pub struct JsReexport {
     /// Where this export statement is located.
     pub export_range: Option<TextRange>,

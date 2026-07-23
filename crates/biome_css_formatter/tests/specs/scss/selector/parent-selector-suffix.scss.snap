@@ -1,0 +1,30 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/selector/parent-selector-suffix.scss
+---
+
+# Input
+
+```scss
+.button{&--active{}&-100\.200{}&#{$state}{}&-#{$state}{}& --active{}}
+
+```
+
+
+# Formatted
+
+```scss
+.button {
+	&--active {
+	}
+	&-100\.200 {
+	}
+	&#{$state} {
+	}
+	&-#{$state} {
+	}
+	& --active {
+	}
+}
+
+```

@@ -1,8 +1,7 @@
 use crate::prelude::*;
 use biome_css_syntax::{
-    AnyScssExpression, AnyScssExpressionItem, ScssBinaryExpression, ScssBinaryExpressionFields,
-    ScssParenthesizedExpression, is_in_scss_control_condition_sequence,
-    unwrap_single_expression_item,
+    ScssBinaryExpression, ScssBinaryExpressionFields, is_in_scss_control_condition_sequence,
+    is_in_scss_parenthesized_expression, is_scss_parenthesized_expression,
 };
 use biome_formatter::{format_args, write};
 
@@ -11,46 +10,22 @@ pub(crate) struct FormatScssBinaryExpression;
 
 impl FormatNodeRule<ScssBinaryExpression> for FormatScssBinaryExpression {
     fn fmt_fields(&self, node: &ScssBinaryExpression, f: &mut CssFormatter) -> FormatResult<()> {
-        let ScssBinaryExpressionFields {
-            left,
-            operator,
-            right,
-        } = node.as_fields();
-        let is_nested_parenthesized = is_nested_in_parenthesized_expression(node);
-        // `$a * ($b + $c)` lets the parentheses own the nested break.
-        let should_indent_right =
-            is_nested_parenthesized || right.as_ref().is_ok_and(is_parenthesized_expression);
-        let formatted_right = format_with(|f| {
-            if should_indent_right {
-                write!(
-                    f,
-                    [indent(&format_args![
-                        soft_line_break_or_space(),
-                        right.format()
-                    ])]
-                )
-            } else {
-                write!(f, [soft_line_break_or_space(), right.format()])
-            }
-        });
+        let left = node.left()?;
+        let formatted_right = FormatScssBinaryRightSide::new(node);
 
         if is_in_scss_control_condition_sequence(node) {
             write!(
                 f,
-                [format_args![
-                    left.format(),
-                    space(),
-                    operator.format(),
+                [
+                    left.format().with_text_case(CssCase::Preserve),
                     formatted_right
-                ]]
+                ]
             )
         } else {
             write!(
                 f,
                 [group(&format_args![
-                    left.format(),
-                    space(),
-                    operator.format(),
+                    left.format().with_text_case(CssCase::Preserve),
                     formatted_right
                 ])]
             )
@@ -58,19 +33,63 @@ impl FormatNodeRule<ScssBinaryExpression> for FormatScssBinaryExpression {
     }
 }
 
-/// Detects parenthesized operands, such as the right side in `$a * ($b)`.
-fn is_parenthesized_expression(expression: &AnyScssExpression) -> bool {
-    matches!(
-        expression,
-        AnyScssExpression::ScssParenthesizedExpression(_)
-    ) || unwrap_single_expression_item(expression)
-        .is_some_and(|item| matches!(item, AnyScssExpressionItem::ScssParenthesizedExpression(_)))
+/// Formats the operator and right side, indenting grouped line breaks.
+///
+/// ```scss
+/// $x: "a" +
+///   "b";
+/// ```
+struct FormatScssBinaryRightSide<'a> {
+    node: &'a ScssBinaryExpression,
 }
 
-/// Detects nested binary values inside `(...)`, such as `($a + $b)`.
-fn is_nested_in_parenthesized_expression(node: &ScssBinaryExpression) -> bool {
-    node.syntax()
-        .ancestors()
-        .skip(1)
-        .any(|ancestor| ScssParenthesizedExpression::can_cast(ancestor.kind()))
+impl<'a> FormatScssBinaryRightSide<'a> {
+    fn new(node: &'a ScssBinaryExpression) -> Self {
+        Self { node }
+    }
+
+    fn should_indent(&self) -> bool {
+        if !is_in_scss_control_condition_sequence(self.node) {
+            return true;
+        }
+
+        let ScssBinaryExpressionFields { right, .. } = self.node.as_fields();
+
+        is_in_scss_parenthesized_expression(self.node)
+            || right.as_ref().is_ok_and(is_scss_parenthesized_expression)
+    }
+}
+
+impl Format<CssFormatContext> for FormatScssBinaryRightSide<'_> {
+    fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
+        let ScssBinaryExpressionFields {
+            operator, right, ..
+        } = self.node.as_fields();
+
+        write!(
+            f,
+            [
+                space(),
+                operator.format()?.with_text_case(CssCase::Preserve)
+            ]
+        )?;
+
+        if self.should_indent() {
+            write!(
+                f,
+                [indent(&format_args![
+                    soft_line_break_or_space(),
+                    right?.format().with_text_case(CssCase::Preserve)
+                ])]
+            )
+        } else {
+            write!(
+                f,
+                [
+                    soft_line_break_or_space(),
+                    right?.format().with_text_case(CssCase::Preserve)
+                ]
+            )
+        }
+    }
 }

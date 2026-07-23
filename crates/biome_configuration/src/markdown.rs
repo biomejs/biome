@@ -31,22 +31,22 @@ pub type MarkdownParseInterpolation = Bool<false>;
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct MarkdownFormatterConfiguration {
     /// Control the formatter for Markdown (and its super languages) files.
-    #[cfg_attr(all(feature = "cli", feature = "markdown"), bpaf(hide))]
+    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<MarkdownFormatterEnabled>,
 
     /// The indent style applied to Markdown files.
-    #[cfg_attr(all(feature = "cli", feature = "markdown"), bpaf(hide))]
+    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_style: Option<IndentStyle>,
 
     /// The size of the indentation applied to Markdown files. Defaults to 2.
-    #[cfg_attr(all(feature = "cli", feature = "markdown"), bpaf(hide))]
+    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
     /// What's the max width of a line applied to Markdown files. Defaults to 80.
-    #[cfg_attr(all(feature = "cli", feature = "markdown"), bpaf(hide))]
+    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
 
@@ -60,12 +60,12 @@ pub struct MarkdownFormatterConfiguration {
     /// Disable the option at your own risk.
     ///
     /// Defaults to true.
-    #[cfg_attr(all(feature = "cli", feature = "markdown"), bpaf(hide))]
+    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trailing_newline: Option<TrailingNewline>,
 
     /// The type of line ending applied to Markdown (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
-    #[cfg_attr(all(feature = "cli", feature = "markdown"), bpaf(hide))]
+    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 }

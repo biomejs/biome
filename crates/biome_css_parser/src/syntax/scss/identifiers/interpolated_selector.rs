@@ -1,24 +1,57 @@
 use crate::parser::CssParser;
+use crate::syntax::is_nth_at_identifier;
 use crate::syntax::scss::expression::parse_scss_selector_interpolation;
 use crate::syntax::scss::identifiers::interpolated_identifier::{
-    complete_scss_interpolated_identifier, is_at_identifier_continuation,
-    is_at_scss_interpolated_identifier,
+    is_at_identifier_continuation, is_at_scss_interpolated_identifier,
+    parse_scss_interpolated_identifier_parts,
 };
-use crate::syntax::scss::is_at_scss_interpolation;
+use crate::syntax::scss::{is_at_scss_interpolation, is_nth_at_scss_interpolation};
 use crate::syntax::selector::{
     parse_selector_custom_identifier_fragment, parse_selector_identifier_fragment,
 };
-use biome_css_syntax::CssSyntaxKind::SCSS_INTERPOLATION;
+use biome_css_syntax::CssSyntaxKind::{SCSS_INTERPOLATED_IDENTIFIER, SCSS_INTERPOLATION};
+use biome_css_syntax::T;
+use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 
-/// Parses selector identifier grammar that may contain interpolation parts.
+/// Returns whether the current token can start an SCSS-interpolated selector
+/// identifier.
 ///
-/// This is different from [`parse_scss_selector_interpolation`], which parses
-/// exactly one standalone selector interpolation such as `#{$type}`. This
-/// helper parses selector identifier grammar, so it can merge adjacent selector
-/// identifier fragments and interpolation fragments into one identifier-shaped
-/// node.
+/// Examples: `#{$tag}` and `button-#{$variant}`.
+#[inline]
+pub(crate) fn is_at_scss_interpolated_selector_identifier(p: &mut CssParser) -> bool {
+    is_nth_at_scss_interpolated_selector_identifier(p, 0)
+}
+
+/// Returns whether the token at `n` can start an SCSS-interpolated selector
+/// identifier.
+///
+/// This is intentionally selector-specific: selector names may be built from an
+/// interpolation alone (`#{$tag}`) or from a plain identifier followed by an
+/// adjacent interpolation suffix (`button#{$state}` or `button-#{$state}`).
+#[inline]
+pub(crate) fn is_nth_at_scss_interpolated_selector_identifier(p: &mut CssParser, n: usize) -> bool {
+    is_nth_at_scss_interpolation(p, n)
+        || is_nth_at_identifier(p, n) && is_nth_at_scss_selector_identifier_suffix(p, n + 1)
+}
+
+/// Returns whether the token at `n` continues a selector identifier with SCSS
+/// interpolation and no separating whitespace.
+///
+/// The suffix can be a direct interpolation (`#{$state}`) or a hyphen followed
+/// by interpolation (`-#{$state}`), matching selector names such as
+/// `button#{$state}` and `button-#{$state}`.
+#[inline]
+fn is_nth_at_scss_selector_identifier_suffix(p: &mut CssParser, n: usize) -> bool {
+    !p.has_nth_preceding_whitespace(n)
+        && (is_nth_at_scss_interpolation(p, n)
+            || p.nth_at(n, T![-])
+                && !p.has_nth_preceding_whitespace(n + 1)
+                && is_nth_at_scss_interpolation(p, n + 1))
+}
+
+/// Parses SCSS-interpolated selector name slots.
 ///
 /// This selector-specific variant keeps the closing `}` of an interpolation in
 /// selector lexing mode so following whitespace is tokenized as a selector
@@ -32,16 +65,11 @@ use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 ///
 /// Docs: https://sass-lang.com/documentation/interpolation/
 #[inline]
-pub(crate) fn parse_scss_selector_interpolated_identifier(p: &mut CssParser) -> ParsedSyntax {
-    parse_selector_interpolated_identifier(p, parse_selector_identifier_fragment)
+pub(crate) fn parse_scss_selector_identifier(p: &mut CssParser) -> ParsedSyntax {
+    parse_scss_selector_identifier_with_fragment(p, parse_selector_identifier_fragment)
 }
 
-/// Parses selector custom identifiers such as `.foo-#{$name}` and preserves the
-/// selector-specific custom-identifier rules used by class and id selectors.
-///
-/// Like `parse_scss_selector_interpolated_identifier`, this keeps selector
-/// whitespace after `#{$...}` visible as a combinator rather than treating it
-/// as trivia.
+/// Parses SCSS-interpolated selector custom identifiers.
 ///
 /// Example:
 /// ```scss
@@ -50,20 +78,14 @@ pub(crate) fn parse_scss_selector_interpolated_identifier(p: &mut CssParser) -> 
 ///
 /// Docs: https://sass-lang.com/documentation/interpolation/
 #[inline]
-pub(crate) fn parse_scss_selector_custom_interpolated_identifier(
-    p: &mut CssParser,
-) -> ParsedSyntax {
-    parse_selector_interpolated_identifier(p, parse_selector_custom_identifier_fragment)
+pub(crate) fn parse_scss_selector_custom_identifier(p: &mut CssParser) -> ParsedSyntax {
+    parse_scss_selector_identifier_with_fragment(p, parse_selector_custom_identifier_fragment)
 }
 
-/// Parses selector identifier grammar using `parse_selector_fragment` for the
-/// non-interpolation fragments.
+/// Parses selector identifier grammar with caller-owned non-interpolation parts.
 ///
-/// `parse_selector_fragment` keeps the selector-specific identifier rules at
-/// the call site. Class/id custom identifiers pass
-/// [`parse_selector_custom_identifier_fragment`], while regular selector
-/// identifiers pass [`parse_selector_identifier_fragment`].
-fn parse_selector_interpolated_identifier(
+/// Examples: `button-#{$variant}` and `.button-#{$variant}`.
+fn parse_scss_selector_identifier_with_fragment(
     p: &mut CssParser,
     parse_selector_fragment: fn(&mut CssParser) -> ParsedSyntax,
 ) -> ParsedSyntax {
@@ -81,11 +103,11 @@ fn parse_selector_interpolated_identifier(
         return Present(first_fragment);
     }
 
-    Present(complete_scss_interpolated_identifier(
-        p,
-        first_fragment,
-        |p| parse_selector_identifier_part(p, parse_selector_fragment),
-    ))
+    let parts = parse_scss_interpolated_identifier_parts(p, first_fragment, |p| {
+        parse_selector_identifier_part(p, parse_selector_fragment)
+    });
+
+    Present(parts.precede(p).complete(p, SCSS_INTERPOLATED_IDENTIFIER))
 }
 
 #[inline]

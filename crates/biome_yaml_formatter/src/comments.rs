@@ -1,12 +1,14 @@
 use biome_diagnostics::category;
 use biome_formatter::comments::{
-    CommentKind, CommentPlacement, CommentStyle, Comments, DecoratedComment, SourceComment,
+    CommentKind, CommentPlacement, CommentStyle, CommentTextPosition, Comments, DecoratedComment,
+    SourceComment,
 };
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{FormatResult, FormatRule, write};
+use biome_rowan::AstNode;
 use biome_rowan::{SyntaxTriviaPieceComments, TextSize};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
-use biome_yaml_syntax::{YamlLanguage, YamlRoot};
+use biome_yaml_syntax::{YamlDocument, YamlLanguage, YamlRoot};
 
 use crate::prelude::*;
 
@@ -58,7 +60,69 @@ impl CommentStyle for YamlCommentStyle {
         comment: DecoratedComment<Self::Language>,
     ) -> CommentPlacement<Self::Language> {
         handle_global_suppression(comment)
+            .or_else(handle_document_comment)
+            .or_else(handle_end_of_line_comment)
     }
+}
+
+/// Handles comments that are attached to the marker tokens (`---`, `...`) or
+/// directives of a [YamlDocument].
+fn handle_document_comment(
+    comment: DecoratedComment<YamlLanguage>,
+) -> CommentPlacement<YamlLanguage> {
+    let Some(document) = YamlDocument::cast_ref(comment.enclosing_node()) else {
+        return CommentPlacement::Default(comment);
+    };
+    let comment_start = comment.piece().text_range().start();
+
+    // Comments following the `...` document end marker belong to the document,
+    // so they are printed after the marker (which is then kept).
+    if let Some(dotdotdot) = document.dotdotdot_token()
+        && comment_start > dotdotdot.text_trimmed_range().start()
+    {
+        return CommentPlacement::trailing(document.syntax().clone(), comment);
+    }
+
+    if let Some(dashdashdash) = document.dashdashdash_token() {
+        if comment_start < dashdashdash.text_trimmed_range().start() {
+            // Comments between the last directive and the `---` marker stay
+            // with the directive so they aren't moved after the marker.
+            if let Some(directive) = document.directives().iter().last()
+                && directive.range().end() <= comment_start
+            {
+                return CommentPlacement::trailing(directive.syntax().clone(), comment);
+            }
+
+            // Comments preceding the `---` marker of a document without
+            // directives lead the whole document.
+            return CommentPlacement::leading(document.syntax().clone(), comment);
+        }
+
+        // Comments between the `---` marker and the document content are
+        // printed right after the marker.
+        let before_content = document
+            .node()
+            .is_none_or(|content| comment_start < content.range().start());
+        if before_content {
+            return CommentPlacement::dangling(document.syntax().clone(), comment);
+        }
+    }
+
+    CommentPlacement::Default(comment)
+}
+
+fn handle_end_of_line_comment(
+    comment: DecoratedComment<YamlLanguage>,
+) -> CommentPlacement<YamlLanguage> {
+    if comment.text_position() != CommentTextPosition::EndOfLine {
+        return CommentPlacement::Default(comment);
+    }
+
+    if let Some(preceding_node) = comment.preceding_node() {
+        return CommentPlacement::trailing(preceding_node.clone(), comment);
+    }
+
+    CommentPlacement::Default(comment)
 }
 
 fn handle_global_suppression(

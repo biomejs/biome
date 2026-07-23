@@ -3,22 +3,32 @@ use crate::cli_options::CliOptions;
 use crate::runner::crawler::CrawlerContext;
 use crate::runner::diagnostics::{ResultExt, ResultIoExt, UnhandledDiagnostic};
 use crate::runner::execution::Execution;
-use biome_console::Console;
-use biome_diagnostics::{DiagnosticExt, DiagnosticTags, Error, Severity, category};
-use biome_fs::{BiomePath, File, OpenOptions};
-use biome_service::diagnostics::FileTooLarge;
-use biome_service::file_handlers::DocumentFileSource;
-use biome_service::projects::ProjectKey;
-use biome_service::workspace::{
-    FeaturesSupported, FileExitsParams, FileFeaturesResult, SupportKind, SupportsFeatureParams,
+use biome_console::{Console, ConsoleExt};
+use biome_diagnostics::{
+    DiagnosticExt, DiagnosticTags, Error, PrintDiagnostic, Severity, category,
 };
-use biome_service::workspace::{FileContent, FileGuard, OpenFileParams};
+use biome_fs::{BiomePath, File, OpenOptions};
+use biome_languages::DocumentFileSource;
+use biome_service::diagnostics::FileTooLarge;
+use biome_service::projects::ProjectKey;
+use biome_service::workspace::FileGuard;
+use biome_service::workspace::{
+    FeaturesSupported, FileContent, FileExistsParams, FileFeaturesResult, OpenFileParams,
+    SupportKind, SupportsFeatureParams,
+};
 use biome_service::{Workspace, WorkspaceError};
+
+#[derive(Debug)]
+pub(crate) struct ChangedFile {
+    pub(crate) path: BiomePath,
+    pub(crate) content: String,
+    pub(crate) version: i32,
+}
 
 #[derive(Debug)]
 pub(crate) enum FileStatus {
     /// File changed and it was a success
-    Changed,
+    Changed(ChangedFile),
     /// File unchanged, and it was a success
     Unchanged,
     /// While handling the file, something happened
@@ -29,12 +39,6 @@ pub(crate) enum FileStatus {
     Ignored,
     /// Files that belong to other tools and shouldn't be touched
     Protected(String),
-}
-
-impl FileStatus {
-    pub const fn is_changed(&self) -> bool {
-        matches!(self, Self::Changed)
-    }
 }
 
 #[derive(Debug)]
@@ -68,24 +72,12 @@ pub(crate) enum Message {
         /// Total number of infos returned by the workspace.
         infos: usize,
     },
-    // DiagnosticsWithActions {
-    //     file_path: String,
-    //     content: String,
-    //     diagnostics_with_actions: Vec<(Diagnostic, Vec<CodeAction>)>,
-    //     skipped_diagnostics: u32,
-    // },
     Diff {
         file_name: String,
         old: String,
         new: String,
         diff_kind: DiffKind,
     },
-}
-
-impl Message {
-    pub(crate) const fn is_failure(&self) -> bool {
-        matches!(self, Self::Failure)
-    }
 }
 
 #[derive(Debug)]
@@ -125,6 +117,27 @@ pub(crate) struct ProcessStdinFilePayload<'a> {
     pub(crate) skip_ignore_check: bool,
 }
 
+pub(crate) fn print_stdin_diagnostics(
+    console: &mut dyn Console,
+    cli_options: &CliOptions,
+    biome_path: &BiomePath,
+    source: &str,
+    diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
+) {
+    for diagnostic in diagnostics {
+        let diagnostic = Error::from(diagnostic)
+            .with_file_path(biome_path.to_string())
+            .with_file_source_code(source);
+        if diagnostic.tags().is_verbose() {
+            if cli_options.verbose {
+                console.error(biome_console::markup! {{PrintDiagnostic::verbose(&diagnostic)}});
+            }
+        } else {
+            console.error(biome_console::markup! {{PrintDiagnostic::simple(&diagnostic)}});
+        }
+    }
+}
+
 pub(crate) trait ProcessFile: Send + Sync + std::panic::RefUnwindSafe {
     fn process_file<Ctx>(
         ctx: &Ctx,
@@ -147,23 +160,29 @@ pub(crate) trait ProcessFile: Send + Sync + std::panic::RefUnwindSafe {
     where
         Ctx: CrawlerContext,
     {
-        let FileFeaturesResult {
-            features_supported: file_features,
-        } = ctx
-            .workspace()
-            .file_features(SupportsFeatureParams {
-                project_key: ctx.project_key(),
-                path: biome_path.clone(),
-                features: ctx.execution().wanted_features(),
-                inline_config: None,
-                skip_ignore_check: false,
-                not_requested_features: ctx.execution().not_requested_features(),
-            })
-            .with_file_path_and_code_and_tags(
-                biome_path.to_string(),
-                category!("files/missingHandler"),
-                DiagnosticTags::VERBOSE,
-            )?;
+        let file_features = if let Some(file_features) = ctx.get_file_features(biome_path) {
+            file_features
+        } else {
+            let FileFeaturesResult {
+                features_supported: file_features,
+            } = ctx
+                .workspace()
+                .file_features(SupportsFeatureParams {
+                    project_key: ctx.project_key(),
+                    path: biome_path.clone(),
+                    features: ctx.execution().wanted_features(),
+                    inline_config: None,
+                    skip_ignore_check: false,
+                    not_requested_features: ctx.execution().not_requested_features(),
+                })
+                .with_file_path_and_code_and_tags(
+                    biome_path.to_string(),
+                    category!("files/missingHandler"),
+                    DiagnosticTags::VERBOSE,
+                )?;
+
+            file_features
+        };
 
         // first we stop if there are some files that don't have ALL features enabled, e.g. images, fonts, etc.
         if file_features.is_ignored() || file_features.is_not_enabled() {
@@ -240,7 +259,7 @@ impl ProcessFile for () {
     }
 }
 
-/// Small wrapper that holds information and operations around the current processed file
+/// Holds the scanned workspace document and the filesystem handle for a processed file.
 pub(crate) struct WorkspaceFile<'ctx, 'app> {
     guard: FileGuard<'app, dyn Workspace + 'ctx>,
     file: Box<dyn File>,
@@ -248,8 +267,7 @@ pub(crate) struct WorkspaceFile<'ctx, 'app> {
 }
 
 impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
-    /// It attempts to read the file from disk, creating a [FileGuard] and
-    /// saving these information internally
+    /// Opens the filesystem file and borrows the document created by the scan.
     pub(crate) fn new<Ctx>(ctx: &'ctx Ctx, path: BiomePath) -> Result<Self, Error>
     where
         Ctx: CrawlerContext,
@@ -263,32 +281,27 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
             .open_with_options(path.as_path(), open_options)
             .with_file_path(path.to_string())?;
 
-        let mut input = String::new();
-        file.read_to_string(&mut input)
-            .with_file_path(path.to_string())?;
-
-        let guard = FileGuard::new(ctx.workspace(), ctx.project_key(), path.clone())
-            .with_file_path_and_code(path.to_string(), category!("internalError/fs"))?;
-
-        if ctx.workspace().file_exists(FileExitsParams {
+        if ctx.workspace().file_exists(FileExistsParams {
             file_path: path.clone(),
         })? {
+            let guard = FileGuard::borrowed(ctx.workspace(), ctx.project_key(), path.clone())
+                .with_file_path_and_code(path.to_string(), category!("internalError/fs"))?;
             Ok(Self { guard, path, file })
         } else {
+            let guard = FileGuard::new(ctx.workspace(), ctx.project_key(), path.clone())
+                .with_file_path_and_code(path.to_string(), category!("internalError/fs"))?;
             let mut input = String::new();
             file.read_to_string(&mut input)
                 .with_file_path(path.to_string())?;
-
             ctx.workspace().open_file(OpenFileParams {
                 project_key: ctx.project_key(),
                 document_file_source: None,
                 path: path.clone(),
-                content: FileContent::from_client(&input),
+                content: FileContent::from_client(input),
                 persist_node_cache: false,
                 inline_config: None,
                 editor_features: None,
             })?;
-
             Ok(Self { guard, path, file })
         }
     }
@@ -301,19 +314,293 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
         self.guard().get_file_content()
     }
 
-    pub(crate) fn as_extension(&self) -> Option<&str> {
-        self.path.extension()
+    pub(crate) fn write_to_disk(&mut self, content: String) -> Result<ChangedFile, Error> {
+        self.file
+            .set_content(content.as_bytes())
+            .with_file_path(self.path.to_string())?;
+        Ok(ChangedFile {
+            path: self.path.clone(),
+            content,
+            version: self.file.file_version(),
+        })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{ChangedFile, FileStatus, ProcessFile, WorkspaceFile};
+    use crate::runner::crawler::CrawlerContext;
+    use crate::runner::execution::{AnalyzerSelectors, Execution};
+    use crate::runner::process_file::Message;
+    use biome_console::MarkupBuf;
+    use biome_diagnostics::{Category, Error, Severity, category};
+    use biome_fs::{
+        BiomePath, FileSystem, FileSystemExt, MemoryFileSystem, PathInterner, TraversalContext,
+    };
+    use biome_service::Workspace;
+    use biome_service::projects::ProjectKey;
+    use biome_service::workspace::{
+        FeatureName, FeaturesBuilder, FeaturesSupported, FileContent, GetFileContentParams,
+        OpenFileParams, OpenProjectParams, OpenProjectResult, SupportKind, server,
+    };
+    use camino::Utf8PathBuf;
+    use papaya::{HashMap, HashSet, HashSetRef, LocalGuard};
+    use std::hash::RandomState;
+    use std::sync::Arc;
+    use std::time::Duration;
+
+    #[derive(Debug)]
+    struct TestExecution {
+        write: bool,
     }
 
-    /// It updates the workspace file with `new_content`
-    pub(crate) fn update_file(&mut self, new_content: impl Into<String>) -> Result<(), Error> {
-        let new_content = new_content.into();
+    impl Execution for TestExecution {
+        fn wanted_features(&self) -> FeatureName {
+            FeaturesBuilder::new().with_all().build()
+        }
 
-        self.file
-            .set_content(new_content.as_bytes())
-            .with_file_path(self.path.to_string())?;
-        self.guard
-            .change_file(self.file.file_version(), new_content)?;
-        Ok(())
+        fn not_requested_features(&self) -> FeatureName {
+            FeaturesBuilder::new().build()
+        }
+
+        fn can_handle(&self, _features: FeaturesSupported) -> bool {
+            true
+        }
+
+        fn is_vcs_targeted(&self) -> bool {
+            false
+        }
+
+        fn supports_kind(&self, _file_features: &FeaturesSupported) -> Option<SupportKind> {
+            None
+        }
+
+        fn get_stdin_file_path(&self) -> Option<&str> {
+            None
+        }
+
+        fn as_diagnostic_category(&self) -> &'static Category {
+            category!("check")
+        }
+
+        fn requires_write_access(&self) -> bool {
+            self.write
+        }
+
+        fn analyzer_selectors(&self) -> AnalyzerSelectors {
+            AnalyzerSelectors::default()
+        }
+
+        fn summary_phrase(&self, _files: usize, _duration: &Duration) -> MarkupBuf {
+            MarkupBuf::default()
+        }
+    }
+
+    struct TestContext<'a> {
+        fs: Arc<MemoryFileSystem>,
+        workspace: &'a dyn Workspace,
+        project_key: ProjectKey,
+        execution: TestExecution,
+        interner: PathInterner,
+        evaluated_paths: HashSet<BiomePath>,
+        file_features: HashMap<BiomePath, FeaturesSupported>,
+    }
+
+    impl CrawlerContext for TestContext<'_> {
+        fn increment_changed(&self, _path: &BiomePath, _changed_file: ChangedFile) {}
+
+        fn increment_unchanged(&self) {}
+
+        fn increment_matches(&self, _num_matches: usize) {}
+
+        fn increment_skipped(&self) {}
+
+        fn push_message(&self, _msg: Message) {}
+
+        fn fs(&self) -> &dyn FileSystem {
+            self.fs.as_ref()
+        }
+
+        fn workspace(&self) -> &dyn Workspace {
+            self.workspace
+        }
+
+        fn project_key(&self) -> ProjectKey {
+            self.project_key
+        }
+
+        fn execution(&self) -> &dyn Execution {
+            &self.execution
+        }
+
+        fn insert_file_features(&self, path: BiomePath, features: FeaturesSupported) {
+            self.file_features.pin().insert(path, features);
+        }
+
+        fn get_file_features(&self, path: &BiomePath) -> Option<FeaturesSupported> {
+            self.file_features.pin().get(path).cloned()
+        }
+    }
+
+    impl TraversalContext for TestContext<'_> {
+        fn interner(&self) -> &PathInterner {
+            &self.interner
+        }
+
+        fn push_diagnostic(&self, _error: Error) {}
+
+        fn can_handle(&self, _path: &BiomePath) -> bool {
+            true
+        }
+
+        fn handle_path(&self, _path: BiomePath) {}
+
+        fn store_path(&self, path: BiomePath) {
+            self.evaluated_paths.pin().insert(path);
+        }
+
+        fn evaluated_paths(&self) -> HashSetRef<'_, BiomePath, RandomState, LocalGuard<'_>> {
+            self.evaluated_paths.pin()
+        }
+    }
+
+    #[test]
+    fn workspace_file_borrows_existing_document() {
+        const SOURCE: &str = "const value = 1;";
+
+        let file_path = Utf8PathBuf::from("/project/file.js");
+        let fs = Arc::new(MemoryFileSystem::default());
+        fs.insert(file_path.clone(), SOURCE);
+
+        let workspace = server(fs.clone(), None);
+        let OpenProjectResult { project_key } = workspace
+            .open_project(OpenProjectParams {
+                path: BiomePath::new("/project"),
+                open_uninitialized: true,
+            })
+            .unwrap();
+        let path = BiomePath::new(&file_path);
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path: path.clone(),
+                content: FileContent::from_client(SOURCE),
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+
+        let (interner, _path_receiver) = PathInterner::new();
+        let ctx = TestContext {
+            fs,
+            workspace: workspace.as_ref(),
+            project_key,
+            execution: TestExecution { write: false },
+            interner,
+            evaluated_paths: HashSet::default(),
+            file_features: HashMap::default(),
+        };
+
+        {
+            let _workspace_file = WorkspaceFile::new(&ctx, path.clone()).unwrap();
+        }
+
+        let content = workspace
+            .get_file_content(GetFileContentParams { project_key, path })
+            .unwrap();
+
+        assert_eq!(content, SOURCE);
+    }
+
+    #[test]
+    fn workspace_file_writes_without_updating_document() {
+        const SOURCE: &str = "const value = 1;";
+        const UPDATED: &str = "const value = 2;";
+
+        let file_path = Utf8PathBuf::from("/project/file.js");
+        let fs = Arc::new(MemoryFileSystem::default());
+        fs.insert(file_path.clone(), SOURCE);
+
+        let workspace = server(fs.clone(), None);
+        let OpenProjectResult { project_key } = workspace
+            .open_project(OpenProjectParams {
+                path: BiomePath::new("/project"),
+                open_uninitialized: true,
+            })
+            .unwrap();
+        let path = BiomePath::new(&file_path);
+
+        let (interner, _path_receiver) = PathInterner::new();
+        let ctx = TestContext {
+            fs: fs.clone(),
+            workspace: workspace.as_ref(),
+            project_key,
+            execution: TestExecution { write: true },
+            interner,
+            evaluated_paths: HashSet::default(),
+            file_features: HashMap::default(),
+        };
+
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path: path.clone(),
+                content: FileContent::from_client(SOURCE),
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+
+        let mut workspace_file = WorkspaceFile::new(&ctx, path.clone()).unwrap();
+        assert_eq!(workspace_file.input().unwrap(), SOURCE);
+
+        let changed = workspace_file.write_to_disk(UPDATED.into()).unwrap();
+        assert_eq!(changed.path, path);
+        assert_eq!(changed.content.as_str(), UPDATED);
+        assert_eq!(changed.version, 1);
+        assert_eq!(workspace_file.input().unwrap(), SOURCE);
+        drop(workspace_file);
+
+        let mut disk_content = String::new();
+        fs.open(&file_path)
+            .unwrap()
+            .read_to_string(&mut disk_content)
+            .unwrap();
+        assert_eq!(disk_content, UPDATED);
+    }
+
+    #[test]
+    fn process_file_uses_cached_file_features() {
+        let file_path = Utf8PathBuf::from("/project/missing.js");
+        let fs = Arc::new(MemoryFileSystem::default());
+        let workspace = server(fs.clone(), None);
+        let OpenProjectResult { project_key } = workspace
+            .open_project(OpenProjectParams {
+                path: BiomePath::new("/project"),
+                open_uninitialized: true,
+            })
+            .unwrap();
+        let path = BiomePath::new(&file_path);
+        let (interner, _path_receiver) = PathInterner::new();
+        let ctx = TestContext {
+            fs,
+            workspace: workspace.as_ref(),
+            project_key,
+            execution: TestExecution { write: false },
+            interner,
+            evaluated_paths: HashSet::default(),
+            file_features: HashMap::default(),
+        };
+        let mut file_features = FeaturesSupported::default();
+        file_features.set_ignored_for_all_features();
+        ctx.insert_file_features(path.clone(), file_features);
+
+        let result = <() as ProcessFile>::execute(&ctx, &path, u32::MAX, Severity::Hint).unwrap();
+
+        assert!(matches!(result, FileStatus::Ignored));
     }
 }

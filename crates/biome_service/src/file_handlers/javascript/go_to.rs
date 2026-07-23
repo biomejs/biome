@@ -1,20 +1,31 @@
 use crate::file_handlers::{ResolveBindingParams, ResolveDefinitionParams};
 use crate::workspace::{DefinitionReference, GoToDefinitionResult};
-use biome_css_syntax::{TextRange, TextSize};
+#[cfg(feature = "module_graph")]
 use biome_fs::BiomePath;
+use biome_js_semantic::js_semantic_model;
 use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
 use biome_js_syntax::{
     AnyJsRoot, AnyJsxAttributeValue, JsImport, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
     JsVariableDeclarator, JsxAttribute, JsxReferenceIdentifier, JsxString,
 };
-use biome_module_graph::{JsOwnExport, ModuleGraph, ModuleInfo};
-use biome_rowan::{AstNode, AstSeparatedList, TokenAtOffset, TokenText};
+#[cfg(feature = "module_graph")]
+use biome_module_graph::{
+    JsExportedSymbolLookup, JsOwnExport, ModuleDb, ModuleInfoKind, SymbolFromModuleInfo,
+    find_js_exported_symbol,
+};
+#[cfg(feature = "module_graph")]
+use biome_rowan::TextRange;
+use biome_rowan::{AstNode, AstSeparatedList, TextSize, TokenAtOffset, TokenText};
+#[cfg(feature = "module_graph")]
+use biome_workspace_db::WorkspaceDb;
+#[cfg(feature = "module_graph")]
 use camino::Utf8Path;
 use std::ops::Add;
 
 /// Source-side capability: given a cursor position, identify what binding the user clicked on.
 pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<DefinitionReference> {
-    let root: AnyJsRoot = params.parse.tree();
+    let semantic_model = js_semantic_model(&params.workspace_db, &params.parsed_source);
+    let root: AnyJsRoot = params.parsed_source.tree(&params.workspace_db);
 
     let token = match root.syntax().token_at_offset(params.cursor_offset) {
         TokenAtOffset::Single(token) => token,
@@ -34,7 +45,6 @@ pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<Definition
         }
 
         if let Some(reference) = JsReferenceIdentifier::cast_ref(&ancestor)
-            && let Some(semantic_model) = params.services.as_js_services()?.semantic_model.as_ref()
             && let Some(binding) = semantic_model.binding(&reference)
         {
             let binding_syntax = binding.syntax();
@@ -54,7 +64,6 @@ pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<Definition
         }
 
         if let Some(reference) = JsxReferenceIdentifier::cast_ref(&ancestor)
-            && let Some(semantic_model) = params.services.as_js_services()?.semantic_model.as_ref()
             && let Some(binding) = semantic_model.binding(&reference)
         {
             let binding_syntax = binding.syntax();
@@ -158,6 +167,7 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
         DefinitionReference::Local { range } => {
             result.store(params.path.clone(), *range);
         }
+        #[cfg(feature = "module_graph")]
         DefinitionReference::Import {
             local_name,
             specifier,
@@ -166,21 +176,27 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
                 local_name,
                 specifier,
                 params.path.as_path(),
-                params.module_graph,
+                &params.workspace_db,
                 &mut result,
             );
         }
+        #[cfg(not(feature = "module_graph"))]
+        DefinitionReference::Import { .. } => return None,
+        #[cfg(feature = "module_graph")]
         DefinitionReference::HtmlComponent { local_name, source } => {
             resolve_import_definition(
                 local_name,
                 source,
                 params.path.as_path(),
-                params.module_graph,
+                &params.workspace_db,
                 &mut result,
             );
         }
+        #[cfg(not(feature = "module_graph"))]
+        DefinitionReference::HtmlComponent { .. } => return None,
         DefinitionReference::LocalEmbedded { range, .. } => {
-            if let Some(offset) = params.offset {
+            let offset = params.parsed_source.diagnostic_offset(&params.workspace_db);
+            if let Some(offset) = offset {
                 result.store(params.path.clone(), range.add(offset))
             }
         }
@@ -192,16 +208,17 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
 }
 
 /// Resolves an imported symbol to its definition in the target module.
+#[cfg(feature = "module_graph")]
 fn resolve_import_definition(
     local_name: &str,
     specifier: &str,
     current_path: &Utf8Path,
-    module_graph: &ModuleGraph,
+    module_db: &WorkspaceDb,
     result: &mut GoToDefinitionResult,
 ) -> Option<()> {
-    let module_info = module_graph.module_info_for_path(current_path)?;
+    let module_info = module_db.module_info_for_path(current_path)?;
     match module_info {
-        ModuleInfo::Js(module_info) => {
+        ModuleInfoKind::Js(module_info) => {
             let import_path = module_info
                 .static_import_paths
                 .get(specifier)
@@ -210,30 +227,37 @@ fn resolve_import_definition(
             let target_path = import_path.resolved_path.as_path()?;
 
             // Skip files not in the module graph
-            if !module_graph.contains(target_path) {
+            if !module_db.contains(target_path) {
                 return None;
             }
 
-            let target_module = module_graph.js_module_info_for_path(target_path)?;
+            let target_module = module_db.module_for_path(target_path)?;
 
-            match target_module
-                .find_js_exported_symbol(module_graph, local_name)
-                .or(target_module.find_js_default_export_symbol(module_graph))
-            {
-                None => {
+            let mut lookup = find_js_exported_symbol(
+                module_db,
+                SymbolFromModuleInfo::new(module_db, local_name, target_module),
+            );
+            if !matches!(lookup, JsExportedSymbolLookup::Found(_)) {
+                lookup = find_js_exported_symbol(
+                    module_db,
+                    SymbolFromModuleInfo::new(module_db, "default", target_module),
+                );
+            }
+            match lookup {
+                JsExportedSymbolLookup::Missing | JsExportedSymbolLookup::Unknown => {
                     result.store(
                         BiomePath::new(target_path),
                         TextRange::new(TextSize::from(0), TextSize::from(0)),
                     );
                 }
-                Some(own_export) => match own_export {
+                JsExportedSymbolLookup::Found(own_export) => match own_export {
                     JsOwnExport::Binding(range) => result.store(BiomePath::new(target_path), range),
                     JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => {}
                 },
             }
         }
-        ModuleInfo::Css(_) => {}
-        ModuleInfo::Html(module_info) => {
+        ModuleInfoKind::Css(_) => {}
+        ModuleInfoKind::Html(module_info) => {
             let resolved_path = module_info
                 .static_import_paths
                 .get(specifier)
@@ -242,20 +266,23 @@ fn resolve_import_definition(
             let target_path = resolved_path.as_path()?;
 
             // Skip files not in the module graph
-            if !module_graph.contains(target_path) {
+            if !module_db.contains(target_path) {
                 return None;
             }
 
             // Check if we need to resolve from a JS file
-            if let Some(module) = module_graph.js_module_info_for_path(target_path) {
-                match module.find_js_exported_symbol(module_graph, local_name) {
-                    None => {
+            if let Some(module) = module_db.module_for_path(target_path) {
+                match find_js_exported_symbol(
+                    module_db,
+                    SymbolFromModuleInfo::new(module_db, local_name, module),
+                ) {
+                    JsExportedSymbolLookup::Missing | JsExportedSymbolLookup::Unknown => {
                         result.store(
                             BiomePath::new(target_path),
                             TextRange::new(TextSize::from(0), TextSize::from(0)),
                         );
                     }
-                    Some(own_export) => match own_export {
+                    JsExportedSymbolLookup::Found(own_export) => match own_export {
                         JsOwnExport::Binding(range) => {
                             result.store(BiomePath::new(target_path), range)
                         }

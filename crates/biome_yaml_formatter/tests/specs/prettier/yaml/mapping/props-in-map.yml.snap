@@ -17,15 +17,17 @@ a: !!map &anchor
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,2 +1,2 @@
- a: !!map &anchor
--  a: 123
-+  a: 123
-\ No newline at end of file
+@@ -1,2 +1,3 @@
+-a: !!map &anchor
++a:
++  !!map &anchor
+   a: 123
 ```
 
 # Output
 
 ```yml
-a: !!map &anchor
-  a: 123```
+a:
+  !!map &anchor
+  a: 123
+```

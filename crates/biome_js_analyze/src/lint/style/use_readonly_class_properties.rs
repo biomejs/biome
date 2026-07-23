@@ -9,10 +9,10 @@ use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsClass, AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter,
-    AnyJsPropertyModifier, AnyTsPropertyParameterModifier, JsClassMemberList, JsFileSource,
-    JsSyntaxKind, JsSyntaxToken, TextRange, TsAccessibilityModifier, TsPropertyParameter,
-    TsReadonlyModifier,
+    AnyJsPropertyModifier, AnyTsPropertyParameterModifier, JsClassMemberList, JsSyntaxKind,
+    JsSyntaxToken, TextRange, TsAccessibilityModifier, TsPropertyParameter, TsReadonlyModifier,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{
     AstNode, AstNodeExt, AstNodeList, AstSeparatedList, BatchMutationExt, Text, TriviaPiece,
 };

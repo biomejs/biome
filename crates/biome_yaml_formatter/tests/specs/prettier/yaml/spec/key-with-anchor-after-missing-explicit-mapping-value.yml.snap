@@ -23,10 +23,8 @@ a: 1
  ---
  a: 1
 -b:
--&anchor c: 3
 +? b
-+&anchor c: 3
-\ No newline at end of file
+ &anchor c: 3
 ```
 
 # Output
@@ -35,4 +33,5 @@ a: 1
 ---
 a: 1
 ? b
-&anchor c: 3```
+&anchor c: 3
+```

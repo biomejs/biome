@@ -1,3 +1,8 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "This module compares CSS values that can span multiple tokens."
+)]
+
 //! Module responsible for providing utility methods regarding fonts
 //!
 

@@ -1,0 +1,355 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@keyframes loader {
+  #{50% - $duration}
+    opacity: 1;
+  }
+}
+
+@keyframes loader {
+  #{50% - $duration {
+    opacity: 1;
+  }
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@1..11 "keyframes" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@11..18 "loader" [] [Whitespace(" ")],
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@18..19 "{" [] [],
+                    items: CssKeyframesItemList [
+                        CssKeyframesItem {
+                            selectors: CssKeyframesSelectorList [
+                                ScssKeyframesSelector {
+                                    selector: ScssInterpolation {
+                                        hash_token: HASH@19..23 "#" [Newline("\n"), Whitespace("  ")] [],
+                                        l_curly_token: L_CURLY@23..24 "{" [] [],
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                ScssBinaryExpression {
+                                                    left: CssPercentage {
+                                                        value_token: CSS_NUMBER_LITERAL@24..26 "50" [] [],
+                                                        percent_token: PERCENT@26..28 "%" [] [Whitespace(" ")],
+                                                    },
+                                                    operator: MINUS@28..30 "-" [] [Whitespace(" ")],
+                                                    right: ScssVariable {
+                                                        dollar_token: DOLLAR@30..31 "$" [] [],
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@31..39 "duration" [] [],
+                                                        },
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                        r_curly_token: R_CURLY@39..40 "}" [] [],
+                                    },
+                                    percent_token: missing (optional),
+                                },
+                            ],
+                            block: CssBogusBlock {
+                                items: [
+                                    CssDeclarationList [
+                                        CssDeclarationWithSemicolon {
+                                            declaration: CssDeclaration {
+                                                property: CssGenericProperty {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@40..52 "opacity" [Newline("\n"), Whitespace("    ")] [],
+                                                    },
+                                                    colon_token: COLON@52..54 ":" [] [Whitespace(" ")],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@54..55 "1" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                                important: missing (optional),
+                                            },
+                                            semicolon_token: SEMICOLON@55..56 ";" [] [],
+                                        },
+                                    ],
+                                    R_CURLY@56..60 "}" [Newline("\n"), Whitespace("  ")] [],
+                                ],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@60..62 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@62..65 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@65..75 "keyframes" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@75..82 "loader" [] [Whitespace(" ")],
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@82..83 "{" [] [],
+                    items: CssKeyframesItemList [
+                        CssKeyframesItem {
+                            selectors: CssKeyframesSelectorList [
+                                CssBogusSelector {
+                                    items: [
+                                        CssBogus {
+                                            items: [
+                                                HASH@83..87 "#" [Newline("\n"), Whitespace("  ")] [],
+                                                L_CURLY@87..88 "{" [] [],
+                                                CssBogus {
+                                                    items: [
+                                                        CssBogus {
+                                                            items: [
+                                                                ScssBinaryExpression {
+                                                                    left: CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@88..90 "50" [] [],
+                                                                        percent_token: PERCENT@90..92 "%" [] [Whitespace(" ")],
+                                                                    },
+                                                                    operator: MINUS@92..94 "-" [] [Whitespace(" ")],
+                                                                    right: ScssVariable {
+                                                                        dollar_token: DOLLAR@94..95 "$" [] [],
+                                                                        name: CssIdentifier {
+                                                                            value_token: IDENT@95..104 "duration" [] [Whitespace(" ")],
+                                                                        },
+                                                                    },
+                                                                },
+                                                                CssBogusPropertyValue {
+                                                                    items: [
+                                                                        L_CURLY@104..105 "{" [] [],
+                                                                    ],
+                                                                },
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@105..117 "opacity" [Newline("\n"), Whitespace("    ")] [],
+                                                                },
+                                                                CssBogusPropertyValue {
+                                                                    items: [
+                                                                        COLON@117..119 ":" [] [Whitespace(" ")],
+                                                                        CSS_NUMBER_LITERAL@119..120 "1" [] [],
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                missing separator,
+                                CssBogusSelector {
+                                    items: [
+                                        SEMICOLON@120..121 ";" [] [],
+                                    ],
+                                },
+                            ],
+                            block: CssBogusBlock {
+                                items: [
+                                    CssDeclarationList [],
+                                    R_CURLY@121..125 "}" [Newline("\n"), Whitespace("  ")] [],
+                                ],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@125..127 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@127..128 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..128
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..127
+    0: CSS_AT_RULE@0..62
+      0: AT@0..1 "@" [] []
+      1: CSS_KEYFRAMES_AT_RULE@1..62
+        0: KEYFRAMES_KW@1..11 "keyframes" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@11..18
+          0: IDENT@11..18 "loader" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@18..62
+          0: L_CURLY@18..19 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@19..60
+            0: CSS_KEYFRAMES_ITEM@19..60
+              0: CSS_KEYFRAMES_SELECTOR_LIST@19..40
+                0: SCSS_KEYFRAMES_SELECTOR@19..40
+                  0: SCSS_INTERPOLATION@19..40
+                    0: HASH@19..23 "#" [Newline("\n"), Whitespace("  ")] []
+                    1: L_CURLY@23..24 "{" [] []
+                    2: SCSS_EXPRESSION@24..39
+                      0: SCSS_EXPRESSION_ITEM_LIST@24..39
+                        0: SCSS_BINARY_EXPRESSION@24..39
+                          0: CSS_PERCENTAGE@24..28
+                            0: CSS_NUMBER_LITERAL@24..26 "50" [] []
+                            1: PERCENT@26..28 "%" [] [Whitespace(" ")]
+                          1: MINUS@28..30 "-" [] [Whitespace(" ")]
+                          2: SCSS_VARIABLE@30..39
+                            0: DOLLAR@30..31 "$" [] []
+                            1: CSS_IDENTIFIER@31..39
+                              0: IDENT@31..39 "duration" [] []
+                    3: R_CURLY@39..40 "}" [] []
+                  1: (empty)
+              1: CSS_BOGUS_BLOCK@40..60
+                0: CSS_DECLARATION_LIST@40..56
+                  0: CSS_DECLARATION_WITH_SEMICOLON@40..56
+                    0: CSS_DECLARATION@40..55
+                      0: CSS_GENERIC_PROPERTY@40..55
+                        0: CSS_IDENTIFIER@40..52
+                          0: IDENT@40..52 "opacity" [Newline("\n"), Whitespace("    ")] []
+                        1: COLON@52..54 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@54..55
+                          0: SCSS_EXPRESSION_ITEM_LIST@54..55
+                            0: CSS_NUMBER@54..55
+                              0: CSS_NUMBER_LITERAL@54..55 "1" [] []
+                      1: (empty)
+                    1: SEMICOLON@55..56 ";" [] []
+                1: R_CURLY@56..60 "}" [Newline("\n"), Whitespace("  ")] []
+          2: R_CURLY@60..62 "}" [Newline("\n")] []
+    1: CSS_AT_RULE@62..127
+      0: AT@62..65 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@65..127
+        0: KEYFRAMES_KW@65..75 "keyframes" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@75..82
+          0: IDENT@75..82 "loader" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@82..127
+          0: L_CURLY@82..83 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@83..125
+            0: CSS_KEYFRAMES_ITEM@83..125
+              0: CSS_KEYFRAMES_SELECTOR_LIST@83..121
+                0: CSS_BOGUS_SELECTOR@83..120
+                  0: CSS_BOGUS@83..120
+                    0: HASH@83..87 "#" [Newline("\n"), Whitespace("  ")] []
+                    1: L_CURLY@87..88 "{" [] []
+                    2: CSS_BOGUS@88..120
+                      0: CSS_BOGUS@88..120
+                        0: SCSS_BINARY_EXPRESSION@88..104
+                          0: CSS_PERCENTAGE@88..92
+                            0: CSS_NUMBER_LITERAL@88..90 "50" [] []
+                            1: PERCENT@90..92 "%" [] [Whitespace(" ")]
+                          1: MINUS@92..94 "-" [] [Whitespace(" ")]
+                          2: SCSS_VARIABLE@94..104
+                            0: DOLLAR@94..95 "$" [] []
+                            1: CSS_IDENTIFIER@95..104
+                              0: IDENT@95..104 "duration" [] [Whitespace(" ")]
+                        1: CSS_BOGUS_PROPERTY_VALUE@104..105
+                          0: L_CURLY@104..105 "{" [] []
+                        2: CSS_IDENTIFIER@105..117
+                          0: IDENT@105..117 "opacity" [Newline("\n"), Whitespace("    ")] []
+                        3: CSS_BOGUS_PROPERTY_VALUE@117..120
+                          0: COLON@117..119 ":" [] [Whitespace(" ")]
+                          1: CSS_NUMBER_LITERAL@119..120 "1" [] []
+                1: (empty)
+                2: CSS_BOGUS_SELECTOR@120..121
+                  0: SEMICOLON@120..121 ";" [] []
+              1: CSS_BOGUS_BLOCK@121..125
+                0: CSS_DECLARATION_LIST@121..121
+                1: R_CURLY@121..125 "}" [Newline("\n"), Whitespace("  ")] []
+          2: R_CURLY@125..127 "}" [Newline("\n")] []
+  2: EOF@127..128 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+keyframes-interpolation.scss:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `opacity`
+  
+    1 │ @keyframes loader {
+    2 │   #{50% - $duration}
+  > 3 │     opacity: 1;
+      │     ^^^^^^^
+    4 │   }
+    5 │ }
+  
+  i Remove opacity
+  
+keyframes-interpolation.scss:8:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '{'.
+  
+     7 │ @keyframes loader {
+   > 8 │   #{50% - $duration {
+       │                     ^
+     9 │     opacity: 1;
+    10 │   }
+  
+  i Expected a SCSS expression here.
+  
+     7 │ @keyframes loader {
+   > 8 │   #{50% - $duration {
+       │                     ^
+     9 │     opacity: 1;
+    10 │   }
+  
+keyframes-interpolation.scss:9:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ': 1'.
+  
+     7 │ @keyframes loader {
+     8 │   #{50% - $duration {
+   > 9 │     opacity: 1;
+       │            ^^^
+    10 │   }
+    11 │ }
+  
+  i Expected a SCSS expression here.
+  
+     7 │ @keyframes loader {
+     8 │   #{50% - $duration {
+   > 9 │     opacity: 1;
+       │            ^^^
+    10 │   }
+    11 │ }
+  
+keyframes-interpolation.scss:9:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `;`
+  
+     7 │ @keyframes loader {
+     8 │   #{50% - $duration {
+   > 9 │     opacity: 1;
+       │               ^
+    10 │   }
+    11 │ }
+  
+  i Remove ;
+  
+keyframes-interpolation.scss:10:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `}`
+  
+     8 │   #{50% - $duration {
+     9 │     opacity: 1;
+  > 10 │   }
+       │   ^
+    11 │ }
+    12 │ 
+  
+  i Remove }
+  
+```

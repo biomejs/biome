@@ -1,6 +1,7 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/scss/declaration/interpolation.scss
+assertion_line: 249
+info: scss/declaration/interpolation.scss
 ---
 
 # Input
@@ -9,7 +10,11 @@ info: css/scss/declaration/interpolation.scss
 .box{
 #{$name}:1px;
 margin-#{$side}:1px;
+-#{$prefix}-radius:4px;
+--#{$prop}:10px;
 --theme-#{$slot}:red;
+color:var(--#{$name});
+background:var(--theme-#{$slot});
 }
 
 ```
@@ -21,7 +26,11 @@ margin-#{$side}:1px;
 .box {
 	#{$name}: 1px;
 	margin-#{$side}: 1px;
+	-#{$prefix}-radius: 4px;
+	--#{$prop}: 10px;
 	--theme-#{$slot}: red;
+	color: var(--#{$name});
+	background: var(--theme-#{$slot});
 }
 
 ```

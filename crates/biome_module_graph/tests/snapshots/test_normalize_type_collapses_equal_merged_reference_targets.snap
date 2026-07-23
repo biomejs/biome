@@ -1,0 +1,46 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+type Foo = {
+	name: "foo";
+};
+
+const Foo = {
+	name: "foo",
+} as const;
+
+export { Foo };
+```
+
+## Inferred types
+
+```
+Binding Foo "Foo" => Object {
+  prototype: No prototype
+  members: ["name": string: foo]
+}
+
+Binding Foo "Foo" => Object {
+  prototype: No prototype
+  members: ["name": string: foo]
+}
+
+Expression "{ name: \"foo\", }" => Object {
+  prototype: No prototype
+  members: ["name": string: foo]
+}
+
+Expression "{ name: \"foo\", } as const" => Object {
+  prototype: No prototype
+  members: ["name": string: foo]
+}
+
+Expression "\"foo\"" => string: foo
+```

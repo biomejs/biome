@@ -71,6 +71,14 @@ pub(crate) fn expected_matching_closing_tag(p: &HtmlParser, range: TextRange) ->
     expected_node("matching closing tag", range, p).into_diagnostic(p)
 }
 
+pub(crate) fn expected_no_spaces(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(
+        "Processing instruction name can't have a leading space.",
+        range,
+    )
+    .with_hint("Remove the leading space.")
+}
+
 /// The parser was encountered a tag that does not have a name.
 ///
 /// ```html
@@ -118,6 +126,14 @@ pub(crate) fn disabled_vue(p: &HtmlParser, range: TextRange) -> ParseDiagnostic 
 
 pub(crate) fn expected_vue_directive_argument(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     expected_node("vue directive argument", range, p).into_diagnostic(p)
+}
+
+pub(crate) fn disabled_angular(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("This looks like Angular syntax, but this is not an Angular file.", range).with_hint(markup!("Remove it or rename this file to have the "<Emphasis>".component.html"</Emphasis>" file extension."))
+}
+
+pub(crate) fn expected_angular_name(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Expected an Angular binding name.", range)
 }
 
 pub(crate) fn expected_expression(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {

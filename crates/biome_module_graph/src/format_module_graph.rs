@@ -1,9 +1,10 @@
 use crate::css_module_info::{CssClassDefinition, CssClassReference, CssImport, CssImports};
 use crate::html_module_info::HtmlModuleInfoInner;
 use crate::js_module_info::{Exports, Imports, JsBindingData};
+use crate::module_graph::ModuleInfoKind;
 use crate::{
     BindingTypeData, CssModuleInfo, HtmlModuleInfo, JsExport, JsImport, JsImportPath,
-    JsImportPhase, JsModuleInfo, JsOwnExport, JsReexport, ModuleInfo,
+    JsImportPhase, JsModuleInfo, JsOwnExport, JsReexport,
 };
 use biome_formatter::prelude::*;
 use biome_formatter::{format_args, write};
@@ -96,13 +97,7 @@ impl Format<FormatTypeContext> for Exports {
         let mut joiner = f.join();
         for (export_name, export) in self.deref() {
             let name = format_with(|f| {
-                write!(
-                    f,
-                    [text(
-                        &std::format!("{:?}", export_name.text()),
-                        TextSize::default()
-                    ),]
-                )
+                write!(f, [text(&std::format!("{:?}", export_name.text()), None),])
             });
             let arrow = format_with(|f| write!(f, [&format_args![space(), token("=>"), space()]]));
 
@@ -138,13 +133,7 @@ impl Format<FormatTypeContext> for Imports {
 
         for (import_name, import) in &self.0 {
             let name = format_with(|f| {
-                write!(
-                    f,
-                    [text(
-                        &std::format!("{:?}", import_name.text()),
-                        TextSize::default()
-                    ),]
-                )
+                write!(f, [text(&std::format!("{:?}", import_name.text()), None),])
             });
             let arrow = format_with(|f| write!(f, [&format_args![space(), token("=>"), space()]]));
 
@@ -254,7 +243,7 @@ impl Format<FormatTypeContext> for JsBindingData {
                 [&format_args![
                     token("Name:"),
                     space(),
-                    text(&self.name, TextSize::default()),
+                    text(&self.name, None),
                     token(","),
                     hard_line_break(),
                     token("Type:"),
@@ -264,10 +253,7 @@ impl Format<FormatTypeContext> for JsBindingData {
                     hard_line_break(),
                     token("Declaration kind:"),
                     space(),
-                    text(
-                        &std::format!("{:?}", self.declaration_kind),
-                        TextSize::default()
-                    ),
+                    text(&std::format!("{:?}", self.declaration_kind), None),
                 ]]
             )
         });
@@ -330,7 +316,7 @@ impl Format<FormatTypeContext> for JsOwnExport {
                     f,
                     [&format_args![
                         token("JsOwnExport::Binding("),
-                        text(&range_str, TextSize::default()),
+                        text(&range_str, None),
                         token(")")
                     ]]
                 )
@@ -339,7 +325,7 @@ impl Format<FormatTypeContext> for JsOwnExport {
                 f,
                 [&format_args![
                     token("JsOwnExport::Type("),
-                    text(&std::format!("{resolved_type_id:?}"), TextSize::default()),
+                    text(&std::format!("{resolved_type_id:?}"), None),
                     token(")")
                 ]]
             ),
@@ -365,10 +351,7 @@ impl Format<FormatTypeContext> for JsImport {
             [&format_args![
                 token("Specifier:"),
                 space(),
-                text(
-                    &std::format!("{:?}", self.specifier.text()),
-                    TextSize::default()
-                ),
+                text(&std::format!("{:?}", self.specifier.text()), None),
             ]]
         )?;
         write!(f, [hard_line_break()])?;
@@ -415,7 +398,7 @@ impl Format<FormatTypeContext> for TypedSize {
         f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
     ) -> FormatResult<()> {
         let value = std::format!("{}", self.0);
-        write!(f, [text(&value, TextSize::default())])
+        write!(f, [text(&value, None)])
     }
 }
 
@@ -504,10 +487,7 @@ impl Format<FormatTypeContext> for CssImport {
                 [&format_args![
                     token("specifier:"),
                     space(),
-                    text(
-                        &std::format!("{:?}", self.specifier.text()),
-                        TextSize::default()
-                    ),
+                    text(&std::format!("{:?}", self.specifier.text()), None),
                     token(","),
                     hard_line_break(),
                     token("resolved_path:"),
@@ -545,7 +525,7 @@ impl Format<FormatTypeContext> for CssImports {
                 write!(
                     f,
                     [&format_args![
-                        text(&std::format!("{:?}", specifier.text()), TextSize::default()),
+                        text(&std::format!("{:?}", specifier.text()), None),
                         space(),
                         token("=>"),
                         space(),
@@ -574,13 +554,10 @@ impl Format<FormatTypeContext> for CssClassDefinition {
         write!(
             f,
             [&format_args![
-                text(self.name.text(), TextSize::default()),
+                text(self.name.text(), None),
                 space(),
                 token("("),
-                text(
-                    &std::format!("{:?}", self.applicability),
-                    TextSize::default()
-                ),
+                text(&std::format!("{:?}", self.applicability), None),
                 token(")"),
             ]]
         )
@@ -599,14 +576,11 @@ impl Format<FormatTypeContext> for CssClassReference {
         write!(
             f,
             [&format_args![
-                text(
-                    &std::format!("{:?}", self.token.text()),
-                    TextSize::default()
-                ),
+                text(&std::format!("{:?}", self.token.text()), None),
                 space(),
                 token("in"),
                 space(),
-                text(self.file_path.as_str(), TextSize::default()),
+                text(self.file_path.as_str(), None),
             ]]
         )
     }
@@ -656,8 +630,7 @@ impl Format<FormatTypeContext> for crate::css_module_info::CssModuleInfoInner {
                 let separator = hard_line_break();
                 let mut joiner = f.join_with(&separator);
                 for class in &sorted {
-                    let entry =
-                        format_with(|f| write!(f, [text(class, TextSize::default()), token(",")]));
+                    let entry = format_with(|f| write!(f, [text(class, None), token(",")]));
                     joiner.entry(&entry);
                 }
                 joiner.finish()
@@ -733,10 +706,10 @@ impl Format<FormatTypeContext> for HtmlModuleInfoInner {
                         write!(
                             f,
                             [&format_args![
-                                text(name, TextSize::default()),
+                                text(name, None),
                                 space(),
                                 token("("),
-                                text(&std::format!("{applicability:?}"), TextSize::default()),
+                                text(&std::format!("{applicability:?}"), None),
                                 token(")"),
                                 token(","),
                             ]]
@@ -766,8 +739,7 @@ impl Format<FormatTypeContext> for HtmlModuleInfoInner {
                 let separator = hard_line_break();
                 let mut joiner = f.join_with(&separator);
                 for class in &sorted {
-                    let entry =
-                        format_with(|f| write!(f, [text(class, TextSize::default()), token(",")]));
+                    let entry = format_with(|f| write!(f, [text(class, None), token(",")]));
                     joiner.entry(&entry);
                 }
                 joiner.finish()
@@ -791,8 +763,7 @@ impl Format<FormatTypeContext> for HtmlModuleInfoInner {
                 let separator = hard_line_break();
                 let mut joiner = f.join_with(&separator);
                 for path in &sorted {
-                    let entry =
-                        format_with(|f| write!(f, [text(path, TextSize::default()), token(",")]));
+                    let entry = format_with(|f| write!(f, [text(path, None), token(",")]));
                     joiner.entry(&entry);
                 }
                 joiner.finish()
@@ -821,11 +792,11 @@ impl Format<FormatTypeContext> for HtmlModuleInfoInner {
                         write!(
                             f,
                             [&format_args![
-                                text(&std::format!("{specifier:?}"), TextSize::default()),
+                                text(&std::format!("{specifier:?}"), None),
                                 space(),
                                 token("=>"),
                                 space(),
-                                text(resolved, TextSize::default()),
+                                text(resolved, None),
                                 token(","),
                             ]]
                         )
@@ -871,7 +842,7 @@ impl Format<FormatTypeContext> for HtmlModuleInfoInner {
 
 // #region ModuleInfo
 
-impl std::fmt::Display for ModuleInfo {
+impl std::fmt::Display for ModuleInfoKind {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let formatted = biome_formatter::format!(FormatTypeContext, [self])
             .expect("Formatting not to throw any FormatErrors");
@@ -884,7 +855,7 @@ impl std::fmt::Display for ModuleInfo {
     }
 }
 
-impl Format<FormatTypeContext> for ModuleInfo {
+impl Format<FormatTypeContext> for ModuleInfoKind {
     fn fmt(
         &self,
         f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,

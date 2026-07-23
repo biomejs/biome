@@ -1,0 +1,16 @@
+@each $name in $names {
+  .text #{ $name } {}
+  .text #{$name} {}
+  .text-#{ $name } {}
+  .text-#{$name} {}
+  .text-#{ $name} {}
+  .text-#{$name } {}
+  #id-#{ $name } {}
+  #id-#{$name} {}
+  tag-#{ $name } {}
+  tag-#{$name} {}
+  %placeholder-#{ $name } {}
+  %placeholder-#{$name} {}
+}
+
+a{#{ $prop }:red; #{$prop}:blue; #{ $left}:green; #{$right }:yellow; margin-#{ $side }:1px; margin-#{$side}:2px; padding-#{ $side}:3px; padding-#{$side }:4px; value:#{ $value }; value-spaced:#{ $value}; value-right:#{$value };}

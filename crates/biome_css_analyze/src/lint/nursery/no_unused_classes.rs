@@ -1,7 +1,9 @@
 use crate::services::module_graph::CssModuleGraph;
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_css_syntax::{CssClassSelector, CssPseudoClassFunctionSelector};
+use biome_css_syntax::CssClassSelector;
+use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
+use biome_module_graph::{SymbolFromModuleInfo, is_class_referenced_by_importers};
 use biome_rowan::AstNode;
 use biome_rule_options::no_unused_classes::NoUnusedClassesOptions;
 
@@ -47,7 +49,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUnusedClasses {
-        version: "next",
+        version: "2.5.0",
         name: "noUnusedClasses",
         language: "css",
         recommended: false,
@@ -73,12 +75,14 @@ impl Rule for NoUnusedClasses {
         let class_name = node.name().ok()?;
         let class_name = class_name.as_css_custom_identifier()?;
         let class_name = class_name.value_token().ok()?;
-        let class_name_text = class_name.text_trimmed();
 
-        let module_graph = ctx.module_graph();
-        let file_path = ctx.file_path();
+        let db = ctx.db();
+        let module = db.module_for_path(ctx.file_path())?;
 
-        if module_graph.is_class_referenced_by_importers(file_path, class_name_text) {
+        if is_class_referenced_by_importers(
+            db,
+            SymbolFromModuleInfo::new(db, class_name.token_text_trimmed().text(), module),
+        ) {
             return None;
         }
 
@@ -113,13 +117,7 @@ impl Rule for NoUnusedClasses {
 /// `:global(...)` pseudo-class function selector.
 fn is_inside_global_pseudo(node: &CssClassSelector) -> bool {
     node.syntax().ancestors().any(|ancestor| {
-        if let Some(func) = CssPseudoClassFunctionSelector::cast(ancestor) {
-            func.name()
-                .ok()
-                .and_then(|n| n.value_token().ok())
-                .is_some_and(|t| t.text_trimmed() == "global")
-        } else {
-            false
-        }
+        AnyCssPseudoClassFunctionSelector::cast(ancestor)
+            .is_some_and(|selector| selector.is_global_pseudo())
     })
 }

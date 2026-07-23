@@ -197,9 +197,9 @@ fn preset_all_does_not_enable_nursery_rules() {
         .as_bytes(),
     );
 
-    // noContinue is a nursery rule — should NOT be triggered by top-level preset: "all"
+    // noLoopFunc is a nursery rule — should NOT be triggered by top-level preset: "all"
     let test = Utf8Path::new("test.js");
-    fs.insert(test.into(), NURSERY_CONTINUE_CODE.as_bytes());
+    fs.insert(test.into(), NURSERY_LOOP_FUNC_CODE.as_bytes());
 
     let (fs, result) = run_cli(
         fs,
@@ -493,12 +493,12 @@ fn preset_recommended_same_as_recommended_true() {
 
 // --- nursery rules and presets ---
 
-const NURSERY_CONTINUE_CODE: &str = r#"for (let i = 0; i < 10; i++) {
-    if (i >= 5) {
-        continue;
-    }
-    console.log(i);
+const NURSERY_LOOP_FUNC_CODE: &str = r#"const queue = [];
+let shared = 0;
+for (let i = 0; i < 10; i += 1) {
+    queue.push(() => shared);
 }
+shared = 100;
 "#;
 
 #[test]
@@ -522,7 +522,7 @@ fn nursery_preset_all_does_not_enable_rules() {
     );
 
     let test = Utf8Path::new("test.js");
-    fs.insert(test.into(), NURSERY_CONTINUE_CODE.as_bytes());
+    fs.insert(test.into(), NURSERY_LOOP_FUNC_CODE.as_bytes());
 
     let (fs, result) = run_cli(
         fs,
@@ -554,7 +554,7 @@ fn nursery_rule_enabled_individually() {
     "linter": {
         "rules": {
             "nursery": {
-                "noContinue": "error"
+                "noLoopFunc": "error"
             }
         }
     }
@@ -563,7 +563,7 @@ fn nursery_rule_enabled_individually() {
     );
 
     let test = Utf8Path::new("test.js");
-    fs.insert(test.into(), NURSERY_CONTINUE_CODE.as_bytes());
+    fs.insert(test.into(), NURSERY_LOOP_FUNC_CODE.as_bytes());
 
     let (fs, result) = run_cli(
         fs,
@@ -571,7 +571,7 @@ fn nursery_rule_enabled_individually() {
         Args::from(["lint", test.as_str()].as_slice()),
     );
 
-    // noContinue explicitly enabled → should see diagnostic
+    // noLoopFunc explicitly enabled → should see diagnostic
     assert!(result.is_err(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(

@@ -1,8 +1,68 @@
-use crate::comments::FormatCssLeadingComment;
+use crate::comments::CssCommentStyle;
 use crate::prelude::*;
-use biome_css_syntax::{CssLanguage, CssSyntaxNode};
-use biome_formatter::comments::{CommentKind, DecoratedComment};
-use biome_formatter::{FormatRefWithRule, write};
+use biome_css_syntax::{CssLanguage, CssSyntaxNode, CssSyntaxToken};
+use biome_formatter::comments::{CommentKind, CommentStyle, DecoratedComment, SourceComment};
+use biome_formatter::write;
+use biome_rowan::syntax::SyntaxTrivia;
+use biome_rowan::{SyntaxResult, SyntaxTriviaPiece, SyntaxTriviaPieceComments};
+
+/// Formats a source gap as a space, line break, or empty line.
+#[derive(Debug, Copy, Clone)]
+pub(crate) struct FormatCommentGap {
+    lines: u32,
+}
+
+impl FormatCommentGap {
+    /// Creates a gap from the number of source line breaks.
+    pub(crate) fn new(lines: u32) -> Self {
+        Self { lines }
+    }
+}
+
+impl Format<CssFormatContext> for FormatCommentGap {
+    fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
+        match self.lines {
+            0 => write!(f, [space()]),
+            1 => write!(f, [hard_line_break()]),
+            _ => write!(f, [empty_line()]),
+        }
+    }
+}
+
+/// Returns `true` for CSS `/* ... */` comments.
+pub(crate) fn is_block_style_comment(piece: &SyntaxTriviaPiece<CssLanguage>) -> bool {
+    piece
+        .as_comments()
+        .is_some_and(|comment| CssCommentStyle::get_comment_kind(&comment).is_inline())
+}
+
+/// Returns `true` for `// c` trivia.
+///
+/// ```scss
+/// color: red; // c
+/// ```
+pub(crate) fn has_line_comment(trivia: SyntaxTrivia<CssLanguage>) -> bool {
+    trivia
+        .pieces()
+        .filter_map(|piece| piece.as_comments())
+        .any(|comment| CssCommentStyle::get_comment_kind(&comment).is_line())
+}
+
+/// Returns whether a token boundary contains a format suppression.
+///
+/// All comments in a suppressed boundary must keep the same owner so mixed
+/// normal and suppression comments preserve their source order.
+pub(crate) fn is_token_boundary_suppressed(
+    preceding: &CssSyntaxToken,
+    following: &CssSyntaxToken,
+) -> bool {
+    preceding
+        .trailing_trivia()
+        .pieces()
+        .chain(following.leading_trivia().pieces())
+        .filter_map(|piece| piece.as_comments())
+        .any(|comment| CssCommentStyle::is_suppression(comment.text()))
+}
 
 /// Returns `true` when the last leading block comment stays with this node.
 pub(crate) fn has_same_group_leading_block_comment(node: &CssSyntaxNode, f: &CssFormatter) -> bool {
@@ -17,40 +77,6 @@ pub(crate) fn has_same_group_leading_block_comment(node: &CssSyntaxNode, f: &Css
         })
 }
 
-/// Formats leading comments with soft lines after each comment.
-///
-/// Group this with the node for `/* comment */ key: value`, so the pair breaks
-/// only when the group does not fit.
-pub(crate) const fn format_leading_comments_with_soft_lines(
-    node: &CssSyntaxNode,
-) -> FormatLeadingCommentsWithSoftLines<'_> {
-    FormatLeadingCommentsWithSoftLines { node }
-}
-
-#[derive(Debug, Copy, Clone)]
-pub(crate) struct FormatLeadingCommentsWithSoftLines<'a> {
-    node: &'a CssSyntaxNode,
-}
-
-impl Format<CssFormatContext> for FormatLeadingCommentsWithSoftLines<'_> {
-    fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
-        let comments = f.comments().clone();
-
-        for comment in comments.leading_comments(self.node) {
-            write!(
-                f,
-                [
-                    FormatRefWithRule::new(comment, FormatCssLeadingComment),
-                    soft_line_break_or_space()
-                ]
-            )?;
-            comment.mark_formatted();
-        }
-
-        Ok(())
-    }
-}
-
 /// Returns `true` for comments that stay on the node's closing line.
 ///
 /// Example: `(a, b) /* end */`.
@@ -62,7 +88,7 @@ pub(crate) fn has_inline_trailing_comment(node: &CssSyntaxNode) -> bool {
     })
 }
 
-/// Returns true when `comment` is in the node's trailing trivia.
+/// Returns `true` when `comment` is in the node's trailing trivia.
 pub(crate) fn is_trailing_comment_on_node(
     node: &CssSyntaxNode,
     comment: &DecoratedComment<CssLanguage>,
@@ -75,5 +101,68 @@ pub(crate) fn is_trailing_comment_on_node(
                 .trailing_trivia()
                 .text_range()
                 .contains_range(comment_piece.text_range())
+    })
+}
+
+/// Returns `true` when `comment` is in a node's leading trivia.
+///
+/// ```scss
+/// // c
+/// $color: red;
+/// ```
+pub(crate) fn is_leading_comment_on_node(
+    node: &CssSyntaxNode,
+    comment: &SyntaxTriviaPieceComments<CssLanguage>,
+) -> bool {
+    let comment_piece = comment.as_piece();
+
+    node.first_token().is_some_and(|token| {
+        token == comment_piece.token()
+            && token
+                .leading_trivia()
+                .text_range()
+                .contains_range(comment_piece.text_range())
+    })
+}
+
+/// Returns `true` for the gap before `:` in `a { color/* c */ : red; }`.
+pub(crate) fn has_source_gap_before_token(
+    comments: &[SourceComment<CssLanguage>],
+    token: &SyntaxResult<CssSyntaxToken>,
+) -> bool {
+    let (Some(last_comment), Ok(token)) = (comments.last(), token.as_ref()) else {
+        return false;
+    };
+
+    last_comment.piece().text_range().end() < token.text_trimmed_range().start()
+}
+
+/// Returns `true` for a pre-token block-comment gap.
+///
+/// Ignores SCSS line comments before `;` for idempotency:
+///
+/// ```text
+/// $x: red !default // c
+/// ;
+/// ```
+pub(crate) fn has_block_comment_gap_before_token(token: &CssSyntaxToken) -> bool {
+    let token_start = token.text_trimmed_range().start();
+
+    if let Some(comment) = token
+        .leading_trivia()
+        .pieces()
+        .filter(is_block_style_comment)
+        .last()
+    {
+        return comment.text_range().end() < token_start;
+    }
+
+    token.prev_token().is_some_and(|previous_token| {
+        previous_token
+            .trailing_trivia()
+            .pieces()
+            .filter(is_block_style_comment)
+            .last()
+            .is_some_and(|comment| comment.text_range().end() < token_start)
     })
 }

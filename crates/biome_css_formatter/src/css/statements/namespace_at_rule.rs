@@ -15,9 +15,11 @@ impl FormatNodeRule<CssNamespaceAtRule> for FormatCssNamespaceAtRule {
         write!(
             f,
             [
-                namespace_token.format(),
+                namespace_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
-                prefix.format(),
+                prefix
+                    .as_ref()
+                    .map(|prefix| prefix.format().with_text_case(CssCase::Preserve)),
                 space(),
                 url.format(),
                 semicolon_token.format(),

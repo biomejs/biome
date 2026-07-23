@@ -1,0 +1,129 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ignorePrimitivesSpecific.ts
+---
+# Input
+```ts
+// Tests for ignorePrimitives: { string: true, number: true }
+// string/number operands suppressed; boolean/bigint still report.
+
+declare const s: string | null;
+declare const n: number | null;
+declare const b: boolean | null;
+declare const big: bigint | null;
+
+// ignored kinds: suppressed
+const r1 = s || 'x';
+const r2 = n || 0;
+
+// non-ignored kinds: SHOULD still report
+const r3 = b || false;
+const r4 = big || 0n;
+
+// string-literal union: suppressed (string ignored, exercises the literal arm)
+declare const litStr: 'a' | 'b' | null;
+const r5 = litStr || 'c';
+
+// every non-nullish variant ignored: suppressed
+declare const sn: string | number | null;
+const r6 = sn || 'x';
+
+// only some variants ignored (boolean not opted out): SHOULD still report
+declare const sb: string | boolean | null;
+const r7 = sb || 'x';
+
+// ternary on a string operand: suppressed (ignorePrimitives applies to ternary too)
+const r8 = s != null ? s : 'x';
+
+// ternary on a boolean operand: SHOULD still report
+const r9 = b != null ? b : false;
+
+```
+
+# Diagnostics
+```
+ignorePrimitivesSpecific.ts:14:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    13 │ // non-ignored kinds: SHOULD still report
+  > 14 │ const r3 = b || false;
+       │              ^^
+    15 │ const r4 = big || 0n;
+    16 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignorePrimitivesSpecific.ts:15:16 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    13 │ // non-ignored kinds: SHOULD still report
+    14 │ const r3 = b || false;
+  > 15 │ const r4 = big || 0n;
+       │                ^^
+    16 │ 
+    17 │ // string-literal union: suppressed (string ignored, exercises the literal arm)
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignorePrimitivesSpecific.ts:27:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    25 │ // only some variants ignored (boolean not opted out): SHOULD still report
+    26 │ declare const sb: string | boolean | null;
+  > 27 │ const r7 = sb || 'x';
+       │               ^^
+    28 │ 
+    29 │ // ternary on a string operand: suppressed (ignorePrimitives applies to ternary too)
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignorePrimitivesSpecific.ts:33:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    32 │ // ternary on a boolean operand: SHOULD still report
+  > 33 │ const r9 = b != null ? b : false;
+       │            ^^^^^^^^^
+    34 │ 
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the ternary with ??.
+  
+    31 31 │   
+    32 32 │   // ternary on a boolean operand: SHOULD still report
+    33    │ - const·r9·=·b·!=·null·?·b·:·false;
+       33 │ + const·r9·=·b·??·false;
+    34 34 │   
+  
+
+```

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 249
 info: scss/selector/interpolated-arguments.scss
 ---
 
@@ -10,6 +9,10 @@ info: scss/selector/interpolated-arguments.scss
 html[lang=#{$locale}]{color:red;}
 html[lang=prefix-#{$locale}]{color:blue;}
 html[lang=#{$locale} i]{color:green;}
+[data-#{$name}=x]{color:red;}
+[ns|data-#{$name}=x]{color:blue;}
+[#{$name}=x]{color:purple;}
+[title="x" #{$mod}]{color:green;}
 .el:nth-of-type(#{$i}){width:1px;}
 .grid:nth-child(#{$numPerRow}n){width:2px;}
 .grid:nth-child(#{$numPerRow}n+1){width:3px;}
@@ -32,6 +35,18 @@ html[lang="prefix-#{$locale}"] {
 	color: blue;
 }
 html[lang="#{$locale}" i] {
+	color: green;
+}
+[data-#{$name}="x"] {
+	color: red;
+}
+[ns|data-#{$name}="x"] {
+	color: blue;
+}
+[#{$name}="x"] {
+	color: purple;
+}
+[title="x" #{$mod}] {
 	color: green;
 }
 .el:nth-of-type(#{$i}) {

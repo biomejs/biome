@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::utils::FormatOptionalSemicolon;
 
-use biome_formatter::trivia::FormatLeadingComments;
+use biome_formatter::trivia::format_leading_comments_from_slice;
 use biome_formatter::{format_args, write};
 use biome_js_syntax::{TsMappedType, TsMappedTypeFields};
 use biome_rowan::Direction;
@@ -39,7 +39,7 @@ impl FormatNodeRule<TsMappedType> for FormatTsMappedType {
         let format_inner = format_with(|f| {
             write!(
                 f,
-                [FormatLeadingComments::Comments(
+                [format_leading_comments_from_slice(
                     comments.dangling_comments(node.syntax())
                 )]
             )?;

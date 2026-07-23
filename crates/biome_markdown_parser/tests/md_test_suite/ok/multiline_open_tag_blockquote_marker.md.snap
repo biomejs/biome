@@ -24,16 +24,12 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@0..9 "Allowed: " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@9..10 "<" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@10..23 "div class=\"a\"" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@9..23 "<div class=\"a\"" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@23..24 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdQuote {
             prefix: MdQuotePrefix {
@@ -67,7 +63,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@38..39 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -86,13 +81,10 @@ MdDocument {
       0: MD_INLINE_ITEM_LIST@0..24
         0: MD_TEXTUAL@0..9
           0: MD_TEXTUAL_LITERAL@0..9 "Allowed: " [] []
-        1: MD_TEXTUAL@9..10
-          0: MD_TEXTUAL_LITERAL@9..10 "<" [] []
-        2: MD_TEXTUAL@10..23
-          0: MD_TEXTUAL_LITERAL@10..23 "div class=\"a\"" [] []
-        3: MD_TEXTUAL@23..24
+        1: MD_TEXTUAL@9..23
+          0: MD_TEXTUAL_LITERAL@9..23 "<div class=\"a\"" [] []
+        2: MD_TEXTUAL@23..24
           0: MD_TEXTUAL_LITERAL@23..24 "\n" [] []
-      1: (empty)
     1: MD_QUOTE@24..39
       0: MD_QUOTE_PREFIX@24..25
         0: MD_QUOTE_INDENT_LIST@24..24
@@ -115,7 +107,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@33..38 " tag." [] []
             3: MD_TEXTUAL@38..39
               0: MD_TEXTUAL_LITERAL@38..39 "\n" [] []
-          1: (empty)
   2: EOF@39..39 "" [] []
 
 ```

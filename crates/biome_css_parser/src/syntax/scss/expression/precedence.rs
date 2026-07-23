@@ -1,6 +1,7 @@
 use crate::lexer::CssReLexContext;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_component_value;
+use crate::syntax::scss::is_at_scss_interpolated_dashed_identifier;
 use crate::syntax::value::dimension::is_at_any_dimension;
 use biome_css_syntax::CssSyntaxKind::{
     CSS_NUMBER_LITERAL, SCSS_BINARY_EXPRESSION, SCSS_UNARY_EXPRESSION,
@@ -8,7 +9,7 @@ use biome_css_syntax::CssSyntaxKind::{
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, TokenSet, token_set};
+use biome_parser::{CompletedMarker, Parser, TokenSet, token_set};
 
 use super::ScssExpressionOptions;
 use super::operand::parse_scss_expression_operand;
@@ -46,12 +47,32 @@ pub(super) fn parse_scss_binary_expression(
     min_prec: u8,
     options: ScssExpressionOptions,
 ) -> ParsedSyntax {
-    let mut left = match parse_scss_unary_expression(p, options) {
+    let left = match parse_scss_unary_expression(p, options) {
         Present(left) => left,
         Absent => return Absent,
     };
 
-    while let Some(prec) = scss_binary_precedence(p) {
+    Present(parse_scss_binary_tail(p, left, min_prec, options))
+}
+
+/// Parses a binary-operator tail after the caller has already parsed the left
+/// operand.
+///
+/// Example: `+ 1px` after `$width` in `$width + 1px`.
+#[inline]
+pub(super) fn parse_scss_binary_tail(
+    p: &mut CssParser,
+    mut left: CompletedMarker,
+    min_prec: u8,
+    options: ScssExpressionOptions,
+) -> CompletedMarker {
+    // `[a / 1 / b]` uses `/` as the bracketed-list separator. Honor caller
+    // delimiters before treating the same token as an infix operator.
+    while !p.at_ts(options.end_ts) {
+        let Some(prec) = scss_binary_precedence(p) else {
+            break;
+        };
+
         if prec < min_prec {
             break;
         }
@@ -63,7 +84,7 @@ pub(super) fn parse_scss_binary_expression(
         left = m.complete(p, SCSS_BINARY_EXPRESSION);
     }
 
-    Present(left)
+    left
 }
 
 /// Parses chained unary operators (`-`, `+`, `not`) before an operand.
@@ -88,6 +109,12 @@ fn parse_scss_unary_expression(p: &mut CssParser, options: ScssExpressionOptions
 
 #[inline]
 fn is_at_scss_unary_operator(p: &mut CssParser) -> bool {
+    // `var(--#{$name})` starts with `-`, but the pair belongs to one
+    // custom-property identifier, not chained unary operators.
+    if is_at_scss_interpolated_dashed_identifier(p) {
+        return false;
+    }
+
     p.at_ts(SCSS_UNARY_OPERATOR_TOKEN_SET)
 }
 
@@ -111,6 +138,15 @@ pub(super) fn scss_binary_precedence(p: &mut CssParser) -> Option<u8> {
         T![*] | T![/] | T![%] => 6,
         _ => return None,
     })
+}
+
+/// Returns whether the current token is a SCSS binary operator, re-lexing tight
+/// signed numeric tokens the same way the expression parser does.
+///
+/// Example: the `+10px` token after `10px` in `10px+10px`.
+#[inline]
+pub(crate) fn is_at_scss_binary_operator(p: &mut CssParser) -> bool {
+    scss_binary_precedence(p).is_some()
 }
 
 /// Re-lexes signed numeric tokens that Sass treats as binary operators.

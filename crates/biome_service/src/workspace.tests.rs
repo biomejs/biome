@@ -1,30 +1,136 @@
-use std::collections::BTreeMap;
-use std::num::NonZeroU64;
-use std::str::FromStr;
-use std::sync::Arc;
-
+use super::{
+    ChangeFileParams, CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult,
+    FileGuard, GetFileContentParams, GetModuleGraphParams, GetSyntaxTreeParams, OpenFileParams,
+    OpenProjectParams, OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectParams,
+    UpdateKind, UpdateModuleGraphParams, UpdateSettingsParams, server,
+};
+use crate::projects::ProjectKey;
+use crate::settings::ModuleGraphResolutionKind;
+use crate::{Workspace, WorkspaceError};
 use biome_analyze::RuleCategories;
-use biome_configuration::analyzer::{RuleGroup, RuleSelector};
+use biome_configuration::analyzer::{AnalyzerSelector, RuleGroup, RuleSelector};
 use biome_configuration::{
     Configuration, FilesConfiguration, OverrideGlobs, OverridePattern, Overrides,
 };
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_fs::{BiomePath, MemoryFileSystem};
-use biome_js_syntax::{JsFileSource, TextSize};
+use biome_js_syntax::TextSize;
+use biome_languages::DocumentFileSource;
+use biome_languages::JsFileSource;
 use biome_plugin_loader::{PluginConfiguration, Plugins};
 use camino::Utf8PathBuf;
 use insta::{assert_debug_snapshot, assert_snapshot};
+use std::collections::BTreeMap;
+use std::num::NonZeroU64;
+use std::str::FromStr;
+use std::sync::{Arc, Barrier};
 
-use super::{
-    CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult, FileGuard,
-    GetModuleGraphParams, GetSyntaxTreeParams, OpenFileParams, OpenProjectParams,
-    OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateKind,
-    UpdateModuleGraphParams, UpdateSettingsParams, server,
-};
-use crate::file_handlers::DocumentFileSource;
-use crate::projects::ProjectKey;
-use crate::settings::ModuleGraphResolutionKind;
-use crate::{Workspace, WorkspaceError};
+#[test]
+fn local_server_retries_reads_interrupted_by_module_updates() {
+    const BASE_PATH: &str = "/project/base.ts";
+    const INDEX_PATH: &str = "/project/index.ts";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from(BASE_PATH),
+        b"export function task(): void {}",
+    );
+    let mut index_source = String::from("import { task } from './base';\n");
+    for _ in 0..2_000 {
+        index_source.push_str("task();\n");
+    }
+    fs.insert(Utf8PathBuf::from(INDEX_PATH), index_source.as_bytes());
+
+    let workspace = server(Arc::new(fs), Some(2));
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration: Configuration::default(),
+            workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(BASE_PATH),
+            content: FileContent::FromClient {
+                content: "export function task(): void {}".into(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let start = Arc::new(Barrier::new(3));
+    std::thread::scope(|scope| {
+        let reader = scope.spawn(|| {
+            start.wait();
+            for _ in 0..8 {
+                workspace
+                    .pull_diagnostics(PullDiagnosticsParams {
+                        project_key,
+                        path: BiomePath::new(INDEX_PATH),
+                        categories: RuleCategories::default(),
+                        only: vec![
+                            AnalyzerSelector::from_str("lint/nursery/noFloatingPromises").unwrap(),
+                        ],
+                        skip: vec![],
+                        enabled_rules: vec![],
+                        include_code_fix: false,
+                        inline_config: None,
+                        max_diagnostics: Some(1),
+                        diagnostic_level: Severity::Hint,
+                        enforce_assist: false,
+                    })
+                    .unwrap();
+            }
+        });
+        let writer = scope.spawn(|| {
+            start.wait();
+            for version in 2..10 {
+                let content = if version % 2 == 0 {
+                    "export async function task(): Promise<void> {}"
+                } else {
+                    "export function task(): void {}"
+                };
+                workspace
+                    .change_file(ChangeFileParams {
+                        project_key,
+                        path: BiomePath::new(BASE_PATH),
+                        content: content.into(),
+                        version,
+                        inline_config: None,
+                        editor_features: None,
+                    })
+                    .unwrap();
+            }
+        });
+
+        start.wait();
+        reader.join().unwrap();
+        writer.join().unwrap();
+    });
+}
 
 fn create_server() -> (Box<dyn Workspace>, ProjectKey) {
     let workspace = server(Arc::new(MemoryFileSystem::default()), None);
@@ -36,6 +142,35 @@ fn create_server() -> (Box<dyn Workspace>, ProjectKey) {
         .unwrap();
 
     (workspace, project_key)
+}
+
+#[test]
+fn borrowed_file_guard_does_not_close_file() {
+    const SOURCE: &str = "const value = 1;";
+
+    let (workspace, project_key) = create_server();
+    let path = BiomePath::new("file.js");
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: path.clone(),
+            content: FileContent::from_client(SOURCE),
+            document_file_source: Some(DocumentFileSource::from(JsFileSource::default())),
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    {
+        let _guard = FileGuard::borrowed(workspace.as_ref(), project_key, path.clone()).unwrap();
+    }
+
+    let content = workspace
+        .get_file_content(GetFileContentParams { project_key, path })
+        .unwrap();
+
+    assert_eq!(content, SOURCE);
 }
 
 #[test]
@@ -926,6 +1061,7 @@ fn correctly_scope_plugin_with_includes() {
                             biome_glob::NormalizedGlob::from_str("**/src/**/*.ts").unwrap(),
                             biome_glob::NormalizedGlob::from_str("!**/*.test.ts").unwrap(),
                         ]),
+                        resolution_kind: None,
                     },
                 )])),
                 ..Default::default()

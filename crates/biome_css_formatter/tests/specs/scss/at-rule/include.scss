@@ -13,6 +13,10 @@ $args...
 $radius:4px
 );
 
+@include button using($value){color:$value;}
+
+@include card($radius:4px)using($value,$fallback){color:$value;background:$fallback;}
+
 @include hover{
 color:red;
 }

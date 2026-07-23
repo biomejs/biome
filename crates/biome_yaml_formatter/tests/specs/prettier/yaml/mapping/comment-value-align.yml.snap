@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/mapping/comment-value-align.yml
 ---
+
 # Input
 
 ```yml
@@ -16,14 +17,15 @@ info: yaml/mapping/comment-value-align.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,2 +1 @@
--123: # hello
+@@ -1,2 +1,2 @@
+ 123: # hello
 -  # comment
-+123:
-\ No newline at end of file
++# comment
 ```
 
 # Output
 
 ```yml
-123:```
+123: # hello
+# comment
+```

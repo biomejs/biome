@@ -3,7 +3,7 @@ use crate::runner::diagnostics::PanicDiagnostic;
 use crate::runner::process_file::{FileStatus, ProcessFile};
 use biome_diagnostics::{DiagnosticExt, DiagnosticTags, Severity, category};
 use biome_fs::{BiomePath, FileSystem, TraversalContext};
-use biome_service::file_handlers::DocumentFileSource;
+use biome_languages::DocumentFileSource;
 use biome_service::workspace::{
     FileFeaturesResult, IgnoreKind, PathIsIgnoredParams, SupportsFeatureParams,
 };
@@ -101,7 +101,12 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
             }
         };
 
-        execution.can_handle(file_features)
+        let can_handle = execution.can_handle(file_features.clone());
+        if can_handle {
+            ctx.insert_file_features(biome_path.clone(), file_features);
+        }
+
+        can_handle
     }
 
     /// This function wraps the [process_file] function implementing the traversal
@@ -121,8 +126,8 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
         // We pass &Ctx which should also implement TraversalContext
 
         match catch_unwind(move || P::execute(ctx, biome_path, max_diagnostics, diagnostic_level)) {
-            Ok(Ok(FileStatus::Changed)) => {
-                ctx.increment_changed(biome_path);
+            Ok(Ok(FileStatus::Changed(changed_file))) => {
+                ctx.increment_changed(biome_path, changed_file);
             }
             Ok(Ok(FileStatus::Unchanged)) => {
                 ctx.increment_unchanged();

@@ -1,0 +1,33 @@
+$spacing: 1rem !default;
+$theme-colors: (
+  primary: #0a84ff,
+  accent: color.adjust(#0a84ff, $lightness: 10%),
+);
+$font-stack: (system-ui, "Helvetica Neue", sans-serif);
+
+.foo {
+  --gap: 10px;
+  --#{$prop}: 10px;
+  --theme-#{$slot}: color.adjust(#fff, $alpha: -0.2);
+  #{$prop}: var(--theme-#{$slot});
+
+  $local-spacing: 2px !global;
+
+  font: {
+    family: $font-stack;
+    size: clamp(1rem, #{$scale}vw, 2rem);
+    weight: 600;
+  }
+
+  color: map.get($theme-colors, primary);
+  border: 1px solid hsl(120deg 50% 50% / 0.4);
+  margin: 1px 2px, 3px 4px;
+  transform: translate(calc(100% - $spacing), min(10px, 2vw));
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.4), #fff);
+  content: "prefix #{$name}" ' plain';
+  image: url(images/#{$name}.png);
+  image-expr: url("../img/" + $name + ".png");
+  call: meta.call($function, $value, $keyword: red, $args...);
+  fallback: var(--theme-#{$slot}, #{$fallback}, pink);
+  width: $spacing !important;
+}

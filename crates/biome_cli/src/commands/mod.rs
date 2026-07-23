@@ -34,10 +34,9 @@ use biome_configuration::{
 use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
 use biome_fs::FileSystem;
-use biome_grit_patterns::GritTargetLanguage;
 use biome_service::configuration::LoadedConfiguration;
 use biome_service::documentation::Doc;
-use biome_service::workspace::FixFileMode;
+use biome_service::workspace::{FixFileMode, SearchLanguage};
 use biome_service::{WatcherOptions, watcher_options};
 use bpaf::Bpaf;
 use std::ffi::OsString;
@@ -208,24 +207,25 @@ pub enum BiomeCommand {
         /// Run only the given lint rule, assist action, group of rules and actions, or domain.
         /// If the severity level of a rule is `off`,
         /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
+        /// Use the `plugin` group to run only the analyzer plugins.
         ///
         /// Example:
         ///
         /// ```shell
-        /// biome check --only=correctness/noUnusedVariables --only=suspicious --only=test
+        /// biome check --only=correctness/noUnusedVariables --only=suspicious --only=test --only=plugin
         /// ```
-        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN|ACTION"))]
+        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN|ACTION|PLUGIN"))]
         only: Vec<AnalyzerSelector>,
 
         /// Skip the given lint rule, assist action, group of rules and actions, or domain by setting the severity level of the rules to `off`.
-        /// This option takes precedence over `--only`.
+        /// This option takes precedence over `--only`. Use the `plugin` group to skip the analyzer plugins.
         ///
         /// Example:
         ///
         /// ```shell
-        /// biome check --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
+        /// biome check --skip=correctness/noUnusedVariables --skip=suspicious --skip=project --skip=plugin
         /// ```
-        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION"))]
+        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION|PLUGIN"))]
         skip: Vec<AnalyzerSelector>,
 
         /// Enables the watch mode to re-run the check automatically when any non-excluded file in the workspace has changed.
@@ -295,24 +295,25 @@ pub enum BiomeCommand {
         /// Run only the given lint rule, assist action, group of rules and actions, or domain.
         /// If the severity level of a rule is `off`,
         /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
+        /// Use the `plugin` group to run only the analyzer plugins.
         ///
         /// Example:
         ///
         /// ```shell
-        /// biome lint --only=correctness/noUnusedVariables --only=suspicious --only=test
+        /// biome lint --only=correctness/noUnusedVariables --only=suspicious --only=test --only=plugin
         /// ```
-        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN|ACTION"))]
+        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN|ACTION|PLUGIN"))]
         only: Vec<AnalyzerSelector>,
 
         /// Skip the given lint rule, assist action, group of rules and actions, or domain by setting the severity level of the rules to `off`.
-        /// This option takes precedence over `--only`.
+        /// This option takes precedence over `--only`. Use the `plugin` group to skip the analyzer plugins.
         ///
         /// Example:
         ///
         /// ```shell
-        /// biome lint --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
+        /// biome lint --skip=correctness/noUnusedVariables --skip=suspicious --skip=project --skip=plugin
         /// ```
-        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION"))]
+        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION|PLUGIN"))]
         skip: Vec<AnalyzerSelector>,
 
         /// Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
@@ -506,24 +507,25 @@ pub enum BiomeCommand {
         /// Run only the given lint rule, assist action, group of rules and actions, or domain.
         /// If the severity level of a rule is `off`,
         /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
+        /// Use the `plugin` group to run only the analyzer plugins.
         ///
         /// Example:
         ///
         /// ```shell
-        /// biome ci --only=correctness/noUnusedVariables --only=suspicious --only=test
+        /// biome ci --only=correctness/noUnusedVariables --only=suspicious --only=test --only=plugin
         /// ```
-        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN|ACTION"))]
+        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN|ACTION|PLUGIN"))]
         only: Vec<AnalyzerSelector>,
 
         /// Skip the given lint rule, assist action, group of rules and actions, or domain by setting the severity level of the rules to `off`.
-        /// This option takes precedence over `--only`.
+        /// This option takes precedence over `--only`. Use the `plugin` group to skip the analyzer plugins.
         ///
         /// Example:
         ///
         /// ```shell
-        /// biome ci --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
+        /// biome ci --skip=correctness/noUnusedVariables --skip=suspicious --skip=project --skip=plugin
         /// ```
-        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION"))]
+        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION|PLUGIN"))]
         skip: Vec<AnalyzerSelector>,
 
         /// Single file, single path or list of paths
@@ -619,7 +621,7 @@ pub enum BiomeCommand {
         ///
         /// When none, the default language is JavaScript.
         #[bpaf(long("language"), short('l'))]
-        language: Option<GritTargetLanguage>,
+        language: Option<SearchLanguage>,
 
         /// The GritQL pattern to search for.
         ///

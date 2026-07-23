@@ -3,59 +3,6 @@ source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
 
-# `/src/reexport.ts` (Module 1)
-
-## Source
-
-```ts
-export * from "./foo.ts";
-```
-
-## Module Info
-
-```
-Exports {
-  No exports
-}
-Imports {
-  No imports
-}
-```
-
-
-# `/src/index.ts` (Not imported by resolver)
-
-## Source
-
-```ts
-import { foo } from "./reexport.ts";
-
-const result = foo();
-```
-
-## Module Info
-
-```
-Exports {
-  No exports
-}
-Imports {
-  "foo" => {
-    Specifier: "./reexport.ts"
-    Resolved path: "/src/reexport.ts"
-    Import Symbol: foo
-  }
-}
-```
-
-## Registered types
-
-```
-Module TypeId(0) => Import Symbol: foo from "/src/reexport.ts"
-
-Module TypeId(1) => Call Module(0) TypeId(0)(No parameters)
-```
-
 # `/src/foo.ts` (Module 2)
 
 ## Source
@@ -100,6 +47,59 @@ Module TypeId(1) => sync Function "foo" {
   returns: number
 }
 ```
+
+# `/src/index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+import { foo } from "./reexport.ts";
+
+const result = foo();
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  "foo" => {
+    Specifier: "./reexport.ts"
+    Resolved path: "/src/reexport.ts"
+    Import Symbol: foo
+  }
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => Import Symbol: foo from "/src/reexport.ts"
+
+Module TypeId(1) => Call Module(0) TypeId(0)(No parameters)
+```
+
+# `/src/reexport.ts` (Module 1)
+
+## Source
+
+```ts
+export * from "./foo.ts";
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  No imports
+}
+```
+
 
 # Module Resolver
 

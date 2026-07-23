@@ -248,7 +248,12 @@ fn resolve_module_with_package_json(
         return resolve_import_alias(specifier, package_path, package_json, fs, options);
     }
 
+    // A package may only reference itself by name when its `package.json` has
+    // an `exports` field (`PACKAGE_SELF_RESOLVE` step 4 in the Node.js
+    // resolution algorithm). Without one, the specifier falls through to the
+    // regular `node_modules` lookup below, which finds the package on disk.
     if let Some(package_name) = &package_json.name
+        && package_json.exports.is_some()
         && specifier.starts_with(package_name.as_ref())
         && specifier
             .as_bytes()

@@ -1,24 +1,23 @@
 #![cfg(test)]
 #![expect(unused_mut, unused_variables)]
 
-use crate::lexer::CssLexContext;
+use super::{
+    CssLexer, TextSize,
+    scan_cursor::{CssScanCursor, StringBodyScanStop, UrlBodyStartScan},
+    source_cursor::SourceCursor,
+};
 use crate::CssParserOptions;
-use biome_css_syntax::CssFileSource;
+use crate::lexer::{CssCustomPropertyCommentMode, CssLexContext};
 use biome_css_syntax::{
     CssSyntaxKind::{self, EOF},
     T, TextRange,
 };
+use biome_languages::CssFileSource;
 use biome_parser::lexer::{Lexer, LexerWithCheckpoint};
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Duration;
-
-use super::{
-    source_cursor::SourceCursor,
-    scan_cursor::{CssScanCursor, StringBodyScanStop, UrlBodyStartScan},
-    CssLexer, TextSize,
-};
 
 // Assert the result of lexing a piece of source code,
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
@@ -142,6 +141,23 @@ fn rewind_restores_lexer_source_cursor_position() {
     assert_eq!(
         lexer.current_range(),
         TextRange::new(TextSize::from(3), TextSize::from(4))
+    );
+}
+
+#[test]
+fn custom_property_context_preserves_unknown_delimiters() {
+    let mut regular = CssLexer::from_str("`");
+    assert_eq!(
+        regular.next_token(CssLexContext::Regular),
+        CssSyntaxKind::ERROR_TOKEN
+    );
+
+    let mut custom_property = CssLexer::from_str("`");
+    assert_eq!(
+        custom_property.next_token(CssLexContext::CustomPropertyValue(
+            CssCustomPropertyCommentMode::PreserveDoubleSlash,
+        )),
+        CssSyntaxKind::CSS_DELIM_LITERAL
     );
 }
 
@@ -298,9 +314,8 @@ fn url_body_context_skips_scss_line_comment_trivia_before_interpolated_function(
 
 #[test]
 fn url_body_context_preserves_protocol_relative_url_in_scss() {
-    let mut lexer =
-        CssLexer::from_str("url(//cdn.example.com/app.css)\n")
-            .with_source_type(CssFileSource::scss());
+    let mut lexer = CssLexer::from_str("url(//cdn.example.com/app.css)\n")
+        .with_source_type(CssFileSource::scss());
 
     assert_eq!(
         lexer.next_token(CssLexContext::Regular),
@@ -530,14 +545,27 @@ fn css_scan_cursor_respects_line_comment_config_in_url_body_scanning() {
 }
 
 #[test]
+fn css_scan_cursor_classifies_scss_raw_url_bodies() {
+    let protocol_relative = CssScanCursor::new(
+        SourceCursor::new("//cdn.example.com/app.css)", 0),
+        true,
+        true,
+    );
+    let escaped_whitespace =
+        CssScanCursor::new(SourceCursor::new("image\\20 fallback.svg)", 0), true, true);
+    let line_comment = CssScanCursor::new(SourceCursor::new("// silent\napp.css)", 0), true, true);
+
+    assert!(protocol_relative.is_scss_raw_url_body());
+    assert!(escaped_whitespace.is_scss_raw_url_body());
+    assert!(!line_comment.is_scss_raw_url_body());
+}
+
+#[test]
 fn css_scan_cursor_scans_plain_string_without_interpolation_mode() {
     let cursor = CssScanCursor::new(SourceCursor::new("\"a#{b}\"", 1), true, true);
     let scan = cursor.scan_plain_string_body(super::CssStringQuote::Double);
 
-    assert!(matches!(
-        scan.stop,
-        StringBodyScanStop::ClosingQuote { .. }
-    ));
+    assert!(matches!(scan.stop, StringBodyScanStop::ClosingQuote { .. }));
 }
 
 #[test]
@@ -646,8 +674,7 @@ fn css_lexer_consumes_identifier_sequence_with_escape() {
     let mut lexer = CssLexer::from_str(r#"\66 oo-bar"#);
     let mut buf = [0u8; 16];
 
-    let (count, only_ascii_used) =
-        lexer.consume_ident_sequence(&mut buf, false);
+    let (count, only_ascii_used) = lexer.consume_ident_sequence(&mut buf, false);
 
     assert!(count > 0);
     assert!(only_ascii_used);
@@ -661,8 +688,7 @@ fn css_lexer_consumes_identifier_sequence_with_slash_mode() {
     let mut lexer = CssLexer::from_str("w/2");
     let mut buf = [0u8; 16];
 
-    let (count, only_ascii_used) =
-        lexer.consume_ident_sequence(&mut buf, true);
+    let (count, only_ascii_used) = lexer.consume_ident_sequence(&mut buf, true);
 
     assert_eq!(&buf[..count], b"w/2");
     assert!(only_ascii_used);
@@ -675,8 +701,7 @@ fn css_lexer_consumes_identifier_sequence_stops_before_slash_when_disabled() {
     let mut lexer = CssLexer::from_str("w/2");
     let mut buf = [0u8; 16];
 
-    let (count, only_ascii_used) =
-        lexer.consume_ident_sequence(&mut buf, false);
+    let (count, only_ascii_used) = lexer.consume_ident_sequence(&mut buf, false);
 
     assert_eq!(&buf[..count], b"w");
     assert!(only_ascii_used);
@@ -689,8 +714,7 @@ fn css_lexer_consumes_identifier_sequence_tracks_non_ascii_transition() {
     let mut lexer = CssLexer::from_str("abécd ");
     let mut buf = [0u8; 16];
 
-    let (count, only_ascii_used) =
-        lexer.consume_ident_sequence(&mut buf, false);
+    let (count, only_ascii_used) = lexer.consume_ident_sequence(&mut buf, false);
 
     assert_eq!(&buf[..count], b"ab");
     assert!(!only_ascii_used);
@@ -757,8 +781,7 @@ fn css_lexer_tailwind_identifier_sequence_keeps_count_when_buffer_fills_before_s
 
 #[test]
 fn lexer_scan_cursor_at_detects_interpolated_function_from_offset() {
-    let lexer =
-        CssLexer::from_str("xxfoo#{1 + 1}(bar)").with_source_type(CssFileSource::scss());
+    let lexer = CssLexer::from_str("xxfoo#{1 + 1}(bar)").with_source_type(CssFileSource::scss());
 
     assert!(lexer.scan_cursor_at(2).is_at_scss_interpolated_function());
 }
@@ -864,13 +887,25 @@ fn css_scan_cursor_consumes_identifier_escape_as_a_single_part() {
 #[test]
 fn css_scan_cursor_scans_raw_url_value_until_closing_paren() {
     let cursor = CssScanCursor::new(SourceCursor::new(r"foo\)bar)", 0), false, false);
-    let scan = cursor
-        .scan_url_raw_value()
-        .expect("expected raw url scan");
+    let scan = cursor.scan_url_raw_value().expect("expected raw url scan");
 
     assert_eq!(scan.start, 0);
     assert_eq!(scan.end, 8);
     assert!(scan.terminated);
+}
+
+#[test]
+fn css_scan_cursor_classifies_final_custom_property_important() {
+    let is_final = |source, skip_line_comments| {
+        CssScanCursor::new(SourceCursor::new(source, 0), true, true)
+            .scan_final_custom_property_important(skip_line_comments)
+    };
+
+    assert!(is_final("!important;", false));
+    assert!(is_final("! /**/ IMPORTANT }", false));
+    assert!(!is_final("!important fallback;", false));
+    assert!(!is_final("!important// raw\n;", false));
+    assert!(is_final("!important// silent\n)", true));
 }
 
 #[test]

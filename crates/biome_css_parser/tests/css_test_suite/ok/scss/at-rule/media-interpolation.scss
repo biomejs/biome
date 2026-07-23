@@ -34,6 +34,12 @@
   }
 }
 
+@media (#{$feature}-suffix: 1px) {
+  .box {
+    color: red;
+  }
+}
+
 @media #{$query} {
   .box {
     color: red;

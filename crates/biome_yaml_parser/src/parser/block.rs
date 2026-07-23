@@ -12,6 +12,7 @@ use biome_yaml_syntax::{
     YamlSyntaxKind::{self, *},
 };
 
+use crate::parser::flow::parse_alias_node;
 use crate::parser::{
     flow::parse_any_flow_node,
     parse_error::expected_header,
@@ -21,7 +22,8 @@ use crate::parser::{
 use super::{
     YamlParser,
     flow::{
-        is_at_flow_json_node, is_at_flow_yaml_node, parse_flow_json_node, parse_flow_yaml_node,
+        is_at_alias_node, is_at_flow_json_node, is_at_flow_yaml_node, parse_flow_json_node,
+        parse_flow_yaml_node,
     },
     parse_error::{expected_block_mapping_entry, expected_block_sequence_entry},
 };
@@ -165,6 +167,14 @@ fn parse_block_map_implicit_entry(p: &mut YamlParser) -> ParsedSyntax {
         // plain yaml key, or empty key with properties
         let yaml_node = parse_flow_yaml_node(p, property_list);
         let m = yaml_node.precede(p);
+        p.expect(T![:]);
+        // Value can be completely empty according to the spec
+        parse_any_block_node(p).ok();
+        Present(m.complete(p, YAML_BLOCK_MAP_IMPLICIT_ENTRY))
+    } else if is_at_alias_node(p) {
+        property_list.undo_completion(p).abandon(p);
+        let alias_node = parse_alias_node(p);
+        let m = alias_node.precede(p);
         p.expect(T![:]);
         // Value can be completely empty according to the spec
         parse_any_block_node(p).ok();

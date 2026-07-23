@@ -74,7 +74,7 @@ declare_lint_rule! {
     /// See [`useTestHooksOnTop`](https://biomejs.dev/linter/rules/use-test-hooks-on-top) if you want to group all the hooks at the top of the block, before any test cases.
     ///
     pub UseTestHooksInOrder {
-        version: "next",
+        version: "2.4.15",
         name: "useTestHooksInOrder",
         language: "js",
         recommended: false,

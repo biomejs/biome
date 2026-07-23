@@ -120,6 +120,9 @@ pub trait NthToken<Lex>: TokenSource {
     /// Gets the kind of the nth non-trivia token
     fn nth(&mut self, n: usize) -> Self::Kind;
 
+    /// Gets the range of the nth non-trivia token.
+    fn nth_range(&mut self, n: usize) -> Option<TextRange>;
+
     /// Returns true if the nth non-trivia token is preceded by a line break
     fn has_nth_preceding_line_break(&mut self, n: usize) -> bool;
 
@@ -140,6 +143,17 @@ where
             self.lexer()
                 .nth_non_trivia(n)
                 .map_or(T::Kind::EOF, |lookahead| lookahead.kind())
+        }
+    }
+
+    /// Gets the range of the nth non-trivia token.
+    fn nth_range(&mut self, n: usize) -> Option<TextRange> {
+        if n == 0 {
+            Some(self.current_range())
+        } else {
+            self.lexer()
+                .nth_non_trivia(n)
+                .map(|lookahead| lookahead.text_range())
         }
     }
 

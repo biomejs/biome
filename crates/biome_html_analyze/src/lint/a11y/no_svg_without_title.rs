@@ -1,12 +1,12 @@
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlAttribute, HtmlElementList, HtmlFileSource};
+use biome_html_syntax::{AnyHtmlElement, HtmlAttribute, HtmlElementList, T};
 use biome_rowan::AstNode;
 use biome_rule_options::no_svg_without_title::NoSvgWithoutTitleOptions;
 
 use crate::Aria;
-use crate::{a11y::is_aria_hidden_true, utils::is_html_tag};
+use crate::a11y::is_aria_hidden_true;
 
 declare_lint_rule! {
     /// Enforces the usage of the `title` element for the `svg` element.
@@ -126,10 +126,8 @@ impl Rule for NoSvgWithoutTitle {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
-
         let tag_element = node.clone().as_any_html_tag_element()?;
-        if !is_html_tag(&tag_element, source_type, "svg") {
+        if tag_element.tag_name_kind() != Some(T![svg]) {
             return None;
         }
 
@@ -147,12 +145,21 @@ impl Rule for NoSvgWithoutTitle {
         }
 
         if ctx.aria_roles().has_name_required_image_role(node) {
-            let aria_label = node.find_attribute_by_name("aria-label");
-            let aria_labelledby = node.find_attribute_by_name("aria-labelledby");
-            let is_valid_a11y_attribute = aria_label.is_some()
-                || is_valid_attribute_value(aria_labelledby, &html_element.children())
-                    .unwrap_or(false);
-            if is_valid_a11y_attribute {
+            let aria_label_attribute = node.find_attribute_by_name("aria-label");
+            if aria_label_attribute.is_some() {
+                return None;
+            }
+
+            let aria_labelledby_attribute = node.find_attribute_by_name("aria-labelledby");
+            if let Some(aria_labelledby_attribute) = aria_labelledby_attribute
+                && let Some(aria_labelledby_html_attribute) =
+                    aria_labelledby_attribute.as_html_attribute()
+                && is_valid_attribute_value(
+                    aria_labelledby_html_attribute,
+                    &html_element.children(),
+                )
+                .unwrap_or(false)
+            {
                 return None;
             }
             Some(())
@@ -194,17 +201,19 @@ fn has_valid_title_element(html_child_list: &HtmlElementList) -> Option<bool> {
 
 /// Checks if the given attribute is attached to the `svg` element and the attribute value is used by the `id` of the child element.
 fn is_valid_attribute_value(
-    attribute: Option<HtmlAttribute>,
+    attribute: &HtmlAttribute,
     html_child_list: &HtmlElementList,
 ) -> Option<bool> {
-    let attribute_value = attribute?.initializer()?.value().ok()?;
+    let attribute_value = attribute.initializer()?.value().ok()?;
     let is_used_attribute = html_child_list
         .into_iter()
         .filter_map(|child| {
             let html_element = child.as_html_element()?;
-            let maybe_attribute = html_element.find_attribute_by_name("id");
-            let child_attribute_value = maybe_attribute?.initializer()?.value().ok()?;
-            let is_valid = attribute_value.string_value() == child_attribute_value.string_value();
+            let id_attribute = html_element.find_attribute_by_name("id")?;
+            let id_html_attribute = id_attribute.as_html_attribute()?;
+            let child_attribute_value = id_html_attribute.initializer()?.value().ok()?;
+            let is_valid = attribute_value.as_static_value()?.text()
+                == child_attribute_value.as_static_value()?.text();
             Some(is_valid)
         })
         .any(|x| x);

@@ -51,8 +51,8 @@ pub(crate) struct CheckCommandPayload {
 struct CheckExecution {
     /// The type of fixes that should be applied when analyzing a file.
     ///
-    /// It's [None] if the `check` command is called without `--apply` or `--apply-suggested`
-    /// arguments.
+    /// It's [None] if the `check` command is called without `--write` or `--fix`.
+    /// `--unsafe` upgrades the mode when combined with `--write` or `--fix`.
     fix_file_mode: Option<FixFileMode>,
     /// An optional tuple.
     /// 1. The virtual path to the file
@@ -112,11 +112,6 @@ impl Execution for CheckExecution {
     fn is_safe_fixes_enabled(&self) -> bool {
         self.fix_file_mode
             .is_some_and(|fix_mode| fix_mode == FixFileMode::SafeFixes)
-    }
-
-    fn is_safe_and_unsafe_fixes_enabled(&self) -> bool {
-        self.fix_file_mode
-            .is_some_and(|fix_mode| fix_mode == FixFileMode::SafeAndUnsafeFixes)
     }
 
     fn as_fix_file_mode(&self) -> Option<FixFileMode> {

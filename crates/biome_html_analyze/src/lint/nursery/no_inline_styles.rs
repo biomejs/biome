@@ -2,9 +2,8 @@ use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_html_syntax::{
-    HtmlAttribute, HtmlAttributeList, HtmlFileSource, element_ext::AnyHtmlTagElement,
-};
+use biome_html_syntax::{HtmlAttribute, HtmlAttributeList, element_ext::AnyHtmlTagElement};
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText};
 use biome_rule_options::no_inline_styles::NoInlineStylesOptions;
 use biome_string_case::StrOnlyExtension;

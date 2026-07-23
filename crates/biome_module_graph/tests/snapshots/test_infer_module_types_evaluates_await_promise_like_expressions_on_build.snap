@@ -1,0 +1,109 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export class StringPromise extends Promise<string> {}
+
+export interface PromiseLike<T> {
+	then(resolve: (value: T) => void): void;
+}
+
+export async function consume(
+	subclass: StringPromise,
+	like: PromiseLike<number>,
+) {
+	const awaitedSubclass = await subclass;
+	const awaitedLike = await like;
+	return awaitedSubclass;
+}
+```
+
+## Inferred types
+
+```
+Binding StringPromise "StringPromise" => class "StringPromise" {
+  extends: instanceof Promise<string>
+  implements: []
+  type_args: []
+}
+
+Expression "Promise" => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Binding PromiseLike "PromiseLike" => interface "PromiseLike" {
+  extends: []
+  type_args: [T]
+  members: [
+    "then":
+      sync Function "then" {
+        accepts: {
+          params: [
+            required resolve: sync Function {
+              accepts: {
+                params: [
+                  required value: instanceof T
+                ]
+                type_args: []
+              }
+              returns: void
+            }
+          ]
+          type_args: []
+        }
+        returns: void
+      }
+  ]
+}
+
+Binding T "T" => T
+
+Binding resolve "resolve" => sync Function {
+  accepts: {
+    params: [
+      required value: instanceof T
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding value "value" => instanceof T
+
+Binding consume "consume" => async Function "consume" {
+  accepts: {
+    params: [
+      required subclass: instanceof StringPromise
+      required like: instanceof PromiseLike<number>
+    ]
+    type_args: []
+  }
+  returns: instanceof Promise<string>
+}
+
+Binding subclass "subclass" => instanceof StringPromise
+
+Binding like "like" => instanceof PromiseLike<number>
+
+Binding awaitedSubclass "awaitedSubclass" => string
+
+Expression "await subclass" => string
+
+Expression "subclass" => instanceof StringPromise
+
+Binding awaitedLike "awaitedLike" => number
+
+Expression "await like" => number
+
+Expression "like" => instanceof PromiseLike<number>
+
+Expression "awaitedSubclass" => string
+```

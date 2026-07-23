@@ -4,11 +4,13 @@ use biome_analyze::{
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_html_syntax::{HtmlSyntaxKind, T};
+use biome_parser::{TokenSet, token_set};
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_interactive_element_to_noninteractive_role::NoInteractiveElementToNoninteractiveRoleOptions;
 
-use crate::{Aria, HtmlRuleAction, utils::is_html_tag};
+use crate::{Aria, HtmlRuleAction};
 
 declare_lint_rule! {
     /// Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.
@@ -40,7 +42,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoInteractiveElementToNoninteractiveRole {
-        version: "next",
+        version: "2.5.0",
         name: "noInteractiveElementToNoninteractiveRole",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("no-interactive-element-to-noninteractive-role").inspired()],
@@ -58,25 +60,20 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
 
         if node.is_custom_component() {
             return None;
         }
 
-        let role_attribute = node.find_attribute_by_name("role")?;
-        let role_attribute_static_value = role_attribute
-            .initializer()?
-            .value()
-            .ok()?
-            .as_static_value()?;
+        let tag_kind = node.tag_name_kind();
+
+        let role_attribute = node.find_attribute_or_vue_binding("role")?;
+        let role_attribute_static_value = role_attribute.as_static_value()?;
         let role_attribute_value = role_attribute_static_value.text();
 
         // `hr` implicitly maps to `separator`, and `presentation`/`none` is explicitly
         // allowed on separators.
-        if is_html_tag(node, source_type, "hr")
-            && matches!(role_attribute_value, "presentation" | "none")
-        {
+        if tag_kind == Some(T![hr]) && matches!(role_attribute_value, "presentation" | "none") {
             return None;
         }
 
@@ -87,26 +84,22 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
             // <div> and <span> are considered neither interactive nor non-interactive, depending on the presence or absence of the role attribute.
             // We don't report <div> and <span> here, because we cannot determine whether they are interactive or non-interactive.
 
-            if ROLE_SENSITIVE_ELEMENTS
-                .iter()
-                .any(|el| is_html_tag(node, source_type, el))
-            {
+            if tag_kind.is_some_and(|kind| ROLE_SENSITIVE_ELEMENTS.contains(kind)) {
                 return None;
             }
 
             // A <svg> element can be given an "img" to make it non-interactive for a11y reasons.
-            if is_html_tag(node, source_type, "svg") && role_attribute_value == "img" {
+            if tag_kind == Some(T![svg]) && role_attribute_value == "img" {
                 return None;
             }
 
             // A <canvas> element can be given an "img" to make it non-interactive for a11y reasons.
-            if is_html_tag(node, source_type, "canvas") && role_attribute_value == "img" {
+            if tag_kind == Some(T![canvas]) && role_attribute_value == "img" {
                 return None;
             }
 
             // a tag without href is considered non-interactive
-            if is_html_tag(node, source_type, "a") && node.find_attribute_by_name("href").is_none()
-            {
+            if tag_kind == Some(T![a]) && node.find_attribute_by_name("href").is_none() {
                 return None;
             }
 
@@ -137,7 +130,7 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<HtmlRuleAction> {
         let node = ctx.query();
-        let role_attribute = node.find_attribute_by_name("role")?;
+        let role_attribute = node.find_attribute_or_vue_binding("role")?;
 
         let mut mutation = ctx.root().begin();
         mutation.remove_node(role_attribute);
@@ -150,4 +143,7 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
     }
 }
 
-static ROLE_SENSITIVE_ELEMENTS: [&str; 3] = ["div", "span", "source"];
+/// `<div>` and `<span>` are neither interactive nor non-interactive without a
+/// role, and `<source>` likewise carries no implicit interactivity, so these are
+/// not reported here.
+const ROLE_SENSITIVE_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(T![div], T![span], T![source]);

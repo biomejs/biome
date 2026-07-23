@@ -11,8 +11,10 @@ use self::scan_cursor::{
 use self::source_cursor::SourceCursor;
 use crate::CssParserOptions;
 use biome_css_syntax::{
-    CssFileSource, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextRange, TextSize,
+    CssNumberScanOptions, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextRange, TextSize,
+    scan_css_number,
 };
+use biome_languages::CssFileSource;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
@@ -22,6 +24,21 @@ use biome_unicode_table::{
     Dispatch::{self, *},
     lookup_byte,
 };
+
+/// Controls how `//` is classified in an SCSS custom-property value.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum CssCustomPropertyCommentMode {
+    /// Preserves `//` as raw content, as in `--value: // literal;`.
+    PreserveDoubleSlash,
+    /// Treats `//` as a comment, as in `@supports (--value: // comment\n token) {}`.
+    ScssLineComments,
+}
+
+#[derive(Debug, Copy, Clone)]
+enum TokenFallback {
+    Error,
+    Delimiter,
+}
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub enum CssLexContext {
@@ -64,10 +81,14 @@ pub enum CssLexContext {
     /// quote for malformed recovery.
     ScssStringInterpolation(CssStringQuote),
 
+    /// Applied to the raw body of an SCSS custom property.
+    CustomPropertyValue(CssCustomPropertyCommentMode),
+
     /// Applied when lexing Tailwind CSS utility classes.
     /// Currently, only applicable to when we encounter a `@apply` rule.
     TailwindUtility,
-    /// Applied when lexing Tailwind CSS utility names in `@utility`.
+    /// Applied when lexing Tailwind CSS utility and variant names in
+    /// `@utility` and `@variant`.
     TailwindUtilityName,
 }
 
@@ -197,6 +218,9 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
                 CssLexContext::Color => self.consume_color_token(current),
                 CssLexContext::UnicodeRange => self.consume_unicode_range_token(current),
                 CssLexContext::ScssString(quote) => self.lex_scss_string_chunk_token(quote),
+                CssLexContext::CustomPropertyValue(comment_mode) => {
+                    self.consume_custom_property_value_token(current, comment_mode)
+                }
                 CssLexContext::TailwindUtility => self.consume_token_tailwind_utility(current),
                 CssLexContext::TailwindUtilityName => {
                     self.consume_token_tailwind_utility_name(current)
@@ -418,6 +442,14 @@ impl<'src> CssLexer<'src> {
     /// Guaranteed to not be at the end of the file
     // A lookup table of `byte -> fn(l: &mut Lexer) -> Token` is exponentially slower than this approach
     fn consume_token(&mut self, current: u8) -> CssSyntaxKind {
+        self.consume_token_with_fallback(current, TokenFallback::Error)
+    }
+
+    fn consume_token_with_fallback(
+        &mut self,
+        current: u8,
+        fallback: TokenFallback,
+    ) -> CssSyntaxKind {
         // The speed difference comes from the difference in table size, a 2kb table is easily fit into cpu cache
         // While a 16kb table will be ejected from cache very often leading to slowdowns, this also allows LLVM
         // to do more aggressive optimizations on the match regarding how to map it to instructions
@@ -434,19 +466,19 @@ impl<'src> CssLexer<'src> {
             QOT => self.consume_string_literal(current),
             SLH => self.consume_slash(),
 
-            DIG | ZER => self.consume_number(current),
+            DIG | ZER => self.consume_number(),
 
-            MIN => self.consume_min(current),
+            MIN => self.consume_min(),
 
             PLS => {
                 if self.is_number_start() {
-                    self.consume_number(current)
+                    self.consume_number()
                 } else {
                     self.consume_byte(T![+])
                 }
             }
 
-            PRD => self.consume_prd(current),
+            PRD => self.consume_prd(),
 
             LSS => self.consume_lss(),
 
@@ -466,7 +498,7 @@ impl<'src> CssLexer<'src> {
                 } else if self.is_ident_start() {
                     self.consume_identifier()
                 } else {
-                    self.consume_unexpected_character()
+                    self.consume_fallback(fallback)
                 }
             }
             UNI if self.options.is_metavariable_enabled() && self.is_metavariable_start() => {
@@ -495,10 +527,40 @@ impl<'src> CssLexer<'src> {
             PRC => self.consume_byte(T![%]),
             Dispatch::AMP => self.consume_byte(T![&]),
 
-            UNI => self.consume_unexpected_character(),
-
-            _ => self.consume_unexpected_character(),
+            _ => self.consume_fallback(fallback),
         }
+    }
+
+    fn consume_fallback(&mut self, fallback: TokenFallback) -> CssSyntaxKind {
+        match fallback {
+            TokenFallback::Error => self.consume_unexpected_character(),
+            TokenFallback::Delimiter => self.consume_custom_property_delimiter(),
+        }
+    }
+
+    /// Lexes one token from an SCSS custom-property value.
+    #[inline]
+    fn consume_custom_property_value_token(
+        &mut self,
+        current: u8,
+        comment_mode: CssCustomPropertyCommentMode,
+    ) -> CssSyntaxKind {
+        if comment_mode == CssCustomPropertyCommentMode::PreserveDoubleSlash
+            && current == b'/'
+            && self.peek_byte() == Some(b'/')
+        {
+            return self.consume_byte(T![/]);
+        }
+
+        self.consume_token_with_fallback(current, TokenFallback::Delimiter)
+    }
+
+    #[inline]
+    fn consume_custom_property_delimiter(&mut self) -> CssSyntaxKind {
+        self.assert_current_char_boundary();
+        let current = self.current_char_unchecked();
+        self.advance(current.len_utf8());
+        CSS_DELIM_LITERAL
     }
 
     fn consume_color_token(&mut self, current: u8) -> CssSyntaxKind {
@@ -896,60 +958,18 @@ impl<'src> CssLexer<'src> {
     }
 
     /// Lexes a CSS number literal
-    fn consume_number(&mut self, current: u8) -> CssSyntaxKind {
+    fn consume_number(&mut self) -> CssSyntaxKind {
         debug_assert!(self.is_number_start());
 
-        if matches!(current, b'+' | b'-') {
-            self.advance(1);
-        }
-
-        // While the next input code point is a digit, consume it.
-        self.consume_number_sequence();
-
-        // According to the spec if the next 2 input code points are U+002E FULL STOP (.) followed by a digit we need to consume them.
-        // However we want to parse numbers like `1.` and `1.e10` where we don't have a number after (.)
-        // If the next input code points are U+002E FULL STOP (.)...
-        if matches!(self.current_byte(), Some(b'.')) {
-            // In SCSS, leave the dot for the ellipsis token (e.g., `10...` or `$args...`).
-            let is_scss_ellipsis =
-                self.is_scss() && self.peek_byte() == Some(b'.') && self.byte_at(2) == Some(b'.');
-
-            if !is_scss_ellipsis {
-                // Consume the dot.
-                self.advance(1);
-
-                // If U+002E FULL STOP (.) is followed by a digit, consume the number sequence.
-                if self
-                    .current_byte()
-                    .is_some_and(|byte| byte.is_ascii_digit())
-                {
-                    self.consume_number_sequence();
-                }
-            }
-        }
-
-        // If the next 2 or 3 input code points are U+0045 LATIN CAPITAL LETTER E (E) or
-        // U+0065 LATIN SMALL LETTER E (e), optionally followed by U+002D HYPHEN-MINUS
-        // (-) or U+002B PLUS SIGN (+), followed by a digit, then:
-        if matches!(self.current_byte(), Some(b'e' | b'E')) {
-            match (self.peek_byte(), self.byte_at(2)) {
-                (Some(b'-' | b'+'), Some(byte)) if byte.is_ascii_digit() => {
-                    // Consume them.
-                    self.advance(3);
-
-                    // While the next input code point is a digit, consume it.
-                    self.consume_number_sequence()
-                }
-                (Some(byte), _) if byte.is_ascii_digit() => {
-                    // Consume them.
-                    self.advance(2);
-
-                    // While the next input code point is a digit, consume it.
-                    self.consume_number_sequence()
-                }
-                _ => {}
-            }
-        }
+        let start = self.position();
+        let Some(end) = scan_css_number(
+            self.source(),
+            start,
+            CssNumberScanOptions::default().with_scss_ellipsis_boundary(self.is_scss()),
+        ) else {
+            return self.consume_unexpected_character();
+        };
+        self.advance(end - start);
 
         // A Number immediately followed by an identifier is considered a single
         // <dimension> token according to the spec: https://www.w3.org/TR/css-values-4/#dimensions.
@@ -969,13 +989,6 @@ impl<'src> CssLexer<'src> {
             CSS_DIMENSION_VALUE
         } else {
             CSS_NUMBER_LITERAL
-        }
-    }
-
-    fn consume_number_sequence(&mut self) {
-        // While the next input code point is a digit, consume it.
-        while let Some(b'0'..=b'9') = self.current_byte() {
-            self.advance(1);
         }
     }
 
@@ -1068,6 +1081,7 @@ impl<'src> CssLexer<'src> {
             b"forward" => FORWARD_KW,
             b"hide" => HIDE_KW,
             b"include" => INCLUDE_KW,
+            b"using" => USING_KW,
             b"mixin" => MIXIN_KW,
             b"optional" => OPTIONAL_KW,
             b"while" => WHILE_KW,
@@ -1235,6 +1249,9 @@ impl<'src> CssLexer<'src> {
             b"returns" => RETURNS_KW,
             b"use" => USE_KW,
             b"with" => WITH_KW,
+            b"custom-media" => CUSTOM_MEDIA_KW,
+            b"true" => TRUE_KW,
+            b"false" => FALSE_KW,
             // Tailwind CSS 4.0 keywords
             b"theme" => THEME_KW,
             b"utility" => UTILITY_KW,
@@ -1467,14 +1484,14 @@ impl<'src> CssLexer<'src> {
     }
 
     #[inline]
-    fn consume_prd(&mut self, current: u8) -> CssSyntaxKind {
+    fn consume_prd(&mut self) -> CssSyntaxKind {
         self.assert_byte(b'.');
 
         if self.is_scss() && self.peek_byte() == Some(b'.') && self.byte_at(2) == Some(b'.') {
             self.advance(2);
             self.consume_byte(T![...])
         } else if self.is_number_start() {
-            self.consume_number(current)
+            self.consume_number()
         } else {
             self.consume_byte(T![.])
         }
@@ -1511,11 +1528,11 @@ impl<'src> CssLexer<'src> {
     }
 
     #[inline]
-    fn consume_min(&mut self, current: u8) -> CssSyntaxKind {
+    fn consume_min(&mut self) -> CssSyntaxKind {
         self.assert_byte(b'-');
 
         if self.is_number_start() {
-            return self.consume_number(current);
+            return self.consume_number();
         }
 
         // GREATER-THAN SIGN (->), consume them and return a CDC.
@@ -1556,23 +1573,12 @@ impl<'src> CssLexer<'src> {
 
     /// Check if the lexer starts a number.
     fn is_number_start(&self) -> bool {
-        match self.current_byte() {
-            Some(b'+' | b'-') => match self.peek_byte() {
-                // If the second code point is a digit, return true.
-                Some(byte) if byte.is_ascii_digit() => true,
-                // Otherwise, if the second code point is a U+002E FULL STOP (.) and the
-                // third code point is a digit, return true.
-                Some(b'.') if self.byte_at(2).is_some_and(|byte| byte.is_ascii_digit()) => true,
-                _ => false,
-            },
-            Some(b'.') => match self.peek_byte() {
-                // If the second code point is a digit, return true.
-                Some(byte) if byte.is_ascii_digit() => true,
-                _ => false,
-            },
-            Some(byte) => byte.is_ascii_digit(),
-            _ => false,
-        }
+        scan_css_number(
+            self.source(),
+            self.position(),
+            CssNumberScanOptions::default(),
+        )
+        .is_some()
     }
 
     /// Check if the lexer starts an identifier.
@@ -1604,6 +1610,21 @@ impl<'src> CssLexer<'src> {
     fn consume_token_tailwind_utility_name(&mut self, current: u8) -> CssSyntaxKind {
         if self.is_ident_start() {
             return self.consume_identifier_with_slash(true);
+        }
+
+        // Tailwind utility and variant names may start with a digit, such as
+        // the `2xl` breakpoint in `@utility 2xl` or `@variant 2xl`. The default
+        // CSS lexer would split that into a number and an identifier, so consume
+        // the whole run as a single identifier here.
+        let dispatched = lookup_byte(current);
+        if matches!(dispatched, DIG | ZER) {
+            while let Some(byte) = self.current_byte() {
+                match lookup_byte(byte) {
+                    DIG | ZER | IDT | UNI | MIN => self.advance_byte_or_char(byte),
+                    _ => break,
+                }
+            }
+            return T![ident];
         }
 
         self.consume_token(current)
@@ -1677,6 +1698,27 @@ impl<'src> CssLexer<'src> {
     /// Example: `url('v'+1)`.
     pub(crate) fn is_at_scss_concatenation_plus(&self, start: usize) -> bool {
         self.scan_cursor_at(start).is_at_scss_concatenation_plus()
+    }
+
+    /// Returns whether a complete `url(...)` body at `start` uses Sass raw-URL syntax.
+    pub(crate) fn is_scss_raw_url_body(&self, start: usize) -> bool {
+        self.scan_cursor_at(start).is_scss_raw_url_body()
+    }
+
+    /// Returns whether `start` begins a final custom-property `!important`.
+    ///
+    /// This uses the source scanner because buffered token lookahead always
+    /// uses regular lexing, which would drop declaration content such as
+    /// `// raw` before deciding whether `!important` is final.
+    pub(crate) fn is_at_final_custom_property_important(
+        &self,
+        start: usize,
+        comment_mode: CssCustomPropertyCommentMode,
+    ) -> bool {
+        self.scan_cursor_at(start)
+            .scan_final_custom_property_important(
+                comment_mode == CssCustomPropertyCommentMode::ScssLineComments,
+            )
     }
 
     fn take_pending_url_raw_value_scan_at_current_position(

@@ -1,7 +1,10 @@
+use crate::cli_options::CliOptions;
 use crate::commands::daemon::read_most_recent_log_file;
 use crate::service::enumerate_pipes;
 use crate::{CliDiagnostic, CliSession, VERSION, service};
-use biome_configuration::{ConfigurationPathHint, Rules};
+use biome_analyze::RuleFilter;
+use biome_configuration::Rules;
+use biome_configuration::analyzer::{DomainSelector, RuleDomainValue};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{
     ConsoleExt, DebugDisplay, DisplayOption, HorizontalLine, KeyValuePair, Padding, SOFT_LINE, fmt,
@@ -17,6 +20,7 @@ use biome_service::configuration::{LoadedConfiguration, load_configuration};
 use biome_service::settings::Settings;
 use biome_service::workspace::{RageEntry, RageParams, client};
 use camino::Utf8PathBuf;
+use std::collections::BTreeSet;
 use std::{env, io, ops::Deref};
 use terminal_size::terminal_size;
 use tokio::runtime::Runtime;
@@ -24,6 +28,7 @@ use tokio::runtime::Runtime;
 /// Handler for the `rage` command
 pub(crate) fn rage(
     session: CliSession,
+    cli_options: &CliOptions,
     daemon_logs: bool,
     formatter: bool,
     linter: bool,
@@ -49,7 +54,7 @@ pub(crate) fn rage(
     {EnvVarOs("JS_RUNTIME_NAME")}
     {EnvVarOs("NODE_PACKAGE_MANAGER")}
 
-    {RageConfiguration { fs: session.app.workspace.fs(), formatter, linter }}
+    {RageConfiguration { fs: session.app.workspace.fs(), formatter, linter, cli_options }}
     {WorkspaceRage(session.app.workspace.deref())}
     ));
 
@@ -196,13 +201,18 @@ struct RageConfiguration<'a> {
     fs: &'a dyn FsWithResolverProxy,
     formatter: bool,
     linter: bool,
+    cli_options: &'a CliOptions,
 }
 
 impl Display for RageConfiguration<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         Section("Biome Configuration").fmt(fmt)?;
 
-        match load_configuration(self.fs, ConfigurationPathHint::default()) {
+        let working_dir = self.fs.working_directory().unwrap_or_default();
+        let path_hint = self
+            .cli_options
+            .as_configuration_path_hint(working_dir.as_path());
+        match load_configuration(self.fs, path_hint) {
             Ok(loaded_configuration) => {
                 if loaded_configuration.directory_path.is_none() {
                     markup! {
@@ -362,6 +372,10 @@ impl Display for RageConfiguration<'_> {
                     // Print linter configuration if --linter option is true
                     if self.linter {
                         let linter_configuration = configuration.get_linter_rules();
+                        let enabled_rules = linter_enabled_rules(
+                            &linter_configuration,
+                            configuration.get_linter_domains(),
+                        );
 
                         let javascript_linter = configuration.get_javascript_linter_configuration();
                         let json_linter = configuration.get_json_linter_configuration();
@@ -374,7 +388,7 @@ impl Display for RageConfiguration<'_> {
                             {KeyValuePair::new("CSS enabled", markup!({DisplayOption(css_linter.enabled)}))}
                             {KeyValuePair::new("GraphQL enabled", markup!({DisplayOption(graphql_linter.enabled)}))}
                             {KeyValuePair::new("Recommended", markup!({DisplayOption(linter_configuration.recommended)}))}
-                            {RageConfigurationLintRules("Enabled rules", linter_configuration)}
+                            {RageConfigurationLintRules("Enabled rules", enabled_rules)}
                         ).fmt(fmt)?;
                     }
                 }
@@ -390,7 +404,40 @@ impl Display for RageConfiguration<'_> {
     }
 }
 
-struct RageConfigurationLintRules<'a>(&'a str, Rules);
+fn linter_enabled_rules(
+    rules: &Rules,
+    domains: Option<&biome_configuration::analyzer::RuleDomains>,
+) -> BTreeSet<RuleFilter<'static>> {
+    let mut enabled_rules = rules
+        .as_enabled_rules()
+        .into_iter()
+        .collect::<BTreeSet<_>>();
+
+    if let Some(domains) = domains {
+        let recommended_rules = Rules::default().as_enabled_rules();
+        for (domain, domain_value) in domains.iter() {
+            let domain_selector = DomainSelector(domain.as_str());
+            let domain_rules = domain_selector
+                .as_rule_filters()
+                .into_iter()
+                .filter(|rule| rule.group() != "nursery");
+            match domain_value {
+                RuleDomainValue::All => enabled_rules.extend(domain_rules),
+                RuleDomainValue::None => {
+                    for rule in domain_rules {
+                        enabled_rules.remove(&rule);
+                    }
+                }
+                RuleDomainValue::Recommended => enabled_rules
+                    .extend(domain_rules.filter(|rule| recommended_rules.contains(rule))),
+            }
+        }
+    }
+
+    enabled_rules
+}
+
+struct RageConfigurationLintRules<'a>(&'a str, BTreeSet<RuleFilter<'static>>);
 
 impl Display for RageConfigurationLintRules<'_> {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> io::Result<()> {
@@ -399,9 +446,7 @@ impl Display for RageConfigurationLintRules<'_> {
         let padding_rules = Padding::new(4);
         fmt.write_markup(markup! {{padding}{rules_str}":"})?;
         fmt.write_markup(markup! {{SOFT_LINE}})?;
-        let rules = self.1.as_enabled_rules();
-        let rules = rules.iter().collect::<std::collections::BTreeSet<_>>();
-        for rule in rules {
+        for rule in &self.1 {
             fmt.write_markup(markup! {{padding_rules}{rule}})?;
             fmt.write_markup(markup! {{SOFT_LINE}})?;
         }

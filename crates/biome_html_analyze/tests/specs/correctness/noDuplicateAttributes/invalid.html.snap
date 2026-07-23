@@ -1,0 +1,129 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+
+<div foo="a" foo="b"></div>
+
+<div Foo Foo></div>
+
+<!-- case-sensitive: these should NOT be considered duplicates -->
+<div foo Foo></div>
+
+<div class class></div>
+<div style style></div>
+
+
+```
+
+# Diagnostics
+```
+invalid.html:3:14 lint/correctness/noDuplicateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate attribute 'foo'.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ <div foo="a" foo="b"></div>
+      │              ^^^^^^^
+    4 │ 
+    5 │ <div Foo Foo></div>
+  
+  i This is the first occurrence of the attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ <div foo="a" foo="b"></div>
+      │      ^^^
+    4 │ 
+    5 │ <div Foo Foo></div>
+  
+  i Each attribute name must be unique within a single element. Duplicate attributes are invalid and can lead to unexpected browser behavior.
+  
+  i Consider removing or renaming the duplicate 'foo' attribute.
+  
+
+```
+
+```
+invalid.html:5:10 lint/correctness/noDuplicateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate attribute 'Foo'.
+  
+    3 │ <div foo="a" foo="b"></div>
+    4 │ 
+  > 5 │ <div Foo Foo></div>
+      │          ^^^
+    6 │ 
+    7 │ <!-- case-sensitive: these should NOT be considered duplicates -->
+  
+  i This is the first occurrence of the attribute.
+  
+    3 │ <div foo="a" foo="b"></div>
+    4 │ 
+  > 5 │ <div Foo Foo></div>
+      │      ^^^
+    6 │ 
+    7 │ <!-- case-sensitive: these should NOT be considered duplicates -->
+  
+  i Each attribute name must be unique within a single element. Duplicate attributes are invalid and can lead to unexpected browser behavior.
+  
+  i Consider removing or renaming the duplicate 'Foo' attribute.
+  
+
+```
+
+```
+invalid.html:10:12 lint/correctness/noDuplicateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate attribute 'class'.
+  
+     8 │ <div foo Foo></div>
+     9 │ 
+  > 10 │ <div class class></div>
+       │            ^^^^^
+    11 │ <div style style></div>
+    12 │ 
+  
+  i This is the first occurrence of the attribute.
+  
+     8 │ <div foo Foo></div>
+     9 │ 
+  > 10 │ <div class class></div>
+       │      ^^^^^
+    11 │ <div style style></div>
+    12 │ 
+  
+  i Each attribute name must be unique within a single element. Duplicate attributes are invalid and can lead to unexpected browser behavior.
+  
+  i Consider removing or renaming the duplicate 'class' attribute.
+  
+
+```
+
+```
+invalid.html:11:12 lint/correctness/noDuplicateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate attribute 'style'.
+  
+    10 │ <div class class></div>
+  > 11 │ <div style style></div>
+       │            ^^^^^
+    12 │ 
+  
+  i This is the first occurrence of the attribute.
+  
+    10 │ <div class class></div>
+  > 11 │ <div style style></div>
+       │      ^^^^^
+    12 │ 
+  
+  i Each attribute name must be unique within a single element. Duplicate attributes are invalid and can lead to unexpected browser behavior.
+  
+  i Consider removing or renaming the duplicate 'style' attribute.
+  
+
+```

@@ -1,10 +1,14 @@
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::scss::{
-    add_scss_variable_member_function_name_diagnostic, is_at_scss_interpolated_function_or_value,
-    is_at_scss_interpolated_string, is_at_scss_module_member_access,
-    is_at_scss_parent_selector_value, is_at_scss_variable, parse_scss_function_call_from_name,
+    add_scss_variable_member_function_name_diagnostic, is_at_scss_interpolated_dashed_identifier,
+    is_at_scss_interpolated_function_or_value, is_at_scss_interpolated_string,
+    is_at_scss_module_member_access, is_at_scss_parent_selector_value,
+    is_at_scss_suffixed_interpolated_value, is_at_scss_variable,
+    parse_scss_function_call_from_name, parse_scss_interpolated_dashed_identifier,
     parse_scss_interpolated_function_or_value, parse_scss_interpolated_string,
-    parse_scss_module_member_access, parse_scss_parent_selector_value, parse_scss_variable,
+    parse_scss_module_member_access, parse_scss_parent_selector_value,
+    parse_scss_suffixed_interpolated_value_until, parse_scss_variable,
 };
 use crate::syntax::{FunctionCallContext, ValueParsingContext};
 use biome_css_syntax::T;
@@ -16,6 +20,8 @@ use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 pub(crate) fn is_at_any_scss_value(p: &mut CssParser) -> bool {
     is_at_scss_variable(p)
         || is_at_scss_module_member_access(p)
+        || is_at_scss_suffixed_interpolated_value(p)
+        || is_at_scss_interpolated_dashed_identifier(p)
         || is_at_scss_interpolated_function_or_value(p)
         || is_at_scss_parent_selector_value(p)
         || is_at_scss_interpolated_string(p)
@@ -25,13 +31,14 @@ pub(crate) fn is_at_any_scss_value(p: &mut CssParser) -> bool {
 ///
 /// This covers the SCSS-specific value families that do not belong to the
 /// shared CSS value parser, including variables, module-member access values,
-/// parent selectors, interpolated strings, and interpolation-led
-/// function-or-value forms.
+/// interpolated dashed identifiers, parent selectors, interpolated strings,
+/// and interpolation-led function-or-value forms.
 ///
 /// Examples:
 /// ```scss
 /// $value
 /// module.$value
+/// --#{$name}
 /// &-suffix
 /// "#{$name}"
 /// foo#{1 + 1}(arg)
@@ -50,7 +57,11 @@ pub(crate) fn parse_any_scss_value_with_context(
         return Absent;
     }
 
-    if is_at_scss_variable(p) {
+    if is_at_scss_suffixed_interpolated_value(p) {
+        parse_scss_suffixed_interpolated_value_until(p, |p| {
+            p.has_preceding_whitespace() || p.has_preceding_line_break()
+        })
+    } else if is_at_scss_variable(p) {
         parse_scss_variable(p)
     } else if is_at_scss_module_member_access(p) {
         let has_dollar_member = p.nth_at(2, T![$]);
@@ -70,12 +81,14 @@ pub(crate) fn parse_any_scss_value_with_context(
         } else {
             Present(name)
         }
+    } else if is_at_scss_interpolated_dashed_identifier(p) {
+        parse_scss_interpolated_dashed_identifier(p)
     } else if is_at_scss_interpolated_function_or_value(p) {
         parse_scss_interpolated_function_or_value(p)
     } else if is_at_scss_parent_selector_value(p) {
         parse_scss_parent_selector_value(p)
     } else {
-        parse_scss_interpolated_string(p)
+        parse_scss_interpolated_string(p, CssLexContext::Regular)
     }
 }
 

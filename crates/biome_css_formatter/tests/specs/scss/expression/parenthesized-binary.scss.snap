@@ -6,7 +6,24 @@ info: scss/expression/parenthesized-binary.scss
 # Input
 
 ```scss
-$value:(1 > $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);
+// Biome intentionally normalizes spaces around SCSS binary operators.
+$parenthesized:(1 > $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);
+
+$parenthesized-tight-after:(1 >$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);
+
+$parenthesized-tight-before:(1> $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);
+
+$parenthesized-tight-both:(1>$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);
+
+$parenthesized-left-tight-both:(($short)>$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);
+
+$parenthesized-equality-tight-after:(1 ==$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);
+
+$parenthesized-greater-equal-tight-after:(1 >=$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);
+
+$parenthesized-plus-tight-after:(1 +$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);
+
+$right-parenthesized:$short > ($very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);
 
 ```
 
@@ -14,14 +31,63 @@ $value:(1 > $very-very-very-very-very-very-very-very-very-very-very-very-very-ve
 # Formatted
 
 ```scss
-$value: (
+// Biome intentionally normalizes spaces around SCSS binary operators.
+$parenthesized: (
 	1 >
 		$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
 );
+
+$parenthesized-tight-after: (
+	1 >
+		$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+);
+
+$parenthesized-tight-before: (
+	1 >
+		$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+);
+
+$parenthesized-tight-both: (
+	1 >
+		$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+);
+
+$parenthesized-left-tight-both: (
+	($short) >
+		$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+);
+
+$parenthesized-equality-tight-after: (
+	1 ==
+		$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+);
+
+$parenthesized-greater-equal-tight-after: (
+	1 >=
+		$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+);
+
+$parenthesized-plus-tight-after: (
+	1 +
+		$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+);
+
+$right-parenthesized: $short >
+	(
+		$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+	);
 
 ```
 
 # Lines exceeding max width of 80 characters
 ```
-    3: 		$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+    4: 		$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+    9: 		$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   14: 		$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   19: 		$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   24: 		$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   29: 		$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   34: 		$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   39: 		$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   44: 		$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
 ```

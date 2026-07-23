@@ -100,7 +100,7 @@ declare_lint_rule! {
         version: "2.4.13",
         name: "useReactNativePlatformComponents",
         language: "js",
-        sources: &[RuleSource::EslintReactNative("split-platform-components").inspired()],
+        sources: &[RuleSource::EslintReactNativeIntellicode("split-platform-components").inspired()],
         domains: &[RuleDomain::ReactNative],
         recommended: true,
         severity: Severity::Error,

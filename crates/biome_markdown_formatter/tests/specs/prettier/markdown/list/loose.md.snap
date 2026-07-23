@@ -26,17 +26,17 @@ info: markdown/list/loose.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,11 @@
+@@ -1,11 +1,8 @@
  - 123
-+
+-
    - abc
  
  - 456
-+
+-
    - def
  
  - 789
-+
+-
    - ghi
 ```
 
@@ -44,14 +44,11 @@ info: markdown/list/loose.md
 
 ```md
 - 123
-
   - abc
 
 - 456
-
   - def
 
 - 789
-
   - ghi
 ```

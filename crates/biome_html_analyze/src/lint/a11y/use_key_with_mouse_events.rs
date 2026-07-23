@@ -3,7 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::use_key_with_mouse_events::UseKeyWithMouseEventsOptions;
 
@@ -51,7 +52,7 @@ declare_lint_rule! {
     /// - [WCAG 2.1.1](https://www.w3.org/WAI/WCAG21/Understanding/keyboard)
     ///
     pub UseKeyWithMouseEvents {
-        version: "next",
+        version: "2.5.0",
         name: "useKeyWithMouseEvents",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("mouse-events-have-key-events").inspired()],
@@ -85,14 +86,20 @@ impl Rule for UseKeyWithMouseEvents {
             }
         }
 
-        if node.find_attribute_by_name("onmouseover").is_some()
-            && node.find_attribute_by_name("onfocus").is_none()
+        if node
+            .find_attribute_or_vue_event_binding("onmouseover")
+            .is_some()
+            && node
+                .find_attribute_or_vue_event_binding("onfocus")
+                .is_none()
         {
             return Some(UseKeyWithMouseEventsState::MissingOnFocus);
         }
 
-        if node.find_attribute_by_name("onmouseout").is_some()
-            && node.find_attribute_by_name("onblur").is_none()
+        if node
+            .find_attribute_or_vue_event_binding("onmouseout")
+            .is_some()
+            && node.find_attribute_or_vue_event_binding("onblur").is_none()
         {
             return Some(UseKeyWithMouseEventsState::MissingOnBlur);
         }

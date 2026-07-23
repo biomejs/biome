@@ -46,6 +46,7 @@ This applies to all agents, all skills, and all contributions. Keep code and doc
 | **[biome-developer](./biome-developer/SKILL.md)** | General development best practices, common gotchas, Biome-specific patterns | Any agent |
 | **[testing-codegen](./testing-codegen/SKILL.md)** | Run tests, manage snapshots, generate code | Any agent |
 | **[changeset](./changeset/SKILL.md)** | Create and write proper changesets for the CHANGELOG | Any agent |
+| **[doc-comments](./doc-comments/SKILL.md)** | Write comments and rustdoc addressed to developers, not end users | Any agent |
 | **[pull-request](./pull-request/SKILL.md)** | Create PRs with proper titles, descriptions, and branch targeting | Any agent |
 | **[type-inference](./type-inference/SKILL.md)** | Work with module graph and type inference system | `biome-lint-engineer` |
 | **[diagnostics-development](./diagnostics-development/SKILL.md)** | Create user-friendly error messages and diagnostics | Any agent |

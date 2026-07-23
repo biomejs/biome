@@ -1,9 +1,12 @@
+// Biome intentionally normalizes spaces around SCSS binary operators.
 $a:10;
 $b:20;
 
 $expr-1:10 +#{$a};
 $expr-2:#{$a}* #{$b};
 $expr-3:10*#{10};
+$expr-4:#{$a}/#{$b}/#{$c};
+$expr-5:-#{$a}/#{$b};
 
 foo{
   plus:10+#{10};

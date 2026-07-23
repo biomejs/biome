@@ -17,7 +17,7 @@ impl FormatNodeRule<CssScopeRangeInterval> for FormatCssScopeRangeInterval {
             [
                 start.format(),
                 space(),
-                to_token.format(),
+                to_token.format()?.with_text_case(CssCase::Preserve),
                 space(),
                 end.format()
             ]

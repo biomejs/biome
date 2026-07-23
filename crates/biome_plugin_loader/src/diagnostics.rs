@@ -82,6 +82,19 @@ impl From<SyntaxError> for PluginDiagnostic {
 }
 
 impl PluginDiagnostic {
+    pub fn cant_read_plugin_file(path: Utf8PathBuf, source: FileSystemDiagnostic) -> Self {
+        Self::InvalidManifest(InvalidManifest {
+            message: MessageAndDescription::from(
+                markup! {
+                    "Failed to read plugin file "
+                    <Emphasis>{path.to_string()}</Emphasis>
+                }
+                .to_owned(),
+            ),
+            source: Some(Error::from(source)),
+        })
+    }
+
     pub fn cant_resolve(path: Utf8PathBuf, kind: Option<ResolveError>) -> Self {
         Self::CantResolve(CantResolve {
             message: MessageAndDescription::from(

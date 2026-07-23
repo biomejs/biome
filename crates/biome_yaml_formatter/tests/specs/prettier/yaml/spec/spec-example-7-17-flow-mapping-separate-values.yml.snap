@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/spec-example-7-17-flow-mapping-separate-values.yml
 ---
+
 # Input
 
 ```yml
@@ -28,7 +29,6 @@ omitted value:,
 +omitted value:,
 +: omitted key,
 +}
-\ No newline at end of file
 ```
 
 # Output
@@ -39,4 +39,5 @@ unquoted : "separate",
 http://foo.com,
 omitted value:,
 : omitted key,
-}```
+}
+```

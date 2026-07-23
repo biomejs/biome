@@ -29,7 +29,23 @@ expression: redactor(content)
           }
         }
       },
-      "message": "This import is unused."
+      "message": "This import is unused.",
+      "severity": "WARNING",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 21,
+              "line": 1
+            },
+            "start": {
+              "column": 1,
+              "line": 1
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {
@@ -49,7 +65,23 @@ expression: redactor(content)
           }
         }
       },
-      "message": "Several of these imports are unused."
+      "message": "Several of these imports are unused.",
+      "severity": "WARNING",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 13,
+              "line": 2
+            },
+            "start": {
+              "column": 10,
+              "line": 2
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {
@@ -69,7 +101,23 @@ expression: redactor(content)
           }
         }
       },
-      "message": "This variable f is unused."
+      "message": "This variable f is unused.",
+      "severity": "WARNING",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 6,
+              "line": 8
+            },
+            "start": {
+              "column": 5,
+              "line": 8
+            }
+          },
+          "text": "_f"
+        }
+      ]
     },
     {
       "code": {
@@ -89,7 +137,23 @@ expression: redactor(content)
           }
         }
       },
-      "message": "This variable f is unused."
+      "message": "This variable f is unused.",
+      "severity": "WARNING",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 8,
+              "line": 9
+            },
+            "start": {
+              "column": 7,
+              "line": 9
+            }
+          },
+          "text": "_f"
+        }
+      ]
     },
     {
       "code": {
@@ -109,7 +173,23 @@ expression: redactor(content)
           }
         }
       },
-      "message": "This import is unused."
+      "message": "This import is unused.",
+      "severity": "WARNING",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 21,
+              "line": 1
+            },
+            "start": {
+              "column": 1,
+              "line": 1
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {
@@ -129,7 +209,23 @@ expression: redactor(content)
           }
         }
       },
-      "message": "Several of these imports are unused."
+      "message": "Several of these imports are unused.",
+      "severity": "WARNING",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 13,
+              "line": 2
+            },
+            "start": {
+              "column": 10,
+              "line": 2
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {
@@ -149,7 +245,23 @@ expression: redactor(content)
           }
         }
       },
-      "message": "This variable f is unused."
+      "message": "This variable f is unused.",
+      "severity": "WARNING",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 6,
+              "line": 8
+            },
+            "start": {
+              "column": 5,
+              "line": 8
+            }
+          },
+          "text": "_f"
+        }
+      ]
     },
     {
       "code": {
@@ -169,7 +281,23 @@ expression: redactor(content)
           }
         }
       },
-      "message": "This variable f is unused."
+      "message": "This variable f is unused.",
+      "severity": "WARNING",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 8,
+              "line": 9
+            },
+            "start": {
+              "column": 7,
+              "line": 9
+            }
+          },
+          "text": "_f"
+        }
+      ]
     },
     {
       "code": {
@@ -189,7 +317,23 @@ expression: redactor(content)
           }
         }
       },
-      "message": "Sort these imports."
+      "message": "Sort these imports.",
+      "severity": "ERROR",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 32,
+              "line": 2
+            },
+            "start": {
+              "column": 10,
+              "line": 1
+            }
+          },
+          "text": "a, b , z } from \"lodash\"\nimport { z} from \"z"
+        }
+      ]
     },
     {
       "code": {
@@ -209,7 +353,23 @@ expression: redactor(content)
           }
         }
       },
-      "message": "Using == may be unsafe if you are relying on type coercion."
+      "message": "Using == may be unsafe if you are relying on type coercion.",
+      "severity": "ERROR",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 5,
+              "line": 4
+            },
+            "start": {
+              "column": 5,
+              "line": 4
+            }
+          },
+          "text": "="
+        }
+      ]
     },
     {
       "code": {
@@ -229,7 +389,23 @@ expression: redactor(content)
           }
         }
       },
-      "message": "This is an unexpected use of the debugger statement."
+      "message": "This is an unexpected use of the debugger statement.",
+      "severity": "ERROR",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 9,
+              "line": 6
+            },
+            "start": {
+              "column": 6,
+              "line": 4
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {
@@ -249,7 +425,8 @@ expression: redactor(content)
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -269,7 +446,8 @@ expression: redactor(content)
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -290,21 +468,7 @@ expression: redactor(content)
         }
       },
       "message": "'z' is redeclared in the same scope.",
-      "suggestions": [
-        {
-          "range": {
-            "end": {
-              "column": 11,
-              "line": 1
-            },
-            "start": {
-              "column": 10,
-              "line": 1
-            }
-          },
-          "text": "Remove the duplicate declaration or rename one of the variables."
-        }
-      ]
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -325,27 +489,14 @@ expression: redactor(content)
         }
       },
       "message": "'f' is redeclared in the same scope.",
-      "suggestions": [
-        {
-          "range": {
-            "end": {
-              "column": 6,
-              "line": 8
-            },
-            "start": {
-              "column": 5,
-              "line": 8
-            }
-          },
-          "text": "Remove the duplicate declaration or rename one of the variables."
-        }
-      ]
+      "severity": "ERROR"
     },
     {
       "code": {
         "value": "format"
       },
-      "message": "Formatter would have printed the following content:"
+      "message": "Formatter would have printed the following content:",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -365,7 +516,23 @@ expression: redactor(content)
           }
         }
       },
-      "message": "Sort these imports."
+      "message": "Sort these imports.",
+      "severity": "ERROR",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 32,
+              "line": 2
+            },
+            "start": {
+              "column": 10,
+              "line": 1
+            }
+          },
+          "text": "a, b , z } from \"lodash\"\nimport { z} from \"z"
+        }
+      ]
     },
     {
       "code": {
@@ -385,7 +552,23 @@ expression: redactor(content)
           }
         }
       },
-      "message": "Using == may be unsafe if you are relying on type coercion."
+      "message": "Using == may be unsafe if you are relying on type coercion.",
+      "severity": "ERROR",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 5,
+              "line": 4
+            },
+            "start": {
+              "column": 5,
+              "line": 4
+            }
+          },
+          "text": "="
+        }
+      ]
     },
     {
       "code": {
@@ -405,7 +588,23 @@ expression: redactor(content)
           }
         }
       },
-      "message": "This is an unexpected use of the debugger statement."
+      "message": "This is an unexpected use of the debugger statement.",
+      "severity": "ERROR",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 9,
+              "line": 6
+            },
+            "start": {
+              "column": 6,
+              "line": 4
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {
@@ -425,7 +624,8 @@ expression: redactor(content)
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -445,7 +645,8 @@ expression: redactor(content)
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -466,21 +667,7 @@ expression: redactor(content)
         }
       },
       "message": "'z' is redeclared in the same scope.",
-      "suggestions": [
-        {
-          "range": {
-            "end": {
-              "column": 11,
-              "line": 1
-            },
-            "start": {
-              "column": 10,
-              "line": 1
-            }
-          },
-          "text": "Remove the duplicate declaration or rename one of the variables."
-        }
-      ]
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -501,27 +688,14 @@ expression: redactor(content)
         }
       },
       "message": "'f' is redeclared in the same scope.",
-      "suggestions": [
-        {
-          "range": {
-            "end": {
-              "column": 6,
-              "line": 8
-            },
-            "start": {
-              "column": 5,
-              "line": 8
-            }
-          },
-          "text": "Remove the duplicate declaration or rename one of the variables."
-        }
-      ]
+      "severity": "ERROR"
     },
     {
       "code": {
         "value": "format"
       },
-      "message": "Formatter would have printed the following content:"
+      "message": "Formatter would have printed the following content:",
+      "severity": "ERROR"
     }
   ]
 }

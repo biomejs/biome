@@ -10,7 +10,7 @@ use biome_js_factory::make::{
 };
 use biome_js_syntax::{
     AnyJsExpression, AnyJsMemberExpression, AnyJsTemplateElement, JsCallExpression,
-    JsTemplateExpression, T, static_value::StaticValue,
+    JsTemplateExpression, T, global_identifier, static_value::StaticValue,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TextRange};
 use biome_rule_options::use_dom_query_selector::UseDomQuerySelectorOptions;
@@ -50,6 +50,31 @@ declare_lint_rule! {
     ///
     /// ```js
     /// document.querySelectorAll(".foo.bar");
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### `ignore`
+    ///
+    /// Allow specific variables to use the older DOM query APIs.
+    /// This is useful if your application has APIs that expose methods with
+    /// the same names as DOM query APIs.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "ignore": ["store", "customApi"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// These are ignored, so they are not flagged.
+    ///
+    /// ```js,use_options
+    /// store.getElementById("COVER_IMAGE");
+    /// customApi.getElementsByClassName("item");
     /// ```
     ///
     pub UseDomQuerySelector {
@@ -96,7 +121,8 @@ impl Rule for UseDomQuerySelector {
         let method = QueryMethod::from_name(method_name.text())?;
 
         let argument = first_and_only_argument(call)?;
-        if is_definitely_not_dom_node(&member.object().ok()?.omit_parentheses()) {
+        let object = member.object().ok()?.omit_parentheses();
+        if is_ignored(&object, ctx.options()) || is_definitely_not_dom_node(&object) {
             return None;
         }
 
@@ -251,6 +277,21 @@ fn is_definitely_not_dom_node(expr: &AnyJsExpression) -> bool {
     ) || expr
         .as_static_value()
         .is_some_and(|value| matches!(value, StaticValue::Undefined(_)))
+}
+
+fn is_ignored(expr: &AnyJsExpression, options: &UseDomQuerySelectorOptions) -> bool {
+    let Some(ignore) = &options.ignore else {
+        return false;
+    };
+
+    let Some((_, name)) = expr
+        .as_any_global_identifier_expression()
+        .and_then(|expr| global_identifier(&expr))
+    else {
+        return false;
+    };
+
+    ignore.iter().any(|ignored| ignored.as_ref() == name.text())
 }
 
 /// Returns `true` when the query argument can be safely converted into a CSS

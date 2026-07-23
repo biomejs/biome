@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_js_syntax::JsFileSource;
+use biome_languages::JsFileSource;
 use biome_rowan::{TextRange, TextSize};
 use enumflags2::{BitFlags, bitflags, make_bitflags};
 use indexmap::IndexMap;

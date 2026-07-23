@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/block-literal/newline.yml
 ---
+
 # Input
 
 ```yml
@@ -22,13 +23,13 @@ info: yaml/block-literal/newline.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -5,4 +5,4 @@
+@@ -3,6 +3,4 @@
+   456
+   789
  
- 
- 
--- 0
-+- 0
-\ No newline at end of file
+-
+-
+ - 0
 ```
 
 # Output
@@ -39,6 +40,5 @@ info: yaml/block-literal/newline.yml
   456
   789
 
-
-
-- 0```
+- 0
+```

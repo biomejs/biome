@@ -3,7 +3,8 @@ use crate::{
     grit_tree::GritTargetTree,
 };
 use biome_css_parser::{CssParserOptions, parse_css};
-use biome_css_syntax::{CssFileSource, CssLanguage};
+use biome_css_syntax::CssLanguage;
+use biome_languages::CssFileSource;
 use biome_parser::AnyParse;
 use camino::Utf8Path;
 use grit_util::{AnalysisLogs, FileOrigin, Parser, SnippetTree};

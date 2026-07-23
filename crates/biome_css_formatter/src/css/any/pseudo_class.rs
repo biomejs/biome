@@ -26,6 +26,7 @@ impl FormatRule<AnyCssPseudoClass> for FormatAnyCssPseudoClass {
             AnyCssPseudoClass::CssPseudoClassFunctionSelectorList(node) => node.format().fmt(f),
             AnyCssPseudoClass::CssPseudoClassFunctionValueList(node) => node.format().fmt(f),
             AnyCssPseudoClass::CssPseudoClassIdentifier(node) => node.format().fmt(f),
+            AnyCssPseudoClass::ScssInterpolatedPseudoClassFunction(node) => node.format().fmt(f),
         }
     }
 }

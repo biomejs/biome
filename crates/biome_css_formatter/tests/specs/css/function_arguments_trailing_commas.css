@@ -1,4 +1,7 @@
 a {
+  custom-property-empty-fallback: var(--name,);
+  custom-property-with-fallback: var(--name, red,);
+
   transition-timing-function: func1(
       func2(
           func3(

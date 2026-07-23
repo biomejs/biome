@@ -19,7 +19,7 @@ use biome_rowan::{AnySyntaxNode, AstNode, RawSyntaxKind, SyntaxKind, TextRange};
 use camino::{Utf8Path, Utf8PathBuf};
 use grit_pattern_matcher::{binding::Binding, pattern::ResolvedPattern};
 use grit_util::{AnalysisLogs, error::GritPatternError};
-use std::{borrow::Cow, fmt::Debug, str::FromStr, sync::Arc};
+use std::{borrow::Cow, fmt::Debug, str::FromStr};
 
 /// Definition of an analyzer plugin backed by a GritQL query.
 #[derive(Debug)]
@@ -38,7 +38,9 @@ impl AnalyzerGritPlugin {
         path: &Utf8Path,
         includes: Option<&[NormalizedGlob]>,
     ) -> Result<Self, PluginDiagnostic> {
-        let source = fs.read_file_from_path(path)?;
+        let source = fs.read_file_from_path(path).map_err(|source| {
+            PluginDiagnostic::cant_read_plugin_file(path.to_path_buf(), source)
+        })?;
         let options = CompilePatternOptions::default()
             .with_extra_built_ins(vec![
                 BuiltInFunction::new(
@@ -59,6 +61,10 @@ impl AnalyzerGritPlugin {
 }
 
 impl AnalyzerPlugin for AnalyzerGritPlugin {
+    fn name(&self) -> &str {
+        self.grit_query.name.as_deref().unwrap_or("anonymous")
+    }
+
     fn language(&self) -> PluginTargetLanguage {
         match &self.grit_query.language {
             GritTargetLanguage::JsTargetLanguage(_) => PluginTargetLanguage::JavaScript,
@@ -87,8 +93,8 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
         file_matches_includes(self.includes.as_deref(), path)
     }
 
-    fn evaluate(&self, node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> PluginEvalResult {
-        let name: &str = self.grit_query.name.as_deref().unwrap_or("anonymous");
+    fn evaluate(&self, node: AnySyntaxNode, path: Utf8PathBuf) -> PluginEvalResult {
+        let name = self.name();
 
         let (root, source_range, original_text) = match self.language() {
             PluginTargetLanguage::JavaScript => node
@@ -296,6 +302,12 @@ mod tests {
         let fs = MemoryFileSystem::default();
         fs.insert("/test.grit".into(), r#"`hello`"#);
         AnalyzerGritPlugin::load(&fs, Utf8Path::new("/test.grit"), includes).unwrap()
+    }
+
+    #[test]
+    fn name_is_derived_from_the_pattern_file() {
+        let plugin = load_test_plugin(None);
+        assert_eq!(plugin.name(), "test");
     }
 
     #[test]

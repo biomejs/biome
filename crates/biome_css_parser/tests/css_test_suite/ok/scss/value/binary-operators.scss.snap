@@ -19,29 +19,36 @@ div {
 }
 
 .division {
-  $var: a / b; // division
-  decl: a / b; // not division
-  with-parens: (a / b); // division
+  $var: a / b;
+  decl: a / b;
+  with-parens: (a / b);
 }
 
-/* TODO(scss at-rules):
 @function f() {
-  @return a / b; // division
+  @return a / b;
+  @return 10 / 2;
 }
-@debug 15px / 30px; // not division
-@debug 1 * 2 / 3; // division
-@debug (1 + 2) / 3; // division
-@debug fn() / 3; // division
-@debug $var / 3; // division
-@debug mod.$var / 3; // division
-*/
+
+@debug 15px / 30px;
+@debug 10 / 2;
+@debug 10/2;
+@debug (10 / 2);
+@debug (bold 10 / 2 sans-serif);
+@debug (10 / 2 bold);
+@debug (10 / 2, bold);
+@debug (a: b, c: 10 / 2);
+@debug (10 / 2 bold: b, c: 10 / 2);
+@debug 10 / 2 + 1;
+@debug 10/2+1;
+@debug 1 * 2 / 3;
+@debug (1 + 2) / 3;
+@debug fn() / 3;
+@debug $var / 3;
+@debug mod.$var / 3;
 
 a {
   prop: a,-1*b;
 }
-
-
-
 
 ```
 
@@ -306,24 +313,24 @@ CssRoot {
                             ],
                         },
                         modifiers: ScssVariableModifierList [],
-                        semicolon_token: SEMICOLON@169..182 ";" [] [Whitespace(" "), Comments("// division")],
+                        semicolon_token: SEMICOLON@169..170 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@182..189 "decl" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@170..177 "decl" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@189..191 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@177..179 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssIdentifier {
-                                                value_token: IDENT@191..193 "a" [] [Whitespace(" ")],
+                                                value_token: IDENT@179..181 "a" [] [Whitespace(" ")],
                                             },
-                                            operator: SLASH@193..195 "/" [] [Whitespace(" ")],
+                                            operator: SLASH@181..183 "/" [] [Whitespace(" ")],
                                             right: CssIdentifier {
-                                                value_token: IDENT@195..196 "b" [] [],
+                                                value_token: IDENT@183..184 "b" [] [],
                                             },
                                         },
                                     ],
@@ -331,43 +338,616 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@196..213 ";" [] [Whitespace(" "), Comments("// not division")],
+                        semicolon_token: SEMICOLON@184..185 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@213..227 "with-parens" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@185..199 "with-parens" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@227..229 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@199..201 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssParenthesizedExpression {
-                                            l_paren_token: L_PAREN@229..230 "(" [] [],
+                                            l_paren_token: L_PAREN@201..202 "(" [] [],
                                             expression: ScssExpression {
                                                 items: ScssExpressionItemList [
                                                     ScssBinaryExpression {
                                                         left: CssIdentifier {
-                                                            value_token: IDENT@230..232 "a" [] [Whitespace(" ")],
+                                                            value_token: IDENT@202..204 "a" [] [Whitespace(" ")],
                                                         },
-                                                        operator: SLASH@232..234 "/" [] [Whitespace(" ")],
+                                                        operator: SLASH@204..206 "/" [] [Whitespace(" ")],
                                                         right: CssIdentifier {
-                                                            value_token: IDENT@234..235 "b" [] [],
+                                                            value_token: IDENT@206..207 "b" [] [],
                                                         },
                                                     },
                                                 ],
                                             },
-                                            r_paren_token: R_PAREN@235..236 ")" [] [],
+                                            r_paren_token: R_PAREN@207..208 ")" [] [],
                                         },
                                     ],
                                 },
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@236..249 ";" [] [Whitespace(" "), Comments("// division")],
+                        semicolon_token: SEMICOLON@208..209 ";" [] [],
                     },
                 ],
-                r_curly_token: R_CURLY@249..251 "}" [Newline("\n")] [],
+                r_curly_token: R_CURLY@209..211 "}" [Newline("\n")] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@211..214 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssFunctionAtRule {
+                function_token: FUNCTION_KW@214..223 "function" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@223..224 "f" [] [],
+                },
+                parameters: ScssParameterList {
+                    l_paren_token: L_PAREN@224..225 "(" [] [],
+                    items: ScssParameterItemList [],
+                    r_paren_token: R_PAREN@225..227 ")" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@227..228 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssAtRule {
+                            at_token: AT@228..232 "@" [Newline("\n"), Whitespace("  ")] [],
+                            rule: ScssReturnAtRule {
+                                return_token: RETURN_KW@232..239 "return" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssBinaryExpression {
+                                            left: CssIdentifier {
+                                                value_token: IDENT@239..241 "a" [] [Whitespace(" ")],
+                                            },
+                                            operator: SLASH@241..243 "/" [] [Whitespace(" ")],
+                                            right: CssIdentifier {
+                                                value_token: IDENT@243..244 "b" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                semicolon_token: SEMICOLON@244..245 ";" [] [],
+                            },
+                        },
+                        CssAtRule {
+                            at_token: AT@245..249 "@" [Newline("\n"), Whitespace("  ")] [],
+                            rule: ScssReturnAtRule {
+                                return_token: RETURN_KW@249..256 "return" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssBinaryExpression {
+                                            left: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@256..259 "10" [] [Whitespace(" ")],
+                                            },
+                                            operator: SLASH@259..261 "/" [] [Whitespace(" ")],
+                                            right: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@261..262 "2" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                semicolon_token: SEMICOLON@262..263 ";" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@263..265 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@265..268 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssDebugAtRule {
+                debug_token: DEBUG_KW@268..274 "debug" [] [Whitespace(" ")],
+                value: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssBinaryExpression {
+                            left: CssRegularDimension {
+                                value_token: CSS_NUMBER_LITERAL@274..276 "15" [] [],
+                                unit_token: IDENT@276..279 "px" [] [Whitespace(" ")],
+                            },
+                            operator: SLASH@279..281 "/" [] [Whitespace(" ")],
+                            right: CssRegularDimension {
+                                value_token: CSS_NUMBER_LITERAL@281..283 "30" [] [],
+                                unit_token: IDENT@283..285 "px" [] [],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@285..286 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@286..288 "@" [Newline("\n")] [],
+            rule: ScssDebugAtRule {
+                debug_token: DEBUG_KW@288..294 "debug" [] [Whitespace(" ")],
+                value: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssBinaryExpression {
+                            left: CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@294..297 "10" [] [Whitespace(" ")],
+                            },
+                            operator: SLASH@297..299 "/" [] [Whitespace(" ")],
+                            right: CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@299..300 "2" [] [],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@300..301 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@301..303 "@" [Newline("\n")] [],
+            rule: ScssDebugAtRule {
+                debug_token: DEBUG_KW@303..309 "debug" [] [Whitespace(" ")],
+                value: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssBinaryExpression {
+                            left: CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@309..311 "10" [] [],
+                            },
+                            operator: SLASH@311..312 "/" [] [],
+                            right: CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@312..313 "2" [] [],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@313..314 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@314..316 "@" [Newline("\n")] [],
+            rule: ScssDebugAtRule {
+                debug_token: DEBUG_KW@316..322 "debug" [] [Whitespace(" ")],
+                value: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssParenthesizedExpression {
+                            l_paren_token: L_PAREN@322..323 "(" [] [],
+                            expression: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssBinaryExpression {
+                                        left: CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@323..326 "10" [] [Whitespace(" ")],
+                                        },
+                                        operator: SLASH@326..328 "/" [] [Whitespace(" ")],
+                                        right: CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@328..329 "2" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_paren_token: R_PAREN@329..330 ")" [] [],
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@330..331 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@331..333 "@" [Newline("\n")] [],
+            rule: ScssDebugAtRule {
+                debug_token: DEBUG_KW@333..339 "debug" [] [Whitespace(" ")],
+                value: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssParenthesizedExpression {
+                            l_paren_token: L_PAREN@339..340 "(" [] [],
+                            expression: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    CssIdentifier {
+                                        value_token: IDENT@340..345 "bold" [] [Whitespace(" ")],
+                                    },
+                                    ScssBinaryExpression {
+                                        left: CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@345..348 "10" [] [Whitespace(" ")],
+                                        },
+                                        operator: SLASH@348..350 "/" [] [Whitespace(" ")],
+                                        right: CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@350..352 "2" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@352..362 "sans-serif" [] [],
+                                    },
+                                ],
+                            },
+                            r_paren_token: R_PAREN@362..363 ")" [] [],
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@363..364 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@364..366 "@" [Newline("\n")] [],
+            rule: ScssDebugAtRule {
+                debug_token: DEBUG_KW@366..372 "debug" [] [Whitespace(" ")],
+                value: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssParenthesizedExpression {
+                            l_paren_token: L_PAREN@372..373 "(" [] [],
+                            expression: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssBinaryExpression {
+                                        left: CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@373..376 "10" [] [Whitespace(" ")],
+                                        },
+                                        operator: SLASH@376..378 "/" [] [Whitespace(" ")],
+                                        right: CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@378..380 "2" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@380..384 "bold" [] [],
+                                    },
+                                ],
+                            },
+                            r_paren_token: R_PAREN@384..385 ")" [] [],
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@385..386 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@386..388 "@" [Newline("\n")] [],
+            rule: ScssDebugAtRule {
+                debug_token: DEBUG_KW@388..394 "debug" [] [Whitespace(" ")],
+                value: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssParenthesizedExpression {
+                            l_paren_token: L_PAREN@394..395 "(" [] [],
+                            expression: ScssListExpression {
+                                elements: ScssListExpressionElementList [
+                                    ScssListExpressionElement {
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                ScssBinaryExpression {
+                                                    left: CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@395..398 "10" [] [Whitespace(" ")],
+                                                    },
+                                                    operator: SLASH@398..400 "/" [] [Whitespace(" ")],
+                                                    right: CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@400..401 "2" [] [],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                    },
+                                    COMMA@401..403 "," [] [Whitespace(" ")],
+                                    ScssListExpressionElement {
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@403..407 "bold" [] [],
+                                                },
+                                            ],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_paren_token: R_PAREN@407..408 ")" [] [],
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@408..409 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@409..411 "@" [Newline("\n")] [],
+            rule: ScssDebugAtRule {
+                debug_token: DEBUG_KW@411..417 "debug" [] [Whitespace(" ")],
+                value: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssMapExpression {
+                            l_paren_token: L_PAREN@417..418 "(" [] [],
+                            pairs: ScssMapExpressionPairList [
+                                ScssMapExpressionPair {
+                                    key: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@418..419 "a" [] [],
+                                            },
+                                        ],
+                                    },
+                                    colon_token: COLON@419..421 ":" [] [Whitespace(" ")],
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@421..422 "b" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                COMMA@422..424 "," [] [Whitespace(" ")],
+                                ScssMapExpressionPair {
+                                    key: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@424..425 "c" [] [],
+                                            },
+                                        ],
+                                    },
+                                    colon_token: COLON@425..427 ":" [] [Whitespace(" ")],
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            ScssBinaryExpression {
+                                                left: CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@427..430 "10" [] [Whitespace(" ")],
+                                                },
+                                                operator: SLASH@430..432 "/" [] [Whitespace(" ")],
+                                                right: CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@432..433 "2" [] [],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                            r_paren_token: R_PAREN@433..434 ")" [] [],
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@434..435 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@435..437 "@" [Newline("\n")] [],
+            rule: ScssDebugAtRule {
+                debug_token: DEBUG_KW@437..443 "debug" [] [Whitespace(" ")],
+                value: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssMapExpression {
+                            l_paren_token: L_PAREN@443..444 "(" [] [],
+                            pairs: ScssMapExpressionPairList [
+                                ScssMapExpressionPair {
+                                    key: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            ScssBinaryExpression {
+                                                left: CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@444..447 "10" [] [Whitespace(" ")],
+                                                },
+                                                operator: SLASH@447..449 "/" [] [Whitespace(" ")],
+                                                right: CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@449..451 "2" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                            CssIdentifier {
+                                                value_token: IDENT@451..455 "bold" [] [],
+                                            },
+                                        ],
+                                    },
+                                    colon_token: COLON@455..457 ":" [] [Whitespace(" ")],
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@457..458 "b" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                COMMA@458..460 "," [] [Whitespace(" ")],
+                                ScssMapExpressionPair {
+                                    key: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@460..461 "c" [] [],
+                                            },
+                                        ],
+                                    },
+                                    colon_token: COLON@461..463 ":" [] [Whitespace(" ")],
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            ScssBinaryExpression {
+                                                left: CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@463..466 "10" [] [Whitespace(" ")],
+                                                },
+                                                operator: SLASH@466..468 "/" [] [Whitespace(" ")],
+                                                right: CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@468..469 "2" [] [],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                            r_paren_token: R_PAREN@469..470 ")" [] [],
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@470..471 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@471..473 "@" [Newline("\n")] [],
+            rule: ScssDebugAtRule {
+                debug_token: DEBUG_KW@473..479 "debug" [] [Whitespace(" ")],
+                value: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssBinaryExpression {
+                            left: ScssBinaryExpression {
+                                left: CssNumber {
+                                    value_token: CSS_NUMBER_LITERAL@479..482 "10" [] [Whitespace(" ")],
+                                },
+                                operator: SLASH@482..484 "/" [] [Whitespace(" ")],
+                                right: CssNumber {
+                                    value_token: CSS_NUMBER_LITERAL@484..486 "2" [] [Whitespace(" ")],
+                                },
+                            },
+                            operator: PLUS@486..488 "+" [] [Whitespace(" ")],
+                            right: CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@488..489 "1" [] [],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@489..490 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@490..492 "@" [Newline("\n")] [],
+            rule: ScssDebugAtRule {
+                debug_token: DEBUG_KW@492..498 "debug" [] [Whitespace(" ")],
+                value: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssBinaryExpression {
+                            left: ScssBinaryExpression {
+                                left: CssNumber {
+                                    value_token: CSS_NUMBER_LITERAL@498..500 "10" [] [],
+                                },
+                                operator: SLASH@500..501 "/" [] [],
+                                right: CssNumber {
+                                    value_token: CSS_NUMBER_LITERAL@501..502 "2" [] [],
+                                },
+                            },
+                            operator: PLUS@502..503 "+" [] [],
+                            right: CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@503..504 "1" [] [],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@504..505 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@505..507 "@" [Newline("\n")] [],
+            rule: ScssDebugAtRule {
+                debug_token: DEBUG_KW@507..513 "debug" [] [Whitespace(" ")],
+                value: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssBinaryExpression {
+                            left: ScssBinaryExpression {
+                                left: CssNumber {
+                                    value_token: CSS_NUMBER_LITERAL@513..515 "1" [] [Whitespace(" ")],
+                                },
+                                operator: STAR@515..517 "*" [] [Whitespace(" ")],
+                                right: CssNumber {
+                                    value_token: CSS_NUMBER_LITERAL@517..519 "2" [] [Whitespace(" ")],
+                                },
+                            },
+                            operator: SLASH@519..521 "/" [] [Whitespace(" ")],
+                            right: CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@521..522 "3" [] [],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@522..523 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@523..525 "@" [Newline("\n")] [],
+            rule: ScssDebugAtRule {
+                debug_token: DEBUG_KW@525..531 "debug" [] [Whitespace(" ")],
+                value: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssBinaryExpression {
+                            left: ScssParenthesizedExpression {
+                                l_paren_token: L_PAREN@531..532 "(" [] [],
+                                expression: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssBinaryExpression {
+                                            left: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@532..534 "1" [] [Whitespace(" ")],
+                                            },
+                                            operator: PLUS@534..536 "+" [] [Whitespace(" ")],
+                                            right: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@536..537 "2" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                r_paren_token: R_PAREN@537..539 ")" [] [Whitespace(" ")],
+                            },
+                            operator: SLASH@539..541 "/" [] [Whitespace(" ")],
+                            right: CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@541..542 "3" [] [],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@542..543 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@543..545 "@" [Newline("\n")] [],
+            rule: ScssDebugAtRule {
+                debug_token: DEBUG_KW@545..551 "debug" [] [Whitespace(" ")],
+                value: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssBinaryExpression {
+                            left: CssFunction {
+                                name: CssIdentifier {
+                                    value_token: IDENT@551..553 "fn" [] [],
+                                },
+                                l_paren_token: L_PAREN@553..554 "(" [] [],
+                                items: CssParameterList [],
+                                r_paren_token: R_PAREN@554..556 ")" [] [Whitespace(" ")],
+                            },
+                            operator: SLASH@556..558 "/" [] [Whitespace(" ")],
+                            right: CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@558..559 "3" [] [],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@559..560 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@560..562 "@" [Newline("\n")] [],
+            rule: ScssDebugAtRule {
+                debug_token: DEBUG_KW@562..568 "debug" [] [Whitespace(" ")],
+                value: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssBinaryExpression {
+                            left: ScssVariable {
+                                dollar_token: DOLLAR@568..569 "$" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@569..573 "var" [] [Whitespace(" ")],
+                                },
+                            },
+                            operator: SLASH@573..575 "/" [] [Whitespace(" ")],
+                            right: CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@575..576 "3" [] [],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@576..577 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@577..579 "@" [Newline("\n")] [],
+            rule: ScssDebugAtRule {
+                debug_token: DEBUG_KW@579..585 "debug" [] [Whitespace(" ")],
+                value: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssBinaryExpression {
+                            left: ScssModuleMemberAccess {
+                                module: CssIdentifier {
+                                    value_token: IDENT@585..588 "mod" [] [],
+                                },
+                                dot_token: DOT@588..589 "." [] [],
+                                member: ScssVariable {
+                                    dollar_token: DOLLAR@589..590 "$" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@590..594 "var" [] [Whitespace(" ")],
+                                    },
+                                },
+                            },
+                            operator: SLASH@594..596 "/" [] [Whitespace(" ")],
+                            right: CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@596..597 "3" [] [],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@597..598 ";" [] [],
             },
         },
         CssQualifiedRule {
@@ -377,22 +957,22 @@ CssRoot {
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
-                            value_token: IDENT@251..519 "a" [Newline("\n"), Newline("\n"), Comments("/* TODO(scss at-rules ..."), Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                            value_token: IDENT@598..602 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
                         },
                     },
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
             block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@519..520 "{" [] [],
+                l_curly_token: L_CURLY@602..603 "{" [] [],
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@520..527 "prop" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@603..610 "prop" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@527..529 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@610..612 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssListExpression {
@@ -401,22 +981,22 @@ CssRoot {
                                                     value: ScssExpression {
                                                         items: ScssExpressionItemList [
                                                             CssIdentifier {
-                                                                value_token: IDENT@529..530 "a" [] [],
+                                                                value_token: IDENT@612..613 "a" [] [],
                                                             },
                                                         ],
                                                     },
                                                 },
-                                                COMMA@530..531 "," [] [],
+                                                COMMA@613..614 "," [] [],
                                                 ScssListExpressionElement {
                                                     value: ScssExpression {
                                                         items: ScssExpressionItemList [
                                                             ScssBinaryExpression {
                                                                 left: CssNumber {
-                                                                    value_token: CSS_NUMBER_LITERAL@531..533 "-1" [] [],
+                                                                    value_token: CSS_NUMBER_LITERAL@614..616 "-1" [] [],
                                                                 },
-                                                                operator: STAR@533..534 "*" [] [],
+                                                                operator: STAR@616..617 "*" [] [],
                                                                 right: CssIdentifier {
-                                                                    value_token: IDENT@534..535 "b" [] [],
+                                                                    value_token: IDENT@617..618 "b" [] [],
                                                                 },
                                                             },
                                                         ],
@@ -429,23 +1009,23 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@535..536 ";" [] [],
+                        semicolon_token: SEMICOLON@618..619 ";" [] [],
                     },
                 ],
-                r_curly_token: R_CURLY@536..538 "}" [Newline("\n")] [],
+                r_curly_token: R_CURLY@619..621 "}" [Newline("\n")] [],
             },
         },
     ],
-    eof_token: EOF@538..542 "" [Newline("\n"), Newline("\n"), Newline("\n"), Newline("\n")] [],
+    eof_token: EOF@621..622 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..542
+0: CSS_ROOT@0..622
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..538
+  1: CSS_ROOT_ITEM_LIST@0..621
     0: CSS_QUALIFIED_RULE@0..21
       0: CSS_SELECTOR_LIST@0..2
         0: CSS_COMPOUND_SELECTOR@0..2
@@ -583,7 +1163,7 @@ CssRoot {
               1: (empty)
             1: SEMICOLON@139..140 ";" [] []
         2: R_CURLY@140..142 "}" [Newline("\n")] []
-    2: CSS_QUALIFIED_RULE@142..251
+    2: CSS_QUALIFIED_RULE@142..211
       0: CSS_SELECTOR_LIST@142..154
         0: CSS_COMPOUND_SELECTOR@142..154
           0: CSS_NESTED_SELECTOR_LIST@142..142
@@ -593,10 +1173,10 @@ CssRoot {
               0: DOT@142..145 "." [Newline("\n"), Newline("\n")] []
               1: CSS_CUSTOM_IDENTIFIER@145..154
                 0: IDENT@145..154 "division" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@154..251
+      1: CSS_DECLARATION_OR_RULE_BLOCK@154..211
         0: L_CURLY@154..155 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@155..249
-          0: SCSS_VARIABLE_DECLARATION@155..182
+        1: CSS_DECLARATION_OR_RULE_LIST@155..209
+          0: SCSS_VARIABLE_DECLARATION@155..170
             0: SCSS_VARIABLE@155..162
               0: DOLLAR@155..159 "$" [Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@159..162
@@ -611,85 +1191,455 @@ CssRoot {
                   2: CSS_IDENTIFIER@168..169
                     0: IDENT@168..169 "b" [] []
             3: SCSS_VARIABLE_MODIFIER_LIST@169..169
-            4: SEMICOLON@169..182 ";" [] [Whitespace(" "), Comments("// division")]
-          1: CSS_DECLARATION_WITH_SEMICOLON@182..213
-            0: CSS_DECLARATION@182..196
-              0: CSS_GENERIC_PROPERTY@182..196
-                0: CSS_IDENTIFIER@182..189
-                  0: IDENT@182..189 "decl" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@189..191 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@191..196
-                  0: SCSS_EXPRESSION_ITEM_LIST@191..196
-                    0: SCSS_BINARY_EXPRESSION@191..196
-                      0: CSS_IDENTIFIER@191..193
-                        0: IDENT@191..193 "a" [] [Whitespace(" ")]
-                      1: SLASH@193..195 "/" [] [Whitespace(" ")]
-                      2: CSS_IDENTIFIER@195..196
-                        0: IDENT@195..196 "b" [] []
+            4: SEMICOLON@169..170 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@170..185
+            0: CSS_DECLARATION@170..184
+              0: CSS_GENERIC_PROPERTY@170..184
+                0: CSS_IDENTIFIER@170..177
+                  0: IDENT@170..177 "decl" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@177..179 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@179..184
+                  0: SCSS_EXPRESSION_ITEM_LIST@179..184
+                    0: SCSS_BINARY_EXPRESSION@179..184
+                      0: CSS_IDENTIFIER@179..181
+                        0: IDENT@179..181 "a" [] [Whitespace(" ")]
+                      1: SLASH@181..183 "/" [] [Whitespace(" ")]
+                      2: CSS_IDENTIFIER@183..184
+                        0: IDENT@183..184 "b" [] []
               1: (empty)
-            1: SEMICOLON@196..213 ";" [] [Whitespace(" "), Comments("// not division")]
-          2: CSS_DECLARATION_WITH_SEMICOLON@213..249
-            0: CSS_DECLARATION@213..236
-              0: CSS_GENERIC_PROPERTY@213..236
-                0: CSS_IDENTIFIER@213..227
-                  0: IDENT@213..227 "with-parens" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@227..229 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@229..236
-                  0: SCSS_EXPRESSION_ITEM_LIST@229..236
-                    0: SCSS_PARENTHESIZED_EXPRESSION@229..236
-                      0: L_PAREN@229..230 "(" [] []
-                      1: SCSS_EXPRESSION@230..235
-                        0: SCSS_EXPRESSION_ITEM_LIST@230..235
-                          0: SCSS_BINARY_EXPRESSION@230..235
-                            0: CSS_IDENTIFIER@230..232
-                              0: IDENT@230..232 "a" [] [Whitespace(" ")]
-                            1: SLASH@232..234 "/" [] [Whitespace(" ")]
-                            2: CSS_IDENTIFIER@234..235
-                              0: IDENT@234..235 "b" [] []
-                      2: R_PAREN@235..236 ")" [] []
+            1: SEMICOLON@184..185 ";" [] []
+          2: CSS_DECLARATION_WITH_SEMICOLON@185..209
+            0: CSS_DECLARATION@185..208
+              0: CSS_GENERIC_PROPERTY@185..208
+                0: CSS_IDENTIFIER@185..199
+                  0: IDENT@185..199 "with-parens" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@199..201 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@201..208
+                  0: SCSS_EXPRESSION_ITEM_LIST@201..208
+                    0: SCSS_PARENTHESIZED_EXPRESSION@201..208
+                      0: L_PAREN@201..202 "(" [] []
+                      1: SCSS_EXPRESSION@202..207
+                        0: SCSS_EXPRESSION_ITEM_LIST@202..207
+                          0: SCSS_BINARY_EXPRESSION@202..207
+                            0: CSS_IDENTIFIER@202..204
+                              0: IDENT@202..204 "a" [] [Whitespace(" ")]
+                            1: SLASH@204..206 "/" [] [Whitespace(" ")]
+                            2: CSS_IDENTIFIER@206..207
+                              0: IDENT@206..207 "b" [] []
+                      2: R_PAREN@207..208 ")" [] []
               1: (empty)
-            1: SEMICOLON@236..249 ";" [] [Whitespace(" "), Comments("// division")]
-        2: R_CURLY@249..251 "}" [Newline("\n")] []
-    3: CSS_QUALIFIED_RULE@251..538
-      0: CSS_SELECTOR_LIST@251..519
-        0: CSS_COMPOUND_SELECTOR@251..519
-          0: CSS_NESTED_SELECTOR_LIST@251..251
-          1: CSS_TYPE_SELECTOR@251..519
+            1: SEMICOLON@208..209 ";" [] []
+        2: R_CURLY@209..211 "}" [Newline("\n")] []
+    3: CSS_AT_RULE@211..265
+      0: AT@211..214 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_FUNCTION_AT_RULE@214..265
+        0: FUNCTION_KW@214..223 "function" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@223..224
+          0: IDENT@223..224 "f" [] []
+        2: SCSS_PARAMETER_LIST@224..227
+          0: L_PAREN@224..225 "(" [] []
+          1: SCSS_PARAMETER_ITEM_LIST@225..225
+          2: R_PAREN@225..227 ")" [] [Whitespace(" ")]
+        3: CSS_DECLARATION_OR_RULE_BLOCK@227..265
+          0: L_CURLY@227..228 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@228..263
+            0: CSS_AT_RULE@228..245
+              0: AT@228..232 "@" [Newline("\n"), Whitespace("  ")] []
+              1: SCSS_RETURN_AT_RULE@232..245
+                0: RETURN_KW@232..239 "return" [] [Whitespace(" ")]
+                1: SCSS_EXPRESSION@239..244
+                  0: SCSS_EXPRESSION_ITEM_LIST@239..244
+                    0: SCSS_BINARY_EXPRESSION@239..244
+                      0: CSS_IDENTIFIER@239..241
+                        0: IDENT@239..241 "a" [] [Whitespace(" ")]
+                      1: SLASH@241..243 "/" [] [Whitespace(" ")]
+                      2: CSS_IDENTIFIER@243..244
+                        0: IDENT@243..244 "b" [] []
+                2: SEMICOLON@244..245 ";" [] []
+            1: CSS_AT_RULE@245..263
+              0: AT@245..249 "@" [Newline("\n"), Whitespace("  ")] []
+              1: SCSS_RETURN_AT_RULE@249..263
+                0: RETURN_KW@249..256 "return" [] [Whitespace(" ")]
+                1: SCSS_EXPRESSION@256..262
+                  0: SCSS_EXPRESSION_ITEM_LIST@256..262
+                    0: SCSS_BINARY_EXPRESSION@256..262
+                      0: CSS_NUMBER@256..259
+                        0: CSS_NUMBER_LITERAL@256..259 "10" [] [Whitespace(" ")]
+                      1: SLASH@259..261 "/" [] [Whitespace(" ")]
+                      2: CSS_NUMBER@261..262
+                        0: CSS_NUMBER_LITERAL@261..262 "2" [] []
+                2: SEMICOLON@262..263 ";" [] []
+          2: R_CURLY@263..265 "}" [Newline("\n")] []
+    4: CSS_AT_RULE@265..286
+      0: AT@265..268 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_DEBUG_AT_RULE@268..286
+        0: DEBUG_KW@268..274 "debug" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@274..285
+          0: SCSS_EXPRESSION_ITEM_LIST@274..285
+            0: SCSS_BINARY_EXPRESSION@274..285
+              0: CSS_REGULAR_DIMENSION@274..279
+                0: CSS_NUMBER_LITERAL@274..276 "15" [] []
+                1: IDENT@276..279 "px" [] [Whitespace(" ")]
+              1: SLASH@279..281 "/" [] [Whitespace(" ")]
+              2: CSS_REGULAR_DIMENSION@281..285
+                0: CSS_NUMBER_LITERAL@281..283 "30" [] []
+                1: IDENT@283..285 "px" [] []
+        2: SEMICOLON@285..286 ";" [] []
+    5: CSS_AT_RULE@286..301
+      0: AT@286..288 "@" [Newline("\n")] []
+      1: SCSS_DEBUG_AT_RULE@288..301
+        0: DEBUG_KW@288..294 "debug" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@294..300
+          0: SCSS_EXPRESSION_ITEM_LIST@294..300
+            0: SCSS_BINARY_EXPRESSION@294..300
+              0: CSS_NUMBER@294..297
+                0: CSS_NUMBER_LITERAL@294..297 "10" [] [Whitespace(" ")]
+              1: SLASH@297..299 "/" [] [Whitespace(" ")]
+              2: CSS_NUMBER@299..300
+                0: CSS_NUMBER_LITERAL@299..300 "2" [] []
+        2: SEMICOLON@300..301 ";" [] []
+    6: CSS_AT_RULE@301..314
+      0: AT@301..303 "@" [Newline("\n")] []
+      1: SCSS_DEBUG_AT_RULE@303..314
+        0: DEBUG_KW@303..309 "debug" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@309..313
+          0: SCSS_EXPRESSION_ITEM_LIST@309..313
+            0: SCSS_BINARY_EXPRESSION@309..313
+              0: CSS_NUMBER@309..311
+                0: CSS_NUMBER_LITERAL@309..311 "10" [] []
+              1: SLASH@311..312 "/" [] []
+              2: CSS_NUMBER@312..313
+                0: CSS_NUMBER_LITERAL@312..313 "2" [] []
+        2: SEMICOLON@313..314 ";" [] []
+    7: CSS_AT_RULE@314..331
+      0: AT@314..316 "@" [Newline("\n")] []
+      1: SCSS_DEBUG_AT_RULE@316..331
+        0: DEBUG_KW@316..322 "debug" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@322..330
+          0: SCSS_EXPRESSION_ITEM_LIST@322..330
+            0: SCSS_PARENTHESIZED_EXPRESSION@322..330
+              0: L_PAREN@322..323 "(" [] []
+              1: SCSS_EXPRESSION@323..329
+                0: SCSS_EXPRESSION_ITEM_LIST@323..329
+                  0: SCSS_BINARY_EXPRESSION@323..329
+                    0: CSS_NUMBER@323..326
+                      0: CSS_NUMBER_LITERAL@323..326 "10" [] [Whitespace(" ")]
+                    1: SLASH@326..328 "/" [] [Whitespace(" ")]
+                    2: CSS_NUMBER@328..329
+                      0: CSS_NUMBER_LITERAL@328..329 "2" [] []
+              2: R_PAREN@329..330 ")" [] []
+        2: SEMICOLON@330..331 ";" [] []
+    8: CSS_AT_RULE@331..364
+      0: AT@331..333 "@" [Newline("\n")] []
+      1: SCSS_DEBUG_AT_RULE@333..364
+        0: DEBUG_KW@333..339 "debug" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@339..363
+          0: SCSS_EXPRESSION_ITEM_LIST@339..363
+            0: SCSS_PARENTHESIZED_EXPRESSION@339..363
+              0: L_PAREN@339..340 "(" [] []
+              1: SCSS_EXPRESSION@340..362
+                0: SCSS_EXPRESSION_ITEM_LIST@340..362
+                  0: CSS_IDENTIFIER@340..345
+                    0: IDENT@340..345 "bold" [] [Whitespace(" ")]
+                  1: SCSS_BINARY_EXPRESSION@345..352
+                    0: CSS_NUMBER@345..348
+                      0: CSS_NUMBER_LITERAL@345..348 "10" [] [Whitespace(" ")]
+                    1: SLASH@348..350 "/" [] [Whitespace(" ")]
+                    2: CSS_NUMBER@350..352
+                      0: CSS_NUMBER_LITERAL@350..352 "2" [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@352..362
+                    0: IDENT@352..362 "sans-serif" [] []
+              2: R_PAREN@362..363 ")" [] []
+        2: SEMICOLON@363..364 ";" [] []
+    9: CSS_AT_RULE@364..386
+      0: AT@364..366 "@" [Newline("\n")] []
+      1: SCSS_DEBUG_AT_RULE@366..386
+        0: DEBUG_KW@366..372 "debug" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@372..385
+          0: SCSS_EXPRESSION_ITEM_LIST@372..385
+            0: SCSS_PARENTHESIZED_EXPRESSION@372..385
+              0: L_PAREN@372..373 "(" [] []
+              1: SCSS_EXPRESSION@373..384
+                0: SCSS_EXPRESSION_ITEM_LIST@373..384
+                  0: SCSS_BINARY_EXPRESSION@373..380
+                    0: CSS_NUMBER@373..376
+                      0: CSS_NUMBER_LITERAL@373..376 "10" [] [Whitespace(" ")]
+                    1: SLASH@376..378 "/" [] [Whitespace(" ")]
+                    2: CSS_NUMBER@378..380
+                      0: CSS_NUMBER_LITERAL@378..380 "2" [] [Whitespace(" ")]
+                  1: CSS_IDENTIFIER@380..384
+                    0: IDENT@380..384 "bold" [] []
+              2: R_PAREN@384..385 ")" [] []
+        2: SEMICOLON@385..386 ";" [] []
+    10: CSS_AT_RULE@386..409
+      0: AT@386..388 "@" [Newline("\n")] []
+      1: SCSS_DEBUG_AT_RULE@388..409
+        0: DEBUG_KW@388..394 "debug" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@394..408
+          0: SCSS_EXPRESSION_ITEM_LIST@394..408
+            0: SCSS_PARENTHESIZED_EXPRESSION@394..408
+              0: L_PAREN@394..395 "(" [] []
+              1: SCSS_LIST_EXPRESSION@395..407
+                0: SCSS_LIST_EXPRESSION_ELEMENT_LIST@395..407
+                  0: SCSS_LIST_EXPRESSION_ELEMENT@395..401
+                    0: SCSS_EXPRESSION@395..401
+                      0: SCSS_EXPRESSION_ITEM_LIST@395..401
+                        0: SCSS_BINARY_EXPRESSION@395..401
+                          0: CSS_NUMBER@395..398
+                            0: CSS_NUMBER_LITERAL@395..398 "10" [] [Whitespace(" ")]
+                          1: SLASH@398..400 "/" [] [Whitespace(" ")]
+                          2: CSS_NUMBER@400..401
+                            0: CSS_NUMBER_LITERAL@400..401 "2" [] []
+                  1: COMMA@401..403 "," [] [Whitespace(" ")]
+                  2: SCSS_LIST_EXPRESSION_ELEMENT@403..407
+                    0: SCSS_EXPRESSION@403..407
+                      0: SCSS_EXPRESSION_ITEM_LIST@403..407
+                        0: CSS_IDENTIFIER@403..407
+                          0: IDENT@403..407 "bold" [] []
+              2: R_PAREN@407..408 ")" [] []
+        2: SEMICOLON@408..409 ";" [] []
+    11: CSS_AT_RULE@409..435
+      0: AT@409..411 "@" [Newline("\n")] []
+      1: SCSS_DEBUG_AT_RULE@411..435
+        0: DEBUG_KW@411..417 "debug" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@417..434
+          0: SCSS_EXPRESSION_ITEM_LIST@417..434
+            0: SCSS_MAP_EXPRESSION@417..434
+              0: L_PAREN@417..418 "(" [] []
+              1: SCSS_MAP_EXPRESSION_PAIR_LIST@418..433
+                0: SCSS_MAP_EXPRESSION_PAIR@418..422
+                  0: SCSS_EXPRESSION@418..419
+                    0: SCSS_EXPRESSION_ITEM_LIST@418..419
+                      0: CSS_IDENTIFIER@418..419
+                        0: IDENT@418..419 "a" [] []
+                  1: COLON@419..421 ":" [] [Whitespace(" ")]
+                  2: SCSS_EXPRESSION@421..422
+                    0: SCSS_EXPRESSION_ITEM_LIST@421..422
+                      0: CSS_IDENTIFIER@421..422
+                        0: IDENT@421..422 "b" [] []
+                1: COMMA@422..424 "," [] [Whitespace(" ")]
+                2: SCSS_MAP_EXPRESSION_PAIR@424..433
+                  0: SCSS_EXPRESSION@424..425
+                    0: SCSS_EXPRESSION_ITEM_LIST@424..425
+                      0: CSS_IDENTIFIER@424..425
+                        0: IDENT@424..425 "c" [] []
+                  1: COLON@425..427 ":" [] [Whitespace(" ")]
+                  2: SCSS_EXPRESSION@427..433
+                    0: SCSS_EXPRESSION_ITEM_LIST@427..433
+                      0: SCSS_BINARY_EXPRESSION@427..433
+                        0: CSS_NUMBER@427..430
+                          0: CSS_NUMBER_LITERAL@427..430 "10" [] [Whitespace(" ")]
+                        1: SLASH@430..432 "/" [] [Whitespace(" ")]
+                        2: CSS_NUMBER@432..433
+                          0: CSS_NUMBER_LITERAL@432..433 "2" [] []
+              2: R_PAREN@433..434 ")" [] []
+        2: SEMICOLON@434..435 ";" [] []
+    12: CSS_AT_RULE@435..471
+      0: AT@435..437 "@" [Newline("\n")] []
+      1: SCSS_DEBUG_AT_RULE@437..471
+        0: DEBUG_KW@437..443 "debug" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@443..470
+          0: SCSS_EXPRESSION_ITEM_LIST@443..470
+            0: SCSS_MAP_EXPRESSION@443..470
+              0: L_PAREN@443..444 "(" [] []
+              1: SCSS_MAP_EXPRESSION_PAIR_LIST@444..469
+                0: SCSS_MAP_EXPRESSION_PAIR@444..458
+                  0: SCSS_EXPRESSION@444..455
+                    0: SCSS_EXPRESSION_ITEM_LIST@444..455
+                      0: SCSS_BINARY_EXPRESSION@444..451
+                        0: CSS_NUMBER@444..447
+                          0: CSS_NUMBER_LITERAL@444..447 "10" [] [Whitespace(" ")]
+                        1: SLASH@447..449 "/" [] [Whitespace(" ")]
+                        2: CSS_NUMBER@449..451
+                          0: CSS_NUMBER_LITERAL@449..451 "2" [] [Whitespace(" ")]
+                      1: CSS_IDENTIFIER@451..455
+                        0: IDENT@451..455 "bold" [] []
+                  1: COLON@455..457 ":" [] [Whitespace(" ")]
+                  2: SCSS_EXPRESSION@457..458
+                    0: SCSS_EXPRESSION_ITEM_LIST@457..458
+                      0: CSS_IDENTIFIER@457..458
+                        0: IDENT@457..458 "b" [] []
+                1: COMMA@458..460 "," [] [Whitespace(" ")]
+                2: SCSS_MAP_EXPRESSION_PAIR@460..469
+                  0: SCSS_EXPRESSION@460..461
+                    0: SCSS_EXPRESSION_ITEM_LIST@460..461
+                      0: CSS_IDENTIFIER@460..461
+                        0: IDENT@460..461 "c" [] []
+                  1: COLON@461..463 ":" [] [Whitespace(" ")]
+                  2: SCSS_EXPRESSION@463..469
+                    0: SCSS_EXPRESSION_ITEM_LIST@463..469
+                      0: SCSS_BINARY_EXPRESSION@463..469
+                        0: CSS_NUMBER@463..466
+                          0: CSS_NUMBER_LITERAL@463..466 "10" [] [Whitespace(" ")]
+                        1: SLASH@466..468 "/" [] [Whitespace(" ")]
+                        2: CSS_NUMBER@468..469
+                          0: CSS_NUMBER_LITERAL@468..469 "2" [] []
+              2: R_PAREN@469..470 ")" [] []
+        2: SEMICOLON@470..471 ";" [] []
+    13: CSS_AT_RULE@471..490
+      0: AT@471..473 "@" [Newline("\n")] []
+      1: SCSS_DEBUG_AT_RULE@473..490
+        0: DEBUG_KW@473..479 "debug" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@479..489
+          0: SCSS_EXPRESSION_ITEM_LIST@479..489
+            0: SCSS_BINARY_EXPRESSION@479..489
+              0: SCSS_BINARY_EXPRESSION@479..486
+                0: CSS_NUMBER@479..482
+                  0: CSS_NUMBER_LITERAL@479..482 "10" [] [Whitespace(" ")]
+                1: SLASH@482..484 "/" [] [Whitespace(" ")]
+                2: CSS_NUMBER@484..486
+                  0: CSS_NUMBER_LITERAL@484..486 "2" [] [Whitespace(" ")]
+              1: PLUS@486..488 "+" [] [Whitespace(" ")]
+              2: CSS_NUMBER@488..489
+                0: CSS_NUMBER_LITERAL@488..489 "1" [] []
+        2: SEMICOLON@489..490 ";" [] []
+    14: CSS_AT_RULE@490..505
+      0: AT@490..492 "@" [Newline("\n")] []
+      1: SCSS_DEBUG_AT_RULE@492..505
+        0: DEBUG_KW@492..498 "debug" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@498..504
+          0: SCSS_EXPRESSION_ITEM_LIST@498..504
+            0: SCSS_BINARY_EXPRESSION@498..504
+              0: SCSS_BINARY_EXPRESSION@498..502
+                0: CSS_NUMBER@498..500
+                  0: CSS_NUMBER_LITERAL@498..500 "10" [] []
+                1: SLASH@500..501 "/" [] []
+                2: CSS_NUMBER@501..502
+                  0: CSS_NUMBER_LITERAL@501..502 "2" [] []
+              1: PLUS@502..503 "+" [] []
+              2: CSS_NUMBER@503..504
+                0: CSS_NUMBER_LITERAL@503..504 "1" [] []
+        2: SEMICOLON@504..505 ";" [] []
+    15: CSS_AT_RULE@505..523
+      0: AT@505..507 "@" [Newline("\n")] []
+      1: SCSS_DEBUG_AT_RULE@507..523
+        0: DEBUG_KW@507..513 "debug" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@513..522
+          0: SCSS_EXPRESSION_ITEM_LIST@513..522
+            0: SCSS_BINARY_EXPRESSION@513..522
+              0: SCSS_BINARY_EXPRESSION@513..519
+                0: CSS_NUMBER@513..515
+                  0: CSS_NUMBER_LITERAL@513..515 "1" [] [Whitespace(" ")]
+                1: STAR@515..517 "*" [] [Whitespace(" ")]
+                2: CSS_NUMBER@517..519
+                  0: CSS_NUMBER_LITERAL@517..519 "2" [] [Whitespace(" ")]
+              1: SLASH@519..521 "/" [] [Whitespace(" ")]
+              2: CSS_NUMBER@521..522
+                0: CSS_NUMBER_LITERAL@521..522 "3" [] []
+        2: SEMICOLON@522..523 ";" [] []
+    16: CSS_AT_RULE@523..543
+      0: AT@523..525 "@" [Newline("\n")] []
+      1: SCSS_DEBUG_AT_RULE@525..543
+        0: DEBUG_KW@525..531 "debug" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@531..542
+          0: SCSS_EXPRESSION_ITEM_LIST@531..542
+            0: SCSS_BINARY_EXPRESSION@531..542
+              0: SCSS_PARENTHESIZED_EXPRESSION@531..539
+                0: L_PAREN@531..532 "(" [] []
+                1: SCSS_EXPRESSION@532..537
+                  0: SCSS_EXPRESSION_ITEM_LIST@532..537
+                    0: SCSS_BINARY_EXPRESSION@532..537
+                      0: CSS_NUMBER@532..534
+                        0: CSS_NUMBER_LITERAL@532..534 "1" [] [Whitespace(" ")]
+                      1: PLUS@534..536 "+" [] [Whitespace(" ")]
+                      2: CSS_NUMBER@536..537
+                        0: CSS_NUMBER_LITERAL@536..537 "2" [] []
+                2: R_PAREN@537..539 ")" [] [Whitespace(" ")]
+              1: SLASH@539..541 "/" [] [Whitespace(" ")]
+              2: CSS_NUMBER@541..542
+                0: CSS_NUMBER_LITERAL@541..542 "3" [] []
+        2: SEMICOLON@542..543 ";" [] []
+    17: CSS_AT_RULE@543..560
+      0: AT@543..545 "@" [Newline("\n")] []
+      1: SCSS_DEBUG_AT_RULE@545..560
+        0: DEBUG_KW@545..551 "debug" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@551..559
+          0: SCSS_EXPRESSION_ITEM_LIST@551..559
+            0: SCSS_BINARY_EXPRESSION@551..559
+              0: CSS_FUNCTION@551..556
+                0: CSS_IDENTIFIER@551..553
+                  0: IDENT@551..553 "fn" [] []
+                1: L_PAREN@553..554 "(" [] []
+                2: CSS_PARAMETER_LIST@554..554
+                3: R_PAREN@554..556 ")" [] [Whitespace(" ")]
+              1: SLASH@556..558 "/" [] [Whitespace(" ")]
+              2: CSS_NUMBER@558..559
+                0: CSS_NUMBER_LITERAL@558..559 "3" [] []
+        2: SEMICOLON@559..560 ";" [] []
+    18: CSS_AT_RULE@560..577
+      0: AT@560..562 "@" [Newline("\n")] []
+      1: SCSS_DEBUG_AT_RULE@562..577
+        0: DEBUG_KW@562..568 "debug" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@568..576
+          0: SCSS_EXPRESSION_ITEM_LIST@568..576
+            0: SCSS_BINARY_EXPRESSION@568..576
+              0: SCSS_VARIABLE@568..573
+                0: DOLLAR@568..569 "$" [] []
+                1: CSS_IDENTIFIER@569..573
+                  0: IDENT@569..573 "var" [] [Whitespace(" ")]
+              1: SLASH@573..575 "/" [] [Whitespace(" ")]
+              2: CSS_NUMBER@575..576
+                0: CSS_NUMBER_LITERAL@575..576 "3" [] []
+        2: SEMICOLON@576..577 ";" [] []
+    19: CSS_AT_RULE@577..598
+      0: AT@577..579 "@" [Newline("\n")] []
+      1: SCSS_DEBUG_AT_RULE@579..598
+        0: DEBUG_KW@579..585 "debug" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@585..597
+          0: SCSS_EXPRESSION_ITEM_LIST@585..597
+            0: SCSS_BINARY_EXPRESSION@585..597
+              0: SCSS_MODULE_MEMBER_ACCESS@585..594
+                0: CSS_IDENTIFIER@585..588
+                  0: IDENT@585..588 "mod" [] []
+                1: DOT@588..589 "." [] []
+                2: SCSS_VARIABLE@589..594
+                  0: DOLLAR@589..590 "$" [] []
+                  1: CSS_IDENTIFIER@590..594
+                    0: IDENT@590..594 "var" [] [Whitespace(" ")]
+              1: SLASH@594..596 "/" [] [Whitespace(" ")]
+              2: CSS_NUMBER@596..597
+                0: CSS_NUMBER_LITERAL@596..597 "3" [] []
+        2: SEMICOLON@597..598 ";" [] []
+    20: CSS_QUALIFIED_RULE@598..621
+      0: CSS_SELECTOR_LIST@598..602
+        0: CSS_COMPOUND_SELECTOR@598..602
+          0: CSS_NESTED_SELECTOR_LIST@598..598
+          1: CSS_TYPE_SELECTOR@598..602
             0: (empty)
-            1: CSS_IDENTIFIER@251..519
-              0: IDENT@251..519 "a" [Newline("\n"), Newline("\n"), Comments("/* TODO(scss at-rules ..."), Newline("\n"), Newline("\n")] [Whitespace(" ")]
-          2: CSS_SUB_SELECTOR_LIST@519..519
-      1: CSS_DECLARATION_OR_RULE_BLOCK@519..538
-        0: L_CURLY@519..520 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@520..536
-          0: CSS_DECLARATION_WITH_SEMICOLON@520..536
-            0: CSS_DECLARATION@520..535
-              0: CSS_GENERIC_PROPERTY@520..535
-                0: CSS_IDENTIFIER@520..527
-                  0: IDENT@520..527 "prop" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@527..529 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@529..535
-                  0: SCSS_EXPRESSION_ITEM_LIST@529..535
-                    0: SCSS_LIST_EXPRESSION@529..535
-                      0: SCSS_LIST_EXPRESSION_ELEMENT_LIST@529..535
-                        0: SCSS_LIST_EXPRESSION_ELEMENT@529..530
-                          0: SCSS_EXPRESSION@529..530
-                            0: SCSS_EXPRESSION_ITEM_LIST@529..530
-                              0: CSS_IDENTIFIER@529..530
-                                0: IDENT@529..530 "a" [] []
-                        1: COMMA@530..531 "," [] []
-                        2: SCSS_LIST_EXPRESSION_ELEMENT@531..535
-                          0: SCSS_EXPRESSION@531..535
-                            0: SCSS_EXPRESSION_ITEM_LIST@531..535
-                              0: SCSS_BINARY_EXPRESSION@531..535
-                                0: CSS_NUMBER@531..533
-                                  0: CSS_NUMBER_LITERAL@531..533 "-1" [] []
-                                1: STAR@533..534 "*" [] []
-                                2: CSS_IDENTIFIER@534..535
-                                  0: IDENT@534..535 "b" [] []
+            1: CSS_IDENTIFIER@598..602
+              0: IDENT@598..602 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@602..602
+      1: CSS_DECLARATION_OR_RULE_BLOCK@602..621
+        0: L_CURLY@602..603 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@603..619
+          0: CSS_DECLARATION_WITH_SEMICOLON@603..619
+            0: CSS_DECLARATION@603..618
+              0: CSS_GENERIC_PROPERTY@603..618
+                0: CSS_IDENTIFIER@603..610
+                  0: IDENT@603..610 "prop" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@610..612 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@612..618
+                  0: SCSS_EXPRESSION_ITEM_LIST@612..618
+                    0: SCSS_LIST_EXPRESSION@612..618
+                      0: SCSS_LIST_EXPRESSION_ELEMENT_LIST@612..618
+                        0: SCSS_LIST_EXPRESSION_ELEMENT@612..613
+                          0: SCSS_EXPRESSION@612..613
+                            0: SCSS_EXPRESSION_ITEM_LIST@612..613
+                              0: CSS_IDENTIFIER@612..613
+                                0: IDENT@612..613 "a" [] []
+                        1: COMMA@613..614 "," [] []
+                        2: SCSS_LIST_EXPRESSION_ELEMENT@614..618
+                          0: SCSS_EXPRESSION@614..618
+                            0: SCSS_EXPRESSION_ITEM_LIST@614..618
+                              0: SCSS_BINARY_EXPRESSION@614..618
+                                0: CSS_NUMBER@614..616
+                                  0: CSS_NUMBER_LITERAL@614..616 "-1" [] []
+                                1: STAR@616..617 "*" [] []
+                                2: CSS_IDENTIFIER@617..618
+                                  0: IDENT@617..618 "b" [] []
               1: (empty)
-            1: SEMICOLON@535..536 ";" [] []
-        2: R_CURLY@536..538 "}" [Newline("\n")] []
-  2: EOF@538..542 "" [Newline("\n"), Newline("\n"), Newline("\n"), Newline("\n")] []
+            1: SEMICOLON@618..619 ";" [] []
+        2: R_CURLY@619..621 "}" [Newline("\n")] []
+  2: EOF@621..622 "" [Newline("\n")] []
 
 ```

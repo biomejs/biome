@@ -421,6 +421,7 @@ impl<'a> TryFrom<&'a EslintRuleName> for RuleSource<'a> {
             Some("react-dom") => RuleSource::EslintReactDom,
             Some("regexp") => RuleSource::EslintRegexp,
             Some("solid") => RuleSource::EslintSolid,
+            Some("svelte") => RuleSource::EslintSvelte,
             Some("sonarjs") => RuleSource::EslintSonarJs,
             Some("@stylistic") => RuleSource::EslintStylistic,
             Some("@typescript-eslint") => RuleSource::EslintTypeScript,
@@ -647,6 +648,20 @@ fn migrate_eslint_rule(
         eslint_eslint::Rule::Any(name, severity) => {
             let _ = migrate_eslint_any_rule(rules, &name, severity, opts, results);
         }
+        eslint_eslint::Rule::ArrayCallbackReturn(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let group = rules.suspicious.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_iterable_callback_return =
+                        Some(biome_config::RuleConfiguration::WithOptions(
+                            biome_config::RuleWithOptions {
+                                level: conf.severity().into(),
+                                options: conf.option_or_default().into(),
+                            },
+                        ));
+                }
+            }
+        }
         eslint_eslint::Rule::ClassMethodsUseThis(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let severity = conf.severity();
@@ -853,7 +868,7 @@ fn migrate_eslint_rule(
         eslint_eslint::Rule::TypeScriptNoShadow(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let severity = conf.severity();
-                let group = rules.nursery.get_or_insert_with(Default::default);
+                let group = rules.suspicious.get_or_insert_with(Default::default);
                 if let SeverityOrGroup::Group(group) = group {
                     let options = conf.option_or_default();
                     group.no_shadow = Some(biome_config::RuleConfiguration::WithOptions(
@@ -866,6 +881,21 @@ fn migrate_eslint_rule(
                 results.add(&name, RuleMigrationResult::Migrated);
             }
         }
+        eslint_eslint::Rule::UnicornNumericSeparatorsStyle(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let group = rules.style.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_numeric_separators =
+                        Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: conf.severity().into(),
+                                fix: None,
+                                options: conf.option_or_default().into(),
+                            },
+                        ));
+                }
+            }
+        }
         eslint_eslint::Rule::UnicornFilenameCase(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let group = rules.style.get_or_insert_with(Default::default);
@@ -874,6 +904,21 @@ fn migrate_eslint_rule(
                         Some(biome_config::RuleConfiguration::WithOptions(
                             biome_config::RuleWithOptions {
                                 level: conf.severity().into(),
+                                options: conf.option_or_default().into(),
+                            },
+                        ));
+                }
+            }
+        }
+        eslint_eslint::Rule::SvelteNoUnnecessaryStateWrap(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.no_svelte_unnecessary_state_wrap =
+                        Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: conf.severity().into(),
+                                fix: None,
                                 options: conf.option_or_default().into(),
                             },
                         ));

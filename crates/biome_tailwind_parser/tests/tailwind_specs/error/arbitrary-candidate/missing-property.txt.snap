@@ -27,7 +27,7 @@ TwRoot {
                     R_BRACKET@6..8 "]" [] [Whitespace(" ")],
                     TW_BASE@8..9 "w" [] [],
                     DASH@9..10 "-" [] [],
-                    TW_VALUE@10..11 "5" [] [],
+                    TW_NUMBER@10..11 "5" [] [],
                 ],
             },
             excl_token: missing (optional),
@@ -52,7 +52,7 @@ TwRoot {
         2: R_BRACKET@6..8 "]" [] [Whitespace(" ")]
         3: TW_BASE@8..9 "w" [] []
         4: DASH@9..10 "-" [] []
-        5: TW_VALUE@10..11 "5" [] []
+        5: TW_NUMBER@10..11 "5" [] []
       3: (empty)
   2: EOF@11..12 "" [Newline("\n")] []
 

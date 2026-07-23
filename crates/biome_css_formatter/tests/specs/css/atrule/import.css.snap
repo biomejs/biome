@@ -185,28 +185,28 @@ st.css');
 @import "./style.css";
 @import "./style.css";
 @import url("./style.css");
-@import url(./style.css);
-@import url("./style.css");
+@import URL(./style.css);
+@import URL("./style.css");
 @import "test.css";
 @import "common.css" screen;
 @import url("landscape.css") screen and (orientation: landscape);
 @import url("theme.css") layer;
 @import url("theme.css") layer;
-@import url("theme.css") layer;
+@import url("theme.css") LAYER;
 @import url("theme.css") layer(default);
-@import url("theme.css") layer(default);
+@import url("theme.css") LAYER(default);
 @import url("tabs.css") layer(framework.component);
 @import url("override.css") layer;
 @import url("narrow.css") supports(display: flex)
 	handheld and (max-width: 400px);
-@import url("narrow.css") supports(display: flex)
+@import url("narrow.css") SUPPORTS(display: flex)
 	handheld and (max-width: 400px);
 @import url("fallback-layout.css") supports(not (display: flex));
 @import url(test.css);
 @import url("test.css");
 @import url("test.css");
 @import url(test.css);
-@import url(test.css);
+@import URL(test.css);
 @import url(test.css);
 @import url(test.css);
 @import url(test.css);
@@ -225,7 +225,7 @@ st.css');
 @import url("");
 @import url("");
 @import url(test.css) screen and (orientation: landscape);
-@import url(test.css) SCREEN and (ORIENTATION: LANDSCAPE);
+@import url(test.css) SCREEN AND (orientation: LANDSCAPE);
 @import url(test.css) screen and (orientation: landscape);
 @import url(test.css) screen and (orientation: landscape);
 @import url(test.css) screen and (orientation: landscape);
@@ -323,12 +323,12 @@ st.css");
 @import url("./test.css") screen and (min-width: 400px);
 @import url("./test.css") layer(default) supports(display: flex)
 	screen and (min-width: 400px);
-@import url("./test.css") layer(DEFAULT) supports(DISPLAY: FLEX)
-	SCREEN and (MIN-WIDTH: 400px);
+@import url("./test.css") LAYER(DEFAULT) SUPPORTS(DISPLAY: FLEX)
+	SCREEN AND (min-width: 400px);
 @import url("./test.css") /* Comment */
 	layer(/* Comment */ /* Comment */ default) /* Comment */
 	supports(
-		/* Comment */ display /* Comment */ /* Comment */: flex /* Comment */
+		/* Comment */ display/* Comment */:/* Comment */ flex /* Comment */
 	) /* Comment */
 	screen /* Comment */ and /* Comment */ (
 		/* Comment */ /* Comment */ /* Comment */ min-width: 400px /* Comment */

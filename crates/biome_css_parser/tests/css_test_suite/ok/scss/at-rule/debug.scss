@@ -3,3 +3,6 @@
 .card {
   @debug (1, 2, 3);
 }
+
+@debug "Value: #{$value}";
+@debug clamp(#{$min}, #{$intercept} + #{$slope * 100}vw, #{$max});

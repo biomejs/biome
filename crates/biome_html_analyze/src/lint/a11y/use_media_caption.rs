@@ -3,11 +3,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlElementList, HtmlFileSource};
+use biome_html_syntax::{AnyHtmlElement, HtmlElementList, HtmlSyntaxKind, T};
+use biome_parser::{TokenSet, token_set};
 use biome_rowan::AstNode;
 use biome_rule_options::use_media_caption::UseMediaCaptionOptions;
-
-use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforces that `audio` and `video` elements must have a `track` for captions.
@@ -70,6 +69,8 @@ declare_lint_rule! {
     }
 }
 
+const MEDIA_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(T![audio], T![video]);
+
 impl Rule for UseMediaCaption {
     type Query = Ast<AnyHtmlElement>;
     type State = ();
@@ -78,19 +79,17 @@ impl Rule for UseMediaCaption {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
-
         // Check if element is audio or video
         let tag_element = node.clone().as_any_html_tag_element()?;
-        let is_audio = is_html_tag(&tag_element, source_type, "audio");
-        let is_video = is_html_tag(&tag_element, source_type, "video");
+        let tag_kind = tag_element.tag_name_kind();
+        let is_video = tag_kind == Some(T![video]);
 
-        if !is_audio && !is_video {
+        if !tag_kind.is_some_and(|kind| MEDIA_ELEMENTS.contains(kind)) {
             return None;
         }
 
         // Muted videos don't need captions (audio still requires captions)
-        if is_video && node.find_attribute_by_name("muted").is_some() {
+        if is_video && node.find_attribute_or_vue_binding("muted").is_some() {
             return None;
         }
 
@@ -100,7 +99,7 @@ impl Rule for UseMediaCaption {
         if html_element.opening_element().is_err() {
             return None;
         }
-        if has_caption_track(&html_element.children(), source_type) {
+        if has_caption_track(&html_element.children()) {
             return None;
         }
 
@@ -126,22 +125,19 @@ impl Rule for UseMediaCaption {
 }
 
 /// Checks if the given `HtmlElementList` has a `track` element with `kind="captions"`.
-fn has_caption_track(html_child_list: &HtmlElementList, source_type: &HtmlFileSource) -> bool {
+fn has_caption_track(html_child_list: &HtmlElementList) -> bool {
     html_child_list
         .into_iter()
         .find_map(|child| {
             let tag_element = child.clone().as_any_html_tag_element()?;
-            let is_track = is_html_tag(&tag_element, source_type, "track");
-            if !is_track {
+            if tag_element.tag_name_kind() != Some(T![track]) {
                 return None;
             }
 
-            let kind_attr = child.find_attribute_by_name("kind")?;
-            let initializer = kind_attr.initializer()?;
-            let value = initializer.value().ok()?;
-            let string_value = value.string_value()?;
+            let kind_attr = child.find_attribute_or_vue_binding("kind")?;
+            let string_value = kind_attr.as_static_value()?;
 
-            if string_value.eq_ignore_ascii_case("captions") {
+            if string_value.text().eq_ignore_ascii_case("captions") {
                 Some(())
             } else {
                 None

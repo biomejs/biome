@@ -5,7 +5,8 @@ use biome_analyze::{
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_html_analyze::HtmlAnalyzerServices;
 use biome_html_parser::parse_html;
-use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
+use biome_html_syntax::HtmlLanguage;
+use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
 use biome_test_utils::{
     CheckActionType, analyze_with_workspace, assert_diagnostics_expectation_comment,
@@ -145,9 +146,9 @@ pub(crate) fn analyze_and_snap(
         let mut project_diagnostics = Vec::new();
         let project_layout = project_layout_for_test_file(input_file, &mut project_diagnostics);
         diagnostics.extend(project_diagnostics);
-        let module_graph = module_graph_for_html_test_file(input_file, &project_layout);
+        let module_db = module_graph_for_html_test_file(input_file, &project_layout);
         HtmlAnalyzerServices {
-            module_graph: Some(module_graph),
+            module_db: Some(module_db.rc_module_db()),
             project_layout: Some(project_layout),
         }
     } else {

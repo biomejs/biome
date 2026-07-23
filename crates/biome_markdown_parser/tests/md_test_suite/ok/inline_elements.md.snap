@@ -44,7 +44,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@29..30 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@30..31 "\n" [] [],
@@ -82,7 +81,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@69..70 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@70..71 "\n" [] [],
@@ -120,7 +118,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@111..112 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@112..113 "\n" [] [],
@@ -175,7 +172,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@178..179 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@179..179 "" [] [],
@@ -202,7 +198,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@22..29 " in it." [] []
         3: MD_TEXTUAL@29..30
           0: MD_TEXTUAL_LITERAL@29..30 "\n" [] []
-      1: (empty)
     1: MD_NEWLINE@30..31
       0: NEWLINE@30..31 "\n" [] []
     2: MD_PARAGRAPH@31..70
@@ -227,7 +222,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@68..69 "." [] []
         5: MD_TEXTUAL@69..70
           0: MD_TEXTUAL_LITERAL@69..70 "\n" [] []
-      1: (empty)
     3: MD_NEWLINE@70..71
       0: NEWLINE@70..71 "\n" [] []
     4: MD_PARAGRAPH@71..112
@@ -252,7 +246,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@110..111 "." [] []
         5: MD_TEXTUAL@111..112
           0: MD_TEXTUAL_LITERAL@111..112 "\n" [] []
-      1: (empty)
     5: MD_NEWLINE@112..113
       0: NEWLINE@112..113 "\n" [] []
     6: MD_PARAGRAPH@113..179
@@ -290,7 +283,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@177..178 "." [] []
         5: MD_TEXTUAL@178..179
           0: MD_TEXTUAL_LITERAL@178..179 "\n" [] []
-      1: (empty)
   2: EOF@179..179 "" [] []
 
 ```

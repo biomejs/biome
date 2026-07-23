@@ -1,0 +1,24 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/block_sequence/nested_block_sequence.yaml
+---
+
+# Input
+
+```yaml
+-
+  - 20
+  - 30
+- - 40
+
+```
+
+
+# Formatted
+
+```yaml
+- - 20
+  - 30
+- - 40
+
+```

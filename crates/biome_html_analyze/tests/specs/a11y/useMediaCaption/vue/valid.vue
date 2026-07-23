@@ -13,3 +13,6 @@
 <Audio />
 <VideoPlayer />
 <AudioPlayer />
+<!-- static Vue bindings with kind="captions" are valid -->
+<video><track :kind="'captions'" /></video>
+<audio><track v-bind:kind="'captions'" /></audio>

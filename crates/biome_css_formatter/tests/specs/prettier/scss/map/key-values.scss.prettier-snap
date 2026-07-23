@@ -14,9 +14,7 @@ $map: (
     "key": "value",
     "key": "value",
     "key": "value",
-  ): (
-      "list",
-    ),
+  ): ("list"),
   (
     "list",
     "list",
@@ -28,9 +26,7 @@ $map: (
     "list",
     "list",
     "list",
-  ): (
-      "list",
-    ),
+  ): ("list"),
   (
     "list",
     "list",

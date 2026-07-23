@@ -3,7 +3,8 @@ use crate::{
     grit_tree::GritTargetTree,
 };
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_js_syntax::JsLanguage;
+use biome_languages::JsFileSource;
 use biome_parser::AnyParse;
 use camino::Utf8Path;
 use grit_util::{AnalysisLogs, FileOrigin, Parser, SnippetTree};

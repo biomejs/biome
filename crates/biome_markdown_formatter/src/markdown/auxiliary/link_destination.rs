@@ -1,6 +1,6 @@
 use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions;
 use crate::prelude::*;
-use crate::shared::TextPrintMode;
+use crate::shared::{TextContext, TextPrintMode};
 use biome_markdown_syntax::{MdLinkDestination, MdLinkDestinationFields};
 
 #[derive(Debug, Clone, Default)]
@@ -14,7 +14,7 @@ impl FormatNodeRule<MdLinkDestination> for FormatMdLinkDestination {
             .with_options(FormatMdFormatInlineItemListOptions {
                 print_mode: TextPrintMode::trim_all(),
                 keep_fences_in_italics: false,
-                inside_list: false,
+                text_context: TextContext::Neutral,
             })
             .fmt(f)
     }

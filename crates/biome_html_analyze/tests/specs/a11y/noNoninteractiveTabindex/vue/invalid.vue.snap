@@ -1,0 +1,163 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<div tabindex="0"></div>
+<div role="article" tabindex="0"></div>
+<article tabindex="0"></article>
+<span tabindex="1"></span>
+<!-- static Vue bindings with tabindex on non-interactive elements should also be flagged -->
+<div :tabindex="'0'"></div>
+<div v-bind:tabindex="'0'"></div>
+<div :role="'article'" :tabindex="'0'"></div>
+
+```
+
+# Diagnostics
+```
+invalid.vue:2:6 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element div is non-interactive. Do not use tabindex.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div tabindex="0"></div>
+      │      ^^^^^^^^^^^^
+    3 │ <div role="article" tabindex="0"></div>
+    4 │ <article tabindex="0"></article>
+  
+  i Adding non-interactive elements to the keyboard navigation flow can confuse users.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    2 │ <div·tabindex="0"></div>
+      │      ------------       
+
+```
+
+```
+invalid.vue:3:21 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element div is non-interactive. Do not use tabindex.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div tabindex="0"></div>
+  > 3 │ <div role="article" tabindex="0"></div>
+      │                     ^^^^^^^^^^^^
+    4 │ <article tabindex="0"></article>
+    5 │ <span tabindex="1"></span>
+  
+  i Adding non-interactive elements to the keyboard navigation flow can confuse users.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    3 │ <div·role="article"·tabindex="0"></div>
+      │                     ------------       
+
+```
+
+```
+invalid.vue:4:10 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element article is non-interactive. Do not use tabindex.
+  
+    2 │ <div tabindex="0"></div>
+    3 │ <div role="article" tabindex="0"></div>
+  > 4 │ <article tabindex="0"></article>
+      │          ^^^^^^^^^^^^
+    5 │ <span tabindex="1"></span>
+    6 │ <!-- static Vue bindings with tabindex on non-interactive elements should also be flagged -->
+  
+  i Adding non-interactive elements to the keyboard navigation flow can confuse users.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    4 │ <article·tabindex="0"></article>
+      │          ------------           
+
+```
+
+```
+invalid.vue:5:7 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element span is non-interactive. Do not use tabindex.
+  
+    3 │ <div role="article" tabindex="0"></div>
+    4 │ <article tabindex="0"></article>
+  > 5 │ <span tabindex="1"></span>
+      │       ^^^^^^^^^^^^
+    6 │ <!-- static Vue bindings with tabindex on non-interactive elements should also be flagged -->
+    7 │ <div :tabindex="'0'"></div>
+  
+  i Adding non-interactive elements to the keyboard navigation flow can confuse users.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    5 │ <span·tabindex="1"></span>
+      │       ------------        
+
+```
+
+```
+invalid.vue:7:6 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element div is non-interactive. Do not use tabindex.
+  
+    5 │ <span tabindex="1"></span>
+    6 │ <!-- static Vue bindings with tabindex on non-interactive elements should also be flagged -->
+  > 7 │ <div :tabindex="'0'"></div>
+      │      ^^^^^^^^^^^^^^^
+    8 │ <div v-bind:tabindex="'0'"></div>
+    9 │ <div :role="'article'" :tabindex="'0'"></div>
+  
+  i Adding non-interactive elements to the keyboard navigation flow can confuse users.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    7 │ <div·:tabindex="'0'"></div>
+      │      ---------------       
+
+```
+
+```
+invalid.vue:8:6 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element div is non-interactive. Do not use tabindex.
+  
+     6 │ <!-- static Vue bindings with tabindex on non-interactive elements should also be flagged -->
+     7 │ <div :tabindex="'0'"></div>
+   > 8 │ <div v-bind:tabindex="'0'"></div>
+       │      ^^^^^^^^^^^^^^^^^^^^^
+     9 │ <div :role="'article'" :tabindex="'0'"></div>
+    10 │ 
+  
+  i Adding non-interactive elements to the keyboard navigation flow can confuse users.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    8 │ <div·v-bind:tabindex="'0'"></div>
+      │      ---------------------       
+
+```
+
+```
+invalid.vue:9:24 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element div is non-interactive. Do not use tabindex.
+  
+     7 │ <div :tabindex="'0'"></div>
+     8 │ <div v-bind:tabindex="'0'"></div>
+   > 9 │ <div :role="'article'" :tabindex="'0'"></div>
+       │                        ^^^^^^^^^^^^^^^
+    10 │ 
+  
+  i Adding non-interactive elements to the keyboard navigation flow can confuse users.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    9 │ <div·:role="'article'"·:tabindex="'0'"></div>
+      │                        ---------------       
+
+```

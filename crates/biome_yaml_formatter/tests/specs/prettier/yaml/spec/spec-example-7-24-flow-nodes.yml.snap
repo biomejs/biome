@@ -26,9 +26,7 @@ info: yaml/spec/spec-example-7-24-flow-nodes.yml
 +- 'b'
  - &anchor "c"
  - *anchor
--- !!str
-+- !!str
-\ No newline at end of file
+ - !!str
 ```
 
 # Output
@@ -38,20 +36,5 @@ info: yaml/spec/spec-example-7-24-flow-nodes.yml
 - 'b'
 - &anchor "c"
 - *anchor
-- !!str```
-
-# Errors
-```
-spec-example-7-24-flow-nodes.yml:4:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected character `*`
-  
-    2 │ - 'b'
-    3 │ - &anchor "c"
-  > 4 │ - *anchor
-      │   ^
-    5 │ - !!str
-    6 │ 
-  
-
+- !!str
 ```

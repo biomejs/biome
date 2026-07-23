@@ -4,11 +4,13 @@ use biome_analyze::{
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_html_syntax::{HtmlSyntaxKind, T};
+use biome_parser::{TokenSet, token_set};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText};
 use biome_rule_options::no_noninteractive_element_to_interactive_role::NoNoninteractiveElementToInteractiveRoleOptions;
 
-use crate::{Aria, HtmlRuleAction, utils::is_html_tag};
+use crate::{Aria, HtmlRuleAction};
 
 declare_lint_rule! {
     /// Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.
@@ -49,7 +51,7 @@ declare_lint_rule! {
     /// - [Mozilla Developer Network - ARIA Techniques](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_button_role#Keyboard_and_focus)
     ///
     pub NoNoninteractiveElementToInteractiveRole {
-        version: "next",
+        version: "2.5.0",
         name: "noNoninteractiveElementToInteractiveRole",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("no-noninteractive-element-to-interactive-role").inspired()],
@@ -67,25 +69,22 @@ impl Rule for NoNoninteractiveElementToInteractiveRole {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
 
         if node.is_custom_component() {
             return None;
         }
 
-        let role_attribute = node.find_attribute_by_name("role")?;
-        let role_attribute_static_value = role_attribute
-            .initializer()?
-            .value()
-            .ok()?
-            .as_static_value()?;
+        let tag_kind = node.tag_name_kind();
+
+        let role_attribute = node.find_attribute_or_vue_binding("role")?;
+        let role_attribute_static_value = role_attribute.as_static_value()?;
         let role_attribute_value = role_attribute_static_value.text();
 
         // Exception: role `treeitem` is allowed on `<li>`
         // Reason: `treeitem` has the superclass role `listitem`, which means it is made to be used on `<li>`
         // Ref: https://w3c.github.io/aria/#treeitem
         // Ref: https://www.w3.org/WAI/ARIA/apg/patterns/treeview/examples/treeview-1a/
-        if is_html_tag(node, source_type, "li") && role_attribute_value == "treeitem" {
+        if tag_kind == Some(T![li]) && role_attribute_value == "treeitem" {
             return None;
         }
 
@@ -94,10 +93,7 @@ impl Rule for NoNoninteractiveElementToInteractiveRole {
         {
             // <div> and <span> are considered neither interactive nor non-interactive, depending on the presence or absence of the role attribute.
             // We don't report <div> and <span> here, because we cannot determine whether they are interactive or non-interactive.
-            if ROLE_SENSITIVE_ELEMENTS
-                .iter()
-                .any(|el| is_html_tag(node, source_type, el))
-            {
+            if tag_kind.is_some_and(|kind| ROLE_SENSITIVE_ELEMENTS.contains(kind)) {
                 return None;
             }
 
@@ -127,7 +123,7 @@ impl Rule for NoNoninteractiveElementToInteractiveRole {
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<HtmlRuleAction> {
         let node = ctx.query();
-        let role_attribute = node.find_attribute_by_name("role")?;
+        let role_attribute = node.find_attribute_or_vue_binding("role")?;
 
         let mut mutation = ctx.root().begin();
         mutation.remove_node(role_attribute);
@@ -140,7 +136,9 @@ impl Rule for NoNoninteractiveElementToInteractiveRole {
     }
 }
 
-static ROLE_SENSITIVE_ELEMENTS: [&str; 2] = ["div", "span"];
+/// `<div>` and `<span>` are neither interactive nor non-interactive without a
+/// role, so they are not reported here.
+const ROLE_SENSITIVE_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(T![div], T![span]);
 
 pub struct RuleState {
     attribute_range: TextRange,

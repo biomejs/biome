@@ -4,7 +4,7 @@ use js_sys::Error;
 use wasm_bindgen::prelude::*;
 
 use biome_service::workspace::{
-    self, ChangeFileParams, CloseFileParams, DropPatternParams, FileExitsParams, FixFileParams,
+    self, ChangeFileParams, CloseFileParams, DropPatternParams, FileExistsParams, FixFileParams,
     FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams,
     GetFileContentParams, GetFormatterIRParams, GetModuleGraphParams, GetRegisteredTypesParams,
     GetSemanticModelParams, GetSyntaxTreeParams, GetTypeInfoParams, OpenProjectParams,
@@ -215,8 +215,8 @@ impl Workspace {
     }
 
     #[wasm_bindgen(js_name = fileExists)]
-    pub fn file_exists(&self, params: IFileExitsParams) -> Result<bool, Error> {
-        let params: FileExitsParams =
+    pub fn file_exists(&self, params: IFileExistsParams) -> Result<bool, Error> {
+        let params: FileExistsParams =
             serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
         self.inner.file_exists(params).map_err(into_error)
     }

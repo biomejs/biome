@@ -12,6 +12,7 @@ impl FormatRule<AnyCssKeyframesSelector> for FormatAnyCssKeyframesSelector {
             AnyCssKeyframesSelector::CssKeyframesIdentSelector(node) => node.format().fmt(f),
             AnyCssKeyframesSelector::CssKeyframesPercentageSelector(node) => node.format().fmt(f),
             AnyCssKeyframesSelector::CssKeyframesRangeSelector(node) => node.format().fmt(f),
+            AnyCssKeyframesSelector::ScssKeyframesSelector(node) => node.format().fmt(f),
         }
     }
 }

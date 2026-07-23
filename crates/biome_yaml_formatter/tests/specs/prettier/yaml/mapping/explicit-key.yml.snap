@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/mapping/explicit-key.yml
 ---
+
 # Input
 
 ```yml
@@ -27,7 +28,7 @@ info: yaml/mapping/explicit-key.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,10 +1,13 @@
+@@ -1,8 +1,11 @@
 -key1: value
 -key2: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
 -longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong: value
@@ -44,10 +45,6 @@ info: yaml/mapping/explicit-key.yml
    foo: bar
  ? multiline
    scalar
-   key
--: value
-+: value
-\ No newline at end of file
 ```
 
 # Output
@@ -65,7 +62,8 @@ info: yaml/mapping/explicit-key.yml
 ? multiline
   scalar
   key
-: value```
+: value
+```
 
 # Lines exceeding max width of 80 characters
 ```

@@ -108,7 +108,7 @@ CssRoot {
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
-                                    name: ScssInterpolatedIdentifier {
+                                    name: ScssInterpolatedDashedIdentifier {
                                         items: ScssInterpolatedIdentifierPartList [
                                             CssIdentifier {
                                                 value_token: IDENT@53..64 "--theme-" [Newline("\n"), Whitespace("  ")] [],
@@ -131,9 +131,9 @@ CssRoot {
                                         ],
                                     },
                                     colon_token: COLON@72..74 ":" [] [Whitespace(" ")],
-                                    value: ScssExpression {
-                                        items: ScssExpressionItemList [
-                                            CssIdentifier {
+                                    value: CssCustomPropertyValue {
+                                        components: CssCustomPropertyComponentList [
+                                            CssCustomIdentifier {
                                                 value_token: IDENT@74..77 "red" [] [],
                                             },
                                         ],
@@ -218,7 +218,7 @@ CssRoot {
             2: CSS_DECLARATION_WITH_SEMICOLON@53..78
               0: CSS_DECLARATION@53..77
                 0: CSS_GENERIC_PROPERTY@53..77
-                  0: SCSS_INTERPOLATED_IDENTIFIER@53..72
+                  0: SCSS_INTERPOLATED_DASHED_IDENTIFIER@53..72
                     0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@53..72
                       0: CSS_IDENTIFIER@53..64
                         0: IDENT@53..64 "--theme-" [Newline("\n"), Whitespace("  ")] []
@@ -233,9 +233,9 @@ CssRoot {
                                 0: IDENT@67..71 "slot" [] []
                         3: R_CURLY@71..72 "}" [] []
                   1: COLON@72..74 ":" [] [Whitespace(" ")]
-                  2: SCSS_EXPRESSION@74..77
-                    0: SCSS_EXPRESSION_ITEM_LIST@74..77
-                      0: CSS_IDENTIFIER@74..77
+                  2: CSS_CUSTOM_PROPERTY_VALUE@74..77
+                    0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@74..77
+                      0: CSS_CUSTOM_IDENTIFIER@74..77
                         0: IDENT@74..77 "red" [] []
                 1: (empty)
               1: SEMICOLON@77..78 ";" [] []

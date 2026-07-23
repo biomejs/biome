@@ -1,7 +1,8 @@
 use crate::prelude::*;
 use crate::utils::scss_each::FormatGapAfterEachIn;
 use biome_css_syntax::{
-    CssSyntaxToken, ScssEachBindingList, ScssEachHeader, ScssEachHeaderFields, ScssEachValueList,
+    AnyScssExpressionItem, CssSyntaxToken, ScssEachBindingList, ScssEachHeader,
+    ScssEachHeaderFields, ScssEachValueList, ScssMapExpression, single_expression_item,
 };
 use biome_formatter::{format_args, write};
 use biome_rowan::AstSeparatedList;
@@ -26,30 +27,42 @@ impl FormatNodeRule<ScssEachHeader> for FormatScssEachHeader {
                 [
                     bindings.format(),
                     soft_line_break_or_space(),
-                    in_token.format()
+                    in_token.format().with_text_case(CssCase::Preserve)
                 ]
             );
         }
 
         if value_count == 1 {
+            let should_break_before_in =
+                binding_count > 0 && has_single_map_with_blank_lines(&values);
+            let should_indent_after_bindings = should_break_before_in && binding_count > 1;
             let gap_before_in = format_with(|f| {
-                if binding_count > 0 {
-                    write!(f, [space()])
-                } else {
+                if binding_count == 0 || should_break_before_in {
                     write!(f, [soft_line_break_or_space()])
+                } else {
+                    write!(f, [space()])
+                }
+            });
+            let in_clause = format_with(|f| {
+                write!(
+                    f,
+                    [
+                        gap_before_in,
+                        in_token.format().with_text_case(CssCase::Preserve),
+                        FormatGapAfterEachIn::new(&in_token, values.syntax()),
+                        values.format()
+                    ]
+                )
+            });
+            let header_tail = format_with(|f| {
+                if should_indent_after_bindings {
+                    write!(f, [indent(&in_clause)])
+                } else {
+                    write!(f, [&in_clause])
                 }
             });
 
-            return write!(
-                f,
-                [group(&format_args![
-                    bindings.format(),
-                    gap_before_in,
-                    in_token.format(),
-                    FormatGapAfterEachIn::new(&in_token, values.syntax()),
-                    values.format()
-                ])]
-            );
+            return write!(f, [group(&format_args![bindings.format(), header_tail])]);
         }
 
         write!(
@@ -61,6 +74,54 @@ impl FormatNodeRule<ScssEachHeader> for FormatScssEachHeader {
             }]
         )
     }
+}
+
+/// Detects a single map value whose pairs had blank lines in source.
+///
+/// ```scss
+/// @each $k, $v in (
+///   a: b,
+///
+///   c: d
+/// ) {
+/// }
+/// ```
+fn has_single_map_with_blank_lines(values: &ScssEachValueList) -> bool {
+    let mut value_elements = values.elements();
+    let Some(value) = value_elements.next() else {
+        return false;
+    };
+
+    if value_elements.next().is_some() {
+        return false;
+    }
+
+    value.node().is_ok_and(|value| {
+        single_expression_item(value).is_some_and(|item| {
+            matches!(
+                item,
+                AnyScssExpressionItem::ScssMapExpression(map)
+                    if has_blank_line_between_pairs(&map)
+            )
+        })
+    })
+}
+
+/// Returns `true` when a map keeps a blank line between pairs.
+///
+/// ```scss
+/// $map: (
+///   a: b,
+///
+///   c: d
+/// );
+/// ```
+fn has_blank_line_between_pairs(node: &ScssMapExpression) -> bool {
+    node.pairs().elements().skip(1).any(|element| {
+        element
+            .node()
+            .is_ok_and(|pair| get_lines_before(pair.syntax()) > 1)
+    })
 }
 
 /// Formats multi-value `@each` headers as one fill sequence.
@@ -97,7 +158,7 @@ impl Format<CssFormatContext> for FormatScssEachMultiValueHeader<'_> {
                 [
                     bindings.format(),
                     soft_line_break_or_space(),
-                    in_token.format()
+                    in_token.format().with_text_case(CssCase::Preserve)
                 ]
             );
         };
@@ -113,7 +174,7 @@ impl Format<CssFormatContext> for FormatScssEachMultiValueHeader<'_> {
                 &group(&format_args![
                     bindings.format(),
                     soft_line_break_or_space(),
-                    in_token.format(),
+                    in_token.format().with_text_case(CssCase::Preserve),
                     FormatGapAfterEachIn::new(in_token, first_value_syntax),
                     format_leading_comments(values.syntax()),
                     first_value_node.format(),
@@ -137,7 +198,7 @@ impl Format<CssFormatContext> for FormatScssEachMultiValueHeader<'_> {
                 [group(&format_args![
                     bindings.format(),
                     space(),
-                    in_token.format(),
+                    in_token.format().with_text_case(CssCase::Preserve),
                     FormatGapAfterEachIn::new(in_token, first_value_syntax),
                     format_leading_comments(values.syntax()),
                     first_value_node.format(),
@@ -159,13 +220,17 @@ impl Format<CssFormatContext> for FormatScssEachMultiValueHeader<'_> {
             if index + 1 == binding_count {
                 // The final binding owns `in` and the first value.
                 if has_value_list_line_comment {
-                    // `@each $x in // list\n a, b` keeps the comment after `in`.
+                    // Keep the comment after `in` in:
+                    //
+                    // @each $x in // list
+                    //   a, b {
+                    // }
                     fill.entry(
                         &separator,
                         &group(&indent(&format_args![
                             binding.node()?.format(),
                             hard_line_break(),
-                            in_token.format(),
+                            in_token.format().with_text_case(CssCase::Preserve),
                             space(),
                             format_leading_comments(values.syntax())
                         ])),
@@ -186,7 +251,7 @@ impl Format<CssFormatContext> for FormatScssEachMultiValueHeader<'_> {
                     &group(&indent(&format_args![
                         binding.node()?.format(),
                         soft_line_break_or_space(),
-                        in_token.format(),
+                        in_token.format().with_text_case(CssCase::Preserve),
                         FormatGapAfterEachIn::new(in_token, first_value_syntax),
                         format_leading_comments(values.syntax()),
                         first_value_node.format(),

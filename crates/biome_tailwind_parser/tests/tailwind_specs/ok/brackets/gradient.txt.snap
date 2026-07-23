@@ -89,8 +89,9 @@ TwRoot {
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@63..65 "to" [] [],
                 minus_token: DASH@65..66 "-" [] [],
-                value: TwNamedValue {
-                    value_token: TW_VALUE@66..69 "90%" [] [],
+                value: TwPercentageValue {
+                    value_token: TW_NUMBER@66..68 "90" [] [],
+                    remainder_token: PERCENT@68..69 "%" [] [],
                 },
                 modifier: missing (optional),
             },
@@ -163,8 +164,9 @@ TwRoot {
       2: TW_FUNCTIONAL_CANDIDATE@63..69
         0: TW_BASE@63..65 "to" [] []
         1: DASH@65..66 "-" [] []
-        2: TW_NAMED_VALUE@66..69
-          0: TW_VALUE@66..69 "90%" [] []
+        2: TW_PERCENTAGE_VALUE@66..69
+          0: TW_NUMBER@66..68 "90" [] []
+          1: PERCENT@68..69 "%" [] []
         3: (empty)
       3: (empty)
   2: EOF@69..70 "" [Newline("\n")] []

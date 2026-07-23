@@ -4,12 +4,13 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExportNamedSpecifier, AnyJsFunction, AnyJsIdentifierUsage, JsClassDeclaration,
-    JsConstructorClassMember, JsFileSource, JsGetterClassMember, JsGetterObjectMember,
-    JsMethodClassMember, JsMethodObjectMember, JsModule, JsScript, JsSetterClassMember,
-    JsSetterObjectMember, JsStaticInitializationBlockClassMember, JsVariableDeclarationClause,
-    TsDeclareStatement, TsModuleDeclaration, TsPropertySignatureTypeMember,
+    JsConstructorClassMember, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
+    JsMethodObjectMember, JsModule, JsScript, JsSetterClassMember, JsSetterObjectMember,
+    JsStaticInitializationBlockClassMember, JsVariableDeclarationClause, TsDeclareStatement,
+    TsModuleDeclaration, TsPropertySignatureTypeMember,
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange, declare_node_union};
 use biome_rule_options::no_invalid_use_before_declaration::NoInvalidUseBeforeDeclarationOptions;
 

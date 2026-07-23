@@ -13,6 +13,22 @@
 	color/* red, */: blue;
 }
 
+/* Comment after property value should stay after the value */
+.selector {
+	color: red/* keep */;
+}
+
+/* Multiple after-colon comments stay near the colon */
+.selector {
+	color:/* first */ /* second */red;
+}
+
+/* Before-colon block comment can break before the colon */
+.selector {
+	color/* before */
+:red;
+}
+
 /* Comment before property name should still work */
 .selector {
   /* comment */

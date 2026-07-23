@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/spec-example-7-16-flow-mapping-entries.yml
 ---
+
 # Input
 
 ```yml
@@ -26,7 +27,6 @@ implicit: entry,
 +implicit: entry,
 +?
 +}
-\ No newline at end of file
 ```
 
 # Output
@@ -36,4 +36,5 @@ implicit: entry,
 ? explicit: entry,
 implicit: entry,
 ?
-}```
+}
+```

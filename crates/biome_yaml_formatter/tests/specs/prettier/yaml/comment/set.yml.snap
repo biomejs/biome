@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/comment/set.yml
 ---
+
 # Input
 
 ```yml
@@ -19,12 +20,12 @@ info: yaml/comment/set.yml
 @@ -1,2 +1,2 @@
  - 123
 -  # 456
-+  
-\ No newline at end of file
++# 456
 ```
 
 # Output
 
 ```yml
 - 123
-  ```
+# 456
+```

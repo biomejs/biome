@@ -11,6 +11,13 @@ impl FormatNodeRule<CssMediaNotCondition> for FormatCssMediaNotCondition {
             condition,
         } = node.as_fields();
 
-        write!(f, [not_token.format(), space(), condition.format()])
+        write!(
+            f,
+            [
+                not_token.format()?.with_text_case(CssCase::Preserve),
+                space(),
+                condition.format()
+            ]
+        )
     }
 }

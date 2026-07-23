@@ -16,6 +16,15 @@ impl FormatNodeRule<CssCounterStyleAtRuleDeclarator> for FormatCssCounterStyleAt
             name,
         } = node.as_fields();
 
-        write!(f, [counter_style_token.format(), space(), name.format()])
+        write!(
+            f,
+            [
+                counter_style_token
+                    .format()?
+                    .with_text_case(CssCase::Lowercase),
+                space(),
+                name.format()
+            ]
+        )
     }
 }

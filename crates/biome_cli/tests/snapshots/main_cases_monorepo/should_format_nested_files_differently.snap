@@ -2,6 +2,18 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## `biome.json`
+
+```json
+{
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  }
+}
+```
+
 ## `packages/lib/biome.json`
 
 ```json
@@ -14,18 +26,6 @@ expression: redactor(content)
   "javascript": {
     "formatter": {
       "quoteStyle": "single"
-    }
-  }
-}
-```
-
-## `biome.json`
-
-```json
-{
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "double"
     }
   }
 }

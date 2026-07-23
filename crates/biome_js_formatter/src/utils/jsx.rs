@@ -1,6 +1,6 @@
 use crate::JsCommentStyle;
 use crate::prelude::*;
-use biome_formatter::{QuoteStyle, comments::CommentStyle, format_args, write};
+use biome_formatter::{FormatOptions, QuoteStyle, comments::CommentStyle, format_args, write};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsxChild, AnyJsxTag, JsComputedMemberExpression,
     JsStaticMemberExpression, JsSyntaxKind, JsxChildList, JsxExpressionChild, JsxTagExpression,
@@ -423,10 +423,17 @@ impl JsxWord {
 
 impl Format<JsFormatContext> for JsxWord {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
-        f.write_element(FormatElement::LocatedTokenText {
-            source_position: self.source_position,
-            slice: self.text.clone(),
-        })
+        if f.source_map_generation().is_enabled() {
+            f.write_element(FormatElement::MappedLocatedTokenText {
+                slice: self.text.clone(),
+                source_position: self.source_position,
+            })
+        } else {
+            f.write_element(FormatElement::LocatedTokenText {
+                slice: self.text.clone(),
+                text_width: TextWidth::from_text(&self.text, f.options().indent_width()),
+            })
+        }
     }
 }
 
@@ -582,7 +589,8 @@ mod tests {
     };
     use biome_formatter::comments::Comments;
     use biome_js_parser::{JsParserOptions, parse};
-    use biome_js_syntax::{JsFileSource, JsxChildList, JsxText};
+    use biome_js_syntax::{JsxChildList, JsxText};
+    use biome_languages::JsFileSource;
     use biome_rowan::{AstNode, TextSize};
 
     #[test]

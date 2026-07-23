@@ -5,3 +5,5 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@future fn({ width:300px })   query{color:red}

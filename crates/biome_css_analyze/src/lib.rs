@@ -18,12 +18,14 @@ use biome_analyze::{
     BatchPluginVisitor, ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases,
     PluginTargetLanguage, RuleAction, RuleRegistry, to_analyzer_suppressions,
 };
-use biome_css_syntax::{CssFileSource, CssLanguage, TextRange};
+use biome_css_syntax::{CssLanguage, TextRange};
 use biome_diagnostics::Error;
-use biome_module_graph::ModuleGraph;
+use biome_languages::CssFileSource;
+use biome_module_graph::ModuleDb;
 use biome_project_layout::ProjectLayout;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
+use std::rc::Rc;
 use std::sync::{Arc, LazyLock};
 
 pub(crate) type CssRuleAction = RuleAction<CssLanguage>;
@@ -34,12 +36,21 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
     metadata
 });
 
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Default)]
 pub struct CssAnalyzerServices<'a> {
     pub semantic_model: Option<&'a biome_css_semantic::model::SemanticModel>,
     pub file_source: CssFileSource,
-    pub module_graph: Option<Arc<ModuleGraph>>,
+    pub module_db: Option<Rc<dyn ModuleDb>>,
     pub project_layout: Option<Arc<ProjectLayout>>,
+}
+
+impl std::fmt::Debug for CssAnalyzerServices<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssAnalyzerServices")
+            .field("file_source", &self.file_source)
+            .field("module_db", &self.module_db.as_ref().map(|_| "..."))
+            .finish_non_exhaustive()
+    }
 }
 
 impl<'a> CssAnalyzerServices<'a> {
@@ -56,8 +67,8 @@ impl<'a> CssAnalyzerServices<'a> {
         self
     }
 
-    pub fn with_module_graph(mut self, module_graph: Arc<ModuleGraph>) -> Self {
-        self.module_graph = Some(module_graph);
+    pub fn with_module_db(mut self, module_db: Rc<dyn ModuleDb>) -> Self {
+        self.module_db = Some(module_db);
         self
     }
 
@@ -82,10 +93,15 @@ where
     F: FnMut(&dyn AnalyzerSignal<CssLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
+    let module_db = services.module_db.clone();
     analyze_with_inspect_matcher(
         root,
         filter,
-        |_| {},
+        move |_| {
+            if let Some(db) = module_db.as_ref() {
+                db.unwind_if_revision_cancelled();
+            }
+        },
         options,
         services,
         plugins,
@@ -164,8 +180,8 @@ where
         let semantic_model = biome_css_semantic::semantic_model(root);
         services.insert_service(Arc::new(semantic_model));
     }
-    if let Some(module_graph) = css_services.module_graph {
-        services.insert_service(module_graph);
+    if let Some(module_db) = css_services.module_db {
+        services.insert_service(module_db);
     }
     if let Some(project_layout) = css_services.project_layout {
         services.insert_service(project_layout);
@@ -181,7 +197,7 @@ where
         .cloned()
         .collect();
 
-    if !css_plugins.is_empty() {
+    if filter.match_plugins() && !css_plugins.is_empty() {
         // SAFETY: All plugins have been verified to target CSS above.
         unsafe {
             analyzer.add_visitor(
@@ -210,11 +226,12 @@ mod tests {
     use biome_console::{Markup, markup};
     use biome_css_parser::{CssParserOptions, parse_css};
     use biome_css_semantic::semantic_model;
-    use biome_css_syntax::{CssFileSource, TextRange};
+    use biome_css_syntax::TextRange;
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{
         Diagnostic, DiagnosticExt, PrintDiagnostic, Severity, category, print_diagnostic_to_string,
     };
+    use biome_languages::CssFileSource;
     use std::slice;
 
     #[ignore]

@@ -812,12 +812,13 @@ impl<'t, Lex: LexerWithCheckpoint<'t>> Iterator for LookaheadIterator<'_, 't, Le
         let kind = lexer.next_token(Lex::LexContext::default());
         // Lex the next token and cache it in the lookahead cache. Needed to cache it right away
         // because of the diagnostic.
-        self.buffered.lookahead.push_back(lexer.checkpoint());
+        let checkpoint = lexer.checkpoint();
+        debug_assert_eq!(kind, checkpoint.current_kind);
+        let lookahead = LookaheadToken::from(&checkpoint);
 
-        Some(LookaheadToken {
-            kind,
-            flags: lexer.current_flags(),
-        })
+        self.buffered.lookahead.push_back(checkpoint);
+
+        Some(lookahead)
     }
 }
 
@@ -826,12 +827,18 @@ impl<'t, Lex: LexerWithCheckpoint<'t>> FusedIterator for LookaheadIterator<'_, '
 #[derive(Debug)]
 pub struct LookaheadToken<Kind> {
     kind: Kind,
+    current_start: TextSize,
+    position: TextSize,
     flags: TokenFlags,
 }
 
 impl<Kind: SyntaxKind> LookaheadToken<Kind> {
     pub fn kind(&self) -> Kind {
         self.kind
+    }
+
+    pub fn text_range(&self) -> TextRange {
+        TextRange::new(self.current_start, self.position)
     }
 
     pub fn has_preceding_line_break(&self) -> bool {
@@ -847,6 +854,8 @@ impl<Kind: SyntaxKind> From<&LexerCheckpoint<Kind>> for LookaheadToken<Kind> {
     fn from(checkpoint: &LexerCheckpoint<Kind>) -> Self {
         Self {
             kind: checkpoint.current_kind,
+            current_start: checkpoint.current_start,
+            position: checkpoint.position,
             flags: checkpoint.current_flags,
         }
     }

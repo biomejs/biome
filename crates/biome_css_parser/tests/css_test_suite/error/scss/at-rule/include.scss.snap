@@ -14,8 +14,6 @@ expression: snapshot
 
 @include button(, $padding);
 
-@include button
-
 ```
 
 
@@ -31,6 +29,7 @@ CssRoot {
                 include_token: INCLUDE_KW@1..8 "include" [] [],
                 name: missing (required),
                 arguments: missing (optional),
+                using_clause: missing (optional),
                 block: missing (optional),
                 semicolon_token: SEMICOLON@8..9 ";" [] [],
             },
@@ -56,6 +55,7 @@ CssRoot {
                     ],
                     r_paren_token: R_PAREN@28..29 ")" [] [],
                 },
+                using_clause: missing (optional),
                 block: missing (optional),
                 semicolon_token: SEMICOLON@29..30 ";" [] [],
             },
@@ -87,6 +87,7 @@ CssRoot {
                     ],
                     r_paren_token: R_PAREN@57..58 ")" [] [],
                 },
+                using_clause: missing (optional),
                 block: missing (optional),
                 semicolon_token: SEMICOLON@58..59 ";" [] [],
             },
@@ -116,33 +117,22 @@ CssRoot {
                     ],
                     r_paren_token: R_PAREN@87..88 ")" [] [],
                 },
+                using_clause: missing (optional),
                 block: missing (optional),
                 semicolon_token: SEMICOLON@88..89 ";" [] [],
             },
         },
-        CssAtRule {
-            at_token: AT@89..92 "@" [Newline("\n"), Newline("\n")] [],
-            rule: ScssIncludeAtRule {
-                include_token: INCLUDE_KW@92..100 "include" [] [Whitespace(" ")],
-                name: CssIdentifier {
-                    value_token: IDENT@100..106 "button" [] [],
-                },
-                arguments: missing (optional),
-                block: missing (optional),
-                semicolon_token: missing (optional),
-            },
-        },
     ],
-    eof_token: EOF@106..107 "" [Newline("\n")] [],
+    eof_token: EOF@89..90 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..107
+0: CSS_ROOT@0..90
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..106
+  1: CSS_ROOT_ITEM_LIST@0..89
     0: CSS_AT_RULE@0..9
       0: AT@0..1 "@" [] []
       1: SCSS_INCLUDE_AT_RULE@1..9
@@ -150,7 +140,8 @@ CssRoot {
         1: (empty)
         2: (empty)
         3: (empty)
-        4: SEMICOLON@8..9 ";" [] []
+        4: (empty)
+        5: SEMICOLON@8..9 ";" [] []
     1: CSS_AT_RULE@9..30
       0: AT@9..12 "@" [Newline("\n"), Newline("\n")] []
       1: SCSS_INCLUDE_AT_RULE@12..30
@@ -167,7 +158,8 @@ CssRoot {
                     0: IDENT@22..28 "radius" [] []
           2: R_PAREN@28..29 ")" [] []
         3: (empty)
-        4: SEMICOLON@29..30 ";" [] []
+        4: (empty)
+        5: SEMICOLON@29..30 ";" [] []
     2: CSS_AT_RULE@30..59
       0: AT@30..33 "@" [Newline("\n"), Newline("\n")] []
       1: SCSS_INCLUDE_AT_RULE@33..59
@@ -188,7 +180,8 @@ CssRoot {
                   2: (empty)
           2: R_PAREN@57..58 ")" [] []
         3: (empty)
-        4: SEMICOLON@58..59 ";" [] []
+        4: (empty)
+        5: SEMICOLON@58..59 ";" [] []
     3: CSS_AT_RULE@59..89
       0: AT@59..62 "@" [Newline("\n"), Newline("\n")] []
       1: SCSS_INCLUDE_AT_RULE@62..89
@@ -208,17 +201,9 @@ CssRoot {
                     0: IDENT@80..87 "padding" [] []
           2: R_PAREN@87..88 ")" [] []
         3: (empty)
-        4: SEMICOLON@88..89 ";" [] []
-    4: CSS_AT_RULE@89..106
-      0: AT@89..92 "@" [Newline("\n"), Newline("\n")] []
-      1: SCSS_INCLUDE_AT_RULE@92..106
-        0: INCLUDE_KW@92..100 "include" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@100..106
-          0: IDENT@100..106 "button" [] []
-        2: (empty)
-        3: (empty)
         4: (empty)
-  2: EOF@106..107 "" [Newline("\n")] []
+        5: SEMICOLON@88..89 ";" [] []
+  2: EOF@89..90 "" [Newline("\n")] []
 
 ```
 
@@ -281,19 +266,5 @@ include.scss:5:26 parse ━━━━━━━━━━━━━━━━━━�
   - ratio
   - custom property
   - function
-  
-include.scss:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `;` but instead the file ends
-  
-     9 │ @include button
-  > 10 │ 
-       │ 
-  
-  i the file ends here
-  
-     9 │ @include button
-  > 10 │ 
-       │ 
   
 ```

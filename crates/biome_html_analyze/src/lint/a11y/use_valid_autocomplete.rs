@@ -3,12 +3,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::{T, element_ext::AnyHtmlTagElement};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_valid_autocomplete::UseValidAutocompleteOptions;
 use phf::phf_set;
-
-use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Use valid values for the `autocomplete` attribute on `input` elements.
@@ -53,7 +51,7 @@ declare_lint_rule! {
     /// - [HTML attribute: autocomplete - HTML: HyperText Markup Language | MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete)
     ///
     pub UseValidAutocomplete {
-        version: "next",
+        version: "2.5.0",
         name: "useValidAutocomplete",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("autocomplete-valid").inspired()],
@@ -70,10 +68,9 @@ impl Rule for UseValidAutocomplete {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
 
         let name = node.tag_name()?;
-        if !is_html_tag(node, source_type, "input")
+        if node.tag_name_kind() != Some(T![input])
             && ctx
                 .options()
                 .input_components
@@ -84,12 +81,8 @@ impl Rule for UseValidAutocomplete {
             return None;
         }
 
-        let autocomplete_attribute = node.attributes().find_by_name("autocomplete")?;
-        let autocomplete_val = autocomplete_attribute
-            .initializer()?
-            .value()
-            .ok()?
-            .as_static_value()?;
+        let autocomplete_attribute = node.find_attribute_or_vue_binding("autocomplete")?;
+        let autocomplete_val = autocomplete_attribute.as_static_value()?;
         let autocompletes = autocomplete_val
             .as_string_constant()?
             .split_ascii_whitespace()

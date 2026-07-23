@@ -91,6 +91,78 @@ ns|foo-#{$name} {
   color: red;
 }
 
+:foo-#{$name} {
+  color: red;
+}
+
+:foo-#{$name}-bar {
+  color: red;
+}
+
+:#{$name}-foo {
+  color: red;
+}
+
+::foo-#{$name} {
+  color: red;
+}
+
+::foo-#{$name}-bar {
+  color: red;
+}
+
+::#{$name}-foo {
+  color: red;
+}
+
+:foo-#{$name}(bar) {
+  color: red;
+}
+
+:#{$name}-foo(bar) {
+  color: red;
+}
+
+:#{$name}(bar) {
+  color: red;
+}
+
+:#{$name}(.item, [hidden]) {
+  color: red;
+}
+
+:#{$name}(> img, + .item) {
+  color: red;
+}
+
+:#{$name}(2n + #{$offset}) {
+  color: red;
+}
+
+:#{$name}(en, #{$locale}) {
+  color: red;
+}
+
+::foo-#{$name}(bar) {
+  color: red;
+}
+
+::#{$name}-foo(bar) {
+  color: red;
+}
+
+::#{$name}(bar) {
+  color: red;
+}
+
+::#{$name}(.item, [hidden]) {
+  color: red;
+}
+
+::#{$name}(#{$arg}) {
+  color: red;
+}
+
 %#{$placeholder} {
   color: red;
 }

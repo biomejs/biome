@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/spec-example-7-5-double-quoted-line-breaks.yml
 ---
+
 # Input
 
 ```yml
@@ -29,7 +30,6 @@ to a line feed, or 	\
  to a line feed, or 	\
 -\ 	non-content"
 + \ 	non-content"
-\ No newline at end of file
 ```
 
 # Output
@@ -39,4 +39,5 @@ to a line feed, or 	\
 to a space,	
  
 to a line feed, or 	\
- \ 	non-content"```
+ \ 	non-content"
+```

@@ -21,28 +21,32 @@ biome_console        = { workspace = true }
 biome_deserialize    = { workspace = true }
 biome_diagnostics    = { workspace = true }
 biome_fs             = { workspace = true }
+biome_languages      = { workspace = true }
 biome_line_index     = { workspace = true }
 biome_lsp_converters = { workspace = true }
 biome_resolver       = { workspace = true }
 biome_rowan          = { workspace = true }
-biome_service        = { workspace = true }
+biome_service        = { workspace = true, features = ["stable"] }
 biome_text_edit      = { workspace = true }
 biome_text_size      = { workspace = true, features = ["serde"] }
 camino               = { workspace = true }
 crossbeam            = { workspace = true }
 futures              = "0.3.32"
 papaya               = { workspace = true }
+parking_lot          = { workspace = true }
 rustc-hash           = { workspace = true }
+salsa                = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }
-tokio                = { workspace = true, features = ["io-std", "rt"] }
+tokio                = { workspace = true, features = ["io-std", "rt", "time"] }
+tower                = { workspace = true }
 tower-lsp-server     = { workspace = true }
 tracing              = { workspace = true, features = ["attributes"] }
 url                  = { workspace = true }
 uuid                 = { workspace = true, features = ["v4"] }
 
 [dev-dependencies]
-tokio = { workspace = true, features = ["macros", "rt", "rt-multi-thread"] }
+tokio = { workspace = true, features = ["io-util", "macros", "rt", "rt-multi-thread"] }
 tower = { workspace = true, features = ["timeout"] }
 
 [lints]

@@ -1,0 +1,41 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/flow/flow_sequence_formatting.yaml
+---
+
+# Input
+
+```yaml
+formatted: [1, 'abc', "xyz", plain]
+unformatted: [  1  ,  'abc',"xyz"  , plain ]
+emptyLineFormatted: [
+  a,
+
+  b,
+]
+emptyLineUnformatted: [ a,
+
+b ]
+
+```
+
+
+# Formatted
+
+```yaml
+formatted: [1, 'abc', "xyz", plain]
+unformatted: [1, 'abc', "xyz", plain]
+emptyLineFormatted:
+  [
+    a,
+
+    b,
+  ]
+emptyLineUnformatted:
+  [
+    a,
+
+    b,
+  ]
+
+```

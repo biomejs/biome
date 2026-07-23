@@ -4,19 +4,22 @@
 pub mod attribute_ext;
 mod directive_ext;
 pub mod element_ext;
-mod file_source;
 mod generated;
 mod script_type;
 pub mod static_value;
 mod string_ext;
+mod svg;
 mod syntax_node;
+pub mod tags;
 mod text_ext;
+mod vue_ext;
 
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
-pub use file_source::{HtmlFileSource, HtmlTextExpressions, HtmlVariant};
 pub use generated::*;
 pub use script_type::*;
+pub use svg::*;
 pub use syntax_node::*;
+pub use tags::HTML_TAG_NAMES;
 
 use crate::HtmlSyntaxKind::{
     ASTRO_BOGUS_FRONTMATTER, HTML_BOGUS, HTML_BOGUS_ATTRIBUTE, HTML_BOGUS_ELEMENT,
@@ -123,10 +126,14 @@ impl TryFrom<HtmlSyntaxKind> for TriviaPieceKind {
 pub fn inner_string_text(token: &HtmlSyntaxToken) -> TokenText {
     let mut text = token.token_text_trimmed();
     if token.kind() == HtmlSyntaxKind::HTML_STRING_LITERAL {
-        // remove string delimiters
-        // SAFETY: string literal token have a delimiters at the start and the end of the string
-        let range = TextRange::new(1.into(), text.len() - TextSize::from(1));
-        text = text.slice(range);
+        let text_str = text.text();
+        if text_str.len() >= 2
+            && ((text_str.starts_with('"') && text_str.ends_with('"'))
+                || (text_str.starts_with('\'') && text_str.ends_with('\'')))
+        {
+            let range = TextRange::new(1.into(), text.len() - TextSize::from(1));
+            text = text.slice(range);
+        }
     }
     text
 }

@@ -63,6 +63,7 @@ CssRoot {
                     ],
                     r_paren_token: R_PAREN@54..55 ")" [] [],
                 },
+                using_clause: missing (optional),
                 block: missing (optional),
                 semicolon_token: SEMICOLON@55..56 ";" [] [],
             },
@@ -112,6 +113,7 @@ CssRoot {
                     ],
                     r_paren_token: R_PAREN@110..111 ")" [] [],
                 },
+                using_clause: missing (optional),
                 block: missing (optional),
                 semicolon_token: SEMICOLON@111..112 ";" [] [],
             },
@@ -159,6 +161,7 @@ CssRoot {
                     ],
                     r_paren_token: R_PAREN@169..170 ")" [] [],
                 },
+                using_clause: missing (optional),
                 block: missing (optional),
                 semicolon_token: SEMICOLON@170..171 ";" [] [],
             },
@@ -208,6 +211,7 @@ CssRoot {
                     ],
                     r_paren_token: R_PAREN@227..228 ")" [] [],
                 },
+                using_clause: missing (optional),
                 block: missing (optional),
                 semicolon_token: SEMICOLON@228..229 ";" [] [],
             },
@@ -253,7 +257,8 @@ CssRoot {
                   0: IDENT@43..54 "ease-in-out" [] []
           2: R_PAREN@54..55 ")" [] []
         3: (empty)
-        4: SEMICOLON@55..56 ";" [] []
+        4: (empty)
+        5: SEMICOLON@55..56 ";" [] []
     1: CSS_AT_RULE@56..112
       0: AT@56..58 "@" [Newline("\n")] []
       1: SCSS_INCLUDE_AT_RULE@58..112
@@ -285,7 +290,8 @@ CssRoot {
                   0: IDENT@99..110 "ease-in-out" [] []
           2: R_PAREN@110..111 ")" [] []
         3: (empty)
-        4: SEMICOLON@111..112 ";" [] []
+        4: (empty)
+        5: SEMICOLON@111..112 ";" [] []
     2: CSS_AT_RULE@112..171
       0: AT@112..114 "@" [Newline("\n")] []
       1: SCSS_INCLUDE_AT_RULE@114..171
@@ -316,7 +322,8 @@ CssRoot {
                   0: IDENT@158..169 "ease-in-out" [] []
           2: R_PAREN@169..170 ")" [] []
         3: (empty)
-        4: SEMICOLON@170..171 ";" [] []
+        4: (empty)
+        5: SEMICOLON@170..171 ";" [] []
     3: CSS_AT_RULE@171..229
       0: AT@171..173 "@" [Newline("\n")] []
       1: SCSS_INCLUDE_AT_RULE@173..229
@@ -348,7 +355,8 @@ CssRoot {
                   0: IDENT@216..227 "ease-in-out" [] []
           2: R_PAREN@227..228 ")" [] []
         3: (empty)
-        4: SEMICOLON@228..229 ";" [] []
+        4: (empty)
+        5: SEMICOLON@228..229 ";" [] []
   2: EOF@229..230 "" [Newline("\n")] []
 
 ```

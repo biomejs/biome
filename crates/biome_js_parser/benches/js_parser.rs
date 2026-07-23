@@ -1,6 +1,6 @@
 use biome_diagnostics::{DiagnosticExt, print_diagnostic_to_string};
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::JsFileSource;
+use biome_languages::JsFileSource;
 use biome_rowan::NodeCache;
 use biome_test_utils::BenchCase;
 use criterion::{

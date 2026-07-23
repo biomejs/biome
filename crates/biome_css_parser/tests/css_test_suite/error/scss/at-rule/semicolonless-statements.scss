@@ -1,0 +1,9 @@
+@mixin content-before-declaration {
+  @content
+  color: red;
+}
+
+@mixin return-before-declaration {
+  @return 1
+  color: red;
+}

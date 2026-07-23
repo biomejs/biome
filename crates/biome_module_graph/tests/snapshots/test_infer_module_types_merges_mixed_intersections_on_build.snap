@@ -1,0 +1,84 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function readCallableObject(
+	value: (() => string) & { value: number },
+): (() => string) & { value: number } {
+	return value;
+}
+
+export function readPrimitive(
+	value: string & { value: number },
+): string & { value: number } {
+	return value;
+}
+```
+
+## Inferred types
+
+```
+Binding readCallableObject "readCallableObject" => sync Function "readCallableObject" {
+  accepts: {
+    params: [
+      required value: Object {
+        prototype: No prototype
+        members: ["value": number]
+      }
+    ]
+    type_args: []
+  }
+  returns: Object {
+    prototype: No prototype
+    members: ["value": number]
+  }
+}
+
+Binding value "value" => Object {
+  prototype: No prototype
+  members: ["value": number]
+}
+
+Expression "value" => Object {
+  prototype: No prototype
+  members: ["value": number]
+}
+
+Binding readPrimitive "readPrimitive" => sync Function "readPrimitive" {
+  accepts: {
+    params: [
+      required value: string
+      & Object {
+        prototype: No prototype
+        members: ["value": number]
+      }
+    ]
+    type_args: []
+  }
+  returns: string
+  & Object {
+    prototype: No prototype
+    members: ["value": number]
+  }
+}
+
+Binding value "value" =>
+  string
+  & Object {
+    prototype: No prototype
+    members: ["value": number]
+  }
+
+Expression "value" =>
+  string
+  & Object {
+    prototype: No prototype
+    members: ["value": number]
+  }
+```

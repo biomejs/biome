@@ -6,10 +6,11 @@ use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsName, AnyJsObjectMember, JsFileSource, JsIdentifierExpression,
-    JsPropertyObjectMember, JsReferenceIdentifier, JsShorthandPropertyObjectMember,
-    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxToken,
+    AnyJsExpression, AnyJsName, AnyJsObjectMember, JsIdentifierExpression, JsPropertyObjectMember,
+    JsReferenceIdentifier, JsShorthandPropertyObjectMember, JsStaticMemberExpression, JsSyntaxKind,
+    JsSyntaxToken,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
 use biome_rule_options::no_global_dirname_filename::NoGlobalDirnameFilenameOptions;
 

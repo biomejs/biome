@@ -1,0 +1,132 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ignoreMixedLogicalExpressionsDefault.ts
+---
+# Input
+```ts
+// Tests for ignoreMixedLogicalExpressions: true
+// These should NOT generate diagnostics because || is mixed with &&
+
+declare const a: string | null;
+declare const b: string;
+declare const c: string;
+
+// || as child of &&
+const r1 = (a || 'default') && b;
+
+// || with && child
+const r2 = a || (b && c);
+
+// || as left operand of &&
+const r3 = (a || b) && c;
+
+// Nested: || inside && inside another &&
+const r4 = (a || b) && c && b;
+
+// ||= mixed with && - should NOT generate diagnostic
+declare let assignMixed: string | null;
+assignMixed ||= b && c;
+
+// Chained || with && sibling: inner || should also be suppressed
+// In `(a || b) || (c && d)`, the inner `a || b` is part of the same
+// mixed expression tree and should not generate a diagnostic.
+declare const x: string | null;
+declare const y: string;
+declare const z: string;
+declare const w: string;
+const r5 = x || y || (z && w);
+
+// Three-way chain: a || b || c && d (without parens around &&)
+const r6 = x || y || z && w;
+
+// ||= chained with || containing && sibling
+// `a || (b && c)` as the RHS of ||=
+declare let chainAssign: string | null;
+chainAssign ||= y || (z && w);
+
+// Nested ||= where the inner ||= contains && in its RHS.
+// Both the outer and the inner ||= participate in the same connected
+// logical tree, so neither should be reported when the option is enabled.
+declare let outerAssign: string | null;
+declare let innerAssign: string | null;
+outerAssign ||= innerAssign ||= b && c;
+
+// Same nested ||= shape with explicit parens around the inner assignment.
+declare let parenOuter: string | null;
+declare let parenInner: string | null;
+parenOuter ||= (parenInner ||= b && c);
+
+// These SHOULD still generate diagnostics (no && mixing)
+declare const d: string | null;
+const r7 = d || 'default';
+
+declare const e: number | undefined;
+const r8 = e || 0;
+
+// ||= without && mixing - SHOULD generate diagnostic
+declare let assignPlain: string | null;
+assignPlain ||= 'default';
+
+```
+
+# Diagnostics
+```
+ignoreMixedLogicalExpressionsDefault.ts:55:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    53 │ // These SHOULD still generate diagnostics (no && mixing)
+    54 │ declare const d: string | null;
+  > 55 │ const r7 = d || 'default';
+       │              ^^
+    56 │ 
+    57 │ declare const e: number | undefined;
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsDefault.ts:58:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    57 │ declare const e: number | undefined;
+  > 58 │ const r8 = e || 0;
+       │              ^^
+    59 │ 
+    60 │ // ||= without && mixing - SHOULD generate diagnostic
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsDefault.ts:62:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    60 │ // ||= without && mixing - SHOULD generate diagnostic
+    61 │ declare let assignPlain: string | null;
+  > 62 │ assignPlain ||= 'default';
+       │             ^^^
+    63 │ 
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

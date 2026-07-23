@@ -3,7 +3,7 @@ use biome_grit_patterns::{
     GritQuery, GritQueryResult, GritTargetFile, GritTargetLanguage, JsTargetLanguage,
 };
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::JsFileSource;
+use biome_languages::JsFileSource;
 
 // Test explicit file pattern with $filename binding - this SHOULD work
 #[test]

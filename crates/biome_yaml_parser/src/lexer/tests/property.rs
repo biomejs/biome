@@ -279,8 +279,8 @@ fn tag_in_block_map_value() {
         WHITESPACE:1,
         FLOW_START:0,
         TAG_PROPERTY_LITERAL:4,
-        FLOW_END:0,
         NEWLINE:1,
+        FLOW_END:0,
         MAPPING_END:0
     );
 }
@@ -310,8 +310,8 @@ fn multi_property_in_block_map_value() {
         ANCHOR_PROPERTY_LITERAL:2,
         WHITESPACE:1,
         TAG_PROPERTY_LITERAL:4,
-        FLOW_END:0,
         NEWLINE:1,
+        FLOW_END:0,
         MAPPING_END:0
     );
 }
@@ -323,11 +323,62 @@ fn property_for_empty_map_value() {
         PLAIN_LITERAL:5,
         COLON:1,
         WHITESPACE:1,
-        FLOW_START:0,
         ANCHOR_PROPERTY_LITERAL:7,
-        FLOW_END:0,
         NEWLINE:1,
         PLAIN_LITERAL:4,
+        COLON:1,
+        WHITESPACE:1,
+        FLOW_START:0,
+        PLAIN_LITERAL:5,
+        FLOW_END:0,
+        MAPPING_END:0
+    );
+}
+
+#[test]
+fn alias_node() {
+    assert_lex!("*alias",
+        FLOW_START:0,
+        ALIAS_LITERAL:6,
+        FLOW_END:0
+    );
+}
+
+#[test]
+fn alias_as_mapping_key() {
+    assert_lex!("*alias : value",
+        MAPPING_START:0,
+        ALIAS_LITERAL:6,
+        WHITESPACE:1,
+        COLON:1,
+        WHITESPACE:1,
+        FLOW_START:0,
+        PLAIN_LITERAL:5,
+        FLOW_END:0,
+        MAPPING_END:0
+    );
+}
+
+#[test]
+fn quoted_key_with_space_before_colon() {
+    assert_lex!(r#""key" : value"#,
+        MAPPING_START:0,
+        DOUBLE_QUOTED_LITERAL:5,
+        WHITESPACE:1,
+        COLON:1,
+        WHITESPACE:1,
+        FLOW_START:0,
+        PLAIN_LITERAL:5,
+        FLOW_END:0,
+        MAPPING_END:0
+    );
+}
+
+#[test]
+fn plain_key_with_space_before_colon() {
+    assert_lex!("key   : value",
+        MAPPING_START:0,
+        PLAIN_LITERAL:6,
         COLON:1,
         WHITESPACE:1,
         FLOW_START:0,

@@ -5,7 +5,7 @@ use crate::syntax::{
     AttrInitializerContext, TextExpression, parse_attribute_initializer,
     parse_single_text_expression,
 };
-use crate::token_source::{HtmlLexContext, HtmlReLexContext};
+use crate::token_source::{HtmlFramework, HtmlLexContext, HtmlReLexContext};
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
@@ -67,13 +67,23 @@ pub(crate) fn parse_astro_spread_or_expression(p: &mut HtmlParser) -> ParsedSynt
             .parse_element(p)
             .or_add_diagnostic(p, expected_expression);
 
-        p.expect_with_context(T!['}'], HtmlLexContext::InsideTag);
+        p.expect_with_context(
+            T!['}'],
+            HtmlLexContext::InsideTag {
+                framework: HtmlFramework::Plain,
+            },
+        );
 
         Present(m.complete(p, HTML_SPREAD_ATTRIBUTE))
     } else {
         p.rewind(checkpoint);
         m.abandon(p);
-        parse_single_text_expression(p, HtmlLexContext::InsideTag)
+        parse_single_text_expression(
+            p,
+            HtmlLexContext::InsideTag {
+                framework: HtmlFramework::Plain,
+            },
+        )
     }
 }
 
@@ -90,7 +100,7 @@ pub(crate) fn is_at_astro_directive_start(p: &mut HtmlParser) -> bool {
     p.re_lex(HtmlReLexContext::InsideTagAstro);
     let first_token = p.cur();
 
-    p.bump_any_with_context(HtmlLexContext::InsideTagAstro);
+    p.bump_any_with_context(super::inside_tag_context(p));
     let second_token = p.cur();
 
     p.rewind(checkpoint);
@@ -121,7 +131,7 @@ pub(crate) fn parse_astro_directive(p: &mut HtmlParser) -> ParsedSyntax {
 
 fn parse_directive(p: &mut HtmlParser, node_kind: HtmlSyntaxKind) -> ParsedSyntax {
     let m = p.start();
-    p.bump_any_with_context(HtmlLexContext::InsideTagAstro);
+    p.bump_any_with_context(super::inside_tag_context(p));
 
     // Parse the directive value (":load" part)
     parse_directive_value(p).or_add_diagnostic(p, |p, range| {
@@ -138,12 +148,12 @@ fn parse_directive_value(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
 
     // Consume the colon token
-    p.expect_with_context(T![:], HtmlLexContext::InsideTagAstro);
+    p.expect_with_context(T![:], super::inside_tag_context(p));
 
     // Parse the directive name (e.g., "load" in "client:load")
     if p.at(HTML_LITERAL) {
         let m_name = p.start();
-        p.bump_with_context(HTML_LITERAL, HtmlLexContext::InsideTagAstro);
+        p.bump_with_context(HTML_LITERAL, super::inside_tag_context(p));
         m_name.complete(p, HTML_ATTRIBUTE_NAME);
     } else {
         p.error(p.err_builder("Expected a directive name after ':'", p.cur_range()));

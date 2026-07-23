@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/keyframes-interpolation.scss
+---
+
+# Input
+
+```scss
+@keyframes  loader{
+#{50%-$loader-icon-duration}{opacity:1}
+#{$i}%{opacity:.75}
+50%,#{75%-$loader-icon-duration},to{opacity:.5}
+entry 100%{opacity:1}
+}
+
+```
+
+
+# Formatted
+
+```scss
+@keyframes loader {
+	#{50% - $loader-icon-duration} {
+		opacity: 1;
+	}
+	#{$i}% {
+		opacity: 0.75;
+	}
+	50%,
+	#{75% - $loader-icon-duration},
+	to {
+		opacity: 0.5;
+	}
+	entry 100% {
+		opacity: 1;
+	}
+}
+
+```

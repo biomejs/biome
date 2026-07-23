@@ -13,24 +13,40 @@ info: yaml/flow-sequence/middle-comments.yml
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1,4 +1,3 @@
--!!set
--# comment 1
-+!!set # comment 1
- # comment 2
--[]
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1 +1,2 @@
+-!!set [] # comment 2 # comment 1
++!!set # comment 2 # comment 1
 +[]
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -1,9 +1,18 @@
+ [
+   source_position(0),
+   "!!set",
+-  line_suffix([" ", source_position(6), "# comment 2 # comment 1"]),
++  line_suffix([" ", source_position(6), "# comment 1"]),
+   expand_parent,
+   " ",
+-  group([source_position(30), "[", source_position(31), "]"]),
++  source_position(18),
++  "# comment 2",
++  hard_line_break,
++  group(expand: propagated, [
++    source_position(30),
++    "[",
++    expand_parent,
++    source_position(31),
++    "]"
++  ]),
+   hard_line_break
+ ]
 \ No newline at end of file
+
 ```
-
-# Output
-
-```yml
-!!set # comment 1
-# comment 2
-[]```

@@ -55,9 +55,9 @@ checksum = "940b3a0ca603d1eade50a4846a2afffd5ef57a9feac2c0e2ec2e14f9ead76000"
 
 [[package]]
 name = "anyhow"
-version = "1.0.102"
+version = "1.0.104"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
+checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
 
 [[package]]
 name = "approx"
@@ -137,10 +137,11 @@ dependencies = [
  "biome_suppression",
  "biome_text_edit",
  "camino",
+ "either",
  "enumflags2",
  "indexmap",
  "insta",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
 ]
@@ -202,7 +203,6 @@ dependencies = [
  "biome_glob",
  "biome_graphql_analyze",
  "biome_graphql_syntax",
- "biome_grit_patterns",
  "biome_html_analyze",
  "biome_html_formatter",
  "biome_html_syntax",
@@ -214,6 +214,7 @@ dependencies = [
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_languages",
  "biome_lsp",
  "biome_migrate",
  "biome_package",
@@ -225,7 +226,6 @@ dependencies = [
  "bpaf",
  "camino",
  "crossbeam",
- "dashmap 6.1.0",
  "directories",
  "insta",
  "libc",
@@ -237,7 +237,7 @@ dependencies = [
  "rayon",
  "regex",
  "reqwest",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "self_update",
  "serde",
  "serde_json",
@@ -282,7 +282,7 @@ dependencies = [
  "insta",
  "mimalloc",
  "regex",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "tests_macros",
@@ -329,7 +329,7 @@ name = "biome_control_flow"
 version = "0.5.7"
 dependencies = [
  "biome_rowan",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -347,6 +347,7 @@ dependencies = [
  "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_fs",
+ "biome_languages",
  "biome_module_graph",
  "biome_plugin_loader",
  "biome_project_layout",
@@ -362,7 +363,7 @@ dependencies = [
  "mimalloc",
  "phf 0.13.1",
  "regex",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "tests_macros",
@@ -388,6 +389,7 @@ dependencies = [
  "biome_formatter",
  "biome_formatter_test",
  "biome_fs",
+ "biome_languages",
  "biome_parser",
  "biome_rowan",
  "biome_service",
@@ -416,6 +418,7 @@ dependencies = [
  "biome_deserialize",
  "biome_diagnostics",
  "biome_fs",
+ "biome_languages",
  "biome_parser",
  "biome_rowan",
  "biome_service",
@@ -439,10 +442,14 @@ version = "0.0.0"
 dependencies = [
  "biome_css_parser",
  "biome_css_syntax",
+ "biome_db",
  "biome_formatter",
+ "biome_languages",
  "biome_rowan",
  "biome_string_case",
- "rustc-hash 2.1.2",
+ "camino",
+ "rustc-hash 2.1.3",
+ "salsa",
 ]
 
 [[package]]
@@ -456,6 +463,17 @@ dependencies = [
  "camino",
  "schemars",
  "serde",
+]
+
+[[package]]
+name = "biome_db"
+version = "0.0.1"
+dependencies = [
+ "biome_diagnostics",
+ "biome_parser",
+ "biome_rowan",
+ "camino",
+ "salsa",
 ]
 
 [[package]]
@@ -557,7 +575,7 @@ dependencies = [
  "drop_bomb",
  "indexmap",
  "insta",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "unicode-width 0.1.12",
@@ -573,6 +591,7 @@ dependencies = [
  "biome_diagnostics",
  "biome_formatter",
  "biome_fs",
+ "biome_languages",
  "biome_parser",
  "biome_rowan",
  "biome_service",
@@ -597,7 +616,7 @@ dependencies = [
  "parking_lot",
  "path-absolutize",
  "rayon",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "serde_json",
@@ -630,6 +649,7 @@ dependencies = [
  "biome_graphql_factory",
  "biome_graphql_parser",
  "biome_graphql_syntax",
+ "biome_languages",
  "biome_rowan",
  "biome_rule_options",
  "biome_string_case",
@@ -639,7 +659,7 @@ dependencies = [
  "filetime",
  "insta",
  "jiff",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "tests_macros",
@@ -664,6 +684,7 @@ dependencies = [
  "biome_fs",
  "biome_graphql_parser",
  "biome_graphql_syntax",
+ "biome_languages",
  "biome_parser",
  "biome_rowan",
  "biome_service",
@@ -710,7 +731,7 @@ dependencies = [
  "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_rowan",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -718,8 +739,6 @@ name = "biome_graphql_syntax"
 version = "0.1.0"
 dependencies = [
  "biome_rowan",
- "biome_string_case",
- "camino",
  "schemars",
  "serde",
 ]
@@ -744,6 +763,7 @@ dependencies = [
  "biome_grit_factory",
  "biome_grit_parser",
  "biome_grit_syntax",
+ "biome_languages",
  "biome_parser",
  "biome_rowan",
  "biome_service",
@@ -793,6 +813,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_languages",
  "biome_parser",
  "biome_rowan",
  "biome_string_case",
@@ -806,7 +827,7 @@ dependencies = [
  "path-absolutize",
  "rand 0.8.5",
  "regex",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "serde_json",
@@ -819,8 +840,6 @@ name = "biome_grit_syntax"
 version = "0.5.7"
 dependencies = [
  "biome_rowan",
- "biome_string_case",
- "camino",
  "schemars",
  "serde",
 ]
@@ -840,7 +859,9 @@ dependencies = [
  "biome_html_factory",
  "biome_html_parser",
  "biome_html_syntax",
+ "biome_languages",
  "biome_module_graph",
+ "biome_parser",
  "biome_project_layout",
  "biome_rowan",
  "biome_rule_options",
@@ -874,6 +895,7 @@ name = "biome_html_formatter"
 version = "0.0.0"
 dependencies = [
  "biome_configuration",
+ "biome_console",
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics_categories",
@@ -882,6 +904,7 @@ dependencies = [
  "biome_fs",
  "biome_html_parser",
  "biome_html_syntax",
+ "biome_languages",
  "biome_parser",
  "biome_rowan",
  "biome_service",
@@ -908,6 +931,7 @@ dependencies = [
  "biome_diagnostics",
  "biome_html_factory",
  "biome_html_syntax",
+ "biome_languages",
  "biome_parser",
  "biome_rowan",
  "biome_string_case",
@@ -931,6 +955,7 @@ dependencies = [
  "biome_aria",
  "biome_html_factory",
  "biome_html_parser",
+ "biome_parser",
  "biome_rowan",
  "biome_string_case",
  "camino",
@@ -948,6 +973,7 @@ dependencies = [
  "biome_aria_metadata",
  "biome_console",
  "biome_control_flow",
+ "biome_db",
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
@@ -959,8 +985,11 @@ dependencies = [
  "biome_js_syntax",
  "biome_js_type_info",
  "biome_jsdoc_comment",
+ "biome_languages",
  "biome_module_graph",
+ "biome_module_replacements",
  "biome_package",
+ "biome_parser",
  "biome_plugin_loader",
  "biome_project_layout",
  "biome_resolver",
@@ -969,19 +998,25 @@ dependencies = [
  "biome_service",
  "biome_string_case",
  "biome_suppression",
+ "biome_tailwind_parser",
+ "biome_tailwind_syntax",
  "biome_test_utils",
  "biome_unicode_table",
+ "biome_workspace_db",
  "bitvec",
  "camino",
  "codspeed-criterion-compat",
+ "either",
  "enumflags2",
  "filetime",
  "globset",
  "insta",
  "mimalloc",
+ "phf 0.13.1",
  "regex",
  "roaring",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
+ "salsa",
  "schemars",
  "serde",
  "smallvec",
@@ -1011,6 +1046,7 @@ dependencies = [
  "biome_js_factory",
  "biome_js_parser",
  "biome_js_syntax",
+ "biome_languages",
  "biome_parser",
  "biome_rowan",
  "biome_service",
@@ -1045,6 +1081,7 @@ dependencies = [
  "biome_fs",
  "biome_js_factory",
  "biome_js_syntax",
+ "biome_languages",
  "biome_parser",
  "biome_rowan",
  "biome_service",
@@ -1059,7 +1096,7 @@ dependencies = [
  "mimalloc",
  "quickcheck",
  "quickcheck_macros",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "serde_json",
@@ -1079,7 +1116,7 @@ dependencies = [
  "biome_text_size",
  "boa_engine",
  "camino",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -1087,15 +1124,19 @@ name = "biome_js_semantic"
 version = "0.5.7"
 dependencies = [
  "biome_console",
+ "biome_db",
  "biome_diagnostics",
  "biome_formatter",
  "biome_js_parser",
  "biome_js_syntax",
  "biome_jsdoc_comment",
+ "biome_languages",
  "biome_rowan",
+ "camino",
  "insta",
  "rust-lapper",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
+ "salsa",
  "smallvec",
 ]
 
@@ -1125,6 +1166,7 @@ dependencies = [
  "biome_js_formatter",
  "biome_js_parser",
  "biome_js_syntax",
+ "biome_languages",
  "biome_rowan",
  "biome_test_utils",
  "camino",
@@ -1136,19 +1178,22 @@ dependencies = [
 name = "biome_js_type_info"
 version = "0.0.1"
 dependencies = [
+ "biome_db",
  "biome_formatter",
  "biome_js_formatter",
  "biome_js_parser",
  "biome_js_semantic",
  "biome_js_syntax",
  "biome_js_type_info_macros",
+ "biome_languages",
  "biome_resolver",
  "biome_rowan",
  "biome_test_utils",
  "camino",
  "hashbrown 0.15.5",
  "insta",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
+ "salsa",
 ]
 
 [[package]]
@@ -1168,6 +1213,7 @@ dependencies = [
  "biome_formatter",
  "biome_js_parser",
  "biome_js_syntax",
+ "biome_languages",
  "biome_rowan",
 ]
 
@@ -1184,6 +1230,8 @@ dependencies = [
  "biome_json_factory",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_languages",
+ "biome_module_replacements",
  "biome_package",
  "biome_project_layout",
  "biome_rowan",
@@ -1197,7 +1245,7 @@ dependencies = [
  "insta",
  "mimalloc",
  "regex",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "tests_macros",
  "tikv-jemallocator",
 ]
@@ -1223,6 +1271,7 @@ dependencies = [
  "biome_fs",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_languages",
  "biome_parser",
  "biome_rowan",
  "biome_service",
@@ -1248,6 +1297,7 @@ dependencies = [
  "biome_diagnostics",
  "biome_json_factory",
  "biome_json_syntax",
+ "biome_languages",
  "biome_parser",
  "biome_rowan",
  "biome_test_utils",
@@ -1268,9 +1318,6 @@ name = "biome_json_syntax"
 version = "0.5.7"
 dependencies = [
  "biome_rowan",
- "biome_string_case",
- "camino",
- "directories",
  "schemars",
  "serde",
 ]
@@ -1285,8 +1332,24 @@ dependencies = [
  "biome_json_syntax",
  "biome_rowan",
  "indexmap",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "static_assertions",
+]
+
+[[package]]
+name = "biome_languages"
+version = "0.1.0"
+dependencies = [
+ "biome_console",
+ "biome_db",
+ "biome_rowan",
+ "biome_string_case",
+ "camino",
+ "directories",
+ "salsa",
+ "schemars",
+ "serde",
+ "tracing",
 ]
 
 [[package]]
@@ -1294,7 +1357,7 @@ name = "biome_line_index"
 version = "0.1.0"
 dependencies = [
  "biome_text_size",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -1308,6 +1371,7 @@ dependencies = [
  "biome_deserialize",
  "biome_diagnostics",
  "biome_fs",
+ "biome_languages",
  "biome_line_index",
  "biome_lsp_converters",
  "biome_resolver",
@@ -1319,7 +1383,9 @@ dependencies = [
  "crossbeam",
  "futures",
  "papaya",
- "rustc-hash 2.1.2",
+ "parking_lot",
+ "rustc-hash 2.1.3",
+ "salsa",
  "serde",
  "serde_json",
  "tokio",
@@ -1337,7 +1403,7 @@ dependencies = [
  "anyhow",
  "biome_line_index",
  "biome_text_size",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "tower",
  "tower-lsp-server",
 ]
@@ -1358,6 +1424,7 @@ dependencies = [
  "biome_formatter",
  "biome_formatter_test",
  "biome_fs",
+ "biome_languages",
  "biome_markdown_factory",
  "biome_markdown_parser",
  "biome_markdown_syntax",
@@ -1407,8 +1474,6 @@ name = "biome_markdown_syntax"
 version = "0.0.1"
 dependencies = [
  "biome_rowan",
- "biome_string_case",
- "camino",
  "schemars",
  "serde",
 ]
@@ -1441,7 +1506,7 @@ dependencies = [
  "biome_test_utils",
  "camino",
  "insta",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "tests_macros",
 ]
 
@@ -1455,6 +1520,7 @@ dependencies = [
  "biome_css_parser",
  "biome_css_semantic",
  "biome_css_syntax",
+ "biome_db",
  "biome_deserialize",
  "biome_diagnostics",
  "biome_formatter",
@@ -1470,12 +1536,14 @@ dependencies = [
  "biome_jsdoc_comment",
  "biome_json_parser",
  "biome_json_value",
+ "biome_languages",
  "biome_package",
  "biome_project_layout",
  "biome_resolver",
  "biome_rowan",
  "biome_service",
  "biome_test_utils",
+ "biome_workspace_db",
  "camino",
  "cfg-if",
  "codspeed-divan-compat",
@@ -1484,13 +1552,21 @@ dependencies = [
  "mimalloc",
  "once_cell",
  "papaya",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
+ "salsa",
  "schemars",
  "serde",
  "serde_json",
  "static_assertions",
  "tikv-jemallocator",
  "walkdir",
+]
+
+[[package]]
+name = "biome_module_replacements"
+version = "0.5.7"
+dependencies = [
+ "phf 0.13.1",
 ]
 
 [[package]]
@@ -1515,7 +1591,7 @@ dependencies = [
  "indexmap",
  "insta",
  "mimalloc",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "serde",
  "static_assertions",
  "tests_macros",
@@ -1553,6 +1629,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_languages",
  "biome_parser",
  "biome_resolver",
  "biome_rowan",
@@ -1564,7 +1641,7 @@ dependencies = [
  "insta",
  "libc",
  "papaya",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "serde_json",
@@ -1580,7 +1657,7 @@ dependencies = [
  "biome_rowan",
  "camino",
  "papaya",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -1588,12 +1665,14 @@ name = "biome_resolver"
 version = "0.1.0"
 dependencies = [
  "biome_console",
+ "biome_db",
  "biome_diagnostics",
  "biome_fs",
  "biome_json_value",
  "biome_package",
  "biome_rowan",
  "camino",
+ "salsa",
 ]
 
 [[package]]
@@ -1607,7 +1686,7 @@ dependencies = [
  "iai",
  "quickcheck",
  "quickcheck_macros",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "serde_json",
@@ -1629,7 +1708,7 @@ dependencies = [
  "camino",
  "enumflags2",
  "regex",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "schemars",
  "serde",
  "serde_json",
@@ -1643,14 +1722,24 @@ dependencies = [
  "anyhow",
  "biome_analyze",
  "biome_configuration",
+ "biome_console",
+ "biome_db",
+ "biome_deserialize",
+ "biome_diagnostics",
  "biome_fs",
  "biome_js_analyze",
  "biome_js_parser",
+ "biome_js_semantic",
+ "biome_json_factory",
  "biome_json_parser",
+ "biome_json_syntax",
+ "biome_languages",
  "biome_module_graph",
  "biome_project_layout",
+ "biome_rowan",
  "biome_service",
  "biome_test_utils",
+ "biome_workspace_db",
  "camino",
 ]
 
@@ -1666,6 +1755,7 @@ dependencies = [
  "biome_css_parser",
  "biome_css_semantic",
  "biome_css_syntax",
+ "biome_db",
  "biome_deserialize",
  "biome_diagnostics",
  "biome_formatter",
@@ -1695,7 +1785,7 @@ dependencies = [
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
- "biome_markdown_factory",
+ "biome_languages",
  "biome_markdown_formatter",
  "biome_markdown_parser",
  "biome_markdown_syntax",
@@ -1710,9 +1800,10 @@ dependencies = [
  "biome_string_case",
  "biome_text_edit",
  "biome_unicode_table",
+ "biome_workspace_db",
  "biome_yaml_formatter",
+ "biome_yaml_parser",
  "biome_yaml_syntax",
- "boxcar",
  "bpaf",
  "camino",
  "crossbeam",
@@ -1723,13 +1814,16 @@ dependencies = [
  "insta",
  "notify",
  "papaya",
+ "parking_lot",
  "rayon",
  "regex",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
+ "salsa",
  "schemars",
  "serde",
  "serde_json",
  "smallvec",
+ "static_assertions",
  "tokio",
  "tracing",
  "web-time",
@@ -1812,6 +1906,7 @@ dependencies = [
  "biome_console",
  "biome_css_parser",
  "biome_css_syntax",
+ "biome_db",
  "biome_deserialize",
  "biome_diagnostics",
  "biome_formatter",
@@ -1822,13 +1917,15 @@ dependencies = [
  "biome_js_parser",
  "biome_js_semantic",
  "biome_js_type_info",
- "biome_json_parser",
+ "biome_languages",
  "biome_module_graph",
  "biome_package",
+ "biome_parser",
  "biome_project_layout",
  "biome_rowan",
  "biome_service",
  "biome_string_case",
+ "biome_workspace_db",
  "camino",
  "countme",
  "json_comments",
@@ -1876,6 +1973,7 @@ dependencies = [
  "biome_fs",
  "biome_js_factory",
  "biome_js_formatter",
+ "biome_languages",
  "biome_rowan",
  "biome_service",
  "camino",
@@ -1890,6 +1988,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_workspace_db"
+version = "0.1.0"
+dependencies = [
+ "biome_db",
+ "biome_fs",
+ "biome_html_parser",
+ "biome_html_syntax",
+ "biome_js_parser",
+ "biome_js_syntax",
+ "biome_languages",
+ "biome_module_graph",
+ "biome_parser",
+ "biome_project_layout",
+ "biome_rowan",
+ "boxcar",
+ "camino",
+ "papaya",
+ "salsa",
+]
+
+[[package]]
 name = "biome_yaml_factory"
 version = "0.0.1"
 dependencies = [
@@ -1901,11 +2020,13 @@ dependencies = [
 name = "biome_yaml_formatter"
 version = "0.1.0"
 dependencies = [
+ "biome_configuration",
  "biome_deserialize",
  "biome_diagnostics",
  "biome_formatter",
  "biome_formatter_test",
  "biome_fs",
+ "biome_languages",
  "biome_parser",
  "biome_rowan",
  "biome_service",
@@ -1916,6 +2037,7 @@ dependencies = [
  "countme",
  "schemars",
  "serde",
+ "similar-asserts",
  "tests_macros",
 ]
 
@@ -1925,6 +2047,7 @@ version = "0.0.1"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
+ "biome_languages",
  "biome_parser",
  "biome_rowan",
  "biome_test_utils",
@@ -1943,8 +2066,6 @@ name = "biome_yaml_syntax"
 version = "0.0.1"
 dependencies = [
  "biome_rowan",
- "biome_string_case",
- "camino",
  "schemars",
  "serde",
 ]
@@ -1985,7 +2106,7 @@ dependencies = [
  "boa_string",
  "indexmap",
  "num-bigint",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -2016,7 +2137,7 @@ dependencies = [
  "hashbrown 0.16.1",
  "icu_normalizer 2.0.0",
  "indexmap",
- "intrusive-collections",
+ "intrusive-collections 0.9.7",
  "itertools 0.14.0",
  "num-bigint",
  "num-integer",
@@ -2026,7 +2147,7 @@ dependencies = [
  "portable-atomic",
  "rand 0.9.3",
  "regress",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "ryu-js",
  "serde",
  "serde_json",
@@ -2064,7 +2185,7 @@ dependencies = [
  "indexmap",
  "once_cell",
  "phf 0.13.1",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "static_assertions",
 ]
 
@@ -2097,7 +2218,7 @@ dependencies = [
  "num-bigint",
  "num-traits",
  "regress",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -2109,7 +2230,7 @@ dependencies = [
  "fast-float2",
  "itoa",
  "paste",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "ryu-js",
  "static_assertions",
 ]
@@ -2128,9 +2249,9 @@ checksum = "36f64beae40a84da1b4b26ff2761a5b895c12adc41dc25aaee1c4f2bbfe97a6e"
 
 [[package]]
 name = "bpaf"
-version = "0.9.25"
+version = "0.9.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b8d4b90317451025bfa1f7d359a5fa698a5f745927ff27696429b7fbd7c0c48"
+checksum = "0b86829876e7e200161a5aa6ea688d46c32d64d70ee3100127790dde84688d6e"
 dependencies = [
  "bpaf_derive",
  "owo-colors",
@@ -2139,9 +2260,9 @@ dependencies = [
 
 [[package]]
 name = "bpaf_derive"
-version = "0.5.23"
+version = "0.5.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "549ca9c364fdc06f9f36d1356980193d930abc80db848193c2dd4d0e9a83de1b"
+checksum = "2f7e98cee839b19076cb3ce1afdb62bb182e04ff5f71f70188827002fae91094"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2199,9 +2320,9 @@ checksum = "1e748733b7cbc798e1434b6ac524f0c1ff2ab456fe201501e6497c8417a4fc33"
 
 [[package]]
 name = "camino"
-version = "1.2.2"
+version = "1.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e629a66d692cb9ff1a1c664e41771b3dcaf961985a9774c0eb0bd1b51cf60a48"
+checksum = "5f2d30e4173c4026932d51d31d6b0613b1fd3014bf3f9f8943d4ba139c437ba0"
 dependencies = [
  "serde_core",
 ]
@@ -2598,27 +2719,27 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-epoch"
-version = "0.9.18"
+version = "0.9.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b82ac4a3c2ca9c3460964f020e1402edd5753411d7737aa39c3714ad1b5420e"
+checksum = "2d6914041f254d6e9176c01941b21115dcfb7089e55135a35411081bd106ef3f"
 dependencies = [
  "crossbeam-utils",
 ]
 
 [[package]]
 name = "crossbeam-queue"
-version = "0.3.11"
+version = "0.3.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df0346b5d5e76ac2fe4e327c5fd1118d6be7c51dfb18f9b7922923f287471e35"
+checksum = "0f58bbc28f91df819d0aa2a2c00cd19754769c2fad90579b3592b1c9ba7a3115"
 dependencies = [
  "crossbeam-utils",
 ]
 
 [[package]]
 name = "crossbeam-utils"
-version = "0.8.19"
+version = "0.8.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "248e3bacc7dc6baa3b21e405ee045c3047101a49145e7e9eca583ab4c2ca5345"
+checksum = "d0a5c400df2834b80a4c3327b3aad3a4c4cd4de0629063962b03235697506a28"
 
 [[package]]
 name = "darling"
@@ -2680,6 +2801,38 @@ dependencies = [
  "lock_api",
  "once_cell",
  "parking_lot_core",
+]
+
+[[package]]
+name = "defmt"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a6e524506490a1953d237cb87b1cfc1e46f88c18f10a22dfe0f507dc6bfc7f7f"
+dependencies = [
+ "bitflags 1.3.2",
+ "defmt-macros",
+]
+
+[[package]]
+name = "defmt-macros"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0a27770e9c8f719a79d8b638281f4d828f77d8fd61e0bd94451b9b85e576a0b"
+dependencies = [
+ "defmt-parser",
+ "proc-macro-error2",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.106",
+]
+
+[[package]]
+name = "defmt-parser"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "10d60334b3b2e7c9d91ef8150abfb6fa4c1c39ebbcf4a81c2e346aad939fee3e"
+dependencies = [
+ "thiserror 2.0.17",
 ]
 
 [[package]]
@@ -2930,13 +3083,12 @@ checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
 
 [[package]]
 name = "filetime"
-version = "0.2.27"
+version = "0.2.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f98844151eee8917efc50bd9e8318cb963ae8b297431495d3f758616ea5c57db"
+checksum = "5c287a33c7f0a620c38e641e7f60827713987b3c0f26e8ddc9462cc69cf75759"
 dependencies = [
  "cfg-if",
  "libc",
- "libredox",
 ]
 
 [[package]]
@@ -3226,14 +3378,16 @@ checksum = "e629b9b98ef3dd8afe6ca2bd0f89306cec16d43d907889945bc5d6687f2f13c7"
 
 [[package]]
 name = "git2"
-version = "0.20.4"
+version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b88256088d75a56f8ecfa070513a775dd9107f6530ef14919dac831af9cfe2b"
+checksum = "ddddbf932745a6be37109b6112d3ee09696106f848449069d3a57bba937ab82e"
 dependencies = [
  "bitflags 2.9.3",
  "libc",
  "libgit2-sys",
  "log",
+ "openssl-probe",
+ "openssl-sys",
  "url",
 ]
 
@@ -3245,9 +3399,9 @@ checksum = "a8d1add55171497b4705a648c6b583acafb01d58050a51727785f0b2c8e0a2b2"
 
 [[package]]
 name = "globset"
-version = "0.4.18"
+version = "0.4.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "52dfc19153a48bde0cbd630453615c8151bce3a5adfac7a0aebfbf0a1e1f57e3"
+checksum = "e47d37d2ae4464254884b60ab7071be2b876a9c35b696bd018ddcc76847309cd"
 dependencies = [
  "aho-corasick",
  "bstr",
@@ -3348,9 +3502,23 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.17.1"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a"
+checksum = "4f467dd6dccf739c208452f8014c75c18bb8301b050ad1cfb27153803edb0f51"
+dependencies = [
+ "allocator-api2",
+ "equivalent",
+ "foldhash 0.2.0",
+]
+
+[[package]]
+name = "hashlink"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a5081f264ed7adee96ea4b4778b6bb9da0a7228b084587aa3bd3ff05da7c5a3b"
+dependencies = [
+ "hashbrown 0.17.0",
+]
 
 [[package]]
 name = "heck"
@@ -3745,7 +3913,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d466e9454f08e4a911e14806c24e16fba1b4c121d1ea474396f396069cf949d9"
 dependencies = [
  "equivalent",
- "hashbrown 0.17.1",
+ "hashbrown 0.17.0",
  "serde",
  "serde_core",
 ]
@@ -3799,9 +3967,9 @@ dependencies = [
 
 [[package]]
 name = "insta"
-version = "1.47.2"
+version = "1.48.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b4a6248eb93a4401ed2f37dfe8ea592d3cf05b7cf4f8efa867b6895af7e094e"
+checksum = "86f0f8fee8c926415c58d6ae43a08523a26faccb2323f5e6b644fe7dd4ef6b82"
 dependencies = [
  "console 0.16.0",
  "globset",
@@ -3818,6 +3986,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "189d0897e4cbe8c75efedf3502c18c887b05046e59d28404d4d8e46cbc4d1e86"
 dependencies = [
  "memoffset",
+]
+
+[[package]]
+name = "intrusive-collections"
+version = "0.10.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4b719c59241cfaac1042a6d26787e28ed7ee4a4e21a5a907786f54222d1b0062"
+dependencies = [
+ "memoffset",
+]
+
+[[package]]
+name = "inventory"
+version = "0.3.24"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a4f0c30c76f2f4ccee3fe55a2435f691ca00c0e4bd87abe4f4a851b1d4dac39b"
+dependencies = [
+ "rustversion",
 ]
 
 [[package]]
@@ -3879,24 +4065,25 @@ checksum = "4a5f13b858c8d314ee3e8f639011f7ccefe71f97f96e50151fb991f267928e2c"
 
 [[package]]
 name = "jiff"
-version = "0.2.24"
+version = "0.2.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f00b5dbd620d61dfdcb6007c9c1f6054ebd75319f163d886a9055cec1155073d"
+checksum = "961d16382652bfdd8c6f68b223b26a8c93e0d475c672f414411db31c6c5c900e"
 dependencies = [
+ "defmt",
  "jiff-static",
  "jiff-tzdb-platform",
  "log",
  "portable-atomic",
  "portable-atomic-util",
  "serde_core",
- "windows-sys 0.61.2",
+ "windows-link",
 ]
 
 [[package]]
 name = "jiff-static"
-version = "0.2.24"
+version = "0.2.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e000de030ff8022ea1da3f466fbb0f3a809f5e51ed31f6dd931c35181ad8e6d7"
+checksum = "d0879bd39df99c4c5e2c6615ccc026391a423dde10532c573e6086eb94a802cc"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3985,13 +4172,14 @@ checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
 
 [[package]]
 name = "libgit2-sys"
-version = "0.18.3+1.9.2"
+version = "0.18.5+1.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c9b3acc4b91781bb0b3386669d325163746af5f6e4f73e6d2d630e09a35f3487"
+checksum = "005d6ae6eac1912906073e069f7db60b1fa98e052a68227824afe3e3a1c59ca2"
 dependencies = [
  "cc",
  "libc",
  "libz-sys",
+ "openssl-sys",
  "pkg-config",
 ]
 
@@ -4012,7 +4200,6 @@ checksum = "c0ff37bd590ca25063e35af745c343cb7a0271906fb7b37e4813e8f79f00268d"
 dependencies = [
  "bitflags 2.9.3",
  "libc",
- "redox_syscall",
 ]
 
 [[package]]
@@ -4029,9 +4216,9 @@ dependencies = [
 
 [[package]]
 name = "linux-raw-sys"
-version = "0.12.1"
+version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53"
+checksum = "6db9c683daf087dc577b7506e9695b3d556a9f3849903fa28186283afd6809e9"
 
 [[package]]
 name = "litemap"
@@ -4311,6 +4498,24 @@ name = "oorandom"
 version = "11.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ab1bc2a289d34bd04a330323ac98a1b4bc82c9d9fcb1e66b63caa84da26b575"
+
+[[package]]
+name = "openssl-probe"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d05e27ee213611ffe7d6348b942e8f942b37114c00cc03cec254295a4a17852e"
+
+[[package]]
+name = "openssl-sys"
+version = "0.9.117"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b47e7e6bb2c38cd930d25a23b40fa52e068c10e85f3e03a7f5ba5aaca5713695"
+dependencies = [
+ "cc",
+ "libc",
+ "pkg-config",
+ "vcpkg",
+]
 
 [[package]]
 name = "option-ext"
@@ -4620,6 +4825,7 @@ dependencies = [
  "proc-macro-error-attr2",
  "proc-macro2",
  "quote",
+ "syn 2.0.106",
 ]
 
 [[package]]
@@ -4716,7 +4922,7 @@ dependencies = [
  "pin-project-lite",
  "quinn-proto",
  "quinn-udp",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "rustls",
  "socket2",
  "thiserror 2.0.17",
@@ -4727,16 +4933,16 @@ dependencies = [
 
 [[package]]
 name = "quinn-proto"
-version = "0.11.14"
+version = "0.11.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "434b42fec591c96ef50e21e886936e66d3cc3f737104fdb9b737c40ffb94c098"
+checksum = "4fcb935c5bec503c2f0e306bdd3e58bb9029dcb14fa8d9ac76e3a5256ac0763e"
 dependencies = [
  "bytes",
  "getrandom 0.3.2",
  "lru-slab",
  "rand 0.9.3",
  "ring",
- "rustc-hash 2.1.2",
+ "rustc-hash 2.1.3",
  "rustls",
  "rustls-pki-types",
  "slab",
@@ -4762,9 +4968,9 @@ dependencies = [
 
 [[package]]
 name = "quote"
-version = "1.0.45"
+version = "1.0.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "41f2619966050689382d2b44f664f4bc593e129785a36d6ee376ddf37259b924"
+checksum = "1fbf4db142a473a8d80c26bbf18454ed458bf8d26c8219c331daecfdbd079001"
 dependencies = [
  "proc-macro2",
 ]
@@ -4864,9 +5070,9 @@ checksum = "0c8d0fd677905edcbeedbf2edb6494d676f0e98d54d5cf9bda0b061cb8fb8aba"
 
 [[package]]
 name = "rayon"
-version = "1.11.0"
+version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "368f01d005bf8fd9b1206fb6fa653e6c4a81ceb1466406b81792d87c5677a58f"
+checksum = "fb39b166781f92d482534ef4b4b1b2568f42613b53e5b6c160e24cfbfa30926d"
 dependencies = [
  "either",
  "rayon-core",
@@ -4924,9 +5130,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.12.3"
+version = "1.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e10754a14b9137dd7b1e3e5b0493cc9171fdd105e0ab477f51b72e7f3ac0e276"
+checksum = "2a0e75113e14dc5acb068cd0786884f214f1312650a3d36d269f5c4f3cdee8a2"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -4953,9 +5159,9 @@ checksum = "53a49587ad06b26609c52e423de037e7f57f20d53535d66e08c695f347df952a"
 
 [[package]]
 name = "regex-syntax"
-version = "0.8.5"
+version = "0.8.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b15c43186be67a4fd63bee50d0303afffcef381492ebe2c5d87f324e1b8815c"
+checksum = "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4"
 
 [[package]]
 name = "regress"
@@ -5039,12 +5245,10 @@ dependencies = [
  "anyhow",
  "biome_analyze",
  "biome_configuration",
- "biome_console",
  "biome_css_analyze",
  "biome_css_parser",
  "biome_css_semantic",
  "biome_css_syntax",
- "biome_deserialize",
  "biome_diagnostics",
  "biome_fs",
  "biome_graphql_analyze",
@@ -5057,9 +5261,9 @@ dependencies = [
  "biome_js_parser",
  "biome_js_syntax",
  "biome_json_analyze",
- "biome_json_factory",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_languages",
  "biome_module_graph",
  "biome_project_layout",
  "biome_rowan",
@@ -5092,9 +5296,9 @@ checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
 name = "rustc-hash"
-version = "2.1.2"
+version = "2.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94300abf3f1ae2e2b8ffb7b58043de3d399c73fa6f4b73826402a5c457614dbe"
+checksum = "6b1e7f9a428571be2dc5bc0505c13fb6bf936822b894ec87abf8a08a4e51742d"
 
 [[package]]
 name = "rustc_version"
@@ -5107,15 +5311,15 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "1.1.4"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6fe4565b9518b83ef4f91bb47ce29620ca828bd32cb7e408f0062e9930ba190"
+checksum = "dade4812df5c384711475be5fcd8c162555352945401aed22a35bffeab61f657"
 dependencies = [
  "bitflags 2.9.3",
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -5171,6 +5375,50 @@ name = "ryu-js"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dd29631678d6fb0903b69223673e122c32e9ae559d0960a38d574695ebc0ea15"
+
+[[package]]
+name = "salsa"
+version = "0.27.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ffbaab832e2ea754afda4a738f987dd1e8bd30c9e5d8c981ee6a3934386095e2"
+dependencies = [
+ "boxcar",
+ "crossbeam-queue",
+ "crossbeam-utils",
+ "hashbrown 0.17.0",
+ "hashlink",
+ "indexmap",
+ "intrusive-collections 0.10.2",
+ "inventory",
+ "parking_lot",
+ "portable-atomic",
+ "rayon",
+ "rustc-hash 2.1.3",
+ "salsa-macro-rules",
+ "salsa-macros",
+ "smallvec",
+ "thin-vec",
+ "tracing",
+ "typeid",
+]
+
+[[package]]
+name = "salsa-macro-rules"
+version = "0.27.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "de6872462ac73d39969a836273c24163e6a26a4e08f5114fcd80e25af30ea9c6"
+
+[[package]]
+name = "salsa-macros"
+version = "0.27.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "76bc78ffaf65b1a9175818592c5130aa10b1bb245a905722fd4db87cea8a8457"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.106",
+ "synstructure",
+]
 
 [[package]]
 name = "same-file"
@@ -5350,9 +5598,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.149"
+version = "1.0.150"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83fc039473c5595ace860d8c4fafa220ff474b3fc6bfdb4293327f1a37e94d86"
+checksum = "e8014e44b4736ed0538adeecded0fce2a272f22dc9578a7eb6b2d9993c74cfb9"
 dependencies = [
  "itoa",
  "memchr",
@@ -5497,9 +5745,9 @@ dependencies = [
 
 [[package]]
 name = "smallvec"
-version = "1.15.1"
+version = "1.15.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
+checksum = "8ed6a63f02c8539c91a8685a86f4099661ba3da017932f6ebbea6de3f0fa7c90"
 dependencies = [
  "serde",
 ]
@@ -5615,9 +5863,9 @@ dependencies = [
 
 [[package]]
 name = "synstructure"
-version = "0.13.1"
+version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8af7666ab7b6390ab78131fb5b0fce11d6b7a6951602017c35fa82800708971"
+checksum = "728a70f3dbaf5bab7f0c4b1ac8d7ae5ea60a4b5549c8a5914361c99147a709d2"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -6131,6 +6379,12 @@ dependencies = [
  "termcolor",
  "toml",
 ]
+
+[[package]]
+name = "typeid"
+version = "1.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bc7d623258602320d5c55d1bc22793b57daff0ec7efc270ea7d55ce1d5f5471c"
 
 [[package]]
 name = "unicase"
@@ -7136,6 +7390,7 @@ dependencies = [
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_languages",
  "biome_rowan",
  "biome_service",
  "biome_string_case",
@@ -7163,6 +7418,7 @@ dependencies = [
  "biome_js_parser",
  "biome_js_semantic",
  "biome_js_syntax",
+ "biome_languages",
  "biome_markdown_parser",
  "biome_markdown_syntax",
  "biome_parser",

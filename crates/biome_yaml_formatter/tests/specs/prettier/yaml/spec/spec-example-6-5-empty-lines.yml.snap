@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/spec-example-6-5-empty-lines.yml
 ---
+
 # Input
 
 ```yml
@@ -22,25 +23,21 @@ Chomping: |
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,6 @@
--Folding: "Empty line
+@@ -1,5 +1,5 @@
+ Folding: "Empty line
 -
-+Folding:
-+  "Empty line
 +   	
    as a line feed"
  Chomping: |
--  Clipped empty lines
-+  Clipped empty lines
-\ No newline at end of file
+   Clipped empty lines
 ```
 
 # Output
 
 ```yml
-Folding:
-  "Empty line
+Folding: "Empty line
    	
   as a line feed"
 Chomping: |
-  Clipped empty lines```
+  Clipped empty lines
+```

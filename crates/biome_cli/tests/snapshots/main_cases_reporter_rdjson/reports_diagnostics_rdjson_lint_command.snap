@@ -68,7 +68,23 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "This import is unused."
+      "message": "This import is unused.",
+      "severity": "WARNING",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 21,
+              "line": 1
+            },
+            "start": {
+              "column": 1,
+              "line": 1
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {
@@ -88,7 +104,23 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "Several of these imports are unused."
+      "message": "Several of these imports are unused.",
+      "severity": "WARNING",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 13,
+              "line": 2
+            },
+            "start": {
+              "column": 10,
+              "line": 2
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {
@@ -108,7 +140,23 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "This variable f is unused."
+      "message": "This variable f is unused.",
+      "severity": "WARNING",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 6,
+              "line": 8
+            },
+            "start": {
+              "column": 5,
+              "line": 8
+            }
+          },
+          "text": "_f"
+        }
+      ]
     },
     {
       "code": {
@@ -128,7 +176,23 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "This variable f is unused."
+      "message": "This variable f is unused.",
+      "severity": "WARNING",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 8,
+              "line": 9
+            },
+            "start": {
+              "column": 7,
+              "line": 9
+            }
+          },
+          "text": "_f"
+        }
+      ]
     },
     {
       "code": {
@@ -148,7 +212,23 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "This import is unused."
+      "message": "This import is unused.",
+      "severity": "WARNING",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 21,
+              "line": 1
+            },
+            "start": {
+              "column": 1,
+              "line": 1
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {
@@ -168,7 +248,23 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "Several of these imports are unused."
+      "message": "Several of these imports are unused.",
+      "severity": "WARNING",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 13,
+              "line": 2
+            },
+            "start": {
+              "column": 10,
+              "line": 2
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {
@@ -188,7 +284,23 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "This variable f is unused."
+      "message": "This variable f is unused.",
+      "severity": "WARNING",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 6,
+              "line": 8
+            },
+            "start": {
+              "column": 5,
+              "line": 8
+            }
+          },
+          "text": "_f"
+        }
+      ]
     },
     {
       "code": {
@@ -208,7 +320,23 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "This variable f is unused."
+      "message": "This variable f is unused.",
+      "severity": "WARNING",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 8,
+              "line": 9
+            },
+            "start": {
+              "column": 7,
+              "line": 9
+            }
+          },
+          "text": "_f"
+        }
+      ]
     },
     {
       "code": {
@@ -228,7 +356,23 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "Using == may be unsafe if you are relying on type coercion."
+      "message": "Using == may be unsafe if you are relying on type coercion.",
+      "severity": "ERROR",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 5,
+              "line": 4
+            },
+            "start": {
+              "column": 5,
+              "line": 4
+            }
+          },
+          "text": "="
+        }
+      ]
     },
     {
       "code": {
@@ -248,7 +392,23 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "This is an unexpected use of the debugger statement."
+      "message": "This is an unexpected use of the debugger statement.",
+      "severity": "ERROR",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 9,
+              "line": 6
+            },
+            "start": {
+              "column": 6,
+              "line": 4
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {
@@ -268,7 +428,8 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -288,7 +449,8 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -309,21 +471,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         }
       },
       "message": "'z' is redeclared in the same scope.",
-      "suggestions": [
-        {
-          "range": {
-            "end": {
-              "column": 11,
-              "line": 1
-            },
-            "start": {
-              "column": 10,
-              "line": 1
-            }
-          },
-          "text": "Remove the duplicate declaration or rename one of the variables."
-        }
-      ]
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -344,21 +492,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         }
       },
       "message": "'f' is redeclared in the same scope.",
-      "suggestions": [
-        {
-          "range": {
-            "end": {
-              "column": 6,
-              "line": 8
-            },
-            "start": {
-              "column": 5,
-              "line": 8
-            }
-          },
-          "text": "Remove the duplicate declaration or rename one of the variables."
-        }
-      ]
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -378,7 +512,23 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "Using == may be unsafe if you are relying on type coercion."
+      "message": "Using == may be unsafe if you are relying on type coercion.",
+      "severity": "ERROR",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 5,
+              "line": 4
+            },
+            "start": {
+              "column": 5,
+              "line": 4
+            }
+          },
+          "text": "="
+        }
+      ]
     },
     {
       "code": {
@@ -398,7 +548,23 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "This is an unexpected use of the debugger statement."
+      "message": "This is an unexpected use of the debugger statement.",
+      "severity": "ERROR",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 9,
+              "line": 6
+            },
+            "start": {
+              "column": 6,
+              "line": 4
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {
@@ -418,7 +584,8 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -438,7 +605,8 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -459,21 +627,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         }
       },
       "message": "'z' is redeclared in the same scope.",
-      "suggestions": [
-        {
-          "range": {
-            "end": {
-              "column": 11,
-              "line": 1
-            },
-            "start": {
-              "column": 10,
-              "line": 1
-            }
-          },
-          "text": "Remove the duplicate declaration or rename one of the variables."
-        }
-      ]
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -494,21 +648,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         }
       },
       "message": "'f' is redeclared in the same scope.",
-      "suggestions": [
-        {
-          "range": {
-            "end": {
-              "column": 6,
-              "line": 8
-            },
-            "start": {
-              "column": 5,
-              "line": 8
-            }
-          },
-          "text": "Remove the duplicate declaration or rename one of the variables."
-        }
-      ]
+      "severity": "ERROR"
     }
   ]
 }

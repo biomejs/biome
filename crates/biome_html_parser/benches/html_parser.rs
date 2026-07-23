@@ -2,7 +2,7 @@ use std::{collections::HashMap, fs, path::Path};
 
 use biome_diagnostics::{DiagnosticExt, print_diagnostic_to_string};
 use biome_html_parser::{HtmlParserOptions, parse_html, parse_html_with_cache};
-use biome_html_syntax::HtmlFileSource;
+use biome_languages::HtmlFileSource;
 use biome_rowan::NodeCache;
 use biome_string_case::StrLikeExtension;
 use biome_test_utils::BenchCase;

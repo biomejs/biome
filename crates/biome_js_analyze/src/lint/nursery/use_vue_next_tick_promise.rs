@@ -40,7 +40,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueNextTickPromise {
-        version: "next",
+        version: "2.4.15",
         name: "useVueNextTickPromise",
         language: "js",
         recommended: true,

@@ -1,7 +1,8 @@
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::scss::{
     is_at_scss_interpolation, is_at_scss_namespaced_variable, is_at_scss_variable,
-    is_nth_at_scss_interpolation, parse_scss_identifier_or_interpolation,
+    is_nth_at_scss_interpolation, parse_scss_interpolation_or_identifier,
     parse_scss_namespaced_variable, parse_scss_regular_interpolation, parse_scss_variable,
 };
 use crate::syntax::value::dimension::{is_at_any_dimension, parse_any_dimension};
@@ -29,6 +30,35 @@ fn is_at_identifier_with_interpolation_suffix(p: &mut CssParser) -> bool {
     is_nth_at_identifier(p, 0)
         && is_nth_at_scss_interpolation(p, 1)
         && !p.has_nth_preceding_whitespace(1)
+}
+
+#[inline]
+pub(crate) fn is_at_scss_interpolated_value_head(p: &mut CssParser) -> bool {
+    is_at_scss_namespaced_variable(p)
+        || is_at_scss_variable(p)
+        || is_at_any_dimension(p)
+        || p.at(CSS_NUMBER_LITERAL)
+}
+
+#[inline]
+pub(crate) fn is_at_scss_suffixed_interpolated_value(p: &mut CssParser) -> bool {
+    if is_at_scss_namespaced_variable(p) {
+        is_nth_at_adjacent_interpolation_suffix(p, 4)
+    } else if is_at_scss_variable(p) {
+        is_nth_at_adjacent_interpolation_suffix(p, 2)
+    } else if is_at_any_dimension(p) {
+        // `10px#{suffix}`: dimension heads include the unit token.
+        is_nth_at_adjacent_interpolation_suffix(p, 2)
+    } else if p.at(CSS_NUMBER_LITERAL) {
+        is_nth_at_adjacent_interpolation_suffix(p, 1)
+    } else {
+        false
+    }
+}
+
+#[inline]
+fn is_nth_at_adjacent_interpolation_suffix(p: &mut CssParser, n: usize) -> bool {
+    is_nth_at_scss_interpolation(p, n) && !p.has_nth_preceding_whitespace(n)
 }
 
 /// Parses an SCSS interpolation-led value and upgrades it to a function call
@@ -71,7 +101,7 @@ pub(crate) fn parse_scss_interpolated_function_or_value_until(
         return Absent;
     }
 
-    let head = match parse_scss_identifier_or_interpolation(p) {
+    let head = match parse_scss_interpolation_or_identifier(p) {
         Present(head) => head,
         Absent => return Absent,
     };
@@ -103,6 +133,61 @@ pub(crate) fn parse_scss_interpolated_function_or_value_until(
             }
         }
         _ => Present(head),
+    }
+}
+
+/// Parses a value head that may be followed by an adjacent interpolation suffix.
+///
+/// This keeps expression operands, regular SCSS values, and CSS-mode SCSS
+/// recovery on the same boundary-aware parser.
+///
+/// Examples:
+/// ```scss
+/// $value#{suffix}
+/// module.$value#{suffix}
+/// 10#{unit}
+/// 10px#{suffix}
+/// ```
+///
+/// Docs: https://sass-lang.com/documentation/interpolation
+#[inline]
+pub(crate) fn parse_scss_suffixed_interpolated_value_until(
+    p: &mut CssParser,
+    should_stop: impl Fn(&mut CssParser) -> bool,
+) -> ParsedSyntax {
+    if !is_at_scss_interpolated_value_head(p) {
+        return Absent;
+    }
+
+    let head = match parse_scss_interpolated_value_head(p) {
+        Present(head) => head,
+        Absent => return Absent,
+    };
+
+    // `10 / 2` and `$value / 2` must leave the operator to Sass precedence;
+    // only adjacent interpolation suffixes like `10#{unit}` continue here.
+    if should_stop(p) || !is_at_scss_interpolation(p) {
+        return Present(head);
+    }
+
+    Present(parse_scss_interpolated_value(p, head, should_stop))
+}
+
+/// Parses the head before an adjacent interpolation suffix.
+///
+/// Examples: `$value`, `module.$value`, `10`, `10px`
+#[inline]
+fn parse_scss_interpolated_value_head(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_scss_namespaced_variable(p) {
+        parse_scss_namespaced_variable(p)
+    } else if is_at_scss_variable(p) {
+        parse_scss_variable(p)
+    } else if is_at_any_dimension(p) {
+        parse_any_dimension(p, CssLexContext::Regular)
+    } else if p.at(CSS_NUMBER_LITERAL) {
+        parse_regular_number(p)
+    } else {
+        Absent
     }
 }
 
@@ -142,10 +227,10 @@ pub(crate) fn is_at_scss_interpolated_value_suffix(p: &mut CssParser) -> bool {
 #[inline]
 pub(crate) fn parse_scss_interpolated_value(
     p: &mut CssParser,
-    first_part: CompletedMarker,
+    head: CompletedMarker,
     should_stop: impl Fn(&mut CssParser) -> bool,
 ) -> CompletedMarker {
-    let list = first_part.precede(p);
+    let list = head.precede(p);
     let mut progress = ParserProgress::default();
 
     // The caller owns the stop condition because expression parsing must stop
@@ -170,7 +255,7 @@ fn parse_scss_interpolated_value_suffix_part(p: &mut CssParser) -> ParsedSyntax 
     } else if is_at_scss_interpolation(p) {
         parse_scss_regular_interpolation(p)
     } else if is_at_any_dimension(p) {
-        parse_any_dimension(p)
+        parse_any_dimension(p, CssLexContext::Regular)
     } else if p.at(CSS_NUMBER_LITERAL) {
         parse_regular_number(p)
     } else if is_at_identifier(p) {

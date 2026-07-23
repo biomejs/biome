@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/spec-example-7-15-flow-mappings.yml
 ---
+
 # Input
 
 ```yml
@@ -21,11 +22,11 @@ info: yaml/spec/spec-example-7-15-flow-mappings.yml
 -- { five: six, seven: eight }
 +- { one : two , three: four , }
 +- {five: six,seven : eight}
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
 - { one : two , three: four , }
-- {five: six,seven : eight}```
+- {five: six,seven : eight}
+```

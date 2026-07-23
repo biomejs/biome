@@ -38,7 +38,7 @@ declare_lint_rule! {
     /// ## Accessibility guidelines
     /// - [WCAG 4.1.2](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)
     pub UseValidAriaProps {
-        version: "next",
+        version: "2.5.0",
         name: "useValidAriaProps",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("aria-props").inspired()],
@@ -109,21 +109,19 @@ fn extract_attribute_name(attr: &AnyHtmlAttribute) -> Option<TokenText> {
             AnyVueDirective::VueVBindShorthandDirective(d) => Some(
                 d.arg()
                     .ok()?
-                    .arg()
-                    .ok()?
+                    .arg()?
                     .as_vue_static_argument()?
                     .name_token()
                     .ok()?
                     .token_text_trimmed(),
             ),
             AnyVueDirective::VueDirective(d) => {
-                if d.name_token().ok()?.text_trimmed() != "v-bind" {
+                if !d.is_binding() {
                     return None;
                 }
                 Some(
                     d.arg()?
-                        .arg()
-                        .ok()?
+                        .arg()?
                         .as_vue_static_argument()?
                         .name_token()
                         .ok()?

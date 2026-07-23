@@ -1,26 +1,25 @@
+use crate::path_info_cache::PathInfoCache;
 use biome_package::{PackageJson, TsConfigJson};
 use biome_project_layout::ProjectLayout;
 use biome_resolver::{FsWithResolverProxy, PathInfo, ResolveError, ResolverFsProxy};
 use camino::{Utf8Path, Utf8PathBuf};
 
-use super::ModuleGraph;
-
 pub(crate) struct ModuleGraphFsProxy<'a> {
     fs: &'a dyn FsWithResolverProxy,
-    module_graph: &'a ModuleGraph,
     project_layout: &'a ProjectLayout,
+    path_info_cache: &'a PathInfoCache,
 }
 
 impl<'a> ModuleGraphFsProxy<'a> {
     pub fn new(
         fs: &'a dyn FsWithResolverProxy,
-        module_graph: &'a ModuleGraph,
+        path_info_cache: &'a PathInfoCache,
         project_layout: &'a ProjectLayout,
     ) -> Self {
         Self {
             fs,
-            module_graph,
             project_layout,
+            path_info_cache,
         }
     }
 }
@@ -36,8 +35,8 @@ impl ResolverFsProxy for ModuleGraphFsProxy<'_> {
     }
 
     fn path_info(&self, path: &Utf8Path) -> Result<PathInfo, ResolveError> {
-        self.module_graph
-            .get_or_insert_path_info(path, self.fs)
+        self.path_info_cache
+            .get_or_insert_with_fs(path, self.fs)
             .ok_or(ResolveError::NotFound)
     }
 

@@ -26,17 +26,17 @@ pub(crate) enum HtmlLexContext {
     #[default]
     Regular,
     /// When the lexer is inside a tag, special characters are lexed as tag tokens.
-    InsideTag,
-    /// Like [InsideTag], but with Vue-style directive tokens enabled (`.`, `:`, `@`, `#`, etc.).
-    /// When `svelte` is `true`, also recognizes `//` and `/* */` as JS-style comments (for Svelte
-    /// component names which need both member-expression `.` support and comment support).
+    ///
+    /// This single context covers plain HTML as well as the Vue/Svelte/Astro
+    /// variants, parameterized by `framework`, which selects the directive lexing
+    /// and whether PascalCase tag names are treated as component names.
+    InsideTag { framework: HtmlFramework },
+    /// Like [InsideTag], but used **only** when lexing a component name or member
+    /// expression (e.g. `Foo` / `Foo.Bar`), after the parser has already decided
+    /// the name is a component. The tag-name token is always emitted as
+    /// `HTML_COMPONENT_LITERAL`, and `.` is lexed as a token for member access.
+    /// When `svelte` is `true`, also recognizes `//` and `/* */` JS-style comments.
     InsideTagWithDirectives { svelte: bool },
-    /// Like [InsideTag], but with Svelte-specific tokens enabled.
-    /// This enables parsing of JS-style `//` and `/* */` comments as trivia.
-    InsideTagSvelte,
-    /// Like [InsideTag], but with Astro-specific tokens enabled.
-    /// This enables parsing of Astro directives (client:, set:, class:, is:, server:)
-    InsideTagAstro,
     /// Lexes Vue directive arguments inside `[]`.
     VueDirectiveArgument,
     /// Lexes the binding and operator portions of a Vue `v-for` value.
@@ -48,6 +48,15 @@ pub(crate) enum HtmlLexContext {
     ///
     /// This is because attribute values can start and end with a `"` or `'` character, or be unquoted, and the lexer needs to know to start lexing a string literal.
     AttributeValue,
+
+    /// Like [AttributeValue] but for quoted values stops at `{` instead of consuming
+    /// the whole string, so the parser can detect interpolations without a pre-scan.
+    SvelteAttributeValue,
+
+    /// Lexes literal chunks of a Svelte template attribute value (e.g. `top: ` and
+    /// `px` in `style="top: {top}px"`). Emits `{` as its own token; everything else
+    /// runs until the next `{` or the closing quote.
+    SvelteTemplateChunk { quote: u8 },
 
     /// Context to be used when parsing the contents of Svelte blocks. Svelte blocks usually start with `{@`, `{:`, `{/` or `{#`.
     /// When lexing using this context, specific tokens are emitted such as `if`, `else`, `debug`, etc.
@@ -77,6 +86,31 @@ pub(crate) enum HtmlLexContext {
     AstroFencedCodeBlock,
 }
 
+/// The framework flavor of an HTML file, used to parameterize the [HtmlLexContext::InsideTag]
+/// context so the lexer knows which directive tokens to recognize and whether
+/// PascalCase tag names should be treated as component names.
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum HtmlFramework {
+    /// Plain HTML. PascalCase names are still HTML tags (case-insensitive).
+    #[default]
+    Plain,
+    /// Vue single-file component. Enables Vue directive tokens (`.`, `:`, `@`, `[`, `]`, `#`).
+    Vue,
+    /// Svelte component. Enables `.` and JS-style comments.
+    Svelte,
+    /// Astro component. Enables Astro directive tokens (`:`, `.`).
+    Astro,
+    /// Angular component. Enables Astro directive tokens (`:`, `.`).
+    Angular,
+}
+
+impl HtmlFramework {
+    /// Whether PascalCase tag names should be treated as component names.
+    pub(crate) const fn supports_components(self) -> bool {
+        !matches!(self, Self::Plain)
+    }
+}
+
 impl HtmlLexContext {
     pub fn single_expression() -> Self {
         Self::TextExpression(TextExpressionKind::Single)
@@ -104,16 +138,23 @@ pub(crate) enum TextExpressionKind {
 pub(crate) enum RestrictedExpressionStopAt {
     /// Stops at 'as' keyword or ',' (for Svelte #each blocks)
     AsOrComma,
+    /// Stops at `,`
+    Comma,
     /// Stops at `)`
     ClosingParen,
     /// Stops at `then` or `catch` keywords
     ThenOrCatch,
+    /// Like `AsOrComma`, but skips the first occurrence of `as` and stops at
+    /// the second. Used when the parser has determined via lookahead that the
+    /// expression contains a TypeScript `as const` assertion before the Svelte
+    /// binding `as`.
+    AsOrCommaSkipFirstAs,
 }
 
 impl RestrictedExpressionStopAt {
     pub(crate) fn matches_punct(&self, byte: u8) -> bool {
         match self {
-            Self::AsOrComma => byte == b',',
+            Self::AsOrComma | Self::Comma | Self::AsOrCommaSkipFirstAs => byte == b',',
             Self::ClosingParen => byte == b')',
             Self::ThenOrCatch => false,
         }
@@ -121,7 +162,8 @@ impl RestrictedExpressionStopAt {
 
     pub(crate) fn matches_keyword(&self, keyword: HtmlSyntaxKind) -> bool {
         match self {
-            Self::AsOrComma => keyword == AS_KW,
+            Self::AsOrComma | Self::AsOrCommaSkipFirstAs => keyword == AS_KW,
+            Self::Comma => false,
             Self::ClosingParen => false,
             Self::ThenOrCatch => keyword == THEN_KW || keyword == CATCH_KW,
         }
@@ -163,6 +205,11 @@ pub(crate) enum HtmlReLexContext {
     InsideTagAstro,
     /// Relex tokens as if the parser was inside a tag in a Svelte file.
     InsideTagSvelte,
+    /// Re-tokenize the current quote token (`DOUBLE_QUOTE` or `SINGLE_QUOTE`)
+    /// as a full `HTML_STRING_LITERAL`. Used when a Svelte attribute value was
+    /// speculatively parsed as a template but turned out to have no
+    /// interpolations, so it can be parsed as a plain string instead.
+    SvelteAttributeString,
 }
 
 pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind>;

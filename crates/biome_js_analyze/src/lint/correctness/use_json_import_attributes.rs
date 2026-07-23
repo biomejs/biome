@@ -9,7 +9,7 @@ use biome_rowan::{
 };
 use biome_rule_options::use_json_import_attributes::UseJsonImportAttributesOptions;
 
-use crate::{JsRuleAction, services::module_graph::ResolvedImports};
+use crate::{JsRuleAction, services::database::ResolvedImports};
 
 // Define an enum to represent the specific reason for the lint violation.
 #[derive(Debug, Clone, PartialEq, Eq)]

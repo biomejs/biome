@@ -4,9 +4,13 @@ use biome_analyze::{
 };
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{Padding, markup};
+#[cfg(feature = "lang_css")]
 use biome_css_syntax::CssLanguage;
+#[cfg(feature = "lang_graphql")]
 use biome_graphql_syntax::GraphqlLanguage;
+#[cfg(feature = "lang_html")]
 use biome_html_syntax::HtmlLanguage;
+#[cfg(feature = "lang_js")]
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
 use biome_rowan::Language;
@@ -53,10 +57,14 @@ impl RulesVisitor {
             rules_metadata: BTreeMap::new(),
         };
 
+        #[cfg(feature = "lang_graphql")]
         biome_graphql_analyze::visit_registry(&mut visitor);
+        #[cfg(feature = "lang_html")]
         biome_html_analyze::visit_registry(&mut visitor);
+        #[cfg(feature = "lang_css")]
         biome_css_analyze::visit_registry(&mut visitor);
         biome_json_analyze::visit_registry(&mut visitor);
+        #[cfg(feature = "lang_js")]
         biome_js_analyze::visit_registry(&mut visitor);
 
         visitor
@@ -84,6 +92,7 @@ impl RulesVisitor {
     }
 }
 
+#[cfg(feature = "lang_js")]
 impl RegistryVisitor<JsLanguage> for RulesVisitor {
     fn record_rule<R>(&mut self)
     where
@@ -103,6 +112,7 @@ impl RegistryVisitor<JsonLanguage> for RulesVisitor {
     }
 }
 
+#[cfg(feature = "lang_css")]
 impl RegistryVisitor<CssLanguage> for RulesVisitor {
     fn record_rule<R>(&mut self)
     where
@@ -113,6 +123,7 @@ impl RegistryVisitor<CssLanguage> for RulesVisitor {
     }
 }
 
+#[cfg(feature = "lang_graphql")]
 impl RegistryVisitor<GraphqlLanguage> for RulesVisitor {
     fn record_rule<R>(&mut self)
     where
@@ -123,6 +134,7 @@ impl RegistryVisitor<GraphqlLanguage> for RulesVisitor {
     }
 }
 
+#[cfg(feature = "lang_html")]
 impl RegistryVisitor<HtmlLanguage> for RulesVisitor {
     fn record_rule<R>(&mut self)
     where

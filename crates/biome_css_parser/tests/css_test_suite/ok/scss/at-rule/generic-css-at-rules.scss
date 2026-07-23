@@ -1,0 +1,9 @@
+@#{$rule-name} #{$value};
+
+@unknown #{meta.inspect($value)} {
+  color: red;
+}
+
+@unknown fn({ width: 300px }) #{$query} {
+  color: red;
+}

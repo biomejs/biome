@@ -64,7 +64,7 @@ declare_lint_rule! {
         version: "2.4.13",
         name: "noReactNativeLiteralColors",
         language: "js",
-        sources: &[RuleSource::EslintReactNative("no-color-literals").same()],
+        sources: &[RuleSource::EslintReactNativeIntellicode("no-color-literals").same()],
         domains: &[RuleDomain::ReactNative],
         recommended: false,
     }

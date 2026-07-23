@@ -10,46 +10,61 @@ mod token_sets;
 mod value;
 
 pub(crate) use at_rule::{
-    parse_bogus_scss_else_at_rule, parse_scss_at_root_at_rule, parse_scss_content_at_rule,
-    parse_scss_debug_at_rule, parse_scss_each_at_rule, parse_scss_error_at_rule,
-    parse_scss_extend_at_rule, parse_scss_for_at_rule, parse_scss_forward_at_rule,
-    parse_scss_function_at_rule, parse_scss_if_at_rule, parse_scss_import_at_rule,
-    parse_scss_include_at_rule, parse_scss_mixin_at_rule, parse_scss_return_at_rule,
-    parse_scss_use_at_rule, parse_scss_warn_at_rule, parse_scss_while_at_rule,
+    is_at_scss_interpolated_media_in_parens, is_at_scss_keyframes_name,
+    is_at_scss_keyframes_selector, is_at_scss_media_condition, is_at_scss_media_query,
+    is_at_scss_supports_interpolated_condition, parse_bogus_scss_else_at_rule,
+    parse_scss_at_root_at_rule, parse_scss_content_at_rule, parse_scss_debug_at_rule,
+    parse_scss_each_at_rule, parse_scss_error_at_rule, parse_scss_extend_at_rule,
+    parse_scss_for_at_rule, parse_scss_forward_at_rule, parse_scss_function_at_rule,
+    parse_scss_if_at_rule, parse_scss_import_at_rule, parse_scss_include_at_rule,
+    parse_scss_interpolated_media_in_parens, parse_scss_interpolated_query_feature,
+    parse_scss_keyframes_name, parse_scss_keyframes_selector, parse_scss_media_condition,
+    parse_scss_media_query, parse_scss_media_query_or_condition_query, parse_scss_mixin_at_rule,
+    parse_scss_return_at_rule, parse_scss_supports_interpolated_condition, parse_scss_use_at_rule,
+    parse_scss_warn_at_rule, parse_scss_while_at_rule,
 };
 pub(crate) use declaration::{
     is_at_scss_nesting_declaration, is_at_scss_variable_declaration, is_at_scss_variable_modifier,
-    parse_scss_interpolated_property_declaration, parse_scss_nesting_declaration,
-    parse_scss_variable_declaration, try_parse_scss_nesting_declaration,
+    parse_exclusive_scss_nested_property_declaration, parse_scss_interpolated_property_declaration,
+    parse_scss_nesting_declaration, parse_scss_variable_declaration,
+    try_parse_scss_nesting_declaration,
 };
 pub(crate) use expression::{
-    SCSS_UNARY_OPERATOR_TOKEN_SET, complete_empty_scss_expression, is_at_scss_interpolation,
-    is_nth_at_scss_interpolation, parse_required_scss_value_until, parse_scss_expression,
-    parse_scss_expression_in_args_until, parse_scss_expression_in_variable_value_until,
-    parse_scss_expression_until, parse_scss_interpolation_inner_expression,
-    parse_scss_interpolation_prefix, parse_scss_optional_value_until,
-    parse_scss_regular_interpolation,
+    SCSS_UNARY_OPERATOR_TOKEN_SET, complete_empty_scss_expression, is_at_scss_binary_operator,
+    is_at_scss_interpolation, is_nth_at_scss_interpolation, parse_required_scss_value_until,
+    parse_scss_expression, parse_scss_expression_from_head, parse_scss_expression_in_args_until,
+    parse_scss_expression_in_variable_value_until, parse_scss_expression_until,
+    parse_scss_interpolation_inner_expression, parse_scss_interpolation_prefix,
+    parse_scss_optional_value_until, parse_scss_regular_interpolation,
 };
 pub(crate) use function_name::{
     add_scss_variable_member_function_name_diagnostic, parse_scss_function_name,
 };
 pub(crate) use identifiers::{
-    is_at_scss_interpolated_identifier, is_at_scss_module_member_access,
-    is_at_scss_namespaced_variable, is_at_scss_variable, is_nth_at_scss_interpolated_identifier,
-    is_nth_at_scss_module_member_access, parse_scss_identifier_or_interpolation,
-    parse_scss_interpolated_identifier, parse_scss_module_member_access,
-    parse_scss_namespaced_variable, parse_scss_selector_custom_interpolated_identifier,
-    parse_scss_selector_interpolated_identifier, parse_scss_variable,
+    is_at_scss_interpolated_dashed_identifier, is_at_scss_interpolated_identifier,
+    is_at_scss_interpolated_selector_identifier, is_at_scss_module_member_access,
+    is_at_scss_namespaced_variable, is_at_scss_variable,
+    is_nth_at_scss_hyphen_interpolated_identifier, is_nth_at_scss_interpolated_dashed_identifier,
+    is_nth_at_scss_interpolated_identifier, is_nth_at_scss_interpolated_selector_identifier,
+    is_nth_at_scss_module_member_access, parse_scss_hyphen_interpolated_identifier,
+    parse_scss_interpolated_dashed_identifier, parse_scss_interpolated_identifier,
+    parse_scss_interpolated_name, parse_scss_interpolation_or_identifier,
+    parse_scss_module_member_access, parse_scss_namespaced_variable,
+    parse_scss_selector_custom_identifier, parse_scss_selector_identifier, parse_scss_variable,
 };
 pub(crate) use parse_error::{
     expected_scss_expression, expected_scss_variable_modifier, scss_ellipsis_not_allowed,
 };
 pub(crate) use property::{
-    is_at_scss_interpolated_property, is_nth_at_scss_interpolated_property,
+    is_at_scss_interpolated_property_name, is_nth_at_scss_interpolated_property_name,
     parse_scss_interpolated_property_name,
 };
 pub(crate) use selector::{
+    is_at_scss_interpolated_attribute_identifier, is_at_scss_parent_selector_suffix,
     is_at_scss_pseudo_class_nth, is_nth_at_scss_placeholder_selector,
+    parse_scss_interpolated_attribute_modifier,
+    parse_scss_interpolated_pseudo_class_function_arguments,
+    parse_scss_interpolated_pseudo_element_function_arguments, parse_scss_parent_selector_suffix,
     parse_scss_placeholder_selector, parse_scss_pseudo_class_nth,
 };
 pub(crate) use token_sets::{
@@ -58,9 +73,12 @@ pub(crate) use token_sets::{
 };
 pub(crate) use value::{
     is_at_any_scss_value, is_at_scss_function, is_at_scss_interpolated_function_or_value,
-    is_at_scss_interpolated_string, is_at_scss_parent_selector_value, is_nth_at_scss_function,
-    parse_any_scss_value_with_context, parse_scss_function, parse_scss_function_call_from_name,
-    parse_scss_interpolated_function_or_value, parse_scss_interpolated_function_or_value_until,
-    parse_scss_interpolated_string, parse_scss_interpolated_value,
-    parse_scss_parent_selector_value,
+    is_at_scss_interpolated_string, is_at_scss_interpolated_value_head,
+    is_at_scss_parent_selector_value, is_at_scss_suffixed_interpolated_value,
+    is_nth_at_scss_function, parse_any_scss_value_with_context,
+    parse_scss_bracketed_value_expression_item, parse_scss_function,
+    parse_scss_function_call_from_name, parse_scss_interpolated_function_or_value,
+    parse_scss_interpolated_function_or_value_until, parse_scss_interpolated_string,
+    parse_scss_interpolated_value, parse_scss_parent_selector_value,
+    parse_scss_suffixed_interpolated_value_until,
 };

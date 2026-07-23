@@ -1,6 +1,5 @@
 use crate::JsRuleAction;
-use crate::services::embedded_bindings::EmbeddedBindings;
-use crate::services::embedded_value_references::EmbeddedValueReferences;
+use crate::services::embedded::EmbeddedService;
 use crate::{services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 use biome_analyze::RuleSource;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
@@ -10,11 +9,13 @@ use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
-    AnyJsExpression, EmbeddingKind, JsClassExpression, JsFileSource, JsForStatement,
-    JsFunctionExpression, JsIdentifierExpression, JsModuleItemList, JsSequenceExpression,
-    JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsDeclarationModule, TsInferType,
+    AnyJsExpression, JsCallExpression, JsClassExpression, JsForStatement, JsFunctionExpression,
+    JsIdentifierExpression, JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode,
+    JsVariableDeclarator, TsConditionalType, TsDeclarationModule, TsInferType,
     TsInterfaceDeclaration, TsTypeAliasDeclaration,
 };
+use biome_languages::JsFileSource;
+use biome_languages::javascript::JsEmbeddingKind;
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
 use biome_rule_options::no_unused_variables::{
     NoUnusedVariablesOptions, NoUnusedVariablesOptionsIgnore,
@@ -371,12 +372,9 @@ impl Rule for NoUnusedVariables {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let binding = ctx.query();
         let model = ctx.model();
-        let embedded_bindings = ctx
-            .get_service::<EmbeddedBindings>()
-            .expect("embedded bindings service");
-        let embedded_references = ctx
-            .get_service::<EmbeddedValueReferences>()
-            .expect("embedded references service");
+        let embedded = ctx
+            .get_service::<EmbeddedService>()
+            .expect("embedded service");
 
         let file_source = ctx.source_type::<JsFileSource>();
 
@@ -401,17 +399,18 @@ impl Rule for NoUnusedVariables {
             return None;
         }
 
-        let binding_name = binding.name_token().ok()?;
-        let binding_name = binding_name.text_trimmed();
+        let binding_name_token = binding.name_token().ok()?;
+        let binding_name = binding_name_token.text_trimmed();
+        let binding_token_text = binding_name_token.token_text_trimmed();
 
         // Ignore name prefixed with `_`
         let is_underscore_prefixed = binding_name.starts_with('_');
-        // Only suppress noUnusedVariables for imports and variable declarations in
-        // embedded script blocks. Function/class/type declarations should still be
-        // flagged unless they are actually referenced in the template
-        // (handled by is_used_as_reference below).
-        // Eventually, we should probably not ignore bindings in embedded blocks, because they might be genuinely unused.
-        let is_defined_in_embedded_binding = embedded_bindings.contains_binding(binding_name)
+        // Skip this for the `<script>` block itself: its own declarations are
+        // in the embedded-binding set, so the name check would always match and
+        // suppress every diagnostic. Template usage is handled by the
+        // reference check below.
+        let is_defined_in_embedded_binding = !file_source.is_embedded_source()
+            && embedded.contains_binding(binding_token_text.clone())
             && binding
                 .declaration()
                 .map(|d| d.parent_binding_pattern_declaration().unwrap_or(d))
@@ -425,7 +424,11 @@ impl Rule for NoUnusedVariables {
                             | AnyJsBindingDeclaration::JsVariableDeclarator(_)
                     )
                 });
-        let is_used_as_reference = embedded_references.is_used_as_value(binding_name);
+        let is_used_as_reference = embedded.is_used(binding_token_text.clone())
+            || matches!(
+                file_source.as_embedding_kind(),
+                JsEmbeddingKind::Svelte { .. }
+            ) && embedded.is_svelte_store_used(binding_token_text);
 
         if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference {
             return None;
@@ -434,7 +437,7 @@ impl Rule for NoUnusedVariables {
         // In Astro files, a top-level type/interface `Props` is always ignored as it's implicitly
         // read by the framework.
         if binding_name == "Props"
-            && let EmbeddingKind::Astro { .. } = file_source.as_embedding_kind()
+            && let JsEmbeddingKind::Astro { .. } = file_source.as_embedding_kind()
             && let AnyJsIdentifierBinding::TsIdentifierBinding(binding) = binding
             && (TsInterfaceDeclaration::can_cast(binding.syntax().parent()?.kind())
                 || TsTypeAliasDeclaration::can_cast(binding.syntax().parent()?.kind()))
@@ -444,6 +447,16 @@ impl Rule for NoUnusedVariables {
         }
 
         if is_unused(model, binding) {
+            // In Svelte 5, assigning to a `$bindable()` prop reflects the value back to the
+            // parent component. Such a variable may be write-only in the script block but is
+            // still meaningful — suppress the diagnostic to avoid a false positive.
+            if matches!(
+                file_source.as_embedding_kind(),
+                JsEmbeddingKind::Svelte { .. }
+            ) && is_svelte_bindable_prop(binding)
+            {
+                return None;
+            }
             suggested_fix_if_unused(binding, ctx.options())
         } else {
             None
@@ -674,6 +687,57 @@ fn is_declaration_merged_with_used(
         }
         _ => None,
     }
+}
+
+/// Returns `true` if `call` is a call to a simple identifier named `name`.
+fn is_call_to(call: &JsCallExpression, name: &str) -> bool {
+    let Ok(AnyJsExpression::JsIdentifierExpression(ident)) = call.callee() else {
+        return false;
+    };
+    ident.name().is_ok_and(|n| n.has_name(name))
+}
+
+/// Returns `true` if the binding is a `$bindable()` shorthand property in a `$props()`
+/// destructuring in a Svelte 5 component.
+///
+/// In Svelte 5, assigning to a `$bindable()` prop reflects the new value back to the parent
+/// component. A variable that appears write-only in the script is therefore intentional and
+/// should not be flagged as unused.
+fn is_svelte_bindable_prop(binding: &AnyJsIdentifierBinding) -> bool {
+    // The binding must be declared as a shorthand property in an object destructuring pattern.
+    let Some(decl) = binding.declaration() else {
+        return false;
+    };
+    let AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(shorthand) = decl else {
+        return false;
+    };
+
+    // The shorthand property must have a default initializer `= $bindable(...)`.
+    let Some(init) = shorthand.init() else {
+        return false;
+    };
+    let Ok(AnyJsExpression::JsCallExpression(call)) = init.expression() else {
+        return false;
+    };
+    if !is_call_to(&call, "$bindable") {
+        return false;
+    }
+
+    // Walk up to find the enclosing `JsVariableDeclarator` whose rhs must be `$props()`.
+    let Some(declarator) = shorthand
+        .syntax()
+        .ancestors()
+        .find_map(JsVariableDeclarator::cast)
+    else {
+        return false;
+    };
+    let Some(declarator_init) = declarator.initializer() else {
+        return false;
+    };
+    let Ok(AnyJsExpression::JsCallExpression(props_call)) = declarator_init.expression() else {
+        return false;
+    };
+    is_call_to(&props_call, "$props")
 }
 
 /// Returns `true` if `binding` is considered as unused.

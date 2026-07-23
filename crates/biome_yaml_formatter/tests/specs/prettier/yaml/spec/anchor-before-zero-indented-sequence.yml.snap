@@ -23,13 +23,10 @@ seq:
 @@ -1,4 +1,5 @@
  ---
 -seq: &anchor
--  - a
--  - b
 +seq:
-+ &anchor
-+- a
-+- b
-\ No newline at end of file
++  &anchor
+   - a
+   - b
 ```
 
 # Output
@@ -37,34 +34,7 @@ seq:
 ```yml
 ---
 seq:
- &anchor
-- a
-- b```
-
-# Errors
-```
-anchor-before-zero-indented-sequence.yml:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a block mapping entry but instead found '- a
-    - b'.
-  
-    2 │ seq:
-    3 │  &anchor
-  > 4 │ - a
-      │ ^^^
-  > 5 │ - b
-      │ ^^^
-    6 │ 
-  
-  i Expected a block mapping entry here.
-  
-    2 │ seq:
-    3 │  &anchor
-  > 4 │ - a
-      │ ^^^
-  > 5 │ - b
-      │ ^^^
-    6 │ 
-  
-
+  &anchor
+  - a
+  - b
 ```

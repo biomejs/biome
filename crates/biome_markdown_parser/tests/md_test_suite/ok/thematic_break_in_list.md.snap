@@ -1,5 +1,6 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 190
 expression: snapshot
 ---
 
@@ -190,10 +191,10 @@ MdDocument {
                         MdNewline {
                             value_token: NEWLINE@36..37 "\n" [] [],
                         },
+                        MdNewline {
+                            value_token: NEWLINE@37..38 "\n" [] [],
+                        },
                     ],
-                },
-                MdNewline {
-                    value_token: NEWLINE@37..38 "\n" [] [],
                 },
                 MdBullet {
                     prefix: MdListMarkerPrefix {
@@ -222,10 +223,10 @@ MdDocument {
                         MdNewline {
                             value_token: NEWLINE@44..45 "\n" [] [],
                         },
+                        MdNewline {
+                            value_token: NEWLINE@45..46 "\n" [] [],
+                        },
                     ],
-                },
-                MdNewline {
-                    value_token: NEWLINE@45..46 "\n" [] [],
                 },
                 MdBullet {
                     prefix: MdListMarkerPrefix {
@@ -257,10 +258,10 @@ MdDocument {
                         MdNewline {
                             value_token: NEWLINE@53..54 "\n" [] [],
                         },
+                        MdNewline {
+                            value_token: NEWLINE@54..55 "\n" [] [],
+                        },
                     ],
-                },
-                MdNewline {
-                    value_token: NEWLINE@54..55 "\n" [] [],
                 },
                 MdBullet {
                     prefix: MdListMarkerPrefix {
@@ -392,13 +393,13 @@ MdDocument {
       0: NEWLINE@29..30 "\n" [] []
     12: MD_BULLET_LIST_ITEM@30..62
       0: MD_BULLET_LIST@30..62
-        0: MD_BULLET@30..37
+        0: MD_BULLET@30..38
           0: MD_LIST_MARKER_PREFIX@30..32
             0: MD_INDENT_TOKEN_LIST@30..30
             1: MINUS@30..31 "-" [] []
             2: MD_LIST_POST_MARKER_SPACE@31..32 " " [] []
             3: MD_INDENT_TOKEN_LIST@32..32
-          1: MD_BLOCK_LIST@32..37
+          1: MD_BLOCK_LIST@32..38
             0: MD_THEMATIC_BREAK_BLOCK@32..36
               0: MD_THEMATIC_BREAK_PART_LIST@32..36
                 0: MD_THEMATIC_BREAK_CHAR@32..33
@@ -411,15 +412,15 @@ MdDocument {
                   0: STAR@35..36 "*" [] []
             1: MD_NEWLINE@36..37
               0: NEWLINE@36..37 "\n" [] []
-        1: MD_NEWLINE@37..38
-          0: NEWLINE@37..38 "\n" [] []
-        2: MD_BULLET@38..45
+            2: MD_NEWLINE@37..38
+              0: NEWLINE@37..38 "\n" [] []
+        1: MD_BULLET@38..46
           0: MD_LIST_MARKER_PREFIX@38..40
             0: MD_INDENT_TOKEN_LIST@38..38
             1: MINUS@38..39 "-" [] []
             2: MD_LIST_POST_MARKER_SPACE@39..40 " " [] []
             3: MD_INDENT_TOKEN_LIST@40..40
-          1: MD_BLOCK_LIST@40..45
+          1: MD_BLOCK_LIST@40..46
             0: MD_THEMATIC_BREAK_BLOCK@40..44
               0: MD_THEMATIC_BREAK_PART_LIST@40..44
                 0: MD_THEMATIC_BREAK_CHAR@40..41
@@ -432,15 +433,15 @@ MdDocument {
                   0: UNDERSCORE@43..44 "_" [] []
             1: MD_NEWLINE@44..45
               0: NEWLINE@44..45 "\n" [] []
-        3: MD_NEWLINE@45..46
-          0: NEWLINE@45..46 "\n" [] []
-        4: MD_BULLET@46..54
+            2: MD_NEWLINE@45..46
+              0: NEWLINE@45..46 "\n" [] []
+        2: MD_BULLET@46..55
           0: MD_LIST_MARKER_PREFIX@46..48
             0: MD_INDENT_TOKEN_LIST@46..46
             1: MINUS@46..47 "-" [] []
             2: MD_LIST_POST_MARKER_SPACE@47..48 " " [] []
             3: MD_INDENT_TOKEN_LIST@48..48
-          1: MD_BLOCK_LIST@48..54
+          1: MD_BLOCK_LIST@48..55
             0: MD_THEMATIC_BREAK_BLOCK@48..53
               0: MD_THEMATIC_BREAK_PART_LIST@48..53
                 0: MD_THEMATIC_BREAK_CHAR@48..49
@@ -455,9 +456,9 @@ MdDocument {
                   0: STAR@52..53 "*" [] []
             1: MD_NEWLINE@53..54
               0: NEWLINE@53..54 "\n" [] []
-        5: MD_NEWLINE@54..55
-          0: NEWLINE@54..55 "\n" [] []
-        6: MD_BULLET@55..62
+            2: MD_NEWLINE@54..55
+              0: NEWLINE@54..55 "\n" [] []
+        3: MD_BULLET@55..62
           0: MD_LIST_MARKER_PREFIX@55..57
             0: MD_INDENT_TOKEN_LIST@55..55
             1: MINUS@55..56 "-" [] []

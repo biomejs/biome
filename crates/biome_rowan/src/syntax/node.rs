@@ -841,6 +841,13 @@ pub struct SendNode {
 }
 
 impl SendNode {
+    /// Consumes this node and returns its source text.
+    pub fn into_source_text(self) -> String {
+        let mut source = String::with_capacity(self.green.text_len().into());
+        self.green.write_source_text(&mut source);
+        source
+    }
+
     /// Downcast this handle back into a [SyntaxNode]
     ///
     /// Returns `None` if the specified language `L` is not the one this node
@@ -903,6 +910,10 @@ impl EmbeddedSendNode {
             node: SyntaxNode::new_root(self.green),
             offset: self.offset,
         }
+    }
+
+    pub fn offset(&self) -> TextSize {
+        self.offset
     }
 }
 

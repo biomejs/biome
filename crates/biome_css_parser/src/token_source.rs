@@ -1,11 +1,14 @@
 use crate::CssParserOptions;
-use crate::lexer::{CssLexContext, CssLexer, CssReLexContext, CssStringQuote};
+use crate::lexer::{
+    CssCustomPropertyCommentMode, CssLexContext, CssLexer, CssReLexContext, CssStringQuote,
+};
 use biome_css_syntax::CssSyntaxKind::EOF;
-use biome_css_syntax::{CssFileSource, CssSyntaxKind, TextRange};
+use biome_css_syntax::{CssSyntaxKind, TextRange};
+use biome_languages::CssFileSource;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{BufferedLexer, LexerCheckpoint};
 use biome_parser::prelude::{BumpWithContext, TokenSource};
-use biome_parser::token_source::{TokenSourceWithBufferedLexer, Trivia};
+use biome_parser::token_source::{NthToken, TokenSourceWithBufferedLexer, Trivia};
 use biome_rowan::TriviaPieceKind;
 use smallvec::SmallVec;
 
@@ -122,6 +125,62 @@ impl<'src> CssTokenSource<'src> {
     pub(crate) fn is_current_token_followed_by_scss_concatenation_plus(&self) -> bool {
         let start = usize::from(self.current_range().end());
         self.lexer.lexer().is_at_scss_concatenation_plus(start)
+    }
+
+    /// Returns whether the body after the current `(` uses Sass raw-URL syntax,
+    /// as in `url(//cdn.example/app.css)`.
+    pub(crate) fn is_scss_raw_url_body(&self) -> bool {
+        let start = usize::from(self.current_range().end());
+        self.lexer.lexer().is_scss_raw_url_body(start)
+    }
+
+    /// Returns whether the current token starts a final custom-property
+    /// `!important` under the active raw-value comment policy.
+    pub(crate) fn is_at_final_custom_property_important(
+        &self,
+        comment_mode: CssCustomPropertyCommentMode,
+    ) -> bool {
+        let start = usize::from(self.current_range().start());
+        self.lexer
+            .lexer()
+            .is_at_final_custom_property_important(start, comment_mode)
+    }
+
+    /// Returns whether the `n`th non-trivia token directly follows the
+    /// preceding token in source text.
+    pub(crate) fn is_nth_source_tight(&mut self, n: usize) -> bool {
+        let Some(previous_n) = n.checked_sub(1) else {
+            return false;
+        };
+        let Some(previous) = <Self as NthToken<CssLexer<'src>>>::nth_range(self, previous_n) else {
+            return false;
+        };
+        let Some(current) = <Self as NthToken<CssLexer<'src>>>::nth_range(self, n) else {
+            return false;
+        };
+
+        previous.end() == current.start()
+    }
+
+    /// Returns whether the current token is immediately preceded by a CSS
+    /// block comment and optional surrounding trivia.
+    pub(crate) fn has_preceding_block_comment(&self) -> bool {
+        let mut trivia_end = self.current_range().start();
+
+        for trivia in self.trivia_list.iter().rev() {
+            if trivia.end_offset() != trivia_end {
+                break;
+            }
+
+            trivia_end = trivia.offset();
+            if trivia.kind().is_comment()
+                && self.lexer.source()[trivia.text_range()].starts_with("/*")
+            {
+                return true;
+            }
+        }
+
+        false
     }
 
     #[inline]

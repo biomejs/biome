@@ -27,7 +27,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@35..36 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdOrderedListItem {
             md_bullet_list: MdBulletList [
@@ -48,7 +47,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@49..50 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -71,7 +69,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@0..35 "Paragraph followed by ordered list." [] []
         1: MD_TEXTUAL@35..36
           0: MD_TEXTUAL_LITERAL@35..36 "\n" [] []
-      1: (empty)
     1: MD_ORDERED_LIST_ITEM@36..50
       0: MD_BULLET_LIST@36..50
         0: MD_BULLET@36..50
@@ -87,7 +84,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@39..49 "first item" [] []
                 1: MD_TEXTUAL@49..50
                   0: MD_TEXTUAL_LITERAL@49..50 "\n" [] []
-              1: (empty)
   2: EOF@50..50 "" [] []
 
 ```

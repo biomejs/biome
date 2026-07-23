@@ -1,6 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
+assertion_line: 206
 expression: snapshot
 ---
 
@@ -9,7 +9,6 @@ expression: snapshot
 ```css
 :global( {}
 :global() {}
-:global(.div, .class) {}
 :global(.div, .class {}
 :global(.div .class {}
 :global(.div .class
@@ -37,6 +36,7 @@ CssRoot {
                                         value_token: IDENT@1..7 "global" [] [],
                                     },
                                     L_PAREN@7..9 "(" [] [Whitespace(" ")],
+                                    CssSelectorList [],
                                 ],
                             },
                         },
@@ -63,6 +63,7 @@ CssRoot {
                                         value_token: IDENT@13..19 "global" [] [],
                                     },
                                     L_PAREN@19..20 "(" [] [],
+                                    CssSelectorList [],
                                     R_PAREN@20..22 ")" [] [Whitespace(" ")],
                                 ],
                             },
@@ -90,71 +91,88 @@ CssRoot {
                                         value_token: IDENT@26..32 "global" [] [],
                                     },
                                     L_PAREN@32..33 "(" [] [],
-                                    CssCompoundSelector {
-                                        nesting_selectors: CssNestedSelectorList [],
-                                        simple_selector: missing (optional),
-                                        sub_selectors: CssSubSelectorList [
-                                            CssClassSelector {
-                                                dot_token: DOT@33..34 "." [] [],
-                                                name: CssCustomIdentifier {
-                                                    value_token: IDENT@34..37 "div" [] [],
+                                    CssSelectorList [
+                                        CssCompoundSelector {
+                                            nesting_selectors: CssNestedSelectorList [],
+                                            simple_selector: missing (optional),
+                                            sub_selectors: CssSubSelectorList [
+                                                CssClassSelector {
+                                                    dot_token: DOT@33..34 "." [] [],
+                                                    name: CssCustomIdentifier {
+                                                        value_token: IDENT@34..37 "div" [] [],
+                                                    },
                                                 },
+                                            ],
+                                        },
+                                        COMMA@37..39 "," [] [Whitespace(" ")],
+                                        CssCompoundSelector {
+                                            nesting_selectors: CssNestedSelectorList [],
+                                            simple_selector: missing (optional),
+                                            sub_selectors: CssSubSelectorList [
+                                                CssClassSelector {
+                                                    dot_token: DOT@39..40 "." [] [],
+                                                    name: CssCustomIdentifier {
+                                                        value_token: IDENT@40..46 "class" [] [Whitespace(" ")],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@46..47 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@47..48 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@48..50 ":" [Newline("\n")] [],
+                            class: CssBogusPseudoClass {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@50..56 "global" [] [],
+                                    },
+                                    L_PAREN@56..57 "(" [] [],
+                                    CssSelectorList [
+                                        CssComplexSelector {
+                                            left: CssCompoundSelector {
+                                                nesting_selectors: CssNestedSelectorList [],
+                                                simple_selector: missing (optional),
+                                                sub_selectors: CssSubSelectorList [
+                                                    CssClassSelector {
+                                                        dot_token: DOT@57..58 "." [] [],
+                                                        name: CssCustomIdentifier {
+                                                            value_token: IDENT@58..61 "div" [] [],
+                                                        },
+                                                    },
+                                                ],
                                             },
-                                        ],
-                                    },
-                                    CssBogus {
-                                        items: [
-                                            COMMA@37..39 "," [] [Whitespace(" ")],
-                                            DOT@39..40 "." [] [],
-                                            IDENT@40..45 "class" [] [],
-                                        ],
-                                    },
-                                    R_PAREN@45..47 ")" [] [Whitespace(" ")],
-                                ],
-                            },
-                        },
-                    ],
-                },
-            ],
-            block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@47..48 "{" [] [],
-                items: CssDeclarationOrRuleList [],
-                r_curly_token: R_CURLY@48..49 "}" [] [],
-            },
-        },
-        CssQualifiedRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selectors: CssNestedSelectorList [],
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoClassSelector {
-                            colon_token: COLON@49..51 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
-                                items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@51..57 "global" [] [],
-                                    },
-                                    L_PAREN@57..58 "(" [] [],
-                                    CssCompoundSelector {
-                                        nesting_selectors: CssNestedSelectorList [],
-                                        simple_selector: missing (optional),
-                                        sub_selectors: CssSubSelectorList [
-                                            CssClassSelector {
-                                                dot_token: DOT@58..59 "." [] [],
-                                                name: CssCustomIdentifier {
-                                                    value_token: IDENT@59..62 "div" [] [],
-                                                },
+                                            combinator: CSS_SPACE_LITERAL@61..62 " " [] [],
+                                            right: CssCompoundSelector {
+                                                nesting_selectors: CssNestedSelectorList [],
+                                                simple_selector: missing (optional),
+                                                sub_selectors: CssSubSelectorList [
+                                                    CssClassSelector {
+                                                        dot_token: DOT@62..63 "." [] [],
+                                                        name: CssCustomIdentifier {
+                                                            value_token: IDENT@63..69 "class" [] [Whitespace(" ")],
+                                                        },
+                                                    },
+                                                ],
                                             },
-                                        ],
-                                    },
-                                    CssBogus {
-                                        items: [
-                                            COMMA@62..64 "," [] [Whitespace(" ")],
-                                            DOT@64..65 "." [] [],
-                                            IDENT@65..71 "class" [] [Whitespace(" ")],
-                                        ],
-                                    },
+                                        },
+                                    ],
                                 ],
                             },
                         },
@@ -162,9 +180,9 @@ CssRoot {
                 },
             ],
             block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@71..72 "{" [] [],
+                l_curly_token: L_CURLY@69..70 "{" [] [],
                 items: CssDeclarationOrRuleList [],
-                r_curly_token: R_CURLY@72..73 "}" [] [],
+                r_curly_token: R_CURLY@70..71 "}" [] [],
             },
         },
         CssQualifiedRule {
@@ -174,93 +192,42 @@ CssRoot {
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
-                            colon_token: COLON@73..75 ":" [Newline("\n")] [],
+                            colon_token: COLON@71..73 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
                                     CssIdentifier {
-                                        value_token: IDENT@75..81 "global" [] [],
+                                        value_token: IDENT@73..79 "global" [] [],
                                     },
-                                    L_PAREN@81..82 "(" [] [],
-                                    CssComplexSelector {
-                                        left: CssCompoundSelector {
-                                            nesting_selectors: CssNestedSelectorList [],
-                                            simple_selector: missing (optional),
-                                            sub_selectors: CssSubSelectorList [
-                                                CssClassSelector {
-                                                    dot_token: DOT@82..83 "." [] [],
-                                                    name: CssCustomIdentifier {
-                                                        value_token: IDENT@83..86 "div" [] [],
+                                    L_PAREN@79..80 "(" [] [],
+                                    CssSelectorList [
+                                        CssComplexSelector {
+                                            left: CssCompoundSelector {
+                                                nesting_selectors: CssNestedSelectorList [],
+                                                simple_selector: missing (optional),
+                                                sub_selectors: CssSubSelectorList [
+                                                    CssClassSelector {
+                                                        dot_token: DOT@80..81 "." [] [],
+                                                        name: CssCustomIdentifier {
+                                                            value_token: IDENT@81..84 "div" [] [],
+                                                        },
                                                     },
-                                                },
-                                            ],
-                                        },
-                                        combinator: CSS_SPACE_LITERAL@86..87 " " [] [],
-                                        right: CssCompoundSelector {
-                                            nesting_selectors: CssNestedSelectorList [],
-                                            simple_selector: missing (optional),
-                                            sub_selectors: CssSubSelectorList [
-                                                CssClassSelector {
-                                                    dot_token: DOT@87..88 "." [] [],
-                                                    name: CssCustomIdentifier {
-                                                        value_token: IDENT@88..94 "class" [] [Whitespace(" ")],
+                                                ],
+                                            },
+                                            combinator: CSS_SPACE_LITERAL@84..85 " " [] [],
+                                            right: CssCompoundSelector {
+                                                nesting_selectors: CssNestedSelectorList [],
+                                                simple_selector: missing (optional),
+                                                sub_selectors: CssSubSelectorList [
+                                                    CssClassSelector {
+                                                        dot_token: DOT@85..86 "." [] [],
+                                                        name: CssCustomIdentifier {
+                                                            value_token: IDENT@86..91 "class" [] [],
+                                                        },
                                                     },
-                                                },
-                                            ],
+                                                ],
+                                            },
                                         },
-                                    },
-                                ],
-                            },
-                        },
-                    ],
-                },
-            ],
-            block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@94..95 "{" [] [],
-                items: CssDeclarationOrRuleList [],
-                r_curly_token: R_CURLY@95..96 "}" [] [],
-            },
-        },
-        CssQualifiedRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selectors: CssNestedSelectorList [],
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoClassSelector {
-                            colon_token: COLON@96..98 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
-                                items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@98..104 "global" [] [],
-                                    },
-                                    L_PAREN@104..105 "(" [] [],
-                                    CssComplexSelector {
-                                        left: CssCompoundSelector {
-                                            nesting_selectors: CssNestedSelectorList [],
-                                            simple_selector: missing (optional),
-                                            sub_selectors: CssSubSelectorList [
-                                                CssClassSelector {
-                                                    dot_token: DOT@105..106 "." [] [],
-                                                    name: CssCustomIdentifier {
-                                                        value_token: IDENT@106..109 "div" [] [],
-                                                    },
-                                                },
-                                            ],
-                                        },
-                                        combinator: CSS_SPACE_LITERAL@109..110 " " [] [],
-                                        right: CssCompoundSelector {
-                                            nesting_selectors: CssNestedSelectorList [],
-                                            simple_selector: missing (optional),
-                                            sub_selectors: CssSubSelectorList [
-                                                CssClassSelector {
-                                                    dot_token: DOT@110..111 "." [] [],
-                                                    name: CssCustomIdentifier {
-                                                        value_token: IDENT@111..116 "class" [] [],
-                                                    },
-                                                },
-                                            ],
-                                        },
-                                    },
+                                    ],
                                 ],
                             },
                         },
@@ -272,16 +239,16 @@ CssRoot {
             },
         },
     ],
-    eof_token: EOF@116..117 "" [Newline("\n")] [],
+    eof_token: EOF@91..92 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..117
+0: CSS_ROOT@0..92
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..116
+  1: CSS_ROOT_ITEM_LIST@0..91
     0: CSS_QUALIFIED_RULE@0..11
       0: CSS_SELECTOR_LIST@0..9
         0: CSS_COMPOUND_SELECTOR@0..9
@@ -294,6 +261,7 @@ CssRoot {
                 0: CSS_IDENTIFIER@1..7
                   0: IDENT@1..7 "global" [] []
                 1: L_PAREN@7..9 "(" [] [Whitespace(" ")]
+                2: CSS_SELECTOR_LIST@9..9
       1: CSS_DECLARATION_OR_RULE_BLOCK@9..11
         0: L_CURLY@9..10 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@10..10
@@ -310,134 +278,114 @@ CssRoot {
                 0: CSS_IDENTIFIER@13..19
                   0: IDENT@13..19 "global" [] []
                 1: L_PAREN@19..20 "(" [] []
-                2: R_PAREN@20..22 ")" [] [Whitespace(" ")]
+                2: CSS_SELECTOR_LIST@20..20
+                3: R_PAREN@20..22 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@22..24
         0: L_CURLY@22..23 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@23..23
         2: R_CURLY@23..24 "}" [] []
-    2: CSS_QUALIFIED_RULE@24..49
-      0: CSS_SELECTOR_LIST@24..47
-        0: CSS_COMPOUND_SELECTOR@24..47
+    2: CSS_QUALIFIED_RULE@24..48
+      0: CSS_SELECTOR_LIST@24..46
+        0: CSS_COMPOUND_SELECTOR@24..46
           0: CSS_NESTED_SELECTOR_LIST@24..24
           1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@24..47
-            0: CSS_PSEUDO_CLASS_SELECTOR@24..47
+          2: CSS_SUB_SELECTOR_LIST@24..46
+            0: CSS_PSEUDO_CLASS_SELECTOR@24..46
               0: COLON@24..26 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@26..47
+              1: CSS_BOGUS_PSEUDO_CLASS@26..46
                 0: CSS_IDENTIFIER@26..32
                   0: IDENT@26..32 "global" [] []
                 1: L_PAREN@32..33 "(" [] []
-                2: CSS_COMPOUND_SELECTOR@33..37
-                  0: CSS_NESTED_SELECTOR_LIST@33..33
-                  1: (empty)
-                  2: CSS_SUB_SELECTOR_LIST@33..37
-                    0: CSS_CLASS_SELECTOR@33..37
-                      0: DOT@33..34 "." [] []
-                      1: CSS_CUSTOM_IDENTIFIER@34..37
-                        0: IDENT@34..37 "div" [] []
-                3: CSS_BOGUS@37..45
-                  0: COMMA@37..39 "," [] [Whitespace(" ")]
-                  1: DOT@39..40 "." [] []
-                  2: IDENT@40..45 "class" [] []
-                4: R_PAREN@45..47 ")" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@47..49
-        0: L_CURLY@47..48 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@48..48
-        2: R_CURLY@48..49 "}" [] []
-    3: CSS_QUALIFIED_RULE@49..73
-      0: CSS_SELECTOR_LIST@49..71
-        0: CSS_COMPOUND_SELECTOR@49..71
-          0: CSS_NESTED_SELECTOR_LIST@49..49
+                2: CSS_SELECTOR_LIST@33..46
+                  0: CSS_COMPOUND_SELECTOR@33..37
+                    0: CSS_NESTED_SELECTOR_LIST@33..33
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@33..37
+                      0: CSS_CLASS_SELECTOR@33..37
+                        0: DOT@33..34 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@34..37
+                          0: IDENT@34..37 "div" [] []
+                  1: COMMA@37..39 "," [] [Whitespace(" ")]
+                  2: CSS_COMPOUND_SELECTOR@39..46
+                    0: CSS_NESTED_SELECTOR_LIST@39..39
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@39..46
+                      0: CSS_CLASS_SELECTOR@39..46
+                        0: DOT@39..40 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@40..46
+                          0: IDENT@40..46 "class" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@46..48
+        0: L_CURLY@46..47 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@47..47
+        2: R_CURLY@47..48 "}" [] []
+    3: CSS_QUALIFIED_RULE@48..71
+      0: CSS_SELECTOR_LIST@48..69
+        0: CSS_COMPOUND_SELECTOR@48..69
+          0: CSS_NESTED_SELECTOR_LIST@48..48
           1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@49..71
-            0: CSS_PSEUDO_CLASS_SELECTOR@49..71
-              0: COLON@49..51 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@51..71
-                0: CSS_IDENTIFIER@51..57
-                  0: IDENT@51..57 "global" [] []
-                1: L_PAREN@57..58 "(" [] []
-                2: CSS_COMPOUND_SELECTOR@58..62
-                  0: CSS_NESTED_SELECTOR_LIST@58..58
-                  1: (empty)
-                  2: CSS_SUB_SELECTOR_LIST@58..62
-                    0: CSS_CLASS_SELECTOR@58..62
-                      0: DOT@58..59 "." [] []
-                      1: CSS_CUSTOM_IDENTIFIER@59..62
-                        0: IDENT@59..62 "div" [] []
-                3: CSS_BOGUS@62..71
-                  0: COMMA@62..64 "," [] [Whitespace(" ")]
-                  1: DOT@64..65 "." [] []
-                  2: IDENT@65..71 "class" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@71..73
-        0: L_CURLY@71..72 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@72..72
-        2: R_CURLY@72..73 "}" [] []
-    4: CSS_QUALIFIED_RULE@73..96
-      0: CSS_SELECTOR_LIST@73..94
-        0: CSS_COMPOUND_SELECTOR@73..94
-          0: CSS_NESTED_SELECTOR_LIST@73..73
+          2: CSS_SUB_SELECTOR_LIST@48..69
+            0: CSS_PSEUDO_CLASS_SELECTOR@48..69
+              0: COLON@48..50 ":" [Newline("\n")] []
+              1: CSS_BOGUS_PSEUDO_CLASS@50..69
+                0: CSS_IDENTIFIER@50..56
+                  0: IDENT@50..56 "global" [] []
+                1: L_PAREN@56..57 "(" [] []
+                2: CSS_SELECTOR_LIST@57..69
+                  0: CSS_COMPLEX_SELECTOR@57..69
+                    0: CSS_COMPOUND_SELECTOR@57..61
+                      0: CSS_NESTED_SELECTOR_LIST@57..57
+                      1: (empty)
+                      2: CSS_SUB_SELECTOR_LIST@57..61
+                        0: CSS_CLASS_SELECTOR@57..61
+                          0: DOT@57..58 "." [] []
+                          1: CSS_CUSTOM_IDENTIFIER@58..61
+                            0: IDENT@58..61 "div" [] []
+                    1: CSS_SPACE_LITERAL@61..62 " " [] []
+                    2: CSS_COMPOUND_SELECTOR@62..69
+                      0: CSS_NESTED_SELECTOR_LIST@62..62
+                      1: (empty)
+                      2: CSS_SUB_SELECTOR_LIST@62..69
+                        0: CSS_CLASS_SELECTOR@62..69
+                          0: DOT@62..63 "." [] []
+                          1: CSS_CUSTOM_IDENTIFIER@63..69
+                            0: IDENT@63..69 "class" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@69..71
+        0: L_CURLY@69..70 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@70..70
+        2: R_CURLY@70..71 "}" [] []
+    4: CSS_QUALIFIED_RULE@71..91
+      0: CSS_SELECTOR_LIST@71..91
+        0: CSS_COMPOUND_SELECTOR@71..91
+          0: CSS_NESTED_SELECTOR_LIST@71..71
           1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@73..94
-            0: CSS_PSEUDO_CLASS_SELECTOR@73..94
-              0: COLON@73..75 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@75..94
-                0: CSS_IDENTIFIER@75..81
-                  0: IDENT@75..81 "global" [] []
-                1: L_PAREN@81..82 "(" [] []
-                2: CSS_COMPLEX_SELECTOR@82..94
-                  0: CSS_COMPOUND_SELECTOR@82..86
-                    0: CSS_NESTED_SELECTOR_LIST@82..82
-                    1: (empty)
-                    2: CSS_SUB_SELECTOR_LIST@82..86
-                      0: CSS_CLASS_SELECTOR@82..86
-                        0: DOT@82..83 "." [] []
-                        1: CSS_CUSTOM_IDENTIFIER@83..86
-                          0: IDENT@83..86 "div" [] []
-                  1: CSS_SPACE_LITERAL@86..87 " " [] []
-                  2: CSS_COMPOUND_SELECTOR@87..94
-                    0: CSS_NESTED_SELECTOR_LIST@87..87
-                    1: (empty)
-                    2: CSS_SUB_SELECTOR_LIST@87..94
-                      0: CSS_CLASS_SELECTOR@87..94
-                        0: DOT@87..88 "." [] []
-                        1: CSS_CUSTOM_IDENTIFIER@88..94
-                          0: IDENT@88..94 "class" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@94..96
-        0: L_CURLY@94..95 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@95..95
-        2: R_CURLY@95..96 "}" [] []
-    5: CSS_QUALIFIED_RULE@96..116
-      0: CSS_SELECTOR_LIST@96..116
-        0: CSS_COMPOUND_SELECTOR@96..116
-          0: CSS_NESTED_SELECTOR_LIST@96..96
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@96..116
-            0: CSS_PSEUDO_CLASS_SELECTOR@96..116
-              0: COLON@96..98 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@98..116
-                0: CSS_IDENTIFIER@98..104
-                  0: IDENT@98..104 "global" [] []
-                1: L_PAREN@104..105 "(" [] []
-                2: CSS_COMPLEX_SELECTOR@105..116
-                  0: CSS_COMPOUND_SELECTOR@105..109
-                    0: CSS_NESTED_SELECTOR_LIST@105..105
-                    1: (empty)
-                    2: CSS_SUB_SELECTOR_LIST@105..109
-                      0: CSS_CLASS_SELECTOR@105..109
-                        0: DOT@105..106 "." [] []
-                        1: CSS_CUSTOM_IDENTIFIER@106..109
-                          0: IDENT@106..109 "div" [] []
-                  1: CSS_SPACE_LITERAL@109..110 " " [] []
-                  2: CSS_COMPOUND_SELECTOR@110..116
-                    0: CSS_NESTED_SELECTOR_LIST@110..110
-                    1: (empty)
-                    2: CSS_SUB_SELECTOR_LIST@110..116
-                      0: CSS_CLASS_SELECTOR@110..116
-                        0: DOT@110..111 "." [] []
-                        1: CSS_CUSTOM_IDENTIFIER@111..116
-                          0: IDENT@111..116 "class" [] []
-      1: CSS_BOGUS_BLOCK@116..116
-  2: EOF@116..117 "" [Newline("\n")] []
+          2: CSS_SUB_SELECTOR_LIST@71..91
+            0: CSS_PSEUDO_CLASS_SELECTOR@71..91
+              0: COLON@71..73 ":" [Newline("\n")] []
+              1: CSS_BOGUS_PSEUDO_CLASS@73..91
+                0: CSS_IDENTIFIER@73..79
+                  0: IDENT@73..79 "global" [] []
+                1: L_PAREN@79..80 "(" [] []
+                2: CSS_SELECTOR_LIST@80..91
+                  0: CSS_COMPLEX_SELECTOR@80..91
+                    0: CSS_COMPOUND_SELECTOR@80..84
+                      0: CSS_NESTED_SELECTOR_LIST@80..80
+                      1: (empty)
+                      2: CSS_SUB_SELECTOR_LIST@80..84
+                        0: CSS_CLASS_SELECTOR@80..84
+                          0: DOT@80..81 "." [] []
+                          1: CSS_CUSTOM_IDENTIFIER@81..84
+                            0: IDENT@81..84 "div" [] []
+                    1: CSS_SPACE_LITERAL@84..85 " " [] []
+                    2: CSS_COMPOUND_SELECTOR@85..91
+                      0: CSS_NESTED_SELECTOR_LIST@85..85
+                      1: (empty)
+                      2: CSS_SUB_SELECTOR_LIST@85..91
+                        0: CSS_CLASS_SELECTOR@85..91
+                          0: DOT@85..86 "." [] []
+                          1: CSS_CUSTOM_IDENTIFIER@86..91
+                            0: IDENT@86..91 "class" [] []
+      1: CSS_BOGUS_BLOCK@91..91
+  2: EOF@91..92 "" [Newline("\n")] []
 
 ```
 
@@ -451,113 +399,73 @@ pseudo_class_function_selector_enabled.css:1:10 parse ━━━━━━━━�
   > 1 │ :global( {}
       │          ^
     2 │ :global() {}
-    3 │ :global(.div, .class) {}
+    3 │ :global(.div, .class {}
   
   i Expected a selector here.
   
   > 1 │ :global( {}
       │          ^
     2 │ :global() {}
-    3 │ :global(.div, .class) {}
+    3 │ :global(.div, .class {}
   
 pseudo_class_function_selector_enabled.css:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a selector but instead found ')'.
+  × Expected a selector but instead found ''.
   
     1 │ :global( {}
   > 2 │ :global() {}
-      │         ^
-    3 │ :global(.div, .class) {}
-    4 │ :global(.div, .class {}
+      │         
+    3 │ :global(.div, .class {}
+    4 │ :global(.div .class {}
   
   i Expected a selector here.
   
     1 │ :global( {}
   > 2 │ :global() {}
-      │         ^
-    3 │ :global(.div, .class) {}
-    4 │ :global(.div, .class {}
+      │         
+    3 │ :global(.div, .class {}
+    4 │ :global(.div .class {}
   
-pseudo_class_function_selector_enabled.css:3:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+pseudo_class_function_selector_enabled.css:3:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a selector but instead found '.div, .class'.
+  × expected `,` but instead found `{`
   
     1 │ :global( {}
     2 │ :global() {}
-  > 3 │ :global(.div, .class) {}
-      │         ^^^^^^^^^^^^
-    4 │ :global(.div, .class {}
-    5 │ :global(.div .class {}
-  
-  i Expected a selector here.
-  
-    1 │ :global( {}
-    2 │ :global() {}
-  > 3 │ :global(.div, .class) {}
-      │         ^^^^^^^^^^^^
-    4 │ :global(.div, .class {}
-    5 │ :global(.div .class {}
-  
-pseudo_class_function_selector_enabled.css:4:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a selector but instead found '.div, .class'.
-  
-    2 │ :global() {}
-    3 │ :global(.div, .class) {}
-  > 4 │ :global(.div, .class {}
-      │         ^^^^^^^^^^^^
-    5 │ :global(.div .class {}
-    6 │ :global(.div .class
-  
-  i Expected a selector here.
-  
-    2 │ :global() {}
-    3 │ :global(.div, .class) {}
-  > 4 │ :global(.div, .class {}
-      │         ^^^^^^^^^^^^
-    5 │ :global(.div .class {}
-    6 │ :global(.div .class
-  
-pseudo_class_function_selector_enabled.css:4:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `)` but instead found `{`
-  
-    2 │ :global() {}
-    3 │ :global(.div, .class) {}
-  > 4 │ :global(.div, .class {}
+  > 3 │ :global(.div, .class {}
       │                      ^
-    5 │ :global(.div .class {}
-    6 │ :global(.div .class
+    4 │ :global(.div .class {}
+    5 │ :global(.div .class
   
   i Remove {
   
-pseudo_class_function_selector_enabled.css:5:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+pseudo_class_function_selector_enabled.css:4:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `)` but instead found `{`
+  × expected `,` but instead found `{`
   
-    3 │ :global(.div, .class) {}
-    4 │ :global(.div, .class {}
-  > 5 │ :global(.div .class {}
+    2 │ :global() {}
+    3 │ :global(.div, .class {}
+  > 4 │ :global(.div .class {}
       │                     ^
-    6 │ :global(.div .class
-    7 │ 
+    5 │ :global(.div .class
+    6 │ 
   
   i Remove {
   
-pseudo_class_function_selector_enabled.css:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+pseudo_class_function_selector_enabled.css:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead the file ends
   
-    5 │ :global(.div .class {}
-    6 │ :global(.div .class
-  > 7 │ 
+    4 │ :global(.div .class {}
+    5 │ :global(.div .class
+  > 6 │ 
       │ 
   
   i the file ends here
   
-    5 │ :global(.div .class {}
-    6 │ :global(.div .class
-  > 7 │ 
+    4 │ :global(.div .class {}
+    5 │ :global(.div .class
+  > 6 │ 
       │ 
   
 ```

@@ -2,7 +2,8 @@ use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, termcolor};
 use biome_html_parser::{HtmlParserOptions, parse_html};
-use biome_html_syntax::{HtmlFileSource, HtmlVariant};
+use biome_languages::HtmlFileSource;
+use biome_languages::html::HtmlVariant;
 use biome_rowan::SyntaxKind;
 use biome_test_utils::{has_bogus_nodes_or_empty_slots, validate_eof_token};
 use camino::Utf8Path;
@@ -39,6 +40,13 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         file_source = HtmlFileSource::html_with_text_expressions();
     }
 
+    // TODO: Remove once Angular has been added to file source detection
+    if let Some(file_name) = test_case_path.file_name()
+        && file_name.ends_with(".component.html")
+    {
+        file_source.set_variant(HtmlVariant::Angular);
+    }
+
     let parser_options = HtmlParserOptions::from(&file_source);
     let parsed = parse_html(&content, parser_options);
     validate_eof_token(parsed.syntax());
@@ -51,6 +59,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         HtmlVariant::Astro => "astro",
         HtmlVariant::Vue => "vue",
         HtmlVariant::Svelte => "svelte",
+        HtmlVariant::Angular => "angular",
     };
     writeln!(
         snapshot,

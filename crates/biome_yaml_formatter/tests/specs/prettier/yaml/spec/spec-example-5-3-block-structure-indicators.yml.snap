@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/spec-example-5-3-block-structure-indicators.yml
 ---
+
 # Input
 
 ```yml
@@ -21,28 +22,24 @@ mapping:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,6 +1,7 @@
- sequence:
--  - one
--  - two
-+- one
-+- two
+@@ -2,5 +2,6 @@
+   - one
+   - two
  mapping:
 -  sky: blue
--  sea: green
 +  ? sky
 +  : blue
-+  sea : green
-\ No newline at end of file
+   sea: green
 ```
 
 # Output
 
 ```yml
 sequence:
-- one
-- two
+  - one
+  - two
 mapping:
   ? sky
   : blue
-  sea : green```
+  sea: green
+```

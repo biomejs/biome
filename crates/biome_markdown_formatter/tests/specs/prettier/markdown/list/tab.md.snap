@@ -38,39 +38,23 @@ info: markdown/list/tab.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,22 +1,23 @@
- - Text
- 
--  [title](link)
-+ 	[title](link)
+@@ -3,7 +3,6 @@
+   [title](link)
  
  - Text
--  - foo
--  - foo
--  - bar
- 
-+ 	- foo
-+	- foo
-+	- bar
-+
+-
+   - foo
+   - foo
+   - bar
+@@ -15,7 +14,7 @@
  - Text
  
--  # foo
-+ 	# foo
- 
- - Text
- 
--  ```
+   ```
 -  foo
--  ```
-+ 	```
-+ 	foo
-+ 	```
++  	foo
+   ```
  
  - Text
- 
--  `foo`
-+ 	`foo`
 ```
 
 # Output
@@ -78,25 +62,24 @@ info: markdown/list/tab.md
 ```md
 - Text
 
- 	[title](link)
+  [title](link)
+
+- Text
+  - foo
+  - foo
+  - bar
 
 - Text
 
- 	- foo
-	- foo
-	- bar
+  # foo
 
 - Text
 
- 	# foo
+  ```
+  	foo
+  ```
 
 - Text
 
- 	```
- 	foo
- 	```
-
-- Text
-
- 	`foo`
+  `foo`
 ```

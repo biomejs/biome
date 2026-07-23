@@ -3,10 +3,9 @@ use biome_configuration::analyzer::AnalyzerSelector;
 use biome_console::MarkupBuf;
 use biome_diagnostics::Category;
 use biome_fs::BiomePath;
-use biome_grit_patterns::GritTargetLanguage;
 use biome_service::configuration::ProjectScanComputer;
 use biome_service::workspace::{
-    FeatureName, FeaturesSupported, FixFileMode, PatternId, ScanKind, SupportKind,
+    FeatureName, FeaturesSupported, FixFileMode, PatternId, ScanKind, SearchLanguage, SupportKind,
 };
 use biome_service::{Workspace, WorkspaceError};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -104,11 +103,6 @@ pub(crate) trait Execution: Send + Sync + std::panic::RefUnwindSafe {
         false
     }
 
-    /// Whether the execution should apply safe and unsafe fixes
-    fn is_safe_and_unsafe_fixes_enabled(&self) -> bool {
-        false
-    }
-
     /// `biome search` command
     fn is_search(&self) -> bool {
         false
@@ -151,7 +145,7 @@ pub(crate) trait Execution: Send + Sync + std::panic::RefUnwindSafe {
     }
 
     /// The search target language
-    fn search_language(&self) -> Option<GritTargetLanguage> {
+    fn search_language(&self) -> Option<SearchLanguage> {
         None
     }
     /// The search pattern to search for.
@@ -184,12 +178,8 @@ pub struct Stdin(
 );
 
 impl Stdin {
-    pub(crate) fn as_path(&self) -> &Utf8Path {
-        self.0.as_path()
-    }
-
-    pub(crate) fn as_content(&self) -> &str {
-        self.1.as_str()
+    pub(crate) fn into_parts(self) -> (Utf8PathBuf, String) {
+        (self.0, self.1)
     }
 }
 

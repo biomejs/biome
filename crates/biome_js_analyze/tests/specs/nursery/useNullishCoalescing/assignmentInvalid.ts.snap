@@ -121,7 +121,7 @@ assignmentInvalid.ts:17:3 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ??= instead.
+  i Safe fix: Replace ||= with ??=.
   
     15 15 │   // Nullish literal
     16 16 │   let d: null = null;
@@ -150,7 +150,7 @@ assignmentInvalid.ts:20:3 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ??= instead.
+  i Safe fix: Replace ||= with ??=.
   
     18 18 │   
     19 19 │   let e: undefined = undefined;
@@ -180,7 +180,7 @@ assignmentInvalid.ts:24:5 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ??= instead.
+  i Safe fix: Replace ||= with ??=.
   
     22 22 │   // Object type with null (safe fix - objects are always truthy)
     23 23 │   declare let obj: { a: string } | null;

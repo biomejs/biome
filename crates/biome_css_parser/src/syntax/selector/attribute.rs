@@ -1,20 +1,25 @@
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{
     expected_any_attribute_matcher_name, expected_any_attribute_modifier, expected_identifier,
+    scss_only_syntax_error,
 };
 use crate::syntax::scss::{
-    is_at_scss_interpolated_string, is_at_scss_interpolation, is_nth_at_scss_interpolation,
-    parse_scss_interpolated_identifier, parse_scss_interpolated_string,
+    is_at_scss_interpolated_attribute_identifier, is_at_scss_interpolated_string,
+    parse_scss_interpolated_attribute_modifier, parse_scss_interpolated_identifier,
+    parse_scss_interpolated_string,
 };
 use crate::syntax::selector::{is_nth_at_namespace, parse_namespace, selector_lex_context};
-use crate::syntax::{is_at_identifier, is_at_string, parse_regular_identifier, parse_string};
+use crate::syntax::{
+    CssSyntaxFeatures, is_at_identifier, is_at_string, parse_regular_identifier, parse_string,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, TokenSet, token_set};
+use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
 
 const ATTRIBUTE_SELECTOR_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T![')'], T!['{']];
 #[inline]
@@ -25,8 +30,12 @@ pub(crate) fn parse_attribute_selector(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T!['[']);
-    // we have diagnostic inside `parse_attribute_name` method
-    parse_attribute_name(p).ok();
+    let name = parse_attribute_name(p);
+    if name.is_absent() && (is_at_attribute_matcher(p) || p.at(T![']'])) {
+        // `[=#{$value}]` and `[]`: `=` or `]` proves the attribute selector
+        // has a missing required name, not just a broader selector recovery.
+        name.or_add_diagnostic(p, expected_identifier);
+    }
 
     // `parse_attribute_matcher` method is invoked with `ok()`,
     // which turns an `Err` into an `Ok` variant, because attribute matcher in a CSS attribute selector
@@ -46,9 +55,16 @@ pub(crate) fn parse_attribute_selector(p: &mut CssParser) -> ParsedSyntax {
 }
 
 fn is_at_attribute_name(p: &mut CssParser) -> bool {
-    is_at_identifier(p) || is_nth_at_namespace(p, 0)
+    is_at_attribute_name_identifier(p) || is_nth_at_namespace(p, 0)
 }
 
+/// Parses an attribute name with an optional namespace.
+///
+/// Examples:
+/// ```scss
+/// [data-#{$name}]
+/// [ns|data-#{$name}]
+/// ```
 #[inline]
 pub(crate) fn parse_attribute_name(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_attribute_name(p) {
@@ -58,8 +74,34 @@ pub(crate) fn parse_attribute_name(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
     // we don't need diagnostic here, because namespace is optional
     parse_namespace(p).ok();
-    parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+    parse_attribute_name_identifier(p).or_add_diagnostic(p, expected_identifier);
     Present(m.complete(p, CSS_ATTRIBUTE_NAME))
+}
+
+#[inline]
+fn is_at_attribute_name_identifier(p: &mut CssParser) -> bool {
+    is_at_identifier(p) || is_at_scss_interpolated_attribute_identifier(p)
+}
+
+#[inline]
+fn parse_attribute_name_identifier(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_attribute_name_identifier(p) {
+        return Absent;
+    }
+
+    if is_at_scss_interpolated_attribute_identifier(p) {
+        // `[lang=#{$locale}]` keeps `lang` as CssIdentifier; only
+        // `[data-#{$name}=x]` needs an interpolated attribute name.
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_interpolated_identifier,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated attribute names", marker.range(p))
+            },
+        )
+    } else {
+        parse_regular_identifier(p)
+    }
 }
 
 const ATTRIBUTE_MATCHER_SET: TokenSet<CssSyntaxKind> =
@@ -81,11 +123,11 @@ fn parse_attribute_matcher(p: &mut CssParser) -> ParsedSyntax {
     p.bump_any();
     parse_attribute_matcher_value(p).or_add_diagnostic(p, expected_any_attribute_matcher_name);
 
-    // `html[lang=prefix-#{$locale ]`: let the missing `]` check report EOF.
-    let modifier = p.cur();
-    if modifier.is_attribute_modifier_keyword() {
-        p.bump(modifier);
-    } else if modifier != T![']'] && modifier != EOF {
+    let modifier = parse_attribute_modifier(p);
+
+    // `[title="x" s {}` already has a modifier; let the selector recovery
+    // report the missing `]` instead of treating `{` as another modifier.
+    if modifier.is_absent() && !p.at(T![']']) && !p.at(EOF) {
         // if we have an invalid modifier, we should add a diagnostic and bump it
         let diagnostic = expected_any_attribute_modifier(p, p.cur_range());
         p.error(diagnostic);
@@ -97,19 +139,62 @@ fn parse_attribute_matcher(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_attribute_matcher_value(p: &mut CssParser) -> bool {
-    is_at_scss_interpolated_attribute_matcher_value(p)
+    is_at_scss_interpolated_attribute_identifier(p)
         || is_at_identifier(p)
         || is_at_string(p)
         || is_at_scss_interpolated_string(p)
 }
 
 #[inline]
-fn is_at_scss_interpolated_attribute_matcher_value(p: &mut CssParser) -> bool {
-    is_at_scss_interpolation(p)
-        || is_at_identifier(p)
-            && is_nth_at_scss_interpolation(p, 1)
-            && !p.has_nth_preceding_whitespace(1)
+fn is_at_attribute_modifier(p: &mut CssParser) -> bool {
+    is_at_attribute_modifier_keyword(p) || is_at_scss_interpolated_attribute_identifier(p)
 }
+
+/// Parses an attribute selector modifier.
+///
+/// Examples:
+/// ```scss
+/// [title="x" i]
+/// [title="x" #{$mod}]
+/// ```
+#[inline]
+fn parse_attribute_modifier(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_attribute_modifier(p) {
+        return Absent;
+    }
+
+    if is_at_scss_interpolated_attribute_identifier(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_interpolated_attribute_modifier,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated attribute modifiers", marker.range(p))
+            },
+        )
+    } else {
+        parse_attribute_modifier_keyword(p)
+    }
+}
+
+#[inline]
+fn is_at_attribute_modifier_keyword(p: &mut CssParser) -> bool {
+    p.cur().is_attribute_modifier_keyword()
+}
+
+/// Parses the case-sensitivity modifier in `[title="x" i]`.
+#[inline]
+fn parse_attribute_modifier_keyword(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_attribute_modifier_keyword(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    // `parse_attribute_modifier` guards this branch with
+    // `is_at_attribute_modifier_keyword`.
+    p.bump_any();
+    Present(m.complete(p, CSS_ATTRIBUTE_MODIFIER))
+}
+
 #[inline]
 fn parse_attribute_matcher_value(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_attribute_matcher_value(p) {
@@ -118,10 +203,20 @@ fn parse_attribute_matcher_value(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    if is_at_scss_interpolated_attribute_matcher_value(p) {
-        parse_scss_interpolated_identifier(p).ok();
+    if is_at_scss_interpolated_attribute_identifier(p) {
+        CssSyntaxFeatures::Scss
+            .parse_exclusive_syntax(p, parse_scss_interpolated_identifier, |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated attribute values", marker.range(p))
+            })
+            .ok();
     } else if is_at_scss_interpolated_string(p) {
-        parse_scss_interpolated_string(p).ok();
+        CssSyntaxFeatures::Scss
+            .parse_exclusive_syntax(
+                p,
+                |p| parse_scss_interpolated_string(p, CssLexContext::Regular),
+                |p, marker| scss_only_syntax_error(p, "SCSS interpolated strings", marker.range(p)),
+            )
+            .ok();
     } else if is_at_string(p) {
         parse_string(p).ok();
     } else {

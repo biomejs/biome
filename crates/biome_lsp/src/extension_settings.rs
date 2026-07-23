@@ -34,7 +34,7 @@ pub struct WorkspaceSettings {
     /// Inline configuration, which gets merged before applying querying instructions via workspace
     pub inline_config: Option<Configuration>,
 
-    /// Enables the "go-to" features, by-passing the use of linting or assist. Enabled by default.
+    /// Enables the "go-to" features, by-passing the use of linting or assist. Disabled by default.
     pub go_to_definition: Option<bool>,
 }
 
@@ -85,7 +85,7 @@ impl ExtensionSettings {
     }
 
     pub(crate) fn editor_features(&self) -> EditorFeatures {
-        let go_to_definition = self.settings.go_to_definition.unwrap_or(true);
+        let go_to_definition = self.settings.go_to_definition.unwrap_or_default();
         let mut features = EditorFeatures::default();
         if go_to_definition {
             features.insert(EditorFeature::GotoDefinition);

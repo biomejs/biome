@@ -6,12 +6,15 @@ use biome_analyze::{
 use biome_aria_metadata::AriaAttribute;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::{
+    AnyHtmlAttribute, AnyVueDirective, HtmlSyntaxKind, T, element_ext::AnyHtmlTagElement,
+};
+use biome_parser::{TokenSet, token_set};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 use biome_rule_options::no_aria_unsupported_elements::NoAriaUnsupportedElementsOptions;
 use biome_string_case::StrLikeExtension;
 
-use crate::{HtmlRuleAction, utils::is_html_tag};
+use crate::HtmlRuleAction;
 
 declare_lint_rule! {
     /// Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.
@@ -39,7 +42,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoAriaUnsupportedElements {
-        version: "next",
+        version: "2.5.0",
         name: "noAriaUnsupportedElements",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("aria-unsupported-elements").inspired()],
@@ -49,7 +52,8 @@ declare_lint_rule! {
     }
 }
 
-const ARIA_UNSUPPORTED_ELEMENTS: [&str; 4] = ["meta", "html", "script", "style"];
+const ARIA_UNSUPPORTED_ELEMENTS: TokenSet<HtmlSyntaxKind> =
+    token_set!(T![meta], T![html], T![script], T![style]);
 
 #[derive(Debug)]
 enum AttributeKind {
@@ -79,32 +83,57 @@ impl Rule for NoAriaUnsupportedElements {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
-
-        let is_unsupported = ARIA_UNSUPPORTED_ELEMENTS
-            .iter()
-            .any(|el| is_html_tag(node, source_type, el));
+        let is_unsupported = node
+            .tag_name_kind()
+            .is_some_and(|kind| ARIA_UNSUPPORTED_ELEMENTS.contains(kind));
 
         if is_unsupported {
             let report = node.attributes().iter().find_map(|attribute| {
-                let attribute = attribute.as_html_attribute()?;
-                let attribute_name = attribute.name().ok()?.value_token().ok()?;
-                let attribute_name_text = attribute_name.token_text_trimmed();
+                let text = match attribute {
+                    AnyHtmlAttribute::HtmlAttribute(a) => {
+                        Some(a.name().ok()?.value_token().ok()?.token_text_trimmed())
+                    }
+                    AnyHtmlAttribute::AnyVueDirective(vue) => match vue {
+                        AnyVueDirective::VueVBindShorthandDirective(d) => Some(
+                            d.arg()
+                                .ok()?
+                                .arg()?
+                                .as_vue_static_argument()?
+                                .name_token()
+                                .ok()?
+                                .token_text_trimmed(),
+                        ),
+                        AnyVueDirective::VueDirective(d) => {
+                            if !d.is_binding() {
+                                return None;
+                            }
+                            Some(
+                                d.arg()?
+                                    .arg()?
+                                    .as_vue_static_argument()?
+                                    .name_token()
+                                    .ok()?
+                                    .token_text_trimmed(),
+                            )
+                        }
+                        _ => None,
+                    },
+                    _ => None,
+                }?;
 
-                let attribute_name_lower = attribute_name_text.to_ascii_lowercase_cow();
-                if attribute_name_lower.starts_with("aria-")
-                    && AriaAttribute::from_str(&attribute_name_lower).is_ok()
-                {
+                let text_lower = text.to_ascii_lowercase_cow();
+                if text_lower.starts_with("aria-") && AriaAttribute::from_str(&text_lower).is_ok() {
                     return Some(RuleState {
                         attribute_kind: AttributeKind::Aria,
                     });
                 }
 
-                if attribute_name_text.eq_ignore_ascii_case("role") {
+                if text.eq_ignore_ascii_case("role") {
                     return Some(RuleState {
                         attribute_kind: AttributeKind::Role,
                     });
                 }
+
                 None
             });
             return report;

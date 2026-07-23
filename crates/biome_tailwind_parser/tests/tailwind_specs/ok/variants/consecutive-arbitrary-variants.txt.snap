@@ -45,8 +45,8 @@ TwRoot {
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@53..55 "mt" [] [],
                 minus_token: DASH@55..56 "-" [] [],
-                value: TwNamedValue {
-                    value_token: TW_VALUE@56..58 "4" [] [Whitespace(" ")],
+                value: TwNumberValue {
+                    value_token: TW_NUMBER@56..58 "4" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
@@ -74,8 +74,12 @@ TwRoot {
         },
         TwFullCandidate {
             variants: TwVariantList [
-                TwStaticVariant {
-                    base_token: TW_BASE@87..92 "hover" [] [],
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@87..92 "hover" [] [],
+                        },
+                    ],
                 },
                 COLON@92..93 ":" [] [],
                 TwArbitraryVariant {
@@ -124,8 +128,8 @@ TwRoot {
       2: TW_FUNCTIONAL_CANDIDATE@53..58
         0: TW_BASE@53..55 "mt" [] []
         1: DASH@55..56 "-" [] []
-        2: TW_NAMED_VALUE@56..58
-          0: TW_VALUE@56..58 "4" [] [Whitespace(" ")]
+        2: TW_NUMBER_VALUE@56..58
+          0: TW_NUMBER@56..58 "4" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
     2: TW_FULL_CANDIDATE@58..87
@@ -145,8 +149,10 @@ TwRoot {
       3: (empty)
     3: TW_FULL_CANDIDATE@87..108
       0: TW_VARIANT_LIST@87..99
-        0: TW_STATIC_VARIANT@87..92
-          0: TW_BASE@87..92 "hover" [] []
+        0: TW_VARIANT_EXPRESSION@87..92
+          0: TW_VARIANT_SEGMENT_LIST@87..92
+            0: TW_NAMED_VARIANT_SEGMENT@87..92
+              0: TW_VARIANT_SEGMENT@87..92 "hover" [] []
         1: COLON@92..93 ":" [] []
         2: TW_ARBITRARY_VARIANT@93..98
           0: L_BRACKET@93..94 "[" [] []

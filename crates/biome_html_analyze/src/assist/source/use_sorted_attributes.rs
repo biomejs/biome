@@ -10,7 +10,7 @@ use biome_diagnostics::Applicability;
 use biome_html_syntax::{
     AnyAstroDirective, AnyHtmlAttribute, AnySvelteBindingProperty, AnySvelteDirective,
     AnyVueDirective, AnyVueDirectiveArgument, AstroDirectiveValue, HtmlAttributeList, HtmlLanguage,
-    HtmlOpeningElement, HtmlSelfClosingElement, SvelteDirectiveValue,
+    HtmlOpeningElement, HtmlProcessingInstruction, HtmlSelfClosingElement, SvelteDirectiveValue,
 };
 use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt, SyntaxToken};
 use biome_rule_options::use_sorted_attributes::{SortOrder, UseSortedAttributesOptions};
@@ -117,8 +117,24 @@ declare_source_rule! {
     /// <textarea id="mytextarea" name="textarea" rows="5" cols="20" data-1="" data-2="" data-11="" data-12="">Hello, world!</textarea>
     /// ```
     ///
+    /// ### `sortFirst`
+    /// A list of attribute names that should be sorted before all other attributes,
+    /// in the order they appear in this list. The remaining attributes are sorted
+    /// after the listed ones. Listed attributes take precedence over the category-based ordering.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "sortFirst": ["type"]
+    ///     }
+    /// }
+    /// ```
+    /// ```html,use_options,expect_diagnostic
+    /// <input id="name" name="name" type="text" />
+    /// ```
+    ///
     pub UseSortedAttributes {
-        version: "next",
+        version: "2.5.0",
         name: "useSortedAttributes",
         language: "html",
         recommended: false,
@@ -135,13 +151,28 @@ impl Rule for UseSortedAttributes {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let attrs = ctx.query();
+
+        if attrs
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .find_map(HtmlProcessingInstruction::cast)
+            .is_some()
+        {
+            return vec![].into_boxed_slice();
+        }
+
         let options = ctx.options();
 
         let mut current_attr_group = AttributeGroup::default();
         let mut attr_groups = Vec::new();
         let sort_by = options.sort_order.unwrap_or_default();
+        let sort_first = options.sort_first.as_deref().unwrap_or_default();
 
-        let comparator = get_comparator(sort_by);
+        let base = get_comparator(sort_by);
+        let comparator = |a: &SortableHtmlAttribute, b: &SortableHtmlAttribute| {
+            a.cmp_sort_first(b, sort_first, base)
+        };
 
         // Convert to boolean-based comparator for is_sorted_by
         let boolean_comparator = |a: &SortableHtmlAttribute, b: &SortableHtmlAttribute| {
@@ -202,8 +233,12 @@ impl Rule for UseSortedAttributes {
         let mut mutation = ctx.root().begin();
         let options = ctx.options();
         let sort_by = options.sort_order.unwrap_or_default();
+        let sort_first = options.sort_first.as_deref().unwrap_or_default();
 
-        let comparator = get_comparator(sort_by);
+        let base = get_comparator(sort_by);
+        let comparator = |a: &SortableHtmlAttribute, b: &SortableHtmlAttribute| {
+            a.cmp_sort_first(b, sort_first, base)
+        };
 
         for (SortableHtmlAttribute(attr), SortableHtmlAttribute(sorted_attr)) in
             zip(state.attrs.iter(), state.get_sorted_attributes(comparator)?)
@@ -222,11 +257,7 @@ impl Rule for UseSortedAttributes {
 
 fn is_v_bind_object(attr: &AnyHtmlAttribute) -> bool {
     if let AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueDirective(dir)) = attr {
-        if let Ok(attr_name) = dir.name_token().as_ref().map(|token| token.text_trimmed()) {
-            attr_name == "v-bind" && dir.arg().is_none()
-        } else {
-            false
-        }
+        dir.is_binding() && dir.arg().is_none()
     } else {
         false
     }
@@ -368,30 +399,31 @@ impl SortableHtmlAttribute {
                 }
             }
             AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueVBindShorthandDirective(dir)) => {
-                if let Ok(arg) = dir.arg().and_then(|arg| arg.arg()) {
-                    match arg {
-                        AnyVueDirectiveArgument::VueBogusDirectiveArgument(_) => {
-                            SortCategory::Unknown
-                        }
-                        AnyVueDirectiveArgument::VueDynamicArgument(_) => {
-                            SortCategory::VueOtherAttribute
-                        }
-                        AnyVueDirectiveArgument::VueStaticArgument(arg) => {
-                            if let Ok(arg_name) =
-                                arg.name_token().as_ref().map(|token| token.text_trimmed())
-                            {
-                                match arg_name {
-                                    "is" => SortCategory::VueDefinition,
-                                    "key" => SortCategory::VueUnique,
-                                    _ => SortCategory::VueOtherAttribute,
-                                }
-                            } else {
-                                SortCategory::VueCustomDirective
+                let Ok(directive_arg) = dir.arg() else {
+                    return SortCategory::VueCustomDirective;
+                };
+                // Argument-less `:="props"` is equivalent to `v-bind="props"`.
+                let Some(arg) = directive_arg.arg() else {
+                    return SortCategory::VueOtherAttribute;
+                };
+                match arg {
+                    AnyVueDirectiveArgument::VueBogusDirectiveArgument(_) => SortCategory::Unknown,
+                    AnyVueDirectiveArgument::VueDynamicArgument(_) => {
+                        SortCategory::VueOtherAttribute
+                    }
+                    AnyVueDirectiveArgument::VueStaticArgument(arg) => {
+                        if let Ok(arg_name) =
+                            arg.name_token().as_ref().map(|token| token.text_trimmed())
+                        {
+                            match arg_name {
+                                "is" => SortCategory::VueDefinition,
+                                "key" => SortCategory::VueUnique,
+                                _ => SortCategory::VueOtherAttribute,
                             }
+                        } else {
+                            SortCategory::VueCustomDirective
                         }
                     }
-                } else {
-                    SortCategory::VueCustomDirective
                 }
             }
             AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueVOnShorthandDirective(_)) => {
@@ -489,13 +521,12 @@ impl SortableAttribute for SortableHtmlAttribute {
                     "v-on" | "v-bind" | "v-slot" => dir
                         .arg()?
                         .arg()
-                        .ok()
                         .and_then(|arg| vue_directive_arg_token(&arg)),
                     _ => dir.name_token().ok(),
                 }
             }
             AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueVBindShorthandDirective(dir)) => {
-                vue_directive_arg_token(&dir.arg().ok()?.arg().ok()?)
+                vue_directive_arg_token(&dir.arg().ok()?.arg()?)
             }
             AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueVSlotShorthandDirective(dir)) => {
                 vue_directive_arg_token(&dir.arg().ok()?)

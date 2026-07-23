@@ -139,7 +139,7 @@ pub struct AnalyzerOptions {
     pub(crate) configuration: AnalyzerConfiguration,
 
     /// The file that is being analyzed
-    pub file_path: Arc<Utf8PathBuf>,
+    pub file_path: Utf8PathBuf,
 
     /// Suppression reason used when applying a suppression code action
     pub(crate) suppression_reason: Option<String>,
@@ -150,7 +150,7 @@ pub struct AnalyzerOptions {
 
 impl AnalyzerOptions {
     pub fn with_file_path(mut self, file_path: impl Into<Utf8PathBuf>) -> Self {
-        self.file_path = Arc::new(file_path.into());
+        self.file_path = file_path.into();
         self
     }
 

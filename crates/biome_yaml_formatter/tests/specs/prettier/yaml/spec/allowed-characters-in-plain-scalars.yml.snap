@@ -21,24 +21,24 @@ safe dash: -foo
 --- Prettier
 +++ Biome
 @@ -1,5 +1,5 @@
- safe: a!"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
+-safe: a!"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
 -  !"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
-+     !"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
++safe: a!" #$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
++!"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
  safe question mark: ?foo
  safe colon: :foo
--safe dash: -foo
-+safe dash: -foo
-\ No newline at end of file
+ safe dash: -foo
 ```
 
 # Output
 
 ```yml
-safe: a!"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
-     !"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
+safe: a!" #$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
+!"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
 safe question mark: ?foo
 safe colon: :foo
-safe dash: -foo```
+safe dash: -foo
+```
 
 # Errors
 ```

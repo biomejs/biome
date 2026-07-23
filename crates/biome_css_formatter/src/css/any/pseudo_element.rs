@@ -15,6 +15,9 @@ impl FormatRule<AnyCssPseudoElement> for FormatAnyCssPseudoElement {
             }
             AnyCssPseudoElement::CssPseudoElementFunctionSelector(node) => node.format().fmt(f),
             AnyCssPseudoElement::CssPseudoElementIdentifier(node) => node.format().fmt(f),
+            AnyCssPseudoElement::ScssInterpolatedPseudoElementFunction(node) => {
+                node.format().fmt(f)
+            }
         }
     }
 }

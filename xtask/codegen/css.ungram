@@ -142,9 +142,40 @@ CssCompoundSelector =
 // &&&&&&&.class {}
 // ^^^^^^^
 // }
-CssNestedSelectorList = CssNestedSelector*
+CssNestedSelectorList = AnyCssNestedSelector*
+
+AnyCssNestedSelector =
+	CssNestedSelector
+	| ScssParentSelector
+
 CssNestedSelector =
 	'&'
+
+// .button {
+//   &--active {}
+//   ^^^^^^^^^
+//   &-100\.200 {}
+//   ^^^^^^^^^^
+//   &#{$state} {}
+//   ^^^^^^^^^^
+// }
+ScssParentSelector =
+	'&'
+	suffix: ScssParentSelectorSuffix
+
+ScssParentSelectorSuffix =
+	items: ScssParentSelectorSuffixPartList
+
+ScssParentSelectorSuffixPartList = AnyScssParentSelectorSuffixPart*
+
+AnyScssParentSelectorSuffixPart =
+	CssIdentifier
+	| CssNumber
+	| ScssInterpolation
+	| ScssParentSelectorSuffixHyphen
+
+ScssParentSelectorSuffixHyphen =
+	'-'
 
 CssSubSelectorList = AnyCssSubSelector*
 
@@ -159,6 +190,7 @@ AnyCssSubSelector =
 	| CssAttributeSelector
 	| CssPseudoClassSelector
 	| CssPseudoElementSelector
+	| CssNestedSelector
 	| CssBogusSubSelector
 
 // * {}
@@ -225,17 +257,28 @@ CssAttributeSelector =
 
 CssAttributeName =
 	namespace: CssNamespace?
-	name: CssIdentifier
+	name: AnyCssAttributeName
 
 // [title = "title" i] {}
 //        ^^^^^^^^^^^
 CssAttributeMatcher =
 	operator: ('~=' | '|=' | '^=' | '$=' | '*=' | '=')
 	value: CssAttributeMatcherValue
-	modifier: ('i' | 's')?
+	modifier: AnyCssAttributeModifier?
+
+AnyCssAttributeModifier =
+	CssAttributeModifier
+	| ScssInterpolatedIdentifier
+
+AnyCssAttributeName =
+	CssIdentifier
+	| ScssInterpolatedIdentifier
+
+CssAttributeModifier =
+	value: ('i' | 's')
 
 CssAttributeMatcherValue =
- name: AnyCssAttributeMatcherValue
+	name: AnyCssAttributeMatcherValue
 
 AnyCssAttributeMatcherValue =
 	CssString
@@ -261,10 +304,11 @@ AnyCssPseudoClass =
 	| CssPseudoClassFunctionNth
 	| CssPseudoClassFunctionCustomIdentifierList
 	| CssPseudoClassFunctionCustomIdentifier
+	| ScssInterpolatedPseudoClassFunction
 	| CssBogusPseudoClass
 
 CssPseudoClassIdentifier =
-	name: CssIdentifier
+	name: AnyCssSelectorIdentifier
 
 // :first-of-type {}
 //  ^^^^^^^^^^^^^
@@ -339,7 +383,7 @@ CssRelativeSelector =
 // :lang(de, fr) {}
 // ^^^^^^^^^^^^^
 CssPseudoClassFunctionValueList =
- 	name: CssIdentifier
+	name: CssIdentifier
 	'('
 	values: CssPseudoValueList
 	')'
@@ -352,6 +396,8 @@ CssPseudoValueList = (AnyCssPseudoValue (',' AnyCssPseudoValue)*)
 //       ^^  ^^
 AnyCssPseudoValue =
 	CssIdentifier
+	| ScssInterpolation
+	| ScssInterpolatedIdentifier
 	| CssString
 	| ScssInterpolatedString
 
@@ -461,6 +507,40 @@ CssPseudoClassFunctionCustomIdentifierList =
 	items: CssCustomIdentifierCommaSeparatedList
 	')'
 
+// :foo-#{$name}(.item, 2n + #{$offset}) {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssInterpolatedPseudoClassFunction =
+	name: ScssInterpolatedIdentifier
+	'('
+	arguments: AnyScssInterpolatedPseudoClassFunctionArguments?
+	')'
+
+AnyScssInterpolatedPseudoClassFunctionArguments =
+	ScssInterpolatedPseudoClassRelativeSelectorArguments
+	| ScssInterpolatedPseudoClassSelectorArguments
+	| ScssInterpolatedPseudoClassNthArguments
+	| ScssInterpolatedPseudoClassValueArguments
+
+// :#{$name}(> img) {}
+//            ^^^^^
+ScssInterpolatedPseudoClassRelativeSelectorArguments =
+	selectors: CssRelativeSelectorList
+
+// :#{$name}(.item) {}
+//            ^^^^^
+ScssInterpolatedPseudoClassSelectorArguments =
+	selectors: CssSelectorList
+
+// :#{$name}(2n + #{$offset}) {}
+//            ^^^^^^^^^^^^^^^
+ScssInterpolatedPseudoClassNthArguments =
+	selector: CssPseudoClassNthSelector
+
+// :#{$name}(en, #{$locale}) {}
+//            ^^^^^^^^^^^^^^
+ScssInterpolatedPseudoClassValueArguments =
+	values: CssPseudoValueList
+
 // a::after {}
 //  ^^^^^^^^
 // video::cue(b) {}
@@ -476,12 +556,13 @@ AnyCssPseudoElement =
 	| CssPseudoElementFunctionSelector
 	| CssPseudoElementFunctionCustomIdentifier
 	| CssPseudoElementFunction
+	| ScssInterpolatedPseudoElementFunction
 	| CssBogusPseudoElement
 
 // a::after {}
 //    ^^^^^
 CssPseudoElementIdentifier =
-	name: CssIdentifier
+	name: AnyCssSelectorIdentifier
 
 // video::cue-region(#scroll > .div) {}
 //        ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -506,6 +587,28 @@ CssPseudoElementFunction =
 	'('
 	items: CssPseudoElementFunctionParameterList
 	')'
+
+// ::foo-#{$name}(.item, #{$arg}) {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssInterpolatedPseudoElementFunction =
+	name: ScssInterpolatedIdentifier
+	'('
+	arguments: AnyScssInterpolatedPseudoElementFunctionArguments?
+	')'
+
+AnyScssInterpolatedPseudoElementFunctionArguments =
+	ScssInterpolatedPseudoElementSelectorArguments
+	| ScssInterpolatedPseudoElementValueArguments
+
+// ::#{$name}(.item) {}
+//             ^^^^^
+ScssInterpolatedPseudoElementSelectorArguments =
+	selectors: CssSelectorList
+
+// ::#{$name}(#{$part}) {}
+//             ^^^^^^^^
+ScssInterpolatedPseudoElementValueArguments =
+	values: CssPseudoValueList
 
 CssPseudoElementFunctionParameterList = CssIdentifier*
 
@@ -617,7 +720,63 @@ CssGenericProperty =
 
 AnyCssGenericPropertyValueOrExpression =
 	CssGenericComponentValueList
+	| CssCustomPropertyValue
 	| ScssExpression
+
+// https://www.w3.org/TR/css-variables-1/#syntax
+CssCustomPropertyValue =
+	components: CssCustomPropertyComponentList
+
+CssCustomPropertyComponentList = AnyCssCustomPropertyComponent*
+
+AnyCssCustomPropertyComponent =
+	CssCustomIdentifier
+	| CssNumber
+	| AnyCssDimension
+	| CssString
+	| ScssInterpolatedString
+	| ScssInterpolation
+	| CssCustomPropertyFunction
+	| CssCustomPropertyParenthesizedBlock
+	| CssCustomPropertyBracketedBlock
+	| CssCustomPropertyBracedBlock
+	| CssCustomPropertyDelimiter
+
+CssCustomPropertyFunction =
+	name: CssCustomIdentifier
+	'('
+	components: CssCustomPropertyComponentList
+	')'
+
+CssCustomPropertyParenthesizedBlock =
+	'('
+	components: CssCustomPropertyComponentList
+	')'
+
+CssCustomPropertyBracketedBlock =
+	'['
+	components: CssCustomPropertyComponentList
+	']'
+
+CssCustomPropertyBracedBlock =
+	'{'
+	components: CssCustomPropertyComponentList
+	'}'
+
+// Punctuation components of <declaration-value>, including <delim-token>.
+// A top-level `;` terminates the value, while a final `!important` is parsed
+// by the enclosing declaration; both remain components inside nested blocks.
+// https://www.w3.org/TR/css-syntax-3/#typedef-declaration-value
+CssCustomPropertyDelimiter =
+	value: (
+		'css_delim_literal'
+		| '$' | '#' | '&' | '@'
+		| ',' | ':' | ';' | '/' | '.' | '...' | '::'
+		| '+' | '-' | '*' | '%' | '^' | '~' | '|' | '||'
+		| '=' | '==' | '!=' | '<' | '<=' | '>' | '>='
+		| '|=' | '^=' | '*=' | '$=' | '~='
+		| '!' | '<!--' | '-->'
+	)
 
 // This grammar is specific to CSS Modules and defines how composes classes.
 // https://github.com/css-modules/css-modules/blob/master/docs/composition.md
@@ -636,7 +795,9 @@ AnyCssGenericPropertyValueOrExpression =
 CssComposesProperty =
 	name: CssIdentifier
 	':'
-	value: CssComposesPropertyValue
+	values: CssComposesPropertyValueList
+
+CssComposesPropertyValueList = CssComposesPropertyValue (',' CssComposesPropertyValue)*
 
 CssComposesPropertyValue =
 	classes: CssComposesClassList
@@ -682,7 +843,11 @@ CssGenericDelimiter =
 
 CssComponentValueList = AnyCssValue*
 
-AnyCssDeclarationName = CssIdentifier | CssDashedIdentifier | ScssInterpolatedIdentifier | TwValueThemeReference
+AnyCssDashedIdentifier =
+	CssDashedIdentifier
+	| ScssInterpolatedDashedIdentifier
+
+AnyCssDeclarationName = CssIdentifier | AnyCssDashedIdentifier | ScssInterpolatedIdentifier | TwValueThemeReference
 
 CssDeclarationImportant =
 	'!'
@@ -720,6 +885,7 @@ AnyCssAtRule =
 	| CssPositionTryAtRule
 	| CssViewTransitionAtRule
 	| CssFunctionAtRule
+	| CssCustomMediaAtRule
 	// SCSS at rules
 	| ScssEachAtRule
 	| ScssAtRootAtRule
@@ -825,7 +991,7 @@ CssViewTransitionAtRuleDeclarator =
 
 CssFunctionAtRuleDeclarator =
 	'function'
-	name: CssDashedIdentifier
+	name: AnyCssDashedIdentifier
 	'('
 	parameters: CssFunctionParameterList
 	')'
@@ -1166,6 +1332,7 @@ CssKeyframesAtRule =
 AnyCssKeyframesName =
 	CssKeyframesScopedName
 	| AnyCssKeyframesIdentifier
+	| ScssKeyframesName
 	| CssBogusKeyframesName
 
 AnyCssKeyframesBlock =
@@ -1204,6 +1371,13 @@ CssKeyframesScopePrefix =
 //            ^^^^^^^^^^^
 AnyCssKeyframesIdentifier = CssCustomIdentifier | CssString
 
+ScssKeyframesName =
+	name: AnyScssKeyframesName
+
+AnyScssKeyframesName =
+	ScssInterpolatedIdentifier
+	| ScssVariable
+
 // @keyframes "something" { from {} to {} }
 //                        ^^^^^^^^^^^^^^^^^
 CssKeyframesBlock =
@@ -1215,7 +1389,11 @@ CssKeyframesItemList = AnyCssKeyframesItem*
 
 AnyCssKeyframesItem =
 	CssKeyframesItem
+	| ScssKeyframesVariableDeclaration
 	| CssBogusKeyframesItem
+
+ScssKeyframesVariableDeclaration =
+	declaration: ScssVariableDeclaration
 
 // @keyframes "something" { 30%, 60% {} }
 //                          ^^^^^^^^^^^
@@ -1229,6 +1407,7 @@ AnyCssKeyframesSelector =
 	CssKeyframesIdentSelector
 	| CssKeyframesPercentageSelector
 	| CssKeyframesRangeSelector
+	| ScssKeyframesSelector
 	| CssBogusSelector
 
 // @keyframes "something" { from {} to {} }
@@ -1250,6 +1429,12 @@ CssKeyframesPercentageSelector =
 CssKeyframesRangeSelector =
 	name: ('cover' | 'contain' | 'entry' | 'exit' | 'entry-crossing' | 'exit-crossing')
 	percentage: CssPercentage
+
+// @keyframes loader { #{50% - $duration} {} #{$i}% {} }
+//                     ^^^^^^^^^^^^^^^^^^    ^^^^^^
+ScssKeyframesSelector =
+	selector: ScssInterpolation
+	'%'?
 
 // https://drafts.csswg.org/mediaqueries-5/#media-query
 // <media-query> = <media-condition>
@@ -1336,42 +1521,49 @@ CssMediaType =
 AnyCssMediaTypeCondition =
 	CssMediaNotCondition
 	| CssMediaAndCondition
-	| AnyCssMediaInParens
+	| AnyCssMediaConditionOperand
 
 // <media-condition> = <media-not> | <media-in-parens> [ <media-and>* | <media-or>* ]
 AnyCssMediaCondition =
 	CssMediaNotCondition
 	| CssMediaAndCondition
 	| CssMediaOrCondition
-	| AnyCssMediaInParens
+	| AnyCssMediaConditionOperand
+
+AnyCssMediaConditionOperand =
+	AnyCssMediaInParens
+	| ScssMediaQuery
 
 // @media not all and not (color)  { }
 //        						^^^^^^^^^^^
 CssMediaNotCondition =
 	'not'
-	condition: AnyCssMediaInParens
+	condition: AnyCssMediaConditionOperand
 
 // @media (width > 400px) or (color) or (inline-width >= 30em)  { }
 //        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssMediaOrCondition =
-	left: AnyCssMediaInParens
+	left: AnyCssMediaConditionOperand
 	'or'
 	right: AnyCssMediaOrCombinableCondition
 
 AnyCssMediaOrCombinableCondition =
 	CssMediaOrCondition
-	| AnyCssMediaInParens
+	| AnyCssMediaConditionOperand
 
 // @media (width > 400px) and (color) and (inline-width >= 30em)  { }
 //        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssMediaAndCondition =
-	left: AnyCssMediaInParens
+	left: AnyCssMediaConditionOperand
 	'and'
 	right: AnyCssMediaAndCombinableCondition
 
 AnyCssMediaAndCombinableCondition =
 	CssMediaAndCondition
-	| AnyCssMediaInParens
+	// Sass accepts `@media #{a} and not (b)`, but plain
+	// `@media (a) and not (b)` must stay invalid in the parser.
+	| CssMediaNotCondition
+	| AnyCssMediaConditionOperand
 
 AnyCssMediaInParens =
 	CssMediaConditionInParens
@@ -1400,7 +1592,9 @@ AnyCssQueryFeature =
 
 AnyCssQueryFeatureName =
 	CssIdentifier
+	| CssDashedIdentifier
 	| ScssInterpolatedIdentifier
+	| ScssVariable
 
 // @container (--responsive: true) {  }
 //             ^^^^^^^^^^^^^^^^^^
@@ -1450,8 +1644,10 @@ AnyCssQueryFeatureValue =
 	| CssIdentifier
 	| CssRatio
 	| AnyCssFunction
+	| ScssVariable
 	| ScssInterpolatedIdentifier
 	| ScssInterpolation
+	| ScssExpression
 
 // https://drafts.csswg.org/css-page/#at-ruledef-page
 // @page = @page <page-selector-list>? { <declaration-rule-list> }
@@ -1646,7 +1842,13 @@ AnyCssSupportsInParens =
 	CssSupportsConditionInParens
 	| CssSupportsFeatureDeclaration
 	| CssSupportsFeatureSelector
+	| ScssSupportsInterpolatedCondition
 	| AnyCssValue // general-enclosed
+
+// @supports #{"(display: grid)"} {}
+//           ^^^^^^^^^^^^^^^^^^^^
+ScssSupportsInterpolatedCondition =
+	condition: ScssInterpolation
 
 // @supports (transition-property: color) or (not (animation-name: foo)) {}
 //                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1891,14 +2093,19 @@ CssValueAtRuleGenericValue = SyntaxElement*
 /// as part of an unformed tree. This enables graceful handling of CSS constructs that are not
 /// supported by the parser, ensuring that the stylesheet can still be processed without errors.
 CssUnknownBlockAtRule =
-	name: CssIdentifier
+	name: AnyCssUnknownAtRuleName
 	components: CssUnknownAtRuleComponentList
 	block: AnyCssDeclarationOrRuleBlock
 
 CssUnknownValueAtRule =
-	name: CssIdentifier
+	name: AnyCssUnknownAtRuleName
 	components: CssUnknownAtRuleComponentList
 	';'
+
+AnyCssUnknownAtRuleName =
+	CssIdentifier
+	| ScssInterpolatedIdentifier
+	| ScssInterpolation
 
 CssUnknownAtRuleComponentList = SyntaxElement*
 
@@ -1968,6 +2175,27 @@ CssReturnsStatement =
 	'returns'
 	type: AnyCssType
 
+// https://www.w3.org/TR/mediaqueries-5/#custom-mq
+// @custom-media <extension-name> [ <media-query-list> | true | false ] ;
+//
+// @custom-media --small-viewport (max-width: 768px);
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssCustomMediaAtRule =
+	declarator: CssCustomMediaAtRuleDeclarator
+	';'
+
+CssCustomMediaAtRuleDeclarator =
+	'custom-media'
+	name: AnyCssDashedIdentifier
+	queries: AnyCssCustomMediaQuery
+
+AnyCssCustomMediaQuery =
+	CssMediaQueryList
+	| CssBooleanMediaQuery
+
+CssBooleanMediaQuery =
+	boolean: ('true' | 'false')
+
 ///////////////
 // AUXILIARY
 ///////////////
@@ -1977,7 +2205,7 @@ CssReturnsStatement =
 AnyCssValue =
 	CssIdentifier
 	| CssCustomIdentifier
-	| CssDashedIdentifier
+	| AnyCssDashedIdentifier
 	| ScssVariable
 	| ScssInterpolatedIdentifier
 	| ScssInterpolatedValue
@@ -2283,6 +2511,7 @@ CssBracketedValueList = AnyCssBracketedValueItem*
 AnyCssBracketedValueItem =
 	AnyCssCustomIdentifier
 	| CssGenericDelimiter
+	| AnyScssExpression
 
 AnyCssCustomIdentifier =
 	CssCustomIdentifier
@@ -2687,7 +2916,7 @@ ScssUseAtRule =
 	url: CssString
 	as_clause: ScssUseAsClause?
 	with_clause: ScssWithClause?
-	';'
+	';'?
 
 // as *
 // ^^^^
@@ -2712,7 +2941,7 @@ ScssForwardAtRule =
 	as_clause: ScssForwardAsClause?
 	visibility_clause: AnyScssForwardVisibilityClause?
 	with_clause: ScssWithClause?
-	';'
+	';'?
 
 // as theme-*
 // ^^^^^^^^^^^
@@ -2849,6 +3078,7 @@ ScssIncludeAtRule =
 	'include'
 	name: AnyScssIncludeTarget
 	arguments: ScssIncludeArgumentList?
+	using_clause: ScssIncludeUsingClause?
 	block: CssDeclarationOrRuleBlock?
 	';'?
 
@@ -2862,6 +3092,12 @@ ScssIncludeArgumentList =
 	'('
 	items: CssParameterList
 	')'
+
+// using ($value, $fallback)
+// ^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssIncludeUsingClause =
+	'using'
+	parameters: ScssParameterList
 
 // ($radius: 4px, $args...)
 // ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2898,6 +3134,11 @@ ScssPlaceholderSelector =
 	name: AnyCssSelectorCustomIdentifier
 
 ScssInterpolatedIdentifier =
+	items: ScssInterpolatedIdentifierPartList
+
+// Parser-owned invariant: starts as a custom-property name, either
+// `--#{$prop}` or `--theme-#{$slot}`.
+ScssInterpolatedDashedIdentifier =
 	items: ScssInterpolatedIdentifierPartList
 
 ScssInterpolatedIdentifierPartList = AnyScssInterpolatedIdentifierPart*
@@ -2958,38 +3199,48 @@ ScssWhileAtRule =
 // ^^^^^^^^^
 // @content($value);
 // ^^^^^^^^^^^^^^^^^
+// @content }
+// ^^^^^^^^
 ScssContentAtRule =
 	'content'
 	arguments: ScssIncludeArgumentList?
-	';'
+	';'?
 
 // @return $width * 2;
 // ^^^^^^^^^^^^^^^^^^^
+// @return $width * 2 }
+// ^^^^^^^^^^^^^^^^^^
 ScssReturnAtRule =
 	'return'
 	value: ScssExpression
-	';'
+	';'?
 
 // @debug $width * 2;
 // ^^^^^^^^^^^^^^^^^^
+// @debug $width * 2 }
+// ^^^^^^^^^^^^^^^^^
 ScssDebugAtRule =
 	'debug'
 	value: ScssExpression
-	';'
+	';'?
 
 // @warn "deprecated";
 // ^^^^^^^^^^^^^^^^^^^
+// @warn "deprecated" }
+// ^^^^^^^^^^^^^^^^^^
 ScssWarnAtRule =
 	'warn'
 	value: ScssExpression
-	';'
+	';'?
 
 // @error "Invalid state.";
 // ^^^^^^^^^^^^^^^^^^^^^^^^
+// @error "Invalid state." }
+// ^^^^^^^^^^^^^^^^^^^^^^^
 ScssErrorAtRule =
 	'error'
 	value: ScssExpression
-	';'
+	';'?
 
 // $variable: value;
 // ^^^^^^^^^^^^^^^^^
@@ -3016,7 +3267,7 @@ ScssNamespacedVariable =
 // font: { family: sans-serif; size: 12px; }
 // ^^^^
 ScssNestingDeclaration =
-	name: CssIdentifier
+	name: AnyCssDeclarationName
 	':'
 	value: ScssExpression
 	block: AnyCssDeclarationOrRuleBlock

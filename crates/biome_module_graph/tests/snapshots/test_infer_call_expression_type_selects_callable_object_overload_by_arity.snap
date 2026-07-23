@@ -1,0 +1,46 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export type Reader = {
+	(): string;
+	(value: number): number;
+};
+```
+
+## Inferred types
+
+```
+Binding Reader "Reader" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function {
+        accepts: {
+          params: [
+            required value: number
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+  ]
+}
+
+Binding value "value" => number
+```

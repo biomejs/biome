@@ -1,3 +1,4 @@
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::media::{is_at_any_media_query, parse_any_media_query};
 use crate::syntax::at_rule::{
@@ -102,7 +103,7 @@ fn parse_scss_interpolated_string_import_item(p: &mut CssParser) -> ParsedSyntax
     }
 
     // Guarded by `is_at_scss_interpolated_string` above.
-    let Some(import_string) = parse_scss_interpolated_string(p).ok() else {
+    let Some(import_string) = parse_scss_interpolated_string(p, CssLexContext::Regular).ok() else {
         return Absent;
     };
 

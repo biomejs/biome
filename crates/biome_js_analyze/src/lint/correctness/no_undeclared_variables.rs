@@ -1,13 +1,13 @@
 use crate::globals::{is_js_global, is_ts_global};
-use crate::services::embedded_bindings::EmbeddedBindings;
+use crate::services::embedded::EmbeddedService;
 use crate::services::semantic::SemanticServices;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{
-    AnyJsFunction, JsFileSource, JsSyntaxToken, Language, TsAsExpression, TsReferenceType,
-};
+use biome_js_syntax::{AnyJsFunction, JsSyntaxToken, TsAsExpression, TsReferenceType};
+use biome_languages::JsFileSource;
+use biome_languages::javascript::Language;
 use biome_rowan::AstNode;
 use biome_rule_options::no_undeclared_variables::NoUndeclaredVariablesOptions;
 
@@ -71,9 +71,9 @@ impl Rule for NoUndeclaredVariables {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.query();
         let source_type = ctx.source_type::<JsFileSource>();
-        let embedded_bindings = ctx
-            .get_service::<EmbeddedBindings>()
-            .expect("embedded bindings service");
+        let embedded = ctx
+            .get_service::<EmbeddedService>()
+            .expect("embedded service");
         let flavor = model.flavor();
 
         model
@@ -87,18 +87,20 @@ impl Rule for NoUndeclaredVariables {
 
                 let token = identifier.value_token().ok()?;
                 let text = token.text_trimmed();
+                let token_text = token.token_text_trimmed();
                 // Semantic resolution handles declared `$store` bindings; this fallback keeps
                 // configured globals and embedded bindings aligned on `store`.
                 let store_name = flavor.store_reference_name(text);
 
-                if ctx.is_global(text) || store_name.is_some_and(|store_name| ctx.is_global(store_name))
+                if ctx.is_global(text)
+                    || store_name.is_some_and(|store_name| ctx.is_global(store_name))
                 {
                     return None;
                 }
 
-                if embedded_bindings.contains_binding(text)
+                if embedded.contains_binding(token_text)
                     || store_name
-                        .is_some_and(|store_name| embedded_bindings.contains_binding(store_name))
+                        .is_some_and(|store_name| embedded.contains_binding_text(store_name))
                 {
                     return None;
                 }

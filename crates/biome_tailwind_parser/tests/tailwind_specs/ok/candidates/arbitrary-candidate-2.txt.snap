@@ -19,8 +19,12 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [
-                TwStaticVariant {
-                    base_token: TW_BASE@0..4 "dark" [] [],
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@0..4 "dark" [] [],
+                        },
+                    ],
                 },
                 COLON@4..5 ":" [] [],
             ],
@@ -50,8 +54,8 @@ TwRoot {
                 r_brack_token: R_BRACKET@37..38 "]" [] [],
                 modifier: TwModifier {
                     slash_token: SLASH@38..39 "/" [] [],
-                    value: TwNamedValue {
-                        value_token: TW_VALUE@39..41 "10" [] [],
+                    value: TwNumberValue {
+                        value_token: TW_NUMBER@39..41 "10" [] [],
                     },
                 },
             },
@@ -70,8 +74,10 @@ TwRoot {
   1: TW_CANDIDATE_LIST@0..41
     0: TW_FULL_CANDIDATE@0..41
       0: TW_VARIANT_LIST@0..5
-        0: TW_STATIC_VARIANT@0..4
-          0: TW_BASE@0..4 "dark" [] []
+        0: TW_VARIANT_EXPRESSION@0..4
+          0: TW_VARIANT_SEGMENT_LIST@0..4
+            0: TW_NAMED_VARIANT_SEGMENT@0..4
+              0: TW_VARIANT_SEGMENT@0..4 "dark" [] []
         1: COLON@4..5 ":" [] []
       1: (empty)
       2: TW_ARBITRARY_CANDIDATE@5..41
@@ -92,8 +98,8 @@ TwRoot {
         4: R_BRACKET@37..38 "]" [] []
         5: TW_MODIFIER@38..41
           0: SLASH@38..39 "/" [] []
-          1: TW_NAMED_VALUE@39..41
-            0: TW_VALUE@39..41 "10" [] []
+          1: TW_NUMBER_VALUE@39..41
+            0: TW_NUMBER@39..41 "10" [] []
       3: (empty)
   2: EOF@41..42 "" [Newline("\n")] []
 

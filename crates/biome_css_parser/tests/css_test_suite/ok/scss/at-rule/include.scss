@@ -9,3 +9,12 @@
 @include hover {
   color: red;
 }
+
+@include button using ($value) {
+  color: $value;
+}
+
+@include card($radius: 4px) using ($value, $fallback) {
+  color: $value;
+  background: $fallback;
+}

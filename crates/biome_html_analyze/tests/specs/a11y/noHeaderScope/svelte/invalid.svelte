@@ -1,0 +1,8 @@
+<!-- should generate diagnostics -->
+<div scope="col"></div>
+<div scope={scopeValue}></div>
+<div {scope}></div>
+<div scope></div>
+<td scope="col"></td>
+<span scope="row"></span>
+<p scope></p>

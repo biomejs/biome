@@ -23,9 +23,7 @@ info: yaml/sequence/middle-comments.yml
 -# comment 1
 +!!set # comment 1
  # comment 2
--- 123
-+- 123
-\ No newline at end of file
+ - 123
 ```
 
 # Output
@@ -33,4 +31,5 @@ info: yaml/sequence/middle-comments.yml
 ```yml
 !!set # comment 1
 # comment 2
-- 123```
+- 123
+```

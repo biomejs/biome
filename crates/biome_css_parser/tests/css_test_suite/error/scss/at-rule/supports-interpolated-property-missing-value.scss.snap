@@ -431,7 +431,7 @@ CssRoot {
                         l_paren_token: L_PAREN@258..259 "(" [] [],
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
-                                name: ScssInterpolatedIdentifier {
+                                name: ScssInterpolatedDashedIdentifier {
                                     items: ScssInterpolatedIdentifierPartList [
                                         CssIdentifier {
                                             value_token: IDENT@259..267 "--theme-" [] [],
@@ -454,8 +454,8 @@ CssRoot {
                                     ],
                                 },
                                 colon_token: COLON@275..276 ":" [] [],
-                                value: ScssExpression {
-                                    items: ScssExpressionItemList [],
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [],
                                 },
                             },
                             important: missing (optional),
@@ -775,7 +775,7 @@ CssRoot {
             0: L_PAREN@258..259 "(" [] []
             1: CSS_DECLARATION@259..276
               0: CSS_GENERIC_PROPERTY@259..276
-                0: SCSS_INTERPOLATED_IDENTIFIER@259..275
+                0: SCSS_INTERPOLATED_DASHED_IDENTIFIER@259..275
                   0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@259..275
                     0: CSS_IDENTIFIER@259..267
                       0: IDENT@259..267 "--theme-" [] []
@@ -790,8 +790,8 @@ CssRoot {
                               0: IDENT@270..274 "slot" [] []
                       3: R_CURLY@274..275 "}" [] []
                 1: COLON@275..276 ":" [] []
-                2: SCSS_EXPRESSION@276..276
-                  0: SCSS_EXPRESSION_ITEM_LIST@276..276
+                2: CSS_CUSTOM_PROPERTY_VALUE@276..276
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@276..276
               1: (empty)
             2: R_PAREN@276..278 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@278..310

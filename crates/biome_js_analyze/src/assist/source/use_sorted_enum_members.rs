@@ -56,7 +56,7 @@ declare_source_rule! {
     /// ```
     ///
     pub UseSortedEnumMembers {
-        version: "next",
+        version: "2.5.0",
         name: "useSortedEnumMembers",
         language: "ts",
         recommended: false,

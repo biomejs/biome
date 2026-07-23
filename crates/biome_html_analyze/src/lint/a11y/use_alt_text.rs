@@ -3,14 +3,12 @@ use biome_analyze::{
 };
 use biome_console::{fmt::Display, fmt::Formatter, markup};
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::T;
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_alt_text::UseAltTextOptions;
 
-use crate::{
-    a11y::{attribute_value_equals_ignore_case, has_non_empty_attribute, is_aria_hidden_true},
-    utils::is_html_tag,
-};
+use crate::a11y::{attribute_value_equals_ignore_case, has_non_empty_attribute, is_aria_hidden_true};
 
 declare_lint_rule! {
     /// Enforce that all elements that require alternative text have meaningful information to relay back to the end user.
@@ -117,14 +115,13 @@ impl Rule for UseAltText {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
 
         let has_alt = has_valid_alt_text(element);
         let has_aria_label = has_non_empty_attribute(element, "aria-label");
         let has_aria_labelledby = has_non_empty_attribute(element, "aria-labelledby");
         let aria_hidden = is_aria_hidden_true(element);
 
-        if is_html_tag(element, source_type, "object") {
+        if element.tag_name_kind() == Some(T![object]) {
             let has_title = has_non_empty_attribute(element, "title");
 
             if !has_title && !has_aria_label && !has_aria_labelledby && !aria_hidden {
@@ -136,18 +133,18 @@ impl Rule for UseAltText {
                     element.syntax().text_trimmed_range(),
                 ));
             }
-        } else if is_html_tag(element, source_type, "img") {
+        } else if element.tag_name_kind() == Some(T![img]) {
             if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
                 return Some((ValidatedElement::Img, element.syntax().text_trimmed_range()));
             }
-        } else if is_html_tag(element, source_type, "area") {
+        } else if element.tag_name_kind() == Some(T![area]) {
             if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
                 return Some((
                     ValidatedElement::Area,
                     element.syntax().text_trimmed_range(),
                 ));
             }
-        } else if is_html_tag(element, source_type, "input")
+        } else if element.tag_name_kind() == Some(T![input])
             && has_type_image_attribute(element)
             && !has_alt
             && !has_aria_label
@@ -184,7 +181,7 @@ impl Rule for UseAltText {
 /// Check if the element has a type="image" attribute
 fn has_type_image_attribute(element: &AnyHtmlTagElement) -> bool {
     element
-        .find_attribute_by_name("type")
+        .find_attribute_or_vue_binding("type")
         .is_some_and(|attr| attribute_value_equals_ignore_case(&attr, "image"))
 }
 

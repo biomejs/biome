@@ -28,6 +28,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdBulletListItem::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MD_CODE_CONTENT => {
+                    let $pattern = unsafe { $crate::MdCodeContent::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_CONTINUATION_INDENT => {
                     let $pattern = unsafe { $crate::MdContinuationIndent::new_unchecked(node) };
                     $body
@@ -60,8 +64,8 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdHtmlBlock::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MD_INDENT => {
-                    let $pattern = unsafe { $crate::MdIndent::new_unchecked(node) };
+                $crate::MarkdownSyntaxKind::MD_HTML_CONTENT => {
+                    let $pattern = unsafe { $crate::MdHtmlContent::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MD_INDENT_CODE_BLOCK => {
@@ -157,10 +161,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdSetextHeader::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MD_SOFT_BREAK => {
-                    let $pattern = unsafe { $crate::MdSoftBreak::new_unchecked(node) };
-                    $body
-                }
                 $crate::MarkdownSyntaxKind::MD_TEXTUAL => {
                     let $pattern = unsafe { $crate::MdTextual::new_unchecked(node) };
                     $body
@@ -179,6 +179,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::MarkdownSyntaxKind::MD_BOGUS_BLOCK => {
                     let $pattern = unsafe { $crate::MdBogusBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_BOGUS_BULLET => {
+                    let $pattern = unsafe { $crate::MdBogusBullet::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MD_BLOCK_LIST => {

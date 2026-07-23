@@ -7,7 +7,8 @@ use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TrailingNewline, TransformSourceMap,
 };
-use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_json_syntax::JsonLanguage;
+use biome_languages::JsonFileSource;
 use std::default::Default;
 use std::fmt;
 use std::rc::Rc;
@@ -126,9 +127,8 @@ impl schemars::JsonSchema for TrailingCommas {
 }
 
 impl JsonFormatOptions {
-    pub fn new(file_source: JsonFileSource) -> Self {
+    pub fn new() -> Self {
         Self {
-            _file_source: file_source,
             trailing_newline: TrailingNewline::default(),
             ..Default::default()
         }

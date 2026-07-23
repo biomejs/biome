@@ -32,7 +32,8 @@ impl FormatNodeRule<JsStringLiteralExpression> for FormatJsStringLiteralExpressi
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use biome_js_syntax::{JsFileSource, JsStringLiteralExpression, ModuleKind};
+    use biome_js_syntax::JsStringLiteralExpression;
+    use biome_languages::{JsFileSource, javascript::ModuleKind};
 
     #[test]
     fn needs_parentheses() {

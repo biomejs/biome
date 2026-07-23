@@ -14,6 +14,8 @@ info: css/atrule/unknown.css
 @tailwind components;
 @tailwind utilities;
 
+@future fn({ width:300px })   query{color:red}
+
 ```
 
 
@@ -27,5 +29,9 @@ info: css/atrule/unknown.css
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@future fn({ width:300px })   query {
+	color: red;
+}
 
 ```

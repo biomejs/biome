@@ -53,6 +53,7 @@
 
 mod client;
 pub(crate) mod document;
+pub mod search;
 mod server;
 
 use biome_analyze::{ActionCategory, RuleCategories};
@@ -61,20 +62,16 @@ use biome_console::{Markup, MarkupBuf, markup};
 use biome_diagnostics::{Applicability, CodeSuggestion, Severity, serde::Diagnostic};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_grit_patterns::GritTargetLanguage;
-use biome_js_syntax::{TextRange, TextSize};
-use biome_module_graph::SerializedModuleInfo;
+use biome_languages::DocumentFileSource;
 use biome_resolver::FsWithResolverProxy;
+use biome_rowan::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use crossbeam::channel::bounded;
-pub use document::{
-    AnyEmbeddedSnippet, CssDocumentServices, DocumentServices, EmbeddedSnippet, JsDocumentServices,
-};
 use enumflags2::{BitFlags, bitflags};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
-pub use server::WorkspaceServer;
+pub use server::{LocalWorkspace, WorkspaceServer};
 use smallvec::SmallVec;
 use std::{
     borrow::Cow,
@@ -87,17 +84,20 @@ use std::{
 use tokio::sync::watch;
 use tracing::debug;
 
-use crate::settings::{EditorFeatures, ModuleGraphResolutionKind, SettingsWithEditor};
 pub use crate::{
-    WorkspaceError,
-    file_handlers::{Capabilities, DocumentFileSource},
-    projects::ProjectKey,
-    scanner::ScanKind,
+    WorkspaceError, file_handlers::Capabilities, projects::ProjectKey, scanner::ScanKind,
     settings::Settings,
 };
-pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 #[cfg(feature = "schema")]
 use schemars::{Schema, SchemaGenerator};
+
+pub mod db;
+use crate::module_graph::SerializedModuleInfo;
+use crate::settings::{EditorFeatures, ModuleGraphResolutionKind, SettingsWithEditor};
+pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
+#[cfg(feature = "lang_grit")]
+pub use search::grit::GritSearchQuery;
+pub use search::{NoopQueryProvider, SearchLanguage, SearchQuery};
 pub use server::OpenFileReason;
 
 /// Notification regarding a workspace's service data.
@@ -115,7 +115,7 @@ fn is_false(value: &bool) -> bool {
     !*value
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct SupportsFeatureParams {
@@ -237,10 +237,7 @@ impl FeaturesSupported {
             }
         }
 
-        if let Some(experimental_full_html_support) =
-            settings.as_ref().experimental_full_html_support
-            && experimental_full_html_support.value()
-        {
+        if settings.as_ref().experimental_full_html_support_enabled() {
             self.insert(FeatureKind::HtmlFullSupport, SupportKind::Supported);
         }
 
@@ -788,7 +785,7 @@ impl FeaturesBuilder {
     }
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateSettingsParams {
@@ -819,7 +816,7 @@ pub struct ProjectFeaturesParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct ProjectFeaturesResult {}
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct OpenFileParams {
@@ -850,7 +847,7 @@ pub struct OpenFileResult {
     diagnostics: Vec<Diagnostic>,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", tag = "type")]
 pub enum FileContent {
@@ -879,7 +876,7 @@ impl FileContent {
     }
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct GetSyntaxTreeParams {
@@ -895,7 +892,7 @@ pub struct GetSyntaxTreeResult {
     pub ast: String,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct GetControlFlowGraphParams {
@@ -904,7 +901,7 @@ pub struct GetControlFlowGraphParams {
     pub cursor: TextSize,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct GetTypeInfoParams {
@@ -912,7 +909,7 @@ pub struct GetTypeInfoParams {
     pub path: BiomePath,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct GetRegisteredTypesParams {
@@ -920,7 +917,7 @@ pub struct GetRegisteredTypesParams {
     pub path: BiomePath,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct GetSemanticModelParams {
@@ -928,12 +925,12 @@ pub struct GetSemanticModelParams {
     pub path: BiomePath,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct GetModuleGraphParams {}
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct GetFormatterIRParams {
@@ -941,7 +938,7 @@ pub struct GetFormatterIRParams {
     pub path: BiomePath,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct GetFileContentParams {
@@ -949,7 +946,7 @@ pub struct GetFileContentParams {
     pub path: BiomePath,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct CheckFileSizeParams {
@@ -971,7 +968,7 @@ impl CheckFileSizeResult {
     }
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct ChangeFileParams {
@@ -992,17 +989,19 @@ pub struct ChangeFileParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct ChangeFileResult {
-    diagnostics: Vec<Diagnostic>,
+    /// Problems found while updating dependency and module data.
+    /// This does not include lint or parse results for the changed file.
+    pub diagnostics: Vec<Diagnostic>,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct CloseFileParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
 }
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateModuleGraphParams {
@@ -1012,7 +1011,7 @@ pub struct UpdateModuleGraphParams {
     pub update_kind: UpdateKind,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum UpdateKind {
@@ -1020,7 +1019,7 @@ pub enum UpdateKind {
     Remove,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct PullDiagnosticsParams {
@@ -1076,7 +1075,48 @@ pub struct PullDiagnosticsResult {
     pub skipped_diagnostics: u64,
 }
 
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct ProcessFileParams {
+    pub project_key: ProjectKey,
+    pub path: BiomePath,
+    pub content: FileContent,
+    pub categories: RuleCategories,
+    #[serde(default)]
+    pub only: Vec<AnalyzerSelector>,
+    #[serde(default)]
+    pub skip: Vec<AnalyzerSelector>,
+    #[serde(default)]
+    pub enabled_rules: Vec<AnalyzerSelector>,
+    pub fix_file_mode: Option<FixFileMode>,
+    pub suppression_reason: Option<String>,
+    pub format: bool,
+    pub write: bool,
+    pub include_code_fix: bool,
+    pub max_diagnostics: Option<u32>,
+    pub diagnostic_level: Severity,
+    pub enforce_assist: bool,
+    pub skip_parse_errors: bool,
+}
+
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct ProcessFileResult {
+    pub output: Option<String>,
+    pub diagnostics: Vec<Diagnostic>,
+    pub format_with_errors_disabled: bool,
+    pub applied_fixes: usize,
+    pub errors: usize,
+    pub warnings: usize,
+    pub infos: usize,
+    pub parse_errors: usize,
+    pub skipped_diagnostics: u64,
+    pub skipped_suggested_fixes: u32,
+}
+
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct PullActionsParams {
@@ -1104,7 +1144,7 @@ fn default_true() -> bool {
     true
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct PullDiagnosticsAndActionsParams {
@@ -1149,7 +1189,7 @@ pub struct CodeAction {
     pub offset: Option<TextSize>,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct FormatFileParams {
@@ -1159,7 +1199,7 @@ pub struct FormatFileParams {
     pub inline_config: Option<Configuration>,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct FormatRangeParams {
@@ -1170,7 +1210,7 @@ pub struct FormatRangeParams {
     pub inline_config: Option<Configuration>,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct FormatOnTypeParams {
@@ -1194,7 +1234,7 @@ pub enum FixFileMode {
     ApplySuppressions,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct FixFileParams {
@@ -1241,7 +1281,7 @@ pub struct FixAction {
     pub range: TextRange,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct RenameParams {
@@ -1261,7 +1301,7 @@ pub struct RenameResult {
     pub indels: TextEdit,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct GoToDefinitionParams {
@@ -1279,6 +1319,15 @@ pub struct GoToDefinitionResult {
 }
 
 impl GoToDefinitionResult {
+    // Used only by language-gated logic.
+    #[expect(
+        clippy::allow_attributes,
+        reason = "`dead_code` is feature-dependent here; `expect(dead_code)` is unfulfilled when language features use this method."
+    )]
+    #[allow(
+        dead_code,
+        reason = "This method is used only by language-gated logic."
+    )]
     pub(crate) fn store(&mut self, path: BiomePath, range: TextRange) {
         if !self.matches.iter().any(|(p, r)| *p == path && *r == range) {
             self.matches.push((path, range));
@@ -1391,12 +1440,12 @@ impl RageEntry {
     }
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct ParsePatternParams {
     pub pattern: String,
-    pub default_language: GritTargetLanguage,
+    pub default_language: SearchLanguage,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1406,7 +1455,7 @@ pub struct ParsePatternResult {
     pub pattern_id: PatternId,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct SearchPatternParams {
@@ -1423,7 +1472,7 @@ pub struct SearchResults {
     pub matches: Vec<TextRange>,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct DropPatternParams {
@@ -1459,7 +1508,7 @@ impl From<&str> for PatternId {
     }
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct PathIsIgnoredParams {
@@ -1477,7 +1526,7 @@ pub struct PathIsIgnoredParams {
     /// Controls how to ignore check should be done
     pub ignore_kind: IgnoreKind,
 }
-#[derive(Debug, Default, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum IgnoreKind {
@@ -1490,7 +1539,7 @@ pub enum IgnoreKind {
     Ancestors,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct OpenProjectParams {
@@ -1510,7 +1559,7 @@ pub struct OpenProjectResult {
     pub project_key: ProjectKey,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct ScanProjectParams {
@@ -1530,21 +1579,21 @@ pub struct ScanProjectParams {
     pub verbose: bool,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct CloseProjectParams {
     pub project_key: ProjectKey,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
-pub struct FileExitsParams {
+pub struct FileExistsParams {
     pub file_path: BiomePath,
 }
 
-impl From<BiomePath> for FileExitsParams {
+impl From<BiomePath> for FileExistsParams {
     fn from(path: BiomePath) -> Self {
         Self { file_path: path }
     }
@@ -1557,6 +1606,9 @@ pub struct GetModuleGraphResult {
     pub data: FxHashMap<String, SerializedModuleInfo>,
 }
 
+// NOTE: when you add new functions to this trait, you must update:
+// - the macro `delegate_workspace_methods` to include the new function if necessary
+// - the macro `retrying_workspace_methods` to include the new function if necessary
 pub trait Workspace: Send + Sync + RefUnwindSafe {
     // #region PROJECT-LEVEL METHODS
 
@@ -1639,7 +1691,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// ### Error
     ///
     /// It throws an error only if there's an issue with the client transport.
-    fn file_exists(&self, params: FileExitsParams) -> Result<bool, WorkspaceError>;
+    fn file_exists(&self, params: FileExistsParams) -> Result<bool, WorkspaceError>;
 
     /// Checks whether a certain feature is supported for the given file path.
     ///
@@ -1671,6 +1723,10 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     /// Changes the content of an open file.
     fn change_file(&self, params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError>;
+
+    /// Processes a file by applying linting, formatting, and assist without changing the open workspace document.
+    /// This is a stateless operation, which means that the new document, after the fixes/fomatting, isn't saved in the workspace.
+    fn process_file(&self, params: ProcessFileParams) -> Result<ProcessFileResult, WorkspaceError>;
 
     /// Retrieves the list of diagnostics associated with a file.
     fn pull_diagnostics(
@@ -1804,11 +1860,116 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     // #endregion
 }
 
+/// Runs `op` again when it is interrupted by a concurrent update to the
+/// workspace database.
+///
+/// An interrupted operation surfaces as a [salsa::Cancelled] panic with the
+/// [salsa::Cancelled::PendingWrite] cause. Any other cause (a panicked
+/// thread, a local cancellation) is a different problem, so it is re-raised
+/// instead of being hidden behind a retry.
+pub(crate) fn retry_on_pending_write<T>(op: impl Fn() -> T) -> T {
+    loop {
+        match salsa::Cancelled::catch(std::panic::AssertUnwindSafe(&op)) {
+            Ok(result) => return result,
+            // The interrupting update finishes quickly, so retry shortly
+            // after.
+            Err(salsa::Cancelled::PendingWrite) => std::thread::sleep(Duration::from_millis(1)),
+            Err(other) => std::panic::resume_unwind(Box::new(other)),
+        }
+    }
+}
+
+/// Wraps another [Workspace] so that any call interrupted by a concurrent
+/// update to the workspace database is automatically retried.
+///
+/// See [retry_on_pending_write] for what "interrupted" means. Callers that
+/// would rather handle the interruption themselves — for example, LSP request
+/// handlers that answer with `ContentModified` so the editor re-sends the
+/// request — should call the inner workspace directly instead.
+pub struct RetryingWorkspace<W>(W);
+
+impl<W: Workspace> RetryingWorkspace<W> {
+    pub fn new(inner: W) -> Self {
+        Self(inner)
+    }
+}
+
+macro_rules! retrying_workspace_methods {
+    ($(fn $name:ident($params:ident: $params_ty:ty) -> $return_ty:ty;)*) => {
+        $(
+            fn $name(&self, $params: $params_ty) -> $return_ty {
+                retry_on_pending_write(|| self.0.$name($params.clone()))
+            }
+        )*
+    };
+}
+
+impl<W: Workspace> Workspace for RetryingWorkspace<W> {
+    retrying_workspace_methods! {
+        fn open_project(params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError>;
+        fn scan_project(params: ScanProjectParams) -> Result<ScanProjectResult, WorkspaceError>;
+        fn update_settings(params: UpdateSettingsParams) -> Result<UpdateSettingsResult, WorkspaceError>;
+        fn close_project(params: CloseProjectParams) -> Result<(), WorkspaceError>;
+        fn open_file(params: OpenFileParams) -> Result<OpenFileResult, WorkspaceError>;
+        fn file_exists(params: FileExistsParams) -> Result<bool, WorkspaceError>;
+        fn file_features(params: SupportsFeatureParams) -> Result<FileFeaturesResult, WorkspaceError>;
+        fn is_path_ignored(params: PathIsIgnoredParams) -> Result<bool, WorkspaceError>;
+        fn get_file_content(params: GetFileContentParams) -> Result<String, WorkspaceError>;
+        fn check_file_size(params: CheckFileSizeParams) -> Result<CheckFileSizeResult, WorkspaceError>;
+        fn change_file(params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError>;
+        fn process_file(params: ProcessFileParams) -> Result<ProcessFileResult, WorkspaceError>;
+        fn pull_diagnostics(params: PullDiagnosticsParams) -> Result<PullDiagnosticsResult, WorkspaceError>;
+        fn pull_actions(params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError>;
+        fn pull_diagnostics_and_actions(params: PullDiagnosticsAndActionsParams) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError>;
+        fn format_file(params: FormatFileParams) -> Result<Printed, WorkspaceError>;
+        fn format_range(params: FormatRangeParams) -> Result<Printed, WorkspaceError>;
+        fn format_on_type(params: FormatOnTypeParams) -> Result<Printed, WorkspaceError>;
+        fn fix_file(params: FixFileParams) -> Result<FixFileResult, WorkspaceError>;
+        fn rename(params: RenameParams) -> Result<RenameResult, WorkspaceError>;
+        fn go_to_definition(params: GoToDefinitionParams) -> Result<Option<GoToDefinitionResult>, WorkspaceError>;
+        fn close_file(params: CloseFileParams) -> Result<(), WorkspaceError>;
+        fn update_module_graph(params: UpdateModuleGraphParams) -> Result<(), WorkspaceError>;
+        fn parse_pattern(params: ParsePatternParams) -> Result<ParsePatternResult, WorkspaceError>;
+        fn search_pattern(params: SearchPatternParams) -> Result<SearchResults, WorkspaceError>;
+        fn drop_pattern(params: DropPatternParams) -> Result<(), WorkspaceError>;
+        fn get_syntax_tree(params: GetSyntaxTreeParams) -> Result<GetSyntaxTreeResult, WorkspaceError>;
+        fn get_control_flow_graph(params: GetControlFlowGraphParams) -> Result<String, WorkspaceError>;
+        fn get_formatter_ir(params: GetFormatterIRParams) -> Result<String, WorkspaceError>;
+        fn get_type_info(params: GetTypeInfoParams) -> Result<String, WorkspaceError>;
+        fn get_registered_types(params: GetRegisteredTypesParams) -> Result<String, WorkspaceError>;
+        fn get_semantic_model(params: GetSemanticModelParams) -> Result<String, WorkspaceError>;
+        fn get_module_graph(params: GetModuleGraphParams) -> Result<GetModuleGraphResult, WorkspaceError>;
+        fn rage(params: RageParams) -> Result<RageResult, WorkspaceError>;
+    }
+
+    // These two never touch the workspace database, so there is nothing to
+    // retry.
+    fn fs(&self) -> &dyn FsWithResolverProxy {
+        self.0.fs()
+    }
+
+    fn server_info(&self) -> Option<&ServerInfo> {
+        self.0.server_info()
+    }
+}
+
 /// Convenience function for constructing a server instance of [Workspace]
 pub fn server(fs: Arc<dyn FsWithResolverProxy>, threads: Option<usize>) -> Box<dyn Workspace> {
     let (watcher_tx, _) = bounded(0);
     let (service_tx, _) = watch::channel(ServiceNotification::IndexUpdated);
-    Box::new(WorkspaceServer::new(fs, watcher_tx, service_tx, threads))
+    let search_provider = cfg_select! {
+        feature = "lang_grit" => {
+            crate::workspace::search::grit::GritSearchQuery::default()
+        }
+        _ => NoopQueryProvider {}
+    };
+    Box::new(LocalWorkspace::new(
+        fs,
+        watcher_tx,
+        service_tx,
+        Arc::new(search_provider),
+        threads,
+    ))
 }
 
 /// Convenience function for constructing a client instance of [Workspace]
@@ -1829,6 +1990,7 @@ pub struct FileGuard<'app, W: Workspace + ?Sized> {
     workspace: &'app W,
     project_key: ProjectKey,
     path: BiomePath,
+    close_on_drop: bool,
 }
 
 impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
@@ -1841,6 +2003,20 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             workspace,
             project_key,
             path,
+            close_on_drop: true,
+        })
+    }
+
+    pub fn borrowed(
+        workspace: &'app W,
+        project_key: ProjectKey,
+        path: BiomePath,
+    ) -> Result<Self, WorkspaceError> {
+        Ok(Self {
+            workspace,
+            project_key,
+            path,
+            close_on_drop: false,
         })
     }
 
@@ -2019,6 +2195,10 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
 
 impl<W: Workspace + ?Sized> Drop for FileGuard<'_, W> {
     fn drop(&mut self) {
+        if !self.close_on_drop {
+            return;
+        }
+
         self.workspace
             .close_file(CloseFileParams {
                 project_key: self.project_key,

@@ -1,11 +1,12 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/scss/expression/precedence.scss
+info: scss/expression/precedence.scss
 ---
 
 # Input
 
 ```scss
+// Biome intentionally normalizes spaces around SCSS binary operators.
 $expr1:$a+$b*$c;
 
 $expr2:(
@@ -116,6 +117,7 @@ $expr24:$a/
 # Formatted
 
 ```scss
+// Biome intentionally normalizes spaces around SCSS binary operators.
 $expr1: $a + $b * $c;
 
 $expr2: ($a + $b) * $c;

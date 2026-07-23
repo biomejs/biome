@@ -49,8 +49,9 @@ TwRoot {
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@33..37 "from" [] [],
                 minus_token: DASH@37..38 "-" [] [],
-                value: TwNamedValue {
-                    value_token: TW_VALUE@38..42 "10%" [] [Whitespace(" ")],
+                value: TwPercentageValue {
+                    value_token: TW_NUMBER@38..40 "10" [] [],
+                    remainder_token: PERCENT@40..42 "%" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
@@ -75,8 +76,9 @@ TwRoot {
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@54..57 "via" [] [],
                 minus_token: DASH@57..58 "-" [] [],
-                value: TwNamedValue {
-                    value_token: TW_VALUE@58..62 "30%" [] [Whitespace(" ")],
+                value: TwPercentageValue {
+                    value_token: TW_NUMBER@58..60 "30" [] [],
+                    remainder_token: PERCENT@60..62 "%" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
@@ -101,8 +103,9 @@ TwRoot {
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@77..79 "to" [] [],
                 minus_token: DASH@79..80 "-" [] [],
-                value: TwNamedValue {
-                    value_token: TW_VALUE@80..83 "90%" [] [],
+                value: TwPercentageValue {
+                    value_token: TW_NUMBER@80..82 "90" [] [],
+                    remainder_token: PERCENT@82..83 "%" [] [],
                 },
                 modifier: missing (optional),
             },
@@ -145,8 +148,9 @@ TwRoot {
       2: TW_FUNCTIONAL_CANDIDATE@33..42
         0: TW_BASE@33..37 "from" [] []
         1: DASH@37..38 "-" [] []
-        2: TW_NAMED_VALUE@38..42
-          0: TW_VALUE@38..42 "10%" [] [Whitespace(" ")]
+        2: TW_PERCENTAGE_VALUE@38..42
+          0: TW_NUMBER@38..40 "10" [] []
+          1: PERCENT@40..42 "%" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
     3: TW_FULL_CANDIDATE@42..54
@@ -165,8 +169,9 @@ TwRoot {
       2: TW_FUNCTIONAL_CANDIDATE@54..62
         0: TW_BASE@54..57 "via" [] []
         1: DASH@57..58 "-" [] []
-        2: TW_NAMED_VALUE@58..62
-          0: TW_VALUE@58..62 "30%" [] [Whitespace(" ")]
+        2: TW_PERCENTAGE_VALUE@58..62
+          0: TW_NUMBER@58..60 "30" [] []
+          1: PERCENT@60..62 "%" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
     5: TW_FULL_CANDIDATE@62..77
@@ -185,8 +190,9 @@ TwRoot {
       2: TW_FUNCTIONAL_CANDIDATE@77..83
         0: TW_BASE@77..79 "to" [] []
         1: DASH@79..80 "-" [] []
-        2: TW_NAMED_VALUE@80..83
-          0: TW_VALUE@80..83 "90%" [] []
+        2: TW_PERCENTAGE_VALUE@80..83
+          0: TW_NUMBER@80..82 "90" [] []
+          1: PERCENT@82..83 "%" [] []
         3: (empty)
       3: (empty)
   2: EOF@83..84 "" [Newline("\n")] []

@@ -1,13 +1,13 @@
 use super::{
-    ChangeFileParams, ChangeFileResult, CloseFileParams, FileExitsParams, FixFileParams,
+    ChangeFileParams, ChangeFileResult, CloseFileParams, FileExistsParams, FixFileParams,
     FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
     GetControlFlowGraphParams, GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult,
     GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, GoToDefinitionParams,
-    GoToDefinitionResult, OpenFileParams, OpenFileResult, PullActionsParams, PullActionsResult,
-    PullDiagnosticsAndActionsParams, PullDiagnosticsAndActionsResult, PullDiagnosticsParams,
-    PullDiagnosticsResult, RenameParams, RenameResult, ScanProjectParams, ScanProjectResult,
-    SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateModuleGraphParams,
-    UpdateSettingsParams, UpdateSettingsResult,
+    GoToDefinitionResult, OpenFileParams, OpenFileResult, ProcessFileParams, ProcessFileResult,
+    PullActionsParams, PullActionsResult, PullDiagnosticsAndActionsParams,
+    PullDiagnosticsAndActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameParams,
+    RenameResult, ScanProjectParams, ScanProjectResult, SearchPatternParams, SearchResults,
+    SupportsFeatureParams, UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
@@ -132,7 +132,7 @@ where
         self.request("biome/open_file", params)
     }
 
-    fn file_exists(&self, params: FileExitsParams) -> Result<bool, WorkspaceError> {
+    fn file_exists(&self, params: FileExistsParams) -> Result<bool, WorkspaceError> {
         self.request("biome/file_exists", params)
     }
 
@@ -160,6 +160,10 @@ where
 
     fn change_file(&self, params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError> {
         self.request("biome/change_file", params)
+    }
+
+    fn process_file(&self, params: ProcessFileParams) -> Result<ProcessFileResult, WorkspaceError> {
+        self.request("biome/process_file", params)
     }
 
     fn pull_diagnostics(

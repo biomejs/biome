@@ -15,7 +15,14 @@ impl FormatNodeRule<ScssUseAtRule> for FormatScssUseAtRule {
             semicolon_token,
         } = node.as_fields();
 
-        write!(f, [use_token.format(), space(), url.format()])?;
+        write!(
+            f,
+            [
+                use_token.format()?.with_text_case(CssCase::Lowercase),
+                space(),
+                url.format()
+            ]
+        )?;
 
         if let Some(as_clause) = as_clause {
             write!(f, [space(), as_clause.format()])?;
@@ -25,6 +32,10 @@ impl FormatNodeRule<ScssUseAtRule> for FormatScssUseAtRule {
             write!(f, [space(), with_clause.format()])?;
         }
 
-        write!(f, [semicolon_token.format()])
+        if let Some(semicolon_token) = semicolon_token {
+            write!(f, [semicolon_token.format()])
+        } else {
+            write!(f, [token(";")])
+        }
     }
 }

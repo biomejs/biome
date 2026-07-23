@@ -9,18 +9,21 @@ use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{
     expected_any_sub_selector, expected_compound_selector, expected_identifier, expected_selector,
+    scss_only_syntax_error,
 };
 use crate::syntax::scss::{
-    is_at_scss_interpolated_identifier, is_nth_at_scss_interpolated_identifier,
+    is_at_scss_interpolated_selector_identifier, is_nth_at_scss_interpolated_selector_identifier,
     is_nth_at_scss_placeholder_selector, parse_scss_placeholder_selector,
-    parse_scss_selector_custom_interpolated_identifier,
-    parse_scss_selector_interpolated_identifier,
+    parse_scss_selector_custom_identifier, parse_scss_selector_identifier,
 };
 use crate::syntax::selector::attribute::parse_attribute_selector;
-use crate::syntax::selector::nested_selector::NestedSelectorList;
+use crate::syntax::selector::nested_selector::{
+    NestedSelectorList, parse_nested_selector_as_sub_selector,
+};
 use crate::syntax::selector::pseudo_class::parse_pseudo_class_selector;
 pub(crate) use crate::syntax::selector::pseudo_class::{
-    PSEUDO_CLASS_NTH_SIGN_SET, parse_pseudo_class_nth_dimension_value,
+    PSEUDO_CLASS_NTH_SIGN_SET, PseudoValueList, is_at_pseudo_class_nth_argument,
+    is_at_pseudo_value, parse_pseudo_class_nth_dimension_value, parse_pseudo_class_nth_selector,
 };
 use crate::syntax::selector::pseudo_element::parse_pseudo_element_selector;
 use crate::syntax::{
@@ -317,7 +320,7 @@ fn is_nth_at_simple_selector(p: &mut CssParser, n: usize) -> bool {
     is_nth_at_namespace(p, n)
         || p.nth_at(n, T![*])
         || is_nth_at_identifier(p, n)
-        || is_nth_at_scss_interpolated_identifier(p, n)
+        || is_nth_at_scss_interpolated_selector_identifier(p, n)
         || is_nth_at_scss_placeholder_selector(p, n)
 }
 
@@ -333,7 +336,11 @@ fn parse_simple_selector(p: &mut CssParser) -> ParsedSyntax {
     }
 
     if is_nth_at_scss_placeholder_selector(p, 0) {
-        return parse_scss_placeholder_selector(p);
+        return CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_placeholder_selector,
+            |p, marker| scss_only_syntax_error(p, "SCSS placeholder selectors", marker.range(p)),
+        );
     }
 
     let namespace = parse_namespace(p);
@@ -413,7 +420,7 @@ fn parse_namespace_prefix(p: &mut CssParser) -> ParsedSyntax {
 pub(crate) struct SubSelectorList;
 impl SubSelectorList {
     pub(crate) const START_SET: TokenSet<CssSyntaxKind> =
-        token_set![T![#], T![.], T![:], T![::], T!['[']];
+        token_set![T![#], T![.], T![:], T![::], T!['['], T![&]];
 }
 impl ParseNodeList for SubSelectorList {
     type Kind = CssSyntaxKind;
@@ -442,7 +449,8 @@ impl ParseNodeList for SubSelectorList {
 ///
 /// This function is responsible for identifying and parsing different types of sub-selectors
 /// based on the current token in the CSS parser. It dispatches to specific parsing functions
-/// for class selectors, ID selectors, attribute selectors, pseudo-classes, and pseudo-elements.
+/// for class selectors, ID selectors, attribute selectors, pseudo-classes, pseudo-elements,
+/// and the nesting selector (`&`), e.g. the trailing `&` in `h1&`.
 #[inline]
 fn parse_sub_selector(p: &mut CssParser) -> ParsedSyntax {
     match p.cur() {
@@ -451,6 +459,7 @@ fn parse_sub_selector(p: &mut CssParser) -> ParsedSyntax {
         T!['['] => parse_attribute_selector(p),
         T![:] => parse_pseudo_class_selector(p),
         T![::] => parse_pseudo_element_selector(p),
+        T![&] => parse_nested_selector_as_sub_selector(p),
         _ => Absent,
     }
 }
@@ -518,7 +527,7 @@ pub(crate) fn parse_universal_selector(p: &mut CssParser, namespace: ParsedSynta
 /// representing an HTML element type.
 #[inline]
 fn parse_type_selector(p: &mut CssParser, namespace: ParsedSyntax) -> ParsedSyntax {
-    if !is_at_type_selector_identifier(p) {
+    if !is_at_selector_identifier(p) {
         return Absent;
     }
 
@@ -527,15 +536,13 @@ fn parse_type_selector(p: &mut CssParser, namespace: ParsedSyntax) -> ParsedSynt
     Present(m.complete(p, CSS_TYPE_SELECTOR))
 }
 
-/// Returns `true` when the current token can start the identifier portion of a
-/// type selector.
+/// Returns `true` when the current token can start a selector identifier.
 ///
-/// SCSS needs the interpolated-identifier branch here because selectors such as
-/// `#{$tag}` and `ns|#{$tag}` are still parsed as `CssTypeSelector`; only the
-/// `ident` field changes from `CssIdentifier` to `ScssInterpolatedIdentifier`.
+/// SCSS uses this for selector names such as `#{$tag}` and `foo-#{$name}`;
+/// callers still own the surrounding selector node.
 #[inline]
-fn is_at_type_selector_identifier(p: &mut CssParser) -> bool {
-    is_at_identifier(p) || is_at_scss_interpolated_identifier(p)
+fn is_at_selector_identifier(p: &mut CssParser) -> bool {
+    is_at_identifier(p) || is_at_scss_interpolated_selector_identifier(p)
 }
 
 /// Parses an identifier within a selector context in CSS.
@@ -546,7 +553,15 @@ fn is_at_type_selector_identifier(p: &mut CssParser) -> bool {
 #[inline]
 fn parse_selector_identifier(p: &mut CssParser) -> ParsedSyntax {
     if CssSyntaxFeatures::Scss.is_supported(p) {
-        parse_scss_selector_interpolated_identifier(p)
+        parse_scss_selector_identifier(p)
+    } else if is_at_scss_interpolated_selector_identifier(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_selector_identifier,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated selector names", marker.range(p))
+            },
+        )
     } else {
         parse_selector_identifier_fragment(p)
     }
@@ -564,7 +579,15 @@ pub(crate) fn parse_selector_identifier_fragment(p: &mut CssParser) -> ParsedSyn
 #[inline]
 pub(crate) fn parse_selector_custom_identifier(p: &mut CssParser) -> ParsedSyntax {
     if CssSyntaxFeatures::Scss.is_supported(p) {
-        parse_scss_selector_custom_interpolated_identifier(p)
+        parse_scss_selector_custom_identifier(p)
+    } else if is_at_scss_interpolated_selector_identifier(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_selector_custom_identifier,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated selector names", marker.range(p))
+            },
+        )
     } else {
         parse_selector_custom_identifier_fragment(p)
     }
@@ -580,7 +603,8 @@ pub(crate) fn parse_selector_custom_identifier_fragment(p: &mut CssParser) -> Pa
     parse_custom_identifier_with_keywords(p, context, true)
 }
 
-const SELECTOR_FUNCTION_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T![')'], T!['{']];
+pub(crate) const SELECTOR_FUNCTION_RECOVERY_SET: TokenSet<CssSyntaxKind> =
+    token_set![T![')'], T!['{']];
 
 #[inline]
 pub(crate) fn eat_or_recover_selector_function_close_token<'a, E, D>(

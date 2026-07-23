@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
 expression: invalidNegatedOrChain.js
 ---
 # Input
@@ -16,6 +17,10 @@ expression: invalidNegatedOrChain.js
 !a.b || !a.b();
 (!foo || !foo.bar) && (!baz || !baz.bar);
 !foo || !foo?.bar.baz;
+!foo || foo.bar !== "x";
+!foo || foo.bar != "x";
+!foo || "x" !== foo.bar;
+!foo || "x" != foo.bar;
 
 ```
 
@@ -221,7 +226,7 @@ invalidNegatedOrChain.js:11:2 lint/complexity/useOptionalChain  FIXABLE  ━━�
   > 11 │ (!foo || !foo.bar) && (!baz || !baz.bar);
        │  ^^^^^^^^^^^^^^^^
     12 │ !foo || !foo?.bar.baz;
-    13 │ 
+    13 │ !foo || foo.bar !== "x";
   
   i Unsafe fix: Change to an optional chain.
   
@@ -230,7 +235,7 @@ invalidNegatedOrChain.js:11:2 lint/complexity/useOptionalChain  FIXABLE  ━━�
     11    │ - (!foo·||·!foo.bar)·&&·(!baz·||·!baz.bar);
        11 │ + (!foo?.bar)·&&·(!baz·||·!baz.bar);
     12 12 │   !foo || !foo?.bar.baz;
-    13 13 │   
+    13 13 │   !foo || foo.bar !== "x";
   
 
 ```
@@ -245,7 +250,7 @@ invalidNegatedOrChain.js:11:24 lint/complexity/useOptionalChain  FIXABLE  ━━
   > 11 │ (!foo || !foo.bar) && (!baz || !baz.bar);
        │                        ^^^^^^^^^^^^^^^^
     12 │ !foo || !foo?.bar.baz;
-    13 │ 
+    13 │ !foo || foo.bar !== "x";
   
   i Unsafe fix: Change to an optional chain.
   
@@ -254,7 +259,7 @@ invalidNegatedOrChain.js:11:24 lint/complexity/useOptionalChain  FIXABLE  ━━
     11    │ - (!foo·||·!foo.bar)·&&·(!baz·||·!baz.bar);
        11 │ + (!foo·||·!foo.bar)·&&·(!baz?.bar);
     12 12 │   !foo || !foo?.bar.baz;
-    13 13 │   
+    13 13 │   !foo || foo.bar !== "x";
   
 
 ```
@@ -268,11 +273,106 @@ invalidNegatedOrChain.js:12:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     11 │ (!foo || !foo.bar) && (!baz || !baz.bar);
   > 12 │ !foo || !foo?.bar.baz;
        │ ^^^^^^^^^^^^^^^^^^^^^
-    13 │ 
+    13 │ !foo || foo.bar !== "x";
+    14 │ !foo || foo.bar != "x";
   
   i Unsafe fix: Change to an optional chain.
   
     12 │ !foo·||·!foo?.bar.baz;
        │     --------          
+
+```
+
+```
+invalidNegatedOrChain.js:13:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    11 │ (!foo || !foo.bar) && (!baz || !baz.bar);
+    12 │ !foo || !foo?.bar.baz;
+  > 13 │ !foo || foo.bar !== "x";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ !foo || foo.bar != "x";
+    15 │ !foo || "x" !== foo.bar;
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    11 11 │   (!foo || !foo.bar) && (!baz || !baz.bar);
+    12 12 │   !foo || !foo?.bar.baz;
+    13    │ - !foo·||·foo.bar·!==·"x";
+       13 │ + foo?.bar·!==·"x";
+    14 14 │   !foo || foo.bar != "x";
+    15 15 │   !foo || "x" !== foo.bar;
+  
+
+```
+
+```
+invalidNegatedOrChain.js:14:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    12 │ !foo || !foo?.bar.baz;
+    13 │ !foo || foo.bar !== "x";
+  > 14 │ !foo || foo.bar != "x";
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    15 │ !foo || "x" !== foo.bar;
+    16 │ !foo || "x" != foo.bar;
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    12 12 │   !foo || !foo?.bar.baz;
+    13 13 │   !foo || foo.bar !== "x";
+    14    │ - !foo·||·foo.bar·!=·"x";
+       14 │ + foo?.bar·!=·"x";
+    15 15 │   !foo || "x" !== foo.bar;
+    16 16 │   !foo || "x" != foo.bar;
+  
+
+```
+
+```
+invalidNegatedOrChain.js:15:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    13 │ !foo || foo.bar !== "x";
+    14 │ !foo || foo.bar != "x";
+  > 15 │ !foo || "x" !== foo.bar;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ !foo || "x" != foo.bar;
+    17 │ 
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    13 13 │   !foo || foo.bar !== "x";
+    14 14 │   !foo || foo.bar != "x";
+    15    │ - !foo·||·"x"·!==·foo.bar;
+       15 │ + "x"·!==·foo?.bar;
+    16 16 │   !foo || "x" != foo.bar;
+    17 17 │   
+  
+
+```
+
+```
+invalidNegatedOrChain.js:16:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    14 │ !foo || foo.bar != "x";
+    15 │ !foo || "x" !== foo.bar;
+  > 16 │ !foo || "x" != foo.bar;
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    14 14 │   !foo || foo.bar != "x";
+    15 15 │   !foo || "x" !== foo.bar;
+    16    │ - !foo·||·"x"·!=·foo.bar;
+       16 │ + "x"·!=·foo?.bar;
+    17 17 │   
+  
 
 ```

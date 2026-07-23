@@ -2,12 +2,11 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::HtmlFileSource;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_html_syntax::{HtmlSyntaxKind, T};
+use biome_parser::{TokenSet, token_set};
 use biome_rowan::AstNode;
 use biome_rule_options::use_aria_activedescendant_with_tabindex::UseAriaActivedescendantWithTabindexOptions;
-
-use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforce that `tabindex` is assigned to non-interactive HTML elements with `aria-activedescendant`.
@@ -55,7 +54,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseAriaActivedescendantWithTabindex {
-        version: "next",
+        version: "2.5.0",
         name: "useAriaActivedescendantWithTabindex",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("aria-activedescendant-has-tabindex").inspired()],
@@ -65,7 +64,8 @@ declare_lint_rule! {
 }
 
 /// HTML elements that are natively interactive (focusable without tabindex).
-const INTERACTIVE_ELEMENTS: &[&str] = &["button", "input", "select", "textarea"];
+const INTERACTIVE_ELEMENTS: TokenSet<HtmlSyntaxKind> =
+    token_set!(T![button], T![input], T![select], T![textarea]);
 
 impl Rule for UseAriaActivedescendantWithTabindex {
     type Query = Ast<AnyHtmlTagElement>;
@@ -77,29 +77,22 @@ impl Rule for UseAriaActivedescendantWithTabindex {
         let element = ctx.query();
 
         // Must have aria-activedescendant attribute
-        element.find_attribute_by_name("aria-activedescendant")?;
+        element.find_attribute_or_vue_binding("aria-activedescendant")?;
 
-        let source_type = ctx.source_type::<HtmlFileSource>();
+        let tag_kind = element.tag_name_kind();
 
         // Skip interactive elements (they are natively tabbable)
-        // In HTML files: case-insensitive (BUTTON, Button, button all match)
-        // In component frameworks (Vue, Svelte, Astro): case-sensitive (only lowercase matches)
-        let is_interactive_element = INTERACTIVE_ELEMENTS
-            .iter()
-            .any(|&h| is_html_tag(element, source_type, h));
-        if is_interactive_element {
+        if tag_kind.is_some_and(|kind| INTERACTIVE_ELEMENTS.contains(kind)) {
             return None;
         }
 
         // Skip anchor elements with href (natively focusable)
-        if is_html_tag(element, source_type, "a")
-            && element.find_attribute_by_name("href").is_some()
-        {
+        if tag_kind == Some(T![a]) && element.find_attribute_by_name("href").is_some() {
             return None;
         }
 
         // Check if tabindex is already present
-        if element.find_attribute_by_name("tabindex").is_some() {
+        if element.find_attribute_or_vue_binding("tabindex").is_some() {
             return None;
         }
 

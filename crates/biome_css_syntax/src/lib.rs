@@ -1,9 +1,10 @@
 #![deny(clippy::use_self)]
 
 #[macro_use]
-mod file_source;
 mod generated;
 mod import_ext;
+mod number_ext;
+mod property_ext;
 mod scss_ext;
 pub mod selector_ext;
 pub mod stmt_ext;
@@ -14,15 +15,15 @@ pub use self::generated::*;
 pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent,
 };
-pub use file_source::{
-    CssFileLanguage, CssFileSource, CssVariant, EmbeddingHtmlKind, EmbeddingKind,
-    EmbeddingStyleApplicability,
-};
+pub use number_ext::{CssNumberScanOptions, scan_css_number};
+pub use property_ext::{CssGridTemplateProperty, css_grid_template_property};
 pub use scss_ext::{
     ScssMapContext, ScssMapPositionKind, ScssMapRole, is_in_scss_control_condition_sequence,
-    is_in_scss_include_arguments, is_in_scss_map_key, is_scss_map_key,
+    is_in_scss_include_arguments, is_in_scss_map_key, is_in_scss_parenthesized_expression,
+    is_scss_comparison_operator, is_scss_expression_ending_with_interpolation,
+    is_scss_expression_starting_with_interpolation, is_scss_map_key,
     is_scss_map_outer_parenthesized_value, is_scss_map_outer_parenthesized_value_list,
-    is_scss_map_outer_parenthesized_value_map, is_scss_map_value,
+    is_scss_map_outer_parenthesized_value_map, is_scss_map_value, is_scss_parenthesized_expression,
     scss_include_keyword_argument_owner, scss_keyword_argument_from_css_expression,
     scss_keyword_argument_from_expression, scss_keyword_argument_from_syntax,
     single_expression_item, unwrap_single_expression_item,

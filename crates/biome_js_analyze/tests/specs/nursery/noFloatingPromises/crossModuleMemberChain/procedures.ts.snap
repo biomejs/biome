@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: procedures.ts
+---
+# Input
+```ts
+declare const trpc: unknown;
+
+export const protectedProcedure = trpc.baseProcedure.use;
+
+```

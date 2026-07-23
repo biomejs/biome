@@ -1,10 +1,10 @@
+use crate::Aria;
 use crate::a11y::is_hidden_from_screen_reader;
-use crate::{Aria, utils::is_html_tag};
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::HtmlFileSource;
-use biome_html_syntax::element_ext::AnyHtmlTagElement;
+
+use biome_html_syntax::{T, element_ext::AnyHtmlTagElement};
 use biome_rowan::AstNode;
 use biome_rule_options::use_key_with_click_events::UseKeyWithClickEventsOptions;
 
@@ -54,7 +54,7 @@ declare_lint_rule! {
     /// - [WCAG 2.1.1](https://www.w3.org/WAI/WCAG21/Understanding/keyboard)
     ///
     pub UseKeyWithClickEvents {
-        version: "next",
+        version: "2.5.0",
         name: "useKeyWithClickEvents",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("click-events-have-key-events").inspired()],
@@ -74,11 +74,7 @@ impl Rule for UseKeyWithClickEvents {
         let aria_roles = ctx.aria_roles();
 
         // Only flag elements that have an onclick attribute
-        if element.find_attribute_by_name("onclick").is_none()
-            && element.find_vue_event_handling_directive("click").is_none()
-        {
-            return None;
-        }
+        element.find_attribute_or_vue_event_binding("onclick")?;
 
         if element.is_custom_component() {
             return None;
@@ -88,25 +84,22 @@ impl Rule for UseKeyWithClickEvents {
             return None;
         }
 
-        if !aria_roles.is_not_interactive_element(element) {
-            let source_type = ctx.source_type::<HtmlFileSource>();
-            if !is_html_tag(element, source_type, "a")
-                || element.find_attribute_by_name("href").is_some()
-            {
-                return None;
-            }
+        if !aria_roles.is_not_interactive_element(element)
+            && (element.tag_name_kind() != Some(T![a])
+                || element.find_attribute_or_vue_binding("href").is_some())
+        {
+            return None;
         }
 
         // Check for keyboard event handlers
-        if element.find_attribute_by_name("onkeydown").is_some()
+        if element
+            .find_attribute_or_vue_event_binding("onkeydown")
+            .is_some()
             || element
-                .find_vue_event_handling_directive("keydown")
+                .find_attribute_or_vue_event_binding("onkeyup")
                 .is_some()
-            || element.find_attribute_by_name("onkeyup").is_some()
-            || element.find_vue_event_handling_directive("keyup").is_some()
-            || element.find_attribute_by_name("onkeypress").is_some()
             || element
-                .find_vue_event_handling_directive("keypress")
+                .find_attribute_or_vue_event_binding("onkeypress")
                 .is_some()
         {
             return None;

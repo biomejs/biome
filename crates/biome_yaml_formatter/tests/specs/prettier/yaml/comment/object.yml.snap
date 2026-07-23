@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/comment/object.yml
 ---
+
 # Input
 
 ```yml
@@ -30,32 +31,30 @@ obj:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,12 +1,8 @@
--#6445
--
- obj:
-   # before
+@@ -7,6 +7,6 @@
  
-+
-   # before
--
--  key: value
+   key: value
  
 -  # after
++# after
  
 -  # after
-+  key: value
-\ No newline at end of file
++# after
 ```
 
 # Output
 
 ```yml
+#6445
+
 obj:
   # before
 
-
   # before
 
+  key: value
 
-  key: value```
+# after
+
+# after
+```

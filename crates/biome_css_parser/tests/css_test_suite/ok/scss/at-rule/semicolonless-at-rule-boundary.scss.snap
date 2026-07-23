@@ -1,0 +1,119 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@mixin button {}
+
+body {
+  @include button
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssMixinAtRule {
+                mixin_token: MIXIN_KW@1..7 "mixin" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@7..14 "button" [] [Whitespace(" ")],
+                },
+                parameters: missing (optional),
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@14..15 "{" [] [],
+                    items: CssDeclarationOrRuleList [],
+                    r_curly_token: R_CURLY@15..16 "}" [] [],
+                },
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@16..23 "body" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@23..24 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssAtRule {
+                        at_token: AT@24..28 "@" [Newline("\n"), Whitespace("  ")] [],
+                        rule: ScssIncludeAtRule {
+                            include_token: INCLUDE_KW@28..36 "include" [] [Whitespace(" ")],
+                            name: CssIdentifier {
+                                value_token: IDENT@36..42 "button" [] [],
+                            },
+                            arguments: missing (optional),
+                            using_clause: missing (optional),
+                            block: missing (optional),
+                            semicolon_token: missing (optional),
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@42..44 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@44..45 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..45
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..44
+    0: CSS_AT_RULE@0..16
+      0: AT@0..1 "@" [] []
+      1: SCSS_MIXIN_AT_RULE@1..16
+        0: MIXIN_KW@1..7 "mixin" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@7..14
+          0: IDENT@7..14 "button" [] [Whitespace(" ")]
+        2: (empty)
+        3: CSS_DECLARATION_OR_RULE_BLOCK@14..16
+          0: L_CURLY@14..15 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@15..15
+          2: R_CURLY@15..16 "}" [] []
+    1: CSS_QUALIFIED_RULE@16..44
+      0: CSS_SELECTOR_LIST@16..23
+        0: CSS_COMPOUND_SELECTOR@16..23
+          0: CSS_NESTED_SELECTOR_LIST@16..16
+          1: CSS_TYPE_SELECTOR@16..23
+            0: (empty)
+            1: CSS_IDENTIFIER@16..23
+              0: IDENT@16..23 "body" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@23..23
+      1: CSS_DECLARATION_OR_RULE_BLOCK@23..44
+        0: L_CURLY@23..24 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@24..42
+          0: CSS_AT_RULE@24..42
+            0: AT@24..28 "@" [Newline("\n"), Whitespace("  ")] []
+            1: SCSS_INCLUDE_AT_RULE@28..42
+              0: INCLUDE_KW@28..36 "include" [] [Whitespace(" ")]
+              1: CSS_IDENTIFIER@36..42
+                0: IDENT@36..42 "button" [] []
+              2: (empty)
+              3: (empty)
+              4: (empty)
+              5: (empty)
+        2: R_CURLY@42..44 "}" [Newline("\n")] []
+  2: EOF@44..45 "" [Newline("\n")] []
+
+```

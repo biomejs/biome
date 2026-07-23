@@ -1,3 +1,4 @@
+mod angular;
 mod astro;
 mod parse_error;
 mod svelte;
@@ -5,7 +6,11 @@ mod vue;
 
 use crate::parser::HtmlParser;
 use crate::syntax::HtmlSyntaxFeatures::{
-    Astro, DoubleTextExpressions, SingleTextExpressions, Svelte, Vue,
+    Angular, Astro, DoubleTextExpressions, SingleTextExpressions, Svelte, Vue,
+};
+use crate::syntax::angular::{
+    parse_angular_event_binding, parse_angular_property_binding,
+    parse_angular_structural_directive, parse_angular_template_ref, parse_angular_two_way_binding,
 };
 use crate::syntax::astro::{
     is_at_astro_directive_keyword, is_at_astro_directive_start, parse_astro_directive,
@@ -21,7 +26,7 @@ use crate::syntax::vue::{
     parse_vue_v_on_shorthand_directive, parse_vue_v_slot_shorthand_directive,
 };
 use crate::token_source::{
-    HtmlEmbeddedLanguage, HtmlLexContext, HtmlReLexContext, TextExpressionKind,
+    HtmlEmbeddedLanguage, HtmlFramework, HtmlLexContext, HtmlReLexContext, TextExpressionKind,
 };
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
@@ -31,6 +36,8 @@ use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
+use biome_rowan::TextRange;
+use biome_string_case::StrLikeExtension;
 
 pub(crate) enum HtmlSyntaxFeatures {
     /// Exclusive to those documents that support Astro
@@ -43,6 +50,8 @@ pub(crate) enum HtmlSyntaxFeatures {
     Svelte,
     /// Exclusive to those documents that support Vue
     Vue,
+    /// Exclusive to those documents that support Angular
+    Angular,
 }
 
 impl SyntaxFeature for HtmlSyntaxFeatures {
@@ -59,6 +68,7 @@ impl SyntaxFeature for HtmlSyntaxFeatures {
             }
             Svelte => p.options().svelte,
             Vue => p.options().vue,
+            Angular => p.options().angular,
         }
     }
 }
@@ -67,14 +77,30 @@ const RECOVER_ATTRIBUTE_LIST: TokenSet<HtmlSyntaxKind> = token_set!(T![>], T![<]
 const RECOVER_TEXT_EXPRESSION_LIST: TokenSet<HtmlSyntaxKind> =
     token_set!(T![<], T![>], T!['}'], T!["}}"]);
 
-/// These elements are effectively always self-closing. They should not have a closing tag (if they do, it should be a parsing error). They might not contain a `/` like in `<img />`.
-static VOID_ELEMENTS: &[&str] = &[
-    "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source",
-    "track", "wbr",
-];
+/// HTML [void elements](https://html.spec.whatwg.org/#void-elements): they never
+/// have content or a closing tag. Tag names are keywords, so this is an `O(1)`
+/// token-kind set.
+const VOID_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(
+    T![area],
+    T![base],
+    T![br],
+    T![col],
+    T![embed],
+    T![hr],
+    T![img],
+    T![input],
+    T![link],
+    T![meta],
+    T![param],
+    T![source],
+    T![track],
+    T![wbr]
+);
 
-/// For these elements, the content is treated as raw text and no parsing is done inside them. This is so that the contents of these tags can be parsed by a different parser.
-pub(crate) static EMBEDDED_LANGUAGE_ELEMENTS: &[&str] = &["script", "style", "pre"];
+/// Elements whose content is treated as raw text / an embedded language. `script`
+/// and `style` share their kinds between HTML and SVG.
+const EMBEDDED_LANGUAGE_ELEMENTS: TokenSet<HtmlSyntaxKind> =
+    token_set!(T![script], T![style], T![pre]);
 
 pub(crate) fn parse_root(p: &mut HtmlParser) {
     let m = p.start();
@@ -111,7 +137,7 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump_with_context(T![<], HtmlLexContext::InsideTag);
+    p.bump_with_context(T![<], inside_tag_context(p));
     p.bump_with_context(T![!], HtmlLexContext::Doctype);
 
     if p.at(T![doctype]) {
@@ -139,6 +165,25 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_DIRECTIVE))
 }
 
+/// The framework flavor of the file currently being parsed.
+#[inline(always)]
+fn html_framework(p: &HtmlParser) -> HtmlFramework {
+    if Vue.is_supported(p) {
+        HtmlFramework::Vue
+    } else if Svelte.is_supported(p) {
+        HtmlFramework::Svelte
+    } else if Astro.is_supported(p) {
+        HtmlFramework::Astro
+    } else if Angular.is_supported(p) {
+        HtmlFramework::Angular
+    } else {
+        HtmlFramework::Plain
+    }
+}
+
+/// The lexer context to use inside a `<...>` tag. `framework` selects the directive
+/// lexing and whether PascalCase tag names are treated as component names.
+///
 /// We need to treat `:`, `.` and `@` differently if we are in a Vue or Astro context.
 ///
 /// Normally, we would do this using [`HtmlSyntaxFeatures`], and we do this elsewhere.
@@ -146,90 +191,92 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
 /// will emit diagnostics. We want to allow them if they have no special meaning.
 #[inline(always)]
 fn inside_tag_context(p: &HtmlParser) -> HtmlLexContext {
-    if Vue.is_supported(p) {
-        HtmlLexContext::InsideTagWithDirectives { svelte: false }
-    } else if Svelte.is_supported(p) {
-        HtmlLexContext::InsideTagSvelte
-    } else if Astro.is_supported(p) {
-        HtmlLexContext::InsideTagAstro
-    } else {
-        HtmlLexContext::InsideTag
+    HtmlLexContext::InsideTag {
+        framework: html_framework(p),
     }
 }
 
-#[inline]
-fn is_possible_component(p: &HtmlParser, tag_name: &str) -> bool {
-    tag_name
-        .chars()
-        .next()
-        .is_some_and(|c| c.is_ascii_uppercase())
-        && !p.options().is_html()
-}
-
-/// Returns the lexer context to use when parsing component names and member expressions.
-/// This allows `.` to be lexed as a token for member expressions like Component.Member
-/// We reuse [HtmlLexContext::InsideTagWithDirectives] context because it supports `.` lexing, but this is ONLY used
-/// for parsing component names, not for parsing attributes.
+/// Returns the lexer context to use when parsing component names and member
+/// expressions (e.g. `Foo` / `Foo.Bar`). The tag-name token is always emitted as
+/// `HTML_COMPONENT_LITERAL` and `.` is lexed as a token for member access. This is
+/// only used once the parser already knows the name is a component.
 #[inline(always)]
 fn component_name_context(p: &HtmlParser) -> HtmlLexContext {
-    if Vue.is_supported(p) || Svelte.is_supported(p) || Astro.is_supported(p) {
-        // Use HtmlLexContext::InsideTagWithDirectives for all component-supporting files when parsing component names
-        // This allows `.` to be lexed properly for member expressions
-        // Note: This is safe because we only use this context for tag names, not attributes
-        HtmlLexContext::InsideTagWithDirectives {
-            svelte: Svelte.is_supported(p),
-        }
-    } else {
-        HtmlLexContext::InsideTag
+    if Angular.is_supported(p) {
+        return inside_tag_context(p);
+    }
+
+    HtmlLexContext::InsideTagWithDirectives {
+        svelte: Svelte.is_supported(p),
     }
 }
 
-/// Parse a tag name, which returns AnyHtmlTagName (one of: HtmlTagName, HtmlComponentName, or HtmlMemberName)
-/// This follows the JSX parser pattern for handling member expressions like Component.Member
+/// Parse a tag name, returning one of `HtmlTagName`, `HtmlComponentName`, or
+/// `HtmlMemberName`. The lexer decides whether the name is a component (emitting
+/// `HTML_COMPONENT_LITERAL`); the parser only assembles member expressions like
+/// `Component.Member`, whose parts are always component names.
 fn parse_any_tag_name(p: &mut HtmlParser) -> ParsedSyntax {
-    if !is_at_start_literal(p) {
-        return Absent;
-    }
-    let tag_text = p.cur_text();
-
-    // Check if this could be a component or has member expression
-    let is_component = is_possible_component(p, tag_text);
-    let has_member_expression = !p.options().is_html() && p.nth_at(1, T![.]);
-
-    // Step 1: Parse base name
-    let name = if is_component || has_member_expression {
-        // Parse as component name - use component_name_context to allow `.` for member expressions
+    if p.cur() == HTML_COMPONENT_LITERAL {
+        // Component name, possibly the base of a member expression.
         let m = p.start();
-        p.bump_with_context(HTML_LITERAL, component_name_context(p));
-        Present(m.complete(p, HTML_COMPONENT_NAME))
-    } else {
-        // Parse as regular HTML tag
-        parse_literal(p, HTML_TAG_NAME)
-    };
-    // Step 2: Extend with member access if present (using .map() pattern from JSX parser)
-    name.map(|mut name| {
-        // Check kind BEFORE moving name with precede()
-        let is_lowercase_tag = name.kind(p) == HTML_TAG_NAME;
+        p.bump_with_context(HTML_COMPONENT_LITERAL, component_name_context(p));
+        let mut name = m.complete(p, HTML_COMPONENT_NAME);
 
         while p.at(T![.]) {
-            // Convert BEFORE precede takes ownership of name
-            if is_lowercase_tag {
-                name.change_kind(p, HTML_COMPONENT_NAME);
-            }
             let m = name.precede(p);
             p.bump_with_context(T![.], component_name_context(p));
-            if is_at_start_literal(p) {
+            // The member is lexed after a `.`, so the lexer emits `HTML_LITERAL`
+            // (or a tag kind) rather than `HTML_COMPONENT_LITERAL`. A member name
+            // is always a component, so remap it.
+            if p.at(HTML_LITERAL) || p.at(HTML_COMPONENT_LITERAL) || p.cur().is_html_tag_name() {
                 let member_m = p.start();
-                p.bump_with_context(HTML_LITERAL, component_name_context(p));
-                member_m.complete(p, HTML_TAG_NAME);
+                p.bump_remap_with_context(HTML_COMPONENT_LITERAL, component_name_context(p));
+                member_m.complete(p, HTML_COMPONENT_NAME);
             } else {
                 p.error(expected_element_name(p, p.cur_range()));
             }
-
             name = m.complete(p, HTML_MEMBER_NAME);
         }
-        name
-    })
+        Present(name)
+    } else if p.cur().is_html_tag_name() {
+        // A known HTML/SVG tag, or the unknown-tag fallback.
+        let m = p.start();
+        p.bump_with_context(p.cur(), inside_tag_context(p));
+        Present(m.complete(p, HTML_TAG_NAME))
+    } else if is_at_start_literal(p) {
+        // A `{{ }}` text expression standing in for a tag name.
+        parse_literal(p, HTML_TAG_NAME)
+    } else {
+        Absent
+    }
+}
+
+/// Parses `<?instruction foo="bar" ?>
+fn parse_processing_instruction(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T![<?]) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    let start_range = p.cur_range();
+    p.bump_with_context(T![<?], inside_tag_context(p));
+
+    let name_range = p.cur_range();
+    parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
+
+    if start_range.end() != name_range.start() {
+        p.error(expected_no_spaces(
+            p,
+            TextRange::new(start_range.end(), name_range.start()),
+        ));
+    }
+
+    AttributeList.parse_list(p);
+
+    p.expect(T![?>]);
+
+    Present(m.complete(p, HTML_PROCESSING_INSTRUCTION))
 }
 
 fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
@@ -239,23 +286,27 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump_with_context(T![<], inside_tag_context(p));
+    // The tag-name token has already been lexed and classified by the lexer, so
+    // these checks are now `O(1)` on the token kind.
+    let name_kind = p.cur();
     let opening_tag_name = p.cur_text().to_string();
-    let should_be_self_closing = VOID_ELEMENTS
-        .iter()
-        .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()))
-        && !is_possible_component(p, opening_tag_name.as_str());
-    let is_embedded_language_tag = EMBEDDED_LANGUAGE_ELEMENTS
-        .iter()
-        .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
+    let should_be_self_closing = VOID_ELEMENTS.contains(name_kind);
+    // In Svelte files, <pre> must be parsed as a regular element so that
+    // Svelte expressions inside it ({@html expr}, {expr}) are visible as AST
+    // nodes for variable-reference tracking.  The HTML formatter's
+    // HTML_VERBATIM_TAGS list independently ensures <pre> content is still
+    // printed verbatim, so removing <pre> from the embedded-language path
+    // here has no effect on formatting output.
+    let is_embedded_language_tag = EMBEDDED_LANGUAGE_ELEMENTS.contains(name_kind)
+        && !(name_kind == T![pre] && Svelte.is_supported(p));
 
     parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
 
-    let context = inside_tag_context(p);
-    match context {
-        HtmlLexContext::InsideTagSvelte => {
+    match html_framework(p) {
+        HtmlFramework::Svelte => {
             p.re_lex(HtmlReLexContext::InsideTagSvelte);
         }
-        HtmlLexContext::InsideTagAstro => {
+        HtmlFramework::Astro => {
             p.re_lex(HtmlReLexContext::InsideTagAstro);
         }
         _ => {}
@@ -278,10 +329,10 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
         p.expect_with_context(
             T![>],
             if is_embedded_language_tag {
-                HtmlLexContext::EmbeddedLanguage(match opening_tag_name.as_str() {
-                    tag if tag.eq_ignore_ascii_case("script") => HtmlEmbeddedLanguage::Script,
-                    tag if tag.eq_ignore_ascii_case("style") => HtmlEmbeddedLanguage::Style,
-                    tag if tag.eq_ignore_ascii_case("pre") => HtmlEmbeddedLanguage::Preformatted,
+                HtmlLexContext::EmbeddedLanguage(match name_kind {
+                    T![script] => HtmlEmbeddedLanguage::Script,
+                    T![style] => HtmlEmbeddedLanguage::Style,
+                    T![pre] => HtmlEmbeddedLanguage::Preformatted,
                     _ => unreachable!(),
                 })
             } else {
@@ -342,16 +393,15 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_with_context(T![<], inside_tag_context(p));
     p.bump_with_context(T![/], inside_tag_context(p));
-    let is_void_element = VOID_ELEMENTS
-        .iter()
-        .any(|tag| tag.eq_ignore_ascii_case(p.cur_text()))
-        && !is_possible_component(p, p.cur_text());
+    // The closing tag name has been classified by the lexer; component closings
+    // (`HTML_COMPONENT_LITERAL`) are never void, so this is `O(1)` and correct.
+    let is_void_element = VOID_ELEMENTS.contains(p.cur());
     let _name = parse_any_tag_name(p);
 
     // There shouldn't be any attributes in a closing tag.
     while p.at(HTML_LITERAL) || p.at(T!["{{"]) || p.at(T!["}}"]) {
         p.error(closing_tag_should_not_have_attributes(p, p.cur_range()));
-        p.bump_remap_with_context(HTML_BOGUS, HtmlLexContext::InsideTag);
+        p.bump_remap_with_context(HTML_BOGUS, inside_tag_context(p));
     }
     p.expect(T![>]);
     let closing = m.complete(p, HTML_CLOSING_ELEMENT);
@@ -373,16 +423,21 @@ fn is_void_closing_tag(p: &HtmlParser, closing: &CompletedMarker) -> bool {
         return false;
     };
 
-    VOID_ELEMENTS
-        .iter()
-        .any(|tag| tag.eq_ignore_ascii_case(name))
-        && !is_possible_component(p, name)
+    // PascalCase names in framework files are components, never void elements.
+    if !p.options().is_html() && name.chars().next().is_some_and(|c| c.is_ascii_uppercase()) {
+        return false;
+    }
+
+    // Void elements are all HTML elements, matched case-insensitively.
+    HtmlSyntaxKind::from_keyword(name.to_ascii_lowercase_cow().as_ref())
+        .is_some_and(|kind| VOID_ELEMENTS.contains(kind))
 }
 
 #[inline]
 pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
     match p.cur() {
         T!["<![CDATA["] => parse_cdata_section(p),
+        T![<?] => parse_processing_instruction(p),
         T![<] => parse_element(p),
         T!["{{"] => HtmlSyntaxFeatures::DoubleTextExpressions.parse_exclusive_syntax(
             p,
@@ -466,7 +521,7 @@ impl ParseNodeList for AttributeList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![>]) || p.at(T![/]) || p.at(T!['}'])
+        p.at(T![>]) || p.at(T![?>]) || p.at(T![/]) || p.at(T!['}'])
     }
 
     fn recover(
@@ -493,22 +548,10 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             DoubleTextExpressions
                 .parse_exclusive_syntax(
                     p,
-                    |p| parse_double_text_expression(p, HtmlLexContext::InsideTag),
+                    |p| parse_double_text_expression(p, inside_tag_context(p)),
                     |p, marker| disabled_interpolation(p, marker.range(p)),
                 )
                 .ok();
-            Present(m.complete(p, HTML_ATTRIBUTE))
-        }
-        T!["{{"] => {
-            let m = p.start();
-            HtmlSyntaxFeatures::DoubleTextExpressions
-                .parse_exclusive_syntax(
-                    p,
-                    |p| parse_double_text_expression(p, HtmlLexContext::InsideTag),
-                    |p, marker| disabled_interpolation(p, marker.range(p)),
-                )
-                .ok();
-
             Present(m.complete(p, HTML_ATTRIBUTE))
         }
         // Check for Astro directives before Vue colon shorthand
@@ -524,6 +567,7 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             parse_vue_v_on_shorthand_directive,
             |p, m| disabled_vue(p, m.range(p)),
         ),
+        T![#] if Angular.is_supported(p) => parse_angular_template_ref(p),
         T![#] => HtmlSyntaxFeatures::Vue.parse_exclusive_syntax(
             p,
             parse_vue_v_slot_shorthand_directive,
@@ -541,6 +585,26 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             p,
             |p| parse_attach_attribute(p),
             |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte(p, m.range(p)),
+        ),
+        T!['('] => Angular.parse_exclusive_syntax(
+            p,
+            parse_angular_event_binding,
+            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_angular(p, m.range(p)),
+        ),
+        T!['['] => Angular.parse_exclusive_syntax(
+            p,
+            parse_angular_property_binding,
+            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_angular(p, m.range(p)),
+        ),
+        T!["[("] => Angular.parse_exclusive_syntax(
+            p,
+            parse_angular_two_way_binding,
+            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_angular(p, m.range(p)),
+        ),
+        T![*] => Angular.parse_exclusive_syntax(
+            p,
+            parse_angular_structural_directive,
+            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_angular(p, m.range(p)),
         ),
         _ if p.cur_text().starts_with("v-") => {
             Vue.parse_exclusive_syntax(p, parse_vue_directive, |p, m| disabled_vue(p, m.range(p)))
@@ -579,6 +643,7 @@ fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
         T![#],
     ]) || (Svelte.is_supported(p) && p.at(T!["{@"]))
         || (Astro.is_supported(p) && is_at_astro_directive_keyword(p))
+        || Angular.is_supported(p) && p.at_ts(token_set![T!['('], T!['['], T!["[("], T![*]])
 }
 
 #[inline]
@@ -642,6 +707,89 @@ fn parse_attribute_string_literal(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_STRING))
 }
 
+struct SvelteTemplateElementList {
+    chunk_context: HtmlLexContext,
+    has_interpolation: bool,
+}
+
+impl SvelteTemplateElementList {
+    fn new(chunk_context: HtmlLexContext) -> Self {
+        Self {
+            chunk_context,
+            has_interpolation: false,
+        }
+    }
+}
+
+impl ParseNodeList for SvelteTemplateElementList {
+    type Kind = HtmlSyntaxKind;
+    type Parser<'source> = HtmlParser<'source>;
+    const LIST_KIND: Self::Kind = SVELTE_TEMPLATE_ELEMENT_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        if p.at(T!['{']) {
+            let result = parse_single_text_expression(p, self.chunk_context);
+            if result.is_present() {
+                self.has_interpolation = true;
+            }
+            result
+        } else if p.at(HTML_TEMPLATE_CHUNK) {
+            let chunk = p.start();
+            p.bump_with_context(HTML_TEMPLATE_CHUNK, self.chunk_context);
+            Present(chunk.complete(p, SVELTE_TEMPLATE_CHUNK_ELEMENT))
+        } else {
+            Absent
+        }
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        !p.at(T!['{']) && !p.at(HTML_TEMPLATE_CHUNK)
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(HTML_BOGUS, token_set![T!['"'], T!["'"]]),
+            expected_attribute,
+        )
+    }
+}
+
+/// Parses a quoted Svelte attribute value as a template that mixes literal text
+/// and `{expression}` interpolations, e.g. `style="top: {top}px"`. The opening
+/// quote token must be the current token.
+///
+/// Returns `true` if any interpolation was encountered. When it returns `false`
+/// the value is a plain string and the caller is expected to rewind and re-parse
+/// it as an `HtmlString`.
+fn parse_svelte_template_attribute_value(p: &mut HtmlParser) -> bool {
+    let quote_kind = p.cur();
+    let quote = if quote_kind == T!['"'] { b'"' } else { b'\'' };
+    let chunk_context = HtmlLexContext::SvelteTemplateChunk { quote };
+
+    let m = p.start();
+    p.bump_with_context(quote_kind, chunk_context);
+
+    let mut list = SvelteTemplateElementList::new(chunk_context);
+    list.parse_list(p);
+    let has_interpolation = list.has_interpolation;
+
+    // r_quote — lex the next token in the inside-tag context so `>` / attributes
+    // are correctly recognised after the closing quote.
+    if p.at(quote_kind) {
+        p.bump_with_context(quote_kind, inside_tag_context(p));
+    } else {
+        p.error(p.err_builder("Missing closing quote", p.cur_range()));
+    }
+
+    m.complete(p, SVELTE_TEMPLATE_ATTRIBUTE_VALUE);
+    has_interpolation
+}
+
 fn parse_attribute_initializer(
     p: &mut HtmlParser,
     context: AttrInitializerContext,
@@ -659,7 +807,12 @@ fn parse_attribute_initializer(
         return Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE));
     }
 
-    p.bump_with_context(T![=], HtmlLexContext::AttributeValue);
+    let attr_value_context = if Svelte.is_supported(p) {
+        HtmlLexContext::SvelteAttributeValue
+    } else {
+        HtmlLexContext::AttributeValue
+    };
+    p.bump_with_context(T![=], attr_value_context);
     if p.at(T!['{']) {
         HtmlSyntaxFeatures::SingleTextExpressions
             .parse_exclusive_syntax(
@@ -699,6 +852,16 @@ fn parse_attribute_initializer(
                 expected_attribute,
             )
             .ok();
+    } else if Svelte.is_supported(p) && matches!(p.cur(), T!['"'] | T!["'"]) {
+        // Speculatively parse as a template. If no interpolation is found the
+        // value is a plain string, so rewind and re-lex it as a single
+        // `HTML_STRING_LITERAL` to parse it as a normal `HtmlString`.
+        let checkpoint = p.checkpoint();
+        if !parse_svelte_template_attribute_value(p) {
+            p.rewind(checkpoint);
+            p.re_lex(HtmlReLexContext::SvelteAttributeString);
+            parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
+        }
     } else {
         parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
     }
@@ -743,9 +906,10 @@ fn parse_double_text_expression(p: &mut HtmlParser, context: HtmlLexContext) -> 
 
     if p.at(T!["}}"]) {
         p.expect_with_context(T!["}}"], context);
-        if context == HtmlLexContext::InsideTag
-            || matches!(context, HtmlLexContext::InsideTagWithDirectives { .. })
-        {
+        if matches!(
+            context,
+            HtmlLexContext::InsideTag { .. } | HtmlLexContext::InsideTagWithDirectives { .. }
+        ) {
             Present(m.complete(p, HTML_ATTRIBUTE_DOUBLE_TEXT_EXPRESSION))
         } else {
             Present(m.complete(p, HTML_DOUBLE_TEXT_EXPRESSION))
@@ -797,11 +961,12 @@ pub(crate) fn parse_single_text_expression(
 
     if p.at(T!['}']) {
         p.bump_remap_with_context(T!['}'], context);
-        if context == HtmlLexContext::InsideTag
-            || matches!(context, HtmlLexContext::InsideTagWithDirectives { .. })
-            || context == HtmlLexContext::InsideTagAstro
-            || context == HtmlLexContext::InsideTagSvelte
-        {
+        if matches!(
+            context,
+            HtmlLexContext::InsideTag { .. }
+                | HtmlLexContext::InsideTagWithDirectives { .. }
+                | HtmlLexContext::SvelteTemplateChunk { .. }
+        ) {
             Present(m.complete(p, HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION))
         } else {
             Present(m.complete(p, HTML_SINGLE_TEXT_EXPRESSION))

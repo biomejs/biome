@@ -1,5 +1,7 @@
 use crate::prelude::*;
 use biome_css_syntax::{ScssInterpolatedIdentifier, ScssInterpolatedIdentifierFields};
+use biome_formatter::write;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssInterpolatedIdentifier;
 impl FormatNodeRule<ScssInterpolatedIdentifier> for FormatScssInterpolatedIdentifier {
@@ -9,6 +11,7 @@ impl FormatNodeRule<ScssInterpolatedIdentifier> for FormatScssInterpolatedIdenti
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
         let ScssInterpolatedIdentifierFields { items } = node.as_fields();
-        items.format().fmt(f)
+
+        write!(f, [items.format()])
     }
 }

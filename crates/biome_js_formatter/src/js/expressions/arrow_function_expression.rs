@@ -914,7 +914,8 @@ pub(crate) fn is_multiline_template_starting_on_same_line(template: &JsTemplateE
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use biome_js_syntax::{JsArrowFunctionExpression, JsFileSource};
+    use biome_js_syntax::JsArrowFunctionExpression;
+    use biome_languages::JsFileSource;
 
     #[test]
     fn needs_parentheses() {

@@ -593,3 +593,26 @@ fn lex_block_scalar_mixed_indentation() {
         BLOCK_CONTENT_LITERAL:28,
     );
 }
+
+#[test]
+fn lex_mapping_with_tag_anchor_then_sequence() {
+    assert_lex!(
+        "foo: !!tag &anchor\n- 1",
+        MAPPING_START:0,
+        PLAIN_LITERAL:3,
+        COLON:1,
+        WHITESPACE:1,
+        TAG_PROPERTY_LITERAL:5,
+        WHITESPACE:1,
+        ANCHOR_PROPERTY_LITERAL:7,
+        NEWLINE:1,
+        SEQUENCE_START:0,
+        DASH:1,
+        WHITESPACE:1,
+        FLOW_START:0,
+        PLAIN_LITERAL:1,
+        FLOW_END:0,
+        SEQUENCE_END:0,
+        MAPPING_END:0,
+    )
+}

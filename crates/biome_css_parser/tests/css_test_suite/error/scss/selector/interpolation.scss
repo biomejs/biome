@@ -5,11 +5,3 @@
 .#{} {
   color: red;
 }
-
-:foo-#{$name} {
-  color: red;
-}
-
-::foo-#{$name} {
-  color: red;
-}

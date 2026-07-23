@@ -16,6 +16,32 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::HtmlSyntaxNode::kind(&node) {
+                $crate::HtmlSyntaxKind::ANGULAR_BINDING_NAME => {
+                    let $pattern = unsafe { $crate::AngularBindingName::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_EVENT_BINDING => {
+                    let $pattern = unsafe { $crate::AngularEventBinding::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_PROPERTY_BINDING => {
+                    let $pattern = unsafe { $crate::AngularPropertyBinding::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_STRUCTURAL_DIRECTIVE => {
+                    let $pattern =
+                        unsafe { $crate::AngularStructuralDirective::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_TEMPLATE_REF_VARIABLE => {
+                    let $pattern =
+                        unsafe { $crate::AngularTemplateRefVariable::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_TWO_WAY_BINDING => {
+                    let $pattern = unsafe { $crate::AngularTwoWayBinding::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::ASTRO_CLASS_DIRECTIVE => {
                     let $pattern = unsafe { $crate::AstroClassDirective::new_unchecked(node) };
                     $body
@@ -115,6 +141,11 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlOpeningElement::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::HTML_PROCESSING_INSTRUCTION => {
+                    let $pattern =
+                        unsafe { $crate::HtmlProcessingInstruction::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_ROOT => {
                     let $pattern = unsafe { $crate::HtmlRoot::new_unchecked(node) };
                     $body
@@ -181,6 +212,17 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::SVELTE_BIND_DIRECTIVE => {
                     let $pattern = unsafe { $crate::SvelteBindDirective::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_BIND_FUNCTION_BINDING_EXPRESSION => {
+                    let $pattern =
+                        unsafe { $crate::SvelteBindFunctionBindingExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE => {
+                    let $pattern = unsafe {
+                        $crate::SvelteBindFunctionBindingInitializerClause::new_unchecked(node)
+                    };
                     $body
                 }
                 $crate::HtmlSyntaxKind::SVELTE_CLASS_DIRECTIVE => {
@@ -292,6 +334,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::SvelteOutDirective::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::SVELTE_RENAME_BINDING => {
+                    let $pattern = unsafe { $crate::SvelteRenameBinding::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::SVELTE_RENDER_BLOCK => {
                     let $pattern = unsafe { $crate::SvelteRenderBlock::new_unchecked(node) };
                     $body
@@ -321,6 +367,16 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::SVELTE_STYLE_DIRECTIVE => {
                     let $pattern = unsafe { $crate::SvelteStyleDirective::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_TEMPLATE_ATTRIBUTE_VALUE => {
+                    let $pattern =
+                        unsafe { $crate::SvelteTemplateAttributeValue::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_TEMPLATE_CHUNK_ELEMENT => {
+                    let $pattern =
+                        unsafe { $crate::SvelteTemplateChunkElement::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::SVELTE_TRANSITION_DIRECTIVE => {
@@ -468,6 +524,11 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::SVELTE_ELSE_IF_CLAUSE_LIST => {
                     let $pattern = unsafe { $crate::SvelteElseIfClauseList::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_TEMPLATE_ELEMENT_LIST => {
+                    let $pattern =
+                        unsafe { $crate::SvelteTemplateElementList::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::VUE_MODIFIER_LIST => {

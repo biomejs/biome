@@ -13,7 +13,10 @@ impl FormatNodeRule<CssUrlValueRaw> for FormatCssUrlValueRaw {
             f,
             [format_replaced(
                 &value_token,
-                &text(token_text.trim(), value_token.text_trimmed_range().start())
+                &text(
+                    token_text.trim(),
+                    Some(value_token.text_trimmed_range().start())
+                )
             )]
         )
     }

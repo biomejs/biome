@@ -1,0 +1,25 @@
+/* should not generate diagnostics */
+
+let foo;
+
+// Decimal: minimumDigits: 7, so 5 and 6 digit numbers are fine
+foo = 12345;
+foo = 123456;
+
+// Hexadecimal: minimumDigits: 4, so 2 digit numbers are fine
+foo = 0xAB;
+foo = 0xA;
+
+// Binary: groupLength: 2, properly grouped
+foo = 0b11_00_11_00;
+
+// Octal: groupLength: 2, properly grouped
+foo = 0o12_34_56_70;
+
+// Decimal with 7+ digits, properly grouped
+foo = 1_234_567;
+foo = 12_345_678;
+
+// Hexadecimal with 4+ digits, properly grouped
+foo = 0xAB_CD;
+foo = 0xAB_CD_EF;

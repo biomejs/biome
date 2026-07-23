@@ -38,6 +38,8 @@ pub(crate) struct FormatHtmlElement {
     /// A `>` token borrowed from the previous sibling element's closing tag.
     /// This is printed at the start of this element's opening tag group.
     borrowed_sibling_r_angle: Option<HtmlSyntaxToken>,
+    /// Whether comments adjacent to this element are formatted by the containing child list.
+    comments_as_children: bool,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -46,6 +48,8 @@ pub(crate) struct FormatHtmlElementOptions {
     pub closing_r_angle_borrowed: bool,
     /// A `>` token borrowed from the previous sibling element's closing tag.
     pub borrowed_sibling_r_angle: Option<HtmlSyntaxToken>,
+    /// Whether comments adjacent to this element are formatted by the containing child list.
+    pub comments_as_children: bool,
 }
 
 impl FormatRuleWithOptions<HtmlElement> for FormatHtmlElement {
@@ -54,6 +58,7 @@ impl FormatRuleWithOptions<HtmlElement> for FormatHtmlElement {
     fn with_options(mut self, options: Self::Options) -> Self {
         self.closing_r_angle_borrowed = options.closing_r_angle_borrowed;
         self.borrowed_sibling_r_angle = options.borrowed_sibling_r_angle;
+        self.comments_as_children = options.comments_as_children;
         self
     }
 }
@@ -72,6 +77,11 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
     }
 
     fn fmt_leading_comments(&self, node: &HtmlElement, f: &mut HtmlFormatter) -> FormatResult<()> {
+        if self.comments_as_children {
+            // handled by element list formatter
+            return Ok(());
+        }
+
         // For block elements, use hard line break after leading comments even if
         // there's no newline in the source. This ensures proper formatting like:
         // <!-- comment -->
@@ -90,6 +100,11 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
     }
 
     fn fmt_trailing_comments(&self, node: &HtmlElement, f: &mut HtmlFormatter) -> FormatResult<()> {
+        if self.comments_as_children {
+            // handled by element list formatter
+            return Ok(());
+        }
+
         // If there is leading whitespace before a leading comment, we need to preserve it because it's probably indentation.
         // See prettier test case: crates/biome_html_formatter/tests/specs/prettier/html/comments/hidden.html
         // The current implementation for `biome_formatter::FormatTrailingComments` actually has a ton of js specific behavior that we don't want in the html formatter.

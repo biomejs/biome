@@ -1,0 +1,42 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/comments/declaration-boundary-comments.css
+---
+
+# Input
+
+```css
+a{padding /* name */ :1px;color:red!important /* important */ ;--token:/* empty */ ;}
+a{height/* tight */:2px;width: /* value */3px;border:red /* plain */ ;--custom /* custom */ :1px;}
+a{margin/* name */
+:1px;padding:
+/* value */2px;}
+@supports( display /* supports */ :flex){}
+
+```
+
+
+# Formatted
+
+```css
+a {
+	padding/* name */ : 1px;
+	color: red !important /* important */ ;
+	--token: /* empty */;
+}
+a {
+	height/* tight */: 2px;
+	width: /* value */ 3px;
+	border: red /* plain */;
+	--custom/* custom */: 1px;
+}
+a {
+	margin/* name */
+: 1px;
+	padding:
+/* value */ 2px;
+}
+@supports (display /* supports */: flex) {
+}
+
+```

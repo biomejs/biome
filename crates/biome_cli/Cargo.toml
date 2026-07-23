@@ -33,7 +33,6 @@ biome_fs                 = { workspace = true }
 biome_glob               = { workspace = true }
 biome_graphql_analyze    = { workspace = true }
 biome_graphql_syntax     = { workspace = true }
-biome_grit_patterns      = { workspace = true }
 biome_html_analyze       = { workspace = true }
 biome_html_formatter     = { workspace = true }
 biome_html_syntax        = { workspace = true }
@@ -45,18 +44,18 @@ biome_json_factory       = { workspace = true }
 biome_json_formatter     = { workspace = true }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
+biome_languages          = { workspace = true, features = ["lang_json"] }
 biome_lsp                = { workspace = true }
 biome_migrate            = { workspace = true }
 biome_package            = { workspace = true }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_rule_options       = { workspace = true }
-biome_service            = { workspace = true }
+biome_service            = { workspace = true, features = ["stable"] }
 biome_text_edit          = { workspace = true }
-bpaf                     = { workspace = true, features = ["bright-color"] }
+bpaf                     = { workspace = true, features = ["bright-color", "docgen"] }
 camino                   = { workspace = true }
 crossbeam                = { workspace = true }
-dashmap                  = { workspace = true }
 notify                   = { workspace = true }
 papaya                   = { workspace = true }
 path-absolutize          = { workspace = true }
@@ -70,16 +69,10 @@ serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true }
 smallvec                 = { workspace = true }
 terminal_size            = { workspace = true }
-tokio                    = { workspace = true, features = [
-  "io-std",
-  "io-util",
-  "macros",
-  "net",
-  "rt",
-  "rt-multi-thread",
-  "sync",
-  "time"
-] }
+tokio                    = {
+  workspace = true,
+  features  = ["io-std", "io-util", "macros", "net", "rt", "rt-multi-thread", "sync", "time"]
+}
 tracing                  = { workspace = true }
 tracing-appender         = "0.2.4"
 tracing-subscriber       = { workspace = true, features = ["env-filter", "json"] }
@@ -101,11 +94,11 @@ tokio                = { workspace = true, features = ["io-util"] }
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dependencies]
 tikv-jemallocator = { workspace = true }
 
-[target.'cfg(unix)'.dependencies]
+[target."cfg(unix)".dependencies]
 libc  = "0.2.184"
 tokio = { workspace = true, features = ["process"] }
 
-[target.'cfg(windows)'.dependencies]
+[target."cfg(windows)".dependencies]
 mimalloc = { workspace = true }
 
 [features]

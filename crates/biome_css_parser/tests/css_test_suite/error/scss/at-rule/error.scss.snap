@@ -54,7 +54,7 @@ CssRoot {
                         },
                     ],
                 },
-                semicolon_token: missing (required),
+                semicolon_token: missing (optional),
             },
         },
     ],

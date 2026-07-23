@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/multiline-scalar-in-mapping.yml
 ---
+
 # Input
 
 ```yml
@@ -19,16 +20,12 @@ d:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,4 +1,5 @@
+@@ -1,4 +1,4 @@
  a: b
 -  c
--d: e
--  f
 + c
-+d:
-+ e
-+  f
-\ No newline at end of file
+ d: e
+   f
 ```
 
 # Output
@@ -36,6 +33,6 @@ d:
 ```yml
 a: b
  c
-d:
- e
-  f```
+d: e
+  f
+```
