@@ -1,5 +1,6 @@
+use crate::comments::preserved_lines_before;
 use crate::prelude::*;
-use biome_formatter::trivia::format_dangling_comments;
+use biome_formatter::trivia::format_dangling_comment;
 use biome_formatter::write;
 use biome_rowan::AstNode;
 use biome_yaml_syntax::{YamlDocument, YamlDocumentFields};
@@ -32,28 +33,43 @@ impl FormatNodeRule<YamlDocument> for FormatYamlDocument {
         // Dangling comments sit between the `---` marker and the content, or
         // in a document without content. A first comment on the same line as
         // the marker stays there; being line comments, all the following ones
-        // necessarily go on their own line.
-        let first_comment_lines_before = f
-            .comments()
-            .dangling_comments(node.syntax())
-            .first()
-            .map(|comment| comment.lines_before());
-        if let Some(lines_before) = first_comment_lines_before {
-            if lines_before == 0 {
+        // necessarily go on their own line, keeping the blank lines that
+        // separate them.
+        //
+        // Cheap clone of an `Rc`, releasing the borrow on the formatter so
+        // the comments can be written while iterating over them
+        let comments = f.comments().clone();
+        if let Some((first, rest)) = comments.dangling_comments(node.syntax()).split_first() {
+            if first.lines_before() == 0 {
                 write!(f, [space()])?;
             } else {
                 write!(f, [hard_line_break()])?;
             }
-            write!(f, [format_dangling_comments(node.syntax())])?;
+            write!(f, [format_dangling_comment(first)])?;
+
+            for comment in rest {
+                if comment.lines_before() > 1 {
+                    write!(f, [empty_line()])?;
+                } else {
+                    write!(f, [hard_line_break()])?;
+                }
+                write!(f, [format_dangling_comment(comment)])?;
+            }
         }
 
         if let Some(document_node) = &document_node {
             if dashdashdash_token.is_some() {
                 // A node with tag or anchor properties stays on the `---`
-                // line if it started there, as Prettier does. A node without
-                // properties always goes on its own line
+                // line if it started there; a node without properties always
+                // goes on its own line
                 if document_node.has_properties() && get_lines_before(document_node.syntax()) == 0 {
                     write!(f, [space()])?;
+                } else if comments.has_dangling_comments(node.syntax())
+                    && preserved_lines_before(&comments, document_node.syntax()) > 1
+                {
+                    // A blank line separating the content from the comments
+                    // above it is kept
+                    write!(f, [empty_line()])?;
                 } else {
                     write!(f, [hard_line_break()])?;
                 }
@@ -77,8 +93,9 @@ impl FormatNodeRule<YamlDocument> for FormatYamlDocument {
         // content
         // ```
         //
-        // They are printed inside `fmt_fields` next to the marker; the
-        // default implementation would print them again after the content
+        // They are printed with `format_dangling_comment`, one at a time,
+        // by `fmt_fields` next to the marker; the default implementation
+        // would print them again after the content
         Ok(())
     }
 }

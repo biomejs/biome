@@ -4,13 +4,13 @@ use biome_formatter::comments::{
     SourceComment,
 };
 use biome_formatter::formatter::Formatter;
-use biome_formatter::{FormatResult, FormatRule, write};
+use biome_formatter::{FormatRefWithRule, FormatResult, FormatRule, write};
 use biome_rowan::AstNode;
 use biome_rowan::{SyntaxTriviaPieceComments, TextSize};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
 use biome_yaml_syntax::{
     YamlDocument, YamlFlowMapExplicitEntry, YamlFoldedScalar, YamlLanguage, YamlLiteralScalar,
-    YamlRoot,
+    YamlRoot, YamlSyntaxKind, YamlSyntaxNode, YamlSyntaxToken,
 };
 
 use crate::prelude::*;
@@ -74,7 +74,236 @@ impl CommentStyle for YamlCommentStyle {
             .or_else(handle_document_comment)
             .or_else(handle_flow_map_explicit_entry_comment)
             .or_else(handle_block_scalar_comment)
+            .or_else(handle_own_line_comment)
             .or_else(handle_end_of_line_comment)
+    }
+}
+
+/// Handles a comment on its own line that is indented deeper than the line
+/// following it. Such a comment belongs to the structure it is indented
+/// under, not to the node after it:
+///
+/// ```yaml
+/// parent:
+///   one: 1
+///   # comment
+/// next: 2
+/// ```
+///
+/// The comment attaches to the deepest entry that precedes it without being
+/// indented deeper than the comment itself: as a trailing comment when the
+/// two are equally indented (the comment reads as a sibling of the entry),
+/// and otherwise as a dangling comment, which the entry prints one level
+/// deeper, in its value slot:
+///
+/// ```yaml
+/// key:
+///   # comment
+/// ```
+fn handle_own_line_comment(
+    comment: DecoratedComment<YamlLanguage>,
+) -> CommentPlacement<YamlLanguage> {
+    if comment.text_position() != CommentTextPosition::OwnLine
+        || YamlCommentStyle::is_suppression(comment.piece().text())
+    {
+        return CommentPlacement::Default(comment);
+    }
+    let Some(preceding) = comment.preceding_node() else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let token = comment.piece().as_piece().token();
+    let comment_start = comment.piece().text_range().start();
+    let mut comment_column = source_column(&token, comment_start);
+
+    // The comments above this one in the same uninterrupted block of
+    // comment lines cap how deep it can attach, so the block is never torn
+    // apart and printed in a different order:
+    //
+    // ```yaml
+    // a:
+    //   b:
+    //  #a
+    //   #still a, not b
+    // ```
+    let mut line_column = None;
+    for piece in token.leading_trivia().pieces() {
+        if piece.text_range().start() >= comment_start {
+            break;
+        }
+        if piece.is_newline() {
+            line_column = Some(0);
+        } else if piece.is_whitespace() {
+            if let Some(column) = &mut line_column {
+                *column += piece.text().len();
+            }
+        } else if piece.is_comments() {
+            if let Some(column) = line_column {
+                comment_column = comment_column.min(column);
+            }
+            line_column = None;
+        }
+    }
+
+    // A comment that isn't indented deeper than the node following it leads
+    // that node
+    if let Some(following) = comment.following_node() {
+        let following_column = following
+            .first_token()
+            .map(|token| source_column(&token, token.text_trimmed_range().start()));
+        if following_column.is_none_or(|column| comment_column <= column) {
+            return CommentPlacement::Default(comment);
+        }
+    }
+
+    // The entries the comment can attach to sit along the last-child chain
+    // of the preceding node, each one nested and indented deeper than the
+    // one before
+    let mut best = None;
+    let mut current = Some(preceding.clone());
+    while let Some(node) = current {
+        if matches!(
+            node.kind(),
+            YamlSyntaxKind::YAML_BLOCK_MAP_IMPLICIT_ENTRY
+                | YamlSyntaxKind::YAML_BLOCK_SEQUENCE_ENTRY
+        ) && let Some(token) = node.first_token()
+        {
+            let column = source_column(&token, token.text_trimmed_range().start());
+            if column <= comment_column {
+                best = Some((node.clone(), column));
+            }
+        }
+        current = node.children().last();
+    }
+
+    match best {
+        Some((entry, column)) if column < comment_column => {
+            CommentPlacement::dangling(entry, comment)
+        }
+        Some((entry, _)) => CommentPlacement::trailing(entry, comment),
+        None => CommentPlacement::Default(comment),
+    }
+}
+
+/// The column at which the text at `offset` starts in the source, computed
+/// by walking backward to the closest line break. `offset` must lie within
+/// the span of `token`, trivia included
+fn source_column(token: &YamlSyntaxToken, offset: TextSize) -> usize {
+    /// Adds the width of a segment preceding the offset to the column;
+    /// `true` when the segment contains the line break the column counts
+    /// from, which ends the walk
+    fn measure(text: &str, column: &mut usize) -> bool {
+        match text.rfind(['\n', '\r']) {
+            Some(index) => {
+                *column += text.len() - index - 1;
+                true
+            }
+            None => {
+                *column += text.len();
+                false
+            }
+        }
+    }
+
+    let mut column = 0;
+    let mut current = Some(token.clone());
+    while let Some(token) = current {
+        let leading: Vec<_> = token.leading_trivia().pieces().collect();
+        let trailing: Vec<_> = token.trailing_trivia().pieces().collect();
+
+        for piece in trailing.iter().rev() {
+            if piece.text_range().end() <= offset && measure(piece.text(), &mut column) {
+                return column;
+            }
+        }
+        if token.text_trimmed_range().end() <= offset && measure(token.text_trimmed(), &mut column)
+        {
+            return column;
+        }
+        for piece in leading.iter().rev() {
+            if piece.text_range().end() <= offset && measure(piece.text(), &mut column) {
+                return column;
+            }
+        }
+
+        current = token.prev_token();
+    }
+    column
+}
+
+/// The number of line breaks to keep in front of `node`. The leading
+/// comments of the node keep the blank lines above them themselves, so the
+/// count stops at the first one; but a comment that attached elsewhere
+/// prints on the other side of the separation, so what matters then is the
+/// blank line count after it
+pub(crate) fn preserved_lines_before(comments: &YamlComments, node: &YamlSyntaxNode) -> usize {
+    if comments.has_leading_comments(node) {
+        return get_lines_before(node);
+    }
+
+    node.first_token().map_or(0, |token| {
+        token
+            .leading_trivia()
+            .pieces()
+            .rev()
+            .take_while(|piece| !piece.is_comments() && !piece.is_skipped())
+            .filter(|piece| piece.is_newline())
+            .count()
+    })
+}
+
+/// Formats the dangling comments of a block collection entry: the comments
+/// sitting in the entry's value slot, indented deeper than the entry itself.
+/// They are printed on their own lines one level deeper than the entry,
+/// keeping any blank line that separates them from the content before them:
+///
+/// ```yaml
+/// key:
+///   # comment
+/// ```
+pub(crate) struct FormatEntryDanglingComments<'a> {
+    node: &'a YamlSyntaxNode,
+}
+
+impl<'a> FormatEntryDanglingComments<'a> {
+    pub(crate) fn new(node: &'a YamlSyntaxNode) -> Self {
+        Self { node }
+    }
+}
+
+impl Format<YamlFormatContext> for FormatEntryDanglingComments<'_> {
+    fn fmt(&self, f: &mut Formatter<YamlFormatContext>) -> FormatResult<()> {
+        // Cheap clone of an `Rc`, releasing the borrow on the formatter so
+        // the comments can be written while iterating over them
+        let comments = f.comments().clone();
+        let dangling = comments.dangling_comments(self.node);
+        if dangling.is_empty() {
+            return Ok(());
+        }
+
+        let content = format_with(|f| {
+            for comment in dangling {
+                // A comment on the entry's own line stays there, right
+                // after the colon or dash
+                if comment.lines_before() == 0 {
+                    write!(f, [space()])?;
+                } else if comment.lines_before() > 1 {
+                    write!(f, [empty_line()])?;
+                } else {
+                    write!(f, [hard_line_break()])?;
+                }
+                write!(
+                    f,
+                    [FormatRefWithRule::new(
+                        comment,
+                        FormatYamlLeadingComment::default()
+                    )]
+                )?;
+                comment.mark_formatted();
+            }
+            Ok(())
+        });
+        write!(f, [indent(&content)])
     }
 }
 
@@ -176,6 +405,23 @@ fn handle_end_of_line_comment(
     }
 
     if let Some(preceding_node) = comment.preceding_node() {
+        // A comment on the line of an entry that ends without a value sits
+        // in the entry's value slot. As a dangling comment the entry prints
+        // it right after the colon, ahead of any value-slot comments on the
+        // following lines; a trailing comment would be deferred past them:
+        //
+        // ```yaml
+        // key: # comment
+        //   # value-slot comment
+        // ```
+        if matches!(
+            preceding_node.kind(),
+            YamlSyntaxKind::YAML_BLOCK_MAP_IMPLICIT_ENTRY
+                | YamlSyntaxKind::YAML_BLOCK_SEQUENCE_ENTRY
+        ) {
+            return CommentPlacement::dangling(preceding_node.clone(), comment);
+        }
+
         return CommentPlacement::trailing(preceding_node.clone(), comment);
     }
 
