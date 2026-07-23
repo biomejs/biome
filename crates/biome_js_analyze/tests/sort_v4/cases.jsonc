@@ -35,11 +35,12 @@
 	"font-medium font-sans p-4",
 
 	// w basename — Named(Spacing) for `--spacing-*` keys,
-	// NamedTyped(Number) for bare integers, NamedTyped(Ratio) for fractions.
+	// NamedTyped(Number) for bare integers, NamedTyped(Ratio) for fractions,
+	// and whole-name static registrations for the named values.
 	"w-10 flex p-4",         // NamedTyped(Number)
 	"w-1/2 flex p-4",        // NamedTyped(Ratio)
-	"w-full flex p-4",       // `full` is no `--spacing-*` key in the default theme → Unknown
-	"w-screen w-10 w-full",  // full/screen aren't --spacing-* keys → Unknown floats front
+	"w-full flex p-4",       // `w-full` is a static registration for the whole name
+	"w-screen w-10 w-full",  // statics join the width bucket and order by name
 
 	// aspect basename — NamedKeyword pool (auto/square),
 	// Named(Aspect) (theme keys like `video`), NamedTyped(Ratio).
@@ -65,6 +66,37 @@
 	// Tailwind registers a negative form (`has_negative`), falling back
 	// to Unknown otherwise.
 	"flex p-4 -flex",            // -flex: has_negative is false → Unknown
+
+	// ─── statics that parse as functional candidates ───────────────
+	// The grammar splits any dashed name into base and value, but
+	// Tailwind registers many such names as static utilities; the whole
+	// name resolves through the static table before functional roots and
+	// orders by name inside its property bucket. Expected order
+	// cross-checked against prettier-plugin-tailwindcss 0.8.0.
+
+	"w-px w-full w-screen w-10 w-4 w-auto",         // statics interleave with functional widths by name
+	"m-auto m-4 m-px m-2",                          // margin family
+	"h-full h-4 h-screen",                          // height family
+	"flex-none flex-1 flex-auto",                   // statics + functional flex
+	"justify-center items-center flex",             // pure-static families keep bucket order
+	"table-caption inline-block flow-root block",   // display statics, none with a functional base
+	"inline-flex inline-grid inline-table inline",  // shared prefix, bare name first
+	"truncate text-clip text-ellipsis",             // truncate's own bucket precedes text-overflow
+	"col-span-full col-span-2 col-auto",            // static, functional, and keyword forms in one bucket
+	"grid-cols-subgrid grid-cols-2",                // keyword branch and functional value order by name
+	"order-none order-first order-2 order-1 order-last", // digits precede letters
+	"overflow-x-hidden overflow-hidden overflow-auto",   // overflow buckets, then name
+	"aspect-video aspect-square aspect-auto aspect-9/16", // theme, keyword, and ratio forms in one bucket
+	"-m-px m-px -m-4 m-4",   // negative statics carry the sign in the name
+	"-w-full flex",          // Tailwind registers no -w-full → Unknown floats front
+	"w-full! w-full w-10",   // important static twin sorts plain-first
+	"w-full/50 w-full w-10", // statics take no modifier → w-full/50 is Unknown
+
+	// Divergence from prettier-plugin-tailwindcss 0.8.0: the plugin
+	// emits `size-*` before `h-*` (its size bucket sorts by the first
+	// declaration, height), while the preset records width as the sort
+	// property for `size`. Same-bucket name order is otherwise exact.
+	"size-full size-4 w-4 h-4",
 
 	// ─── unknown classes ───────────────────────────────────────────
 	// Tokens that resolve to no branch float to the front and keep

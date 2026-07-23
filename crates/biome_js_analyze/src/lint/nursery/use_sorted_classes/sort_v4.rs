@@ -11,7 +11,7 @@ use super::tailwind_preset_v4::{
     FUNCTIONAL_UTILITIES, KEYWORD_POOL, PROPERTY_INDEX, STATIC_UTILITIES,
 };
 use super::tailwind_preset_v4_types::{
-    ArbitraryBranch, NamedBranch, NamedValueType, Negative,
+    ArbitraryBranch, NamedBranch, NamedValueType, Negative, UtilityEntry,
 };
 use super::arbitrary_value_match::value_matches_type;
 
@@ -157,34 +157,49 @@ impl SortKey {
                 let Ok(base) = f.base_token() else {
                     return Self::Unknown;
                 };
-                let Some(entry) = FUNCTIONAL_UTILITIES.get(base.text_trimmed()) else {
-                    return Self::Unknown;
-                };
-
-                let (named_branches, arbitrary_branches) = if is_negative {
-                    match entry.negative {
-                        None => return Self::Unknown,
-                        Some(Negative::SameBranches) => {
-                            (entry.named_branches, entry.arbitrary_branches)
-                        }
-                        Some(Negative::Distinct {
-                            named_branches,
-                            arbitrary_branches,
-                        }) => (named_branches, arbitrary_branches),
-                    }
-                } else {
-                    (entry.named_branches, entry.arbitrary_branches)
-                };
 
                 let Ok(value) = f.value() else {
                     return Self::Unknown;
                 };
 
-                if let AnyTwValue::TwArbitraryValue(arb) = &value {
-                    resolve_arbitrary_branch(arbitrary_branches, &arb.value())
+                // Tailwind resolves a candidate's full name as a static
+                // utility before trying functional roots: `w-full`,
+                // `m-auto`, and `justify-center` are static
+                // registrations even though the grammar splits them
+                // into base and value. Statics take no modifier, so a
+                // modifier skips the lookup.
+                if f.modifier().is_none()
+                    && let Some(text) = named_text(&value)
+                    && let Some(entry) = joined_static_entry(base.text_trimmed(), text.text())
+                    && (!is_negative || entry.has_negative)
+                {
+                    Some((entry.property_idx, entry.property_count))
                 } else {
-                    let modifier = f.modifier();
-                    resolve_named_branch(named_branches, &value, modifier.as_ref())
+                    let Some(entry) = FUNCTIONAL_UTILITIES.get(base.text_trimmed()) else {
+                        return Self::Unknown;
+                    };
+
+                    let (named_branches, arbitrary_branches) = if is_negative {
+                        match entry.negative {
+                            None => return Self::Unknown,
+                            Some(Negative::SameBranches) => {
+                                (entry.named_branches, entry.arbitrary_branches)
+                            }
+                            Some(Negative::Distinct {
+                                named_branches,
+                                arbitrary_branches,
+                            }) => (named_branches, arbitrary_branches),
+                        }
+                    } else {
+                        (entry.named_branches, entry.arbitrary_branches)
+                    };
+
+                    if let AnyTwValue::TwArbitraryValue(arb) = &value {
+                        resolve_arbitrary_branch(arbitrary_branches, &arb.value())
+                    } else {
+                        let modifier = f.modifier();
+                        resolve_named_branch(named_branches, &value, modifier.as_ref())
+                    }
                 }
             }
         };
@@ -302,6 +317,24 @@ fn named_value_type_matches(
             )
             | (NamedValueType::Ratio, AnyTwValue::TwNumberValue(_), true)
     )
+}
+
+/// Look up `base-value` in `STATIC_UTILITIES` without allocating,
+/// reassembling the name in a stack buffer sized for the longest static
+/// utility name (`font-stretch-ultra-condensed`, 28 bytes).
+fn joined_static_entry(base: &str, value: &str) -> Option<&'static UtilityEntry> {
+    const LONGEST_STATIC_NAME: usize = 32;
+    let len = base.len() + 1 + value.len();
+    if len > LONGEST_STATIC_NAME {
+        return None;
+    }
+    let mut buf = [0u8; LONGEST_STATIC_NAME];
+    buf[..base.len()].copy_from_slice(base.as_bytes());
+    buf[base.len()] = b'-';
+    buf[base.len() + 1..len].copy_from_slice(value.as_bytes());
+    // Joining two `str`s with an ASCII byte always forms valid UTF-8.
+    let name = str::from_utf8(&buf[..len]).ok()?;
+    STATIC_UTILITIES.get(name)
 }
 
 /// Walk a basename's named branch list and return the first matching
@@ -732,6 +765,42 @@ mod tests {
     fn important_with_variants_is_still_unknown() {
         // Variant weight is the remaining TODO; `!` must not bypass it.
         assert_eq!(classify("hover:flex!"), SortKey::Unknown);
+    }
+
+    #[test]
+    fn functional_shaped_static_names_resolve_through_the_static_table() {
+        // `w-full` parses as functional `w` + `full`; the whole name is
+        // a static registration, and the join must land in the same
+        // width bucket as functional `w` candidates.
+        let SortKey::Known { property_idx, .. } = classify("w-full") else {
+            panic!("expected `w-full` to classify as known");
+        };
+        let SortKey::Known {
+            property_idx: functional_idx,
+            ..
+        } = classify("w-10")
+        else {
+            panic!("expected `w-10` to classify as known");
+        };
+        assert_eq!(property_idx, functional_idx);
+        // Static names whose parsed base is no functional utility at
+        // all resolve too.
+        assert!(matches!(classify("justify-center"), SortKey::Known { .. }));
+        assert!(matches!(classify("inline-block"), SortKey::Known { .. }));
+    }
+
+    #[test]
+    fn joined_static_negatives_require_a_registered_negative_form() {
+        // Tailwind registers `-m-px` but no `-w-full`.
+        assert!(matches!(classify("-m-px"), SortKey::Known { .. }));
+        assert_eq!(classify("-w-full"), SortKey::Unknown);
+    }
+
+    #[test]
+    fn joined_static_lookup_skips_modified_candidates() {
+        // Statics take no modifier; `w-full/50` is not a valid
+        // candidate and resolves through no branch either.
+        assert_eq!(classify("w-full/50"), SortKey::Unknown);
     }
 
     #[test]
