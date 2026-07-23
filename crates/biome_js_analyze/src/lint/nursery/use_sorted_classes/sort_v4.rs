@@ -1,6 +1,7 @@
 use std::cmp::Ordering;
 
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxNodeText, TokenText};
+use biome_string_case::Collator;
 use biome_tailwind_syntax::{
     AnyTwCandidate, AnyTwFullCandidate, AnyTwModifier, AnyTwValue, CssGenericComponentValueList,
     TwRoot,
@@ -60,29 +61,29 @@ enum SortKey {
 }
 
 /// The value and modifier text of a candidate — `red-500` + `50` for
-/// `bg-red-500/50`, `[13px]` + `` for `w-[13px]`, `1` + `2` for the
-/// fraction `w-1/2`. Candidates with an identical
-/// (property, registration) placement order by natural comparison of
-/// these texts, mirroring how Tailwind orders same-utility candidates
-/// in generated CSS.
+/// `bg-red-500/50`, `[13px]` + nothing for `w-[13px]`, `1` + `2` for the
+/// fraction `w-1/2` — held as allocation-free views into the syntax
+/// tree. Candidates with an identical (property, registration) placement
+/// order by natural comparison of these texts, mirroring how Tailwind
+/// orders same-utility candidates in generated CSS.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 struct ValueKey {
-    value: String,
-    modifier: String,
+    value: Option<SyntaxNodeText>,
+    modifier: Option<SyntaxNodeText>,
 }
 
 impl ValueKey {
     fn from_candidate(candidate: &AnyTwCandidate) -> Self {
         match candidate {
             AnyTwCandidate::TwArbitraryCandidate(arbitrary) => Self {
-                value: arbitrary.value().syntax().text_trimmed().to_string(),
+                value: Some(arbitrary.value().syntax().text_trimmed()),
                 modifier: modifier_text(arbitrary.modifier().as_ref()),
             },
             AnyTwCandidate::TwFunctionalCandidate(functional) => Self {
                 value: functional
                     .value()
-                    .map(|value| value.syntax().text_trimmed().to_string())
-                    .unwrap_or_default(),
+                    .ok()
+                    .map(|value| value.syntax().text_trimmed()),
                 modifier: modifier_text(functional.modifier().as_ref()),
             },
             // Static candidates have no value; ties between distinct
@@ -94,72 +95,50 @@ impl ValueKey {
     }
 
     fn compare(&self, other: &Self) -> Ordering {
-        natural_cmp(&self.value, &other.value)
-            .then_with(|| natural_cmp(&self.modifier, &other.modifier))
+        natural_cmp(self.value.as_ref(), other.value.as_ref())
+            .then_with(|| natural_cmp(self.modifier.as_ref(), other.modifier.as_ref()))
     }
 }
 
-fn modifier_text(modifier: Option<&AnyTwModifier>) -> String {
+fn modifier_text(modifier: Option<&AnyTwModifier>) -> Option<SyntaxNodeText> {
     match modifier {
         Some(AnyTwModifier::TwModifier(modifier)) => modifier
             .value()
-            .map(|value| value.syntax().text_trimmed().to_string())
-            .unwrap_or_default(),
-        Some(AnyTwModifier::TwBogusModifier(bogus)) => bogus.syntax().text_trimmed().to_string(),
-        None => String::new(),
+            .ok()
+            .map(|value| value.syntax().text_trimmed()),
+        Some(AnyTwModifier::TwBogusModifier(bogus)) => Some(bogus.syntax().text_trimmed()),
+        None => None,
     }
 }
 
-/// Byte-wise comparison with numeric digit runs: when both strings hold
-/// a digit at the first point of divergence, the full runs containing
-/// them compare as integers (`75` < `700`, `red-50` < `red-100`);
-/// everywhere else plain byte order applies, which places digits before
-/// `[` and `[` before letters (`4` < `[1px]` < `auto`) — matching the
-/// order Tailwind emits same-utility candidates in.
-fn natural_cmp(a: &str, b: &str) -> Ordering {
-    let (a, b) = (a.as_bytes(), b.as_bytes());
-    let (mut i, mut j) = (0, 0);
-    while let (Some(&byte_a), Some(&byte_b)) = (a.get(i), b.get(j)) {
-        if byte_a.is_ascii_digit() && byte_b.is_ascii_digit() {
-            let (run_a, next_i) = digit_run(a, i);
-            let (run_b, next_j) = digit_run(b, j);
-            match compare_digit_runs(run_a, run_b) {
-                Ordering::Equal => (i, j) = (next_i, next_j),
-                ordering => return ordering,
-            }
-        } else if byte_a == byte_b {
-            i += 1;
-            j += 1;
-        } else {
-            return byte_a.cmp(&byte_b);
-        }
+/// Orders candidate value text the way Tailwind's own `compare()` does:
+/// plain code-point order, except that digit sequences compare as
+/// integers (`75` < `700`, `red-50` < `red-100`). Code-point order
+/// places digits before `[` and `[` before letters
+/// (`4` < `[1px]` < `auto`), matching the order Tailwind emits
+/// same-utility candidates in — which is why this does not reuse
+/// [biome_string_case::CldrAsciiCollator]: CLDR collation places
+/// punctuation before digits and interleaves letter case.
+struct TwValueCollator;
+
+impl Collator for TwValueCollator {
+    type Char = char;
+
+    fn weight(&self, c: &char) -> impl Ord {
+        *c
     }
-    // One string is a prefix of the other; the shorter sorts first
-    // (`in` < `in-out`, and a bare value precedes any longer one).
-    (a.len() - i).cmp(&(b.len() - j))
-}
 
-/// The maximal ASCII digit run starting at `start`, and the index just
-/// past it.
-fn digit_run(bytes: &[u8], start: usize) -> (&[u8], usize) {
-    let mut end = start;
-    while bytes.get(end).is_some_and(|byte| byte.is_ascii_digit()) {
-        end += 1;
+    fn as_digit(&self, c: &char) -> Option<impl Ord> {
+        c.is_ascii_digit().then_some(*c)
     }
-    (&bytes[start..end], end)
 }
 
-/// Compare digit runs as integers without parsing: strip leading zeros,
-/// then longer runs are larger, then byte order decides.
-fn compare_digit_runs(a: &[u8], b: &[u8]) -> Ordering {
-    let a = trim_leading_zeros(a);
-    let b = trim_leading_zeros(b);
-    a.len().cmp(&b.len()).then_with(|| a.cmp(b))
-}
-
-fn trim_leading_zeros(run: &[u8]) -> &[u8] {
-    let first_nonzero = run.iter().position(|&byte| byte != b'0').unwrap_or(run.len());
-    &run[first_nonzero..]
+/// Natural comparison of two optional text views without materializing
+/// either side; a missing text compares as empty, so a bare value
+/// precedes any longer one (`in` < `in-out`).
+fn natural_cmp(a: Option<&SyntaxNodeText>, b: Option<&SyntaxNodeText>) -> Ordering {
+    let chars = |text: Option<&SyntaxNodeText>| text.map(|text| text.chars()).into_iter().flatten();
+    TwValueCollator.cmp(chars(a), chars(b))
 }
 
 impl SortKey {
@@ -507,11 +486,20 @@ mod tests {
         }
     }
 
-    fn value_key(value: &str, modifier: &str) -> ValueKey {
-        ValueKey {
-            value: value.to_string(),
-            modifier: modifier.to_string(),
-        }
+    /// The value and modifier text of a known key, materialized for
+    /// assertion messages; a missing text reads as empty.
+    fn value_texts(key: &SortKey) -> (String, String) {
+        let SortKey::Known { value, .. } = key else {
+            panic!("expected a known key");
+        };
+        let text = |text: Option<&SyntaxNodeText>| {
+            text.map(ToString::to_string).unwrap_or_default()
+        };
+        (text(value.value.as_ref()), text(value.modifier.as_ref()))
+    }
+
+    fn nat_cmp(a: &str, b: &str) -> Ordering {
+        TwValueCollator.cmp(a.chars(), b.chars())
     }
 
     fn classify(input: &str) -> SortKey {
@@ -593,34 +581,17 @@ mod tests {
     fn compare_breaks_registration_tie_by_value_before_importance() {
         // `p-2! p-4`: the value decides, the important suffix does not
         // pull `p-4` ahead of `p-2!`.
-        let important_two = SortKey::Known {
-            property_idx: 5,
-            property_count: 1,
-            registration_idx: 0,
-            value: value_key("2", ""),
-            important: true,
-        };
-        let plain_four = SortKey::Known {
-            property_idx: 5,
-            property_count: 1,
-            registration_idx: 0,
-            value: value_key("4", ""),
-            important: false,
-        };
+        let important_two = classify("p-2!");
+        let plain_four = classify("p-4");
         assert_eq!(compare(&important_two, &plain_four), Ordering::Less);
     }
 
     #[test]
     fn compare_breaks_value_tie_by_modifier() {
-        let base = |modifier: &str| SortKey::Known {
-            property_idx: 5,
-            property_count: 1,
-            registration_idx: 0,
-            value: value_key("red-500", modifier),
-            important: false,
-        };
-        assert_eq!(compare(&base("25"), &base("50")), Ordering::Less);
-        assert_eq!(compare(&base("50"), &base("50")), Ordering::Equal);
+        let twenty_five = classify("bg-red-500/25");
+        let fifty = classify("bg-red-500/50");
+        assert_eq!(compare(&twenty_five, &fifty), Ordering::Less);
+        assert_eq!(compare(&fifty, &fifty), Ordering::Equal);
     }
 
     // endregion: compare
@@ -628,30 +599,30 @@ mod tests {
     // region: natural comparison
 
     #[test]
-    fn natural_cmp_compares_digit_runs_numerically() {
-        assert_eq!(natural_cmp("2", "10"), Ordering::Less);
-        assert_eq!(natural_cmp("red-50", "red-100"), Ordering::Less);
-        // The run is compared from its start, not from the point of
-        // divergence: `75` < `700` even though `5` > `0`.
-        assert_eq!(natural_cmp("75", "700"), Ordering::Less);
-        assert_eq!(natural_cmp("[2px]", "[10rem]"), Ordering::Less);
+    fn collator_compares_digit_sequences_numerically() {
+        assert_eq!(nat_cmp("2", "10"), Ordering::Less);
+        assert_eq!(nat_cmp("red-50", "red-100"), Ordering::Less);
+        // The digit sequence is compared as a whole number, not from the
+        // point of divergence: `75` < `700` even though `5` > `0`.
+        assert_eq!(nat_cmp("75", "700"), Ordering::Less);
+        assert_eq!(nat_cmp("[2px]", "[10rem]"), Ordering::Less);
     }
 
     #[test]
-    fn natural_cmp_uses_byte_order_outside_digit_runs() {
+    fn collator_uses_code_point_order_outside_digit_sequences() {
         // Digits precede `[`, and `[` precedes letters.
-        assert_eq!(natural_cmp("4", "[1px]"), Ordering::Less);
-        assert_eq!(natural_cmp("[13px]", "auto"), Ordering::Less);
-        assert_eq!(natural_cmp("2xl", "base"), Ordering::Less);
-        assert_eq!(natural_cmp("bold", "light"), Ordering::Less);
+        assert_eq!(nat_cmp("4", "[1px]"), Ordering::Less);
+        assert_eq!(nat_cmp("[13px]", "auto"), Ordering::Less);
+        assert_eq!(nat_cmp("2xl", "base"), Ordering::Less);
+        assert_eq!(nat_cmp("bold", "light"), Ordering::Less);
     }
 
     #[test]
-    fn natural_cmp_puts_prefixes_first() {
-        assert_eq!(natural_cmp("", "sm"), Ordering::Less);
-        assert_eq!(natural_cmp("in", "in-out"), Ordering::Less);
-        assert_eq!(natural_cmp("1", "1.5"), Ordering::Less);
-        assert_eq!(natural_cmp("sm", "sm"), Ordering::Equal);
+    fn collator_puts_prefixes_first() {
+        assert_eq!(nat_cmp("", "sm"), Ordering::Less);
+        assert_eq!(nat_cmp("in", "in-out"), Ordering::Less);
+        assert_eq!(nat_cmp("1", "1.5"), Ordering::Less);
+        assert_eq!(nat_cmp("sm", "sm"), Ordering::Equal);
     }
 
     // endregion: natural comparison
@@ -793,16 +764,21 @@ mod tests {
         let parsed = parse_tailwind("[display:block]");
         let full = parsed.tree().candidates().iter().next().unwrap();
         let display_idx = *PROPERTY_INDEX.get("display").unwrap();
-        assert_eq!(
-            SortKey::from_candidate(&full),
-            SortKey::Known {
-                property_idx: display_idx,
-                property_count: 1,
-                registration_idx: 0,
-                value: value_key("block", ""),
-                important: false,
-            }
-        );
+        let key = SortKey::from_candidate(&full);
+        let SortKey::Known {
+            property_idx,
+            property_count,
+            registration_idx,
+            important: false,
+            ..
+        } = &key
+        else {
+            panic!("expected a plain known key");
+        };
+        assert_eq!(*property_idx, display_idx);
+        assert_eq!(*property_count, 1);
+        assert_eq!(*registration_idx, 0);
+        assert_eq!(value_texts(&key), ("block".to_string(), String::new()));
     }
 
     #[test]
@@ -855,20 +831,18 @@ mod tests {
 
     #[test]
     fn classification_captures_value_and_modifier_text() {
-        let value_of = |input: &str| match classify(input) {
-            SortKey::Known { value, .. } => value,
-            SortKey::Unknown => panic!("expected `{input}` to classify as known"),
-        };
-        assert_eq!(value_of("p-4"), value_key("4", ""));
+        let texts_of = |input: &str| value_texts(&classify(input));
+        let pair = |value: &str, modifier: &str| (value.to_string(), modifier.to_string());
+        assert_eq!(texts_of("p-4"), pair("4", ""));
         // The parser splits a fraction into value and modifier.
-        assert_eq!(value_of("w-1/2"), value_key("1", "2"));
-        assert_eq!(value_of("bg-red-500/50"), value_key("red-500", "50"));
+        assert_eq!(texts_of("w-1/2"), pair("1", "2"));
+        assert_eq!(texts_of("bg-red-500/50"), pair("red-500", "50"));
         // Arbitrary values keep their brackets; arbitrary properties
         // contribute their value text.
-        assert_eq!(value_of("w-[13px]"), value_key("[13px]", ""));
-        assert_eq!(value_of("[color:red]/50"), value_key("red", "50"));
+        assert_eq!(texts_of("w-[13px]"), pair("[13px]", ""));
+        assert_eq!(texts_of("[color:red]/50"), pair("red", "50"));
         // Static utilities have no value.
-        assert_eq!(value_of("flex"), ValueKey::default());
+        assert_eq!(texts_of("flex"), pair("", ""));
     }
 
     // endregion: sort key classification
