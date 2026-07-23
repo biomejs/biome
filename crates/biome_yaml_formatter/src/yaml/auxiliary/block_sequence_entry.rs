@@ -11,7 +11,18 @@ impl FormatNodeRule<YamlBlockSequenceEntry> for FormatYamlBlockSequenceEntry {
         write!(f, [minus_token.format()])?;
 
         if let Some(value) = value {
-            write!(f, [space(), align("  ", &value.format())])?;
+            if value.is_block_scalar() {
+                // A block scalar indents its own content one level past the
+                // `-`, so the alignment for continuation lines is not needed:
+                //
+                // ```yaml
+                // - |
+                //   content
+                // ```
+                write!(f, [space(), value.format()])?;
+            } else {
+                write!(f, [space(), align("  ", &value.format())])?;
+            }
         }
 
         Ok(())

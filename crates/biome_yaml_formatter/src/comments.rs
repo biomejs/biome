@@ -8,7 +8,10 @@ use biome_formatter::{FormatResult, FormatRule, write};
 use biome_rowan::AstNode;
 use biome_rowan::{SyntaxTriviaPieceComments, TextSize};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
-use biome_yaml_syntax::{YamlDocument, YamlFlowMapExplicitEntry, YamlLanguage, YamlRoot};
+use biome_yaml_syntax::{
+    YamlDocument, YamlFlowMapExplicitEntry, YamlFoldedScalar, YamlLanguage, YamlLiteralScalar,
+    YamlRoot,
+};
 
 use crate::prelude::*;
 
@@ -70,6 +73,7 @@ impl CommentStyle for YamlCommentStyle {
         handle_global_suppression(comment)
             .or_else(handle_document_comment)
             .or_else(handle_flow_map_explicit_entry_comment)
+            .or_else(handle_block_scalar_comment)
             .or_else(handle_end_of_line_comment)
     }
 }
@@ -135,6 +139,30 @@ fn handle_flow_map_explicit_entry_comment(
         && comment.piece().text_range().start() < colon.text_trimmed_range().start()
     {
         return CommentPlacement::dangling(entry.syntax().clone(), comment);
+    }
+
+    CommentPlacement::Default(comment)
+}
+
+/// Handles the comment on the header line of a block scalar (`a: | # c`).
+/// It is made a dangling comment of the scalar so its format rule can print
+/// it right after the header indicators, before the content starts.
+fn handle_block_scalar_comment(
+    comment: DecoratedComment<YamlLanguage>,
+) -> CommentPlacement<YamlLanguage> {
+    let enclosing = comment.enclosing_node();
+    let content = if let Some(scalar) = YamlLiteralScalar::cast_ref(enclosing) {
+        scalar.content()
+    } else if let Some(scalar) = YamlFoldedScalar::cast_ref(enclosing) {
+        scalar.content()
+    } else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let before_content =
+        content.is_ok_and(|content| comment.piece().text_range().start() < content.range().start());
+    if before_content {
+        return CommentPlacement::dangling(enclosing.clone(), comment);
     }
 
     CommentPlacement::Default(comment)

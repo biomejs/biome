@@ -69,7 +69,16 @@ impl FormatNodeRule<YamlDocument> for FormatYamlDocument {
     }
 
     fn fmt_dangling_comments(&self, _: &YamlDocument, _: &mut YamlFormatter) -> FormatResult<()> {
-        // Handled inside `fmt_fields` so they are printed next to the `---` marker
+        // The dangling comments sit between the `---` marker and the
+        // content, or close a document without content:
+        //
+        // ```yaml
+        // --- # comment
+        // content
+        // ```
+        //
+        // They are printed inside `fmt_fields` next to the marker; the
+        // default implementation would print them again after the content
         Ok(())
     }
 }
