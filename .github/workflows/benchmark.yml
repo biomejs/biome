@@ -159,8 +159,8 @@ jobs:
               - 'crates/biome_project_layout/**/*.rs'
               - 'crates/biome_resolver/**/*.rs'
               - 'crates/biome_rowan/**/*.rs'
-              - 'crates/biome_service/**'
-              - 'crates/biome_workspace_db/**'
+              - 'crates/biome_service/**/*.rs'
+              - 'crates/biome_workspace_db/**/*.rs'
 
       - name: Set change outputs
         id: outputs
