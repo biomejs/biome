@@ -1,0 +1,15 @@
+? simple
+: value
+? valueless
+? multiline
+  scalar key
+: kept
+? - seq
+  - key
+: - seq
+  - value
+? key # comment
+: value
+sets: !!set
+  ? one
+  ? two
