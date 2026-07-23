@@ -567,6 +567,71 @@ fn test_export_default_imported_binding() {
 }
 
 #[test]
+fn test_overload_selection_does_not_leak_module_local_references() {
+    // Regression test for issue #10885 (fixed by #10891): overload selection
+    // compares a signature's parameter types against the argument types
+    // (`signature_accepts_arguments`). Resolving a parameter's function type
+    // used to clone the raw data from the imported module without applying
+    // its module ID, so the function's module-local return type reference was
+    // later looked up in module 0's `type_id_map`. When the imported module
+    // had more types than module 0, that lookup panicked with an index out of
+    // bounds; otherwise it silently resolved a wrong type.
+    let fs = MemoryFileSystem::default();
+
+    // The imported module needs more types than module 0 so a leaked
+    // reference lands out of bounds instead of resolving a wrong type.
+    let mut dep = String::new();
+    for i in 0..64 {
+        dep.push_str(&format!(
+            "export const pad{i} = {{ field{i}: {i}, other{i}: \"{i}\" }};\n"
+        ));
+    }
+    dep.push_str(
+        r#"
+        export function run(scope: () => Promise<void>): Promise<void>;
+        export function run(scope: () => void): void;
+        export function run(scope: () => Promise<void> | void): Promise<void> | void {
+            return scope();
+        }
+        "#,
+    );
+    fs.insert("/src/dep.ts".into(), dep);
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import { run } from "./dep.ts";
+
+            export default run(async () => {});
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/src/dep.ts"),
+        BiomePath::new("/src/index.ts"),
+    ];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let index_module = db
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+
+    // Building the resolver runs inference, which flattens the call and
+    // selects the async overload. Before #10891, this panicked with
+    // "index out of bounds: the len is 6 but the index is 195" in
+    // `mapped_resolved_id`. A recurrence of the leak would trip the
+    // `debug_assert!` that replaced the hard index there.
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
+
+    // Liveness only: the default export must still be resolvable. The exact
+    // inferred type is not this test's concern.
+    resolver
+        .resolved_type_of_default_export()
+        .expect("default export must exist");
+}
+
+#[test]
 fn test_export_const_type_declaration_with_namespace() {
     let fs = MemoryFileSystem::default();
     fs.insert(

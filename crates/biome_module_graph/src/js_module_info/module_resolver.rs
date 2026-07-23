@@ -495,10 +495,16 @@ impl TypeResolver for ModuleResolver {
     /// be mapped to the resolver's own types instead.
     fn mapped_resolved_id(&self, resolved_id: ResolvedTypeId) -> ResolvedTypeId {
         if resolved_id.resolver_id() == MODULE_0_ID {
-            ResolvedTypeId::new(
-                TypeResolverLevel::Full,
-                self.type_id_map[resolved_id.id().index()],
-            )
+            match self.type_id_map.get(resolved_id.id().index()) {
+                Some(type_id) => ResolvedTypeId::new(TypeResolverLevel::Full, *type_id),
+                None => {
+                    // A module-local reference from another module leaked in
+                    // without its module ID applied. Degrade to unknown rather
+                    // than panicking on an out-of-bounds index.
+                    debug_assert!(false, "Invalid module 0 type reference: {resolved_id:?}");
+                    GLOBAL_UNKNOWN_ID
+                }
+            }
         } else {
             resolved_id
         }
