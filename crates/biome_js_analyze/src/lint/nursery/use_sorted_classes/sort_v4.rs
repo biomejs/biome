@@ -8,7 +8,7 @@ use biome_tailwind_syntax::{
 };
 
 use super::tailwind_preset_v4::{
-    FUNCTIONAL_UTILITIES, KEYWORD_POOL, PROPERTY_INDEX, STATIC_UTILITIES,
+    FUNCTIONAL_UTILITIES, KEYWORD_POOL, PROPERTY_INDEX, SIGNATURE_POOL, STATIC_UTILITIES,
 };
 use super::tailwind_preset_v4_types::{
     ArbitraryBranch, NamedBranch, NamedValueType, Negative, UtilityEntry,
@@ -52,11 +52,51 @@ pub fn sort_class_list(root: &TwRoot) -> String {
 enum SortKey {
     Unknown,
     Known {
-        property_idx: u16,
-        property_count: u8,
+        signature: Signature,
+        /// Total declaration count — Tailwind's tie-break after the
+        /// signature (wider utilities sort first).
+        count: u8,
         name: NameKey,
         important: bool,
     },
+}
+
+/// The ascending property-order indices a candidate's declarations
+/// touch — the primary Tailwind sort key. Candidates order by the first
+/// differing index after their shared prefix; a candidate whose list is
+/// a prefix of the other's sorts after it (`size-4` = height+width
+/// precedes `h-4` = height alone).
+#[derive(Clone, Debug, Eq, PartialEq)]
+enum Signature {
+    /// A generated `SIGNATURE_POOL` entry.
+    Pool(&'static [u16]),
+    /// A single property, for arbitrary-property candidates
+    /// (`[display:block]`).
+    Property([u16; 1]),
+}
+
+impl Signature {
+    fn as_slice(&self) -> &[u16] {
+        match self {
+            Self::Pool(indices) => indices,
+            Self::Property(index) => index,
+        }
+    }
+
+    fn compare(&self, other: &Self) -> Ordering {
+        let (a, b) = (self.as_slice(), other.as_slice());
+        let mut i = 0;
+        while i < a.len() && i < b.len() && a[i] == b[i] {
+            i += 1;
+        }
+        match (a.get(i), b.get(i)) {
+            (Some(a), Some(b)) => a.cmp(b),
+            // The longer list wins a shared prefix.
+            (Some(_), None) => Ordering::Less,
+            (None, Some(_)) => Ordering::Greater,
+            (None, None) => Ordering::Equal,
+        }
+    }
 }
 
 /// The candidate's name — the negative sign plus the `base-value/modifier`
@@ -137,7 +177,7 @@ impl SortKey {
                 };
                 PROPERTY_INDEX
                     .get(property_token.text_trimmed())
-                    .map(|&property_idx| (property_idx, 1))
+                    .map(|&property_idx| (Signature::Property([property_idx]), 1))
             }
             AnyTwCandidate::TwBogusCandidate(_) => None,
 
@@ -150,7 +190,7 @@ impl SortKey {
                     // Tailwind registers negative statics individually
                     // (`-m-px` exists, `-flex` does not).
                     .filter(|entry| !is_negative || entry.has_negative)
-                    .map(|entry| (entry.property_idx, entry.property_count))
+                    .map(|entry| (pool_signature(entry.sig), entry.count))
             }
 
             AnyTwCandidate::TwFunctionalCandidate(f) => {
@@ -173,7 +213,7 @@ impl SortKey {
                     && let Some(entry) = joined_static_entry(base.text_trimmed(), text.text())
                     && (!is_negative || entry.has_negative)
                 {
-                    Some((entry.property_idx, entry.property_count))
+                    Some((pool_signature(entry.sig), entry.count))
                 } else {
                     let Some(entry) = FUNCTIONAL_UTILITIES.get(base.text_trimmed()) else {
                         return Self::Unknown;
@@ -194,21 +234,22 @@ impl SortKey {
                         (entry.named_branches, entry.arbitrary_branches)
                     };
 
-                    if let AnyTwValue::TwArbitraryValue(arb) = &value {
+                    let resolved = if let AnyTwValue::TwArbitraryValue(arb) = &value {
                         resolve_arbitrary_branch(arbitrary_branches, &arb.value())
                     } else {
                         let modifier = f.modifier();
                         resolve_named_branch(named_branches, &value, modifier.as_ref())
-                    }
+                    };
+                    resolved.map(|(sig, count)| (pool_signature(sig), count))
                 }
             }
         };
 
         match placement {
             None => Self::Unknown,
-            Some((property_idx, property_count)) => Self::Known {
-                property_idx,
-                property_count,
+            Some((signature, count)) => Self::Known {
+                signature,
+                count,
                 name: NameKey {
                     negative: is_negative,
                     text: Some(inner.syntax().text_trimmed()),
@@ -217,6 +258,10 @@ impl SortKey {
             },
         }
     }
+}
+
+fn pool_signature(idx: u16) -> Signature {
+    Signature::Pool(SIGNATURE_POOL[usize::from(idx)])
 }
 
 fn compare(a: &SortKey, b: &SortKey) -> Ordering {
@@ -228,24 +273,23 @@ fn compare(a: &SortKey, b: &SortKey) -> Ordering {
         (SortKey::Known { .. }, SortKey::Unknown) => Ordering::Greater,
         (
             SortKey::Known {
-                property_idx: p1,
-                property_count: c1,
+                signature: s1,
+                count: c1,
                 name: n1,
                 important: i1,
             },
             SortKey::Known {
-                property_idx: p2,
-                property_count: c2,
+                signature: s2,
+                count: c2,
                 name: n2,
                 important: i2,
             },
-        ) => p1
-            .cmp(p2)
+        ) => s1
+            .compare(s2)
             // Wider utilities (e.g. `sr-only` setting 9 properties) win
-            // their property bucket so they sort before single-property
-            // utilities in the same bucket.
+            // a signature tie so they sort before narrower utilities.
             .then_with(|| c2.cmp(c1))
-            // Candidates inside one bucket order by name, the way
+            // Candidates with one placement order by name, the way
             // Tailwind emits them (`m-2 m-4 m-auto m-px`,
             // `collapse invisible visible`).
             .then_with(|| n1.compare(n2))
@@ -421,8 +465,8 @@ mod tests {
 
     fn known(property_idx: u16, property_count: u8) -> SortKey {
         SortKey::Known {
-            property_idx,
-            property_count,
+            signature: Signature::Property([property_idx]),
+            count: property_count,
             name: NameKey::default(),
             important: false,
         }
@@ -514,13 +558,33 @@ mod tests {
     fn compare_breaks_exact_key_tie_plain_before_important() {
         let plain = known(5, 1);
         let important = SortKey::Known {
-            property_idx: 5,
-            property_count: 1,
+            signature: Signature::Property([5]),
+            count: 1,
             name: NameKey::default(),
             important: true,
         };
         assert_eq!(compare(&plain, &important), Ordering::Less);
         assert_eq!(compare(&important, &plain), Ordering::Greater);
+    }
+
+    #[test]
+    fn compare_orders_by_first_differing_signature_index() {
+        // `container` touches `--tw-container-component`, which precedes
+        // `display` in the property order.
+        let container = classify("container");
+        let flex = classify("flex");
+        assert_eq!(compare(&container, &flex), Ordering::Less);
+    }
+
+    #[test]
+    fn compare_longer_signature_wins_a_shared_prefix() {
+        // `size-4` = height + width; `h-4` = height alone. The longer
+        // list sorts first, and `w-4` = width alone sorts after both.
+        let size = classify("size-4");
+        let height = classify("h-4");
+        let width = classify("w-4");
+        assert_eq!(compare(&size, &height), Ordering::Less);
+        assert_eq!(compare(&height, &width), Ordering::Less);
     }
 
     #[test]
@@ -702,30 +766,30 @@ mod tests {
     // region: sort key classification
 
     #[test]
-    fn arbitrary_candidate_takes_bucket_from_property_index() {
+    fn arbitrary_candidate_takes_signature_from_property_index() {
         let parsed = parse_tailwind("[display:block]");
         let full = parsed.tree().candidates().iter().next().unwrap();
         let display_idx = *PROPERTY_INDEX.get("display").unwrap();
         let key = SortKey::from_candidate(&full);
         let SortKey::Known {
-            property_idx,
-            property_count,
+            signature,
+            count,
             important: false,
             ..
         } = &key
         else {
             panic!("expected a plain known key");
         };
-        assert_eq!(*property_idx, display_idx);
-        assert_eq!(*property_count, 1);
+        assert_eq!(*signature, Signature::Property([display_idx]));
+        assert_eq!(*count, 1);
         assert_eq!(name_text(&key), "[display:block]");
     }
 
     #[test]
     fn important_suffix_is_position_neutral_in_the_key() {
         let SortKey::Known {
-            property_idx,
-            property_count,
+            signature,
+            count,
             name,
             important: false,
         } = classify("flex")
@@ -735,8 +799,8 @@ mod tests {
         assert_eq!(
             classify("flex!"),
             SortKey::Known {
-                property_idx,
-                property_count,
+                signature,
+                count,
                 name,
                 important: true,
             }
@@ -770,19 +834,19 @@ mod tests {
     #[test]
     fn functional_shaped_static_names_resolve_through_the_static_table() {
         // `w-full` parses as functional `w` + `full`; the whole name is
-        // a static registration, and the join must land in the same
-        // width bucket as functional `w` candidates.
-        let SortKey::Known { property_idx, .. } = classify("w-full") else {
+        // a static registration, and the join must land on the same
+        // width signature as functional `w` candidates.
+        let SortKey::Known { signature, .. } = classify("w-full") else {
             panic!("expected `w-full` to classify as known");
         };
         let SortKey::Known {
-            property_idx: functional_idx,
+            signature: functional_signature,
             ..
         } = classify("w-10")
         else {
             panic!("expected `w-10` to classify as known");
         };
-        assert_eq!(property_idx, functional_idx);
+        assert_eq!(signature, functional_signature);
         // Static names whose parsed base is no functional utility at
         // all resolve too.
         assert!(matches!(classify("justify-center"), SortKey::Known { .. }));

@@ -149,7 +149,28 @@ input:  w-full/50 w-full w-10
 sorted: w-full/50 w-10 w-full
 ---
 input:  size-full size-4 w-4 h-4
-sorted: h-4 size-4 size-full w-4
+sorted: size-4 size-full h-4 w-4
+---
+input:  container flex p-4
+sorted: container flex p-4
+---
+input:  container mx-auto px-4
+sorted: container mx-auto px-4
+---
+input:  font-medium text-sm whitespace-nowrap transition-all outline-none
+sorted: text-sm font-medium whitespace-nowrap transition-all outline-none
+---
+input:  font-medium font-sans text-sm
+sorted: font-sans text-sm font-medium
+---
+input:  sr-only not-sr-only absolute
+sorted: sr-only not-sr-only absolute
+---
+input:  truncate text-clip overflow-hidden
+sorted: truncate overflow-hidden text-clip
+---
+input:  group peer flex p-4
+sorted: group peer flex p-4
 ---
 input:  p-4 foo flex
 sorted: foo flex p-4
@@ -212,7 +233,7 @@ input:  bg-[#fff] bg-[COVER] border-[THIN] text-[LARGER] flex
 sorted: flex border-[THIN] bg-[#fff] bg-[COVER] text-[LARGER]
 ---
 input:  ring-[4px] p-[calc(100%-1rem)] bg-[cover] shadow-[#000] [mask-type:luminance] text-[20px] from-[20%] bg-[url('/hero.png')] border-[2px] flex
-sorted: flex border-[2px] bg-[url('/hero.png')] from-[20%] bg-[cover] [mask-type:luminance] p-[calc(100%-1rem)] text-[20px] shadow-[#000] ring-[4px]
+sorted: flex border-[2px] bg-[url('/hero.png')] from-[20%] bg-[cover] [mask-type:luminance] p-[calc(100%-1rem)] text-[20px] ring-[4px] shadow-[#000]
 ---
 input:  ring-[#000]/50 text-[20px]/8 border-[#f00]/50 flex bg-[#fff]/50
 sorted: flex border-[#f00]/50 bg-[#fff]/50 text-[20px]/8 ring-[#000]/50
@@ -335,4 +356,4 @@ input:  hover:text-accent-foreground border bg-background shadow-xs hover:bg-acc
 sorted: hover:text-accent-foreground border bg-background hover:bg-accent dark:border-input dark:bg-input/30 dark:hover:bg-input/50 shadow-xs
 ---
 input:  items-center [&_svg]:pointer-events-none inline-flex disabled:opacity-50 gap-2 focus-visible:border-ring justify-center rounded-md text-sm shrink-0 transition-all font-medium outline-none whitespace-nowrap focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:shrink-0
-sorted: [&_svg]:pointer-events-none disabled:opacity-50 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:shrink-0 inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm whitespace-nowrap transition-all font-medium outline-none
+sorted: [&_svg]:pointer-events-none disabled:opacity-50 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:shrink-0 inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none
