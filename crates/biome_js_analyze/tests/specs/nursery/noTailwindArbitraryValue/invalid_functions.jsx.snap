@@ -1,0 +1,162 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_functions.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+clsx("w-[400px]");
+cn("text-[#555]");
+classnames("w-[400px]", "text-red-500");
+clsx(["w-[400px]"]);
+cn({ "w-[400px]": isActive });
+tw`w-[400px]`;
+tw.div`text-[#555]`;
+
+```
+
+# Diagnostics
+```
+invalid_functions.jsx:2:9 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ clsx("w-[400px]");
+      │         ^^^^^^^
+    3 │ cn("text-[#555]");
+    4 │ classnames("w-[400px]", "text-red-500");
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_functions.jsx:3:10 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+    1 │ /* should generate diagnostics */
+    2 │ clsx("w-[400px]");
+  > 3 │ cn("text-[#555]");
+      │          ^^^^^^
+    4 │ classnames("w-[400px]", "text-red-500");
+    5 │ clsx(["w-[400px]"]);
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_functions.jsx:4:15 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+    2 │ clsx("w-[400px]");
+    3 │ cn("text-[#555]");
+  > 4 │ classnames("w-[400px]", "text-red-500");
+      │               ^^^^^^^
+    5 │ clsx(["w-[400px]"]);
+    6 │ cn({ "w-[400px]": isActive });
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_functions.jsx:5:10 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+    3 │ cn("text-[#555]");
+    4 │ classnames("w-[400px]", "text-red-500");
+  > 5 │ clsx(["w-[400px]"]);
+      │          ^^^^^^^
+    6 │ cn({ "w-[400px]": isActive });
+    7 │ tw`w-[400px]`;
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_functions.jsx:6:9 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+    4 │ classnames("w-[400px]", "text-red-500");
+    5 │ clsx(["w-[400px]"]);
+  > 6 │ cn({ "w-[400px]": isActive });
+      │         ^^^^^^^
+    7 │ tw`w-[400px]`;
+    8 │ tw.div`text-[#555]`;
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_functions.jsx:7:6 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+    5 │ clsx(["w-[400px]"]);
+    6 │ cn({ "w-[400px]": isActive });
+  > 7 │ tw`w-[400px]`;
+      │      ^^^^^^^
+    8 │ tw.div`text-[#555]`;
+    9 │ 
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_functions.jsx:8:13 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+    6 │ cn({ "w-[400px]": isActive });
+    7 │ tw`w-[400px]`;
+  > 8 │ tw.div`text-[#555]`;
+      │             ^^^^^^
+    9 │ 
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
