@@ -13,7 +13,7 @@ For full contributing guidelines, see [CONTRIBUTING.md](./CONTRIBUTING.md).
 ## Conversational Style
 
 - Keep answers short and concise.
-- No emojis in commits, issues, PR comments, code, or any agent output.
+- No emojis anywhere: source code, comments, rustdoc, diagnostics, tests, snapshots, commit messages, issues, PR comments, or any agent output. This is the single canonical statement of the rule; individual skills do not repeat it. The one deliberate exception is the agent-PR opt-in marker described in the note at the top of this file.
 - No fluff or cheerful filler text.
 - Technical prose only. Be kind but direct (e.g., "Thanks @user" not "Thanks so much @user!").
 
@@ -246,17 +246,8 @@ Located in `.claude/skills/`, these provide step-by-step workflows:
 - **testing-codegen** - Testing and code generation commands
 - **type-inference** - Working with module graph and types
 - **diagnostics-development** - Creating user-facing diagnostics
-- **prettier-compare** - Comparing with Prettier
 
 See [`.claude/skills/README.md`](./.claude/skills/README.md) for the full catalog.
-
-### Specialized Agents
-
-Located in `.claude/agents/`, invoke these for complex tasks:
-
-- **biome-lint-engineer** - Lint/analyzer work
-- **ir-formatter-engineer** - Formatter work
-- **cst-parser-engineer** - Parser work
 
 ## Workflow Examples
 
