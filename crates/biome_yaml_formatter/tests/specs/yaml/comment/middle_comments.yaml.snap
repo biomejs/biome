@@ -1,0 +1,35 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/middle_comments.yaml
+---
+
+# Input
+
+```yaml
+single: !!str # comment
+  123
+plain2: !!str # one
+# two
+  hello
+flowtag: !!map # comment
+  {}
+anchored: &default # This key
+  subkey: value
+
+```
+
+
+# Formatted
+
+```yaml
+single: !!str # comment
+123
+plain2: !!str # one
+# two
+  hello
+flowtag: !!map # comment
+  {}
+anchored: &default # This key
+  subkey: value
+
+```
