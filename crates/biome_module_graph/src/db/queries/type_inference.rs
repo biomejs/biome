@@ -15,9 +15,9 @@
 //! shapes produce `Unknown` or `None` instead of a TypeScript diagnostic.
 
 use crate::db::type_inference::{
-    apply_substitutions_to_root_body, collected_type_result, infer_module_types_cycle_result,
-    normalize_structural_type, normalize_type_cycle_result, resolve_raw_types,
-    substitutions_for_instance,
+    ImportResolution, apply_substitutions_to_root_body, collected_type_result,
+    infer_module_types_cycle_result, normalize_structural_type, normalize_type_cycle_result,
+    resolve_raw_types, substitutions_for_instance,
 };
 use crate::module_for_key;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
@@ -77,7 +77,12 @@ pub fn infer_module_types<'db>(
         }
     }
 
-    Some(resolve_raw_types(db, module, &js_info))
+    Some(resolve_raw_types(
+        db,
+        module,
+        &js_info,
+        ImportResolution::Full,
+    ))
 }
 
 // NOTE: this is the only exception to the rule, it's a public query and not tracked. Keep it here.
