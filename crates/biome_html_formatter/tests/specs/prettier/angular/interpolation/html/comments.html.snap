@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/interpolation/html/comments.html
+---
+
+# Input
+
+```html
+{{a() // comment }}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,3 +1 @@
+-{{
+-  a() // comment
+-}}
++{{a() // comment }}
+```
+
+# Output
+
+```html
+{{a() // comment }}
+```
+
+# Errors
+```
+comments.html:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+  > 1 │ {{a() // comment }}
+      │ ^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+
+```

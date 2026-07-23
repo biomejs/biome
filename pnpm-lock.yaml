@@ -30,8 +30,8 @@ importers:
   crates/biome_formatter_test/src/prettier:
     dependencies:
       prettier:
-        specifier: 3.8.4
-        version: 3.8.4
+        specifier: 3.9.5
+        version: 3.9.5
 
   packages/@biomejs/backend-jsonrpc:
     devDependencies:
@@ -1398,13 +1398,13 @@ packages:
     engines: {node: '>=10.13.0'}
     hasBin: true
 
-  prettier@3.8.4:
-    resolution: {integrity: sha512-N2MylSdi48+5N/6S5j+maeHbUSIzzZ5uOcX5Hm4QpV8Dkb1HFjfAKTKX6yNPJQD9AhcT3ifHNB66tWTTJDi11Q==}
+  prettier@3.9.4:
+    resolution: {integrity: sha512-yWG/o/4oJfo036EKAfK6ACAoDOfHeRHx4tuxkfBZiauURiaSmYwlpOr5LQqKtIkRD2z1PLteme2WoxEnj4tHTg==}
     engines: {node: '>=14'}
     hasBin: true
 
-  prettier@3.9.4:
-    resolution: {integrity: sha512-yWG/o/4oJfo036EKAfK6ACAoDOfHeRHx4tuxkfBZiauURiaSmYwlpOr5LQqKtIkRD2z1PLteme2WoxEnj4tHTg==}
+  prettier@3.9.5:
+    resolution: {integrity: sha512-/FVl766LpUfB5vXgCYOYa0MeV/441Ia99AeICQIQFTY/Nw0roZwULcXpku5i1/m5kt/baz+s4Zogspd839HSMg==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -3016,7 +3016,7 @@ snapshots:
   prettier-plugin-astro@0.14.1:
     dependencies:
       '@astrojs/compiler': 2.13.0
-      prettier: 3.9.4
+      prettier: 3.9.5
       sass-formatter: 0.7.9
 
   prettier-plugin-svelte@3.5.1(prettier@3.9.4)(svelte@5.46.4):
@@ -3026,9 +3026,9 @@ snapshots:
 
   prettier@2.8.8: {}
 
-  prettier@3.8.4: {}
-
   prettier@3.9.4: {}
+
+  prettier@3.9.5: {}
 
   process@0.11.10: {}
 

@@ -1,0 +1,64 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/icu-expression/basic-plural-04.html
+---
+
+# Input
+
+```html
+<foo>
+  <bar>{VAR_PLURAL, plural, =0 {Found no results} =1 {Found one result} other {Found <ph id="0" equiv="INTERPOLATION" disp="{{response.getItemsList().length}}"/> results} }</bar>
+</foo>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,15 +1,12 @@
+ <foo>
+-  <bar>{VAR_PLURAL, plural,
+-    =0 {Found no results}
+-    =1 {Found one result}
+-    other {
+-      Found
+-      <ph
+-        id="0"
+-        equiv="INTERPOLATION"
+-        disp="{{ response.getItemsList().length }}"
+-      />
+-      results
+-    }
+-  }</bar>
++  <bar
++    >{ VAR_PLURAL, plural, =0 { Found no results} =1 { Found one result} other {
++    Found
++    <ph
++      id="0"
++      equiv="INTERPOLATION"
++      disp="{{response.getItemsList().length}}"
++    />
++    results} }</bar
++  >
+ </foo>
+```
+
+# Output
+
+```html
+<foo>
+  <bar
+    >{ VAR_PLURAL, plural, =0 { Found no results} =1 { Found one result} other {
+    Found
+    <ph
+      id="0"
+      equiv="INTERPOLATION"
+      disp="{{response.getItemsList().length}}"
+    />
+    results} }</bar
+  >
+</foo>
+```

@@ -1,0 +1,78 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/control-flow/with-comment.html
+---
+
+# Input
+
+```html
+<div>
+  <!-- comment -->
+  <span>Not checked</span>
+</div>
+
+
+<!-- comment -->
+@if (isChecked()) {
+<span>
+  Checked
+  <!-- comment -->
+</span>
+} <!-- comment -->
+@else {
+<span>Not checked</span>
+}
+<!-- comment -->
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,16 +2,13 @@
+   <!-- comment -->
+   <span>Not checked</span>
+ </div>
+-
+ <!-- comment -->
+ @if (isChecked()) {
+-  <span>
+-    Checked
+-    <!-- comment -->
+-  </span>
+-}
+-<!-- comment -->
+-@else {
+-  <span>Not checked</span>
++<span>
++  Checked
++  <!-- comment -->
++</span>
++} <!-- comment --> @else {
++<span>Not checked</span>
+ }
+-<!-- comment -->
++<!-- comment -->
+\ No newline at end of file
+```
+
+# Output
+
+```html
+<div>
+  <!-- comment -->
+  <span>Not checked</span>
+</div>
+<!-- comment -->
+@if (isChecked()) {
+<span>
+  Checked
+  <!-- comment -->
+</span>
+} <!-- comment --> @else {
+<span>Not checked</span>
+}
+<!-- comment -->```

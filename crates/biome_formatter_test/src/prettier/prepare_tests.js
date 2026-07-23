@@ -34,7 +34,15 @@ async function traverseDir(dir, input_config) {
 
 	for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
 		if (entry.isDirectory()) {
-			await traverseDir(path.resolve(dir, entry.name), config);
+
+			// These tests don't contain real HTML, and its specific to prettier's testing infra
+			const subDir = path.resolve(dir, entry.name);
+			const relSubDir = path.relative(PRETTIER_ROOT, subDir);
+			if (relSubDir === path.join('html', 'cursor')) {
+				continue;
+			}
+
+			await traverseDir(subDir, config);
 			continue;
 		}
 
@@ -43,6 +51,12 @@ async function traverseDir(dir, input_config) {
 
 			// Ignore spec files
 			if (file.startsWith('format.test')) {
+				continue;
+			}
+
+			// Ignore non-official or legacy Angular template files in the angular directory
+			// (couldn't find any documentation on what these file extensions are and if they are still supported)
+			if (file.endsWith('.ng') && path.relative(PRETTIER_ROOT, dir).startsWith('angular')) {
 				continue;
 			}
 
