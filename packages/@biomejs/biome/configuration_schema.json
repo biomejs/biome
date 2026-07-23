@@ -5129,6 +5129,26 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoReactLeakedIntervalConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactLeakedIntervalOptions" }
+			]
+		},
+		"NoReactLeakedIntervalOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoReactLeakedTimeoutConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactLeakedTimeoutOptions" }
+			]
+		},
+		"NoReactLeakedTimeoutOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoReactNativeDeepImportsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6791,6 +6811,20 @@
 					"description": "Disallow using page.waitForTimeout().\nSee https://biomejs.dev/linter/rules/no-playwright-wait-for-timeout",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoPlaywrightWaitForTimeoutConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactLeakedInterval": {
+					"description": "Disallow forgetting to clear setInterval within useEffect.\nSee https://biomejs.dev/linter/rules/no-react-leaked-interval",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactLeakedIntervalConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactLeakedTimeout": {
+					"description": "Disallow forgetting to clear setTimeout within useEffect.\nSee https://biomejs.dev/linter/rules/no-react-leaked-timeout",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactLeakedTimeoutConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9727,6 +9761,24 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoReactForwardRefOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReactLeakedIntervalOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactLeakedIntervalOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReactLeakedTimeoutOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactLeakedTimeoutOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
