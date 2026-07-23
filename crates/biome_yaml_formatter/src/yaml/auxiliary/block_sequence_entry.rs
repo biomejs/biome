@@ -1,3 +1,4 @@
+use crate::comments::FormatEntryDanglingComments;
 use crate::prelude::*;
 use biome_formatter::write;
 use biome_yaml_syntax::{YamlBlockSequenceEntry, YamlBlockSequenceEntryFields};
@@ -25,6 +26,25 @@ impl FormatNodeRule<YamlBlockSequenceEntry> for FormatYamlBlockSequenceEntry {
             }
         }
 
+        write!(f, [FormatEntryDanglingComments::new(node.syntax())])
+    }
+
+    fn fmt_dangling_comments(
+        &self,
+        _: &YamlBlockSequenceEntry,
+        _: &mut YamlFormatter,
+    ) -> FormatResult<()> {
+        // The dangling comments sit in the entry's value slot, indented
+        // deeper than the entry:
+        //
+        // ```yaml
+        // - value
+        //     # comment
+        // ```
+        //
+        // They are printed by `FormatEntryDanglingComments`, which
+        // `fmt_fields` writes with that indentation; the default
+        // implementation would print them without it
         Ok(())
     }
 }
