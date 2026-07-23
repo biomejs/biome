@@ -1,0 +1,32 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/document/blank_line_between_documents.yaml
+---
+
+# Input
+
+```yaml
+a: 1
+b: 2
+
+---
+c: 3
+
+---
+d: 4
+
+```
+
+
+# Formatted
+
+```yaml
+a: 1
+b: 2
+
+---
+c: 3
+---
+d: 4
+
+```
