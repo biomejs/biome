@@ -96,8 +96,6 @@ fn infer_types(...)
 **Vague hedging.** "Some cases", "various reasons", "handles edge cases",
 "etc." — either name them or drop the sentence.
 
-**Emojis.** Banned everywhere in this repository, comments included.
-
 **Ad-hoc section banners** (`// ----- helpers -----`, `// ==== TYPES ====`).
 For grouping in long files, use the region comment pattern below instead.
 

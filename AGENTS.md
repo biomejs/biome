@@ -13,7 +13,7 @@ For full contributing guidelines, see [CONTRIBUTING.md](./CONTRIBUTING.md).
 ## Conversational Style
 
 - Keep answers short and concise.
-- No emojis anywhere: source code, comments, rustdoc, diagnostics, tests, snapshots, commit messages, issues, PR comments, or any agent output. This is the single canonical statement of the rule; individual skills do not repeat it.
+- No emojis anywhere: source code, comments, rustdoc, diagnostics, tests, snapshots, commit messages, issues, PR comments, or any agent output. This is the single canonical statement of the rule; individual skills do not repeat it. The one deliberate exception is the agent-PR opt-in marker described in the note at the top of this file.
 - No fluff or cheerful filler text.
 - Technical prose only. Be kind but direct (e.g., "Thanks @user" not "Thanks so much @user!").
 
