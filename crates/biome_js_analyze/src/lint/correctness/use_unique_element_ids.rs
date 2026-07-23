@@ -4,7 +4,7 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsxAttributeValue, JsCallExpression, JsPropertyObjectMember, JsxAttribute,
-    jsx_ext::AnyJsxElement,
+    JsxElement, jsx_ext::AnyJsxElement,
 };
 use biome_rowan::{AstNode, TokenText, declare_node_union};
 use biome_rule_options::use_unique_element_ids::UseUniqueElementIdsOptions;
@@ -42,6 +42,24 @@ declare_lint_rule! {
     /// ```jsx
     /// const id = useId();
     /// React.createElement("div", { id });
+    /// ```
+    ///
+    /// SVG elements are allowed to use static `id` attributes since they have
+    /// local scope within the SVG context:
+    ///
+    /// ```jsx
+    /// function Icon() {
+    ///   return (
+    ///     <svg>
+    ///       <defs>
+    ///         <linearGradient id="gradient1">
+    ///           <stop offset="0%" stopColor="red" />
+    ///         </linearGradient>
+    ///       </defs>
+    ///       <rect id="rect1" fill="url(#gradient1)" />
+    ///     </svg>
+    ///   );
+    /// }
     /// ```
     ///
     /// ## Options
@@ -103,6 +121,19 @@ impl UseUniqueElementIdsQuery {
         }
     }
 
+    /// Check if this element is inside an SVG context by walking up the AST tree.
+    /// We look for `JsxElement` ancestors whose opening element is `<svg>`.
+    fn is_inside_svg(&self) -> bool {
+        self.syntax().ancestors().filter_map(JsxElement::cast).any(|element| {
+            element
+                .opening_element()
+                .ok()
+                .and_then(|opening| opening.name().ok())
+                .and_then(|name| name.as_jsx_name().cloned())
+                .is_some_and(|name| name.value_token().is_ok_and(|t| t.text_trimmed() == "svg"))
+        })
+    }
+
     fn element_name(&self, model: &SemanticModel) -> Option<TokenText> {
         match self {
             Self::AnyJsxElement(jsx) => jsx
@@ -139,6 +170,12 @@ impl Rule for UseUniqueElementIds {
         let node = ctx.query();
         let model = ctx.model();
         let options = ctx.options();
+        
+        // Skip if this element is inside an SVG context
+        if node.is_inside_svg() {
+            return None;
+        }
+        
         if let Some(name) = node.element_name(model)
             && let Some(excluded_components) = &options.excluded_components
             && excluded_components.contains(name.text())

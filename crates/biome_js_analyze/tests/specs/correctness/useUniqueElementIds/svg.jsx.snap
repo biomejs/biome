@@ -1,0 +1,143 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: svg.jsx
+---
+# Input
+```jsx
+// SVG elements with static id attributes should not be flagged
+function SvgWithIds() {
+	return (
+		<svg>
+			<defs>
+				<linearGradient id="gradient1">
+					<stop offset="0%" stopColor="red" />
+					<stop offset="100%" stopColor="blue" />
+				</linearGradient>
+				<pattern id="pattern1" width="10" height="10">
+					<circle cx="5" cy="5" r="3" fill="blue" />
+				</pattern>
+				<clipPath id="clip1">
+					<rect x="0" y="0" width="100" height="100" />
+				</clipPath>
+			</defs>
+			<rect id="rect1" width="100" height="100" fill="url(#gradient1)" />
+			<circle id="circle1" cx="50" cy="50" r="25" />
+		</svg>
+	);
+}
+
+// Nested SVG elements should also not be flagged
+function NestedSvg() {
+	return (
+		<div>
+			<svg>
+				<g id="group1">
+					<rect id="rect2" width="50" height="50" />
+					<svg>
+						<circle id="circle2" cx="25" cy="25" r="10" />
+					</svg>
+				</g>
+			</svg>
+		</div>
+	);
+}
+
+// HTML elements outside SVG should still be flagged (these should trigger diagnostics)
+function HtmlWithIds() {
+	return (
+		<div>
+			<div id="shouldBeFlagged1">Content</div>
+			<svg>
+				<rect id="shouldNotBeFlagged" width="50" height="50" />
+			</svg>
+			<p id="shouldBeFlagged2">More content</p>
+		</div>
+	);
+}
+
+// Mixed case: SVG elements should not be flagged, but HTML elements should
+function MixedContent() {
+	return (
+		<div id="htmlDiv">
+			<svg>
+				<defs>
+					<linearGradient id="svgGradient">
+						<stop offset="0%" />
+					</linearGradient>
+				</defs>
+				<rect id="svgRect" fill="url(#svgGradient)" />
+			</svg>
+			<span id="htmlSpan">Text</span>
+		</div>
+	);
+}
+```
+
+# Diagnostics
+```
+svg.jsx:43:4 lint/correctness/useUniqueElementIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × id attribute should not be a static string literal. Generate unique IDs using useId().
+  
+    41 │ 	return (
+    42 │ 		<div>
+  > 43 │ 			<div id="shouldBeFlagged1">Content</div>
+       │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ 			<svg>
+    45 │ 				<rect id="shouldNotBeFlagged" width="50" height="50" />
+  
+  i In React, if you hardcode IDs and use the component multiple times, it can lead to duplicate IDs in the DOM. Instead, generate unique IDs using useId().
+  
+
+```
+
+```
+svg.jsx:47:4 lint/correctness/useUniqueElementIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × id attribute should not be a static string literal. Generate unique IDs using useId().
+  
+    45 │ 				<rect id="shouldNotBeFlagged" width="50" height="50" />
+    46 │ 			</svg>
+  > 47 │ 			<p id="shouldBeFlagged2">More content</p>
+       │ 			^^^^^^^^^^^^^^^^^^^^^^^^^
+    48 │ 		</div>
+    49 │ 	);
+  
+  i In React, if you hardcode IDs and use the component multiple times, it can lead to duplicate IDs in the DOM. Instead, generate unique IDs using useId().
+  
+
+```
+
+```
+svg.jsx:55:3 lint/correctness/useUniqueElementIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × id attribute should not be a static string literal. Generate unique IDs using useId().
+  
+    53 │ function MixedContent() {
+    54 │ 	return (
+  > 55 │ 		<div id="htmlDiv">
+       │ 		^^^^^^^^^^^^^^^^^^
+    56 │ 			<svg>
+    57 │ 				<defs>
+  
+  i In React, if you hardcode IDs and use the component multiple times, it can lead to duplicate IDs in the DOM. Instead, generate unique IDs using useId().
+  
+
+```
+
+```
+svg.jsx:64:4 lint/correctness/useUniqueElementIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × id attribute should not be a static string literal. Generate unique IDs using useId().
+  
+    62 │ 				<rect id="svgRect" fill="url(#svgGradient)" />
+    63 │ 			</svg>
+  > 64 │ 			<span id="htmlSpan">Text</span>
+       │ 			^^^^^^^^^^^^^^^^^^^^
+    65 │ 		</div>
+    66 │ 	);
+  
+  i In React, if you hardcode IDs and use the component multiple times, it can lead to duplicate IDs in the DOM. Instead, generate unique IDs using useId().
+  
+
+```
