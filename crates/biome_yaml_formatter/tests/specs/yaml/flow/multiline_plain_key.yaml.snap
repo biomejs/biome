@@ -1,0 +1,29 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/flow/multiline_plain_key.yaml
+---
+
+# Input
+
+```yaml
+{ matches
+% : 20 }
+---
+[? foo
+ bar : baz]
+
+```
+
+
+# Formatted
+
+```yaml
+{ ? matches
+    %
+  : 20 }
+---
+[? foo
+    bar
+  : baz]
+
+```

@@ -1,5 +1,9 @@
 use crate::prelude::*;
-use biome_yaml_syntax::{AnyYamlMappingImplicitKey, AnyYamlProperty, YamlSyntaxNode};
+use biome_formatter::write;
+use biome_rowan::AstNodeList;
+use biome_yaml_syntax::{
+    AnyYamlFlowNode, AnyYamlMappingImplicitKey, AnyYamlProperty, YamlSyntaxNode, YamlSyntaxToken,
+};
 
 /// Whether a `:` placed directly after this key would be lexed as part of
 /// the key's last token. Alias, anchor, and tag tokens may all contain `:`
@@ -64,5 +68,93 @@ pub(crate) fn lines_before_through_end_tokens(node: &YamlSyntaxNode) -> usize {
             return count;
         }
         token = prev;
+    }
+}
+
+/// The value token of a key that is a plain scalar spanning multiple lines,
+/// which only the explicit `? key : value` entry form can represent
+pub(crate) fn multiline_plain_key_token(
+    key: Option<&AnyYamlMappingImplicitKey>,
+) -> Option<YamlSyntaxToken> {
+    let AnyYamlMappingImplicitKey::YamlFlowYamlNode(node) = key? else {
+        return None;
+    };
+    if !node.properties().is_empty() {
+        return None;
+    }
+    let token = node.content()?.value_token().ok()?;
+    token
+        .text_trimmed()
+        .contains(['\n', '\r'])
+        .then_some(token)
+}
+
+/// Formats a flow mapping entry whose key is a multiline plain scalar in the
+/// explicit `? key : value` form, the only one that can hold such a key:
+///
+/// ```yaml
+/// { ? matches
+///     %
+///   : 20 }
+/// ```
+///
+/// The line breaks are literal so the enclosing flow collection stays flat,
+/// as Prettier keeps it; a literal break resets the printer to the document
+/// root, so the continuation and `:` lines carry their own indentation.
+pub(crate) struct FormatMultilineKeyEntry<'a> {
+    /// The `?` of an entry already in the explicit form; a synthesized `?`
+    /// is printed without one
+    pub(crate) question_mark_token: Option<&'a YamlSyntaxToken>,
+    pub(crate) key: &'a AnyYamlMappingImplicitKey,
+    pub(crate) key_token: &'a YamlSyntaxToken,
+    pub(crate) colon_token: &'a YamlSyntaxToken,
+    pub(crate) value: &'a Option<AnyYamlFlowNode>,
+}
+
+impl Format<YamlFormatContext> for FormatMultilineKeyEntry<'_> {
+    fn fmt(&self, f: &mut YamlFormatter) -> FormatResult<()> {
+        // The key is written as text rather than through its formatting
+        // rule, so its nodes must be marked as checked for suppression
+        // comments by hand
+        for node in self.key.syntax().descendants() {
+            f.comments().mark_suppression_checked(&node);
+        }
+
+        match self.question_mark_token {
+            Some(token) => write!(f, [token.format(), space()])?,
+            None => write!(f, [text("?", None), space()])?,
+        }
+
+        let key = format_with(|f| {
+            let value_text = self.key_token.text_trimmed().trim_end();
+            for (index, line) in value_text.lines().enumerate() {
+                if index == 0 {
+                    write!(f, [text(line.trim_end(), None)])?;
+                } else {
+                    let line = std::format!("    {}", line.trim());
+                    write!(
+                        f,
+                        [literal_line_break_without_parent(), text(&line, None)]
+                    )?;
+                }
+            }
+            Ok(())
+        });
+        write!(f, [format_replaced(self.key_token, &key)])?;
+
+        write!(
+            f,
+            [
+                literal_line_break_without_parent(),
+                text("  ", None),
+                self.colon_token.format()
+            ]
+        )?;
+
+        if let Some(value) = self.value {
+            write!(f, [space(), value.format()])?;
+        }
+
+        Ok(())
     }
 }
