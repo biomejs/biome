@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::write;
+use biome_formatter::{format_args, write};
 use biome_rowan::AstNode;
 use biome_yaml_syntax::{
     AnyYamlBlockHeader, YamlBlockContent, YamlBlockContentFields, YamlBlockHeaderList,
@@ -46,18 +46,6 @@ impl FormatNodeRule<YamlBlockContent> for FormatYamlBlockContent {
         };
         let ends_with_break = token_text.ends_with(['\n', '\r']);
 
-        let kept_lines = match chomping {
-            // The line break terminating the last line is printed by the
-            // enclosing structure, so the line it opens isn't content
-            Chomping::Keep => lines().count().saturating_sub(usize::from(ends_with_break)),
-            // Trailing blank lines are dropped
-            Chomping::Clip | Chomping::Strip => lines()
-                .enumerate()
-                .filter(|(_, line)| !line.is_empty())
-                .last()
-                .map_or(0, |(index, _)| index + 1),
-        };
-
         let ancestors = collection_ancestor_count(node.syntax());
         let base_indent = match indicator {
             Some(indicator) => (indicator - 1).saturating_add(ancestors),
@@ -69,22 +57,43 @@ impl FormatNodeRule<YamlBlockContent> for FormatYamlBlockContent {
                 .unwrap_or(usize::MAX),
         };
 
-        // FIXME: A non-empty line that is indented less than the base ends
-        // the scalar per the spec, but the lexer includes such lines
-        // (trailing comment lines, in practice) in the content token.
-        // Re-indenting them would promote them to actual scalar content, so
-        // the content is kept exactly as is for now. Once the lexer ends the
-        // scalar at such lines, this fallback can be removed
-        if lines().any(|line| {
+        // A non-empty line that is indented less than the base ends the
+        // scalar per the spec, but the lexer includes such lines (trailing
+        // comment lines, in practice) in the content token. Everything from
+        // the first such line on is not content; it is rendered after the
+        // scalar, dedented to the document root
+        let scalar_end = lines().position(|line| {
             let spaces = leading_spaces(line);
             spaces < line.len() && spaces < base_indent
-        }) {
-            return format_verbatim_node(node.syntax()).fmt(f);
-        }
+        });
+        let content_lines = scalar_end.unwrap_or(usize::MAX);
+
+        // A line holding only whitespace up to the base indentation is an
+        // empty line, not content
+        let is_empty_line = |line: &str| {
+            let spaces = leading_spaces(line);
+            spaces == line.len() && spaces <= base_indent
+        };
+
+        let kept_lines = match chomping {
+            // With a trailing comment region the token continues past the
+            // content, whose trailing blank lines all belong to it
+            Chomping::Keep if scalar_end.is_some() => content_lines,
+            // The line break terminating the last line is printed by the
+            // enclosing structure, so the line it opens isn't content
+            Chomping::Keep => lines().count().saturating_sub(usize::from(ends_with_break)),
+            // Trailing blank lines are dropped
+            Chomping::Clip | Chomping::Strip => lines()
+                .take(content_lines)
+                .enumerate()
+                .filter(|(_, line)| !is_empty_line(line))
+                .last()
+                .map_or(0, |(index, _)| index + 1),
+        };
 
         let is_last = is_last_descendant(node.syntax());
+        let state = std::cell::Cell::new(LineState::default());
         let content = format_with(|f| {
-            let state = std::cell::Cell::new(LineState::default());
             for line in lines().take(kept_lines) {
                 write!(
                     f,
@@ -101,6 +110,7 @@ impl FormatNodeRule<YamlBlockContent> for FormatYamlBlockContent {
             // leaves them in the leading trivia of the next token, so they
             // are recovered from there
             if chomping == Chomping::Keep
+                && scalar_end.is_none()
                 && !token_text.is_empty()
                 && !ends_with_break
                 && let Some(next_token) = value_token.next_token()
@@ -144,7 +154,20 @@ impl FormatNodeRule<YamlBlockContent> for FormatYamlBlockContent {
             //   foo
             //
             // ```
-            if chomping == Chomping::Keep && is_last && state.get().any_line {
+            //
+            // A comment following the scalar prints the blank line above
+            // itself instead, so the scalar adds none of its own
+            let comments_follow = value_token.next_token().is_some_and(|next| {
+                next.leading_trivia()
+                    .pieces()
+                    .any(|piece| piece.is_comments())
+            });
+            if chomping == Chomping::Keep
+                && scalar_end.is_none()
+                && is_last
+                && !comments_follow
+                && state.get().any_line
+            {
                 write!(f, [text("\n", None)])?;
             }
 
@@ -160,6 +183,7 @@ impl FormatNodeRule<YamlBlockContent> for FormatYamlBlockContent {
             //
             // ```
             if chomping == Chomping::Keep
+                && scalar_end.is_none()
                 && token_text.is_empty()
                 && is_last
                 && let Some(next_token) = value_token.next_token()
@@ -178,9 +202,44 @@ impl FormatNodeRule<YamlBlockContent> for FormatYamlBlockContent {
             Ok(())
         });
 
+        // The blank lines the chomping dropped and the trailing comment
+        // lines after them, printed after the scalar at the document root,
+        // where the comments live:
+        //
+        // ```yaml
+        // strip: |-
+        //   # text
+        //
+        // # comment
+        // ```
+        let trailing = format_with(|f| {
+            if scalar_end.is_none() {
+                return Ok(());
+            }
+            for line in lines().skip(kept_lines) {
+                write!(
+                    f,
+                    [FormatContentLine {
+                        line,
+                        // Strips all the indentation, putting the comments
+                        // at column zero
+                        base_indent: usize::MAX,
+                        state: &state
+                    }]
+                )?;
+            }
+            Ok(())
+        });
+
         match indicator {
             // Content one level deeper than the parent node
-            None => write!(f, [format_replaced(&value_token, &indent(&content))]),
+            None => write!(
+                f,
+                [format_replaced(
+                    &value_token,
+                    &format_args![indent(&content), dedent_to_root(&trailing)]
+                )]
+            ),
             // An explicit indicator makes the content indentation absolute
             Some(indicator) => {
                 let align_spaces = " ".repeat((indicator - 1).saturating_add(ancestors));
@@ -188,7 +247,10 @@ impl FormatNodeRule<YamlBlockContent> for FormatYamlBlockContent {
                     f,
                     [format_replaced(
                         &value_token,
-                        &dedent_to_root(&align(align_spaces, &content))
+                        &format_args![
+                            dedent_to_root(&align(align_spaces, &content)),
+                            dedent_to_root(&trailing)
+                        ]
                     )]
                 )
             }
