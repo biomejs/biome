@@ -12,6 +12,6 @@ impl FormatNodeRule<CssKeyframesIdentSelector> for FormatCssKeyframesIdentSelect
     ) -> FormatResult<()> {
         let CssKeyframesIdentSelectorFields { selector } = node.as_fields();
 
-        write!(f, [selector.format()])
+        write!(f, [selector.format()?.with_text_case(CssCase::Lowercase)])
     }
 }

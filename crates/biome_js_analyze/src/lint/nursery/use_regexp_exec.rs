@@ -4,7 +4,6 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::JsCallExpression;
-use biome_js_type_info::{Literal, ResolvedTypeData, TypeData};
 use biome_rowan::{AstNode, AstSeparatedList};
 use biome_rule_options::use_regexp_exec::UseRegexpExecOptions;
 
@@ -54,14 +53,21 @@ impl Rule for UseRegexpExec {
 
         let call_object = callee.object().ok()?;
         if !ctx
-            .type_of_expression(&call_object)
-            .is_string_or_string_literal()
+            .inferred_type_of_expression(&call_object)
+            .is_some_and(|ty| ty.is_string_or_string_literal())
         {
             return None;
         }
 
-        let call_name = callee.member().ok()?.as_js_name()?.to_trimmed_text();
-        if call_name != "match" {
+        if callee
+            .member()
+            .ok()?
+            .as_js_name()?
+            .value_token()
+            .ok()?
+            .text_trimmed()
+            != "match"
+        {
             return None;
         }
 
@@ -69,18 +75,9 @@ impl Rule for UseRegexpExec {
         let first_arg = args.first()?.ok()?;
         let express = first_arg.as_any_js_expression()?;
 
-        let value_type = ctx.type_of_expression(express);
-
-        if value_type
-            .resolved_data()
-            .map(ResolvedTypeData::as_raw_data)
-            .is_some_and(|ty| match ty {
-                TypeData::Literal(literal) => match literal.as_ref() {
-                    Literal::RegExp(literal) => !literal.flags.contains('g'),
-                    _ => false,
-                },
-                _ => false,
-            })
+        if ctx
+            .inferred_type_of_expression(express)
+            .is_some_and(|ty| ty.is_regexp_literal_without_global_flag())
         {
             return Some(());
         }

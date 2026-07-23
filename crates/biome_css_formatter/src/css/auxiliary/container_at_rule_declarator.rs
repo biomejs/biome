@@ -17,9 +17,15 @@ impl FormatNodeRule<CssContainerAtRuleDeclarator> for FormatCssContainerAtRuleDe
             query,
         } = node.as_fields();
 
-        write!(f, [container_token.format(), space()])?;
+        write!(
+            f,
+            [
+                container_token.format()?.with_text_case(CssCase::Lowercase),
+                space()
+            ]
+        )?;
 
-        if name.is_some() {
+        if let Some(name) = name {
             write!(f, [name.format(), space()])?;
         }
 

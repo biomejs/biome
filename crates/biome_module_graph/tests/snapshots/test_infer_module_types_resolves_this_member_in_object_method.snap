@@ -1,0 +1,76 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+class Base {
+	static read(): Promise<void> {
+		return Promise.resolve();
+	}
+}
+class Derived extends Base {}
+export const result = Derived.read();
+```
+
+## Inferred types
+
+```
+Binding Base "Base" => class "Base" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Promise" => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "Promise.resolve" => sync Function "resolve" {
+  accepts: {
+    params: [
+      required value: TResolveValue
+    ]
+    type_args: [TResolveValue]
+  }
+  returns: instanceof Promise<TResolveValue>
+}
+
+Expression "Promise.resolve()" => instanceof Promise<TResolveValue>
+
+Binding Derived "Derived" => class "Derived" {
+  extends: Base
+  implements: []
+  type_args: []
+}
+
+Expression "Base" => class "Base" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding result "result" => instanceof Promise<void>
+
+Expression "Derived" => class "Derived" {
+  extends: Base
+  implements: []
+  type_args: []
+}
+
+Expression "Derived.read" => sync Function "read" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<void>
+}
+
+Expression "Derived.read()" => instanceof Promise<void>
+```

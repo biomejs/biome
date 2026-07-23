@@ -45,7 +45,7 @@ pub use crate::file_handlers::vue::VueFileHandler;
 use crate::settings::{Settings, SettingsWithEditor};
 use crate::utils::growth_guard::GrowthGuard;
 use crate::workspace::{
-    CodeAction, DefinitionReference, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult,
+    CodeAction, DefinitionReference, FixAction, FixFileMode, GetSyntaxTreeResult,
     GoToDefinitionResult, PatternId, PullActionsResult, PullDiagnosticsAndActionsResult,
     RenameResult, SearchQuery,
 };
@@ -61,9 +61,9 @@ use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
 use biome_css_analyze::METADATA as css_metadata;
 #[cfg(feature = "lang_css")]
 use biome_css_syntax::CssLanguage;
-use biome_db::{AnyParsedSource, ParsedSnippet};
+use biome_db::{AnyParsedSource, ParsedSnippet, ParsedSource};
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
-use biome_formatter::{FormatContext, FormatResult, Formatted, Printed, SourceMapGeneration};
+use biome_formatter::Printed;
 use biome_fs::BiomePath;
 #[cfg(feature = "lang_graphql")]
 use biome_graphql_analyze::METADATA as graphql_metadata;
@@ -79,11 +79,13 @@ use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{AnyJsModuleItem, JsLanguage, JsxAttribute, JsxAttributeList};
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::JsonLanguage;
-use biome_languages::DocumentFileSource;
 #[cfg(feature = "lang_js")]
 use biome_languages::javascript::{
     JsEmbeddingKind, JsFileSource, Language, LanguageVariant, SvelteFileKind,
 };
+use biome_languages::{DocumentFileSource, LanguageDb};
+#[cfg(feature = "module_graph")]
+use biome_module_graph::ModuleDb;
 use biome_package::PackageJson;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
@@ -93,7 +95,6 @@ use biome_rowan::{BatchMutation, NodeCache, SendNode, SyntaxNode, TextRange, Tex
 use biome_text_edit::TextEdit;
 use biome_workspace_db::WorkspaceDb;
 use camino::{Utf8Path, Utf8PathBuf};
-use either::Either;
 #[cfg(feature = "lang_html")]
 use html::HtmlFileHandler;
 #[cfg(feature = "lang_js")]
@@ -103,6 +104,8 @@ use rustc_hash::{FxHashSet, FxHasher};
 use std::borrow::Cow;
 use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
+#[cfg(feature = "module_graph")]
+use std::rc::Rc;
 use std::sync::Arc;
 use tracing::trace;
 
@@ -119,13 +122,13 @@ pub(crate) fn matches_on_type_char(value: &str) -> bool {
 }
 
 pub struct FixAllParams<'a> {
-    pub(crate) parsed_source: AnyParsedSource,
+    pub(crate) parsed_source: ParsedOrigin,
     pub(crate) fix_file_mode: FixFileMode,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
-    /// Whether it should format the code action
-    pub(crate) should_format: bool,
     pub(crate) biome_path: &'a BiomePath,
     pub(crate) workspace_db: WorkspaceDb,
+    #[cfg(feature = "module_graph")]
+    pub(crate) module_db: Rc<dyn ModuleDb>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) document_file_source: DocumentFileSource,
     pub(crate) only: &'a [AnalyzerSelector],
@@ -135,10 +138,243 @@ pub struct FixAllParams<'a> {
     pub(crate) enabled_rules: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) working_directory: Option<&'a Utf8Path>,
-    /// The initial indentation level to apply when printing formatted code.
-    /// Used by embedded language handlers (Svelte, Vue) to preserve
-    /// `indentScriptAndStyle` indentation during fix-all operations.
-    pub(crate) embeds_initial_indent: u16,
+    pub(crate) collect_final_diagnostics: bool,
+}
+
+/// A small wrapper for the parsed file.
+#[derive(Clone, Debug)]
+pub(crate) enum ParsedOrigin {
+    /// The parse result has been queried from the database.
+    Workspace(AnyParsedSource),
+    /// The parse result has been generated from the server during an in-flight operation, and it won't
+    /// be saved back to the workspace. This is usually used for in-memory operations or stateless operations.
+    Interned {
+        parse: AnyParse,
+        diagnostic_offset: Option<TextSize>,
+        snippets: Vec<ParsedSnippetOrigin>,
+    },
+}
+
+#[derive(Clone, Debug)]
+pub(crate) enum ParsedSnippetOrigin {
+    /// The parse result has been queried from the database.
+    Workspace(ParsedSnippet),
+    /// The parse result has been generated from the server during an in-flight operation, and it won't
+    /// be saved back to the workspace. This is usually used for in-memory operations or stateless operations.
+    Interned {
+        parse: AnyParse,
+        content: EmbedContent,
+        file_source: DocumentFileSource,
+    },
+}
+
+impl ParsedSnippetOrigin {
+    pub(crate) fn parsed_origin(&self) -> ParsedOrigin {
+        match self {
+            Self::Workspace(snippet) => (*snippet).into(),
+            Self::Interned { parse, content, .. } => {
+                ParsedOrigin::interned(parse.clone(), Some(content.content_offset))
+            }
+        }
+    }
+
+    pub(crate) fn file_source(&self, db: &WorkspaceDb) -> Option<DocumentFileSource> {
+        match self {
+            Self::Workspace(snippet) => db.source_from_index(snippet.document_source_index(db)),
+            Self::Interned { file_source, .. } => Some(*file_source),
+        }
+    }
+
+    pub(crate) fn element_range(&self, db: &WorkspaceDb) -> TextRange {
+        match self {
+            Self::Workspace(snippet) => snippet.element_range(db),
+            Self::Interned { content, .. } => content.element_range,
+        }
+    }
+
+    pub(crate) fn content_range(&self, db: &WorkspaceDb) -> TextRange {
+        match self {
+            Self::Workspace(snippet) => snippet.content_range(db),
+            Self::Interned { content, .. } => content.content_range,
+        }
+    }
+
+    pub(crate) fn content_offset(&self, db: &WorkspaceDb) -> TextSize {
+        match self {
+            Self::Workspace(snippet) => snippet.content_offset(db),
+            Self::Interned { content, .. } => content.content_offset,
+        }
+    }
+
+    pub(crate) fn diagnostics<'a>(
+        &'a self,
+        db: &'a WorkspaceDb,
+    ) -> &'a [biome_parser::diagnostic::ParseDiagnostic] {
+        match self {
+            Self::Workspace(snippet) => snippet.parsed(db).diagnostics(),
+            Self::Interned { parse, .. } => parse.diagnostics(),
+        }
+    }
+
+    pub(crate) fn serde_diagnostics(
+        &self,
+        db: &WorkspaceDb,
+    ) -> Vec<biome_diagnostics::serde::Diagnostic> {
+        match self {
+            Self::Workspace(snippet) => snippet.serde_diagnostics(db),
+            Self::Interned { parse, .. } => parse.clone().into_serde_diagnostics(),
+        }
+    }
+
+    pub(crate) fn has_errors(&self, db: &WorkspaceDb) -> bool {
+        self.diagnostics(db)
+            .iter()
+            .any(|diagnostic| diagnostic.severity() >= Severity::Error)
+    }
+
+    pub(crate) fn error_count(&self, db: &WorkspaceDb) -> usize {
+        self.diagnostics(db)
+            .iter()
+            .filter(|diagnostic| diagnostic.severity() >= Severity::Error)
+            .count()
+    }
+}
+
+impl ParsedOrigin {
+    pub(crate) fn interned(parse: AnyParse, diagnostic_offset: Option<TextSize>) -> Self {
+        Self::Interned {
+            parse,
+            diagnostic_offset,
+            snippets: Vec::new(),
+        }
+    }
+
+    pub(crate) fn interned_document(parse: AnyParse, snippets: Vec<ParsedSnippetOrigin>) -> Self {
+        Self::Interned {
+            parse,
+            diagnostic_offset: None,
+            snippets,
+        }
+    }
+
+    pub(crate) fn tree<N>(&self, db: &WorkspaceDb) -> N
+    where
+        N: biome_rowan::AstNode,
+        N::Language: 'static,
+    {
+        match self {
+            Self::Workspace(source) => source.tree(db),
+            Self::Interned { parse, .. } => parse.tree(),
+        }
+    }
+
+    pub(crate) fn syntax<L>(&self, db: &WorkspaceDb) -> SyntaxNode<L>
+    where
+        L: biome_rowan::Language + 'static,
+    {
+        match self {
+            Self::Workspace(source) => source.syntax(db),
+            Self::Interned { parse, .. } => parse.syntax(),
+        }
+    }
+
+    pub(crate) fn parse(&self, db: &WorkspaceDb) -> AnyParse {
+        match self {
+            Self::Workspace(source) => source.any_parse(db).clone(),
+            Self::Interned { parse, .. } => parse.clone(),
+        }
+    }
+
+    pub(crate) fn send_node(&self, db: &WorkspaceDb) -> SendNode {
+        match self {
+            Self::Workspace(source) => source.any_parse(db).unwrap_as_send_node(),
+            Self::Interned { parse, .. } => parse.unwrap_as_send_node(),
+        }
+    }
+
+    pub(crate) fn diagnostics<'a>(
+        &'a self,
+        db: &'a WorkspaceDb,
+    ) -> &'a [biome_parser::diagnostic::ParseDiagnostic] {
+        match self {
+            Self::Workspace(source) => source.diagnostics(db),
+            Self::Interned { parse, .. } => parse.diagnostics(),
+        }
+    }
+
+    pub(crate) fn serde_diagnostics(
+        &self,
+        db: &WorkspaceDb,
+    ) -> Vec<biome_diagnostics::serde::Diagnostic> {
+        match self {
+            Self::Workspace(source) => source.serde_diagnostics(db),
+            Self::Interned { parse, .. } => parse.clone().into_serde_diagnostics(),
+        }
+    }
+
+    pub(crate) fn diagnostic_offset(&self, db: &WorkspaceDb) -> Option<TextSize> {
+        match self {
+            Self::Workspace(source) => source.diagnostic_offset(db),
+            Self::Interned {
+                diagnostic_offset, ..
+            } => *diagnostic_offset,
+        }
+    }
+}
+
+impl From<AnyParsedSource> for ParsedOrigin {
+    fn from(source: AnyParsedSource) -> Self {
+        Self::Workspace(source)
+    }
+}
+
+impl From<ParsedSource> for ParsedOrigin {
+    fn from(source: ParsedSource) -> Self {
+        Self::Workspace(source.into())
+    }
+}
+
+impl From<ParsedSnippet> for ParsedOrigin {
+    fn from(source: ParsedSnippet) -> Self {
+        Self::Workspace(source.into())
+    }
+}
+
+impl From<&ParsedSnippet> for ParsedOrigin {
+    fn from(source: &ParsedSnippet) -> Self {
+        Self::Workspace((*source).into())
+    }
+}
+
+impl From<AnyParse> for ParsedOrigin {
+    fn from(parse: AnyParse) -> Self {
+        Self::interned(parse, None)
+    }
+}
+
+pub(crate) enum SnippetsIterator<'a> {
+    Workspace(std::slice::Iter<'a, ParsedSnippet>),
+    Interned(std::slice::Iter<'a, ParsedSnippetOrigin>),
+}
+
+impl Iterator for SnippetsIterator<'_> {
+    type Item = ParsedSnippetOrigin;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self {
+            Self::Workspace(snippets) => {
+                snippets.next().copied().map(ParsedSnippetOrigin::Workspace)
+            }
+            Self::Interned(snippets) => snippets.next().cloned(),
+        }
+    }
+}
+
+pub(crate) struct FixedFileResult {
+    pub(crate) root: SendNode,
+    pub(crate) skipped_suggested_fixes: u32,
+    pub(crate) actions: Vec<FixAction>,
+    pub(crate) errors: usize,
 }
 
 #[derive(Default)]
@@ -164,17 +400,18 @@ pub struct ParseEmbedResult {
     pub(crate) nodes: Vec<(AnyParse, EmbedContent, DocumentFileSource)>,
 }
 
-pub(crate) struct ParseEmbeddedParams<'a> {
+pub(crate) struct ParseEmbeddedParams<'a, 'settings> {
     pub(crate) any_parse: &'a AnyParse,
     pub(crate) path: &'a BiomePath,
     pub(crate) file_source: &'a DocumentFileSource,
-    pub(crate) settings: &'a SettingsWithEditor<'a>,
+    pub(crate) settings: &'a SettingsWithEditor<'settings>,
     pub(crate) node_cache: &'a mut NodeCache,
 }
 
 type Parse =
     fn(&BiomePath, DocumentFileSource, &str, &SettingsWithEditor, &mut NodeCache) -> ParseResult;
-type ParseEmbeddedNodes = fn(ParseEmbeddedParams) -> ParseEmbedResult;
+type ParseEmbeddedNodes =
+    for<'a, 'settings> fn(ParseEmbeddedParams<'a, 'settings>) -> ParseEmbedResult;
 #[derive(Default)]
 pub struct ParserCapabilities {
     /// Parse a file
@@ -215,7 +452,7 @@ pub struct DebugCapabilities {
 }
 
 pub(crate) struct LintParams<'a> {
-    pub(crate) parsed_source: AnyParsedSource,
+    pub(crate) parsed_source: ParsedOrigin,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
@@ -223,6 +460,8 @@ pub(crate) struct LintParams<'a> {
     pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) categories: RuleCategories,
     pub(crate) workspace_db: WorkspaceDb,
+    #[cfg(feature = "module_graph")]
+    pub(crate) module_db: Rc<dyn ModuleDb>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_selectors: &'a [AnalyzerSelector],
@@ -666,12 +905,9 @@ impl<'a> ProcessFixAll<'a> {
     /// Returns `Some(new_text)` if the edit was applied, `None` otherwise.
     pub(crate) fn apply_plugin_text_edit(
         &mut self,
-        text_edit: Option<(TextRange, TextEdit)>,
+        (range, edit): (TextRange, TextEdit),
         current_text: &str,
     ) -> Result<Option<String>, WorkspaceError> {
-        let Some((range, edit)) = text_edit else {
-            return Ok(None);
-        };
         let new_text = edit.new_string(current_text);
         if new_text == current_text {
             return Ok(None);
@@ -680,39 +916,13 @@ impl<'a> ProcessFixAll<'a> {
         Ok(Some(new_text))
     }
 
-    /// Finish processing the fix all actions. Returns the result of the fix-all actions. The `format_tree`
-    /// is a closure that must return the new code (formatted, if needed).
-    ///
-    /// `initial_indent` specifies the base indentation level for printing. This is used by
-    /// embedded language handlers (e.g. Svelte, Vue) to preserve `indentScriptAndStyle`
-    /// indentation when formatting during fix-all operations.
-    pub(crate) fn finish<F, C>(
-        self,
-        format_tree: F,
-        initial_indent: u16,
-    ) -> Result<FixFileResult, WorkspaceError>
-    where
-        F: FnOnce() -> Result<Either<FormatResult<Formatted<C>>, String>, WorkspaceError>,
-        C: FormatContext,
-    {
-        let code = match format_tree()? {
-            Either::Left(printed) => {
-                if initial_indent > 0 {
-                    printed?
-                        .print_with_indent(initial_indent, SourceMapGeneration::Disabled)?
-                        .into_code()
-                } else {
-                    printed?.print()?.into_code()
-                }
-            }
-            Either::Right(string) => string,
-        };
-        Ok(FixFileResult {
-            code,
+    pub(crate) fn finish(self, root: SendNode) -> FixedFileResult {
+        FixedFileResult {
+            root,
             skipped_suggested_fixes: self.skipped_suggested_fixes,
             actions: self.actions,
             errors: self.errors,
-        })
+        }
     }
 }
 
@@ -806,7 +1016,7 @@ pub(crate) struct UpdateSnippetsNodes {
 
 type Lint = fn(LintParams) -> LintResults;
 type CodeActions = fn(CodeActionsParams) -> PullActionsResult;
-type FixAll = fn(FixAllParams) -> Result<FixFileResult, WorkspaceError>;
+type FixAll = fn(FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError>;
 type Rename = fn(
     &BiomePath,
     AnyParsedSource,
@@ -815,7 +1025,7 @@ type Rename = fn(
     WorkspaceDb,
 ) -> Result<RenameResult, WorkspaceError>;
 type UpdateSnippets =
-    fn(AnyParsedSource, WorkspaceDb, Vec<UpdateSnippetsNodes>) -> Result<SendNode, WorkspaceError>;
+    fn(ParsedOrigin, WorkspaceDb, Vec<UpdateSnippetsNodes>) -> Result<SendNode, WorkspaceError>;
 type PullDiagnosticsAndActions = fn(DiagnosticsAndActionsParams) -> PullDiagnosticsAndActionsResult;
 
 #[derive(Default)]
@@ -837,7 +1047,7 @@ pub struct AnalyzerCapabilities {
 type Format = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParsedSource,
+    ParsedOrigin,
     &SettingsWithEditor,
     WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
@@ -871,9 +1081,9 @@ pub(crate) fn format_on_type_noop(offset: TextSize) -> Printed {
 type FormatEmbedded = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParsedSource,
+    ParsedOrigin,
     &SettingsWithEditor,
-    Vec<ParsedSnippet>,
+    Vec<ParsedSnippetOrigin>,
     WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
 
@@ -1492,7 +1702,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             self.enabled_rules.extend(rules.as_enabled_rules());
             self.disabled_rules.extend(rules.as_disabled_rules());
         }
-        let fixable_rules = self
+        let fixable_rules: Vec<_> = self
             .enabled_rules
             .iter()
             .filter(|rule| self.rules_with_fix.contains(rule))

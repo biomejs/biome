@@ -1,0 +1,60 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export class Base {
+	label: string;
+}
+
+export class Derived extends Base {
+	value: number;
+
+	read() {
+		const own = this.value;
+		const inherited = super.label;
+		return own;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding Base "Base" => class "Base" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding Derived "Derived" => class "Derived" {
+  extends: Base
+  implements: []
+  type_args: []
+}
+
+Expression "Base" => class "Base" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding own "own" => number
+
+Expression "this" => instanceof Derived
+
+Expression "this.value" => number
+
+Binding inherited "inherited" => string
+
+Expression "super" => instanceof Base
+
+Expression "super.label" => string
+
+Expression "own" => number
+```

@@ -15,11 +15,11 @@ importers:
         specifier: 0.7.0
         version: 0.7.0
       '@changesets/cli':
-        specifier: 2.31.0
-        version: 2.31.0(@types/node@24.13.2)
+        specifier: 2.31.1
+        version: 2.31.1(@types/node@24.13.3)
       '@types/node':
-        specifier: 24.13.2
-        version: 24.13.2
+        specifier: 24.13.3
+        version: 24.13.3
       commonmark:
         specifier: 0.31.2
         version: 0.31.2
@@ -49,55 +49,55 @@ importers:
         version: 4.1.5(@types/node@24.12.2)(happy-dom@20.9.0)(vite@7.3.5(@types/node@24.12.2)(tsx@4.21.0))
     optionalDependencies:
       '@biomejs/cli-darwin-arm64':
-        specifier: 2.5.3
+        specifier: 2.5.5
         version: link:../cli-darwin-arm64
       '@biomejs/cli-darwin-x64':
-        specifier: 2.5.3
+        specifier: 2.5.5
         version: link:../cli-darwin-x64
       '@biomejs/cli-linux-arm64':
-        specifier: 2.5.3
+        specifier: 2.5.5
         version: link:../cli-linux-arm64
       '@biomejs/cli-linux-arm64-musl':
-        specifier: 2.5.3
+        specifier: 2.5.5
         version: link:../cli-linux-arm64-musl
       '@biomejs/cli-linux-x64':
-        specifier: 2.5.3
+        specifier: 2.5.5
         version: link:../cli-linux-x64
       '@biomejs/cli-linux-x64-musl':
-        specifier: 2.5.3
+        specifier: 2.5.5
         version: link:../cli-linux-x64-musl
       '@biomejs/cli-win32-arm64':
-        specifier: 2.5.3
+        specifier: 2.5.5
         version: link:../cli-win32-arm64
       '@biomejs/cli-win32-x64':
-        specifier: 2.5.3
+        specifier: 2.5.5
         version: link:../cli-win32-x64
 
   packages/@biomejs/biome:
     optionalDependencies:
       '@biomejs/cli-darwin-arm64':
-        specifier: 2.5.3
+        specifier: 2.5.5
         version: link:../cli-darwin-arm64
       '@biomejs/cli-darwin-x64':
-        specifier: 2.5.3
+        specifier: 2.5.5
         version: link:../cli-darwin-x64
       '@biomejs/cli-linux-arm64':
-        specifier: 2.5.3
+        specifier: 2.5.5
         version: link:../cli-linux-arm64
       '@biomejs/cli-linux-arm64-musl':
-        specifier: 2.5.3
+        specifier: 2.5.5
         version: link:../cli-linux-arm64-musl
       '@biomejs/cli-linux-x64':
-        specifier: 2.5.3
+        specifier: 2.5.5
         version: link:../cli-linux-x64
       '@biomejs/cli-linux-x64-musl':
-        specifier: 2.5.3
+        specifier: 2.5.5
         version: link:../cli-linux-x64-musl
       '@biomejs/cli-win32-arm64':
-        specifier: 2.5.3
+        specifier: 2.5.5
         version: link:../cli-win32-arm64
       '@biomejs/cli-win32-x64':
-        specifier: 2.5.3
+        specifier: 2.5.5
         version: link:../cli-win32-x64
 
   packages/@biomejs/cli-darwin-arm64: {}
@@ -132,10 +132,10 @@ importers:
         version: 5.9.3
       vite:
         specifier: 7.3.5
-        version: 7.3.5(@types/node@24.13.2)(tsx@4.21.0)
+        version: 7.3.5(@types/node@24.13.3)(tsx@4.21.0)
       vitest:
         specifier: 4.1.5
-        version: 4.1.5(@types/node@24.13.2)(happy-dom@20.9.0)(vite@7.3.5(@types/node@24.13.2)(tsx@4.21.0))
+        version: 4.1.5(@types/node@24.13.3)(happy-dom@20.9.0)(vite@7.3.5(@types/node@24.13.3)(tsx@4.21.0))
 
   packages/@biomejs/plugin-api:
     dependencies:
@@ -240,8 +240,8 @@ packages:
   '@changesets/changelog-github@0.7.0':
     resolution: {integrity: sha512-rBsbRvc4TVn+FvFnOVM3LxlFJfTXXCp8gfVJ+0BubxWNSVnLuAzowi5j+IEraLLP52w8AAs9QfKbPS3MMiXQJA==}
 
-  '@changesets/cli@2.31.0':
-    resolution: {integrity: sha512-AhI4enNTgHu2IZr6K4WZyf0EPch4XVMn1yOMFmCD9gsfBGqMYaHXls5HyDv6/CL5axVQABz68eG30eCtbr2wFg==}
+  '@changesets/cli@2.31.1':
+    resolution: {integrity: sha512-uO05WTcRBwuVOJVSW8Cmpqw6q0WDL53ajGCMyszutvOe5toOnunbpM4jZzf+qxBOz7i0AzopZ8diBuewjmF40w==}
     hasBin: true
 
   '@changesets/config@3.1.4':
@@ -840,8 +840,8 @@ packages:
   '@types/node@24.12.2':
     resolution: {integrity: sha512-A1sre26ke7HDIuY/M23nd9gfB+nrmhtYyMINbjI1zHJxYteKR6qSMX56FsmjMcDb3SMcjJg5BiRRgOCC/yBD0g==}
 
-  '@types/node@24.13.2':
-    resolution: {integrity: sha512-fRa09kZTgu8o71KFcDjUFuc7F+dEbZYZmkI0mg5YBTRs0yMKjYHsq/c0urDKeDb+D5qVgXOdFcuu+DZPKOITwA==}
+  '@types/node@24.13.3':
+    resolution: {integrity: sha512-Dh8vAsV36ig5wa9OX4pXvMc9D3Veibfw2wix0CUwYODLD8nkj9UsLjASr49nPg+2eKzxhBV+v7L8pXvT4e639Q==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -1873,7 +1873,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@changesets/cli@2.31.0(@types/node@24.13.2)':
+  '@changesets/cli@2.31.1(@types/node@24.13.3)':
     dependencies:
       '@changesets/apply-release-plan': 7.1.1
       '@changesets/assemble-release-plan': 6.0.10
@@ -1889,7 +1889,7 @@ snapshots:
       '@changesets/should-skip-package': 0.1.2
       '@changesets/types': 6.1.0
       '@changesets/write': 0.4.0
-      '@inquirer/external-editor': 1.0.3(@types/node@24.13.2)
+      '@inquirer/external-editor': 1.0.3(@types/node@24.13.3)
       '@manypkg/get-packages': 1.1.3
       ansi-colors: 4.1.3
       enquirer: 2.4.1
@@ -2075,12 +2075,12 @@ snapshots:
   '@esbuild/win32-x64@0.27.2':
     optional: true
 
-  '@inquirer/external-editor@1.0.3(@types/node@24.13.2)':
+  '@inquirer/external-editor@1.0.3(@types/node@24.13.3)':
     dependencies:
       chardet: 2.1.1
       iconv-lite: 0.7.0
     optionalDependencies:
-      '@types/node': 24.13.2
+      '@types/node': 24.13.3
 
   '@jimp/core@1.6.0':
     dependencies:
@@ -2483,7 +2483,7 @@ snapshots:
     dependencies:
       undici-types: 7.16.0
 
-  '@types/node@24.13.2':
+  '@types/node@24.13.3':
     dependencies:
       undici-types: 7.18.2
 
@@ -2497,7 +2497,7 @@ snapshots:
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 24.13.2
+      '@types/node': 24.13.3
 
   '@typescript-eslint/types@8.57.2': {}
 
@@ -2518,13 +2518,13 @@ snapshots:
     optionalDependencies:
       vite: 7.3.5(@types/node@24.12.2)(tsx@4.21.0)
 
-  '@vitest/mocker@4.1.5(vite@7.3.5(@types/node@24.13.2)(tsx@4.21.0))':
+  '@vitest/mocker@4.1.5(vite@7.3.5(@types/node@24.13.3)(tsx@4.21.0))':
     dependencies:
       '@vitest/spy': 4.1.5
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 7.3.5(@types/node@24.13.2)(tsx@4.21.0)
+      vite: 7.3.5(@types/node@24.13.3)(tsx@4.21.0)
 
   '@vitest/pretty-format@4.1.5':
     dependencies:
@@ -2795,7 +2795,7 @@ snapshots:
 
   happy-dom@20.9.0:
     dependencies:
-      '@types/node': 24.13.2
+      '@types/node': 24.13.3
       '@types/whatwg-mimetype': 3.0.2
       '@types/ws': 8.18.1
       entities: 7.0.1
@@ -3310,7 +3310,7 @@ snapshots:
       fsevents: 2.3.3
       tsx: 4.21.0
 
-  vite@7.3.5(@types/node@24.13.2)(tsx@4.21.0):
+  vite@7.3.5(@types/node@24.13.3)(tsx@4.21.0):
     dependencies:
       esbuild: 0.27.2
       fdir: 6.5.0(picomatch@4.0.4)
@@ -3319,7 +3319,7 @@ snapshots:
       rollup: 4.46.2
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 24.13.2
+      '@types/node': 24.13.3
       fsevents: 2.3.3
       tsx: 4.21.0
 
@@ -3351,10 +3351,10 @@ snapshots:
     transitivePeerDependencies:
       - msw
 
-  vitest@4.1.5(@types/node@24.13.2)(happy-dom@20.9.0)(vite@7.3.5(@types/node@24.13.2)(tsx@4.21.0)):
+  vitest@4.1.5(@types/node@24.13.3)(happy-dom@20.9.0)(vite@7.3.5(@types/node@24.13.3)(tsx@4.21.0)):
     dependencies:
       '@vitest/expect': 4.1.5
-      '@vitest/mocker': 4.1.5(vite@7.3.5(@types/node@24.13.2)(tsx@4.21.0))
+      '@vitest/mocker': 4.1.5(vite@7.3.5(@types/node@24.13.3)(tsx@4.21.0))
       '@vitest/pretty-format': 4.1.5
       '@vitest/runner': 4.1.5
       '@vitest/snapshot': 4.1.5
@@ -3371,10 +3371,10 @@ snapshots:
       tinyexec: 1.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.1.0
-      vite: 7.3.5(@types/node@24.13.2)(tsx@4.21.0)
+      vite: 7.3.5(@types/node@24.13.3)(tsx@4.21.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 24.13.2
+      '@types/node': 24.13.3
       happy-dom: 20.9.0
     transitivePeerDependencies:
       - msw

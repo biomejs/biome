@@ -1,0 +1,64 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export let flag: boolean = true;
+export let maybeText: string | undefined = "value";
+
+export const choice = flag ? "value" : 1;
+export const andValue = maybeText && 1;
+export const orValue = maybeText || 1;
+export const nullishValue = maybeText ?? 1;
+```
+
+## Inferred types
+
+```
+Binding flag "flag" => instanceof boolean
+
+Expression "true" => bool: true
+
+Binding maybeText "maybeText" => instanceof string | undefined
+
+Expression "\"value\"" => string: value
+
+Binding choice "choice" => string: value | number: 1
+
+Expression "flag" => instanceof boolean
+
+Expression "flag ? \"value\" : 1" => string: value | number: 1
+
+Expression "\"value\"" => string: value
+
+Expression "1" => number: 1
+
+Binding andValue "andValue" => string:  | undefined | number: 1
+
+Expression "maybeText" => instanceof string | undefined
+
+Expression "maybeText && 1" => string:  | undefined | number: 1
+
+Expression "1" => number: 1
+
+Binding orValue "orValue" => string | number: 1
+
+Expression "maybeText" => instanceof string | undefined
+
+Expression "maybeText || 1" => string | number: 1
+
+Expression "1" => number: 1
+
+Binding nullishValue "nullishValue" => string | number: 1
+
+Expression "maybeText" => instanceof string | undefined
+
+Expression "maybeText ?? 1" => string | number: 1
+
+Expression "1" => number: 1
+```

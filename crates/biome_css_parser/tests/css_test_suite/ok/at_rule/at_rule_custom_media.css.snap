@@ -1,0 +1,291 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@custom-media --all all;
+@custom-media --screen-and-color screen and (color);
+@custom-media --modern (color), (hover);
+@custom-media --mobile (max-width: 768px);
+@custom-media --true true;
+@custom-media --false false;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssCustomMediaAtRule {
+                declarator: CssCustomMediaAtRuleDeclarator {
+                    custom_media_token: CUSTOM_MEDIA_KW@1..14 "custom-media" [] [Whitespace(" ")],
+                    name: CssDashedIdentifier {
+                        value_token: IDENT@14..20 "--all" [] [Whitespace(" ")],
+                    },
+                    queries: CssMediaQueryList [
+                        CssMediaTypeQuery {
+                            modifier: missing (optional),
+                            ty: CssMediaType {
+                                value: CssIdentifier {
+                                    value_token: IDENT@20..23 "all" [] [],
+                                },
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@23..24 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@24..26 "@" [Newline("\n")] [],
+            rule: CssCustomMediaAtRule {
+                declarator: CssCustomMediaAtRuleDeclarator {
+                    custom_media_token: CUSTOM_MEDIA_KW@26..39 "custom-media" [] [Whitespace(" ")],
+                    name: CssDashedIdentifier {
+                        value_token: IDENT@39..58 "--screen-and-color" [] [Whitespace(" ")],
+                    },
+                    queries: CssMediaQueryList [
+                        CssMediaAndTypeQuery {
+                            left: CssMediaTypeQuery {
+                                modifier: missing (optional),
+                                ty: CssMediaType {
+                                    value: CssIdentifier {
+                                        value_token: IDENT@58..65 "screen" [] [Whitespace(" ")],
+                                    },
+                                },
+                            },
+                            and_token: AND_KW@65..69 "and" [] [Whitespace(" ")],
+                            right: CssMediaFeatureInParens {
+                                l_paren_token: L_PAREN@69..70 "(" [] [],
+                                feature: CssQueryFeatureBoolean {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@70..75 "color" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@75..76 ")" [] [],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@76..77 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@77..79 "@" [Newline("\n")] [],
+            rule: CssCustomMediaAtRule {
+                declarator: CssCustomMediaAtRuleDeclarator {
+                    custom_media_token: CUSTOM_MEDIA_KW@79..92 "custom-media" [] [Whitespace(" ")],
+                    name: CssDashedIdentifier {
+                        value_token: IDENT@92..101 "--modern" [] [Whitespace(" ")],
+                    },
+                    queries: CssMediaQueryList [
+                        CssMediaConditionQuery {
+                            condition: CssMediaFeatureInParens {
+                                l_paren_token: L_PAREN@101..102 "(" [] [],
+                                feature: CssQueryFeatureBoolean {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@102..107 "color" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@107..108 ")" [] [],
+                            },
+                        },
+                        COMMA@108..110 "," [] [Whitespace(" ")],
+                        CssMediaConditionQuery {
+                            condition: CssMediaFeatureInParens {
+                                l_paren_token: L_PAREN@110..111 "(" [] [],
+                                feature: CssQueryFeatureBoolean {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@111..116 "hover" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@116..117 ")" [] [],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@117..118 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@118..120 "@" [Newline("\n")] [],
+            rule: CssCustomMediaAtRule {
+                declarator: CssCustomMediaAtRuleDeclarator {
+                    custom_media_token: CUSTOM_MEDIA_KW@120..133 "custom-media" [] [Whitespace(" ")],
+                    name: CssDashedIdentifier {
+                        value_token: IDENT@133..142 "--mobile" [] [Whitespace(" ")],
+                    },
+                    queries: CssMediaQueryList [
+                        CssMediaConditionQuery {
+                            condition: CssMediaFeatureInParens {
+                                l_paren_token: L_PAREN@142..143 "(" [] [],
+                                feature: CssQueryFeaturePlain {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@143..152 "max-width" [] [],
+                                    },
+                                    colon_token: COLON@152..154 ":" [] [Whitespace(" ")],
+                                    value: CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@154..157 "768" [] [],
+                                        unit_token: IDENT@157..159 "px" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@159..160 ")" [] [],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@160..161 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@161..163 "@" [Newline("\n")] [],
+            rule: CssCustomMediaAtRule {
+                declarator: CssCustomMediaAtRuleDeclarator {
+                    custom_media_token: CUSTOM_MEDIA_KW@163..176 "custom-media" [] [Whitespace(" ")],
+                    name: CssDashedIdentifier {
+                        value_token: IDENT@176..183 "--true" [] [Whitespace(" ")],
+                    },
+                    queries: CssBooleanMediaQuery {
+                        boolean: TRUE_KW@183..187 "true" [] [],
+                    },
+                },
+                semicolon_token: SEMICOLON@187..188 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@188..190 "@" [Newline("\n")] [],
+            rule: CssCustomMediaAtRule {
+                declarator: CssCustomMediaAtRuleDeclarator {
+                    custom_media_token: CUSTOM_MEDIA_KW@190..203 "custom-media" [] [Whitespace(" ")],
+                    name: CssDashedIdentifier {
+                        value_token: IDENT@203..211 "--false" [] [Whitespace(" ")],
+                    },
+                    queries: CssBooleanMediaQuery {
+                        boolean: FALSE_KW@211..216 "false" [] [],
+                    },
+                },
+                semicolon_token: SEMICOLON@216..217 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@217..218 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..218
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..217
+    0: CSS_AT_RULE@0..24
+      0: AT@0..1 "@" [] []
+      1: CSS_CUSTOM_MEDIA_AT_RULE@1..24
+        0: CSS_CUSTOM_MEDIA_AT_RULE_DECLARATOR@1..23
+          0: CUSTOM_MEDIA_KW@1..14 "custom-media" [] [Whitespace(" ")]
+          1: CSS_DASHED_IDENTIFIER@14..20
+            0: IDENT@14..20 "--all" [] [Whitespace(" ")]
+          2: CSS_MEDIA_QUERY_LIST@20..23
+            0: CSS_MEDIA_TYPE_QUERY@20..23
+              0: (empty)
+              1: CSS_MEDIA_TYPE@20..23
+                0: CSS_IDENTIFIER@20..23
+                  0: IDENT@20..23 "all" [] []
+        1: SEMICOLON@23..24 ";" [] []
+    1: CSS_AT_RULE@24..77
+      0: AT@24..26 "@" [Newline("\n")] []
+      1: CSS_CUSTOM_MEDIA_AT_RULE@26..77
+        0: CSS_CUSTOM_MEDIA_AT_RULE_DECLARATOR@26..76
+          0: CUSTOM_MEDIA_KW@26..39 "custom-media" [] [Whitespace(" ")]
+          1: CSS_DASHED_IDENTIFIER@39..58
+            0: IDENT@39..58 "--screen-and-color" [] [Whitespace(" ")]
+          2: CSS_MEDIA_QUERY_LIST@58..76
+            0: CSS_MEDIA_AND_TYPE_QUERY@58..76
+              0: CSS_MEDIA_TYPE_QUERY@58..65
+                0: (empty)
+                1: CSS_MEDIA_TYPE@58..65
+                  0: CSS_IDENTIFIER@58..65
+                    0: IDENT@58..65 "screen" [] [Whitespace(" ")]
+              1: AND_KW@65..69 "and" [] [Whitespace(" ")]
+              2: CSS_MEDIA_FEATURE_IN_PARENS@69..76
+                0: L_PAREN@69..70 "(" [] []
+                1: CSS_QUERY_FEATURE_BOOLEAN@70..75
+                  0: CSS_IDENTIFIER@70..75
+                    0: IDENT@70..75 "color" [] []
+                2: R_PAREN@75..76 ")" [] []
+        1: SEMICOLON@76..77 ";" [] []
+    2: CSS_AT_RULE@77..118
+      0: AT@77..79 "@" [Newline("\n")] []
+      1: CSS_CUSTOM_MEDIA_AT_RULE@79..118
+        0: CSS_CUSTOM_MEDIA_AT_RULE_DECLARATOR@79..117
+          0: CUSTOM_MEDIA_KW@79..92 "custom-media" [] [Whitespace(" ")]
+          1: CSS_DASHED_IDENTIFIER@92..101
+            0: IDENT@92..101 "--modern" [] [Whitespace(" ")]
+          2: CSS_MEDIA_QUERY_LIST@101..117
+            0: CSS_MEDIA_CONDITION_QUERY@101..108
+              0: CSS_MEDIA_FEATURE_IN_PARENS@101..108
+                0: L_PAREN@101..102 "(" [] []
+                1: CSS_QUERY_FEATURE_BOOLEAN@102..107
+                  0: CSS_IDENTIFIER@102..107
+                    0: IDENT@102..107 "color" [] []
+                2: R_PAREN@107..108 ")" [] []
+            1: COMMA@108..110 "," [] [Whitespace(" ")]
+            2: CSS_MEDIA_CONDITION_QUERY@110..117
+              0: CSS_MEDIA_FEATURE_IN_PARENS@110..117
+                0: L_PAREN@110..111 "(" [] []
+                1: CSS_QUERY_FEATURE_BOOLEAN@111..116
+                  0: CSS_IDENTIFIER@111..116
+                    0: IDENT@111..116 "hover" [] []
+                2: R_PAREN@116..117 ")" [] []
+        1: SEMICOLON@117..118 ";" [] []
+    3: CSS_AT_RULE@118..161
+      0: AT@118..120 "@" [Newline("\n")] []
+      1: CSS_CUSTOM_MEDIA_AT_RULE@120..161
+        0: CSS_CUSTOM_MEDIA_AT_RULE_DECLARATOR@120..160
+          0: CUSTOM_MEDIA_KW@120..133 "custom-media" [] [Whitespace(" ")]
+          1: CSS_DASHED_IDENTIFIER@133..142
+            0: IDENT@133..142 "--mobile" [] [Whitespace(" ")]
+          2: CSS_MEDIA_QUERY_LIST@142..160
+            0: CSS_MEDIA_CONDITION_QUERY@142..160
+              0: CSS_MEDIA_FEATURE_IN_PARENS@142..160
+                0: L_PAREN@142..143 "(" [] []
+                1: CSS_QUERY_FEATURE_PLAIN@143..159
+                  0: CSS_IDENTIFIER@143..152
+                    0: IDENT@143..152 "max-width" [] []
+                  1: COLON@152..154 ":" [] [Whitespace(" ")]
+                  2: CSS_REGULAR_DIMENSION@154..159
+                    0: CSS_NUMBER_LITERAL@154..157 "768" [] []
+                    1: IDENT@157..159 "px" [] []
+                2: R_PAREN@159..160 ")" [] []
+        1: SEMICOLON@160..161 ";" [] []
+    4: CSS_AT_RULE@161..188
+      0: AT@161..163 "@" [Newline("\n")] []
+      1: CSS_CUSTOM_MEDIA_AT_RULE@163..188
+        0: CSS_CUSTOM_MEDIA_AT_RULE_DECLARATOR@163..187
+          0: CUSTOM_MEDIA_KW@163..176 "custom-media" [] [Whitespace(" ")]
+          1: CSS_DASHED_IDENTIFIER@176..183
+            0: IDENT@176..183 "--true" [] [Whitespace(" ")]
+          2: CSS_BOOLEAN_MEDIA_QUERY@183..187
+            0: TRUE_KW@183..187 "true" [] []
+        1: SEMICOLON@187..188 ";" [] []
+    5: CSS_AT_RULE@188..217
+      0: AT@188..190 "@" [Newline("\n")] []
+      1: CSS_CUSTOM_MEDIA_AT_RULE@190..217
+        0: CSS_CUSTOM_MEDIA_AT_RULE_DECLARATOR@190..216
+          0: CUSTOM_MEDIA_KW@190..203 "custom-media" [] [Whitespace(" ")]
+          1: CSS_DASHED_IDENTIFIER@203..211
+            0: IDENT@203..211 "--false" [] [Whitespace(" ")]
+          2: CSS_BOOLEAN_MEDIA_QUERY@211..216
+            0: FALSE_KW@211..216 "false" [] []
+        1: SEMICOLON@216..217 ";" [] []
+  2: EOF@217..218 "" [Newline("\n")] []
+
+```

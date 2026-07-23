@@ -27,6 +27,8 @@ mod buffer;
 mod builders;
 pub mod comments;
 pub mod diagnostics;
+#[cfg(debug_assertions)]
+mod format_audit;
 pub mod format_element;
 mod format_extensions;
 pub mod formatter;
@@ -39,6 +41,7 @@ pub mod printer;
 pub mod separated;
 mod source_map;
 pub mod token;
+mod token_case;
 pub mod trivia;
 
 use crate::formatter::Formatter;
@@ -50,8 +53,13 @@ use std::fmt::{Debug, Display};
 use crate::builders::syntax_token_cow_slice;
 use crate::comments::{CommentStyle, Comments, SourceComment};
 pub use crate::diagnostics::{ActualStart, FormatError, InvalidDocumentError, PrintError};
+#[cfg(debug_assertions)]
+use crate::format_audit::FormatAudit;
 use crate::format_element::document::Document;
 use crate::format_element::{Interned, LineMode};
+pub use crate::format_extensions::{
+    FormatScopedOptions, FormatScopedOptionsExt, FormatWithScopedOptions,
+};
 #[cfg(debug_assertions)]
 use crate::printed_tokens::PrintedTokens;
 use crate::printer::{Printer, PrinterOptions};
@@ -79,6 +87,7 @@ pub use source_map::{TransformSourceMap, TransformSourceMapBuilder};
 use std::num::ParseIntError;
 use std::str::FromStr;
 use token::string::Quote;
+pub use token_case::{FormatRuleWithTextCase, FormatTextCaseExt, TextCase};
 
 #[derive(Debug, Default, Clone, Copy, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
@@ -1644,6 +1653,7 @@ where
 
     let mut document = Document::from(buffer.into_vec());
     document.propagate_expand();
+    state.assert_no_audit_events();
 
     Ok(Formatted::new(document, state.into_context()))
 }
@@ -1772,6 +1782,7 @@ pub fn format_node_with_source_map_generation<L: FormatLanguage>(
     document.propagate_expand();
 
     state.assert_formatted_all_tokens(&root);
+    state.assert_no_audit_events();
 
     let context = state.into_context();
     let comments = context.comments();
@@ -1848,6 +1859,7 @@ pub fn format_node_with_offset<L: FormatLanguage>(
     document.propagate_expand();
 
     state.assert_formatted_all_tokens(&root);
+    state.assert_no_audit_events();
 
     let context = state.into_context();
     let comments = context.comments();
@@ -2278,6 +2290,8 @@ pub struct FormatState<Context> {
     // the Formatter is still completely immutable in release builds
     #[cfg(debug_assertions)]
     pub printed_tokens: PrintedTokens,
+    #[cfg(debug_assertions)]
+    format_audit: FormatAudit,
 }
 
 impl<Context> std::fmt::Debug for FormatState<Context>
@@ -2308,6 +2322,8 @@ impl<Context> FormatState<Context> {
 
             #[cfg(debug_assertions)]
             printed_tokens: Default::default(),
+            #[cfg(debug_assertions)]
+            format_audit: Default::default(),
         }
     }
 
@@ -2349,6 +2365,17 @@ impl<Context> FormatState<Context> {
 
     #[cfg(not(debug_assertions))]
     #[inline]
+    pub fn record_audit_event(&mut self, _event: impl Into<String>) {}
+
+    /// Records a formatter audit event that must be resolved before formatting completes.
+    #[cfg(debug_assertions)]
+    #[inline]
+    pub fn record_audit_event(&mut self, event: impl Into<String>) {
+        self.format_audit.record_event(event);
+    }
+
+    #[cfg(not(debug_assertions))]
+    #[inline]
     pub fn set_token_tracking_disabled(&mut self, _: bool) {}
 
     /// Disables or enables token tracking for a portion of the code.
@@ -2381,6 +2408,17 @@ impl<Context> FormatState<Context> {
     pub fn assert_formatted_all_tokens<L: Language>(&self, root: &SyntaxNode<L>) {
         self.printed_tokens.assert_all_tracked(root);
     }
+
+    #[cfg(not(debug_assertions))]
+    #[inline]
+    pub fn assert_no_audit_events(&self) {}
+
+    /// Asserts in debug builds that no formatter audit events were recorded.
+    #[cfg(debug_assertions)]
+    #[inline]
+    pub fn assert_no_audit_events(&self) {
+        self.format_audit.assert_no_events();
+    }
 }
 
 impl<Context> FormatState<Context>
@@ -2391,6 +2429,8 @@ where
         FormatStateSnapshot {
             #[cfg(debug_assertions)]
             printed_tokens: self.printed_tokens.snapshot(),
+            #[cfg(debug_assertions)]
+            format_audit: self.format_audit.snapshot(),
         }
     }
 
@@ -2398,11 +2438,14 @@ where
         let FormatStateSnapshot {
             #[cfg(debug_assertions)]
             printed_tokens,
+            #[cfg(debug_assertions)]
+            format_audit,
         } = snapshot;
 
         cfg_if::cfg_if! {
             if #[cfg(debug_assertions)] {
                 self.printed_tokens.restore(printed_tokens);
+                self.format_audit.restore(format_audit);
             }
         }
     }
@@ -2411,18 +2454,463 @@ where
 pub struct FormatStateSnapshot {
     #[cfg(debug_assertions)]
     printed_tokens: printed_tokens::PrintedTokensSnapshot,
+    #[cfg(debug_assertions)]
+    format_audit: format_audit::FormatAuditSnapshot,
 }
 
 #[cfg(test)]
 mod tests {
+    use std::borrow::Cow;
+
     use super::{
-        FormatElement, FormatState, LineWidth, SimpleFormatContext, SourceMapGeneration, VecBuffer,
+        Document, FormatElement, FormatState, Formatted, LineEnding, LineMode, LineWidth, Printed,
+        SimpleFormatContext, SimpleFormatOptions, SourceMapGeneration, SourceMarker, VecBuffer,
     };
     use crate::prelude::*;
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_deserialize_macros::Deserializable;
     use biome_diagnostics::Error;
+    use biome_js_parser::{JsParserOptions, parse_module};
+    use biome_js_syntax::{JsSyntaxKind, JsSyntaxToken};
     use biome_rowan::TextSize;
+
+    fn print_literal_token_slice<'a>(
+        syntax_token: &'a JsSyntaxToken,
+        text: Cow<'a, str>,
+        start: TextSize,
+    ) -> Printed {
+        let formatted = crate::format!(
+            SimpleFormatContext::default(),
+            [syntax_token_cow_slice(text, syntax_token, start).with_literal_line_breaks()]
+        )
+        .unwrap();
+
+        formatted
+            .print_with_indent(0, SourceMapGeneration::Enabled)
+            .unwrap()
+    }
+
+    fn print_literal_token_slice_followed_by_generated<'a>(
+        syntax_token: &'a JsSyntaxToken,
+        text: Cow<'a, str>,
+        start: TextSize,
+        context: SimpleFormatContext,
+        source_map_generation: SourceMapGeneration,
+    ) -> Printed {
+        let formatted = crate::format!(
+            context,
+            [
+                syntax_token_cow_slice(text, syntax_token, start).with_literal_line_breaks(),
+                token(";")
+            ]
+        )
+        .unwrap();
+
+        formatted
+            .print_with_indent(0, source_map_generation)
+            .unwrap()
+    }
+
+    #[test]
+    fn borrowed_syntax_token_slice_preserves_literal_lines_and_source_markers() {
+        let token = JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "ab\ncd", [], []);
+        let printed =
+            print_literal_token_slice(&token, Cow::Borrowed(token.text()), TextSize::from(0));
+
+        assert_eq!(printed.as_code(), "ab\ncd");
+        assert_eq!(
+            printed.sourcemap(),
+            [
+                SourceMarker {
+                    source: TextSize::from(0),
+                    dest: TextSize::from(0)
+                },
+                SourceMarker {
+                    source: TextSize::from(2),
+                    dest: TextSize::from(2)
+                },
+                SourceMarker {
+                    source: TextSize::from(3),
+                    dest: TextSize::from(3)
+                },
+                SourceMarker {
+                    source: TextSize::from(5),
+                    dest: TextSize::from(5)
+                },
+            ]
+        );
+    }
+
+    #[test]
+    fn syntax_token_slice_preserves_boundary_literal_lines() {
+        let token =
+            JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "\nab\n\n", [], []);
+        let printed =
+            print_literal_token_slice(&token, Cow::Borrowed(token.text()), TextSize::from(0));
+
+        assert_eq!(printed.as_code(), "\nab\n\n");
+    }
+
+    #[test]
+    fn owned_syntax_token_slice_preserves_literal_line_source_markers() {
+        let token = JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "xxxxxxx", [], []);
+        let printed =
+            print_literal_token_slice(&token, Cow::Owned("AB\nCD".to_string()), TextSize::from(1));
+
+        assert_eq!(printed.as_code(), "AB\nCD");
+        assert_eq!(
+            printed.sourcemap(),
+            [
+                SourceMarker {
+                    source: TextSize::from(1),
+                    dest: TextSize::from(0)
+                },
+                SourceMarker {
+                    source: TextSize::from(3),
+                    dest: TextSize::from(2)
+                },
+                SourceMarker {
+                    source: TextSize::from(4),
+                    dest: TextSize::from(3)
+                },
+                SourceMarker {
+                    source: TextSize::from(6),
+                    dest: TextSize::from(5)
+                },
+            ]
+        );
+    }
+
+    #[test]
+    fn syntax_token_slice_without_newlines_keeps_one_text_element() {
+        let token = JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "plain", [], []);
+        let formatted = crate::format!(
+            SimpleFormatContext::default(),
+            [
+                syntax_token_cow_slice(Cow::Borrowed(token.text()), &token, TextSize::from(0),)
+                    .with_literal_line_breaks()
+            ]
+        )
+        .unwrap();
+
+        assert_eq!(formatted.document().as_ref().len(), 1);
+        assert!(matches!(
+            formatted.document().as_ref()[0],
+            FormatElement::MappedLocatedTokenText { .. }
+        ));
+    }
+
+    #[test]
+    fn syntax_token_slice_trailing_literal_lines_advance_source_for_generated_text() {
+        let cases: &[(&str, u32, &[SourceMarker])] = &[
+            (
+                "a\n",
+                0,
+                &[
+                    SourceMarker {
+                        source: TextSize::from(0),
+                        dest: TextSize::from(0),
+                    },
+                    SourceMarker {
+                        source: TextSize::from(1),
+                        dest: TextSize::from(1),
+                    },
+                    SourceMarker {
+                        source: TextSize::from(2),
+                        dest: TextSize::from(2),
+                    },
+                    SourceMarker {
+                        source: TextSize::from(2),
+                        dest: TextSize::from(3),
+                    },
+                ],
+            ),
+            (
+                "\n",
+                10,
+                &[
+                    SourceMarker {
+                        source: TextSize::from(10),
+                        dest: TextSize::from(0),
+                    },
+                    SourceMarker {
+                        source: TextSize::from(11),
+                        dest: TextSize::from(1),
+                    },
+                    SourceMarker {
+                        source: TextSize::from(11),
+                        dest: TextSize::from(2),
+                    },
+                ],
+            ),
+            (
+                "a\n\n",
+                0,
+                &[
+                    SourceMarker {
+                        source: TextSize::from(0),
+                        dest: TextSize::from(0),
+                    },
+                    SourceMarker {
+                        source: TextSize::from(1),
+                        dest: TextSize::from(1),
+                    },
+                    SourceMarker {
+                        source: TextSize::from(2),
+                        dest: TextSize::from(2),
+                    },
+                    SourceMarker {
+                        source: TextSize::from(3),
+                        dest: TextSize::from(3),
+                    },
+                    SourceMarker {
+                        source: TextSize::from(3),
+                        dest: TextSize::from(4),
+                    },
+                ],
+            ),
+        ];
+
+        for &(text, start, expected_markers) in cases {
+            let syntax_token =
+                JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, text, [], []);
+            let printed = print_literal_token_slice_followed_by_generated(
+                &syntax_token,
+                Cow::Borrowed(syntax_token.text()),
+                TextSize::from(start),
+                SimpleFormatContext::default(),
+                SourceMapGeneration::Enabled,
+            );
+
+            assert_eq!(printed.as_code(), std::format!("{text};"));
+            assert_eq!(printed.sourcemap(), expected_markers);
+        }
+    }
+
+    #[test]
+    fn syntax_token_slice_literal_line_mapping_uses_configured_line_ending() {
+        let syntax_token =
+            JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "a\n", [], []);
+        let printed = print_literal_token_slice_followed_by_generated(
+            &syntax_token,
+            Cow::Borrowed(syntax_token.text()),
+            TextSize::from(0),
+            SimpleFormatContext::new(SimpleFormatOptions {
+                line_ending: LineEnding::Crlf,
+                ..SimpleFormatOptions::default()
+            }),
+            SourceMapGeneration::Enabled,
+        );
+
+        assert_eq!(printed.as_code(), "a\r\n;");
+        assert_eq!(
+            printed.sourcemap(),
+            [
+                SourceMarker {
+                    source: TextSize::from(0),
+                    dest: TextSize::from(0),
+                },
+                SourceMarker {
+                    source: TextSize::from(1),
+                    dest: TextSize::from(1),
+                },
+                SourceMarker {
+                    source: TextSize::from(2),
+                    dest: TextSize::from(3),
+                },
+                SourceMarker {
+                    source: TextSize::from(2),
+                    dest: TextSize::from(4),
+                },
+            ]
+        );
+    }
+
+    #[test]
+    fn syntax_token_slice_literal_lines_without_source_map_keep_output() {
+        let syntax_token =
+            JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "a\n\n", [], []);
+        let mut state = FormatState::new_with_source_map_generation(
+            SimpleFormatContext::default(),
+            SourceMapGeneration::Disabled,
+        );
+        let mut buffer = VecBuffer::new(&mut state);
+        crate::write!(
+            buffer,
+            [
+                syntax_token_cow_slice(
+                    Cow::Borrowed(syntax_token.text()),
+                    &syntax_token,
+                    TextSize::from(0),
+                )
+                .with_literal_line_breaks(),
+                token(";")
+            ]
+        )
+        .unwrap();
+        let elements = buffer.into_vec();
+        assert_eq!(
+            elements
+                .iter()
+                .filter(|element| {
+                    matches!(
+                        element,
+                        FormatElement::Line(LineMode::Literal {
+                            source_position: None,
+                            ..
+                        })
+                    )
+                })
+                .count(),
+            2
+        );
+        assert!(elements.iter().all(|element| !matches!(
+            element,
+            FormatElement::Line(LineMode::Literal {
+                source_position: Some(_),
+                ..
+            })
+        )));
+
+        let formatted = Formatted::new(Document::from(elements), state.into_context());
+        let printed = formatted
+            .print_with_indent(0, SourceMapGeneration::Disabled)
+            .unwrap();
+
+        assert_eq!(printed.as_code(), "a\n\n;");
+        assert!(printed.sourcemap().is_empty());
+    }
+
+    #[test]
+    fn syntax_token_slice_literal_line_supersedes_pending_source_position() {
+        let syntax_token =
+            JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "\n", [], []);
+        let formatted = crate::format!(
+            SimpleFormatContext::default(),
+            [
+                source_position(TextSize::from(0)),
+                syntax_token_cow_slice(
+                    Cow::Borrowed(syntax_token.text()),
+                    &syntax_token,
+                    TextSize::from(0),
+                )
+                .with_literal_line_breaks(),
+                token(";")
+            ]
+        )
+        .unwrap();
+        let printed = formatted
+            .print_with_indent(0, SourceMapGeneration::Enabled)
+            .unwrap();
+
+        assert_eq!(printed.as_code(), "\n;");
+        assert_eq!(
+            printed.sourcemap(),
+            [
+                SourceMarker {
+                    source: TextSize::from(0),
+                    dest: TextSize::from(0),
+                },
+                SourceMarker {
+                    source: TextSize::from(1),
+                    dest: TextSize::from(1),
+                },
+                SourceMarker {
+                    source: TextSize::from(1),
+                    dest: TextSize::from(2),
+                },
+            ]
+        );
+    }
+
+    #[test]
+    fn source_mapped_literal_line_break_survives_line_suffix_flush() {
+        let syntax_token =
+            JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "a", [], []);
+        let formatted = crate::format!(
+            SimpleFormatContext::default(),
+            [
+                syntax_token_cow_slice(
+                    Cow::Borrowed(syntax_token.text()),
+                    &syntax_token,
+                    TextSize::from(0),
+                ),
+                line_suffix(&crate::format_args![token("!")]),
+                crate::builders::source_mapped_literal_line_break_without_parent(TextSize::from(1)),
+                token(";")
+            ]
+        )
+        .unwrap();
+        let printed = formatted
+            .print_with_indent(0, SourceMapGeneration::Enabled)
+            .unwrap();
+
+        assert_eq!(printed.as_code(), "a!\n;");
+        assert_eq!(
+            printed.sourcemap(),
+            [
+                SourceMarker {
+                    source: TextSize::from(0),
+                    dest: TextSize::from(0),
+                },
+                SourceMarker {
+                    source: TextSize::from(1),
+                    dest: TextSize::from(1),
+                },
+                SourceMarker {
+                    source: TextSize::from(1),
+                    dest: TextSize::from(2),
+                },
+                SourceMarker {
+                    source: TextSize::from(2),
+                    dest: TextSize::from(3),
+                },
+                SourceMarker {
+                    source: TextSize::from(2),
+                    dest: TextSize::from(4),
+                },
+            ]
+        );
+    }
+
+    #[test]
+    fn borrowed_utf8_syntax_token_slice_uses_absolute_source_positions() {
+        let parse = parse_module("`aé\nbc`", JsParserOptions::default());
+        assert!(parse.diagnostics().is_empty());
+        let root = parse.syntax();
+        let syntax_token = std::iter::successors(root.first_token(), JsSyntaxToken::next_token)
+            .find(|token| token.kind() == JsSyntaxKind::TEMPLATE_CHUNK)
+            .unwrap();
+        assert_eq!(syntax_token.text_range().start(), TextSize::from(1));
+
+        let text = &syntax_token.text()[1..];
+        assert_eq!(text, "é\nbc");
+        let printed =
+            print_literal_token_slice(&syntax_token, Cow::Borrowed(text), TextSize::from(2));
+
+        assert_eq!(printed.as_code(), "é\nbc");
+        assert_eq!(
+            printed.sourcemap(),
+            [
+                SourceMarker {
+                    source: TextSize::from(2),
+                    dest: TextSize::from(0),
+                },
+                SourceMarker {
+                    source: TextSize::from(4),
+                    dest: TextSize::from(2),
+                },
+                SourceMarker {
+                    source: TextSize::from(5),
+                    dest: TextSize::from(3),
+                },
+                SourceMarker {
+                    source: TextSize::from(7),
+                    dest: TextSize::from(5),
+                },
+            ]
+        );
+    }
 
     #[test]
     fn test_out_of_range_line_width() {
@@ -2535,5 +3023,183 @@ mod tests {
             } if source_position == TextSize::from(7)
         ));
         assert!(matches!(elements[1], FormatElement::Token { text: ";" }));
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic(expected = "formatter audit failed")]
+    fn format_state_reports_audit_events() {
+        let mut state = FormatState::new(SimpleFormatContext::default());
+
+        state.record_audit_event("missing explicit formatter decision");
+
+        state.assert_no_audit_events();
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic(expected = "formatter audit failed")]
+    fn format_reports_audit_events() {
+        let content = format_with(|f| {
+            f.state_mut()
+                .record_audit_event("missing explicit formatter decision");
+            Ok(())
+        });
+
+        crate::format!(SimpleFormatContext::default(), [content]).unwrap();
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    fn format_state_restores_audit_events_with_snapshot() {
+        let mut state = FormatState::new(SimpleFormatContext::default());
+        let snapshot = state.snapshot();
+
+        state.record_audit_event("speculative formatter decision");
+        state.restore_snapshot(snapshot);
+
+        state.assert_no_audit_events();
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic(expected = "persistent formatter decision")]
+    fn format_state_restore_preserves_earlier_audit_events() {
+        let mut state = FormatState::new(SimpleFormatContext::default());
+        state.record_audit_event("persistent formatter decision");
+        let snapshot = state.snapshot();
+
+        state.record_audit_event("speculative formatter decision");
+        state.restore_snapshot(snapshot);
+
+        state.assert_no_audit_events();
+    }
+
+    #[cfg(debug_assertions)]
+    mod audit_entrypoint_tests {
+        use super::*;
+        use crate::comments::{CommentKind, CommentStyle, Comments, SourceComment};
+        use crate::{
+            CstFormatContext, FormatContext, FormatLanguage, SimpleFormatOptions,
+            TransformSourceMap,
+        };
+        use biome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+        use biome_rowan::{SyntaxNode, SyntaxNodeWithOffset, SyntaxTriviaPieceComments};
+
+        #[derive(Debug, Default)]
+        struct AuditContext {
+            options: SimpleFormatOptions,
+            comments: Comments<RawLanguage>,
+        }
+
+        impl FormatContext for AuditContext {
+            type Options = SimpleFormatOptions;
+
+            fn options(&self) -> &Self::Options {
+                &self.options
+            }
+
+            fn source_map(&self) -> Option<&TransformSourceMap> {
+                None
+            }
+        }
+
+        impl CstFormatContext for AuditContext {
+            type Language = RawLanguage;
+            type Style = AuditCommentStyle;
+            type CommentRule = AuditCommentRule;
+
+            fn comments(&self) -> &Comments<Self::Language> {
+                &self.comments
+            }
+        }
+
+        #[derive(Debug, Default)]
+        struct AuditCommentStyle;
+
+        impl CommentStyle for AuditCommentStyle {
+            type Language = RawLanguage;
+
+            fn get_comment_kind(
+                _comment: &SyntaxTriviaPieceComments<Self::Language>,
+            ) -> CommentKind {
+                CommentKind::InlineBlock
+            }
+        }
+
+        #[derive(Debug, Default)]
+        struct AuditCommentRule;
+
+        impl FormatRule<SourceComment<RawLanguage>> for AuditCommentRule {
+            type Context = AuditContext;
+
+            fn fmt(
+                &self,
+                _item: &SourceComment<RawLanguage>,
+                _f: &mut Formatter<Self::Context>,
+            ) -> FormatResult<()> {
+                Ok(())
+            }
+        }
+
+        #[derive(Debug, Default)]
+        struct AuditRootRule;
+
+        impl FormatRule<SyntaxNode<RawLanguage>> for AuditRootRule {
+            type Context = AuditContext;
+
+            fn fmt(
+                &self,
+                _item: &SyntaxNode<RawLanguage>,
+                f: &mut Formatter<Self::Context>,
+            ) -> FormatResult<()> {
+                f.state_mut().record_audit_event("entrypoint audit event");
+                Ok(())
+            }
+        }
+
+        #[derive(Debug, Default)]
+        struct AuditLanguage {
+            options: SimpleFormatOptions,
+        }
+
+        impl FormatLanguage for AuditLanguage {
+            type SyntaxLanguage = RawLanguage;
+            type Context = AuditContext;
+            type FormatRule = AuditRootRule;
+
+            fn options(&self) -> &SimpleFormatOptions {
+                &self.options
+            }
+
+            fn create_context(
+                self,
+                root: &SyntaxNode<RawLanguage>,
+                _source_map: Option<TransformSourceMap>,
+                _delegate_fmt_embedded_nodes: bool,
+            ) -> AuditContext {
+                AuditContext {
+                    options: self.options,
+                    comments: Comments::from_node(root, &AuditCommentStyle, None),
+                }
+            }
+        }
+
+        fn root() -> SyntaxNode<RawLanguage> {
+            RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |_| {})
+        }
+
+        #[test]
+        #[should_panic(expected = "entrypoint audit event")]
+        fn format_node_reports_audit_events() {
+            crate::format_node(&root(), AuditLanguage::default(), false).unwrap();
+        }
+
+        #[test]
+        #[should_panic(expected = "entrypoint audit event")]
+        fn format_node_with_offset_reports_audit_events() {
+            let root = SyntaxNodeWithOffset::new(root(), TextSize::from(10));
+            crate::format_node_with_offset(&root, AuditLanguage::default(), false).unwrap();
+        }
     }
 }

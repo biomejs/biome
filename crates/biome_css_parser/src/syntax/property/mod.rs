@@ -1,7 +1,8 @@
 pub(crate) mod color;
+mod custom;
 pub(crate) mod unicode_range;
 
-use crate::lexer::CssLexContext;
+use crate::lexer::{CssCustomPropertyCommentMode, CssLexContext};
 use crate::parser::CssParser;
 use crate::syntax::css_modules::{
     composes_not_allowed, expected_classes_list, expected_composes_import_source,
@@ -27,7 +28,8 @@ use biome_parser::parse_recovery::{
 };
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
+use biome_parser::{CompletedMarker, Parser, SyntaxFeature, TokenSet, token_set};
+pub(crate) use custom::{parse_custom_property_value, parse_supports_custom_property_value};
 
 #[inline]
 pub(crate) fn is_at_any_property(p: &mut CssParser) -> bool {
@@ -376,14 +378,27 @@ fn parse_generic_property_with_value_end_set(
     value_end_set: TokenSet<CssSyntaxKind>,
     recovery_end_set: TokenSet<CssSyntaxKind>,
 ) -> ParsedSyntax {
-    let m = p.start();
-    if parse_generic_property_name(p).is_absent() {
-        m.abandon(p);
+    if !is_at_generic_property(p) {
         return Absent;
     }
 
-    p.expect(T![:]);
-    parse_property_value_with_end_set(p, value_end_set, recovery_end_set);
+    let m = p.start();
+    let is_custom_property = parse_generic_property_name(p).ok().is_some_and(|name| {
+        matches!(
+            name.kind(p),
+            CSS_DASHED_IDENTIFIER | SCSS_INTERPOLATED_DASHED_IDENTIFIER
+        )
+    });
+
+    if CssSyntaxFeatures::Scss.is_supported(p) && is_custom_property {
+        p.expect_with_context(
+            T![:],
+            CssLexContext::CustomPropertyValue(CssCustomPropertyCommentMode::PreserveDoubleSlash),
+        );
+    } else {
+        p.expect(T![:]);
+    }
+    parse_property_value_with_end_set(p, is_custom_property, value_end_set, recovery_end_set);
 
     Present(m.complete(p, CSS_GENERIC_PROPERTY))
 }
@@ -391,13 +406,16 @@ fn parse_generic_property_with_value_end_set(
 #[inline]
 pub(crate) fn parse_property_value_with_end_set(
     p: &mut CssParser,
+    is_custom_property: bool,
     value_end_set: TokenSet<CssSyntaxKind>,
     recovery_end_set: TokenSet<CssSyntaxKind>,
-) {
-    if CssSyntaxFeatures::Scss.is_supported(p) {
-        parse_required_scss_value_until(p, value_end_set);
+) -> CompletedMarker {
+    if CssSyntaxFeatures::Scss.is_supported(p) && is_custom_property {
+        parse_custom_property_value(p, value_end_set)
+    } else if CssSyntaxFeatures::Scss.is_supported(p) {
+        parse_required_scss_value_until(p, value_end_set)
     } else {
-        GenericComponentValueList::new(value_end_set, recovery_end_set).parse_list(p);
+        GenericComponentValueList::new(value_end_set, recovery_end_set).parse_list(p)
     }
 }
 

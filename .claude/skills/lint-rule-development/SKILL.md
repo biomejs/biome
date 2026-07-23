@@ -14,19 +14,6 @@ Use this skill when creating new lint rules or assist actions for Biome. It prov
 2. Ensure `cargo`, `just`, and `pnpm` are available
 3. Read `crates/biome_analyze/CONTRIBUTING.md` for in-depth concepts
 
-## Code Standards
-
-**CRITICAL: No Emojis**
-
-Emojis are BANNED in all lint rule code:
-- NO emojis in rustdoc comments
-- NO emojis in diagnostic messages
-- NO emojis in code action descriptions
-- NO emojis in test files or test comments
-- NO emojis anywhere in the rule implementation
-
-Keep all code and documentation professional and emoji-free.
-
 ## Common Workflows
 
 ### Create a New Lint Rule
@@ -429,45 +416,9 @@ type Query = Semantic<AnyFunctionLike>;
 
 ## High Quality Diagnostics
 
-**VERY IMPORTANT**: Rule diagnostics MUST convey these messages, in this order:
+Diagnostics must convey, in order: (1) what the problem is, (2) why it is a problem, (3) how to fix it — the fix goes in the `action()` message when one exists, otherwise in the diagnostic advice. This is the same three-pillar rule shown in the diagnostic example near the top of this skill.
 
-1. What the problem is
-2. Why it's a problem (motivation to fix the issue)
-3. How to fix it (actionable advice)
-
-If the rule has an `action()` to fix the issue, the 3rd message should go in the action's message. If not, it should go in the diagnostic's advice.
-
-Diagnostics must remain focused on the specific issue that the rule is flagging. Avoid including superfluous details that aren't directly relevant to the problem, as this can overwhelm users and obscure the main point.
-If a rule can flag multiple classes of the same category of issue, the diagnostic messages should be surgically customized to the specific issue being flagged, rather than using generic messages that apply to all cases. This ensures that users receive precise and relevant information about the problem and how to fix it.
-
-### Examples
-
-Good:
-```
-1. "Foo is not allowed here."
-2. "Foo harms readability because of X, Y, Z."
-3. "Consider using Bar instead, which is more concise and easier to read."
-```
-
-```
-1. "Unexpected for-in loop."
-2. "For-in loops are confusing and easy to misuse."
-3. "You likely want to use a regular loop, for-of loop or forEach instead."
-```
-
-Bad:
-
-```
-1. "Prefer let or const over var." // conflates the what and the how in one message,
-2. "var is bad." // not meaningful motivation to fix, doesn't explain the consequences
-// third message missing is bad, because it doesn't give users a clear path to fix the issue
-```
-
-```
-1. "This var declaration is not at the top of its containing scope." // Good start, explains what the problem is
-2. "Move standalone var declarations before other statements in the same function, script, module, or static block." // Doesn't explain why, only tells the action. The "why" must come second, after the what.
-3. "At module scope, imports and leading "<Emphasis>"export var"</Emphasis>" declarations may appear before other statements." // Doesn't explain the action, just gives a superfluous detail about module scope.
-```
+For the full treatment — message vs. advice, code frames, good and bad phrasing examples, severity levels — see the [diagnostics-development](../diagnostics-development/SKILL.md) skill, which is the canonical source. Do not duplicate that guidance here.
 
 ## Tips
 

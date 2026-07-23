@@ -52,22 +52,23 @@ jobs:
       - name: Run clippy
         run: cargo lint
 
-  check-dependencies:
-    name: Check Dependencies
-    runs-on: depot-ubuntu-24.04-arm
-    steps:
-      - name: Checkout PR Branch
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-      - name: Install toolchain
-        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
-        with:
-          channel: nightly
-          bins: cargo-udeps
-          cache: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Detect unused dependencies using udeps
-        run: cargo +nightly udeps --all-targets --all-features
+  #  NOTE: enable once it becomes stable again
+  #  check-dependencies:
+  #    name: Check Dependencies
+  #    runs-on: depot-ubuntu-24.04-arm
+  #    steps:
+  #      - name: Checkout PR Branch
+  #        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+  #      - name: Install toolchain
+  #        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
+  #        with:
+  #          channel: nightly
+  #          bins: cargo-udeps
+  #          cache: false
+  #        env:
+  #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #      - name: Detect unused dependencies using udeps
+  #        run: cargo +nightly udeps --all-targets --all-features
 
   deny:
     name: Cargo Deny
@@ -76,7 +77,7 @@ jobs:
       - name: Checkout PR Branch
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Install cargo-deny
-        uses: taiki-e/install-action@16b05812d776ae1dfaabc8277e421fb6d2506419 # v2.82.7
+        uses: taiki-e/install-action@c7eb1735f09259a5035e8e5d44b1406b1cddc0fb # v2.83.0
         with:
           tool: cargo-deny
       - run: cargo deny check bans

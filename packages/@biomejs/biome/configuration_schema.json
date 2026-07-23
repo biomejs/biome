@@ -4746,6 +4746,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoNegationInEqualityCheckConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoNegationInEqualityCheckOptions" }
+			]
+		},
+		"NoNegationInEqualityCheckOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoNestedComponentDefinitionsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6704,6 +6714,13 @@
 					"description": "Disallow Promises to be used in places where they are almost certainly a mistake.\nSee https://biomejs.dev/linter/rules/no-misused-promises",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoMisusedPromisesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noNegationInEqualityCheck": {
+					"description": "Disallow negated expressions on the left side of an equality check.\nSee https://biomejs.dev/linter/rules/no-negation-in-equality-check",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoNegationInEqualityCheckConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9357,6 +9374,16 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoNegationElseOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoNegationInEqualityCheckOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoNegationInEqualityCheckOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -1,0 +1,69 @@
+/* should not generate diagnostics */
+
+export interface Pad0 {
+	a: string;
+	b: number;
+	c: boolean;
+	d(): void;
+}
+export interface Pad1 {
+	a: string;
+	b: number;
+	c: boolean;
+	d(): void;
+}
+export interface Pad2 {
+	a: string;
+	b: number;
+	c: boolean;
+	d(): void;
+}
+export interface Pad3 {
+	a: string;
+	b: number;
+	c: boolean;
+	d(): void;
+}
+export interface Pad4 {
+	a: string;
+	b: number;
+	c: boolean;
+	d(): void;
+}
+export interface Pad5 {
+	a: string;
+	b: number;
+	c: boolean;
+	d(): void;
+}
+export interface Pad6 {
+	a: string;
+	b: number;
+	c: boolean;
+	d(): void;
+}
+export interface Pad7 {
+	a: string;
+	b: number;
+	c: boolean;
+	d(): void;
+}
+export interface Pad8 {
+	a: string;
+	b: number;
+	c: boolean;
+	d(): void;
+}
+export interface Pad9 {
+	a: string;
+	b: number;
+	c: boolean;
+	d(): void;
+}
+
+export interface BestEffort {
+	(cb: () => Promise<number>): Promise<number>;
+	(cb: () => number): number;
+}
+
+export declare const bestEffort: BestEffort;

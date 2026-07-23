@@ -1,5 +1,6 @@
 use biome_rowan::TextRange;
 
+use crate::numbers::canonicalize_js_bigint_literal;
 use crate::{JsSyntaxKind, JsSyntaxToken};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -33,7 +34,8 @@ impl StaticValue {
             Self::Boolean(token) => token.text_trimmed() == "false",
             Self::Null(_) | Self::Undefined(_) | Self::EmptyString(_) => true,
             Self::Number(token) => token.text_trimmed() == "0",
-            Self::BigInt(token) => token.text_trimmed() == "0n",
+            Self::BigInt(token) => canonicalize_js_bigint_literal(token.text_trimmed())
+                .is_some_and(|text| text == "0n"),
             Self::String(_) => self.text().is_empty(),
         }
     }

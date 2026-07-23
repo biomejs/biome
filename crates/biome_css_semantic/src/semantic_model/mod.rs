@@ -202,6 +202,26 @@ mod tests {
     }
 
     #[test]
+    fn test_scss_global_custom_variables() {
+        let parse = parse_css(
+            r#":root {
+  --literal: $gap;
+  --computed: #{$gap};
+}"#,
+            CssFileSource::scss(),
+            CssParserOptions::default(),
+        );
+
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+        let global_custom_variables = model.global_custom_variables();
+
+        assert_eq!(global_custom_variables.len(), 2);
+        assert!(global_custom_variables.contains_key("--literal"));
+        assert!(global_custom_variables.contains_key("--computed"));
+    }
+
+    #[test]
     fn test_empty_at_property() {
         let parse = parse_css(
             r#"@property --item-size {}"#,

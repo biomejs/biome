@@ -1,0 +1,52 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+type WithName = {
+	name: string;
+};
+
+type WithValue = {
+	value: number;
+};
+
+export function readCombined(
+	value: WithName & (WithValue & WithName),
+): WithName & (WithValue & WithName) {
+	return value;
+}
+```
+
+## Inferred types
+
+```
+Binding WithName "WithName" => Object {
+  prototype: No prototype
+  members: ["name": string]
+}
+
+Binding WithValue "WithValue" => Object {
+  prototype: No prototype
+  members: ["value": number]
+}
+
+Binding readCombined "readCombined" => sync Function "readCombined" {
+  accepts: {
+    params: [
+      required value: instanceof WithName & instanceof WithValue
+    ]
+    type_args: []
+  }
+  returns: instanceof WithName & instanceof WithValue
+}
+
+Binding value "value" => instanceof WithName & instanceof WithValue
+
+Expression "value" => instanceof WithName & instanceof WithValue
+```

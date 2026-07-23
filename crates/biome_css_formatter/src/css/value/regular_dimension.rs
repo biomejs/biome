@@ -1,6 +1,16 @@
-use crate::{prelude::*, utils::string_utils::FormatDimensionUnit};
-use biome_css_syntax::{CssRegularDimension, CssRegularDimensionFields};
+use crate::{
+    prelude::*,
+    utils::{
+        case::is_supports_test_declaration, custom_property::is_raw_custom_property_component,
+        string_utils::FormatDimensionUnit,
+    },
+};
+use biome_css_syntax::{
+    AnyCssDeclarationName, CssDeclaration, CssGenericProperty, CssRegularDimension,
+    CssRegularDimensionFields,
+};
 use biome_formatter::{token::number::NumberFormatOptions, write};
+use biome_rowan::AstNode as _;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssRegularDimension;
@@ -11,12 +21,34 @@ impl FormatNodeRule<CssRegularDimension> for FormatCssRegularDimension {
             unit_token,
         } = node.as_fields();
 
+        if is_raw_custom_property_component(node) {
+            return write!(f, [value_token.format(), unit_token.format()]);
+        }
+
+        let unit_token = unit_token?;
+        let unit = if is_in_interpolated_property_name(node) {
+            FormatDimensionUnit::preserve_source_case(unit_token)
+        } else {
+            FormatDimensionUnit::from(unit_token)
+        };
+
         write!(
             f,
             [
                 format_number_token(&value_token?, NumberFormatOptions::default()),
-                FormatDimensionUnit::from(unit_token?),
+                unit,
             ]
         )
     }
+}
+
+/// Matches units in interpolated declaration names such as `--foo-#{$size + 1PX}`.
+fn is_in_interpolated_property_name(node: &CssRegularDimension) -> bool {
+    node.syntax()
+        .ancestors()
+        .skip(1)
+        .filter_map(AnyCssDeclarationName::cast)
+        .find_map(|name| name.parent::<CssGenericProperty>())
+        .and_then(|property| property.parent::<CssDeclaration>())
+        .is_some_and(|declaration| !is_supports_test_declaration(&declaration))
 }

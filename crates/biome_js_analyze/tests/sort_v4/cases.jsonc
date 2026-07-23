@@ -16,7 +16,7 @@
 	"bg-red-500 flex p-4",   // ThemeNamespace::Color
 	"p-4 m-2 flex",          // NamedTyped(Number)
 	"text-lg bg-red-500 p-4",
-	"p-4 p-2",               // same basename, stable input order
+	"p-4 p-2",               // same basename, ordered by value (p-2 first)
 	"origin-top flex p-4",   // NamedKeyword pool
 	"flex-1 flex p-4",       // STATIC `flex` wins over functional `flex` basename
 
@@ -30,8 +30,8 @@
 	// NamedTyped(Number) for bare integers, NamedTyped(Ratio) for fractions.
 	"w-10 flex p-4",         // NamedTyped(Number)
 	"w-1/2 flex p-4",        // NamedTyped(Ratio)
-	"w-full flex p-4",       // Named(Spacing) — `--spacing-full` theme key
-	"w-screen w-10 w-full",  // multi-value same basename, stable order
+	"w-full flex p-4",       // `full` is no `--spacing-*` key in the default theme → Unknown
+	"w-screen w-10 w-full",  // full/screen aren't --spacing-* keys → Unknown floats front
 
 	// aspect basename — NamedKeyword pool (auto/square),
 	// Named(Aspect) (theme keys like `video`), NamedTyped(Ratio).
@@ -75,7 +75,7 @@
 
 	"from-50% flex",              // TwPercentageValue → gradient-stop
 	"to-100% via-25% from-50%",   // three gradient stops, stable order within bucket
-	"flex w-1/2 w-1/3",           // two ratios share the same w branch, stable input order
+	"flex w-1/2 w-1/3",           // two ratios share the same w branch, ordered by value text
 	"flex bg-red-500/50",         // color modifier — base named color sort key
 	"flex text-lg/8",             // line-height modifier — base named text-size sort key
 	"flex w-1/foo",               // non-fraction modifier — base number sort key
@@ -112,10 +112,34 @@
 	"p-4 bg-linear-to-r from-blue-500 to-purple-500 m-2",         // linear gradient with surrounding spacing
 	"mask-linear-to-75% mask-linear-from-25%",                    // mask gradient stops
 
+	// ─── value ordering within a utility ───────────────────────────
+	// Candidates sharing a (property, registration) placement order by
+	// natural comparison of their value text (digit runs compare
+	// numerically), then modifier. Expected order cross-checked against
+	// prettier-plugin-tailwindcss 0.8.0.
+
+	"p-10 p-2 p-4",                     // numeric, not lexicographic
+	"p-2.5 p-2 p-10",                   // decimal segments compare piecewise
+	"duration-700 duration-75",         // digit runs compare from their start
+	"bg-red-500 bg-red-50 bg-red-100",  // scale steps within one color
+	"bg-red-500 bg-blue-500",           // colors order by text, not theme order
+	"text-lg text-sm text-2xl text-xs", // digit-led values first, then alphabetical
+	"w-2/5 w-1/2",                      // fractions by text, not numeric value
+	"leading-6 leading-none leading-3", // digits precede letters
+	"-m-4 -m-2 m-1",                    // negatives keep their bucket, values still order
+	"bg-red-500/50 bg-red-500/25",      // modifier breaks a value tie
+	"text-lg/8 text-sm/6",              // value ordering beats the modifier
+	"mt-2 mt-[10px]",                   // concrete number before arbitrary value
+	"w-[1px] w-4",                      // bracket text compares as written
+	"w-[2px] w-[10rem] w-[13px]",       // numeric inside brackets, across units
+	"ease-in ease-out ease-in-out",     // keyword-pool values order by text
+	"[display:flex] [display:block]",   // arbitrary properties compare their values
+	"p-4! p-2",                         // value order dominates the important suffix
+
 	// ─── important suffix ──────────────────────────────────────────
 	// `flex!` sorts exactly where `flex` does; an exact-key tie breaks
 	// plain-first. Expected order cross-checked against
-	// prettier-plugin-tailwindcss.
+	// prettier-plugin-tailwindcss 0.8.0.
 
 	"px-2! flex p-4",               // position-neutral: sorts as px-2
 	"underline flex!",              // jumps ahead with its utility

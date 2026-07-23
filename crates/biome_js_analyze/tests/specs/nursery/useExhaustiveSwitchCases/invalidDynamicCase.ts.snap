@@ -1,0 +1,56 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidDynamicCase.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+declare const value: "a" | "b";
+declare const dynamicCase: "a" | "b";
+
+switch (value) {
+    case dynamicCase:
+        break;
+}
+
+```
+
+# Diagnostics
+```
+invalidDynamicCase.ts:6:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+     4 │ declare const dynamicCase: "a" | "b";
+     5 │ 
+   > 6 │ switch (value) {
+       │ ^^^^^^^^^^^^^^^^
+   > 7 │     case dynamicCase:
+   > 8 │         break;
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "a"
+  - "b"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+     6  6 │   switch (value) {
+     7  7 │       case dynamicCase:
+     8    │ - ········break;
+        8 │ + ········break;
+        9 │ + ····case·"a":·throw·new·Error("TODO:·Not·implemented·yet");
+       10 │ + ····case·"b":·throw·new·Error("TODO:·Not·implemented·yet");
+     9 11 │   }
+    10 12 │   
+  
+
+```

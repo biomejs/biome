@@ -1,0 +1,109 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export class Box {
+	value: number;
+
+	read() {
+		const arrow = () => {
+			const arrowValue = this.value;
+			return arrowValue;
+		};
+
+		function nested() {
+			const plainValue = this.value;
+			return plainValue;
+		}
+
+		return arrow();
+	}
+}
+
+export class Solo {
+	read() {
+		const noParent = super.value;
+		return noParent;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding Box "Box" => class "Box" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding arrow "arrow" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: local type 1
+}
+
+Expression "() => { const arrowValue = this.value; return arrowValue; }" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: local type 1
+}
+
+Binding arrowValue "arrowValue" => number
+
+Expression "this" => instanceof Box
+
+Expression "this.value" => number
+
+Expression "arrowValue" => number
+
+Binding nested "nested" => sync Function "nested" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown
+}
+
+Binding plainValue "plainValue" => unknown
+
+Expression "this" => instanceof unknown
+
+Expression "this.value" => unknown
+
+Expression "plainValue" => unknown
+
+Expression "arrow" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: local type 1
+}
+
+Expression "arrow()" => number
+
+Binding Solo "Solo" => class "Solo" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding noParent "noParent" => unknown
+
+Expression "super" => unknown
+
+Expression "super.value" => unknown
+
+Expression "noParent" => unknown
+```

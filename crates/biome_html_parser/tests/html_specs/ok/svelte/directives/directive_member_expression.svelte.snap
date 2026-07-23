@@ -33,7 +33,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..35 "<" [Comments("<!-- simple member ex ..."), Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@35..42 "button" [] [Whitespace(" ")],
+                    value_token: BUTTON_KW@35..42 "button" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     SvelteUseDirective {
@@ -65,7 +65,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@63..64 "<" [] [],
                 slash_token: SLASH@64..65 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@65..71 "button" [] [],
+                    value_token: BUTTON_KW@65..71 "button" [] [],
                 },
                 r_angle_token: R_ANGLE@71..72 ">" [] [],
             },
@@ -74,7 +74,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@72..113 "<" [Newline("\n"), Comments("<!-- member expressio ..."), Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@113..120 "button" [] [Whitespace(" ")],
+                    value_token: BUTTON_KW@113..120 "button" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     SvelteUseDirective {
@@ -115,7 +115,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@161..162 "<" [] [],
                 slash_token: SLASH@162..163 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@163..169 "button" [] [],
+                    value_token: BUTTON_KW@163..169 "button" [] [],
                 },
                 r_angle_token: R_ANGLE@169..170 ">" [] [],
             },
@@ -124,7 +124,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@170..224 "<" [Newline("\n"), Comments("<!-- in/out with memb ..."), Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@224..228 "div" [] [Whitespace(" ")],
+                    value_token: DIV_KW@224..228 "div" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     SvelteInDirective {
@@ -183,7 +183,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@274..275 "<" [] [],
                 slash_token: SLASH@275..276 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@276..279 "div" [] [],
+                    value_token: DIV_KW@276..279 "div" [] [],
                 },
                 r_angle_token: R_ANGLE@279..280 ">" [] [],
             },
@@ -192,7 +192,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@280..347 "<" [Newline("\n"), Comments("<!-- transition with  ..."), Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@347..351 "div" [] [Whitespace(" ")],
+                    value_token: DIV_KW@347..351 "div" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     SvelteTransitionDirective {
@@ -240,7 +240,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@403..404 "<" [] [],
                 slash_token: SLASH@404..405 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@405..408 "div" [] [],
+                    value_token: DIV_KW@405..408 "div" [] [],
                 },
                 r_angle_token: R_ANGLE@408..409 ">" [] [],
             },
@@ -249,7 +249,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@409..411 "<" [Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@411..415 "div" [] [Whitespace(" ")],
+                    value_token: DIV_KW@411..415 "div" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     SvelteTransitionDirective {
@@ -288,7 +288,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@455..456 "<" [] [],
                 slash_token: SLASH@456..457 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@457..460 "div" [] [],
+                    value_token: DIV_KW@457..460 "div" [] [],
                 },
                 r_angle_token: R_ANGLE@460..461 ">" [] [],
             },
@@ -297,7 +297,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@461..495 "<" [Newline("\n"), Comments("<!-- deep member expr ..."), Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@495..499 "div" [] [Whitespace(" ")],
+                    value_token: DIV_KW@495..499 "div" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     SvelteInDirective {
@@ -342,7 +342,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@519..520 "<" [] [],
                 slash_token: SLASH@520..521 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@521..524 "div" [] [],
+                    value_token: DIV_KW@521..524 "div" [] [],
                 },
                 r_angle_token: R_ANGLE@524..525 ">" [] [],
             },
@@ -364,7 +364,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..57
         0: L_ANGLE@0..35 "<" [Comments("<!-- simple member ex ..."), Newline("\n")] []
         1: HTML_TAG_NAME@35..42
-          0: HTML_LITERAL@35..42 "button" [] [Whitespace(" ")]
+          0: BUTTON_KW@35..42 "button" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@42..56
           0: SVELTE_USE_DIRECTIVE@42..56
             0: USE_KW@42..45 "use" [] []
@@ -386,13 +386,13 @@ HtmlRoot {
         0: L_ANGLE@63..64 "<" [] []
         1: SLASH@64..65 "/" [] []
         2: HTML_TAG_NAME@65..71
-          0: HTML_LITERAL@65..71 "button" [] []
+          0: BUTTON_KW@65..71 "button" [] []
         3: R_ANGLE@71..72 ">" [] []
     1: HTML_ELEMENT@72..170
       0: HTML_OPENING_ELEMENT@72..150
         0: L_ANGLE@72..113 "<" [Newline("\n"), Comments("<!-- member expressio ..."), Newline("\n")] []
         1: HTML_TAG_NAME@113..120
-          0: HTML_LITERAL@113..120 "button" [] [Whitespace(" ")]
+          0: BUTTON_KW@113..120 "button" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@120..149
           0: SVELTE_USE_DIRECTIVE@120..149
             0: USE_KW@120..123 "use" [] []
@@ -420,13 +420,13 @@ HtmlRoot {
         0: L_ANGLE@161..162 "<" [] []
         1: SLASH@162..163 "/" [] []
         2: HTML_TAG_NAME@163..169
-          0: HTML_LITERAL@163..169 "button" [] []
+          0: BUTTON_KW@163..169 "button" [] []
         3: R_ANGLE@169..170 ">" [] []
     2: HTML_ELEMENT@170..280
       0: HTML_OPENING_ELEMENT@170..274
         0: L_ANGLE@170..224 "<" [Newline("\n"), Comments("<!-- in/out with memb ..."), Newline("\n")] []
         1: HTML_TAG_NAME@224..228
-          0: HTML_LITERAL@224..228 "div" [] [Whitespace(" ")]
+          0: DIV_KW@224..228 "div" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@228..273
           0: SVELTE_IN_DIRECTIVE@228..250
             0: IN_KW@228..230 "in" [] []
@@ -466,13 +466,13 @@ HtmlRoot {
         0: L_ANGLE@274..275 "<" [] []
         1: SLASH@275..276 "/" [] []
         2: HTML_TAG_NAME@276..279
-          0: HTML_LITERAL@276..279 "div" [] []
+          0: DIV_KW@276..279 "div" [] []
         3: R_ANGLE@279..280 ">" [] []
     3: HTML_ELEMENT@280..409
       0: HTML_OPENING_ELEMENT@280..397
         0: L_ANGLE@280..347 "<" [Newline("\n"), Comments("<!-- transition with  ..."), Newline("\n")] []
         1: HTML_TAG_NAME@347..351
-          0: HTML_LITERAL@347..351 "div" [] [Whitespace(" ")]
+          0: DIV_KW@347..351 "div" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@351..396
           0: SVELTE_TRANSITION_DIRECTIVE@351..396
             0: TRANSITION_KW@351..361 "transition" [] []
@@ -504,13 +504,13 @@ HtmlRoot {
         0: L_ANGLE@403..404 "<" [] []
         1: SLASH@404..405 "/" [] []
         2: HTML_TAG_NAME@405..408
-          0: HTML_LITERAL@405..408 "div" [] []
+          0: DIV_KW@405..408 "div" [] []
         3: R_ANGLE@408..409 ">" [] []
     4: HTML_ELEMENT@409..461
       0: HTML_OPENING_ELEMENT@409..448
         0: L_ANGLE@409..411 "<" [Newline("\n")] []
         1: HTML_TAG_NAME@411..415
-          0: HTML_LITERAL@411..415 "div" [] [Whitespace(" ")]
+          0: DIV_KW@411..415 "div" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@415..447
           0: SVELTE_TRANSITION_DIRECTIVE@415..447
             0: TRANSITION_KW@415..425 "transition" [] []
@@ -536,13 +536,13 @@ HtmlRoot {
         0: L_ANGLE@455..456 "<" [] []
         1: SLASH@456..457 "/" [] []
         2: HTML_TAG_NAME@457..460
-          0: HTML_LITERAL@457..460 "div" [] []
+          0: DIV_KW@457..460 "div" [] []
         3: R_ANGLE@460..461 ">" [] []
     5: HTML_ELEMENT@461..525
       0: HTML_OPENING_ELEMENT@461..515
         0: L_ANGLE@461..495 "<" [Newline("\n"), Comments("<!-- deep member expr ..."), Newline("\n")] []
         1: HTML_TAG_NAME@495..499
-          0: HTML_LITERAL@495..499 "div" [] [Whitespace(" ")]
+          0: DIV_KW@495..499 "div" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@499..514
           0: SVELTE_IN_DIRECTIVE@499..514
             0: IN_KW@499..501 "in" [] []
@@ -572,7 +572,7 @@ HtmlRoot {
         0: L_ANGLE@519..520 "<" [] []
         1: SLASH@520..521 "/" [] []
         2: HTML_TAG_NAME@521..524
-          0: HTML_LITERAL@521..524 "div" [] []
+          0: DIV_KW@521..524 "div" [] []
         3: R_ANGLE@524..525 ">" [] []
   4: EOF@525..526 "" [Newline("\n")] []
 

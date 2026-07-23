@@ -1,12 +1,16 @@
 use crate::CssFormatter;
 use crate::comments::CssComments;
 use crate::prelude::*;
-use biome_css_syntax::{
-    CssFunction, CssGenericDelimiter, CssGenericProperty, CssLanguage, CssSyntaxKind,
-    ScssExpression, ScssIncludeArgumentList, css_grid_template_property,
+use crate::utils::case::{
+    identifier_has_escape, is_author_owned_property_value, value_identifier_case,
 };
-use biome_formatter::{CstFormatContext, format_args, write};
-use biome_formatter::{FormatOptions, FormatResult};
+use biome_css_syntax::{
+    CssFunction, CssGenericDelimiter, CssGenericProperty, CssIdentifier, CssLanguage,
+    CssSyntaxKind, ScssExpression, ScssIncludeArgumentList, css_grid_template_property,
+};
+use biome_formatter::{
+    CstFormatContext, FormatOptions, FormatResult, FormatWithRule, format_args, write,
+};
 use biome_rowan::{AstNode, AstNodeList, Text, TextSize};
 use std::cmp;
 
@@ -61,7 +65,8 @@ fn try_write_fill_comma_groups<N, I>(
 ) -> Option<FormatResult<()>>
 where
     N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
-    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
+    I: AstNode<Language = CssLanguage> + Clone + IntoFormat<CssFormatContext>,
+    I::Format: FormatWithRule<CssFormatContext, Item = I>,
 {
     if !matches!(layout, ValueListLayout::Fill) {
         return None;
@@ -95,7 +100,8 @@ fn write_fill_comma_groups<N, I>(
 ) -> FormatResult<()>
 where
     N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
-    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
+    I: AstNode<Language = CssLanguage> + Clone + IntoFormat<CssFormatContext>,
+    I::Format: FormatWithRule<CssFormatContext, Item = I>,
 {
     let mut groups: Vec<Vec<I>> = Vec::new();
     let mut current_group: Vec<I> = Vec::new();
@@ -124,7 +130,10 @@ where
 
             for element in group_items {
                 let is_comma = is_comma_delimiter(element);
-                let formatted = element.clone().into_format();
+                let formatted = element
+                    .clone()
+                    .into_format()
+                    .with_text_case(CssCase::Preserve);
 
                 inner_fill.entry(
                     &format_once(|f| {
@@ -151,9 +160,11 @@ where
 pub(crate) fn write_component_value_list<N, I>(node: &N, f: &mut CssFormatter) -> FormatResult<()>
 where
     N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
-    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
+    I: AstNode<Language = CssLanguage> + Clone + IntoFormat<CssFormatContext>,
+    I::Format: FormatWithRule<CssFormatContext, Item = I>,
 {
     let layout = get_value_list_layout(node, f.context().comments(), f);
+    let lowercase_css_wide_keyword = should_lowercase_css_wide_keyword(node);
 
     // Check if any of the elements in the list have a leading newline.
     // We skip the first element because it is the first element in the list and should not be considered.
@@ -173,7 +184,9 @@ where
         if node.len() == 1 {
             let mut builder = f.join_nodes_with_soft_line();
 
-            for (element, formatted) in node.iter().zip(node.iter().formatted()) {
+            for element in node.iter() {
+                let formatted =
+                    format_component_value_element(element.clone(), lowercase_css_wide_keyword);
                 builder.entry(element.syntax(), &formatted);
             }
 
@@ -193,7 +206,9 @@ where
             let mut fill = f.fill();
             let mut at_group_boundary = false;
 
-            for (element, formatted) in node.iter().zip(node.iter().formatted()) {
+            for element in node.iter() {
+                let formatted =
+                    format_component_value_element(element.clone(), lowercase_css_wide_keyword);
                 fill.entry(
                     &format_once(|f| {
                         // If the current element is not a comma, insert a soft line break or a space.
@@ -296,6 +311,70 @@ where
             write!(f, [group(&values)])
         }
     }
+}
+
+/// Formats an element with CSS-wide casing only when its list owns the complete value.
+fn format_component_value_element<I>(
+    element: I,
+    lowercase_css_wide_keyword: bool,
+) -> impl Format<CssFormatContext>
+where
+    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
+    I::Format: FormatWithRule<CssFormatContext, Item = I>,
+{
+    let case = if lowercase_css_wide_keyword {
+        CssCase::Lowercase
+    } else {
+        CssCase::Preserve
+    };
+    element.into_format().with_text_case(case)
+}
+
+/// Matches complete CSS-wide keyword values such as `color: INITIAL`.
+fn should_lowercase_css_wide_keyword<N, I>(list: &N) -> bool
+where
+    N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
+    I: AstNode<Language = CssLanguage>,
+{
+    let mut items = list.iter();
+    let Some(item) = items.next() else {
+        return false;
+    };
+    if items.next().is_some() {
+        return false;
+    }
+    let Some(identifier) = CssIdentifier::cast_ref(item.syntax()) else {
+        return false;
+    };
+    if value_identifier_case(&identifier) != CssCase::Lowercase {
+        return false;
+    }
+
+    let Some(parent) = list.syntax().parent() else {
+        return false;
+    };
+
+    match parent.kind() {
+        CssSyntaxKind::CSS_ATTR_FALLBACK_VALUE | CssSyntaxKind::CSS_IF_BRANCH => true,
+        CssSyntaxKind::CSS_GENERIC_PROPERTY => CssGenericProperty::cast(parent)
+            .is_some_and(|property| property_normalizes_css_wide_keyword(&property)),
+        CssSyntaxKind::SCSS_EXPRESSION => ScssExpression::cast(parent)
+            .and_then(|expression| expression.parent::<CssGenericProperty>())
+            .is_some_and(|property| property_normalizes_css_wide_keyword(&property)),
+        _ => false,
+    }
+}
+
+/// Returns whether a property owns a standard CSS-wide keyword value.
+fn property_normalizes_css_wide_keyword(property: &CssGenericProperty) -> bool {
+    let Ok(name) = property.name() else {
+        return false;
+    };
+    let Some(identifier) = name.as_css_identifier() else {
+        return false;
+    };
+
+    !identifier_has_escape(identifier) && !is_author_owned_property_value(property)
 }
 
 #[derive(Copy, Clone, Debug)]

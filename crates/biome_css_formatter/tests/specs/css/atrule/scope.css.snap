@@ -114,7 +114,7 @@ to ( .content > *  , :hover  ) {}
 	}
 }
 
-@scope to (.content > *) {
+@scope TO (.content > *) {
 	img {
 		border-radius: 50%;
 	}

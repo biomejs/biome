@@ -18,6 +18,6 @@ jobs:
       contents: read
     steps:
       - name: AgentScan
-        uses: MatteoGabriele/agentscan-action@51fb33d2bf6290780418ae231d7e7096ef5d8311 # v1.15.0
+        uses: MatteoGabriele/agentscan-action@d8da234c758c9a195222a68c3ecfe02a603185b6 # v1.15.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}

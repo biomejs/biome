@@ -26,7 +26,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1..8 "object" [] [Whitespace(" ")],
+                    value_token: OBJECT_KW@1..8 "object" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     HtmlAttribute {
@@ -80,7 +80,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@90..93 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@93..99 "param" [] [Whitespace(" ")],
+                        value_token: PARAM_KW@93..99 "param" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         HtmlAttribute {
@@ -112,7 +112,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@128..131 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@131..137 "param" [] [Whitespace(" ")],
+                        value_token: PARAM_KW@131..137 "param" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         HtmlAttribute {
@@ -146,7 +146,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@183..185 "<" [Newline("\n")] [],
                 slash_token: SLASH@185..186 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@186..192 "object" [] [],
+                    value_token: OBJECT_KW@186..192 "object" [] [],
                 },
                 r_angle_token: R_ANGLE@192..193 ">" [] [],
             },
@@ -168,7 +168,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..90
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..8
-          0: HTML_LITERAL@1..8 "object" [] [Whitespace(" ")]
+          0: OBJECT_KW@1..8 "object" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@8..89
           0: HTML_ATTRIBUTE@8..31
             0: HTML_ATTRIBUTE_NAME@8..12
@@ -203,7 +203,7 @@ HtmlRoot {
         0: HTML_SELF_CLOSING_ELEMENT@90..128
           0: L_ANGLE@90..93 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@93..99
-            0: HTML_LITERAL@93..99 "param" [] [Whitespace(" ")]
+            0: PARAM_KW@93..99 "param" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@99..127
             0: HTML_ATTRIBUTE@99..115
               0: HTML_ATTRIBUTE_NAME@99..103
@@ -224,7 +224,7 @@ HtmlRoot {
         1: HTML_SELF_CLOSING_ELEMENT@128..183
           0: L_ANGLE@128..131 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@131..137
-            0: HTML_LITERAL@131..137 "param" [] [Whitespace(" ")]
+            0: PARAM_KW@131..137 "param" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@137..182
             0: HTML_ATTRIBUTE@137..148
               0: HTML_ATTRIBUTE_NAME@137..141
@@ -246,7 +246,7 @@ HtmlRoot {
         0: L_ANGLE@183..185 "<" [Newline("\n")] []
         1: SLASH@185..186 "/" [] []
         2: HTML_TAG_NAME@186..192
-          0: HTML_LITERAL@186..192 "object" [] []
+          0: OBJECT_KW@186..192 "object" [] []
         3: R_ANGLE@192..193 ">" [] []
   4: EOF@193..194 "" [Newline("\n")] []
 

@@ -4,8 +4,8 @@ use camino::Utf8PathBuf;
 use std::fmt::{Display, Formatter};
 use std::fs::File;
 use std::str::FromStr;
-use tracing::Metadata;
 use tracing::subscriber::Interest;
+use tracing::{Level, Metadata};
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::fmt::writer::MakeWriterExt;
@@ -180,8 +180,9 @@ impl Display for LoggingLevel {
 }
 
 /// Tracing filter enabling:
-/// - All spans and events at level info or higher
-/// - All spans and events at level debug in crates whose name starts with `biome`
+/// - Spans and events at the requested level in `biome*` crates
+/// - Spans and events at level info or higher in dependencies
+/// - Spans and events at level warn or higher in Salsa
 struct LoggingFilter {
     level: LoggingLevel,
 }
@@ -195,17 +196,23 @@ const SELF_FILTER: LevelFilter = if cfg!(debug_assertions) {
 
 impl LoggingFilter {
     fn is_enabled(&self, meta: &Metadata<'_>) -> bool {
-        let filter = if meta.target().starts_with("biome") {
+        self.is_enabled_for(meta.target(), meta.level())
+    }
+
+    fn is_enabled_for(&self, target: &str, level: &Level) -> bool {
+        let filter = if target.starts_with("biome") {
             if let Some(level) = self.level.to_filter_level() {
                 level
             } else {
                 return false;
             }
+        } else if target == "salsa" || target.starts_with("salsa::") {
+            LevelFilter::WARN
         } else {
             LevelFilter::INFO
         };
 
-        meta.level() <= &filter
+        level <= &filter
     }
 }
 
@@ -314,10 +321,12 @@ mod tracing_subscriber_ext {
 
 #[cfg(test)]
 mod tests {
+    use super::{LoggingFilter, LoggingLevel};
     use std::{
         io::Write,
         sync::{Arc, Mutex},
     };
+    use tracing::Level;
 
     struct MockWriter {
         bytes: Mutex<Vec<u8>>,
@@ -388,5 +397,18 @@ mod tests {
         writer.write_all(b"Hello, world!").unwrap();
 
         writer_two.assert_written();
+    }
+
+    #[test]
+    fn logging_filter_hides_salsa_info_events() {
+        let filter = LoggingFilter {
+            level: LoggingLevel::Debug,
+        };
+
+        assert!(!filter.is_enabled_for("salsa::runtime", &Level::INFO));
+        assert!(!filter.is_enabled_for("salsa", &Level::INFO));
+        assert!(filter.is_enabled_for("salsa::runtime", &Level::WARN));
+        assert!(filter.is_enabled_for("biome_service", &Level::DEBUG));
+        assert!(filter.is_enabled_for("other_dependency", &Level::INFO));
     }
 }

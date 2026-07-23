@@ -12,6 +12,7 @@ expression: valid.svelte
 
 <!-- Native anchors with accessible content -->
 <a>content</a>
+<a>{ stringVariable }</a>
 <a><span>content</span></a>
 <a><span aria-hidden="true"></span>content</a>
 <a><div aria-hidden="true"></div>content</a>

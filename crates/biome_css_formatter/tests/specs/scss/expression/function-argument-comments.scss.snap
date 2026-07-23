@@ -1,0 +1,63 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/expression/function-argument-comments.scss
+---
+
+# Input
+
+```scss
+.comments{
+line:outerFunctionWithAnExtremelyLongName(1,
+// line comment
+nestedFunctionWithAnExtremelyLongName(firstArgumentWithLongName,secondArgumentWithLongName,thirdArgumentWithLongName));
+block:outerFunctionWithAnExtremelyLongName(1,
+/* block comment */
+nestedFunctionWithAnExtremelyLongName(firstArgumentWithLongName,secondArgumentWithLongName,thirdArgumentWithLongName));
+binary:fn(1,
+// binary comment
+veryLongArgumentName + anotherVeryLongArgumentName + thirdVeryLongArgumentName);
+list:fn(1,
+// list comment
+firstVeryLongListItem secondVeryLongListItem thirdVeryLongListItem fourthVeryLongListItem);
+}
+
+```
+
+
+# Formatted
+
+```scss
+.comments {
+	line: outerFunctionWithAnExtremelyLongName(
+		1,
+		// line comment
+		nestedFunctionWithAnExtremelyLongName(
+				firstArgumentWithLongName,
+				secondArgumentWithLongName,
+				thirdArgumentWithLongName
+			)
+	);
+	block: outerFunctionWithAnExtremelyLongName(
+		1,
+		/* block comment */
+		nestedFunctionWithAnExtremelyLongName(
+				firstArgumentWithLongName,
+				secondArgumentWithLongName,
+				thirdArgumentWithLongName
+			)
+	);
+	binary: fn(
+		1,
+		// binary comment
+		veryLongArgumentName + anotherVeryLongArgumentName +
+			thirdVeryLongArgumentName
+	);
+	list: fn(
+		1,
+		// list comment
+		firstVeryLongListItem secondVeryLongListItem thirdVeryLongListItem
+			fourthVeryLongListItem
+	);
+}
+
+```
