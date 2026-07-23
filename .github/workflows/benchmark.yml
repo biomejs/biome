@@ -41,6 +41,7 @@ jobs:
       configuration: ${{ steps.outputs.outputs.configuration }}
       manifests: ${{ steps.outputs.outputs.manifests }}
       module_graph: ${{ steps.outputs.outputs.module_graph }}
+      service: ${{ steps.outputs.outputs.service }}
     steps:
       - name: Checkout Branch
         if: github.event_name == 'push'
@@ -62,8 +63,6 @@ jobs:
               - 'crates/biome_js_formatter/**/*.rs'
               - 'crates/biome_js_parser/**/*.rs'
               - 'crates/biome_js_*/**/*.rs'
-              - 'crates/biome_service/Cargo.toml'
-              - 'crates/biome_service/**/*.rs'
               - 'crates/biome_formatter/**/*.rs'
               - 'crates/biome_rowan/**/*.rs'
               - 'crates/biome_parser/**/*.rs'
@@ -148,6 +147,20 @@ jobs:
               - 'Cargo.lock'
               - 'crates/biome_module_graph/**/*.rs'
               - 'crates/biome_rowan/**/*.rs'
+            service:
+              - '.github/workflows/benchmark.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_analyze/**/*.rs'
+              - 'crates/biome_configuration/**/*.rs'
+              - 'crates/biome_fs/**/*.rs'
+              - 'crates/biome_js_*/**/*.rs'
+              - 'crates/biome_module_graph/**/*.rs'
+              - 'crates/biome_parser/**/*.rs'
+              - 'crates/biome_project_layout/**/*.rs'
+              - 'crates/biome_resolver/**/*.rs'
+              - 'crates/biome_rowan/**/*.rs'
+              - 'crates/biome_service/**'
+              - 'crates/biome_workspace_db/**'
 
       - name: Set change outputs
         id: outputs
@@ -164,6 +177,7 @@ jobs:
           CONFIGURATION: ${{ steps.filter.outputs.configuration }}
           MANIFESTS: ${{ steps.filter.outputs.manifests }}
           MODULE_GRAPH: ${{ steps.filter.outputs.module_graph }}
+          SERVICE: ${{ steps.filter.outputs.service }}
         run: |
           if [ "$EVENT_NAME" = 'workflow_dispatch' ] || [ "$EVENT_NAME" = 'merge_group' ]; then
             JS=true
@@ -177,6 +191,7 @@ jobs:
             CONFIGURATION=true
             MANIFESTS=true
             MODULE_GRAPH=true
+            SERVICE=true
           fi
 
           echo "js=$JS" >> "$GITHUB_OUTPUT"
@@ -190,6 +205,7 @@ jobs:
           echo "configuration=$CONFIGURATION" >> "$GITHUB_OUTPUT"
           echo "manifests=$MANIFESTS" >> "$GITHUB_OUTPUT"
           echo "module_graph=$MODULE_GRAPH" >> "$GITHUB_OUTPUT"
+          echo "service=$SERVICE" >> "$GITHUB_OUTPUT"
 
   js:
     needs: changes
@@ -205,7 +221,6 @@ jobs:
           - biome_js_parser
           - biome_js_formatter
           - biome_js_analyze
-          - biome_service
     steps: &bench_steps
       - name: Checkout PR Branch
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -235,6 +250,20 @@ jobs:
           mode: simulation
           run: cargo codspeed run
           token: ${{ secrets.CODSPEED_TOKEN }}
+
+  service:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.service == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Bench Service
+    runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_service
+    steps: *bench_steps
 
   json:
     needs: changes
