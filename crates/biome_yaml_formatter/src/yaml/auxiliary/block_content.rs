@@ -148,6 +148,33 @@ impl FormatNodeRule<YamlBlockContent> for FormatYamlBlockContent {
                 write!(f, [text("\n", None)])?;
             }
 
+            // An empty keep-chomped scalar that closes the last document
+            // still owns the blank lines after its header; the parser left
+            // them in the leading trivia of the next token. Every break is
+            // printed here: after a literal line break the printer drops
+            // the line break the enclosing structure emits, so it can't
+            // supply the last one:
+            //
+            // ```yaml
+            // keep: |+
+            //
+            // ```
+            if chomping == Chomping::Keep
+                && token_text.is_empty()
+                && is_last
+                && let Some(next_token) = value_token.next_token()
+            {
+                let breaks = next_token
+                    .leading_trivia()
+                    .pieces()
+                    .take_while(|piece| piece.is_newline() || piece.is_whitespace())
+                    .filter(|piece| piece.is_newline())
+                    .count();
+                for _ in 1..=breaks {
+                    write!(f, [text("\n", None)])?;
+                }
+            }
+
             Ok(())
         });
 

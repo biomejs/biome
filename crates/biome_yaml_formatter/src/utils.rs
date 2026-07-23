@@ -2,7 +2,8 @@ use crate::prelude::*;
 use biome_formatter::write;
 use biome_rowan::AstNodeList;
 use biome_yaml_syntax::{
-    AnyYamlFlowNode, AnyYamlMappingImplicitKey, AnyYamlProperty, YamlSyntaxNode, YamlSyntaxToken,
+    AnyYamlBlockHeader, AnyYamlFlowNode, AnyYamlMappingImplicitKey, AnyYamlProperty,
+    YamlFoldedScalar, YamlLiteralScalar, YamlSyntaxNode, YamlSyntaxToken,
 };
 
 /// Whether a `:` placed directly after this key would be lexed as part of
@@ -71,6 +72,30 @@ pub(crate) fn lines_before_through_end_tokens(node: &YamlSyntaxNode) -> usize {
     }
 }
 
+/// Whether the last node of `root` is a literal or folded block scalar with
+/// keep chomping (`|+`). Such a scalar owns every line break that follows
+/// it, so the enclosing structures print none of their own, as Prettier
+/// does
+pub(crate) fn ends_in_keep_chomped_scalar(root: &YamlSyntaxNode) -> bool {
+    let mut current = root.clone();
+    while let Some(last) = current.last_child() {
+        current = last;
+    }
+    current.ancestors().any(|ancestor| {
+        let headers = match (
+            YamlLiteralScalar::cast_ref(&ancestor),
+            YamlFoldedScalar::cast_ref(&ancestor),
+        ) {
+            (Some(scalar), _) => scalar.headers(),
+            (_, Some(scalar)) => scalar.headers(),
+            _ => return false,
+        };
+        headers
+            .iter()
+            .any(|header| matches!(header, AnyYamlBlockHeader::YamlBlockKeepIndicator(_)))
+    })
+}
+
 /// The value token of a key that is a plain scalar spanning multiple lines,
 /// which only the explicit `? key : value` entry form can represent
 pub(crate) fn multiline_plain_key_token(
@@ -83,10 +108,7 @@ pub(crate) fn multiline_plain_key_token(
         return None;
     }
     let token = node.content()?.value_token().ok()?;
-    token
-        .text_trimmed()
-        .contains(['\n', '\r'])
-        .then_some(token)
+    token.text_trimmed().contains(['\n', '\r']).then_some(token)
 }
 
 /// Formats a flow mapping entry whose key is a multiline plain scalar in the
@@ -132,10 +154,7 @@ impl Format<YamlFormatContext> for FormatMultilineKeyEntry<'_> {
                     write!(f, [text(line.trim_end(), None)])?;
                 } else {
                     let line = std::format!("    {}", line.trim());
-                    write!(
-                        f,
-                        [literal_line_break_without_parent(), text(&line, None)]
-                    )?;
+                    write!(f, [literal_line_break_without_parent(), text(&line, None)])?;
                 }
             }
             Ok(())
