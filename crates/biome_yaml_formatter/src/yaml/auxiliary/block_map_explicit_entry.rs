@@ -1,12 +1,13 @@
-use crate::comments::{FormatCommentsSlice, source_column};
+use crate::comments::{FormatCommentsSlice, source_column, subtree_has_comments};
 use crate::prelude::*;
 use crate::yaml::auxiliary::block_map_implicit_entry::FormatEntryValue;
+use crate::yaml::auxiliary::flow_map_implicit_entry::FormatCollectionKeyEntry;
 use biome_formatter::comments::SourceComment;
 use biome_formatter::{format_args, write};
 use biome_rowan::{AstNode, TextSize};
 use biome_yaml_syntax::{
-    AnyYamlBlockNode, AnyYamlFlowNode, AnyYamlProperty, YamlBlockInBlockNode,
-    YamlBlockMapExplicitEntry, YamlBlockMapExplicitEntryFields, YamlLanguage,
+    AnyYamlBlockNode, AnyYamlFlowNode, AnyYamlMappingImplicitKey, AnyYamlProperty,
+    YamlBlockInBlockNode, YamlBlockMapExplicitEntry, YamlBlockMapExplicitEntryFields, YamlLanguage,
 };
 
 #[derive(Debug, Clone, Default)]
@@ -95,6 +96,49 @@ impl FormatNodeRule<YamlBlockMapExplicitEntry> for FormatYamlBlockMapExplicitEnt
             || !(before_colon.is_empty() || key_trailing_inline)
             || (value.is_none() && (in_set_mapping(node) || key_has_inline_trailing))
             || key_comments_force_explicit;
+
+        // A flow collection key converting to the implicit form gets the
+        // group that reflows it onto one line when it fits and synthesizes
+        // the explicit `?` form again when it doesn't
+        if !keep_explicit
+            && let Some(key_node @ AnyYamlBlockNode::YamlFlowInBlockNode(flow_in_block)) = &key
+            && key_node.is_flow_collection()
+            && let Ok(AnyYamlFlowNode::YamlFlowJsonNode(json_node)) = flow_in_block.flow()
+            && let Some(colon) = &colon_token
+            && let Some(value_node @ AnyYamlBlockNode::YamlFlowInBlockNode(_)) = &value
+            && before_colon.is_empty()
+            && after_colon.is_empty()
+        {
+            // The flow-in-block wrapper is written through its parts, not
+            // its own rule
+            f.comments().mark_suppression_checked(key_node.syntax());
+            let implicit_key = AnyYamlMappingImplicitKey::YamlFlowJsonNode(json_node);
+
+            write!(f, [format_removed(&question_mark_token)])?;
+            if let Ok(flow_start) = flow_in_block.flow_start_token() {
+                write!(f, [format_removed(&flow_start)])?;
+            }
+            write!(
+                f,
+                [FormatCollectionKeyEntry {
+                    key: &implicit_key,
+                    colon_token: colon,
+                    value: &value_node.format(),
+                    value_has_comments: subtree_has_comments(f.comments(), value_node.syntax()),
+                }]
+            )?;
+            if let Ok(flow_end) = flow_in_block.flow_end_token() {
+                write!(f, [format_removed(&flow_end)])?;
+            }
+
+            return write!(
+                f,
+                [indent(&FormatCommentsSlice {
+                    comments: value_slot,
+                    inline_first: false
+                })]
+            );
+        }
 
         if !keep_explicit && (key.is_some() || value.is_some()) {
             write!(f, [format_removed(&question_mark_token), key.format()])?;
