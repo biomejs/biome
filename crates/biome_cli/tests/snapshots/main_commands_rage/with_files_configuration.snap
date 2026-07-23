@@ -2,13 +2,13 @@
 source: crates/biome_cli/tests/commands/rage.rs
 expression: content
 ---
-## `biome.jsonc`
+## `biome.json`
 
 ```json
 {
-  "formatter": {
-    // disable formatter
-    "enabled": false
+  "files": {
+    "ignoreUnknown": true,
+    "includes": ["**/*.js", "**/*.ts", "!**/generated/**"]
   }
 }
 ```
@@ -42,16 +42,16 @@ Environment:
 
 Biome Configuration:
   Status:                       Loaded successfully.
-  Path:                         biome.jsonc
-  Formatter enabled:            false
+  Path:                         biome.json
+  Formatter enabled:            true
   Linter enabled:               true
   Assist enabled:               true
   VCS enabled:                  false
   HTML full support enabled:    unset
 
 Files:
-  Ignore Unknown:               unset
-  Includes:                     unset
+  Ignore Unknown:               true
+  Includes:                     **/*.js, **/*.ts, !**/generated/**
 
 Server:
   Version:                      0.0.0
