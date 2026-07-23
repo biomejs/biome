@@ -11,7 +11,7 @@ use biome_rowan::{SyntaxTriviaPieceComments, TextSize};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
 use biome_yaml_syntax::{
     AnyYamlMappingImplicitKey, YamlBlockInBlockNode, YamlBlockMapExplicitEntry,
-    YamlDocument, YamlFlowJsonNode, YamlFlowMapExplicitEntry,
+    YamlBlockMapImplicitEntry, YamlDocument, YamlFlowJsonNode, YamlFlowMapExplicitEntry,
     YamlFlowYamlNode, YamlFoldedScalar, YamlLanguage, YamlLiteralScalar, YamlRoot, YamlSyntaxKind,
     YamlSyntaxNode, YamlSyntaxToken,
 };
@@ -78,6 +78,7 @@ impl CommentStyle for YamlCommentStyle {
             .or_else(handle_flow_map_explicit_entry_comment)
             .or_else(handle_block_map_explicit_entry_comment)
             .or_else(handle_middle_comment)
+            .or_else(handle_flow_collection_open_comment)
             .or_else(handle_block_scalar_comment)
             .or_else(handle_own_line_comment)
             .or_else(handle_end_of_line_comment)
@@ -156,6 +157,63 @@ fn middle_comment_region(node: &YamlSyntaxNode) -> Option<(TextSize, TextSize)> 
         }
         _ => None,
     }
+}
+
+/// Handles a comment right after the opening bracket of a flow collection
+/// that sits on the line of a mapping key:
+///
+/// ```yaml
+/// key: [ # comment
+///   1, 2]
+/// ```
+///
+/// Prettier treats it as ending the key's line: the comment becomes a
+/// trailing comment of the key, and the collection moves to its own line
+/// below. A comment in a collection that starts on its own line stays
+/// inside it.
+fn handle_flow_collection_open_comment(
+    comment: DecoratedComment<YamlLanguage>,
+) -> CommentPlacement<YamlLanguage> {
+    if comment.text_position() != CommentTextPosition::EndOfLine
+        || comment.preceding_node().is_some()
+    {
+        return CommentPlacement::Default(comment);
+    }
+
+    let enclosing = comment.enclosing_node();
+    if !matches!(
+        enclosing.kind(),
+        YamlSyntaxKind::YAML_FLOW_SEQUENCE | YamlSyntaxKind::YAML_FLOW_MAPPING
+    ) {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(entry) = enclosing
+        .ancestors()
+        .find(|ancestor| ancestor.kind() == YamlSyntaxKind::YAML_BLOCK_MAP_IMPLICIT_ENTRY)
+        .and_then(YamlBlockMapImplicitEntry::cast)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+    let Some(value) = entry.value() else {
+        return CommentPlacement::Default(comment);
+    };
+    let Some(key) = entry.key() else {
+        return CommentPlacement::Default(comment);
+    };
+
+    // The collection has to start on the key's line; the entry must also be
+    // the direct parent of the collection, not of some enclosing entry
+    let on_key_line = value
+        .syntax()
+        .descendants()
+        .any(|descendant| descendant == *enclosing)
+        && crate::utils::lines_before_through_end_tokens(value.syntax()) == 0;
+    if !on_key_line {
+        return CommentPlacement::Default(comment);
+    }
+
+    CommentPlacement::trailing(key.syntax().clone(), comment)
 }
 
 /// Formats the middle comments of a node, its dangling comments sitting
