@@ -9,8 +9,9 @@ use super::lower::{
 
 /// Number of `Error` class members expected in generated output.
 const ERROR_MEMBER_COUNT: usize = 6;
+const SYMBOL_MEMBER_COUNT: usize = 2;
 /// Expected number of lowered generated globals.
-const GENERATED_GLOBAL_COUNT: usize = 7;
+const GENERATED_GLOBAL_COUNT: usize = 10;
 
 /// Expected shape of one lowered disposable pair (interface + dispose helper), checked by
 /// [`assert_disposable_shape`] against the generated model.
@@ -77,6 +78,7 @@ pub fn compare_lowered_globals(lowered: &LoweredGlobalTypes) -> Result<()> {
     let call = generated_function(lowered, "Error.call", "ERROR_CALL_ID_GLOBAL_TYPE_ID")?;
     assert_error_call_shape(call)?;
 
+    assert_symbol_shape(lowered)?;
     assert_disposable_shape(
         lowered,
         DisposableShape {
@@ -106,6 +108,79 @@ pub fn compare_lowered_globals(lowered: &LoweredGlobalTypes) -> Result<()> {
         },
     )?;
 
+    Ok(())
+}
+
+/// Validates the generated `Symbol` class and its two symbol-valued helpers.
+fn assert_symbol_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
+    let Some(symbol) = lowered.global("Symbol") else {
+        bail!("generated globals are missing the Symbol global");
+    };
+    if symbol.id_constant() != "SYMBOL_ID_GLOBAL_TYPE_ID" {
+        bail!(
+            "generated Symbol global targets {}, expected SYMBOL_ID_GLOBAL_TYPE_ID",
+            symbol.id_constant()
+        );
+    }
+    let LoweredTypeData::Class(class) = symbol.data() else {
+        bail!("generated Symbol global is not a class");
+    };
+    if class.name() != "Symbol" {
+        bail!(
+            "generated Symbol class has name {}, expected Symbol",
+            class.name()
+        );
+    }
+    if class.members().len() != SYMBOL_MEMBER_COUNT {
+        bail!(
+            "generated Symbol global has {} members, expected {}",
+            class.members().len(),
+            SYMBOL_MEMBER_COUNT
+        );
+    }
+
+    assert_symbol_member(class, "dispose", "GLOBAL_SYMBOL_DISPOSE_ID")?;
+    assert_symbol_member(class, "asyncDispose", "GLOBAL_SYMBOL_ASYNC_DISPOSE_ID")?;
+    assert_symbol_helper(
+        lowered,
+        "Symbol.dispose",
+        "SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID",
+    )?;
+    assert_symbol_helper(
+        lowered,
+        "Symbol.asyncDispose",
+        "SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
+    )?;
+
+    Ok(())
+}
+
+fn assert_symbol_member(class: &LoweredClass, name: &str, type_id: &'static str) -> Result<()> {
+    let Some(member) = class.member(name) else {
+        bail!("generated Symbol global is missing {name}");
+    };
+    if member.kind() != &LoweredMemberKind::NamedStatic {
+        bail!("generated Symbol.{name} has unexpected kind");
+    }
+    if member.type_reference() != &LoweredTypeReference::Predefined(type_id) {
+        bail!("generated Symbol.{name} has unexpected type");
+    }
+    Ok(())
+}
+
+fn assert_symbol_helper(lowered: &LoweredGlobalTypes, name: &str, id_constant: &str) -> Result<()> {
+    let Some(helper) = lowered.global(name) else {
+        bail!("generated globals are missing {name}");
+    };
+    if helper.id_constant() != id_constant {
+        bail!(
+            "generated {name} targets {}, expected {id_constant}",
+            helper.id_constant()
+        );
+    }
+    if helper.data() != &LoweredTypeData::Symbol {
+        bail!("generated {name} helper is not symbol data");
+    }
     Ok(())
 }
 

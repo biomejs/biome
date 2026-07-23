@@ -5,7 +5,7 @@ use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
     AnyJsBindingPattern, AnyJsExpression, AnyJsFormalParameter, AnyJsName, AnyJsObjectMemberName,
     AnyJsParameter, AnyJsRoot, AnyTsReturnType, AnyTsType, AnyTsTypeMember,
-    AnyTsVariableAnnotation, JsParameters, JsVariableDeclarator, TsCallSignatureTypeMember,
+    AnyTsVariableAnnotation, JsParameters, JsVariableDeclarator, T, TsCallSignatureTypeMember,
     TsConstructSignatureTypeMember, TsDeclarationModule, TsInterfaceDeclaration,
     TsMethodSignatureTypeMember, TsPropertySignatureTypeMember,
 };
@@ -68,6 +68,7 @@ pub enum LoweredTypeData {
     Constructor(LoweredConstructor),
     Function(LoweredFunction),
     Interface(LoweredInterface),
+    Symbol,
 }
 
 /// Lowered class-like global.
@@ -344,6 +345,9 @@ pub fn lower_global_types(
         data: LoweredTypeData::Function(call),
     });
 
+    if let Some(symbol_globals) = lower_symbol_globals(manifest, &mut source_cache)? {
+        globals.extend(symbol_globals);
+    }
     if let Some(disposable_globals) =
         lower_disposable_global(manifest, &mut source_cache, DISPOSABLE_GLOBAL)?
     {
@@ -443,6 +447,264 @@ struct ParsedSource<'a> {
 struct ParsedSourceCache<'a> {
     source_files: &'a [DiscoveredFile],
     parsed: Vec<ParsedSource<'a>>,
+}
+
+#[derive(Clone, Copy)]
+enum SelectedSymbolMember {
+    Dispose,
+    AsyncDispose,
+}
+
+impl SelectedSymbolMember {
+    fn name(self) -> &'static str {
+        match self {
+            Self::Dispose => "dispose",
+            Self::AsyncDispose => "asyncDispose",
+        }
+    }
+}
+
+/// Lowers the predefined `Symbol` projection and its two well-known symbol helpers.
+fn lower_symbol_globals(
+    manifest: &GlobalManifest,
+    source_cache: &mut ParsedSourceCache,
+) -> Result<Option<[LoweredGlobal; 3]>> {
+    let Some(symbol_group) = manifest.global_group("Symbol") else {
+        return Ok(None);
+    };
+    if !symbol_group.has_role(GlobalDeclarationRole::Type) {
+        bail!("Symbol global must have a type-side declaration");
+    }
+    if !symbol_group.has_role(GlobalDeclarationRole::Value) {
+        bail!("Symbol global must have a value-side declaration");
+    }
+
+    validate_symbol_declarations(symbol_group.declarations(), source_cache)?;
+
+    let Some(constructor_group) = manifest.global_group("SymbolConstructor") else {
+        bail!("Symbol global value side references missing SymbolConstructor group");
+    };
+    if !constructor_group.has_role(GlobalDeclarationRole::Type) {
+        bail!("SymbolConstructor must have a type-side declaration");
+    }
+    validate_symbol_constructor_members(constructor_group.declarations(), source_cache)?;
+
+    Ok(Some([
+        LoweredGlobal {
+            name: Text::from("Symbol"),
+            id_constant: "SYMBOL_ID_GLOBAL_TYPE_ID",
+            data: LoweredTypeData::Class(LoweredClass {
+                name: Text::from("Symbol"),
+                members: Box::new([
+                    LoweredTypeMember {
+                        name: Text::from("dispose"),
+                        kind: LoweredMemberKind::NamedStatic,
+                        type_reference: LoweredTypeReference::Predefined(
+                            "GLOBAL_SYMBOL_DISPOSE_ID",
+                        ),
+                    },
+                    LoweredTypeMember {
+                        name: Text::from("asyncDispose"),
+                        kind: LoweredMemberKind::NamedStatic,
+                        type_reference: LoweredTypeReference::Predefined(
+                            "GLOBAL_SYMBOL_ASYNC_DISPOSE_ID",
+                        ),
+                    },
+                ]),
+            }),
+        },
+        LoweredGlobal {
+            name: Text::from("Symbol.dispose"),
+            id_constant: "SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID",
+            data: LoweredTypeData::Symbol,
+        },
+        LoweredGlobal {
+            name: Text::from("Symbol.asyncDispose"),
+            id_constant: "SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
+            data: LoweredTypeData::Symbol,
+        },
+    ]))
+}
+
+fn validate_symbol_declarations(
+    records: &[DeclarationRecord],
+    source_cache: &mut ParsedSourceCache,
+) -> Result<()> {
+    for record in records {
+        match &record.kind {
+            DeclarationKind::Interface => {}
+            DeclarationKind::VariableDeclarator { .. } => {
+                validate_symbol_constructor_reference(record, source_cache)?;
+            }
+            DeclarationKind::TypeAlias => {
+                bail!("type aliases are not supported in the Symbol global")
+            }
+            DeclarationKind::DeclareFunction | DeclarationKind::ImportEquals => {
+                bail!(
+                    "unsupported value-side Symbol declaration {:?}",
+                    record.kind
+                )
+            }
+        }
+    }
+
+    Ok(())
+}
+
+fn validate_symbol_constructor_reference(
+    record: &DeclarationRecord,
+    source_cache: &mut ParsedSourceCache,
+) -> Result<()> {
+    let declarator = source_cache
+        .find_variable_declarator(record)?
+        .with_context(|| {
+            format!(
+                "failed to find variable declaration {} at {:?}",
+                record.declared_name.text(),
+                record.text_range
+            )
+        })?;
+    let Some(annotation) = declarator.variable_annotation() else {
+        bail!("declare var Symbol is missing a type annotation");
+    };
+    let AnyTsVariableAnnotation::TsTypeAnnotation(annotation) = annotation else {
+        bail!("declare var Symbol uses unsupported definite assignment annotation");
+    };
+    let AnyTsType::TsReferenceType(reference) = annotation.ty()? else {
+        bail!("declare var Symbol must reference SymbolConstructor");
+    };
+    if reference.type_arguments().is_some() {
+        bail!("declare var Symbol must reference SymbolConstructor without type arguments");
+    }
+    let biome_js_syntax::AnyTsName::JsReferenceIdentifier(identifier) = reference
+        .name()
+        .context("declare var Symbol is missing a type reference name")?
+    else {
+        bail!("declare var Symbol must reference SymbolConstructor");
+    };
+    if identifier.value_token()?.token_text_trimmed().text() != "SymbolConstructor" {
+        bail!("declare var Symbol must reference SymbolConstructor");
+    }
+
+    Ok(())
+}
+
+/// Validates the two selected `unique symbol` properties across merged constructor interfaces.
+fn validate_symbol_constructor_members(
+    records: &[DeclarationRecord],
+    source_cache: &mut ParsedSourceCache,
+) -> Result<()> {
+    let mut saw_dispose = false;
+    let mut saw_async_dispose = false;
+
+    for record in records {
+        match &record.kind {
+            DeclarationKind::Interface => {}
+            DeclarationKind::TypeAlias => {
+                bail!("type aliases are not supported in SymbolConstructor")
+            }
+            DeclarationKind::DeclareFunction
+            | DeclarationKind::VariableDeclarator { .. }
+            | DeclarationKind::ImportEquals => {
+                bail!("value-side SymbolConstructor declarations are not supported")
+            }
+        }
+
+        let declaration = source_cache
+            .find_interface_declaration(record)?
+            .with_context(|| {
+                format!(
+                    "failed to find interface declaration {} at {:?}",
+                    record.declared_name.text(),
+                    record.text_range
+                )
+            })?;
+        for member in declaration.members() {
+            match member {
+                AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
+                    if let Some(member) = selected_symbol_member(property.name()?)? {
+                        let saw_member = match member {
+                            SelectedSymbolMember::Dispose => &mut saw_dispose,
+                            SelectedSymbolMember::AsyncDispose => &mut saw_async_dispose,
+                        };
+                        if *saw_member {
+                            bail!(
+                                "SymbolConstructor has multiple {} properties",
+                                member.name()
+                            );
+                        }
+                        validate_unique_symbol_property(&property, member.name())?;
+                        *saw_member = true;
+                    }
+                }
+                AnyTsTypeMember::TsMethodSignatureTypeMember(member) => {
+                    reject_selected_symbol_non_property(member.name()?)?;
+                }
+                AnyTsTypeMember::TsGetterSignatureTypeMember(member) => {
+                    reject_selected_symbol_non_property(member.name()?)?;
+                }
+                AnyTsTypeMember::TsSetterSignatureTypeMember(member) => {
+                    reject_selected_symbol_non_property(member.name()?)?;
+                }
+                AnyTsTypeMember::JsBogusMember(_)
+                | AnyTsTypeMember::TsCallSignatureTypeMember(_)
+                | AnyTsTypeMember::TsConstructSignatureTypeMember(_)
+                | AnyTsTypeMember::TsIndexSignatureTypeMember(_) => {}
+            }
+        }
+    }
+
+    if !saw_dispose {
+        bail!("SymbolConstructor is missing dispose");
+    }
+    if !saw_async_dispose {
+        bail!("SymbolConstructor is missing asyncDispose");
+    }
+
+    Ok(())
+}
+
+fn reject_selected_symbol_non_property(name: AnyJsObjectMemberName) -> Result<()> {
+    if let Some(member) = selected_symbol_member(name)? {
+        bail!("SymbolConstructor.{} must be a property", member.name());
+    }
+    Ok(())
+}
+
+fn selected_symbol_member(name: AnyJsObjectMemberName) -> Result<Option<SelectedSymbolMember>> {
+    let AnyJsObjectMemberName::JsLiteralMemberName(name) = name else {
+        return Ok(None);
+    };
+
+    Ok(match name.name()?.text() {
+        "dispose" => Some(SelectedSymbolMember::Dispose),
+        "asyncDispose" => Some(SelectedSymbolMember::AsyncDispose),
+        _ => None,
+    })
+}
+
+fn validate_unique_symbol_property(
+    property: &TsPropertySignatureTypeMember,
+    name: &str,
+) -> Result<()> {
+    if property.optional_token().is_some() {
+        bail!("SymbolConstructor.{name} must not be optional");
+    }
+    let type_node = property
+        .type_annotation()
+        .with_context(|| format!("SymbolConstructor.{name} is missing a type annotation"))?
+        .ty()
+        .with_context(|| format!("SymbolConstructor.{name} has a malformed type annotation"))?;
+    let AnyTsType::TsTypeOperatorType(operator) = type_node else {
+        bail!("SymbolConstructor.{name} must be unique symbol");
+    };
+    if operator.operator_token()?.kind() != T![unique]
+        || !matches!(operator.ty()?, AnyTsType::TsSymbolType(_))
+    {
+        bail!("SymbolConstructor.{name} must be unique symbol");
+    }
+
+    Ok(())
 }
 
 impl<'a> ParsedSourceCache<'a> {

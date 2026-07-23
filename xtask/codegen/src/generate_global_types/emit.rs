@@ -15,7 +15,10 @@ const OUTPUT_RELATIVE_PATH: &str = "crates/biome_js_type_info/src/generated/glob
 ///
 /// Must stay ordered by ascending `GlobalTypeId` index so the emitted
 /// `MIGRATED_PREDEFINED_IDS` stays sorted for the runtime `binary_search`.
-const GLOBAL_ID_EMIT_ORDER: [&str; 7] = [
+const GLOBAL_ID_EMIT_ORDER: [&str; 10] = [
+    "SYMBOL_ID_GLOBAL_TYPE_ID",
+    "SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID",
+    "SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
     "DISPOSABLE_ID_GLOBAL_TYPE_ID",
     "DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID",
     "ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID",
@@ -93,6 +96,7 @@ fn render_type_data(data: &LoweredTypeData) -> String {
         LoweredTypeData::Constructor(constructor) => render_constructor(constructor),
         LoweredTypeData::Function(function) => render_function(function),
         LoweredTypeData::Interface(interface) => render_interface(interface),
+        LoweredTypeData::Symbol => "crate::TypeData::Symbol".to_string(),
     }
 }
 
@@ -287,7 +291,7 @@ fn global_with_id_constant<'a>(
 }
 
 /// Returns generated globals in the sorted predefined-ID order.
-fn sorted_globals(lowered: &LoweredGlobalTypes) -> Result<[&LoweredGlobal; 7]> {
+fn sorted_globals(lowered: &LoweredGlobalTypes) -> Result<[&LoweredGlobal; 10]> {
     for global in lowered.globals() {
         if !GLOBAL_ID_EMIT_ORDER.contains(&global.id_constant()) {
             bail!(
@@ -306,5 +310,8 @@ fn sorted_globals(lowered: &LoweredGlobalTypes) -> Result<[&LoweredGlobal; 7]> {
         global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[4])?,
         global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[5])?,
         global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[6])?,
+        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[7])?,
+        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[8])?,
+        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[9])?,
     ])
 }
