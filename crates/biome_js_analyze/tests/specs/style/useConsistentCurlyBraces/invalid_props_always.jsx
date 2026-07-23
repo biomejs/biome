@@ -1,0 +1,1 @@
+<App prop="Hello world" />;
