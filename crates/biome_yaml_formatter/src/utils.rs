@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_yaml_syntax::{AnyYamlMappingImplicitKey, AnyYamlProperty};
+use biome_yaml_syntax::{AnyYamlMappingImplicitKey, AnyYamlProperty, YamlSyntaxNode};
 
 /// Whether a `:` placed directly after this key would be lexed as part of
 /// the key's last token. Alias, anchor, and tag tokens may all contain `:`
@@ -35,5 +35,34 @@ where
         f.join_with(space())
             .entries(tags.chain(anchors).map(|property| property.into_format()))
             .finish()
+    }
+}
+
+/// The number of line breaks in front of `node`, counting through the
+/// zero-width end tokens (`MAPPING_END`, `FLOW_END`, ...) before it, whose
+/// leading trivia carries the line breaks that separate `node` from the
+/// content above. Stops at a comment, since the breaks above one belong to
+/// it, not to `node`
+pub(crate) fn lines_before_through_end_tokens(node: &YamlSyntaxNode) -> usize {
+    let mut count = 0;
+    let Some(mut token) = node.first_token() else {
+        return 0;
+    };
+    loop {
+        for piece in token.leading_trivia().pieces().rev() {
+            if piece.is_comments() {
+                return count;
+            }
+            if piece.is_newline() {
+                count += 1;
+            }
+        }
+        let Some(prev) = token.prev_token() else {
+            return count;
+        };
+        if !prev.text_trimmed().is_empty() {
+            return count;
+        }
+        token = prev;
     }
 }
