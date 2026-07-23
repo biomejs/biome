@@ -1,0 +1,7 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i /file.js|JS_MODULE|function|false|false

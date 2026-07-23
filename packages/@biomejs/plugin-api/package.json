@@ -7,7 +7,8 @@
     "README.md",
     "LICENSE-APACHE",
     "LICENSE-MIT",
-    "index.d.ts"
+    "index.d.ts",
+    "js_ast.d.ts"
   ],
   "exports": {
     ".": {

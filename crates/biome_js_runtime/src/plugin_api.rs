@@ -7,7 +7,8 @@ use boa_engine::{Context, JsNativeError, JsValue, Module, NativeFunction, js_str
 
 use biome_analyze::RuleDiagnostic;
 use biome_diagnostics::{Severity, category};
-use biome_text_size::TextRange;
+
+use crate::ast::JsAstNode;
 
 pub(crate) struct JsPluginApi {
     diagnostics: Rc<RefCell<Vec<RuleDiagnostic>>>,
@@ -26,9 +27,19 @@ impl JsPluginApi {
         // SAFETY: The closure doesn't capture any GC-managed values.
         let register_diagnostic = FunctionObjectBuilder::new(context.realm(), unsafe {
             NativeFunction::from_closure(move |_this, args, context| {
-                let [severity, message] = args else {
+                let [node, severity, message] = args else {
                     return Err(JsNativeError::typ()
-                        .with_message("registerDiagnostic() expects two string arguments")
+                        .with_message(
+                            "registerDiagnostic() expects an AST node, severity, and message",
+                        )
+                        .into());
+                };
+
+                let Some(range) = JsAstNode::text_range(node) else {
+                    return Err(JsNativeError::typ()
+                        .with_message(
+                            "registerDiagnostic() expects an AST node as its first argument",
+                        )
                         .into());
                 };
 
@@ -48,7 +59,7 @@ impl JsPluginApi {
 
                 let diagnostic = RuleDiagnostic::new(
                     category!("plugin"),
-                    None::<TextRange>, // TODO: retrieve a span from the AST
+                    range,
                     message.to_string(context)?.to_std_string_lossy(),
                 )
                 .with_severity(severity);
@@ -58,20 +69,22 @@ impl JsPluginApi {
                 Ok(JsValue::undefined())
             })
         })
-        .length(2)
+        .length(3)
         .name("registerDiagnostic")
         .build();
 
-        // TODO: auto-generate AST classes and insert into the runtime
         // TODO: more runtime APIs?
 
         Module::synthetic(
             &[js_string!("registerDiagnostic")],
             SyntheticModuleInitializer::from_copy_closure_with_captures(
-                |module, fns, _| {
-                    module.set_export(&js_string!("registerDiagnostic"), fns.0.clone().into())
+                |module, register_diagnostic, _| {
+                    module.set_export(
+                        &js_string!("registerDiagnostic"),
+                        register_diagnostic.clone().into(),
+                    )
                 },
-                (register_diagnostic,),
+                register_diagnostic,
             ),
             None,
             None,
