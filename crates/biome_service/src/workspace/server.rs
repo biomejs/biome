@@ -3,10 +3,10 @@ use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
 use crate::embed::EmbedContent;
-#[cfg(feature = "lang_html")]
-use crate::file_handlers::html::{css_verbatim_ranges, js_verbatim_ranges};
 #[cfg(feature = "lang_js")]
 use crate::file_handlers::AstroFileHandler;
+#[cfg(feature = "lang_html")]
+use crate::file_handlers::html::{css_verbatim_ranges, js_verbatim_ranges};
 use crate::file_handlers::{
     AnalyzerVisitorCache, Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, Features,
     FixAllParams, FixedFileResult, LintParams, LintResults, ParseEmbeddedParams, ParseResult,

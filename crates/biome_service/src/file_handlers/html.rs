@@ -68,9 +68,9 @@ use biome_js_syntax::JsLanguage;
 use biome_js_syntax::JsTemplateChunkElement;
 #[cfg(feature = "html_embeds")]
 use biome_json_syntax::JsonLanguage;
-use biome_languages::{CssFileSource, JsFileSource};
 #[cfg(feature = "html_embeds")]
 use biome_languages::HtmlFileSource;
+use biome_languages::{CssFileSource, JsFileSource};
 #[cfg(feature = "html_embeds")]
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutation, Direction, NodeCache, SendNode, TextRange, TextSize};
