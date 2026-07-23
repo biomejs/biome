@@ -32,23 +32,9 @@ top7:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,13 +1,16 @@
- ---
--top1: &node1
--  &k1 key1: one
-+top1:
-+  &node1 &k1 key1: one
- top2: &node2 # comment
-   key2: two
- top3:
-   &k3 key3: three
--top4: &node4
--  &k4 key4: four
--top5: &node5
-+top4:
-+  &node4 &k4 key4: four
-+top5:
-+  &node5
+@@ -9,5 +9,7 @@
+   &k4 key4: four
+ top5: &node5
    key5: five
 -top6: &val6 six
 -top7: &val7 seven
@@ -62,16 +48,15 @@ top7:
 
 ```yml
 ---
-top1:
-  &node1 &k1 key1: one
+top1: &node1
+  &k1 key1: one
 top2: &node2 # comment
   key2: two
 top3:
   &k3 key3: three
-top4:
-  &node4 &k4 key4: four
-top5:
-  &node5
+top4: &node4
+  &k4 key4: four
+top5: &node5
   key5: five
 top6: &val6
 six
