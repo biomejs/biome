@@ -27,13 +27,13 @@ Not indented:
 ```diff
 --- Prettier
 +++ Biome
-@@ -5,8 +5,9 @@
+@@ -5,8 +5,8 @@
    By one space: |
      By four
        spaces
 -  Flow style: # Leading spaces
-+  Flow style:
-     [
+-    [
++  Flow style: [
 +      # Leading spaces
        By two, # in flow style
        Also by two, # are neither
@@ -50,8 +50,7 @@ Not indented:
   By one space: |
     By four
       spaces
-  Flow style:
-    [
+  Flow style: [
       # Leading spaces
       By two, # in flow style
       Also by two, # are neither

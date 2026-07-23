@@ -802,7 +802,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 children,
                 AnyYamlFlowMapEntry::can_cast,
                 T ! [,],
-                false,
+                true,
             ),
             YAML_FLOW_SEQUENCE_ENTRY_LIST => Self::make_separated_list_syntax(
                 kind,

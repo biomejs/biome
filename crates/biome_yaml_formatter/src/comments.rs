@@ -8,11 +8,19 @@ use biome_formatter::{FormatResult, FormatRule, write};
 use biome_rowan::AstNode;
 use biome_rowan::{SyntaxTriviaPieceComments, TextSize};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
-use biome_yaml_syntax::{YamlDocument, YamlLanguage, YamlRoot};
+use biome_yaml_syntax::{YamlDocument, YamlFlowMapExplicitEntry, YamlLanguage, YamlRoot};
 
 use crate::prelude::*;
 
 pub type YamlComments = Comments<YamlLanguage>;
+
+/// Whether any comment is attached to `node` or one of its descendants
+pub(crate) fn subtree_has_comments(
+    comments: &YamlComments,
+    node: &biome_yaml_syntax::YamlSyntaxNode,
+) -> bool {
+    node.descendants().any(|node| comments.has_comments(&node))
+}
 
 #[derive(Default)]
 pub struct FormatYamlLeadingComment;
@@ -61,6 +69,7 @@ impl CommentStyle for YamlCommentStyle {
     ) -> CommentPlacement<Self::Language> {
         handle_global_suppression(comment)
             .or_else(handle_document_comment)
+            .or_else(handle_flow_map_explicit_entry_comment)
             .or_else(handle_end_of_line_comment)
     }
 }
@@ -106,6 +115,26 @@ fn handle_document_comment(
         if before_content {
             return CommentPlacement::dangling(document.syntax().clone(), comment);
         }
+    }
+
+    CommentPlacement::Default(comment)
+}
+
+/// Handles comments between the key and the `:` of an explicit flow mapping
+/// entry (`? key : value`). They are made dangling comments of the entry so
+/// its format rule can print them on their own lines before the `:`, where
+/// they attach the same way when reparsed.
+fn handle_flow_map_explicit_entry_comment(
+    comment: DecoratedComment<YamlLanguage>,
+) -> CommentPlacement<YamlLanguage> {
+    let Some(entry) = YamlFlowMapExplicitEntry::cast_ref(comment.enclosing_node()) else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if let Some(colon) = entry.colon_token()
+        && comment.piece().text_range().start() < colon.text_trimmed_range().start()
+    {
+        return CommentPlacement::dangling(entry.syntax().clone(), comment);
     }
 
     CommentPlacement::Default(comment)
