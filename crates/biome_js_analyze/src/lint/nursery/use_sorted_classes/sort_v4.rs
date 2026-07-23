@@ -66,6 +66,9 @@ enum SortKey {
 /// tree. Candidates with an identical (property, registration) placement
 /// order by natural comparison of these texts, mirroring how Tailwind
 /// orders same-utility candidates in generated CSS.
+// TODO: the derived equality compares text chunk-wise and cannot
+// short-circuit on syntax kind mismatches; switch to a structural node
+// comparison once a generic `is_node_equal` is available.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 struct ValueKey {
     value: Option<SyntaxNodeText>,
