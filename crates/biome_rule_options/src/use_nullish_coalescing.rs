@@ -28,6 +28,10 @@ pub struct UseNullishCoalescingOptions {
     /// Whether to ignore `||` and `||=` operations whose non-nullish operand types are all primitives of the configured kinds. Accepts `true` for every primitive, or an object selecting `string`, `number`, `boolean`, `bigint` (default: none).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_primitives: Option<IgnorePrimitives>,
+
+    /// Whether to ignore `if` statements that only assign to a nullish variable and could be rewritten as `??=` (default: `false`).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ignore_if_statements: Option<bool>,
 }
 
 impl UseNullishCoalescingOptions {
@@ -45,6 +49,10 @@ impl UseNullishCoalescingOptions {
 
     pub fn ignore_boolean_coercion(&self) -> bool {
         self.ignore_boolean_coercion.unwrap_or(false)
+    }
+
+    pub fn ignore_if_statements(&self) -> bool {
+        self.ignore_if_statements.unwrap_or(false)
     }
 
     /// Whether any `ignorePrimitives` selection is configured.

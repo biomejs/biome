@@ -8487,6 +8487,10 @@ export interface UseNullishCoalescingOptions {
 	 */
 	ignoreConditionalTests?: boolean;
 	/**
+	 * Whether to ignore `if` statements that only assign to a nullish variable and could be rewritten as `??=` (default: `false`).
+	 */
+	ignoreIfStatements?: boolean;
+	/**
 	 * Whether to ignore `||` and `||=` binary operations that are part of a mixed logical expression with `&&` (default: `false`).
 	 */
 	ignoreMixedLogicalExpressions?: boolean;
