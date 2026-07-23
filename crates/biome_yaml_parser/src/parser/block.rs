@@ -38,6 +38,32 @@ pub(crate) fn parse_any_block_node(p: &mut YamlParser) -> ParsedSyntax {
     }
 }
 
+/// Parses the value of a block mapping entry, which the `:` on the key's
+/// line precedes.
+///
+/// Bare properties on a line of their own are not part of the value: the
+/// lexer wraps a scalar value in `FLOW_START`/`FLOW_END` and opens a nested
+/// collection with a `MAPPING_START`/`SEQUENCE_START` in front of the
+/// properties, so bare ones on their own line can only open the key of a
+/// sibling entry:
+///
+/// ```yaml
+/// b:
+/// &anchor c: 3
+/// ```
+fn parse_block_map_entry_value(p: &mut YamlParser) -> ParsedSyntax {
+    if is_at_property(p)
+        && p.has_preceding_line_break()
+        && matches!(
+            p.source_mut().kind_after_properties(),
+            PLAIN_LITERAL | DOUBLE_QUOTED_LITERAL | SINGLE_QUOTED_LITERAL
+        )
+    {
+        return Absent;
+    }
+    parse_any_block_node(p)
+}
+
 fn parse_block_in_block_node(p: &mut YamlParser) -> CompletedMarker {
     let m = p.start();
     PropertyList.parse_list(p);
@@ -146,7 +172,7 @@ fn parse_block_map_explicit_entry(p: &mut YamlParser) -> ParsedSyntax {
     // Value can be omitted in an explicit entry
     if p.at(T![:]) {
         p.bump(T![:]);
-        parse_any_block_node(p).ok();
+        parse_block_map_entry_value(p).ok();
     }
 
     Present(m.complete(p, YAML_BLOCK_MAP_EXPLICIT_ENTRY))
@@ -161,7 +187,7 @@ fn parse_block_map_implicit_entry(p: &mut YamlParser) -> ParsedSyntax {
         let m = json_node.precede(p);
         p.expect(T![:]);
         // Value can be completely empty according to the spec
-        parse_any_block_node(p).ok();
+        parse_block_map_entry_value(p).ok();
         Present(m.complete(p, YAML_BLOCK_MAP_IMPLICIT_ENTRY))
     } else if is_at_flow_yaml_node(p) || !property_empty {
         // plain yaml key, or empty key with properties
@@ -169,7 +195,7 @@ fn parse_block_map_implicit_entry(p: &mut YamlParser) -> ParsedSyntax {
         let m = yaml_node.precede(p);
         p.expect(T![:]);
         // Value can be completely empty according to the spec
-        parse_any_block_node(p).ok();
+        parse_block_map_entry_value(p).ok();
         Present(m.complete(p, YAML_BLOCK_MAP_IMPLICIT_ENTRY))
     } else if is_at_alias_node(p) {
         property_list.undo_completion(p).abandon(p);
@@ -177,14 +203,14 @@ fn parse_block_map_implicit_entry(p: &mut YamlParser) -> ParsedSyntax {
         let m = alias_node.precede(p);
         p.expect(T![:]);
         // Value can be completely empty according to the spec
-        parse_any_block_node(p).ok();
+        parse_block_map_entry_value(p).ok();
         Present(m.complete(p, YAML_BLOCK_MAP_IMPLICIT_ENTRY))
     } else if p.at(T![:]) {
         // empty key
         property_list.undo_completion(p).abandon(p);
         let m = p.start();
         p.bump(T![:]);
-        parse_any_block_node(p).ok();
+        parse_block_map_entry_value(p).ok();
         Present(m.complete(p, YAML_BLOCK_MAP_IMPLICIT_ENTRY))
     } else {
         property_list.undo_completion(p).abandon(p);
