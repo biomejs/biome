@@ -218,12 +218,25 @@ impl SortKey {
                 let Ok(name) = s.base_token() else {
                     return Self::Unknown;
                 };
-                STATIC_UTILITIES
-                    .get(name.text_trimmed())
+                let name = name.text_trimmed();
+                if let Some(entry) = STATIC_UTILITIES
+                    .get(name)
                     // Tailwind registers negative statics individually
                     // (`-m-px` exists, `-flex` does not).
                     .filter(|entry| !is_negative || entry.has_negative)
-                    .map(|entry| (pool_signature(entry.sig), entry.count))
+                {
+                    Some((pool_signature(entry.sig), entry.count))
+                } else if !is_negative
+                    && let Some(entry) = FUNCTIONAL_UTILITIES.get(name)
+                    && let Some((sig, count)) = entry.bare
+                {
+                    // Functional utilities with a default compile bare
+                    // (`border`, `ring`, `shadow`) without a static
+                    // registration.
+                    Some((pool_signature(sig), count))
+                } else {
+                    None
+                }
             }
 
             AnyTwCandidate::TwFunctionalCandidate(f) => {
@@ -884,6 +897,18 @@ mod tests {
         // all resolve too.
         assert!(matches!(classify("justify-center"), SortKey::Known { .. }));
         assert!(matches!(classify("inline-block"), SortKey::Known { .. }));
+    }
+
+    #[test]
+    fn bare_functional_defaults_resolve_through_the_bare_placement() {
+        // `border` and `ring` compile bare through a default value and
+        // have no static registration.
+        assert!(matches!(classify("border"), SortKey::Known { .. }));
+        assert!(matches!(classify("ring"), SortKey::Known { .. }));
+        // A valueless utility without a default stays unknown, and bare
+        // negatives are never registered.
+        assert_eq!(classify("w"), SortKey::Unknown);
+        assert_eq!(classify("-border"), SortKey::Unknown);
     }
 
     #[test]
