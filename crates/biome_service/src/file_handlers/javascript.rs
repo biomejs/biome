@@ -1103,7 +1103,14 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
 
     let mut process_lint = ProcessLint::new(&params);
 
-    let semantic_model = semantic_model(&tree, SemanticModelOptions::from(&files_source));
+    let semantic_model = match &params.parsed_source {
+        super::ParsedOrigin::Workspace(source) => {
+            js_semantic_model(&params.workspace_db, source).clone()
+        }
+        super::ParsedOrigin::Interned { .. } => {
+            semantic_model(&tree, SemanticModelOptions::from(&files_source))
+        }
+    };
     let services = js_analyzer_services(
         &tree,
         &params.workspace_db,

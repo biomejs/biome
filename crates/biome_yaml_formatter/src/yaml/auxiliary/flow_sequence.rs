@@ -16,10 +16,10 @@ impl FormatNodeRule<YamlFlowSequence> for FormatYamlFlowSequence {
             f,
             [group(&format_args![
                 l_brack_token.format(),
-                should_expand.then_some(expand_parent()),
                 soft_block_indent(&entries.format()),
                 r_brack_token.format()
-            ])]
+            ])
+            .should_expand(should_expand)]
         )
     }
 }

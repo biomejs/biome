@@ -1,11 +1,12 @@
 #![deny(clippy::wildcard_enum_match_arm)]
 
-use crate::ModuleDb;
+use crate::module_graph::{ModuleInfo, ModuleInfoKind};
+use crate::{JsExport, JsModuleInfo, JsOwnExport, ModuleDb};
 use biome_css_syntax::TextRange;
 use biome_js_type_info::interned_types::{
     LocalTypeId, ModuleKey, TypeData as InferredTypeData, TypeTransformError,
 };
-use rustc_hash::FxHashMap;
+use rustc_hash::{FxHashMap, FxHashSet};
 
 mod expressions;
 mod globals;
@@ -15,7 +16,7 @@ mod qualifiers;
 mod resolver;
 
 pub(in crate::db) use lookup::{apply_substitutions_to_root_body, substitutions_for_instance};
-pub(in crate::db) use resolver::resolve_raw_types;
+pub(in crate::db) use resolver::{ImportResolution, resolve_raw_types};
 
 /// Type information attached to one binding declaration.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, salsa::Update)]
@@ -155,11 +156,127 @@ pub(in crate::db) fn normalize_structural_type<'db>(
 }
 
 pub(super) fn infer_module_types_cycle_result<'db>(
-    _db: &'db dyn ModuleDb,
+    db: &'db dyn ModuleDb,
     _id: salsa::Id,
-    _module: crate::module_graph::ModuleInfo,
+    module: ModuleInfo,
 ) -> Option<InferredModuleTypes<'db>> {
-    None
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        return None;
+    };
+    if !js_info.infer_types {
+        return None;
+    }
+
+    let blocked = inference_scc(db, module, &js_info);
+    Some(resolve_raw_types(
+        db,
+        module,
+        &js_info,
+        ImportResolution::CycleFallback(&blocked),
+    ))
+}
+
+/// Returns the inferable modules in the strongly connected component containing
+/// `root`.
+///
+/// The cycle fallback blocks imports within this set to stop recursive Salsa
+/// queries while continuing to infer dependencies outside the cycle. A module
+/// belongs to the set when it is reachable from `root` and can also reach
+/// `root`.
+fn inference_scc(
+    db: &dyn ModuleDb,
+    root: ModuleInfo,
+    root_info: &JsModuleInfo,
+) -> FxHashSet<ModuleInfo> {
+    const MAX_DEPENDENCY_STEPS: usize = 1024;
+
+    // Record every dependency reachable from the root while building the
+    // reverse graph needed to determine which modules can reach it again.
+    let mut reachable = FxHashSet::default();
+    let mut reverse = FxHashMap::<ModuleInfo, Vec<ModuleInfo>>::default();
+    let mut pending = vec![(root, root_info.clone())];
+    let mut remaining_dependency_steps = MAX_DEPENDENCY_STEPS;
+    reachable.insert(root);
+
+    while let Some((source, source_info)) = pending.pop() {
+        db.unwind_if_revision_cancelled();
+
+        let dependency_paths = source_info
+            .static_import_paths
+            .values()
+            .map(|import| &import.resolved_path)
+            .chain(
+                source_info
+                    .blanket_reexports
+                    .iter()
+                    .map(|reexport| &reexport.import.resolved_path),
+            )
+            .chain(
+                source_info
+                    .exports
+                    .values()
+                    .filter_map(|export| match export {
+                        JsExport::Reexport(reexport) | JsExport::ReexportType(reexport) => {
+                            Some(&reexport.import.resolved_path)
+                        }
+                        JsExport::Own(JsOwnExport::Namespace(reexport))
+                        | JsExport::OwnType(JsOwnExport::Namespace(reexport)) => {
+                            Some(&reexport.import.resolved_path)
+                        }
+                        JsExport::Own(_) | JsExport::OwnType(_) => None,
+                    }),
+            );
+
+        for resolved_path in dependency_paths {
+            let Some(path) = resolved_path.as_path() else {
+                continue;
+            };
+            let Some(target) = db.module_for_path(path) else {
+                continue;
+            };
+            let ModuleInfoKind::Js(target_info) = target.kind(db) else {
+                continue;
+            };
+            if !target_info.infer_types {
+                continue;
+            }
+
+            reverse.entry(target).or_default().push(source);
+            if reachable.insert(target) {
+                if remaining_dependency_steps == 0 {
+                    // The search cannot determine the exact cycle within its
+                    // step limit. Block every dependency found so far to avoid
+                    // starting another long inference chain from the fallback.
+                    return reachable;
+                }
+                remaining_dependency_steps -= 1;
+                pending.push((target, target_info));
+            }
+        }
+    }
+
+    // Walking predecessors from the root intersects the reachable set with
+    // modules that can reach the root, yielding its strongly connected
+    // component. Acyclic dependencies have no reverse path and remain usable.
+    let mut scc = FxHashSet::default();
+    let mut pending = vec![root];
+    let mut remaining_dependency_steps = MAX_DEPENDENCY_STEPS;
+    scc.insert(root);
+    while let Some(target) = pending.pop() {
+        db.unwind_if_revision_cancelled();
+        if let Some(predecessors) = reverse.get(&target) {
+            for predecessor in predecessors {
+                if scc.insert(*predecessor) {
+                    if remaining_dependency_steps == 0 {
+                        return scc;
+                    }
+                    remaining_dependency_steps -= 1;
+                    pending.push(*predecessor);
+                }
+            }
+        }
+    }
+    scc
 }
 
 pub(super) fn normalize_type_cycle_result<'db>(

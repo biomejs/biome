@@ -280,17 +280,7 @@ foobar: !sexy
      - Mercury # Rotates - no light/dark sides.
      - Venus # Deadliest. Aptly named.
      - Earth # Mostly dirt.
-@@ -60,7 +63,8 @@
-     - Uranus # Where the sun hardly shines.
-     - Neptune # Boring. No rings.
-     - Pluto # You call this a planet?
--  Flow style: !!seq [
-+  Flow style:
-+    !!seq [
-       Mercury,
-       Venus,
-       Earth,
-@@ -204,6 +208,7 @@
+@@ -204,6 +207,7 @@
  #
  # result = jsyaml.load(yourData, { schema: SEXY_SCHEMA });
  
@@ -369,8 +359,7 @@ seq:
     - Uranus # Where the sun hardly shines.
     - Neptune # Boring. No rings.
     - Pluto # You call this a planet?
-  Flow style:
-    !!seq [
+  Flow style: !!seq [
       Mercury,
       Venus,
       Earth,

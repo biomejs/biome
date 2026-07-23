@@ -78,6 +78,7 @@ impl<'a> Printer<'a> {
     }
 
     /// Prints a single element and push the following elements to queue
+    #[inline(always)]
     fn print_element(
         &mut self,
         stack: &mut PrintCallStack,
@@ -368,6 +369,7 @@ impl<'a> Printer<'a> {
         result
     }
 
+    #[inline(always)]
     fn print_text(&mut self, text: Text) {
         if !self.state.pending_indent.is_empty() {
             let indent = std::mem::take(&mut self.state.pending_indent);
@@ -1209,6 +1211,7 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
     }
 
     /// Tests if the passed element fits on the current line or not.
+    #[inline(always)]
     fn fits_element(&mut self, element: &'a FormatElement) -> PrintResult<Fits> {
         use Tag::*;
 

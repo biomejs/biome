@@ -1,0 +1,10 @@
+.component {
+  &--#{$state} {}
+  &#{$state}-- {}
+  &#{$state}-- div {}
+  &--- {}
+  &-- {}
+
+  &--active {}
+  & --#{$state} {}
+}

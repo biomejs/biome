@@ -382,8 +382,26 @@ pub enum TextWidth {
 
 impl TextWidth {
     pub fn from_text(text: &str, indent_width: IndentWidth) -> Self {
+        const fn is_printable_ascii(byte: u8) -> bool {
+            matches!(byte, b' '..=b'~')
+        }
+
         let mut width = 0u32;
 
+        for (index, byte) in text.bytes().enumerate() {
+            match byte {
+                b'\t' => width = width.saturating_add(indent_width.value() as u32),
+                b'\n' => return Self::Multiline,
+                byte if is_printable_ascii(byte) => width = width.saturating_add(1),
+                _ => return Self::from_text_slow(&text[index..], indent_width, width),
+            }
+        }
+
+        Self::Width(Width::new(width))
+    }
+
+    #[cold]
+    fn from_text_slow(text: &str, indent_width: IndentWidth, mut width: u32) -> Self {
         for c in text.chars() {
             let char_width = match c {
                 '\t' => indent_width.value() as u32,
@@ -586,7 +604,25 @@ pub trait FormatElements {
 
 #[cfg(test)]
 mod tests {
-    use crate::format_element::{LINE_TERMINATORS, normalize_newlines};
+    use crate::IndentWidth;
+    use crate::format_element::{LINE_TERMINATORS, TextWidth, normalize_newlines};
+
+    #[test]
+    fn text_width() {
+        let indent_width = IndentWidth::try_from(4).unwrap();
+        let width = |text| {
+            TextWidth::from_text(text, indent_width)
+                .width()
+                .map(super::Width::value)
+        };
+
+        assert_eq!(width("printable ASCII ~"), Some(17));
+        assert_eq!(width("a\tb"), Some(6));
+        assert_eq!(width("a\nb"), None);
+        assert_eq!(width("a寿司b"), Some(6));
+        assert_eq!(width("a\u{200b}b"), Some(2));
+        assert_eq!(width("a\0\rb"), Some(2));
+    }
 
     #[test]
     fn test_normalize_newlines() {
