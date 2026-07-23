@@ -43,8 +43,7 @@ sequence: !!seq
 mapping: !!map
   key: !!str value
 
-mapping:
-  !!map
+mapping: !!map
   key: !!str value
 
 ```

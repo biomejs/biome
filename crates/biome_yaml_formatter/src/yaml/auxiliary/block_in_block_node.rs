@@ -1,5 +1,7 @@
 use crate::prelude::*;
+use crate::utils::FormatProperties;
 use biome_formatter::{format_args, write};
+use biome_rowan::AstNodeList;
 use biome_yaml_syntax::{
     AnyYamlBlockInBlockContent, YamlBlockInBlockNode, YamlBlockInBlockNodeFields, YamlSyntaxKind,
 };
@@ -12,7 +14,17 @@ impl FormatNodeRule<YamlBlockInBlockNode> for FormatYamlBlockInBlockNode {
             content,
         } = node.as_fields();
 
-        write!(f, [properties.format()])?;
+        // The properties of a block mapping that the parser attached to the
+        // mapping's first key are printed here, up on the mapping's own line
+        let pulled_up = node
+            .properties_on_first_key()
+            .into_iter()
+            .flat_map(|(key_properties, count)| key_properties.iter().take(count));
+        let effective_properties = properties.iter().chain(pulled_up);
+        let has_properties = effective_properties.clone().next().is_some();
+        let last_property = effective_properties.clone().last();
+
+        write!(f, [FormatProperties(effective_properties)])?;
 
         // The parser can produce a node that has properties but no content and
         // no diagnostic, e.g. for `--- !!str` with its scalar on the next line
@@ -20,10 +32,8 @@ impl FormatNodeRule<YamlBlockInBlockNode> for FormatYamlBlockInBlockNode {
             return Ok(());
         };
 
-        if !properties.is_empty() {
-            let has_comments_between = properties
-                .iter()
-                .last()
+        if has_properties {
+            let has_comments_between = last_property
                 .is_some_and(|property| f.comments().has_trailing_comments(property.syntax()))
                 || f.comments().has_leading_comments(content.syntax());
             let is_block_collection = matches!(
