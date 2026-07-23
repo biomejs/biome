@@ -23,20 +23,18 @@ e
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,9 +1,8 @@
-----
--!!map
+@@ -1,9 +1,11 @@
+ ---
+ !!map
 -a: b
-----
--!!seq
-+--- !!map
 +? a
 +: b
-+--- !!seq
+ ---
+ !!seq
  - !!str c
-----
+ ---
 -!!str d
-+--- !!str
++!!str
 +d
  e
 ```
@@ -44,12 +42,15 @@ e
 # Output
 
 ```yml
---- !!map
+---
+!!map
 ? a
 : b
---- !!seq
+---
+!!seq
 - !!str c
---- !!str
+---
+!!str
 d
 e
 ```
