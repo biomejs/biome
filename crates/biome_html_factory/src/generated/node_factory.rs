@@ -12,6 +12,188 @@ pub fn angular_binding_name(value_token: SyntaxToken) -> AngularBindingName {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn angular_block_body(
+    l_curly_token: SyntaxToken,
+    children: HtmlElementList,
+    r_curly_token: SyntaxToken,
+) -> AngularBlockBody {
+    AngularBlockBody::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_BLOCK_BODY,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(children.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn angular_case_clause(
+    at_token: SyntaxToken,
+    case_token: SyntaxToken,
+    parameters: AngularParameters,
+    children: AngularBlockBody,
+) -> AngularCaseClause {
+    AngularCaseClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_CASE_CLAUSE,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(case_token)),
+            Some(SyntaxElement::Node(parameters.into_syntax())),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_default_clause(
+    at_token: SyntaxToken,
+    default_token: SyntaxToken,
+    children: AngularBlockBody,
+) -> AngularDefaultClause {
+    AngularDefaultClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_DEFAULT_CLAUSE,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(default_token)),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_defer_block(opening_block: AngularDeferOpeningBlock) -> AngularDeferBlockBuilder {
+    AngularDeferBlockBuilder {
+        opening_block,
+        placeholder_clause: None,
+        loading_clause: None,
+        error_clause: None,
+    }
+}
+pub struct AngularDeferBlockBuilder {
+    opening_block: AngularDeferOpeningBlock,
+    placeholder_clause: Option<AngularPlaceholderClause>,
+    loading_clause: Option<AngularLoadingClause>,
+    error_clause: Option<AngularErrorClause>,
+}
+impl AngularDeferBlockBuilder {
+    pub fn with_placeholder_clause(mut self, placeholder_clause: AngularPlaceholderClause) -> Self {
+        self.placeholder_clause = Some(placeholder_clause);
+        self
+    }
+    pub fn with_loading_clause(mut self, loading_clause: AngularLoadingClause) -> Self {
+        self.loading_clause = Some(loading_clause);
+        self
+    }
+    pub fn with_error_clause(mut self, error_clause: AngularErrorClause) -> Self {
+        self.error_clause = Some(error_clause);
+        self
+    }
+    pub fn build(self) -> AngularDeferBlock {
+        AngularDeferBlock::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_DEFER_BLOCK,
+            [
+                Some(SyntaxElement::Node(self.opening_block.into_syntax())),
+                self.placeholder_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.loading_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.error_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn angular_defer_opening_block(
+    at_token: SyntaxToken,
+    defer_token: SyntaxToken,
+    children: AngularBlockBody,
+) -> AngularDeferOpeningBlockBuilder {
+    AngularDeferOpeningBlockBuilder {
+        at_token,
+        defer_token,
+        children,
+        parameters: None,
+    }
+}
+pub struct AngularDeferOpeningBlockBuilder {
+    at_token: SyntaxToken,
+    defer_token: SyntaxToken,
+    children: AngularBlockBody,
+    parameters: Option<AngularParameters>,
+}
+impl AngularDeferOpeningBlockBuilder {
+    pub fn with_parameters(mut self, parameters: AngularParameters) -> Self {
+        self.parameters = Some(parameters);
+        self
+    }
+    pub fn build(self) -> AngularDeferOpeningBlock {
+        AngularDeferOpeningBlock::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_DEFER_OPENING_BLOCK,
+            [
+                Some(SyntaxElement::Token(self.at_token)),
+                Some(SyntaxElement::Token(self.defer_token)),
+                self.parameters
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.children.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn angular_else_clause(
+    at_token: SyntaxToken,
+    else_token: SyntaxToken,
+    children: AngularBlockBody,
+) -> AngularElseClause {
+    AngularElseClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_ELSE_CLAUSE,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(else_token)),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_else_if_clause(
+    at_token: SyntaxToken,
+    else_token: SyntaxToken,
+    if_token: SyntaxToken,
+    condition: AngularParameters,
+    children: AngularBlockBody,
+) -> AngularElseIfClause {
+    AngularElseIfClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_ELSE_IF_CLAUSE,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(else_token)),
+            Some(SyntaxElement::Token(if_token)),
+            Some(SyntaxElement::Node(condition.into_syntax())),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_empty_clause(
+    at_token: SyntaxToken,
+    empty_token: SyntaxToken,
+    children: AngularBlockBody,
+) -> AngularEmptyClause {
+    AngularEmptyClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_EMPTY_CLAUSE,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(empty_token)),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_error_clause(
+    at_token: SyntaxToken,
+    error_token: SyntaxToken,
+    children: AngularBlockBody,
+) -> AngularErrorClause {
+    AngularErrorClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_ERROR_CLAUSE,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(error_token)),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
 pub fn angular_event_binding(
     l_paren_token: SyntaxToken,
     name: AngularBindingName,
@@ -44,6 +226,198 @@ impl AngularEventBindingBuilder {
                 Some(SyntaxElement::Token(self.r_paren_token)),
                 self.initializer
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn angular_for_block(opening_block: AngularForOpeningBlock) -> AngularForBlockBuilder {
+    AngularForBlockBuilder {
+        opening_block,
+        empty_clause: None,
+    }
+}
+pub struct AngularForBlockBuilder {
+    opening_block: AngularForOpeningBlock,
+    empty_clause: Option<AngularEmptyClause>,
+}
+impl AngularForBlockBuilder {
+    pub fn with_empty_clause(mut self, empty_clause: AngularEmptyClause) -> Self {
+        self.empty_clause = Some(empty_clause);
+        self
+    }
+    pub fn build(self) -> AngularForBlock {
+        AngularForBlock::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_FOR_BLOCK,
+            [
+                Some(SyntaxElement::Node(self.opening_block.into_syntax())),
+                self.empty_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn angular_for_opening_block(
+    at_token: SyntaxToken,
+    for_token: SyntaxToken,
+    parameters: AngularParameters,
+    children: AngularBlockBody,
+) -> AngularForOpeningBlock {
+    AngularForOpeningBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_FOR_OPENING_BLOCK,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(for_token)),
+            Some(SyntaxElement::Node(parameters.into_syntax())),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_if_block(
+    opening_block: AngularIfOpeningBlock,
+    else_if_clauses: AngularElseIfClauseList,
+) -> AngularIfBlockBuilder {
+    AngularIfBlockBuilder {
+        opening_block,
+        else_if_clauses,
+        else_clause: None,
+    }
+}
+pub struct AngularIfBlockBuilder {
+    opening_block: AngularIfOpeningBlock,
+    else_if_clauses: AngularElseIfClauseList,
+    else_clause: Option<AngularElseClause>,
+}
+impl AngularIfBlockBuilder {
+    pub fn with_else_clause(mut self, else_clause: AngularElseClause) -> Self {
+        self.else_clause = Some(else_clause);
+        self
+    }
+    pub fn build(self) -> AngularIfBlock {
+        AngularIfBlock::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_IF_BLOCK,
+            [
+                Some(SyntaxElement::Node(self.opening_block.into_syntax())),
+                Some(SyntaxElement::Node(self.else_if_clauses.into_syntax())),
+                self.else_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn angular_if_opening_block(
+    at_token: SyntaxToken,
+    if_token: SyntaxToken,
+    condition: AngularParameters,
+    children: AngularBlockBody,
+) -> AngularIfOpeningBlock {
+    AngularIfOpeningBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_IF_OPENING_BLOCK,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(if_token)),
+            Some(SyntaxElement::Node(condition.into_syntax())),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_let_block(
+    at_token: SyntaxToken,
+    let_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    semicolon_token: SyntaxToken,
+) -> AngularLetBlock {
+    AngularLetBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_LET_BLOCK,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(let_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn angular_loading_clause(
+    at_token: SyntaxToken,
+    loading_token: SyntaxToken,
+    children: AngularBlockBody,
+) -> AngularLoadingClauseBuilder {
+    AngularLoadingClauseBuilder {
+        at_token,
+        loading_token,
+        children,
+        parameters: None,
+    }
+}
+pub struct AngularLoadingClauseBuilder {
+    at_token: SyntaxToken,
+    loading_token: SyntaxToken,
+    children: AngularBlockBody,
+    parameters: Option<AngularParameters>,
+}
+impl AngularLoadingClauseBuilder {
+    pub fn with_parameters(mut self, parameters: AngularParameters) -> Self {
+        self.parameters = Some(parameters);
+        self
+    }
+    pub fn build(self) -> AngularLoadingClause {
+        AngularLoadingClause::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_LOADING_CLAUSE,
+            [
+                Some(SyntaxElement::Token(self.at_token)),
+                Some(SyntaxElement::Token(self.loading_token)),
+                self.parameters
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.children.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn angular_parameters(
+    l_paren_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    r_paren_token: SyntaxToken,
+) -> AngularParameters {
+    AngularParameters::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_PARAMETERS,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn angular_placeholder_clause(
+    at_token: SyntaxToken,
+    placeholder_token: SyntaxToken,
+    children: AngularBlockBody,
+) -> AngularPlaceholderClauseBuilder {
+    AngularPlaceholderClauseBuilder {
+        at_token,
+        placeholder_token,
+        children,
+        parameters: None,
+    }
+}
+pub struct AngularPlaceholderClauseBuilder {
+    at_token: SyntaxToken,
+    placeholder_token: SyntaxToken,
+    children: AngularBlockBody,
+    parameters: Option<AngularParameters>,
+}
+impl AngularPlaceholderClauseBuilder {
+    pub fn with_parameters(mut self, parameters: AngularParameters) -> Self {
+        self.parameters = Some(parameters);
+        self
+    }
+    pub fn build(self) -> AngularPlaceholderClause {
+        AngularPlaceholderClause::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_PLACEHOLDER_CLAUSE,
+            [
+                Some(SyntaxElement::Token(self.at_token)),
+                Some(SyntaxElement::Token(self.placeholder_token)),
+                self.parameters
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.children.into_syntax())),
             ],
         ))
     }
@@ -115,6 +489,52 @@ impl AngularStructuralDirectiveBuilder {
             ],
         ))
     }
+}
+pub fn angular_switch_block(
+    opening_block: AngularSwitchOpeningBlock,
+    cases: AngularCaseClauseList,
+) -> AngularSwitchBlockBuilder {
+    AngularSwitchBlockBuilder {
+        opening_block,
+        cases,
+        default_clause: None,
+    }
+}
+pub struct AngularSwitchBlockBuilder {
+    opening_block: AngularSwitchOpeningBlock,
+    cases: AngularCaseClauseList,
+    default_clause: Option<AngularDefaultClause>,
+}
+impl AngularSwitchBlockBuilder {
+    pub fn with_default_clause(mut self, default_clause: AngularDefaultClause) -> Self {
+        self.default_clause = Some(default_clause);
+        self
+    }
+    pub fn build(self) -> AngularSwitchBlock {
+        AngularSwitchBlock::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_SWITCH_BLOCK,
+            [
+                Some(SyntaxElement::Node(self.opening_block.into_syntax())),
+                Some(SyntaxElement::Node(self.cases.into_syntax())),
+                self.default_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn angular_switch_opening_block(
+    at_token: SyntaxToken,
+    switch_token: SyntaxToken,
+    parameters: AngularParameters,
+) -> AngularSwitchOpeningBlock {
+    AngularSwitchOpeningBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_SWITCH_OPENING_BLOCK,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(switch_token)),
+            Some(SyntaxElement::Node(parameters.into_syntax())),
+        ],
+    ))
 }
 pub fn angular_template_ref_variable(
     hash_token: SyntaxToken,
@@ -1977,6 +2397,30 @@ impl VueVSlotShorthandDirectiveBuilder {
             ],
         ))
     }
+}
+pub fn angular_case_clause_list<I>(items: I) -> AngularCaseClauseList
+where
+    I: IntoIterator<Item = AngularCaseClause>,
+    I::IntoIter: ExactSizeIterator,
+{
+    AngularCaseClauseList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_CASE_CLAUSE_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn angular_else_if_clause_list<I>(items: I) -> AngularElseIfClauseList
+where
+    I: IntoIterator<Item = AngularElseIfClause>,
+    I::IntoIter: ExactSizeIterator,
+{
+    AngularElseIfClauseList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_ELSE_IF_CLAUSE_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
 }
 pub fn html_attribute_list<I>(items: I) -> HtmlAttributeList
 where
