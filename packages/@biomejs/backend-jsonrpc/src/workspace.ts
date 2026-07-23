@@ -2429,6 +2429,11 @@ See https://biomejs.dev/linter/rules/no-inline-styles
 	 */
 	noInlineStyles?: NoInlineStylesConfiguration;
 	/**
+	* Disallow specific object properties.
+See https://biomejs.dev/linter/rules/no-js-restricted-properties 
+	 */
+	noJsRestrictedProperties?: NoJsRestrictedPropertiesConfiguration;
+	/**
 	* Flags text nodes with a trailing $ before a JSX expression.
 See https://biomejs.dev/linter/rules/no-jsx-leaked-dollar 
 	 */
@@ -4679,6 +4684,9 @@ export type NoImpliedEvalConfiguration =
 export type NoInlineStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInlineStylesOptions;
+export type NoJsRestrictedPropertiesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoJsRestrictedPropertiesOptions;
 export type NoJsxLeakedDollarConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxLeakedDollarOptions;
@@ -6533,6 +6541,10 @@ export interface RuleWithNoInlineStylesOptions {
 	level: RulePlainConfiguration;
 	options?: NoInlineStylesOptions;
 }
+export interface RuleWithNoJsRestrictedPropertiesOptions {
+	level: RulePlainConfiguration;
+	options?: NoJsRestrictedPropertiesOptions;
+}
 export interface RuleWithNoJsxLeakedDollarOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8303,6 +8315,21 @@ export type NoFloatingPromisesOptions = {};
 export type NoIdenticalTestTitleOptions = {};
 export type NoImpliedEvalOptions = {};
 export type NoInlineStylesOptions = {};
+export interface NoJsRestrictedPropertiesOptions {
+	/**
+	* Restriction entries for object/property access.
+
+Each entry can describe one of these cases:
+
+- exact object/property match:
+  `{ "object": "require", "property": "ensure" }`
+- property-wide restriction with allowed objects:
+  `{ "property": "__defineGetter__", "allowObjects": ["Object"] }`
+- object-wide restriction with allowed properties:
+  `{ "object": "arguments", "allowProperties": ["length"] }` 
+	 */
+	entries?: RestrictedPropertyEntry[];
+}
 export type NoJsxLeakedDollarOptions = {};
 export type NoJsxNamespaceOptions = {};
 export type NoLoopFuncOptions = {};
@@ -9225,6 +9252,38 @@ while for `useState()` it would be `[1]`.
 	 */
 	stableResult?: StableHookResult;
 }
+export interface RestrictedPropertyEntry {
+	/**
+	* Objects that are allowed when `property` is restricted globally.
+
+Example:
+`{ "property": "__defineGetter__", "allowObjects": ["Object"] }` 
+	 */
+	allowObjects?: string[];
+	/**
+	* Properties that are allowed when `object` is restricted globally.
+
+Example:
+`{ "object": "arguments", "allowProperties": ["length"] }` 
+	 */
+	allowProperties?: string[];
+	/**
+	 * Optional custom note appended to the diagnostic.
+	 */
+	message?: string;
+	/**
+	* Object name to restrict.
+
+Example: `"require"` or `"Object"`. 
+	 */
+	object?: string;
+	/**
+	* Property name to restrict.
+
+Example: `"ensure"` or `"__defineGetter__"`. 
+	 */
+	property?: string;
+}
 /**
 	* The Baseline availability level to target.
 
@@ -9704,6 +9763,7 @@ export type Category =
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noInlineStyles"
+	| "lint/nursery/noJsRestrictedProperties"
 	| "lint/nursery/noJsxLeakedDollar"
 	| "lint/nursery/noJsxNamespace"
 	| "lint/nursery/noLoopFunc"
