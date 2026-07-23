@@ -1,6 +1,6 @@
 use crate::comments::subtree_has_comments;
 use crate::prelude::*;
-use crate::utils::needs_space_before_colon;
+use crate::utils::{FormatMultilineKeyEntry, multiline_plain_key_token, needs_space_before_colon};
 use biome_formatter::{format_args, write};
 use biome_rowan::AstNode;
 use biome_yaml_syntax::{
@@ -26,6 +26,23 @@ impl FormatNodeRule<YamlFlowMapImplicitEntry> for FormatYamlFlowMapImplicitEntry
             .parent()
             .is_some_and(|parent| parent.kind() == YamlSyntaxKind::YAML_FLOW_MAP_ENTRY_LIST);
 
+        // A key spanning multiple lines can only be held by the explicit
+        // `? key : value` form, so the entry converts to it
+        if let (Some(key_token), Some(colon_token)) =
+            (multiline_plain_key_token(key.as_ref()), &colon_token)
+        {
+            return write!(
+                f,
+                [FormatMultilineKeyEntry {
+                    question_mark_token: None,
+                    key: key.as_ref().expect("multiline key exists"),
+                    key_token: &key_token,
+                    colon_token,
+                    value: &value,
+                }]
+            );
+        }
+
         if let (Some(entry_key), Some(colon_token), Some(entry_value)) =
             (&key, &colon_token, &value)
             && entry_key.is_flow_collection()
@@ -35,7 +52,8 @@ impl FormatNodeRule<YamlFlowMapImplicitEntry> for FormatYamlFlowMapImplicitEntry
                 [FormatCollectionKeyEntry {
                     key: entry_key,
                     colon_token,
-                    value: entry_value
+                    value: &entry_value.format(),
+                    value_has_comments: subtree_has_comments(f.comments(), entry_value.syntax()),
                 }]
             );
         }
@@ -69,18 +87,23 @@ impl FormatNodeRule<YamlFlowMapImplicitEntry> for FormatYamlFlowMapImplicitEntry
 /// of its own, and conditional content on that group picks between the
 /// implicit and the explicit form. A comment inside the key expands the
 /// group, so it picks the explicit form as well.
-struct FormatCollectionKeyEntry<'a> {
-    key: &'a AnyYamlMappingImplicitKey,
-    colon_token: &'a YamlSyntaxToken,
-    value: &'a AnyYamlFlowNode,
+pub(crate) struct FormatCollectionKeyEntry<'a, V> {
+    pub(crate) key: &'a AnyYamlMappingImplicitKey,
+    pub(crate) colon_token: &'a YamlSyntaxToken,
+    pub(crate) value: &'a V,
+    /// Whether a comment inside the value forces it to break
+    pub(crate) value_has_comments: bool,
 }
 
-impl Format<YamlFormatContext> for FormatCollectionKeyEntry<'_> {
+impl<V> Format<YamlFormatContext> for FormatCollectionKeyEntry<'_, V>
+where
+    V: Format<YamlFormatContext>,
+{
     fn fmt(&self, f: &mut YamlFormatter) -> FormatResult<()> {
         let group_id = f.group_id("collection_key");
         let key_format = self.key.format().memoized();
         let colon_format = self.colon_token.format().memoized();
-        let value_format = self.value.format().memoized();
+        let value_format = self.value.memoized();
 
         write!(
             f,
@@ -103,7 +126,7 @@ impl Format<YamlFormatContext> for FormatCollectionKeyEntry<'_> {
                 .with_group_id(Some(group_id)),
                 if_group_fits_on_line(&format_with(|f| {
                     write!(f, [colon_format])?;
-                    if subtree_has_comments(f.comments(), self.value.syntax()) {
+                    if self.value_has_comments {
                         // A value that a comment forces to break stays on the
                         // key's line instead of moving to its own line:
                         //
