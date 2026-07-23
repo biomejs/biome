@@ -15,8 +15,9 @@ publish              = false
 development = ["biome_service"]
 
 [[bench]]
-harness = false
-name    = "pull_diagnostics"
+harness           = false
+name              = "pull_diagnostics"
+required-features = ["type_inference"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -101,7 +102,7 @@ web-time                 = { workspace = true }
 
 [dev-dependencies]
 biome_configuration = { path = "../biome_configuration", features = ["test-utils"] }
-biome_service       = { path = ".", features = ["testing", "type_inference"] }
+biome_service       = { path = ".", features = ["testing"] }
 divan               = { package = "codspeed-divan-compat", version = "=4.4.1" }
 insta               = { workspace = true }
 static_assertions   = { workspace = true }

@@ -259,11 +259,35 @@ jobs:
       pull-requests: write
     name: Bench Service
     runs-on: depot-ubuntu-24.04-arm-16
-    strategy:
-      matrix:
-        package:
-          - biome_service
-    steps: *bench_steps
+    steps:
+      - name: Checkout PR Branch
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
+        with:
+          channel: stable
+          cache-target: release
+          bins: cargo-codspeed
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compile
+        timeout-minutes: 20
+        run: cargo codspeed build -p biome_service --bench pull_diagnostics --features type_inference
+        env:
+          CARGO_BUILD_JOBS: 3
+
+      - name: Run the benchmarks
+        uses: CodSpeedHQ/action@f99becdce5e5d51fd556489ebef684f4ecfd6286 # v4.18.5
+        timeout-minutes: 50
+        with:
+          mode: simulation
+          run: cargo codspeed run -p biome_service --bench pull_diagnostics
+          token: ${{ secrets.CODSPEED_TOKEN }}
 
   json:
     needs: changes
