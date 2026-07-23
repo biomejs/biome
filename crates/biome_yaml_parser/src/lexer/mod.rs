@@ -442,10 +442,9 @@ impl<'src> YamlLexer<'src> {
             if is_plain_safe(c, in_flow_collection) && c != b':' && c != b'#' {
                 self.advance_char_unchecked();
             }
-            // Technically this should have been (current == b'#' &&
-            // is_non_blank_char(self.last_byte())), but this is simpler
-            else if is_non_blank_char(c) && self.peek_byte().is_some_and(|c| c == b'#') {
-                self.advance_char_unchecked();
+            // A `#` right after a non-blank character doesn't start a
+            // comment and stays part of the scalar
+            else if c == b'#' && self.prev_byte().is_some_and(is_non_blank_char) {
                 self.advance(1); // '#'
             } else if c == b':'
                 && self
@@ -789,7 +788,7 @@ impl<'src> YamlLexer<'src> {
         self.advance(1);
 
         while let Some(c) = self.current_byte() {
-            if is_anchor_char(c) && c != b':' {
+            if is_anchor_char(c) {
                 self.advance(1);
             } else {
                 break;
