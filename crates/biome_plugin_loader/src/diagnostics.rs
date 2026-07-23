@@ -7,7 +7,7 @@ use biome_console::fmt::Display;
 use biome_console::markup;
 use biome_deserialize::DeserializationDiagnostic;
 use biome_diagnostics::{Diagnostic, Error, MessageAndDescription};
-use biome_fs::FileSystemDiagnostic;
+use biome_fs::{FileSystemDiagnostic, FsErrorKind};
 use biome_grit_patterns::CompileError;
 use biome_resolver::{ResolveError, ResolveErrorDiagnostic};
 use biome_rowan::SyntaxError;
@@ -29,6 +29,9 @@ pub enum PluginDiagnostic {
 
     /// Error loading the plugin from the file system.
     FileSystem(FileSystemDiagnostic),
+
+    /// Error reading a plugin file from the file system.
+    CantReadFile(CantReadFile),
 
     /// When something is wrong with the manifest.
     InvalidManifest(InvalidManifest),
@@ -105,6 +108,17 @@ impl PluginDiagnostic {
     pub fn unsupported_rule_format(message: impl Display) -> Self {
         Self::UnsupportedRuleFormat(UnsupportedRuleFormat {
             message: MessageAndDescription::from(markup! {{message}}.to_owned()),
+        })
+    }
+
+    pub fn cant_read_file(path: Utf8PathBuf, source: FileSystemDiagnostic) -> Self {
+        let FileSystemDiagnostic {
+            error_kind, source, ..
+        } = source;
+        Self::CantReadFile(CantReadFile {
+            error_kind,
+            path: path.to_string(),
+            source,
         })
     }
 
@@ -193,6 +207,24 @@ pub struct UnsupportedRuleFormat {
     #[message]
     #[description]
     pub message: MessageAndDescription,
+}
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "plugin",
+    severity = Error,
+)]
+pub struct CantReadFile {
+    #[message]
+    #[description]
+    error_kind: FsErrorKind,
+
+    #[location(resource)]
+    path: String,
+
+    #[serde(skip)]
+    #[source]
+    source: Option<Error>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]

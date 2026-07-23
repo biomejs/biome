@@ -1,0 +1,10 @@
+---
+source: crates/biome_plugin_loader/src/lib.rs
+expression: content
+---
+/my-plugin/rules/missing.grit plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Cannot read file.
+    
+    Caused by:
+      path "/my-plugin/rules/missing.grit" does not exists in memory filesystem
