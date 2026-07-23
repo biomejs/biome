@@ -1,18 +1,17 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-assertion_line: 549
 expression: redactor(content)
 ---
-## `packages/mobile/biome.json`
-
-```json
-{ "root": false, "extends": ["../tools/biome.shared.jsonc"] }
-```
-
 ## `biome.json`
 
 ```json
 { "root": true }
+```
+
+## `packages/mobile/biome.json`
+
+```json
+{ "root": false, "extends": ["../tools/biome.shared.jsonc"] }
 ```
 
 ## `packages/mobile/src/file.js`

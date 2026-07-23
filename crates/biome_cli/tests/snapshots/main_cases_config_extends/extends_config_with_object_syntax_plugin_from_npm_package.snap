@@ -1,8 +1,13 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-assertion_line: 549
 expression: redactor(content)
 ---
+## `biome.json`
+
+```json
+{ "extends": ["@shared/config/biome"] }
+```
+
 ## `node_modules/@shared/config/biome.jsonc`
 
 ```json
@@ -13,12 +18,6 @@ expression: redactor(content)
   ],
   "linter": { "enabled": true }
 }
-```
-
-## `biome.json`
-
-```json
-{ "extends": ["@shared/config/biome"] }
 ```
 
 ## `node_modules/@shared/config/grit/no-object-assign.grit`
