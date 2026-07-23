@@ -133,16 +133,33 @@ pub enum SvelteFileKind {
     SourceModule,
 }
 
+/// Identifies the parser contract for JavaScript embedded in a Svelte file.
+///
+/// Each mode selects the root syntax expected by the parser and records how
+/// bindings and references from the snippet participate in the host document.
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
 pub enum SvelteEmbeddingKind {
+    /// JavaScript content from a `<script>` block or a Svelte source module, parsed as a
+    /// JavaScript or TypeScript module.
     #[default]
     Source,
+    /// A template interpolation or directive payload parsed as a single expression.
     Expression,
+    /// The name and parameters from a `{#snippet ...}` block parsed as a Svelte snippet root.
     SnippetSignature,
+    /// The payload of a `{@const ...}` block parsed as an assignment expression.
+    ///
+    /// The HTML syntax stores the `const` token separately, so this mode receives
+    /// only the assignment payload. It must retain expression-root parsing for
+    /// compatibility with that representation.
     LegacyConst,
+    /// The payload of a `{let ...}` or `{const ...}` tag parsed as a Svelte declaration root.
+    ///
+    /// The snippet includes the keyword and must contain one `let` or `const`
+    /// variable declaration, an optional semicolon, and no trailing code.
     Declaration,
 }
 

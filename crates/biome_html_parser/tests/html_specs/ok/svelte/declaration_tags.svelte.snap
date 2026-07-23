@@ -14,6 +14,7 @@ let source = 1;
 {  let spaced = source}
 {const first = 1, second = { value: "}" }}
 {const regex = /[}]/}
+{let matcher = /}/}
 {const comment = /* } */ { nested: true }}
 {const template = `}`}
 
@@ -25,6 +26,8 @@ let source = 1;
 {template}
 {letter}
 {constellation}
+{let$state}
+{consté}
 {var invalid = 1}
 
 ```
@@ -92,93 +95,114 @@ HtmlRoot {
         SvelteDeclarationBlock {
             l_curly_token: L_CURLY@145..147 "{" [Newline("\n")] [],
             declaration: HtmlTextExpression {
-                html_literal_token: HTML_LITERAL@147..187 "const comment = /* } */ { nested: true }" [] [],
+                html_literal_token: HTML_LITERAL@147..164 "let matcher = /}/" [] [],
             },
-            r_curly_token: R_CURLY@187..188 "}" [] [],
+            r_curly_token: R_CURLY@164..165 "}" [] [],
         },
         SvelteDeclarationBlock {
-            l_curly_token: L_CURLY@188..190 "{" [Newline("\n")] [],
+            l_curly_token: L_CURLY@165..167 "{" [Newline("\n")] [],
             declaration: HtmlTextExpression {
-                html_literal_token: HTML_LITERAL@190..210 "const template = `}`" [] [],
+                html_literal_token: HTML_LITERAL@167..207 "const comment = /* } */ { nested: true }" [] [],
             },
-            r_curly_token: R_CURLY@210..211 "}" [] [],
+            r_curly_token: R_CURLY@207..208 "}" [] [],
+        },
+        SvelteDeclarationBlock {
+            l_curly_token: L_CURLY@208..210 "{" [Newline("\n")] [],
+            declaration: HtmlTextExpression {
+                html_literal_token: HTML_LITERAL@210..230 "const template = `}`" [] [],
+            },
+            r_curly_token: R_CURLY@230..231 "}" [] [],
         },
         HtmlSingleTextExpression {
-            l_curly_token: L_CURLY@211..214 "{" [Newline("\n"), Newline("\n")] [],
+            l_curly_token: L_CURLY@231..234 "{" [Newline("\n"), Newline("\n")] [],
             expression: HtmlTextExpression {
-                html_literal_token: HTML_LITERAL@214..219 "value" [] [],
+                html_literal_token: HTML_LITERAL@234..239 "value" [] [],
             },
-            r_curly_token: R_CURLY@219..220 "}" [] [],
+            r_curly_token: R_CURLY@239..240 "}" [] [],
         },
         HtmlSingleTextExpression {
-            l_curly_token: L_CURLY@220..222 "{" [Newline("\n")] [],
+            l_curly_token: L_CURLY@240..242 "{" [Newline("\n")] [],
             expression: HtmlTextExpression {
-                html_literal_token: HTML_LITERAL@222..227 "first" [] [],
+                html_literal_token: HTML_LITERAL@242..247 "first" [] [],
             },
-            r_curly_token: R_CURLY@227..228 "}" [] [],
+            r_curly_token: R_CURLY@247..248 "}" [] [],
         },
         HtmlSingleTextExpression {
-            l_curly_token: L_CURLY@228..230 "{" [Newline("\n")] [],
+            l_curly_token: L_CURLY@248..250 "{" [Newline("\n")] [],
             expression: HtmlTextExpression {
-                html_literal_token: HTML_LITERAL@230..236 "second" [] [],
+                html_literal_token: HTML_LITERAL@250..256 "second" [] [],
             },
-            r_curly_token: R_CURLY@236..237 "}" [] [],
+            r_curly_token: R_CURLY@256..257 "}" [] [],
         },
         HtmlSingleTextExpression {
-            l_curly_token: L_CURLY@237..239 "{" [Newline("\n")] [],
+            l_curly_token: L_CURLY@257..259 "{" [Newline("\n")] [],
             expression: HtmlTextExpression {
-                html_literal_token: HTML_LITERAL@239..244 "regex" [] [],
+                html_literal_token: HTML_LITERAL@259..264 "regex" [] [],
             },
-            r_curly_token: R_CURLY@244..245 "}" [] [],
+            r_curly_token: R_CURLY@264..265 "}" [] [],
         },
         HtmlSingleTextExpression {
-            l_curly_token: L_CURLY@245..247 "{" [Newline("\n")] [],
+            l_curly_token: L_CURLY@265..267 "{" [Newline("\n")] [],
             expression: HtmlTextExpression {
-                html_literal_token: HTML_LITERAL@247..254 "comment" [] [],
-            },
-            r_curly_token: R_CURLY@254..255 "}" [] [],
-        },
-        HtmlSingleTextExpression {
-            l_curly_token: L_CURLY@255..257 "{" [Newline("\n")] [],
-            expression: HtmlTextExpression {
-                html_literal_token: HTML_LITERAL@257..265 "template" [] [],
-            },
-            r_curly_token: R_CURLY@265..266 "}" [] [],
-        },
-        HtmlSingleTextExpression {
-            l_curly_token: L_CURLY@266..268 "{" [Newline("\n")] [],
-            expression: HtmlTextExpression {
-                html_literal_token: HTML_LITERAL@268..274 "letter" [] [],
+                html_literal_token: HTML_LITERAL@267..274 "comment" [] [],
             },
             r_curly_token: R_CURLY@274..275 "}" [] [],
         },
         HtmlSingleTextExpression {
             l_curly_token: L_CURLY@275..277 "{" [Newline("\n")] [],
             expression: HtmlTextExpression {
-                html_literal_token: HTML_LITERAL@277..290 "constellation" [] [],
+                html_literal_token: HTML_LITERAL@277..285 "template" [] [],
             },
-            r_curly_token: R_CURLY@290..291 "}" [] [],
+            r_curly_token: R_CURLY@285..286 "}" [] [],
         },
         HtmlSingleTextExpression {
-            l_curly_token: L_CURLY@291..293 "{" [Newline("\n")] [],
+            l_curly_token: L_CURLY@286..288 "{" [Newline("\n")] [],
             expression: HtmlTextExpression {
-                html_literal_token: HTML_LITERAL@293..308 "var invalid = 1" [] [],
+                html_literal_token: HTML_LITERAL@288..294 "letter" [] [],
             },
-            r_curly_token: R_CURLY@308..309 "}" [] [],
+            r_curly_token: R_CURLY@294..295 "}" [] [],
+        },
+        HtmlSingleTextExpression {
+            l_curly_token: L_CURLY@295..297 "{" [Newline("\n")] [],
+            expression: HtmlTextExpression {
+                html_literal_token: HTML_LITERAL@297..310 "constellation" [] [],
+            },
+            r_curly_token: R_CURLY@310..311 "}" [] [],
+        },
+        HtmlSingleTextExpression {
+            l_curly_token: L_CURLY@311..313 "{" [Newline("\n")] [],
+            expression: HtmlTextExpression {
+                html_literal_token: HTML_LITERAL@313..322 "let$state" [] [],
+            },
+            r_curly_token: R_CURLY@322..323 "}" [] [],
+        },
+        HtmlSingleTextExpression {
+            l_curly_token: L_CURLY@323..325 "{" [Newline("\n")] [],
+            expression: HtmlTextExpression {
+                html_literal_token: HTML_LITERAL@325..332 "consté" [] [],
+            },
+            r_curly_token: R_CURLY@332..333 "}" [] [],
+        },
+        HtmlSingleTextExpression {
+            l_curly_token: L_CURLY@333..335 "{" [Newline("\n")] [],
+            expression: HtmlTextExpression {
+                html_literal_token: HTML_LITERAL@335..350 "var invalid = 1" [] [],
+            },
+            r_curly_token: R_CURLY@350..351 "}" [] [],
         },
     ],
-    eof_token: EOF@309..310 "" [Newline("\n")] [],
+    eof_token: EOF@351..352 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: HTML_ROOT@0..310
+0: HTML_ROOT@0..352
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..309
+  3: HTML_ELEMENT_LIST@0..351
     0: HTML_ELEMENT@0..34
       0: HTML_OPENING_ELEMENT@0..8
         0: L_ANGLE@0..1 "<" [] []
@@ -215,61 +239,76 @@ HtmlRoot {
       1: HTML_TEXT_EXPRESSION@125..144
         0: HTML_LITERAL@125..144 "const regex = /[}]/" [] []
       2: R_CURLY@144..145 "}" [] []
-    5: SVELTE_DECLARATION_BLOCK@145..188
+    5: SVELTE_DECLARATION_BLOCK@145..165
       0: L_CURLY@145..147 "{" [Newline("\n")] []
-      1: HTML_TEXT_EXPRESSION@147..187
-        0: HTML_LITERAL@147..187 "const comment = /* } */ { nested: true }" [] []
-      2: R_CURLY@187..188 "}" [] []
-    6: SVELTE_DECLARATION_BLOCK@188..211
-      0: L_CURLY@188..190 "{" [Newline("\n")] []
-      1: HTML_TEXT_EXPRESSION@190..210
-        0: HTML_LITERAL@190..210 "const template = `}`" [] []
-      2: R_CURLY@210..211 "}" [] []
-    7: HTML_SINGLE_TEXT_EXPRESSION@211..220
-      0: L_CURLY@211..214 "{" [Newline("\n"), Newline("\n")] []
-      1: HTML_TEXT_EXPRESSION@214..219
-        0: HTML_LITERAL@214..219 "value" [] []
-      2: R_CURLY@219..220 "}" [] []
-    8: HTML_SINGLE_TEXT_EXPRESSION@220..228
-      0: L_CURLY@220..222 "{" [Newline("\n")] []
-      1: HTML_TEXT_EXPRESSION@222..227
-        0: HTML_LITERAL@222..227 "first" [] []
-      2: R_CURLY@227..228 "}" [] []
-    9: HTML_SINGLE_TEXT_EXPRESSION@228..237
-      0: L_CURLY@228..230 "{" [Newline("\n")] []
-      1: HTML_TEXT_EXPRESSION@230..236
-        0: HTML_LITERAL@230..236 "second" [] []
-      2: R_CURLY@236..237 "}" [] []
-    10: HTML_SINGLE_TEXT_EXPRESSION@237..245
-      0: L_CURLY@237..239 "{" [Newline("\n")] []
-      1: HTML_TEXT_EXPRESSION@239..244
-        0: HTML_LITERAL@239..244 "regex" [] []
-      2: R_CURLY@244..245 "}" [] []
-    11: HTML_SINGLE_TEXT_EXPRESSION@245..255
-      0: L_CURLY@245..247 "{" [Newline("\n")] []
-      1: HTML_TEXT_EXPRESSION@247..254
-        0: HTML_LITERAL@247..254 "comment" [] []
-      2: R_CURLY@254..255 "}" [] []
-    12: HTML_SINGLE_TEXT_EXPRESSION@255..266
-      0: L_CURLY@255..257 "{" [Newline("\n")] []
-      1: HTML_TEXT_EXPRESSION@257..265
-        0: HTML_LITERAL@257..265 "template" [] []
-      2: R_CURLY@265..266 "}" [] []
-    13: HTML_SINGLE_TEXT_EXPRESSION@266..275
-      0: L_CURLY@266..268 "{" [Newline("\n")] []
-      1: HTML_TEXT_EXPRESSION@268..274
-        0: HTML_LITERAL@268..274 "letter" [] []
+      1: HTML_TEXT_EXPRESSION@147..164
+        0: HTML_LITERAL@147..164 "let matcher = /}/" [] []
+      2: R_CURLY@164..165 "}" [] []
+    6: SVELTE_DECLARATION_BLOCK@165..208
+      0: L_CURLY@165..167 "{" [Newline("\n")] []
+      1: HTML_TEXT_EXPRESSION@167..207
+        0: HTML_LITERAL@167..207 "const comment = /* } */ { nested: true }" [] []
+      2: R_CURLY@207..208 "}" [] []
+    7: SVELTE_DECLARATION_BLOCK@208..231
+      0: L_CURLY@208..210 "{" [Newline("\n")] []
+      1: HTML_TEXT_EXPRESSION@210..230
+        0: HTML_LITERAL@210..230 "const template = `}`" [] []
+      2: R_CURLY@230..231 "}" [] []
+    8: HTML_SINGLE_TEXT_EXPRESSION@231..240
+      0: L_CURLY@231..234 "{" [Newline("\n"), Newline("\n")] []
+      1: HTML_TEXT_EXPRESSION@234..239
+        0: HTML_LITERAL@234..239 "value" [] []
+      2: R_CURLY@239..240 "}" [] []
+    9: HTML_SINGLE_TEXT_EXPRESSION@240..248
+      0: L_CURLY@240..242 "{" [Newline("\n")] []
+      1: HTML_TEXT_EXPRESSION@242..247
+        0: HTML_LITERAL@242..247 "first" [] []
+      2: R_CURLY@247..248 "}" [] []
+    10: HTML_SINGLE_TEXT_EXPRESSION@248..257
+      0: L_CURLY@248..250 "{" [Newline("\n")] []
+      1: HTML_TEXT_EXPRESSION@250..256
+        0: HTML_LITERAL@250..256 "second" [] []
+      2: R_CURLY@256..257 "}" [] []
+    11: HTML_SINGLE_TEXT_EXPRESSION@257..265
+      0: L_CURLY@257..259 "{" [Newline("\n")] []
+      1: HTML_TEXT_EXPRESSION@259..264
+        0: HTML_LITERAL@259..264 "regex" [] []
+      2: R_CURLY@264..265 "}" [] []
+    12: HTML_SINGLE_TEXT_EXPRESSION@265..275
+      0: L_CURLY@265..267 "{" [Newline("\n")] []
+      1: HTML_TEXT_EXPRESSION@267..274
+        0: HTML_LITERAL@267..274 "comment" [] []
       2: R_CURLY@274..275 "}" [] []
-    14: HTML_SINGLE_TEXT_EXPRESSION@275..291
+    13: HTML_SINGLE_TEXT_EXPRESSION@275..286
       0: L_CURLY@275..277 "{" [Newline("\n")] []
-      1: HTML_TEXT_EXPRESSION@277..290
-        0: HTML_LITERAL@277..290 "constellation" [] []
-      2: R_CURLY@290..291 "}" [] []
-    15: HTML_SINGLE_TEXT_EXPRESSION@291..309
-      0: L_CURLY@291..293 "{" [Newline("\n")] []
-      1: HTML_TEXT_EXPRESSION@293..308
-        0: HTML_LITERAL@293..308 "var invalid = 1" [] []
-      2: R_CURLY@308..309 "}" [] []
-  4: EOF@309..310 "" [Newline("\n")] []
+      1: HTML_TEXT_EXPRESSION@277..285
+        0: HTML_LITERAL@277..285 "template" [] []
+      2: R_CURLY@285..286 "}" [] []
+    14: HTML_SINGLE_TEXT_EXPRESSION@286..295
+      0: L_CURLY@286..288 "{" [Newline("\n")] []
+      1: HTML_TEXT_EXPRESSION@288..294
+        0: HTML_LITERAL@288..294 "letter" [] []
+      2: R_CURLY@294..295 "}" [] []
+    15: HTML_SINGLE_TEXT_EXPRESSION@295..311
+      0: L_CURLY@295..297 "{" [Newline("\n")] []
+      1: HTML_TEXT_EXPRESSION@297..310
+        0: HTML_LITERAL@297..310 "constellation" [] []
+      2: R_CURLY@310..311 "}" [] []
+    16: HTML_SINGLE_TEXT_EXPRESSION@311..323
+      0: L_CURLY@311..313 "{" [Newline("\n")] []
+      1: HTML_TEXT_EXPRESSION@313..322
+        0: HTML_LITERAL@313..322 "let$state" [] []
+      2: R_CURLY@322..323 "}" [] []
+    17: HTML_SINGLE_TEXT_EXPRESSION@323..333
+      0: L_CURLY@323..325 "{" [Newline("\n")] []
+      1: HTML_TEXT_EXPRESSION@325..332
+        0: HTML_LITERAL@325..332 "consté" [] []
+      2: R_CURLY@332..333 "}" [] []
+    18: HTML_SINGLE_TEXT_EXPRESSION@333..351
+      0: L_CURLY@333..335 "{" [Newline("\n")] []
+      1: HTML_TEXT_EXPRESSION@335..350
+        0: HTML_LITERAL@335..350 "var invalid = 1" [] []
+      2: R_CURLY@350..351 "}" [] []
+  4: EOF@351..352 "" [Newline("\n")] []
 
 ```

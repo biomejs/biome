@@ -17,6 +17,7 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{Marker, Parser, SyntaxFeature, TokenSet, token_set};
 use biome_rowan::TextRange;
+use biome_unicode_table::is_js_id_continue;
 use std::ops::Sub;
 
 pub(crate) fn parse_svelte_hash_block(p: &mut HtmlParser) -> ParsedSyntax {
@@ -415,9 +416,9 @@ pub(crate) fn parse_svelte_declaration_or_expression(p: &mut HtmlParser) -> Pars
 
     let is_declaration = ["let", "const"].into_iter().any(|keyword| {
         p.cur_text().strip_prefix(keyword).is_some_and(|rest| {
-            rest.as_bytes()
-                .first()
-                .is_none_or(|byte| !byte.is_ascii_alphanumeric() && *byte != b'_')
+            rest.chars()
+                .next()
+                .is_none_or(|character| !is_js_id_continue(character))
         })
     });
 

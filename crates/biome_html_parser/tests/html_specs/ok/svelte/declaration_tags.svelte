@@ -6,6 +6,7 @@ let source = 1;
 {  let spaced = source}
 {const first = 1, second = { value: "}" }}
 {const regex = /[}]/}
+{let matcher = /}/}
 {const comment = /* } */ { nested: true }}
 {const template = `}`}
 
@@ -17,4 +18,6 @@ let source = 1;
 {template}
 {letter}
 {constellation}
+{let$state}
+{consté}
 {var invalid = 1}
