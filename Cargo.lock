@@ -632,6 +632,7 @@ dependencies = [
  "biome_deserialize_macros",
  "biome_text_size",
  "globset",
+ "parking_lot",
  "schemars",
  "serde",
 ]
