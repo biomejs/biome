@@ -29,7 +29,10 @@ pub fn format_yaml_verbatim_node(node: &YamlSyntaxNode) -> FormatYamlVerbatimNod
         kind: VerbatimKind::Verbatim {
             length: node.text_range_with_trivia().len(),
         },
-        format_comments: true,
+        // This variant is used from within `FormatNodeRule::fmt_fields`, where
+        // `FormatNodeRule::fmt` already formats the node's leading and trailing
+        // comments. Formatting them here as well would print them twice.
+        format_comments: false,
     }
 }
 
@@ -53,20 +56,6 @@ impl Format<YamlFormatContext> for FormatYamlVerbatimNode<'_> {
 
         let preserve_outer_trivia = self.node.parent().is_none();
 
-        for element in self.node.descendants_with_tokens(Direction::Next) {
-            match element {
-                SyntaxElement::Token(token) => f.state_mut().track_token(&token),
-                SyntaxElement::Node(node) => {
-                    let comments = f.context().comments();
-                    comments.mark_suppression_checked(&node);
-
-                    for comment in comments.leading_dangling_trailing_comments(&node) {
-                        comment.mark_formatted();
-                    }
-                }
-            }
-        }
-
         // The trimmed range of a node is its range without any of its leading or trailing trivia.
         // Except for nodes that used to be parenthesized, the range than covers the source from the
         // `(` to the `)` (the trimmed range of the parenthesized expression, not the inner expression)
@@ -79,6 +68,40 @@ impl Format<YamlFormatContext> for FormatYamlVerbatimNode<'_> {
             )
         };
 
+        // Comments attached to a descendant node that are part of the printed
+        // source range don't need any handling of their own. However, comments
+        // placed on a descendant can physically sit in the trivia surrounding
+        // the verbatim node, so they have to be printed here or they would be
+        // dropped.
+        let mut descendant_comments_before = Vec::new();
+        let mut descendant_comments_after = Vec::new();
+        for element in self.node.descendants_with_tokens(Direction::Next) {
+            match element {
+                SyntaxElement::Token(token) => f.state_mut().track_token(&token),
+                SyntaxElement::Node(node) => {
+                    let comments = f.context().comments();
+                    comments.mark_suppression_checked(&node);
+
+                    if node == *self.node {
+                        // The verbatim node's own comments are handled below,
+                        // or by the caller
+                        continue;
+                    }
+                    for comment in comments.leading_dangling_trailing_comments(&node) {
+                        if !preserve_outer_trivia {
+                            let comment_range = source_range(f, comment.piece().text_range());
+                            if comment_range.end() <= verbatim_source_range.start() {
+                                descendant_comments_before.push(comment.clone());
+                            } else if comment_range.start() >= verbatim_source_range.end() {
+                                descendant_comments_after.push(comment.clone());
+                            }
+                        }
+                        comment.mark_formatted();
+                    }
+                }
+            }
+        }
+
         let verbatim_text_start = if preserve_outer_trivia {
             self.node.text_range_with_trivia().start()
         } else {
@@ -88,7 +111,7 @@ impl Format<YamlFormatContext> for FormatYamlVerbatimNode<'_> {
         f.write_element(FormatElement::Tag(Tag::StartVerbatim(self.kind)))?;
 
         // Format all leading comments that are outside of the node's source range.
-        if self.format_comments {
+        {
             let comments = f.context().comments().clone();
             let leading_comments = comments.leading_comments(self.node);
 
@@ -99,15 +122,25 @@ impl Format<YamlFormatContext> for FormatYamlVerbatimNode<'_> {
             let (outside_trimmed_range, in_trimmed_range) =
                 leading_comments.split_at(outside_trimmed_range);
 
-            biome_formatter::write!(
-                f,
-                [format_leading_comments_from_slice(outside_trimmed_range)]
-            )?;
+            if self.format_comments {
+                biome_formatter::write!(
+                    f,
+                    [format_leading_comments_from_slice(outside_trimmed_range)]
+                )?;
+            }
 
             for comment in in_trimmed_range {
                 comment.mark_formatted();
             }
         }
+
+        descendant_comments_before.sort_by_key(|comment| comment.piece().text_range().start());
+        biome_formatter::write!(
+            f,
+            [format_leading_comments_from_slice(
+                &descendant_comments_before
+            )]
+        )?;
 
         // Find the first skipped token trivia, if any, and include it in the verbatim range because
         // the comments only format **up to** but not including skipped token trivia.
@@ -148,8 +181,16 @@ impl Format<YamlFormatContext> for FormatYamlVerbatimNode<'_> {
             comment.mark_formatted();
         }
 
+        descendant_comments_after.sort_by_key(|comment| comment.piece().text_range().start());
+        biome_formatter::write!(
+            f,
+            [format_trailing_comments_from_slice(
+                &descendant_comments_after
+            )]
+        )?;
+
         // Format all trailing comments that are outside of the trimmed range.
-        if self.format_comments {
+        {
             let comments = f.context().comments().clone();
 
             let trailing_comments = comments.trailing_comments(self.node);
@@ -165,10 +206,12 @@ impl Format<YamlFormatContext> for FormatYamlVerbatimNode<'_> {
                 comment.mark_formatted();
             }
 
-            biome_formatter::write!(
-                f,
-                [format_trailing_comments_from_slice(outside_trimmed_range)]
-            )?;
+            if self.format_comments {
+                biome_formatter::write!(
+                    f,
+                    [format_trailing_comments_from_slice(outside_trimmed_range)]
+                )?;
+            }
         }
 
         f.write_element(FormatElement::Tag(Tag::EndVerbatim))

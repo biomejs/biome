@@ -11,9 +11,14 @@ impl FormatNodeRule<YamlBlockInBlockNode> for FormatYamlBlockInBlockNode {
             properties,
             content,
         } = node.as_fields();
-        let content = content?;
 
         write!(f, [properties.format()])?;
+
+        // The parser can produce a node that has properties but no content and
+        // no diagnostic, e.g. for `--- !!str` with its scalar on the next line
+        let Ok(content) = content else {
+            return Ok(());
+        };
 
         if !properties.is_empty() {
             if matches!(

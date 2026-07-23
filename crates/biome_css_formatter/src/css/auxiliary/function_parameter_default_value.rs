@@ -14,6 +14,13 @@ impl FormatNodeRule<CssFunctionParameterDefaultValue> for FormatCssFunctionParam
     ) -> FormatResult<()> {
         let CssFunctionParameterDefaultValueFields { colon_token, value } = node.as_fields();
 
-        write!(f, [colon_token.format(), space(), value.format()])
+        write!(
+            f,
+            [
+                colon_token.format(),
+                space(),
+                value?.format().with_text_case(CssCase::Preserve)
+            ]
+        )
     }
 }

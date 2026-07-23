@@ -16,7 +16,13 @@ impl FormatNodeRule<CssImportAtRule> for FormatCssImportAtRule {
             semicolon_token,
         } = node.as_fields();
 
-        write!(f, [import_token.format(), space()])?;
+        write!(
+            f,
+            [
+                import_token.format()?.with_text_case(CssCase::Lowercase),
+                space()
+            ]
+        )?;
         let import_clause = FormatImportClause::new(url, layer, supports, media);
         write!(f, [group(&indent(&import_clause))])?;
 

@@ -922,17 +922,13 @@ fn classify_quote_break_after_newline(
             if at_setext || at_block_interrupt(p) || textual_looks_like_list_marker(p) {
                 return QuoteBreakKind::Other;
             }
-            // Tab between `>` and a block-level marker (e.g. `> \t- nested`)
-            // leaves the marker token mid-line in the buffer, so the direct
-            // checks miss it. Only enter the lookahead retry when the current
-            // token is a whitespace-only textual run that contains a tab —
-            // otherwise the original checks above are authoritative and the
-            // retry would add lookahead overhead to every quote continuation.
+            // Retry after short space indentation because the marker remains mid-line.
+            // Keep 4+ spaces lazy; tabs need retry because their width depends on position.
             let needs_ws_retry = p.at(MD_TEXTUAL_LITERAL) && {
                 let bytes = p.cur_text().as_bytes();
                 !bytes.is_empty()
                     && bytes.iter().all(|b| matches!(b, b' ' | b'\t'))
-                    && bytes.contains(&b'\t')
+                    && (bytes.contains(&b'\t') || residual_indent < INDENT_CODE_BLOCK_SPACES)
             };
             if !needs_ws_retry {
                 return QuoteBreakKind::None;

@@ -13,10 +13,38 @@ use biome_js_syntax::{AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsFunctionDecl
 use biome_js_type_info::{
     GlobalsResolver, NUM_PREDEFINED_TYPES, Resolvable, ResolvedTypeData, ResolvedTypeId, ScopeId,
     TypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+    TypeStore,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, Text};
 use biome_test_utils::dump_registered_types;
+
+#[derive(Default)]
+pub struct TestTypeCollector {
+    pub types: TypeStore,
+}
+
+impl biome_js_type_info::RawTypeCollector for TestTypeCollector {
+    fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
+        self.types.find(type_data)
+    }
+
+    fn get_by_id(&self, id: TypeId) -> &TypeData {
+        self.types.get_by_id(id)
+    }
+
+    fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
+        self.types.insert_cow(type_data)
+    }
+
+    fn resolve_expression(
+        &mut self,
+        scope_id: ScopeId,
+        expression: &AnyJsExpression,
+    ) -> Cow<'_, TypeData> {
+        Cow::Owned(TypeData::from_any_js_expression(self, scope_id, expression))
+    }
+}
 
 pub fn assert_type_data_snapshot(
     source_code: &str,

@@ -8,6 +8,12 @@ impl FormatNodeRule<CssTypeSelector> for FormatCssTypeSelector {
     fn fmt_fields(&self, node: &CssTypeSelector, f: &mut CssFormatter) -> FormatResult<()> {
         let CssTypeSelectorFields { namespace, ident } = node.as_fields();
 
-        write!(f, [namespace.format(), ident.format()])
+        write!(
+            f,
+            [
+                namespace.format(),
+                ident?.format().with_text_case(CssCase::Preserve)
+            ]
+        )
     }
 }

@@ -1,4 +1,3 @@
-use crate::utils::is_html_tag;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -6,7 +5,7 @@ use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_deserialize::TextRange;
 use biome_diagnostics::Severity;
-use biome_html_syntax::AnyHtmlAttribute;
+use biome_html_syntax::{AnyHtmlAttribute, HtmlSyntaxKind};
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
@@ -102,7 +101,8 @@ impl Rule for UseSemanticElements {
                 .iter()
                 .chain(related_elements.iter())
                 .any(|instance| {
-                    is_html_tag(node, source_type, instance.element.as_str())
+                    node.tag_name_kind()
+                        == HtmlSyntaxKind::from_keyword(instance.element.as_str())
                         && instance.attributes.iter().all(|required_attr| {
                             node.find_attribute_or_vue_binding(required_attr.attribute.as_str())
                                 .and_then(|attr| attr.as_static_value())

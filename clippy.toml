@@ -1,5 +1,6 @@
 allow-dbg-in-tests = true
 disallowed-methods = [
+  { path = "biome_rowan::AstNode::to_trimmed_text", reason = "Prefer typed token access when matching a single token. Use `biome_rowan::cursor::token::SyntaxToken::token_text` or `biome_rowan::cursor::token::SyntaxToken::token_text_trimmed` instead.", allow-invalid = true },
   { path = "str::to_ascii_lowercase", reason = "Avoid memory allocation. Use `biome_string_case::StrOnlyExtension::to_ascii_lowercase_cow` instead." },
   { path = "std::ffi::OsStr::to_ascii_lowercase", reason = "Avoid memory allocation. Use `biome_string_case::StrLikeExtension::to_ascii_lowercase_cow` instead." },
   { path = "str::to_lowercase", reason = "Avoid memory allocation. Use `biome_string_case::StrOnlyExtension::to_lowercase_cow` instead." },

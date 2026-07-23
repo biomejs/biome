@@ -344,6 +344,13 @@ impl SemanticModel {
             })
     }
 
+    pub fn binding_by_id(&self, id: BindingId) -> Option<Binding> {
+        self.data.bindings.get(id.index()).map(|_| Binding {
+            data: self.data.clone(),
+            id,
+        })
+    }
+
     pub fn all_exported_bindings(&self) -> impl Iterator<Item = Binding> + '_ {
         self.data.exported.iter().map(|&id| Binding {
             data: self.data.clone(),

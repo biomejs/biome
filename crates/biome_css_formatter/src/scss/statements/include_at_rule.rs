@@ -19,9 +19,9 @@ impl FormatNodeRule<ScssIncludeAtRule> for FormatScssIncludeAtRule {
         write!(
             f,
             [
-                include_token.format(),
+                include_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
-                name.format(),
+                name?.format().with_text_case(CssCase::Preserve),
                 arguments.format()
             ]
         )?;

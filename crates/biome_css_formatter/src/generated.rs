@@ -382,6 +382,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBinaryExpression {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssBooleanMediaQuery>
+    for crate::css::auxiliary::boolean_media_query::FormatCssBooleanMediaQuery
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssBooleanMediaQuery,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssBooleanMediaQuery>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssBooleanMediaQuery {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssBooleanMediaQuery,
+        crate::css::auxiliary::boolean_media_query::FormatCssBooleanMediaQuery,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::boolean_media_query::FormatCssBooleanMediaQuery::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBooleanMediaQuery {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssBooleanMediaQuery,
+        crate::css::auxiliary::boolean_media_query::FormatCssBooleanMediaQuery,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::boolean_media_query::FormatCssBooleanMediaQuery::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssBracketedValue>
     for crate::css::auxiliary::bracketed_value::FormatCssBracketedValue
 {
@@ -1337,6 +1375,229 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCustomIdentifier {
         FormatOwnedWithRule::new(
             self,
             crate::css::value::custom_identifier::FormatCssCustomIdentifier::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::CssCustomMediaAtRule>
+    for crate::css::statements::custom_media_at_rule::FormatCssCustomMediaAtRule
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssCustomMediaAtRule,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssCustomMediaAtRule>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssCustomMediaAtRule {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssCustomMediaAtRule,
+        crate::css::statements::custom_media_at_rule::FormatCssCustomMediaAtRule,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::statements::custom_media_at_rule::FormatCssCustomMediaAtRule::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCustomMediaAtRule {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssCustomMediaAtRule,
+        crate::css::statements::custom_media_at_rule::FormatCssCustomMediaAtRule,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::statements::custom_media_at_rule::FormatCssCustomMediaAtRule::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::CssCustomMediaAtRuleDeclarator>
+    for crate::css::auxiliary::custom_media_at_rule_declarator::FormatCssCustomMediaAtRuleDeclarator
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssCustomMediaAtRuleDeclarator,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssCustomMediaAtRuleDeclarator>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssCustomMediaAtRuleDeclarator {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssCustomMediaAtRuleDeclarator , crate :: css :: auxiliary :: custom_media_at_rule_declarator :: FormatCssCustomMediaAtRuleDeclarator > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: custom_media_at_rule_declarator :: FormatCssCustomMediaAtRuleDeclarator :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCustomMediaAtRuleDeclarator {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssCustomMediaAtRuleDeclarator , crate :: css :: auxiliary :: custom_media_at_rule_declarator :: FormatCssCustomMediaAtRuleDeclarator > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: custom_media_at_rule_declarator :: FormatCssCustomMediaAtRuleDeclarator :: default ())
+    }
+}
+impl FormatRule<biome_css_syntax::CssCustomPropertyBracedBlock>
+    for crate::css::auxiliary::custom_property_braced_block::FormatCssCustomPropertyBracedBlock
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssCustomPropertyBracedBlock,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssCustomPropertyBracedBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssCustomPropertyBracedBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssCustomPropertyBracedBlock,
+        crate::css::auxiliary::custom_property_braced_block::FormatCssCustomPropertyBracedBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: custom_property_braced_block :: FormatCssCustomPropertyBracedBlock :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCustomPropertyBracedBlock {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssCustomPropertyBracedBlock,
+        crate::css::auxiliary::custom_property_braced_block::FormatCssCustomPropertyBracedBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: custom_property_braced_block :: FormatCssCustomPropertyBracedBlock :: default ())
+    }
+}
+impl FormatRule < biome_css_syntax :: CssCustomPropertyBracketedBlock > for crate :: css :: auxiliary :: custom_property_bracketed_block :: FormatCssCustomPropertyBracketedBlock { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssCustomPropertyBracketedBlock , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssCustomPropertyBracketedBlock > :: fmt (self , node , f) } }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssCustomPropertyBracketedBlock {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssCustomPropertyBracketedBlock , crate :: css :: auxiliary :: custom_property_bracketed_block :: FormatCssCustomPropertyBracketedBlock > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: custom_property_bracketed_block :: FormatCssCustomPropertyBracketedBlock :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCustomPropertyBracketedBlock {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssCustomPropertyBracketedBlock , crate :: css :: auxiliary :: custom_property_bracketed_block :: FormatCssCustomPropertyBracketedBlock > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: custom_property_bracketed_block :: FormatCssCustomPropertyBracketedBlock :: default ())
+    }
+}
+impl FormatRule<biome_css_syntax::CssCustomPropertyDelimiter>
+    for crate::css::auxiliary::custom_property_delimiter::FormatCssCustomPropertyDelimiter
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssCustomPropertyDelimiter,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssCustomPropertyDelimiter>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssCustomPropertyDelimiter {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssCustomPropertyDelimiter,
+        crate::css::auxiliary::custom_property_delimiter::FormatCssCustomPropertyDelimiter,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: custom_property_delimiter :: FormatCssCustomPropertyDelimiter :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCustomPropertyDelimiter {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssCustomPropertyDelimiter,
+        crate::css::auxiliary::custom_property_delimiter::FormatCssCustomPropertyDelimiter,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: custom_property_delimiter :: FormatCssCustomPropertyDelimiter :: default ())
+    }
+}
+impl FormatRule<biome_css_syntax::CssCustomPropertyFunction>
+    for crate::css::auxiliary::custom_property_function::FormatCssCustomPropertyFunction
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssCustomPropertyFunction,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssCustomPropertyFunction>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssCustomPropertyFunction {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssCustomPropertyFunction,
+        crate::css::auxiliary::custom_property_function::FormatCssCustomPropertyFunction,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: custom_property_function :: FormatCssCustomPropertyFunction :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCustomPropertyFunction {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssCustomPropertyFunction,
+        crate::css::auxiliary::custom_property_function::FormatCssCustomPropertyFunction,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: custom_property_function :: FormatCssCustomPropertyFunction :: default ())
+    }
+}
+impl FormatRule < biome_css_syntax :: CssCustomPropertyParenthesizedBlock > for crate :: css :: auxiliary :: custom_property_parenthesized_block :: FormatCssCustomPropertyParenthesizedBlock { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssCustomPropertyParenthesizedBlock , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssCustomPropertyParenthesizedBlock > :: fmt (self , node , f) } }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssCustomPropertyParenthesizedBlock {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssCustomPropertyParenthesizedBlock , crate :: css :: auxiliary :: custom_property_parenthesized_block :: FormatCssCustomPropertyParenthesizedBlock > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: custom_property_parenthesized_block :: FormatCssCustomPropertyParenthesizedBlock :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCustomPropertyParenthesizedBlock {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssCustomPropertyParenthesizedBlock , crate :: css :: auxiliary :: custom_property_parenthesized_block :: FormatCssCustomPropertyParenthesizedBlock > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: custom_property_parenthesized_block :: FormatCssCustomPropertyParenthesizedBlock :: default ())
+    }
+}
+impl FormatRule<biome_css_syntax::CssCustomPropertyValue>
+    for crate::css::auxiliary::custom_property_value::FormatCssCustomPropertyValue
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssCustomPropertyValue,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssCustomPropertyValue>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssCustomPropertyValue {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssCustomPropertyValue,
+        crate::css::auxiliary::custom_property_value::FormatCssCustomPropertyValue,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::custom_property_value::FormatCssCustomPropertyValue::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCustomPropertyValue {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssCustomPropertyValue,
+        crate::css::auxiliary::custom_property_value::FormatCssCustomPropertyValue,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::custom_property_value::FormatCssCustomPropertyValue::default(),
         )
     }
 }
@@ -10484,6 +10745,25 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCustomIdentifierSpace
         FormatOwnedWithRule :: new (self , crate :: css :: lists :: custom_identifier_space_separated_list :: FormatCssCustomIdentifierSpaceSeparatedList :: default ())
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssCustomPropertyComponentList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssCustomPropertyComponentList,
+        crate::css::lists::custom_property_component_list::FormatCssCustomPropertyComponentList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: lists :: custom_property_component_list :: FormatCssCustomPropertyComponentList :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCustomPropertyComponentList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssCustomPropertyComponentList,
+        crate::css::lists::custom_property_component_list::FormatCssCustomPropertyComponentList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: lists :: custom_property_component_list :: FormatCssCustomPropertyComponentList :: default ())
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::CssDeclarationList {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -13312,6 +13592,50 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssCustomIdentifier {
             self,
             crate::css::any::custom_identifier::FormatAnyCssCustomIdentifier::default(),
         )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssCustomMediaQuery {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssCustomMediaQuery,
+        crate::css::any::custom_media_query::FormatAnyCssCustomMediaQuery,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::custom_media_query::FormatAnyCssCustomMediaQuery::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssCustomMediaQuery {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssCustomMediaQuery,
+        crate::css::any::custom_media_query::FormatAnyCssCustomMediaQuery,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::custom_media_query::FormatAnyCssCustomMediaQuery::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssCustomPropertyComponent {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssCustomPropertyComponent,
+        crate::css::any::custom_property_component::FormatAnyCssCustomPropertyComponent,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: any :: custom_property_component :: FormatAnyCssCustomPropertyComponent :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssCustomPropertyComponent {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssCustomPropertyComponent,
+        crate::css::any::custom_property_component::FormatAnyCssCustomPropertyComponent,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: any :: custom_property_component :: FormatAnyCssCustomPropertyComponent :: default ())
     }
 }
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssDashedIdentifier {

@@ -2454,6 +2454,11 @@ See https://biomejs.dev/linter/rules/no-misused-promises
 	 */
 	noMisusedPromises?: NoMisusedPromisesConfiguration;
 	/**
+	* Disallow negated expressions on the left side of an equality check.
+See https://biomejs.dev/linter/rules/no-negation-in-equality-check 
+	 */
+	noNegationInEqualityCheck?: NoNegationInEqualityCheckConfiguration;
+	/**
 	* Disallow usage of element handles (page.$() and page.$$()).
 See https://biomejs.dev/linter/rules/no-playwright-element-handle 
 	 */
@@ -4689,6 +4694,9 @@ export type NoMisleadingReturnTypeConfiguration =
 export type NoMisusedPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedPromisesOptions;
+export type NoNegationInEqualityCheckConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNegationInEqualityCheckOptions;
 export type NoPlaywrightElementHandleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightElementHandleOptions;
@@ -6555,6 +6563,11 @@ export interface RuleWithNoMisusedPromisesOptions {
 	level: RulePlainConfiguration;
 	options?: NoMisusedPromisesOptions;
 }
+export interface RuleWithNoNegationInEqualityCheckOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoNegationInEqualityCheckOptions;
+}
 export interface RuleWithNoPlaywrightElementHandleOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8303,6 +8316,7 @@ export type NoJsxNamespaceOptions = {};
 export type NoLoopFuncOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
 export type NoMisusedPromisesOptions = {};
+export type NoNegationInEqualityCheckOptions = {};
 export type NoPlaywrightElementHandleOptions = {};
 export type NoPlaywrightEvalOptions = {};
 export type NoPlaywrightForceOptionOptions = {};
@@ -9682,7 +9696,6 @@ export type Category =
 	| "lint/correctness/useVueValidVPre"
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
-	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noComponentHookFactories"
@@ -9705,6 +9718,7 @@ export type Category =
 	| "lint/nursery/noMisleadingReturnType"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
+	| "lint/nursery/noNegationInEqualityCheck"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
@@ -9719,6 +9733,7 @@ export type Category =
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactStringRefs"
+	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
@@ -9747,7 +9762,6 @@ export type Category =
 	| "lint/nursery/useExplicitReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
-	| "lint/nursery/useReactFunctionComponentDefinition"
 	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useIframeSandbox"
 	| "lint/nursery/useImportRestrictions"
@@ -9763,6 +9777,7 @@ export type Category =
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useReactAsyncServerFunction"
+	| "lint/nursery/useReactFunctionComponentDefinition"
 	| "lint/nursery/useReactNativePlatformComponents"
 	| "lint/nursery/useReduceTypeParameter"
 	| "lint/nursery/useRegexpExec"
@@ -10417,7 +10432,8 @@ export type HtmlVariant =
 	| { Standard: HtmlTextExpressions }
 	| "Astro"
 	| "Vue"
-	| "Svelte";
+	| "Svelte"
+	| "Angular";
 export type GritVariant = "Standard";
 export type SvelteFileKind = "Component" | "SourceModule";
 export type EmbeddingHtmlKind =
@@ -10446,6 +10462,10 @@ export interface ChangeFileParams {
 	version: number;
 }
 export interface ChangeFileResult {
+	/**
+	* Problems found while updating dependency and module data.
+This does not include lint or parse results for the changed file. 
+	 */
 	diagnostics: Diagnostic[];
 }
 export interface CloseFileParams {
@@ -10642,6 +10662,43 @@ to distinguish parse errors from analyzer errors.
 	skippedDiagnostics: number;
 	warnings: number;
 }
+export interface ProcessFileParams {
+	categories: RuleCategories;
+	content: FileContent;
+	diagnosticLevel: Severity;
+	enabledRules?: AnalyzerSelector[];
+	enforceAssist: boolean;
+	fixFileMode?: FixFileMode;
+	format: boolean;
+	includeCodeFix: boolean;
+	maxDiagnostics?: number;
+	only?: AnalyzerSelector[];
+	path: BiomePath;
+	projectKey: ProjectKey;
+	skip?: AnalyzerSelector[];
+	skipParseErrors: boolean;
+	suppressionReason?: string;
+	write: boolean;
+}
+/**
+ * Which fixes should be applied during the analyzing phase
+ */
+export type FixFileMode =
+	| "safeFixes"
+	| "safeAndUnsafeFixes"
+	| "applySuppressions";
+export interface ProcessFileResult {
+	appliedFixes: number;
+	diagnostics: Diagnostic[];
+	errors: number;
+	formatWithErrorsDisabled: boolean;
+	infos: number;
+	output?: string;
+	parseErrors: number;
+	skippedDiagnostics: number;
+	skippedSuggestedFixes: number;
+	warnings: number;
+}
 export interface PullActionsParams {
 	categories?: RuleCategories;
 	/**
@@ -10785,13 +10842,6 @@ export interface FixFileParams {
 	skip?: AnalyzerSelector[];
 	suppressionReason?: string;
 }
-/**
- * Which fixes should be applied during the analyzing phase
- */
-export type FixFileMode =
-	| "safeFixes"
-	| "safeAndUnsafeFixes"
-	| "applySuppressions";
 export interface FixFileResult {
 	/**
 	 * List of all the code actions applied to the file
@@ -10880,6 +10930,7 @@ export interface Workspace {
 	pullDiagnostics(
 		params: PullDiagnosticsParams,
 	): Promise<PullDiagnosticsResult>;
+	processFile(params: ProcessFileParams): Promise<ProcessFileResult>;
 	pullActions(params: PullActionsParams): Promise<PullActionsResult>;
 	pullDiagnosticsAndActions(
 		params: PullDiagnosticsAndActionsParams,
@@ -10955,6 +11006,9 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		pullDiagnostics(params) {
 			return transport.request("biome/pull_diagnostics", params);
+		},
+		processFile(params) {
+			return transport.request("biome/process_file", params);
 		},
 		pullActions(params) {
 			return transport.request("biome/pull_actions", params);

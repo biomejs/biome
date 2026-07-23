@@ -26,7 +26,7 @@ impl FormatNodeRule<ScssExtendAtRule> for FormatScssExtendAtRule {
         write!(
             f,
             [
-                extend_token.format(),
+                extend_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
                 group(&target),
                 semicolon_token.format()

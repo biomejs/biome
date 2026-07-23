@@ -54,7 +54,7 @@ div {
 ```css
 div {
 	/* Generic property tests */
-	border: InItial;
+	border: initial;
 	border: inherit;
 
 	border: zzz-unknown-value;

@@ -9,7 +9,8 @@ use crate::syntax::scss::{
     parse_scss_variable,
 };
 use crate::syntax::{
-    CssSyntaxFeatures, is_at_any_value, is_at_identifier, parse_any_value, parse_regular_identifier,
+    CssSyntaxFeatures, is_at_any_value, is_at_dashed_identifier, is_at_identifier, parse_any_value,
+    parse_dashed_identifier, parse_regular_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T, TextRange};
@@ -77,6 +78,8 @@ pub(crate) fn parse_query_feature_name(p: &mut CssParser) -> ParsedSyntax {
                 scss_only_syntax_error(p, "SCSS interpolated query feature names", marker.range(p))
             },
         )
+    } else if is_at_dashed_identifier(p) {
+        parse_dashed_identifier(p)
     } else {
         parse_regular_identifier(p)
     }

@@ -15,7 +15,7 @@ impl FormatNodeRule<TwApplyAtRule> for FormatTwApplyAtRule {
         write!(
             f,
             [
-                apply_token.format(),
+                apply_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
                 classes.format(),
                 semicolon_token.format()
