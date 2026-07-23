@@ -207,6 +207,12 @@ pub fn css_binary_expression(
         ],
     ))
 }
+pub fn css_boolean_media_query(boolean_token: SyntaxToken) -> CssBooleanMediaQuery {
+    CssBooleanMediaQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOOLEAN_MEDIA_QUERY,
+        [Some(SyntaxElement::Token(boolean_token))],
+    ))
+}
 pub fn css_bracketed_value(
     l_brack_token: SyntaxToken,
     items: CssBracketedValueList,
@@ -674,6 +680,104 @@ pub fn css_custom_identifier(value_token: SyntaxToken) -> CssCustomIdentifier {
     CssCustomIdentifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_CUSTOM_IDENTIFIER,
         [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_custom_media_at_rule(
+    declarator: CssCustomMediaAtRuleDeclarator,
+    semicolon_token: SyntaxToken,
+) -> CssCustomMediaAtRule {
+    CssCustomMediaAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_MEDIA_AT_RULE,
+        [
+            Some(SyntaxElement::Node(declarator.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn css_custom_media_at_rule_declarator(
+    custom_media_token: SyntaxToken,
+    name: AnyCssDashedIdentifier,
+    queries: AnyCssCustomMediaQuery,
+) -> CssCustomMediaAtRuleDeclarator {
+    CssCustomMediaAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_MEDIA_AT_RULE_DECLARATOR,
+        [
+            Some(SyntaxElement::Token(custom_media_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(queries.into_syntax())),
+        ],
+    ))
+}
+pub fn css_custom_property_braced_block(
+    l_curly_token: SyntaxToken,
+    components: CssCustomPropertyComponentList,
+    r_curly_token: SyntaxToken,
+) -> CssCustomPropertyBracedBlock {
+    CssCustomPropertyBracedBlock::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_PROPERTY_BRACED_BLOCK,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(components.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn css_custom_property_bracketed_block(
+    l_brack_token: SyntaxToken,
+    components: CssCustomPropertyComponentList,
+    r_brack_token: SyntaxToken,
+) -> CssCustomPropertyBracketedBlock {
+    CssCustomPropertyBracketedBlock::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_PROPERTY_BRACKETED_BLOCK,
+        [
+            Some(SyntaxElement::Token(l_brack_token)),
+            Some(SyntaxElement::Node(components.into_syntax())),
+            Some(SyntaxElement::Token(r_brack_token)),
+        ],
+    ))
+}
+pub fn css_custom_property_delimiter(value_token: SyntaxToken) -> CssCustomPropertyDelimiter {
+    CssCustomPropertyDelimiter::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_PROPERTY_DELIMITER,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_custom_property_function(
+    name: CssCustomIdentifier,
+    l_paren_token: SyntaxToken,
+    components: CssCustomPropertyComponentList,
+    r_paren_token: SyntaxToken,
+) -> CssCustomPropertyFunction {
+    CssCustomPropertyFunction::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_PROPERTY_FUNCTION,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(components.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_custom_property_parenthesized_block(
+    l_paren_token: SyntaxToken,
+    components: CssCustomPropertyComponentList,
+    r_paren_token: SyntaxToken,
+) -> CssCustomPropertyParenthesizedBlock {
+    CssCustomPropertyParenthesizedBlock::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(components.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_custom_property_value(
+    components: CssCustomPropertyComponentList,
+) -> CssCustomPropertyValue {
+    CssCustomPropertyValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_PROPERTY_VALUE,
+        [Some(SyntaxElement::Node(components.into_syntax()))],
     ))
 }
 pub fn css_dashed_identifier(value_token: SyntaxToken) -> CssDashedIdentifier {
@@ -4873,6 +4977,18 @@ where
 {
     CssCustomIdentifierSpaceSeparatedList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn css_custom_property_component_list<I>(items: I) -> CssCustomPropertyComponentList
+where
+    I: IntoIterator<Item = AnyCssCustomPropertyComponent>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssCustomPropertyComponentList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_PROPERTY_COMPONENT_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

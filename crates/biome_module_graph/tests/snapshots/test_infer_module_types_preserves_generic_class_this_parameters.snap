@@ -1,0 +1,127 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+class Box<T> {
+	constructor(readonly value: T) {}
+	read() {
+		return this.value;
+	}
+}
+
+export const direct = new Box(Promise.resolve("value")).value;
+export const method = new Box(Promise.resolve("value")).read;
+export const result = method();
+```
+
+## Inferred types
+
+```
+Binding Box "Box" => class "Box" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Binding T "T" => T
+
+Binding value "value" => instanceof T
+
+Expression "this" => instanceof Box<T>
+
+Expression "this.value" => T
+
+Binding direct "direct" => instanceof Promise<string: value>
+
+Expression "new Box(Promise.resolve(\"value\"))" => instanceof Box<instanceof Promise<string: value>>
+
+Expression "new Box(Promise.resolve(\"value\")).value" => instanceof Promise<string: value>
+
+Expression "Box" => class "Box" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "Promise" => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "Promise.resolve" => sync Function "resolve" {
+  accepts: {
+    params: [
+      required value: TResolveValue
+    ]
+    type_args: [TResolveValue]
+  }
+  returns: instanceof Promise<TResolveValue>
+}
+
+Expression "Promise.resolve(\"value\")" => instanceof Promise<string: value>
+
+Expression "\"value\"" => string: value
+
+Binding method "method" => sync Function "read" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<string: value>
+}
+
+Expression "new Box(Promise.resolve(\"value\"))" => instanceof Box<instanceof Promise<string: value>>
+
+Expression "new Box(Promise.resolve(\"value\")).read" => sync Function "read" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<string: value>
+}
+
+Expression "Box" => class "Box" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "Promise" => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "Promise.resolve" => sync Function "resolve" {
+  accepts: {
+    params: [
+      required value: TResolveValue
+    ]
+    type_args: [TResolveValue]
+  }
+  returns: instanceof Promise<TResolveValue>
+}
+
+Expression "Promise.resolve(\"value\")" => instanceof Promise<string: value>
+
+Expression "\"value\"" => string: value
+
+Binding result "result" => instanceof Promise<string: value>
+
+Expression "method" => sync Function "read" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<string: value>
+}
+
+Expression "method()" => instanceof Promise<string: value>
+```

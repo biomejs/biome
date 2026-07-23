@@ -720,7 +720,63 @@ CssGenericProperty =
 
 AnyCssGenericPropertyValueOrExpression =
 	CssGenericComponentValueList
+	| CssCustomPropertyValue
 	| ScssExpression
+
+// https://www.w3.org/TR/css-variables-1/#syntax
+CssCustomPropertyValue =
+	components: CssCustomPropertyComponentList
+
+CssCustomPropertyComponentList = AnyCssCustomPropertyComponent*
+
+AnyCssCustomPropertyComponent =
+	CssCustomIdentifier
+	| CssNumber
+	| AnyCssDimension
+	| CssString
+	| ScssInterpolatedString
+	| ScssInterpolation
+	| CssCustomPropertyFunction
+	| CssCustomPropertyParenthesizedBlock
+	| CssCustomPropertyBracketedBlock
+	| CssCustomPropertyBracedBlock
+	| CssCustomPropertyDelimiter
+
+CssCustomPropertyFunction =
+	name: CssCustomIdentifier
+	'('
+	components: CssCustomPropertyComponentList
+	')'
+
+CssCustomPropertyParenthesizedBlock =
+	'('
+	components: CssCustomPropertyComponentList
+	')'
+
+CssCustomPropertyBracketedBlock =
+	'['
+	components: CssCustomPropertyComponentList
+	']'
+
+CssCustomPropertyBracedBlock =
+	'{'
+	components: CssCustomPropertyComponentList
+	'}'
+
+// Punctuation components of <declaration-value>, including <delim-token>.
+// A top-level `;` terminates the value, while a final `!important` is parsed
+// by the enclosing declaration; both remain components inside nested blocks.
+// https://www.w3.org/TR/css-syntax-3/#typedef-declaration-value
+CssCustomPropertyDelimiter =
+	value: (
+		'css_delim_literal'
+		| '$' | '#' | '&' | '@'
+		| ',' | ':' | ';' | '/' | '.' | '...' | '::'
+		| '+' | '-' | '*' | '%' | '^' | '~' | '|' | '||'
+		| '=' | '==' | '!=' | '<' | '<=' | '>' | '>='
+		| '|=' | '^=' | '*=' | '$=' | '~='
+		| '!' | '<!--' | '-->'
+	)
 
 // This grammar is specific to CSS Modules and defines how composes classes.
 // https://github.com/css-modules/css-modules/blob/master/docs/composition.md
@@ -829,6 +885,7 @@ AnyCssAtRule =
 	| CssPositionTryAtRule
 	| CssViewTransitionAtRule
 	| CssFunctionAtRule
+	| CssCustomMediaAtRule
 	// SCSS at rules
 	| ScssEachAtRule
 	| ScssAtRootAtRule
@@ -1535,6 +1592,7 @@ AnyCssQueryFeature =
 
 AnyCssQueryFeatureName =
 	CssIdentifier
+	| CssDashedIdentifier
 	| ScssInterpolatedIdentifier
 	| ScssVariable
 
@@ -2116,6 +2174,27 @@ CssFunctionParameterDefaultValue =
 CssReturnsStatement =
 	'returns'
 	type: AnyCssType
+
+// https://www.w3.org/TR/mediaqueries-5/#custom-mq
+// @custom-media <extension-name> [ <media-query-list> | true | false ] ;
+//
+// @custom-media --small-viewport (max-width: 768px);
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssCustomMediaAtRule =
+	declarator: CssCustomMediaAtRuleDeclarator
+	';'
+
+CssCustomMediaAtRuleDeclarator =
+	'custom-media'
+	name: AnyCssDashedIdentifier
+	queries: AnyCssCustomMediaQuery
+
+AnyCssCustomMediaQuery =
+	CssMediaQueryList
+	| CssBooleanMediaQuery
+
+CssBooleanMediaQuery =
+	boolean: ('true' | 'false')
 
 ///////////////
 // AUXILIARY

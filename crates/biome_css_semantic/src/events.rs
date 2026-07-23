@@ -124,6 +124,9 @@ impl SemanticEventExtractor {
                             };
                             let value = match generic.value() {
                                 Ok(value) => match value {
+                                    AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(
+                                        value,
+                                    ) => CssPropertyInitialValueKind::from(value),
                                     AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(
                                         list,
                                     ) => CssPropertyInitialValueKind::from(list),
@@ -236,6 +239,9 @@ impl SemanticEventExtractor {
                             continue;
                         };
                         initial_value = Some(match value {
+                            AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(value) => {
+                                CssPropertyInitialValueKind::from(value)
+                            }
                             AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(
                                 list,
                             ) => CssPropertyInitialValueKind::from(list),

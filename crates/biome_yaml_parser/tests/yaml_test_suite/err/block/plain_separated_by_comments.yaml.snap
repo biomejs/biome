@@ -37,7 +37,7 @@ YamlRoot {
                                 flow: YamlFlowYamlNode {
                                     properties: YamlPropertyList [],
                                     content: YamlPlainScalar {
-                                        value_token: PLAIN_LITERAL@5..25 "plain " [] [Comments("# separated by")],
+                                        value_token: PLAIN_LITERAL@5..25 "plain" [] [Whitespace(" "), Comments("# separated by")],
                                     },
                                 },
                                 flow_end_token: FLOW_END@25..25 "" [] [],
@@ -86,7 +86,7 @@ YamlRoot {
                 1: YAML_FLOW_YAML_NODE@5..25
                   0: YAML_PROPERTY_LIST@5..5
                   1: YAML_PLAIN_SCALAR@5..25
-                    0: PLAIN_LITERAL@5..25 "plain " [] [Comments("# separated by")]
+                    0: PLAIN_LITERAL@5..25 "plain" [] [Whitespace(" "), Comments("# separated by")]
                 2: FLOW_END@25..25 "" [] []
             1: YAML_BOGUS_BLOCK_MAP_ENTRY@25..35
               0: FLOW_START@25..28 "" [Newline("\n"), Whitespace("  ")] []

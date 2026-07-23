@@ -24,7 +24,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                    value_token: DIV_KW@1..5 "div" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     SvelteClassDirective {
@@ -59,7 +59,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@40..41 "<" [] [],
                 slash_token: SLASH@41..42 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@42..45 "div" [] [],
+                    value_token: DIV_KW@42..45 "div" [] [],
                 },
                 r_angle_token: R_ANGLE@45..46 ">" [] [],
             },
@@ -68,7 +68,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@46..48 "<" [Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@48..52 "div" [] [Whitespace(" ")],
+                    value_token: DIV_KW@48..52 "div" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     SvelteClassDirective {
@@ -123,7 +123,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@117..118 "<" [] [],
                 slash_token: SLASH@118..119 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@119..122 "div" [] [],
+                    value_token: DIV_KW@119..122 "div" [] [],
                 },
                 r_angle_token: R_ANGLE@122..123 ">" [] [],
             },
@@ -145,7 +145,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..30
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..5
-          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+          0: DIV_KW@1..5 "div" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@5..29
           0: SVELTE_CLASS_DIRECTIVE@5..29
             0: CLASS_KW@5..10 "class" [] []
@@ -169,13 +169,13 @@ HtmlRoot {
         0: L_ANGLE@40..41 "<" [] []
         1: SLASH@41..42 "/" [] []
         2: HTML_TAG_NAME@42..45
-          0: HTML_LITERAL@42..45 "div" [] []
+          0: DIV_KW@42..45 "div" [] []
         3: R_ANGLE@45..46 ">" [] []
     1: HTML_ELEMENT@46..123
       0: HTML_OPENING_ELEMENT@46..103
         0: L_ANGLE@46..48 "<" [Newline("\n")] []
         1: HTML_TAG_NAME@48..52
-          0: HTML_LITERAL@48..52 "div" [] [Whitespace(" ")]
+          0: DIV_KW@48..52 "div" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@52..102
           0: SVELTE_CLASS_DIRECTIVE@52..76
             0: CLASS_KW@52..57 "class" [] []
@@ -213,7 +213,7 @@ HtmlRoot {
         0: L_ANGLE@117..118 "<" [] []
         1: SLASH@118..119 "/" [] []
         2: HTML_TAG_NAME@119..122
-          0: HTML_LITERAL@119..122 "div" [] []
+          0: DIV_KW@119..122 "div" [] []
         3: R_ANGLE@122..123 ">" [] []
   4: EOF@123..124 "" [Newline("\n")] []
 

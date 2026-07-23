@@ -103,11 +103,6 @@ pub(crate) trait Execution: Send + Sync + std::panic::RefUnwindSafe {
         false
     }
 
-    /// Whether the execution should apply safe and unsafe fixes
-    fn is_safe_and_unsafe_fixes_enabled(&self) -> bool {
-        false
-    }
-
     /// `biome search` command
     fn is_search(&self) -> bool {
         false
@@ -183,12 +178,8 @@ pub struct Stdin(
 );
 
 impl Stdin {
-    pub(crate) fn as_path(&self) -> &Utf8Path {
-        self.0.as_path()
-    }
-
-    pub(crate) fn as_content(&self) -> &str {
-        self.1.as_str()
+    pub(crate) fn into_parts(self) -> (Utf8PathBuf, String) {
+        (self.0, self.1)
     }
 }
 

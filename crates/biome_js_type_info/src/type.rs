@@ -12,6 +12,8 @@
 use std::fmt::Debug;
 use std::{ops::Deref, sync::Arc};
 
+use biome_js_syntax::numbers::canonicalize_js_bigint_literal;
+
 use crate::conditionals::ConditionalType;
 use crate::globals::GLOBAL_REGEXP_ID;
 use crate::{
@@ -263,13 +265,13 @@ impl Type {
 
     /// Returns whether this type is a bigint with the given `value`.
     pub fn is_bigint_literal(&self, value: i64) -> bool {
+        let expected = format!("{value}n");
         self.as_raw_data().is_some_and(|ty| match ty {
             TypeData::Literal(literal) => match literal.as_ref() {
-                Literal::BigInt(literal) => literal
-                    .trim_end_matches('n')
-                    .parse::<i64>()
-                    .ok()
-                    .is_some_and(|literal_value| literal_value == value),
+                Literal::BigInt(literal) => {
+                    canonicalize_js_bigint_literal(literal.text()).as_deref()
+                        == Some(expected.as_str())
+                }
                 _ => false,
             },
             _ => false,

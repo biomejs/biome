@@ -54,13 +54,31 @@ Binding readPrimitive "readPrimitive" => sync Function "readPrimitive" {
   accepts: {
     params: [
       required value: string
+      & Object {
+        prototype: No prototype
+        members: ["value": number]
+      }
     ]
     type_args: []
   }
   returns: string
+  & Object {
+    prototype: No prototype
+    members: ["value": number]
+  }
 }
 
-Binding value "value" => string
+Binding value "value" =>
+  string
+  & Object {
+    prototype: No prototype
+    members: ["value": number]
+  }
 
-Expression "value" => string
+Expression "value" =>
+  string
+  & Object {
+    prototype: No prototype
+    members: ["value": number]
+  }
 ```

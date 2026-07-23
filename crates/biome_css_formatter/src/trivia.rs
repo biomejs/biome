@@ -18,7 +18,7 @@ pub(crate) fn format_removed(token: &CssSyntaxToken) -> FormatRemoved<'_> {
 
 impl<'a> Format<CssFormatContext> for FormatRemoved<'a> {
     fn fmt(&self, f: &mut Formatter<CssFormatContext>) -> FormatResult<()> {
-        FormatCssSyntaxToken.format_removed(self.token, f)
+        FormatCssSyntaxToken::default().format_removed(self.token, f)
     }
 }
 
@@ -39,7 +39,7 @@ pub(crate) fn format_replaced<'a>(
 
 impl<'a> Format<CssFormatContext> for FormatReplaced<'a> {
     fn fmt(&self, f: &mut Formatter<CssFormatContext>) -> FormatResult<()> {
-        FormatCssSyntaxToken.format_replaced(self.token, &self.content, f)
+        FormatCssSyntaxToken::default().format_replaced(self.token, &self.content, f)
     }
 }
 
@@ -70,9 +70,9 @@ impl Format<CssFormatContext> for CleanedNumberLiteralText<'_> {
 }
 
 pub(crate) fn on_skipped(token: &CssSyntaxToken, f: &mut CssFormatter) -> FormatResult<()> {
-    FormatCssSyntaxToken.format_skipped_token_trivia(token, f)
+    FormatCssSyntaxToken::default().format_skipped_token_trivia(token, f)
 }
 
 pub(crate) fn on_removed(token: &CssSyntaxToken, f: &mut CssFormatter) -> FormatResult<()> {
-    FormatCssSyntaxToken.format_removed(token, f)
+    FormatCssSyntaxToken::default().format_removed(token, f)
 }

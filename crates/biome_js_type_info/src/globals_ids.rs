@@ -16,13 +16,23 @@ const PREDEFINED_TYPE_COUNT: usize = 65;
 
 /// Type ID that is known to index the predefined global resolver.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub(crate) struct GlobalTypeId(TypeId);
+pub struct GlobalTypeId(TypeId);
 
 impl GlobalTypeId {
     /// Wraps a `TypeId` that has been verified by the caller to address a
     /// predefined manifest slot. Internal constructor only.
     const fn from_type_id(id: TypeId) -> Self {
         Self(id)
+    }
+
+    /// Converts a type ID into a predefined global type ID when it indexes the
+    /// global manifest.
+    pub const fn try_from_type_id(id: TypeId) -> Option<Self> {
+        if id.index() < NUM_PREDEFINED_TYPES {
+            Some(Self(id))
+        } else {
+            None
+        }
     }
 
     /// Test-only constructor for synthesizing `GlobalTypeId` values at

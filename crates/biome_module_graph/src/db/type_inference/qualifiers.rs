@@ -1,9 +1,11 @@
 use super::resolver::ResolutionCtx;
+use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_type_info::{
-    GLOBAL_RESOLVER, Path, TypeImportQualifier, TypeReferenceQualifier, TypeResolver,
+    Path, TypeImportQualifier, TypeReference, TypeReferenceQualifier, TypeResolverLevel,
+    global_type_id_for_qualifier,
     interned_types::{
-        Literal as InferredLiteral, TypeData as InferredTypeData, TypeMember as InferredTypeMember,
-        TypeMemberKind as InferredTypeMemberKind,
+        Literal as InferredLiteral, LocalTypeHandle, LocalTypeId, TypeData as InferredTypeData,
+        TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
     },
 };
 use biome_rowan::Text;
@@ -12,13 +14,65 @@ const MAX_SCOPE_RESOLUTION_STEPS: usize = 1024;
 const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 
 impl<'db> ResolutionCtx<'db, '_> {
+    /// Resolves a qualifier that names a binding whose type is still being
+    /// inferred to a local type handle.
+    ///
+    /// Only single-identifier qualifiers match; the identifier's binding is
+    /// searched upward through the scope chain. Returns `None` when the
+    /// binding is missing, its type reference is not a thin resolved ID, or
+    /// the referenced type is not currently in progress.
+    pub(super) fn resolve_in_progress_this_qualifier(
+        &self,
+        qualifier: &TypeReferenceQualifier,
+    ) -> Option<InferredTypeData<'db>> {
+        let mut path = qualifier.path.iter();
+        let identifier = path.next()?;
+        if path.next().is_some() {
+            return None;
+        }
+
+        let mut scope = self
+            .js_info
+            .semantic_model
+            .scope_from_id(qualifier.scope_id);
+        for _ in 0..MAX_SCOPE_RESOLUTION_STEPS {
+            let binding = scope
+                .get_binding_reference(identifier.text())
+                .and_then(|reference| reference.get_binding_id_for_qualifier(qualifier))
+                .and_then(|id| self.js_info.semantic_model.binding_by_id(id));
+            if let Some(binding) = binding {
+                let TypeReference::Resolved(resolved_id) = self
+                    .js_info
+                    .raw_binding_types
+                    .get(&binding.syntax().text_trimmed_range())?
+                else {
+                    return None;
+                };
+                if resolved_id.level() != TypeResolverLevel::Thin
+                    || !self.in_progress.contains(&resolved_id.id())
+                {
+                    return None;
+                }
+                return Some(InferredTypeData::Local(LocalTypeHandle::new(
+                    self.db,
+                    self.module_key,
+                    LocalTypeId::new(resolved_id.id().index()),
+                )));
+            }
+            scope = scope.parent()?;
+        }
+        None
+    }
+
     pub(in crate::db::type_inference) fn resolve_qualifier(
         &mut self,
         qualifier: &TypeReferenceQualifier,
     ) -> InferredTypeData<'db> {
-        let Some(identifier) = qualifier.path.iter().next() else {
+        let mut path = qualifier.path.iter();
+        let Some(identifier) = path.next() else {
             return InferredTypeData::Unknown;
         };
+        let members = path.collect::<Vec<_>>();
 
         let mut scope = self
             .js_info
@@ -26,26 +80,38 @@ impl<'db> ResolutionCtx<'db, '_> {
             .scope_from_id(qualifier.scope_id);
         let mut reached_root_scope = false;
         for _ in 0..MAX_SCOPE_RESOLUTION_STEPS {
-            if let Some(binding) = scope.get_binding(identifier.text()) {
-                if binding.is_imported()
+            let binding = scope
+                .get_binding_reference(identifier.text())
+                .and_then(|reference| reference.get_binding_id_for_qualifier(qualifier))
+                .and_then(|id| self.js_info.semantic_model.binding_by_id(id));
+            if let Some(binding) = binding {
+                let mut target = if binding.is_imported()
                     && let Some(import) = self.js_info.static_imports.get(identifier.text())
                 {
-                    let target = self.resolve_import(&TypeImportQualifier {
+                    self.resolve_import(&TypeImportQualifier {
                         symbol: import.symbol.clone(),
                         resolved_path: import.resolved_path.clone(),
                         type_only: qualifier.type_only,
-                    });
-                    return self.apply_qualifier_type_parameters(target, qualifier);
+                    })
+                } else {
+                    self.js_info
+                        .raw_binding_types
+                        .get(&binding.syntax().text_trimmed_range())
+                        .cloned()
+                        .map_or(InferredTypeData::Unknown, |reference| {
+                            self.resolve(&reference)
+                        })
+                };
+
+                for member in &members {
+                    let Some(member_ty) =
+                        self.resolve_static_member_expression(target, member.text())
+                    else {
+                        return InferredTypeData::Unknown;
+                    };
+                    target = member_ty;
                 }
 
-                let target = self
-                    .js_info
-                    .raw_binding_types
-                    .get(&binding.syntax().text_trimmed_range())
-                    .cloned()
-                    .map_or(InferredTypeData::Unknown, |reference| {
-                        self.resolve(&reference)
-                    });
                 return self.apply_qualifier_type_parameters(target, qualifier);
             }
 
@@ -152,8 +218,8 @@ impl<'db> ResolutionCtx<'db, '_> {
             return ty;
         }
 
-        if let Some(resolved_id) = GLOBAL_RESOLVER.resolve_qualifier(qualifier) {
-            return self.resolve_resolved_id(resolved_id);
+        if let Some(id) = global_type_id_for_qualifier(qualifier) {
+            return super::globals::global_type(self.db, id);
         }
 
         InferredTypeData::Unknown
@@ -166,15 +232,14 @@ impl<'db> ResolutionCtx<'db, '_> {
         let mut parts = qualifier.path.iter();
         let first = parts.next()?;
         let mut target = parts.next().and_then(|member| {
-            let base = GLOBAL_RESOLVER
-                .resolve_qualifier(&TypeReferenceQualifier {
-                    path: Path::from(first.clone()),
-                    type_parameters: Box::default(),
-                    scope_id: qualifier.scope_id,
-                    type_only: qualifier.type_only,
-                    excluded_binding_id: qualifier.excluded_binding_id,
-                })
-                .map(|resolved_id| self.resolve_resolved_id(resolved_id))?;
+            let base = global_type_id_for_qualifier(&TypeReferenceQualifier {
+                path: Path::from(first.clone()),
+                type_parameters: Box::default(),
+                scope_id: qualifier.scope_id,
+                type_only: qualifier.type_only,
+                excluded_binding_id: qualifier.excluded_binding_id,
+            })
+            .map(|id| super::globals::global_type(self.db, id))?;
             self.resolve_static_member_expression(base, member.text())
         })?;
 
@@ -236,6 +301,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -339,6 +405,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Boolean
                 | InferredTypeData::Null
@@ -393,6 +460,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -441,6 +509,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null

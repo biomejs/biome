@@ -27,7 +27,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@15..17 "<" [Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@17..18 "p" [] [],
+                    value_token: P_KW@17..18 "p" [] [],
                 },
                 attributes: HtmlAttributeList [],
                 r_angle_token: R_ANGLE@18..19 ">" [] [],
@@ -41,7 +41,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@34..35 "<" [] [],
                 slash_token: SLASH@35..36 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@36..37 "p" [] [],
+                    value_token: P_KW@36..37 "p" [] [],
                 },
                 r_angle_token: R_ANGLE@37..38 ">" [] [],
             },
@@ -65,7 +65,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@15..19
         0: L_ANGLE@15..17 "<" [Newline("\n")] []
         1: HTML_TAG_NAME@17..18
-          0: HTML_LITERAL@17..18 "p" [] []
+          0: P_KW@17..18 "p" [] []
         2: HTML_ATTRIBUTE_LIST@18..18
         3: R_ANGLE@18..19 ">" [] []
       1: HTML_ELEMENT_LIST@19..34
@@ -75,7 +75,7 @@ HtmlRoot {
         0: L_ANGLE@34..35 "<" [] []
         1: SLASH@35..36 "/" [] []
         2: HTML_TAG_NAME@36..37
-          0: HTML_LITERAL@36..37 "p" [] []
+          0: P_KW@36..37 "p" [] []
         3: R_ANGLE@37..38 ">" [] []
   4: EOF@38..39 "" [Newline("\n")] []
 

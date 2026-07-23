@@ -24,6 +24,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssAttributeName" => lang::CssAttributeName::KIND_SET.iter().next(),
         "CssAttributeSelector" => lang::CssAttributeSelector::KIND_SET.iter().next(),
         "CssBinaryExpression" => lang::CssBinaryExpression::KIND_SET.iter().next(),
+        "CssBooleanMediaQuery" => lang::CssBooleanMediaQuery::KIND_SET.iter().next(),
         "CssBracketedValue" => lang::CssBracketedValue::KIND_SET.iter().next(),
         "CssCharsetAtRule" => lang::CssCharsetAtRule::KIND_SET.iter().next(),
         "CssClassSelector" => lang::CssClassSelector::KIND_SET.iter().next(),
@@ -78,6 +79,24 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
             .iter()
             .next(),
         "CssCustomIdentifier" => lang::CssCustomIdentifier::KIND_SET.iter().next(),
+        "CssCustomMediaAtRule" => lang::CssCustomMediaAtRule::KIND_SET.iter().next(),
+        "CssCustomMediaAtRuleDeclarator" => {
+            lang::CssCustomMediaAtRuleDeclarator::KIND_SET.iter().next()
+        }
+        "CssCustomPropertyBracedBlock" => {
+            lang::CssCustomPropertyBracedBlock::KIND_SET.iter().next()
+        }
+        "CssCustomPropertyBracketedBlock" => lang::CssCustomPropertyBracketedBlock::KIND_SET
+            .iter()
+            .next(),
+        "CssCustomPropertyDelimiter" => lang::CssCustomPropertyDelimiter::KIND_SET.iter().next(),
+        "CssCustomPropertyFunction" => lang::CssCustomPropertyFunction::KIND_SET.iter().next(),
+        "CssCustomPropertyParenthesizedBlock" => {
+            lang::CssCustomPropertyParenthesizedBlock::KIND_SET
+                .iter()
+                .next()
+        }
+        "CssCustomPropertyValue" => lang::CssCustomPropertyValue::KIND_SET.iter().next(),
         "CssDashedIdentifier" => lang::CssDashedIdentifier::KIND_SET.iter().next(),
         "CssDeclaration" => lang::CssDeclaration::KIND_SET.iter().next(),
         "CssDeclarationBlock" => lang::CssDeclarationBlock::KIND_SET.iter().next(),
@@ -482,6 +501,13 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "CssContainerStyleQueryInParens" => &[("query", 2)],
         "CssCounterStyleAtRule" => &[("declarator", 0), ("block", 1)],
         "CssCounterStyleAtRuleDeclarator" => &[("name", 1)],
+        "CssCustomMediaAtRule" => &[("declarator", 0)],
+        "CssCustomMediaAtRuleDeclarator" => &[("name", 1), ("queries", 2)],
+        "CssCustomPropertyBracedBlock" => &[("components", 1)],
+        "CssCustomPropertyBracketedBlock" => &[("components", 1)],
+        "CssCustomPropertyFunction" => &[("name", 0), ("components", 2)],
+        "CssCustomPropertyParenthesizedBlock" => &[("components", 1)],
+        "CssCustomPropertyValue" => &[("components", 0)],
         "CssDeclaration" => &[("property", 0), ("important", 1)],
         "CssDeclarationBlock" => &[("declarations", 1)],
         "CssDeclarationOrAtRuleBlock" => &[("items", 1)],

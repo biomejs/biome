@@ -394,12 +394,13 @@ pub(crate) fn parse_svelte_spread_or_expression(p: &mut HtmlParser) -> ParsedSyn
             .parse_element(p)
             .or_add_diagnostic(p, expected_expression);
 
-        p.expect_with_context(T!['}'], HtmlLexContext::InsideTagSvelte);
+        p.expect_with_context(T!['}'], super::inside_tag_context(p));
         Present(m.complete(p, HTML_SPREAD_ATTRIBUTE))
     } else {
         p.rewind(checkpoint);
         m.abandon(p);
-        parse_single_text_expression(p, HtmlLexContext::InsideTagSvelte)
+        let context = super::inside_tag_context(p);
+        parse_single_text_expression(p, context)
     }
 }
 
@@ -900,7 +901,7 @@ pub(crate) fn parse_attach_attribute(p: &mut HtmlParser) -> ParsedSyntax {
 
     parse_single_text_expression_content(p).or_add_diagnostic(p, expected_text_expression);
 
-    p.expect_with_context(T!['}'], HtmlLexContext::InsideTagSvelte);
+    p.expect_with_context(T!['}'], super::inside_tag_context(p));
 
     Present(m.complete(p, SVELTE_ATTACH_ATTRIBUTE))
 }
@@ -991,7 +992,7 @@ fn parse_svelte_binding_property(p: &mut HtmlParser) -> ParsedSyntax {
 
 fn parse_binding_literal(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
-    p.bump_with_context(HTML_LITERAL, HtmlLexContext::InsideTagSvelte);
+    p.bump_with_context(HTML_LITERAL, super::inside_tag_context(p));
     Present(m.complete(p, SVELTE_LITERAL))
 }
 
@@ -1305,7 +1306,7 @@ fn parse_bind_initializer(p: &mut HtmlParser) -> ParsedSyntax {
             parse_bind_function_text_expression(p, HtmlLexContext::Svelte).ok();
 
             if p.at(T!['}']) {
-                p.bump_remap_with_context(T!['}'], HtmlLexContext::InsideTagSvelte);
+                p.bump_remap_with_context(T!['}'], super::inside_tag_context(p));
                 expression.complete(p, SVELTE_BIND_FUNCTION_BINDING_EXPRESSION);
                 return Present(m.complete(p, SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE));
             }

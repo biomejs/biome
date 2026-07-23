@@ -12,9 +12,21 @@ impl FormatNodeRule<TwSourceAtRule> for FormatTwSourceAtRule {
             semicolon_token,
         } = node.as_fields();
 
-        write!(f, [source_token.format(), space()])?;
+        write!(
+            f,
+            [
+                source_token.format()?.with_text_case(CssCase::Lowercase),
+                space()
+            ]
+        )?;
         if let Some(not_token) = not_token {
-            write!(f, [not_token.format(), space()])?;
+            write!(
+                f,
+                [
+                    not_token.format().with_text_case(CssCase::Preserve),
+                    space()
+                ]
+            )?;
         }
         write!(f, [source.format(), semicolon_token.format()])
     }

@@ -776,7 +776,7 @@ macro_rules! workspace_method {
 }
 
 /// Returns a list of signature for all the methods in the [Workspace] trait
-pub fn methods() -> [WorkspaceMethod; 30] {
+pub fn methods() -> [WorkspaceMethod; 31] {
     [
         workspace_method!(file_features),
         workspace_method!(update_settings),
@@ -798,6 +798,7 @@ pub fn methods() -> [WorkspaceMethod; 30] {
         workspace_method!(get_semantic_model),
         workspace_method!(get_module_graph),
         workspace_method!(pull_diagnostics),
+        workspace_method!(process_file),
         workspace_method!(pull_actions),
         workspace_method!(pull_diagnostics_and_actions),
         workspace_method!(format_file),

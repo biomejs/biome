@@ -22,18 +22,39 @@ Not indented:
 ```
 
 
-# Error
-```text
-reformat: formatter output had syntax errors where input had none:
-spec-example-6-1-indentation-spaces.yml:13:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Prettier differences
 
-  × Insufficient indentation in flow collection
-  
-    11 │     Also by two, # are neither
-    12 │     Still by two, # content nor
-  > 13 │   ] # indentation.
-       │   
-    14 │ 
-  
+```diff
+--- Prettier
++++ Biome
+@@ -5,8 +5,9 @@
+   By one space: |
+     By four
+       spaces
+-  Flow style: # Leading spaces
++  Flow style:
+     [
++      # Leading spaces
+       By two, # in flow style
+       Also by two, # are neither
+       Still by two, # content nor
+```
 
+# Output
+
+```yml
+# Leading comment line spaces are
+# neither content nor indentation.
+
+Not indented:
+  By one space: |
+    By four
+      spaces
+  Flow style:
+    [
+      # Leading spaces
+      By two, # in flow style
+      Also by two, # are neither
+      Still by two, # content nor
+    ] # indentation.
 ```

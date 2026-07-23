@@ -101,6 +101,27 @@ pub const fn hard_line_break() -> Line {
     Line::new(LineMode::Hard)
 }
 
+/// A forced line break that doesn't expand enclosing groups.
+///
+/// The printer always emits the configured line ending and resets indentation
+/// to the document root. Compose it with [`expand_parent`] when the enclosing
+/// group must also expand.
+#[inline]
+pub const fn literal_line_break_without_parent() -> Line {
+    Line::new(LineMode::Literal {
+        source_position: None,
+    })
+}
+
+#[inline]
+pub(crate) const fn source_mapped_literal_line_break_without_parent(
+    source_position: TextSize,
+) -> Line {
+    Line::new(LineMode::Literal {
+        source_position: Some(source_position),
+    })
+}
+
 /// A forced empty line. An empty line inserts enough line breaks in the output for
 /// the previous and next element to be separated by an empty line.
 ///
@@ -340,7 +361,7 @@ where
 
 /// Creates a text from a dynamic string and a range of the input source
 pub fn text(text: &str, position: Option<TextSize>) -> Text<'_> {
-    debug_assert_no_newlines(text);
+    debug_assert_normalized_newlines(text);
 
     Text { text, position }
 }
@@ -385,7 +406,7 @@ pub fn syntax_token_cow_slice<'a, L: Language>(
     token: &'a SyntaxToken<L>,
     start: TextSize,
 ) -> SyntaxTokenCowSlice<'a, L> {
-    debug_assert_no_newlines(&text);
+    debug_assert_normalized_newlines(&text);
 
     SyntaxTokenCowSlice { text, token, start }
 }
@@ -396,16 +417,42 @@ pub struct SyntaxTokenCowSlice<'a, L: Language> {
     start: TextSize,
 }
 
-impl<L: Language, Context> Format<Context> for SyntaxTokenCowSlice<'_, L>
-where
-    Context: FormatContext,
-{
-    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+impl<'a, L: Language> SyntaxTokenCowSlice<'a, L> {
+    /// Splits embedded LF characters into non-propagating literal lines.
+    ///
+    /// The slice must use LF as its only line terminator. Callers normalize
+    /// source line endings before constructing it, for example with
+    /// [`crate::normalize_newlines`]. The printer converts each logical LF to
+    /// the configured output line ending.
+    ///
+    /// For `before\nafter`, this emits text for `before`, one literal line, and
+    /// text for `after`. Printing at zero indentation produces:
+    ///
+    /// ```text
+    /// before
+    /// after
+    /// ```
+    ///
+    /// Every literal line resets indentation to the document root.
+    /// Text without newlines keeps the existing single-element representation.
+    pub fn with_literal_line_breaks(self) -> SyntaxTokenCowSliceWithLiteralLineBreaks<'a, L> {
+        SyntaxTokenCowSliceWithLiteralLineBreaks { slice: self }
+    }
+
+    fn fmt_segment<Context>(
+        &self,
+        text: &str,
+        start: TextSize,
+        f: &mut Formatter<Context>,
+    ) -> FormatResult<()>
+    where
+        Context: FormatContext,
+    {
         match &self.text {
-            Cow::Borrowed(text) => {
-                let range = TextRange::at(self.start, text.text_len());
+            Cow::Borrowed(_) => {
+                let range = TextRange::at(start, text.text_len());
                 debug_assert_eq!(
-                    *text,
+                    text,
                     &self.token.text()[range - self.token.text_range().start()],
                     "The borrowed string doesn't match the specified token substring. Does the borrowed string belong to this token and range?"
                 );
@@ -416,7 +463,7 @@ where
                 if f.source_map_generation().is_enabled() {
                     f.write_element(FormatElement::MappedLocatedTokenText {
                         slice,
-                        source_position: self.start,
+                        source_position: start,
                     })
                 } else {
                     f.write_element(FormatElement::LocatedTokenText {
@@ -425,15 +472,15 @@ where
                     })
                 }
             }
-            Cow::Owned(text) => {
+            Cow::Owned(_) => {
                 if f.source_map_generation().is_enabled() {
                     f.write_element(FormatElement::MappedText {
-                        text: text.clone().into_boxed_str(),
-                        source_position: self.start,
+                        text: text.to_string().into_boxed_str(),
+                        source_position: start,
                     })
                 } else {
                     f.write_element(FormatElement::Text {
-                        text: text.clone().into_boxed_str(),
+                        text: text.to_string().into_boxed_str(),
                         text_width: TextWidth::from_text(text, f.options().indent_width()),
                     })
                 }
@@ -442,9 +489,83 @@ where
     }
 }
 
+impl<L: Language, Context> Format<Context> for SyntaxTokenCowSlice<'_, L>
+where
+    Context: FormatContext,
+{
+    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        self.fmt_segment(self.text.as_ref(), self.start, f)
+    }
+}
+
 impl<L: Language> std::fmt::Debug for SyntaxTokenCowSlice<'_, L> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::write!(f, "SyntaxTokenCowSlice({})", self.text)
+    }
+}
+
+/// Formatter returned by [`SyntaxTokenCowSlice::with_literal_line_breaks`].
+pub struct SyntaxTokenCowSliceWithLiteralLineBreaks<'a, L: Language> {
+    slice: SyntaxTokenCowSlice<'a, L>,
+}
+
+impl<L: Language> std::fmt::Debug for SyntaxTokenCowSliceWithLiteralLineBreaks<'_, L> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("SyntaxTokenCowSliceWithLiteralLineBreaks")
+            .field(&self.slice)
+            .finish()
+    }
+}
+
+impl<L: Language, Context> Format<Context> for SyntaxTokenCowSliceWithLiteralLineBreaks<'_, L>
+where
+    Context: FormatContext,
+{
+    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        let text = self.slice.text.as_ref();
+        let Some((first, rest)) = text.split_once('\n') else {
+            return self.slice.fmt(f);
+        };
+
+        let mut source_position = self.slice.start;
+        if !first.is_empty() {
+            self.slice.fmt_segment(first, source_position, f)?;
+        }
+        source_position += first.text_len();
+        self.fmt_literal_line_break(source_position, f)?;
+        source_position += "\n".text_len();
+
+        let mut segments = rest.split('\n').peekable();
+        while let Some(segment) = segments.next() {
+            if !segment.is_empty() {
+                self.slice.fmt_segment(segment, source_position, f)?;
+            }
+            source_position += segment.text_len();
+
+            if segments.peek().is_some() {
+                self.fmt_literal_line_break(source_position, f)?;
+                source_position += "\n".text_len();
+            }
+        }
+
+        Ok(())
+    }
+}
+
+impl<L: Language> SyntaxTokenCowSliceWithLiteralLineBreaks<'_, L> {
+    fn fmt_literal_line_break<Context>(
+        &self,
+        source_position: TextSize,
+        f: &mut Formatter<Context>,
+    ) -> FormatResult<()>
+    where
+        Context: FormatContext,
+    {
+        if f.source_map_generation().is_enabled() {
+            source_mapped_literal_line_break_without_parent(source_position).fmt(f)
+        } else {
+            literal_line_break_without_parent().fmt(f)
+        }
     }
 }
 
@@ -456,7 +577,7 @@ pub fn located_token_text<L: Language>(
     let relative_range = range - token.text_range().start();
     let slice = token.token_text().slice(relative_range);
 
-    debug_assert_no_newlines(&slice);
+    debug_assert_normalized_newlines(&slice);
 
     LocatedTokenText {
         text: slice,
@@ -494,10 +615,10 @@ impl std::fmt::Debug for LocatedTokenText {
     }
 }
 
-fn debug_assert_no_newlines(text: &str) {
+fn debug_assert_normalized_newlines(text: &str) {
     debug_assert!(
         !text.contains('\r'),
-        "The content '{text}' contains an unsupported '\\r' line terminator character but text must only use line feeds '\\n' as line separator. Use '\\n' instead of '\\r' and '\\r\\n' to insert a line break in strings."
+        "The content '{text}' contains a carriage return, but formatter text must use LF line endings. Normalize source text with `normalize_newlines` before constructing formatter text."
     );
 }
 

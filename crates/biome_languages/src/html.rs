@@ -31,6 +31,8 @@ pub enum HtmlVariant {
     Vue,
     /// Use this variant to parse a Svelte file
     Svelte,
+    /// Use this variant to parse an Angular file
+    Angular,
 }
 
 impl Default for HtmlVariant {
@@ -62,6 +64,10 @@ impl HtmlFileSource {
 
     pub const fn is_astro(&self) -> bool {
         matches!(self.variant, HtmlVariant::Astro)
+    }
+
+    pub const fn is_angular(&self) -> bool {
+        matches!(self.variant, HtmlVariant::Angular)
     }
 
     pub const fn supports_components(&self) -> bool {
@@ -97,19 +103,29 @@ impl HtmlFileSource {
             variant: HtmlVariant::Vue,
         }
     }
+
     pub fn svelte() -> Self {
         Self {
             variant: HtmlVariant::Svelte,
         }
     }
 
+    pub fn angular() -> Self {
+        Self {
+            variant: HtmlVariant::Angular,
+        }
+    }
+
+    pub fn set_variant(&mut self, variant: HtmlVariant) {
+        self.variant = variant;
+    }
+
     /// Try to return the HTML file source corresponding to this file name from well-known files
     pub fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
-        let Some(extension) = path.extension() else {
-            return Err(FileSourceError::MissingFileExtension);
-        };
-
-        Self::try_from_extension(extension)
+        match path.extension() {
+            Some(extension) => Self::try_from_extension(extension),
+            None => Err(FileSourceError::MissingFileExtension),
+        }
     }
 
     /// Try to return the HTML file source corresponding to this file extension

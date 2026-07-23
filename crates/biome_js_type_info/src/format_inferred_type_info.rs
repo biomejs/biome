@@ -110,6 +110,22 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeData<'db> {
                     )
                 }
             }
+            Self::GlobalType(id) => {
+                if let Some(name) = crate::globals_ids::global_type_name(id.as_type_id()) {
+                    write!(f, [text(name, None)])
+                } else {
+                    write!(
+                        f,
+                        [&format_args![
+                            token("global"),
+                            space(),
+                            token("type"),
+                            space(),
+                            text(&id.index().to_string(), None)
+                        ]]
+                    )
+                }
+            }
             Self::Intersection(intersection) => write!(
                 f,
                 [FmtInferredTypeList {
@@ -375,6 +391,9 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeMemberKind<'db> {
             }
             Self::ComputedValue(ty) | Self::ConstAssertedComputedValue(ty) => {
                 write!(f, [token("computed"), space(), token("["), ty, token("]")])
+            }
+            Self::ComputedValueNamed(name, _) | Self::ConstAssertedComputedValueNamed(name, _) => {
+                write!(f, [text(&std::format!("computed [{name}]"), None)])
             }
             Self::Named(name) | Self::ConstAssertedNamed(name) => {
                 write!(f, [text(&std::format!("\"{name}\""), None)])

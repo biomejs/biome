@@ -41,6 +41,7 @@ biome_languages           = { workspace = true, features = ["lang_js"] }
 biome_module_graph        = { workspace = true }
 biome_module_replacements = { workspace = true }
 biome_package             = { workspace = true }
+biome_parser              = { workspace = true }
 biome_project_layout      = { workspace = true }
 biome_resolver            = { workspace = true }
 biome_rowan               = { workspace = true }
@@ -68,7 +69,6 @@ smallvec                  = { workspace = true }
 biome_db            = { path = "../biome_db" }
 biome_fs            = { path = "../biome_fs" }
 biome_js_parser     = { path = "../biome_js_parser", features = ["tests"] }
-biome_parser        = { path = "../biome_parser" }
 biome_plugin_loader = { path = "../biome_plugin_loader" }
 biome_service       = { path = "../biome_service" }
 biome_test_utils    = { path = "../biome_test_utils", features = ["html_embeds", "module_graph"] }

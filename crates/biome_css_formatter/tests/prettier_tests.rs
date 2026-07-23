@@ -24,9 +24,6 @@ fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     ));
 
     let test_file = PrettierTestFile::new(input, root_path);
-    let options = CssFormatOptions::default()
-        .with_indent_style(IndentStyle::Space)
-        .with_indent_width(IndentWidth::default());
     let source_type = {
         if test_file.file_extension() == "scss" {
             CssFileSource::scss()
@@ -34,6 +31,9 @@ fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
             CssFileSource::css()
         }
     };
+    let options = CssFormatOptions::new(source_type)
+        .with_indent_style(IndentStyle::Space)
+        .with_indent_width(IndentWidth::default());
     let language = language::CssTestFormatLanguage::new(source_type);
     let snapshot = PrettierSnapshot::new(test_file, language, CssFormatLanguage::new(options));
 

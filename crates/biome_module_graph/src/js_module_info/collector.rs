@@ -386,7 +386,7 @@ impl JsModuleInfoCollector {
 
         self.populate_namespace_and_module_members();
 
-        self.register_export_types();
+        let raw_exports = self.collect_exports_from(self.exports.clone(), true);
 
         let raw_types = self.raw_types();
         let raw_expressions = self.raw_expressions();
@@ -407,6 +407,7 @@ impl JsModuleInfoCollector {
 
         FinalisedModuleTypes {
             exports,
+            raw_exports,
             binding_type_data,
             raw_types,
             raw_expressions,
@@ -820,18 +821,10 @@ impl JsModuleInfoCollector {
         }
     }
 
-    fn register_export_types(&mut self) {
-        let _ = self.collect_exports_from(self.exports.clone());
-    }
-
-    fn collect_exports(&mut self) -> IndexMap<Text, JsExport> {
-        let exports = std::mem::take(&mut self.exports);
-        self.collect_exports_from(exports)
-    }
-
     fn collect_exports_from(
         &mut self,
         exports: Vec<JsCollectedExport>,
+        raw: bool,
     ) -> IndexMap<Text, JsExport> {
         let mut finalised_exports = IndexMap::new();
 
@@ -852,51 +845,74 @@ impl JsModuleInfoCollector {
                     }
                 }
                 JsCollectedExport::ExportDefault { ty } => {
-                    let resolved = self.resolve_reference(&ty).unwrap_or(GLOBAL_UNKNOWN_ID);
+                    let resolved = if raw {
+                        self.raw_resolved_id(&ty)
+                    } else {
+                        self.resolve_reference(&ty).unwrap_or(GLOBAL_UNKNOWN_ID)
+                    };
 
                     let export = JsExport::Own(JsOwnExport::Type(resolved));
                     finalised_exports.insert(Text::new_static("default"), export);
                 }
                 JsCollectedExport::ExportDefaultAssignment { ty } => {
-                    let resolved = self.resolve_reference(&ty).unwrap_or(GLOBAL_UNKNOWN_ID);
+                    let resolved = if raw {
+                        self.raw_resolved_id(&ty)
+                    } else {
+                        self.resolve_reference(&ty).unwrap_or(GLOBAL_UNKNOWN_ID)
+                    };
                     let mut found_members = false;
 
-                    if let Some(data) = self.get_by_resolved_id(resolved) {
-                        for member in data.as_raw_data().own_members() {
-                            let Some(name) = member.name() else {
-                                continue;
-                            };
-
-                            // DANGER: Normally, when resolving a type reference
-                            //         retrieved through `as_raw_data()`, we
-                            //         should call
-                            //         `apply_module_id_to_reference()` on the
-                            //         reference first. But because we know we
-                            //         are resolving inside the collector,
-                            //         before any module IDs _could_ be applied,
-                            //         we can omit this here.
-                            if let Some(resolved_member) = self.resolve_reference(&member.ty) {
-                                let export = JsExport::Own(JsOwnExport::Type(resolved_member));
-                                finalised_exports.insert(name, export);
-                                found_members = true;
+                    if raw {
+                        if let Some(data) = self.raw_type_by_resolved_id(resolved) {
+                            for member in data.own_members() {
+                                let Some(name) = member.name() else {
+                                    continue;
+                                };
+                                if let TypeReference::Resolved(resolved_member) = member.ty {
+                                    let export = JsExport::Own(JsOwnExport::Type(resolved_member));
+                                    finalised_exports.insert(name, export);
+                                    found_members = true;
+                                }
                             }
                         }
-                    }
 
-                    // If the resolved type has no members (e.g., the
-                    // reference is still an unresolved qualifier), fall back
-                    // to the scope tree to collect namespace bindings directly.
-                    if !found_members
-                        && let Some(data) = self.get_by_resolved_id(resolved)
-                        && let TypeData::Reference(TypeReference::Qualifier(qualifier)) =
-                            data.as_raw_data()
-                        && let Some(first_part) = qualifier.path.iter().next()
-                    {
-                        self.collect_namespace_exports_for_binding(
-                            first_part,
-                            qualifier.scope_id,
-                            &mut finalised_exports,
-                        );
+                        if !found_members
+                            && let Some(data) = self.raw_type_by_resolved_id(resolved)
+                            && let TypeData::Reference(TypeReference::Qualifier(qualifier)) = data
+                            && let Some(first_part) = qualifier.path.iter().next()
+                        {
+                            self.collect_namespace_exports_for_binding(
+                                first_part,
+                                qualifier.scope_id,
+                                &mut finalised_exports,
+                            );
+                        }
+                    } else {
+                        if let Some(data) = self.get_by_resolved_id(resolved) {
+                            for member in data.as_raw_data().own_members() {
+                                let Some(name) = member.name() else {
+                                    continue;
+                                };
+                                if let Some(resolved_member) = self.resolve_reference(&member.ty) {
+                                    let export = JsExport::Own(JsOwnExport::Type(resolved_member));
+                                    finalised_exports.insert(name, export);
+                                    found_members = true;
+                                }
+                            }
+                        }
+
+                        if !found_members
+                            && let Some(data) = self.get_by_resolved_id(resolved)
+                            && let TypeData::Reference(TypeReference::Qualifier(qualifier)) =
+                                data.as_raw_data()
+                            && let Some(first_part) = qualifier.path.iter().next()
+                        {
+                            self.collect_namespace_exports_for_binding(
+                                first_part,
+                                qualifier.scope_id,
+                                &mut finalised_exports,
+                            );
+                        }
                     }
 
                     let export = JsExport::Own(JsOwnExport::Type(resolved));
@@ -923,6 +939,25 @@ impl JsModuleInfoCollector {
         }
 
         finalised_exports
+    }
+
+    fn collect_exports(&mut self) -> IndexMap<Text, JsExport> {
+        let exports = std::mem::take(&mut self.exports);
+        self.collect_exports_from(exports, false)
+    }
+
+    fn raw_resolved_id(&mut self, ty: &TypeReference) -> ResolvedTypeId {
+        match ty {
+            TypeReference::Resolved(id) => *id,
+            _ => ResolvedTypeId::new(
+                TypeResolverLevel::Thin,
+                self.register_type(Cow::Owned(TypeData::reference(ty.clone()))),
+            ),
+        }
+    }
+
+    fn raw_type_by_resolved_id(&self, id: ResolvedTypeId) -> Option<&TypeData> {
+        (id.level() == TypeResolverLevel::Thin).then(|| self.types.get_by_id(id.id()))
     }
 
     fn get_export_for_local_name(&mut self, local_name: TokenText) -> Option<JsOwnExport> {
@@ -1166,6 +1201,7 @@ impl JsModuleInfo {
             static_import_paths: collector.static_import_paths,
             dynamic_import_paths: collector.dynamic_import_paths,
             exports: Exports(finalised.exports),
+            raw_exports: Exports(finalised.raw_exports),
             blanket_reexports: collector.blanket_reexports,
             semantic_model,
             binding_type_data: finalised.binding_type_data,
@@ -1183,6 +1219,7 @@ impl JsModuleInfo {
 
 struct FinalisedModuleTypes {
     exports: IndexMap<Text, JsExport>,
+    raw_exports: IndexMap<Text, JsExport>,
     binding_type_data: FxHashMap<TextRange, BindingTypeData>,
     raw_types: Vec<RawTypeData>,
     raw_expressions: FxHashMap<TextRange, TypeReference>,

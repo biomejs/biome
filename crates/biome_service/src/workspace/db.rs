@@ -5,11 +5,11 @@ use crate::module_graph::{ModuleInfo, ModuleInfoKind, PathInfoCache};
 use biome_db::{ParsedSnippet, ParsedSource};
 use biome_languages::DocumentFileSource;
 use biome_parser::AnyParse;
-use biome_rowan::SendNode;
 use biome_workspace_db::{ParsedSourceUpdateMode, SharedWorkspaceDb, WorkspaceDb, WorkspaceDbData};
 use camino::Utf8Path;
 use parking_lot::Mutex;
 use std::cell::Cell;
+use std::marker::PhantomData;
 use std::ops::Deref;
 use std::panic::resume_unwind;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -45,6 +45,7 @@ thread_local! {
 pub(crate) struct DbReadGuard {
     db: WorkspaceDb,
     _live_read: LiveReadGuard,
+    _not_send: PhantomData<std::sync::MutexGuard<'static, ()>>,
 }
 
 impl DbReadGuard {
@@ -52,16 +53,21 @@ impl DbReadGuard {
         Self {
             db,
             _live_read: LiveReadGuard::new(tracks_live_read),
+            _not_send: PhantomData,
         }
     }
 
-    /// Consumes the guard and returns the raw database without read tracking.
+    /// Clones the raw database without extending read tracking to the clone.
+    pub(crate) fn clone_untracked_db(&self) -> WorkspaceDb {
+        self.db.clone()
+    }
+
+    /// Returns the database without the guard.
     ///
-    /// NOTE: After this returns, same-thread writes cannot see that this
-    /// database handle is live. Do not call this before code that may perform a
-    /// [`DbState`] write on the same thread. Prefer keeping the guard alive for
-    /// normal reads, and only use this when a lower-level read-only API needs a
-    /// plain [`WorkspaceDb`].
+    /// After this call, [`DbState`] cannot detect that the returned database is
+    /// still in use. A write on the same thread could then wait forever for that
+    /// database to be dropped. Keep the guard for normal reads. Use this method
+    /// only when passing the database to code that only reads from [`DbState`].
     pub(crate) fn into_untracked_db(self) -> WorkspaceDb {
         self.db
     }
@@ -93,7 +99,6 @@ impl Drop for LiveReadGuard {
                 );
                 reads.set(count.saturating_sub(1));
             });
-            self.tracks_live_read = false;
         }
     }
 }
@@ -224,16 +229,16 @@ impl DbState {
         }
     }
 
-    pub(crate) fn update_parsed_root(&self, path: &Utf8Path, new_root: SendNode) {
+    /// Checks whether the shared module map currently contains `path` without
+    /// creating a database snapshot.
+    ///
+    /// Use this to skip work that has already been done. Use the module
+    /// database APIs when reading or analyzing the module itself.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn contains_module_untracked(&self, path: &Utf8Path) -> bool {
         match &self.storage {
-            DbStorage::Shared(shared_db) => shared_db.fork().update_parsed_root_with_mode(
-                path,
-                new_root,
-                ParsedSourceUpdateMode::Replace,
-            ),
-            DbStorage::Owned(db) => db.with_setter(|db| {
-                db.update_parsed_root_with_mode(path, new_root, ParsedSourceUpdateMode::Setters)
-            }),
+            DbStorage::Shared(shared_db) => shared_db.fork().data().contains_module_untracked(path),
+            DbStorage::Owned(db) => db.data.contains_module_untracked(path),
         }
     }
 
@@ -271,8 +276,8 @@ impl DbState {
 
     pub(crate) fn unload_path(&self, path: &Utf8Path) {
         match &self.storage {
-            DbStorage::Shared(shared_db) => shared_db.fork().unload_path(path),
-            DbStorage::Owned(db) => db.data.unload_path(path),
+            DbStorage::Shared(shared_db) => shared_db.fork().data().unload_path(path),
+            DbStorage::Owned(db) => db.with_setter(|db| db.unload_path(path)),
         }
     }
 
@@ -286,7 +291,7 @@ impl DbState {
             DbStorage::Shared(shared_db) => {
                 let db = shared_db.fork();
                 let module = ModuleInfo::new(&db, path.clone(), kind);
-                db.insert_module(path, module);
+                db.data().insert_module(path, module);
                 module
             }
             DbStorage::Owned(db) => db.with_setter(|db| db.update_or_insert_module(path, kind)),
@@ -296,8 +301,8 @@ impl DbState {
     #[cfg(feature = "module_graph")]
     pub(crate) fn remove_module(&self, path: &Utf8Path) {
         match &self.storage {
-            DbStorage::Shared(shared_db) => shared_db.fork().remove_module(path),
-            DbStorage::Owned(db) => db.data.remove_module(path),
+            DbStorage::Shared(shared_db) => shared_db.fork().data().remove_module(path),
+            DbStorage::Owned(db) => db.with_setter(|db| db.remove_module(path)),
         }
     }
 
@@ -342,6 +347,8 @@ mod tests {
     use std::sync::{Arc, Barrier, mpsc};
     use std::thread;
     use std::time::Duration;
+
+    static_assertions::assert_not_impl_any!(DbReadGuard: Send);
 
     fn parse_js(source: &str) -> AnyParse {
         parse(
@@ -448,7 +455,32 @@ mod tests {
         setter.join().unwrap();
     }
 
-    #[cfg(debug_assertions)]
+    /// Scanner bookkeeping must remain available while another thread is
+    /// publishing database updates. Unlike a tracked database fork, checking
+    /// shared module membership must not unwind when a setter is pending.
+    #[cfg(feature = "module_graph")]
+    #[test]
+    fn untracked_module_membership_does_not_wait_for_pending_setters() {
+        let state = Arc::new(DbState::lsp());
+        let path = Utf8PathBuf::from("test.js");
+        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+
+        let db = state.fork();
+        let setter = {
+            let state = state.clone();
+            let path = path.clone();
+            thread::spawn(move || {
+                state.update_parsed_file(&path, parse_js("let b = 2;"), 0, vec![]);
+            })
+        };
+
+        wait_for_pending_setter(&state);
+        assert!(!state.contains_module_untracked(&path));
+
+        drop(db);
+        setter.join().unwrap();
+    }
+
     #[test]
     #[should_panic(expected = "db setter invoked while this thread holds a db clone")]
     fn owned_storage_setter_panics_when_this_thread_holds_read_guard() {
@@ -459,20 +491,16 @@ mod tests {
         state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
     }
 
-    #[cfg(not(debug_assertions))]
     #[test]
-    fn owned_storage_setter_cancels_when_this_thread_holds_read_guard() {
-        let state = DbState::lsp();
+    fn replacement_update_does_not_cancel_concurrent_reads() {
+        let state = DbState::default();
         let path = Utf8PathBuf::from("test.js");
-        let _db = state.fork();
+        let db = state.fork();
 
-        let result = salsa::Cancelled::catch(AssertUnwindSafe(|| {
-            state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
-        }));
-        assert!(
-            matches!(result, Err(salsa::Cancelled::PendingWrite)),
-            "setter should cancel instead of deadlocking when this thread holds a read guard"
-        );
+        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+
+        assert_eq!(state.pending_setters(), 0);
+        assert!(db.get_file(&path).is_some());
     }
 
     #[test]

@@ -29,7 +29,7 @@ input:  text-lg bg-red-500 p-4
 sorted: bg-red-500 p-4 text-lg
 ---
 input:  p-4 p-2
-sorted: p-4 p-2
+sorted: p-2 p-4
 ---
 input:  origin-top flex p-4
 sorted: flex origin-top p-4
@@ -143,7 +143,7 @@ input:  border-[#f00] border-[2px]
 sorted: border-[2px] border-[#f00]
 ---
 input:  text-[#fff] text-[larger] text-[20px]
-sorted: text-[larger] text-[20px] text-[#fff]
+sorted: text-[20px] text-[larger] text-[#fff]
 ---
 input:  bg-[#fff] bg-[COVER] border-[THIN] text-[LARGER] flex
 sorted: flex border-[THIN] bg-[#fff] bg-[COVER] text-[LARGER]
@@ -174,6 +174,57 @@ sorted: m-2 bg-linear-to-r from-blue-500 to-purple-500 p-4
 ---
 input:  mask-linear-to-75% mask-linear-from-25%
 sorted: mask-linear-from-25% mask-linear-to-75%
+---
+input:  p-10 p-2 p-4
+sorted: p-2 p-4 p-10
+---
+input:  p-2.5 p-2 p-10
+sorted: p-2 p-2.5 p-10
+---
+input:  duration-700 duration-75
+sorted: duration-75 duration-700
+---
+input:  bg-red-500 bg-red-50 bg-red-100
+sorted: bg-red-50 bg-red-100 bg-red-500
+---
+input:  bg-red-500 bg-blue-500
+sorted: bg-blue-500 bg-red-500
+---
+input:  text-lg text-sm text-2xl text-xs
+sorted: text-2xl text-lg text-sm text-xs
+---
+input:  w-2/5 w-1/2
+sorted: w-1/2 w-2/5
+---
+input:  leading-6 leading-none leading-3
+sorted: leading-3 leading-6 leading-none
+---
+input:  -m-4 -m-2 m-1
+sorted: -m-2 -m-4 m-1
+---
+input:  bg-red-500/50 bg-red-500/25
+sorted: bg-red-500/25 bg-red-500/50
+---
+input:  text-lg/8 text-sm/6
+sorted: text-lg/8 text-sm/6
+---
+input:  mt-2 mt-[10px]
+sorted: mt-2 mt-[10px]
+---
+input:  w-[1px] w-4
+sorted: w-4 w-[1px]
+---
+input:  w-[2px] w-[10rem] w-[13px]
+sorted: w-[2px] w-[10rem] w-[13px]
+---
+input:  ease-in ease-out ease-in-out
+sorted: ease-in ease-in-out ease-out
+---
+input:  [display:flex] [display:block]
+sorted: [display:block] [display:flex]
+---
+input:  p-4! p-2
+sorted: p-2 p-4!
 ---
 input:  px-2! flex p-4
 sorted: flex p-4 px-2!

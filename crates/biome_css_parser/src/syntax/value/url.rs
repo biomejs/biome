@@ -230,9 +230,11 @@ fn parse_url_value_with_context(p: &mut CssParser, context: ValueParsingContext)
     } else if is_at_string(p) {
         parse_string(p)
     } else if is_at_scss_interpolated_string(p) {
-        CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_interpolated_string, |p, m| {
-            scss_only_syntax_error(p, "SCSS interpolated strings", m.range(p))
-        })
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            |p| parse_scss_interpolated_string(p, CssLexContext::Regular),
+            |p, m| scss_only_syntax_error(p, "SCSS interpolated strings", m.range(p)),
+        )
     } else {
         parse_url_value_raw(p)
     }
