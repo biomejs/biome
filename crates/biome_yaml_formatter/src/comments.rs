@@ -10,10 +10,9 @@ use biome_rowan::AstNodeList;
 use biome_rowan::{SyntaxTriviaPieceComments, TextSize};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
 use biome_yaml_syntax::{
-    AnyYamlMappingImplicitKey, YamlBlockInBlockNode, YamlBlockMapExplicitEntry,
-    YamlDocument, YamlFlowJsonNode, YamlFlowMapExplicitEntry,
-    YamlFlowYamlNode, YamlFoldedScalar, YamlLanguage, YamlLiteralScalar, YamlRoot, YamlSyntaxKind,
-    YamlSyntaxNode, YamlSyntaxToken,
+    AnyYamlMappingImplicitKey, YamlBlockInBlockNode, YamlBlockMapExplicitEntry, YamlDocument,
+    YamlFlowJsonNode, YamlFlowMapExplicitEntry, YamlFlowYamlNode, YamlFoldedScalar, YamlLanguage,
+    YamlLiteralScalar, YamlRoot, YamlSyntaxKind, YamlSyntaxNode, YamlSyntaxToken,
 };
 
 use crate::prelude::*;
