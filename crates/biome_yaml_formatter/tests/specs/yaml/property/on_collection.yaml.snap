@@ -1,0 +1,44 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/property/on_collection.yaml
+---
+
+# Input
+
+```yaml
+key: &anchor
+  a: 1
+tagged: !!map
+  b: 2
+both: !!map &anchor
+  c: 3
+commented: &anchor # comment
+  d: 4
+seq: &anchor
+  - a
+  - b
+--- !!map &doc
+e: 5
+
+```
+
+
+# Formatted
+
+```yaml
+key: &anchor
+  a: 1
+tagged: !!map
+  b: 2
+both: !!map &anchor
+  c: 3
+commented: &anchor # comment
+  d: 4
+seq: &anchor
+  - a
+  - b
+---
+!!map &doc
+e: 5
+
+```
