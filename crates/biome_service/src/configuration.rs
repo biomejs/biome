@@ -572,6 +572,13 @@ pub trait ConfigurationExt {
     ) -> Result<Vec<Deserialized<Configuration>>, WorkspaceError>;
 
     fn migrate_deprecated_fields(&mut self);
+
+    fn normalize_plugin(
+        &self,
+        config: &mut Configuration,
+        relative_resolution_base_path: Utf8PathBuf,
+        external_resolution_base_path: &Utf8Path,
+    );
 }
 
 impl ConfigurationExt for Configuration {
@@ -722,25 +729,48 @@ impl ConfigurationExt for Configuration {
                 );
                 let (mut config, diagnostics) = deserialized.consume();
                 if let Some(config) = config.as_mut() {
-                    let config_dir = extend_configuration_file_path
-                        .parent()
-                        .unwrap_or(external_resolution_base_path);
-                    if let Some(plugins) = config.plugins.as_mut() {
-                        plugins.normalize_object_relative_paths(config_dir);
-                    }
-                    if let Some(overrides) = config.overrides.as_mut() {
-                        for pattern in overrides.0.iter_mut() {
-                            if let Some(plugins) = pattern.plugins.as_mut() {
-                                // Normalize object-syntax plugin paths only
-                                plugins.normalize_object_relative_paths(config_dir);
-                            }
-                        }
-                    }
+                    self.normalize_plugin(
+                        config,
+                        extend_configuration_file_path,
+                        external_resolution_base_path,
+                    );
                 }
                 deserialized_configurations.push(Deserialized::new(config, diagnostics))
             }
         }
         Ok(deserialized_configurations)
+    }
+
+    #[cfg(feature = "plugins")]
+    fn normalize_plugin(
+        &self,
+        config: &mut Configuration,
+        extend_configuration_file_path: Utf8PathBuf,
+        external_resolution_base_path: &Utf8Path,
+    ) {
+        let config_dir = extend_configuration_file_path
+            .parent()
+            .unwrap_or(external_resolution_base_path);
+        if let Some(plugins) = config.plugins.as_mut() {
+            plugins.normalize_object_relative_paths(config_dir);
+        }
+        if let Some(overrides) = config.overrides.as_mut() {
+            for pattern in overrides.0.iter_mut() {
+                if let Some(plugins) = pattern.plugins.as_mut() {
+                    // Normalize object-syntax plugin paths only
+                    plugins.normalize_object_relative_paths(config_dir);
+                }
+            }
+        }
+    }
+
+    #[cfg(not(feature = "plugins"))]
+    fn normalize_plugin(
+        &self,
+        _config: &mut Configuration,
+        _relative_resolution_base_path: Utf8PathBuf,
+        _external_resolution_base_path: &Utf8Path,
+    ) {
     }
 
     /// Checks for the presence of deprecated fields and updates the
