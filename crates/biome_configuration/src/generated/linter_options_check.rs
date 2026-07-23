@@ -1622,6 +1622,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useBannerComment",
+        TypeId::of::<biome_rule_options::use_banner_comment::UseBannerCommentOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useBaseline",
         TypeId::of::<biome_rule_options::use_baseline::UseBaselineOptions>(),
     ));

@@ -344,6 +344,7 @@ pub mod use_as_const_assertion;
 pub mod use_at_index;
 pub mod use_await;
 pub mod use_await_thenable;
+pub mod use_banner_comment;
 pub mod use_baseline;
 pub mod use_biome_ignore_folder;
 pub mod use_block_statements;

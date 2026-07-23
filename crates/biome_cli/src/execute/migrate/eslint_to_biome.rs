@@ -396,6 +396,7 @@ impl<'a> TryFrom<&'a EslintRuleName> for RuleSource<'a> {
             None => RuleSource::Eslint,
             Some("barrel-files") => RuleSource::EslintBarrelFiles,
             Some("@graphql-eslint") => RuleSource::EslintGraphql,
+            Some("header") => RuleSource::EslintHeader,
             Some("import") => RuleSource::EslintImport,
             Some("import-access") => RuleSource::EslintImportAccess,
             Some("jest") => RuleSource::EslintJest,

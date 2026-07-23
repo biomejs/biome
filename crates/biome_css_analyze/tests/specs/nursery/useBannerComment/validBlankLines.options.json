@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../../../packages//biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useBannerComment": {
+          "level": "error",
+          "options": {
+            "content": "Copyright 2026 Acme"
+          }
+        }
+      }
+    }
+  }
+}
