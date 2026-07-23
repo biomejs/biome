@@ -10,8 +10,8 @@ use biome_rowan::AstNode;
 use biome_rowan::{SyntaxTriviaPieceComments, TextSize};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
 use biome_yaml_syntax::{
-    YamlDocument, YamlFlowMapExplicitEntry, YamlFoldedScalar, YamlLanguage, YamlLiteralScalar,
-    YamlRoot, YamlSyntaxKind, YamlSyntaxNode, YamlSyntaxToken,
+    YamlBlockMapExplicitEntry, YamlDocument, YamlFlowMapExplicitEntry, YamlFoldedScalar,
+    YamlLanguage, YamlLiteralScalar, YamlRoot, YamlSyntaxKind, YamlSyntaxNode, YamlSyntaxToken,
 };
 
 use crate::prelude::*;
@@ -74,10 +74,47 @@ impl CommentStyle for YamlCommentStyle {
         handle_global_suppression(comment)
             .or_else(handle_document_comment)
             .or_else(handle_flow_map_explicit_entry_comment)
+            .or_else(handle_block_map_explicit_entry_comment)
             .or_else(handle_block_scalar_comment)
             .or_else(handle_own_line_comment)
             .or_else(handle_end_of_line_comment)
     }
+}
+
+/// Handles the comments in the head of an explicit block mapping entry
+/// (`? key : value`): next to the `?`, between the key and the `:`, and on
+/// the line of the `:` before the value. They are made dangling comments of
+/// the entry, whose format rule prints each at the position it came from:
+///
+/// ```yaml
+/// ? key
+///   # comment
+/// : value
+/// ```
+fn handle_block_map_explicit_entry_comment(
+    comment: DecoratedComment<YamlLanguage>,
+) -> CommentPlacement<YamlLanguage> {
+    let Some(entry) = YamlBlockMapExplicitEntry::cast_ref(comment.enclosing_node()) else {
+        return CommentPlacement::Default(comment);
+    };
+    let comment_start = comment.piece().text_range().start();
+
+    if let Some(colon) = entry.colon_token() {
+        if comment_start < colon.text_trimmed_range().start() {
+            return CommentPlacement::dangling(entry.syntax().clone(), comment);
+        }
+        if comment.text_position() == CommentTextPosition::EndOfLine
+            && entry
+                .value()
+                .is_some_and(|value| comment_start < value.range().start())
+        {
+            return CommentPlacement::dangling(entry.syntax().clone(), comment);
+        }
+    } else if entry.value().is_none() {
+        return CommentPlacement::dangling(entry.syntax().clone(), comment);
+    }
+
+    CommentPlacement::Default(comment)
 }
 
 /// Handles a comment on its own line that is indented deeper than the line
@@ -164,7 +201,7 @@ fn handle_own_line_comment(
     let mut best = None;
     let mut current = Some(preceding.clone());
     while let Some(node) = current {
-        if BLOCK_ENTRIES.contains(node.kind())
+        if OWN_LINE_ENTRIES.contains(node.kind())
             && let Some(token) = node.first_token()
         {
             let offset = token.text_trimmed_range().start();
@@ -185,16 +222,20 @@ fn handle_own_line_comment(
     }
 }
 
-/// The block collection entries that own-line and end-of-line comments
-/// attach to
+/// The block collection entries that end-of-line comments attach to
 const BLOCK_ENTRIES: TokenSet<YamlSyntaxKind> = token_set![
     YamlSyntaxKind::YAML_BLOCK_MAP_IMPLICIT_ENTRY,
     YamlSyntaxKind::YAML_BLOCK_SEQUENCE_ENTRY
 ];
 
+/// The entries that own-line comments attach to; unlike end-of-line
+/// comments, they can also sit in an explicit block mapping entry
+const OWN_LINE_ENTRIES: TokenSet<YamlSyntaxKind> =
+    BLOCK_ENTRIES.union(token_set![YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_ENTRY]);
+
 /// The column at which the text at `offset` starts in the source, computed
 /// by walking backward from `token` to the closest line break
-struct SourceColumn {
+pub(crate) struct SourceColumn {
     token: YamlSyntaxToken,
     offset: TextSize,
     /// The width of the source seen so far between the line break and the
@@ -203,7 +244,7 @@ struct SourceColumn {
 }
 
 impl SourceColumn {
-    fn new(token: YamlSyntaxToken, offset: TextSize) -> Self {
+    pub(crate) fn new(token: YamlSyntaxToken, offset: TextSize) -> Self {
         // The offset must lie within the span of the token including its
         // trivia, not just the trimmed range: it may point into the trivia,
         // e.g. at a comment piece in the token's leading trivia. The end is
@@ -241,7 +282,7 @@ impl SourceColumn {
     /// Walks the source backward from the offset, token by token and trivia
     /// piece by trivia piece, measuring every segment until the one holding
     /// the line break that opens the offset's line
-    fn compute(mut self) -> usize {
+    pub(crate) fn compute(mut self) -> usize {
         let mut current = Some(self.token.clone());
         while let Some(token) = current {
             for piece in token.trailing_trivia().pieces().rev() {
@@ -313,26 +354,43 @@ impl Format<YamlFormatContext> for FormatEntryDanglingComments<'_> {
             return Ok(());
         }
 
-        let content = format_with(|f| {
-            for comment in dangling {
-                // A comment on the entry's own line stays there, right
-                // after the colon or dash
-                if comment.lines_before() == 0 {
-                    write!(f, [space()])?;
-                } else if comment.lines_before() > 1 {
-                    write!(f, [empty_line()])?;
-                } else {
-                    write!(f, [hard_line_break()])?;
-                }
-                write!(
-                    f,
-                    [FormatRefWithRule::new(comment, FormatYamlLeadingComment)]
-                )?;
-                comment.mark_formatted();
+        write!(
+            f,
+            [indent(&FormatCommentsSlice {
+                comments: dangling,
+                inline_first: true
+            })]
+        )
+    }
+}
+
+/// Formats a run of comments, each opened by the line break its position in
+/// the source calls for: a blank line when one separated it from the content
+/// before, otherwise a plain break. With `inline_first`, a first comment
+/// that started on the line of the preceding content stays there, after a
+/// space
+pub(crate) struct FormatCommentsSlice<'a> {
+    pub(crate) comments: &'a [SourceComment<YamlLanguage>],
+    pub(crate) inline_first: bool,
+}
+
+impl Format<YamlFormatContext> for FormatCommentsSlice<'_> {
+    fn fmt(&self, f: &mut Formatter<YamlFormatContext>) -> FormatResult<()> {
+        for (index, comment) in self.comments.iter().enumerate() {
+            if index == 0 && self.inline_first && comment.lines_before() == 0 {
+                write!(f, [space()])?;
+            } else if comment.lines_before() > 1 {
+                write!(f, [empty_line()])?;
+            } else {
+                write!(f, [hard_line_break()])?;
             }
-            Ok(())
-        });
-        write!(f, [indent(&content)])
+            write!(
+                f,
+                [FormatRefWithRule::new(comment, FormatYamlLeadingComment)]
+            )?;
+            comment.mark_formatted();
+        }
+        Ok(())
     }
 }
 

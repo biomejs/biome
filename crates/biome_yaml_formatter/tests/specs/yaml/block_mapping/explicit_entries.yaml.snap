@@ -1,0 +1,46 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/block_mapping/explicit_entries.yaml
+---
+
+# Input
+
+```yaml
+? simple
+: value
+? valueless
+? multiline
+  scalar key
+: kept
+? - seq
+  - key
+: - seq
+  - value
+? key # comment
+: value
+sets: !!set
+  ? one
+  ? two
+
+```
+
+
+# Formatted
+
+```yaml
+simple: value
+valueless:
+? multiline
+  scalar key
+: kept
+? - seq
+  - key
+: - seq
+  - value
+key: # comment
+  value
+sets: !!set
+  ? one
+  ? two
+
+```
