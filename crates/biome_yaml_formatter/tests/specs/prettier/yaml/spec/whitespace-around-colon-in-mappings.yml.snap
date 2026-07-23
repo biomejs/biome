@@ -22,21 +22,40 @@ top6:
 ```
 
 
-# Error
-```text
-reformat: formatter output had syntax errors where input had none:
-whitespace-around-colon-in-mappings.yml:7:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Prettier differences
 
-  × expected `:` but instead found `*alias1`
-  
-    5 │ top3:
-    6 │   &node3
-  > 7 │   *alias1: scalar3
-      │   ^^^^^^^
-    8 │ top4:
-    9 │   *alias2: scalar4
-  
-  i Remove *alias1
-  
+```diff
+--- Prettier
++++ Biome
+@@ -1,11 +1,11 @@
+ "top1":
+   "key1": &alias1 scalar1
+-"top2":
+-  "key2": &alias2 scalar2
++'top2':
++  'key2': &alias2 scalar2
+ top3: &node3
+   *alias1 : scalar3
+ top4:
+   *alias2 : scalar4
+ top5: scalar5
+ top6:
+-  &anchor6 "key6": scalar6
++  &anchor6 'key6': scalar6
+```
 
+# Output
+
+```yml
+"top1":
+  "key1": &alias1 scalar1
+'top2':
+  'key2': &alias2 scalar2
+top3: &node3
+  *alias1 : scalar3
+top4:
+  *alias2 : scalar4
+top5: scalar5
+top6:
+  &anchor6 'key6': scalar6
 ```

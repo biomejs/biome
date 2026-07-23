@@ -1,5 +1,6 @@
 use crate::comments::{FormatEntryDanglingComments, subtree_has_comments};
 use crate::prelude::*;
+use crate::utils::needs_space_before_colon;
 use biome_formatter::format_args;
 use biome_formatter::write;
 use biome_yaml_syntax::{
@@ -20,7 +21,15 @@ impl FormatNodeRule<YamlBlockMapImplicitEntry> for FormatYamlBlockMapImplicitEnt
             value,
         } = node.as_fields();
 
-        write!(f, [key.format(), colon_token.format()])?;
+        write!(f, [key.format()])?;
+
+        // A `:` directly following an alias, anchor, or tag would be lexed as
+        // part of that token, so the separating space is required
+        if key.as_ref().is_some_and(needs_space_before_colon) {
+            write!(f, [space()])?;
+        }
+
+        write!(f, [colon_token.format()])?;
 
         if let Some(value) = value {
             // A comment on the key's line, between the colon and the value,
@@ -35,11 +44,27 @@ impl FormatNodeRule<YamlBlockMapImplicitEntry> for FormatYamlBlockMapImplicitEnt
                 .is_some_and(|key| f.comments().has_trailing_comments(key.syntax()));
             let has_leading_comments = f.comments().has_leading_comments(value.syntax());
 
-            if has_leading_comments || comment_ends_key_line || value.is_nested_block_collection() {
+            if has_leading_comments || comment_ends_key_line {
                 write!(
                     f,
                     [indent(&format_args![hard_line_break(), value.format()])]
                 )?;
+            } else if value.is_nested_block_collection() {
+                // The properties of the collection stay on the key's line,
+                // with the collection itself below:
+                //
+                // ```yaml
+                // key: &anchor
+                //   a: 1
+                // ```
+                if value.has_properties() {
+                    write!(f, [space(), value.format()])?;
+                } else {
+                    write!(
+                        f,
+                        [indent(&format_args![hard_line_break(), value.format()])]
+                    )?;
+                }
             } else if value.is_flow_collection() {
                 // A collection that a comment forces to break
                 // stays on the key's line, while one that only breaks because

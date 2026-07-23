@@ -31,30 +31,47 @@ impl FormatNodeRule<YamlBlockInBlockNode> for FormatYamlBlockInBlockNode {
                 AnyYamlBlockInBlockContent::YamlBlockMapping(_)
                     | AnyYamlBlockInBlockContent::YamlBlockSequence(_)
             );
-            let at_document_level = node
-                .syntax()
-                .parent()
-                .is_some_and(|parent| parent.kind() == YamlSyntaxKind::YAML_DOCUMENT);
+            let parent_kind = node.syntax().parent().map(|parent| parent.kind());
 
-            // A block collection is already placed on an indented line by the
-            // enclosing entry, and at the document level the content carries
-            // no indentation, so a plain line break suffices for both
-            if is_block_collection || (has_comments_between && at_document_level) {
-                write!(f, [hard_line_break()])?;
-            } else if has_comments_between {
-                // A comment between the properties and a block scalar ends
-                // the header line, so the scalar moves to its own line,
-                // indented past the entry:
+            if is_block_collection {
+                // The properties stay on the line the node started on and
+                // the collection goes below, indented past a mapping key:
                 //
                 // ```yaml
-                // key: !tag # comment
-                //   |
-                //     content
+                // key: &anchor
+                //   a: 1
                 // ```
-                return write!(
-                    f,
-                    [indent(&format_args![hard_line_break(), content.format()])]
-                );
+                //
+                // At the document level and in a sequence entry the
+                // collection needs no indentation of its own: it sits at
+                // column zero, or is aligned by the enclosing entry
+                if parent_kind == Some(YamlSyntaxKind::YAML_BLOCK_MAP_IMPLICIT_ENTRY) {
+                    return write!(
+                        f,
+                        [indent(&format_args![hard_line_break(), content.format()])]
+                    );
+                }
+                write!(f, [hard_line_break()])?;
+            } else if has_comments_between {
+                if parent_kind == Some(YamlSyntaxKind::YAML_DOCUMENT) {
+                    // At the document level the scalar's header carries no
+                    // indentation
+                    write!(f, [hard_line_break()])?;
+                } else {
+                    // A comment between the properties and a block scalar
+                    // ends the header line, so the scalar moves to its own
+                    // line, indented past the entry:
+                    //
+                    // ```yaml
+                    // key: !tag # comment
+                    //   |
+                    //     content
+                    // ```
+                    return write!(
+                        f,
+                        [indent(&format_args![hard_line_break(), content.format()])]
+                    );
+                }
             } else {
                 write!(f, [space()])?;
             }
