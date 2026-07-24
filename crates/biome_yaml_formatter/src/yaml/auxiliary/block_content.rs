@@ -1,3 +1,4 @@
+use crate::content_lines::ContentLines;
 use crate::prelude::*;
 use biome_formatter::write;
 use biome_parser::{TokenSet, token_set};
@@ -269,50 +270,6 @@ fn parent_headers(node: &YamlBlockContent) -> (Chomping, Option<usize>) {
 /// `s-indent`, section 6.1 of the spec), so a leading tab is scalar content
 fn leading_spaces(line: &str) -> usize {
     line.bytes().take_while(|byte| *byte == b' ').count()
-}
-
-/// Iterator over the lines of a block scalar token, splitting at `\r\n`,
-/// `\n`, and lone `\r` line breaks alike.
-///
-/// Text that ends with a line break yields a final empty line, which is how
-/// it is distinguished from text that ends mid-line
-#[derive(Debug, Clone)]
-struct ContentLines<'a> {
-    rest: Option<&'a str>,
-}
-
-impl<'a> ContentLines<'a> {
-    fn new(text: &'a str) -> Self {
-        Self { rest: Some(text) }
-    }
-
-    /// Whether the remaining text ends with a line break, i.e. whether the
-    /// last line the iterator yields is an empty one split off by that break
-    fn ends_with_break(&self) -> bool {
-        self.rest.is_some_and(|text| text.ends_with(['\n', '\r']))
-    }
-}
-
-impl<'a> Iterator for ContentLines<'a> {
-    type Item = &'a str;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let text = self.rest.take()?;
-        // A `\r\n` pair is always entered at the `\r`, never in the middle,
-        // since the search matches whichever of the two bytes comes first
-        match text.find(['\n', '\r']) {
-            Some(index) => {
-                let bytes = text.as_bytes();
-                let break_len = match bytes[index] {
-                    b'\r' if bytes.get(index + 1) == Some(&b'\n') => 2,
-                    _ => 1,
-                };
-                self.rest = Some(&text[index + break_len..]);
-                Some(&text[..index])
-            }
-            None => Some(text),
-        }
-    }
 }
 
 /// The aggregates of the content lines that the formatting is derived from,
