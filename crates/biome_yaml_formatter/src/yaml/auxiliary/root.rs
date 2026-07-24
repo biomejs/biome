@@ -1,6 +1,7 @@
+use crate::comments::FormatYamlLeadingComment;
 use crate::prelude::*;
 use crate::utils::ends_in_keep_chomped_scalar;
-use biome_formatter::{FormatOptions, write};
+use biome_formatter::{FormatOptions, FormatRefWithRule, write};
 use biome_rowan::{AstNode, AstNodeList};
 use biome_yaml_syntax::{YamlRoot, YamlRootFields};
 #[derive(Debug, Clone, Default)]
@@ -38,9 +39,6 @@ impl FormatNodeRule<YamlRoot> for FormatYamlRoot {
         // ```yaml
         // # Comment
         // ```
-        //
-        // Cheap clone of an `Rc`, releasing the borrow on the formatter so
-        // the comments can be written while iterating over them
         let comments = f.comments().clone();
         for (index, comment) in comments.leading_comments(node.syntax()).iter().enumerate() {
             if index > 0 {
@@ -50,13 +48,7 @@ impl FormatNodeRule<YamlRoot> for FormatYamlRoot {
                     write!(f, [hard_line_break()])?;
                 }
             }
-            write!(
-                f,
-                [biome_formatter::FormatRefWithRule::new(
-                    comment,
-                    crate::comments::FormatYamlLeadingComment
-                )]
-            )?;
+            write!(f, [FormatRefWithRule::new(comment, FormatYamlLeadingComment)])?;
             comment.mark_formatted();
         }
         Ok(())

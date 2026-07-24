@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::utils::{ends_in_keep_chomped_scalar, lines_before_through_end_tokens};
 use biome_formatter::write;
+use biome_parser::{TokenSet, token_set};
 use biome_rowan::AstNode;
 use biome_yaml_syntax::{YamlDocument, YamlDocumentList, YamlSyntaxKind};
 #[derive(Debug, Clone, Default)]
@@ -46,6 +47,13 @@ impl FormatRule<YamlDocumentList> for FormatYamlDocumentList {
     }
 }
 
+/// The block collection entry lists whose entry count decides whether a
+/// blank line before the next document marker survives
+const ENTRY_LISTS: TokenSet<YamlSyntaxKind> = token_set![
+    YamlSyntaxKind::YAML_BLOCK_MAP_ENTRY_LIST,
+    YamlSyntaxKind::YAML_BLOCK_SEQUENCE_ENTRY_LIST
+];
+
 /// Whether the block collection holding the last entry of the document has
 /// two or more entries
 fn ends_in_multi_entry_collection(document: &YamlDocument) -> bool {
@@ -59,12 +67,9 @@ fn ends_in_multi_entry_collection(document: &YamlDocument) -> bool {
     current
         .ancestors()
         .find_map(|ancestor| {
-            matches!(
-                ancestor.kind(),
-                YamlSyntaxKind::YAML_BLOCK_MAP_ENTRY_LIST
-                    | YamlSyntaxKind::YAML_BLOCK_SEQUENCE_ENTRY_LIST
-            )
-            .then(|| ancestor.children().count())
+            ENTRY_LISTS
+                .contains(ancestor.kind())
+                .then(|| ancestor.children().count())
         })
         .is_some_and(|entries| entries >= 2)
 }

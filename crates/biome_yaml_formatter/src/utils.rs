@@ -3,8 +3,8 @@ use crate::prelude::*;
 use biome_formatter::write;
 use biome_rowan::AstNodeList;
 use biome_yaml_syntax::{
-    AnyYamlBlockHeader, AnyYamlFlowNode, AnyYamlMappingImplicitKey, AnyYamlProperty,
-    YamlFoldedScalar, YamlLiteralScalar, YamlPropertyList, YamlSyntaxNode, YamlSyntaxToken,
+    AnyYamlBlockHeader, AnyYamlBlockScalar, AnyYamlFlowNode, AnyYamlMappingImplicitKey,
+    AnyYamlProperty, YamlPropertyList, YamlSyntaxNode, YamlSyntaxToken,
 };
 
 /// Whether a `:` placed directly after this key would be lexed as part of
@@ -122,17 +122,12 @@ pub(crate) fn ends_in_keep_chomped_scalar(root: &YamlSyntaxNode) -> bool {
         current = last;
     }
     current.ancestors().any(|ancestor| {
-        let headers = match (
-            YamlLiteralScalar::cast_ref(&ancestor),
-            YamlFoldedScalar::cast_ref(&ancestor),
-        ) {
-            (Some(scalar), _) => scalar.headers(),
-            (_, Some(scalar)) => scalar.headers(),
-            _ => return false,
-        };
-        headers
-            .iter()
-            .any(|header| matches!(header, AnyYamlBlockHeader::YamlBlockKeepIndicator(_)))
+        AnyYamlBlockScalar::cast(ancestor).is_some_and(|scalar| {
+            scalar
+                .headers()
+                .iter()
+                .any(|header| matches!(header, AnyYamlBlockHeader::YamlBlockKeepIndicator(_)))
+        })
     })
 }
 
