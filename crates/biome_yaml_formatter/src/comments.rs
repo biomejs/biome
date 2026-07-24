@@ -249,8 +249,7 @@ impl SourceColumn {
                     return self.column;
                 }
             }
-            if token.text_trimmed_range().end() <= self.offset
-                && self.measure(token.text_trimmed())
+            if token.text_trimmed_range().end() <= self.offset && self.measure(token.text_trimmed())
             {
                 return self.column;
             }
