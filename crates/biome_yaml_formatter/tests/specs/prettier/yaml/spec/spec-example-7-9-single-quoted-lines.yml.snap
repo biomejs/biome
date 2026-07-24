@@ -23,10 +23,9 @@ info: yaml/spec/spec-example-7-9-single-quoted-lines.yml
 -" 1st non-empty
 +' 1st non-empty
  
--2nd non-empty
+ 2nd non-empty
 -3rd non-empty "
-+ 2nd non-empty 
-+	3rd non-empty '
++3rd non-empty '
 ```
 
 # Output
@@ -34,6 +33,6 @@ info: yaml/spec/spec-example-7-9-single-quoted-lines.yml
 ```yml
 ' 1st non-empty
 
- 2nd non-empty 
-	3rd non-empty '
+2nd non-empty
+3rd non-empty '
 ```

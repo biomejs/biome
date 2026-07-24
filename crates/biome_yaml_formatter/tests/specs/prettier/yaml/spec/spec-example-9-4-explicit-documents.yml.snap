@@ -29,7 +29,7 @@ info: yaml/spec/spec-example-9-4-explicit-documents.yml
 -  : 20 }
 +{
 +  matches
-+%: 20,
++  %: 20,
 +}
  ...
  ---
@@ -42,7 +42,7 @@ info: yaml/spec/spec-example-9-4-explicit-documents.yml
 ---
 {
   matches
-%: 20,
+  %: 20,
 }
 ...
 ---
