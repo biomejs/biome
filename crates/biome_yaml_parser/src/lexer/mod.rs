@@ -788,6 +788,9 @@ impl<'src> YamlLexer<'src> {
         self.advance(1);
 
         while let Some(c) = self.current_byte() {
+            // An alias name is a run of `ns-anchor-char`s (rule [103],
+            // section 7.1 of the spec), which includes `:`, so `*a:` is an
+            // alias named `a:` rather than an alias used as a mapping key
             if is_anchor_char(c) {
                 self.advance(1);
             } else {
