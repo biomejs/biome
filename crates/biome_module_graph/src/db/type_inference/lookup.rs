@@ -1,6 +1,6 @@
 use super::{InferredModuleTypes, collected_type_result};
 use crate::ModuleDb;
-use crate::db::queries::infer_module_types;
+use crate::db::queries::{LocalTypeInput, infer_local_type, infer_module_types};
 use crate::module_graph::ModuleInfo;
 use biome_js_type_info::interned_types::{
     Literal as InferredLiteral, LocalTypeHandle, ModuleKey, ReturnType as InferredReturnType,
@@ -13,6 +13,64 @@ use salsa::plumbing::{AsId, FromId};
 
 const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 const MAX_MEMBER_LOOKUP_STEPS: usize = 1024;
+
+/// Resolves local handles through leaf queries until reaching a concrete type.
+///
+/// Repeated handles remain symbolic. Missing modules or local types resolve to
+/// `Unknown`.
+pub(in crate::db) fn resolve_local_type_on_demand<'db>(
+    db: &'db dyn ModuleDb,
+    mut ty: InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    let mut seen = FxHashSet::default();
+
+    for _ in 0..MAX_LOCAL_TYPE_RESOLUTION_STEPS {
+        let InferredTypeData::Local(local) = ty else {
+            return ty;
+        };
+        let key = (local.module(db), local.type_id(db));
+        if !seen.insert(key) {
+            return ty;
+        }
+        let Some(module) = module_for_key(db, key.0) else {
+            return InferredTypeData::Unknown;
+        };
+        let input = LocalTypeInput::new(db, module, key.1);
+        ty = infer_local_type(db, input).unwrap_or(InferredTypeData::Unknown);
+    }
+
+    ty
+}
+
+/// Finds a member while resolving local handles through leaf queries.
+pub(in crate::db) fn find_member_type_on_demand<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    name: &str,
+) -> Option<InferredTypeData<'db>> {
+    find_member_type_with_resolver(
+        db,
+        &mut OnDemandMemberLookupResolver,
+        ty,
+        name,
+        MemberLookupMode::Any,
+    )
+}
+
+/// Finds a value member while resolving local handles through leaf queries.
+pub(in crate::db) fn find_value_member_type_on_demand<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    name: &str,
+) -> Option<InferredTypeData<'db>> {
+    find_member_type_with_resolver(
+        db,
+        &mut OnDemandMemberLookupResolver,
+        ty,
+        name,
+        MemberLookupMode::Value,
+    )
+}
 
 impl<'db> InferredModuleTypes<'db> {
     pub(in crate::db::type_inference) fn resolve_type_iterative(
@@ -141,6 +199,29 @@ impl<'db> MemberLookupResolver<'db> for &InferredModuleTypes<'db> {
         ty: InferredTypeData<'db>,
     ) -> InferredTypeData<'db> {
         self.resolve_type_iterative(db, ty)
+    }
+
+    fn finalize_member_type(
+        &mut self,
+        db: &'db dyn ModuleDb,
+        ty: InferredTypeData<'db>,
+        _is_optional: bool,
+        substitutions: &[InferredTypeSubstitution<'db>],
+        _crossed_instance: bool,
+    ) -> InferredTypeData<'db> {
+        apply_substitutions(db, ty, substitutions)
+    }
+}
+
+struct OnDemandMemberLookupResolver;
+
+impl<'db> MemberLookupResolver<'db> for OnDemandMemberLookupResolver {
+    fn resolve_type(
+        &mut self,
+        db: &'db dyn ModuleDb,
+        ty: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        resolve_local_type_on_demand(db, ty)
     }
 
     fn finalize_member_type(

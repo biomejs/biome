@@ -52,6 +52,8 @@ mod intersections;
 mod normalization;
 #[path = "spec_tests_v2/promises.test.rs"]
 mod promises;
+#[path = "spec_tests_v2/queries.test.rs"]
+mod queries;
 #[path = "spec_tests_v2/substitutions.test.rs"]
 mod substitutions;
 
@@ -210,11 +212,11 @@ impl TestModuleDb {
         }
     }
 
-    fn take_salsa_events(&mut self) -> Vec<salsa::Event> {
+    fn take_salsa_events(&self) -> Vec<salsa::Event> {
         std::mem::take(&mut *self.events.0.lock().unwrap())
     }
 
-    fn clear_salsa_events(&mut self) {
+    fn clear_salsa_events(&self) {
         self.take_salsa_events();
     }
 }
@@ -855,6 +857,24 @@ fn build_js_test_module_db_with_layout(
     db
 }
 
+fn binding_range_by_name(db: &dyn ModuleDb, module: ModuleInfo, name: &str) -> TextRange {
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        panic!("module must contain JavaScript information");
+    };
+    js_info
+        .semantic_model
+        .all_bindings()
+        .find(|binding| {
+            binding
+                .tree()
+                .name_token()
+                .is_ok_and(|token| token.text_trimmed() == name)
+        })
+        .unwrap_or_else(|| panic!("{name} binding must exist"))
+        .syntax()
+        .text_trimmed_range()
+}
+
 #[test]
 fn test_infer_module_types_resolves_record_index_signature_on_build() {
     let fs = MemoryFileSystem::default();
@@ -1218,8 +1238,7 @@ fn test_infer_module_types_bottom_up_warms_blanket_reexports() {
         "#,
     );
 
-    let mut db =
-        build_js_test_module_db(&fs, &["/src/leaf.ts", "/src/mid.ts", "/src/index.ts"], true);
+    let db = build_js_test_module_db(&fs, &["/src/leaf.ts", "/src/mid.ts", "/src/index.ts"], true);
     let leaf_module = db
         .module_for_path(Utf8Path::new("/src/leaf.ts"))
         .expect("leaf module must exist");
@@ -4751,7 +4770,7 @@ fn test_infer_module_types_is_memoized() {
         "#,
     );
 
-    let mut db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
     let index_module = db
         .module_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");

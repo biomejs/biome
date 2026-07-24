@@ -1,29 +1,40 @@
-//! Salsa-backed queries for module-level type inference.
+//! Salsa-backed queries for JavaScript type inference.
 //!
-//! Tracked functions cache their results and record the modules and types they
-//! inspect. Salsa reruns a query when one of those dependencies changes. Query
-//! inputs with several fields use interned structs, which give equal input
-//! values one shared database identity; interning the input is separate from
-//! caching the query result.
+//! Expression, binding, and local-type queries resolve one entry from the raw
+//! tables stored in [`ModuleInfo`]. These are the primary query units for
+//! consumers that do not need every inferred type in a module.
 //!
-//! [`infer_module_types_bottom_up`] is the entry point for callers outside a
-//! database query. It prepares imported modules iteratively so long import
-//! chains do not consume the Rust call stack. Queries that run while module
-//! inference is already active call [`infer_module_types`] directly.
+//! Export discovery is tracked separately from type resolution. Origin and
+//! namespace-name queries inspect only module graph inputs, so their results
+//! can be shared by importers without caching provisional inferred types.
+//!
+//! [`infer_module_types`] materializes the complete set of resolved tables for
+//! compatibility with bulk consumers. [`infer_module_types_bottom_up`] prepares
+//! its dependencies iteratively so long import chains do not consume the Rust
+//! call stack.
+//!
+//! Tracked functions record the inputs and queries they inspect. Salsa reruns a
+//! query when one of those dependencies changes. Inputs with several fields use
+//! interned structs so equal values share one database identity; interning an
+//! input is separate from caching the query result.
 //!
 //! Call and constructor inference is best effort. Unsupported or unresolved
 //! shapes produce `Unknown` or `None` instead of a TypeScript diagnostic.
 
 use crate::db::type_inference::{
-    ImportResolution, apply_substitutions_to_root_body, collected_type_result,
+    ExportOriginResult, ImportResolution, ResolutionCtx, apply_substitutions_to_root_body,
+    collect_namespace_export_names, collected_type_result, find_export_origin,
+    find_member_type_on_demand as find_member_type_impl,
+    find_value_member_type_on_demand as find_value_member_type_impl,
     infer_module_types_cycle_result, normalize_structural_type, normalize_type_cycle_result,
-    resolve_raw_types, substitutions_for_instance,
+    resolve_export_type_on_demand, resolve_local_type_on_demand, resolve_raw_types,
+    substitutions_for_instance,
 };
 use crate::module_for_key;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
-use crate::{JsExport, JsOwnExport, ModuleDb, ResolvedPath};
+use crate::{JsExport, JsOwnExport, ModuleDb, ResolvedPath, SymbolFromModuleInfo};
 use biome_js_type_info::{
-    RawTypeData, TypeReference, TypeResolverLevel, global_types,
+    RawTypeData, TypeId, TypeReference, TypeResolverLevel, global_types,
     interned_types::{
         CallArgumentType as InferredCallArgumentType,
         FunctionParameter as InferredFunctionParameter, InternedConstructor as InferredConstructor,
@@ -36,6 +47,7 @@ use biome_js_type_info::{
         TypeTransformResult,
     },
 };
+use biome_rowan::{Text, TextRange};
 use rustc_hash::FxHashSet;
 
 /// Inferred type tables for one JavaScript or TypeScript module.
@@ -46,14 +58,42 @@ const MAX_ARGUMENT_SEQUENCE_STEPS: usize = 4096;
 const MAX_ARGUMENT_TYPE_STEPS: usize = 1024;
 const MAX_LOCAL_EXTENDS_STEPS: usize = 1024;
 
-// #region EXPORTED TRACKED QUERIES
+// #region EXPORT DISCOVERY QUERIES
 
-/// Infers and caches the types collected for a module.
+/// Finds the module and local name that own an exported symbol.
+///
+/// This query reads only module graph inputs and never resolves inferred types.
+/// Keeping export discovery independent of inference prevents it from joining
+/// an inference cycle. The caller resolves the type stored at the returned
+/// origin.
+#[salsa::tracked(returns(ref))]
+pub(crate) fn resolved_export_origin<'db>(
+    db: &'db dyn ModuleDb,
+    symbol: SymbolFromModuleInfo<'db>,
+) -> ExportOriginResult {
+    find_export_origin(db, *symbol.module(db), Text::from(symbol.name(db)))
+}
+
+/// Collects the export names visible through a module namespace.
+///
+/// This query reads only module graph inputs. An unresolved blanket re-export,
+/// unsupported module, disabled inference, or exhausted traversal budget makes
+/// the namespace indeterminate.
+#[salsa::tracked(returns(ref))]
+pub(crate) fn namespace_export_names(db: &dyn ModuleDb, module: ModuleInfo) -> Option<Box<[Text]>> {
+    collect_namespace_export_names(db, module)
+}
+
+// #endregion
+
+// #region LEAF AND MODULE QUERIES
+
+/// Materializes all inferred type tables for a module.
 ///
 /// The query returns `None` for non-JavaScript modules, modules whose type
 /// inference is disabled, and dependency cycles that Salsa cannot recover.
-/// Imported module results are query dependencies, so changing an import
-/// invalidates affected importers.
+/// Prefer the expression, binding, or local-type query when only one entry is
+/// required.
 ///
 /// Callers outside another database query should use
 /// [`infer_module_types_bottom_up`] to prepare imports first.
@@ -69,14 +109,6 @@ pub fn infer_module_types<'db>(
         return None;
     }
 
-    for import_path in js_info.static_import_paths.values() {
-        if let Some(path) = import_path.as_path()
-            && let Some(target) = db.module_for_path(path)
-        {
-            let _ = infer_module_types(db, target);
-        }
-    }
-
     Some(resolve_raw_types(
         db,
         module,
@@ -85,7 +117,171 @@ pub fn infer_module_types<'db>(
     ))
 }
 
-// NOTE: this is the only exception to the rule, it's a public query and not tracked. Keep it here.
+/// Infers the type collected for one expression.
+///
+/// Returns `None` when the module does not support inference or the expression
+/// was not collected. An inference cycle returns `Unknown`.
+///
+/// Requesting the `promise` expression in the expression statement infers
+/// `Promise<number>`.
+///
+/// ```ts
+/// const promise = Promise.resolve(1);
+/// promise;
+/// ```
+#[salsa::tracked(cycle_result=infer_expression_type_cycle_result)]
+pub fn infer_expression_type<'db>(
+    db: &'db dyn ModuleDb,
+    input: ExpressionTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let module = input.module(db);
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        return None;
+    };
+    if !js_info.infer_types {
+        return None;
+    }
+
+    let reference = js_info.raw_expressions.get(&input.expression(db))?.clone();
+    let mut ctx = ResolutionCtx::new(db, module, &js_info, ImportResolution::Full);
+    Some(ctx.resolve(&reference))
+}
+
+/// Infers the type collected for one binding range.
+///
+/// Returns `None` when the module does not support inference or the range has
+/// no collected binding. An inference cycle returns `Unknown`.
+///
+/// Requesting the declaration binding for `value` infers the numeric literal
+/// type `1`.
+///
+/// ```ts
+/// const value = 1;
+/// ```
+#[salsa::tracked(cycle_result=infer_binding_type_cycle_result)]
+pub fn infer_binding_type<'db>(
+    db: &'db dyn ModuleDb,
+    input: BindingTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let module = input.module(db);
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        return None;
+    };
+    if !js_info.infer_types {
+        return None;
+    }
+
+    let reference = js_info.raw_binding_types.get(&input.range(db))?.clone();
+    let mut ctx = ResolutionCtx::new(db, module, &js_info, ImportResolution::Full);
+    Some(ctx.resolve(&reference))
+}
+
+/// Infers one entry from a module's local type table.
+///
+/// Returns `None` when the module does not support inference or the ID is out
+/// of bounds. An inference cycle returns `Unknown`.
+///
+/// Requesting the local type for `Value` infers an interface with a `field`
+/// member of type `string`.
+///
+/// ```ts
+/// interface Value {
+///     field: string;
+/// }
+/// ```
+#[salsa::tracked(cycle_result=infer_local_type_cycle_result)]
+pub fn infer_local_type<'db>(
+    db: &'db dyn ModuleDb,
+    input: LocalTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let module = input.module(db);
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        return None;
+    };
+    let type_id = input.type_id(db);
+    if !js_info.infer_types || type_id.index() >= js_info.raw_types.len() {
+        return None;
+    }
+
+    let mut ctx = ResolutionCtx::new(db, module, &js_info, ImportResolution::Full);
+    Some(ctx.resolve_raw_type_id(TypeId::new(type_id.index())))
+}
+
+/// Infers the type exported under the requested symbol name.
+///
+/// Returns `None` when the module does not support inference. Missing,
+/// ambiguous, indeterminate, or cyclic exports resolve to `Unknown`.
+///
+/// Requesting the export named `value` infers the numeric literal type `1`.
+///
+/// ```ts
+/// export const value = 1;
+/// ```
+#[salsa::tracked(cycle_result=infer_export_type_cycle_result)]
+pub fn infer_export_type<'db>(
+    db: &'db dyn ModuleDb,
+    symbol: SymbolFromModuleInfo<'db>,
+) -> Option<InferredTypeData<'db>> {
+    resolve_export_type_on_demand(db, *symbol.module(db), &symbol.name(db))
+}
+
+fn infer_expression_type_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: ExpressionTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    Some(InferredTypeData::Unknown)
+}
+
+fn infer_binding_type_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: BindingTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    Some(InferredTypeData::Unknown)
+}
+
+fn infer_local_type_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: LocalTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    Some(InferredTypeData::Unknown)
+}
+
+fn infer_export_type_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _symbol: SymbolFromModuleInfo<'db>,
+) -> Option<InferredTypeData<'db>> {
+    Some(InferredTypeData::Unknown)
+}
+
+/// Finds a named member while resolving local types through leaf queries.
+pub fn find_member_type<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    name: &str,
+) -> Option<InferredTypeData<'db>> {
+    find_member_type_impl(db, ty, name)
+}
+
+/// Finds a named member available on a value while resolving local types
+/// through leaf queries.
+pub fn find_value_member_type<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    name: &str,
+) -> Option<InferredTypeData<'db>> {
+    find_value_member_type_impl(db, ty, name)
+}
+
+// #endregion
+
+// #region EXTERNAL INFERENCE ENTRY POINTS
+
+// The scheduler remains untracked because `infer_module_types` caches each
+// module result while this explicit work list prevents recursive stack growth.
 /// Infers a module after preparing every module it imports or re-exports.
 ///
 /// This is the entry point for work initiated outside a database query, such
@@ -131,8 +327,8 @@ pub fn infer_module_types_bottom_up<'db>(
         let ModuleInfoKind::Js(js_info) = current.kind(db) else {
             continue;
         };
-        for import_path in js_info.static_import_paths.values() {
-            push_inference_dependency(db, &visited, &mut stack, &import_path.resolved_path);
+        for import in js_info.static_imports.values() {
+            push_inference_dependency(db, &visited, &mut stack, &import.resolved_path);
         }
         for reexport in js_info.blanket_reexports.iter() {
             push_inference_dependency(db, &visited, &mut stack, &reexport.import.resolved_path);
@@ -163,6 +359,10 @@ pub fn infer_module_types_bottom_up<'db>(
 
     None
 }
+
+// #endregion
+
+// #region CALL AND NORMALIZATION QUERIES
 
 /// Infers the return type of a call expression.
 ///
@@ -242,24 +442,18 @@ pub fn infer_constructor_argument_type<'db>(
 
 /// Resolves local handles and simplifies structural wrappers in `input`.
 ///
-/// If module inference is unavailable, the original type is returned. A cycle,
-/// invalid structural rebuild, or exhausted normalization budget returns
-/// [`InferredTypeData::Unknown`].
+/// A cycle, invalid structural rebuild, or exhausted normalization budget
+/// returns [`InferredTypeData::Unknown`].
 #[salsa::tracked(cycle_result=normalize_type_cycle_result)]
 pub fn normalize_type<'db>(
     db: &'db dyn ModuleDb,
     input: NormalizeTypeInput<'db>,
 ) -> InferredTypeData<'db> {
-    let module = input.module(db);
     let ty = input.ty(db);
     if !needs_type_normalization(ty) {
         return ty;
     }
-    let Some(inferred) = infer_module_types(db, module) else {
-        return ty;
-    };
-
-    normalize_structural_type(db, ty, |ty| inferred.resolve_type(db, ty))
+    normalize_structural_type(db, ty, |ty| resolve_local_type_on_demand(db, ty))
         .unwrap_or(InferredTypeData::Unknown)
 }
 
@@ -451,7 +645,7 @@ fn resolve_tuple_instance<'db>(
         }
         *remaining_steps -= 1;
 
-        let target = resolve_local_type(db, instance.ty(db));
+        let target = resolve_local_type_on_demand(db, instance.ty(db));
         let substitutions =
             substitutions_for_instance(db, target, instance.type_parameters(db), &[]);
         ty = apply_substitutions_to_root_body(db, target, &substitutions);
@@ -723,7 +917,7 @@ fn infer_argument_type<'db>(
                     pending.push(ArgumentTypeItem::Type(global_types(db).get(id)));
                 }
                 InferredTypeData::InstanceOf(instance) => {
-                    let target = resolve_local_type(db, instance.ty(db));
+                    let target = resolve_local_type_on_demand(db, instance.ty(db));
                     let substitutions =
                         substitutions_for_instance(db, target, instance.type_parameters(db), &[]);
                     pending.push(ArgumentTypeItem::Type(apply_substitutions_to_root_body(
@@ -756,22 +950,6 @@ fn infer_argument_type<'db>(
     }
 
     None
-}
-
-fn resolve_local_type<'db>(
-    db: &'db dyn ModuleDb,
-    ty: InferredTypeData<'db>,
-) -> InferredTypeData<'db> {
-    let InferredTypeData::Local(local) = ty else {
-        return ty;
-    };
-    let Some(module) = module_for_key(db, local.module(db)) else {
-        return ty;
-    };
-    let Some(inferred) = infer_module_types(db, module) else {
-        return ty;
-    };
-    inferred.resolve_type(db, ty)
 }
 
 fn select_constructor_argument_type<'db>(
@@ -2089,6 +2267,36 @@ impl<'db> ArgumentMatchAction<'db> {
 // #endregion
 
 // #region INTERNED TYPES
+
+/// Interned input for [`infer_expression_type`].
+#[salsa::interned]
+#[derive(Debug)]
+pub struct ExpressionTypeInput<'db> {
+    /// Module containing the expression.
+    pub module: ModuleInfo,
+    /// Source location that identifies the expression in the module's raw table.
+    pub expression: TextRange,
+}
+
+/// Interned input for [`infer_binding_type`].
+#[salsa::interned]
+#[derive(Debug)]
+pub struct BindingTypeInput<'db> {
+    /// Module containing the binding.
+    pub module: ModuleInfo,
+    /// Source range used to identify the binding.
+    pub range: TextRange,
+}
+
+/// Interned input for [`infer_local_type`].
+#[salsa::interned]
+#[derive(Debug)]
+pub struct LocalTypeInput<'db> {
+    /// Module owning the local type table.
+    pub module: ModuleInfo,
+    /// Index of the requested local type.
+    pub type_id: InferredLocalTypeId,
+}
 
 /// Interned input for [`infer_call_expression_type`].
 #[salsa::interned]

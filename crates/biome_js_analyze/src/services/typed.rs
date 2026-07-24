@@ -9,53 +9,30 @@ use biome_js_syntax::{
     JsSyntaxNode,
 };
 use biome_js_type_info::{
-    InferredType, TypeResolverLevel,
+    InferredType,
     interned_types::{
-        CallArgumentType as InferredCallArgumentType, LocalTypeHandle, LocalTypeId,
-        ReturnType as InferredReturnType, TypeData as InferredTypeData,
+        CallArgumentType as InferredCallArgumentType, ReturnType as InferredReturnType,
+        TypeData as InferredTypeData,
     },
 };
 use biome_module_graph::{
-    CallArgumentTypeInput, InferredModuleTypes, JsOwnExport, ModuleDb, ModuleInfo, ModuleInfoKind,
-    NormalizeTypeInput, infer_call_argument_type, infer_constructor_argument_type,
-    infer_module_types, infer_module_types_bottom_up, normalize_type,
+    BindingTypeInput, CallArgumentTypeInput, ExpressionTypeInput, ModuleDb, ModuleInfo,
+    NormalizeTypeInput, SymbolFromModuleInfo, find_member_type, find_value_member_type,
+    infer_binding_type, infer_call_argument_type, infer_constructor_argument_type,
+    infer_export_type, infer_expression_type, normalize_type,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
-use std::cell::OnceCell;
 use std::rc::Rc;
-
-#[derive(Default)]
-struct TypedModuleState {
-    inference_available: OnceCell<bool>,
-}
 
 #[derive(Clone)]
 pub(crate) struct TypedModule {
     db: Rc<dyn ModuleDb>,
     module: ModuleInfo,
-    state: Rc<TypedModuleState>,
 }
 
 impl TypedModule {
     pub(crate) fn new(db: Rc<dyn ModuleDb>, module: ModuleInfo) -> Self {
-        Self {
-            db,
-            module,
-            state: Rc::new(TypedModuleState::default()),
-        }
-    }
-
-    fn inferred_types<'db>(&'db self) -> Option<&'db InferredModuleTypes<'db>> {
-        let db = self.db.as_ref();
-        if let Some(is_available) = self.state.inference_available.get() {
-            return is_available
-                .then(|| infer_module_types(db, self.module))
-                .flatten();
-        }
-
-        let inferred = infer_module_types_bottom_up(db, self.module);
-        let _ = self.state.inference_available.set(inferred.is_some());
-        inferred
+        Self { db, module }
     }
 }
 
@@ -70,6 +47,24 @@ pub struct TypedService {
 }
 
 impl TypedService {
+    fn inferred_expression_data<'db>(
+        &'db self,
+        expression: TextRange,
+    ) -> Option<InferredTypeData<'db>> {
+        let typed_module = self.module.as_ref()?;
+        let db = typed_module.db.as_ref();
+        infer_expression_type(
+            db,
+            ExpressionTypeInput::new(db, typed_module.module, expression),
+        )
+    }
+
+    fn inferred_binding_data<'db>(&'db self, range: TextRange) -> Option<InferredTypeData<'db>> {
+        let typed_module = self.module.as_ref()?;
+        let db = typed_module.db.as_ref();
+        infer_binding_type(db, BindingTypeInput::new(db, typed_module.module, range))
+    }
+
     fn normalized_inferred_type<'db>(
         &'db self,
         ty: InferredTypeData<'db>,
@@ -87,8 +82,7 @@ impl TypedService {
     ) -> Option<InferredType<'db>> {
         let typed_module = self.module.as_ref()?;
         let db = typed_module.db.as_ref();
-        let inferred = typed_module.inferred_types()?;
-        let ty = inferred.expressions.get(&expression.range()).copied()?;
+        let ty = self.inferred_expression_data(expression.range())?;
         let ty = normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
 
         Some(InferredType::new(db, ty))
@@ -111,11 +105,7 @@ impl TypedService {
         };
 
         let db = typed_module.db.as_ref();
-        let inferred = typed_module.inferred_types()?;
-        let ty = inferred
-            .binding_type_data
-            .get(&binding.tree().syntax().text_trimmed_range())?
-            .ty;
+        let ty = self.inferred_binding_data(binding.tree().syntax().text_trimmed_range())?;
         let ty = normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
 
         Some(InferredType::new(db, ty))
@@ -128,10 +118,9 @@ impl TypedService {
     ) -> Option<InferredType<'db>> {
         let typed_module = self.module.as_ref()?;
         let db = typed_module.db.as_ref();
-        let inferred = typed_module.inferred_types()?;
         let function_ty = match function {
             AnyJsFunction::JsArrowFunctionExpression(expression) => {
-                inferred.expressions.get(&expression.range()).copied()
+                self.inferred_expression_data(expression.range())
             }
             AnyJsFunction::JsFunctionDeclaration(declaration) => declaration
                 .id()
@@ -154,7 +143,7 @@ impl TypedService {
                 }
             }
             AnyJsFunction::JsFunctionExpression(expression) => {
-                inferred.expressions.get(&expression.range()).copied()
+                self.inferred_expression_data(expression.range())
             }
         }?;
         let function = function_ty.callable_function(db)?;
@@ -172,7 +161,6 @@ impl TypedService {
     ) -> Option<InferredType<'db>> {
         let typed_module = self.module.as_ref()?;
         let db = typed_module.db.as_ref();
-        let inferred = typed_module.inferred_types()?;
         let parent_ty = member_syntax.ancestors().find_map(|ancestor| {
             if let Some(class) = JsClassDeclaration::cast(ancestor.clone()) {
                 let binding_range = class
@@ -182,16 +170,13 @@ impl TypedService {
                     .name_token()
                     .ok()?
                     .text_trimmed_range();
-                return inferred
-                    .binding_type_data
-                    .get(&binding_range)
-                    .map(|data| data.ty);
+                return self.inferred_binding_data(binding_range);
             }
             if let Some(class) = JsClassExpression::cast(ancestor.clone()) {
-                return inferred.expressions.get(&class.range()).copied();
+                return self.inferred_expression_data(class.range());
             }
             if let Some(object) = JsObjectExpression::cast(ancestor) {
-                return inferred.expressions.get(&object.range()).copied();
+                return self.inferred_expression_data(object.range());
             }
             None
         })?;
@@ -199,7 +184,7 @@ impl TypedService {
             db,
             NormalizeTypeInput::new(db, typed_module.module, parent_ty),
         );
-        let member_ty = inferred.find_member_type(db, parent_ty, member_name)?;
+        let member_ty = find_member_type(db, parent_ty, member_name)?;
         let return_ty = member_ty.callable_function(db).and_then(|function| {
             let InferredReturnType::Type(return_ty) = function.return_type(db) else {
                 return None;
@@ -212,24 +197,8 @@ impl TypedService {
     fn inferred_default_export_data<'db>(&'db self) -> Option<InferredTypeData<'db>> {
         let typed_module = self.module.as_ref()?;
         let db = typed_module.db.as_ref();
-        let inferred = typed_module.inferred_types()?;
-        let ModuleInfoKind::Js(js_info) = typed_module.module.kind(db) else {
-            return None;
-        };
-        let own_export = js_info.exports.get("default")?.as_own_export()?;
-        let ty = match own_export {
-            JsOwnExport::Binding(range) => inferred.binding_type_data.get(range)?.ty,
-            JsOwnExport::Type(resolved) if resolved.level() == TypeResolverLevel::Thin => {
-                let type_id = LocalTypeId::new(resolved.index());
-                if inferred.named_type_ids.contains(&type_id) {
-                    InferredTypeData::Local(LocalTypeHandle::new(db, inferred.module_key, type_id))
-                } else {
-                    *inferred.types.get(resolved.index())?
-                }
-            }
-            JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => return None,
-        };
-        Some(ty)
+        let symbol = SymbolFromModuleInfo::new(db, "default", typed_module.module);
+        infer_export_type(db, symbol)
     }
 
     fn inferred_named_value_data<'db>(
@@ -237,7 +206,6 @@ impl TypedService {
         range: TextRange,
         name: &str,
     ) -> Option<InferredTypeData<'db>> {
-        let typed_module = self.module.as_ref()?;
         let model = self.model.as_ref()?;
         let mut scope = model.scope_for_range(range);
         let binding = loop {
@@ -246,11 +214,7 @@ impl TypedService {
             }
             scope = scope.parent()?;
         };
-        typed_module
-            .inferred_types()?
-            .binding_type_data
-            .get(&binding.tree().syntax().text_trimmed_range())
-            .map(|data| data.ty)
+        self.inferred_binding_data(binding.tree().syntax().text_trimmed_range())
     }
 
     /// Determines whether an expression has a callable member with the given name.
@@ -264,13 +228,12 @@ impl TypedService {
     ) -> Option<bool> {
         let typed_module = self.module.as_ref()?;
         let db = typed_module.db.as_ref();
-        let inferred = typed_module.inferred_types()?;
-        let ty = inferred.expressions.get(&expression.range()).copied()?;
+        let ty = self.inferred_expression_data(expression.range())?;
         let ty = normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
         if !InferredType::new(db, ty).is_inferred() {
             return None;
         }
-        let Some(member_ty) = inferred.find_value_member_type(db, ty, name) else {
+        let Some(member_ty) = find_value_member_type(db, ty, name) else {
             return Some(false);
         };
         let member_ty = normalize_type(
@@ -292,8 +255,7 @@ impl TypedService {
     ) -> Option<InferredType<'db>> {
         let typed_module = self.module.as_ref()?;
         let db = typed_module.db.as_ref();
-        let inferred = typed_module.inferred_types()?;
-        let callee_ty = inferred.expressions.get(&callee.range()).copied()?;
+        let callee_ty = self.inferred_expression_data(callee.range())?;
         let callee_ty = normalize_type(
             db,
             NormalizeTypeInput::new(db, typed_module.module, callee_ty),
@@ -306,7 +268,7 @@ impl TypedService {
                     AnyJsCallArgument::AnyJsExpression(expression) => (expression, false),
                     AnyJsCallArgument::JsSpread(spread) => (spread.argument().ok()?, true),
                 };
-                let ty = inferred.expressions.get(&expression.range()).copied()?;
+                let ty = self.inferred_expression_data(expression.range())?;
                 let ty = normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
                 Some(if is_spread {
                     InferredCallArgumentType::Spread(ty)
