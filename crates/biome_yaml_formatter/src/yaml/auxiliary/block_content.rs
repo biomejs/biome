@@ -377,7 +377,7 @@ impl ContentStats {
                 }
                 let base_indent = *base_indent.get_or_insert(spaces);
                 if spaces < base_indent {
-                    stats.scalar_end = Some(stats.line_count - 1);
+                    stats.scalar_end = Some(stats.line_count.saturating_sub(1));
                 } else {
                     stats.trimmed_count = stats.line_count;
                 }
