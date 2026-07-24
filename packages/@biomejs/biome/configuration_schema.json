@@ -7608,12 +7608,26 @@
 			"additionalProperties": false
 		},
 		"PluginConfiguration": {
-			"description": "Configuration for a single plugin entry.\n\nCan be either a plain path string or an object with path and options:\n\n```json\n{\n  \"plugins\": [\n    \"simple-plugin.grit\",\n    { \"path\": \"scoped-plugin.grit\", \"includes\": [\"src/**/*.ts\"] }\n  ]\n}\n```",
+			"description": "Configuration for a single plugin entry.\n\nCan be either a plain path string or an object with path and options:\n\n```json\n{\n  \"plugins\": [\n    \"simple-plugin.grit\",\n    { \"path\": \"scoped-plugin.grit\", \"includes\": [\"src/**/*.ts\"] },\n    { \"path\": \"./local-plugin.grit\", \"includes\": [\"src/**/*.ts\"], \"resolutionKind\": \"config\" }\n  ]\n}\n```",
 			"anyOf": [
 				{ "description": "A plain path to the plugin.", "type": "string" },
 				{
 					"description": "A path with additional options.",
 					"$ref": "#/$defs/PluginWithOptions"
+				}
+			]
+		},
+		"PluginResolvePath": {
+			"oneOf": [
+				{
+					"description": "Resolve relative paths from the consuming project.",
+					"type": "string",
+					"const": "project"
+				},
+				{
+					"description": "Resolve relative paths from the configuration file that declared the plugin.",
+					"type": "string",
+					"const": "config"
 				}
 			]
 		},
@@ -7626,7 +7640,11 @@
 					"type": ["array", "null"],
 					"items": { "$ref": "#/$defs/NormalizedGlob" }
 				},
-				"path": { "description": "The path to the plugin.", "type": "string" }
+				"path": { "description": "The path to the plugin.", "type": "string" },
+				"resolutionKind": {
+					"description": "Controls how the plugin is resolved.\n\nThis only affects plugin resolution. It does not change how `includes`\nare interpreted.\n\nWhen omitted, relative plugin paths are resolved from the consuming\nproject.",
+					"anyOf": [{ "$ref": "#/$defs/PluginResolvePath" }, { "type": "null" }]
+				}
 			},
 			"additionalProperties": false,
 			"required": ["path"]
@@ -16322,6 +16340,11 @@
 		"UseSortedAttributesOptions": {
 			"type": "object",
 			"properties": {
+				"sortFirst": {
+					"description": "A list of attribute names that should be sorted before all other\nattributes, in the order they appear in this list. The remaining\nattributes are sorted after the listed ones.\n\nThis is useful to keep attributes such as `key` first.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
 				"sortOrder": {
 					"anyOf": [{ "$ref": "#/$defs/SortOrder" }, { "type": "null" }]
 				}
@@ -16368,6 +16391,12 @@
 		},
 		"UseSortedInterfaceMembersOptions": {
 			"type": "object",
+			"properties": {
+				"partitionByNewLine": {
+					"description": "When enabled, members separated by a blank line are kept in their own\nsection and sorted only within that section. This preserves logical\ngroupings the author intentionally introduced with empty lines.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseSortedKeysConfiguration": {
