@@ -44,7 +44,7 @@ comments:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,14 +1,14 @@
+@@ -1,8 +1,8 @@
 ----
 -!<tag:clarkevans.com,2002:invoice>
 +--- !<tag:clarkevans.com,2002:invoice>
@@ -56,14 +56,6 @@ comments:
    given: Chris
    family: Dumars
    address:
-     lines: |
--      458 Walkman Dr.
--      Suite #292
-+            458 Walkman Dr.
-+            Suite #292
-     city: Royal Oak
-     state: MI
-     postal: 48046
 @@ -25,5 +25,5 @@
  tax: 251.42
  total: 4443.52
@@ -86,8 +78,8 @@ bill-to:
   family: Dumars
   address:
     lines: |
-            458 Walkman Dr.
-            Suite #292
+      458 Walkman Dr.
+      Suite #292
     city: Royal Oak
     state: MI
     postal: 48046

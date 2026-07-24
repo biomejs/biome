@@ -21,15 +21,12 @@ info: yaml/spec/spec-example-8-15-block-sequence-entry-types.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,6 +1,6 @@
+@@ -1,4 +1,4 @@
 --  # Empty
 +- # Empty
  - |
--  block node
-+ block node
+   block node
  - - one # Compact
-   - two # sequence
- - one: two # Compact mapping
 ```
 
 # Output
@@ -37,7 +34,7 @@ info: yaml/spec/spec-example-8-15-block-sequence-entry-types.yml
 ```yml
 - # Empty
 - |
- block node
+  block node
 - - one # Compact
   - two # sequence
 - one: two # Compact mapping
