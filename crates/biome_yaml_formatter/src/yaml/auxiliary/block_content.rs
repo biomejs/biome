@@ -1,9 +1,10 @@
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_rowan::AstNode;
+use biome_parser::{TokenSet, token_set};
+use biome_rowan::{AstNode, declare_node_union};
 use biome_yaml_syntax::{
     AnyYamlBlockHeader, YamlBlockContent, YamlBlockContentFields, YamlBlockHeaderList,
-    YamlSyntaxKind, YamlSyntaxNode,
+    YamlFoldedScalar, YamlLiteralScalar, YamlSyntaxKind,
 };
 
 /// Formats the content of a literal (`|`) or folded (`>`) block scalar.
@@ -21,52 +22,37 @@ impl FormatNodeRule<YamlBlockContent> for FormatYamlBlockContent {
         let YamlBlockContentFields { value_token } = node.as_fields();
         let value_token = value_token?;
 
-        let (chomping, indicator) = parent_headers(node.syntax());
+        let (chomping, indicator) = parent_headers(node);
 
         let token_text = value_token.text_trimmed();
 
+        let lines = ContentLines::new(token_text);
+        let ends_with_break = lines.ends_with_break();
         // The first line of the token is the tail of the header line; the
         // content starts after its line break
-        let body = line_break(token_text).map(|(index, len)| &token_text[index + len..]);
-        let lines = || {
-            let mut rest = body;
-            std::iter::from_fn(move || {
-                let text = rest?;
-                match line_break(text) {
-                    Some((index, len)) => {
-                        rest = Some(&text[index + len..]);
-                        Some(&text[..index])
-                    }
-                    None => {
-                        rest = None;
-                        Some(text)
-                    }
-                }
-            })
-        };
-        let ends_with_break = token_text.ends_with(['\n', '\r']);
+        let lines = lines.skip(1);
+
+        let stats = ContentStats::new(lines.clone());
 
         let kept_lines = match chomping {
             // The line break terminating the last line is printed by the
             // enclosing structure, so the line it opens isn't content
-            Chomping::Keep => lines().count().saturating_sub(usize::from(ends_with_break)),
+            Chomping::Keep => stats.count.saturating_sub(usize::from(ends_with_break)),
             // Trailing blank lines are dropped
-            Chomping::Clip | Chomping::Strip => lines()
-                .enumerate()
-                .filter(|(_, line)| !line.is_empty())
-                .last()
-                .map_or(0, |(index, _)| index + 1),
+            Chomping::Clip | Chomping::Strip => stats.trimmed_count,
         };
 
-        let ancestors = collection_ancestor_count(node.syntax());
+        // The number of block collections the node is nested in, which the
+        // absolute indentation of explicitly indented content is computed from
+        let ancestors = node
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .filter(|ancestor| BLOCK_COLLECTIONS.contains(ancestor.kind()))
+            .count();
         let base_indent = match indicator {
-            Some(indicator) => (indicator - 1).saturating_add(ancestors),
-            None => lines()
-                .find_map(|line| {
-                    let spaces = leading_spaces(line);
-                    (spaces < line.len()).then_some(spaces)
-                })
-                .unwrap_or(usize::MAX),
+            Some(indicator) => indicator.saturating_sub(1).saturating_add(ancestors),
+            None => stats.first_indent,
         };
 
         // FIXME: A non-empty line that is indented less than the base ends
@@ -75,17 +61,14 @@ impl FormatNodeRule<YamlBlockContent> for FormatYamlBlockContent {
         // Re-indenting them would promote them to actual scalar content, so
         // the content is kept exactly as is for now. Once the lexer ends the
         // scalar at such lines, this fallback can be removed
-        if lines().any(|line| {
-            let spaces = leading_spaces(line);
-            spaces < line.len() && spaces < base_indent
-        }) {
+        if stats.min_indent < base_indent {
             return format_verbatim_node(node.syntax()).fmt(f);
         }
 
-        let is_last = is_last_descendant(node.syntax());
+        let is_last = closes_last_document(node);
         let content = format_with(|f| {
             let state = std::cell::Cell::new(LineState::default());
-            for line in lines().take(kept_lines) {
+            for line in lines.clone().take(kept_lines) {
                 write!(
                     f,
                     [FormatContentLine {
@@ -156,7 +139,8 @@ impl FormatNodeRule<YamlBlockContent> for FormatYamlBlockContent {
             None => write!(f, [format_replaced(&value_token, &indent(&content))]),
             // An explicit indicator makes the content indentation absolute
             Some(indicator) => {
-                let align_spaces = " ".repeat((indicator - 1).saturating_add(ancestors));
+                let align_spaces =
+                    " ".repeat(indicator.saturating_sub(1).saturating_add(ancestors));
                 write!(
                     f,
                     [format_replaced(
@@ -169,16 +153,35 @@ impl FormatNodeRule<YamlBlockContent> for FormatYamlBlockContent {
     }
 }
 
+/// The block collections a node can be nested in, each of which adds one
+/// level of indentation
+const BLOCK_COLLECTIONS: TokenSet<YamlSyntaxKind> = token_set![
+    YamlSyntaxKind::YAML_BLOCK_MAPPING,
+    YamlSyntaxKind::YAML_BLOCK_SEQUENCE
+];
+
+/// What a block scalar does with the line breaks trailing its content,
+/// chosen by the chomping indicator in its header.
+///
+/// See <https://yaml.org/spec/1.2.2/#8112-block-chomping-indicator>
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Chomping {
+    /// Keep the line break ending the last non-empty line, drop the blank
+    /// lines after it. The default, used when no indicator is given
     Clip,
+    /// Drop the ending line break and the trailing blank lines (`-`)
     Strip,
+    /// Keep both the ending line break and the trailing blank lines (`+`)
     Keep,
 }
 
+/// What the content lines formatted so far looked like, which the following
+/// lines of the same scalar base their formatting on
 #[derive(Debug, Clone, Copy, Default)]
 struct LineState {
+    /// Whether any content line has been formatted yet
     any_line: bool,
+    /// Whether the most recently formatted line was blank
     prev_empty: bool,
 }
 
@@ -217,17 +220,31 @@ impl Format<YamlFormatContext> for FormatContentLine<'_> {
     }
 }
 
+declare_node_union! {
+    /// A block scalar, the node a `YamlBlockContent` sits in
+    AnyYamlBlockScalar = YamlLiteralScalar | YamlFoldedScalar
+}
+
+impl AnyYamlBlockScalar {
+    fn headers(&self) -> YamlBlockHeaderList {
+        match self {
+            Self::YamlLiteralScalar(scalar) => scalar.headers(),
+            Self::YamlFoldedScalar(scalar) => scalar.headers(),
+        }
+    }
+}
+
 /// Reads the chomping behavior and the explicit indentation indicator from
 /// the headers of the enclosing block scalar
-fn parent_headers(node: &YamlSyntaxNode) -> (Chomping, Option<usize>) {
+fn parent_headers(node: &YamlBlockContent) -> (Chomping, Option<usize>) {
     let mut chomping = Chomping::Clip;
     let mut indicator = None;
 
     let headers = node
+        .syntax()
         .parent()
-        .into_iter()
-        .flat_map(|parent| parent.children())
-        .find_map(YamlBlockHeaderList::cast);
+        .and_then(AnyYamlBlockScalar::cast)
+        .map(|scalar| scalar.headers());
     for header in headers.into_iter().flatten() {
         match header {
             AnyYamlBlockHeader::YamlBlockStripIndicator(_) => chomping = Chomping::Strip,
@@ -246,41 +263,106 @@ fn parent_headers(node: &YamlSyntaxNode) -> (Chomping, Option<usize>) {
     (chomping, indicator)
 }
 
+/// The number of leading space characters of the line.
+///
+/// YAML indentation consists exclusively of spaces; tabs are forbidden (rule
+/// `s-indent`, section 6.1 of the spec), so a leading tab is scalar content
 fn leading_spaces(line: &str) -> usize {
     line.bytes().take_while(|byte| *byte == b' ').count()
 }
 
-/// The position and byte length of the first line break in `text`, treating
-/// `\r\n`, `\n`, and a lone `\r` each as one break
-fn line_break(text: &str) -> Option<(usize, usize)> {
-    // A `\r\n` pair is always entered at the `\r`, never in the middle,
-    // since the search matches whichever of the two bytes comes first
-    let index = text.find(['\n', '\r'])?;
-    let bytes = text.as_bytes();
-    let len = match bytes[index] {
-        b'\r' if bytes.get(index + 1) == Some(&b'\n') => 2,
-        _ => 1,
-    };
-    Some((index, len))
+/// Iterator over the lines of a block scalar token, splitting at `\r\n`,
+/// `\n`, and lone `\r` line breaks alike.
+///
+/// Text that ends with a line break yields a final empty line, which is how
+/// it is distinguished from text that ends mid-line
+#[derive(Debug, Clone)]
+struct ContentLines<'a> {
+    rest: Option<&'a str>,
 }
 
-/// The number of block collections the node is nested in, which the
-/// absolute indentation of explicitly indented content is computed from
-fn collection_ancestor_count(node: &YamlSyntaxNode) -> usize {
-    node.ancestors()
-        .filter(|ancestor| {
-            matches!(
-                ancestor.kind(),
-                YamlSyntaxKind::YAML_BLOCK_MAPPING | YamlSyntaxKind::YAML_BLOCK_SEQUENCE
-            )
-        })
-        .count()
+impl<'a> ContentLines<'a> {
+    fn new(text: &'a str) -> Self {
+        Self { rest: Some(text) }
+    }
+
+    /// Whether the remaining text ends with a line break, i.e. whether the
+    /// last line the iterator yields is an empty one split off by that break
+    fn ends_with_break(&self) -> bool {
+        self.rest.is_some_and(|text| text.ends_with(['\n', '\r']))
+    }
 }
 
-/// Whether no node follows this one in the stream, i.e. the node closes the
-/// last document
-fn is_last_descendant(node: &YamlSyntaxNode) -> bool {
-    let mut current = node.clone();
+impl<'a> Iterator for ContentLines<'a> {
+    type Item = &'a str;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let text = self.rest.take()?;
+        // A `\r\n` pair is always entered at the `\r`, never in the middle,
+        // since the search matches whichever of the two bytes comes first
+        match text.find(['\n', '\r']) {
+            Some(index) => {
+                let bytes = text.as_bytes();
+                let break_len = match bytes[index] {
+                    b'\r' if bytes.get(index + 1) == Some(&b'\n') => 2,
+                    _ => 1,
+                };
+                self.rest = Some(&text[index + break_len..]);
+                Some(&text[..index])
+            }
+            None => Some(text),
+        }
+    }
+}
+
+/// The aggregates of the content lines that the formatting is derived from,
+/// all gathered in a single pass over the lines
+struct ContentStats {
+    /// The number of lines
+    count: usize,
+    /// The number of lines that remain after dropping the trailing empty
+    /// lines
+    trimmed_count: usize,
+    /// The leading spaces of the first non-blank line, `usize::MAX` when
+    /// every line is blank
+    first_indent: usize,
+    /// The smallest leading spaces of any non-blank line, `usize::MAX` when
+    /// every line is blank
+    min_indent: usize,
+}
+
+impl ContentStats {
+    fn new<'a>(lines: impl Iterator<Item = &'a str>) -> Self {
+        let mut stats = Self {
+            count: 0,
+            trimmed_count: 0,
+            first_indent: usize::MAX,
+            min_indent: usize::MAX,
+        };
+        for line in lines {
+            stats.count += 1;
+            if !line.is_empty() {
+                stats.trimmed_count = stats.count;
+            }
+            let spaces = leading_spaces(line);
+            if spaces < line.len() {
+                if stats.first_indent == usize::MAX {
+                    stats.first_indent = spaces;
+                }
+                stats.min_indent = stats.min_indent.min(spaces);
+            }
+        }
+        stats
+    }
+}
+
+/// Whether nothing follows the node in the stream, i.e. the node closes the
+/// last document.
+///
+/// That is the case exactly when no ancestor, walking up to the root, has a
+/// sibling after it — any such sibling would put content after the node
+fn closes_last_document(node: &YamlBlockContent) -> bool {
+    let mut current = node.syntax().clone();
     loop {
         if current.next_sibling().is_some() {
             return false;
