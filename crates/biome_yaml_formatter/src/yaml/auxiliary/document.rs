@@ -35,9 +35,6 @@ impl FormatNodeRule<YamlDocument> for FormatYamlDocument {
         // the marker stays there; being line comments, all the following ones
         // necessarily go on their own line, keeping the blank lines that
         // separate them.
-        //
-        // Cheap clone of an `Rc`, releasing the borrow on the formatter so
-        // the comments can be written while iterating over them
         let comments = f.comments().clone();
         if let Some((first, rest)) = comments.dangling_comments(node.syntax()).split_first() {
             if first.lines_before() == 0 {
