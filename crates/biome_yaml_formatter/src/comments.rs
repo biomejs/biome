@@ -94,6 +94,10 @@ fn handle_middle_comment(
     comment: DecoratedComment<YamlLanguage>,
 ) -> CommentPlacement<YamlLanguage> {
     let range = comment.piece().text_range();
+    // The node owning the properties the comment sits between is at most a
+    // few levels up — the enclosing flow node, or the block-in-block node
+    // whose properties the parser flattened onto its mapping's first key —
+    // so the walk is capped rather than climbing to the root
     for node in comment.enclosing_node().ancestors().take(5) {
         if let Some((start, end)) = middle_comment_region(&node)
             && start <= range.start()
@@ -130,7 +134,7 @@ fn middle_comment_region(node: &YamlSyntaxNode) -> Option<(TextSize, TextSize)> 
         YamlSyntaxKind::YAML_BLOCK_IN_BLOCK_NODE => {
             let node = YamlBlockInBlockNode::cast_ref(node)?;
             if let Some((properties, count)) = node.properties_on_first_key() {
-                let last = properties.iter().nth(count - 1)?;
+                let last = properties.iter().nth(count.saturating_sub(1))?;
                 // The key's own line, where the mapping's content begins
                 let rest_start = properties
                     .iter()
@@ -175,8 +179,6 @@ impl<'a> FormatMiddleComments<'a> {
 
 impl Format<YamlFormatContext> for FormatMiddleComments<'_> {
     fn fmt(&self, f: &mut Formatter<YamlFormatContext>) -> FormatResult<()> {
-        // Cheap clone of an `Rc`, releasing the borrow on the formatter so
-        // the comments can be written while iterating over them
         let comments = f.comments().clone();
         let dangling = comments.dangling_comments(self.node);
         let single = dangling.len() == 1;
