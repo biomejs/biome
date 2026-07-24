@@ -14,12 +14,13 @@ use biome_js_syntax::{
     AnyJsIdentifierUsage, AnyJsModuleItem, AnyJsObjectAssignmentPatternMember,
     AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsRoot, AnyJsStatement,
     AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression, JsCallExpression, JsExport,
-    JsImport, JsModuleItemList, JsReferenceIdentifier, JsStaticMemberExpression,
+    JsImport, JsLanguage, JsModuleItemList, JsReferenceIdentifier, JsStaticMemberExpression,
     JsSvelteGenericsRoot, JsSvelteSnippetRoot, JsVariableStatement, JsxReferenceIdentifier,
 };
 use biome_languages::html::HtmlVariant;
 use biome_languages::javascript::JsEmbeddingKind;
 use biome_languages::{HtmlFileSource, JsFileSource, LanguageDb};
+use biome_parser::AnyParse;
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
 use std::collections::{HashSet, VecDeque};
 
@@ -169,7 +170,14 @@ fn collect_embedded_references(
         // one module and share a top-level scope, so a binding used only in
         // the other block must still count as used.
         if !js_file_source.is_embedded_source() || is_svelte {
-            let root: AnyJsRoot = snippet.parsed(db).tree();
+            // Severely malformed content (e.g. a stray unrecoverable token in
+            // the generics list) can make list recovery produce a shape the
+            // node factory rejects, collapsing the whole root to a bogus
+            // node. Cast fallibly instead of `.tree()`'s panicking cast so
+            // that case is skipped rather than crashing the analysis.
+            let Some(root) = any_js_root_from_snippet(snippet.parsed(db)) else {
+                continue;
+            };
             if let Some(generics_root) = root.as_js_svelte_generics_root() {
                 builder.visit_svelte_generics_root(generics_root);
             } else {
@@ -186,6 +194,15 @@ fn collect_embedded_references(
     }
 
     Some(builder)
+}
+
+fn any_js_root_from_snippet(parsed: &AnyParse) -> Option<AnyJsRoot> {
+    let syntax = if parsed.is_embedded_node_parse() {
+        parsed.clone().embedded_syntax::<JsLanguage>().node
+    } else {
+        parsed.syntax::<JsLanguage>()
+    };
+    AnyJsRoot::cast(syntax)
 }
 
 fn block_kind_from_js_source(source: &JsFileSource) -> Option<EmbeddedBlockKind> {

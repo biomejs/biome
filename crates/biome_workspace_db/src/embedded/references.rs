@@ -424,6 +424,57 @@ import type {{ FilterFieldDef, FilterValue }} from './types';
         ));
     }
 
+    /// Regression test: a `generics` value with unrecoverable content (a
+    /// stray `)` right after a separator) makes the type parameter list's
+    /// error recovery produce a shape the node factory rejects, so the whole
+    /// snippet root collapses to a generic bogus node instead of
+    /// `JsSvelteGenericsRoot`. Extracting references from it must degrade
+    /// gracefully instead of panicking on the `AnyJsRoot` cast.
+    #[test]
+    fn svelte_generics_attribute_with_unrecoverable_content_does_not_panic() {
+        let db = TestDb::new();
+        let path = Utf8PathBuf::from("src/Broken.svelte");
+        let generics_source = "T, )";
+        let html_source = format!(r#"<script lang="ts" generics="{generics_source}"></script>"#);
+        let parsed = parse_html(&html_source, HtmlParserOptions::default().with_svelte()).into();
+
+        let generics_snippet_parse = biome_js_parser::parse(
+            generics_source,
+            JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Svelte {
+                is_source: false,
+                is_function_signature: false,
+                kind: SvelteFileKind::Component,
+                is_const_block: false,
+                is_generics_declaration: true,
+            }),
+            JsParserOptions::default(),
+        )
+        .into();
+        let content_start = TextSize::from(
+            html_source
+                .find(generics_source)
+                .expect("generics attribute value should exist") as u32,
+        );
+        let content_end = content_start + TextSize::from(generics_source.len() as u32);
+        let generics_snippet = ParsedSnippet::new(
+            &db,
+            generics_snippet_parse,
+            TextRange::new(content_start, content_end),
+            TextRange::new(content_start, content_end),
+            content_start,
+            6,
+        );
+
+        let file = ParsedSource::new(&db, path.clone(), parsed, 4, vec![generics_snippet]);
+        db.insert_file(path.clone(), file);
+
+        // Must not panic.
+        assert!(!is_type_reference_used(
+            &db,
+            InternedReference::new(&db, path, token_text("T"))
+        ));
+    }
+
     #[test]
     fn is_value_reference_used_is_memoized() {
         let db = TestDb::new();
