@@ -59,12 +59,9 @@ impl FormatNodeRule<YamlDocument> for FormatYamlDocument {
 
         if let Some(document_node) = &document_node {
             if dashdashdash_token.is_some() {
-                // A node with tag or anchor properties stays on the `---`
-                // line if it started there; a node without properties always
-                // goes on its own line
-                if document_node.has_properties() && get_lines_before(document_node.syntax()) == 0 {
-                    write!(f, [space()])?;
-                } else if comments.has_dangling_comments(node.syntax())
+                // The content always goes on its own line below the marker,
+                // even when it started on the marker's line
+                if comments.has_dangling_comments(node.syntax())
                     && preserved_lines_before(&comments, document_node.syntax()) > 1
                 {
                     // A blank line separating the content from the comments

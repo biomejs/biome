@@ -31,7 +31,7 @@ block: > # lala
 ```diff
 --- Prettier
 +++ Biome
-@@ -5,11 +5,12 @@
+@@ -5,10 +5,10 @@
  c: #lala
    d
  ? # lala
@@ -40,14 +40,11 @@ block: > # lala
  : # lala
 -  - #lala
 -    seq2
--e: &node # lala
 + - #lala
 +  seq2
-+e:
-+  &node # lala
+ e: &node # lala
    - x: y
  block: > # lala
-   abcde
 ```
 
 # Output
@@ -64,8 +61,7 @@ c: #lala
 : # lala
  - #lala
   seq2
-e:
-  &node # lala
+e: &node # lala
   - x: y
 block: > # lala
   abcde

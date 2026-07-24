@@ -32,15 +32,13 @@ top7:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,13 +1,17 @@
+@@ -1,13 +1,16 @@
  ---
 -top1: &node1
 -  &k1 key1: one
--top2: &node2 # comment
 +top1:
 +  &node1 &k1 key1: one
-+top2:
-+  &node2 # comment
+ top2: &node2 # comment
    key2: two
  top3:
    &k3 key3: three
@@ -66,8 +64,7 @@ top7:
 ---
 top1:
   &node1 &k1 key1: one
-top2:
-  &node2 # comment
+top2: &node2 # comment
   key2: two
 top3:
   &k3 key3: three
