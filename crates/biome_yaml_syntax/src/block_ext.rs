@@ -1,5 +1,22 @@
-use crate::{AnyYamlBlockInBlockContent, AnyYamlBlockNode, AnyYamlFlowNode, AnyYamlJsonContent};
-use biome_rowan::AstNodeList;
+use crate::{
+    AnyYamlBlockInBlockContent, AnyYamlBlockNode, AnyYamlFlowNode, AnyYamlJsonContent,
+    YamlBlockHeaderList, YamlFoldedScalar, YamlLiteralScalar,
+};
+use biome_rowan::{AstNodeList, declare_node_union};
+
+declare_node_union! {
+    /// A block scalar, the node a `YamlBlockContent` sits in
+    pub AnyYamlBlockScalar = YamlLiteralScalar | YamlFoldedScalar
+}
+
+impl AnyYamlBlockScalar {
+    pub fn headers(&self) -> YamlBlockHeaderList {
+        match self {
+            Self::YamlLiteralScalar(scalar) => scalar.headers(),
+            Self::YamlFoldedScalar(scalar) => scalar.headers(),
+        }
+    }
+}
 
 impl AnyYamlBlockNode {
     pub fn is_nested_block_collection(&self) -> bool {
