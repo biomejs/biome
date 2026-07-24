@@ -171,6 +171,9 @@ pub enum JsEmbeddingKind {
 
         /// Whether this is a `{@const name = value}` block.
         is_const_block: bool,
+
+        /// Whether this is the value of a `<script generics="...">` attribute.
+        is_generics_declaration: bool,
     },
     #[default]
     None,
@@ -221,6 +224,15 @@ impl JsEmbeddingKind {
             self,
             Self::Svelte {
                 is_function_signature: true,
+                ..
+            }
+        )
+    }
+    pub const fn is_svelte_generics_declaration(&self) -> bool {
+        matches!(
+            self,
+            Self::Svelte {
+                is_generics_declaration: true,
                 ..
             }
         )
@@ -349,6 +361,7 @@ impl JsFileSource {
             is_function_signature: false,
             kind: SvelteFileKind::Component,
             is_const_block: false,
+            is_generics_declaration: false,
         })
     }
 
@@ -558,6 +571,7 @@ impl JsFileSource {
                 is_function_signature: false,
                 kind: SvelteFileKind::SourceModule,
                 is_const_block: false,
+                is_generics_declaration: false,
             }));
         }
 

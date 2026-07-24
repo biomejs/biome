@@ -87,6 +87,8 @@ pub(crate) enum SvelteBlockKind {
     Render,
     Snippet,
     Const,
+    /// The value of a `<script generics="...">` attribute.
+    Generics,
 }
 
 impl From<&AnySvelteBlock> for EmbedBlockKind {

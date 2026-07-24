@@ -195,6 +195,16 @@ mod tests {
                         is_function_signature: false,
                         kind: SvelteFileKind::Component,
                         is_const_block: false,
+                        is_generics_declaration: false,
+                    },
+                )),
+                6 => DocumentFileSource::Js(JsFileSource::ts().with_embedding_kind(
+                    JsEmbeddingKind::Svelte {
+                        is_source: false,
+                        is_function_signature: false,
+                        kind: SvelteFileKind::Component,
+                        is_const_block: false,
+                        is_generics_declaration: true,
                     },
                 )),
                 _ => DocumentFileSource::Js(JsFileSource::ts().with_embedding_kind(
@@ -316,38 +326,81 @@ mod tests {
 
     fn parse_svelte_generics_source(db: &TestDb) -> Utf8PathBuf {
         let path = Utf8PathBuf::from("src/FilterList.svelte");
-        let html_source = r#"<script lang="ts" generics="F extends string, T extends FilterValue<F>, D extends FilterFieldDef<F> = FilterFieldDef<F>">
-import type { FilterFieldDef, FilterValue } from './types';
+        let generics_source = "F extends string, T extends FilterValue<F>, D extends FilterFieldDef<F> = FilterFieldDef<F>";
+        let html_source = format!(
+            r#"<script lang="ts" generics="{generics_source}">
+import type {{ FilterFieldDef, FilterValue }} from './types';
 </script>
-<div></div>"#;
-        let parsed = parse_html(html_source, HtmlParserOptions::default().with_svelte()).into();
+<div></div>"#
+        );
+        let parsed = parse_html(&html_source, HtmlParserOptions::default().with_svelte()).into();
+
         let js_source = "import type { FilterFieldDef, FilterValue } from './types';";
-        let snippet_parse = biome_js_parser::parse(
+        let script_snippet_parse = biome_js_parser::parse(
             js_source,
             JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Svelte {
                 is_source: true,
                 is_function_signature: false,
                 kind: SvelteFileKind::Component,
                 is_const_block: false,
+                is_generics_declaration: false,
             }),
             JsParserOptions::default(),
         )
         .into();
-        let content_start = TextSize::from(
+        let script_content_start = TextSize::from(
             html_source
                 .find(js_source)
                 .expect("script body should exist") as u32,
         );
-        let content_end = content_start + TextSize::from(js_source.len() as u32);
-        let snippet = ParsedSnippet::new(
+        let script_content_end = script_content_start + TextSize::from(js_source.len() as u32);
+        let script_snippet = ParsedSnippet::new(
             db,
-            snippet_parse,
-            TextRange::new(content_start, content_end),
-            TextRange::new(content_start, content_end),
-            content_start,
+            script_snippet_parse,
+            TextRange::new(script_content_start, script_content_end),
+            TextRange::new(script_content_start, script_content_end),
+            script_content_start,
             5,
         );
-        let file = ParsedSource::new(db, path.clone(), parsed, 4, vec![snippet]);
+
+        // Mirrors how `parse_embedded_nodes` extracts the `generics` attribute
+        // value: parsed with its own offset, as a standalone snippet, using
+        // the `is_generics_declaration` embedding kind.
+        let generics_snippet_parse = biome_js_parser::parse(
+            generics_source,
+            JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Svelte {
+                is_source: false,
+                is_function_signature: false,
+                kind: SvelteFileKind::Component,
+                is_const_block: false,
+                is_generics_declaration: true,
+            }),
+            JsParserOptions::default(),
+        )
+        .into();
+        let generics_content_start = TextSize::from(
+            html_source
+                .find(generics_source)
+                .expect("generics attribute value should exist") as u32,
+        );
+        let generics_content_end =
+            generics_content_start + TextSize::from(generics_source.len() as u32);
+        let generics_snippet = ParsedSnippet::new(
+            db,
+            generics_snippet_parse,
+            TextRange::new(generics_content_start, generics_content_end),
+            TextRange::new(generics_content_start, generics_content_end),
+            generics_content_start,
+            6,
+        );
+
+        let file = ParsedSource::new(
+            db,
+            path.clone(),
+            parsed,
+            4,
+            vec![script_snippet, generics_snippet],
+        );
         db.insert_file(path.clone(), file);
         path
     }

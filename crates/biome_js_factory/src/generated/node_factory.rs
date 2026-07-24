@@ -3392,6 +3392,18 @@ pub fn js_super_expression(super_token: SyntaxToken) -> JsSuperExpression {
         [Some(SyntaxElement::Token(super_token))],
     ))
 }
+pub fn js_svelte_generics_root(
+    type_parameters: TsTypeParameterList,
+    eof_token: SyntaxToken,
+) -> JsSvelteGenericsRoot {
+    JsSvelteGenericsRoot::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_SVELTE_GENERICS_ROOT,
+        [
+            Some(SyntaxElement::Node(type_parameters.into_syntax())),
+            Some(SyntaxElement::Token(eof_token)),
+        ],
+    ))
+}
 pub fn js_svelte_snippet_root(
     name: AnyJsBinding,
     parameters: JsParameters,
