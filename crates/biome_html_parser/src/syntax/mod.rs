@@ -4,7 +4,7 @@ mod parse_error;
 mod svelte;
 mod vue;
 
-use crate::parser::HtmlParser;
+use crate::parser::{HtmlParser, HtmlParserCheckpoint};
 use crate::syntax::HtmlSyntaxFeatures::{
     Angular, Astro, DoubleTextExpressions, SingleTextExpressions, Svelte, Vue,
 };
@@ -31,12 +31,12 @@ use crate::token_source::{
 };
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
-use biome_parser::Parser;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
+use biome_parser::{Marker, Parser};
 use biome_rowan::TextRange;
 use biome_string_case::StrLikeExtension;
 
@@ -958,6 +958,16 @@ pub(crate) fn parse_single_text_expression(
 
     p.bump_with_context(T!['{'], HtmlLexContext::single_expression());
 
+    parse_single_text_expression_after_opening(p, context, checkpoint, m, opening_range)
+}
+
+pub(crate) fn parse_single_text_expression_after_opening(
+    p: &mut HtmlParser,
+    context: HtmlLexContext,
+    checkpoint: HtmlParserCheckpoint,
+    m: Marker,
+    opening_range: TextRange,
+) -> ParsedSyntax {
     TextExpression::new_single().parse_element(p).ok();
 
     if p.at(T!['}']) {
