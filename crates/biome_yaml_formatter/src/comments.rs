@@ -5,6 +5,7 @@ use biome_formatter::comments::{
 };
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{FormatRefWithRule, FormatResult, FormatRule, write};
+use biome_parser::{TokenSet, token_set};
 use biome_rowan::AstNode;
 use biome_rowan::{SyntaxTriviaPieceComments, TextSize};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
@@ -114,7 +115,7 @@ fn handle_own_line_comment(
 
     let token = comment.piece().as_piece().token();
     let comment_start = comment.piece().text_range().start();
-    let mut comment_column = source_column(&token, comment_start);
+    let mut comment_column = SourceColumn::new(token.clone(), comment_start).compute();
 
     // The comments above this one in the same uninterrupted block of
     // comment lines cap how deep it can attach, so the block is never torn
@@ -148,9 +149,10 @@ fn handle_own_line_comment(
     // A comment that isn't indented deeper than the node following it leads
     // that node
     if let Some(following) = comment.following_node() {
-        let following_column = following
-            .first_token()
-            .map(|token| source_column(&token, token.text_trimmed_range().start()));
+        let following_column = following.first_token().map(|token| {
+            let offset = token.text_trimmed_range().start();
+            SourceColumn::new(token, offset).compute()
+        });
         if following_column.is_none_or(|column| comment_column <= column) {
             return CommentPlacement::Default(comment);
         }
@@ -162,13 +164,11 @@ fn handle_own_line_comment(
     let mut best = None;
     let mut current = Some(preceding.clone());
     while let Some(node) = current {
-        if matches!(
-            node.kind(),
-            YamlSyntaxKind::YAML_BLOCK_MAP_IMPLICIT_ENTRY
-                | YamlSyntaxKind::YAML_BLOCK_SEQUENCE_ENTRY
-        ) && let Some(token) = node.first_token()
+        if BLOCK_ENTRIES.contains(node.kind())
+            && let Some(token) = node.first_token()
         {
-            let column = source_column(&token, token.text_trimmed_range().start());
+            let offset = token.text_trimmed_range().start();
+            let column = SourceColumn::new(token, offset).compute();
             if column <= comment_column {
                 best = Some((node.clone(), column));
             }
@@ -185,50 +185,85 @@ fn handle_own_line_comment(
     }
 }
 
+/// The block collection entries that own-line and end-of-line comments
+/// attach to
+const BLOCK_ENTRIES: TokenSet<YamlSyntaxKind> = token_set![
+    YamlSyntaxKind::YAML_BLOCK_MAP_IMPLICIT_ENTRY,
+    YamlSyntaxKind::YAML_BLOCK_SEQUENCE_ENTRY
+];
+
 /// The column at which the text at `offset` starts in the source, computed
-/// by walking backward to the closest line break. `offset` must lie within
-/// the span of `token`, trivia included
-fn source_column(token: &YamlSyntaxToken, offset: TextSize) -> usize {
+/// by walking backward from `token` to the closest line break
+struct SourceColumn {
+    token: YamlSyntaxToken,
+    offset: TextSize,
+    /// The width of the source seen so far between the line break and the
+    /// offset
+    column: usize,
+}
+
+impl SourceColumn {
+    fn new(token: YamlSyntaxToken, offset: TextSize) -> Self {
+        // The offset must lie within the span of the token including its
+        // trivia, not just the trimmed range: it may point into the trivia,
+        // e.g. at a comment piece in the token's leading trivia. The end is
+        // included, since the start of a zero-width synthetic token (like
+        // FLOW_START) coincides with it
+        debug_assert!(
+            token.text_range().contains_inclusive(offset),
+            "offset {offset:?} outside token {:?} at {:?}",
+            token.kind(),
+            token.text_range()
+        );
+        Self {
+            token,
+            offset,
+            column: 0,
+        }
+    }
+
     /// Adds the width of a segment preceding the offset to the column;
     /// `true` when the segment contains the line break the column counts
     /// from, which ends the walk
-    fn measure(text: &str, column: &mut usize) -> bool {
+    fn measure(&mut self, text: &str) -> bool {
         match text.rfind(['\n', '\r']) {
             Some(index) => {
-                *column += text.len() - index - 1;
+                self.column += text.len() - index - 1;
                 true
             }
             None => {
-                *column += text.len();
+                self.column += text.len();
                 false
             }
         }
     }
 
-    let mut column = 0;
-    let mut current = Some(token.clone());
-    while let Some(token) = current {
-        let leading: Vec<_> = token.leading_trivia().pieces().collect();
-        let trailing: Vec<_> = token.trailing_trivia().pieces().collect();
-
-        for piece in trailing.iter().rev() {
-            if piece.text_range().end() <= offset && measure(piece.text(), &mut column) {
-                return column;
+    /// Walks the source backward from the offset, token by token and trivia
+    /// piece by trivia piece, measuring every segment until the one holding
+    /// the line break that opens the offset's line
+    fn compute(mut self) -> usize {
+        let mut current = Some(self.token.clone());
+        while let Some(token) = current {
+            for piece in token.trailing_trivia().pieces().rev() {
+                if piece.text_range().end() <= self.offset && self.measure(piece.text()) {
+                    return self.column;
+                }
             }
-        }
-        if token.text_trimmed_range().end() <= offset && measure(token.text_trimmed(), &mut column)
-        {
-            return column;
-        }
-        for piece in leading.iter().rev() {
-            if piece.text_range().end() <= offset && measure(piece.text(), &mut column) {
-                return column;
+            if token.text_trimmed_range().end() <= self.offset
+                && self.measure(token.text_trimmed())
+            {
+                return self.column;
             }
-        }
+            for piece in token.leading_trivia().pieces().rev() {
+                if piece.text_range().end() <= self.offset && self.measure(piece.text()) {
+                    return self.column;
+                }
+            }
 
-        current = token.prev_token();
+            current = token.prev_token();
+        }
+        self.column
     }
-    column
 }
 
 /// The number of line breaks to keep in front of `node`. The leading
@@ -273,8 +308,6 @@ impl<'a> FormatEntryDanglingComments<'a> {
 
 impl Format<YamlFormatContext> for FormatEntryDanglingComments<'_> {
     fn fmt(&self, f: &mut Formatter<YamlFormatContext>) -> FormatResult<()> {
-        // Cheap clone of an `Rc`, releasing the borrow on the formatter so
-        // the comments can be written while iterating over them
         let comments = f.comments().clone();
         let dangling = comments.dangling_comments(self.node);
         if dangling.is_empty() {
@@ -414,11 +447,7 @@ fn handle_end_of_line_comment(
         // key: # comment
         //   # value-slot comment
         // ```
-        if matches!(
-            preceding_node.kind(),
-            YamlSyntaxKind::YAML_BLOCK_MAP_IMPLICIT_ENTRY
-                | YamlSyntaxKind::YAML_BLOCK_SEQUENCE_ENTRY
-        ) {
+        if BLOCK_ENTRIES.contains(preceding_node.kind()) {
             return CommentPlacement::dangling(preceding_node.clone(), comment);
         }
 
