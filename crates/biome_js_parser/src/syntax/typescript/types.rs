@@ -245,6 +245,18 @@ pub(crate) fn parse_ts_type_parameters(p: &mut JsParser, context: TypeContext) -
     Present(m.complete(p, TS_TYPE_PARAMETERS))
 }
 
+/// Parses a bare, comma-separated list of type parameters without the
+/// surrounding `<` `>` delimiters.
+///
+/// Used to parse Svelte's `<script generics="T extends unknown">` attribute
+/// value, which contains only the interior of a type parameter list.
+pub(crate) fn parse_ts_type_parameter_list(
+    p: &mut JsParser,
+    context: TypeContext,
+) -> CompletedMarker {
+    TsTypeParameterList(context).parse_list(p)
+}
+
 struct TsTypeParameterList(TypeContext);
 
 impl ParseSeparatedList for TsTypeParameterList {

@@ -320,6 +320,18 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
 
             // Pass 4: directive attributes and attributes which initializer is a text expression
             for element in html_root.syntax().descendants() {
+                // `<script generics="...">` type parameter list
+                if let Some(html_element) = HtmlElement::cast_ref(&element)
+                    && let Some(candidate) = build_svelte_script_generics_candidate(&html_element)
+                {
+                    ctx.parse_and_push(
+                        &candidate,
+                        &doc_file_source,
+                        Some(embedded_file_source),
+                        &mut nodes,
+                    );
+                }
+
                 // Handle special Svelte directives (bind:, class:, etc.)
                 if let Some(directive) = AnySvelteDirective::cast_ref(&element) {
                     for candidate in build_svelte_directive_candidates(&directive) {
@@ -600,6 +612,42 @@ fn build_svelte_directive_candidates(directive: &AnySvelteDirective) -> Vec<Embe
             candidates
         }
     }
+}
+
+/// Build an `EmbedCandidate::TextExpression` from a Svelte `<script generics="...">`
+/// attribute value.
+///
+/// Unlike other Svelte attributes, `generics` holds a plain quoted string
+/// (`generics="T extends unknown"`), not a curly-brace expression. The content
+/// is the bare type parameter list understood by [`JsEmbeddingKind::Svelte`]'s
+/// `is_generics_declaration` flag.
+fn build_svelte_script_generics_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
+    if !element.is_script_tag() {
+        return None;
+    }
+
+    let attribute = element.find_attribute_by_name("generics")?;
+    let attribute = attribute.as_html_attribute()?;
+    let value = attribute.initializer()?.value().ok()?;
+    let html_string = value.as_html_string()?;
+    let content_token = html_string.value_token().ok()?;
+    let inner_text = html_string.inner_string_text().ok()?;
+    if inner_text.text().is_empty() {
+        return None;
+    }
+
+    let token_range = content_token.text_trimmed_range();
+    let inner_offset = token_range.start() + TextSize::from(1);
+
+    Some(EmbedCandidate::TextExpression {
+        content: EmbedContent {
+            element_range: attribute.range(),
+            content_range: token_range,
+            content_offset: inner_offset,
+            text: inner_text,
+        },
+        block_kind: EmbedBlockKind::Svelte(SvelteBlockKind::Generics),
+    })
 }
 
 fn build_text_expression_directive_candidate(
@@ -943,6 +991,7 @@ fn parse_matched_embed(
                             is_function_signature: false,
                             kind: SvelteFileKind::Component,
                             is_const_block: false,
+                            is_generics_declaration: false,
                         });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Vue {
@@ -971,6 +1020,10 @@ fn parse_matched_embed(
                             is_const_block: matches!(
                                 block_kind,
                                 EmbedBlockKind::Svelte(SvelteBlockKind::Const)
+                            ),
+                            is_generics_declaration: matches!(
+                                block_kind,
+                                EmbedBlockKind::Svelte(SvelteBlockKind::Generics)
                             ),
                         });
                     } else if ctx.host_file_source.is_vue() {
@@ -1010,6 +1063,7 @@ fn parse_matched_embed(
                                 is_function_signature: false,
                                 kind: SvelteFileKind::Component,
                                 is_const_block: false,
+                                is_generics_declaration: false,
                             });
                         }
                         // TODO: Angular support

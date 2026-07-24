@@ -10430,6 +10430,10 @@ Source-level embeds (`<script>`) use `true`; directives and text expressions use
 				 */
 				is_function_signature: boolean;
 				/**
+				 * Whether this is the value of a `<script generics="...">` attribute.
+				 */
+				is_generics_declaration: boolean;
+				/**
 				 * Where the bindings are defined
 				 */
 				is_source: boolean;

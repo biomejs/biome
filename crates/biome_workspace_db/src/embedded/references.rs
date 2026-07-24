@@ -130,7 +130,7 @@ mod tests {
     use biome_db::{Db, ParsedSnippet, ParsedSource};
     use biome_html_parser::{HtmlParserOptions, parse_html};
     use biome_js_parser::JsParserOptions;
-    use biome_languages::javascript::JsEmbeddingKind;
+    use biome_languages::javascript::{JsEmbeddingKind, SvelteFileKind};
     use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
     use biome_rowan::{RawSyntaxKind, TextRange, TextSize};
     use camino::{Utf8Path, Utf8PathBuf};
@@ -188,6 +188,25 @@ mod tests {
         fn source_from_index(&self, index: usize) -> Option<DocumentFileSource> {
             Some(match index {
                 0 => DocumentFileSource::Html(HtmlFileSource::vue()),
+                4 => DocumentFileSource::Html(HtmlFileSource::svelte()),
+                5 => DocumentFileSource::Js(JsFileSource::ts().with_embedding_kind(
+                    JsEmbeddingKind::Svelte {
+                        is_source: true,
+                        is_function_signature: false,
+                        kind: SvelteFileKind::Component,
+                        is_const_block: false,
+                        is_generics_declaration: false,
+                    },
+                )),
+                6 => DocumentFileSource::Js(JsFileSource::ts().with_embedding_kind(
+                    JsEmbeddingKind::Svelte {
+                        is_source: false,
+                        is_function_signature: false,
+                        kind: SvelteFileKind::Component,
+                        is_const_block: false,
+                        is_generics_declaration: true,
+                    },
+                )),
                 _ => DocumentFileSource::Js(JsFileSource::ts().with_embedding_kind(
                     JsEmbeddingKind::Vue {
                         setup: false,
@@ -302,6 +321,157 @@ mod tests {
         assert!(is_value_reference_used(
             &db,
             InternedReference::new(&db, path, token_text("foo"))
+        ));
+    }
+
+    fn parse_svelte_generics_source(db: &TestDb) -> Utf8PathBuf {
+        let path = Utf8PathBuf::from("src/FilterList.svelte");
+        let generics_source = "F extends string, T extends FilterValue<F>, D extends FilterFieldDef<F> = FilterFieldDef<F>";
+        let html_source = format!(
+            r#"<script lang="ts" generics="{generics_source}">
+import type {{ FilterFieldDef, FilterValue }} from './types';
+</script>
+<div></div>"#
+        );
+        let parsed = parse_html(&html_source, HtmlParserOptions::default().with_svelte()).into();
+
+        let js_source = "import type { FilterFieldDef, FilterValue } from './types';";
+        let script_snippet_parse = biome_js_parser::parse(
+            js_source,
+            JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Svelte {
+                is_source: true,
+                is_function_signature: false,
+                kind: SvelteFileKind::Component,
+                is_const_block: false,
+                is_generics_declaration: false,
+            }),
+            JsParserOptions::default(),
+        )
+        .into();
+        let script_content_start = TextSize::from(
+            html_source
+                .find(js_source)
+                .expect("script body should exist") as u32,
+        );
+        let script_content_end = script_content_start + TextSize::from(js_source.len() as u32);
+        let script_snippet = ParsedSnippet::new(
+            db,
+            script_snippet_parse,
+            TextRange::new(script_content_start, script_content_end),
+            TextRange::new(script_content_start, script_content_end),
+            script_content_start,
+            5,
+        );
+
+        // Mirrors how `parse_embedded_nodes` extracts the `generics` attribute
+        // value: parsed with its own offset, as a standalone snippet, using
+        // the `is_generics_declaration` embedding kind.
+        let generics_snippet_parse = biome_js_parser::parse(
+            generics_source,
+            JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Svelte {
+                is_source: false,
+                is_function_signature: false,
+                kind: SvelteFileKind::Component,
+                is_const_block: false,
+                is_generics_declaration: true,
+            }),
+            JsParserOptions::default(),
+        )
+        .into();
+        let generics_content_start = TextSize::from(
+            html_source
+                .find(generics_source)
+                .expect("generics attribute value should exist") as u32,
+        );
+        let generics_content_end =
+            generics_content_start + TextSize::from(generics_source.len() as u32);
+        let generics_snippet = ParsedSnippet::new(
+            db,
+            generics_snippet_parse,
+            TextRange::new(generics_content_start, generics_content_end),
+            TextRange::new(generics_content_start, generics_content_end),
+            generics_content_start,
+            6,
+        );
+
+        let file = ParsedSource::new(
+            db,
+            path.clone(),
+            parsed,
+            4,
+            vec![script_snippet, generics_snippet],
+        );
+        db.insert_file(path.clone(), file);
+        path
+    }
+
+    #[test]
+    fn svelte_generics_attribute_registers_type_references() {
+        let db = TestDb::new();
+        let path = parse_svelte_generics_source(&db);
+
+        assert!(is_type_reference_used(
+            &db,
+            InternedReference::new(&db, path.clone(), token_text("FilterValue"))
+        ));
+        assert!(is_type_reference_used(
+            &db,
+            InternedReference::new(&db, path.clone(), token_text("FilterFieldDef"))
+        ));
+        assert!(!is_type_reference_used(
+            &db,
+            InternedReference::new(&db, path, token_text("F"))
+        ));
+    }
+
+    /// Regression test: a `generics` value with unrecoverable content (a
+    /// stray `)` right after a separator) makes the type parameter list's
+    /// error recovery produce a shape the node factory rejects, so the whole
+    /// snippet root collapses to a generic bogus node instead of
+    /// `JsSvelteGenericsRoot`. Extracting references from it must degrade
+    /// gracefully instead of panicking on the `AnyJsRoot` cast.
+    #[test]
+    fn svelte_generics_attribute_with_unrecoverable_content_does_not_panic() {
+        let db = TestDb::new();
+        let path = Utf8PathBuf::from("src/Broken.svelte");
+        let generics_source = "T, )";
+        let html_source = format!(r#"<script lang="ts" generics="{generics_source}"></script>"#);
+        let parsed = parse_html(&html_source, HtmlParserOptions::default().with_svelte()).into();
+
+        let generics_snippet_parse = biome_js_parser::parse(
+            generics_source,
+            JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Svelte {
+                is_source: false,
+                is_function_signature: false,
+                kind: SvelteFileKind::Component,
+                is_const_block: false,
+                is_generics_declaration: true,
+            }),
+            JsParserOptions::default(),
+        )
+        .into();
+        let content_start = TextSize::from(
+            html_source
+                .find(generics_source)
+                .expect("generics attribute value should exist") as u32,
+        );
+        let content_end = content_start + TextSize::from(generics_source.len() as u32);
+        let generics_snippet = ParsedSnippet::new(
+            &db,
+            generics_snippet_parse,
+            TextRange::new(content_start, content_end),
+            TextRange::new(content_start, content_end),
+            content_start,
+            6,
+        );
+
+        let file = ParsedSource::new(&db, path.clone(), parsed, 4, vec![generics_snippet]);
+        db.insert_file(path.clone(), file);
+
+        // Must not panic.
+        assert!(!is_type_reference_used(
+            &db,
+            InternedReference::new(&db, path, token_text("T"))
         ));
     }
 
