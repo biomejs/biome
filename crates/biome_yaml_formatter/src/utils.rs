@@ -1,3 +1,4 @@
+use crate::content_lines::ContentLines;
 use crate::prelude::*;
 use biome_formatter::write;
 use biome_rowan::AstNodeList;
@@ -111,12 +112,14 @@ pub(crate) fn lines_before_through_end_tokens(node: &YamlSyntaxNode) -> usize {
     }
 }
 
-/// The value token of a key that is a plain scalar spanning multiple lines,
-/// which only the explicit `? key : value` entry form can represent
-pub(crate) fn multiline_plain_key_token(
+/// A key that is a plain scalar spanning multiple lines, which only the
+/// explicit `? key : value` entry form can represent, together with its
+/// value token
+pub(crate) fn multiline_plain_key(
     key: Option<&AnyYamlMappingImplicitKey>,
-) -> Option<YamlSyntaxToken> {
-    let AnyYamlMappingImplicitKey::YamlFlowYamlNode(node) = key? else {
+) -> Option<(&AnyYamlMappingImplicitKey, YamlSyntaxToken)> {
+    let key = key?;
+    let AnyYamlMappingImplicitKey::YamlFlowYamlNode(node) = key else {
         return None;
     };
     if !node.properties().is_empty() {
@@ -126,7 +129,7 @@ pub(crate) fn multiline_plain_key_token(
     token
         .text_trimmed()
         .contains(['\n', '\r'])
-        .then_some(token)
+        .then_some((key, token))
 }
 
 /// Formats a flow mapping entry whose key is a multiline plain scalar in the
@@ -167,14 +170,17 @@ impl Format<YamlFormatContext> for FormatMultilineKeyEntry<'_> {
 
         let key = format_with(|f| {
             let value_text = self.key_token.text_trimmed().trim_end();
-            for (index, line) in value_text.lines().enumerate() {
+            for (index, line) in ContentLines::new(value_text).enumerate() {
                 if index == 0 {
                     write!(f, [text(line.trim_end(), None)])?;
                 } else {
-                    let line = std::format!("    {}", line.trim());
                     write!(
                         f,
-                        [literal_line_break_without_parent(), text(&line, None)]
+                        [
+                            literal_line_break_without_parent(),
+                            text("    ", None),
+                            text(line.trim(), None)
+                        ]
                     )?;
                 }
             }

@@ -1,6 +1,6 @@
 use crate::comments::subtree_has_comments;
 use crate::prelude::*;
-use crate::utils::{FormatMultilineKeyEntry, multiline_plain_key_token, needs_space_before_colon};
+use crate::utils::{FormatMultilineKeyEntry, multiline_plain_key, needs_space_before_colon};
 use biome_formatter::{format_args, write};
 use biome_rowan::AstNode;
 use biome_yaml_syntax::{
@@ -28,14 +28,14 @@ impl FormatNodeRule<YamlFlowMapImplicitEntry> for FormatYamlFlowMapImplicitEntry
 
         // A key spanning multiple lines can only be held by the explicit
         // `? key : value` form, so the entry converts to it
-        if let (Some(key_token), Some(colon_token)) =
-            (multiline_plain_key_token(key.as_ref()), &colon_token)
+        if let Some((entry_key, key_token)) = multiline_plain_key(key.as_ref())
+            && let Some(colon_token) = &colon_token
         {
             return write!(
                 f,
                 [FormatMultilineKeyEntry {
                     question_mark_token: None,
-                    key: key.as_ref().expect("multiline key exists"),
+                    key: entry_key,
                     key_token: &key_token,
                     colon_token,
                     value: &value,
