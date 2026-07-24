@@ -86,7 +86,7 @@ impl Rule for UseDisposables {
         let decl = ctx.query();
         let initializer = decl.initializer()?;
         let expression = initializer.expression().ok()?;
-        let ty = ctx.inferred_type_of_expression(&expression)?;
+        let ty = ctx.type_of_expression(&expression)?;
         // Lookup the parent declaration which possibly has `await` and/or `using` tokens.
         let parent = decl
             .parent::<JsVariableDeclaratorList>()?

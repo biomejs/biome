@@ -1,4 +1,5 @@
 use crate::TypeDb;
+use crate::global_types;
 use crate::interned_types::{ConditionalType, Literal, ReturnType, TypeData};
 use crate::return_type_relation::{
     ReturnTypeRelation, compare_declared_return_type_owned,
@@ -330,7 +331,12 @@ impl<'db> InferredType<'db> {
     }
 
     pub fn function_returns_void(self) -> bool {
-        self.function_return_matches(|ty| matches!(ty, TypeData::VoidKeyword))
+        self.function_return_matches(|ty| match ty {
+            TypeData::GlobalType(id) => {
+                matches!(global_types(self.db).get(id), TypeData::VoidKeyword)
+            }
+            ty => matches!(ty, TypeData::VoidKeyword),
+        })
     }
 
     /// Returns `Some(true)` when a union contains a `Promise` or `PromiseLike`
@@ -685,7 +691,18 @@ impl<'db> InferredType<'db> {
                         pending.push(constraint);
                     }
                     TypeData::GlobalType(id) => pending.push(crate::global_types(self.db).get(id)),
-                    TypeData::InstanceOf(instance) => pending.push(instance.ty(self.db)),
+                    TypeData::InstanceOf(instance) => {
+                        let target = instance.ty(self.db);
+                        if target.is_array_class(self.db) {
+                            conditional = if conditional == ConditionalType::Unknown {
+                                ConditionalType::Truthy
+                            } else {
+                                conditional.merged_with(ConditionalType::Truthy)
+                            };
+                        } else {
+                            pending.push(target);
+                        }
+                    }
                     TypeData::Intersection(intersection) => {
                         pending.extend(intersection.types(self.db).iter().copied());
                     }
