@@ -103,39 +103,19 @@ where
     I: AstNode<Language = CssLanguage> + Clone + IntoFormat<CssFormatContext>,
     I::Format: FormatWithRule<CssFormatContext, Item = I>,
 {
-    let mut groups: Vec<Vec<I>> = Vec::new();
-    let mut current_group: Vec<I> = Vec::new();
-
-    for element in node.iter() {
-        let is_comma = is_comma_delimiter(&element);
-        // Keep the comma token in the current group so we print `group1,` before breaking to `group2`.
-        current_group.push(element);
-
-        if is_comma {
-            groups.push(current_group);
-            current_group = Vec::new();
-        }
-    }
-
-    if !current_group.is_empty() {
-        groups.push(current_group);
-    }
-
+    let mut elements = node.iter().peekable();
     let group_separator = soft_line_break_or_space();
-    let mut outer_fill = f.fill();
+    let mut groups = f.fill();
 
-    for group_items in &groups {
-        let content = format_with(|f: &mut Formatter<'_, CssFormatContext>| {
-            let mut inner_fill = f.fill();
+    while elements.peek().is_some() {
+        let content = format_once(|f: &mut Formatter<'_, CssFormatContext>| {
+            let mut values = f.fill();
 
-            for element in group_items {
-                let is_comma = is_comma_delimiter(element);
-                let formatted = element
-                    .clone()
-                    .into_format()
-                    .with_text_case(CssCase::Preserve);
+            for element in elements.by_ref() {
+                let is_comma = is_comma_delimiter(&element);
+                let formatted = element.into_format().with_text_case(CssCase::Preserve);
 
-                inner_fill.entry(
+                values.entry(
                     &format_once(|f| {
                         // Avoid inserting a separator before commas (e.g. `value , value`).
                         if !is_comma {
@@ -145,16 +125,20 @@ where
                     }),
                     &formatted,
                 );
+
+                if is_comma {
+                    break;
+                }
             }
 
-            inner_fill.finish()
+            values.finish()
         });
 
         // Group each comma-group so wrapping prefers breaking between groups (at commas).
-        outer_fill.entry(&group_separator, &group(&content));
+        groups.entry(&group_separator, &group(&content));
     }
 
-    outer_fill.finish()
+    groups.finish()
 }
 
 pub(crate) fn write_component_value_list<N, I>(node: &N, f: &mut CssFormatter) -> FormatResult<()>
