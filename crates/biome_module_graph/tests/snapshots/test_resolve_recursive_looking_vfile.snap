@@ -182,7 +182,7 @@ Exports {
     ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(22))
   }
   "messages" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(48))
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(49))
   }
   "contents" => {
     ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(42))
@@ -244,9 +244,9 @@ Module TypeId(1) => Module(0) TypeId(42) | Module(0) TypeId(0) | Module(0) TypeI
 
 Module TypeId(2) => Module(0) TypeId(1) | undefined
 
-Module TypeId(3) => Module(0) TypeId(49) | undefined
+Module TypeId(3) => Module(0) TypeId(50) | undefined
 
-Module TypeId(4) => Module(0) TypeId(51) | Module(0) TypeId(51) | Module(0) TypeId(51)
+Module TypeId(4) => Module(0) TypeId(52) | Module(0) TypeId(53) | Module(0) TypeId(54)
 
 Module TypeId(5) => Module(0) TypeId(4) | undefined
 
@@ -263,7 +263,7 @@ Module TypeId(9) => interface "VFile" {
     (): Module(0) TypeId(36),
     "history": Module(0) TypeId(47),
     "data": Module(0) TypeId(22),
-    "messages": Module(0) TypeId(48),
+    "messages": Module(0) TypeId(49),
     "contents": Module(0) TypeId(42),
     "path"?: Module(0) TypeId(6),
     "dirname"?: Module(0) TypeId(6),
@@ -289,7 +289,7 @@ Module TypeId(10) => Namespace {
                 "BufferEncoding",
             ),
             ty: Resolved(
-                Module(0) TypeId(49),
+                Module(0) TypeId(50),
             ),
         },
         TypeMember {
@@ -459,7 +459,7 @@ Module TypeId(39) => sync Function {
     ]
     type_args: []
   }
-  returns: Module(0) TypeId(51)
+  returns: Module(0) TypeId(48)
 }
 
 Module TypeId(40) => never
@@ -510,11 +510,13 @@ Module TypeId(46) => sync Function {
 
 Module TypeId(47) => instanceof Array<string>
 
-Module TypeId(48) => instanceof Array<Module(0) TypeId(51)>
+Module TypeId(48) => instanceof Module(0) TypeId(62)
 
-Module TypeId(49) => Module(0) TypeId(11) | Module(0) TypeId(12) | Module(0) TypeId(13) | Module(0) TypeId(14) | Module(0) TypeId(15) | Module(0) TypeId(16) | Module(0) TypeId(17) | Module(0) TypeId(18) | Module(0) TypeId(19) | Module(0) TypeId(20)
+Module TypeId(49) => instanceof Array<Module(0) TypeId(48)>
 
-Module TypeId(50) => sync Function {
+Module TypeId(50) => Module(0) TypeId(11) | Module(0) TypeId(12) | Module(0) TypeId(13) | Module(0) TypeId(14) | Module(0) TypeId(15) | Module(0) TypeId(16) | Module(0) TypeId(17) | Module(0) TypeId(18) | Module(0) TypeId(19) | Module(0) TypeId(20)
+
+Module TypeId(51) => sync Function {
   accepts: {
     params: [
       optional encoding: Module(0) TypeId(3)
@@ -524,27 +526,31 @@ Module TypeId(50) => sync Function {
   returns: string
 }
 
-Module TypeId(51) => instanceof Import Symbol: All from
+Module TypeId(52) => instanceof Module(0) TypeId(59)
 
-Module TypeId(52) => Module(0) TypeId(4) | undefined
+Module TypeId(53) => instanceof Module(0) TypeId(60)
 
-Module TypeId(53) => sync Function {
+Module TypeId(54) => instanceof Module(0) TypeId(61)
+
+Module TypeId(55) => Module(0) TypeId(4) | undefined
+
+Module TypeId(56) => sync Function {
   accepts: {
     params: [
       required reason: string
-      optional position: Module(0) TypeId(52)
+      optional position: Module(0) TypeId(55)
       optional ruleId: Module(0) TypeId(6)
     ]
     type_args: []
   }
-  returns: Module(0) TypeId(51)
+  returns: Module(0) TypeId(48)
 }
 
-Module TypeId(54) => sync Function {
+Module TypeId(57) => sync Function {
   accepts: {
     params: [
       required reason: string
-      optional position: Module(0) TypeId(52)
+      optional position: Module(0) TypeId(55)
       optional ruleId: Module(0) TypeId(6)
     ]
     type_args: []
@@ -552,14 +558,14 @@ Module TypeId(54) => sync Function {
   returns: Module(0) TypeId(40)
 }
 
-Module TypeId(55) => interface "VFile" {
+Module TypeId(58) => interface "VFile" {
   extends: []
   type_args: []
   members: [
     (): Module(0) TypeId(46),
     "history": Module(0) TypeId(47),
     "data": Module(0) TypeId(22),
-    "messages": Module(0) TypeId(48),
+    "messages": Module(0) TypeId(49),
     "contents": Module(0) TypeId(42),
     "path"?: Module(0) TypeId(6),
     "dirname"?: Module(0) TypeId(6),
@@ -567,11 +573,19 @@ Module TypeId(55) => interface "VFile" {
     "stem"?: Module(0) TypeId(6),
     "extname"?: Module(0) TypeId(6),
     "cwd": string,
-    "toString": Module(0) TypeId(50),
-    "message": Module(0) TypeId(53),
-    "fail": Module(0) TypeId(54),
-    "info": Module(0) TypeId(53),
+    "toString": Module(0) TypeId(51),
+    "message": Module(0) TypeId(56),
+    "fail": Module(0) TypeId(57),
+    "info": Module(0) TypeId(56),
     [string]: Module(0) TypeId(22)
   ]
 }
+
+Module TypeId(59) => Import Symbol: All from .Point
+
+Module TypeId(60) => Import Symbol: All from .Position
+
+Module TypeId(61) => Import Symbol: All from .Node
+
+Module TypeId(62) => Import Symbol: All from .VFileMessage
 ```

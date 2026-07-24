@@ -1,0 +1,85 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export class Box {
+	static label: string;
+	value: number;
+	optional?: string;
+}
+
+export const object = { name: "value" };
+export const objectName = object.name;
+export const staticLabel = Box.label;
+export const box: Box = {} as Box;
+export const memberValue = box.value;
+export const optionalValue = box.optional;
+```
+
+## Inferred types
+
+```
+Binding Box "Box" => class "Box" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding object "object" => Object {
+  prototype: No prototype
+  members: ["name": string: value]
+}
+
+Expression "{ name: \"value\" }" => Object {
+  prototype: No prototype
+  members: ["name": string: value]
+}
+
+Expression "\"value\"" => string: value
+
+Binding objectName "objectName" => string: value
+
+Expression "object" => Object {
+  prototype: No prototype
+  members: ["name": string: value]
+}
+
+Expression "object.name" => string: value
+
+Binding staticLabel "staticLabel" => string
+
+Expression "Box" => class "Box" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Box.label" => string
+
+Binding box "box" => instanceof Box
+
+Expression "{}" => Object {
+  prototype: No prototype
+  members: []
+}
+
+Expression "{} as Box" => instanceof Box
+
+Binding memberValue "memberValue" => number
+
+Expression "box" => instanceof Box
+
+Expression "box.value" => number
+
+Binding optionalValue "optionalValue" => string | undefined
+
+Expression "box" => instanceof Box
+
+Expression "box.optional" => string | undefined
+```

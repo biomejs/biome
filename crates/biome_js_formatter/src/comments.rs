@@ -852,8 +852,11 @@ fn handle_if_statement_comment(
             // ```javascript
             // if (cond1)  /* test */ if (other) { a }
             // ```
-            if let Some(if_statement) = JsIfStatement::cast_ref(following)
-                && let Ok(nested_consequent) = if_statement.consequent()
+            if let Some(nested_if) = JsIfStatement::cast_ref(following)
+                && if_statement
+                    .consequent()
+                    .is_ok_and(|consequent| consequent.syntax() == following)
+                && let Ok(nested_consequent) = nested_if.consequent()
             {
                 return place_leading_statement_comment(nested_consequent, comment);
             }

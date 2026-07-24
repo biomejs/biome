@@ -57,7 +57,7 @@ own challenges.
 ## Type Data Structures
 
 In Biome, the most basic data structure for type information is a giant `enum`,
-called `TypeData`, defined in [`type_info.rs`](src/type_info.rs).
+called `TypeData`, defined in [`type_data.rs`](src/type_data.rs).
 
 This enum has many different variants in order to cover all the different kinds
 of types that TypeScript supports. But a few are specifically
@@ -116,12 +116,14 @@ Type references come in multiple variants:
 
 ```rs
 enum TypeReference {
-    Qualifier(TypeReferenceQualifier),
+    Qualifier(Box<TypeReferenceQualifier>),
     Resolved(ResolvedTypeId),
-    Import(TypeImportQualifier),
-    Unknown,
+    Import(Box<TypeImportQualifier>),
 }
 ```
+
+Unknown references use `TypeReference::unknown()`, which creates a resolved
+reference to the global unknown type.
 
 The reason for these variants is that _type resolution_, the process of
 resolving type references, works in multiple phases.
@@ -199,7 +201,7 @@ variant, where the `ResolverId` can be used to indicate this type can be looked
 up from a vector of predefined types.
 
 But ultimately, if not even a global declaration was found, then we're at a loss
-and fall back to `TypeReference::Unknown`.
+and use `TypeReference::unknown()`, which resolves to the global unknown type.
 
 Thin inference is implemented in
 [`js_module_info/collector.rs`](../biome_module_graph/src/js_module_info/collector.rs).
@@ -211,12 +213,16 @@ have the entire module graph at our disposal, so that whenever we run into an
 unresolved `TypeReference::Import` variant, we can resolve it on the spot, at
 which point it becomes a `TypeReference::Resolved` variant again.
 
-Today, results from our full inference cannot be cached for the same reason
-we've seen before: Such a cache would get stale the moment a module is replaced,
-and we don't want to have complex cache invalidation schemes.
+Full inference runs as the Salsa-tracked [`infer_module_types`] query. Salsa
+records imported module results as dependencies and invalidates affected
+importers when their inputs change. The query therefore returns a borrowed,
+memoized `InferredModuleTypes` result instead of rebuilding or cloning the
+module's type tables for each request.
 
-Full inference is implemented in
-[`scoped_resolver.rs`](../biome_module_graph/src/js_module_info/scoped_resolver.rs).
+[`infer_module_types`]: ../biome_module_graph/src/db/queries/type_inference.rs
+
+Full inference is implemented by that query and the helpers in
+[`db/type_inference`](../biome_module_graph/src/db/type_inference/).
 
 ## Type Resolvers
 
@@ -234,10 +240,10 @@ we have _type resolvers_. There's a `TypeResolver` trait, defined in
   directly.
 * **`JsModuleInfoCollector`**. This one is responsible for collecting
   information about a module, and for performing thin inference on it.
-* **`ModuleResolver`**. This is the one that is responsible for our actual full
-  inference, that is able to infer _across_ modules. Compare this to the
-  `JsModuleInfoCollector` which only collects information inside a single
-  module.
+* **`ModuleResolver`**. This is the legacy `TypeResolver`-based implementation
+  for resolving types across modules. The Salsa-backed full-inference path uses
+  the tracked query described above. Compare both with `JsModuleInfoCollector`,
+  which only collects information inside a single module.
 
 I've mentioned before that types are stored in vectors. Those type vectors are
 stored inside `TypeStore` structures which are kept inside the various

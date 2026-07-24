@@ -1,0 +1,14 @@
+.comments{
+line:outerFunctionWithAnExtremelyLongName(1,
+// line comment
+nestedFunctionWithAnExtremelyLongName(firstArgumentWithLongName,secondArgumentWithLongName,thirdArgumentWithLongName));
+block:outerFunctionWithAnExtremelyLongName(1,
+/* block comment */
+nestedFunctionWithAnExtremelyLongName(firstArgumentWithLongName,secondArgumentWithLongName,thirdArgumentWithLongName));
+binary:fn(1,
+// binary comment
+veryLongArgumentName + anotherVeryLongArgumentName + thirdVeryLongArgumentName);
+list:fn(1,
+// list comment
+firstVeryLongListItem secondVeryLongListItem thirdVeryLongListItem fourthVeryLongListItem);
+}

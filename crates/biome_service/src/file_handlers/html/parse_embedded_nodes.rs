@@ -392,6 +392,8 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 }
             }
         }
+        // TODO: Angular support
+        HtmlVariant::Angular => {}
     }
     ParseEmbedResult { nodes }
 }
@@ -902,6 +904,8 @@ fn embedded_css_file_source(
         HtmlVariant::Svelte => CssEmbeddingKind::Html(EmbeddingHtmlKind::Svelte {
             applicability: EmbeddingStyleApplicability::Local,
         }),
+        // TODO: Angular support
+        HtmlVariant::Angular => CssEmbeddingKind::Html(EmbeddingHtmlKind::Html),
     };
 
     base.with_embedding_kind(embedding_kind)
@@ -1062,6 +1066,8 @@ fn parse_matched_embed(
                                 is_generics_declaration: false,
                             });
                         }
+                        // TODO: Angular support
+                        HtmlVariant::Angular => {}
                     }
 
                     false

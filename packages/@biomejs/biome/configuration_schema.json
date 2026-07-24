@@ -4519,6 +4519,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoJsRestrictedPropertiesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoJsRestrictedPropertiesOptions" }
+			]
+		},
+		"NoJsRestrictedPropertiesOptions": {
+			"type": "object",
+			"properties": {
+				"entries": {
+					"description": "Restriction entries for object/property access.\n\nEach entry can describe one of these cases:\n\n- exact object/property match:\n  `{ \"object\": \"require\", \"property\": \"ensure\" }`\n- property-wide restriction with allowed objects:\n  `{ \"property\": \"__defineGetter__\", \"allowObjects\": [\"Object\"] }`\n- object-wide restriction with allowed properties:\n  `{ \"object\": \"arguments\", \"allowProperties\": [\"length\"] }`",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/RestrictedPropertyEntry" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoJsxLeakedDollarConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4743,6 +4760,16 @@
 			]
 		},
 		"NoNegationElseOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoNegationInEqualityCheckConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoNegationInEqualityCheckOptions" }
+			]
+		},
+		"NoNegationInEqualityCheckOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -6672,6 +6699,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noJsRestrictedProperties": {
+					"description": "Disallow specific object properties.\nSee https://biomejs.dev/linter/rules/no-js-restricted-properties",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoJsRestrictedPropertiesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noJsxLeakedDollar": {
 					"description": "Flags text nodes with a trailing $ before a JSX expression.\nSee https://biomejs.dev/linter/rules/no-jsx-leaked-dollar",
 					"anyOf": [
@@ -6704,6 +6738,13 @@
 					"description": "Disallow Promises to be used in places where they are almost certainly a mistake.\nSee https://biomejs.dev/linter/rules/no-misused-promises",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoMisusedPromisesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noNegationInEqualityCheck": {
+					"description": "Disallow negated expressions on the left side of an equality check.\nSee https://biomejs.dev/linter/rules/no-negation-in-equality-check",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoNegationInEqualityCheckConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7620,6 +7661,34 @@
 		"RestrictedModifier": {
 			"type": "string",
 			"enum": ["abstract", "private", "protected", "readonly", "static"]
+		},
+		"RestrictedPropertyEntry": {
+			"type": "object",
+			"properties": {
+				"allowObjects": {
+					"description": "Objects that are allowed when `property` is restricted globally.\n\nExample:\n`{ \"property\": \"__defineGetter__\", \"allowObjects\": [\"Object\"] }`",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"allowProperties": {
+					"description": "Properties that are allowed when `object` is restricted globally.\n\nExample:\n`{ \"object\": \"arguments\", \"allowProperties\": [\"length\"] }`",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"message": {
+					"description": "Optional custom note appended to the diagnostic.",
+					"type": ["string", "null"]
+				},
+				"object": {
+					"description": "Object name to restrict.\n\nExample: `\"require\"` or `\"Object\"`.",
+					"type": ["string", "null"]
+				},
+				"property": {
+					"description": "Property name to restrict.\n\nExample: `\"ensure\"` or `\"__defineGetter__\"`.",
+					"type": ["string", "null"]
+				}
+			},
+			"additionalProperties": false
 		},
 		"RuleAssistPlainConfiguration": { "type": "string", "enum": ["off", "on"] },
 		"RuleAssistWithNoDuplicateClassesOptions": {
@@ -9167,6 +9236,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoJsRestrictedPropertiesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoJsRestrictedPropertiesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoJsxLeakedDollarOptions": {
 			"type": "object",
 			"properties": {
@@ -9357,6 +9435,16 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoNegationElseOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoNegationInEqualityCheckOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoNegationInEqualityCheckOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -448,6 +448,41 @@ pub struct CssBinaryExpressionFields {
     pub right: SyntaxResult<AnyCssExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssBooleanMediaQuery {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssBooleanMediaQuery {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssBooleanMediaQueryFields {
+        CssBooleanMediaQueryFields {
+            boolean: self.boolean(),
+        }
+    }
+    pub fn boolean(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssBooleanMediaQuery {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssBooleanMediaQueryFields {
+    pub boolean: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssBracketedValue {
     pub(crate) syntax: SyntaxNode,
 }
@@ -1826,6 +1861,346 @@ impl Serialize for CssCustomIdentifier {
 #[derive(Serialize)]
 pub struct CssCustomIdentifierFields {
     pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssCustomMediaAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssCustomMediaAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssCustomMediaAtRuleFields {
+        CssCustomMediaAtRuleFields {
+            declarator: self.declarator(),
+            semicolon_token: self.semicolon_token(),
+        }
+    }
+    pub fn declarator(&self) -> SyntaxResult<CssCustomMediaAtRuleDeclarator> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for CssCustomMediaAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssCustomMediaAtRuleFields {
+    pub declarator: SyntaxResult<CssCustomMediaAtRuleDeclarator>,
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssCustomMediaAtRuleDeclarator {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssCustomMediaAtRuleDeclarator {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssCustomMediaAtRuleDeclaratorFields {
+        CssCustomMediaAtRuleDeclaratorFields {
+            custom_media_token: self.custom_media_token(),
+            name: self.name(),
+            queries: self.queries(),
+        }
+    }
+    pub fn custom_media_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<AnyCssDashedIdentifier> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn queries(&self) -> SyntaxResult<AnyCssCustomMediaQuery> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for CssCustomMediaAtRuleDeclarator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssCustomMediaAtRuleDeclaratorFields {
+    pub custom_media_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<AnyCssDashedIdentifier>,
+    pub queries: SyntaxResult<AnyCssCustomMediaQuery>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssCustomPropertyBracedBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssCustomPropertyBracedBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssCustomPropertyBracedBlockFields {
+        CssCustomPropertyBracedBlockFields {
+            l_curly_token: self.l_curly_token(),
+            components: self.components(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn components(&self) -> CssCustomPropertyComponentList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for CssCustomPropertyBracedBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssCustomPropertyBracedBlockFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub components: CssCustomPropertyComponentList,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssCustomPropertyBracketedBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssCustomPropertyBracketedBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssCustomPropertyBracketedBlockFields {
+        CssCustomPropertyBracketedBlockFields {
+            l_brack_token: self.l_brack_token(),
+            components: self.components(),
+            r_brack_token: self.r_brack_token(),
+        }
+    }
+    pub fn l_brack_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn components(&self) -> CssCustomPropertyComponentList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn r_brack_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for CssCustomPropertyBracketedBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssCustomPropertyBracketedBlockFields {
+    pub l_brack_token: SyntaxResult<SyntaxToken>,
+    pub components: CssCustomPropertyComponentList,
+    pub r_brack_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssCustomPropertyDelimiter {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssCustomPropertyDelimiter {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssCustomPropertyDelimiterFields {
+        CssCustomPropertyDelimiterFields {
+            value: self.value(),
+        }
+    }
+    pub fn value(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssCustomPropertyDelimiter {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssCustomPropertyDelimiterFields {
+    pub value: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssCustomPropertyFunction {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssCustomPropertyFunction {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssCustomPropertyFunctionFields {
+        CssCustomPropertyFunctionFields {
+            name: self.name(),
+            l_paren_token: self.l_paren_token(),
+            components: self.components(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<CssCustomIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn components(&self) -> CssCustomPropertyComponentList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for CssCustomPropertyFunction {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssCustomPropertyFunctionFields {
+    pub name: SyntaxResult<CssCustomIdentifier>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub components: CssCustomPropertyComponentList,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssCustomPropertyParenthesizedBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssCustomPropertyParenthesizedBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssCustomPropertyParenthesizedBlockFields {
+        CssCustomPropertyParenthesizedBlockFields {
+            l_paren_token: self.l_paren_token(),
+            components: self.components(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn components(&self) -> CssCustomPropertyComponentList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for CssCustomPropertyParenthesizedBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssCustomPropertyParenthesizedBlockFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub components: CssCustomPropertyComponentList,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssCustomPropertyValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssCustomPropertyValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssCustomPropertyValueFields {
+        CssCustomPropertyValueFields {
+            components: self.components(),
+        }
+    }
+    pub fn components(&self) -> CssCustomPropertyComponentList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssCustomPropertyValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssCustomPropertyValueFields {
+    pub components: CssCustomPropertyComponentList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssDashedIdentifier {
@@ -13052,6 +13427,7 @@ pub enum AnyCssAtRule {
     CssColorProfileAtRule(CssColorProfileAtRule),
     CssContainerAtRule(CssContainerAtRule),
     CssCounterStyleAtRule(CssCounterStyleAtRule),
+    CssCustomMediaAtRule(CssCustomMediaAtRule),
     CssDocumentAtRule(CssDocumentAtRule),
     CssFontFaceAtRule(CssFontFaceAtRule),
     CssFontFeatureValuesAtRule(CssFontFeatureValuesAtRule),
@@ -13128,6 +13504,12 @@ impl AnyCssAtRule {
     pub fn as_css_counter_style_at_rule(&self) -> Option<&CssCounterStyleAtRule> {
         match &self {
             Self::CssCounterStyleAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_custom_media_at_rule(&self) -> Option<&CssCustomMediaAtRule> {
+        match &self {
+            Self::CssCustomMediaAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -14103,6 +14485,111 @@ impl AnyCssCustomIdentifier {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssCustomMediaQuery {
+    CssBooleanMediaQuery(CssBooleanMediaQuery),
+    CssMediaQueryList(CssMediaQueryList),
+}
+impl AnyCssCustomMediaQuery {
+    pub fn as_css_boolean_media_query(&self) -> Option<&CssBooleanMediaQuery> {
+        match &self {
+            Self::CssBooleanMediaQuery(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_media_query_list(&self) -> Option<&CssMediaQueryList> {
+        match &self {
+            Self::CssMediaQueryList(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssCustomPropertyComponent {
+    AnyCssDimension(AnyCssDimension),
+    CssCustomIdentifier(CssCustomIdentifier),
+    CssCustomPropertyBracedBlock(CssCustomPropertyBracedBlock),
+    CssCustomPropertyBracketedBlock(CssCustomPropertyBracketedBlock),
+    CssCustomPropertyDelimiter(CssCustomPropertyDelimiter),
+    CssCustomPropertyFunction(CssCustomPropertyFunction),
+    CssCustomPropertyParenthesizedBlock(CssCustomPropertyParenthesizedBlock),
+    CssNumber(CssNumber),
+    CssString(CssString),
+    ScssInterpolatedString(ScssInterpolatedString),
+    ScssInterpolation(ScssInterpolation),
+}
+impl AnyCssCustomPropertyComponent {
+    pub fn as_any_css_dimension(&self) -> Option<&AnyCssDimension> {
+        match &self {
+            Self::AnyCssDimension(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_custom_identifier(&self) -> Option<&CssCustomIdentifier> {
+        match &self {
+            Self::CssCustomIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_custom_property_braced_block(&self) -> Option<&CssCustomPropertyBracedBlock> {
+        match &self {
+            Self::CssCustomPropertyBracedBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_custom_property_bracketed_block(
+        &self,
+    ) -> Option<&CssCustomPropertyBracketedBlock> {
+        match &self {
+            Self::CssCustomPropertyBracketedBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_custom_property_delimiter(&self) -> Option<&CssCustomPropertyDelimiter> {
+        match &self {
+            Self::CssCustomPropertyDelimiter(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_custom_property_function(&self) -> Option<&CssCustomPropertyFunction> {
+        match &self {
+            Self::CssCustomPropertyFunction(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_custom_property_parenthesized_block(
+        &self,
+    ) -> Option<&CssCustomPropertyParenthesizedBlock> {
+        match &self {
+            Self::CssCustomPropertyParenthesizedBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_number(&self) -> Option<&CssNumber> {
+        match &self {
+            Self::CssNumber(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_string(&self) -> Option<&CssString> {
+        match &self {
+            Self::CssString(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_string(&self) -> Option<&ScssInterpolatedString> {
+        match &self {
+            Self::ScssInterpolatedString(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolation(&self) -> Option<&ScssInterpolation> {
+        match &self {
+            Self::ScssInterpolation(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDashedIdentifier {
     CssDashedIdentifier(CssDashedIdentifier),
     ScssInterpolatedDashedIdentifier(ScssInterpolatedDashedIdentifier),
@@ -14604,10 +15091,17 @@ impl AnyCssGenericComponentValue {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssGenericPropertyValueOrExpression {
+    CssCustomPropertyValue(CssCustomPropertyValue),
     CssGenericComponentValueList(CssGenericComponentValueList),
     ScssExpression(ScssExpression),
 }
 impl AnyCssGenericPropertyValueOrExpression {
+    pub fn as_css_custom_property_value(&self) -> Option<&CssCustomPropertyValue> {
+        match &self {
+            Self::CssCustomPropertyValue(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_generic_component_value_list(&self) -> Option<&CssGenericComponentValueList> {
         match &self {
             Self::CssGenericComponentValueList(item) => Some(item),
@@ -15794,11 +16288,18 @@ impl AnyCssQueryFeature {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssQueryFeatureName {
+    CssDashedIdentifier(CssDashedIdentifier),
     CssIdentifier(CssIdentifier),
     ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
     ScssVariable(ScssVariable),
 }
 impl AnyCssQueryFeatureName {
+    pub fn as_css_dashed_identifier(&self) -> Option<&CssDashedIdentifier> {
+        match &self {
+            Self::CssDashedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
         match &self {
             Self::CssIdentifier(item) => Some(item),
@@ -17912,6 +18413,53 @@ impl From<CssBinaryExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssBooleanMediaQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOOLEAN_MEDIA_QUERY as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOOLEAN_MEDIA_QUERY
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBooleanMediaQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssBooleanMediaQuery")
+                .field("boolean", &support::DebugSyntaxResult(self.boolean()))
+                .finish()
+        } else {
+            f.debug_struct("CssBooleanMediaQuery").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssBooleanMediaQuery> for SyntaxNode {
+    fn from(n: CssBooleanMediaQuery) -> Self {
+        n.syntax
+    }
+}
+impl From<CssBooleanMediaQuery> for SyntaxElement {
+    fn from(n: CssBooleanMediaQuery) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssBracketedValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -19548,6 +20096,426 @@ impl From<CssCustomIdentifier> for SyntaxNode {
 }
 impl From<CssCustomIdentifier> for SyntaxElement {
     fn from(n: CssCustomIdentifier) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssCustomMediaAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_CUSTOM_MEDIA_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_CUSTOM_MEDIA_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssCustomMediaAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssCustomMediaAtRule")
+                .field("declarator", &support::DebugSyntaxResult(self.declarator()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssCustomMediaAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssCustomMediaAtRule> for SyntaxNode {
+    fn from(n: CssCustomMediaAtRule) -> Self {
+        n.syntax
+    }
+}
+impl From<CssCustomMediaAtRule> for SyntaxElement {
+    fn from(n: CssCustomMediaAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssCustomMediaAtRuleDeclarator {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_CUSTOM_MEDIA_AT_RULE_DECLARATOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_CUSTOM_MEDIA_AT_RULE_DECLARATOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssCustomMediaAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssCustomMediaAtRuleDeclarator")
+                .field(
+                    "custom_media_token",
+                    &support::DebugSyntaxResult(self.custom_media_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("queries", &support::DebugSyntaxResult(self.queries()))
+                .finish()
+        } else {
+            f.debug_struct("CssCustomMediaAtRuleDeclarator").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssCustomMediaAtRuleDeclarator> for SyntaxNode {
+    fn from(n: CssCustomMediaAtRuleDeclarator) -> Self {
+        n.syntax
+    }
+}
+impl From<CssCustomMediaAtRuleDeclarator> for SyntaxElement {
+    fn from(n: CssCustomMediaAtRuleDeclarator) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssCustomPropertyBracedBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_CUSTOM_PROPERTY_BRACED_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_CUSTOM_PROPERTY_BRACED_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssCustomPropertyBracedBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssCustomPropertyBracedBlock")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("components", &self.components())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssCustomPropertyBracedBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssCustomPropertyBracedBlock> for SyntaxNode {
+    fn from(n: CssCustomPropertyBracedBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<CssCustomPropertyBracedBlock> for SyntaxElement {
+    fn from(n: CssCustomPropertyBracedBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssCustomPropertyBracketedBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_CUSTOM_PROPERTY_BRACKETED_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_CUSTOM_PROPERTY_BRACKETED_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssCustomPropertyBracketedBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssCustomPropertyBracketedBlock")
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("components", &self.components())
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssCustomPropertyBracketedBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssCustomPropertyBracketedBlock> for SyntaxNode {
+    fn from(n: CssCustomPropertyBracketedBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<CssCustomPropertyBracketedBlock> for SyntaxElement {
+    fn from(n: CssCustomPropertyBracketedBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssCustomPropertyDelimiter {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_CUSTOM_PROPERTY_DELIMITER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_CUSTOM_PROPERTY_DELIMITER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssCustomPropertyDelimiter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssCustomPropertyDelimiter")
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("CssCustomPropertyDelimiter").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssCustomPropertyDelimiter> for SyntaxNode {
+    fn from(n: CssCustomPropertyDelimiter) -> Self {
+        n.syntax
+    }
+}
+impl From<CssCustomPropertyDelimiter> for SyntaxElement {
+    fn from(n: CssCustomPropertyDelimiter) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssCustomPropertyFunction {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_CUSTOM_PROPERTY_FUNCTION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_CUSTOM_PROPERTY_FUNCTION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssCustomPropertyFunction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssCustomPropertyFunction")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("components", &self.components())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssCustomPropertyFunction").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssCustomPropertyFunction> for SyntaxNode {
+    fn from(n: CssCustomPropertyFunction) -> Self {
+        n.syntax
+    }
+}
+impl From<CssCustomPropertyFunction> for SyntaxElement {
+    fn from(n: CssCustomPropertyFunction) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssCustomPropertyParenthesizedBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssCustomPropertyParenthesizedBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssCustomPropertyParenthesizedBlock")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("components", &self.components())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssCustomPropertyParenthesizedBlock")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssCustomPropertyParenthesizedBlock> for SyntaxNode {
+    fn from(n: CssCustomPropertyParenthesizedBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<CssCustomPropertyParenthesizedBlock> for SyntaxElement {
+    fn from(n: CssCustomPropertyParenthesizedBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssCustomPropertyValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_CUSTOM_PROPERTY_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_CUSTOM_PROPERTY_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssCustomPropertyValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssCustomPropertyValue")
+                .field("components", &self.components())
+                .finish()
+        } else {
+            f.debug_struct("CssCustomPropertyValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssCustomPropertyValue> for SyntaxNode {
+    fn from(n: CssCustomPropertyValue) -> Self {
+        n.syntax
+    }
+}
+impl From<CssCustomPropertyValue> for SyntaxElement {
+    fn from(n: CssCustomPropertyValue) -> Self {
         n.syntax.into()
     }
 }
@@ -33218,6 +34186,11 @@ impl From<CssCounterStyleAtRule> for AnyCssAtRule {
         Self::CssCounterStyleAtRule(node)
     }
 }
+impl From<CssCustomMediaAtRule> for AnyCssAtRule {
+    fn from(node: CssCustomMediaAtRule) -> Self {
+        Self::CssCustomMediaAtRule(node)
+    }
+}
 impl From<CssDocumentAtRule> for AnyCssAtRule {
     fn from(node: CssDocumentAtRule) -> Self {
         Self::CssDocumentAtRule(node)
@@ -33460,6 +34433,7 @@ impl AstNode for AnyCssAtRule {
         .union(CssColorProfileAtRule::KIND_SET)
         .union(CssContainerAtRule::KIND_SET)
         .union(CssCounterStyleAtRule::KIND_SET)
+        .union(CssCustomMediaAtRule::KIND_SET)
         .union(CssDocumentAtRule::KIND_SET)
         .union(CssFontFaceAtRule::KIND_SET)
         .union(CssFontFeatureValuesAtRule::KIND_SET)
@@ -33515,6 +34489,7 @@ impl AstNode for AnyCssAtRule {
                 | CSS_COLOR_PROFILE_AT_RULE
                 | CSS_CONTAINER_AT_RULE
                 | CSS_COUNTER_STYLE_AT_RULE
+                | CSS_CUSTOM_MEDIA_AT_RULE
                 | CSS_DOCUMENT_AT_RULE
                 | CSS_FONT_FACE_AT_RULE
                 | CSS_FONT_FEATURE_VALUES_AT_RULE
@@ -33575,6 +34550,7 @@ impl AstNode for AnyCssAtRule {
             CSS_COUNTER_STYLE_AT_RULE => {
                 Self::CssCounterStyleAtRule(CssCounterStyleAtRule { syntax })
             }
+            CSS_CUSTOM_MEDIA_AT_RULE => Self::CssCustomMediaAtRule(CssCustomMediaAtRule { syntax }),
             CSS_DOCUMENT_AT_RULE => Self::CssDocumentAtRule(CssDocumentAtRule { syntax }),
             CSS_FONT_FACE_AT_RULE => Self::CssFontFaceAtRule(CssFontFaceAtRule { syntax }),
             CSS_FONT_FEATURE_VALUES_AT_RULE => {
@@ -33647,6 +34623,7 @@ impl AstNode for AnyCssAtRule {
             Self::CssColorProfileAtRule(it) => it.syntax(),
             Self::CssContainerAtRule(it) => it.syntax(),
             Self::CssCounterStyleAtRule(it) => it.syntax(),
+            Self::CssCustomMediaAtRule(it) => it.syntax(),
             Self::CssDocumentAtRule(it) => it.syntax(),
             Self::CssFontFaceAtRule(it) => it.syntax(),
             Self::CssFontFeatureValuesAtRule(it) => it.syntax(),
@@ -33703,6 +34680,7 @@ impl AstNode for AnyCssAtRule {
             Self::CssColorProfileAtRule(it) => it.into_syntax(),
             Self::CssContainerAtRule(it) => it.into_syntax(),
             Self::CssCounterStyleAtRule(it) => it.into_syntax(),
+            Self::CssCustomMediaAtRule(it) => it.into_syntax(),
             Self::CssDocumentAtRule(it) => it.into_syntax(),
             Self::CssFontFaceAtRule(it) => it.into_syntax(),
             Self::CssFontFeatureValuesAtRule(it) => it.into_syntax(),
@@ -33761,6 +34739,7 @@ impl std::fmt::Debug for AnyCssAtRule {
             Self::CssColorProfileAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssContainerAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssCounterStyleAtRule(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssCustomMediaAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDocumentAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssFontFaceAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssFontFeatureValuesAtRule(it) => std::fmt::Debug::fmt(it, f),
@@ -33819,6 +34798,7 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssColorProfileAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssContainerAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssCounterStyleAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssCustomMediaAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssDocumentAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssFontFaceAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssFontFeatureValuesAtRule(it) => it.into_syntax(),
@@ -35818,6 +36798,253 @@ impl From<AnyCssCustomIdentifier> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssBooleanMediaQuery> for AnyCssCustomMediaQuery {
+    fn from(node: CssBooleanMediaQuery) -> Self {
+        Self::CssBooleanMediaQuery(node)
+    }
+}
+impl From<CssMediaQueryList> for AnyCssCustomMediaQuery {
+    fn from(node: CssMediaQueryList) -> Self {
+        Self::CssMediaQueryList(node)
+    }
+}
+impl AstNode for AnyCssCustomMediaQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssBooleanMediaQuery::KIND_SET.union(CssMediaQueryList::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_BOOLEAN_MEDIA_QUERY | CSS_MEDIA_QUERY_LIST)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOOLEAN_MEDIA_QUERY => Self::CssBooleanMediaQuery(CssBooleanMediaQuery { syntax }),
+            CSS_MEDIA_QUERY_LIST => Self::CssMediaQueryList(CssMediaQueryList::cast(syntax)?),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssBooleanMediaQuery(it) => it.syntax(),
+            Self::CssMediaQueryList(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssBooleanMediaQuery(it) => it.into_syntax(),
+            Self::CssMediaQueryList(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssCustomMediaQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssBooleanMediaQuery(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssMediaQueryList(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssCustomMediaQuery> for SyntaxNode {
+    fn from(n: AnyCssCustomMediaQuery) -> Self {
+        match n {
+            AnyCssCustomMediaQuery::CssBooleanMediaQuery(it) => it.into_syntax(),
+            AnyCssCustomMediaQuery::CssMediaQueryList(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssCustomMediaQuery> for SyntaxElement {
+    fn from(n: AnyCssCustomMediaQuery) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssCustomIdentifier> for AnyCssCustomPropertyComponent {
+    fn from(node: CssCustomIdentifier) -> Self {
+        Self::CssCustomIdentifier(node)
+    }
+}
+impl From<CssCustomPropertyBracedBlock> for AnyCssCustomPropertyComponent {
+    fn from(node: CssCustomPropertyBracedBlock) -> Self {
+        Self::CssCustomPropertyBracedBlock(node)
+    }
+}
+impl From<CssCustomPropertyBracketedBlock> for AnyCssCustomPropertyComponent {
+    fn from(node: CssCustomPropertyBracketedBlock) -> Self {
+        Self::CssCustomPropertyBracketedBlock(node)
+    }
+}
+impl From<CssCustomPropertyDelimiter> for AnyCssCustomPropertyComponent {
+    fn from(node: CssCustomPropertyDelimiter) -> Self {
+        Self::CssCustomPropertyDelimiter(node)
+    }
+}
+impl From<CssCustomPropertyFunction> for AnyCssCustomPropertyComponent {
+    fn from(node: CssCustomPropertyFunction) -> Self {
+        Self::CssCustomPropertyFunction(node)
+    }
+}
+impl From<CssCustomPropertyParenthesizedBlock> for AnyCssCustomPropertyComponent {
+    fn from(node: CssCustomPropertyParenthesizedBlock) -> Self {
+        Self::CssCustomPropertyParenthesizedBlock(node)
+    }
+}
+impl From<CssNumber> for AnyCssCustomPropertyComponent {
+    fn from(node: CssNumber) -> Self {
+        Self::CssNumber(node)
+    }
+}
+impl From<CssString> for AnyCssCustomPropertyComponent {
+    fn from(node: CssString) -> Self {
+        Self::CssString(node)
+    }
+}
+impl From<ScssInterpolatedString> for AnyCssCustomPropertyComponent {
+    fn from(node: ScssInterpolatedString) -> Self {
+        Self::ScssInterpolatedString(node)
+    }
+}
+impl From<ScssInterpolation> for AnyCssCustomPropertyComponent {
+    fn from(node: ScssInterpolation) -> Self {
+        Self::ScssInterpolation(node)
+    }
+}
+impl AstNode for AnyCssCustomPropertyComponent {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssDimension::KIND_SET
+        .union(CssCustomIdentifier::KIND_SET)
+        .union(CssCustomPropertyBracedBlock::KIND_SET)
+        .union(CssCustomPropertyBracketedBlock::KIND_SET)
+        .union(CssCustomPropertyDelimiter::KIND_SET)
+        .union(CssCustomPropertyFunction::KIND_SET)
+        .union(CssCustomPropertyParenthesizedBlock::KIND_SET)
+        .union(CssNumber::KIND_SET)
+        .union(CssString::KIND_SET)
+        .union(ScssInterpolatedString::KIND_SET)
+        .union(ScssInterpolation::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_CUSTOM_IDENTIFIER
+            | CSS_CUSTOM_PROPERTY_BRACED_BLOCK
+            | CSS_CUSTOM_PROPERTY_BRACKETED_BLOCK
+            | CSS_CUSTOM_PROPERTY_DELIMITER
+            | CSS_CUSTOM_PROPERTY_FUNCTION
+            | CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK
+            | CSS_NUMBER
+            | CSS_STRING
+            | SCSS_INTERPOLATED_STRING
+            | SCSS_INTERPOLATION => true,
+            k if AnyCssDimension::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_CUSTOM_IDENTIFIER => Self::CssCustomIdentifier(CssCustomIdentifier { syntax }),
+            CSS_CUSTOM_PROPERTY_BRACED_BLOCK => {
+                Self::CssCustomPropertyBracedBlock(CssCustomPropertyBracedBlock { syntax })
+            }
+            CSS_CUSTOM_PROPERTY_BRACKETED_BLOCK => {
+                Self::CssCustomPropertyBracketedBlock(CssCustomPropertyBracketedBlock { syntax })
+            }
+            CSS_CUSTOM_PROPERTY_DELIMITER => {
+                Self::CssCustomPropertyDelimiter(CssCustomPropertyDelimiter { syntax })
+            }
+            CSS_CUSTOM_PROPERTY_FUNCTION => {
+                Self::CssCustomPropertyFunction(CssCustomPropertyFunction { syntax })
+            }
+            CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK => {
+                Self::CssCustomPropertyParenthesizedBlock(CssCustomPropertyParenthesizedBlock {
+                    syntax,
+                })
+            }
+            CSS_NUMBER => Self::CssNumber(CssNumber { syntax }),
+            CSS_STRING => Self::CssString(CssString { syntax }),
+            SCSS_INTERPOLATED_STRING => {
+                Self::ScssInterpolatedString(ScssInterpolatedString { syntax })
+            }
+            SCSS_INTERPOLATION => Self::ScssInterpolation(ScssInterpolation { syntax }),
+            _ => {
+                if let Some(any_css_dimension) = AnyCssDimension::cast(syntax) {
+                    return Some(Self::AnyCssDimension(any_css_dimension));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssCustomIdentifier(it) => it.syntax(),
+            Self::CssCustomPropertyBracedBlock(it) => it.syntax(),
+            Self::CssCustomPropertyBracketedBlock(it) => it.syntax(),
+            Self::CssCustomPropertyDelimiter(it) => it.syntax(),
+            Self::CssCustomPropertyFunction(it) => it.syntax(),
+            Self::CssCustomPropertyParenthesizedBlock(it) => it.syntax(),
+            Self::CssNumber(it) => it.syntax(),
+            Self::CssString(it) => it.syntax(),
+            Self::ScssInterpolatedString(it) => it.syntax(),
+            Self::ScssInterpolation(it) => it.syntax(),
+            Self::AnyCssDimension(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssCustomIdentifier(it) => it.into_syntax(),
+            Self::CssCustomPropertyBracedBlock(it) => it.into_syntax(),
+            Self::CssCustomPropertyBracketedBlock(it) => it.into_syntax(),
+            Self::CssCustomPropertyDelimiter(it) => it.into_syntax(),
+            Self::CssCustomPropertyFunction(it) => it.into_syntax(),
+            Self::CssCustomPropertyParenthesizedBlock(it) => it.into_syntax(),
+            Self::CssNumber(it) => it.into_syntax(),
+            Self::CssString(it) => it.into_syntax(),
+            Self::ScssInterpolatedString(it) => it.into_syntax(),
+            Self::ScssInterpolation(it) => it.into_syntax(),
+            Self::AnyCssDimension(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssCustomPropertyComponent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssDimension(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssCustomPropertyBracedBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssCustomPropertyBracketedBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssCustomPropertyDelimiter(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssCustomPropertyFunction(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssCustomPropertyParenthesizedBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssNumber(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssString(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedString(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolation(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssCustomPropertyComponent> for SyntaxNode {
+    fn from(n: AnyCssCustomPropertyComponent) -> Self {
+        match n {
+            AnyCssCustomPropertyComponent::AnyCssDimension(it) => it.into_syntax(),
+            AnyCssCustomPropertyComponent::CssCustomIdentifier(it) => it.into_syntax(),
+            AnyCssCustomPropertyComponent::CssCustomPropertyBracedBlock(it) => it.into_syntax(),
+            AnyCssCustomPropertyComponent::CssCustomPropertyBracketedBlock(it) => it.into_syntax(),
+            AnyCssCustomPropertyComponent::CssCustomPropertyDelimiter(it) => it.into_syntax(),
+            AnyCssCustomPropertyComponent::CssCustomPropertyFunction(it) => it.into_syntax(),
+            AnyCssCustomPropertyComponent::CssCustomPropertyParenthesizedBlock(it) => {
+                it.into_syntax()
+            }
+            AnyCssCustomPropertyComponent::CssNumber(it) => it.into_syntax(),
+            AnyCssCustomPropertyComponent::CssString(it) => it.into_syntax(),
+            AnyCssCustomPropertyComponent::ScssInterpolatedString(it) => it.into_syntax(),
+            AnyCssCustomPropertyComponent::ScssInterpolation(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssCustomPropertyComponent> for SyntaxElement {
+    fn from(n: AnyCssCustomPropertyComponent) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssDashedIdentifier> for AnyCssDashedIdentifier {
     fn from(node: CssDashedIdentifier) -> Self {
         Self::CssDashedIdentifier(node)
@@ -37250,6 +38477,11 @@ impl From<AnyCssGenericComponentValue> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssCustomPropertyValue> for AnyCssGenericPropertyValueOrExpression {
+    fn from(node: CssCustomPropertyValue) -> Self {
+        Self::CssCustomPropertyValue(node)
+    }
+}
 impl From<CssGenericComponentValueList> for AnyCssGenericPropertyValueOrExpression {
     fn from(node: CssGenericComponentValueList) -> Self {
         Self::CssGenericComponentValueList(node)
@@ -37262,13 +38494,20 @@ impl From<ScssExpression> for AnyCssGenericPropertyValueOrExpression {
 }
 impl AstNode for AnyCssGenericPropertyValueOrExpression {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssGenericComponentValueList::KIND_SET.union(ScssExpression::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssCustomPropertyValue::KIND_SET
+        .union(CssGenericComponentValueList::KIND_SET)
+        .union(ScssExpression::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_GENERIC_COMPONENT_VALUE_LIST | SCSS_EXPRESSION)
+        matches!(
+            kind,
+            CSS_CUSTOM_PROPERTY_VALUE | CSS_GENERIC_COMPONENT_VALUE_LIST | SCSS_EXPRESSION
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_CUSTOM_PROPERTY_VALUE => {
+                Self::CssCustomPropertyValue(CssCustomPropertyValue { syntax })
+            }
             CSS_GENERIC_COMPONENT_VALUE_LIST => {
                 Self::CssGenericComponentValueList(CssGenericComponentValueList::cast(syntax)?)
             }
@@ -37279,12 +38518,14 @@ impl AstNode for AnyCssGenericPropertyValueOrExpression {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::CssCustomPropertyValue(it) => it.syntax(),
             Self::CssGenericComponentValueList(it) => it.syntax(),
             Self::ScssExpression(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::CssCustomPropertyValue(it) => it.into_syntax(),
             Self::CssGenericComponentValueList(it) => it.into_syntax(),
             Self::ScssExpression(it) => it.into_syntax(),
         }
@@ -37293,6 +38534,7 @@ impl AstNode for AnyCssGenericPropertyValueOrExpression {
 impl std::fmt::Debug for AnyCssGenericPropertyValueOrExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::CssCustomPropertyValue(it) => std::fmt::Debug::fmt(it, f),
             Self::CssGenericComponentValueList(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -37301,6 +38543,7 @@ impl std::fmt::Debug for AnyCssGenericPropertyValueOrExpression {
 impl From<AnyCssGenericPropertyValueOrExpression> for SyntaxNode {
     fn from(n: AnyCssGenericPropertyValueOrExpression) -> Self {
         match n {
+            AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(it) => it.into_syntax(),
             AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(it) => {
                 it.into_syntax()
             }
@@ -40675,6 +41918,11 @@ impl From<AnyCssQueryFeature> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssDashedIdentifier> for AnyCssQueryFeatureName {
+    fn from(node: CssDashedIdentifier) -> Self {
+        Self::CssDashedIdentifier(node)
+    }
+}
 impl From<CssIdentifier> for AnyCssQueryFeatureName {
     fn from(node: CssIdentifier) -> Self {
         Self::CssIdentifier(node)
@@ -40692,17 +41940,19 @@ impl From<ScssVariable> for AnyCssQueryFeatureName {
 }
 impl AstNode for AnyCssQueryFeatureName {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssIdentifier::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssDashedIdentifier::KIND_SET
+        .union(CssIdentifier::KIND_SET)
         .union(ScssInterpolatedIdentifier::KIND_SET)
         .union(ScssVariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER | SCSS_VARIABLE
+            CSS_DASHED_IDENTIFIER | CSS_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER | SCSS_VARIABLE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_DASHED_IDENTIFIER => Self::CssDashedIdentifier(CssDashedIdentifier { syntax }),
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
             SCSS_INTERPOLATED_IDENTIFIER => {
                 Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
@@ -40714,6 +41964,7 @@ impl AstNode for AnyCssQueryFeatureName {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::CssDashedIdentifier(it) => it.syntax(),
             Self::CssIdentifier(it) => it.syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.syntax(),
             Self::ScssVariable(it) => it.syntax(),
@@ -40721,6 +41972,7 @@ impl AstNode for AnyCssQueryFeatureName {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::CssDashedIdentifier(it) => it.into_syntax(),
             Self::CssIdentifier(it) => it.into_syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             Self::ScssVariable(it) => it.into_syntax(),
@@ -40730,6 +41982,7 @@ impl AstNode for AnyCssQueryFeatureName {
 impl std::fmt::Debug for AnyCssQueryFeatureName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::CssDashedIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssVariable(it) => std::fmt::Debug::fmt(it, f),
@@ -40739,6 +41992,7 @@ impl std::fmt::Debug for AnyCssQueryFeatureName {
 impl From<AnyCssQueryFeatureName> for SyntaxNode {
     fn from(n: AnyCssQueryFeatureName) -> Self {
         match n {
+            AnyCssQueryFeatureName::CssDashedIdentifier(it) => it.into_syntax(),
             AnyCssQueryFeatureName::CssIdentifier(it) => it.into_syntax(),
             AnyCssQueryFeatureName::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             AnyCssQueryFeatureName::ScssVariable(it) => it.into_syntax(),
@@ -45237,6 +46491,16 @@ impl std::fmt::Display for AnyCssCustomIdentifier {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssCustomMediaQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssCustomPropertyComponent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssDashedIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -45862,6 +47126,11 @@ impl std::fmt::Display for CssBinaryExpression {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssBooleanMediaQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssBracketedValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -46018,6 +47287,46 @@ impl std::fmt::Display for CssCounterStyleAtRuleDeclarator {
     }
 }
 impl std::fmt::Display for CssCustomIdentifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssCustomMediaAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssCustomMediaAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssCustomPropertyBracedBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssCustomPropertyBracketedBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssCustomPropertyDelimiter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssCustomPropertyFunction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssCustomPropertyParenthesizedBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssCustomPropertyValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -49845,6 +51154,88 @@ impl IntoIterator for &CssCustomIdentifierSpaceSeparatedList {
 impl IntoIterator for CssCustomIdentifierSpaceSeparatedList {
     type Item = AnyCssCustomIdentifier;
     type IntoIter = AstNodeListIterator<Language, AnyCssCustomIdentifier>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct CssCustomPropertyComponentList {
+    syntax_list: SyntaxList,
+}
+impl CssCustomPropertyComponentList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for CssCustomPropertyComponentList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_CUSTOM_PROPERTY_COMPONENT_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_CUSTOM_PROPERTY_COMPONENT_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for CssCustomPropertyComponentList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for CssCustomPropertyComponentList {
+    type Language = Language;
+    type Node = AnyCssCustomPropertyComponent;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for CssCustomPropertyComponentList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CssCustomPropertyComponentList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &CssCustomPropertyComponentList {
+    type Item = AnyCssCustomPropertyComponent;
+    type IntoIter = AstNodeListIterator<Language, AnyCssCustomPropertyComponent>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for CssCustomPropertyComponentList {
+    type Item = AnyCssCustomPropertyComponent;
+    type IntoIter = AstNodeListIterator<Language, AnyCssCustomPropertyComponent>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

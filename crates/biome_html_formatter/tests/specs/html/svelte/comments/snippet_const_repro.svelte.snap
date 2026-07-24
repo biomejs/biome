@@ -1,0 +1,32 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/comments/snippet_const_repro.svelte
+---
+
+# Input
+
+```svelte
+{#snippet thing(x: number)}
+	<!-- a doc comment sitting between the snippet's opening tag and its first {@const} -->
+	{@const doubled = x * 2}
+	<div>{doubled}</div>
+{/snippet}
+
+```
+
+
+# Formatted
+
+```svelte
+{#snippet thing(x: number)}
+	<!-- a doc comment sitting between the snippet's opening tag and its first {@const} -->
+	{@const doubled = x * 2}
+	<div>{doubled}</div>
+{/snippet}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2: 	<!-- a doc comment sitting between the snippet's opening tag and its first {@const} -->
+```

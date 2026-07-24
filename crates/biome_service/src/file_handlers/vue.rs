@@ -5,11 +5,11 @@ use super::{
 use crate::WorkspaceError;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
-    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities, javascript,
+    ExtensionHandler, FixAllParams, FixedFileResult, FormatterCapabilities, LintParams,
+    LintResults, ParseResult, ParserCapabilities, javascript,
 };
 use crate::settings::SettingsWithEditor;
-use crate::workspace::{FixFileResult, PullActionsResult};
+use crate::workspace::PullActionsResult;
 use biome_db::AnyParsedSource;
 use biome_formatter::{Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
@@ -165,7 +165,7 @@ fn parse(
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
@@ -231,13 +231,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     javascript::code_actions(params)
 }
 
-fn fix_all(mut params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    let html_options = params
-        .settings
-        .format_options::<HtmlLanguage>(params.biome_path, &params.document_file_source);
-    if *html_options.indent_script_and_style() {
-        params.embeds_initial_indent = 1;
-    }
+fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     javascript::fix_all(params)
 }
 

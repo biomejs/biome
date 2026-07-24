@@ -29,21 +29,14 @@ info: yaml/spec/spec-example-2-24-global-tags.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,10 +1,9 @@
+@@ -1,6 +1,5 @@
  %TAG ! tag:clarkevans.com,2002:
 ----
 -!shape
--# Use the ! handle for presenting
--# tag:clarkevans.com,2002:circle
 +--- !shape
-+  # Use the ! handle for presenting
-+  # tag:clarkevans.com,2002:circle
+ # Use the ! handle for presenting
+ # tag:clarkevans.com,2002:circle
  - !circle
--  center: &ORIGIN { x: 73, y: 129 }
-+  center: &ORIGIN {x: 73, y: 129}
-   radius: 7
- - !line
-   start: *ORIGIN
 ```
 
 # Output
@@ -51,10 +44,10 @@ info: yaml/spec/spec-example-2-24-global-tags.yml
 ```yml
 %TAG ! tag:clarkevans.com,2002:
 --- !shape
-  # Use the ! handle for presenting
-  # tag:clarkevans.com,2002:circle
+# Use the ! handle for presenting
+# tag:clarkevans.com,2002:circle
 - !circle
-  center: &ORIGIN {x: 73, y: 129}
+  center: &ORIGIN { x: 73, y: 129 }
   radius: 7
 - !line
   start: *ORIGIN

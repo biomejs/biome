@@ -3,6 +3,7 @@
 #[macro_use]
 mod generated;
 mod block_ext;
+mod flow_ext;
 mod syntax_node;
 
 pub use self::generated::*;

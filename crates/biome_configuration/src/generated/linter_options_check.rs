@@ -700,6 +700,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noJsRestrictedProperties",
+        TypeId::of::<
+            biome_rule_options::no_js_restricted_properties::NoJsRestrictedPropertiesOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "noJsxLeakedDollar",
         TypeId::of::<biome_rule_options::no_jsx_leaked_dollar::NoJsxLeakedDollarOptions>(),
     ));
@@ -797,6 +804,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "style",
         "noNegationElse",
         TypeId::of::<biome_rule_options::no_negation_else::NoNegationElseOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noNegationInEqualityCheck",
+        TypeId::of::<
+            biome_rule_options::no_negation_in_equality_check::NoNegationInEqualityCheckOptions,
+        >(),
     ));
     result.push(("correctness", "noNestedComponentDefinitions", TypeId::of::<biome_rule_options::no_nested_component_definitions::NoNestedComponentDefinitionsOptions>()));
     result.push((

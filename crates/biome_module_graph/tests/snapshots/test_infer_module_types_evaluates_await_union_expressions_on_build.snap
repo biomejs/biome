@@ -1,0 +1,41 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export async function consume(
+	value: Promise<Promise<string>> | number | undefined,
+) {
+	const awaited = await value;
+	return awaited;
+}
+```
+
+## Inferred types
+
+```
+Binding consume "consume" => async Function "consume" {
+  accepts: {
+    params: [
+      required value: instanceof Promise<instanceof Promise<string>> | number | undefined
+    ]
+    type_args: []
+  }
+  returns: instanceof Promise<string | number | undefined>
+}
+
+Binding value "value" => instanceof Promise<instanceof Promise<string>> | number | undefined
+
+Binding awaited "awaited" => string | number | undefined
+
+Expression "await value" => string | number | undefined
+
+Expression "value" => instanceof Promise<instanceof Promise<string>> | number | undefined
+
+Expression "awaited" => string | number | undefined
+```

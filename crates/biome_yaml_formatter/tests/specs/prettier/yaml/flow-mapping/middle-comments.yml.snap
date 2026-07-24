@@ -18,16 +18,15 @@ info: yaml/flow-mapping/middle-comments.yml
 reformat: output mismatch
 --- re-formatted
 +++ formatted
-@@ -1,3 +1,3 @@
--!!map # comment 2 # comment 2 # comment 1
+@@ -1 +1,2 @@
+-!!map {} # comment 2 # comment 1
 +!!map # comment 2 # comment 1
- # comment 2
- {}
++{}
 
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -1,17 +1,17 @@
+@@ -1,9 +1,12 @@
  [
    source_position(0),
    "!!map",
@@ -35,19 +34,13 @@ IR differences:
 +  line_suffix([" ", source_position(6), "# comment 1"]),
    expand_parent,
    " ",
--  source_position(30),
+-  group([source_position(30), "{", source_position(31), "}"]),
 +  source_position(18),
-   "# comment 2",
-   hard_line_break,
-   verbatim([
--    source_position(30),
-+    source_position(18),
-     "# comment 2",
-     hard_line_break,
--    source_position(42),
-+    source_position(30),
-     "{}"
-   ]),
++  "# comment 2",
++  hard_line_break,
++  group(expand: true, [source_position(30), "{", source_position(31), "}"]),
    hard_line_break
+ ]
+\ No newline at end of file
 
 ```

@@ -457,10 +457,20 @@ impl<'src> YamlLexer<'src> {
                 // of the plain literal even though it's "plain safe"
                 self.advance(1); // ':'
             } else if is_space(c) {
+                let might_be_token_end = self.current_coordinate;
                 self.consume_whitespaces();
+                // A `#` preceded by a blank starts a comment, which ends the
+                // scalar. The blanks belong to the comment's leading trivia
+                if self.current_byte() == Some(b'#') {
+                    self.current_coordinate = might_be_token_end;
+                    return LexToken::new(PLAIN_LITERAL, start, might_be_token_end);
+                }
             } else if is_break(c) {
                 let might_be_token_end = self.current_coordinate;
-                if !self.is_scalar_continuation() {
+                // A line whose content starts with `#` is a comment, which can
+                // never be part of a plain scalar
+                if !self.is_scalar_continuation() || self.current_byte() == Some(b'#') {
+                    self.current_coordinate = might_be_token_end;
                     return LexToken::new(PLAIN_LITERAL, start, might_be_token_end);
                 }
             } else {
@@ -669,7 +679,10 @@ impl<'src> YamlLexer<'src> {
                 break;
             }
         }
-        if self.breach_parent_scope() {
+        // A document marker at the start of a line always ends the current
+        // document, so it can never be part of a multiline scalar
+        // https://yaml.org/spec/1.2.2/#rule-c-forbidden
+        if self.breach_parent_scope() || self.is_at_directive_end() || self.is_at_doc_end() {
             self.current_coordinate = start;
             false
         } else {

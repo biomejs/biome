@@ -2429,6 +2429,11 @@ See https://biomejs.dev/linter/rules/no-inline-styles
 	 */
 	noInlineStyles?: NoInlineStylesConfiguration;
 	/**
+	* Disallow specific object properties.
+See https://biomejs.dev/linter/rules/no-js-restricted-properties 
+	 */
+	noJsRestrictedProperties?: NoJsRestrictedPropertiesConfiguration;
+	/**
 	* Flags text nodes with a trailing $ before a JSX expression.
 See https://biomejs.dev/linter/rules/no-jsx-leaked-dollar 
 	 */
@@ -2453,6 +2458,11 @@ See https://biomejs.dev/linter/rules/no-misleading-return-type
 See https://biomejs.dev/linter/rules/no-misused-promises 
 	 */
 	noMisusedPromises?: NoMisusedPromisesConfiguration;
+	/**
+	* Disallow negated expressions on the left side of an equality check.
+See https://biomejs.dev/linter/rules/no-negation-in-equality-check 
+	 */
+	noNegationInEqualityCheck?: NoNegationInEqualityCheckConfiguration;
 	/**
 	* Disallow usage of element handles (page.$() and page.$$()).
 See https://biomejs.dev/linter/rules/no-playwright-element-handle 
@@ -4674,6 +4684,9 @@ export type NoImpliedEvalConfiguration =
 export type NoInlineStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInlineStylesOptions;
+export type NoJsRestrictedPropertiesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoJsRestrictedPropertiesOptions;
 export type NoJsxLeakedDollarConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxLeakedDollarOptions;
@@ -4689,6 +4702,9 @@ export type NoMisleadingReturnTypeConfiguration =
 export type NoMisusedPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedPromisesOptions;
+export type NoNegationInEqualityCheckConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNegationInEqualityCheckOptions;
 export type NoPlaywrightElementHandleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightElementHandleOptions;
@@ -6525,6 +6541,10 @@ export interface RuleWithNoInlineStylesOptions {
 	level: RulePlainConfiguration;
 	options?: NoInlineStylesOptions;
 }
+export interface RuleWithNoJsRestrictedPropertiesOptions {
+	level: RulePlainConfiguration;
+	options?: NoJsRestrictedPropertiesOptions;
+}
 export interface RuleWithNoJsxLeakedDollarOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6546,6 +6566,11 @@ export interface RuleWithNoMisusedPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoMisusedPromisesOptions;
+}
+export interface RuleWithNoNegationInEqualityCheckOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoNegationInEqualityCheckOptions;
 }
 export interface RuleWithNoPlaywrightElementHandleOptions {
 	fix?: FixKind;
@@ -8290,11 +8315,27 @@ export type NoFloatingPromisesOptions = {};
 export type NoIdenticalTestTitleOptions = {};
 export type NoImpliedEvalOptions = {};
 export type NoInlineStylesOptions = {};
+export interface NoJsRestrictedPropertiesOptions {
+	/**
+	* Restriction entries for object/property access.
+
+Each entry can describe one of these cases:
+
+- exact object/property match:
+  `{ "object": "require", "property": "ensure" }`
+- property-wide restriction with allowed objects:
+  `{ "property": "__defineGetter__", "allowObjects": ["Object"] }`
+- object-wide restriction with allowed properties:
+  `{ "object": "arguments", "allowProperties": ["length"] }` 
+	 */
+	entries?: RestrictedPropertyEntry[];
+}
 export type NoJsxLeakedDollarOptions = {};
 export type NoJsxNamespaceOptions = {};
 export type NoLoopFuncOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
 export type NoMisusedPromisesOptions = {};
+export type NoNegationInEqualityCheckOptions = {};
 export type NoPlaywrightElementHandleOptions = {};
 export type NoPlaywrightEvalOptions = {};
 export type NoPlaywrightForceOptionOptions = {};
@@ -9211,6 +9252,38 @@ while for `useState()` it would be `[1]`.
 	 */
 	stableResult?: StableHookResult;
 }
+export interface RestrictedPropertyEntry {
+	/**
+	* Objects that are allowed when `property` is restricted globally.
+
+Example:
+`{ "property": "__defineGetter__", "allowObjects": ["Object"] }` 
+	 */
+	allowObjects?: string[];
+	/**
+	* Properties that are allowed when `object` is restricted globally.
+
+Example:
+`{ "object": "arguments", "allowProperties": ["length"] }` 
+	 */
+	allowProperties?: string[];
+	/**
+	 * Optional custom note appended to the diagnostic.
+	 */
+	message?: string;
+	/**
+	* Object name to restrict.
+
+Example: `"require"` or `"Object"`. 
+	 */
+	object?: string;
+	/**
+	* Property name to restrict.
+
+Example: `"ensure"` or `"__defineGetter__"`. 
+	 */
+	property?: string;
+}
 /**
 	* The Baseline availability level to target.
 
@@ -9674,7 +9747,6 @@ export type Category =
 	| "lint/correctness/useVueValidVPre"
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
-	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noComponentHookFactories"
@@ -9691,12 +9763,14 @@ export type Category =
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noInlineStyles"
+	| "lint/nursery/noJsRestrictedProperties"
 	| "lint/nursery/noJsxLeakedDollar"
 	| "lint/nursery/noJsxNamespace"
 	| "lint/nursery/noLoopFunc"
 	| "lint/nursery/noMisleadingReturnType"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
+	| "lint/nursery/noNegationInEqualityCheck"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
@@ -9711,6 +9785,7 @@ export type Category =
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactStringRefs"
+	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
@@ -9739,7 +9814,6 @@ export type Category =
 	| "lint/nursery/useExplicitReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
-	| "lint/nursery/useReactFunctionComponentDefinition"
 	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useIframeSandbox"
 	| "lint/nursery/useImportRestrictions"
@@ -9755,6 +9829,7 @@ export type Category =
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useReactAsyncServerFunction"
+	| "lint/nursery/useReactFunctionComponentDefinition"
 	| "lint/nursery/useReactNativePlatformComponents"
 	| "lint/nursery/useReduceTypeParameter"
 	| "lint/nursery/useRegexpExec"
@@ -10413,7 +10488,8 @@ export type HtmlVariant =
 	| { Standard: HtmlTextExpressions }
 	| "Astro"
 	| "Vue"
-	| "Svelte";
+	| "Svelte"
+	| "Angular";
 export type GritVariant = "Standard";
 export type SvelteFileKind = "Component" | "SourceModule";
 export type EmbeddingHtmlKind =
@@ -10442,6 +10518,10 @@ export interface ChangeFileParams {
 	version: number;
 }
 export interface ChangeFileResult {
+	/**
+	* Problems found while updating dependency and module data.
+This does not include lint or parse results for the changed file. 
+	 */
 	diagnostics: Diagnostic[];
 }
 export interface CloseFileParams {
@@ -10638,6 +10718,43 @@ to distinguish parse errors from analyzer errors.
 	skippedDiagnostics: number;
 	warnings: number;
 }
+export interface ProcessFileParams {
+	categories: RuleCategories;
+	content: FileContent;
+	diagnosticLevel: Severity;
+	enabledRules?: AnalyzerSelector[];
+	enforceAssist: boolean;
+	fixFileMode?: FixFileMode;
+	format: boolean;
+	includeCodeFix: boolean;
+	maxDiagnostics?: number;
+	only?: AnalyzerSelector[];
+	path: BiomePath;
+	projectKey: ProjectKey;
+	skip?: AnalyzerSelector[];
+	skipParseErrors: boolean;
+	suppressionReason?: string;
+	write: boolean;
+}
+/**
+ * Which fixes should be applied during the analyzing phase
+ */
+export type FixFileMode =
+	| "safeFixes"
+	| "safeAndUnsafeFixes"
+	| "applySuppressions";
+export interface ProcessFileResult {
+	appliedFixes: number;
+	diagnostics: Diagnostic[];
+	errors: number;
+	formatWithErrorsDisabled: boolean;
+	infos: number;
+	output?: string;
+	parseErrors: number;
+	skippedDiagnostics: number;
+	skippedSuggestedFixes: number;
+	warnings: number;
+}
 export interface PullActionsParams {
 	categories?: RuleCategories;
 	/**
@@ -10781,13 +10898,6 @@ export interface FixFileParams {
 	skip?: AnalyzerSelector[];
 	suppressionReason?: string;
 }
-/**
- * Which fixes should be applied during the analyzing phase
- */
-export type FixFileMode =
-	| "safeFixes"
-	| "safeAndUnsafeFixes"
-	| "applySuppressions";
 export interface FixFileResult {
 	/**
 	 * List of all the code actions applied to the file
@@ -10876,6 +10986,7 @@ export interface Workspace {
 	pullDiagnostics(
 		params: PullDiagnosticsParams,
 	): Promise<PullDiagnosticsResult>;
+	processFile(params: ProcessFileParams): Promise<ProcessFileResult>;
 	pullActions(params: PullActionsParams): Promise<PullActionsResult>;
 	pullDiagnosticsAndActions(
 		params: PullDiagnosticsAndActionsParams,
@@ -10951,6 +11062,9 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		pullDiagnostics(params) {
 			return transport.request("biome/pull_diagnostics", params);
+		},
+		processFile(params) {
+			return transport.request("biome/process_file", params);
 		},
 		pullActions(params) {
 			return transport.request("biome/pull_actions", params);

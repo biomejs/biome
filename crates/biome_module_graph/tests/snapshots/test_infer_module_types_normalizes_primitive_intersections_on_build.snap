@@ -1,0 +1,50 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function readString(value: string & string): string & string {
+	return value;
+}
+
+export function readNever(value: string & number): string & number {
+	return value;
+}
+```
+
+## Inferred types
+
+```
+Binding readString "readString" => sync Function "readString" {
+  accepts: {
+    params: [
+      required value: string
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Binding value "value" => string
+
+Expression "value" => string
+
+Binding readNever "readNever" => sync Function "readNever" {
+  accepts: {
+    params: [
+      required value: never
+    ]
+    type_args: []
+  }
+  returns: never
+}
+
+Binding value "value" => never
+
+Expression "value" => never
+```

@@ -9,7 +9,7 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::{
     FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter, MAX_FLATTEN_DEPTH,
-    Module, Namespace, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeData, TypeId,
+    Module, Namespace, RawTypeData, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeData, TypeId,
     TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
     TypeResolver, TypeResolverLevel, TypeStore, UnionCollector,
 };
@@ -70,8 +70,8 @@ pub(super) struct JsModuleInfoCollector {
     /// Diagnostics emitted during the collection of module graph information
     diagnostics: Vec<JsModuleInfoDiagnostic>,
 
-    /// Whether to enable type inference when finalizing the module info
-    infer_types: bool,
+    /// How much type inference work to perform when finalizing the module info
+    inference_mode: TypeInferenceMode,
 
     /// CSS class references from JSX `className` or `class` attributes
     /// (static string literals only).
@@ -79,6 +79,7 @@ pub(super) struct JsModuleInfoCollector {
 }
 
 /// Intermediary representation for an exported symbol.
+#[derive(Clone)]
 pub(super) enum JsCollectedExport {
     ExportNamedSymbol {
         /// Name under which the symbol will be exported.
@@ -143,7 +144,7 @@ impl JsModuleInfoCollector {
             types: TypeStore::default(),
             static_imports: IndexMap::new(),
             diagnostics: Vec::new(),
-            infer_types: false,
+            inference_mode: TypeInferenceMode::Disabled,
             referenced_classes: Vec::new(),
         }
     }
@@ -334,6 +335,16 @@ impl JsModuleInfoCollector {
         })
     }
 
+    pub fn register_default_export_declaration(
+        &mut self,
+        declaration: &AnyJsExportDefaultDeclaration,
+    ) {
+        let type_data =
+            TypeData::from_any_js_export_default_declaration(self, ScopeId::GLOBAL, declaration);
+        let ty = TypeReference::from(self.register_and_resolve(type_data));
+        self.register_export(JsCollectedExport::ExportDefault { ty });
+    }
+
     pub fn register_blanket_reexport(&mut self, reexport: JsReexport) {
         self.blanket_reexports.push(reexport);
     }
@@ -368,20 +379,20 @@ impl JsModuleInfoCollector {
         );
     }
 
-    fn finalise(
-        &mut self,
-        semantic_model: &SemanticModel,
-    ) -> (
-        IndexMap<Text, JsExport>,
-        FxHashMap<TextRange, super::BindingTypeData>,
-    ) {
-        if self.infer_types {
+    fn finalise(&mut self, semantic_model: &SemanticModel) -> FinalisedModuleTypes {
+        if self.inference_mode != TypeInferenceMode::Disabled {
             self.infer_all_types(semantic_model);
         }
 
         self.populate_namespace_and_module_members();
 
-        if self.infer_types {
+        let raw_exports = self.collect_exports_from(self.exports.clone(), true);
+
+        let raw_types = self.raw_types();
+        let raw_expressions = self.raw_expressions();
+        let raw_binding_types = self.raw_binding_types();
+
+        if self.inference_mode == TypeInferenceMode::Complete {
             self.resolve_all_and_downgrade_project_references();
 
             // Purging before flattening will save us from duplicate work during
@@ -394,7 +405,32 @@ impl JsModuleInfoCollector {
         let exports = self.collect_exports();
         let binding_type_data = self.build_binding_type_data(semantic_model);
 
-        (exports, binding_type_data)
+        FinalisedModuleTypes {
+            exports,
+            raw_exports,
+            binding_type_data,
+            raw_types,
+            raw_expressions,
+            raw_binding_types,
+        }
+    }
+
+    fn raw_types(&self) -> Vec<RawTypeData> {
+        self.types.as_references().into_iter().cloned().collect()
+    }
+
+    fn raw_expressions(&self) -> FxHashMap<TextRange, TypeReference> {
+        self.parsed_expressions
+            .iter()
+            .map(|(range, resolved_id)| (*range, TypeReference::Resolved(*resolved_id)))
+            .collect()
+    }
+
+    fn raw_binding_types(&self) -> FxHashMap<TextRange, TypeReference> {
+        self.bindings
+            .iter()
+            .map(|binding| (binding.range, binding.ty.clone()))
+            .collect()
     }
 
     fn infer_all_types(&mut self, semantic_model: &biome_js_semantic::SemanticModel) {
@@ -785,10 +821,13 @@ impl JsModuleInfoCollector {
         }
     }
 
-    fn collect_exports(&mut self) -> IndexMap<Text, JsExport> {
+    fn collect_exports_from(
+        &mut self,
+        exports: Vec<JsCollectedExport>,
+        raw: bool,
+    ) -> IndexMap<Text, JsExport> {
         let mut finalised_exports = IndexMap::new();
 
-        let exports = std::mem::take(&mut self.exports);
         for export in exports {
             match export {
                 JsCollectedExport::ExportNamedSymbol {
@@ -806,51 +845,74 @@ impl JsModuleInfoCollector {
                     }
                 }
                 JsCollectedExport::ExportDefault { ty } => {
-                    let resolved = self.resolve_reference(&ty).unwrap_or(GLOBAL_UNKNOWN_ID);
+                    let resolved = if raw {
+                        self.raw_resolved_id(&ty)
+                    } else {
+                        self.resolve_reference(&ty).unwrap_or(GLOBAL_UNKNOWN_ID)
+                    };
 
                     let export = JsExport::Own(JsOwnExport::Type(resolved));
                     finalised_exports.insert(Text::new_static("default"), export);
                 }
                 JsCollectedExport::ExportDefaultAssignment { ty } => {
-                    let resolved = self.resolve_reference(&ty).unwrap_or(GLOBAL_UNKNOWN_ID);
+                    let resolved = if raw {
+                        self.raw_resolved_id(&ty)
+                    } else {
+                        self.resolve_reference(&ty).unwrap_or(GLOBAL_UNKNOWN_ID)
+                    };
                     let mut found_members = false;
 
-                    if let Some(data) = self.get_by_resolved_id(resolved) {
-                        for member in data.as_raw_data().own_members() {
-                            let Some(name) = member.name() else {
-                                continue;
-                            };
-
-                            // DANGER: Normally, when resolving a type reference
-                            //         retrieved through `as_raw_data()`, we
-                            //         should call
-                            //         `apply_module_id_to_reference()` on the
-                            //         reference first. But because we know we
-                            //         are resolving inside the collector,
-                            //         before any module IDs _could_ be applied,
-                            //         we can omit this here.
-                            if let Some(resolved_member) = self.resolve_reference(&member.ty) {
-                                let export = JsExport::Own(JsOwnExport::Type(resolved_member));
-                                finalised_exports.insert(name, export);
-                                found_members = true;
+                    if raw {
+                        if let Some(data) = self.raw_type_by_resolved_id(resolved) {
+                            for member in data.own_members() {
+                                let Some(name) = member.name() else {
+                                    continue;
+                                };
+                                if let TypeReference::Resolved(resolved_member) = member.ty {
+                                    let export = JsExport::Own(JsOwnExport::Type(resolved_member));
+                                    finalised_exports.insert(name, export);
+                                    found_members = true;
+                                }
                             }
                         }
-                    }
 
-                    // If the resolved type has no members (e.g., the
-                    // reference is still an unresolved qualifier), fall back
-                    // to the scope tree to collect namespace bindings directly.
-                    if !found_members
-                        && let Some(data) = self.get_by_resolved_id(resolved)
-                        && let TypeData::Reference(TypeReference::Qualifier(qualifier)) =
-                            data.as_raw_data()
-                        && let Some(first_part) = qualifier.path.iter().next()
-                    {
-                        self.collect_namespace_exports_for_binding(
-                            first_part,
-                            qualifier.scope_id,
-                            &mut finalised_exports,
-                        );
+                        if !found_members
+                            && let Some(data) = self.raw_type_by_resolved_id(resolved)
+                            && let TypeData::Reference(TypeReference::Qualifier(qualifier)) = data
+                            && let Some(first_part) = qualifier.path.iter().next()
+                        {
+                            self.collect_namespace_exports_for_binding(
+                                first_part,
+                                qualifier.scope_id,
+                                &mut finalised_exports,
+                            );
+                        }
+                    } else {
+                        if let Some(data) = self.get_by_resolved_id(resolved) {
+                            for member in data.as_raw_data().own_members() {
+                                let Some(name) = member.name() else {
+                                    continue;
+                                };
+                                if let Some(resolved_member) = self.resolve_reference(&member.ty) {
+                                    let export = JsExport::Own(JsOwnExport::Type(resolved_member));
+                                    finalised_exports.insert(name, export);
+                                    found_members = true;
+                                }
+                            }
+                        }
+
+                        if !found_members
+                            && let Some(data) = self.get_by_resolved_id(resolved)
+                            && let TypeData::Reference(TypeReference::Qualifier(qualifier)) =
+                                data.as_raw_data()
+                            && let Some(first_part) = qualifier.path.iter().next()
+                        {
+                            self.collect_namespace_exports_for_binding(
+                                first_part,
+                                qualifier.scope_id,
+                                &mut finalised_exports,
+                            );
+                        }
                     }
 
                     let export = JsExport::Own(JsOwnExport::Type(resolved));
@@ -877,6 +939,25 @@ impl JsModuleInfoCollector {
         }
 
         finalised_exports
+    }
+
+    fn collect_exports(&mut self) -> IndexMap<Text, JsExport> {
+        let exports = std::mem::take(&mut self.exports);
+        self.collect_exports_from(exports, false)
+    }
+
+    fn raw_resolved_id(&mut self, ty: &TypeReference) -> ResolvedTypeId {
+        match ty {
+            TypeReference::Resolved(id) => *id,
+            _ => ResolvedTypeId::new(
+                TypeResolverLevel::Thin,
+                self.register_type(Cow::Owned(TypeData::reference(ty.clone()))),
+            ),
+        }
+    }
+
+    fn raw_type_by_resolved_id(&self, id: ResolvedTypeId) -> Option<&TypeData> {
+        (id.level() == TypeResolverLevel::Thin).then(|| self.types.get_by_id(id.id()))
     }
 
     fn get_export_for_local_name(&mut self, local_name: TokenText) -> Option<JsOwnExport> {
@@ -1092,28 +1173,55 @@ impl JsModuleInfoCollector {
     }
 }
 
+/// Selects how much type inference work the collector performs while
+/// finalizing a module.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TypeInferenceMode {
+    /// No type inference at all.
+    Disabled,
+    /// Collects the raw type table for the salsa-backed inference engine,
+    /// without running the legacy resolution and flattening passes.
+    RawTypesOnly,
+    /// Collects the raw type table and runs the legacy resolution and
+    /// flattening passes.
+    Complete,
+}
+
 impl JsModuleInfo {
     pub(super) fn new(
         mut collector: JsModuleInfoCollector,
         semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
-        infer_types: bool,
+        inference_mode: TypeInferenceMode,
     ) -> Self {
-        collector.infer_types = infer_types;
-        let (exports, binding_type_data) = collector.finalise(&semantic_model);
+        collector.inference_mode = inference_mode;
+        let finalised = collector.finalise(&semantic_model);
 
         Self(Arc::new(JsModuleInfoInner {
             static_imports: Imports(collector.static_imports),
             static_import_paths: collector.static_import_paths,
             dynamic_import_paths: collector.dynamic_import_paths,
-            exports: Exports(exports),
+            exports: Exports(finalised.exports),
+            raw_exports: Exports(finalised.raw_exports),
             blanket_reexports: collector.blanket_reexports,
             semantic_model,
-            binding_type_data,
+            binding_type_data: finalised.binding_type_data,
+            raw_types: finalised.raw_types,
+            raw_expressions: finalised.raw_expressions,
+            raw_binding_types: finalised.raw_binding_types,
             expressions: collector.parsed_expressions,
             types: collector.types.into(),
             diagnostics: collector.diagnostics.into_iter().map(Into::into).collect(),
-            infer_types: collector.infer_types,
+            infer_types: collector.inference_mode != TypeInferenceMode::Disabled,
             referenced_classes: collector.referenced_classes,
         }))
     }
+}
+
+struct FinalisedModuleTypes {
+    exports: IndexMap<Text, JsExport>,
+    raw_exports: IndexMap<Text, JsExport>,
+    binding_type_data: FxHashMap<TextRange, BindingTypeData>,
+    raw_types: Vec<RawTypeData>,
+    raw_expressions: FxHashMap<TextRange, TypeReference>,
+    raw_binding_types: FxHashMap<TextRange, TypeReference>,
 }

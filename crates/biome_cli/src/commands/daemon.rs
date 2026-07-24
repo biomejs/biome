@@ -127,56 +127,52 @@ pub(crate) fn lsp_proxy(
     log_options: LogOptions,
 ) -> Result<(), CliDiagnostic> {
     let rt = Runtime::new()?;
-    rt.block_on(start_lsp_proxy(&rt, watcher_options, log_options))?;
+    rt.block_on(start_lsp_proxy(watcher_options, log_options))?;
 
     Ok(())
+}
+
+async fn forward_lsp<I, O, R, W>(
+    mut input: I,
+    mut output: O,
+    mut socket_read: R,
+    mut socket_write: W,
+) where
+    I: io::AsyncRead + Unpin,
+    O: io::AsyncWrite + Unpin,
+    R: io::AsyncRead + Unpin,
+    W: io::AsyncWrite + Unpin,
+{
+    tokio::select! {
+        result = io::copy(&mut input, &mut socket_write) => {
+            if result.is_ok() {
+                let _ = io::AsyncWriteExt::flush(&mut socket_write).await;
+            }
+        }
+        result = io::copy(&mut socket_read, &mut output) => {
+            if result.is_ok() {
+                let _ = io::AsyncWriteExt::flush(&mut output).await;
+            }
+        }
+    }
 }
 
 /// Start a proxy process.
 /// Receives a process via `stdin` and then copy the content to the LSP socket.
 /// Copy to the process on `stdout` when the LSP responds to a message
 async fn start_lsp_proxy(
-    rt: &Runtime,
     watcher_options: WatcherOptions,
     log_options: LogOptions,
 ) -> Result<(), CliDiagnostic> {
     ensure_daemon(true, watcher_options, log_options).await?;
 
     match open_socket().await? {
-        Some((mut owned_read_half, mut owned_write_half)) => {
-            // forward stdin to socket
-            let mut stdin = io::stdin();
-            let input_handle = rt.spawn(async move {
-                loop {
-                    match io::copy(&mut stdin, &mut owned_write_half).await {
-                        Ok(b) => {
-                            if b == 0 {
-                                return Ok(());
-                            }
-                        }
-                        Err(err) => return Err(err),
-                    };
-                }
-            });
+        Some((owned_read_half, owned_write_half)) => {
+            forward_lsp(io::stdin(), io::stdout(), owned_read_half, owned_write_half).await;
 
-            // receive socket response to stdout
-            let mut stdout = io::stdout();
-            let out_put_handle = rt.spawn(async move {
-                loop {
-                    match io::copy(&mut owned_read_half, &mut stdout).await {
-                        Ok(b) => {
-                            if b == 0 {
-                                return Ok(());
-                            }
-                        }
-                        Err(err) => return Err(err),
-                    };
-                }
-            });
-
-            let _ = input_handle.await;
-            let _ = out_put_handle.await;
-            Ok(())
+            // Tokio standard I/O uses blocking reads that cannot be cancelled.
+            // Exit so a pending read cannot keep a disconnected proxy alive.
+            process::exit(0);
         }
         None => Ok(()),
     }
@@ -284,5 +280,41 @@ impl<S> Filter<S> for LoggingFilter {
 
     fn max_level_hint(&self) -> Option<LevelFilter> {
         Some(SELF_FILTER)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::forward_lsp;
+    use std::time::Duration;
+    use tokio::io::{duplex, empty, sink, split};
+    use tokio::time::timeout;
+
+    #[tokio::test]
+    async fn forwarding_stops_when_the_daemon_disconnects() {
+        let (input, _input_writer) = duplex(64);
+        let (socket, remote) = duplex(64);
+        let (socket_read, socket_write) = split(socket);
+        drop(remote);
+
+        timeout(
+            Duration::from_secs(1),
+            forward_lsp(input, sink(), socket_read, socket_write),
+        )
+        .await
+        .expect("forwarding should stop after the daemon disconnects");
+    }
+
+    #[tokio::test]
+    async fn forwarding_stops_when_the_editor_disconnects() {
+        let (socket, _remote) = duplex(64);
+        let (socket_read, socket_write) = split(socket);
+
+        timeout(
+            Duration::from_secs(1),
+            forward_lsp(empty(), sink(), socket_read, socket_write),
+        )
+        .await
+        .expect("forwarding should stop after the editor disconnects");
     }
 }

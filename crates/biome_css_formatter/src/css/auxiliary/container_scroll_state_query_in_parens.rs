@@ -23,7 +23,7 @@ impl FormatNodeRule<CssContainerScrollStateQueryInParens>
         write!(
             f,
             [
-                name.format(),
+                name?.format().with_text_case(CssCase::Preserve),
                 group(&format_args![
                     l_paren_token.format(),
                     soft_block_indent(&query.format()),

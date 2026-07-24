@@ -479,6 +479,8 @@ fn static_member_matches(
     member.has_name(name)
         && match object.as_raw_data() {
             TypeData::Class(_) => member.is_static() && !member.kind().is_constructor(),
+            // Namespace members should be registered as static members.
+            TypeData::Namespace(_) => member.is_static(),
             _ => !member.is_static(),
         }
 }
@@ -932,7 +934,12 @@ fn resolve_function(
 
         let resolved = resolver.resolve_and_get(current_type_reference.as_ref())?;
         match resolved.as_raw_data() {
-            TypeData::Function(function) => return Some(function.clone()),
+            TypeData::Function(_) => {
+                let TypeData::Function(function) = resolved.to_data() else {
+                    return None;
+                };
+                return Some(function);
+            }
             // Callable interfaces/objects: `interface Cb { (): Promise<void> }`
             TypeData::Interface(interface) => {
                 let member = interface

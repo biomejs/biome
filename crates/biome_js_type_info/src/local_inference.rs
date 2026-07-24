@@ -12,15 +12,16 @@ use biome_js_syntax::{
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
     JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList,
-    JsConstructorParameters, JsForInStatement, JsForOfStatement, JsForVariableDeclaration,
-    JsFormalParameter, JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression,
-    JsGetterObjectMember, JsInitializerClause, JsLogicalExpression, JsLogicalOperator,
-    JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern, JsObjectExpression,
-    JsParameters, JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier,
-    JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode,
-    JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator,
-    TsDeclareFunctionDeclaration, TsExternalModuleDeclaration, TsInterfaceDeclaration,
-    TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
+    JsConstructorParameters, JsExtendsClause, JsForInStatement, JsForOfStatement,
+    JsForVariableDeclaration, JsFormalParameter, JsFunctionBody, JsFunctionDeclaration,
+    JsFunctionExpression, JsGetterObjectMember, JsInitializerClause, JsLogicalExpression,
+    JsLogicalOperator, JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern,
+    JsObjectExpression, JsParameters, JsPropertyClassMember, JsPropertyObjectMember,
+    JsReferenceIdentifier, JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind,
+    JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
+    JsVariableDeclarator, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration,
+    TsInstantiationExpression, TsInterfaceDeclaration, TsModuleDeclaration,
+    TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
     TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
     TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
@@ -28,16 +29,16 @@ use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
 
 use crate::globals::{
     GLOBAL_GLOBAL_ID, GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_ID, GLOBAL_STRING_ID,
-    GLOBAL_UNDEFINED_ID,
+    GLOBAL_SYMBOL_ASYNC_DISPOSE_ID, GLOBAL_SYMBOL_DISPOSE_ID, GLOBAL_UNDEFINED_ID,
 };
 use crate::literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral};
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, ConstructorParameter,
     DestructureField, Function, FunctionParameter, FunctionParameterBinding, GenericTypeParameter,
     Interface, Literal, Module, NamedFunctionParameter, Namespace, Object, Path,
-    PatternFunctionParameter, PredicateReturnType, ResolvedTypeId, ReturnType, ScopeId, Tuple,
+    PatternFunctionParameter, PredicateReturnType, RawTypeCollector, ReturnType, ScopeId, Tuple,
     TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberAccessibility, TypeMemberKind,
-    TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeResolver,
+    TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier,
     TypeofAdditionExpression, TypeofAwaitExpression, TypeofBitwiseNotExpression,
     TypeofCallExpression, TypeofConditionalExpression, TypeofDestructureExpression,
     TypeofExpression, TypeofIndexExpression, TypeofIterableValueOfExpression,
@@ -53,7 +54,7 @@ impl TypeData {
     /// associated types.
     pub fn apply_array_binding_pattern(
         &self,
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         pattern: &JsArrayBindingPattern,
     ) -> Box<[(Text, TypeReference)]> {
@@ -71,7 +72,7 @@ impl TypeData {
 
     fn apply_array_binding_pattern_element(
         &self,
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         i: usize,
         elem: AnyJsArrayBindingPatternElement,
@@ -134,7 +135,7 @@ impl TypeData {
     /// associated types.
     pub fn apply_object_binding_pattern(
         &self,
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         pattern: &JsObjectBindingPattern,
     ) -> Box<[(Text, TypeReference)]> {
@@ -188,7 +189,7 @@ impl TypeData {
 
     fn apply_object_binding_pattern_member(
         &self,
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         names: &[Text],
         member_name: Option<Text>,
@@ -259,7 +260,7 @@ impl TypeData {
     }
 
     pub fn from_any_js_declaration(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &AnyJsDeclaration,
     ) -> Self {
@@ -306,7 +307,7 @@ impl TypeData {
     }
 
     pub fn from_any_js_declaration_clause(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: AnyJsDeclarationClause,
     ) -> Self {
@@ -316,7 +317,7 @@ impl TypeData {
     }
 
     pub fn from_any_js_export_default_declaration(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &AnyJsExportDefaultDeclaration,
     ) -> Self {
@@ -337,12 +338,9 @@ impl TypeData {
                             )
                         })
                         .unwrap_or_default(),
-                    extends: decl
-                        .extends_clause()
-                        .and_then(|extends| extends.super_class().ok())
-                        .map(|super_class| {
-                            resolver.reference_to_resolved_expression(scope_id, &super_class)
-                        }),
+                    extends: decl.extends_clause().and_then(|extends| {
+                        reference_to_extends_clause(resolver, scope_id, extends)
+                    }),
                     implements: decl
                         .implements_clause()
                         .map(|implements| {
@@ -428,7 +426,7 @@ impl TypeData {
     }
 
     pub fn from_any_js_expression(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &AnyJsExpression,
     ) -> Self {
@@ -467,6 +465,14 @@ impl TypeData {
             ))),
             AnyJsExpression::JsArrowFunctionExpression(expr) => {
                 Self::from_js_arrow_function_expression(resolver, scope_id, expr)
+            }
+            AnyJsExpression::JsAwaitExpression(expr) => {
+                Self::from(TypeofExpression::Await(TypeofAwaitExpression {
+                    argument: expr
+                        .argument()
+                        .map(|arg| resolver.reference_to_resolved_expression(scope_id, &arg))
+                        .unwrap_or_default(),
+                }))
             }
             AnyJsExpression::JsBinaryExpression(expr) => {
                 Self::from_js_binary_expression(resolver, scope_id, expr)
@@ -609,6 +615,9 @@ impl TypeData {
                     Self::from_any_ts_type(resolver, scope_id, &annotation)
                 }
             }
+            AnyJsExpression::TsInstantiationExpression(expr) => {
+                Self::from_ts_instantiation_expression(resolver, scope_id, expr).unwrap_or_default()
+            }
             AnyJsExpression::TsTypeAssertionExpression(expr) => {
                 let Ok(annotation) = expr.ty() else {
                     return Self::unknown();
@@ -656,7 +665,7 @@ impl TypeData {
     }
 
     pub fn from_any_ts_type(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         ty: &AnyTsType,
     ) -> Self {
@@ -699,7 +708,7 @@ impl TypeData {
                         .unwrap_or_default(),
                 ]);
 
-                Self::union_of(resolver, types)
+                resolver.union_of(types)
             }
             AnyTsType::TsConstructorType(ty) => Self::Constructor(Box::new(Constructor {
                 type_parameters: generic_params_from_ts_type_params(
@@ -824,7 +833,7 @@ impl TypeData {
                     .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
                     .collect();
 
-                Self::union_of(resolver, types)
+                resolver.union_of(types)
             }
             AnyTsType::TsUnknownType(_) => Self::UnknownKeyword,
             AnyTsType::TsVoidType(_) => Self::VoidKeyword,
@@ -832,7 +841,7 @@ impl TypeData {
     }
 
     pub fn from_any_ts_type_result(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         ty: SyntaxResult<AnyTsType>,
     ) -> Self {
@@ -841,7 +850,7 @@ impl TypeData {
     }
 
     pub fn from_js_arrow_function_expression(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &JsArrowFunctionExpression,
     ) -> Self {
@@ -883,7 +892,7 @@ impl TypeData {
     }
 
     pub fn from_js_binary_expression(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &JsBinaryExpression,
     ) -> Self {
@@ -946,7 +955,7 @@ impl TypeData {
     }
 
     pub fn from_js_class_declaration(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &JsClassDeclaration,
     ) -> Self {
@@ -965,10 +974,7 @@ impl TypeData {
             ),
             extends: decl
                 .extends_clause()
-                .and_then(|extends| extends.super_class().ok())
-                .map(|super_class| {
-                    resolver.reference_to_resolved_expression(scope_id, &super_class)
-                }),
+                .and_then(|extends| reference_to_extends_clause(resolver, scope_id, extends)),
             implements: decl
                 .implements_clause()
                 .map(|implements| {
@@ -980,7 +986,7 @@ impl TypeData {
     }
 
     pub fn from_js_class_expression(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &JsClassExpression,
     ) -> Self {
@@ -998,10 +1004,7 @@ impl TypeData {
             ),
             extends: decl
                 .extends_clause()
-                .and_then(|extends| extends.super_class().ok())
-                .map(|super_class| {
-                    resolver.reference_to_resolved_expression(scope_id, &super_class)
-                }),
+                .and_then(|extends| reference_to_extends_clause(resolver, scope_id, extends)),
             implements: decl
                 .implements_clause()
                 .map(|implements| {
@@ -1013,7 +1016,7 @@ impl TypeData {
     }
 
     pub fn from_js_function_declaration(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &JsFunctionDeclaration,
     ) -> Self {
@@ -1043,7 +1046,7 @@ impl TypeData {
     }
 
     pub fn from_js_function_expression(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &JsFunctionExpression,
     ) -> Self {
@@ -1072,7 +1075,7 @@ impl TypeData {
     }
 
     pub fn from_js_logical_expression(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &JsLogicalExpression,
     ) -> Option<Self> {
@@ -1101,7 +1104,7 @@ impl TypeData {
     }
 
     pub fn from_js_new_expression(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &JsNewExpression,
     ) -> Option<Self> {
@@ -1115,8 +1118,23 @@ impl TypeData {
         })))
     }
 
+    pub fn from_ts_instantiation_expression(
+        resolver: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        expr: &TsInstantiationExpression,
+    ) -> Option<Self> {
+        let expression = expr.expression().ok()?;
+        let arguments = expr.arguments().ok();
+        Some(Self::instance_of(TypeInstance {
+            ty: resolver.reference_to_resolved_expression(scope_id, &expression),
+            type_parameters: TypeReference::types_from_ts_type_arguments(
+                resolver, scope_id, arguments,
+            ),
+        }))
+    }
+
     pub fn from_js_object_expression(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &JsObjectExpression,
     ) -> Self {
@@ -1139,7 +1157,7 @@ impl TypeData {
     }
 
     pub fn from_js_unary_expression(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &JsUnaryExpression,
     ) -> Self {
@@ -1178,7 +1196,7 @@ impl TypeData {
     }
 
     pub fn from_js_variable_declarator<'a>(
-        resolver: &'a mut dyn TypeResolver,
+        resolver: &'a mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &JsVariableDeclarator,
     ) -> Option<Cow<'a, Self>> {
@@ -1201,7 +1219,7 @@ impl TypeData {
     }
 
     pub fn from_ts_declare_function_declaration(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &TsDeclareFunctionDeclaration,
     ) -> Self {
@@ -1243,7 +1261,7 @@ impl TypeData {
     }
 
     pub fn from_ts_interface_declaration(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &TsInterfaceDeclaration,
     ) -> Option<Self> {
@@ -1283,7 +1301,7 @@ impl TypeData {
     }
 
     pub fn from_ts_reference_type(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         ty: &TsReferenceType,
     ) -> Self {
@@ -1303,7 +1321,7 @@ impl TypeData {
     }
 
     pub fn from_ts_type_alias_declaration(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &TsTypeAliasDeclaration,
     ) -> Option<Self> {
@@ -1319,7 +1337,7 @@ impl TypeData {
     }
 
     pub fn from_ts_typeof_type(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         ty: &TsTypeofType,
     ) -> Self {
@@ -1359,7 +1377,7 @@ impl TypeData {
     }
 
     pub fn typed_bindings_from_js_binding_pattern(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         ty: Self,
         pattern: &AnyJsBindingPattern,
@@ -1392,7 +1410,7 @@ impl TypeData {
     }
 
     pub fn typed_bindings_from_js_for_statement(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &JsForVariableDeclaration,
     ) -> Option<Box<[(Text, TypeReference)]>> {
@@ -1420,7 +1438,7 @@ impl TypeData {
     }
 
     pub fn typed_bindings_from_js_variable_declaration(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &JsVariableDeclaration,
     ) -> Box<[(Text, TypeReference)]> {
@@ -1435,7 +1453,7 @@ impl TypeData {
     }
 
     pub fn typed_bindings_from_js_variable_declarator(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &JsVariableDeclarator,
     ) -> Option<Box<[(Text, TypeReference)]>> {
@@ -1447,7 +1465,7 @@ impl TypeData {
 
 impl CallArgumentType {
     pub fn types_from_js_call_arguments(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         arguments: Option<JsCallArguments>,
     ) -> Box<[Self]> {
@@ -1463,7 +1481,7 @@ impl CallArgumentType {
     }
 
     pub fn from_any_js_call_argument(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         arg: &AnyJsCallArgument,
     ) -> Self {
@@ -1483,7 +1501,7 @@ impl CallArgumentType {
 
 impl ConstructorParameter {
     pub fn from_any_js_constructor_parameter(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         param: &AnyJsConstructorParameter,
     ) -> Self {
@@ -1515,7 +1533,7 @@ impl ConstructorParameter {
     }
 
     pub fn params_from_js_constructor_parameters(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         params: &JsConstructorParameters,
     ) -> Box<[Self]> {
@@ -1531,7 +1549,7 @@ impl ConstructorParameter {
 
 impl FunctionParameter {
     pub fn from_any_js_formal_parameter(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         param: &AnyJsFormalParameter,
     ) -> Self {
@@ -1544,7 +1562,7 @@ impl FunctionParameter {
     }
 
     pub fn from_any_js_parameter(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         param: &AnyJsParameter,
     ) -> Self {
@@ -1569,7 +1587,7 @@ impl FunctionParameter {
     }
 
     pub fn from_js_formal_parameter(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         param: &JsFormalParameter,
     ) -> Self {
@@ -1584,7 +1602,7 @@ impl FunctionParameter {
     }
 
     pub fn from_js_rest_parameter(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         param: &JsRestParameter,
     ) -> Self {
@@ -1599,7 +1617,7 @@ impl FunctionParameter {
     }
 
     fn from_binding_with_annotation(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         binding: SyntaxResult<AnyJsBindingPattern>,
         annotation: Option<TsTypeAnnotation>,
@@ -1620,7 +1638,8 @@ impl FunctionParameter {
         // Optional parameters can be called without a value, so include `undefined` in the type
         let ty = if is_optional {
             let ty_ref = resolver.reference_to_owned_data(ty_data.clone());
-            ResolvedTypeId::new(resolver.level(), resolver.optional(ty_ref)).into()
+            let id = resolver.optional(ty_ref);
+            resolver.reference_to_id(id)
         } else {
             resolver.reference_to_owned_data(ty_data.clone())
         };
@@ -1650,7 +1669,7 @@ impl FunctionParameter {
     }
 
     pub fn params_from_js_parameters(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         params: &JsParameters,
     ) -> Box<[Self]> {
@@ -1672,7 +1691,7 @@ impl From<(Text, TypeReference)> for FunctionParameterBinding {
 
 impl FunctionParameterBinding {
     pub fn bindings_from_any_js_binding_pattern_of_type(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         pattern: &AnyJsBindingPattern,
         ty: &TypeData,
@@ -1704,7 +1723,7 @@ impl FunctionParameterBinding {
 
 impl GenericTypeParameter {
     pub fn from_ts_type_parameter(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         param: &TsTypeParameter,
     ) -> Option<Self> {
@@ -1732,7 +1751,7 @@ impl GenericTypeParameter {
     }
 
     pub fn params_from_ts_type_parameters(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         params: &TsTypeParameters,
     ) -> Box<[Self]> {
@@ -1747,7 +1766,7 @@ impl GenericTypeParameter {
 
 impl ReturnType {
     pub fn from_any_ts_return_type(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         ty: &AnyTsReturnType,
     ) -> Option<Self> {
@@ -1798,7 +1817,7 @@ impl ReturnType {
 
 impl TupleElementType {
     pub fn from_any_ts_tuple_type_element(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         el: &AnyTsTupleTypeElement,
     ) -> Self {
@@ -1845,12 +1864,28 @@ impl TupleElementType {
 
 impl TypeMember {
     pub fn from_any_js_class_member(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         member: &AnyJsClassMember,
     ) -> Option<Self> {
         match member {
             AnyJsClassMember::JsConstructorClassMember(member) => {
+                let constructor = Constructor {
+                    type_parameters: [].into(),
+                    parameters: constructor_params_from_js_constructor_params(
+                        resolver,
+                        scope_id,
+                        member.parameters(),
+                    ),
+                    return_type: None,
+                };
+                let ty = resolver.register_and_resolve(constructor.into());
+                Some(Self {
+                    kind: TypeMemberKind::Constructor,
+                    ty: ty.into(),
+                })
+            }
+            AnyJsClassMember::TsConstructorSignatureClassMember(member) => {
                 let constructor = Constructor {
                     type_parameters: [].into(),
                     parameters: constructor_params_from_js_constructor_params(
@@ -2008,7 +2043,7 @@ impl TypeMember {
     }
 
     pub fn from_any_js_object_member(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         member: &AnyJsObjectMember,
     ) -> Option<Self> {
@@ -2040,7 +2075,7 @@ impl TypeMember {
                 .and_then(|name| match name {
                     AnyJsObjectMemberName::JsComputedMemberName(name) => {
                         name.expression().ok().map(|expr| {
-                            TypeMemberKind::IndexSignature(TypeReference::from_any_js_expression(
+                            TypeMemberKind::ComputedValue(computed_member_reference(
                                 resolver, scope_id, &expr,
                             ))
                         })
@@ -2088,7 +2123,7 @@ impl TypeMember {
                 .and_then(|name| match name {
                     AnyJsObjectMemberName::JsComputedMemberName(name) => {
                         name.expression().ok().map(|expr| {
-                            TypeMemberKind::IndexSignature(TypeReference::from_any_js_expression(
+                            TypeMemberKind::ComputedValue(computed_member_reference(
                                 resolver, scope_id, &expr,
                             ))
                         })
@@ -2143,7 +2178,7 @@ impl TypeMember {
     }
 
     pub fn from_any_ts_type_member(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         member: &AnyTsTypeMember,
     ) -> Option<Self> {
@@ -2213,7 +2248,10 @@ impl TypeMember {
                 let ty = resolver.register_and_resolve(function.into()).into();
                 Some(Self {
                     kind: TypeMemberKind::Getter(name.into()),
-                    ty: ResolvedTypeId::new(resolver.level(), resolver.optional(ty)).into(),
+                    ty: {
+                        let id = resolver.optional(ty);
+                        resolver.reference_to_id(id)
+                    },
                 })
             }
             AnyTsTypeMember::TsIndexSignatureTypeMember(member) => {
@@ -2277,7 +2315,7 @@ impl TypeMember {
 
     #[inline]
     fn from_class_member_info(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         name: AnyJsClassMemberName,
         ty: TypeReference,
@@ -2285,8 +2323,8 @@ impl TypeMember {
         is_optional: bool,
     ) -> Option<Self> {
         let kind = match name {
-            AnyJsClassMemberName::JsComputedMemberName(name) => TypeMemberKind::IndexSignature(
-                TypeReference::from_any_js_expression(resolver, scope_id, &name.expression().ok()?),
+            AnyJsClassMemberName::JsComputedMemberName(name) => TypeMemberKind::ComputedValue(
+                computed_member_reference(resolver, scope_id, &name.expression().ok()?),
             ),
             _ => {
                 let name = text_from_class_member_name(name.name()?);
@@ -2314,7 +2352,7 @@ impl TypeMember {
 
     #[inline]
     fn from_name_and_optional_type(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         name: TokenText,
         ty: TypeReference,
         is_optional: bool,
@@ -2327,14 +2365,17 @@ impl TypeMember {
                 TypeMemberKind::Named(name)
             },
             ty: match is_optional {
-                true => ResolvedTypeId::new(resolver.level(), resolver.optional(ty)).into(),
+                true => {
+                    let id = resolver.optional(ty);
+                    resolver.reference_to_id(id)
+                }
                 false => ty,
             },
         }
     }
 
     fn members_from_class_member_list(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         member_list: JsClassMemberList,
     ) -> Box<[Self]> {
@@ -2348,8 +2389,8 @@ impl TypeMember {
         for i in 0..num_members {
             let member = &members[i];
             if member.is_constructor()
-                && let Some(member_ty) = resolver.resolve_and_get(&member.ty)
-                && let TypeData::Constructor(constructor) = member_ty.as_raw_data()
+                && let Some(member_ty) = resolver.get_by_reference(&member.ty)
+                && let TypeData::Constructor(constructor) = member_ty.as_ref()
             {
                 for param in &constructor.parameters {
                     if let Some(_accessibility) = param.accessibility
@@ -2373,9 +2414,39 @@ impl TypeMember {
     }
 }
 
+fn computed_member_reference(
+    resolver: &mut dyn RawTypeCollector,
+    scope_id: ScopeId,
+    expression: &AnyJsExpression,
+) -> TypeReference {
+    if let Some(member) = expression.as_js_static_member_expression()
+        && let Ok(object) = member.object()
+        && let Some(identifier) = object.as_js_identifier_expression()
+        && let (Some(object_name), Some(member_name)) = (
+            identifier
+                .name()
+                .ok()
+                .and_then(|name| text_from_token(name.value_token())),
+            member.member().ok().and_then(text_from_any_js_name),
+        )
+        && object_name.text() == "Symbol"
+        && resolver.is_global_symbol(scope_id)
+    {
+        match member_name.text() {
+            "dispose" => return TypeReference::Resolved(GLOBAL_SYMBOL_DISPOSE_ID),
+            "asyncDispose" => {
+                return TypeReference::Resolved(GLOBAL_SYMBOL_ASYNC_DISPOSE_ID);
+            }
+            _ => {}
+        }
+    }
+
+    TypeReference::from_any_js_expression(resolver, scope_id, expression)
+}
+
 impl TypeReference {
     pub fn from_any_js_expression(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &AnyJsExpression,
     ) -> Self {
@@ -2384,7 +2455,7 @@ impl TypeReference {
     }
 
     pub fn from_any_ts_type(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         ty: &AnyTsType,
     ) -> Self {
@@ -2400,7 +2471,7 @@ impl TypeReference {
     }
 
     pub fn from_ts_reference_type(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         ty: &TsReferenceType,
     ) -> Self {
@@ -2409,7 +2480,7 @@ impl TypeReference {
     }
 
     pub fn types_from_ts_type_arguments(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         arguments: Option<TsTypeArguments>,
     ) -> Box<[Self]> {
@@ -2425,7 +2496,7 @@ impl TypeReference {
     }
 
     pub fn types_from_ts_type_list(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         types: TsTypeList,
     ) -> Box<[Self]> {
@@ -2437,7 +2508,7 @@ impl TypeReference {
     }
 
     pub fn types_from_ts_type_parameters(
-        resolver: &mut dyn TypeResolver,
+        resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         params: &TsTypeParameters,
     ) -> Box<[Self]> {
@@ -2629,6 +2700,28 @@ impl TypeofThisOrSuperExpression {
     }
 }
 
+fn reference_to_extends_clause(
+    resolver: &mut dyn RawTypeCollector,
+    scope_id: ScopeId,
+    extends: JsExtendsClause,
+) -> Option<TypeReference> {
+    let super_class = extends.super_class().ok()?;
+    let super_class = resolver.reference_to_resolved_expression(scope_id, &super_class);
+    let type_parameters =
+        TypeReference::types_from_ts_type_arguments(resolver, scope_id, extends.type_arguments());
+
+    if type_parameters.is_empty() {
+        Some(super_class)
+    } else {
+        Some(
+            resolver.reference_to_owned_data(TypeData::instance_of(TypeInstance {
+                ty: super_class,
+                type_parameters,
+            })),
+        )
+    }
+}
+
 impl TypeMemberAccessibility {
     fn from_modifier_list(modifier_list: TsPropertyParameterModifierList) -> Self {
         for modifier in modifier_list {
@@ -2647,7 +2740,7 @@ impl TypeMemberAccessibility {
 
 #[inline]
 fn constructor_params_from_js_constructor_params(
-    resolver: &mut dyn TypeResolver,
+    resolver: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     params: SyntaxResult<JsConstructorParameters>,
 ) -> Box<[ConstructorParameter]> {
@@ -2660,7 +2753,7 @@ fn constructor_params_from_js_constructor_params(
 
 #[inline]
 fn constructor_params_from_js_params(
-    resolver: &mut dyn TypeResolver,
+    resolver: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     params: SyntaxResult<JsParameters>,
 ) -> Box<[ConstructorParameter]> {
@@ -2682,7 +2775,7 @@ fn constructor_params_from_js_params(
 
 #[inline]
 fn function_params_from_js_params(
-    resolver: &mut dyn TypeResolver,
+    resolver: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     params: SyntaxResult<JsParameters>,
 ) -> Box<[FunctionParameter]> {
@@ -2692,7 +2785,7 @@ fn function_params_from_js_params(
 }
 
 fn function_return_type(
-    resolver: &mut dyn TypeResolver,
+    resolver: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     is_async: bool,
     annotation: Option<TsReturnTypeAnnotation>,
@@ -2729,7 +2822,7 @@ fn function_return_type(
 }
 
 fn getter_return_type(
-    resolver: &mut dyn TypeResolver,
+    resolver: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     annotation: Option<TsTypeAnnotation>,
     body: Option<JsFunctionBody>,
@@ -2748,7 +2841,7 @@ fn getter_return_type(
 
 #[inline]
 fn generic_params_from_ts_type_params(
-    resolver: &mut dyn TypeResolver,
+    resolver: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     params: Option<TsTypeParameters>,
 ) -> Box<[TypeReference]> {
@@ -2782,7 +2875,7 @@ fn path_from_any_ts_module_name(module_name: AnyTsModuleName) -> Option<Path> {
 
 #[inline]
 fn return_type_from_annotation(
-    resolver: &mut dyn TypeResolver,
+    resolver: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     annotation: Option<TsReturnTypeAnnotation>,
 ) -> Option<ReturnType> {
@@ -2840,7 +2933,7 @@ fn text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text> {
 
 #[inline]
 fn type_from_annotation(
-    resolver: &mut dyn TypeResolver,
+    resolver: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     annotation: Option<TsTypeAnnotation>,
 ) -> Option<TypeReference> {
@@ -2850,7 +2943,7 @@ fn type_from_annotation(
 }
 
 fn type_from_function_body(
-    resolver: &mut dyn TypeResolver,
+    resolver: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     body: JsFunctionBody,
 ) -> TypeData {
@@ -2879,7 +2972,7 @@ fn type_from_function_body(
                 .map(|ty| resolver.reference_to_owned_data(ty))
                 .collect();
 
-            TypeData::union_of(resolver, return_types)
+            resolver.union_of(return_types)
         }
     }
 }
@@ -2921,7 +3014,7 @@ fn expression_is_const_assertion(expression: &AnyJsExpression) -> bool {
 
 /// Builds the type produced by a const assertion expression.
 fn type_data_from_const_assertion_expression(
-    resolver: &mut dyn TypeResolver,
+    resolver: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     expression: &AnyJsExpression,
 ) -> TypeData {
@@ -2958,13 +3051,13 @@ fn type_data_from_const_assertion_expression(
 }
 
 /// Applies const assertion conversion to inferred tuple and object types.
-fn apply_deep_const(resolver: &mut dyn TypeResolver, inner_type: TypeData) -> TypeData {
+fn apply_deep_const(resolver: &mut dyn RawTypeCollector, inner_type: TypeData) -> TypeData {
     apply_deep_const_inner(resolver, inner_type, 0)
 }
 
 /// Recursively applies `as const` to tuple elements and object members.
 fn apply_deep_const_inner(
-    resolver: &mut dyn TypeResolver,
+    resolver: &mut dyn RawTypeCollector,
     inner_type: TypeData,
     depth: usize,
 ) -> TypeData {
@@ -3003,7 +3096,7 @@ fn apply_deep_const_inner(
 
 /// Resolves a type reference, applies const assertion conversion, and stores the result.
 fn apply_deep_const_reference(
-    resolver: &mut dyn TypeResolver,
+    resolver: &mut dyn RawTypeCollector,
     type_reference: &TypeReference,
     depth: usize,
 ) -> TypeReference {
@@ -3012,8 +3105,8 @@ fn apply_deep_const_reference(
     }
 
     let Some(inner_type) = resolver
-        .resolve_and_get(type_reference)
-        .map(|resolved| resolved.to_data())
+        .get_by_reference(type_reference)
+        .map(Cow::into_owned)
     else {
         return type_reference.clone();
     };
