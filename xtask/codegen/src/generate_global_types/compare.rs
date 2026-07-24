@@ -10,8 +10,6 @@ use super::lower::{
 /// Number of `Error` class members expected in generated output.
 const ERROR_MEMBER_COUNT: usize = 6;
 const SYMBOL_MEMBER_COUNT: usize = 2;
-/// Expected number of lowered generated globals.
-const GENERATED_GLOBAL_COUNT: usize = 10;
 
 /// Expected shape of one lowered disposable pair (interface + dispose helper), checked by
 /// [`assert_disposable_shape`] against the generated model.
@@ -29,14 +27,6 @@ struct DisposableShape<'a> {
 
 /// Validates lowered generated globals before they are emitted.
 pub fn compare_lowered_globals(lowered: &LoweredGlobalTypes) -> Result<()> {
-    if lowered.globals().len() != GENERATED_GLOBAL_COUNT {
-        bail!(
-            "generated globals contain {} entries, expected {}",
-            lowered.globals().len(),
-            GENERATED_GLOBAL_COUNT
-        );
-    }
-
     let Some(error) = lowered.global("Error") else {
         bail!("generated globals are missing the Error global");
     };

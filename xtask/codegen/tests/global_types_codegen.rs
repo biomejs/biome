@@ -1407,12 +1407,12 @@ mod tests {
     }
 
     #[test]
-    fn comparator_rejects_missing_disposable_globals() -> Result<()> {
+    fn comparator_rejects_missing_symbol_global() -> Result<()> {
         let lowered = lowered_from_fixture("manifest.error.d.ts")?;
 
         expect_error_contains(
             compare_lowered_globals(&lowered),
-            "generated globals contain 3 entries, expected 10",
+            "generated globals are missing the Symbol global",
         )
     }
 

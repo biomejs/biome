@@ -345,19 +345,14 @@ pub fn lower_global_types(
         data: LoweredTypeData::Function(call),
     });
 
-    if let Some(symbol_globals) = lower_symbol_globals(manifest, &mut source_cache)? {
-        globals.extend(symbol_globals);
-    }
-    if let Some(disposable_globals) =
-        lower_disposable_global(manifest, &mut source_cache, DISPOSABLE_GLOBAL)?
-    {
-        globals.extend(disposable_globals);
-    }
-    if let Some(async_disposable_globals) =
-        lower_disposable_global(manifest, &mut source_cache, ASYNC_DISPOSABLE_GLOBAL)?
-    {
-        globals.extend(async_disposable_globals);
-    }
+    lower_symbol_globals(manifest, &mut source_cache, &mut globals)?;
+    lower_disposable_global(manifest, &mut source_cache, &mut globals, DISPOSABLE_GLOBAL)?;
+    lower_disposable_global(
+        manifest,
+        &mut source_cache,
+        &mut globals,
+        ASYNC_DISPOSABLE_GLOBAL,
+    )?;
 
     Ok(LoweredGlobalTypes {
         globals: globals.into_boxed_slice(),
@@ -468,9 +463,10 @@ impl SelectedSymbolMember {
 fn lower_symbol_globals(
     manifest: &GlobalManifest,
     source_cache: &mut ParsedSourceCache,
-) -> Result<Option<[LoweredGlobal; 3]>> {
+    globals: &mut Vec<LoweredGlobal>,
+) -> Result<()> {
     let Some(symbol_group) = manifest.global_group("Symbol") else {
-        return Ok(None);
+        return Ok(());
     };
     if !symbol_group.has_role(GlobalDeclarationRole::Type) {
         bail!("Symbol global must have a type-side declaration");
@@ -489,41 +485,39 @@ fn lower_symbol_globals(
     }
     validate_symbol_constructor_members(constructor_group.declarations(), source_cache)?;
 
-    Ok(Some([
-        LoweredGlobal {
+    globals.push(LoweredGlobal {
+        name: Text::from("Symbol"),
+        id_constant: "SYMBOL_ID_GLOBAL_TYPE_ID",
+        data: LoweredTypeData::Class(LoweredClass {
             name: Text::from("Symbol"),
-            id_constant: "SYMBOL_ID_GLOBAL_TYPE_ID",
-            data: LoweredTypeData::Class(LoweredClass {
-                name: Text::from("Symbol"),
-                members: Box::new([
-                    LoweredTypeMember {
-                        name: Text::from("dispose"),
-                        kind: LoweredMemberKind::NamedStatic,
-                        type_reference: LoweredTypeReference::Predefined(
-                            "GLOBAL_SYMBOL_DISPOSE_ID",
-                        ),
-                    },
-                    LoweredTypeMember {
-                        name: Text::from("asyncDispose"),
-                        kind: LoweredMemberKind::NamedStatic,
-                        type_reference: LoweredTypeReference::Predefined(
-                            "GLOBAL_SYMBOL_ASYNC_DISPOSE_ID",
-                        ),
-                    },
-                ]),
-            }),
-        },
-        LoweredGlobal {
-            name: Text::from("Symbol.dispose"),
-            id_constant: "SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID",
-            data: LoweredTypeData::Symbol,
-        },
-        LoweredGlobal {
-            name: Text::from("Symbol.asyncDispose"),
-            id_constant: "SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
-            data: LoweredTypeData::Symbol,
-        },
-    ]))
+            members: Box::new([
+                LoweredTypeMember {
+                    name: Text::from("dispose"),
+                    kind: LoweredMemberKind::NamedStatic,
+                    type_reference: LoweredTypeReference::Predefined("GLOBAL_SYMBOL_DISPOSE_ID"),
+                },
+                LoweredTypeMember {
+                    name: Text::from("asyncDispose"),
+                    kind: LoweredMemberKind::NamedStatic,
+                    type_reference: LoweredTypeReference::Predefined(
+                        "GLOBAL_SYMBOL_ASYNC_DISPOSE_ID",
+                    ),
+                },
+            ]),
+        }),
+    });
+    globals.push(LoweredGlobal {
+        name: Text::from("Symbol.dispose"),
+        id_constant: "SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID",
+        data: LoweredTypeData::Symbol,
+    });
+    globals.push(LoweredGlobal {
+        name: Text::from("Symbol.asyncDispose"),
+        id_constant: "SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
+        data: LoweredTypeData::Symbol,
+    });
+
+    Ok(())
 }
 
 fn validate_symbol_declarations(
@@ -785,14 +779,14 @@ impl<'a> ParsedSourceCache<'a> {
 }
 
 /// Lowers a disposable interface into its interface global plus the dispose helper global.
-/// Returns `None` when the manifest has no group for `spec.interface_name`.
 fn lower_disposable_global(
     manifest: &GlobalManifest,
     source_cache: &mut ParsedSourceCache,
+    globals: &mut Vec<LoweredGlobal>,
     spec: DisposableGlobalSpec,
-) -> Result<Option<[LoweredGlobal; 2]>> {
+) -> Result<()> {
     let Some(group) = manifest.global_group(spec.interface_name) else {
-        return Ok(None);
+        return Ok(());
     };
     if !group.has_role(GlobalDeclarationRole::Type) {
         bail!(
@@ -854,26 +848,26 @@ fn lower_disposable_global(
     let lowered_member = lowered_member
         .with_context(|| format!("{} is missing {}", spec.interface_name, spec.member_name))?;
 
-    Ok(Some([
-        LoweredGlobal {
+    globals.push(LoweredGlobal {
+        name: Text::from(spec.interface_name),
+        id_constant: spec.global_id_constant,
+        data: LoweredTypeData::Interface(LoweredInterface {
             name: Text::from(spec.interface_name),
-            id_constant: spec.global_id_constant,
-            data: LoweredTypeData::Interface(LoweredInterface {
-                name: Text::from(spec.interface_name),
-                members: Box::new([lowered_member]),
-            }),
-        },
-        LoweredGlobal {
-            name: Text::from(spec.helper_name),
-            id_constant: spec.helper_id_constant,
-            data: LoweredTypeData::Function(LoweredFunction {
-                is_async: spec.return_kind.helper_is_async(),
-                name: None,
-                parameters: Box::default(),
-                return_type: LoweredTypeReference::Predefined(spec.return_kind.return_type_id()),
-            }),
-        },
-    ]))
+            members: Box::new([lowered_member]),
+        }),
+    });
+    globals.push(LoweredGlobal {
+        name: Text::from(spec.helper_name),
+        id_constant: spec.helper_id_constant,
+        data: LoweredTypeData::Function(LoweredFunction {
+            is_async: spec.return_kind.helper_is_async(),
+            name: None,
+            parameters: Box::default(),
+            return_type: LoweredTypeReference::Predefined(spec.return_kind.return_type_id()),
+        }),
+    });
+
+    Ok(())
 }
 
 /// Lowers the single member of a disposable interface. Only a computed method signature

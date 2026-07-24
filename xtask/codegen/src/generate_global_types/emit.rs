@@ -15,7 +15,7 @@ const OUTPUT_RELATIVE_PATH: &str = "crates/biome_js_type_info/src/generated/glob
 ///
 /// Must stay ordered by ascending `GlobalTypeId` index so the emitted
 /// `MIGRATED_PREDEFINED_IDS` stays sorted for the runtime `binary_search`.
-const GLOBAL_ID_EMIT_ORDER: [&str; 10] = [
+const GLOBAL_ID_EMIT_ORDER: &[&str] = &[
     "SYMBOL_ID_GLOBAL_TYPE_ID",
     "SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID",
     "SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
@@ -67,25 +67,25 @@ pub(crate) fn set_generated_global_type_data(builder: &mut crate::globals_builde
 /// Builds the migrated ID slice body.
 fn render_migrated_ids(lowered: &LoweredGlobalTypes) -> Result<String> {
     let mut ids = String::new();
-    for global in sorted_globals(lowered)? {
+    for_each_global_in_emit_order(lowered, |global| {
         ids.push_str("    crate::globals::");
         ids.push_str(global.id_constant());
         ids.push_str(",\n");
-    }
+    })?;
     Ok(ids)
 }
 
 /// Builds the resolver registration statements.
 fn render_registrations(lowered: &LoweredGlobalTypes) -> Result<String> {
     let mut registrations = String::new();
-    for global in sorted_globals(lowered)? {
+    for_each_global_in_emit_order(lowered, |global| {
         registrations.push_str("    let data = ");
         registrations.push_str(&render_type_data(global.data()));
         registrations.push_str(";\n");
         registrations.push_str("    builder.set_type_data(crate::globals::");
         registrations.push_str(global.id_constant());
         registrations.push_str(", data);\n");
-    }
+    })?;
     Ok(registrations)
 }
 
@@ -290,8 +290,10 @@ fn global_with_id_constant<'a>(
     bail!("generated global output is missing {id_constant}");
 }
 
-/// Returns generated globals in the sorted predefined-ID order.
-fn sorted_globals(lowered: &LoweredGlobalTypes) -> Result<[&LoweredGlobal; 10]> {
+fn for_each_global_in_emit_order(
+    lowered: &LoweredGlobalTypes,
+    mut visit: impl FnMut(&LoweredGlobal),
+) -> Result<()> {
     for global in lowered.globals() {
         if !GLOBAL_ID_EMIT_ORDER.contains(&global.id_constant()) {
             bail!(
@@ -302,16 +304,9 @@ fn sorted_globals(lowered: &LoweredGlobalTypes) -> Result<[&LoweredGlobal; 10]> 
         }
     }
 
-    Ok([
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[0])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[1])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[2])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[3])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[4])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[5])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[6])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[7])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[8])?,
-        global_with_id_constant(lowered, GLOBAL_ID_EMIT_ORDER[9])?,
-    ])
+    for id_constant in GLOBAL_ID_EMIT_ORDER {
+        visit(global_with_id_constant(lowered, id_constant)?);
+    }
+
+    Ok(())
 }
