@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 
 use biome_parser::{
-    CompletedMarker, Parser,
+    CompletedMarker, Parser, TokenSet,
     parse_lists::ParseNodeList,
     parse_recovery::{ParseRecovery, ParseRecoveryTokenSet},
     prelude::ParsedSyntax::{self, *},
@@ -52,12 +52,17 @@ pub(crate) fn parse_any_block_node(p: &mut YamlParser) -> ParsedSyntax {
 /// &anchor c: 3
 /// ```
 fn parse_block_map_entry_value(p: &mut YamlParser) -> ParsedSyntax {
+    /// The flow scalar tokens that, following bare own-line properties,
+    /// mark them as the next entry's key properties
+    const FLOW_SCALARS: TokenSet<YamlSyntaxKind> = token_set![
+        PLAIN_LITERAL,
+        DOUBLE_QUOTED_LITERAL,
+        SINGLE_QUOTED_LITERAL
+    ];
+
     if is_at_property(p)
         && p.has_preceding_line_break()
-        && matches!(
-            p.source_mut().kind_after_properties(),
-            PLAIN_LITERAL | DOUBLE_QUOTED_LITERAL | SINGLE_QUOTED_LITERAL
-        )
+        && FLOW_SCALARS.contains(p.source_mut().kind_after_properties())
     {
         return Absent;
     }

@@ -1,8 +1,10 @@
 use std::collections::LinkedList;
 
 use biome_parser::{
+    TokenSet,
     diagnostic::ParseDiagnostic,
     lexer::{Lexer, LexerCheckpoint},
+    token_set,
 };
 use biome_rowan::{TextLen, TextRange, TextSize};
 use biome_unicode_table::{Dispatch::WHS, lookup_byte};
@@ -41,6 +43,16 @@ impl<'src> YamlLexer<'src> {
     /// trivia, lexing further ahead as needed. The tokens stay buffered, so
     /// consuming them later is unaffected
     pub(crate) fn kind_after_properties(&mut self) -> YamlSyntaxKind {
+        /// The tokens the lookahead skips over: the properties themselves
+        /// and the trivia between them
+        const SKIPPED: TokenSet<YamlSyntaxKind> = token_set![
+            ANCHOR_PROPERTY_LITERAL,
+            TAG_PROPERTY_LITERAL,
+            WHITESPACE,
+            NEWLINE,
+            COMMENT
+        ];
+
         let mut index = 0;
         loop {
             while self.tokens.len() <= index {
@@ -51,9 +63,7 @@ impl<'src> YamlLexer<'src> {
                 }
             }
             match self.tokens.iter().nth(index).map(|token| token.kind) {
-                Some(
-                    ANCHOR_PROPERTY_LITERAL | TAG_PROPERTY_LITERAL | WHITESPACE | NEWLINE | COMMENT,
-                ) => index += 1,
+                Some(kind) if SKIPPED.contains(kind) => index += 1,
                 Some(kind) => return kind,
                 None => return EOF,
             }
