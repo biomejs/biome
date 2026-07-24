@@ -17,6 +17,6 @@ info: yaml/flow/nested_flow.yaml
 # Formatted
 
 ```yaml
-{ a: [1, { 'c': d }, 3], e: { f: g } }
+{ a: [1, { "c": d }, 3], e: { f: g } }
 
 ```

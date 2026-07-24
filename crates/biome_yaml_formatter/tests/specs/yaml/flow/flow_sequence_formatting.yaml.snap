@@ -23,8 +23,8 @@ b ]
 # Formatted
 
 ```yaml
-formatted: [1, 'abc', "xyz", plain]
-unformatted: [1, 'abc', "xyz", plain]
+formatted: [1, "abc", "xyz", plain]
+unformatted: [1, "abc", "xyz", plain]
 emptyLineFormatted:
   [
     a,
