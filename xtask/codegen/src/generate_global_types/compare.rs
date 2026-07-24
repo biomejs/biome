@@ -10,6 +10,10 @@ use super::lower::{
 /// Number of `Error` class members expected in generated output.
 const ERROR_MEMBER_COUNT: usize = 6;
 const SYMBOL_MEMBER_COUNT: usize = 2;
+const WEAK_MAP_TYPE_PARAMETERS: &[LoweredTypeReference] = &[
+    LoweredTypeReference::Predefined("GLOBAL_T_ID"),
+    LoweredTypeReference::Predefined("GLOBAL_U_ID"),
+];
 
 /// Expected shape of one lowered disposable pair (interface + dispose helper), checked by
 /// [`assert_disposable_shape`] against the generated model.
@@ -69,6 +73,7 @@ pub fn compare_lowered_globals(lowered: &LoweredGlobalTypes) -> Result<()> {
     assert_error_call_shape(call)?;
 
     assert_symbol_shape(lowered)?;
+    assert_weak_map_shape(lowered)?;
     assert_disposable_shape(
         lowered,
         DisposableShape {
@@ -97,6 +102,36 @@ pub fn compare_lowered_globals(lowered: &LoweredGlobalTypes) -> Result<()> {
             return_type_id: "GLOBAL_INSTANCEOF_PROMISE_ID",
         },
     )?;
+
+    Ok(())
+}
+
+/// Validates the generated `WeakMap` class.
+fn assert_weak_map_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
+    let Some(weak_map) = lowered.global("WeakMap") else {
+        bail!("generated globals are missing the WeakMap global");
+    };
+    if weak_map.id_constant() != "WEAK_MAP_ID_GLOBAL_TYPE_ID" {
+        bail!(
+            "generated WeakMap global targets {}, expected WEAK_MAP_ID_GLOBAL_TYPE_ID",
+            weak_map.id_constant()
+        );
+    }
+    let LoweredTypeData::Class(class) = weak_map.data() else {
+        bail!("generated WeakMap global is not a class");
+    };
+    if class.name() != "WeakMap" {
+        bail!(
+            "generated WeakMap class has name {}, expected WeakMap",
+            class.name()
+        );
+    }
+    if class.type_parameters() != WEAK_MAP_TYPE_PARAMETERS {
+        bail!("generated WeakMap global has unexpected type parameters");
+    }
+    if !class.members().is_empty() {
+        bail!("generated WeakMap global must not have members");
+    }
 
     Ok(())
 }

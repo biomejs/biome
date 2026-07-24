@@ -75,6 +75,7 @@ pub enum LoweredTypeData {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LoweredClass {
     name: Text,
+    type_parameters: Box<[LoweredTypeReference]>,
     members: Box<[LoweredTypeMember]>,
 }
 
@@ -82,6 +83,11 @@ impl LoweredClass {
     /// Class name.
     pub fn name(&self) -> &str {
         self.name.text()
+    }
+
+    /// Class type parameters in declaration order.
+    pub fn type_parameters(&self) -> &[LoweredTypeReference] {
+        &self.type_parameters
     }
 
     /// Class members in declaration order.
@@ -331,6 +337,7 @@ pub fn lower_global_types(
         id_constant: "ERROR_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Class(LoweredClass {
             name: Text::from("Error"),
+            type_parameters: Box::default(),
             members: members.into_boxed_slice(),
         }),
     });
@@ -353,6 +360,7 @@ pub fn lower_global_types(
         &mut globals,
         ASYNC_DISPOSABLE_GLOBAL,
     )?;
+    lower_weak_map_global(manifest, &mut source_cache, &mut globals)?;
 
     Ok(LoweredGlobalTypes {
         globals: globals.into_boxed_slice(),
@@ -434,6 +442,8 @@ const ASYNC_DISPOSABLE_GLOBAL: DisposableGlobalSpec = DisposableGlobalSpec {
     return_kind: DisposableReturnKind::PromiseLikeVoid,
 };
 
+const WEAK_MAP_TYPE_PARAMETER_COUNT: usize = 2;
+
 struct ParsedSource<'a> {
     repo_relative: &'a str,
     module: TsDeclarationModule,
@@ -490,6 +500,7 @@ fn lower_symbol_globals(
         id_constant: "SYMBOL_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Class(LoweredClass {
             name: Text::from("Symbol"),
+            type_parameters: Box::default(),
             members: Box::new([
                 LoweredTypeMember {
                     name: Text::from("dispose"),
@@ -578,6 +589,84 @@ fn validate_symbol_constructor_reference(
     };
     if identifier.value_token()?.token_text_trimmed().text() != "SymbolConstructor" {
         bail!("declare var Symbol must reference SymbolConstructor");
+    }
+
+    Ok(())
+}
+
+/// Lowers `WeakMap` to a class with two type parameters and no members.
+fn lower_weak_map_global(
+    manifest: &GlobalManifest,
+    source_cache: &mut ParsedSourceCache,
+    globals: &mut Vec<LoweredGlobal>,
+) -> Result<()> {
+    let Some(weak_map_group) = manifest.global_group("WeakMap") else {
+        return Ok(());
+    };
+    if !weak_map_group.has_role(GlobalDeclarationRole::Type) {
+        bail!("WeakMap global must have a type-side declaration");
+    }
+
+    let mut saw_interface = false;
+    for record in weak_map_group.declarations() {
+        match &record.kind {
+            DeclarationKind::Interface => {
+                saw_interface = true;
+                let declaration = source_cache
+                    .find_interface_declaration(record)?
+                    .with_context(|| {
+                        format!(
+                            "failed to find interface declaration {} at {:?}",
+                            record.declared_name.text(),
+                            record.text_range
+                        )
+                    })?;
+                validate_weak_map_interface(&declaration)?;
+            }
+            DeclarationKind::TypeAlias => {
+                bail!("type aliases are not supported in the WeakMap global")
+            }
+            DeclarationKind::DeclareFunction
+            | DeclarationKind::VariableDeclarator { .. }
+            | DeclarationKind::ImportEquals => {}
+        }
+    }
+    if !saw_interface {
+        bail!("WeakMap global must include an interface declaration");
+    }
+
+    globals.push(LoweredGlobal {
+        name: Text::from("WeakMap"),
+        id_constant: "WEAK_MAP_ID_GLOBAL_TYPE_ID",
+        data: LoweredTypeData::Class(LoweredClass {
+            name: Text::from("WeakMap"),
+            type_parameters: Box::new([
+                LoweredTypeReference::Predefined("GLOBAL_T_ID"),
+                LoweredTypeReference::Predefined("GLOBAL_U_ID"),
+            ]),
+            members: Box::default(),
+        }),
+    });
+
+    Ok(())
+}
+
+fn validate_weak_map_interface(declaration: &TsInterfaceDeclaration) -> Result<()> {
+    if declaration.extends_clause().is_some() {
+        bail!("WeakMap interface extends clauses are not supported");
+    }
+    let type_parameters = declaration
+        .type_parameters()
+        .context("WeakMap interface must declare two type parameters")?;
+    let mut type_parameter_count = 0;
+    for type_parameter in type_parameters.items() {
+        type_parameter.context("WeakMap interface has a malformed type parameter")?;
+        type_parameter_count += 1;
+    }
+    if type_parameter_count != WEAK_MAP_TYPE_PARAMETER_COUNT {
+        bail!(
+            "WeakMap interface has {type_parameter_count} type parameters, expected {WEAK_MAP_TYPE_PARAMETER_COUNT}"
+        );
     }
 
     Ok(())
