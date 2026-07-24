@@ -11,10 +11,10 @@ use super::lower::{
 /// Relative path of the generated global types module from the workspace root.
 const OUTPUT_RELATIVE_PATH: &str = "crates/biome_js_type_info/src/generated/global_types.rs";
 
-/// Stable generated global emission order for generated globals with fixed IDs.
+/// Generated globals in ascending `GlobalTypeId` index order.
 ///
-/// Must stay ordered by ascending `GlobalTypeId` index so the emitted
-/// `MIGRATED_PREDEFINED_IDS` stays sorted for the runtime `binary_search`.
+/// The index is the row position in `PREDEFINED_ID_ROWS`. This keeps
+/// `MIGRATED_PREDEFINED_IDS` sorted for the runtime `binary_search`.
 const GLOBAL_ID_EMIT_ORDER: &[&str] = &[
     "SYMBOL_ID_GLOBAL_TYPE_ID",
     "SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID",
