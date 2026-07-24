@@ -6,11 +6,13 @@ use biome_formatter::comments::{
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{FormatRefWithRule, FormatResult, FormatRule, write};
 use biome_rowan::AstNode;
+use biome_rowan::AstNodeList;
 use biome_rowan::{SyntaxTriviaPieceComments, TextSize};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
 use biome_yaml_syntax::{
-    YamlBlockMapExplicitEntry, YamlDocument, YamlFlowMapExplicitEntry, YamlFoldedScalar,
-    YamlLanguage, YamlLiteralScalar, YamlRoot, YamlSyntaxKind, YamlSyntaxNode, YamlSyntaxToken,
+    AnyYamlMappingImplicitKey, YamlBlockInBlockNode, YamlBlockMapExplicitEntry, YamlDocument,
+    YamlFlowJsonNode, YamlFlowMapExplicitEntry, YamlFlowYamlNode, YamlFoldedScalar, YamlLanguage,
+    YamlLiteralScalar, YamlRoot, YamlSyntaxKind, YamlSyntaxNode, YamlSyntaxToken,
 };
 
 use crate::prelude::*;
@@ -74,9 +76,122 @@ impl CommentStyle for YamlCommentStyle {
             .or_else(handle_document_comment)
             .or_else(handle_flow_map_explicit_entry_comment)
             .or_else(handle_block_map_explicit_entry_comment)
+            .or_else(handle_middle_comment)
             .or_else(handle_block_scalar_comment)
             .or_else(handle_own_line_comment)
             .or_else(handle_end_of_line_comment)
+    }
+}
+
+/// Handles a middle comment, one sitting between a node's properties and its
+/// content. It becomes a dangling comment of the node that owns the
+/// properties, whose format rule keeps a single one on the properties' line
+/// and moves a group onto their own lines above the content, as Prettier
+/// does.
+fn handle_middle_comment(
+    comment: DecoratedComment<YamlLanguage>,
+) -> CommentPlacement<YamlLanguage> {
+    let range = comment.piece().text_range();
+    for node in comment.enclosing_node().ancestors().take(5) {
+        if let Some((start, end)) = middle_comment_region(&node)
+            && start <= range.start()
+            && range.end() <= end
+        {
+            return CommentPlacement::dangling(node, comment);
+        }
+    }
+    CommentPlacement::Default(comment)
+}
+
+/// The source range between `node`'s properties and its content, in which a
+/// comment is a middle comment of the node. For a block node whose
+/// properties the parser flattened onto the first key of its mapping, the
+/// region reaches down to the start of the key's own line.
+fn middle_comment_region(node: &YamlSyntaxNode) -> Option<(TextSize, TextSize)> {
+    match node.kind() {
+        YamlSyntaxKind::YAML_FLOW_YAML_NODE => {
+            let node = YamlFlowYamlNode::cast_ref(node)?;
+            let skipped = AnyYamlMappingImplicitKey::YamlFlowYamlNode(node.clone())
+                .enclosing_mapping_property_count();
+            let last = node.properties().iter().skip(skipped).last()?;
+            let content = node.content()?;
+            Some((last.range().end(), content.range().start()))
+        }
+        YamlSyntaxKind::YAML_FLOW_JSON_NODE => {
+            let node = YamlFlowJsonNode::cast_ref(node)?;
+            let skipped = AnyYamlMappingImplicitKey::YamlFlowJsonNode(node.clone())
+                .enclosing_mapping_property_count();
+            let last = node.properties().iter().skip(skipped).last()?;
+            let content = node.content().ok()?;
+            Some((last.range().end(), content.range().start()))
+        }
+        YamlSyntaxKind::YAML_BLOCK_IN_BLOCK_NODE => {
+            let node = YamlBlockInBlockNode::cast_ref(node)?;
+            if let Some((properties, count)) = node.properties_on_first_key() {
+                let last = properties.iter().nth(count - 1)?;
+                // The key's own line, where the mapping's content begins
+                let rest_start = properties
+                    .iter()
+                    .nth(count)
+                    .map(|property| property.range().start())
+                    .or_else(|| {
+                        let key = last.syntax().parent()?.parent()?;
+                        match AnyYamlMappingImplicitKey::cast(key)? {
+                            AnyYamlMappingImplicitKey::YamlFlowYamlNode(node) => {
+                                Some(node.content()?.range().start())
+                            }
+                            AnyYamlMappingImplicitKey::YamlFlowJsonNode(node) => {
+                                Some(node.content().ok()?.range().start())
+                            }
+                            AnyYamlMappingImplicitKey::YamlAliasNode(_) => None,
+                        }
+                    })?;
+                Some((last.range().end(), rest_start))
+            } else {
+                let last = node.properties().iter().last()?;
+                let content = node.content().ok()?;
+                Some((last.range().end(), content.range().start()))
+            }
+        }
+        _ => None,
+    }
+}
+
+/// Formats the middle comments of a node, its dangling comments sitting
+/// between its properties and its content. A single comment joins the
+/// properties' line; a group goes onto its own lines below. The caller
+/// prints the line break that separates the comments from the content.
+pub(crate) struct FormatMiddleComments<'a> {
+    node: &'a YamlSyntaxNode,
+}
+
+impl<'a> FormatMiddleComments<'a> {
+    pub(crate) fn new(node: &'a YamlSyntaxNode) -> Self {
+        Self { node }
+    }
+}
+
+impl Format<YamlFormatContext> for FormatMiddleComments<'_> {
+    fn fmt(&self, f: &mut Formatter<YamlFormatContext>) -> FormatResult<()> {
+        // Cheap clone of an `Rc`, releasing the borrow on the formatter so
+        // the comments can be written while iterating over them
+        let comments = f.comments().clone();
+        let dangling = comments.dangling_comments(self.node);
+        let single = dangling.len() == 1;
+
+        for comment in dangling {
+            if single {
+                write!(f, [space()])?;
+            } else {
+                write!(f, [hard_line_break()])?;
+            }
+            write!(
+                f,
+                [FormatRefWithRule::new(comment, FormatYamlLeadingComment)]
+            )?;
+            comment.mark_formatted();
+        }
+        Ok(())
     }
 }
 
@@ -351,10 +466,7 @@ impl Format<YamlFormatContext> for FormatCommentsSlice<'_> {
             }
             write!(
                 f,
-                [FormatRefWithRule::new(
-                    comment,
-                    FormatYamlLeadingComment::default()
-                )]
+                [FormatRefWithRule::new(comment, FormatYamlLeadingComment)]
             )?;
             comment.mark_formatted();
         }
