@@ -1,6 +1,6 @@
 use crate::content_lines::ContentLines;
 use crate::prelude::*;
-use biome_formatter::write;
+use biome_formatter::{QuoteStyle, write};
 use biome_yaml_syntax::YamlSyntaxToken;
 use std::borrow::Cow;
 
@@ -119,9 +119,7 @@ impl Format<YamlFormatContext> for FormatFlowScalar<'_> {
 /// equivalent, so text with any other escape keeps its double quotes; a
 /// backslash in a single quoted scalar is content that double quotes would
 /// misread as an escape, so such text keeps its single quotes
-fn normalize_quotes(value: &str, quote_style: biome_formatter::QuoteStyle) -> Cow<'_, str> {
-    use biome_formatter::QuoteStyle;
-
+fn normalize_quotes(value: &str, quote_style: QuoteStyle) -> Cow<'_, str> {
     let bytes = value.as_bytes();
     let quote = match bytes.first() {
         Some(b'"') if bytes.len() >= 2 && bytes.last() == Some(&b'"') => QuoteStyle::Double,
