@@ -1,3 +1,4 @@
+use crate::content_lines::ContentLines;
 use crate::prelude::*;
 use biome_formatter::write;
 use biome_yaml_syntax::YamlSyntaxToken;
@@ -40,19 +41,20 @@ impl Format<YamlFormatContext> for FormatFlowScalar<'_> {
         }
 
         let content = format_with(|f| {
-            let mut lines = split_lines(value).peekable();
+            let mut lines = ContentLines::new(value);
 
             // Leading whitespace before the token is trivia rather than part
             // of its text, so the first line only has its end trimmed
-            let first = lines.next().unwrap_or("").trim_end();
-            write!(f, [text(first, position)])?;
+            if let Some(first) = lines.next() {
+                write!(f, [text(first.trim_end(), position)])?;
+            }
 
             let mut prev_empty = false;
             while let Some(line) = lines.next() {
                 // The trailing whitespace of the last line is kept: in a
                 // quoted scalar it sits against the closing quote and is
                 // content
-                let line = if lines.peek().is_some() {
+                let line = if lines.has_remaining() {
                     line.trim()
                 } else {
                     line.trim_start()
@@ -87,31 +89,4 @@ impl Format<YamlFormatContext> for FormatFlowScalar<'_> {
 
         write!(f, [format_replaced(self.token, &content)])
     }
-}
-
-/// Splits `text` at its line breaks: `\r\n`, `\n`, or a lone `\r`.
-///
-/// [str::lines] can't be used here because it doesn't split at a lone `\r`,
-/// which YAML accepts as a line break. Leaving one embedded in a line would
-/// print a `\r` the printer's line ending option never normalized.
-fn split_lines(text: &str) -> impl Iterator<Item = &str> {
-    let mut rest = Some(text);
-    std::iter::from_fn(move || {
-        let current = rest?;
-        match current.find(['\n', '\r']) {
-            Some(index) => {
-                let len = if current[index..].starts_with("\r\n") {
-                    2
-                } else {
-                    1
-                };
-                rest = Some(&current[index + len..]);
-                Some(&current[..index])
-            }
-            None => {
-                rest = None;
-                Some(current)
-            }
-        }
-    })
 }
