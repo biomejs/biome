@@ -330,6 +330,66 @@ const props: Props = { title: "Hello" };
 }
 
 #[test]
+fn formats_declaration_tags() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+            "html": {
+                "formatter": { "enabled": true },
+                "experimentalFullSupportEnabled": true
+            }
+        }"#
+        .as_bytes(),
+    );
+
+    let svelte_file_path = Utf8Path::new("file.svelte");
+    fs.insert(
+        svelte_file_path.into(),
+        r#"<script>
+const source={value:1};
+</script>
+
+{let    value=source.value;}
+{const first=1,second={value:"}"};}
+{const regex=/[}]/;}
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", svelte_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(
+        &fs,
+        svelte_file_path,
+        r#"<script>
+const source = { value: 1 };
+</script>
+
+{let value = source.value}
+{const first = 1,
+	second = { value: "}" }}
+{const regex = /[}]/}
+"#,
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "formats_declaration_tags",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn format_stdin_successfully() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

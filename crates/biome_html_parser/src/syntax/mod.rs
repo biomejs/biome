@@ -4,7 +4,7 @@ mod parse_error;
 mod svelte;
 mod vue;
 
-use crate::parser::HtmlParser;
+use crate::parser::{HtmlParser, HtmlParserCheckpoint};
 use crate::syntax::HtmlSyntaxFeatures::{
     Angular, Astro, DoubleTextExpressions, SingleTextExpressions, Svelte, Vue,
 };
@@ -19,7 +19,8 @@ use crate::syntax::astro::{
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::{
     SVELTE_KEYWORDS, is_at_svelte_directive_start, parse_attach_attribute, parse_svelte_at_block,
-    parse_svelte_directive, parse_svelte_hash_block, parse_svelte_spread_or_expression,
+    parse_svelte_declaration_or_expression, parse_svelte_directive, parse_svelte_hash_block,
+    parse_svelte_spread_or_expression,
 };
 use crate::syntax::vue::{
     VUE_KEYWORDS, parse_vue_directive, parse_vue_v_bind_shorthand_directive, parse_vue_v_for_value,
@@ -30,12 +31,12 @@ use crate::token_source::{
 };
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
-use biome_parser::Parser;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
+use biome_parser::{Marker, Parser};
 use biome_rowan::TextRange;
 use biome_string_case::StrLikeExtension;
 
@@ -446,7 +447,7 @@ pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
         ),
         T!["{@"] => parse_svelte_at_block(p),
         T!["{#"] => parse_svelte_hash_block(p),
-        T!['{'] => parse_single_text_expression(p, HtmlLexContext::Regular).or_else(|| {
+        T!['{'] => parse_svelte_declaration_or_expression(p).or_else(|| {
             let m = p.start();
             p.bump_remap(HTML_LITERAL);
             Present(m.complete(p, HTML_CONTENT))
@@ -957,6 +958,16 @@ pub(crate) fn parse_single_text_expression(
 
     p.bump_with_context(T!['{'], HtmlLexContext::single_expression());
 
+    parse_single_text_expression_after_opening(p, context, checkpoint, m, opening_range)
+}
+
+pub(crate) fn parse_single_text_expression_after_opening(
+    p: &mut HtmlParser,
+    context: HtmlLexContext,
+    checkpoint: HtmlParserCheckpoint,
+    m: Marker,
+    opening_range: TextRange,
+) -> ParsedSyntax {
     TextExpression::new_single().parse_element(p).ok();
 
     if p.at(T!['}']) {

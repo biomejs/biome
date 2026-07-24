@@ -648,27 +648,10 @@ impl<'src> HtmlLexer<'src> {
             return self.consume_newline_or_whitespaces();
         }
 
-        let mut brackets_stack = 0;
-        while let Some(current) = self.current_byte() {
-            match current {
-                b'}' => {
-                    if brackets_stack == 0 {
-                        break;
-                    } else {
-                        brackets_stack -= 1;
-                        self.advance(1);
-                    }
-                }
-                b'{' => {
-                    brackets_stack += 1;
-                    self.advance(1);
-                }
-
-                _ => {
-                    self.advance(1);
-                }
-            }
-        }
+        let mut quotes_seen = QuotesSeen::new();
+        let expression_length =
+            quotes_seen.expression_length(&self.source.as_bytes()[self.position..]);
+        self.advance(expression_length);
 
         HTML_LITERAL
     }
@@ -1868,6 +1851,16 @@ fn is_vue_directive_prefix_bytes(bytes: &[u8]) -> bool {
     bytes.starts_with(b"v-")
 }
 
+fn slash_starts_regex(previous_non_whitespace: Option<u8>) -> bool {
+    match previous_non_whitespace {
+        None => true,
+        Some(byte) => !matches!(
+            lookup_byte(byte),
+            IDT | DOL | DIG | ZER | PNC | BTC | PLS | MIN
+        ),
+    }
+}
+
 /// Check if a char is a linebreak (for JS-style comments in Svelte)
 fn is_linebreak(chr: char) -> bool {
     matches!(chr, '\n' | '\r' | '\u{2028}' | '\u{2029}')
@@ -1914,9 +1907,9 @@ impl<'src> LexerWithCheckpoint<'src> for HtmlLexer<'src> {
 }
 
 /// Tracks whether the lexer is currently inside an open string literal, regex
-/// literal, or comment while scanning Astro frontmatter. Used to determine
-/// whether a `---` sequence is a genuine closing fence or merely three dashes
-/// that appear inside a string or regex.
+/// literal, or comment while scanning embedded JavaScript. This distinguishes
+/// Astro closing fences and Svelte expression braces from the same characters
+/// inside JavaScript literals or comments.
 ///
 /// ## Design
 ///
@@ -1976,6 +1969,110 @@ impl QuotesSeen {
             prev_byte: None,
             prev_non_ws_byte: None,
         }
+    }
+
+    fn expression_length(&mut self, source: &[u8]) -> usize {
+        let mut position = 0;
+        let mut brackets_stack = 0;
+
+        'expression: loop {
+            if self.is_empty() {
+                while let Some(&current) = source.get(position) {
+                    match current {
+                        b'}' => {
+                            if brackets_stack == 0 {
+                                break 'expression;
+                            }
+                            brackets_stack -= 1;
+                        }
+                        b'{' => brackets_stack += 1,
+                        b'"' | b'\'' | b'`' => {
+                            self.current_quote = Some(current);
+                            position += 1;
+                            break;
+                        }
+                        b'/' => {
+                            match source.get(position + 1) {
+                                Some(b'/') => self.comment = QuotesSeenComment::SingleLine,
+                                Some(b'*') => self.comment = QuotesSeenComment::MultiLine,
+                                Some(b'>') => {}
+                                _ => {
+                                    let expression = &source[..position];
+                                    let previous_non_whitespace = expression
+                                        .iter()
+                                        .rev()
+                                        .copied()
+                                        .find(|byte| !byte.is_ascii_whitespace());
+                                    self.in_regex = expression.last() != Some(&b'<')
+                                        && slash_starts_regex(previous_non_whitespace);
+                                }
+                            }
+                            position += 1;
+                            if !self.is_empty() {
+                                break;
+                            }
+                            continue;
+                        }
+                        _ => {}
+                    }
+                    position += 1;
+                }
+            } else if let Some(quote) = self.current_quote {
+                while let Some(&current) = source.get(position) {
+                    position += 1;
+                    if self.escaped {
+                        self.escaped = false;
+                    } else if current == b'\\' {
+                        self.escaped = true;
+                    } else if current == quote {
+                        self.current_quote = None;
+                        break;
+                    }
+                }
+            } else if self.in_regex {
+                while let Some(&current) = source.get(position) {
+                    position += 1;
+                    if self.escaped {
+                        self.escaped = false;
+                    } else if current == b'\\' {
+                        self.escaped = true;
+                    } else if current == b'/' {
+                        self.in_regex = false;
+                        break;
+                    }
+                }
+            } else {
+                match self.comment {
+                    QuotesSeenComment::SingleLine => {
+                        while let Some(&current) = source.get(position) {
+                            position += 1;
+                            if current == b'\n' {
+                                self.comment = QuotesSeenComment::None;
+                                break;
+                            }
+                        }
+                    }
+                    QuotesSeenComment::MultiLine => {
+                        let mut previous = b'/';
+                        while let Some(&current) = source.get(position) {
+                            position += 1;
+                            if previous == b'*' && current == b'/' {
+                                self.comment = QuotesSeenComment::None;
+                                break;
+                            }
+                            previous = current;
+                        }
+                    }
+                    QuotesSeenComment::None => unreachable!(),
+                }
+            }
+
+            if position == source.len() {
+                break;
+            }
+        }
+
+        position
     }
 
     /// Processes one byte of frontmatter source and updates the tracking state.
@@ -2133,21 +2230,7 @@ impl QuotesSeen {
     /// paren/bracket, number, or `++`/`--` suffix, `/` is division. In all
     /// other positions `/` starts a regex.
     fn slash_starts_regex(&self) -> bool {
-        match self.prev_non_ws_byte {
-            None => true,
-            Some(b) => !matches!(
-                b,
-                b'a'..=b'z'
-                    | b'A'..=b'Z'
-                    | b'0'..=b'9'
-                    | b'_'
-                    | b'$'
-                    | b')'
-                    | b']'
-                    | b'+'
-                    | b'-'
-            ),
-        }
+        slash_starts_regex(self.prev_non_ws_byte)
     }
 
     /// Returns `true` when the tracker is not currently inside an open string

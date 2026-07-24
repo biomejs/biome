@@ -6,7 +6,8 @@ use crate::syntax::parse_error::{
 };
 use crate::syntax::{
     AttrInitializerContext, TextExpression, parse_attribute_initializer, parse_html_element,
-    parse_single_text_expression, parse_single_text_expression_content,
+    parse_single_text_expression, parse_single_text_expression_after_opening,
+    parse_single_text_expression_content,
 };
 use crate::token_source::{HtmlLexContext, HtmlReLexContext, RestrictedExpressionStopAt};
 use biome_html_syntax::HtmlSyntaxKind::*;
@@ -17,6 +18,10 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{Marker, Parser, SyntaxFeature, TokenSet, token_set};
 use biome_rowan::TextRange;
+use biome_unicode_table::{
+    Dispatch::{DIG, DOL, IDT, UNI, ZER},
+    is_js_id_continue, lookup_byte,
+};
 use std::ops::Sub;
 
 pub(crate) fn parse_svelte_hash_block(p: &mut HtmlParser) -> ParsedSyntax {
@@ -401,6 +406,49 @@ pub(crate) fn parse_svelte_spread_or_expression(p: &mut HtmlParser) -> ParsedSyn
         m.abandon(p);
         let context = super::inside_tag_context(p);
         parse_single_text_expression(p, context)
+    }
+}
+
+pub(crate) fn parse_svelte_declaration_or_expression(p: &mut HtmlParser) -> ParsedSyntax {
+    if !Svelte.is_supported(p) || !p.at(T!['{']) {
+        return parse_single_text_expression(p, HtmlLexContext::Regular);
+    }
+
+    let checkpoint = p.checkpoint();
+    let m = p.start();
+    let opening_range = p.cur_range();
+    p.bump_with_context(T!['{'], HtmlLexContext::single_expression());
+
+    let text = p.cur_text();
+    let declaration_rest = match text.as_bytes().first() {
+        Some(b'l') => text.strip_prefix("let"),
+        Some(b'c') => text.strip_prefix("const"),
+        _ => None,
+    };
+    let is_declaration = declaration_rest.is_some_and(|rest| match rest.as_bytes().first() {
+        None => true,
+        Some(byte) => match lookup_byte(*byte) {
+            IDT | DOL | DIG | ZER => false,
+            UNI => rest
+                .chars()
+                .next()
+                .is_none_or(|character| !is_js_id_continue(character)),
+            _ => true,
+        },
+    });
+
+    if is_declaration {
+        parse_single_text_expression_content(p).or_add_diagnostic(p, expected_text_expression);
+        p.expect_with_context(T!['}'], HtmlLexContext::Regular);
+        Present(m.complete(p, SVELTE_DECLARATION_BLOCK))
+    } else {
+        parse_single_text_expression_after_opening(
+            p,
+            HtmlLexContext::Regular,
+            checkpoint,
+            m,
+            opening_range,
+        )
     }
 }
 

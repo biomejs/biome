@@ -8,7 +8,7 @@ use biome_diagnostics::{print_diagnostic_to_string, termcolor};
 use biome_fs::BiomePath;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_languages::JsFileSource;
-use biome_languages::javascript::{JsEmbeddingKind, SvelteFileKind};
+use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
 use biome_rowan::SyntaxKind;
 use biome_service::settings::Settings;
 use biome_test_utils::{has_bogus_nodes_or_empty_slots, validate_eof_token};
@@ -87,10 +87,13 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     if file_name.contains(".inline_expr.") {
         // Use Svelte embedding kind for testing (any embedding kind would work)
         file_source = file_source.with_embedding_kind(JsEmbeddingKind::Svelte {
-            is_source: false,
-            is_function_signature: false,
-            kind: SvelteFileKind::Component,
-            is_const_block: false,
+            file_kind: SvelteFileKind::Component,
+            embedding_kind: SvelteEmbeddingKind::Expression,
+        });
+    } else if file_name.contains(".svelte_declaration.") {
+        file_source = file_source.with_embedding_kind(JsEmbeddingKind::Svelte {
+            file_kind: SvelteFileKind::Component,
+            embedding_kind: SvelteEmbeddingKind::Declaration,
         });
     }
 
