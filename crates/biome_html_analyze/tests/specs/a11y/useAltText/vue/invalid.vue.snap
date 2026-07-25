@@ -4,37 +4,39 @@ expression: invalid.vue
 ---
 # Input
 ```vue
-<!-- should generate diagnostics -->
+<template>
+	<!-- should generate diagnostics -->
 
-<!-- img without alt -->
-<img src="image.png" />
-<img src="image.png" class="photo" />
+	<!-- img without alt -->
+	<img src="image.png" />
+	<img src="image.png" class="photo" />
 
-<!-- area without alt -->
-<area href="foo" />
-<map name="map"><area shape="rect" coords="0,0,100,100" href="link" /></map>
+	<!-- area without alt -->
+	<area href="foo" />
+	<map name="map"><area shape="rect" coords="0,0,100,100" href="link" /></map>
 
-<!-- input type="image" without alt -->
-<input type="image" src="submit.png" />
-<input type="image" src="button.png" name="submit" />
+	<!-- input type="image" without alt -->
+	<input type="image" src="submit.png" />
+	<input type="image" src="button.png" name="submit" />
 
-<!-- object without title -->
-<object data="movie.swf"></object>
-<object data="document.pdf" type="application/pdf"></object>
+	<!-- object without title -->
+	<object data="movie.swf"></object>
+	<object data="document.pdf" type="application/pdf"></object>
+</template>
 
 ```
 
 # Diagnostics
 ```
-invalid.vue:4:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:5:2 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
   
-    3 │ <!-- img without alt -->
-  > 4 │ <img src="image.png" />
-      │ ^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ <img src="image.png" class="photo" />
-    6 │ 
+    4 │ 	<!-- img without alt -->
+  > 5 │ 	<img src="image.png" />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 	<img src="image.png" class="photo" />
+    7 │ 
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
@@ -44,16 +46,16 @@ invalid.vue:4:1 lint/a11y/useAltText ━━━━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:5:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:6:2 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
   
-    3 │ <!-- img without alt -->
-    4 │ <img src="image.png" />
-  > 5 │ <img src="image.png" class="photo" />
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │ 
-    7 │ <!-- area without alt -->
+    4 │ 	<!-- img without alt -->
+    5 │ 	<img src="image.png" />
+  > 6 │ 	<img src="image.png" class="photo" />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ 	<!-- area without alt -->
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
@@ -63,15 +65,15 @@ invalid.vue:5:1 lint/a11y/useAltText ━━━━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:8:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:9:2 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
   
-     7 │ <!-- area without alt -->
-   > 8 │ <area href="foo" />
-       │ ^^^^^^^^^^^^^^^^^^^
-     9 │ <map name="map"><area shape="rect" coords="0,0,100,100" href="link" /></map>
-    10 │ 
+     8 │ 	<!-- area without alt -->
+   > 9 │ 	<area href="foo" />
+       │ 	^^^^^^^^^^^^^^^^^^^
+    10 │ 	<map name="map"><area shape="rect" coords="0,0,100,100" href="link" /></map>
+    11 │ 
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
@@ -81,16 +83,16 @@ invalid.vue:8:1 lint/a11y/useAltText ━━━━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:9:17 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:10:18 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
   
-     7 │ <!-- area without alt -->
-     8 │ <area href="foo" />
-   > 9 │ <map name="map"><area shape="rect" coords="0,0,100,100" href="link" /></map>
-       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    10 │ 
-    11 │ <!-- input type="image" without alt -->
+     8 │ 	<!-- area without alt -->
+     9 │ 	<area href="foo" />
+  > 10 │ 	<map name="map"><area shape="rect" coords="0,0,100,100" href="link" /></map>
+       │ 	                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ 	<!-- input type="image" without alt -->
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
@@ -100,15 +102,15 @@ invalid.vue:9:17 lint/a11y/useAltText ━━━━━━━━━━━━━━
 ```
 
 ```
-invalid.vue:12:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:13:2 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
   
-    11 │ <!-- input type="image" without alt -->
-  > 12 │ <input type="image" src="submit.png" />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    13 │ <input type="image" src="button.png" name="submit" />
-    14 │ 
+    12 │ 	<!-- input type="image" without alt -->
+  > 13 │ 	<input type="image" src="submit.png" />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 	<input type="image" src="button.png" name="submit" />
+    15 │ 
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
@@ -118,16 +120,16 @@ invalid.vue:12:1 lint/a11y/useAltText ━━━━━━━━━━━━━━
 ```
 
 ```
-invalid.vue:13:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:14:2 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
   
-    11 │ <!-- input type="image" without alt -->
-    12 │ <input type="image" src="submit.png" />
-  > 13 │ <input type="image" src="button.png" name="submit" />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    14 │ 
-    15 │ <!-- object without title -->
+    12 │ 	<!-- input type="image" without alt -->
+    13 │ 	<input type="image" src="submit.png" />
+  > 14 │ 	<input type="image" src="button.png" name="submit" />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ 	<!-- object without title -->
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
@@ -137,15 +139,15 @@ invalid.vue:13:1 lint/a11y/useAltText ━━━━━━━━━━━━━━
 ```
 
 ```
-invalid.vue:16:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:17:2 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a text alternative through the title, aria-label, or aria-labelledby attribute.
   
-    15 │ <!-- object without title -->
-  > 16 │ <object data="movie.swf"></object>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    17 │ <object data="document.pdf" type="application/pdf"></object>
-    18 │ 
+    16 │ 	<!-- object without title -->
+  > 17 │ 	<object data="movie.swf"></object>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 	<object data="document.pdf" type="application/pdf"></object>
+    19 │ </template>
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
@@ -155,15 +157,16 @@ invalid.vue:16:1 lint/a11y/useAltText ━━━━━━━━━━━━━━
 ```
 
 ```
-invalid.vue:17:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:18:2 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a text alternative through the title, aria-label, or aria-labelledby attribute.
   
-    15 │ <!-- object without title -->
-    16 │ <object data="movie.swf"></object>
-  > 17 │ <object data="document.pdf" type="application/pdf"></object>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    18 │ 
+    16 │ 	<!-- object without title -->
+    17 │ 	<object data="movie.swf"></object>
+  > 18 │ 	<object data="document.pdf" type="application/pdf"></object>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ </template>
+    20 │ 
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   

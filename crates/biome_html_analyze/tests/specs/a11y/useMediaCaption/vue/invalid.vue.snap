@@ -4,40 +4,43 @@ expression: invalid.vue
 ---
 # Input
 ```vue
-<!-- should generate diagnostics -->
-<video></video>
-<audio></audio>
-<video>
-    <source src="video.webm" type="video/webm" />
-</video>
-<audio>
-    <source src="audio.ogg" type="audio/ogg" />
-</audio>
-<!-- track without kind="captions" -->
-<video><track kind="subtitles" /></video>
-<!-- track with missing kind attribute -->
-<video><track src="captions.vtt" /></video>
-<!-- track with empty kind attribute -->
-<video><track kind="" /></video>
-<!-- muted audio still requires captions -->
-<audio muted></audio>
-<!-- static Vue bindings with non-captions kind should also be flagged -->
-<video><track :kind="'subtitles'" /></video>
-<audio><track v-bind:kind="'metadata'" /></audio>
+<template>
+	<!-- should generate diagnostics -->
+	<video></video>
+	<audio></audio>
+	<video>
+	    <source src="video.webm" type="video/webm" />
+	</video>
+	<audio>
+	    <source src="audio.ogg" type="audio/ogg" />
+	</audio>
+	<!-- track without kind="captions" -->
+	<video><track kind="subtitles" /></video>
+	<!-- track with missing kind attribute -->
+	<video><track src="captions.vtt" /></video>
+	<!-- track with empty kind attribute -->
+	<video><track kind="" /></video>
+	<!-- muted audio still requires captions -->
+	<audio muted></audio>
+	<!-- static Vue bindings with non-captions kind should also be flagged -->
+	<video><track :kind="'subtitles'" /></video>
+	<audio><track v-bind:kind="'metadata'" /></audio>
+</template>
 
 ```
 
 # Diagnostics
 ```
-invalid.vue:2:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:3:2 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a track for captions when using audio or video elements.
   
-    1 │ <!-- should generate diagnostics -->
-  > 2 │ <video></video>
-      │ ^^^^^^^^^^^^^^^
-    3 │ <audio></audio>
-    4 │ <video>
+    1 │ <template>
+    2 │ 	<!-- should generate diagnostics -->
+  > 3 │ 	<video></video>
+      │ 	^^^^^^^^^^^^^^^
+    4 │ 	<audio></audio>
+    5 │ 	<video>
   
   i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
   
@@ -45,16 +48,16 @@ invalid.vue:2:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:3:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:4:2 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a track for captions when using audio or video elements.
   
-    1 │ <!-- should generate diagnostics -->
-    2 │ <video></video>
-  > 3 │ <audio></audio>
-      │ ^^^^^^^^^^^^^^^
-    4 │ <video>
-    5 │     <source src="video.webm" type="video/webm" />
+    2 │ 	<!-- should generate diagnostics -->
+    3 │ 	<video></video>
+  > 4 │ 	<audio></audio>
+      │ 	^^^^^^^^^^^^^^^
+    5 │ 	<video>
+    6 │ 	    <source src="video.webm" type="video/webm" />
   
   i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
   
@@ -62,19 +65,19 @@ invalid.vue:3:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:4:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:5:2 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a track for captions when using audio or video elements.
   
-    2 │ <video></video>
-    3 │ <audio></audio>
-  > 4 │ <video>
-      │ ^^^^^^^
-  > 5 │     <source src="video.webm" type="video/webm" />
-  > 6 │ </video>
-      │ ^^^^^^^^
-    7 │ <audio>
-    8 │     <source src="audio.ogg" type="audio/ogg" />
+    3 │ 	<video></video>
+    4 │ 	<audio></audio>
+  > 5 │ 	<video>
+      │ 	^^^^^^^
+  > 6 │ 	    <source src="video.webm" type="video/webm" />
+  > 7 │ 	</video>
+      │ 	^^^^^^^^
+    8 │ 	<audio>
+    9 │ 	    <source src="audio.ogg" type="audio/ogg" />
   
   i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
   
@@ -82,19 +85,19 @@ invalid.vue:4:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:7:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:8:2 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a track for captions when using audio or video elements.
   
-     5 │     <source src="video.webm" type="video/webm" />
-     6 │ </video>
-   > 7 │ <audio>
-       │ ^^^^^^^
-   > 8 │     <source src="audio.ogg" type="audio/ogg" />
-   > 9 │ </audio>
-       │ ^^^^^^^^
-    10 │ <!-- track without kind="captions" -->
-    11 │ <video><track kind="subtitles" /></video>
+     6 │ 	    <source src="video.webm" type="video/webm" />
+     7 │ 	</video>
+   > 8 │ 	<audio>
+       │ 	^^^^^^^
+   > 9 │ 	    <source src="audio.ogg" type="audio/ogg" />
+  > 10 │ 	</audio>
+       │ 	^^^^^^^^
+    11 │ 	<!-- track without kind="captions" -->
+    12 │ 	<video><track kind="subtitles" /></video>
   
   i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
   
@@ -102,16 +105,16 @@ invalid.vue:7:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:11:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:12:2 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a track for captions when using audio or video elements.
   
-     9 │ </audio>
-    10 │ <!-- track without kind="captions" -->
-  > 11 │ <video><track kind="subtitles" /></video>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │ <!-- track with missing kind attribute -->
-    13 │ <video><track src="captions.vtt" /></video>
+    10 │ 	</audio>
+    11 │ 	<!-- track without kind="captions" -->
+  > 12 │ 	<video><track kind="subtitles" /></video>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 	<!-- track with missing kind attribute -->
+    14 │ 	<video><track src="captions.vtt" /></video>
   
   i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
   
@@ -119,16 +122,16 @@ invalid.vue:11:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:13:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:14:2 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a track for captions when using audio or video elements.
   
-    11 │ <video><track kind="subtitles" /></video>
-    12 │ <!-- track with missing kind attribute -->
-  > 13 │ <video><track src="captions.vtt" /></video>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    14 │ <!-- track with empty kind attribute -->
-    15 │ <video><track kind="" /></video>
+    12 │ 	<video><track kind="subtitles" /></video>
+    13 │ 	<!-- track with missing kind attribute -->
+  > 14 │ 	<video><track src="captions.vtt" /></video>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 	<!-- track with empty kind attribute -->
+    16 │ 	<video><track kind="" /></video>
   
   i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
   
@@ -136,16 +139,16 @@ invalid.vue:13:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:15:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:16:2 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a track for captions when using audio or video elements.
   
-    13 │ <video><track src="captions.vtt" /></video>
-    14 │ <!-- track with empty kind attribute -->
-  > 15 │ <video><track kind="" /></video>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    16 │ <!-- muted audio still requires captions -->
-    17 │ <audio muted></audio>
+    14 │ 	<video><track src="captions.vtt" /></video>
+    15 │ 	<!-- track with empty kind attribute -->
+  > 16 │ 	<video><track kind="" /></video>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 	<!-- muted audio still requires captions -->
+    18 │ 	<audio muted></audio>
   
   i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
   
@@ -153,16 +156,16 @@ invalid.vue:15:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:17:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:18:2 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a track for captions when using audio or video elements.
   
-    15 │ <video><track kind="" /></video>
-    16 │ <!-- muted audio still requires captions -->
-  > 17 │ <audio muted></audio>
-       │ ^^^^^^^^^^^^^^^^^^^^^
-    18 │ <!-- static Vue bindings with non-captions kind should also be flagged -->
-    19 │ <video><track :kind="'subtitles'" /></video>
+    16 │ 	<video><track kind="" /></video>
+    17 │ 	<!-- muted audio still requires captions -->
+  > 18 │ 	<audio muted></audio>
+       │ 	^^^^^^^^^^^^^^^^^^^^^
+    19 │ 	<!-- static Vue bindings with non-captions kind should also be flagged -->
+    20 │ 	<video><track :kind="'subtitles'" /></video>
   
   i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
   
@@ -170,16 +173,16 @@ invalid.vue:17:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:19:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:20:2 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a track for captions when using audio or video elements.
   
-    17 │ <audio muted></audio>
-    18 │ <!-- static Vue bindings with non-captions kind should also be flagged -->
-  > 19 │ <video><track :kind="'subtitles'" /></video>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    20 │ <audio><track v-bind:kind="'metadata'" /></audio>
-    21 │ 
+    18 │ 	<audio muted></audio>
+    19 │ 	<!-- static Vue bindings with non-captions kind should also be flagged -->
+  > 20 │ 	<video><track :kind="'subtitles'" /></video>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 	<audio><track v-bind:kind="'metadata'" /></audio>
+    22 │ </template>
   
   i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
   
@@ -187,15 +190,16 @@ invalid.vue:19:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:20:1 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:21:2 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a track for captions when using audio or video elements.
   
-    18 │ <!-- static Vue bindings with non-captions kind should also be flagged -->
-    19 │ <video><track :kind="'subtitles'" /></video>
-  > 20 │ <audio><track v-bind:kind="'metadata'" /></audio>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    21 │ 
+    19 │ 	<!-- static Vue bindings with non-captions kind should also be flagged -->
+    20 │ 	<video><track :kind="'subtitles'" /></video>
+  > 21 │ 	<audio><track v-bind:kind="'metadata'" /></audio>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ </template>
+    23 │ 
   
   i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
   

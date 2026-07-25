@@ -38,7 +38,7 @@ use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
 use biome_parser::{Marker, Parser};
-use biome_rowan::TextRange;
+use biome_rowan::{TextRange, TextSize};
 use biome_string_case::StrLikeExtension;
 
 pub(crate) enum HtmlSyntaxFeatures {
@@ -141,7 +141,12 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
     p.set_after_frontmatter(true);
 
     parse_doc_type(p).ok();
+    // Only a real `.vue` document has single-file-component blocks. Plain HTML
+    // parsed with the Vue extensions turned on keeps ordinary element nesting,
+    // where an unknown top-level tag is a custom element rather than a block.
+    p.set_at_vue_sfc_top_level(Vue.is_supported(p) && !p.options().is_html());
     ElementList.parse_list(p);
+    p.set_at_vue_sfc_top_level(false);
 
     m.complete(p, HTML_ROOT);
 }
@@ -294,6 +299,102 @@ fn parse_processing_instruction(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_PROCESSING_INSTRUCTION))
 }
 
+/// Whether a top-level block of a Vue single-file component holds something
+/// other than HTML, and so has to be read as opaque text.
+///
+/// `<script>` and `<style>` are excluded because the embedded-language path
+/// already handles them. A `<template>` is markup unless a `lang` attribute
+/// hands it to a preprocessor such as Pug. Everything else is a custom block
+/// like `<i18n>` or `<docs>`, whose content the SFC spec leaves entirely to
+/// whichever tool consumes it, so it may not even be markup.
+///
+/// `<html>` is excluded as well: a document that opens with it is a plain HTML
+/// page that happens to carry a `.vue` extension, not a component.
+///
+/// See <https://vuejs.org/api/sfc-spec.html#custom-blocks>.
+fn is_vue_raw_text_block(name_kind: HtmlSyntaxKind, attributes: &str) -> bool {
+    match name_kind {
+        T![script] | T![style] | T![html] => false,
+        T![template] => find_attribute_value(attributes, "lang")
+            .is_some_and(|lang| !lang.is_empty() && !lang.eq_ignore_ascii_case("html")),
+        _ => true,
+    }
+}
+
+/// Whether a closing tag for `name` appears anywhere after `from`.
+///
+/// A raw-text block runs to its closing tag, so one that is never closed would
+/// swallow the rest of the file and turn a single typo into a cascade of
+/// errors. Custom blocks can be named anything, which makes that easy to hit
+/// by accident, so an unclosed block falls back to ordinary element parsing
+/// and its diagnostics stay where the mistake is.
+fn has_closing_tag(source: &str, from: TextSize, name: &str) -> bool {
+    let Some(rest) = source.get(usize::from(from)..) else {
+        return false;
+    };
+
+    rest.match_indices("</").any(|(index, _)| {
+        let after_slash = &rest[index + "</".len()..];
+        after_slash
+            .get(..name.len())
+            .is_some_and(|candidate| candidate.eq_ignore_ascii_case(name))
+            && after_slash[name.len()..]
+                .trim_start_matches([' ', '\t', '\n', '\r', '\x0C'])
+                .starts_with('>')
+    })
+}
+
+/// Reads the value of `name` out of the attribute region of an opening tag.
+///
+/// Returns `None` when the attribute is absent, and an empty string when it is
+/// present without a value. The region has already been delimited by the
+/// attribute parser, so this only has to walk name/value pairs to avoid
+/// matching a `name` that appears inside some other attribute's value.
+fn find_attribute_value<'a>(attributes: &'a str, name: &str) -> Option<&'a str> {
+    let mut rest = attributes;
+    loop {
+        rest = rest.trim_start();
+        if rest.is_empty() {
+            return None;
+        }
+
+        let name_end = rest
+            .find(|c: char| c == '=' || c.is_whitespace())
+            .unwrap_or(rest.len());
+        let (attribute_name, after_name) = rest.split_at(name_end);
+        let after_name = after_name.trim_start();
+
+        let Some(after_eq) = after_name.strip_prefix('=') else {
+            // A valueless attribute; the rest of `after_name` is the next one.
+            if attribute_name.eq_ignore_ascii_case(name) {
+                return Some("");
+            }
+            rest = after_name;
+            continue;
+        };
+
+        let after_eq = after_eq.trim_start();
+        let (value, remainder) = match after_eq.chars().next() {
+            Some(quote @ ('"' | '\'')) => {
+                let inner = &after_eq[quote.len_utf8()..];
+                match inner.find(quote) {
+                    Some(end) => (&inner[..end], &inner[end + quote.len_utf8()..]),
+                    None => (inner, ""),
+                }
+            }
+            _ => {
+                let end = after_eq.find(char::is_whitespace).unwrap_or(after_eq.len());
+                after_eq.split_at(end)
+            }
+        };
+
+        if attribute_name.eq_ignore_ascii_case(name) {
+            return Some(value);
+        }
+        rest = remainder;
+    }
+}
+
 fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(T![<]) {
         return Absent;
@@ -304,8 +405,13 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     // The tag-name token has already been lexed and classified by the lexer, so
     // these checks are now `O(1)` on the token kind.
     let name_kind = p.cur();
+    let name_range = p.cur_range();
     let opening_tag_name = p.cur_text().to_string();
     let should_be_self_closing = VOID_ELEMENTS.contains(name_kind);
+    // Consumed below, once it is known whether this element opens a block of a
+    // Vue single-file component. Nested elements are ordinary markup.
+    let is_sfc_block = p.at_sfc_top_level();
+    p.set_at_vue_sfc_top_level(false);
     // In Svelte files, the preformatted elements must be parsed as regular
     // elements so that Svelte expressions inside them ({@html expr}, {expr})
     // are visible as AST nodes for variable-reference tracking. The formatter
@@ -327,11 +433,23 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
         _ => {}
     }
 
+    // The attribute region runs from here to the `>` the list stops at, so the
+    // `lang` lookup below reads a span the parser has already delimited.
+    let attributes_start = p.cur_range().start();
     AttributeList.parse_list(p);
+    let attributes = p
+        .source_text()
+        .get(usize::from(attributes_start)..usize::from(p.cur_range().start()))
+        .unwrap_or_default();
+    let is_raw_text_block = is_sfc_block
+        && is_vue_raw_text_block(name_kind, attributes)
+        && has_closing_tag(p.source_text(), p.cur_range().end(), &opening_tag_name);
+    let is_raw_text = is_embedded_language_tag || is_raw_text_block;
 
     if p.at(T![/]) {
         p.bump_with_context(T![/], inside_tag_context(p));
         p.expect_with_context(T![>], HtmlLexContext::Regular);
+        p.set_at_vue_sfc_top_level(is_sfc_block);
         Present(m.complete(p, HTML_SELF_CLOSING_ELEMENT))
     } else {
         if should_be_self_closing {
@@ -339,11 +457,16 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
                 p.bump_with_context(T![/], inside_tag_context(p));
             }
             p.expect_with_context(T![>], HtmlLexContext::Regular);
+            p.set_at_vue_sfc_top_level(is_sfc_block);
             return Present(m.complete(p, HTML_SELF_CLOSING_ELEMENT));
         }
         p.expect_with_context(
             T![>],
-            if is_embedded_language_tag {
+            if is_raw_text_block {
+                HtmlLexContext::EmbeddedLanguage(HtmlEmbeddedLanguage::RawTextBlock {
+                    name: name_range,
+                })
+            } else if is_embedded_language_tag {
                 HtmlLexContext::EmbeddedLanguage(match name_kind {
                     T![script] => HtmlEmbeddedLanguage::Script,
                     T![style] => HtmlEmbeddedLanguage::Style,
@@ -369,8 +492,8 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
             p.re_lex(HtmlReLexContext::HtmlText);
         }
 
-        if is_embedded_language_tag {
-            // embedded language tags always have 1 element as content
+        if is_raw_text {
+            // raw text tags always have 1 element as content
             let list = p.start();
             if p.at(HTML_LITERAL) {
                 let m = p.start();
@@ -402,6 +525,7 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
                 break;
             }
         }
+        p.set_at_vue_sfc_top_level(is_sfc_block);
         let previous = opening.precede(p);
 
         Present(previous.complete(p, HTML_ELEMENT))
@@ -1108,4 +1232,64 @@ const HTML_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(T![html], T![doctype]
 #[inline]
 fn is_at_keyword(p: &mut HtmlParser) -> bool {
     p.at_ts(ALL_POSSIBLE_KEYWORDS)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn find_attribute_value_reads_quoted_and_bare_values() {
+        assert_eq!(find_attribute_value(r#"lang="pug""#, "lang"), Some("pug"));
+        assert_eq!(find_attribute_value("lang='pug'", "lang"), Some("pug"));
+        assert_eq!(find_attribute_value("lang=pug", "lang"), Some("pug"));
+        assert_eq!(find_attribute_value("LANG=\"pug\"", "lang"), Some("pug"));
+        assert_eq!(
+            find_attribute_value(r#"  lang = "pug"  "#, "lang"),
+            Some("pug")
+        );
+    }
+
+    #[test]
+    fn find_attribute_value_skips_other_attributes() {
+        assert_eq!(
+            find_attribute_value(r#"src="a.pug" lang="pug" scoped"#, "lang"),
+            Some("pug")
+        );
+        // A `lang=` inside another attribute's value is not an attribute.
+        assert_eq!(find_attribute_value(r#"title="lang=pug""#, "lang"), None);
+        assert_eq!(find_attribute_value("scoped src=a", "lang"), None);
+        assert_eq!(find_attribute_value("", "lang"), None);
+    }
+
+    #[test]
+    fn find_attribute_value_reports_a_valueless_attribute_as_empty() {
+        assert_eq!(find_attribute_value("lang", "lang"), Some(""));
+        assert_eq!(find_attribute_value("scoped lang", "lang"), Some(""));
+        assert_eq!(find_attribute_value(r#"lang="""#, "lang"), Some(""));
+    }
+
+    #[test]
+    fn has_closing_tag_matches_only_the_whole_name() {
+        let from = TextSize::from(0);
+        assert!(has_closing_tag("x </docs>", from, "docs"));
+        assert!(has_closing_tag("x </DOCS>", from, "docs"));
+        assert!(has_closing_tag("x </docs   >", from, "docs"));
+        // A longer name that merely starts with `docs` is a different tag.
+        assert!(!has_closing_tag("x </docsy>", from, "docs"));
+        assert!(!has_closing_tag("x </doc>", from, "docs"));
+        assert!(!has_closing_tag("x <docs>", from, "docs"));
+        assert!(!has_closing_tag("nothing here", from, "docs"));
+    }
+
+    #[test]
+    fn has_closing_tag_starts_looking_at_the_offset() {
+        // The closing tag sits before the offset, so it does not count.
+        assert!(!has_closing_tag("</docs> rest", TextSize::from(7), "docs"));
+        assert!(has_closing_tag(
+            "</docs> </docs>",
+            TextSize::from(7),
+            "docs"
+        ));
+    }
 }

@@ -18,7 +18,12 @@ pub(crate) type HtmlLosslessTreeSink<'source> =
 pub(crate) struct HtmlParser<'source> {
     context: ParserContext<HtmlSyntaxKind>,
     source: HtmlTokenSource<'source>,
+    source_text: &'source str,
     options: HtmlParserOptions,
+    /// Whether the parser is about to read a top-level block of a Vue
+    /// single-file component. Only true for the outermost element list, so
+    /// that a `<docs>` nested inside a `<template>` stays ordinary markup.
+    at_vue_sfc_top_level: bool,
 }
 
 impl<'source> HtmlParser<'source> {
@@ -26,12 +31,28 @@ impl<'source> HtmlParser<'source> {
         Self {
             context: ParserContext::default(),
             source: HtmlTokenSource::from_str(source),
+            source_text: source,
             options,
+            at_vue_sfc_top_level: false,
         }
     }
 
     pub(crate) fn options(&self) -> &HtmlParserOptions {
         &self.options
+    }
+
+    /// The full text being parsed, for the few decisions that need to look at
+    /// a span of source rather than at the token stream.
+    pub(crate) fn source_text(&self) -> &'source str {
+        self.source_text
+    }
+
+    pub(crate) fn at_sfc_top_level(&self) -> bool {
+        self.at_vue_sfc_top_level
+    }
+
+    pub(crate) fn set_at_vue_sfc_top_level(&mut self, value: bool) {
+        self.at_vue_sfc_top_level = value;
     }
 
     pub fn finish(
