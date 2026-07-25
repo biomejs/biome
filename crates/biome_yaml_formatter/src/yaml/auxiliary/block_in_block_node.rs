@@ -21,7 +21,6 @@ impl FormatNodeRule<YamlBlockInBlockNode> for FormatYamlBlockInBlockNode {
             .into_iter()
             .flat_map(|(key_properties, count)| key_properties.iter().take(count));
         let effective_properties = properties.iter().chain(pulled_up);
-        let has_properties = effective_properties.clone().next().is_some();
         let last_property = effective_properties.clone().last();
 
         write!(f, [FormatProperties(effective_properties)])?;
@@ -32,9 +31,8 @@ impl FormatNodeRule<YamlBlockInBlockNode> for FormatYamlBlockInBlockNode {
             return Ok(());
         };
 
-        if has_properties {
-            let has_comments_between = last_property
-                .is_some_and(|property| f.comments().has_trailing_comments(property.syntax()))
+        if let Some(last_property) = last_property {
+            let has_comments_between = f.comments().has_trailing_comments(last_property.syntax())
                 || f.comments().has_leading_comments(content.syntax());
             let is_block_collection = matches!(
                 &content,
