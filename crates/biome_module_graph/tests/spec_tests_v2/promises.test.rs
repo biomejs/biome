@@ -219,12 +219,30 @@ fn test_expression_function_return_classifies_callable_interfaces_conservatively
         interface CyclicCallable extends CyclicCallable {
             (): Promise<void>;
         }
+        type AsyncObject = {
+            (): Promise<void>;
+        };
+        type SyncObject = {
+            (): void;
+        };
+        type OverloadedObject = {
+            (): Promise<void>;
+            (value: string): Promise<void>;
+        };
+        type MixedObject = {
+            (): void;
+            (value: string): Promise<void>;
+        };
         declare const asyncCallback: AsyncCallable;
         declare const syncCallback: SyncCallable;
         declare const inheritedAsyncCallback: InheritedAsyncCallable;
         declare const overloadedCallback: OverloadedCallable;
         declare const mixedCallback: MixedCallable;
         declare const cyclicCallback: CyclicCallable;
+        declare const asyncObject: AsyncObject;
+        declare const syncObject: SyncObject;
+        declare const overloadedObject: OverloadedObject;
+        declare const mixedObject: MixedObject;
         declare const unionCallback: (() => Promise<void>) | (() => Promise<number>);
         declare function consume(value: unknown): void;
         consume(asyncCallback);
@@ -233,6 +251,10 @@ fn test_expression_function_return_classifies_callable_interfaces_conservatively
         consume(overloadedCallback);
         consume(mixedCallback);
         consume(cyclicCallback);
+        consume(asyncObject);
+        consume(syncObject);
+        consume(overloadedObject);
+        consume(mixedObject);
         consume(unionCallback);
     "#;
     let fs = MemoryFileSystem::default();
@@ -249,6 +271,10 @@ fn test_expression_function_return_classifies_callable_interfaces_conservatively
         ("overloadedCallback", None),
         ("mixedCallback", None),
         ("cyclicCallback", Some(true)),
+        ("asyncObject", Some(true)),
+        ("syncObject", Some(false)),
+        ("overloadedObject", None),
+        ("mixedObject", None),
         ("unionCallback", None),
     ] {
         assert_eq!(

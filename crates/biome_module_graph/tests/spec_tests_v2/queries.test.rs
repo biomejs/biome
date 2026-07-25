@@ -386,9 +386,15 @@ fn test_expression_function_return_query_follows_only_interface_call_signature()
             (value: Noise): Result;
             unrelated: Noise;
         }
+        type AsyncObject = {
+            (value: Noise): Result;
+            unrelated: Noise;
+        };
         declare const callback: AsyncHandler;
+        declare const objectCallback: AsyncObject;
         declare function consume(value: unknown): void;
         consume(callback);
+        consume(objectCallback);
     "#;
     let fs = MemoryFileSystem::default();
     fs.insert("/src/index.ts".into(), SOURCE);
@@ -402,6 +408,11 @@ fn test_expression_function_return_query_follows_only_interface_call_signature()
         module,
         expression_range_by_source(&db, module, SOURCE, "callback"),
     );
+    let object_expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(&db, module, SOURCE, "objectCallback"),
+    );
     let noise = LocalTypeInput::new(&db, module, local_type_id_by_name(&db, module, "Noise"));
 
     db.clear_salsa_events();
@@ -409,9 +420,14 @@ fn test_expression_function_return_query_follows_only_interface_call_signature()
         infer_expression_function_returns_promise(&db, expression),
         Some(true)
     );
+    assert_eq!(
+        infer_expression_function_returns_promise(&db, object_expression),
+        Some(true)
+    );
     let events = db.take_salsa_events();
 
     assert_function_query_was_not_run(&db, infer_expression_type, expression, &events);
+    assert_function_query_was_not_run(&db, infer_expression_type, object_expression, &events);
     assert_function_query_was_not_run(&db, infer_local_type, noise, &events);
     assert_function_query_was_not_run(&db, infer_module_types, module, &events);
 }

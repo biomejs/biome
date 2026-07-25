@@ -49,25 +49,40 @@ enum MemberLookupMode {
     Instance,
 }
 
+/// The Promise-related property requested from the current target.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 enum Projection {
+    /// Whether an expression evaluates to a Promise-like value.
     Promise,
+    /// Whether an instance target represents `Promise` or `PromiseLike`.
     PromiseTarget,
+    /// Whether a callable returns a Promise-like value.
     FunctionReturn,
+    /// Whether an expression evaluates to an array of Promise-like values.
     ArrayPromise,
+    /// Whether a callable returns an array of Promise-like values.
     ArrayFunctionReturn,
+    /// Whether awaiting an expression produces an array of Promise-like values.
     AwaitedArrayPromise,
+    /// Whether awaiting a callable's return produces an array of Promise-like values.
     AwaitedArrayFunctionReturn,
 }
 
+/// A location in the raw type graph that has not yet been classified.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 enum ClassificationTarget {
+    /// A raw type reference owned by the state's current module.
     Reference(TypeReference),
+    /// An entry in the current module's raw local type table.
     Local(TypeId),
+    /// A symbol imported from another resolved module path.
     Import {
+        /// Path used to locate the imported module in the module graph.
         resolved_path: ResolvedPath,
+        /// Export selected from the imported module.
         symbol: ImportSymbol,
     },
+    /// An export name owned by the state's current module.
     Export(Text),
 }
 
@@ -502,7 +517,7 @@ fn classify_expression(
                             members: state.members,
                             projection: state.projection,
                         },
-                        TypeofExpression::Await(expression)
+                        TypeofExpression::Await(_)
                             if matches!(state.projection, Projection::Promise) =>
                         {
                             return DoesNotReturnPromise;
@@ -665,21 +680,44 @@ fn classify_expression(
                         if matches!(state.projection, Projection::PromiseTarget) {
                             return DoesNotReturnPromise;
                         }
-                        let Some((name, remaining)) = state.members.split_first() else {
-                            return DoesNotReturnPromise;
-                        };
-                        let Some(member) = find_own_member(&object.members, name, None) else {
-                            return Indeterminate;
-                        };
-                        if member.is_getter() {
-                            return Indeterminate;
-                        }
-                        ClassificationState {
-                            module: state.module,
-                            target: ClassificationTarget::Reference(member.ty.clone()),
-                            mode: MemberLookupMode::Value,
-                            members: remaining.into(),
-                            projection: state.projection,
+                        if state.members.is_empty()
+                            && matches!(
+                                state.projection,
+                                Projection::FunctionReturn
+                                    | Projection::ArrayFunctionReturn
+                                    | Projection::AwaitedArrayFunctionReturn
+                            )
+                        {
+                            match sole_call_signature(&object.members) {
+                                Ok(Some(call_signature)) => ClassificationState {
+                                    module: state.module,
+                                    target: ClassificationTarget::Reference(
+                                        call_signature.ty.clone(),
+                                    ),
+                                    mode: MemberLookupMode::Value,
+                                    members: Box::default(),
+                                    projection: state.projection,
+                                },
+                                Ok(None) => return DoesNotReturnPromise,
+                                Err(()) => return Indeterminate,
+                            }
+                        } else {
+                            let Some((name, remaining)) = state.members.split_first() else {
+                                return DoesNotReturnPromise;
+                            };
+                            let Some(member) = find_own_member(&object.members, name, None) else {
+                                return Indeterminate;
+                            };
+                            if member.is_getter() {
+                                return Indeterminate;
+                            }
+                            ClassificationState {
+                                module: state.module,
+                                target: ClassificationTarget::Reference(member.ty.clone()),
+                                mode: MemberLookupMode::Value,
+                                members: remaining.into(),
+                                projection: state.projection,
+                            }
                         }
                     }
                     RawTypeData::Literal(literal) => match literal.as_ref() {
@@ -775,15 +813,8 @@ fn classify_expression(
                                     | Projection::AwaitedArrayFunctionReturn
                             )
                         {
-                            let mut call_signatures = interface
-                                .members
-                                .iter()
-                                .filter(|member| member.kind.is_call_signature());
-                            if let Some(call_signature) = call_signatures.next() {
-                                if call_signatures.next().is_some() {
-                                    return Indeterminate;
-                                }
-                                ClassificationState {
+                            match sole_call_signature(&interface.members) {
+                                Ok(Some(call_signature)) => ClassificationState {
                                     module: state.module,
                                     target: ClassificationTarget::Reference(
                                         call_signature.ty.clone(),
@@ -791,9 +822,8 @@ fn classify_expression(
                                     mode: MemberLookupMode::Value,
                                     members: Box::default(),
                                     projection: state.projection,
-                                }
-                            } else {
-                                match interface.extends.as_ref() {
+                                },
+                                Ok(None) => match interface.extends.as_ref() {
                                     [extends] => ClassificationState {
                                         module: state.module,
                                         target: ClassificationTarget::Reference(extends.clone()),
@@ -803,7 +833,8 @@ fn classify_expression(
                                     },
                                     [] => return DoesNotReturnPromise,
                                     [_, ..] => return Indeterminate,
-                                }
+                                },
+                                Err(()) => return Indeterminate,
                             }
                         } else {
                             let Some((name, remaining)) = state.members.split_first() else {
@@ -926,4 +957,16 @@ fn find_own_member<'a>(
                 MemberLookupMode::Instance => !member.is_static(),
             })
     })
+}
+
+fn sole_call_signature(members: &[TypeMember]) -> Result<Option<&TypeMember>, ()> {
+    let mut call_signatures = members
+        .iter()
+        .filter(|member| member.kind.is_call_signature());
+    let call_signature = call_signatures.next();
+    if call_signatures.next().is_some() {
+        Err(())
+    } else {
+        Ok(call_signature)
+    }
 }
