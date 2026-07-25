@@ -8,6 +8,7 @@ use biome_formatter::{
 };
 use biome_html_syntax::HtmlLanguage;
 use biome_languages::HtmlFileSource;
+use biome_rowan::TextRange;
 
 use crate::comments::{FormatHtmlComment, HtmlCommentStyle, HtmlComments};
 
@@ -421,6 +422,11 @@ pub struct HtmlFormatContext {
     source_map: Option<TransformSourceMap>,
 
     should_delegate_fmt_embedded_nodes: bool,
+
+    /// The ranges another formatter has content ready for. A hole may only be
+    /// left where one of these sits, because a hole nothing fills prints as
+    /// nothing at all.
+    embedded_node_ranges: Rc<[TextRange]>,
 }
 
 impl HtmlFormatContext {
@@ -430,7 +436,18 @@ impl HtmlFormatContext {
             comments: Rc::new(comments),
             source_map: None,
             should_delegate_fmt_embedded_nodes: false,
+            embedded_node_ranges: Rc::from([]),
         }
+    }
+
+    pub fn with_embedded_node_ranges(mut self, ranges: Rc<[TextRange]>) -> Self {
+        self.embedded_node_ranges = ranges;
+        self
+    }
+
+    /// Whether another formatter has content ready for `range`.
+    pub fn has_embedded_node(&self, range: TextRange) -> bool {
+        self.embedded_node_ranges.contains(&range)
     }
 
     pub fn with_source_map(mut self, source_map: Option<TransformSourceMap>) -> Self {

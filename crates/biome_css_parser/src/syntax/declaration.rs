@@ -159,8 +159,14 @@ pub(crate) fn parse_optional_declaration_semicolon(p: &mut CssParser) {
     // Otherwise, a semicolon is expected and the parser will enforce its presence.
     // div { color: red; }
     // div { color: red }
-    if !p.at(T!['}']) {
-        if p.nth_at(1, T!['}']) {
+    //
+    // A snippet has no closing brace, so the end of the input closes the last
+    // declaration in its place. That is what lets a `style` attribute be
+    // written the way everyone writes it: `style="color: red"`.
+    let ends_at_eof = p.source_type.as_embedding_kind().is_snippet();
+    let closes_declaration = |at_eof: bool| at_eof && ends_at_eof;
+    if !p.at(T!['}']) && !closes_declaration(p.at(EOF)) {
+        if p.nth_at(1, T!['}']) || closes_declaration(p.nth_at(1, EOF)) {
             p.eat(T![;]);
         } else {
             p.expect(T![;]);
