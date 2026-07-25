@@ -257,7 +257,9 @@ fn classify_expression(
                         if let Some((binding_id, binding)) = binding {
                             if matches!(
                                 state.projection,
-                                Projection::FunctionReturn | Projection::ArrayFunctionReturn
+                                Projection::FunctionReturn
+                                    | Projection::ArrayFunctionReturn
+                                    | Projection::AwaitedArrayFunctionReturn
                             ) && scope
                                 .overload_sets()
                                 .iter()
@@ -420,10 +422,10 @@ fn classify_expression(
                             return DoesNotReturnPromise;
                         }
                         if function.is_async {
-                            return match state.projection {
-                                Projection::FunctionReturn => ReturnsPromise,
-                                Projection::ArrayFunctionReturn => DoesNotReturnPromise,
-                                Projection::AwaitedArrayFunctionReturn => DoesNotReturnPromise,
+                            match state.projection {
+                                Projection::FunctionReturn => return ReturnsPromise,
+                                Projection::ArrayFunctionReturn => return DoesNotReturnPromise,
+                                Projection::AwaitedArrayFunctionReturn => {}
                                 Projection::Promise
                                 | Projection::PromiseTarget
                                 | Projection::ArrayPromise
@@ -506,7 +508,10 @@ fn classify_expression(
                             return DoesNotReturnPromise;
                         }
                         TypeofExpression::Await(expression)
-                            if matches!(state.projection, Projection::ArrayPromise) =>
+                            if matches!(
+                                state.projection,
+                                Projection::ArrayPromise | Projection::AwaitedArrayPromise
+                            ) =>
                         {
                             ClassificationState {
                                 module: state.module,
@@ -762,21 +767,62 @@ fn classify_expression(
                         };
                     }
                     RawTypeData::Interface(interface) => {
-                        let Some((name, remaining)) = state.members.split_first() else {
-                            return Indeterminate;
-                        };
-                        let Some(member) = find_own_member(&interface.members, name, None) else {
-                            return Indeterminate;
-                        };
-                        if member.is_getter() {
-                            return Indeterminate;
-                        }
-                        ClassificationState {
-                            module: state.module,
-                            target: ClassificationTarget::Reference(member.ty.clone()),
-                            mode: MemberLookupMode::Value,
-                            members: remaining.into(),
-                            projection: state.projection,
+                        if state.members.is_empty()
+                            && matches!(
+                                state.projection,
+                                Projection::FunctionReturn
+                                    | Projection::ArrayFunctionReturn
+                                    | Projection::AwaitedArrayFunctionReturn
+                            )
+                        {
+                            let mut call_signatures = interface
+                                .members
+                                .iter()
+                                .filter(|member| member.kind.is_call_signature());
+                            if let Some(call_signature) = call_signatures.next() {
+                                if call_signatures.next().is_some() {
+                                    return Indeterminate;
+                                }
+                                ClassificationState {
+                                    module: state.module,
+                                    target: ClassificationTarget::Reference(
+                                        call_signature.ty.clone(),
+                                    ),
+                                    mode: MemberLookupMode::Value,
+                                    members: Box::default(),
+                                    projection: state.projection,
+                                }
+                            } else {
+                                match interface.extends.as_ref() {
+                                    [extends] => ClassificationState {
+                                        module: state.module,
+                                        target: ClassificationTarget::Reference(extends.clone()),
+                                        mode: state.mode,
+                                        members: Box::default(),
+                                        projection: state.projection,
+                                    },
+                                    [] => return DoesNotReturnPromise,
+                                    [_, ..] => return Indeterminate,
+                                }
+                            }
+                        } else {
+                            let Some((name, remaining)) = state.members.split_first() else {
+                                return Indeterminate;
+                            };
+                            let Some(member) = find_own_member(&interface.members, name, None)
+                            else {
+                                return Indeterminate;
+                            };
+                            if member.is_getter() {
+                                return Indeterminate;
+                            }
+                            ClassificationState {
+                                module: state.module,
+                                target: ClassificationTarget::Reference(member.ty.clone()),
+                                mode: MemberLookupMode::Value,
+                                members: remaining.into(),
+                                projection: state.projection,
+                            }
                         }
                     }
                 }

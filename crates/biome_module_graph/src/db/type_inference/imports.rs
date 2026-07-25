@@ -1,7 +1,6 @@
 use super::{
     InferredModuleTypes,
     globals::global_type,
-    named_type_ids,
     resolver::{MAX_RAW_TYPE_RESOLUTION_DEPTH, ResolutionCtx},
 };
 use crate::db::queries::{
@@ -11,14 +10,15 @@ use crate::db::queries::{
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsExport, JsImport, JsOwnExport, ModuleDb, ResolvedPath};
 use biome_js_type_info::{
-    GlobalTypeId, ImportSymbol, Path, ResolvedTypeId, TypeImportQualifier, TypeResolverLevel,
+    GlobalTypeId, ImportSymbol, Path, ResolvedTypeId, TypeImportQualifier, TypeReference,
+    TypeResolverLevel,
     interned_types::{
         InternedNamespace as InferredNamespace, LocalTypeHandle, LocalTypeId, ModuleKey,
         TypeData as InferredTypeData, TypeMember as InferredTypeMember,
         TypeMemberKind as InferredTypeMemberKind,
     },
 };
-use biome_rowan::Text;
+use biome_rowan::{Text, TextRange};
 use rustc_hash::FxHashSet;
 use salsa::plumbing::AsId;
 use std::cell::Cell;
@@ -489,8 +489,7 @@ impl<'db> ResolutionCtx<'db, '_> {
 
         let ty = match own_export {
             JsOwnExport::Binding(range) => {
-                let input = BindingTypeInput::new(self.db, *module, *range);
-                infer_binding_type(self.db, input).unwrap_or(InferredTypeData::Unknown)
+                inferred_type_from_binding_on_demand(self.db, *module, &js_info, *range)
             }
             JsOwnExport::Type(resolved_id) => {
                 inferred_type_from_resolved_id_on_demand(self.db, *module, &js_info, *resolved_id)
@@ -751,6 +750,27 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 }
 
+fn inferred_type_from_binding_on_demand<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    js_info: &crate::JsModuleInfo,
+    range: TextRange,
+) -> InferredTypeData<'db> {
+    if let Some(TypeReference::Resolved(resolved_id)) = js_info.raw_binding_types.get(&range)
+        && resolved_id.level() == TypeResolverLevel::Thin
+        && js_info.is_named_type(resolved_id.id())
+    {
+        return InferredTypeData::Local(LocalTypeHandle::new(
+            db,
+            ModuleKey::new(module.as_id()),
+            LocalTypeId::new(resolved_id.index()),
+        ));
+    }
+
+    let input = BindingTypeInput::new(db, module, range);
+    infer_binding_type(db, input).unwrap_or(InferredTypeData::Unknown)
+}
+
 /// Resolves an exported type ID from an already materialized module table.
 fn inferred_type_from_resolved_id_from_tables<'db>(
     db: &'db dyn ModuleDb,
@@ -760,7 +780,11 @@ fn inferred_type_from_resolved_id_from_tables<'db>(
     match resolved_id.level() {
         TypeResolverLevel::Thin => {
             let local_type_id = LocalTypeId::new(resolved_id.index());
-            if inferred_types.named_type_ids.contains(&local_type_id) {
+            if inferred_types
+                .named_type_ids
+                .binary_search(&local_type_id)
+                .is_ok()
+            {
                 InferredTypeData::Local(LocalTypeHandle::new(
                     db,
                     inferred_types.module_key,
@@ -794,7 +818,7 @@ fn inferred_type_from_resolved_id_on_demand<'db>(
     match resolved_id.level() {
         TypeResolverLevel::Thin => {
             let local_type_id = LocalTypeId::new(resolved_id.index());
-            if named_type_ids(js_info).contains(&resolved_id.id()) {
+            if js_info.is_named_type(resolved_id.id()) {
                 InferredTypeData::Local(LocalTypeHandle::new(
                     db,
                     ModuleKey::new(module.as_id()),

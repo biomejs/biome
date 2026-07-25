@@ -4,7 +4,7 @@ use biome_module_graph::{
     function_returns_promise, infer_binding_type, infer_export_type,
     infer_expression_function_returns_promise, infer_expression_is_array_of_promises,
     infer_expression_is_promise, infer_expression_type, infer_local_type, is_array_of_promise_type,
-    is_promise_type,
+    is_promise_type, resolve_callable_type,
 };
 
 fn local_type_id_by_name(db: &dyn ModuleDb, module: ModuleInfo, name: &str) -> InferredLocalTypeId {
@@ -91,6 +91,53 @@ fn test_binding_query_resolves_imports_without_materializing_modules() {
 }
 
 #[test]
+fn test_namespace_query_keeps_named_exports_symbolic() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/source.ts".into(), "export class Value { field = 1; }");
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import * as source from "./source.ts";
+            export { source };
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/source.ts", "/src/index.ts"], true);
+    let source_module = db
+        .module_for_path(Utf8Path::new("/src/source.ts"))
+        .expect("source module must exist");
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let source_binding = BindingTypeInput::new(
+        &db,
+        index_module,
+        binding_range_by_name(&db, index_module, "source"),
+    );
+    let value_binding = BindingTypeInput::new(
+        &db,
+        source_module,
+        binding_range_by_name(&db, source_module, "Value"),
+    );
+
+    db.clear_salsa_events();
+    let namespace = infer_binding_type(&db, source_binding).expect("namespace must be inferred");
+    let InferredTypeData::Namespace(namespace) = namespace else {
+        panic!("namespace import must infer a namespace");
+    };
+    let value = namespace
+        .members(&db)
+        .iter()
+        .find(|member| member.kind.has_name("Value"))
+        .expect("namespace must contain Value");
+    assert!(matches!(value.ty, InferredTypeData::Local(_)));
+    let events = db.take_salsa_events();
+
+    assert_function_query_was_not_run(&db, infer_binding_type, value_binding, &events);
+    assert_function_query_was_not_run(&db, infer_module_types, source_module, &events);
+}
+
+#[test]
 fn test_member_lookup_resolves_local_types_without_materializing_the_module() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -117,6 +164,65 @@ fn test_member_lookup_resolves_local_types_without_materializing_the_module() {
     let events = db.take_salsa_events();
 
     assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+}
+
+#[test]
+fn test_callable_type_resolution_skips_interface_parameters_and_siblings() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            interface Noise {
+                nested: string;
+            }
+            interface Handler {
+                (value: Noise): void;
+                unrelated: Noise;
+            }
+            declare const handler: Handler;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let handler_input =
+        BindingTypeInput::new(&db, module, binding_range_by_name(&db, module, "handler"));
+    let handler = infer_binding_type(&db, handler_input).expect("handler type must be inferred");
+    let noise = LocalTypeInput::new(&db, module, local_type_id_by_name(&db, module, "Noise"));
+
+    db.clear_salsa_events();
+    let callable = resolve_callable_type(&db, handler).expect("Handler must be callable");
+    assert!(InferredType::new(&db, callable).function_returns_void());
+    let events = db.take_salsa_events();
+
+    assert_function_query_was_not_run(&db, infer_local_type, noise, &events);
+    assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+}
+
+#[test]
+fn test_member_lookup_rejects_stale_local_handles_after_module_replacement() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        "export interface Value { field: string; }",
+    );
+
+    let mut db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let path = Utf8PathBuf::from("/src/index.ts");
+    let original = db.module_for_path(&path).expect("module must exist");
+    let original_key = InferredModuleKey::new(original.as_id());
+    let type_id = local_type_id_by_name(&db, original, "Value");
+    let replacement = ModuleInfo::new(&db, path.clone(), original.kind(&db).clone());
+    db.modules.insert(path, replacement);
+    let stale = InferredTypeData::Local(biome_js_type_info::interned_types::LocalTypeHandle::new(
+        &db,
+        original_key,
+        type_id,
+    ));
+
+    assert!(find_member_type(&db, stale, "field").is_none());
 }
 
 #[test]
@@ -270,6 +376,47 @@ fn test_expression_function_return_query_skips_expression_and_sibling_type_queri
 }
 
 #[test]
+fn test_expression_function_return_query_follows_only_interface_call_signature() {
+    const SOURCE: &str = r#"
+        interface Noise {
+            nested: string;
+        }
+        type Result = Promise<void>;
+        interface AsyncHandler {
+            (value: Noise): Result;
+            unrelated: Noise;
+        }
+        declare const callback: AsyncHandler;
+        declare function consume(value: unknown): void;
+        consume(callback);
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(&db, module, SOURCE, "callback"),
+    );
+    let noise = LocalTypeInput::new(&db, module, local_type_id_by_name(&db, module, "Noise"));
+
+    db.clear_salsa_events();
+    assert_eq!(
+        infer_expression_function_returns_promise(&db, expression),
+        Some(true)
+    );
+    let events = db.take_salsa_events();
+
+    assert_function_query_was_not_run(&db, infer_expression_type, expression, &events);
+    assert_function_query_was_not_run(&db, infer_local_type, noise, &events);
+    assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+}
+
+#[test]
 fn test_expression_array_promise_query_skips_sibling_type_queries() {
     const SOURCE: &str = r#"
         interface Noise {
@@ -304,6 +451,75 @@ fn test_expression_array_promise_query_skips_sibling_type_queries() {
 
     assert_function_query_was_not_run(&db, infer_expression_type, expression, &events);
     assert_function_query_was_not_run(&db, infer_local_type, noise, &events);
+}
+
+#[test]
+fn test_expression_array_promise_query_unwraps_awaited_function_returns_selectively() {
+    const SOURCE: &str = r#"
+        interface Noise {
+            nested: string;
+        }
+        async function asyncValues(value: Noise): Promise<Array<Promise<void>>> {
+            return [];
+        }
+        function syncValues(value: Noise): Promise<Array<Promise<void>>> {
+            return Promise.resolve([]);
+        }
+        declare const directValues: Promise<Array<Promise<void>>>;
+        declare const uncertain: unknown;
+        declare function overloaded(): Promise<Array<Promise<void>>>;
+        declare function overloaded(value: string): Promise<Array<Promise<void>>>;
+
+        await asyncValues(null as never);
+        await syncValues(null as never);
+        await directValues;
+        await await asyncValues(null as never);
+        await uncertain;
+        await overloaded();
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inputs = [
+        ("await asyncValues(null as never)", Some(true)),
+        ("await syncValues(null as never)", Some(true)),
+        ("await directValues", Some(true)),
+        ("await await asyncValues(null as never)", Some(true)),
+        ("await uncertain", Some(false)),
+        ("await overloaded()", None),
+    ]
+    .map(|(source, expected)| {
+        (
+            source,
+            ExpressionTypeInput::new(
+                &db,
+                module,
+                expression_range_by_source(&db, module, SOURCE, source),
+            ),
+            expected,
+        )
+    });
+    let noise = LocalTypeInput::new(&db, module, local_type_id_by_name(&db, module, "Noise"));
+
+    db.clear_salsa_events();
+    for (source, input, expected) in inputs {
+        assert_eq!(
+            infer_expression_is_array_of_promises(&db, input),
+            expected,
+            "{source}"
+        );
+    }
+    let events = db.take_salsa_events();
+
+    for (_, input, _) in inputs {
+        assert_function_query_was_not_run(&db, infer_expression_type, input, &events);
+    }
+    assert_function_query_was_not_run(&db, infer_local_type, noise, &events);
+    assert_function_query_was_not_run(&db, infer_module_types, module, &events);
 }
 
 #[test]

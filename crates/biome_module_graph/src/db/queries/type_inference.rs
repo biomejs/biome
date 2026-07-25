@@ -416,6 +416,15 @@ pub fn function_returns_promise<'db>(
     })
 }
 
+/// Resolves only the wrappers needed to reach one unambiguous callable type.
+pub fn resolve_callable_type<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+) -> Option<InferredTypeData<'db>> {
+    InferredType::new(db, ty)
+        .callable_type_with(|ty| resolve_local_type_on_demand(db, ty).expand_structural_global(db))
+}
+
 // #endregion
 
 // #region EXTERNAL INFERENCE ENTRY POINTS
@@ -1643,7 +1652,6 @@ impl<'db> ArgumentTypeCompatibility<'db> {
             ) => ArgumentMatchAction::Mismatch,
             (
                 InferredTypeData::Conditional
-                | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
                 | InferredTypeData::Literal(_)
@@ -1655,7 +1663,6 @@ impl<'db> ArgumentTypeCompatibility<'db> {
             | (
                 _,
                 InferredTypeData::Conditional
-                | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
                 | InferredTypeData::Literal(_)

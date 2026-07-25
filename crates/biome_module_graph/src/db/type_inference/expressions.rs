@@ -435,7 +435,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
             }
             InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
@@ -562,7 +561,6 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             InferredTypeData::Tuple(tuple) => self.push_tuple_spread_arguments(tuple, args),
             ty @ (InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
@@ -637,7 +635,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                 )
             }
             InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
@@ -684,7 +681,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                     Some(constructor)
                 }
                 InferredTypeData::Unknown
-                | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
                 | InferredTypeData::BigInt
@@ -899,7 +895,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                 interface.name(self.db).text() == "PromiseLike"
             }
             InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
@@ -944,7 +939,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                     InferredTypeData::instance_of(self.db, extends, Box::default())
                 }),
             InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
@@ -1043,8 +1037,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     match self.resolve_inferred_type(*ty) {
                         InferredTypeData::Undefined => {}
                         InferredTypeData::Unknown => types.push(InferredTypeData::Unknown),
-                        ty @ (InferredTypeData::Divergent(_)
-                        | InferredTypeData::Global
+                        ty @ (InferredTypeData::Global
                         | InferredTypeData::GlobalType(_)
                         | InferredTypeData::BigInt
                         | InferredTypeData::Boolean
@@ -1114,7 +1107,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                 .map(|ty| apply_substitutions(self.db, ty, &substitutions))
             }
             ty @ (InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
             | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
@@ -1491,7 +1483,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                     .map(|ty| self.optional_element_type(*ty, true))
             }
             InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
@@ -1560,7 +1551,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                 Some(InferredTypeData::array_instance(self.db, type_parameters))
             }
             InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
@@ -1621,7 +1611,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                 self.rest_object_from_type(target, excluded_names)
             }
             subject @ (InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
@@ -1735,7 +1724,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                     }
                 }
                 InferredTypeData::Unknown
-                | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
                 | InferredTypeData::BigInt
@@ -1853,8 +1841,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredLiteral::Template(_) => Some(InferredTypeData::String),
             },
             InferredTypeData::Unknown => Some(InferredTypeData::Unknown),
-            InferredTypeData::Divergent(_)
-            | InferredTypeData::Global
+            InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
             | InferredTypeData::Symbol
             | InferredTypeData::Conditional
@@ -1886,7 +1873,6 @@ impl<'db> ResolutionCtx<'db, '_> {
         match self.resolve_inferred_type(argument) {
             InferredTypeData::BigInt => InferredTypeData::BigInt,
             InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
             | InferredTypeData::Boolean
@@ -1952,7 +1938,6 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Symbol => self.typeof_string_literal("symbol"),
             InferredTypeData::Undefined => self.typeof_string_literal("undefined"),
             InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
             | InferredTypeData::Conditional
@@ -2033,7 +2018,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                     InferredTypeData::TypeofType(ty) => pending.push(ty.ty(self.db)),
                     InferredTypeData::TypeofValue(value) => pending.push(value.ty(self.db)),
                     InferredTypeData::Unknown
-                    | InferredTypeData::Divergent(_)
                     | InferredTypeData::Global
                     | InferredTypeData::GlobalType(_)
                     | InferredTypeData::BigInt
@@ -2112,7 +2096,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                     InferredTypeData::TypeofType(ty) => pending.push(ty.ty(self.db)),
                     InferredTypeData::TypeofValue(value) => pending.push(value.ty(self.db)),
                     InferredTypeData::Unknown
-                    | InferredTypeData::Divergent(_)
                     | InferredTypeData::Global
                     | InferredTypeData::GlobalType(_)
                     | InferredTypeData::BigInt
@@ -2163,7 +2146,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Number => FilterAction::Mapped(self.number_literal("0")),
                 InferredTypeData::String => FilterAction::Mapped(self.string_literal("")),
                 InferredTypeData::Unknown
-                | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
                 | InferredTypeData::Null
@@ -2208,7 +2190,6 @@ impl<'db> ResolutionCtx<'db, '_> {
             ConditionalSubset::Truthy => match ty {
                 InferredTypeData::Boolean => FilterAction::Mapped(self.boolean_literal(true)),
                 InferredTypeData::Unknown
-                | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
                 | InferredTypeData::BigInt

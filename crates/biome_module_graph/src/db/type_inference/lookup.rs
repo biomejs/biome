@@ -1,15 +1,13 @@
 use super::{InferredModuleTypes, collected_type_result};
-use crate::ModuleDb;
 use crate::db::queries::{LocalTypeInput, infer_local_type, infer_module_types};
-use crate::module_graph::ModuleInfo;
+use crate::{ModuleDb, module_for_key};
 use biome_js_type_info::interned_types::{
-    Literal as InferredLiteral, LocalTypeHandle, ModuleKey, ReturnType as InferredReturnType,
+    Literal as InferredLiteral, LocalTypeHandle, ReturnType as InferredReturnType,
     TypeData as InferredTypeData, TypeMember as InferredTypeMember,
     TypeMemberKind as InferredTypeMemberKind, TypeSubstitution as InferredTypeSubstitution,
     TypeTransformResult,
 };
 use rustc_hash::FxHashSet;
-use salsa::plumbing::{AsId, FromId};
 
 const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 const MAX_MEMBER_LOOKUP_STEPS: usize = 1024;
@@ -400,7 +398,6 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
                 );
             }
             InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
@@ -478,7 +475,6 @@ fn declared_type_parameters<'db>(
         InferredTypeData::InstanceOf(instance) => Some(instance.type_parameters(db)),
         InferredTypeData::Interface(interface) => Some(interface.type_parameters(db)),
         InferredTypeData::Unknown
-        | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
         | InferredTypeData::GlobalType(_)
         | InferredTypeData::BigInt
@@ -548,7 +544,6 @@ fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> Inf
     match ty {
         InferredTypeData::InstanceOf(instance) => instance.ty(db),
         ty @ (InferredTypeData::Unknown
-        | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
         | InferredTypeData::GlobalType(_)
         | InferredTypeData::BigInt
@@ -584,15 +579,6 @@ fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> Inf
         | InferredTypeData::UnknownKeyword
         | InferredTypeData::VoidKeyword) => ty,
     }
-}
-
-pub(in crate::db::type_inference) fn module_for_key(
-    db: &dyn ModuleDb,
-    module_key: ModuleKey,
-) -> Option<ModuleInfo> {
-    let module = ModuleInfo::from_id(module_key.as_id());
-    let current = db.module_for_path(module.path(db))?;
-    (ModuleKey::new(current.as_id()) == module_key).then_some(current)
 }
 
 /// Finds a member defined directly on `ty` without traversing related types.
@@ -667,7 +653,6 @@ fn find_own_member_type<'db>(
             find(object.members(db), mode, mode.allows_index_signature())
         }
         InferredTypeData::Unknown
-        | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
         | InferredTypeData::GlobalType(_)
         | InferredTypeData::BigInt

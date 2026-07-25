@@ -16,6 +16,7 @@ use std::{borrow::Cow, collections::VecDeque, fmt, ops::ControlFlow};
 
 const MAX_TYPE_VARIANT_STEPS: usize = 1024;
 const MAX_TYPE_RELATION_DEPTH: usize = 50;
+const MAX_CALLABLE_TYPE_STEPS: usize = 64;
 const MAX_PROMISE_TYPE_STEPS: usize = 64;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -273,7 +274,6 @@ impl<'db> InferredType<'db> {
                 TypeData::TypeofType(typeof_type) => typeof_type.ty(self.db),
                 TypeData::TypeofValue(typeof_value) => typeof_value.ty(self.db),
                 TypeData::Unknown
-                | TypeData::Divergent(_)
                 | TypeData::Local(_)
                 | TypeData::TypeofExpression(_)
                 | TypeData::AnyKeyword
@@ -533,7 +533,6 @@ impl<'db> InferredType<'db> {
                 | TypeData::ThisKeyword
                 | TypeData::VoidKeyword => {}
                 TypeData::Unknown
-                | TypeData::Divergent(_)
                 | TypeData::Local(_)
                 | TypeData::TypeofExpression(_)
                 | TypeData::AnyKeyword
@@ -791,7 +790,6 @@ impl<'db> InferredType<'db> {
                     pending.extend(union.types(self.db).iter().copied());
                 }
                 TypeData::Unknown
-                | TypeData::Divergent(_)
                 | TypeData::Local(_)
                 | TypeData::TypeofExpression(_)
                 | TypeData::AnyKeyword
@@ -800,6 +798,80 @@ impl<'db> InferredType<'db> {
                 }
                 _ => {}
             }
+        }
+
+        None
+    }
+
+    /// Resolves the outer wrappers of a callable without traversing its
+    /// parameters or unrelated members.
+    ///
+    /// Interfaces and objects must expose exactly one call signature. An
+    /// interface without an own call signature may extend exactly one type.
+    pub fn callable_type_with(
+        self,
+        mut resolve: impl FnMut(TypeData<'db>) -> TypeData<'db>,
+    ) -> Option<TypeData<'db>> {
+        let mut data = self.data;
+        let mut seen = FxHashSet::default();
+
+        for _ in 0..MAX_CALLABLE_TYPE_STEPS {
+            data = resolve(data).expand_structural_global(self.db);
+            if !seen.insert(data) {
+                return None;
+            }
+            if data.callable_function(self.db).is_some() {
+                return Some(data);
+            }
+
+            data = match data {
+                TypeData::InstanceOf(instance) => instance.ty(self.db),
+                TypeData::Interface(interface) => {
+                    let mut signatures = interface
+                        .members(self.db)
+                        .iter()
+                        .filter(|member| member.kind.is_call_signature());
+                    if let Some(signature) = signatures.next() {
+                        if signatures.next().is_some() {
+                            return None;
+                        }
+                        signature.ty
+                    } else {
+                        let extends = interface.extends(self.db);
+                        let [extends] = extends.as_ref() else {
+                            return None;
+                        };
+                        *extends
+                    }
+                }
+                TypeData::Literal(literal) => {
+                    let Literal::Object(members) = literal.literal(self.db) else {
+                        return None;
+                    };
+                    let mut signatures = members
+                        .iter()
+                        .filter(|member| member.kind.is_call_signature());
+                    let signature = signatures.next()?;
+                    if signatures.next().is_some() {
+                        return None;
+                    }
+                    signature.ty
+                }
+                TypeData::Object(object) => {
+                    let mut signatures = object
+                        .members(self.db)
+                        .iter()
+                        .filter(|member| member.kind.is_call_signature());
+                    let signature = signatures.next()?;
+                    if signatures.next().is_some() {
+                        return None;
+                    }
+                    signature.ty
+                }
+                TypeData::TypeofType(typeof_type) => typeof_type.ty(self.db),
+                TypeData::TypeofValue(typeof_value) => typeof_value.ty(self.db),
+                _ => return None,
+            };
         }
 
         None
@@ -837,10 +909,7 @@ impl<'db> InferredType<'db> {
     pub const fn is_inferred(self) -> bool {
         !matches!(
             self.data,
-            TypeData::Unknown
-                | TypeData::Divergent(_)
-                | TypeData::Local(_)
-                | TypeData::TypeofExpression(_)
+            TypeData::Unknown | TypeData::Local(_) | TypeData::TypeofExpression(_)
         )
     }
 
@@ -1224,7 +1293,6 @@ impl<'db> InferredType<'db> {
 
             match data {
                 TypeData::Unknown
-                | TypeData::Divergent(_)
                 | TypeData::AnyKeyword
                 | TypeData::UnknownKeyword
                 | TypeData::Local(_)
@@ -1392,7 +1460,6 @@ impl<'db> DepthFirstVisitor<TypeData<'db>> for CallableVisitor<'db> {
 
         match data {
             TypeData::Unknown
-            | TypeData::Divergent(_)
             | TypeData::Local(_)
             | TypeData::TypeofExpression(_)
             | TypeData::AnyKeyword

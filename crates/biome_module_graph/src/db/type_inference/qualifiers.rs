@@ -299,7 +299,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                 Some(interface.type_parameters(self.db).to_vec().into())
             }
             InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
@@ -403,7 +402,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
                 InferredTypeData::Object(object) => return Some(object.members(self.db).to_vec()),
                 InferredTypeData::Unknown
-                | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
                 | InferredTypeData::BigInt
@@ -458,7 +456,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                     .collect(),
             ),
             InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
@@ -507,7 +504,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredLiteral::Template(_) => None,
             },
             InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt

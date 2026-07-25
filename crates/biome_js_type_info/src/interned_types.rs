@@ -99,16 +99,10 @@ pub trait TypeDb: biome_db::Db {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
-pub struct DivergentType {
-    pub id: salsa::Id,
-}
-
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, salsa::Update)]
 pub enum TypeData<'db> {
     #[default]
     Unknown,
-    Divergent(DivergentType),
     Global,
     BigInt,
     Boolean,
@@ -252,17 +246,12 @@ pub enum ConditionalSubset {
 impl<'db> TypeData<'db> {
     // #region Type inspection
 
-    pub fn divergent(id: salsa::Id) -> Self {
-        Self::Divergent(DivergentType { id })
-    }
-
     /// Returns whether this type prevents a consumer from reaching a
     /// conclusive negative result without further resolution.
     pub const fn is_indeterminate(self) -> bool {
         matches!(
             self,
             Self::Unknown
-                | Self::Divergent(_)
                 | Self::Local(_)
                 | Self::TypeofExpression(_)
                 | Self::AnyKeyword
@@ -307,7 +296,7 @@ impl<'db> TypeData<'db> {
                 return "object";
             }
             return match self {
-                Self::Unknown | Self::UnknownKeyword | Self::Divergent(_) => "unknown",
+                Self::Unknown | Self::UnknownKeyword => "unknown",
                 Self::AnyKeyword => "any",
                 Self::NeverKeyword => "never",
                 Self::Null => "null",
@@ -596,8 +585,7 @@ impl<'db> TypeData<'db> {
                 Literal::Template(_) => ConditionalType::Anything,
             }),
             Self::Null | Self::Undefined | Self::VoidKeyword => Some(ConditionalType::Nullish),
-            Self::Divergent(_)
-            | Self::Generic(_)
+            Self::Generic(_)
             | Self::GlobalType(_)
             | Self::Local(_)
             | Self::TypeOperator(_)
@@ -641,7 +629,6 @@ impl<'db> TypeData<'db> {
             | Self::Tuple(_)
             | Self::Union(_) => type_parameters.is_empty(),
             Self::Class(_)
-            | Self::Divergent(_)
             | Self::Generic(_)
             | Self::GlobalType(_)
             | Self::Local(_)
@@ -886,7 +873,6 @@ impl<'db> TypeData<'db> {
             | Self::Namespace(_)
             | Self::Object(_) => self,
             expanded @ (Self::Unknown
-            | Self::Divergent(_)
             | Self::Global
             | Self::GlobalType(_)
             | Self::BigInt
@@ -1193,7 +1179,7 @@ impl<'db> TypeData<'db> {
 
     pub fn to_raw_lossy(self, db: &'db dyn TypeDb) -> RawTypeData {
         match self {
-            Self::Unknown | Self::Divergent(_) => raw::TypeData::Unknown,
+            Self::Unknown => raw::TypeData::Unknown,
             Self::GlobalType(id) => raw::TypeData::Reference(raw::RawTypeId::Global(id).into()),
             Self::Global => raw::TypeData::Global,
             Self::BigInt => raw::TypeData::BigInt,
@@ -1318,7 +1304,7 @@ impl<'db> TypeData<'db> {
 
     pub fn to_raw_reference_lossy(self) -> raw::TypeReference {
         match self {
-            Self::Unknown | Self::Divergent(_) => raw::TypeReference::Resolved(GLOBAL_UNKNOWN_ID),
+            Self::Unknown => raw::TypeReference::Resolved(GLOBAL_UNKNOWN_ID),
             Self::GlobalType(id) => raw::RawTypeId::Global(id).into(),
             Self::Global => raw::TypeReference::Resolved(GLOBAL_GLOBAL_ID),
             Self::Boolean => raw::TypeReference::Resolved(GLOBAL_BOOLEAN_ID),

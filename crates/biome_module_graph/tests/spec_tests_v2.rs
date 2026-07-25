@@ -86,6 +86,61 @@ fn test_module_keys_reject_stale_handles() {
 }
 
 #[test]
+fn test_named_type_ids_are_sorted_and_deduplicated() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            class ClassType {}
+            enum EnumType { Value }
+            interface InterfaceType { first: string }
+            interface InterfaceType { second: number }
+            module ModuleType {}
+            namespace NamespaceType {}
+            type AliasType = string;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    assert!(
+        inferred
+            .named_type_ids
+            .windows(2)
+            .all(|ids| ids[0] < ids[1]),
+        "named type IDs must be sorted and deduplicated"
+    );
+
+    let ModuleInfoKind::Js(info) = module.kind(&db) else {
+        panic!("module must contain JavaScript information");
+    };
+    let mut names = inferred
+        .named_type_ids
+        .iter()
+        .map(|id| {
+            info.local_type_name(*id)
+                .expect("named type must have a name")
+                .to_string()
+        })
+        .collect::<Vec<_>>();
+    names.sort();
+    assert_eq!(
+        names,
+        [
+            "ClassType",
+            "InterfaceType",
+            "InterfaceType",
+            "ModuleType",
+            "NamespaceType",
+        ]
+    );
+}
+
+#[test]
 fn test_infer_module_types_poison_unresolved_union_variants() {
     let fs = MemoryFileSystem::default();
     fs.insert(

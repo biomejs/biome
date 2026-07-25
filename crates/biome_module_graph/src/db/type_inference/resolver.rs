@@ -1,8 +1,7 @@
-use super::{BindingTypeData, InferredModuleTypes, globals::global_type, lookup::module_for_key};
+use super::{BindingTypeData, InferredModuleTypes, globals::global_type};
 use crate::db::queries::{LocalTypeInput, infer_local_type, infer_module_types};
 use crate::module_graph::ModuleInfo;
-use crate::{JsModuleInfo, ModuleDb};
-use biome_js_semantic::JsDeclarationKind;
+use crate::{JsModuleInfo, ModuleDb, module_for_key};
 use biome_js_type_info::{
     GlobalTypeId, RawTypeData, ResolvedTypeId, ScopeId, TypeId, TypeReference,
     TypeReferenceQualifier, TypeResolverLevel,
@@ -42,7 +41,6 @@ pub(in crate::db) struct ResolutionCtx<'db, 'a> {
     pub(in crate::db::type_inference) module_key: ModuleKey,
     pub(in crate::db::type_inference) js_info: &'a JsModuleInfo,
     pub(in crate::db::type_inference) import_resolution: ImportResolution<'a>,
-    pub(in crate::db::type_inference) named_type_ids: FxHashSet<TypeId>,
     pub(in crate::db::type_inference) resolved: FxHashMap<TypeId, InferredTypeData<'db>>,
     pub(in crate::db::type_inference) in_progress: FxHashSet<TypeId>,
     pub(in crate::db::type_inference) resolution_depth: Cell<usize>,
@@ -55,13 +53,6 @@ pub(in crate::db) fn resolve_raw_types<'db>(
     import_resolution: ImportResolution<'_>,
 ) -> InferredModuleTypes<'db> {
     let mut ctx = ResolutionCtx::new(db, module, js_info, import_resolution);
-
-    let mut named_type_ids = ctx
-        .named_type_ids
-        .iter()
-        .map(|type_id| LocalTypeId::new(type_id.index()))
-        .collect::<Vec<_>>();
-    named_type_ids.sort_unstable();
 
     let types = (0..js_info.raw_types.len())
         .map(|index| ctx.resolve_raw_type_id(TypeId::new(index)))
@@ -88,40 +79,11 @@ pub(in crate::db) fn resolve_raw_types<'db>(
 
     InferredModuleTypes {
         module_key: ctx.module_key,
-        named_type_ids: named_type_ids.into_boxed_slice(),
+        named_type_ids: js_info.named_type_ids.clone(),
         types,
         expressions,
         binding_type_data,
     }
-}
-
-pub(in crate::db) fn named_type_ids(js_info: &JsModuleInfo) -> FxHashSet<TypeId> {
-    js_info
-        .raw_binding_types
-        .iter()
-        .filter_map(|(range, reference)| {
-            let binding = js_info.semantic_model.as_binding_by_range(*range)?;
-            if !is_named_type_declaration(binding.declaration_kind()) {
-                return None;
-            }
-            let TypeReference::Resolved(resolved_id) = reference else {
-                return None;
-            };
-            (resolved_id.level() == TypeResolverLevel::Thin).then(|| resolved_id.id())
-        })
-        .collect()
-}
-
-fn is_named_type_declaration(declaration_kind: JsDeclarationKind) -> bool {
-    matches!(
-        declaration_kind,
-        JsDeclarationKind::Class
-            | JsDeclarationKind::Enum
-            | JsDeclarationKind::Interface
-            | JsDeclarationKind::Module
-            | JsDeclarationKind::Namespace
-            | JsDeclarationKind::Type
-    )
 }
 
 impl<'db, 'a> ResolutionCtx<'db, 'a> {
@@ -136,7 +98,6 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
             module_key: ModuleKey::new(module.as_id()),
             js_info,
             import_resolution,
-            named_type_ids: named_type_ids(js_info),
             resolved: FxHashMap::default(),
             in_progress: FxHashSet::default(),
             resolution_depth: Cell::new(0),
@@ -193,7 +154,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
     }
 
     fn resolve_raw_type_reference(&mut self, type_id: TypeId) -> InferredTypeData<'db> {
-        if self.named_type_ids.contains(&type_id) {
+        if self.js_info.is_named_type(type_id) {
             return self.local_type(type_id);
         }
 
@@ -295,7 +256,6 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
                     }
                 }
                 InferredTypeData::Unknown
-                | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
                 | InferredTypeData::BigInt

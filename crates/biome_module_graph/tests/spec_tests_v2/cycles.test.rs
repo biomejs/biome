@@ -14,6 +14,93 @@ fn unwrap_typeof_values<'db>(
     ty
 }
 
+fn insert_import_chain(fs: &MemoryFileSystem, import_count: usize) -> Vec<String> {
+    let paths = (0..=import_count)
+        .map(|index| format!("/src/chain{index}.ts"))
+        .collect::<Vec<_>>();
+
+    for (index, path) in paths.iter().enumerate() {
+        let source = if index == import_count {
+            "export const value = 1;".to_string()
+        } else {
+            format!(
+                "import {{ value as next }} from \"./chain{}.ts\"; export const value = next;",
+                index + 1
+            )
+        };
+        fs.insert(path.into(), source);
+    }
+
+    paths
+}
+
+#[test]
+fn test_import_chains_preserve_terminal_export_across_on_demand_depth_boundary() {
+    for import_count in [127, 128, 129] {
+        let fs = MemoryFileSystem::default();
+        let paths = insert_import_chain(&fs, import_count);
+        let path_refs = paths.iter().map(String::as_str).collect::<Vec<_>>();
+        let db = build_js_test_module_db(&fs, &path_refs, true);
+        let root = db
+            .module_for_path(Utf8Path::new(&paths[0]))
+            .expect("root module must exist");
+
+        let inferred = infer_module_types(&db, root).expect("types must be inferred");
+        let value = inferred_binding_ty_by_name(&db, root, inferred, "value")
+            .expect("terminal export type must be inferred");
+        assert!(
+            is_inferred_number(&db, unwrap_typeof_values(&db, value)),
+            "terminal export must remain numeric across {import_count} imports, got {value:?}"
+        );
+    }
+}
+
+#[test]
+fn test_deep_import_cycle_preserves_neighboring_acyclic_export() {
+    const CYCLE_LENGTH: usize = 129;
+
+    let fs = MemoryFileSystem::default();
+    let mut paths = (0..CYCLE_LENGTH)
+        .map(|index| format!("/src/cycle{index}.ts"))
+        .collect::<Vec<_>>();
+    for (index, path) in paths.iter().enumerate() {
+        let next = (index + 1) % CYCLE_LENGTH;
+        let (stable_import, stable_export) = if index == 0 {
+            (
+                "import { stable } from \"./stable.ts\";",
+                "export const acyclic = stable;",
+            )
+        } else {
+            ("", "")
+        };
+        fs.insert(
+            path.into(),
+            format!(
+                "{stable_import} import {{ cyclic as next }} from \"./cycle{next}.ts\"; export const cyclic = next; {stable_export}"
+            ),
+        );
+    }
+    fs.insert("/src/stable.ts".into(), "export const stable = 1;");
+    paths.push("/src/stable.ts".to_string());
+
+    let path_refs = paths.iter().map(String::as_str).collect::<Vec<_>>();
+    let db = build_js_test_module_db(&fs, &path_refs, true);
+    let root = db
+        .module_for_path(Utf8Path::new(&paths[0]))
+        .expect("root module must exist");
+
+    let inferred = infer_module_types(&db, root).expect("types must be inferred");
+    let cyclic = inferred_binding_ty_by_name(&db, root, inferred, "cyclic")
+        .expect("cyclic binding type must be inferred");
+    assert_eq!(unwrap_typeof_values(&db, cyclic), InferredTypeData::Unknown);
+    let acyclic = inferred_binding_ty_by_name(&db, root, inferred, "acyclic")
+        .expect("acyclic binding type must be inferred");
+    assert!(
+        is_inferred_number(&db, unwrap_typeof_values(&db, acyclic)),
+        "neighboring acyclic export must remain numeric, got {acyclic:?}"
+    );
+}
+
 #[test]
 fn test_infer_module_types_bottom_up_handles_import_cycles() {
     let fs = MemoryFileSystem::default();

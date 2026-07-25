@@ -199,15 +199,40 @@ fn test_expression_function_return_keeps_member_path_in_cycle_identity() {
 }
 
 #[test]
-fn test_expression_function_return_leaves_interface_and_union_indeterminate() {
+fn test_expression_function_return_classifies_callable_interfaces_conservatively() {
     const SOURCE: &str = r#"
-        interface Callable {
+        interface AsyncCallable {
             (): Promise<void>;
         }
-        declare const interfaceCallback: Callable;
+        interface SyncCallable {
+            (): void;
+        }
+        interface InheritedAsyncCallable extends AsyncCallable {}
+        interface OverloadedCallable {
+            (): Promise<void>;
+            (value: string): Promise<void>;
+        }
+        interface MixedCallable {
+            (): void;
+            (value: string): Promise<void>;
+        }
+        interface CyclicCallable extends CyclicCallable {
+            (): Promise<void>;
+        }
+        declare const asyncCallback: AsyncCallable;
+        declare const syncCallback: SyncCallable;
+        declare const inheritedAsyncCallback: InheritedAsyncCallable;
+        declare const overloadedCallback: OverloadedCallable;
+        declare const mixedCallback: MixedCallable;
+        declare const cyclicCallback: CyclicCallable;
         declare const unionCallback: (() => Promise<void>) | (() => Promise<number>);
         declare function consume(value: unknown): void;
-        consume(interfaceCallback);
+        consume(asyncCallback);
+        consume(syncCallback);
+        consume(inheritedAsyncCallback);
+        consume(overloadedCallback);
+        consume(mixedCallback);
+        consume(cyclicCallback);
         consume(unionCallback);
     "#;
     let fs = MemoryFileSystem::default();
@@ -217,10 +242,18 @@ fn test_expression_function_return_leaves_interface_and_union_indeterminate() {
         .module_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
 
-    for expression in ["interfaceCallback", "unionCallback"] {
+    for (expression, expected) in [
+        ("asyncCallback", Some(true)),
+        ("syncCallback", Some(false)),
+        ("inheritedAsyncCallback", Some(true)),
+        ("overloadedCallback", None),
+        ("mixedCallback", None),
+        ("cyclicCallback", Some(true)),
+        ("unionCallback", None),
+    ] {
         assert_eq!(
             expression_function_returns_promise(&db, module, SOURCE, expression),
-            None,
+            expected,
             "{expression}"
         );
     }

@@ -21,7 +21,7 @@ use biome_module_graph::{
     infer_binding_type, infer_call_argument_type, infer_constructor_argument_type,
     infer_export_type, infer_expression_function_returns_promise,
     infer_expression_is_array_of_promises, infer_expression_is_promise, infer_expression_type,
-    normalize_type,
+    normalize_type, resolve_callable_type,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use std::rc::Rc;
@@ -316,6 +316,7 @@ impl TypedService {
         } else {
             infer_call_argument_type(db, input)?
         };
+        let argument_ty = resolve_callable_type(db, argument_ty)?;
 
         Some(InferredType::new(db, argument_ty))
     }
