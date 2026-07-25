@@ -52,6 +52,8 @@ mod intersections;
 mod normalization;
 #[path = "spec_tests_v2/promises.test.rs"]
 mod promises;
+#[path = "spec_tests_v2/queries.test.rs"]
+mod queries;
 #[path = "spec_tests_v2/substitutions.test.rs"]
 mod substitutions;
 
@@ -80,6 +82,61 @@ fn test_module_keys_reject_stale_handles() {
     assert_eq!(
         module_for_key(&db, InferredModuleKey::new(replacement.as_id())),
         Some(replacement)
+    );
+}
+
+#[test]
+fn test_named_type_ids_are_sorted_and_deduplicated() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            class ClassType {}
+            enum EnumType { Value }
+            interface InterfaceType { first: string }
+            interface InterfaceType { second: number }
+            module ModuleType {}
+            namespace NamespaceType {}
+            type AliasType = string;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    assert!(
+        inferred
+            .named_type_ids
+            .windows(2)
+            .all(|ids| ids[0] < ids[1]),
+        "named type IDs must be sorted and deduplicated"
+    );
+
+    let ModuleInfoKind::Js(info) = module.kind(&db) else {
+        panic!("module must contain JavaScript information");
+    };
+    let mut names = inferred
+        .named_type_ids
+        .iter()
+        .map(|id| {
+            info.local_type_name(*id)
+                .expect("named type must have a name")
+                .to_string()
+        })
+        .collect::<Vec<_>>();
+    names.sort();
+    assert_eq!(
+        names,
+        [
+            "ClassType",
+            "InterfaceType",
+            "InterfaceType",
+            "ModuleType",
+            "NamespaceType",
+        ]
     );
 }
 
@@ -210,11 +267,11 @@ impl TestModuleDb {
         }
     }
 
-    fn take_salsa_events(&mut self) -> Vec<salsa::Event> {
+    fn take_salsa_events(&self) -> Vec<salsa::Event> {
         std::mem::take(&mut *self.events.0.lock().unwrap())
     }
 
-    fn clear_salsa_events(&mut self) {
+    fn clear_salsa_events(&self) {
         self.take_salsa_events();
     }
 }
@@ -855,6 +912,24 @@ fn build_js_test_module_db_with_layout(
     db
 }
 
+fn binding_range_by_name(db: &dyn ModuleDb, module: ModuleInfo, name: &str) -> TextRange {
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        panic!("module must contain JavaScript information");
+    };
+    js_info
+        .semantic_model
+        .all_bindings()
+        .find(|binding| {
+            binding
+                .tree()
+                .name_token()
+                .is_ok_and(|token| token.text_trimmed() == name)
+        })
+        .unwrap_or_else(|| panic!("{name} binding must exist"))
+        .syntax()
+        .text_trimmed_range()
+}
+
 #[test]
 fn test_infer_module_types_resolves_record_index_signature_on_build() {
     let fs = MemoryFileSystem::default();
@@ -1218,8 +1293,7 @@ fn test_infer_module_types_bottom_up_warms_blanket_reexports() {
         "#,
     );
 
-    let mut db =
-        build_js_test_module_db(&fs, &["/src/leaf.ts", "/src/mid.ts", "/src/index.ts"], true);
+    let db = build_js_test_module_db(&fs, &["/src/leaf.ts", "/src/mid.ts", "/src/index.ts"], true);
     let leaf_module = db
         .module_for_path(Utf8Path::new("/src/leaf.ts"))
         .expect("leaf module must exist");
@@ -4751,7 +4825,7 @@ fn test_infer_module_types_is_memoized() {
         "#,
     );
 
-    let mut db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
     let index_module = db
         .module_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");

@@ -99,16 +99,10 @@ pub trait TypeDb: biome_db::Db {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
-pub struct DivergentType {
-    pub id: salsa::Id,
-}
-
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, salsa::Update)]
 pub enum TypeData<'db> {
     #[default]
     Unknown,
-    Divergent(DivergentType),
     Global,
     BigInt,
     Boolean,
@@ -252,8 +246,97 @@ pub enum ConditionalSubset {
 impl<'db> TypeData<'db> {
     // #region Type inspection
 
-    pub fn divergent(id: salsa::Id) -> Self {
-        Self::Divergent(DivergentType { id })
+    /// Returns whether this type prevents a consumer from reaching a
+    /// conclusive negative result without further resolution.
+    pub const fn is_indeterminate(self) -> bool {
+        matches!(
+            self,
+            Self::Unknown
+                | Self::Local(_)
+                | Self::TypeofExpression(_)
+                | Self::AnyKeyword
+                | Self::UnknownKeyword
+        )
+    }
+
+    /// Returns whether this type represents an object-like value.
+    ///
+    /// Instance targets are followed iteratively. A recursive instance chain is
+    /// considered object-like.
+    pub fn is_object_like(mut self, db: &'db dyn TypeDb) -> bool {
+        let mut seen = FxHashSet::default();
+        loop {
+            if !seen.insert(self) {
+                return true;
+            }
+            match self {
+                Self::Class(_)
+                | Self::Constructor(_)
+                | Self::Function(_)
+                | Self::Interface(_)
+                | Self::Module(_)
+                | Self::Namespace(_)
+                | Self::Object(_)
+                | Self::ObjectKeyword
+                | Self::Tuple(_) => return true,
+                Self::InstanceOf(instance) => self = instance.ty(db),
+                _ => return false,
+            }
+        }
+    }
+
+    /// Returns a stable category name suitable for diagnostics.
+    ///
+    /// Instance targets are followed iteratively. Compound types use their
+    /// category name instead of constructing a description from their members.
+    pub fn type_description(mut self, db: &'db dyn TypeDb) -> &'static str {
+        let mut seen = FxHashSet::default();
+        loop {
+            if !seen.insert(self) {
+                return "object";
+            }
+            return match self {
+                Self::Unknown | Self::UnknownKeyword => "unknown",
+                Self::AnyKeyword => "any",
+                Self::NeverKeyword => "never",
+                Self::Null => "null",
+                Self::Undefined | Self::VoidKeyword => "undefined",
+                Self::Boolean => "boolean",
+                Self::Number => "number",
+                Self::String => "string",
+                Self::BigInt => "bigint",
+                Self::Symbol => "symbol",
+                Self::ObjectKeyword | Self::Object(_) => "object",
+                Self::Interface(_) => "interface",
+                Self::Class(_) => "class",
+                Self::Function(_) => "function",
+                Self::Tuple(_) => "tuple",
+                Self::Module(_) | Self::Namespace(_) => "namespace",
+                Self::Constructor(_) => "constructor",
+                Self::InstanceOf(instance) => {
+                    self = instance.ty(db);
+                    continue;
+                }
+                Self::Intersection(_) => "intersection",
+                Self::Union(_) => "union",
+                Self::Literal(literal) => match literal.literal(db) {
+                    Literal::BigInt(_) => "bigint",
+                    Literal::Boolean(_) => "boolean",
+                    Literal::Number(_) => "number",
+                    Literal::String(_) | Literal::Template(_) => "string",
+                    Literal::Object(_) => "object",
+                    Literal::RegExp(_) => "RegExp",
+                },
+                Self::Generic(_) => "generic",
+                Self::Local(_) => "unresolved",
+                Self::MergedReference(_) => "merged type",
+                Self::TypeOperator(_) => "type operator",
+                Self::TypeofExpression(_) | Self::TypeofType(_) | Self::TypeofValue(_) => "typeof",
+                Self::Conditional => "conditional",
+                Self::Global | Self::GlobalType(_) => "global",
+                Self::ThisKeyword => "this",
+            };
+        }
     }
 
     pub fn is_string_key_type(self, db: &'db dyn TypeDb) -> bool {
@@ -502,8 +585,7 @@ impl<'db> TypeData<'db> {
                 Literal::Template(_) => ConditionalType::Anything,
             }),
             Self::Null | Self::Undefined | Self::VoidKeyword => Some(ConditionalType::Nullish),
-            Self::Divergent(_)
-            | Self::Generic(_)
+            Self::Generic(_)
             | Self::GlobalType(_)
             | Self::Local(_)
             | Self::TypeOperator(_)
@@ -547,7 +629,6 @@ impl<'db> TypeData<'db> {
             | Self::Tuple(_)
             | Self::Union(_) => type_parameters.is_empty(),
             Self::Class(_)
-            | Self::Divergent(_)
             | Self::Generic(_)
             | Self::GlobalType(_)
             | Self::Local(_)
@@ -792,7 +873,6 @@ impl<'db> TypeData<'db> {
             | Self::Namespace(_)
             | Self::Object(_) => self,
             expanded @ (Self::Unknown
-            | Self::Divergent(_)
             | Self::Global
             | Self::GlobalType(_)
             | Self::BigInt
@@ -1099,7 +1179,7 @@ impl<'db> TypeData<'db> {
 
     pub fn to_raw_lossy(self, db: &'db dyn TypeDb) -> RawTypeData {
         match self {
-            Self::Unknown | Self::Divergent(_) => raw::TypeData::Unknown,
+            Self::Unknown => raw::TypeData::Unknown,
             Self::GlobalType(id) => raw::TypeData::Reference(raw::RawTypeId::Global(id).into()),
             Self::Global => raw::TypeData::Global,
             Self::BigInt => raw::TypeData::BigInt,
@@ -1224,7 +1304,7 @@ impl<'db> TypeData<'db> {
 
     pub fn to_raw_reference_lossy(self) -> raw::TypeReference {
         match self {
-            Self::Unknown | Self::Divergent(_) => raw::TypeReference::Resolved(GLOBAL_UNKNOWN_ID),
+            Self::Unknown => raw::TypeReference::Resolved(GLOBAL_UNKNOWN_ID),
             Self::GlobalType(id) => raw::RawTypeId::Global(id).into(),
             Self::Global => raw::TypeReference::Resolved(GLOBAL_GLOBAL_ID),
             Self::Boolean => raw::TypeReference::Resolved(GLOBAL_BOOLEAN_ID),
@@ -2000,9 +2080,22 @@ pub struct TypeMember<'db> {
     pub ty: TypeData<'db>,
 }
 
+const CUSTOM_STRINGIFICATION_MEMBER_NAMES: [&str; 3] = ["toLocaleString", "toString", "valueOf"];
+
 impl TypeMember<'_> {
     pub(crate) fn name(&self) -> Option<Text> {
         self.kind.name()
+    }
+
+    /// Returns whether this member declares one of JavaScript's object
+    /// conversion hooks.
+    ///
+    /// Classification is name-based. It does not resolve the member type or
+    /// require the member to be callable.
+    pub(crate) fn is_custom_stringification_member(&self) -> bool {
+        CUSTOM_STRINGIFICATION_MEMBER_NAMES
+            .iter()
+            .any(|name| self.kind.has_name(name))
     }
 }
 

@@ -53,7 +53,7 @@ impl Rule for UseRegexpExec {
 
         let call_object = callee.object().ok()?;
         if !ctx
-            .inferred_type_of_expression(&call_object)
+            .type_of_expression(&call_object)
             .is_some_and(|ty| ty.is_string_or_string_literal())
         {
             return None;
@@ -76,7 +76,7 @@ impl Rule for UseRegexpExec {
         let express = first_arg.as_any_js_expression()?;
 
         if ctx
-            .inferred_type_of_expression(express)
+            .type_of_expression(express)
             .is_some_and(|ty| ty.is_regexp_literal_without_global_flag())
         {
             return Some(());
