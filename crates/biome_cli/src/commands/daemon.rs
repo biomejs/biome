@@ -212,6 +212,13 @@ pub(crate) fn read_most_recent_log_file(
 /// `biome-logs/server.log.yyyy-MM-dd-HH` files inside the system temporary
 /// directory)
 fn setup_tracing_subscriber(log_path: Utf8PathBuf, log_file_name_prefix: String) {
+    // `max_log_files` makes the appender enumerate the log directory as it is built. On a
+    // first run that directory doesn't exist yet, and tracing-appender reports the failed
+    // read straight to stderr, which LSP clients surface as an error even though the daemon
+    // starts fine. Creating it up front keeps startup quiet; if it cannot be created,
+    // `build()` below still fails with a clearer message.
+    let _ = fs::create_dir_all(&log_path);
+
     let appender_builder = tracing_appender::rolling::RollingFileAppender::builder();
     let file_appender = appender_builder
         .filename_prefix(log_file_name_prefix)
