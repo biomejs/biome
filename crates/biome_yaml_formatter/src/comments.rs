@@ -326,10 +326,7 @@ impl Format<YamlFormatContext> for FormatEntryDanglingComments<'_> {
                 }
                 write!(
                     f,
-                    [FormatRefWithRule::new(
-                        comment,
-                        FormatYamlLeadingComment
-                    )]
+                    [FormatRefWithRule::new(comment, FormatYamlLeadingComment)]
                 )?;
                 comment.mark_formatted();
             }
