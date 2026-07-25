@@ -320,7 +320,7 @@ pub(in crate::db) fn resolve_export_type_on_demand<'db>(
         return None;
     }
 
-    let ctx = ResolutionCtx::new(db, module, &js_info, super::ImportResolution::Full);
+    let ctx = ResolutionCtx::new(db, module, &js_info, super::ImportResolution::OnDemand);
     Some(ctx.resolve_export_name_on_demand(module, name))
 }
 

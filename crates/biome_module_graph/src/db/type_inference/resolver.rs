@@ -23,9 +23,17 @@ pub(super) const MAX_RAW_TYPE_RESOLUTION_DEPTH: usize = 64;
 const MAX_INFERRED_EXPRESSION_WRAPPER_STEPS: usize = 64;
 const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 
+/// Selects how a resolution context follows references into imported modules.
+///
+/// Regular queries resolve only the requested imported symbol. Salsa cycle
+/// recovery cannot recursively request members of the strongly connected
+/// component that caused the cycle, so it uses materialized module tables and
+/// treats that component as unavailable instead.
 #[derive(Clone, Copy)]
 pub(in crate::db) enum ImportResolution<'a> {
-    Full,
+    /// Resolves imported symbols through export discovery and leaf queries.
+    OnDemand,
+    /// Reads imports from module tables while blocking the active cyclic component.
     CycleFallback(&'a FxHashSet<ModuleInfo>),
 }
 
@@ -145,7 +153,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
         module: ModuleInfo,
     ) -> Option<&'db InferredModuleTypes<'db>> {
         match self.import_resolution {
-            ImportResolution::Full => infer_module_types(self.db, module),
+            ImportResolution::OnDemand => infer_module_types(self.db, module),
             ImportResolution::CycleFallback(blocked) => {
                 if blocked.contains(&module) {
                     None

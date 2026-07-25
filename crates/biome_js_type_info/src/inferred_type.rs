@@ -245,6 +245,55 @@ impl<'db> InferredType<'db> {
             .and_then(|ty| is_promise_instance(self.db, *ty))
     }
 
+    /// Returns whether this type is an array of Promises while resolving only
+    /// its outer wrappers and element type.
+    pub fn is_array_of_promise_with(
+        self,
+        mut resolve: impl FnMut(TypeData<'db>) -> TypeData<'db>,
+    ) -> Option<bool> {
+        let mut data = self.data;
+        let mut seen = FxHashSet::default();
+
+        for _ in 0..MAX_PROMISE_TYPE_STEPS {
+            data = resolve(data).expand_structural_global(self.db);
+            if !seen.insert(data) {
+                return None;
+            }
+
+            data = match data {
+                TypeData::InstanceOf(instance) => {
+                    if !instance.ty(self.db).is_array_class(self.db) {
+                        return Some(false);
+                    }
+                    let element = instance.type_parameters(self.db).first()?;
+                    return is_promise_instance_with(self.db, *element, &mut resolve);
+                }
+                TypeData::MergedReference(reference) => {
+                    let mut targets = reference.targets(self.db);
+                    let Some(first) = targets.next() else {
+                        return Some(false);
+                    };
+                    if targets.all(|target| target == first) {
+                        first
+                    } else {
+                        return Some(false);
+                    }
+                }
+                TypeData::TypeofType(typeof_type) => typeof_type.ty(self.db),
+                TypeData::TypeofValue(typeof_value) => typeof_value.ty(self.db),
+                TypeData::Unknown
+                | TypeData::Divergent(_)
+                | TypeData::Local(_)
+                | TypeData::TypeofExpression(_)
+                | TypeData::AnyKeyword
+                | TypeData::UnknownKeyword => return None,
+                _ => return Some(false),
+            };
+        }
+
+        None
+    }
+
     pub fn is_disposable(self) -> bool {
         self.has_computed_member("Symbol.dispose")
     }
@@ -260,6 +309,15 @@ impl<'db> InferredType<'db> {
     /// or exceeds the promise traversal limit.
     pub fn is_promise_instance(self) -> Option<bool> {
         is_promise_instance(self.db, self.data)
+    }
+
+    /// Returns whether this type is a Promise while resolving types only as
+    /// they are reached by the Promise traversal.
+    pub fn is_promise_instance_with(
+        self,
+        mut resolve: impl FnMut(TypeData<'db>) -> TypeData<'db>,
+    ) -> Option<bool> {
+        is_promise_instance_with(self.db, self.data, &mut resolve)
     }
 
     pub fn is_function(self) -> bool {
@@ -324,6 +382,67 @@ impl<'db> InferredType<'db> {
             return Some(false);
         };
         is_promise_instance(self.db, *return_ty)
+    }
+
+    /// Returns whether this callable returns a Promise while resolving only
+    /// its outer callable wrappers and return type.
+    pub fn function_returns_promise_with(
+        self,
+        mut resolve: impl FnMut(TypeData<'db>) -> TypeData<'db>,
+    ) -> Option<bool> {
+        let mut pending = VecDeque::from([self.data]);
+        let mut seen = FxHashSet::default();
+        let mut indeterminate = false;
+
+        for _ in 0..MAX_PROMISE_TYPE_STEPS {
+            let Some(data) = pending.pop_front() else {
+                return if indeterminate { None } else { Some(false) };
+            };
+            let data = resolve(data).expand_structural_global(self.db);
+            if !seen.insert(data) {
+                indeterminate = true;
+                continue;
+            }
+            if let Some(function) = data.callable_function(self.db) {
+                let ReturnType::Type(return_ty) = function.return_type(self.db) else {
+                    continue;
+                };
+                match is_promise_instance_with(self.db, *return_ty, &mut resolve) {
+                    Some(true) => return Some(true),
+                    Some(false) => continue,
+                    None => {
+                        indeterminate = true;
+                        continue;
+                    }
+                }
+            }
+
+            match data {
+                TypeData::InstanceOf(instance) => pending.push_back(instance.ty(self.db)),
+                TypeData::MergedReference(reference) => {
+                    pending.extend(reference.targets(self.db));
+                }
+                TypeData::TypeofType(typeof_type) => pending.push_back(typeof_type.ty(self.db)),
+                TypeData::TypeofValue(typeof_value) => pending.push_back(typeof_value.ty(self.db)),
+                TypeData::Union(union) => {
+                    if union.types(self.db).len() > MAX_PROMISE_TYPE_STEPS - seen.len() {
+                        return None;
+                    }
+                    pending.extend(union.types(self.db).iter().copied());
+                }
+                TypeData::Unknown
+                | TypeData::Divergent(_)
+                | TypeData::Local(_)
+                | TypeData::TypeofExpression(_)
+                | TypeData::AnyKeyword
+                | TypeData::UnknownKeyword => {
+                    indeterminate = true;
+                }
+                _ => {}
+            }
+        }
+
+        None
     }
 
     pub fn function_returns_conditional(self) -> bool {
@@ -1421,12 +1540,21 @@ fn has_custom_stringification_member(members: &[crate::interned_types::TypeMembe
 }
 
 fn is_promise_instance<'db>(db: &'db dyn TypeDb, data: TypeData<'db>) -> Option<bool> {
+    is_promise_instance_with(db, data, &mut |data| data)
+}
+
+fn is_promise_instance_with<'db>(
+    db: &'db dyn TypeDb,
+    data: TypeData<'db>,
+    resolve: &mut impl FnMut(TypeData<'db>) -> TypeData<'db>,
+) -> Option<bool> {
     let mut completed = FxHashSet::default();
     let mut pending = VecDeque::from([(data, Vec::new(), false, false)]);
     let mut processed = 0;
     let mut indeterminate = false;
 
     while let Some((data, path, is_instance_target, is_promise_like_target)) = pending.pop_front() {
+        let data = resolve(data);
         if path.contains(&data) {
             indeterminate = true;
             continue;
@@ -1465,7 +1593,8 @@ fn is_promise_instance<'db>(db: &'db dyn TypeDb, data: TypeData<'db>) -> Option<
                     .iter()
                     .filter(|member| !member.kind.is_static() && member.kind.has_name("then"))
                 {
-                    match InferredType::new(db, member.ty).is_callable() {
+                    let member_ty = resolve(member.ty);
+                    match InferredType::new(db, member_ty).is_callable() {
                         Some(true) => return Some(true),
                         Some(false) => {}
                         None => indeterminate = true,

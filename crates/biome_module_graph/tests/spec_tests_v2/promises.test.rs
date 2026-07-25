@@ -1,4 +1,230 @@
 use super::*;
+use biome_module_graph::{ExpressionTypeInput, infer_expression_function_returns_promise};
+
+fn expression_function_returns_promise(
+    db: &TestModuleDb,
+    module: ModuleInfo,
+    source: &str,
+    expression: &str,
+) -> Option<bool> {
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        panic!("module must contain JavaScript information");
+    };
+    let range = js_info
+        .raw_expressions
+        .keys()
+        .find(|range| source_snippet(source, **range) == expression)
+        .copied()
+        .unwrap_or_else(|| panic!("{expression} expression must exist"));
+    infer_expression_function_returns_promise(db, ExpressionTypeInput::new(db, module, range))
+}
+
+#[test]
+fn test_expression_function_return_classifies_selected_object_members() {
+    const SOURCE: &str = r#"
+        declare function consume(value: unknown): void;
+        const callbacks = {
+            selected: async () => {},
+            cacheDir: "/tmp",
+        };
+        consume(callbacks.selected);
+        consume(callbacks.cacheDir);
+        consume({ selected: async () => {}, cacheDir: "/tmp" });
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+
+    assert_eq!(
+        expression_function_returns_promise(&db, module, SOURCE, "callbacks.selected"),
+        Some(true)
+    );
+    assert_eq!(
+        expression_function_returns_promise(&db, module, SOURCE, "callbacks.cacheDir"),
+        Some(false)
+    );
+    assert_eq!(
+        expression_function_returns_promise(
+            &db,
+            module,
+            SOURCE,
+            r#"{ selected: async () => {}, cacheDir: "/tmp" }"#,
+        ),
+        Some(false)
+    );
+}
+
+#[test]
+fn test_expression_function_return_classifies_local_aliases_and_static_members() {
+    const SOURCE: &str = r#"
+        declare function consume(value: unknown): void;
+        const callback = async () => {};
+        const alias = callback;
+        class Callbacks {
+            static selected = alias;
+        }
+        consume(alias);
+        consume(Callbacks.selected);
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+
+    assert_eq!(
+        expression_function_returns_promise(&db, module, SOURCE, "alias"),
+        Some(true)
+    );
+    assert_eq!(
+        expression_function_returns_promise(&db, module, SOURCE, "Callbacks.selected"),
+        Some(true)
+    );
+}
+
+#[test]
+fn test_expression_function_return_classifies_promise_like_returns() {
+    const SOURCE: &str = r#"
+        interface PromiseLike<T> {
+            then(resolve: (value: T) => void): void;
+        }
+        declare function callback(): PromiseLike<void>;
+        declare function consume(value: unknown): void;
+        consume(callback);
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+
+    assert_eq!(
+        expression_function_returns_promise(&db, module, SOURCE, "callback"),
+        Some(true)
+    );
+}
+
+#[test]
+fn test_expression_function_return_classifies_this_member_chains() {
+    const SOURCE: &str = r#"
+        declare function consume(value: unknown): void;
+        class Runner {
+            #settings = {
+                config: {
+                    callback: async () => {},
+                    cacheDir: "/tmp",
+                },
+            };
+
+            run() {
+                consume(this.#settings.config.callback);
+                consume(this.#settings.config.cacheDir);
+            }
+        }
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+
+    assert_eq!(
+        expression_function_returns_promise(&db, module, SOURCE, "this.#settings.config.callback",),
+        Some(true)
+    );
+    assert_eq!(
+        expression_function_returns_promise(&db, module, SOURCE, "this.#settings.config.cacheDir",),
+        Some(false)
+    );
+}
+
+#[test]
+fn test_expression_function_return_classifies_imported_named_aliases() {
+    const SOURCE: &str = r#"
+        export const callback = async () => {};
+        export const callbacks = { selected: callback };
+    "#;
+    const INDEX: &str = r#"
+        import { callback as importedCallback, callbacks as importedCallbacks } from "./source.ts";
+        declare function consume(value: unknown): void;
+        consume(importedCallback);
+        consume(importedCallbacks.selected);
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/source.ts".into(), SOURCE);
+    fs.insert("/src/index.ts".into(), INDEX);
+    let db = build_js_test_module_db(&fs, &["/src/source.ts", "/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+
+    assert_eq!(
+        expression_function_returns_promise(&db, module, INDEX, "importedCallback"),
+        Some(true)
+    );
+    assert_eq!(
+        expression_function_returns_promise(&db, module, INDEX, "importedCallbacks.selected"),
+        Some(true)
+    );
+}
+
+#[test]
+fn test_expression_function_return_keeps_member_path_in_cycle_identity() {
+    const SOURCE: &str = r#"
+        type Recursive = {
+            next: Recursive;
+            callback: () => Promise<void>;
+        };
+        declare const root: Recursive;
+        declare function consume(value: unknown): void;
+        consume(root.next.callback);
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+
+    assert_eq!(
+        expression_function_returns_promise(&db, module, SOURCE, "root.next.callback"),
+        Some(true)
+    );
+}
+
+#[test]
+fn test_expression_function_return_leaves_interface_and_union_indeterminate() {
+    const SOURCE: &str = r#"
+        interface Callable {
+            (): Promise<void>;
+        }
+        declare const interfaceCallback: Callable;
+        declare const unionCallback: (() => Promise<void>) | (() => Promise<number>);
+        declare function consume(value: unknown): void;
+        consume(interfaceCallback);
+        consume(unionCallback);
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+
+    for expression in ["interfaceCallback", "unionCallback"] {
+        assert_eq!(
+            expression_function_returns_promise(&db, module, SOURCE, expression),
+            None,
+            "{expression}"
+        );
+    }
+}
 
 fn inferred_promise_value_type<'db>(
     db: &'db dyn ModuleDb,

@@ -12,6 +12,7 @@ mod expressions;
 mod globals;
 mod imports;
 mod lookup;
+mod promise_classification;
 mod qualifiers;
 mod resolver;
 
@@ -22,6 +23,10 @@ pub(in crate::db) use imports::{
 pub(in crate::db) use lookup::{
     apply_substitutions_to_root_body, find_member_type_on_demand, find_value_member_type_on_demand,
     resolve_local_type_on_demand, substitutions_for_instance,
+};
+pub(in crate::db) use promise_classification::{
+    PromiseClassification, classify_expression_array_promise, classify_expression_function_return,
+    classify_expression_promise,
 };
 pub(in crate::db) use resolver::{
     ImportResolution, ResolutionCtx, named_type_ids, resolve_raw_types,

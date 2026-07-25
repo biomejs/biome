@@ -22,7 +22,9 @@
 //! shapes produce `Unknown` or `None` instead of a TypeScript diagnostic.
 
 use crate::db::type_inference::{
-    ExportOriginResult, ImportResolution, ResolutionCtx, apply_substitutions_to_root_body,
+    ExportOriginResult, ImportResolution, PromiseClassification, ResolutionCtx,
+    apply_substitutions_to_root_body, classify_expression_array_promise,
+    classify_expression_function_return, classify_expression_promise,
     collect_namespace_export_names, collected_type_result, find_export_origin,
     find_member_type_on_demand as find_member_type_impl,
     find_value_member_type_on_demand as find_value_member_type_impl,
@@ -34,7 +36,7 @@ use crate::module_for_key;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsExport, JsOwnExport, ModuleDb, ResolvedPath, SymbolFromModuleInfo};
 use biome_js_type_info::{
-    RawTypeData, TypeId, TypeReference, TypeResolverLevel, global_types,
+    InferredType, RawTypeData, TypeId, TypeReference, TypeResolverLevel, global_types,
     interned_types::{
         CallArgumentType as InferredCallArgumentType,
         FunctionParameter as InferredFunctionParameter, InternedConstructor as InferredConstructor,
@@ -113,7 +115,7 @@ pub fn infer_module_types<'db>(
         db,
         module,
         &js_info,
-        ImportResolution::Full,
+        ImportResolution::OnDemand,
     ))
 }
 
@@ -143,8 +145,93 @@ pub fn infer_expression_type<'db>(
     }
 
     let reference = js_info.raw_expressions.get(&input.expression(db))?.clone();
-    let mut ctx = ResolutionCtx::new(db, module, &js_info, ImportResolution::Full);
+    let mut ctx = ResolutionCtx::new(db, module, &js_info, ImportResolution::OnDemand);
     Some(ctx.resolve(&reference))
+}
+
+/// Classifies whether an expression is a Promise without resolving unrelated members.
+///
+/// Returns `Some(true)` for `Promise` and `PromiseLike` instances and
+/// `Some(false)` for conclusive non-matches. Missing expressions, disabled
+/// inference, unsupported or ambiguous type shapes, dependency cycles, and
+/// exhausted traversal budgets return `None`.
+#[salsa::tracked(cycle_result=infer_expression_is_promise_cycle_result)]
+pub fn infer_expression_is_promise<'db>(
+    db: &'db dyn ModuleDb,
+    input: ExpressionTypeInput<'db>,
+) -> Option<bool> {
+    let module = input.module(db);
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        return None;
+    };
+    if !js_info.infer_types {
+        return None;
+    }
+
+    let reference = js_info.raw_expressions.get(&input.expression(db))?;
+    match classify_expression_promise(db, module, reference.clone()) {
+        PromiseClassification::ReturnsPromise => Some(true),
+        PromiseClassification::DoesNotReturnPromise => Some(false),
+        PromiseClassification::Indeterminate => None,
+    }
+}
+
+/// Classifies whether an expression is an array of Promise-like values without
+/// resolving unrelated members.
+#[salsa::tracked(cycle_result=infer_expression_is_array_of_promises_cycle_result)]
+pub fn infer_expression_is_array_of_promises<'db>(
+    db: &'db dyn ModuleDb,
+    input: ExpressionTypeInput<'db>,
+) -> Option<bool> {
+    let module = input.module(db);
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        return None;
+    };
+    if !js_info.infer_types {
+        return None;
+    }
+
+    let reference = js_info.raw_expressions.get(&input.expression(db))?;
+    match classify_expression_array_promise(db, module, reference.clone()) {
+        PromiseClassification::ReturnsPromise => Some(true),
+        PromiseClassification::DoesNotReturnPromise => Some(false),
+        PromiseClassification::Indeterminate => None,
+    }
+}
+
+/// Classifies whether an expression is a function that returns a Promise.
+///
+/// Returns `Some(true)` for a supported function whose return type is a
+/// `Promise` or `PromiseLike`, and `Some(false)` when the selected expression is
+/// conclusively not such a function. `None` represents missing expressions,
+/// disabled inference, unsupported or ambiguous type shapes, dependency
+/// cycles, and exhausted traversal budgets.
+///
+/// Requesting `callbacks.callback` returns `Some(true)` without resolving `other`:
+///
+/// ```ts
+/// const callbacks = { callback: async () => {}, other: unknown };
+/// callbacks.callback;
+/// ```
+#[salsa::tracked(cycle_result=infer_expression_function_returns_promise_cycle_result)]
+pub fn infer_expression_function_returns_promise<'db>(
+    db: &'db dyn ModuleDb,
+    input: ExpressionTypeInput<'db>,
+) -> Option<bool> {
+    let module = input.module(db);
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        return None;
+    };
+    if !js_info.infer_types {
+        return None;
+    }
+
+    let reference = js_info.raw_expressions.get(&input.expression(db))?;
+    match classify_expression_function_return(db, module, reference.clone()) {
+        PromiseClassification::ReturnsPromise => Some(true),
+        PromiseClassification::DoesNotReturnPromise => Some(false),
+        PromiseClassification::Indeterminate => None,
+    }
 }
 
 /// Infers the type collected for one binding range.
@@ -172,7 +259,7 @@ pub fn infer_binding_type<'db>(
     }
 
     let reference = js_info.raw_binding_types.get(&input.range(db))?.clone();
-    let mut ctx = ResolutionCtx::new(db, module, &js_info, ImportResolution::Full);
+    let mut ctx = ResolutionCtx::new(db, module, &js_info, ImportResolution::OnDemand);
     Some(ctx.resolve(&reference))
 }
 
@@ -203,7 +290,7 @@ pub fn infer_local_type<'db>(
         return None;
     }
 
-    let mut ctx = ResolutionCtx::new(db, module, &js_info, ImportResolution::Full);
+    let mut ctx = ResolutionCtx::new(db, module, &js_info, ImportResolution::OnDemand);
     Some(ctx.resolve_raw_type_id(TypeId::new(type_id.index())))
 }
 
@@ -231,6 +318,30 @@ fn infer_expression_type_cycle_result<'db>(
     _input: ExpressionTypeInput<'db>,
 ) -> Option<InferredTypeData<'db>> {
     Some(InferredTypeData::Unknown)
+}
+
+fn infer_expression_is_promise_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: ExpressionTypeInput<'db>,
+) -> Option<bool> {
+    None
+}
+
+fn infer_expression_is_array_of_promises_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: ExpressionTypeInput<'db>,
+) -> Option<bool> {
+    None
+}
+
+fn infer_expression_function_returns_promise_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: ExpressionTypeInput<'db>,
+) -> Option<bool> {
+    None
 }
 
 fn infer_binding_type_cycle_result<'db>(
@@ -274,6 +385,35 @@ pub fn find_value_member_type<'db>(
     name: &str,
 ) -> Option<InferredTypeData<'db>> {
     find_value_member_type_impl(db, ty, name)
+}
+
+/// Returns whether `ty` is a Promise without resolving unrelated nested types.
+pub fn is_promise_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> Option<bool> {
+    InferredType::new(db, ty).is_promise_instance_with(|ty| {
+        resolve_local_type_on_demand(db, ty).expand_structural_global(db)
+    })
+}
+
+/// Returns whether `ty` is an array of Promises without resolving unrelated
+/// nested types.
+pub fn is_array_of_promise_type<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+) -> Option<bool> {
+    InferredType::new(db, ty).is_array_of_promise_with(|ty| {
+        resolve_local_type_on_demand(db, ty).expand_structural_global(db)
+    })
+}
+
+/// Returns whether `ty` is callable and returns a Promise without resolving
+/// callable parameters or unrelated nested types.
+pub fn function_returns_promise<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+) -> Option<bool> {
+    InferredType::new(db, ty).function_returns_promise_with(|ty| {
+        resolve_local_type_on_demand(db, ty).expand_structural_global(db)
+    })
 }
 
 // #endregion
@@ -925,6 +1065,13 @@ fn infer_argument_type<'db>(
                         target,
                         &substitutions,
                     )));
+                }
+                InferredTypeData::Local(_) => {
+                    let resolved = resolve_local_type_on_demand(db, callee);
+                    if resolved == callee {
+                        return None;
+                    }
+                    pending.push(ArgumentTypeItem::Type(resolved));
                 }
                 InferredTypeData::Union(union) => {
                     let types = union.types(db);
@@ -2268,7 +2415,7 @@ impl<'db> ArgumentMatchAction<'db> {
 
 // #region INTERNED TYPES
 
-/// Interned input for [`infer_expression_type`].
+/// Interned input for queries that project information from one expression.
 #[salsa::interned]
 #[derive(Debug)]
 pub struct ExpressionTypeInput<'db> {

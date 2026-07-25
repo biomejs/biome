@@ -19,7 +19,9 @@ use biome_module_graph::{
     BindingTypeInput, CallArgumentTypeInput, ExpressionTypeInput, ModuleDb, ModuleInfo,
     NormalizeTypeInput, SymbolFromModuleInfo, find_member_type, find_value_member_type,
     infer_binding_type, infer_call_argument_type, infer_constructor_argument_type,
-    infer_export_type, infer_expression_type, normalize_type,
+    infer_export_type, infer_expression_function_returns_promise,
+    infer_expression_is_array_of_promises, infer_expression_is_promise, infer_expression_type,
+    normalize_type,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use std::rc::Rc;
@@ -86,6 +88,41 @@ impl TypedService {
         let ty = normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
 
         Some(InferredType::new(db, ty))
+    }
+
+    /// Returns whether an expression is a Promise without resolving unrelated members.
+    pub fn expression_is_promise(&self, expression: &AnyJsExpression) -> Option<bool> {
+        let typed_module = self.module.as_ref()?;
+        let db = typed_module.db.as_ref();
+        infer_expression_is_promise(
+            db,
+            ExpressionTypeInput::new(db, typed_module.module, expression.range()),
+        )
+    }
+
+    /// Returns whether an expression is an array of Promises without
+    /// normalizing unrelated nested types.
+    pub fn expression_is_array_of_promises(&self, expression: &AnyJsExpression) -> Option<bool> {
+        let typed_module = self.module.as_ref()?;
+        let db = typed_module.db.as_ref();
+        infer_expression_is_array_of_promises(
+            db,
+            ExpressionTypeInput::new(db, typed_module.module, expression.range()),
+        )
+    }
+
+    /// Returns whether an expression is callable and returns a Promise without
+    /// normalizing callable parameters or unrelated nested types.
+    pub fn expression_function_returns_promise(
+        &self,
+        expression: &AnyJsExpression,
+    ) -> Option<bool> {
+        let typed_module = self.module.as_ref()?;
+        let db = typed_module.db.as_ref();
+        infer_expression_function_returns_promise(
+            db,
+            ExpressionTypeInput::new(db, typed_module.module, expression.range()),
+        )
     }
 
     /// Returns the Salsa-inferred type for a named value visible at `range`.
@@ -256,10 +293,6 @@ impl TypedService {
         let typed_module = self.module.as_ref()?;
         let db = typed_module.db.as_ref();
         let callee_ty = self.inferred_expression_data(callee.range())?;
-        let callee_ty = normalize_type(
-            db,
-            NormalizeTypeInput::new(db, typed_module.module, callee_ty),
-        );
         let arguments = arguments
             .iter()
             .map(|argument| {
@@ -269,7 +302,6 @@ impl TypedService {
                     AnyJsCallArgument::JsSpread(spread) => (spread.argument().ok()?, true),
                 };
                 let ty = self.inferred_expression_data(expression.range())?;
-                let ty = normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
                 Some(if is_spread {
                     InferredCallArgumentType::Spread(ty)
                 } else {
@@ -284,10 +316,6 @@ impl TypedService {
         } else {
             infer_call_argument_type(db, input)?
         };
-        let argument_ty = normalize_type(
-            db,
-            NormalizeTypeInput::new(db, typed_module.module, argument_ty),
-        );
 
         Some(InferredType::new(db, argument_ty))
     }

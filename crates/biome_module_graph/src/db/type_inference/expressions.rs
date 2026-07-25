@@ -811,7 +811,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         Some(inferred_parameters.into_boxed_slice())
     }
 
-    fn resolve_await_expression(
+    pub(in crate::db::type_inference) fn resolve_await_expression(
         &mut self,
         argument: InferredTypeData<'db>,
     ) -> Option<InferredTypeData<'db>> {

@@ -176,16 +176,27 @@ impl Rule for NoFloatingPromises {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let expression = node.expression().ok()?;
-        let ty = ctx.type_of_expression(&expression)?;
 
         // Uncomment the following line for debugging convenience:
         //let printed = format!("type of {expression:?} = {ty:?}");
-        if ty.is_array_of_promise() == Some(true) {
+        let is_array_of_promises = ctx.expression_is_array_of_promises(&expression);
+        if is_array_of_promises == Some(true) {
             return Some(NoFloatingPromisesState::ArrayOfPromises);
         }
 
-        if ty.is_promise_instance() != Some(true) {
-            return None;
+        let is_promise = ctx.expression_is_promise(&expression);
+        if is_promise != Some(true) {
+            if is_array_of_promises == Some(false) && is_promise == Some(false) {
+                return None;
+            }
+
+            let ty = ctx.type_of_expression(&expression)?;
+            if ty.is_array_of_promise() == Some(true) {
+                return Some(NoFloatingPromisesState::ArrayOfPromises);
+            }
+            if ty.is_promise_instance() != Some(true) {
+                return None;
+            }
         }
 
         if is_handled_promise(expression).unwrap_or_default() {

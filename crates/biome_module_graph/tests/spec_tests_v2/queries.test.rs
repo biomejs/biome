@@ -1,8 +1,42 @@
 use super::*;
 use biome_module_graph::{
     BindingTypeInput, ExpressionTypeInput, LocalTypeInput, SymbolFromModuleInfo, find_member_type,
-    infer_binding_type, infer_export_type, infer_expression_type, infer_local_type,
+    function_returns_promise, infer_binding_type, infer_export_type,
+    infer_expression_function_returns_promise, infer_expression_is_array_of_promises,
+    infer_expression_is_promise, infer_expression_type, infer_local_type, is_array_of_promise_type,
+    is_promise_type,
 };
+
+fn local_type_id_by_name(db: &dyn ModuleDb, module: ModuleInfo, name: &str) -> InferredLocalTypeId {
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        panic!("module must contain JavaScript information");
+    };
+    (0..js_info.raw_types.len())
+        .map(InferredLocalTypeId::new)
+        .find(|type_id| {
+            js_info
+                .local_type_name(*type_id)
+                .is_some_and(|type_name| type_name.text() == name)
+        })
+        .unwrap_or_else(|| panic!("{name} local type must exist"))
+}
+
+fn expression_range_by_source(
+    db: &dyn ModuleDb,
+    module: ModuleInfo,
+    source: &str,
+    expected: &str,
+) -> TextRange {
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        panic!("module must contain JavaScript information");
+    };
+    js_info
+        .raw_expressions
+        .keys()
+        .find(|range| source_snippet(source, **range) == expected)
+        .copied()
+        .unwrap_or_else(|| panic!("{expected} expression must exist"))
+}
 
 #[test]
 fn test_binding_query_does_not_materialize_the_module() {
@@ -83,6 +117,285 @@ fn test_member_lookup_resolves_local_types_without_materializing_the_module() {
     let events = db.take_salsa_events();
 
     assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+}
+
+#[test]
+fn test_promise_classification_query_skips_instance_type_arguments() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            interface Noise {
+                nested: string;
+            }
+            declare const values: Array<Noise>;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let binding = BindingTypeInput::new(&db, module, binding_range_by_name(&db, module, "values"));
+    let values = infer_binding_type(&db, binding).expect("values type must be inferred");
+    let noise = LocalTypeInput::new(&db, module, local_type_id_by_name(&db, module, "Noise"));
+
+    db.clear_salsa_events();
+    assert_eq!(is_promise_type(&db, values), Some(false));
+    let events = db.take_salsa_events();
+
+    assert_function_query_was_not_run(&db, infer_local_type, noise, &events);
+}
+
+#[test]
+fn test_array_promise_classification_query_skips_promise_type_arguments() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            interface Noise {
+                nested: string;
+            }
+            declare const values: Array<Promise<Noise>>;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let binding = BindingTypeInput::new(&db, module, binding_range_by_name(&db, module, "values"));
+    let values = infer_binding_type(&db, binding).expect("values type must be inferred");
+    let noise = LocalTypeInput::new(&db, module, local_type_id_by_name(&db, module, "Noise"));
+
+    db.clear_salsa_events();
+    assert_eq!(is_array_of_promise_type(&db, values), Some(true));
+    let events = db.take_salsa_events();
+
+    assert_function_query_was_not_run(&db, infer_local_type, noise, &events);
+}
+
+#[test]
+fn test_promise_return_classification_query_resolves_return_but_skips_parameters() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            interface Noise {
+                nested: string;
+            }
+            type Result = Promise<void>;
+            type Callback = (value: Noise) => Result;
+            declare const callback: Callback;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let binding =
+        BindingTypeInput::new(&db, module, binding_range_by_name(&db, module, "callback"));
+    let callback = infer_binding_type(&db, binding).expect("callback type must be inferred");
+    let callback_input =
+        LocalTypeInput::new(&db, module, local_type_id_by_name(&db, module, "Callback"));
+    let result = LocalTypeInput::new(&db, module, local_type_id_by_name(&db, module, "Result"));
+    let noise = LocalTypeInput::new(&db, module, local_type_id_by_name(&db, module, "Noise"));
+
+    db.clear_salsa_events();
+    assert_eq!(function_returns_promise(&db, callback), Some(true));
+    let events = db.take_salsa_events();
+
+    assert_function_query_was_run(&db, infer_local_type, callback_input, &events);
+    assert_function_query_was_run(&db, infer_local_type, result, &events);
+    assert_function_query_was_not_run(&db, infer_local_type, noise, &events);
+}
+
+#[test]
+fn test_expression_function_return_query_skips_expression_and_sibling_type_queries() {
+    const SOURCE: &str = r#"
+        interface Noise {
+            nested: string;
+        }
+        declare function consume(value: unknown): void;
+        class Runner {
+            #settings = {
+                config: { cacheDir: "/tmp", unrelated: null as unknown as Noise }
+            };
+
+            run() {
+                consume({ image: "", syntaxHighlight: async () => {}, unrelated: null as unknown as Noise });
+                consume(this.#settings.config.cacheDir);
+            }
+        }
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let object = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(
+            &db,
+            module,
+            SOURCE,
+            r#"{ image: "", syntaxHighlight: async () => {}, unrelated: null as unknown as Noise }"#,
+        ),
+    );
+    let cache_dir = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(&db, module, SOURCE, "this.#settings.config.cacheDir"),
+    );
+    let noise = LocalTypeInput::new(&db, module, local_type_id_by_name(&db, module, "Noise"));
+
+    db.clear_salsa_events();
+    assert_eq!(
+        infer_expression_function_returns_promise(&db, object),
+        Some(false)
+    );
+    assert_eq!(
+        infer_expression_function_returns_promise(&db, cache_dir),
+        Some(false)
+    );
+    let events = db.take_salsa_events();
+
+    assert_function_query_was_not_run(&db, infer_expression_type, object, &events);
+    assert_function_query_was_not_run(&db, infer_expression_type, cache_dir, &events);
+    assert_function_query_was_not_run(&db, infer_local_type, noise, &events);
+}
+
+#[test]
+fn test_expression_array_promise_query_skips_sibling_type_queries() {
+    const SOURCE: &str = r#"
+        interface Noise {
+            nested: string;
+        }
+        const callbacks = {
+            promises: (): Array<Promise<void>> => [],
+            unrelated: null as unknown as Noise,
+        };
+        callbacks.promises();
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(&db, module, SOURCE, "callbacks.promises()"),
+    );
+    let noise = LocalTypeInput::new(&db, module, local_type_id_by_name(&db, module, "Noise"));
+
+    db.clear_salsa_events();
+    assert_eq!(
+        infer_expression_is_array_of_promises(&db, expression),
+        Some(true)
+    );
+    let events = db.take_salsa_events();
+
+    assert_function_query_was_not_run(&db, infer_expression_type, expression, &events);
+    assert_function_query_was_not_run(&db, infer_local_type, noise, &events);
+}
+
+#[test]
+fn test_expression_promise_queries_follow_imported_interface_members() {
+    const SOURCE: &str = r#"
+        import type { LoaderContext } from "./types";
+        declare const context: LoaderContext;
+        context.store.set({ id: "entry" });
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/types.ts".into(),
+        r#"
+            interface Noise {
+                nested: string;
+            }
+            interface DataStore {
+                set(value: { id: string }): void;
+            }
+            export interface LoaderContext {
+                store: DataStore;
+                unrelated: Noise;
+            }
+        "#,
+    );
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/types.ts", "/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let types_module = db
+        .module_for_path(Utf8Path::new("/src/types.ts"))
+        .expect("types module must exist");
+    let expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(&db, module, SOURCE, "context.store.set({ id: \"entry\" })"),
+    );
+    let noise = LocalTypeInput::new(
+        &db,
+        types_module,
+        local_type_id_by_name(&db, types_module, "Noise"),
+    );
+
+    db.clear_salsa_events();
+    assert_eq!(infer_expression_is_promise(&db, expression), Some(false));
+    assert_eq!(
+        infer_expression_is_array_of_promises(&db, expression),
+        Some(false)
+    );
+    let events = db.take_salsa_events();
+
+    assert_function_query_was_not_run(&db, infer_expression_type, expression, &events);
+    assert_function_query_was_not_run(&db, infer_local_type, noise, &events);
+}
+
+#[test]
+fn test_expression_promise_queries_match_unknown_node_builtin_imports() {
+    const SOURCE: &str = r#"
+        import fs from "node:fs/promises";
+        async function createDirectory() {
+            await fs.mkdir("/tmp/example", { recursive: true });
+        }
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let expression = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(
+            &db,
+            module,
+            SOURCE,
+            "await fs.mkdir(\"/tmp/example\", { recursive: true })",
+        ),
+    );
+
+    db.clear_salsa_events();
+    assert_eq!(infer_expression_is_promise(&db, expression), Some(false));
+    assert_eq!(
+        infer_expression_is_array_of_promises(&db, expression),
+        Some(false)
+    );
+    let events = db.take_salsa_events();
+
+    assert_function_query_was_not_run(&db, infer_expression_type, expression, &events);
 }
 
 #[test]
