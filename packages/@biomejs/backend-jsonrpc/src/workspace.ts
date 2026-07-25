@@ -10455,7 +10455,11 @@ export type LanguageVersion = "eS2022" | "eSNext";
  * It represents the extension of the file
  */
 export type JsonFileVariant = "standard" | "jsonc";
-export type CssEmbeddingKind = "None" | "Styled" | { Html: EmbeddingHtmlKind };
+export type CssEmbeddingKind =
+	| "None"
+	| "Styled"
+	| { Html: EmbeddingHtmlKind }
+	| "HtmlStyleAttribute";
 /**
  * The language of the stylesheet.
  */

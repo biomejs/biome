@@ -383,6 +383,15 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
         // TODO: Angular support
         HtmlVariant::Angular => {}
     }
+
+    for element in html_root.syntax().descendants() {
+        if let Some(attribute) = HtmlAttribute::cast_ref(&element)
+            && let Some(candidate) = build_attribute_candidate(&attribute)
+        {
+            ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
+        }
+    }
+
     ParseEmbedResult { nodes }
 }
 
@@ -750,6 +759,30 @@ fn build_text_expression_candidate(expression: &HtmlTextExpression) -> Option<Em
     })
 }
 
+fn build_attribute_candidate(attribute: &HtmlAttribute) -> Option<EmbedCandidate> {
+    let name = attribute
+        .name()
+        .ok()?
+        .value_token()
+        .ok()?
+        .token_text_trimmed();
+    let value = attribute.initializer()?.value().ok()?;
+    let html_string = value.as_html_string()?;
+    let value_token = html_string.value_token().ok()?;
+    let text = html_string.inner_string_text().ok()?;
+    let content_range = text.source_range(value_token.text_range());
+
+    Some(EmbedCandidate::Attribute {
+        name,
+        content: EmbedContent {
+            element_range: attribute.range(),
+            content_range,
+            content_offset: content_range.start(),
+            text,
+        },
+    })
+}
+
 /// Build an `EmbedCandidate::Element` from an `HtmlElement`.
 /// Returns `None` if the element has no embedded content or has multiple children (error).
 fn build_html_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
@@ -842,6 +875,10 @@ fn embedded_css_file_source(
     host_file_source: &HtmlFileSource,
     candidate: &EmbedCandidate,
 ) -> CssFileSource {
+    if matches!(candidate, EmbedCandidate::Attribute { .. }) {
+        return CssFileSource::css().with_embedding_kind(CssEmbeddingKind::HtmlStyleAttribute);
+    }
+
     let base = if host_file_source.is_html() {
         CssFileSource::css()
     } else {
@@ -1032,6 +1069,7 @@ fn parse_matched_embed(
 
                     false
                 }
+                EmbedCandidate::Attribute { .. } => false,
             };
 
             let doc_source = DocumentFileSource::Js(js_source);
@@ -1063,10 +1101,12 @@ fn parse_matched_embed(
             let mut options = ctx
                 .settings
                 .parse_options::<CssLanguage>(ctx.biome_path, &doc_source);
-            if ctx.host_file_source.is_vue() {
-                options.css_modules = CssModulesKind::Vue;
-            } else if !ctx.host_file_source.is_html() {
-                options.css_modules = CssModulesKind::Classic;
+            if !css_source.as_embedding_kind().is_html_style_attribute() {
+                if ctx.host_file_source.is_vue() {
+                    options.css_modules = CssModulesKind::Vue;
+                } else if !ctx.host_file_source.is_html() {
+                    options.css_modules = CssModulesKind::Classic;
+                }
             }
             let parse = parse_css_with_offset_and_cache(
                 content.text.text(),

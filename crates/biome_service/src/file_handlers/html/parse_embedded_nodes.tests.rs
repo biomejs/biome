@@ -213,3 +213,16 @@ const duration = 100;
 
     assert_no_diagnostics(FILE_PATH, FILE_CONTENT);
 }
+
+#[test]
+fn html_style_attribute_is_parsed_as_css() {
+    assert_diagnostics("/project/file.html", r#"<div style="color: rgb("></div>"#);
+}
+
+#[test]
+fn html_non_style_attribute_is_not_parsed_as_css() {
+    assert_no_diagnostics(
+        "/project/file.html",
+        r#"<div data-style="color: rgb("></div>"#,
+    );
+}

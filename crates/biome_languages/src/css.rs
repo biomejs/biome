@@ -13,8 +13,25 @@ pub enum CssEmbeddingKind {
     /// The CSS is embedded inside HTML-like files
     Html(EmbeddingHtmlKind),
 
+    /// The value of a `style` attribute, which is a list of declarations
+    /// rather than a stylesheet, and which is printed on the attribute's own
+    /// line rather than as a block.
+    HtmlStyleAttribute,
+
     #[default]
     None,
+}
+
+impl CssEmbeddingKind {
+    /// Whether the CSS is a bare list of declarations, with no selector or
+    /// block around it.
+    pub fn is_snippet(self) -> bool {
+        matches!(self, Self::Styled | Self::HtmlStyleAttribute)
+    }
+
+    pub fn is_html_style_attribute(self) -> bool {
+        matches!(self, Self::HtmlStyleAttribute)
+    }
 }
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]

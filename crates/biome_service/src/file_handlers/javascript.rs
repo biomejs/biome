@@ -1557,6 +1557,7 @@ fn format_embedded(
                     FormatElement::Line(LineMode::Hard),
                     FormatElement::Interned(Interned::new(document.into_elements())),
                     FormatElement::Tag(Tag::EndIndent),
+                    FormatElement::Line(LineMode::Hard),
                 ];
                 Document::new(elements)
             };

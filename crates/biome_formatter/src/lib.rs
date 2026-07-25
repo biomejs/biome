@@ -55,8 +55,8 @@ use crate::comments::{CommentStyle, Comments, SourceComment};
 pub use crate::diagnostics::{ActualStart, FormatError, InvalidDocumentError, PrintError};
 #[cfg(debug_assertions)]
 use crate::format_audit::FormatAudit;
+use crate::format_element::Interned;
 use crate::format_element::document::Document;
-use crate::format_element::{Interned, LineMode};
 pub use crate::format_extensions::{
     FormatScopedOptions, FormatScopedOptionsExt, FormatWithScopedOptions,
 };
@@ -1113,7 +1113,10 @@ impl<Context> Formatted<Context> {
             },
             FormatElement::Tag(Tag::EndEmbedded) => {
                 if last_start_resolved {
-                    Some(FormatElement::Line(LineMode::Hard))
+                    // The replacement document brings whatever trailing break
+                    // it needs: content that sits in a block of its own ends
+                    // with a line, an attribute value must not.
+                    Some(FormatElement::Interned(Interned::new(Vec::new())))
                 } else {
                     // Keep EndEmbedded paired with the unresolved StartEmbedded.
                     None
@@ -2463,9 +2466,10 @@ mod tests {
     use std::borrow::Cow;
 
     use super::{
-        Document, FormatElement, FormatState, Formatted, LineEnding, LineMode, LineWidth, Printed,
+        Document, FormatElement, FormatState, Formatted, LineEnding, LineWidth, Printed,
         SimpleFormatContext, SimpleFormatOptions, SourceMapGeneration, SourceMarker, VecBuffer,
     };
+    use crate::format_element::LineMode;
     use crate::prelude::*;
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_deserialize_macros::Deserializable;

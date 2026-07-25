@@ -18,6 +18,7 @@ mod handle_svelte_files;
 mod handle_vue_files;
 mod help;
 mod html;
+mod html_style_attribute;
 mod included_files;
 mod indent_script_and_style;
 mod javascript;

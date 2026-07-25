@@ -16,6 +16,7 @@ use comments::HtmlCommentStyle;
 use context::HtmlFormatContext;
 pub use context::HtmlFormatOptions;
 use cst::FormatHtmlSyntaxNode;
+use std::rc::Rc;
 
 mod angular;
 mod astro;
@@ -41,9 +42,23 @@ pub fn format_node(
     root: &HtmlSyntaxNode,
     delegate_fmt_embedded_nodes: bool,
 ) -> FormatResult<Formatted<HtmlFormatContext>> {
+    format_node_with_embedded_ranges(options, root, delegate_fmt_embedded_nodes, Rc::from([]))
+}
+
+/// Formats `root`, leaving a hole at each of `embedded_node_ranges` for
+/// another formatter to fill.
+///
+/// A hole nothing fills prints as nothing, so a range only belongs here once
+/// its content has actually been parsed.
+pub fn format_node_with_embedded_ranges(
+    options: HtmlFormatOptions,
+    root: &HtmlSyntaxNode,
+    delegate_fmt_embedded_nodes: bool,
+    embedded_node_ranges: Rc<[TextRange]>,
+) -> FormatResult<Formatted<HtmlFormatContext>> {
     biome_formatter::format_node(
         root,
-        HtmlFormatLanguage::new(options),
+        HtmlFormatLanguage::new(options).with_embedded_node_ranges(embedded_node_ranges),
         delegate_fmt_embedded_nodes,
     )
 }
@@ -147,11 +162,20 @@ where
 #[derive(Debug, Clone)]
 pub struct HtmlFormatLanguage {
     options: HtmlFormatOptions,
+    embedded_node_ranges: Rc<[TextRange]>,
 }
 
 impl HtmlFormatLanguage {
     pub fn new(options: HtmlFormatOptions) -> Self {
-        Self { options }
+        Self {
+            options,
+            embedded_node_ranges: Rc::from([]),
+        }
+    }
+
+    pub fn with_embedded_node_ranges(mut self, ranges: Rc<[TextRange]>) -> Self {
+        self.embedded_node_ranges = ranges;
+        self
     }
 }
 
@@ -171,7 +195,9 @@ impl FormatLanguage for HtmlFormatLanguage {
         delegate_fmt_embedded_nodes: bool,
     ) -> Self::Context {
         let comments = Comments::from_node(root, &HtmlCommentStyle, source_map.as_ref());
-        let context = HtmlFormatContext::new(self.options, comments).with_source_map(source_map);
+        let context = HtmlFormatContext::new(self.options, comments)
+            .with_source_map(source_map)
+            .with_embedded_node_ranges(self.embedded_node_ranges);
         if delegate_fmt_embedded_nodes {
             context.with_fmt_embedded_nodes()
         } else {
