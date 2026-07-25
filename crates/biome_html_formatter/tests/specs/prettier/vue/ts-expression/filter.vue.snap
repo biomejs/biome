@@ -1,0 +1,126 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/ts-expression/filter.vue
+---
+
+# Input
+
+```vue
+<script setup lang="ts"></script>
+
+<!-- vue filters are only allowed in v-bind and interpolation -->
+<template>
+  <div>
+    <div class="allowed">{{
+      value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird
+    }}</div>
+    <div class="allowed" v-bind:something='
+      value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird
+    '></div>
+    <div class="allowed" :class='
+      value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird'
+    ></div>
+    <div class="not-allowed" v-if='
+      value | thisIsARealSuperLongBitwiseOr("arg1", arg2 as unknown) | anotherBitwiseOrLongJustForFun | bitwiseOrTheThird
+    '></div>
+  </div>
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -4,39 +4,24 @@
+ <template>
+   <div>
+     <div class="allowed">
+-      {{
+-        value
+-          | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown)
+-          | anotherPipeLongJustForFun
+-          | pipeTheThird
+-      }}
++      {{ value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird }}
+     </div>
+     <div
+       class="allowed"
+-      v-bind:something="
+-        value
+-          | thisIsARealSuperLongFilterPipe('arg1', arg2 as unknown)
+-          | anotherPipeLongJustForFun
+-          | pipeTheThird
+-      "
++      v-bind:something='
++      value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird
++    '
+     ></div>
+     <div
+       class="allowed"
+-      :class="
+-        value
+-          | thisIsARealSuperLongFilterPipe('arg1', arg2 as unknown)
+-          | anotherPipeLongJustForFun
+-          | pipeTheThird
+-      "
++      :class='
++      value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird'
+     ></div>
+     <div
+       class="not-allowed"
+-      v-if="
+-        value |
+-          thisIsARealSuperLongBitwiseOr('arg1', arg2 as unknown) |
+-          anotherBitwiseOrLongJustForFun |
+-          bitwiseOrTheThird
+-      "
++      v-if='
++      value | thisIsARealSuperLongBitwiseOr("arg1", arg2 as unknown) | anotherBitwiseOrLongJustForFun | bitwiseOrTheThird
++    '
+     ></div>
+   </div>
+ </template>
+```
+
+# Output
+
+```vue
+<script setup lang="ts"></script>
+
+<!-- vue filters are only allowed in v-bind and interpolation -->
+<template>
+  <div>
+    <div class="allowed">
+      {{ value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird }}
+    </div>
+    <div
+      class="allowed"
+      v-bind:something='
+      value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird
+    '
+    ></div>
+    <div
+      class="allowed"
+      :class='
+      value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird'
+    ></div>
+    <div
+      class="not-allowed"
+      v-if='
+      value | thisIsARealSuperLongBitwiseOr("arg1", arg2 as unknown) | anotherBitwiseOrLongJustForFun | bitwiseOrTheThird
+    '
+    ></div>
+  </div>
+</template>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    7:       {{ value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird }}
+   12:       value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird
+   18:       value | thisIsARealSuperLongFilterPipe("arg1", arg2 as unknown) | anotherPipeLongJustForFun | pipeTheThird'
+   23:       value | thisIsARealSuperLongBitwiseOr("arg1", arg2 as unknown) | anotherBitwiseOrLongJustForFun | bitwiseOrTheThird
+```

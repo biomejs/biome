@@ -1,0 +1,110 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/event-binding/non-ascii-expression-ts.vue
+---
+
+# Input
+
+```vue
+<script setup lang="ts">
+const 我 = () => {}
+const me = () => {}
+
+type Foo = () => void
+</script>
+
+<template>
+  <div @click="   我   " />
+  <div @click="   me   " />
+  <div @click="我   as Foo" />
+  <div @click="me   as Foo" />
+  <div @click="我   satisfies Foo" />
+  <div @click="me   satisfies Foo" />
+  <div @click="   (<number>我)" />
+  <div @click="   (<number>me)" />
+  <div @click="   我!" />
+  <div @click="   me!" />
+  <div @click="我<   string>" />
+  <div @click="me<   string>" />
+  <div @click="我!   as unknown   satisfies Foo" />
+  <div @click="me!   as unknown   satisfies Foo" />
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,23 +1,23 @@
+ <script setup lang="ts">
+-const 我 = () => {};
+-const me = () => {};
++const 我 = () => {}
++const me = () => {}
+ 
+-type Foo = () => void;
++type Foo = () => void
+ </script>
+ 
+ <template>
+-  <div @click="我" />
+-  <div @click="me" />
+-  <div @click="我 as Foo" />
+-  <div @click="me as Foo" />
+-  <div @click="我 satisfies Foo" />
+-  <div @click="me satisfies Foo" />
+-  <div @click="<number>我" />
+-  <div @click="<number>me" />
+-  <div @click="我!" />
+-  <div @click="me!" />
+-  <div @click="我<string>" />
+-  <div @click="me<string>" />
+-  <div @click="我! as unknown satisfies Foo" />
+-  <div @click="me! as unknown satisfies Foo" />
++  <div @click="   我   " />
++  <div @click="   me   " />
++  <div @click="我   as Foo" />
++  <div @click="me   as Foo" />
++  <div @click="我   satisfies Foo" />
++  <div @click="me   satisfies Foo" />
++  <div @click="   (<number>我)" />
++  <div @click="   (<number>me)" />
++  <div @click="   我!" />
++  <div @click="   me!" />
++  <div @click="我<   string>" />
++  <div @click="me<   string>" />
++  <div @click="我!   as unknown   satisfies Foo" />
++  <div @click="me!   as unknown   satisfies Foo" />
+ </template>
+```
+
+# Output
+
+```vue
+<script setup lang="ts">
+const 我 = () => {}
+const me = () => {}
+
+type Foo = () => void
+</script>
+
+<template>
+  <div @click="   我   " />
+  <div @click="   me   " />
+  <div @click="我   as Foo" />
+  <div @click="me   as Foo" />
+  <div @click="我   satisfies Foo" />
+  <div @click="me   satisfies Foo" />
+  <div @click="   (<number>我)" />
+  <div @click="   (<number>me)" />
+  <div @click="   我!" />
+  <div @click="   me!" />
+  <div @click="我<   string>" />
+  <div @click="me<   string>" />
+  <div @click="我!   as unknown   satisfies Foo" />
+  <div @click="me!   as unknown   satisfies Foo" />
+</template>
+```

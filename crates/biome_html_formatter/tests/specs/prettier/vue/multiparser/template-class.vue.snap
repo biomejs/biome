@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/multiparser/template-class.vue
+---
+
+# Input
+
+```vue
+<template>
+  <h2
+    class="title"
+    :class="{ 'issue-realtime-pre-pulse': preAnimation,
+ 'issue-realtime-trigger-pulse': pulseAnimation}"
+    v-html="titleHtml"
+  >
+  </h2>
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,10 +1,8 @@
+ <template>
+   <h2
+     class="title"
+-    :class="{
+-      'issue-realtime-pre-pulse': preAnimation,
+-      'issue-realtime-trigger-pulse': pulseAnimation,
+-    }"
++    :class="{ 'issue-realtime-pre-pulse': preAnimation,
++ 'issue-realtime-trigger-pulse': pulseAnimation}"
+     v-html="titleHtml"
+   ></h2>
+ </template>
+```
+
+# Output
+
+```vue
+<template>
+  <h2
+    class="title"
+    :class="{ 'issue-realtime-pre-pulse': preAnimation,
+ 'issue-realtime-trigger-pulse': pulseAnimation}"
+    v-html="titleHtml"
+  ></h2>
+</template>
+```
