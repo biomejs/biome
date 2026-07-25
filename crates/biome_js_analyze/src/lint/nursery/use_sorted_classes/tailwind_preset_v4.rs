@@ -405,837 +405,836 @@ pub(super) static KEYWORD_POOL: &[&[&str]] = &[
 ];
 
 pub static STATIC_UTILITIES: phf::Map<&'static str, UtilityEntry> = phf_map! {
-    "sr-only" => UtilityEntry { property_idx: 3, property_count: 9, registration_idx: 0, negative_registration_idx: None },
-    "not-sr-only" => UtilityEntry { property_idx: 3, property_count: 8, registration_idx: 1, negative_registration_idx: None },
-    "pointer-events-none" => UtilityEntry { property_idx: 1, property_count: 1, registration_idx: 2, negative_registration_idx: None },
-    "pointer-events-auto" => UtilityEntry { property_idx: 1, property_count: 1, registration_idx: 3, negative_registration_idx: None },
-    "visible" => UtilityEntry { property_idx: 2, property_count: 1, registration_idx: 4, negative_registration_idx: None },
-    "invisible" => UtilityEntry { property_idx: 2, property_count: 1, registration_idx: 5, negative_registration_idx: None },
-    "collapse" => UtilityEntry { property_idx: 2, property_count: 1, registration_idx: 6, negative_registration_idx: None },
-    "static" => UtilityEntry { property_idx: 3, property_count: 1, registration_idx: 7, negative_registration_idx: None },
-    "fixed" => UtilityEntry { property_idx: 3, property_count: 1, registration_idx: 8, negative_registration_idx: None },
-    "absolute" => UtilityEntry { property_idx: 3, property_count: 1, registration_idx: 9, negative_registration_idx: None },
-    "relative" => UtilityEntry { property_idx: 3, property_count: 1, registration_idx: 10, negative_registration_idx: None },
-    "sticky" => UtilityEntry { property_idx: 3, property_count: 1, registration_idx: 11, negative_registration_idx: None },
-    "inset-auto" => UtilityEntry { property_idx: 4, property_count: 1, registration_idx: 12, negative_registration_idx: None },
-    "inset-full" => UtilityEntry { property_idx: 4, property_count: 1, registration_idx: 13, negative_registration_idx: Some(14) },
-    "inset-px" => UtilityEntry { property_idx: 4, property_count: 1, registration_idx: 16, negative_registration_idx: Some(15) },
-    "inset-x-auto" => UtilityEntry { property_idx: 5, property_count: 1, registration_idx: 17, negative_registration_idx: None },
-    "inset-x-full" => UtilityEntry { property_idx: 5, property_count: 1, registration_idx: 18, negative_registration_idx: Some(19) },
-    "inset-x-px" => UtilityEntry { property_idx: 5, property_count: 1, registration_idx: 21, negative_registration_idx: Some(20) },
-    "inset-y-auto" => UtilityEntry { property_idx: 6, property_count: 1, registration_idx: 22, negative_registration_idx: None },
-    "inset-y-full" => UtilityEntry { property_idx: 6, property_count: 1, registration_idx: 23, negative_registration_idx: Some(24) },
-    "inset-y-px" => UtilityEntry { property_idx: 6, property_count: 1, registration_idx: 26, negative_registration_idx: Some(25) },
-    "inset-s-auto" => UtilityEntry { property_idx: 7, property_count: 1, registration_idx: 27, negative_registration_idx: None },
-    "inset-s-full" => UtilityEntry { property_idx: 7, property_count: 1, registration_idx: 28, negative_registration_idx: Some(29) },
-    "inset-s-px" => UtilityEntry { property_idx: 7, property_count: 1, registration_idx: 31, negative_registration_idx: Some(30) },
-    "inset-e-auto" => UtilityEntry { property_idx: 8, property_count: 1, registration_idx: 32, negative_registration_idx: None },
-    "inset-e-full" => UtilityEntry { property_idx: 8, property_count: 1, registration_idx: 33, negative_registration_idx: Some(34) },
-    "inset-e-px" => UtilityEntry { property_idx: 8, property_count: 1, registration_idx: 36, negative_registration_idx: Some(35) },
-    "inset-bs-auto" => UtilityEntry { property_idx: 9, property_count: 1, registration_idx: 37, negative_registration_idx: None },
-    "inset-bs-full" => UtilityEntry { property_idx: 9, property_count: 1, registration_idx: 38, negative_registration_idx: Some(39) },
-    "inset-bs-px" => UtilityEntry { property_idx: 9, property_count: 1, registration_idx: 41, negative_registration_idx: Some(40) },
-    "inset-be-auto" => UtilityEntry { property_idx: 10, property_count: 1, registration_idx: 42, negative_registration_idx: None },
-    "inset-be-full" => UtilityEntry { property_idx: 10, property_count: 1, registration_idx: 43, negative_registration_idx: Some(44) },
-    "inset-be-px" => UtilityEntry { property_idx: 10, property_count: 1, registration_idx: 46, negative_registration_idx: Some(45) },
-    "top-auto" => UtilityEntry { property_idx: 11, property_count: 1, registration_idx: 47, negative_registration_idx: None },
-    "top-full" => UtilityEntry { property_idx: 11, property_count: 1, registration_idx: 48, negative_registration_idx: Some(49) },
-    "top-px" => UtilityEntry { property_idx: 11, property_count: 1, registration_idx: 51, negative_registration_idx: Some(50) },
-    "right-auto" => UtilityEntry { property_idx: 12, property_count: 1, registration_idx: 52, negative_registration_idx: None },
-    "right-full" => UtilityEntry { property_idx: 12, property_count: 1, registration_idx: 53, negative_registration_idx: Some(54) },
-    "right-px" => UtilityEntry { property_idx: 12, property_count: 1, registration_idx: 56, negative_registration_idx: Some(55) },
-    "bottom-auto" => UtilityEntry { property_idx: 13, property_count: 1, registration_idx: 57, negative_registration_idx: None },
-    "bottom-full" => UtilityEntry { property_idx: 13, property_count: 1, registration_idx: 58, negative_registration_idx: Some(59) },
-    "bottom-px" => UtilityEntry { property_idx: 13, property_count: 1, registration_idx: 61, negative_registration_idx: Some(60) },
-    "left-auto" => UtilityEntry { property_idx: 14, property_count: 1, registration_idx: 62, negative_registration_idx: None },
-    "left-full" => UtilityEntry { property_idx: 14, property_count: 1, registration_idx: 63, negative_registration_idx: Some(64) },
-    "left-px" => UtilityEntry { property_idx: 14, property_count: 1, registration_idx: 66, negative_registration_idx: Some(65) },
-    "isolate" => UtilityEntry { property_idx: 15, property_count: 1, registration_idx: 67, negative_registration_idx: None },
-    "isolation-auto" => UtilityEntry { property_idx: 15, property_count: 1, registration_idx: 68, negative_registration_idx: None },
-    "float-start" => UtilityEntry { property_idx: 24, property_count: 1, registration_idx: 69, negative_registration_idx: None },
-    "float-end" => UtilityEntry { property_idx: 24, property_count: 1, registration_idx: 70, negative_registration_idx: None },
-    "float-right" => UtilityEntry { property_idx: 24, property_count: 1, registration_idx: 71, negative_registration_idx: None },
-    "float-left" => UtilityEntry { property_idx: 24, property_count: 1, registration_idx: 72, negative_registration_idx: None },
-    "float-none" => UtilityEntry { property_idx: 24, property_count: 1, registration_idx: 73, negative_registration_idx: None },
-    "clear-start" => UtilityEntry { property_idx: 25, property_count: 1, registration_idx: 74, negative_registration_idx: None },
-    "clear-end" => UtilityEntry { property_idx: 25, property_count: 1, registration_idx: 75, negative_registration_idx: None },
-    "clear-right" => UtilityEntry { property_idx: 25, property_count: 1, registration_idx: 76, negative_registration_idx: None },
-    "clear-left" => UtilityEntry { property_idx: 25, property_count: 1, registration_idx: 77, negative_registration_idx: None },
-    "clear-both" => UtilityEntry { property_idx: 25, property_count: 1, registration_idx: 78, negative_registration_idx: None },
-    "clear-none" => UtilityEntry { property_idx: 25, property_count: 1, registration_idx: 79, negative_registration_idx: None },
-    "m-auto" => UtilityEntry { property_idx: 27, property_count: 1, registration_idx: 80, negative_registration_idx: None },
-    "m-px" => UtilityEntry { property_idx: 27, property_count: 1, registration_idx: 82, negative_registration_idx: Some(81) },
-    "mx-auto" => UtilityEntry { property_idx: 28, property_count: 1, registration_idx: 83, negative_registration_idx: None },
-    "mx-px" => UtilityEntry { property_idx: 28, property_count: 1, registration_idx: 85, negative_registration_idx: Some(84) },
-    "my-auto" => UtilityEntry { property_idx: 29, property_count: 1, registration_idx: 86, negative_registration_idx: None },
-    "my-px" => UtilityEntry { property_idx: 29, property_count: 1, registration_idx: 88, negative_registration_idx: Some(87) },
-    "ms-auto" => UtilityEntry { property_idx: 30, property_count: 1, registration_idx: 89, negative_registration_idx: None },
-    "ms-px" => UtilityEntry { property_idx: 30, property_count: 1, registration_idx: 91, negative_registration_idx: Some(90) },
-    "me-auto" => UtilityEntry { property_idx: 31, property_count: 1, registration_idx: 92, negative_registration_idx: None },
-    "me-px" => UtilityEntry { property_idx: 31, property_count: 1, registration_idx: 94, negative_registration_idx: Some(93) },
-    "mbs-auto" => UtilityEntry { property_idx: 32, property_count: 1, registration_idx: 95, negative_registration_idx: None },
-    "mbs-px" => UtilityEntry { property_idx: 32, property_count: 1, registration_idx: 97, negative_registration_idx: Some(96) },
-    "mbe-auto" => UtilityEntry { property_idx: 33, property_count: 1, registration_idx: 98, negative_registration_idx: None },
-    "mbe-px" => UtilityEntry { property_idx: 33, property_count: 1, registration_idx: 100, negative_registration_idx: Some(99) },
-    "mt-auto" => UtilityEntry { property_idx: 34, property_count: 1, registration_idx: 101, negative_registration_idx: None },
-    "mt-px" => UtilityEntry { property_idx: 34, property_count: 1, registration_idx: 103, negative_registration_idx: Some(102) },
-    "mr-auto" => UtilityEntry { property_idx: 35, property_count: 1, registration_idx: 104, negative_registration_idx: None },
-    "mr-px" => UtilityEntry { property_idx: 35, property_count: 1, registration_idx: 106, negative_registration_idx: Some(105) },
-    "mb-auto" => UtilityEntry { property_idx: 36, property_count: 1, registration_idx: 107, negative_registration_idx: None },
-    "mb-px" => UtilityEntry { property_idx: 36, property_count: 1, registration_idx: 109, negative_registration_idx: Some(108) },
-    "ml-auto" => UtilityEntry { property_idx: 37, property_count: 1, registration_idx: 110, negative_registration_idx: None },
-    "ml-px" => UtilityEntry { property_idx: 37, property_count: 1, registration_idx: 112, negative_registration_idx: Some(111) },
-    "box-border" => UtilityEntry { property_idx: 38, property_count: 1, registration_idx: 113, negative_registration_idx: None },
-    "box-content" => UtilityEntry { property_idx: 38, property_count: 1, registration_idx: 114, negative_registration_idx: None },
-    "block" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 115, negative_registration_idx: None },
-    "inline-block" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 116, negative_registration_idx: None },
-    "inline" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 117, negative_registration_idx: None },
-    "hidden" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 118, negative_registration_idx: None },
-    "inline-flex" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 119, negative_registration_idx: None },
-    "table" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 120, negative_registration_idx: None },
-    "inline-table" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 121, negative_registration_idx: None },
-    "table-caption" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 122, negative_registration_idx: None },
-    "table-cell" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 123, negative_registration_idx: None },
-    "table-column" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 124, negative_registration_idx: None },
-    "table-column-group" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 125, negative_registration_idx: None },
-    "table-footer-group" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 126, negative_registration_idx: None },
-    "table-header-group" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 127, negative_registration_idx: None },
-    "table-row-group" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 128, negative_registration_idx: None },
-    "table-row" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 129, negative_registration_idx: None },
-    "flow-root" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 130, negative_registration_idx: None },
-    "flex" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 131, negative_registration_idx: None },
-    "grid" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 132, negative_registration_idx: None },
-    "inline-grid" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 133, negative_registration_idx: None },
-    "contents" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 134, negative_registration_idx: None },
-    "list-item" => UtilityEntry { property_idx: 39, property_count: 1, registration_idx: 135, negative_registration_idx: None },
-    "field-sizing-content" => UtilityEntry { property_idx: 40, property_count: 1, registration_idx: 136, negative_registration_idx: None },
-    "field-sizing-fixed" => UtilityEntry { property_idx: 40, property_count: 1, registration_idx: 137, negative_registration_idx: None },
-    "size-full" => UtilityEntry { property_idx: 45, property_count: 2, registration_idx: 138, negative_registration_idx: None },
-    "w-full" => UtilityEntry { property_idx: 45, property_count: 1, registration_idx: 139, negative_registration_idx: None },
-    "h-full" => UtilityEntry { property_idx: 42, property_count: 1, registration_idx: 140, negative_registration_idx: None },
-    "min-w-full" => UtilityEntry { property_idx: 47, property_count: 1, registration_idx: 141, negative_registration_idx: None },
-    "min-h-full" => UtilityEntry { property_idx: 44, property_count: 1, registration_idx: 142, negative_registration_idx: None },
-    "max-w-full" => UtilityEntry { property_idx: 46, property_count: 1, registration_idx: 143, negative_registration_idx: None },
-    "max-h-full" => UtilityEntry { property_idx: 43, property_count: 1, registration_idx: 144, negative_registration_idx: None },
-    "size-svw" => UtilityEntry { property_idx: 45, property_count: 2, registration_idx: 145, negative_registration_idx: None },
-    "w-svw" => UtilityEntry { property_idx: 45, property_count: 1, registration_idx: 146, negative_registration_idx: None },
-    "h-svw" => UtilityEntry { property_idx: 42, property_count: 1, registration_idx: 147, negative_registration_idx: None },
-    "min-w-svw" => UtilityEntry { property_idx: 47, property_count: 1, registration_idx: 148, negative_registration_idx: None },
-    "min-h-svw" => UtilityEntry { property_idx: 44, property_count: 1, registration_idx: 149, negative_registration_idx: None },
-    "max-w-svw" => UtilityEntry { property_idx: 46, property_count: 1, registration_idx: 150, negative_registration_idx: None },
-    "max-h-svw" => UtilityEntry { property_idx: 43, property_count: 1, registration_idx: 151, negative_registration_idx: None },
-    "size-lvw" => UtilityEntry { property_idx: 45, property_count: 2, registration_idx: 152, negative_registration_idx: None },
-    "w-lvw" => UtilityEntry { property_idx: 45, property_count: 1, registration_idx: 153, negative_registration_idx: None },
-    "h-lvw" => UtilityEntry { property_idx: 42, property_count: 1, registration_idx: 154, negative_registration_idx: None },
-    "min-w-lvw" => UtilityEntry { property_idx: 47, property_count: 1, registration_idx: 155, negative_registration_idx: None },
-    "min-h-lvw" => UtilityEntry { property_idx: 44, property_count: 1, registration_idx: 156, negative_registration_idx: None },
-    "max-w-lvw" => UtilityEntry { property_idx: 46, property_count: 1, registration_idx: 157, negative_registration_idx: None },
-    "max-h-lvw" => UtilityEntry { property_idx: 43, property_count: 1, registration_idx: 158, negative_registration_idx: None },
-    "size-dvw" => UtilityEntry { property_idx: 45, property_count: 2, registration_idx: 159, negative_registration_idx: None },
-    "w-dvw" => UtilityEntry { property_idx: 45, property_count: 1, registration_idx: 160, negative_registration_idx: None },
-    "h-dvw" => UtilityEntry { property_idx: 42, property_count: 1, registration_idx: 161, negative_registration_idx: None },
-    "min-w-dvw" => UtilityEntry { property_idx: 47, property_count: 1, registration_idx: 162, negative_registration_idx: None },
-    "min-h-dvw" => UtilityEntry { property_idx: 44, property_count: 1, registration_idx: 163, negative_registration_idx: None },
-    "max-w-dvw" => UtilityEntry { property_idx: 46, property_count: 1, registration_idx: 164, negative_registration_idx: None },
-    "max-h-dvw" => UtilityEntry { property_idx: 43, property_count: 1, registration_idx: 165, negative_registration_idx: None },
-    "size-svh" => UtilityEntry { property_idx: 45, property_count: 2, registration_idx: 166, negative_registration_idx: None },
-    "w-svh" => UtilityEntry { property_idx: 45, property_count: 1, registration_idx: 167, negative_registration_idx: None },
-    "h-svh" => UtilityEntry { property_idx: 42, property_count: 1, registration_idx: 168, negative_registration_idx: None },
-    "min-w-svh" => UtilityEntry { property_idx: 47, property_count: 1, registration_idx: 169, negative_registration_idx: None },
-    "min-h-svh" => UtilityEntry { property_idx: 44, property_count: 1, registration_idx: 170, negative_registration_idx: None },
-    "max-w-svh" => UtilityEntry { property_idx: 46, property_count: 1, registration_idx: 171, negative_registration_idx: None },
-    "max-h-svh" => UtilityEntry { property_idx: 43, property_count: 1, registration_idx: 172, negative_registration_idx: None },
-    "size-lvh" => UtilityEntry { property_idx: 45, property_count: 2, registration_idx: 173, negative_registration_idx: None },
-    "w-lvh" => UtilityEntry { property_idx: 45, property_count: 1, registration_idx: 174, negative_registration_idx: None },
-    "h-lvh" => UtilityEntry { property_idx: 42, property_count: 1, registration_idx: 175, negative_registration_idx: None },
-    "min-w-lvh" => UtilityEntry { property_idx: 47, property_count: 1, registration_idx: 176, negative_registration_idx: None },
-    "min-h-lvh" => UtilityEntry { property_idx: 44, property_count: 1, registration_idx: 177, negative_registration_idx: None },
-    "max-w-lvh" => UtilityEntry { property_idx: 46, property_count: 1, registration_idx: 178, negative_registration_idx: None },
-    "max-h-lvh" => UtilityEntry { property_idx: 43, property_count: 1, registration_idx: 179, negative_registration_idx: None },
-    "size-dvh" => UtilityEntry { property_idx: 45, property_count: 2, registration_idx: 180, negative_registration_idx: None },
-    "w-dvh" => UtilityEntry { property_idx: 45, property_count: 1, registration_idx: 181, negative_registration_idx: None },
-    "h-dvh" => UtilityEntry { property_idx: 42, property_count: 1, registration_idx: 182, negative_registration_idx: None },
-    "min-w-dvh" => UtilityEntry { property_idx: 47, property_count: 1, registration_idx: 183, negative_registration_idx: None },
-    "min-h-dvh" => UtilityEntry { property_idx: 44, property_count: 1, registration_idx: 184, negative_registration_idx: None },
-    "max-w-dvh" => UtilityEntry { property_idx: 46, property_count: 1, registration_idx: 185, negative_registration_idx: None },
-    "max-h-dvh" => UtilityEntry { property_idx: 43, property_count: 1, registration_idx: 186, negative_registration_idx: None },
-    "size-min" => UtilityEntry { property_idx: 45, property_count: 2, registration_idx: 187, negative_registration_idx: None },
-    "w-min" => UtilityEntry { property_idx: 45, property_count: 1, registration_idx: 188, negative_registration_idx: None },
-    "h-min" => UtilityEntry { property_idx: 42, property_count: 1, registration_idx: 189, negative_registration_idx: None },
-    "min-w-min" => UtilityEntry { property_idx: 47, property_count: 1, registration_idx: 190, negative_registration_idx: None },
-    "min-h-min" => UtilityEntry { property_idx: 44, property_count: 1, registration_idx: 191, negative_registration_idx: None },
-    "max-w-min" => UtilityEntry { property_idx: 46, property_count: 1, registration_idx: 192, negative_registration_idx: None },
-    "max-h-min" => UtilityEntry { property_idx: 43, property_count: 1, registration_idx: 193, negative_registration_idx: None },
-    "size-max" => UtilityEntry { property_idx: 45, property_count: 2, registration_idx: 194, negative_registration_idx: None },
-    "w-max" => UtilityEntry { property_idx: 45, property_count: 1, registration_idx: 195, negative_registration_idx: None },
-    "h-max" => UtilityEntry { property_idx: 42, property_count: 1, registration_idx: 196, negative_registration_idx: None },
-    "min-w-max" => UtilityEntry { property_idx: 47, property_count: 1, registration_idx: 197, negative_registration_idx: None },
-    "min-h-max" => UtilityEntry { property_idx: 44, property_count: 1, registration_idx: 198, negative_registration_idx: None },
-    "max-w-max" => UtilityEntry { property_idx: 46, property_count: 1, registration_idx: 199, negative_registration_idx: None },
-    "max-h-max" => UtilityEntry { property_idx: 43, property_count: 1, registration_idx: 200, negative_registration_idx: None },
-    "size-fit" => UtilityEntry { property_idx: 45, property_count: 2, registration_idx: 201, negative_registration_idx: None },
-    "w-fit" => UtilityEntry { property_idx: 45, property_count: 1, registration_idx: 202, negative_registration_idx: None },
-    "h-fit" => UtilityEntry { property_idx: 42, property_count: 1, registration_idx: 203, negative_registration_idx: None },
-    "min-w-fit" => UtilityEntry { property_idx: 47, property_count: 1, registration_idx: 204, negative_registration_idx: None },
-    "min-h-fit" => UtilityEntry { property_idx: 44, property_count: 1, registration_idx: 205, negative_registration_idx: None },
-    "max-w-fit" => UtilityEntry { property_idx: 46, property_count: 1, registration_idx: 206, negative_registration_idx: None },
-    "max-h-fit" => UtilityEntry { property_idx: 43, property_count: 1, registration_idx: 207, negative_registration_idx: None },
-    "size-auto" => UtilityEntry { property_idx: 45, property_count: 2, registration_idx: 208, negative_registration_idx: None },
-    "w-auto" => UtilityEntry { property_idx: 45, property_count: 1, registration_idx: 209, negative_registration_idx: None },
-    "h-auto" => UtilityEntry { property_idx: 42, property_count: 1, registration_idx: 210, negative_registration_idx: None },
-    "min-w-auto" => UtilityEntry { property_idx: 47, property_count: 1, registration_idx: 211, negative_registration_idx: None },
-    "min-h-auto" => UtilityEntry { property_idx: 44, property_count: 1, registration_idx: 212, negative_registration_idx: None },
-    "h-lh" => UtilityEntry { property_idx: 42, property_count: 1, registration_idx: 213, negative_registration_idx: None },
-    "min-h-lh" => UtilityEntry { property_idx: 44, property_count: 1, registration_idx: 214, negative_registration_idx: None },
-    "max-h-lh" => UtilityEntry { property_idx: 43, property_count: 1, registration_idx: 215, negative_registration_idx: None },
-    "w-screen" => UtilityEntry { property_idx: 45, property_count: 1, registration_idx: 216, negative_registration_idx: None },
-    "min-w-screen" => UtilityEntry { property_idx: 47, property_count: 1, registration_idx: 217, negative_registration_idx: None },
-    "max-w-screen" => UtilityEntry { property_idx: 46, property_count: 1, registration_idx: 218, negative_registration_idx: None },
-    "h-screen" => UtilityEntry { property_idx: 42, property_count: 1, registration_idx: 219, negative_registration_idx: None },
-    "min-h-screen" => UtilityEntry { property_idx: 44, property_count: 1, registration_idx: 220, negative_registration_idx: None },
-    "max-h-screen" => UtilityEntry { property_idx: 43, property_count: 1, registration_idx: 221, negative_registration_idx: None },
-    "max-w-none" => UtilityEntry { property_idx: 46, property_count: 1, registration_idx: 222, negative_registration_idx: None },
-    "max-h-none" => UtilityEntry { property_idx: 43, property_count: 1, registration_idx: 223, negative_registration_idx: None },
-    "size-px" => UtilityEntry { property_idx: 45, property_count: 2, registration_idx: 224, negative_registration_idx: None },
-    "w-px" => UtilityEntry { property_idx: 45, property_count: 1, registration_idx: 225, negative_registration_idx: None },
-    "min-w-px" => UtilityEntry { property_idx: 47, property_count: 1, registration_idx: 226, negative_registration_idx: None },
-    "max-w-px" => UtilityEntry { property_idx: 46, property_count: 1, registration_idx: 227, negative_registration_idx: None },
-    "h-px" => UtilityEntry { property_idx: 42, property_count: 1, registration_idx: 228, negative_registration_idx: None },
-    "min-h-px" => UtilityEntry { property_idx: 44, property_count: 1, registration_idx: 229, negative_registration_idx: None },
-    "max-h-px" => UtilityEntry { property_idx: 43, property_count: 1, registration_idx: 230, negative_registration_idx: None },
-    "inline-full" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 231, negative_registration_idx: None },
-    "block-full" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 232, negative_registration_idx: None },
-    "min-inline-full" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 233, negative_registration_idx: None },
-    "min-block-full" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 234, negative_registration_idx: None },
-    "max-inline-full" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 235, negative_registration_idx: None },
-    "max-block-full" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 236, negative_registration_idx: None },
-    "inline-min" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 237, negative_registration_idx: None },
-    "block-min" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 238, negative_registration_idx: None },
-    "min-inline-min" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 239, negative_registration_idx: None },
-    "min-block-min" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 240, negative_registration_idx: None },
-    "max-inline-min" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 241, negative_registration_idx: None },
-    "max-block-min" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 242, negative_registration_idx: None },
-    "inline-max" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 243, negative_registration_idx: None },
-    "block-max" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 244, negative_registration_idx: None },
-    "min-inline-max" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 245, negative_registration_idx: None },
-    "min-block-max" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 246, negative_registration_idx: None },
-    "max-inline-max" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 247, negative_registration_idx: None },
-    "max-block-max" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 248, negative_registration_idx: None },
-    "inline-fit" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 249, negative_registration_idx: None },
-    "block-fit" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 250, negative_registration_idx: None },
-    "min-inline-fit" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 251, negative_registration_idx: None },
-    "min-block-fit" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 252, negative_registration_idx: None },
-    "max-inline-fit" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 253, negative_registration_idx: None },
-    "max-block-fit" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 254, negative_registration_idx: None },
-    "inline-svw" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 255, negative_registration_idx: None },
-    "min-inline-svw" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 256, negative_registration_idx: None },
-    "max-inline-svw" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 257, negative_registration_idx: None },
-    "inline-lvw" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 258, negative_registration_idx: None },
-    "min-inline-lvw" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 259, negative_registration_idx: None },
-    "max-inline-lvw" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 260, negative_registration_idx: None },
-    "inline-dvw" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 261, negative_registration_idx: None },
-    "min-inline-dvw" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 262, negative_registration_idx: None },
-    "max-inline-dvw" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 263, negative_registration_idx: None },
-    "block-svh" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 264, negative_registration_idx: None },
-    "min-block-svh" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 265, negative_registration_idx: None },
-    "max-block-svh" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 266, negative_registration_idx: None },
-    "block-lvh" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 267, negative_registration_idx: None },
-    "min-block-lvh" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 268, negative_registration_idx: None },
-    "max-block-lvh" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 269, negative_registration_idx: None },
-    "block-dvh" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 270, negative_registration_idx: None },
-    "min-block-dvh" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 271, negative_registration_idx: None },
-    "max-block-dvh" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 272, negative_registration_idx: None },
-    "inline-auto" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 273, negative_registration_idx: None },
-    "block-auto" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 274, negative_registration_idx: None },
-    "min-inline-auto" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 275, negative_registration_idx: None },
-    "min-block-auto" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 276, negative_registration_idx: None },
-    "block-lh" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 277, negative_registration_idx: None },
-    "min-block-lh" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 278, negative_registration_idx: None },
-    "max-block-lh" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 279, negative_registration_idx: None },
-    "inline-screen" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 280, negative_registration_idx: None },
-    "min-inline-screen" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 281, negative_registration_idx: None },
-    "max-inline-screen" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 282, negative_registration_idx: None },
-    "block-screen" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 283, negative_registration_idx: None },
-    "min-block-screen" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 284, negative_registration_idx: None },
-    "max-block-screen" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 285, negative_registration_idx: None },
-    "max-inline-none" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 286, negative_registration_idx: None },
-    "max-block-none" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 287, negative_registration_idx: None },
-    "inline-px" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 288, negative_registration_idx: None },
-    "min-inline-px" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 289, negative_registration_idx: None },
-    "max-inline-px" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 290, negative_registration_idx: None },
-    "block-px" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 291, negative_registration_idx: None },
-    "min-block-px" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 292, negative_registration_idx: None },
-    "max-block-px" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 293, negative_registration_idx: None },
-    "container" => UtilityEntry { property_idx: 45, property_count: 7, registration_idx: 294, negative_registration_idx: None },
-    "flex-auto" => UtilityEntry { property_idx: 48, property_count: 1, registration_idx: 295, negative_registration_idx: None },
-    "flex-initial" => UtilityEntry { property_idx: 48, property_count: 1, registration_idx: 296, negative_registration_idx: None },
-    "flex-none" => UtilityEntry { property_idx: 48, property_count: 1, registration_idx: 297, negative_registration_idx: None },
-    "basis-auto" => UtilityEntry { property_idx: 51, property_count: 1, registration_idx: 298, negative_registration_idx: None },
-    "basis-full" => UtilityEntry { property_idx: 51, property_count: 1, registration_idx: 299, negative_registration_idx: None },
-    "basis-px" => UtilityEntry { property_idx: 51, property_count: 1, registration_idx: 300, negative_registration_idx: None },
-    "table-auto" => UtilityEntry { property_idx: 52, property_count: 1, registration_idx: 301, negative_registration_idx: None },
-    "table-fixed" => UtilityEntry { property_idx: 52, property_count: 1, registration_idx: 302, negative_registration_idx: None },
-    "caption-top" => UtilityEntry { property_idx: 53, property_count: 1, registration_idx: 303, negative_registration_idx: None },
-    "caption-bottom" => UtilityEntry { property_idx: 53, property_count: 1, registration_idx: 304, negative_registration_idx: None },
-    "border-collapse" => UtilityEntry { property_idx: 54, property_count: 1, registration_idx: 305, negative_registration_idx: None },
-    "border-separate" => UtilityEntry { property_idx: 54, property_count: 1, registration_idx: 306, negative_registration_idx: None },
-    "border-spacing-px" => UtilityEntry { property_idx: 354, property_count: 3, registration_idx: 307, negative_registration_idx: None },
-    "border-spacing-x-px" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 308, negative_registration_idx: None },
-    "border-spacing-y-px" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 309, negative_registration_idx: None },
-    "translate-none" => UtilityEntry { property_idx: 57, property_count: 1, registration_idx: 310, negative_registration_idx: None },
-    "translate-full" => UtilityEntry { property_idx: 58, property_count: 3, registration_idx: 312, negative_registration_idx: Some(311) },
-    "translate-px" => UtilityEntry { property_idx: 58, property_count: 3, registration_idx: 314, negative_registration_idx: Some(313) },
-    "translate-x-full" => UtilityEntry { property_idx: 58, property_count: 2, registration_idx: 316, negative_registration_idx: Some(315) },
-    "translate-x-px" => UtilityEntry { property_idx: 58, property_count: 2, registration_idx: 318, negative_registration_idx: Some(317) },
-    "translate-y-full" => UtilityEntry { property_idx: 59, property_count: 2, registration_idx: 320, negative_registration_idx: Some(319) },
-    "translate-y-px" => UtilityEntry { property_idx: 59, property_count: 2, registration_idx: 322, negative_registration_idx: Some(321) },
-    "translate-z-px" => UtilityEntry { property_idx: 60, property_count: 2, registration_idx: 324, negative_registration_idx: Some(323) },
-    "translate-3d" => UtilityEntry { property_idx: 57, property_count: 1, registration_idx: 325, negative_registration_idx: None },
-    "scale-none" => UtilityEntry { property_idx: 61, property_count: 1, registration_idx: 326, negative_registration_idx: None },
-    "scale-3d" => UtilityEntry { property_idx: 61, property_count: 1, registration_idx: 327, negative_registration_idx: None },
-    "rotate-none" => UtilityEntry { property_idx: 65, property_count: 1, registration_idx: 328, negative_registration_idx: None },
-    "transform-cpu" => UtilityEntry { property_idx: 71, property_count: 1, registration_idx: 329, negative_registration_idx: None },
-    "transform-gpu" => UtilityEntry { property_idx: 71, property_count: 1, registration_idx: 330, negative_registration_idx: None },
-    "transform-none" => UtilityEntry { property_idx: 71, property_count: 1, registration_idx: 331, negative_registration_idx: None },
-    "transform-flat" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 332, negative_registration_idx: None },
-    "transform-3d" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 333, negative_registration_idx: None },
-    "transform-content" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 334, negative_registration_idx: None },
-    "transform-border" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 335, negative_registration_idx: None },
-    "transform-fill" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 336, negative_registration_idx: None },
-    "transform-stroke" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 337, negative_registration_idx: None },
-    "transform-view" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 338, negative_registration_idx: None },
-    "backface-visible" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 339, negative_registration_idx: None },
-    "backface-hidden" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 340, negative_registration_idx: None },
-    "cursor-auto" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 341, negative_registration_idx: None },
-    "cursor-default" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 342, negative_registration_idx: None },
-    "cursor-pointer" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 343, negative_registration_idx: None },
-    "cursor-wait" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 344, negative_registration_idx: None },
-    "cursor-text" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 345, negative_registration_idx: None },
-    "cursor-move" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 346, negative_registration_idx: None },
-    "cursor-help" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 347, negative_registration_idx: None },
-    "cursor-not-allowed" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 348, negative_registration_idx: None },
-    "cursor-none" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 349, negative_registration_idx: None },
-    "cursor-context-menu" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 350, negative_registration_idx: None },
-    "cursor-progress" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 351, negative_registration_idx: None },
-    "cursor-cell" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 352, negative_registration_idx: None },
-    "cursor-crosshair" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 353, negative_registration_idx: None },
-    "cursor-vertical-text" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 354, negative_registration_idx: None },
-    "cursor-alias" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 355, negative_registration_idx: None },
-    "cursor-copy" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 356, negative_registration_idx: None },
-    "cursor-no-drop" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 357, negative_registration_idx: None },
-    "cursor-grab" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 358, negative_registration_idx: None },
-    "cursor-grabbing" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 359, negative_registration_idx: None },
-    "cursor-all-scroll" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 360, negative_registration_idx: None },
-    "cursor-col-resize" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 361, negative_registration_idx: None },
-    "cursor-row-resize" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 362, negative_registration_idx: None },
-    "cursor-n-resize" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 363, negative_registration_idx: None },
-    "cursor-e-resize" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 364, negative_registration_idx: None },
-    "cursor-s-resize" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 365, negative_registration_idx: None },
-    "cursor-w-resize" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 366, negative_registration_idx: None },
-    "cursor-ne-resize" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 367, negative_registration_idx: None },
-    "cursor-nw-resize" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 368, negative_registration_idx: None },
-    "cursor-se-resize" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 369, negative_registration_idx: None },
-    "cursor-sw-resize" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 370, negative_registration_idx: None },
-    "cursor-ew-resize" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 371, negative_registration_idx: None },
-    "cursor-ns-resize" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 372, negative_registration_idx: None },
-    "cursor-nesw-resize" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 373, negative_registration_idx: None },
-    "cursor-nwse-resize" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 374, negative_registration_idx: None },
-    "cursor-zoom-in" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 375, negative_registration_idx: None },
-    "cursor-zoom-out" => UtilityEntry { property_idx: 73, property_count: 1, registration_idx: 376, negative_registration_idx: None },
-    "touch-auto" => UtilityEntry { property_idx: 74, property_count: 1, registration_idx: 377, negative_registration_idx: None },
-    "touch-none" => UtilityEntry { property_idx: 74, property_count: 1, registration_idx: 378, negative_registration_idx: None },
-    "touch-manipulation" => UtilityEntry { property_idx: 74, property_count: 1, registration_idx: 379, negative_registration_idx: None },
-    "touch-pan-x" => UtilityEntry { property_idx: 75, property_count: 2, registration_idx: 380, negative_registration_idx: None },
-    "touch-pan-left" => UtilityEntry { property_idx: 75, property_count: 2, registration_idx: 381, negative_registration_idx: None },
-    "touch-pan-right" => UtilityEntry { property_idx: 75, property_count: 2, registration_idx: 382, negative_registration_idx: None },
-    "touch-pan-y" => UtilityEntry { property_idx: 76, property_count: 2, registration_idx: 383, negative_registration_idx: None },
-    "touch-pan-up" => UtilityEntry { property_idx: 76, property_count: 2, registration_idx: 384, negative_registration_idx: None },
-    "touch-pan-down" => UtilityEntry { property_idx: 76, property_count: 2, registration_idx: 385, negative_registration_idx: None },
-    "touch-pinch-zoom" => UtilityEntry { property_idx: 77, property_count: 2, registration_idx: 386, negative_registration_idx: None },
-    "select-none" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 387, negative_registration_idx: None },
-    "select-text" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 388, negative_registration_idx: None },
-    "select-all" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 389, negative_registration_idx: None },
-    "select-auto" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 390, negative_registration_idx: None },
-    "resize-none" => UtilityEntry { property_idx: 78, property_count: 1, registration_idx: 391, negative_registration_idx: None },
-    "resize-x" => UtilityEntry { property_idx: 78, property_count: 1, registration_idx: 392, negative_registration_idx: None },
-    "resize-y" => UtilityEntry { property_idx: 78, property_count: 1, registration_idx: 393, negative_registration_idx: None },
-    "resize" => UtilityEntry { property_idx: 78, property_count: 1, registration_idx: 394, negative_registration_idx: None },
-    "snap-none" => UtilityEntry { property_idx: 79, property_count: 1, registration_idx: 395, negative_registration_idx: None },
-    "snap-x" => UtilityEntry { property_idx: 79, property_count: 1, registration_idx: 396, negative_registration_idx: None },
-    "snap-y" => UtilityEntry { property_idx: 79, property_count: 1, registration_idx: 397, negative_registration_idx: None },
-    "snap-both" => UtilityEntry { property_idx: 79, property_count: 1, registration_idx: 398, negative_registration_idx: None },
-    "snap-mandatory" => UtilityEntry { property_idx: 80, property_count: 1, registration_idx: 399, negative_registration_idx: None },
-    "snap-proximity" => UtilityEntry { property_idx: 80, property_count: 1, registration_idx: 400, negative_registration_idx: None },
-    "snap-align-none" => UtilityEntry { property_idx: 81, property_count: 1, registration_idx: 401, negative_registration_idx: None },
-    "snap-start" => UtilityEntry { property_idx: 81, property_count: 1, registration_idx: 402, negative_registration_idx: None },
-    "snap-end" => UtilityEntry { property_idx: 81, property_count: 1, registration_idx: 403, negative_registration_idx: None },
-    "snap-center" => UtilityEntry { property_idx: 81, property_count: 1, registration_idx: 404, negative_registration_idx: None },
-    "snap-normal" => UtilityEntry { property_idx: 82, property_count: 1, registration_idx: 405, negative_registration_idx: None },
-    "snap-always" => UtilityEntry { property_idx: 82, property_count: 1, registration_idx: 406, negative_registration_idx: None },
-    "scroll-m-px" => UtilityEntry { property_idx: 83, property_count: 1, registration_idx: 408, negative_registration_idx: Some(407) },
-    "scroll-mx-px" => UtilityEntry { property_idx: 84, property_count: 1, registration_idx: 410, negative_registration_idx: Some(409) },
-    "scroll-my-px" => UtilityEntry { property_idx: 85, property_count: 1, registration_idx: 412, negative_registration_idx: Some(411) },
-    "scroll-ms-px" => UtilityEntry { property_idx: 86, property_count: 1, registration_idx: 414, negative_registration_idx: Some(413) },
-    "scroll-me-px" => UtilityEntry { property_idx: 87, property_count: 1, registration_idx: 416, negative_registration_idx: Some(415) },
-    "scroll-mbs-px" => UtilityEntry { property_idx: 88, property_count: 1, registration_idx: 418, negative_registration_idx: Some(417) },
-    "scroll-mbe-px" => UtilityEntry { property_idx: 89, property_count: 1, registration_idx: 420, negative_registration_idx: Some(419) },
-    "scroll-mt-px" => UtilityEntry { property_idx: 90, property_count: 1, registration_idx: 422, negative_registration_idx: Some(421) },
-    "scroll-mr-px" => UtilityEntry { property_idx: 91, property_count: 1, registration_idx: 424, negative_registration_idx: Some(423) },
-    "scroll-mb-px" => UtilityEntry { property_idx: 92, property_count: 1, registration_idx: 426, negative_registration_idx: Some(425) },
-    "scroll-ml-px" => UtilityEntry { property_idx: 93, property_count: 1, registration_idx: 428, negative_registration_idx: Some(427) },
-    "scroll-p-px" => UtilityEntry { property_idx: 94, property_count: 1, registration_idx: 429, negative_registration_idx: None },
-    "scroll-px-px" => UtilityEntry { property_idx: 95, property_count: 1, registration_idx: 430, negative_registration_idx: None },
-    "scroll-py-px" => UtilityEntry { property_idx: 96, property_count: 1, registration_idx: 431, negative_registration_idx: None },
-    "scroll-ps-px" => UtilityEntry { property_idx: 97, property_count: 1, registration_idx: 432, negative_registration_idx: None },
-    "scroll-pe-px" => UtilityEntry { property_idx: 98, property_count: 1, registration_idx: 433, negative_registration_idx: None },
-    "scroll-pbs-px" => UtilityEntry { property_idx: 99, property_count: 1, registration_idx: 434, negative_registration_idx: None },
-    "scroll-pbe-px" => UtilityEntry { property_idx: 100, property_count: 1, registration_idx: 435, negative_registration_idx: None },
-    "scroll-pt-px" => UtilityEntry { property_idx: 101, property_count: 1, registration_idx: 436, negative_registration_idx: None },
-    "scroll-pr-px" => UtilityEntry { property_idx: 102, property_count: 1, registration_idx: 437, negative_registration_idx: None },
-    "scroll-pb-px" => UtilityEntry { property_idx: 103, property_count: 1, registration_idx: 438, negative_registration_idx: None },
-    "scroll-pl-px" => UtilityEntry { property_idx: 104, property_count: 1, registration_idx: 439, negative_registration_idx: None },
-    "list-inside" => UtilityEntry { property_idx: 105, property_count: 1, registration_idx: 440, negative_registration_idx: None },
-    "list-outside" => UtilityEntry { property_idx: 105, property_count: 1, registration_idx: 441, negative_registration_idx: None },
-    "appearance-none" => UtilityEntry { property_idx: 108, property_count: 1, registration_idx: 442, negative_registration_idx: None },
-    "appearance-auto" => UtilityEntry { property_idx: 108, property_count: 1, registration_idx: 443, negative_registration_idx: None },
-    "scheme-normal" => UtilityEntry { property_idx: 306, property_count: 1, registration_idx: 444, negative_registration_idx: None },
-    "scheme-dark" => UtilityEntry { property_idx: 306, property_count: 1, registration_idx: 445, negative_registration_idx: None },
-    "scheme-light" => UtilityEntry { property_idx: 306, property_count: 1, registration_idx: 446, negative_registration_idx: None },
-    "scheme-light-dark" => UtilityEntry { property_idx: 306, property_count: 1, registration_idx: 447, negative_registration_idx: None },
-    "scheme-only-dark" => UtilityEntry { property_idx: 306, property_count: 1, registration_idx: 448, negative_registration_idx: None },
-    "scheme-only-light" => UtilityEntry { property_idx: 306, property_count: 1, registration_idx: 449, negative_registration_idx: None },
-    "break-before-auto" => UtilityEntry { property_idx: 110, property_count: 1, registration_idx: 450, negative_registration_idx: None },
-    "break-before-avoid" => UtilityEntry { property_idx: 110, property_count: 1, registration_idx: 451, negative_registration_idx: None },
-    "break-before-all" => UtilityEntry { property_idx: 110, property_count: 1, registration_idx: 452, negative_registration_idx: None },
-    "break-before-avoid-page" => UtilityEntry { property_idx: 110, property_count: 1, registration_idx: 453, negative_registration_idx: None },
-    "break-before-page" => UtilityEntry { property_idx: 110, property_count: 1, registration_idx: 454, negative_registration_idx: None },
-    "break-before-left" => UtilityEntry { property_idx: 110, property_count: 1, registration_idx: 455, negative_registration_idx: None },
-    "break-before-right" => UtilityEntry { property_idx: 110, property_count: 1, registration_idx: 456, negative_registration_idx: None },
-    "break-before-column" => UtilityEntry { property_idx: 110, property_count: 1, registration_idx: 457, negative_registration_idx: None },
-    "break-inside-auto" => UtilityEntry { property_idx: 111, property_count: 1, registration_idx: 458, negative_registration_idx: None },
-    "break-inside-avoid" => UtilityEntry { property_idx: 111, property_count: 1, registration_idx: 459, negative_registration_idx: None },
-    "break-inside-avoid-page" => UtilityEntry { property_idx: 111, property_count: 1, registration_idx: 460, negative_registration_idx: None },
-    "break-inside-avoid-column" => UtilityEntry { property_idx: 111, property_count: 1, registration_idx: 461, negative_registration_idx: None },
-    "break-after-auto" => UtilityEntry { property_idx: 112, property_count: 1, registration_idx: 462, negative_registration_idx: None },
-    "break-after-avoid" => UtilityEntry { property_idx: 112, property_count: 1, registration_idx: 463, negative_registration_idx: None },
-    "break-after-all" => UtilityEntry { property_idx: 112, property_count: 1, registration_idx: 464, negative_registration_idx: None },
-    "break-after-avoid-page" => UtilityEntry { property_idx: 112, property_count: 1, registration_idx: 465, negative_registration_idx: None },
-    "break-after-page" => UtilityEntry { property_idx: 112, property_count: 1, registration_idx: 466, negative_registration_idx: None },
-    "break-after-left" => UtilityEntry { property_idx: 112, property_count: 1, registration_idx: 467, negative_registration_idx: None },
-    "break-after-right" => UtilityEntry { property_idx: 112, property_count: 1, registration_idx: 468, negative_registration_idx: None },
-    "break-after-column" => UtilityEntry { property_idx: 112, property_count: 1, registration_idx: 469, negative_registration_idx: None },
-    "grid-flow-row" => UtilityEntry { property_idx: 114, property_count: 1, registration_idx: 470, negative_registration_idx: None },
-    "grid-flow-col" => UtilityEntry { property_idx: 114, property_count: 1, registration_idx: 471, negative_registration_idx: None },
-    "grid-flow-dense" => UtilityEntry { property_idx: 114, property_count: 1, registration_idx: 472, negative_registration_idx: None },
-    "grid-flow-row-dense" => UtilityEntry { property_idx: 114, property_count: 1, registration_idx: 473, negative_registration_idx: None },
-    "grid-flow-col-dense" => UtilityEntry { property_idx: 114, property_count: 1, registration_idx: 474, negative_registration_idx: None },
-    "flex-row" => UtilityEntry { property_idx: 118, property_count: 1, registration_idx: 475, negative_registration_idx: None },
-    "flex-row-reverse" => UtilityEntry { property_idx: 118, property_count: 1, registration_idx: 476, negative_registration_idx: None },
-    "flex-col" => UtilityEntry { property_idx: 118, property_count: 1, registration_idx: 477, negative_registration_idx: None },
-    "flex-col-reverse" => UtilityEntry { property_idx: 118, property_count: 1, registration_idx: 478, negative_registration_idx: None },
-    "flex-wrap" => UtilityEntry { property_idx: 119, property_count: 1, registration_idx: 479, negative_registration_idx: None },
-    "flex-nowrap" => UtilityEntry { property_idx: 119, property_count: 1, registration_idx: 480, negative_registration_idx: None },
-    "flex-wrap-reverse" => UtilityEntry { property_idx: 119, property_count: 1, registration_idx: 481, negative_registration_idx: None },
-    "place-content-center" => UtilityEntry { property_idx: 120, property_count: 1, registration_idx: 482, negative_registration_idx: None },
-    "place-content-start" => UtilityEntry { property_idx: 120, property_count: 1, registration_idx: 483, negative_registration_idx: None },
-    "place-content-end" => UtilityEntry { property_idx: 120, property_count: 1, registration_idx: 484, negative_registration_idx: None },
-    "place-content-center-safe" => UtilityEntry { property_idx: 120, property_count: 1, registration_idx: 485, negative_registration_idx: None },
-    "place-content-end-safe" => UtilityEntry { property_idx: 120, property_count: 1, registration_idx: 486, negative_registration_idx: None },
-    "place-content-between" => UtilityEntry { property_idx: 120, property_count: 1, registration_idx: 487, negative_registration_idx: None },
-    "place-content-around" => UtilityEntry { property_idx: 120, property_count: 1, registration_idx: 488, negative_registration_idx: None },
-    "place-content-evenly" => UtilityEntry { property_idx: 120, property_count: 1, registration_idx: 489, negative_registration_idx: None },
-    "place-content-baseline" => UtilityEntry { property_idx: 120, property_count: 1, registration_idx: 490, negative_registration_idx: None },
-    "place-content-stretch" => UtilityEntry { property_idx: 120, property_count: 1, registration_idx: 491, negative_registration_idx: None },
-    "place-items-center" => UtilityEntry { property_idx: 121, property_count: 1, registration_idx: 492, negative_registration_idx: None },
-    "place-items-start" => UtilityEntry { property_idx: 121, property_count: 1, registration_idx: 493, negative_registration_idx: None },
-    "place-items-end" => UtilityEntry { property_idx: 121, property_count: 1, registration_idx: 494, negative_registration_idx: None },
-    "place-items-center-safe" => UtilityEntry { property_idx: 121, property_count: 1, registration_idx: 495, negative_registration_idx: None },
-    "place-items-end-safe" => UtilityEntry { property_idx: 121, property_count: 1, registration_idx: 496, negative_registration_idx: None },
-    "place-items-baseline" => UtilityEntry { property_idx: 121, property_count: 1, registration_idx: 497, negative_registration_idx: None },
-    "place-items-stretch" => UtilityEntry { property_idx: 121, property_count: 1, registration_idx: 498, negative_registration_idx: None },
-    "content-normal" => UtilityEntry { property_idx: 122, property_count: 1, registration_idx: 499, negative_registration_idx: None },
-    "content-center" => UtilityEntry { property_idx: 122, property_count: 1, registration_idx: 500, negative_registration_idx: None },
-    "content-start" => UtilityEntry { property_idx: 122, property_count: 1, registration_idx: 501, negative_registration_idx: None },
-    "content-end" => UtilityEntry { property_idx: 122, property_count: 1, registration_idx: 502, negative_registration_idx: None },
-    "content-center-safe" => UtilityEntry { property_idx: 122, property_count: 1, registration_idx: 503, negative_registration_idx: None },
-    "content-end-safe" => UtilityEntry { property_idx: 122, property_count: 1, registration_idx: 504, negative_registration_idx: None },
-    "content-between" => UtilityEntry { property_idx: 122, property_count: 1, registration_idx: 505, negative_registration_idx: None },
-    "content-around" => UtilityEntry { property_idx: 122, property_count: 1, registration_idx: 506, negative_registration_idx: None },
-    "content-evenly" => UtilityEntry { property_idx: 122, property_count: 1, registration_idx: 507, negative_registration_idx: None },
-    "content-baseline" => UtilityEntry { property_idx: 122, property_count: 1, registration_idx: 508, negative_registration_idx: None },
-    "content-stretch" => UtilityEntry { property_idx: 122, property_count: 1, registration_idx: 509, negative_registration_idx: None },
-    "items-center" => UtilityEntry { property_idx: 123, property_count: 1, registration_idx: 510, negative_registration_idx: None },
-    "items-start" => UtilityEntry { property_idx: 123, property_count: 1, registration_idx: 511, negative_registration_idx: None },
-    "items-end" => UtilityEntry { property_idx: 123, property_count: 1, registration_idx: 512, negative_registration_idx: None },
-    "items-center-safe" => UtilityEntry { property_idx: 123, property_count: 1, registration_idx: 513, negative_registration_idx: None },
-    "items-end-safe" => UtilityEntry { property_idx: 123, property_count: 1, registration_idx: 514, negative_registration_idx: None },
-    "items-baseline" => UtilityEntry { property_idx: 123, property_count: 1, registration_idx: 515, negative_registration_idx: None },
-    "items-baseline-last" => UtilityEntry { property_idx: 123, property_count: 1, registration_idx: 516, negative_registration_idx: None },
-    "items-stretch" => UtilityEntry { property_idx: 123, property_count: 1, registration_idx: 517, negative_registration_idx: None },
-    "justify-normal" => UtilityEntry { property_idx: 124, property_count: 1, registration_idx: 518, negative_registration_idx: None },
-    "justify-center" => UtilityEntry { property_idx: 124, property_count: 1, registration_idx: 519, negative_registration_idx: None },
-    "justify-start" => UtilityEntry { property_idx: 124, property_count: 1, registration_idx: 520, negative_registration_idx: None },
-    "justify-end" => UtilityEntry { property_idx: 124, property_count: 1, registration_idx: 521, negative_registration_idx: None },
-    "justify-center-safe" => UtilityEntry { property_idx: 124, property_count: 1, registration_idx: 522, negative_registration_idx: None },
-    "justify-end-safe" => UtilityEntry { property_idx: 124, property_count: 1, registration_idx: 523, negative_registration_idx: None },
-    "justify-between" => UtilityEntry { property_idx: 124, property_count: 1, registration_idx: 524, negative_registration_idx: None },
-    "justify-around" => UtilityEntry { property_idx: 124, property_count: 1, registration_idx: 525, negative_registration_idx: None },
-    "justify-evenly" => UtilityEntry { property_idx: 124, property_count: 1, registration_idx: 526, negative_registration_idx: None },
-    "justify-baseline" => UtilityEntry { property_idx: 124, property_count: 1, registration_idx: 527, negative_registration_idx: None },
-    "justify-stretch" => UtilityEntry { property_idx: 124, property_count: 1, registration_idx: 528, negative_registration_idx: None },
-    "justify-items-normal" => UtilityEntry { property_idx: 125, property_count: 1, registration_idx: 529, negative_registration_idx: None },
-    "justify-items-center" => UtilityEntry { property_idx: 125, property_count: 1, registration_idx: 530, negative_registration_idx: None },
-    "justify-items-start" => UtilityEntry { property_idx: 125, property_count: 1, registration_idx: 531, negative_registration_idx: None },
-    "justify-items-end" => UtilityEntry { property_idx: 125, property_count: 1, registration_idx: 532, negative_registration_idx: None },
-    "justify-items-center-safe" => UtilityEntry { property_idx: 125, property_count: 1, registration_idx: 533, negative_registration_idx: None },
-    "justify-items-end-safe" => UtilityEntry { property_idx: 125, property_count: 1, registration_idx: 534, negative_registration_idx: None },
-    "justify-items-stretch" => UtilityEntry { property_idx: 125, property_count: 1, registration_idx: 535, negative_registration_idx: None },
-    "gap-px" => UtilityEntry { property_idx: 126, property_count: 1, registration_idx: 536, negative_registration_idx: None },
-    "gap-x-px" => UtilityEntry { property_idx: 127, property_count: 1, registration_idx: 537, negative_registration_idx: None },
-    "gap-y-px" => UtilityEntry { property_idx: 128, property_count: 1, registration_idx: 538, negative_registration_idx: None },
-    "space-x-px" => UtilityEntry { property_idx: 129, property_count: 3, registration_idx: 540, negative_registration_idx: Some(539) },
-    "space-y-px" => UtilityEntry { property_idx: 130, property_count: 3, registration_idx: 542, negative_registration_idx: Some(541) },
-    "space-x-reverse" => UtilityEntry { property_idx: 129, property_count: 1, registration_idx: 543, negative_registration_idx: None },
-    "space-y-reverse" => UtilityEntry { property_idx: 130, property_count: 1, registration_idx: 544, negative_registration_idx: None },
-    "accent-auto" => UtilityEntry { property_idx: 305, property_count: 1, registration_idx: 545, negative_registration_idx: None },
-    "place-self-auto" => UtilityEntry { property_idx: 136, property_count: 1, registration_idx: 546, negative_registration_idx: None },
-    "place-self-start" => UtilityEntry { property_idx: 136, property_count: 1, registration_idx: 547, negative_registration_idx: None },
-    "place-self-end" => UtilityEntry { property_idx: 136, property_count: 1, registration_idx: 548, negative_registration_idx: None },
-    "place-self-center" => UtilityEntry { property_idx: 136, property_count: 1, registration_idx: 549, negative_registration_idx: None },
-    "place-self-end-safe" => UtilityEntry { property_idx: 136, property_count: 1, registration_idx: 550, negative_registration_idx: None },
-    "place-self-center-safe" => UtilityEntry { property_idx: 136, property_count: 1, registration_idx: 551, negative_registration_idx: None },
-    "place-self-stretch" => UtilityEntry { property_idx: 136, property_count: 1, registration_idx: 552, negative_registration_idx: None },
-    "self-auto" => UtilityEntry { property_idx: 137, property_count: 1, registration_idx: 553, negative_registration_idx: None },
-    "self-start" => UtilityEntry { property_idx: 137, property_count: 1, registration_idx: 554, negative_registration_idx: None },
-    "self-end" => UtilityEntry { property_idx: 137, property_count: 1, registration_idx: 555, negative_registration_idx: None },
-    "self-center" => UtilityEntry { property_idx: 137, property_count: 1, registration_idx: 556, negative_registration_idx: None },
-    "self-end-safe" => UtilityEntry { property_idx: 137, property_count: 1, registration_idx: 557, negative_registration_idx: None },
-    "self-center-safe" => UtilityEntry { property_idx: 137, property_count: 1, registration_idx: 558, negative_registration_idx: None },
-    "self-stretch" => UtilityEntry { property_idx: 137, property_count: 1, registration_idx: 559, negative_registration_idx: None },
-    "self-baseline" => UtilityEntry { property_idx: 137, property_count: 1, registration_idx: 560, negative_registration_idx: None },
-    "self-baseline-last" => UtilityEntry { property_idx: 137, property_count: 1, registration_idx: 561, negative_registration_idx: None },
-    "justify-self-auto" => UtilityEntry { property_idx: 138, property_count: 1, registration_idx: 562, negative_registration_idx: None },
-    "justify-self-start" => UtilityEntry { property_idx: 138, property_count: 1, registration_idx: 563, negative_registration_idx: None },
-    "justify-self-end" => UtilityEntry { property_idx: 138, property_count: 1, registration_idx: 564, negative_registration_idx: None },
-    "justify-self-center" => UtilityEntry { property_idx: 138, property_count: 1, registration_idx: 565, negative_registration_idx: None },
-    "justify-self-end-safe" => UtilityEntry { property_idx: 138, property_count: 1, registration_idx: 566, negative_registration_idx: None },
-    "justify-self-center-safe" => UtilityEntry { property_idx: 138, property_count: 1, registration_idx: 567, negative_registration_idx: None },
-    "justify-self-stretch" => UtilityEntry { property_idx: 138, property_count: 1, registration_idx: 568, negative_registration_idx: None },
-    "overflow-auto" => UtilityEntry { property_idx: 139, property_count: 1, registration_idx: 569, negative_registration_idx: None },
-    "overflow-x-auto" => UtilityEntry { property_idx: 140, property_count: 1, registration_idx: 570, negative_registration_idx: None },
-    "overflow-y-auto" => UtilityEntry { property_idx: 141, property_count: 1, registration_idx: 571, negative_registration_idx: None },
-    "overflow-hidden" => UtilityEntry { property_idx: 139, property_count: 1, registration_idx: 572, negative_registration_idx: None },
-    "overflow-x-hidden" => UtilityEntry { property_idx: 140, property_count: 1, registration_idx: 573, negative_registration_idx: None },
-    "overflow-y-hidden" => UtilityEntry { property_idx: 141, property_count: 1, registration_idx: 574, negative_registration_idx: None },
-    "overflow-clip" => UtilityEntry { property_idx: 139, property_count: 1, registration_idx: 575, negative_registration_idx: None },
-    "overflow-x-clip" => UtilityEntry { property_idx: 140, property_count: 1, registration_idx: 576, negative_registration_idx: None },
-    "overflow-y-clip" => UtilityEntry { property_idx: 141, property_count: 1, registration_idx: 577, negative_registration_idx: None },
-    "overflow-visible" => UtilityEntry { property_idx: 139, property_count: 1, registration_idx: 578, negative_registration_idx: None },
-    "overflow-x-visible" => UtilityEntry { property_idx: 140, property_count: 1, registration_idx: 579, negative_registration_idx: None },
-    "overflow-y-visible" => UtilityEntry { property_idx: 141, property_count: 1, registration_idx: 580, negative_registration_idx: None },
-    "overflow-scroll" => UtilityEntry { property_idx: 139, property_count: 1, registration_idx: 581, negative_registration_idx: None },
-    "overflow-x-scroll" => UtilityEntry { property_idx: 140, property_count: 1, registration_idx: 582, negative_registration_idx: None },
-    "overflow-y-scroll" => UtilityEntry { property_idx: 141, property_count: 1, registration_idx: 583, negative_registration_idx: None },
-    "overscroll-auto" => UtilityEntry { property_idx: 142, property_count: 1, registration_idx: 584, negative_registration_idx: None },
-    "overscroll-x-auto" => UtilityEntry { property_idx: 143, property_count: 1, registration_idx: 585, negative_registration_idx: None },
-    "overscroll-y-auto" => UtilityEntry { property_idx: 144, property_count: 1, registration_idx: 586, negative_registration_idx: None },
-    "overscroll-contain" => UtilityEntry { property_idx: 142, property_count: 1, registration_idx: 587, negative_registration_idx: None },
-    "overscroll-x-contain" => UtilityEntry { property_idx: 143, property_count: 1, registration_idx: 588, negative_registration_idx: None },
-    "overscroll-y-contain" => UtilityEntry { property_idx: 144, property_count: 1, registration_idx: 589, negative_registration_idx: None },
-    "overscroll-none" => UtilityEntry { property_idx: 142, property_count: 1, registration_idx: 590, negative_registration_idx: None },
-    "overscroll-x-none" => UtilityEntry { property_idx: 143, property_count: 1, registration_idx: 591, negative_registration_idx: None },
-    "overscroll-y-none" => UtilityEntry { property_idx: 144, property_count: 1, registration_idx: 592, negative_registration_idx: None },
-    "scroll-auto" => UtilityEntry { property_idx: 145, property_count: 1, registration_idx: 593, negative_registration_idx: None },
-    "scroll-smooth" => UtilityEntry { property_idx: 145, property_count: 1, registration_idx: 594, negative_registration_idx: None },
-    "truncate" => UtilityEntry { property_idx: 139, property_count: 3, registration_idx: 595, negative_registration_idx: None },
-    "text-ellipsis" => UtilityEntry { property_idx: 289, property_count: 1, registration_idx: 596, negative_registration_idx: None },
-    "text-clip" => UtilityEntry { property_idx: 289, property_count: 1, registration_idx: 597, negative_registration_idx: None },
-    "hyphens-none" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 598, negative_registration_idx: None },
-    "hyphens-manual" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 599, negative_registration_idx: None },
-    "hyphens-auto" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 600, negative_registration_idx: None },
-    "whitespace-normal" => UtilityEntry { property_idx: 291, property_count: 1, registration_idx: 601, negative_registration_idx: None },
-    "whitespace-nowrap" => UtilityEntry { property_idx: 291, property_count: 1, registration_idx: 602, negative_registration_idx: None },
-    "whitespace-pre" => UtilityEntry { property_idx: 291, property_count: 1, registration_idx: 603, negative_registration_idx: None },
-    "whitespace-pre-line" => UtilityEntry { property_idx: 291, property_count: 1, registration_idx: 604, negative_registration_idx: None },
-    "whitespace-pre-wrap" => UtilityEntry { property_idx: 291, property_count: 1, registration_idx: 605, negative_registration_idx: None },
-    "whitespace-break-spaces" => UtilityEntry { property_idx: 291, property_count: 1, registration_idx: 606, negative_registration_idx: None },
-    "text-wrap" => UtilityEntry { property_idx: 286, property_count: 1, registration_idx: 607, negative_registration_idx: None },
-    "text-nowrap" => UtilityEntry { property_idx: 286, property_count: 1, registration_idx: 608, negative_registration_idx: None },
-    "text-balance" => UtilityEntry { property_idx: 286, property_count: 1, registration_idx: 609, negative_registration_idx: None },
-    "text-pretty" => UtilityEntry { property_idx: 286, property_count: 1, registration_idx: 610, negative_registration_idx: None },
-    "break-normal" => UtilityEntry { property_idx: 287, property_count: 2, registration_idx: 611, negative_registration_idx: None },
-    "break-all" => UtilityEntry { property_idx: 288, property_count: 1, registration_idx: 612, negative_registration_idx: None },
-    "break-keep" => UtilityEntry { property_idx: 288, property_count: 1, registration_idx: 613, negative_registration_idx: None },
-    "wrap-anywhere" => UtilityEntry { property_idx: 287, property_count: 1, registration_idx: 614, negative_registration_idx: None },
-    "wrap-break-word" => UtilityEntry { property_idx: 287, property_count: 1, registration_idx: 615, negative_registration_idx: None },
-    "wrap-normal" => UtilityEntry { property_idx: 287, property_count: 1, registration_idx: 616, negative_registration_idx: None },
-    "border-solid" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 617, negative_registration_idx: None },
-    "border-dashed" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 618, negative_registration_idx: None },
-    "border-dotted" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 619, negative_registration_idx: None },
-    "border-double" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 620, negative_registration_idx: None },
-    "border-hidden" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 621, negative_registration_idx: None },
-    "border-none" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 622, negative_registration_idx: None },
-    "divide-x-reverse" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 623, negative_registration_idx: None },
-    "divide-y-reverse" => UtilityEntry { property_idx: 133, property_count: 1, registration_idx: 624, negative_registration_idx: None },
-    "divide-solid" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 625, negative_registration_idx: None },
-    "divide-dashed" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 626, negative_registration_idx: None },
-    "divide-dotted" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 627, negative_registration_idx: None },
-    "divide-double" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 628, negative_registration_idx: None },
-    "divide-none" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 629, negative_registration_idx: None },
-    "bg-auto" => UtilityEntry { property_idx: 247, property_count: 1, registration_idx: 630, negative_registration_idx: None },
-    "bg-cover" => UtilityEntry { property_idx: 247, property_count: 1, registration_idx: 631, negative_registration_idx: None },
-    "bg-contain" => UtilityEntry { property_idx: 247, property_count: 1, registration_idx: 632, negative_registration_idx: None },
-    "bg-fixed" => UtilityEntry { property_idx: 248, property_count: 1, registration_idx: 633, negative_registration_idx: None },
-    "bg-local" => UtilityEntry { property_idx: 248, property_count: 1, registration_idx: 634, negative_registration_idx: None },
-    "bg-scroll" => UtilityEntry { property_idx: 248, property_count: 1, registration_idx: 635, negative_registration_idx: None },
-    "bg-top" => UtilityEntry { property_idx: 250, property_count: 1, registration_idx: 636, negative_registration_idx: None },
-    "bg-top-left" => UtilityEntry { property_idx: 250, property_count: 1, registration_idx: 637, negative_registration_idx: None },
-    "bg-top-right" => UtilityEntry { property_idx: 250, property_count: 1, registration_idx: 638, negative_registration_idx: None },
-    "bg-bottom" => UtilityEntry { property_idx: 250, property_count: 1, registration_idx: 639, negative_registration_idx: None },
-    "bg-bottom-left" => UtilityEntry { property_idx: 250, property_count: 1, registration_idx: 640, negative_registration_idx: None },
-    "bg-bottom-right" => UtilityEntry { property_idx: 250, property_count: 1, registration_idx: 641, negative_registration_idx: None },
-    "bg-left" => UtilityEntry { property_idx: 250, property_count: 1, registration_idx: 642, negative_registration_idx: None },
-    "bg-right" => UtilityEntry { property_idx: 250, property_count: 1, registration_idx: 643, negative_registration_idx: None },
-    "bg-center" => UtilityEntry { property_idx: 250, property_count: 1, registration_idx: 644, negative_registration_idx: None },
-    "bg-repeat" => UtilityEntry { property_idx: 251, property_count: 1, registration_idx: 645, negative_registration_idx: None },
-    "bg-no-repeat" => UtilityEntry { property_idx: 251, property_count: 1, registration_idx: 646, negative_registration_idx: None },
-    "bg-repeat-x" => UtilityEntry { property_idx: 251, property_count: 1, registration_idx: 647, negative_registration_idx: None },
-    "bg-repeat-y" => UtilityEntry { property_idx: 251, property_count: 1, registration_idx: 648, negative_registration_idx: None },
-    "bg-repeat-round" => UtilityEntry { property_idx: 251, property_count: 1, registration_idx: 649, negative_registration_idx: None },
-    "bg-repeat-space" => UtilityEntry { property_idx: 251, property_count: 1, registration_idx: 650, negative_registration_idx: None },
-    "bg-none" => UtilityEntry { property_idx: 195, property_count: 1, registration_idx: 651, negative_registration_idx: None },
-    "via-none" => UtilityEntry { property_idx: 198, property_count: 1, registration_idx: 652, negative_registration_idx: None },
-    "mask-none" => UtilityEntry { property_idx: 205, property_count: 1, registration_idx: 653, negative_registration_idx: None },
-    "mask-add" => UtilityEntry { property_idx: 253, property_count: 1, registration_idx: 654, negative_registration_idx: None },
-    "mask-subtract" => UtilityEntry { property_idx: 253, property_count: 1, registration_idx: 655, negative_registration_idx: None },
-    "mask-intersect" => UtilityEntry { property_idx: 253, property_count: 1, registration_idx: 656, negative_registration_idx: None },
-    "mask-exclude" => UtilityEntry { property_idx: 253, property_count: 1, registration_idx: 657, negative_registration_idx: None },
-    "mask-alpha" => UtilityEntry { property_idx: 254, property_count: 1, registration_idx: 658, negative_registration_idx: None },
-    "mask-luminance" => UtilityEntry { property_idx: 254, property_count: 1, registration_idx: 659, negative_registration_idx: None },
-    "mask-match" => UtilityEntry { property_idx: 254, property_count: 1, registration_idx: 660, negative_registration_idx: None },
-    "mask-type-alpha" => UtilityEntry { property_idx: 255, property_count: 1, registration_idx: 661, negative_registration_idx: None },
-    "mask-type-luminance" => UtilityEntry { property_idx: 255, property_count: 1, registration_idx: 662, negative_registration_idx: None },
-    "mask-auto" => UtilityEntry { property_idx: 256, property_count: 1, registration_idx: 663, negative_registration_idx: None },
-    "mask-cover" => UtilityEntry { property_idx: 256, property_count: 1, registration_idx: 664, negative_registration_idx: None },
-    "mask-contain" => UtilityEntry { property_idx: 256, property_count: 1, registration_idx: 665, negative_registration_idx: None },
-    "mask-top" => UtilityEntry { property_idx: 258, property_count: 1, registration_idx: 666, negative_registration_idx: None },
-    "mask-top-left" => UtilityEntry { property_idx: 258, property_count: 1, registration_idx: 667, negative_registration_idx: None },
-    "mask-top-right" => UtilityEntry { property_idx: 258, property_count: 1, registration_idx: 668, negative_registration_idx: None },
-    "mask-bottom" => UtilityEntry { property_idx: 258, property_count: 1, registration_idx: 669, negative_registration_idx: None },
-    "mask-bottom-left" => UtilityEntry { property_idx: 258, property_count: 1, registration_idx: 670, negative_registration_idx: None },
-    "mask-bottom-right" => UtilityEntry { property_idx: 258, property_count: 1, registration_idx: 671, negative_registration_idx: None },
-    "mask-left" => UtilityEntry { property_idx: 258, property_count: 1, registration_idx: 672, negative_registration_idx: None },
-    "mask-right" => UtilityEntry { property_idx: 258, property_count: 1, registration_idx: 673, negative_registration_idx: None },
-    "mask-center" => UtilityEntry { property_idx: 258, property_count: 1, registration_idx: 674, negative_registration_idx: None },
-    "mask-repeat" => UtilityEntry { property_idx: 259, property_count: 1, registration_idx: 675, negative_registration_idx: None },
-    "mask-no-repeat" => UtilityEntry { property_idx: 259, property_count: 1, registration_idx: 676, negative_registration_idx: None },
-    "mask-repeat-x" => UtilityEntry { property_idx: 259, property_count: 1, registration_idx: 677, negative_registration_idx: None },
-    "mask-repeat-y" => UtilityEntry { property_idx: 259, property_count: 1, registration_idx: 678, negative_registration_idx: None },
-    "mask-repeat-round" => UtilityEntry { property_idx: 259, property_count: 1, registration_idx: 679, negative_registration_idx: None },
-    "mask-repeat-space" => UtilityEntry { property_idx: 259, property_count: 1, registration_idx: 680, negative_registration_idx: None },
-    "mask-clip-border" => UtilityEntry { property_idx: 257, property_count: 1, registration_idx: 681, negative_registration_idx: None },
-    "mask-clip-padding" => UtilityEntry { property_idx: 257, property_count: 1, registration_idx: 682, negative_registration_idx: None },
-    "mask-clip-content" => UtilityEntry { property_idx: 257, property_count: 1, registration_idx: 683, negative_registration_idx: None },
-    "mask-clip-fill" => UtilityEntry { property_idx: 257, property_count: 1, registration_idx: 684, negative_registration_idx: None },
-    "mask-clip-stroke" => UtilityEntry { property_idx: 257, property_count: 1, registration_idx: 685, negative_registration_idx: None },
-    "mask-clip-view" => UtilityEntry { property_idx: 257, property_count: 1, registration_idx: 686, negative_registration_idx: None },
-    "mask-no-clip" => UtilityEntry { property_idx: 257, property_count: 1, registration_idx: 687, negative_registration_idx: None },
-    "mask-origin-border" => UtilityEntry { property_idx: 260, property_count: 1, registration_idx: 688, negative_registration_idx: None },
-    "mask-origin-padding" => UtilityEntry { property_idx: 260, property_count: 1, registration_idx: 689, negative_registration_idx: None },
-    "mask-origin-content" => UtilityEntry { property_idx: 260, property_count: 1, registration_idx: 690, negative_registration_idx: None },
-    "mask-origin-fill" => UtilityEntry { property_idx: 260, property_count: 1, registration_idx: 691, negative_registration_idx: None },
-    "mask-origin-stroke" => UtilityEntry { property_idx: 260, property_count: 1, registration_idx: 692, negative_registration_idx: None },
-    "mask-origin-view" => UtilityEntry { property_idx: 260, property_count: 1, registration_idx: 693, negative_registration_idx: None },
-    "mask-circle" => UtilityEntry { property_idx: 233, property_count: 1, registration_idx: 694, negative_registration_idx: None },
-    "mask-ellipse" => UtilityEntry { property_idx: 233, property_count: 1, registration_idx: 695, negative_registration_idx: None },
-    "mask-radial-closest-side" => UtilityEntry { property_idx: 234, property_count: 1, registration_idx: 696, negative_registration_idx: None },
-    "mask-radial-farthest-side" => UtilityEntry { property_idx: 234, property_count: 1, registration_idx: 697, negative_registration_idx: None },
-    "mask-radial-closest-corner" => UtilityEntry { property_idx: 234, property_count: 1, registration_idx: 698, negative_registration_idx: None },
-    "mask-radial-farthest-corner" => UtilityEntry { property_idx: 234, property_count: 1, registration_idx: 699, negative_registration_idx: None },
-    "mask-radial-at-top" => UtilityEntry { property_idx: 235, property_count: 1, registration_idx: 700, negative_registration_idx: None },
-    "mask-radial-at-top-left" => UtilityEntry { property_idx: 235, property_count: 1, registration_idx: 701, negative_registration_idx: None },
-    "mask-radial-at-top-right" => UtilityEntry { property_idx: 235, property_count: 1, registration_idx: 702, negative_registration_idx: None },
-    "mask-radial-at-bottom" => UtilityEntry { property_idx: 235, property_count: 1, registration_idx: 703, negative_registration_idx: None },
-    "mask-radial-at-bottom-left" => UtilityEntry { property_idx: 235, property_count: 1, registration_idx: 704, negative_registration_idx: None },
-    "mask-radial-at-bottom-right" => UtilityEntry { property_idx: 235, property_count: 1, registration_idx: 705, negative_registration_idx: None },
-    "mask-radial-at-left" => UtilityEntry { property_idx: 235, property_count: 1, registration_idx: 706, negative_registration_idx: None },
-    "mask-radial-at-right" => UtilityEntry { property_idx: 235, property_count: 1, registration_idx: 707, negative_registration_idx: None },
-    "mask-radial-at-center" => UtilityEntry { property_idx: 235, property_count: 1, registration_idx: 708, negative_registration_idx: None },
-    "box-decoration-slice" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 709, negative_registration_idx: None },
-    "box-decoration-clone" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 710, negative_registration_idx: None },
-    "bg-clip-text" => UtilityEntry { property_idx: 249, property_count: 1, registration_idx: 711, negative_registration_idx: None },
-    "bg-clip-border" => UtilityEntry { property_idx: 249, property_count: 1, registration_idx: 712, negative_registration_idx: None },
-    "bg-clip-padding" => UtilityEntry { property_idx: 249, property_count: 1, registration_idx: 713, negative_registration_idx: None },
-    "bg-clip-content" => UtilityEntry { property_idx: 249, property_count: 1, registration_idx: 714, negative_registration_idx: None },
-    "bg-origin-border" => UtilityEntry { property_idx: 252, property_count: 1, registration_idx: 715, negative_registration_idx: None },
-    "bg-origin-padding" => UtilityEntry { property_idx: 252, property_count: 1, registration_idx: 716, negative_registration_idx: None },
-    "bg-origin-content" => UtilityEntry { property_idx: 252, property_count: 1, registration_idx: 717, negative_registration_idx: None },
-    "bg-blend-normal" => UtilityEntry { property_idx: 308, property_count: 1, registration_idx: 718, negative_registration_idx: None },
-    "mix-blend-normal" => UtilityEntry { property_idx: 309, property_count: 1, registration_idx: 719, negative_registration_idx: None },
-    "bg-blend-multiply" => UtilityEntry { property_idx: 308, property_count: 1, registration_idx: 720, negative_registration_idx: None },
-    "mix-blend-multiply" => UtilityEntry { property_idx: 309, property_count: 1, registration_idx: 721, negative_registration_idx: None },
-    "bg-blend-screen" => UtilityEntry { property_idx: 308, property_count: 1, registration_idx: 722, negative_registration_idx: None },
-    "mix-blend-screen" => UtilityEntry { property_idx: 309, property_count: 1, registration_idx: 723, negative_registration_idx: None },
-    "bg-blend-overlay" => UtilityEntry { property_idx: 308, property_count: 1, registration_idx: 724, negative_registration_idx: None },
-    "mix-blend-overlay" => UtilityEntry { property_idx: 309, property_count: 1, registration_idx: 725, negative_registration_idx: None },
-    "bg-blend-darken" => UtilityEntry { property_idx: 308, property_count: 1, registration_idx: 726, negative_registration_idx: None },
-    "mix-blend-darken" => UtilityEntry { property_idx: 309, property_count: 1, registration_idx: 727, negative_registration_idx: None },
-    "bg-blend-lighten" => UtilityEntry { property_idx: 308, property_count: 1, registration_idx: 728, negative_registration_idx: None },
-    "mix-blend-lighten" => UtilityEntry { property_idx: 309, property_count: 1, registration_idx: 729, negative_registration_idx: None },
-    "bg-blend-color-dodge" => UtilityEntry { property_idx: 308, property_count: 1, registration_idx: 730, negative_registration_idx: None },
-    "mix-blend-color-dodge" => UtilityEntry { property_idx: 309, property_count: 1, registration_idx: 731, negative_registration_idx: None },
-    "bg-blend-color-burn" => UtilityEntry { property_idx: 308, property_count: 1, registration_idx: 732, negative_registration_idx: None },
-    "mix-blend-color-burn" => UtilityEntry { property_idx: 309, property_count: 1, registration_idx: 733, negative_registration_idx: None },
-    "bg-blend-hard-light" => UtilityEntry { property_idx: 308, property_count: 1, registration_idx: 734, negative_registration_idx: None },
-    "mix-blend-hard-light" => UtilityEntry { property_idx: 309, property_count: 1, registration_idx: 735, negative_registration_idx: None },
-    "bg-blend-soft-light" => UtilityEntry { property_idx: 308, property_count: 1, registration_idx: 736, negative_registration_idx: None },
-    "mix-blend-soft-light" => UtilityEntry { property_idx: 309, property_count: 1, registration_idx: 737, negative_registration_idx: None },
-    "bg-blend-difference" => UtilityEntry { property_idx: 308, property_count: 1, registration_idx: 738, negative_registration_idx: None },
-    "mix-blend-difference" => UtilityEntry { property_idx: 309, property_count: 1, registration_idx: 739, negative_registration_idx: None },
-    "bg-blend-exclusion" => UtilityEntry { property_idx: 308, property_count: 1, registration_idx: 740, negative_registration_idx: None },
-    "mix-blend-exclusion" => UtilityEntry { property_idx: 309, property_count: 1, registration_idx: 741, negative_registration_idx: None },
-    "bg-blend-hue" => UtilityEntry { property_idx: 308, property_count: 1, registration_idx: 742, negative_registration_idx: None },
-    "mix-blend-hue" => UtilityEntry { property_idx: 309, property_count: 1, registration_idx: 743, negative_registration_idx: None },
-    "bg-blend-saturation" => UtilityEntry { property_idx: 308, property_count: 1, registration_idx: 744, negative_registration_idx: None },
-    "mix-blend-saturation" => UtilityEntry { property_idx: 309, property_count: 1, registration_idx: 745, negative_registration_idx: None },
-    "bg-blend-color" => UtilityEntry { property_idx: 308, property_count: 1, registration_idx: 746, negative_registration_idx: None },
-    "mix-blend-color" => UtilityEntry { property_idx: 309, property_count: 1, registration_idx: 747, negative_registration_idx: None },
-    "bg-blend-luminosity" => UtilityEntry { property_idx: 308, property_count: 1, registration_idx: 748, negative_registration_idx: None },
-    "mix-blend-luminosity" => UtilityEntry { property_idx: 309, property_count: 1, registration_idx: 749, negative_registration_idx: None },
-    "mix-blend-plus-darker" => UtilityEntry { property_idx: 309, property_count: 1, registration_idx: 750, negative_registration_idx: None },
-    "mix-blend-plus-lighter" => UtilityEntry { property_idx: 309, property_count: 1, registration_idx: 751, negative_registration_idx: None },
-    "fill-none" => UtilityEntry { property_idx: 261, property_count: 1, registration_idx: 752, negative_registration_idx: None },
-    "stroke-none" => UtilityEntry { property_idx: 262, property_count: 1, registration_idx: 753, negative_registration_idx: None },
-    "object-contain" => UtilityEntry { property_idx: 264, property_count: 1, registration_idx: 754, negative_registration_idx: None },
-    "object-cover" => UtilityEntry { property_idx: 264, property_count: 1, registration_idx: 755, negative_registration_idx: None },
-    "object-fill" => UtilityEntry { property_idx: 264, property_count: 1, registration_idx: 756, negative_registration_idx: None },
-    "object-none" => UtilityEntry { property_idx: 264, property_count: 1, registration_idx: 757, negative_registration_idx: None },
-    "object-scale-down" => UtilityEntry { property_idx: 264, property_count: 1, registration_idx: 758, negative_registration_idx: None },
-    "p-px" => UtilityEntry { property_idx: 266, property_count: 1, registration_idx: 759, negative_registration_idx: None },
-    "px-px" => UtilityEntry { property_idx: 267, property_count: 1, registration_idx: 760, negative_registration_idx: None },
-    "py-px" => UtilityEntry { property_idx: 268, property_count: 1, registration_idx: 761, negative_registration_idx: None },
-    "ps-px" => UtilityEntry { property_idx: 269, property_count: 1, registration_idx: 762, negative_registration_idx: None },
-    "pe-px" => UtilityEntry { property_idx: 270, property_count: 1, registration_idx: 763, negative_registration_idx: None },
-    "pbs-px" => UtilityEntry { property_idx: 271, property_count: 1, registration_idx: 764, negative_registration_idx: None },
-    "pbe-px" => UtilityEntry { property_idx: 272, property_count: 1, registration_idx: 765, negative_registration_idx: None },
-    "pt-px" => UtilityEntry { property_idx: 273, property_count: 1, registration_idx: 766, negative_registration_idx: None },
-    "pr-px" => UtilityEntry { property_idx: 274, property_count: 1, registration_idx: 767, negative_registration_idx: None },
-    "pb-px" => UtilityEntry { property_idx: 275, property_count: 1, registration_idx: 768, negative_registration_idx: None },
-    "pl-px" => UtilityEntry { property_idx: 276, property_count: 1, registration_idx: 769, negative_registration_idx: None },
-    "text-left" => UtilityEntry { property_idx: 277, property_count: 1, registration_idx: 770, negative_registration_idx: None },
-    "text-center" => UtilityEntry { property_idx: 277, property_count: 1, registration_idx: 771, negative_registration_idx: None },
-    "text-right" => UtilityEntry { property_idx: 277, property_count: 1, registration_idx: 772, negative_registration_idx: None },
-    "text-justify" => UtilityEntry { property_idx: 277, property_count: 1, registration_idx: 773, negative_registration_idx: None },
-    "text-start" => UtilityEntry { property_idx: 277, property_count: 1, registration_idx: 774, negative_registration_idx: None },
-    "text-end" => UtilityEntry { property_idx: 277, property_count: 1, registration_idx: 775, negative_registration_idx: None },
-    "indent-px" => UtilityEntry { property_idx: 278, property_count: 1, registration_idx: 777, negative_registration_idx: Some(776) },
-    "align-baseline" => UtilityEntry { property_idx: 279, property_count: 1, registration_idx: 778, negative_registration_idx: None },
-    "align-top" => UtilityEntry { property_idx: 279, property_count: 1, registration_idx: 779, negative_registration_idx: None },
-    "align-middle" => UtilityEntry { property_idx: 279, property_count: 1, registration_idx: 780, negative_registration_idx: None },
-    "align-bottom" => UtilityEntry { property_idx: 279, property_count: 1, registration_idx: 781, negative_registration_idx: None },
-    "align-text-top" => UtilityEntry { property_idx: 279, property_count: 1, registration_idx: 782, negative_registration_idx: None },
-    "align-text-bottom" => UtilityEntry { property_idx: 279, property_count: 1, registration_idx: 783, negative_registration_idx: None },
-    "align-sub" => UtilityEntry { property_idx: 279, property_count: 1, registration_idx: 784, negative_registration_idx: None },
-    "align-super" => UtilityEntry { property_idx: 279, property_count: 1, registration_idx: 785, negative_registration_idx: None },
-    "uppercase" => UtilityEntry { property_idx: 293, property_count: 1, registration_idx: 786, negative_registration_idx: None },
-    "lowercase" => UtilityEntry { property_idx: 293, property_count: 1, registration_idx: 787, negative_registration_idx: None },
-    "capitalize" => UtilityEntry { property_idx: 293, property_count: 1, registration_idx: 788, negative_registration_idx: None },
-    "normal-case" => UtilityEntry { property_idx: 293, property_count: 1, registration_idx: 789, negative_registration_idx: None },
-    "italic" => UtilityEntry { property_idx: 294, property_count: 1, registration_idx: 790, negative_registration_idx: None },
-    "not-italic" => UtilityEntry { property_idx: 294, property_count: 1, registration_idx: 791, negative_registration_idx: None },
-    "underline" => UtilityEntry { property_idx: 297, property_count: 1, registration_idx: 792, negative_registration_idx: None },
-    "overline" => UtilityEntry { property_idx: 297, property_count: 1, registration_idx: 793, negative_registration_idx: None },
-    "line-through" => UtilityEntry { property_idx: 297, property_count: 1, registration_idx: 794, negative_registration_idx: None },
-    "no-underline" => UtilityEntry { property_idx: 297, property_count: 1, registration_idx: 795, negative_registration_idx: None },
-    "font-stretch-normal" => UtilityEntry { property_idx: 295, property_count: 1, registration_idx: 796, negative_registration_idx: None },
-    "font-stretch-ultra-condensed" => UtilityEntry { property_idx: 295, property_count: 1, registration_idx: 797, negative_registration_idx: None },
-    "font-stretch-extra-condensed" => UtilityEntry { property_idx: 295, property_count: 1, registration_idx: 798, negative_registration_idx: None },
-    "font-stretch-condensed" => UtilityEntry { property_idx: 295, property_count: 1, registration_idx: 799, negative_registration_idx: None },
-    "font-stretch-semi-condensed" => UtilityEntry { property_idx: 295, property_count: 1, registration_idx: 800, negative_registration_idx: None },
-    "font-stretch-semi-expanded" => UtilityEntry { property_idx: 295, property_count: 1, registration_idx: 801, negative_registration_idx: None },
-    "font-stretch-expanded" => UtilityEntry { property_idx: 295, property_count: 1, registration_idx: 802, negative_registration_idx: None },
-    "font-stretch-extra-expanded" => UtilityEntry { property_idx: 295, property_count: 1, registration_idx: 803, negative_registration_idx: None },
-    "font-stretch-ultra-expanded" => UtilityEntry { property_idx: 295, property_count: 1, registration_idx: 804, negative_registration_idx: None },
-    "decoration-solid" => UtilityEntry { property_idx: 299, property_count: 1, registration_idx: 805, negative_registration_idx: None },
-    "decoration-double" => UtilityEntry { property_idx: 299, property_count: 1, registration_idx: 806, negative_registration_idx: None },
-    "decoration-dotted" => UtilityEntry { property_idx: 299, property_count: 1, registration_idx: 807, negative_registration_idx: None },
-    "decoration-dashed" => UtilityEntry { property_idx: 299, property_count: 1, registration_idx: 808, negative_registration_idx: None },
-    "decoration-wavy" => UtilityEntry { property_idx: 299, property_count: 1, registration_idx: 809, negative_registration_idx: None },
-    "decoration-auto" => UtilityEntry { property_idx: 300, property_count: 1, registration_idx: 810, negative_registration_idx: None },
-    "decoration-from-font" => UtilityEntry { property_idx: 300, property_count: 1, registration_idx: 811, negative_registration_idx: None },
-    "drop-shadow-none" => UtilityEntry { property_idx: 328, property_count: 2, registration_idx: 812, negative_registration_idx: None },
-    "transition-discrete" => UtilityEntry { property_idx: 346, property_count: 1, registration_idx: 813, negative_registration_idx: None },
-    "transition-normal" => UtilityEntry { property_idx: 346, property_count: 1, registration_idx: 814, negative_registration_idx: None },
-    "duration-initial" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 815, negative_registration_idx: None },
-    "will-change-auto" => UtilityEntry { property_idx: 350, property_count: 1, registration_idx: 816, negative_registration_idx: None },
-    "will-change-scroll" => UtilityEntry { property_idx: 350, property_count: 1, registration_idx: 817, negative_registration_idx: None },
-    "will-change-contents" => UtilityEntry { property_idx: 350, property_count: 1, registration_idx: 818, negative_registration_idx: None },
-    "will-change-transform" => UtilityEntry { property_idx: 350, property_count: 1, registration_idx: 819, negative_registration_idx: None },
-    "content-none" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 820, negative_registration_idx: None },
-    "contain-none" => UtilityEntry { property_idx: 351, property_count: 1, registration_idx: 821, negative_registration_idx: None },
-    "contain-content" => UtilityEntry { property_idx: 351, property_count: 1, registration_idx: 822, negative_registration_idx: None },
-    "contain-strict" => UtilityEntry { property_idx: 351, property_count: 1, registration_idx: 823, negative_registration_idx: None },
-    "contain-size" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 824, negative_registration_idx: None },
-    "contain-inline-size" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 825, negative_registration_idx: None },
-    "contain-layout" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 826, negative_registration_idx: None },
-    "contain-paint" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 827, negative_registration_idx: None },
-    "contain-style" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 828, negative_registration_idx: None },
-    "forced-color-adjust-none" => UtilityEntry { property_idx: 353, property_count: 1, registration_idx: 829, negative_registration_idx: None },
-    "forced-color-adjust-auto" => UtilityEntry { property_idx: 353, property_count: 1, registration_idx: 830, negative_registration_idx: None },
-    "leading-px" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 831, negative_registration_idx: None },
-    "antialiased" => UtilityEntry { property_idx: 302, property_count: 2, registration_idx: 832, negative_registration_idx: None },
-    "subpixel-antialiased" => UtilityEntry { property_idx: 302, property_count: 2, registration_idx: 833, negative_registration_idx: None },
-    "normal-nums" => UtilityEntry { property_idx: 296, property_count: 1, registration_idx: 834, negative_registration_idx: None },
-    "ordinal" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 835, negative_registration_idx: None },
-    "slashed-zero" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 836, negative_registration_idx: None },
-    "lining-nums" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 837, negative_registration_idx: None },
-    "oldstyle-nums" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 838, negative_registration_idx: None },
-    "proportional-nums" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 839, negative_registration_idx: None },
-    "tabular-nums" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 840, negative_registration_idx: None },
-    "diagonal-fractions" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 841, negative_registration_idx: None },
-    "stacked-fractions" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 842, negative_registration_idx: None },
-    "outline-hidden" => UtilityEntry { property_idx: 354, property_count: 4, registration_idx: 843, negative_registration_idx: None },
-    "outline-none" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 844, negative_registration_idx: None },
-    "outline-solid" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 845, negative_registration_idx: None },
-    "outline-dashed" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 846, negative_registration_idx: None },
-    "outline-dotted" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 847, negative_registration_idx: None },
-    "outline-double" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 848, negative_registration_idx: None },
-    "text-shadow-initial" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 849, negative_registration_idx: None },
-    "shadow-initial" => UtilityEntry { property_idx: 312, property_count: 1, registration_idx: 850, negative_registration_idx: None },
-    "inset-shadow-initial" => UtilityEntry { property_idx: 316, property_count: 1, registration_idx: 851, negative_registration_idx: None },
-    "ring-inset" => UtilityEntry { property_idx: 354, property_count: 1, registration_idx: 852, negative_registration_idx: None },
-    "bg-gradient-to-t" => UtilityEntry { property_idx: 196, property_count: 2, registration_idx: 853, negative_registration_idx: None },
-    "bg-gradient-to-tr" => UtilityEntry { property_idx: 196, property_count: 2, registration_idx: 854, negative_registration_idx: None },
-    "bg-gradient-to-r" => UtilityEntry { property_idx: 196, property_count: 2, registration_idx: 855, negative_registration_idx: None },
-    "bg-gradient-to-br" => UtilityEntry { property_idx: 196, property_count: 2, registration_idx: 856, negative_registration_idx: None },
-    "bg-gradient-to-b" => UtilityEntry { property_idx: 196, property_count: 2, registration_idx: 857, negative_registration_idx: None },
-    "bg-gradient-to-bl" => UtilityEntry { property_idx: 196, property_count: 2, registration_idx: 858, negative_registration_idx: None },
-    "bg-gradient-to-l" => UtilityEntry { property_idx: 196, property_count: 2, registration_idx: 859, negative_registration_idx: None },
-    "bg-gradient-to-tl" => UtilityEntry { property_idx: 196, property_count: 2, registration_idx: 860, negative_registration_idx: None },
-    "bg-left-top" => UtilityEntry { property_idx: 250, property_count: 1, registration_idx: 861, negative_registration_idx: None },
-    "bg-right-top" => UtilityEntry { property_idx: 250, property_count: 1, registration_idx: 862, negative_registration_idx: None },
-    "bg-left-bottom" => UtilityEntry { property_idx: 250, property_count: 1, registration_idx: 863, negative_registration_idx: None },
-    "bg-right-bottom" => UtilityEntry { property_idx: 250, property_count: 1, registration_idx: 864, negative_registration_idx: None },
-    "object-left-top" => UtilityEntry { property_idx: 265, property_count: 1, registration_idx: 865, negative_registration_idx: None },
-    "object-right-top" => UtilityEntry { property_idx: 265, property_count: 1, registration_idx: 866, negative_registration_idx: None },
-    "object-left-bottom" => UtilityEntry { property_idx: 265, property_count: 1, registration_idx: 867, negative_registration_idx: None },
-    "object-right-bottom" => UtilityEntry { property_idx: 265, property_count: 1, registration_idx: 868, negative_registration_idx: None },
-    "overflow-ellipsis" => UtilityEntry { property_idx: 289, property_count: 1, registration_idx: 869, negative_registration_idx: None },
-    "decoration-slice" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 870, negative_registration_idx: None },
-    "decoration-clone" => UtilityEntry { property_idx: 354, property_count: 2, registration_idx: 871, negative_registration_idx: None },
-    "order-none" => UtilityEntry { property_idx: 17, property_count: 1, registration_idx: 872, negative_registration_idx: None },
-    "break-words" => UtilityEntry { property_idx: 287, property_count: 1, registration_idx: 873, negative_registration_idx: None },
-    "start-auto" => UtilityEntry { property_idx: 7, property_count: 1, registration_idx: 874, negative_registration_idx: None },
-    "start-full" => UtilityEntry { property_idx: 7, property_count: 1, registration_idx: 875, negative_registration_idx: Some(876) },
-    "start-px" => UtilityEntry { property_idx: 7, property_count: 1, registration_idx: 877, negative_registration_idx: Some(878) },
-    "end-auto" => UtilityEntry { property_idx: 8, property_count: 1, registration_idx: 879, negative_registration_idx: None },
-    "end-full" => UtilityEntry { property_idx: 8, property_count: 1, registration_idx: 880, negative_registration_idx: Some(881) },
-    "end-px" => UtilityEntry { property_idx: 8, property_count: 1, registration_idx: 882, negative_registration_idx: Some(883) },
+    "sr-only" => UtilityEntry { property_idx: 3, property_count: 9, has_negative: false },
+    "not-sr-only" => UtilityEntry { property_idx: 3, property_count: 8, has_negative: false },
+    "pointer-events-none" => UtilityEntry { property_idx: 1, property_count: 1, has_negative: false },
+    "pointer-events-auto" => UtilityEntry { property_idx: 1, property_count: 1, has_negative: false },
+    "visible" => UtilityEntry { property_idx: 2, property_count: 1, has_negative: false },
+    "invisible" => UtilityEntry { property_idx: 2, property_count: 1, has_negative: false },
+    "collapse" => UtilityEntry { property_idx: 2, property_count: 1, has_negative: false },
+    "static" => UtilityEntry { property_idx: 3, property_count: 1, has_negative: false },
+    "fixed" => UtilityEntry { property_idx: 3, property_count: 1, has_negative: false },
+    "absolute" => UtilityEntry { property_idx: 3, property_count: 1, has_negative: false },
+    "relative" => UtilityEntry { property_idx: 3, property_count: 1, has_negative: false },
+    "sticky" => UtilityEntry { property_idx: 3, property_count: 1, has_negative: false },
+    "inset-auto" => UtilityEntry { property_idx: 4, property_count: 1, has_negative: false },
+    "inset-full" => UtilityEntry { property_idx: 4, property_count: 1, has_negative: true },
+    "inset-px" => UtilityEntry { property_idx: 4, property_count: 1, has_negative: true },
+    "inset-x-auto" => UtilityEntry { property_idx: 5, property_count: 1, has_negative: false },
+    "inset-x-full" => UtilityEntry { property_idx: 5, property_count: 1, has_negative: true },
+    "inset-x-px" => UtilityEntry { property_idx: 5, property_count: 1, has_negative: true },
+    "inset-y-auto" => UtilityEntry { property_idx: 6, property_count: 1, has_negative: false },
+    "inset-y-full" => UtilityEntry { property_idx: 6, property_count: 1, has_negative: true },
+    "inset-y-px" => UtilityEntry { property_idx: 6, property_count: 1, has_negative: true },
+    "inset-s-auto" => UtilityEntry { property_idx: 7, property_count: 1, has_negative: false },
+    "inset-s-full" => UtilityEntry { property_idx: 7, property_count: 1, has_negative: true },
+    "inset-s-px" => UtilityEntry { property_idx: 7, property_count: 1, has_negative: true },
+    "inset-e-auto" => UtilityEntry { property_idx: 8, property_count: 1, has_negative: false },
+    "inset-e-full" => UtilityEntry { property_idx: 8, property_count: 1, has_negative: true },
+    "inset-e-px" => UtilityEntry { property_idx: 8, property_count: 1, has_negative: true },
+    "inset-bs-auto" => UtilityEntry { property_idx: 9, property_count: 1, has_negative: false },
+    "inset-bs-full" => UtilityEntry { property_idx: 9, property_count: 1, has_negative: true },
+    "inset-bs-px" => UtilityEntry { property_idx: 9, property_count: 1, has_negative: true },
+    "inset-be-auto" => UtilityEntry { property_idx: 10, property_count: 1, has_negative: false },
+    "inset-be-full" => UtilityEntry { property_idx: 10, property_count: 1, has_negative: true },
+    "inset-be-px" => UtilityEntry { property_idx: 10, property_count: 1, has_negative: true },
+    "top-auto" => UtilityEntry { property_idx: 11, property_count: 1, has_negative: false },
+    "top-full" => UtilityEntry { property_idx: 11, property_count: 1, has_negative: true },
+    "top-px" => UtilityEntry { property_idx: 11, property_count: 1, has_negative: true },
+    "right-auto" => UtilityEntry { property_idx: 12, property_count: 1, has_negative: false },
+    "right-full" => UtilityEntry { property_idx: 12, property_count: 1, has_negative: true },
+    "right-px" => UtilityEntry { property_idx: 12, property_count: 1, has_negative: true },
+    "bottom-auto" => UtilityEntry { property_idx: 13, property_count: 1, has_negative: false },
+    "bottom-full" => UtilityEntry { property_idx: 13, property_count: 1, has_negative: true },
+    "bottom-px" => UtilityEntry { property_idx: 13, property_count: 1, has_negative: true },
+    "left-auto" => UtilityEntry { property_idx: 14, property_count: 1, has_negative: false },
+    "left-full" => UtilityEntry { property_idx: 14, property_count: 1, has_negative: true },
+    "left-px" => UtilityEntry { property_idx: 14, property_count: 1, has_negative: true },
+    "isolate" => UtilityEntry { property_idx: 15, property_count: 1, has_negative: false },
+    "isolation-auto" => UtilityEntry { property_idx: 15, property_count: 1, has_negative: false },
+    "float-start" => UtilityEntry { property_idx: 24, property_count: 1, has_negative: false },
+    "float-end" => UtilityEntry { property_idx: 24, property_count: 1, has_negative: false },
+    "float-right" => UtilityEntry { property_idx: 24, property_count: 1, has_negative: false },
+    "float-left" => UtilityEntry { property_idx: 24, property_count: 1, has_negative: false },
+    "float-none" => UtilityEntry { property_idx: 24, property_count: 1, has_negative: false },
+    "clear-start" => UtilityEntry { property_idx: 25, property_count: 1, has_negative: false },
+    "clear-end" => UtilityEntry { property_idx: 25, property_count: 1, has_negative: false },
+    "clear-right" => UtilityEntry { property_idx: 25, property_count: 1, has_negative: false },
+    "clear-left" => UtilityEntry { property_idx: 25, property_count: 1, has_negative: false },
+    "clear-both" => UtilityEntry { property_idx: 25, property_count: 1, has_negative: false },
+    "clear-none" => UtilityEntry { property_idx: 25, property_count: 1, has_negative: false },
+    "m-auto" => UtilityEntry { property_idx: 27, property_count: 1, has_negative: false },
+    "m-px" => UtilityEntry { property_idx: 27, property_count: 1, has_negative: true },
+    "mx-auto" => UtilityEntry { property_idx: 28, property_count: 1, has_negative: false },
+    "mx-px" => UtilityEntry { property_idx: 28, property_count: 1, has_negative: true },
+    "my-auto" => UtilityEntry { property_idx: 29, property_count: 1, has_negative: false },
+    "my-px" => UtilityEntry { property_idx: 29, property_count: 1, has_negative: true },
+    "ms-auto" => UtilityEntry { property_idx: 30, property_count: 1, has_negative: false },
+    "ms-px" => UtilityEntry { property_idx: 30, property_count: 1, has_negative: true },
+    "me-auto" => UtilityEntry { property_idx: 31, property_count: 1, has_negative: false },
+    "me-px" => UtilityEntry { property_idx: 31, property_count: 1, has_negative: true },
+    "mbs-auto" => UtilityEntry { property_idx: 32, property_count: 1, has_negative: false },
+    "mbs-px" => UtilityEntry { property_idx: 32, property_count: 1, has_negative: true },
+    "mbe-auto" => UtilityEntry { property_idx: 33, property_count: 1, has_negative: false },
+    "mbe-px" => UtilityEntry { property_idx: 33, property_count: 1, has_negative: true },
+    "mt-auto" => UtilityEntry { property_idx: 34, property_count: 1, has_negative: false },
+    "mt-px" => UtilityEntry { property_idx: 34, property_count: 1, has_negative: true },
+    "mr-auto" => UtilityEntry { property_idx: 35, property_count: 1, has_negative: false },
+    "mr-px" => UtilityEntry { property_idx: 35, property_count: 1, has_negative: true },
+    "mb-auto" => UtilityEntry { property_idx: 36, property_count: 1, has_negative: false },
+    "mb-px" => UtilityEntry { property_idx: 36, property_count: 1, has_negative: true },
+    "ml-auto" => UtilityEntry { property_idx: 37, property_count: 1, has_negative: false },
+    "ml-px" => UtilityEntry { property_idx: 37, property_count: 1, has_negative: true },
+    "box-border" => UtilityEntry { property_idx: 38, property_count: 1, has_negative: false },
+    "box-content" => UtilityEntry { property_idx: 38, property_count: 1, has_negative: false },
+    "block" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "inline-block" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "inline" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "hidden" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "inline-flex" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "table" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "inline-table" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "table-caption" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "table-cell" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "table-column" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "table-column-group" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "table-footer-group" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "table-header-group" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "table-row-group" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "table-row" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "flow-root" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "flex" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "grid" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "inline-grid" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "contents" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "list-item" => UtilityEntry { property_idx: 39, property_count: 1, has_negative: false },
+    "field-sizing-content" => UtilityEntry { property_idx: 40, property_count: 1, has_negative: false },
+    "field-sizing-fixed" => UtilityEntry { property_idx: 40, property_count: 1, has_negative: false },
+    "size-full" => UtilityEntry { property_idx: 45, property_count: 2, has_negative: false },
+    "w-full" => UtilityEntry { property_idx: 45, property_count: 1, has_negative: false },
+    "h-full" => UtilityEntry { property_idx: 42, property_count: 1, has_negative: false },
+    "min-w-full" => UtilityEntry { property_idx: 47, property_count: 1, has_negative: false },
+    "min-h-full" => UtilityEntry { property_idx: 44, property_count: 1, has_negative: false },
+    "max-w-full" => UtilityEntry { property_idx: 46, property_count: 1, has_negative: false },
+    "max-h-full" => UtilityEntry { property_idx: 43, property_count: 1, has_negative: false },
+    "size-svw" => UtilityEntry { property_idx: 45, property_count: 2, has_negative: false },
+    "w-svw" => UtilityEntry { property_idx: 45, property_count: 1, has_negative: false },
+    "h-svw" => UtilityEntry { property_idx: 42, property_count: 1, has_negative: false },
+    "min-w-svw" => UtilityEntry { property_idx: 47, property_count: 1, has_negative: false },
+    "min-h-svw" => UtilityEntry { property_idx: 44, property_count: 1, has_negative: false },
+    "max-w-svw" => UtilityEntry { property_idx: 46, property_count: 1, has_negative: false },
+    "max-h-svw" => UtilityEntry { property_idx: 43, property_count: 1, has_negative: false },
+    "size-lvw" => UtilityEntry { property_idx: 45, property_count: 2, has_negative: false },
+    "w-lvw" => UtilityEntry { property_idx: 45, property_count: 1, has_negative: false },
+    "h-lvw" => UtilityEntry { property_idx: 42, property_count: 1, has_negative: false },
+    "min-w-lvw" => UtilityEntry { property_idx: 47, property_count: 1, has_negative: false },
+    "min-h-lvw" => UtilityEntry { property_idx: 44, property_count: 1, has_negative: false },
+    "max-w-lvw" => UtilityEntry { property_idx: 46, property_count: 1, has_negative: false },
+    "max-h-lvw" => UtilityEntry { property_idx: 43, property_count: 1, has_negative: false },
+    "size-dvw" => UtilityEntry { property_idx: 45, property_count: 2, has_negative: false },
+    "w-dvw" => UtilityEntry { property_idx: 45, property_count: 1, has_negative: false },
+    "h-dvw" => UtilityEntry { property_idx: 42, property_count: 1, has_negative: false },
+    "min-w-dvw" => UtilityEntry { property_idx: 47, property_count: 1, has_negative: false },
+    "min-h-dvw" => UtilityEntry { property_idx: 44, property_count: 1, has_negative: false },
+    "max-w-dvw" => UtilityEntry { property_idx: 46, property_count: 1, has_negative: false },
+    "max-h-dvw" => UtilityEntry { property_idx: 43, property_count: 1, has_negative: false },
+    "size-svh" => UtilityEntry { property_idx: 45, property_count: 2, has_negative: false },
+    "w-svh" => UtilityEntry { property_idx: 45, property_count: 1, has_negative: false },
+    "h-svh" => UtilityEntry { property_idx: 42, property_count: 1, has_negative: false },
+    "min-w-svh" => UtilityEntry { property_idx: 47, property_count: 1, has_negative: false },
+    "min-h-svh" => UtilityEntry { property_idx: 44, property_count: 1, has_negative: false },
+    "max-w-svh" => UtilityEntry { property_idx: 46, property_count: 1, has_negative: false },
+    "max-h-svh" => UtilityEntry { property_idx: 43, property_count: 1, has_negative: false },
+    "size-lvh" => UtilityEntry { property_idx: 45, property_count: 2, has_negative: false },
+    "w-lvh" => UtilityEntry { property_idx: 45, property_count: 1, has_negative: false },
+    "h-lvh" => UtilityEntry { property_idx: 42, property_count: 1, has_negative: false },
+    "min-w-lvh" => UtilityEntry { property_idx: 47, property_count: 1, has_negative: false },
+    "min-h-lvh" => UtilityEntry { property_idx: 44, property_count: 1, has_negative: false },
+    "max-w-lvh" => UtilityEntry { property_idx: 46, property_count: 1, has_negative: false },
+    "max-h-lvh" => UtilityEntry { property_idx: 43, property_count: 1, has_negative: false },
+    "size-dvh" => UtilityEntry { property_idx: 45, property_count: 2, has_negative: false },
+    "w-dvh" => UtilityEntry { property_idx: 45, property_count: 1, has_negative: false },
+    "h-dvh" => UtilityEntry { property_idx: 42, property_count: 1, has_negative: false },
+    "min-w-dvh" => UtilityEntry { property_idx: 47, property_count: 1, has_negative: false },
+    "min-h-dvh" => UtilityEntry { property_idx: 44, property_count: 1, has_negative: false },
+    "max-w-dvh" => UtilityEntry { property_idx: 46, property_count: 1, has_negative: false },
+    "max-h-dvh" => UtilityEntry { property_idx: 43, property_count: 1, has_negative: false },
+    "size-min" => UtilityEntry { property_idx: 45, property_count: 2, has_negative: false },
+    "w-min" => UtilityEntry { property_idx: 45, property_count: 1, has_negative: false },
+    "h-min" => UtilityEntry { property_idx: 42, property_count: 1, has_negative: false },
+    "min-w-min" => UtilityEntry { property_idx: 47, property_count: 1, has_negative: false },
+    "min-h-min" => UtilityEntry { property_idx: 44, property_count: 1, has_negative: false },
+    "max-w-min" => UtilityEntry { property_idx: 46, property_count: 1, has_negative: false },
+    "max-h-min" => UtilityEntry { property_idx: 43, property_count: 1, has_negative: false },
+    "size-max" => UtilityEntry { property_idx: 45, property_count: 2, has_negative: false },
+    "w-max" => UtilityEntry { property_idx: 45, property_count: 1, has_negative: false },
+    "h-max" => UtilityEntry { property_idx: 42, property_count: 1, has_negative: false },
+    "min-w-max" => UtilityEntry { property_idx: 47, property_count: 1, has_negative: false },
+    "min-h-max" => UtilityEntry { property_idx: 44, property_count: 1, has_negative: false },
+    "max-w-max" => UtilityEntry { property_idx: 46, property_count: 1, has_negative: false },
+    "max-h-max" => UtilityEntry { property_idx: 43, property_count: 1, has_negative: false },
+    "size-fit" => UtilityEntry { property_idx: 45, property_count: 2, has_negative: false },
+    "w-fit" => UtilityEntry { property_idx: 45, property_count: 1, has_negative: false },
+    "h-fit" => UtilityEntry { property_idx: 42, property_count: 1, has_negative: false },
+    "min-w-fit" => UtilityEntry { property_idx: 47, property_count: 1, has_negative: false },
+    "min-h-fit" => UtilityEntry { property_idx: 44, property_count: 1, has_negative: false },
+    "max-w-fit" => UtilityEntry { property_idx: 46, property_count: 1, has_negative: false },
+    "max-h-fit" => UtilityEntry { property_idx: 43, property_count: 1, has_negative: false },
+    "size-auto" => UtilityEntry { property_idx: 45, property_count: 2, has_negative: false },
+    "w-auto" => UtilityEntry { property_idx: 45, property_count: 1, has_negative: false },
+    "h-auto" => UtilityEntry { property_idx: 42, property_count: 1, has_negative: false },
+    "min-w-auto" => UtilityEntry { property_idx: 47, property_count: 1, has_negative: false },
+    "min-h-auto" => UtilityEntry { property_idx: 44, property_count: 1, has_negative: false },
+    "h-lh" => UtilityEntry { property_idx: 42, property_count: 1, has_negative: false },
+    "min-h-lh" => UtilityEntry { property_idx: 44, property_count: 1, has_negative: false },
+    "max-h-lh" => UtilityEntry { property_idx: 43, property_count: 1, has_negative: false },
+    "w-screen" => UtilityEntry { property_idx: 45, property_count: 1, has_negative: false },
+    "min-w-screen" => UtilityEntry { property_idx: 47, property_count: 1, has_negative: false },
+    "max-w-screen" => UtilityEntry { property_idx: 46, property_count: 1, has_negative: false },
+    "h-screen" => UtilityEntry { property_idx: 42, property_count: 1, has_negative: false },
+    "min-h-screen" => UtilityEntry { property_idx: 44, property_count: 1, has_negative: false },
+    "max-h-screen" => UtilityEntry { property_idx: 43, property_count: 1, has_negative: false },
+    "max-w-none" => UtilityEntry { property_idx: 46, property_count: 1, has_negative: false },
+    "max-h-none" => UtilityEntry { property_idx: 43, property_count: 1, has_negative: false },
+    "size-px" => UtilityEntry { property_idx: 45, property_count: 2, has_negative: false },
+    "w-px" => UtilityEntry { property_idx: 45, property_count: 1, has_negative: false },
+    "min-w-px" => UtilityEntry { property_idx: 47, property_count: 1, has_negative: false },
+    "max-w-px" => UtilityEntry { property_idx: 46, property_count: 1, has_negative: false },
+    "h-px" => UtilityEntry { property_idx: 42, property_count: 1, has_negative: false },
+    "min-h-px" => UtilityEntry { property_idx: 44, property_count: 1, has_negative: false },
+    "max-h-px" => UtilityEntry { property_idx: 43, property_count: 1, has_negative: false },
+    "inline-full" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "block-full" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-inline-full" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-block-full" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-inline-full" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-block-full" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "inline-min" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "block-min" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-inline-min" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-block-min" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-inline-min" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-block-min" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "inline-max" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "block-max" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-inline-max" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-block-max" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-inline-max" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-block-max" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "inline-fit" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "block-fit" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-inline-fit" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-block-fit" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-inline-fit" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-block-fit" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "inline-svw" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-inline-svw" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-inline-svw" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "inline-lvw" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-inline-lvw" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-inline-lvw" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "inline-dvw" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-inline-dvw" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-inline-dvw" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "block-svh" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-block-svh" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-block-svh" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "block-lvh" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-block-lvh" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-block-lvh" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "block-dvh" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-block-dvh" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-block-dvh" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "inline-auto" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "block-auto" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-inline-auto" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-block-auto" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "block-lh" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-block-lh" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-block-lh" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "inline-screen" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-inline-screen" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-inline-screen" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "block-screen" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-block-screen" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-block-screen" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-inline-none" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-block-none" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "inline-px" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-inline-px" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-inline-px" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "block-px" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "min-block-px" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "max-block-px" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "container" => UtilityEntry { property_idx: 45, property_count: 7, has_negative: false },
+    "flex-auto" => UtilityEntry { property_idx: 48, property_count: 1, has_negative: false },
+    "flex-initial" => UtilityEntry { property_idx: 48, property_count: 1, has_negative: false },
+    "flex-none" => UtilityEntry { property_idx: 48, property_count: 1, has_negative: false },
+    "basis-auto" => UtilityEntry { property_idx: 51, property_count: 1, has_negative: false },
+    "basis-full" => UtilityEntry { property_idx: 51, property_count: 1, has_negative: false },
+    "basis-px" => UtilityEntry { property_idx: 51, property_count: 1, has_negative: false },
+    "table-auto" => UtilityEntry { property_idx: 52, property_count: 1, has_negative: false },
+    "table-fixed" => UtilityEntry { property_idx: 52, property_count: 1, has_negative: false },
+    "caption-top" => UtilityEntry { property_idx: 53, property_count: 1, has_negative: false },
+    "caption-bottom" => UtilityEntry { property_idx: 53, property_count: 1, has_negative: false },
+    "border-collapse" => UtilityEntry { property_idx: 54, property_count: 1, has_negative: false },
+    "border-separate" => UtilityEntry { property_idx: 54, property_count: 1, has_negative: false },
+    "border-spacing-px" => UtilityEntry { property_idx: 354, property_count: 3, has_negative: false },
+    "border-spacing-x-px" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "border-spacing-y-px" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "translate-none" => UtilityEntry { property_idx: 57, property_count: 1, has_negative: false },
+    "translate-full" => UtilityEntry { property_idx: 58, property_count: 3, has_negative: true },
+    "translate-px" => UtilityEntry { property_idx: 58, property_count: 3, has_negative: true },
+    "translate-x-full" => UtilityEntry { property_idx: 58, property_count: 2, has_negative: true },
+    "translate-x-px" => UtilityEntry { property_idx: 58, property_count: 2, has_negative: true },
+    "translate-y-full" => UtilityEntry { property_idx: 59, property_count: 2, has_negative: true },
+    "translate-y-px" => UtilityEntry { property_idx: 59, property_count: 2, has_negative: true },
+    "translate-z-px" => UtilityEntry { property_idx: 60, property_count: 2, has_negative: true },
+    "translate-3d" => UtilityEntry { property_idx: 57, property_count: 1, has_negative: false },
+    "scale-none" => UtilityEntry { property_idx: 61, property_count: 1, has_negative: false },
+    "scale-3d" => UtilityEntry { property_idx: 61, property_count: 1, has_negative: false },
+    "rotate-none" => UtilityEntry { property_idx: 65, property_count: 1, has_negative: false },
+    "transform-cpu" => UtilityEntry { property_idx: 71, property_count: 1, has_negative: false },
+    "transform-gpu" => UtilityEntry { property_idx: 71, property_count: 1, has_negative: false },
+    "transform-none" => UtilityEntry { property_idx: 71, property_count: 1, has_negative: false },
+    "transform-flat" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "transform-3d" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "transform-content" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "transform-border" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "transform-fill" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "transform-stroke" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "transform-view" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "backface-visible" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "backface-hidden" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "cursor-auto" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-default" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-pointer" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-wait" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-text" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-move" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-help" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-not-allowed" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-none" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-context-menu" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-progress" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-cell" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-crosshair" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-vertical-text" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-alias" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-copy" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-no-drop" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-grab" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-grabbing" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-all-scroll" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-col-resize" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-row-resize" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-n-resize" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-e-resize" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-s-resize" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-w-resize" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-ne-resize" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-nw-resize" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-se-resize" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-sw-resize" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-ew-resize" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-ns-resize" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-nesw-resize" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-nwse-resize" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-zoom-in" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "cursor-zoom-out" => UtilityEntry { property_idx: 73, property_count: 1, has_negative: false },
+    "touch-auto" => UtilityEntry { property_idx: 74, property_count: 1, has_negative: false },
+    "touch-none" => UtilityEntry { property_idx: 74, property_count: 1, has_negative: false },
+    "touch-manipulation" => UtilityEntry { property_idx: 74, property_count: 1, has_negative: false },
+    "touch-pan-x" => UtilityEntry { property_idx: 75, property_count: 2, has_negative: false },
+    "touch-pan-left" => UtilityEntry { property_idx: 75, property_count: 2, has_negative: false },
+    "touch-pan-right" => UtilityEntry { property_idx: 75, property_count: 2, has_negative: false },
+    "touch-pan-y" => UtilityEntry { property_idx: 76, property_count: 2, has_negative: false },
+    "touch-pan-up" => UtilityEntry { property_idx: 76, property_count: 2, has_negative: false },
+    "touch-pan-down" => UtilityEntry { property_idx: 76, property_count: 2, has_negative: false },
+    "touch-pinch-zoom" => UtilityEntry { property_idx: 77, property_count: 2, has_negative: false },
+    "select-none" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "select-text" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "select-all" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "select-auto" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "resize-none" => UtilityEntry { property_idx: 78, property_count: 1, has_negative: false },
+    "resize-x" => UtilityEntry { property_idx: 78, property_count: 1, has_negative: false },
+    "resize-y" => UtilityEntry { property_idx: 78, property_count: 1, has_negative: false },
+    "resize" => UtilityEntry { property_idx: 78, property_count: 1, has_negative: false },
+    "snap-none" => UtilityEntry { property_idx: 79, property_count: 1, has_negative: false },
+    "snap-x" => UtilityEntry { property_idx: 79, property_count: 1, has_negative: false },
+    "snap-y" => UtilityEntry { property_idx: 79, property_count: 1, has_negative: false },
+    "snap-both" => UtilityEntry { property_idx: 79, property_count: 1, has_negative: false },
+    "snap-mandatory" => UtilityEntry { property_idx: 80, property_count: 1, has_negative: false },
+    "snap-proximity" => UtilityEntry { property_idx: 80, property_count: 1, has_negative: false },
+    "snap-align-none" => UtilityEntry { property_idx: 81, property_count: 1, has_negative: false },
+    "snap-start" => UtilityEntry { property_idx: 81, property_count: 1, has_negative: false },
+    "snap-end" => UtilityEntry { property_idx: 81, property_count: 1, has_negative: false },
+    "snap-center" => UtilityEntry { property_idx: 81, property_count: 1, has_negative: false },
+    "snap-normal" => UtilityEntry { property_idx: 82, property_count: 1, has_negative: false },
+    "snap-always" => UtilityEntry { property_idx: 82, property_count: 1, has_negative: false },
+    "scroll-m-px" => UtilityEntry { property_idx: 83, property_count: 1, has_negative: true },
+    "scroll-mx-px" => UtilityEntry { property_idx: 84, property_count: 1, has_negative: true },
+    "scroll-my-px" => UtilityEntry { property_idx: 85, property_count: 1, has_negative: true },
+    "scroll-ms-px" => UtilityEntry { property_idx: 86, property_count: 1, has_negative: true },
+    "scroll-me-px" => UtilityEntry { property_idx: 87, property_count: 1, has_negative: true },
+    "scroll-mbs-px" => UtilityEntry { property_idx: 88, property_count: 1, has_negative: true },
+    "scroll-mbe-px" => UtilityEntry { property_idx: 89, property_count: 1, has_negative: true },
+    "scroll-mt-px" => UtilityEntry { property_idx: 90, property_count: 1, has_negative: true },
+    "scroll-mr-px" => UtilityEntry { property_idx: 91, property_count: 1, has_negative: true },
+    "scroll-mb-px" => UtilityEntry { property_idx: 92, property_count: 1, has_negative: true },
+    "scroll-ml-px" => UtilityEntry { property_idx: 93, property_count: 1, has_negative: true },
+    "scroll-p-px" => UtilityEntry { property_idx: 94, property_count: 1, has_negative: false },
+    "scroll-px-px" => UtilityEntry { property_idx: 95, property_count: 1, has_negative: false },
+    "scroll-py-px" => UtilityEntry { property_idx: 96, property_count: 1, has_negative: false },
+    "scroll-ps-px" => UtilityEntry { property_idx: 97, property_count: 1, has_negative: false },
+    "scroll-pe-px" => UtilityEntry { property_idx: 98, property_count: 1, has_negative: false },
+    "scroll-pbs-px" => UtilityEntry { property_idx: 99, property_count: 1, has_negative: false },
+    "scroll-pbe-px" => UtilityEntry { property_idx: 100, property_count: 1, has_negative: false },
+    "scroll-pt-px" => UtilityEntry { property_idx: 101, property_count: 1, has_negative: false },
+    "scroll-pr-px" => UtilityEntry { property_idx: 102, property_count: 1, has_negative: false },
+    "scroll-pb-px" => UtilityEntry { property_idx: 103, property_count: 1, has_negative: false },
+    "scroll-pl-px" => UtilityEntry { property_idx: 104, property_count: 1, has_negative: false },
+    "list-inside" => UtilityEntry { property_idx: 105, property_count: 1, has_negative: false },
+    "list-outside" => UtilityEntry { property_idx: 105, property_count: 1, has_negative: false },
+    "appearance-none" => UtilityEntry { property_idx: 108, property_count: 1, has_negative: false },
+    "appearance-auto" => UtilityEntry { property_idx: 108, property_count: 1, has_negative: false },
+    "scheme-normal" => UtilityEntry { property_idx: 306, property_count: 1, has_negative: false },
+    "scheme-dark" => UtilityEntry { property_idx: 306, property_count: 1, has_negative: false },
+    "scheme-light" => UtilityEntry { property_idx: 306, property_count: 1, has_negative: false },
+    "scheme-light-dark" => UtilityEntry { property_idx: 306, property_count: 1, has_negative: false },
+    "scheme-only-dark" => UtilityEntry { property_idx: 306, property_count: 1, has_negative: false },
+    "scheme-only-light" => UtilityEntry { property_idx: 306, property_count: 1, has_negative: false },
+    "break-before-auto" => UtilityEntry { property_idx: 110, property_count: 1, has_negative: false },
+    "break-before-avoid" => UtilityEntry { property_idx: 110, property_count: 1, has_negative: false },
+    "break-before-all" => UtilityEntry { property_idx: 110, property_count: 1, has_negative: false },
+    "break-before-avoid-page" => UtilityEntry { property_idx: 110, property_count: 1, has_negative: false },
+    "break-before-page" => UtilityEntry { property_idx: 110, property_count: 1, has_negative: false },
+    "break-before-left" => UtilityEntry { property_idx: 110, property_count: 1, has_negative: false },
+    "break-before-right" => UtilityEntry { property_idx: 110, property_count: 1, has_negative: false },
+    "break-before-column" => UtilityEntry { property_idx: 110, property_count: 1, has_negative: false },
+    "break-inside-auto" => UtilityEntry { property_idx: 111, property_count: 1, has_negative: false },
+    "break-inside-avoid" => UtilityEntry { property_idx: 111, property_count: 1, has_negative: false },
+    "break-inside-avoid-page" => UtilityEntry { property_idx: 111, property_count: 1, has_negative: false },
+    "break-inside-avoid-column" => UtilityEntry { property_idx: 111, property_count: 1, has_negative: false },
+    "break-after-auto" => UtilityEntry { property_idx: 112, property_count: 1, has_negative: false },
+    "break-after-avoid" => UtilityEntry { property_idx: 112, property_count: 1, has_negative: false },
+    "break-after-all" => UtilityEntry { property_idx: 112, property_count: 1, has_negative: false },
+    "break-after-avoid-page" => UtilityEntry { property_idx: 112, property_count: 1, has_negative: false },
+    "break-after-page" => UtilityEntry { property_idx: 112, property_count: 1, has_negative: false },
+    "break-after-left" => UtilityEntry { property_idx: 112, property_count: 1, has_negative: false },
+    "break-after-right" => UtilityEntry { property_idx: 112, property_count: 1, has_negative: false },
+    "break-after-column" => UtilityEntry { property_idx: 112, property_count: 1, has_negative: false },
+    "grid-flow-row" => UtilityEntry { property_idx: 114, property_count: 1, has_negative: false },
+    "grid-flow-col" => UtilityEntry { property_idx: 114, property_count: 1, has_negative: false },
+    "grid-flow-dense" => UtilityEntry { property_idx: 114, property_count: 1, has_negative: false },
+    "grid-flow-row-dense" => UtilityEntry { property_idx: 114, property_count: 1, has_negative: false },
+    "grid-flow-col-dense" => UtilityEntry { property_idx: 114, property_count: 1, has_negative: false },
+    "flex-row" => UtilityEntry { property_idx: 118, property_count: 1, has_negative: false },
+    "flex-row-reverse" => UtilityEntry { property_idx: 118, property_count: 1, has_negative: false },
+    "flex-col" => UtilityEntry { property_idx: 118, property_count: 1, has_negative: false },
+    "flex-col-reverse" => UtilityEntry { property_idx: 118, property_count: 1, has_negative: false },
+    "flex-wrap" => UtilityEntry { property_idx: 119, property_count: 1, has_negative: false },
+    "flex-nowrap" => UtilityEntry { property_idx: 119, property_count: 1, has_negative: false },
+    "flex-wrap-reverse" => UtilityEntry { property_idx: 119, property_count: 1, has_negative: false },
+    "place-content-center" => UtilityEntry { property_idx: 120, property_count: 1, has_negative: false },
+    "place-content-start" => UtilityEntry { property_idx: 120, property_count: 1, has_negative: false },
+    "place-content-end" => UtilityEntry { property_idx: 120, property_count: 1, has_negative: false },
+    "place-content-center-safe" => UtilityEntry { property_idx: 120, property_count: 1, has_negative: false },
+    "place-content-end-safe" => UtilityEntry { property_idx: 120, property_count: 1, has_negative: false },
+    "place-content-between" => UtilityEntry { property_idx: 120, property_count: 1, has_negative: false },
+    "place-content-around" => UtilityEntry { property_idx: 120, property_count: 1, has_negative: false },
+    "place-content-evenly" => UtilityEntry { property_idx: 120, property_count: 1, has_negative: false },
+    "place-content-baseline" => UtilityEntry { property_idx: 120, property_count: 1, has_negative: false },
+    "place-content-stretch" => UtilityEntry { property_idx: 120, property_count: 1, has_negative: false },
+    "place-items-center" => UtilityEntry { property_idx: 121, property_count: 1, has_negative: false },
+    "place-items-start" => UtilityEntry { property_idx: 121, property_count: 1, has_negative: false },
+    "place-items-end" => UtilityEntry { property_idx: 121, property_count: 1, has_negative: false },
+    "place-items-center-safe" => UtilityEntry { property_idx: 121, property_count: 1, has_negative: false },
+    "place-items-end-safe" => UtilityEntry { property_idx: 121, property_count: 1, has_negative: false },
+    "place-items-baseline" => UtilityEntry { property_idx: 121, property_count: 1, has_negative: false },
+    "place-items-stretch" => UtilityEntry { property_idx: 121, property_count: 1, has_negative: false },
+    "content-normal" => UtilityEntry { property_idx: 122, property_count: 1, has_negative: false },
+    "content-center" => UtilityEntry { property_idx: 122, property_count: 1, has_negative: false },
+    "content-start" => UtilityEntry { property_idx: 122, property_count: 1, has_negative: false },
+    "content-end" => UtilityEntry { property_idx: 122, property_count: 1, has_negative: false },
+    "content-center-safe" => UtilityEntry { property_idx: 122, property_count: 1, has_negative: false },
+    "content-end-safe" => UtilityEntry { property_idx: 122, property_count: 1, has_negative: false },
+    "content-between" => UtilityEntry { property_idx: 122, property_count: 1, has_negative: false },
+    "content-around" => UtilityEntry { property_idx: 122, property_count: 1, has_negative: false },
+    "content-evenly" => UtilityEntry { property_idx: 122, property_count: 1, has_negative: false },
+    "content-baseline" => UtilityEntry { property_idx: 122, property_count: 1, has_negative: false },
+    "content-stretch" => UtilityEntry { property_idx: 122, property_count: 1, has_negative: false },
+    "items-center" => UtilityEntry { property_idx: 123, property_count: 1, has_negative: false },
+    "items-start" => UtilityEntry { property_idx: 123, property_count: 1, has_negative: false },
+    "items-end" => UtilityEntry { property_idx: 123, property_count: 1, has_negative: false },
+    "items-center-safe" => UtilityEntry { property_idx: 123, property_count: 1, has_negative: false },
+    "items-end-safe" => UtilityEntry { property_idx: 123, property_count: 1, has_negative: false },
+    "items-baseline" => UtilityEntry { property_idx: 123, property_count: 1, has_negative: false },
+    "items-baseline-last" => UtilityEntry { property_idx: 123, property_count: 1, has_negative: false },
+    "items-stretch" => UtilityEntry { property_idx: 123, property_count: 1, has_negative: false },
+    "justify-normal" => UtilityEntry { property_idx: 124, property_count: 1, has_negative: false },
+    "justify-center" => UtilityEntry { property_idx: 124, property_count: 1, has_negative: false },
+    "justify-start" => UtilityEntry { property_idx: 124, property_count: 1, has_negative: false },
+    "justify-end" => UtilityEntry { property_idx: 124, property_count: 1, has_negative: false },
+    "justify-center-safe" => UtilityEntry { property_idx: 124, property_count: 1, has_negative: false },
+    "justify-end-safe" => UtilityEntry { property_idx: 124, property_count: 1, has_negative: false },
+    "justify-between" => UtilityEntry { property_idx: 124, property_count: 1, has_negative: false },
+    "justify-around" => UtilityEntry { property_idx: 124, property_count: 1, has_negative: false },
+    "justify-evenly" => UtilityEntry { property_idx: 124, property_count: 1, has_negative: false },
+    "justify-baseline" => UtilityEntry { property_idx: 124, property_count: 1, has_negative: false },
+    "justify-stretch" => UtilityEntry { property_idx: 124, property_count: 1, has_negative: false },
+    "justify-items-normal" => UtilityEntry { property_idx: 125, property_count: 1, has_negative: false },
+    "justify-items-center" => UtilityEntry { property_idx: 125, property_count: 1, has_negative: false },
+    "justify-items-start" => UtilityEntry { property_idx: 125, property_count: 1, has_negative: false },
+    "justify-items-end" => UtilityEntry { property_idx: 125, property_count: 1, has_negative: false },
+    "justify-items-center-safe" => UtilityEntry { property_idx: 125, property_count: 1, has_negative: false },
+    "justify-items-end-safe" => UtilityEntry { property_idx: 125, property_count: 1, has_negative: false },
+    "justify-items-stretch" => UtilityEntry { property_idx: 125, property_count: 1, has_negative: false },
+    "gap-px" => UtilityEntry { property_idx: 126, property_count: 1, has_negative: false },
+    "gap-x-px" => UtilityEntry { property_idx: 127, property_count: 1, has_negative: false },
+    "gap-y-px" => UtilityEntry { property_idx: 128, property_count: 1, has_negative: false },
+    "space-x-px" => UtilityEntry { property_idx: 129, property_count: 3, has_negative: true },
+    "space-y-px" => UtilityEntry { property_idx: 130, property_count: 3, has_negative: true },
+    "space-x-reverse" => UtilityEntry { property_idx: 129, property_count: 1, has_negative: false },
+    "space-y-reverse" => UtilityEntry { property_idx: 130, property_count: 1, has_negative: false },
+    "accent-auto" => UtilityEntry { property_idx: 305, property_count: 1, has_negative: false },
+    "place-self-auto" => UtilityEntry { property_idx: 136, property_count: 1, has_negative: false },
+    "place-self-start" => UtilityEntry { property_idx: 136, property_count: 1, has_negative: false },
+    "place-self-end" => UtilityEntry { property_idx: 136, property_count: 1, has_negative: false },
+    "place-self-center" => UtilityEntry { property_idx: 136, property_count: 1, has_negative: false },
+    "place-self-end-safe" => UtilityEntry { property_idx: 136, property_count: 1, has_negative: false },
+    "place-self-center-safe" => UtilityEntry { property_idx: 136, property_count: 1, has_negative: false },
+    "place-self-stretch" => UtilityEntry { property_idx: 136, property_count: 1, has_negative: false },
+    "self-auto" => UtilityEntry { property_idx: 137, property_count: 1, has_negative: false },
+    "self-start" => UtilityEntry { property_idx: 137, property_count: 1, has_negative: false },
+    "self-end" => UtilityEntry { property_idx: 137, property_count: 1, has_negative: false },
+    "self-center" => UtilityEntry { property_idx: 137, property_count: 1, has_negative: false },
+    "self-end-safe" => UtilityEntry { property_idx: 137, property_count: 1, has_negative: false },
+    "self-center-safe" => UtilityEntry { property_idx: 137, property_count: 1, has_negative: false },
+    "self-stretch" => UtilityEntry { property_idx: 137, property_count: 1, has_negative: false },
+    "self-baseline" => UtilityEntry { property_idx: 137, property_count: 1, has_negative: false },
+    "self-baseline-last" => UtilityEntry { property_idx: 137, property_count: 1, has_negative: false },
+    "justify-self-auto" => UtilityEntry { property_idx: 138, property_count: 1, has_negative: false },
+    "justify-self-start" => UtilityEntry { property_idx: 138, property_count: 1, has_negative: false },
+    "justify-self-end" => UtilityEntry { property_idx: 138, property_count: 1, has_negative: false },
+    "justify-self-center" => UtilityEntry { property_idx: 138, property_count: 1, has_negative: false },
+    "justify-self-end-safe" => UtilityEntry { property_idx: 138, property_count: 1, has_negative: false },
+    "justify-self-center-safe" => UtilityEntry { property_idx: 138, property_count: 1, has_negative: false },
+    "justify-self-stretch" => UtilityEntry { property_idx: 138, property_count: 1, has_negative: false },
+    "overflow-auto" => UtilityEntry { property_idx: 139, property_count: 1, has_negative: false },
+    "overflow-x-auto" => UtilityEntry { property_idx: 140, property_count: 1, has_negative: false },
+    "overflow-y-auto" => UtilityEntry { property_idx: 141, property_count: 1, has_negative: false },
+    "overflow-hidden" => UtilityEntry { property_idx: 139, property_count: 1, has_negative: false },
+    "overflow-x-hidden" => UtilityEntry { property_idx: 140, property_count: 1, has_negative: false },
+    "overflow-y-hidden" => UtilityEntry { property_idx: 141, property_count: 1, has_negative: false },
+    "overflow-clip" => UtilityEntry { property_idx: 139, property_count: 1, has_negative: false },
+    "overflow-x-clip" => UtilityEntry { property_idx: 140, property_count: 1, has_negative: false },
+    "overflow-y-clip" => UtilityEntry { property_idx: 141, property_count: 1, has_negative: false },
+    "overflow-visible" => UtilityEntry { property_idx: 139, property_count: 1, has_negative: false },
+    "overflow-x-visible" => UtilityEntry { property_idx: 140, property_count: 1, has_negative: false },
+    "overflow-y-visible" => UtilityEntry { property_idx: 141, property_count: 1, has_negative: false },
+    "overflow-scroll" => UtilityEntry { property_idx: 139, property_count: 1, has_negative: false },
+    "overflow-x-scroll" => UtilityEntry { property_idx: 140, property_count: 1, has_negative: false },
+    "overflow-y-scroll" => UtilityEntry { property_idx: 141, property_count: 1, has_negative: false },
+    "overscroll-auto" => UtilityEntry { property_idx: 142, property_count: 1, has_negative: false },
+    "overscroll-x-auto" => UtilityEntry { property_idx: 143, property_count: 1, has_negative: false },
+    "overscroll-y-auto" => UtilityEntry { property_idx: 144, property_count: 1, has_negative: false },
+    "overscroll-contain" => UtilityEntry { property_idx: 142, property_count: 1, has_negative: false },
+    "overscroll-x-contain" => UtilityEntry { property_idx: 143, property_count: 1, has_negative: false },
+    "overscroll-y-contain" => UtilityEntry { property_idx: 144, property_count: 1, has_negative: false },
+    "overscroll-none" => UtilityEntry { property_idx: 142, property_count: 1, has_negative: false },
+    "overscroll-x-none" => UtilityEntry { property_idx: 143, property_count: 1, has_negative: false },
+    "overscroll-y-none" => UtilityEntry { property_idx: 144, property_count: 1, has_negative: false },
+    "scroll-auto" => UtilityEntry { property_idx: 145, property_count: 1, has_negative: false },
+    "scroll-smooth" => UtilityEntry { property_idx: 145, property_count: 1, has_negative: false },
+    "truncate" => UtilityEntry { property_idx: 139, property_count: 3, has_negative: false },
+    "text-ellipsis" => UtilityEntry { property_idx: 289, property_count: 1, has_negative: false },
+    "text-clip" => UtilityEntry { property_idx: 289, property_count: 1, has_negative: false },
+    "hyphens-none" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "hyphens-manual" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "hyphens-auto" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "whitespace-normal" => UtilityEntry { property_idx: 291, property_count: 1, has_negative: false },
+    "whitespace-nowrap" => UtilityEntry { property_idx: 291, property_count: 1, has_negative: false },
+    "whitespace-pre" => UtilityEntry { property_idx: 291, property_count: 1, has_negative: false },
+    "whitespace-pre-line" => UtilityEntry { property_idx: 291, property_count: 1, has_negative: false },
+    "whitespace-pre-wrap" => UtilityEntry { property_idx: 291, property_count: 1, has_negative: false },
+    "whitespace-break-spaces" => UtilityEntry { property_idx: 291, property_count: 1, has_negative: false },
+    "text-wrap" => UtilityEntry { property_idx: 286, property_count: 1, has_negative: false },
+    "text-nowrap" => UtilityEntry { property_idx: 286, property_count: 1, has_negative: false },
+    "text-balance" => UtilityEntry { property_idx: 286, property_count: 1, has_negative: false },
+    "text-pretty" => UtilityEntry { property_idx: 286, property_count: 1, has_negative: false },
+    "break-normal" => UtilityEntry { property_idx: 287, property_count: 2, has_negative: false },
+    "break-all" => UtilityEntry { property_idx: 288, property_count: 1, has_negative: false },
+    "break-keep" => UtilityEntry { property_idx: 288, property_count: 1, has_negative: false },
+    "wrap-anywhere" => UtilityEntry { property_idx: 287, property_count: 1, has_negative: false },
+    "wrap-break-word" => UtilityEntry { property_idx: 287, property_count: 1, has_negative: false },
+    "wrap-normal" => UtilityEntry { property_idx: 287, property_count: 1, has_negative: false },
+    "border-solid" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "border-dashed" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "border-dotted" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "border-double" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "border-hidden" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "border-none" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "divide-x-reverse" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "divide-y-reverse" => UtilityEntry { property_idx: 133, property_count: 1, has_negative: false },
+    "divide-solid" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "divide-dashed" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "divide-dotted" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "divide-double" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "divide-none" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "bg-auto" => UtilityEntry { property_idx: 247, property_count: 1, has_negative: false },
+    "bg-cover" => UtilityEntry { property_idx: 247, property_count: 1, has_negative: false },
+    "bg-contain" => UtilityEntry { property_idx: 247, property_count: 1, has_negative: false },
+    "bg-fixed" => UtilityEntry { property_idx: 248, property_count: 1, has_negative: false },
+    "bg-local" => UtilityEntry { property_idx: 248, property_count: 1, has_negative: false },
+    "bg-scroll" => UtilityEntry { property_idx: 248, property_count: 1, has_negative: false },
+    "bg-top" => UtilityEntry { property_idx: 250, property_count: 1, has_negative: false },
+    "bg-top-left" => UtilityEntry { property_idx: 250, property_count: 1, has_negative: false },
+    "bg-top-right" => UtilityEntry { property_idx: 250, property_count: 1, has_negative: false },
+    "bg-bottom" => UtilityEntry { property_idx: 250, property_count: 1, has_negative: false },
+    "bg-bottom-left" => UtilityEntry { property_idx: 250, property_count: 1, has_negative: false },
+    "bg-bottom-right" => UtilityEntry { property_idx: 250, property_count: 1, has_negative: false },
+    "bg-left" => UtilityEntry { property_idx: 250, property_count: 1, has_negative: false },
+    "bg-right" => UtilityEntry { property_idx: 250, property_count: 1, has_negative: false },
+    "bg-center" => UtilityEntry { property_idx: 250, property_count: 1, has_negative: false },
+    "bg-repeat" => UtilityEntry { property_idx: 251, property_count: 1, has_negative: false },
+    "bg-no-repeat" => UtilityEntry { property_idx: 251, property_count: 1, has_negative: false },
+    "bg-repeat-x" => UtilityEntry { property_idx: 251, property_count: 1, has_negative: false },
+    "bg-repeat-y" => UtilityEntry { property_idx: 251, property_count: 1, has_negative: false },
+    "bg-repeat-round" => UtilityEntry { property_idx: 251, property_count: 1, has_negative: false },
+    "bg-repeat-space" => UtilityEntry { property_idx: 251, property_count: 1, has_negative: false },
+    "bg-none" => UtilityEntry { property_idx: 195, property_count: 1, has_negative: false },
+    "via-none" => UtilityEntry { property_idx: 198, property_count: 1, has_negative: false },
+    "mask-none" => UtilityEntry { property_idx: 205, property_count: 1, has_negative: false },
+    "mask-add" => UtilityEntry { property_idx: 253, property_count: 1, has_negative: false },
+    "mask-subtract" => UtilityEntry { property_idx: 253, property_count: 1, has_negative: false },
+    "mask-intersect" => UtilityEntry { property_idx: 253, property_count: 1, has_negative: false },
+    "mask-exclude" => UtilityEntry { property_idx: 253, property_count: 1, has_negative: false },
+    "mask-alpha" => UtilityEntry { property_idx: 254, property_count: 1, has_negative: false },
+    "mask-luminance" => UtilityEntry { property_idx: 254, property_count: 1, has_negative: false },
+    "mask-match" => UtilityEntry { property_idx: 254, property_count: 1, has_negative: false },
+    "mask-type-alpha" => UtilityEntry { property_idx: 255, property_count: 1, has_negative: false },
+    "mask-type-luminance" => UtilityEntry { property_idx: 255, property_count: 1, has_negative: false },
+    "mask-auto" => UtilityEntry { property_idx: 256, property_count: 1, has_negative: false },
+    "mask-cover" => UtilityEntry { property_idx: 256, property_count: 1, has_negative: false },
+    "mask-contain" => UtilityEntry { property_idx: 256, property_count: 1, has_negative: false },
+    "mask-top" => UtilityEntry { property_idx: 258, property_count: 1, has_negative: false },
+    "mask-top-left" => UtilityEntry { property_idx: 258, property_count: 1, has_negative: false },
+    "mask-top-right" => UtilityEntry { property_idx: 258, property_count: 1, has_negative: false },
+    "mask-bottom" => UtilityEntry { property_idx: 258, property_count: 1, has_negative: false },
+    "mask-bottom-left" => UtilityEntry { property_idx: 258, property_count: 1, has_negative: false },
+    "mask-bottom-right" => UtilityEntry { property_idx: 258, property_count: 1, has_negative: false },
+    "mask-left" => UtilityEntry { property_idx: 258, property_count: 1, has_negative: false },
+    "mask-right" => UtilityEntry { property_idx: 258, property_count: 1, has_negative: false },
+    "mask-center" => UtilityEntry { property_idx: 258, property_count: 1, has_negative: false },
+    "mask-repeat" => UtilityEntry { property_idx: 259, property_count: 1, has_negative: false },
+    "mask-no-repeat" => UtilityEntry { property_idx: 259, property_count: 1, has_negative: false },
+    "mask-repeat-x" => UtilityEntry { property_idx: 259, property_count: 1, has_negative: false },
+    "mask-repeat-y" => UtilityEntry { property_idx: 259, property_count: 1, has_negative: false },
+    "mask-repeat-round" => UtilityEntry { property_idx: 259, property_count: 1, has_negative: false },
+    "mask-repeat-space" => UtilityEntry { property_idx: 259, property_count: 1, has_negative: false },
+    "mask-clip-border" => UtilityEntry { property_idx: 257, property_count: 1, has_negative: false },
+    "mask-clip-padding" => UtilityEntry { property_idx: 257, property_count: 1, has_negative: false },
+    "mask-clip-content" => UtilityEntry { property_idx: 257, property_count: 1, has_negative: false },
+    "mask-clip-fill" => UtilityEntry { property_idx: 257, property_count: 1, has_negative: false },
+    "mask-clip-stroke" => UtilityEntry { property_idx: 257, property_count: 1, has_negative: false },
+    "mask-clip-view" => UtilityEntry { property_idx: 257, property_count: 1, has_negative: false },
+    "mask-no-clip" => UtilityEntry { property_idx: 257, property_count: 1, has_negative: false },
+    "mask-origin-border" => UtilityEntry { property_idx: 260, property_count: 1, has_negative: false },
+    "mask-origin-padding" => UtilityEntry { property_idx: 260, property_count: 1, has_negative: false },
+    "mask-origin-content" => UtilityEntry { property_idx: 260, property_count: 1, has_negative: false },
+    "mask-origin-fill" => UtilityEntry { property_idx: 260, property_count: 1, has_negative: false },
+    "mask-origin-stroke" => UtilityEntry { property_idx: 260, property_count: 1, has_negative: false },
+    "mask-origin-view" => UtilityEntry { property_idx: 260, property_count: 1, has_negative: false },
+    "mask-circle" => UtilityEntry { property_idx: 233, property_count: 1, has_negative: false },
+    "mask-ellipse" => UtilityEntry { property_idx: 233, property_count: 1, has_negative: false },
+    "mask-radial-closest-side" => UtilityEntry { property_idx: 234, property_count: 1, has_negative: false },
+    "mask-radial-farthest-side" => UtilityEntry { property_idx: 234, property_count: 1, has_negative: false },
+    "mask-radial-closest-corner" => UtilityEntry { property_idx: 234, property_count: 1, has_negative: false },
+    "mask-radial-farthest-corner" => UtilityEntry { property_idx: 234, property_count: 1, has_negative: false },
+    "mask-radial-at-top" => UtilityEntry { property_idx: 235, property_count: 1, has_negative: false },
+    "mask-radial-at-top-left" => UtilityEntry { property_idx: 235, property_count: 1, has_negative: false },
+    "mask-radial-at-top-right" => UtilityEntry { property_idx: 235, property_count: 1, has_negative: false },
+    "mask-radial-at-bottom" => UtilityEntry { property_idx: 235, property_count: 1, has_negative: false },
+    "mask-radial-at-bottom-left" => UtilityEntry { property_idx: 235, property_count: 1, has_negative: false },
+    "mask-radial-at-bottom-right" => UtilityEntry { property_idx: 235, property_count: 1, has_negative: false },
+    "mask-radial-at-left" => UtilityEntry { property_idx: 235, property_count: 1, has_negative: false },
+    "mask-radial-at-right" => UtilityEntry { property_idx: 235, property_count: 1, has_negative: false },
+    "mask-radial-at-center" => UtilityEntry { property_idx: 235, property_count: 1, has_negative: false },
+    "box-decoration-slice" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "box-decoration-clone" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "bg-clip-text" => UtilityEntry { property_idx: 249, property_count: 1, has_negative: false },
+    "bg-clip-border" => UtilityEntry { property_idx: 249, property_count: 1, has_negative: false },
+    "bg-clip-padding" => UtilityEntry { property_idx: 249, property_count: 1, has_negative: false },
+    "bg-clip-content" => UtilityEntry { property_idx: 249, property_count: 1, has_negative: false },
+    "bg-origin-border" => UtilityEntry { property_idx: 252, property_count: 1, has_negative: false },
+    "bg-origin-padding" => UtilityEntry { property_idx: 252, property_count: 1, has_negative: false },
+    "bg-origin-content" => UtilityEntry { property_idx: 252, property_count: 1, has_negative: false },
+    "bg-blend-normal" => UtilityEntry { property_idx: 308, property_count: 1, has_negative: false },
+    "mix-blend-normal" => UtilityEntry { property_idx: 309, property_count: 1, has_negative: false },
+    "bg-blend-multiply" => UtilityEntry { property_idx: 308, property_count: 1, has_negative: false },
+    "mix-blend-multiply" => UtilityEntry { property_idx: 309, property_count: 1, has_negative: false },
+    "bg-blend-screen" => UtilityEntry { property_idx: 308, property_count: 1, has_negative: false },
+    "mix-blend-screen" => UtilityEntry { property_idx: 309, property_count: 1, has_negative: false },
+    "bg-blend-overlay" => UtilityEntry { property_idx: 308, property_count: 1, has_negative: false },
+    "mix-blend-overlay" => UtilityEntry { property_idx: 309, property_count: 1, has_negative: false },
+    "bg-blend-darken" => UtilityEntry { property_idx: 308, property_count: 1, has_negative: false },
+    "mix-blend-darken" => UtilityEntry { property_idx: 309, property_count: 1, has_negative: false },
+    "bg-blend-lighten" => UtilityEntry { property_idx: 308, property_count: 1, has_negative: false },
+    "mix-blend-lighten" => UtilityEntry { property_idx: 309, property_count: 1, has_negative: false },
+    "bg-blend-color-dodge" => UtilityEntry { property_idx: 308, property_count: 1, has_negative: false },
+    "mix-blend-color-dodge" => UtilityEntry { property_idx: 309, property_count: 1, has_negative: false },
+    "bg-blend-color-burn" => UtilityEntry { property_idx: 308, property_count: 1, has_negative: false },
+    "mix-blend-color-burn" => UtilityEntry { property_idx: 309, property_count: 1, has_negative: false },
+    "bg-blend-hard-light" => UtilityEntry { property_idx: 308, property_count: 1, has_negative: false },
+    "mix-blend-hard-light" => UtilityEntry { property_idx: 309, property_count: 1, has_negative: false },
+    "bg-blend-soft-light" => UtilityEntry { property_idx: 308, property_count: 1, has_negative: false },
+    "mix-blend-soft-light" => UtilityEntry { property_idx: 309, property_count: 1, has_negative: false },
+    "bg-blend-difference" => UtilityEntry { property_idx: 308, property_count: 1, has_negative: false },
+    "mix-blend-difference" => UtilityEntry { property_idx: 309, property_count: 1, has_negative: false },
+    "bg-blend-exclusion" => UtilityEntry { property_idx: 308, property_count: 1, has_negative: false },
+    "mix-blend-exclusion" => UtilityEntry { property_idx: 309, property_count: 1, has_negative: false },
+    "bg-blend-hue" => UtilityEntry { property_idx: 308, property_count: 1, has_negative: false },
+    "mix-blend-hue" => UtilityEntry { property_idx: 309, property_count: 1, has_negative: false },
+    "bg-blend-saturation" => UtilityEntry { property_idx: 308, property_count: 1, has_negative: false },
+    "mix-blend-saturation" => UtilityEntry { property_idx: 309, property_count: 1, has_negative: false },
+    "bg-blend-color" => UtilityEntry { property_idx: 308, property_count: 1, has_negative: false },
+    "mix-blend-color" => UtilityEntry { property_idx: 309, property_count: 1, has_negative: false },
+    "bg-blend-luminosity" => UtilityEntry { property_idx: 308, property_count: 1, has_negative: false },
+    "mix-blend-luminosity" => UtilityEntry { property_idx: 309, property_count: 1, has_negative: false },
+    "mix-blend-plus-darker" => UtilityEntry { property_idx: 309, property_count: 1, has_negative: false },
+    "mix-blend-plus-lighter" => UtilityEntry { property_idx: 309, property_count: 1, has_negative: false },
+    "fill-none" => UtilityEntry { property_idx: 261, property_count: 1, has_negative: false },
+    "stroke-none" => UtilityEntry { property_idx: 262, property_count: 1, has_negative: false },
+    "object-contain" => UtilityEntry { property_idx: 264, property_count: 1, has_negative: false },
+    "object-cover" => UtilityEntry { property_idx: 264, property_count: 1, has_negative: false },
+    "object-fill" => UtilityEntry { property_idx: 264, property_count: 1, has_negative: false },
+    "object-none" => UtilityEntry { property_idx: 264, property_count: 1, has_negative: false },
+    "object-scale-down" => UtilityEntry { property_idx: 264, property_count: 1, has_negative: false },
+    "p-px" => UtilityEntry { property_idx: 266, property_count: 1, has_negative: false },
+    "px-px" => UtilityEntry { property_idx: 267, property_count: 1, has_negative: false },
+    "py-px" => UtilityEntry { property_idx: 268, property_count: 1, has_negative: false },
+    "ps-px" => UtilityEntry { property_idx: 269, property_count: 1, has_negative: false },
+    "pe-px" => UtilityEntry { property_idx: 270, property_count: 1, has_negative: false },
+    "pbs-px" => UtilityEntry { property_idx: 271, property_count: 1, has_negative: false },
+    "pbe-px" => UtilityEntry { property_idx: 272, property_count: 1, has_negative: false },
+    "pt-px" => UtilityEntry { property_idx: 273, property_count: 1, has_negative: false },
+    "pr-px" => UtilityEntry { property_idx: 274, property_count: 1, has_negative: false },
+    "pb-px" => UtilityEntry { property_idx: 275, property_count: 1, has_negative: false },
+    "pl-px" => UtilityEntry { property_idx: 276, property_count: 1, has_negative: false },
+    "text-left" => UtilityEntry { property_idx: 277, property_count: 1, has_negative: false },
+    "text-center" => UtilityEntry { property_idx: 277, property_count: 1, has_negative: false },
+    "text-right" => UtilityEntry { property_idx: 277, property_count: 1, has_negative: false },
+    "text-justify" => UtilityEntry { property_idx: 277, property_count: 1, has_negative: false },
+    "text-start" => UtilityEntry { property_idx: 277, property_count: 1, has_negative: false },
+    "text-end" => UtilityEntry { property_idx: 277, property_count: 1, has_negative: false },
+    "indent-px" => UtilityEntry { property_idx: 278, property_count: 1, has_negative: true },
+    "align-baseline" => UtilityEntry { property_idx: 279, property_count: 1, has_negative: false },
+    "align-top" => UtilityEntry { property_idx: 279, property_count: 1, has_negative: false },
+    "align-middle" => UtilityEntry { property_idx: 279, property_count: 1, has_negative: false },
+    "align-bottom" => UtilityEntry { property_idx: 279, property_count: 1, has_negative: false },
+    "align-text-top" => UtilityEntry { property_idx: 279, property_count: 1, has_negative: false },
+    "align-text-bottom" => UtilityEntry { property_idx: 279, property_count: 1, has_negative: false },
+    "align-sub" => UtilityEntry { property_idx: 279, property_count: 1, has_negative: false },
+    "align-super" => UtilityEntry { property_idx: 279, property_count: 1, has_negative: false },
+    "uppercase" => UtilityEntry { property_idx: 293, property_count: 1, has_negative: false },
+    "lowercase" => UtilityEntry { property_idx: 293, property_count: 1, has_negative: false },
+    "capitalize" => UtilityEntry { property_idx: 293, property_count: 1, has_negative: false },
+    "normal-case" => UtilityEntry { property_idx: 293, property_count: 1, has_negative: false },
+    "italic" => UtilityEntry { property_idx: 294, property_count: 1, has_negative: false },
+    "not-italic" => UtilityEntry { property_idx: 294, property_count: 1, has_negative: false },
+    "underline" => UtilityEntry { property_idx: 297, property_count: 1, has_negative: false },
+    "overline" => UtilityEntry { property_idx: 297, property_count: 1, has_negative: false },
+    "line-through" => UtilityEntry { property_idx: 297, property_count: 1, has_negative: false },
+    "no-underline" => UtilityEntry { property_idx: 297, property_count: 1, has_negative: false },
+    "font-stretch-normal" => UtilityEntry { property_idx: 295, property_count: 1, has_negative: false },
+    "font-stretch-ultra-condensed" => UtilityEntry { property_idx: 295, property_count: 1, has_negative: false },
+    "font-stretch-extra-condensed" => UtilityEntry { property_idx: 295, property_count: 1, has_negative: false },
+    "font-stretch-condensed" => UtilityEntry { property_idx: 295, property_count: 1, has_negative: false },
+    "font-stretch-semi-condensed" => UtilityEntry { property_idx: 295, property_count: 1, has_negative: false },
+    "font-stretch-semi-expanded" => UtilityEntry { property_idx: 295, property_count: 1, has_negative: false },
+    "font-stretch-expanded" => UtilityEntry { property_idx: 295, property_count: 1, has_negative: false },
+    "font-stretch-extra-expanded" => UtilityEntry { property_idx: 295, property_count: 1, has_negative: false },
+    "font-stretch-ultra-expanded" => UtilityEntry { property_idx: 295, property_count: 1, has_negative: false },
+    "decoration-solid" => UtilityEntry { property_idx: 299, property_count: 1, has_negative: false },
+    "decoration-double" => UtilityEntry { property_idx: 299, property_count: 1, has_negative: false },
+    "decoration-dotted" => UtilityEntry { property_idx: 299, property_count: 1, has_negative: false },
+    "decoration-dashed" => UtilityEntry { property_idx: 299, property_count: 1, has_negative: false },
+    "decoration-wavy" => UtilityEntry { property_idx: 299, property_count: 1, has_negative: false },
+    "decoration-auto" => UtilityEntry { property_idx: 300, property_count: 1, has_negative: false },
+    "decoration-from-font" => UtilityEntry { property_idx: 300, property_count: 1, has_negative: false },
+    "drop-shadow-none" => UtilityEntry { property_idx: 328, property_count: 2, has_negative: false },
+    "transition-discrete" => UtilityEntry { property_idx: 346, property_count: 1, has_negative: false },
+    "transition-normal" => UtilityEntry { property_idx: 346, property_count: 1, has_negative: false },
+    "duration-initial" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "will-change-auto" => UtilityEntry { property_idx: 350, property_count: 1, has_negative: false },
+    "will-change-scroll" => UtilityEntry { property_idx: 350, property_count: 1, has_negative: false },
+    "will-change-contents" => UtilityEntry { property_idx: 350, property_count: 1, has_negative: false },
+    "will-change-transform" => UtilityEntry { property_idx: 350, property_count: 1, has_negative: false },
+    "content-none" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "contain-none" => UtilityEntry { property_idx: 351, property_count: 1, has_negative: false },
+    "contain-content" => UtilityEntry { property_idx: 351, property_count: 1, has_negative: false },
+    "contain-strict" => UtilityEntry { property_idx: 351, property_count: 1, has_negative: false },
+    "contain-size" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "contain-inline-size" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "contain-layout" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "contain-paint" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "contain-style" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "forced-color-adjust-none" => UtilityEntry { property_idx: 353, property_count: 1, has_negative: false },
+    "forced-color-adjust-auto" => UtilityEntry { property_idx: 353, property_count: 1, has_negative: false },
+    "leading-px" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "antialiased" => UtilityEntry { property_idx: 302, property_count: 2, has_negative: false },
+    "subpixel-antialiased" => UtilityEntry { property_idx: 302, property_count: 2, has_negative: false },
+    "normal-nums" => UtilityEntry { property_idx: 296, property_count: 1, has_negative: false },
+    "ordinal" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "slashed-zero" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "lining-nums" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "oldstyle-nums" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "proportional-nums" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "tabular-nums" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "diagonal-fractions" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "stacked-fractions" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "outline-hidden" => UtilityEntry { property_idx: 354, property_count: 4, has_negative: false },
+    "outline-none" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "outline-solid" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "outline-dashed" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "outline-dotted" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "outline-double" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "text-shadow-initial" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "shadow-initial" => UtilityEntry { property_idx: 312, property_count: 1, has_negative: false },
+    "inset-shadow-initial" => UtilityEntry { property_idx: 316, property_count: 1, has_negative: false },
+    "ring-inset" => UtilityEntry { property_idx: 354, property_count: 1, has_negative: false },
+    "bg-gradient-to-t" => UtilityEntry { property_idx: 196, property_count: 2, has_negative: false },
+    "bg-gradient-to-tr" => UtilityEntry { property_idx: 196, property_count: 2, has_negative: false },
+    "bg-gradient-to-r" => UtilityEntry { property_idx: 196, property_count: 2, has_negative: false },
+    "bg-gradient-to-br" => UtilityEntry { property_idx: 196, property_count: 2, has_negative: false },
+    "bg-gradient-to-b" => UtilityEntry { property_idx: 196, property_count: 2, has_negative: false },
+    "bg-gradient-to-bl" => UtilityEntry { property_idx: 196, property_count: 2, has_negative: false },
+    "bg-gradient-to-l" => UtilityEntry { property_idx: 196, property_count: 2, has_negative: false },
+    "bg-gradient-to-tl" => UtilityEntry { property_idx: 196, property_count: 2, has_negative: false },
+    "bg-left-top" => UtilityEntry { property_idx: 250, property_count: 1, has_negative: false },
+    "bg-right-top" => UtilityEntry { property_idx: 250, property_count: 1, has_negative: false },
+    "bg-left-bottom" => UtilityEntry { property_idx: 250, property_count: 1, has_negative: false },
+    "bg-right-bottom" => UtilityEntry { property_idx: 250, property_count: 1, has_negative: false },
+    "object-left-top" => UtilityEntry { property_idx: 265, property_count: 1, has_negative: false },
+    "object-right-top" => UtilityEntry { property_idx: 265, property_count: 1, has_negative: false },
+    "object-left-bottom" => UtilityEntry { property_idx: 265, property_count: 1, has_negative: false },
+    "object-right-bottom" => UtilityEntry { property_idx: 265, property_count: 1, has_negative: false },
+    "overflow-ellipsis" => UtilityEntry { property_idx: 289, property_count: 1, has_negative: false },
+    "decoration-slice" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "decoration-clone" => UtilityEntry { property_idx: 354, property_count: 2, has_negative: false },
+    "order-none" => UtilityEntry { property_idx: 17, property_count: 1, has_negative: false },
+    "break-words" => UtilityEntry { property_idx: 287, property_count: 1, has_negative: false },
+    "start-auto" => UtilityEntry { property_idx: 7, property_count: 1, has_negative: false },
+    "start-full" => UtilityEntry { property_idx: 7, property_count: 1, has_negative: true },
+    "start-px" => UtilityEntry { property_idx: 7, property_count: 1, has_negative: true },
+    "end-auto" => UtilityEntry { property_idx: 8, property_count: 1, has_negative: false },
+    "end-full" => UtilityEntry { property_idx: 8, property_count: 1, has_negative: true },
+    "end-px" => UtilityEntry { property_idx: 8, property_count: 1, has_negative: true },
 };
 
 pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_map! {
     "inset" => FunctionalEntry {
-        registration_idx: 1,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 4, 1),
             NamedBranch::Typed(NamedValueType::Number, 4, 1),
@@ -1244,10 +1243,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(4, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 0 }),
+        negative: Some(SameBranches),
     },
     "inset-x" => FunctionalEntry {
-        registration_idx: 3,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 5, 1),
             NamedBranch::Typed(NamedValueType::Number, 5, 1),
@@ -1256,10 +1254,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(5, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 2 }),
+        negative: Some(SameBranches),
     },
     "inset-y" => FunctionalEntry {
-        registration_idx: 5,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 6, 1),
             NamedBranch::Typed(NamedValueType::Number, 6, 1),
@@ -1268,10 +1265,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(6, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 4 }),
+        negative: Some(SameBranches),
     },
     "inset-s" => FunctionalEntry {
-        registration_idx: 7,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 7, 1),
             NamedBranch::Typed(NamedValueType::Number, 7, 1),
@@ -1280,10 +1276,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(7, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 6 }),
+        negative: Some(SameBranches),
     },
     "inset-e" => FunctionalEntry {
-        registration_idx: 9,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 8, 1),
             NamedBranch::Typed(NamedValueType::Number, 8, 1),
@@ -1292,10 +1287,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(8, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 8 }),
+        negative: Some(SameBranches),
     },
     "inset-bs" => FunctionalEntry {
-        registration_idx: 11,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 9, 1),
             NamedBranch::Typed(NamedValueType::Number, 9, 1),
@@ -1304,10 +1298,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(9, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 10 }),
+        negative: Some(SameBranches),
     },
     "inset-be" => FunctionalEntry {
-        registration_idx: 13,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 10, 1),
             NamedBranch::Typed(NamedValueType::Number, 10, 1),
@@ -1316,10 +1309,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(10, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 12 }),
+        negative: Some(SameBranches),
     },
     "top" => FunctionalEntry {
-        registration_idx: 15,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 11, 1),
             NamedBranch::Typed(NamedValueType::Number, 11, 1),
@@ -1328,10 +1320,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(11, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 14 }),
+        negative: Some(SameBranches),
     },
     "right" => FunctionalEntry {
-        registration_idx: 17,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 12, 1),
             NamedBranch::Typed(NamedValueType::Number, 12, 1),
@@ -1340,10 +1331,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(12, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 16 }),
+        negative: Some(SameBranches),
     },
     "bottom" => FunctionalEntry {
-        registration_idx: 19,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 13, 1),
             NamedBranch::Typed(NamedValueType::Number, 13, 1),
@@ -1352,10 +1342,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(13, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 18 }),
+        negative: Some(SameBranches),
     },
     "left" => FunctionalEntry {
-        registration_idx: 21,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 14, 1),
             NamedBranch::Typed(NamedValueType::Number, 14, 1),
@@ -1364,10 +1353,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(14, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 20 }),
+        negative: Some(SameBranches),
     },
     "z" => FunctionalEntry {
-        registration_idx: 23,
         named_branches: &[
             NamedBranch::Keyword(0, 16, 1),
             NamedBranch::Typed(NamedValueType::Number, 16, 1),
@@ -1376,7 +1364,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(16, 1),
         ],
         negative: Some(Distinct {
-            registration_idx: 22,
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, 16, 1),
             ],
@@ -1386,7 +1373,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         }),
     },
     "order" => FunctionalEntry {
-        registration_idx: 25,
         named_branches: &[
             NamedBranch::Keyword(1, 17, 1),
             NamedBranch::Typed(NamedValueType::Number, 17, 1),
@@ -1395,7 +1381,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(17, 1),
         ],
         negative: Some(Distinct {
-            registration_idx: 24,
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, 17, 1),
             ],
@@ -1405,7 +1390,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         }),
     },
     "col" => FunctionalEntry {
-        registration_idx: 27,
         named_branches: &[
             NamedBranch::Keyword(0, 18, 1),
             NamedBranch::Typed(NamedValueType::Number, 18, 1),
@@ -1414,7 +1398,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(18, 1),
         ],
         negative: Some(Distinct {
-            registration_idx: 26,
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, 18, 1),
             ],
@@ -1424,7 +1407,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         }),
     },
     "col-span" => FunctionalEntry {
-        registration_idx: 28,
         named_branches: &[
             NamedBranch::Keyword(2, 18, 1),
             NamedBranch::Typed(NamedValueType::Number, 18, 1),
@@ -1435,7 +1417,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "col-start" => FunctionalEntry {
-        registration_idx: 30,
         named_branches: &[
             NamedBranch::Keyword(0, 19, 1),
             NamedBranch::Typed(NamedValueType::Number, 19, 1),
@@ -1444,7 +1425,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(19, 1),
         ],
         negative: Some(Distinct {
-            registration_idx: 29,
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, 19, 1),
             ],
@@ -1454,7 +1434,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         }),
     },
     "col-end" => FunctionalEntry {
-        registration_idx: 32,
         named_branches: &[
             NamedBranch::Keyword(0, 20, 1),
             NamedBranch::Typed(NamedValueType::Number, 20, 1),
@@ -1463,7 +1442,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(20, 1),
         ],
         negative: Some(Distinct {
-            registration_idx: 31,
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, 20, 1),
             ],
@@ -1473,7 +1451,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         }),
     },
     "row" => FunctionalEntry {
-        registration_idx: 34,
         named_branches: &[
             NamedBranch::Keyword(0, 21, 1),
             NamedBranch::Typed(NamedValueType::Number, 21, 1),
@@ -1482,7 +1459,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(21, 1),
         ],
         negative: Some(Distinct {
-            registration_idx: 33,
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, 21, 1),
             ],
@@ -1492,7 +1468,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         }),
     },
     "row-span" => FunctionalEntry {
-        registration_idx: 35,
         named_branches: &[
             NamedBranch::Keyword(2, 21, 1),
             NamedBranch::Typed(NamedValueType::Number, 21, 1),
@@ -1503,7 +1478,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "row-start" => FunctionalEntry {
-        registration_idx: 37,
         named_branches: &[
             NamedBranch::Keyword(0, 22, 1),
             NamedBranch::Typed(NamedValueType::Number, 22, 1),
@@ -1512,7 +1486,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(22, 1),
         ],
         negative: Some(Distinct {
-            registration_idx: 36,
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, 22, 1),
             ],
@@ -1522,7 +1495,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         }),
     },
     "row-end" => FunctionalEntry {
-        registration_idx: 39,
         named_branches: &[
             NamedBranch::Keyword(0, 23, 1),
             NamedBranch::Typed(NamedValueType::Number, 23, 1),
@@ -1531,7 +1503,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(23, 1),
         ],
         negative: Some(Distinct {
-            registration_idx: 38,
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, 23, 1),
             ],
@@ -1541,7 +1512,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         }),
     },
     "m" => FunctionalEntry {
-        registration_idx: 41,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 27, 1),
             NamedBranch::Typed(NamedValueType::Number, 27, 1),
@@ -1549,10 +1519,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(27, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 40 }),
+        negative: Some(SameBranches),
     },
     "mx" => FunctionalEntry {
-        registration_idx: 43,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 28, 1),
             NamedBranch::Typed(NamedValueType::Number, 28, 1),
@@ -1560,10 +1529,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(28, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 42 }),
+        negative: Some(SameBranches),
     },
     "my" => FunctionalEntry {
-        registration_idx: 45,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 29, 1),
             NamedBranch::Typed(NamedValueType::Number, 29, 1),
@@ -1571,10 +1539,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(29, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 44 }),
+        negative: Some(SameBranches),
     },
     "ms" => FunctionalEntry {
-        registration_idx: 47,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 30, 1),
             NamedBranch::Typed(NamedValueType::Number, 30, 1),
@@ -1582,10 +1549,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(30, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 46 }),
+        negative: Some(SameBranches),
     },
     "me" => FunctionalEntry {
-        registration_idx: 49,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 31, 1),
             NamedBranch::Typed(NamedValueType::Number, 31, 1),
@@ -1593,10 +1559,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(31, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 48 }),
+        negative: Some(SameBranches),
     },
     "mbs" => FunctionalEntry {
-        registration_idx: 51,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 32, 1),
             NamedBranch::Typed(NamedValueType::Number, 32, 1),
@@ -1604,10 +1569,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(32, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 50 }),
+        negative: Some(SameBranches),
     },
     "mbe" => FunctionalEntry {
-        registration_idx: 53,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 33, 1),
             NamedBranch::Typed(NamedValueType::Number, 33, 1),
@@ -1615,10 +1579,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(33, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 52 }),
+        negative: Some(SameBranches),
     },
     "mt" => FunctionalEntry {
-        registration_idx: 55,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 34, 1),
             NamedBranch::Typed(NamedValueType::Number, 34, 1),
@@ -1626,10 +1589,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(34, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 54 }),
+        negative: Some(SameBranches),
     },
     "mr" => FunctionalEntry {
-        registration_idx: 57,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 35, 1),
             NamedBranch::Typed(NamedValueType::Number, 35, 1),
@@ -1637,10 +1599,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(35, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 56 }),
+        negative: Some(SameBranches),
     },
     "mb" => FunctionalEntry {
-        registration_idx: 59,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 36, 1),
             NamedBranch::Typed(NamedValueType::Number, 36, 1),
@@ -1648,10 +1609,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(36, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 58 }),
+        negative: Some(SameBranches),
     },
     "ml" => FunctionalEntry {
-        registration_idx: 61,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 37, 1),
             NamedBranch::Typed(NamedValueType::Number, 37, 1),
@@ -1659,10 +1619,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(37, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 60 }),
+        negative: Some(SameBranches),
     },
     "line-clamp" => FunctionalEntry {
-        registration_idx: 62,
         named_branches: &[
             NamedBranch::Keyword(3, 139, 4),
             NamedBranch::Typed(NamedValueType::Number, 139, 4),
@@ -1673,7 +1632,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "block" => FunctionalEntry {
-        registration_idx: 63,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 1),
             NamedBranch::Typed(NamedValueType::Number, 354, 1),
@@ -1685,7 +1643,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "inline" => FunctionalEntry {
-        registration_idx: 64,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 1),
             NamedBranch::Theme(ThemeNamespace::Container, 354, 1),
@@ -1698,7 +1655,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "flex" => FunctionalEntry {
-        registration_idx: 65,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 48, 1),
             NamedBranch::Typed(NamedValueType::Ratio, 48, 1),
@@ -1709,7 +1665,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "aspect" => FunctionalEntry {
-        registration_idx: 66,
         named_branches: &[
             NamedBranch::Keyword(4, 41, 1),
             NamedBranch::Theme(ThemeNamespace::Aspect, 41, 1),
@@ -1721,7 +1676,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "max-w-screen" => FunctionalEntry {
-        registration_idx: 67,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Breakpoint, 46, 1),
         ],
@@ -1729,7 +1683,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "size" => FunctionalEntry {
-        registration_idx: 68,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 45, 2),
             NamedBranch::Typed(NamedValueType::Number, 45, 2),
@@ -1741,7 +1694,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "w" => FunctionalEntry {
-        registration_idx: 69,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 45, 1),
             NamedBranch::Theme(ThemeNamespace::Container, 45, 1),
@@ -1754,7 +1706,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "min-w" => FunctionalEntry {
-        registration_idx: 70,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 47, 1),
             NamedBranch::Theme(ThemeNamespace::Container, 47, 1),
@@ -1767,7 +1718,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "max-w" => FunctionalEntry {
-        registration_idx: 71,
         named_branches: &[
             NamedBranch::Keyword(5, 46, 1),
             NamedBranch::Theme(ThemeNamespace::Spacing, 46, 1),
@@ -1781,7 +1731,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "h" => FunctionalEntry {
-        registration_idx: 72,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 42, 1),
             NamedBranch::Typed(NamedValueType::Number, 42, 1),
@@ -1793,7 +1742,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "min-h" => FunctionalEntry {
-        registration_idx: 73,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 44, 1),
             NamedBranch::Typed(NamedValueType::Number, 44, 1),
@@ -1805,7 +1753,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "max-h" => FunctionalEntry {
-        registration_idx: 74,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 43, 1),
             NamedBranch::Typed(NamedValueType::Number, 43, 1),
@@ -1817,7 +1764,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "min-inline" => FunctionalEntry {
-        registration_idx: 75,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 1),
             NamedBranch::Theme(ThemeNamespace::Container, 354, 1),
@@ -1830,7 +1776,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "max-inline" => FunctionalEntry {
-        registration_idx: 76,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 1),
             NamedBranch::Theme(ThemeNamespace::Container, 354, 1),
@@ -1843,7 +1788,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "min-block" => FunctionalEntry {
-        registration_idx: 77,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 1),
             NamedBranch::Typed(NamedValueType::Number, 354, 1),
@@ -1855,7 +1799,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "max-block" => FunctionalEntry {
-        registration_idx: 78,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 1),
             NamedBranch::Typed(NamedValueType::Number, 354, 1),
@@ -1867,7 +1810,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "shrink" => FunctionalEntry {
-        registration_idx: 79,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 49, 1),
         ],
@@ -1877,7 +1819,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "grow" => FunctionalEntry {
-        registration_idx: 80,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 50, 1),
         ],
@@ -1887,7 +1828,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "basis" => FunctionalEntry {
-        registration_idx: 81,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 51, 1),
             NamedBranch::Theme(ThemeNamespace::Container, 51, 1),
@@ -1900,7 +1840,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "border-spacing" => FunctionalEntry {
-        registration_idx: 82,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 3),
             NamedBranch::Typed(NamedValueType::Number, 354, 3),
@@ -1911,7 +1850,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "border-spacing-x" => FunctionalEntry {
-        registration_idx: 83,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 2),
             NamedBranch::Typed(NamedValueType::Number, 354, 2),
@@ -1922,7 +1860,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "border-spacing-y" => FunctionalEntry {
-        registration_idx: 84,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 2),
             NamedBranch::Typed(NamedValueType::Number, 354, 2),
@@ -1933,7 +1870,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "origin" => FunctionalEntry {
-        registration_idx: 85,
         named_branches: &[
             NamedBranch::Keyword(6, 56, 1),
         ],
@@ -1943,7 +1879,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "perspective-origin" => FunctionalEntry {
-        registration_idx: 86,
         named_branches: &[
             NamedBranch::Keyword(6, 354, 1),
         ],
@@ -1953,7 +1888,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "perspective" => FunctionalEntry {
-        registration_idx: 87,
         named_branches: &[
             NamedBranch::Keyword(3, 354, 1),
             NamedBranch::Theme(ThemeNamespace::Perspective, 354, 1),
@@ -1964,7 +1898,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "translate" => FunctionalEntry {
-        registration_idx: 89,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 58, 3),
             NamedBranch::Typed(NamedValueType::Number, 58, 3),
@@ -1973,10 +1906,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(58, 3),
         ],
-        negative: Some(SameBranches { registration_idx: 88 }),
+        negative: Some(SameBranches),
     },
     "translate-x" => FunctionalEntry {
-        registration_idx: 91,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 58, 2),
             NamedBranch::Typed(NamedValueType::Number, 58, 2),
@@ -1985,10 +1917,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(58, 2),
         ],
-        negative: Some(SameBranches { registration_idx: 90 }),
+        negative: Some(SameBranches),
     },
     "translate-y" => FunctionalEntry {
-        registration_idx: 93,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 59, 2),
             NamedBranch::Typed(NamedValueType::Number, 59, 2),
@@ -1997,10 +1928,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(59, 2),
         ],
-        negative: Some(SameBranches { registration_idx: 92 }),
+        negative: Some(SameBranches),
     },
     "translate-z" => FunctionalEntry {
-        registration_idx: 95,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 60, 2),
             NamedBranch::Typed(NamedValueType::Number, 60, 2),
@@ -2008,120 +1938,108 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(60, 2),
         ],
-        negative: Some(SameBranches { registration_idx: 94 }),
+        negative: Some(SameBranches),
     },
     "scale" => FunctionalEntry {
-        registration_idx: 97,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 62, 4),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(61, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 96 }),
+        negative: Some(SameBranches),
     },
     "scale-x" => FunctionalEntry {
-        registration_idx: 99,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 62, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(62, 2),
         ],
-        negative: Some(SameBranches { registration_idx: 98 }),
+        negative: Some(SameBranches),
     },
     "scale-y" => FunctionalEntry {
-        registration_idx: 101,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 63, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(63, 2),
         ],
-        negative: Some(SameBranches { registration_idx: 100 }),
+        negative: Some(SameBranches),
     },
     "scale-z" => FunctionalEntry {
-        registration_idx: 103,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 64, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(64, 2),
         ],
-        negative: Some(SameBranches { registration_idx: 102 }),
+        negative: Some(SameBranches),
     },
     "rotate" => FunctionalEntry {
-        registration_idx: 105,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 65, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(65, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 104 }),
+        negative: Some(SameBranches),
     },
     "rotate-x" => FunctionalEntry {
-        registration_idx: 107,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 66, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(66, 2),
         ],
-        negative: Some(SameBranches { registration_idx: 106 }),
+        negative: Some(SameBranches),
     },
     "rotate-y" => FunctionalEntry {
-        registration_idx: 109,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 67, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(67, 2),
         ],
-        negative: Some(SameBranches { registration_idx: 108 }),
+        negative: Some(SameBranches),
     },
     "rotate-z" => FunctionalEntry {
-        registration_idx: 111,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 68, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(68, 2),
         ],
-        negative: Some(SameBranches { registration_idx: 110 }),
+        negative: Some(SameBranches),
     },
     "skew" => FunctionalEntry {
-        registration_idx: 113,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 69, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(69, 3),
         ],
-        negative: Some(SameBranches { registration_idx: 112 }),
+        negative: Some(SameBranches),
     },
     "skew-x" => FunctionalEntry {
-        registration_idx: 115,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 69, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(69, 2),
         ],
-        negative: Some(SameBranches { registration_idx: 114 }),
+        negative: Some(SameBranches),
     },
     "skew-y" => FunctionalEntry {
-        registration_idx: 117,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 70, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(70, 2),
         ],
-        negative: Some(SameBranches { registration_idx: 116 }),
+        negative: Some(SameBranches),
     },
     "transform" => FunctionalEntry {
-        registration_idx: 118,
         named_branches: &[],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(71, 1),
@@ -2129,7 +2047,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "cursor" => FunctionalEntry {
-        registration_idx: 119,
         named_branches: &[],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(73, 1),
@@ -2137,7 +2054,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "scroll-m" => FunctionalEntry {
-        registration_idx: 121,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 83, 1),
             NamedBranch::Typed(NamedValueType::Number, 83, 1),
@@ -2145,10 +2061,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(83, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 120 }),
+        negative: Some(SameBranches),
     },
     "scroll-mx" => FunctionalEntry {
-        registration_idx: 123,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 84, 1),
             NamedBranch::Typed(NamedValueType::Number, 84, 1),
@@ -2156,10 +2071,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(84, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 122 }),
+        negative: Some(SameBranches),
     },
     "scroll-my" => FunctionalEntry {
-        registration_idx: 125,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 85, 1),
             NamedBranch::Typed(NamedValueType::Number, 85, 1),
@@ -2167,10 +2081,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(85, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 124 }),
+        negative: Some(SameBranches),
     },
     "scroll-ms" => FunctionalEntry {
-        registration_idx: 127,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 86, 1),
             NamedBranch::Typed(NamedValueType::Number, 86, 1),
@@ -2178,10 +2091,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(86, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 126 }),
+        negative: Some(SameBranches),
     },
     "scroll-me" => FunctionalEntry {
-        registration_idx: 129,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 87, 1),
             NamedBranch::Typed(NamedValueType::Number, 87, 1),
@@ -2189,10 +2101,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(87, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 128 }),
+        negative: Some(SameBranches),
     },
     "scroll-mbs" => FunctionalEntry {
-        registration_idx: 131,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 88, 1),
             NamedBranch::Typed(NamedValueType::Number, 88, 1),
@@ -2200,10 +2111,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(88, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 130 }),
+        negative: Some(SameBranches),
     },
     "scroll-mbe" => FunctionalEntry {
-        registration_idx: 133,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 89, 1),
             NamedBranch::Typed(NamedValueType::Number, 89, 1),
@@ -2211,10 +2121,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(89, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 132 }),
+        negative: Some(SameBranches),
     },
     "scroll-mt" => FunctionalEntry {
-        registration_idx: 135,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 90, 1),
             NamedBranch::Typed(NamedValueType::Number, 90, 1),
@@ -2222,10 +2131,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(90, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 134 }),
+        negative: Some(SameBranches),
     },
     "scroll-mr" => FunctionalEntry {
-        registration_idx: 137,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 91, 1),
             NamedBranch::Typed(NamedValueType::Number, 91, 1),
@@ -2233,10 +2141,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(91, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 136 }),
+        negative: Some(SameBranches),
     },
     "scroll-mb" => FunctionalEntry {
-        registration_idx: 139,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 92, 1),
             NamedBranch::Typed(NamedValueType::Number, 92, 1),
@@ -2244,10 +2151,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(92, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 138 }),
+        negative: Some(SameBranches),
     },
     "scroll-ml" => FunctionalEntry {
-        registration_idx: 141,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 93, 1),
             NamedBranch::Typed(NamedValueType::Number, 93, 1),
@@ -2255,10 +2161,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(93, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 140 }),
+        negative: Some(SameBranches),
     },
     "scroll-p" => FunctionalEntry {
-        registration_idx: 142,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 94, 1),
             NamedBranch::Typed(NamedValueType::Number, 94, 1),
@@ -2269,7 +2174,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "scroll-px" => FunctionalEntry {
-        registration_idx: 143,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 95, 1),
             NamedBranch::Typed(NamedValueType::Number, 95, 1),
@@ -2280,7 +2184,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "scroll-py" => FunctionalEntry {
-        registration_idx: 144,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 96, 1),
             NamedBranch::Typed(NamedValueType::Number, 96, 1),
@@ -2291,7 +2194,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "scroll-ps" => FunctionalEntry {
-        registration_idx: 145,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 97, 1),
             NamedBranch::Typed(NamedValueType::Number, 97, 1),
@@ -2302,7 +2204,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "scroll-pe" => FunctionalEntry {
-        registration_idx: 146,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 98, 1),
             NamedBranch::Typed(NamedValueType::Number, 98, 1),
@@ -2313,7 +2214,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "scroll-pbs" => FunctionalEntry {
-        registration_idx: 147,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 99, 1),
             NamedBranch::Typed(NamedValueType::Number, 99, 1),
@@ -2324,7 +2224,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "scroll-pbe" => FunctionalEntry {
-        registration_idx: 148,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 100, 1),
             NamedBranch::Typed(NamedValueType::Number, 100, 1),
@@ -2335,7 +2234,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "scroll-pt" => FunctionalEntry {
-        registration_idx: 149,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 101, 1),
             NamedBranch::Typed(NamedValueType::Number, 101, 1),
@@ -2346,7 +2244,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "scroll-pr" => FunctionalEntry {
-        registration_idx: 150,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 102, 1),
             NamedBranch::Typed(NamedValueType::Number, 102, 1),
@@ -2357,7 +2254,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "scroll-pb" => FunctionalEntry {
-        registration_idx: 151,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 103, 1),
             NamedBranch::Typed(NamedValueType::Number, 103, 1),
@@ -2368,7 +2264,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "scroll-pl" => FunctionalEntry {
-        registration_idx: 152,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 104, 1),
             NamedBranch::Typed(NamedValueType::Number, 104, 1),
@@ -2379,7 +2274,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "list" => FunctionalEntry {
-        registration_idx: 153,
         named_branches: &[
             NamedBranch::Keyword(7, 106, 1),
         ],
@@ -2389,7 +2283,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "list-image" => FunctionalEntry {
-        registration_idx: 154,
         named_branches: &[
             NamedBranch::Keyword(3, 107, 1),
         ],
@@ -2399,7 +2292,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "columns" => FunctionalEntry {
-        registration_idx: 155,
         named_branches: &[
             NamedBranch::Keyword(0, 109, 1),
             NamedBranch::Theme(ThemeNamespace::Container, 109, 1),
@@ -2411,7 +2303,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "auto-cols" => FunctionalEntry {
-        registration_idx: 156,
         named_branches: &[
             NamedBranch::Keyword(8, 113, 1),
         ],
@@ -2421,7 +2312,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "auto-rows" => FunctionalEntry {
-        registration_idx: 157,
         named_branches: &[
             NamedBranch::Keyword(8, 115, 1),
         ],
@@ -2431,7 +2321,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "grid-cols" => FunctionalEntry {
-        registration_idx: 158,
         named_branches: &[
             NamedBranch::Keyword(9, 116, 1),
             NamedBranch::Typed(NamedValueType::Number, 116, 1),
@@ -2442,7 +2331,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "grid-rows" => FunctionalEntry {
-        registration_idx: 159,
         named_branches: &[
             NamedBranch::Keyword(9, 117, 1),
             NamedBranch::Typed(NamedValueType::Number, 117, 1),
@@ -2453,7 +2341,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "gap" => FunctionalEntry {
-        registration_idx: 160,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 126, 1),
             NamedBranch::Typed(NamedValueType::Number, 126, 1),
@@ -2464,7 +2351,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "gap-x" => FunctionalEntry {
-        registration_idx: 161,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 127, 1),
             NamedBranch::Typed(NamedValueType::Number, 127, 1),
@@ -2475,7 +2361,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "gap-y" => FunctionalEntry {
-        registration_idx: 162,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 128, 1),
             NamedBranch::Typed(NamedValueType::Number, 128, 1),
@@ -2486,7 +2371,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "space-x" => FunctionalEntry {
-        registration_idx: 164,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 129, 3),
             NamedBranch::Typed(NamedValueType::Number, 129, 3),
@@ -2494,10 +2378,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(129, 3),
         ],
-        negative: Some(SameBranches { registration_idx: 163 }),
+        negative: Some(SameBranches),
     },
     "space-y" => FunctionalEntry {
-        registration_idx: 166,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 130, 3),
             NamedBranch::Typed(NamedValueType::Number, 130, 3),
@@ -2505,10 +2388,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(130, 3),
         ],
-        negative: Some(SameBranches { registration_idx: 165 }),
+        negative: Some(SameBranches),
     },
     "accent" => FunctionalEntry {
-        registration_idx: 167,
         named_branches: &[
             NamedBranch::Keyword(10, 305, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 305, 1),
@@ -2519,7 +2401,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "caret" => FunctionalEntry {
-        registration_idx: 168,
         named_branches: &[
             NamedBranch::Keyword(10, 304, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 304, 1),
@@ -2530,7 +2411,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "divide" => FunctionalEntry {
-        registration_idx: 169,
         named_branches: &[
             NamedBranch::Keyword(10, 183, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 183, 1),
@@ -2541,7 +2421,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "rounded" => FunctionalEntry {
-        registration_idx: 170,
         named_branches: &[
             NamedBranch::Keyword(11, 146, 1),
             NamedBranch::Theme(ThemeNamespace::Radius, 146, 1),
@@ -2552,7 +2431,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "rounded-s" => FunctionalEntry {
-        registration_idx: 171,
         named_branches: &[
             NamedBranch::Keyword(11, 153, 2),
             NamedBranch::Theme(ThemeNamespace::Radius, 153, 2),
@@ -2563,7 +2441,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "rounded-e" => FunctionalEntry {
-        registration_idx: 172,
         named_branches: &[
             NamedBranch::Keyword(11, 154, 2),
             NamedBranch::Theme(ThemeNamespace::Radius, 154, 2),
@@ -2574,7 +2451,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "rounded-t" => FunctionalEntry {
-        registration_idx: 173,
         named_branches: &[
             NamedBranch::Keyword(11, 157, 2),
             NamedBranch::Theme(ThemeNamespace::Radius, 157, 2),
@@ -2585,7 +2461,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "rounded-r" => FunctionalEntry {
-        registration_idx: 174,
         named_branches: &[
             NamedBranch::Keyword(11, 158, 2),
             NamedBranch::Theme(ThemeNamespace::Radius, 158, 2),
@@ -2596,7 +2471,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "rounded-b" => FunctionalEntry {
-        registration_idx: 175,
         named_branches: &[
             NamedBranch::Keyword(11, 159, 2),
             NamedBranch::Theme(ThemeNamespace::Radius, 159, 2),
@@ -2607,7 +2481,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "rounded-l" => FunctionalEntry {
-        registration_idx: 176,
         named_branches: &[
             NamedBranch::Keyword(11, 157, 2),
             NamedBranch::Theme(ThemeNamespace::Radius, 157, 2),
@@ -2618,7 +2491,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "rounded-ss" => FunctionalEntry {
-        registration_idx: 177,
         named_branches: &[
             NamedBranch::Keyword(11, 153, 1),
             NamedBranch::Theme(ThemeNamespace::Radius, 153, 1),
@@ -2629,7 +2501,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "rounded-se" => FunctionalEntry {
-        registration_idx: 178,
         named_branches: &[
             NamedBranch::Keyword(11, 154, 1),
             NamedBranch::Theme(ThemeNamespace::Radius, 154, 1),
@@ -2640,7 +2511,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "rounded-ee" => FunctionalEntry {
-        registration_idx: 179,
         named_branches: &[
             NamedBranch::Keyword(11, 155, 1),
             NamedBranch::Theme(ThemeNamespace::Radius, 155, 1),
@@ -2651,7 +2521,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "rounded-es" => FunctionalEntry {
-        registration_idx: 180,
         named_branches: &[
             NamedBranch::Keyword(11, 156, 1),
             NamedBranch::Theme(ThemeNamespace::Radius, 156, 1),
@@ -2662,7 +2531,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "rounded-tl" => FunctionalEntry {
-        registration_idx: 181,
         named_branches: &[
             NamedBranch::Keyword(11, 157, 1),
             NamedBranch::Theme(ThemeNamespace::Radius, 157, 1),
@@ -2673,7 +2541,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "rounded-tr" => FunctionalEntry {
-        registration_idx: 182,
         named_branches: &[
             NamedBranch::Keyword(11, 158, 1),
             NamedBranch::Theme(ThemeNamespace::Radius, 158, 1),
@@ -2684,7 +2551,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "rounded-br" => FunctionalEntry {
-        registration_idx: 183,
         named_branches: &[
             NamedBranch::Keyword(11, 159, 1),
             NamedBranch::Theme(ThemeNamespace::Radius, 159, 1),
@@ -2695,7 +2561,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "rounded-bl" => FunctionalEntry {
-        registration_idx: 184,
         named_branches: &[
             NamedBranch::Keyword(11, 160, 1),
             NamedBranch::Theme(ThemeNamespace::Radius, 160, 1),
@@ -2706,7 +2571,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "border" => FunctionalEntry {
-        registration_idx: 185,
         named_branches: &[
             NamedBranch::Keyword(10, 183, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 183, 1),
@@ -2720,7 +2584,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "border-x" => FunctionalEntry {
-        registration_idx: 186,
         named_branches: &[
             NamedBranch::Keyword(10, 184, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 184, 1),
@@ -2734,7 +2597,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "border-y" => FunctionalEntry {
-        registration_idx: 187,
         named_branches: &[
             NamedBranch::Keyword(10, 185, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 185, 1),
@@ -2748,7 +2610,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "border-s" => FunctionalEntry {
-        registration_idx: 188,
         named_branches: &[
             NamedBranch::Keyword(10, 186, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 186, 1),
@@ -2762,7 +2623,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "border-e" => FunctionalEntry {
-        registration_idx: 189,
         named_branches: &[
             NamedBranch::Keyword(10, 187, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 187, 1),
@@ -2776,7 +2636,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "border-bs" => FunctionalEntry {
-        registration_idx: 190,
         named_branches: &[
             NamedBranch::Keyword(10, 188, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 188, 1),
@@ -2790,7 +2649,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "border-be" => FunctionalEntry {
-        registration_idx: 191,
         named_branches: &[
             NamedBranch::Keyword(10, 189, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 189, 1),
@@ -2804,7 +2662,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "border-t" => FunctionalEntry {
-        registration_idx: 192,
         named_branches: &[
             NamedBranch::Keyword(10, 190, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 190, 1),
@@ -2818,7 +2675,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "border-r" => FunctionalEntry {
-        registration_idx: 193,
         named_branches: &[
             NamedBranch::Keyword(10, 191, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 191, 1),
@@ -2832,7 +2688,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "border-b" => FunctionalEntry {
-        registration_idx: 194,
         named_branches: &[
             NamedBranch::Keyword(10, 192, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 192, 1),
@@ -2846,7 +2701,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "border-l" => FunctionalEntry {
-        registration_idx: 195,
         named_branches: &[
             NamedBranch::Keyword(10, 193, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 193, 1),
@@ -2860,7 +2714,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "divide-x" => FunctionalEntry {
-        registration_idx: 196,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 354, 4),
         ],
@@ -2870,7 +2723,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "divide-y" => FunctionalEntry {
-        registration_idx: 197,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 133, 5),
         ],
@@ -2880,7 +2732,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "bg-size" => FunctionalEntry {
-        registration_idx: 198,
         named_branches: &[],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(247, 1),
@@ -2888,7 +2739,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "bg-position" => FunctionalEntry {
-        registration_idx: 199,
         named_branches: &[],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(250, 1),
@@ -2896,7 +2746,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "bg-linear" => FunctionalEntry {
-        registration_idx: 201,
         named_branches: &[
             NamedBranch::Keyword(12, 196, 3),
             NamedBranch::Typed(NamedValueType::Number, 196, 3),
@@ -2906,7 +2755,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(196, 2),
         ],
         negative: Some(Distinct {
-            registration_idx: 200,
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, 196, 3),
                 NamedBranch::Typed(NamedValueType::Ratio, 196, 3),
@@ -2917,7 +2765,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         }),
     },
     "bg-conic" => FunctionalEntry {
-        registration_idx: 203,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 196, 2),
             NamedBranch::Typed(NamedValueType::Ratio, 196, 2),
@@ -2925,10 +2772,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(196, 2),
         ],
-        negative: Some(SameBranches { registration_idx: 202 }),
+        negative: Some(SameBranches),
     },
     "bg-radial" => FunctionalEntry {
-        registration_idx: 204,
         named_branches: &[],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(196, 2),
@@ -2936,7 +2782,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "bg" => FunctionalEntry {
-        registration_idx: 205,
         named_branches: &[
             NamedBranch::Keyword(10, 194, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 194, 1),
@@ -2954,7 +2799,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "from" => FunctionalEntry {
-        registration_idx: 206,
         named_branches: &[
             NamedBranch::Keyword(10, 199, 2),
             NamedBranch::Theme(ThemeNamespace::Color, 199, 2),
@@ -2968,7 +2812,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "via" => FunctionalEntry {
-        registration_idx: 207,
         named_branches: &[
             NamedBranch::Keyword(10, 201, 3),
             NamedBranch::Theme(ThemeNamespace::Color, 201, 3),
@@ -2982,7 +2825,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "to" => FunctionalEntry {
-        registration_idx: 208,
         named_branches: &[
             NamedBranch::Keyword(10, 203, 2),
             NamedBranch::Theme(ThemeNamespace::Color, 203, 2),
@@ -2996,7 +2838,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask" => FunctionalEntry {
-        registration_idx: 209,
         named_branches: &[],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 256, 1),
@@ -3008,7 +2849,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-size" => FunctionalEntry {
-        registration_idx: 210,
         named_branches: &[],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(256, 1),
@@ -3016,7 +2856,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-position" => FunctionalEntry {
-        registration_idx: 211,
         named_branches: &[],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(258, 1),
@@ -3024,7 +2863,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-x-from" => FunctionalEntry {
-        registration_idx: 212,
         named_branches: &[
             NamedBranch::Keyword(10, 205, 7),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 7),
@@ -3037,7 +2875,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-x-to" => FunctionalEntry {
-        registration_idx: 213,
         named_branches: &[
             NamedBranch::Keyword(10, 205, 7),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 7),
@@ -3050,7 +2887,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-y-from" => FunctionalEntry {
-        registration_idx: 214,
         named_branches: &[
             NamedBranch::Keyword(10, 205, 7),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 7),
@@ -3063,7 +2899,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-y-to" => FunctionalEntry {
-        registration_idx: 215,
         named_branches: &[
             NamedBranch::Keyword(10, 205, 7),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 7),
@@ -3076,7 +2911,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-t-from" => FunctionalEntry {
-        registration_idx: 216,
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
@@ -3089,7 +2923,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-t-to" => FunctionalEntry {
-        registration_idx: 217,
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
@@ -3102,7 +2935,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-r-from" => FunctionalEntry {
-        registration_idx: 218,
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
@@ -3115,7 +2947,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-r-to" => FunctionalEntry {
-        registration_idx: 219,
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
@@ -3128,7 +2959,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-b-from" => FunctionalEntry {
-        registration_idx: 220,
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
@@ -3141,7 +2971,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-b-to" => FunctionalEntry {
-        registration_idx: 221,
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
@@ -3154,7 +2983,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-l-from" => FunctionalEntry {
-        registration_idx: 222,
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
@@ -3167,7 +2995,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-l-to" => FunctionalEntry {
-        registration_idx: 223,
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
@@ -3180,17 +3007,15 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-linear" => FunctionalEntry {
-        registration_idx: 225,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 205, 4),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 4),
         ],
-        negative: Some(SameBranches { registration_idx: 224 }),
+        negative: Some(SameBranches),
     },
     "mask-linear-from" => FunctionalEntry {
-        registration_idx: 226,
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
@@ -3203,7 +3028,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-linear-to" => FunctionalEntry {
-        registration_idx: 227,
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
@@ -3216,7 +3040,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-radial-at" => FunctionalEntry {
-        registration_idx: 228,
         named_branches: &[],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(235, 1),
@@ -3224,7 +3047,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-radial" => FunctionalEntry {
-        registration_idx: 229,
         named_branches: &[],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 4),
@@ -3232,7 +3054,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-radial-from" => FunctionalEntry {
-        registration_idx: 230,
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
@@ -3245,7 +3066,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-radial-to" => FunctionalEntry {
-        registration_idx: 231,
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
@@ -3258,17 +3078,15 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-conic" => FunctionalEntry {
-        registration_idx: 233,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 205, 4),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 4),
         ],
-        negative: Some(SameBranches { registration_idx: 232 }),
+        negative: Some(SameBranches),
     },
     "mask-conic-from" => FunctionalEntry {
-        registration_idx: 234,
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
@@ -3281,7 +3099,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "mask-conic-to" => FunctionalEntry {
-        registration_idx: 235,
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
@@ -3294,7 +3111,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "fill" => FunctionalEntry {
-        registration_idx: 236,
         named_branches: &[
             NamedBranch::Keyword(10, 261, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 261, 1),
@@ -3305,7 +3121,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "stroke" => FunctionalEntry {
-        registration_idx: 237,
         named_branches: &[
             NamedBranch::Keyword(10, 262, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 262, 1),
@@ -3321,7 +3136,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "object" => FunctionalEntry {
-        registration_idx: 238,
         named_branches: &[
             NamedBranch::Keyword(6, 265, 1),
         ],
@@ -3331,7 +3145,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "p" => FunctionalEntry {
-        registration_idx: 239,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 266, 1),
             NamedBranch::Typed(NamedValueType::Number, 266, 1),
@@ -3342,7 +3155,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "px" => FunctionalEntry {
-        registration_idx: 240,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 267, 1),
             NamedBranch::Typed(NamedValueType::Number, 267, 1),
@@ -3353,7 +3165,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "py" => FunctionalEntry {
-        registration_idx: 241,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 268, 1),
             NamedBranch::Typed(NamedValueType::Number, 268, 1),
@@ -3364,7 +3175,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "ps" => FunctionalEntry {
-        registration_idx: 242,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 269, 1),
             NamedBranch::Typed(NamedValueType::Number, 269, 1),
@@ -3375,7 +3185,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "pe" => FunctionalEntry {
-        registration_idx: 243,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 270, 1),
             NamedBranch::Typed(NamedValueType::Number, 270, 1),
@@ -3386,7 +3195,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "pbs" => FunctionalEntry {
-        registration_idx: 244,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 271, 1),
             NamedBranch::Typed(NamedValueType::Number, 271, 1),
@@ -3397,7 +3205,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "pbe" => FunctionalEntry {
-        registration_idx: 245,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 272, 1),
             NamedBranch::Typed(NamedValueType::Number, 272, 1),
@@ -3408,7 +3215,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "pt" => FunctionalEntry {
-        registration_idx: 246,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 273, 1),
             NamedBranch::Typed(NamedValueType::Number, 273, 1),
@@ -3419,7 +3225,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "pr" => FunctionalEntry {
-        registration_idx: 247,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 274, 1),
             NamedBranch::Typed(NamedValueType::Number, 274, 1),
@@ -3430,7 +3235,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "pb" => FunctionalEntry {
-        registration_idx: 248,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 275, 1),
             NamedBranch::Typed(NamedValueType::Number, 275, 1),
@@ -3441,7 +3245,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "pl" => FunctionalEntry {
-        registration_idx: 249,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 276, 1),
             NamedBranch::Typed(NamedValueType::Number, 276, 1),
@@ -3452,7 +3255,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "indent" => FunctionalEntry {
-        registration_idx: 251,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 278, 1),
             NamedBranch::Typed(NamedValueType::Number, 278, 1),
@@ -3460,10 +3262,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(278, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 250 }),
+        negative: Some(SameBranches),
     },
     "align" => FunctionalEntry {
-        registration_idx: 252,
         named_branches: &[],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(279, 1),
@@ -3471,7 +3272,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "font" => FunctionalEntry {
-        registration_idx: 253,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Font, 280, 1),
             NamedBranch::Theme(ThemeNamespace::FontWeight, 354, 2),
@@ -3497,7 +3297,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "font-features" => FunctionalEntry {
-        registration_idx: 254,
         named_branches: &[],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(281, 1),
@@ -3505,7 +3304,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "font-stretch" => FunctionalEntry {
-        registration_idx: 255,
         named_branches: &[],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(295, 1),
@@ -3513,7 +3311,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "placeholder" => FunctionalEntry {
-        registration_idx: 256,
         named_branches: &[
             NamedBranch::Keyword(10, 292, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 292, 1),
@@ -3524,7 +3321,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "decoration" => FunctionalEntry {
-        registration_idx: 257,
         named_branches: &[
             NamedBranch::Keyword(10, 298, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 298, 1),
@@ -3538,7 +3334,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "animate" => FunctionalEntry {
-        registration_idx: 258,
         named_branches: &[
             NamedBranch::Keyword(3, 72, 1),
             NamedBranch::Theme(ThemeNamespace::Animate, 72, 1),
@@ -3549,7 +3344,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "filter" => FunctionalEntry {
-        registration_idx: 259,
         named_branches: &[],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(334, 1),
@@ -3557,7 +3351,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "backdrop-filter" => FunctionalEntry {
-        registration_idx: 260,
         named_branches: &[],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(354, 2),
@@ -3565,7 +3358,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "blur" => FunctionalEntry {
-        registration_idx: 261,
         named_branches: &[
             NamedBranch::Keyword(3, 325, 2),
             NamedBranch::Theme(ThemeNamespace::Blur, 325, 2),
@@ -3576,7 +3368,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "backdrop-blur" => FunctionalEntry {
-        registration_idx: 262,
         named_branches: &[
             NamedBranch::Keyword(3, 335, 3),
             NamedBranch::Theme(ThemeNamespace::Blur, 335, 3),
@@ -3587,7 +3378,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "brightness" => FunctionalEntry {
-        registration_idx: 263,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 326, 2),
         ],
@@ -3597,7 +3387,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "backdrop-brightness" => FunctionalEntry {
-        registration_idx: 264,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 336, 3),
         ],
@@ -3607,7 +3396,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "contrast" => FunctionalEntry {
-        registration_idx: 265,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 327, 2),
         ],
@@ -3617,7 +3405,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "backdrop-contrast" => FunctionalEntry {
-        registration_idx: 266,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 337, 3),
         ],
@@ -3627,7 +3414,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "grayscale" => FunctionalEntry {
-        registration_idx: 267,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 329, 2),
         ],
@@ -3637,7 +3423,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "backdrop-grayscale" => FunctionalEntry {
-        registration_idx: 268,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 338, 3),
         ],
@@ -3647,27 +3432,24 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "hue-rotate" => FunctionalEntry {
-        registration_idx: 270,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 330, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(330, 2),
         ],
-        negative: Some(SameBranches { registration_idx: 269 }),
+        negative: Some(SameBranches),
     },
     "backdrop-hue-rotate" => FunctionalEntry {
-        registration_idx: 272,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 339, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(339, 3),
         ],
-        negative: Some(SameBranches { registration_idx: 271 }),
+        negative: Some(SameBranches),
     },
     "invert" => FunctionalEntry {
-        registration_idx: 273,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 331, 2),
         ],
@@ -3677,7 +3459,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "backdrop-invert" => FunctionalEntry {
-        registration_idx: 274,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 340, 3),
         ],
@@ -3687,7 +3468,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "saturate" => FunctionalEntry {
-        registration_idx: 275,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 332, 2),
         ],
@@ -3697,7 +3477,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "backdrop-saturate" => FunctionalEntry {
-        registration_idx: 276,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 342, 3),
         ],
@@ -3707,7 +3486,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "sepia" => FunctionalEntry {
-        registration_idx: 277,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 333, 2),
         ],
@@ -3717,7 +3495,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "backdrop-sepia" => FunctionalEntry {
-        registration_idx: 278,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 343, 3),
         ],
@@ -3727,7 +3504,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "drop-shadow" => FunctionalEntry {
-        registration_idx: 279,
         named_branches: &[
             NamedBranch::Keyword(10, 354, 2),
             NamedBranch::Theme(ThemeNamespace::Color, 354, 2),
@@ -3740,7 +3516,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "backdrop-opacity" => FunctionalEntry {
-        registration_idx: 280,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 341, 3),
         ],
@@ -3750,7 +3525,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "transition" => FunctionalEntry {
-        registration_idx: 281,
         named_branches: &[
             NamedBranch::Keyword(13, 345, 3),
             NamedBranch::Keyword(3, 345, 1),
@@ -3761,7 +3535,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "delay" => FunctionalEntry {
-        registration_idx: 282,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 347, 1),
         ],
@@ -3771,7 +3544,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "duration" => FunctionalEntry {
-        registration_idx: 283,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 354, 2),
         ],
@@ -3781,7 +3553,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "ease" => FunctionalEntry {
-        registration_idx: 284,
         named_branches: &[
             NamedBranch::Keyword(14, 354, 1),
             NamedBranch::Keyword(15, 354, 2),
@@ -3793,7 +3564,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "will-change" => FunctionalEntry {
-        registration_idx: 285,
         named_branches: &[],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(350, 1),
@@ -3801,7 +3571,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "content" => FunctionalEntry {
-        registration_idx: 286,
         named_branches: &[],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(354, 2),
@@ -3809,7 +3578,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "contain" => FunctionalEntry {
-        registration_idx: 287,
         named_branches: &[],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(351, 1),
@@ -3817,7 +3585,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "leading" => FunctionalEntry {
-        registration_idx: 288,
         named_branches: &[
             NamedBranch::Keyword(3, 354, 2),
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 2),
@@ -3830,17 +3597,15 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "tracking" => FunctionalEntry {
-        registration_idx: 290,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Tracking, 354, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(354, 2),
         ],
-        negative: Some(SameBranches { registration_idx: 289 }),
+        negative: Some(SameBranches),
     },
     "outline" => FunctionalEntry {
-        registration_idx: 291,
         named_branches: &[
             NamedBranch::Keyword(10, 324, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 324, 1),
@@ -3855,17 +3620,15 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "outline-offset" => FunctionalEntry {
-        registration_idx: 293,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 323, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(323, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 292 }),
+        negative: Some(SameBranches),
     },
     "opacity" => FunctionalEntry {
-        registration_idx: 294,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 307, 1),
         ],
@@ -3875,7 +3638,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "underline-offset" => FunctionalEntry {
-        registration_idx: 296,
         named_branches: &[
             NamedBranch::Keyword(0, 301, 1),
             NamedBranch::Typed(NamedValueType::Number, 301, 1),
@@ -3884,7 +3646,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             ArbitraryBranch::Fallback(301, 1),
         ],
         negative: Some(Distinct {
-            registration_idx: 295,
             named_branches: &[
                 NamedBranch::Typed(NamedValueType::Number, 301, 1),
             ],
@@ -3894,7 +3655,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         }),
     },
     "text" => FunctionalEntry {
-        registration_idx: 297,
         named_branches: &[
             NamedBranch::Keyword(10, 292, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 292, 1),
@@ -3910,7 +3670,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "text-shadow" => FunctionalEntry {
-        registration_idx: 298,
         named_branches: &[
             NamedBranch::Keyword(10, 354, 1),
             NamedBranch::Keyword(3, 354, 1),
@@ -3924,7 +3683,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "shadow" => FunctionalEntry {
-        registration_idx: 299,
         named_branches: &[
             NamedBranch::Keyword(10, 312, 1),
             NamedBranch::Keyword(3, 311, 2),
@@ -3938,7 +3696,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "inset-shadow" => FunctionalEntry {
-        registration_idx: 300,
         named_branches: &[
             NamedBranch::Keyword(10, 316, 1),
             NamedBranch::Keyword(3, 315, 2),
@@ -3952,7 +3709,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "ring" => FunctionalEntry {
-        registration_idx: 301,
         named_branches: &[
             NamedBranch::Keyword(10, 314, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 314, 1),
@@ -3965,7 +3721,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "inset-ring" => FunctionalEntry {
-        registration_idx: 302,
         named_branches: &[
             NamedBranch::Keyword(10, 318, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 318, 1),
@@ -3978,7 +3733,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "ring-offset" => FunctionalEntry {
-        registration_idx: 303,
         named_branches: &[
             NamedBranch::Keyword(10, 320, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 320, 1),
@@ -3991,7 +3745,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "@container" => FunctionalEntry {
-        registration_idx: 304,
         named_branches: &[],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(0, 1),
@@ -3999,7 +3752,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "flex-shrink" => FunctionalEntry {
-        registration_idx: 305,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 49, 1),
         ],
@@ -4009,7 +3761,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "flex-grow" => FunctionalEntry {
-        registration_idx: 306,
         named_branches: &[
             NamedBranch::Typed(NamedValueType::Number, 50, 1),
         ],
@@ -4019,7 +3770,6 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "start" => FunctionalEntry {
-        registration_idx: 308,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 7, 1),
             NamedBranch::Typed(NamedValueType::Number, 7, 1),
@@ -4028,10 +3778,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(7, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 307 }),
+        negative: Some(SameBranches),
     },
     "end" => FunctionalEntry {
-        registration_idx: 310,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 8, 1),
             NamedBranch::Typed(NamedValueType::Number, 8, 1),
@@ -4040,7 +3789,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(8, 1),
         ],
-        negative: Some(SameBranches { registration_idx: 309 }),
+        negative: Some(SameBranches),
     },
 };
 

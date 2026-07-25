@@ -1,13 +1,21 @@
 [
 	// ─── static utilities ──────────────────────────────────────────
 	// STATIC_UTILITIES exact-match keywords. Sorted by property_idx,
-	// then property_count desc, then registration_idx.
+	// then property_count desc, then name.
 
 	"flex block absolute",
 	"static visible flex",                         // already sorted
 	"sr-only block flex absolute relative",        // sr-only multi-prop floats up
-	"pointer-events-none collapse static visible", // visibility group tie-broken by reg_idx
+	"pointer-events-none collapse static visible", // visibility bucket ordered by name
 	"flex",                                        // single-token passthrough
+
+	// distinct static utilities inside one property bucket order by
+	// name, the way Tailwind emits them — not by utility registration
+	// order. Expected order cross-checked against
+	// prettier-plugin-tailwindcss 0.8.0.
+	"inline flex block hidden grid table contents", // display bucket, name order
+	"visible collapse invisible",                   // visibility bucket, name order
+	"sticky static relative fixed absolute",        // position bucket, name order
 
 	// ─── functional + named value ──────────────────────────────────
 	// Named (theme namespace), NamedKeyword (hardcoded keyword pool),
@@ -27,11 +35,12 @@
 	"font-medium font-sans p-4",
 
 	// w basename — Named(Spacing) for `--spacing-*` keys,
-	// NamedTyped(Number) for bare integers, NamedTyped(Ratio) for fractions.
+	// NamedTyped(Number) for bare integers, NamedTyped(Ratio) for fractions,
+	// and whole-name static registrations for the named values.
 	"w-10 flex p-4",         // NamedTyped(Number)
 	"w-1/2 flex p-4",        // NamedTyped(Ratio)
-	"w-full flex p-4",       // `full` is no `--spacing-*` key in the default theme → Unknown
-	"w-screen w-10 w-full",  // full/screen aren't --spacing-* keys → Unknown floats front
+	"w-full flex p-4",       // `w-full` is a static registration for the whole name
+	"w-screen w-10 w-full",  // statics join the width bucket and order by name
 
 	// aspect basename — NamedKeyword pool (auto/square),
 	// Named(Aspect) (theme keys like `video`), NamedTyped(Ratio).
@@ -41,21 +50,53 @@
 
 	// ─── negative-prefixed functional utilities ────────────────────
 	// Parser splits `-` off; classify routes through `entry.negative`
-	// to pick the correct (registration_idx, branches) slot.
+	// to pick the correct branch slot, and the sign joins the name so
+	// negatives group before positives inside a bucket (`-` precedes
+	// every letter in code-point order).
 
 	"p-4 flex -mt-2",            // SameBranches: -mt reuses mt's branches
-	"flex mt-3 -mt-2",           // negative + positive of same basename, distinct reg_idx
-	"flex -mt-2 -inset-2",       // two SameBranches negatives sorted by their own reg_idx
+	"flex mt-3 -mt-2",           // negative + positive of same basename, sign orders first
+	"flex -mt-2 -inset-2",       // two negatives in distinct property buckets
 	"flex -bg-red-500 p-4",      // -bg has no negative entry → Unknown → floats to front
 	"p-4 flex -z-auto",          // -z drops NamedKeyword(auto) → resolve fails → Unknown
 	"p-4 flex -z-10",            // Distinct: -z keeps NamedTyped(Number), routes to z-index
 
 	// negative static utilities. The parser strips the leading `-` and
-	// hands us a TwStaticCandidate; classify uses
-	// `negative_registration_idx` to pick the matching slot, falling
-	// back to Unknown when it's `None` (Tailwind doesn't register a
-	// negative form).
-	"flex p-4 -flex",            // -flex: negative_registration_idx is None → Unknown
+	// hands us a TwStaticCandidate; classify keeps the entry only when
+	// Tailwind registers a negative form (`has_negative`), falling back
+	// to Unknown otherwise.
+	"flex p-4 -flex",            // -flex: has_negative is false → Unknown
+
+	// ─── statics that parse as functional candidates ───────────────
+	// The grammar splits any dashed name into base and value, but
+	// Tailwind registers many such names as static utilities; the whole
+	// name resolves through the static table before functional roots and
+	// orders by name inside its property bucket. Expected order
+	// cross-checked against prettier-plugin-tailwindcss 0.8.0.
+
+	"w-px w-full w-screen w-10 w-4 w-auto",         // statics interleave with functional widths by name
+	"m-auto m-4 m-px m-2",                          // margin family
+	"h-full h-4 h-screen",                          // height family
+	"flex-none flex-1 flex-auto",                   // statics + functional flex
+	"justify-center items-center flex",             // pure-static families keep bucket order
+	"table-caption inline-block flow-root block",   // display statics, none with a functional base
+	"inline-flex inline-grid inline-table inline",  // shared prefix, bare name first
+	"truncate text-clip text-ellipsis",             // truncate's own bucket precedes text-overflow
+	"col-span-full col-span-2 col-auto",            // static, functional, and keyword forms in one bucket
+	"grid-cols-subgrid grid-cols-2",                // keyword branch and functional value order by name
+	"order-none order-first order-2 order-1 order-last", // digits precede letters
+	"overflow-x-hidden overflow-hidden overflow-auto",   // overflow buckets, then name
+	"aspect-video aspect-square aspect-auto aspect-9/16", // theme, keyword, and ratio forms in one bucket
+	"-m-px m-px -m-4 m-4",   // negative statics carry the sign in the name
+	"-w-full flex",          // Tailwind registers no -w-full → Unknown floats front
+	"w-full! w-full w-10",   // important static twin sorts plain-first
+	"w-full/50 w-full w-10", // statics take no modifier → w-full/50 is Unknown
+
+	// Divergence from prettier-plugin-tailwindcss 0.8.0: the plugin
+	// emits `size-*` before `h-*` (its size bucket sorts by the first
+	// declaration, height), while the preset records width as the sort
+	// property for `size`. Same-bucket name order is otherwise exact.
+	"size-full size-4 w-4 h-4",
 
 	// ─── unknown classes ───────────────────────────────────────────
 	// Tokens that resolve to no branch float to the front and keep
@@ -93,9 +134,9 @@
 	"ring-[4px] p-[calc(100%-1rem)] bg-[cover] shadow-[#000] [mask-type:luminance] text-[20px] from-[20%] bg-[url('/hero.png')] border-[2px] flex",
 
 	// ─── arbitrary value modifiers ─────────────────────────────────
-	// Modifiers do not contribute to the sort key for arbitrary values;
-	// the base utility and arbitrary value still determine the property
-	// bucket.
+	// Modifiers ride along in the candidate name; the base utility and
+	// arbitrary value still determine the property bucket, which decides
+	// each of these cases.
 
 	"ring-[#000]/50 text-[20px]/8 border-[#f00]/50 flex bg-[#fff]/50",
 	"text-[#fff]/50 text-[20px]/8 flex",
@@ -113,10 +154,10 @@
 	"mask-linear-to-75% mask-linear-from-25%",                    // mask gradient stops
 
 	// ─── value ordering within a utility ───────────────────────────
-	// Candidates sharing a (property, registration) placement order by
-	// natural comparison of their value text (digit runs compare
-	// numerically), then modifier. Expected order cross-checked against
-	// prettier-plugin-tailwindcss 0.8.0.
+	// Candidates sharing a property bucket order by natural comparison
+	// of their name (digit runs compare numerically), which for one
+	// basename is the value text, then the modifier. Expected order
+	// cross-checked against prettier-plugin-tailwindcss 0.8.0.
 
 	"p-10 p-2 p-4",                     // numeric, not lexicographic
 	"p-2.5 p-2 p-10",                   // decimal segments compare piecewise
