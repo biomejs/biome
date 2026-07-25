@@ -1,0 +1,68 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: elements/preformatted.html
+---
+
+# Input
+
+```html
+<div>
+<textarea>
+  A leading newline, trailing spaces, and	tabs are all part of the value.
+</textarea>
+<textarea>on one line  with   runs of spaces</textarea>
+<textarea></textarea>
+<textarea>
+</textarea>
+<textarea rows="4" cols="20">
+line one
+    line two
+</textarea>
+<xmp>
+  x  y
+z
+</xmp>
+<plaintext>
+  a  b
+</plaintext>
+</div>
+
+```
+
+
+# Formatted
+
+```html
+<div>
+	<textarea>
+  A leading newline, trailing spaces, and	tabs are all part of the value.
+</textarea>
+	<textarea>on one line  with   runs of spaces</textarea>
+	<textarea></textarea>
+	<textarea>
+</textarea>
+	<textarea rows="4" cols="20">
+line one
+    line two
+</textarea>
+	<xmp>
+  x  y
+z
+</xmp>
+	<plaintext>
+  a  b
+</plaintext>
+</div>
+
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"\n  A leading newline, trailing spaces, and\ttabs are all part of the value.\n" => 17..92
+"on one line  with   runs of spaces" => 115..149
+"\n" => 195..196
+"\nline one\n    line two\n" => 238..261
+"\n  x  y\nz\n" => 279..289
+"\n  a  b\n" => 308..316

@@ -1,5 +1,6 @@
 use crate::html::lists::element_list::{FormatHtmlElementListOptions, HtmlChildListLayout};
 use crate::utils::css_display::{CssDisplay, get_css_display, get_css_display_from_tag};
+use crate::utils::metadata::get_css_whitespace;
 use crate::verbatim::{format_html_leading_comments, format_html_leading_comments_for_block};
 use crate::{html::lists::element_list::FormatHtmlElementList, prelude::*};
 use biome_formatter::{CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, write};
@@ -15,10 +16,19 @@ use super::{
     opening_element::{FormatHtmlOpeningElement, FormatHtmlOpeningElementOptions},
 };
 
-/// `pre` tags are "preformatted", so we should not format the content inside them. <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/pre>
-/// We ignore the `script` and `style` tags as well, since embedded language parsing/formatting is not yet implemented.
+/// Whether the content of `tag_name` has to be printed exactly as it appears in the source.
 ///
-const HTML_VERBATIM_TAGS: &[&str] = &["script", "style", "pre"];
+/// `script` and `style` hold an embedded language, which is either handed to the
+/// matching formatter or left alone. Everything else in this set is
+/// preformatted: the user-agent stylesheet gives it a `white-space` value that
+/// keeps newlines and runs of spaces, so reflowing the content would change
+/// what the page renders. `<textarea>` is the sharpest example, since its text
+/// is the value of a form field.
+fn is_verbatim_tag(tag_name: &str) -> bool {
+    tag_name.eq_ignore_ascii_case("script")
+        || tag_name.eq_ignore_ascii_case("style")
+        || get_css_whitespace(tag_name).preserves_content()
+}
 
 /// Helper to get token text from any tag name variant
 fn get_tag_name_text(name: &AnyHtmlTagName) -> Option<TokenText> {
@@ -157,11 +167,10 @@ impl FormatHtmlElement {
             .is_some_and(|tt| tt.to_ascii_lowercase_cow() == "template");
         let should_be_verbatim = match tag_name {
             AnyHtmlTagName::HtmlComponentName(_) | AnyHtmlTagName::HtmlMemberName(_) => false,
-            AnyHtmlTagName::HtmlTagName(tag_name) => HTML_VERBATIM_TAGS.iter().any(|tag| {
-                tag_name.value_token().as_ref().is_ok_and(|tag_name_token| {
-                    tag_name_token.text_trimmed().eq_ignore_ascii_case(tag)
-                })
-            }),
+            AnyHtmlTagName::HtmlTagName(tag_name) => tag_name
+                .value_token()
+                .as_ref()
+                .is_ok_and(|tag_name_token| is_verbatim_tag(tag_name_token.text_trimmed())),
         };
 
         let should_format_embedded_nodes = if f.context().should_delegate_fmt_embedded_nodes() {
@@ -270,7 +279,11 @@ impl FormatHtmlElement {
         if should_format_embedded_nodes {
             write!(f, [children.format()])?;
         } else if should_be_verbatim {
-            write!(f, [&format_html_verbatim_node(children.syntax())])?;
+            // An element with no children has nothing to reproduce, and asking
+            // for it anyway would record an empty range as verbatim.
+            if !children.is_empty() {
+                write!(f, [&format_html_verbatim_node(children.syntax())])?;
+            }
         } else {
             // Use BestFitting layout to allow the formatter to choose between
             // flat and expanded versions. The `if_group_breaks`/`if_group_fits_on_line`

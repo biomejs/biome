@@ -174,7 +174,23 @@ impl RestrictedExpressionStopAt {
 pub(crate) enum HtmlEmbeddedLanguage {
     Script,
     Style,
-    Preformatted,
+    /// An element whose text the user-agent stylesheet renders with a
+    /// `white-space` value that keeps newlines and runs of spaces. Lexing the
+    /// text as a single literal is what lets the formatter reproduce it
+    /// byte for byte; splitting it into markup would lose the whitespace to
+    /// trivia.
+    Preformatted(PreformattedElement),
+}
+
+/// The preformatted elements, each identified by the closing tag that ends its
+/// text. `pre` renders as `white-space: pre` and `textarea` as `pre-wrap`;
+/// `xmp` and `plaintext` are obsolete but browsers still read them as raw text.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum PreformattedElement {
+    Pre,
+    Textarea,
+    Xmp,
+    Plaintext,
 }
 
 impl HtmlEmbeddedLanguage {
@@ -182,7 +198,12 @@ impl HtmlEmbeddedLanguage {
         match self {
             Self::Script => "</script>",
             Self::Style => "</style>",
-            Self::Preformatted => "</pre>",
+            Self::Preformatted(element) => match element {
+                PreformattedElement::Pre => "</pre>",
+                PreformattedElement::Textarea => "</textarea>",
+                PreformattedElement::Xmp => "</xmp>",
+                PreformattedElement::Plaintext => "</plaintext>",
+            },
         }
     }
 }

@@ -918,7 +918,18 @@ pub(crate) enum CssWhitespace {
     PreserveNoWrap,
 }
 
-#[cfg_attr(not(test), expect(dead_code))]
+impl CssWhitespace {
+    /// Whether this mode keeps newlines and runs of spaces in the element's
+    /// text, which makes that text whitespace-sensitive.
+    ///
+    /// `PreLine` is deliberately excluded: it keeps newlines but still
+    /// collapses runs of spaces, so its content can be reflowed in part and
+    /// isn't verbatim.
+    pub(crate) fn preserves_content(self) -> bool {
+        matches!(self, Self::Pre | Self::PreWrap)
+    }
+}
+
 pub(crate) fn get_css_whitespace(tag_name: &str) -> CssWhitespace {
     // Mirrors Prettier's CSS white-space lookup:
     // prettier/src/language-html/constants.evaluate.js
