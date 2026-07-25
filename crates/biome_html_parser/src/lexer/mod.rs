@@ -1002,8 +1002,16 @@ impl<'src> HtmlLexer<'src> {
         self.assert_current_char_boundary();
 
         const BUFFER_SIZE: usize = 14;
+        let lowercase_buffer = matches!(
+            &context,
+            IdentifierContext::Doctype | IdentifierContext::None
+        );
         let mut buffer = [0u8; BUFFER_SIZE];
-        buffer[0] = first;
+        buffer[0] = if lowercase_buffer {
+            first.to_ascii_lowercase()
+        } else {
+            first
+        };
         let mut len = 1;
 
         self.advance_byte_or_char(first);
@@ -1013,7 +1021,7 @@ impl<'src> HtmlLexer<'src> {
                 IdentifierContext::Doctype | IdentifierContext::None => {
                     if is_attribute_name_byte(byte) {
                         if len < BUFFER_SIZE {
-                            buffer[len] = byte;
+                            buffer[len] = byte.to_ascii_lowercase();
                             len += 1;
                         }
 
@@ -1099,8 +1107,8 @@ impl<'src> HtmlLexer<'src> {
         }
 
         match &buffer[..len] {
-            b"doctype" | b"DOCTYPE" => DOCTYPE_KW,
-            b"html" | b"HTML" if context.is_doctype() => HTML_KW,
+            b"doctype" => DOCTYPE_KW,
+            b"html" if context.is_doctype() => HTML_KW,
             b"client" if context.is_astro() && self.current_byte() == Some(b':') => CLIENT_KW,
             b"set" if context.is_astro() && self.current_byte() == Some(b':') => SET_KW,
             b"class" if context.is_astro() && self.current_byte() == Some(b':') => CLASS_KW,
