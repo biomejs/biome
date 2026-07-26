@@ -1,0 +1,63 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/whitespace-between-tags-and-text.svelte
+---
+
+# Input
+
+```svelte
+<div>
+
+    <Tag />
+    Text
+    <Tag />
+
+    Text
+
+    <Tag />
+
+
+    Text
+
+
+    <Tag />
+
+
+</div>
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,11 +2,9 @@
+     <Tag />
+     Text
+     <Tag />
+-
+     Text
+ 
+     <Tag />
+-
+     Text
+ 
+     <Tag />
+```
+
+# Output
+
+```svelte
+<div>
+    <Tag />
+    Text
+    <Tag />
+    Text
+
+    <Tag />
+    Text
+
+    <Tag />
+</div>
+```

@@ -1,0 +1,112 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/attributes-class.svelte
+---
+
+# Input
+
+```svelte
+<button
+    class="bg-green-500 text-gray-100 hover:bg-green-400 flex items-center px-4 py-2 border border-l-0        rounded-r "
+>
+    Copy
+</button>
+<div
+    class="bg-green-500 text-gray-100 hover:bg-green-400       flex items-center px-4 py-2 border border-l-0 rounded-r"
+>
+    Copy
+</div>
+<span
+    class="bg-green-500 text-gray-100 hover:bg-green-400 flex 
+    
+    items-center px-4 py-2 border border-l-0 rounded-r "
+>
+    Copy
+</span>
+<p
+    class="bg-green-500 
+    text-gray-100 hover:bg-green-400 flex items-center px-4 py-2 border border-l-0 rounded-r 
+    "
+>
+    Copy
+</p>
+
+<P class="leave me   alone   because I'm a prop  " />
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,23 +1,23 @@
+ <button
+-    class="bg-green-500 text-gray-100 hover:bg-green-400 flex items-center px-4 py-2 border border-l-0 rounded-r"
++    class="bg-green-500 text-gray-100 hover:bg-green-400 flex items-center px-4 py-2 border border-l-0        rounded-r "
+ >
+     Copy
+ </button>
+ <div
+-    class="bg-green-500 text-gray-100 hover:bg-green-400 flex items-center px-4 py-2 border border-l-0 rounded-r"
++    class="bg-green-500 text-gray-100 hover:bg-green-400       flex items-center px-4 py-2 border border-l-0 rounded-r"
+ >
+     Copy
+ </div>
+ <span
+-    class="bg-green-500 text-gray-100 hover:bg-green-400 flex
++    class="bg-green-500 text-gray-100 hover:bg-green-400 flex 
+     
+-    items-center px-4 py-2 border border-l-0 rounded-r"
++    items-center px-4 py-2 border border-l-0 rounded-r "
+ >
+     Copy
+ </span>
+ <p
+-    class="bg-green-500
+-    text-gray-100 hover:bg-green-400 flex items-center px-4 py-2 border border-l-0 rounded-r
++    class="bg-green-500 
++    text-gray-100 hover:bg-green-400 flex items-center px-4 py-2 border border-l-0 rounded-r 
+     "
+ >
+     Copy
+```
+
+# Output
+
+```svelte
+<button
+    class="bg-green-500 text-gray-100 hover:bg-green-400 flex items-center px-4 py-2 border border-l-0        rounded-r "
+>
+    Copy
+</button>
+<div
+    class="bg-green-500 text-gray-100 hover:bg-green-400       flex items-center px-4 py-2 border border-l-0 rounded-r"
+>
+    Copy
+</div>
+<span
+    class="bg-green-500 text-gray-100 hover:bg-green-400 flex 
+    
+    items-center px-4 py-2 border border-l-0 rounded-r "
+>
+    Copy
+</span>
+<p
+    class="bg-green-500 
+    text-gray-100 hover:bg-green-400 flex items-center px-4 py-2 border border-l-0 rounded-r 
+    "
+>
+    Copy
+</p>
+
+<P class="leave me   alone   because I'm a prop  " />
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2:     class="bg-green-500 text-gray-100 hover:bg-green-400 flex items-center px-4 py-2 border border-l-0        rounded-r "
+    7:     class="bg-green-500 text-gray-100 hover:bg-green-400       flex items-center px-4 py-2 border border-l-0 rounded-r"
+   20:     text-gray-100 hover:bg-green-400 flex items-center px-4 py-2 border border-l-0 rounded-r 
+```
