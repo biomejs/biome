@@ -56,14 +56,6 @@ comments:
    given: Chris
    family: Dumars
    address:
-@@ -25,5 +25,5 @@
- tax: 251.42
- total: 4443.52
- comments: Late afternoon is best.
--  Backup contact is Nancy
--  Billsmer @ 338-4338.
-+    Backup contact is Nancy
-+    Billsmer @ 338-4338.
 ```
 
 # Output
@@ -96,6 +88,6 @@ product:
 tax: 251.42
 total: 4443.52
 comments: Late afternoon is best.
-    Backup contact is Nancy
-    Billsmer @ 338-4338.
+  Backup contact is Nancy
+  Billsmer @ 338-4338.
 ```
