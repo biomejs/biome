@@ -292,7 +292,7 @@ fn parse_processing_instruction(p: &mut HtmlParser) -> ParsedSyntax {
         ));
     }
 
-    AttributeList.parse_list(p);
+    AttributeList::default().parse_list(p);
 
     p.expect(T![?>]);
 
@@ -304,19 +304,19 @@ fn parse_processing_instruction(p: &mut HtmlParser) -> ParsedSyntax {
 ///
 /// `<script>` and `<style>` are excluded because the embedded-language path
 /// already handles them. A `<template>` is markup unless a `lang` attribute
-/// hands it to a preprocessor such as Pug. Everything else is a custom block
-/// like `<i18n>` or `<docs>`, whose content the SFC spec leaves entirely to
-/// whichever tool consumes it, so it may not even be markup.
+/// names a preprocessor such as Pug; which one it names doesn't matter, since
+/// nobody writes out the markup default. Everything else is a custom block like
+/// `<i18n>` or `<docs>`, whose content the SFC spec leaves entirely to whichever
+/// tool consumes it, so it may not even be markup.
 ///
 /// `<html>` is excluded as well: a document that opens with it is a plain HTML
 /// page that happens to carry a `.vue` extension, not a component.
 ///
 /// See <https://vuejs.org/api/sfc-spec.html#custom-blocks>.
-fn is_vue_raw_text_block(name_kind: HtmlSyntaxKind, attributes: &str) -> bool {
+fn is_vue_raw_text_block(name_kind: HtmlSyntaxKind, has_lang_value: bool) -> bool {
     match name_kind {
         T![script] | T![style] | T![html] => false,
-        T![template] => find_attribute_value(attributes, "lang")
-            .is_some_and(|lang| !lang.is_empty() && !lang.eq_ignore_ascii_case("html")),
+        T![template] => has_lang_value,
         _ => true,
     }
 }
@@ -342,57 +342,6 @@ fn has_closing_tag(source: &str, from: TextSize, name: &str) -> bool {
                 .trim_start_matches([' ', '\t', '\n', '\r', '\x0C'])
                 .starts_with('>')
     })
-}
-
-/// Reads the value of `name` out of the attribute region of an opening tag.
-///
-/// Returns `None` when the attribute is absent, and an empty string when it is
-/// present without a value. The region has already been delimited by the
-/// attribute parser, so this only has to walk name/value pairs to avoid
-/// matching a `name` that appears inside some other attribute's value.
-fn find_attribute_value<'a>(attributes: &'a str, name: &str) -> Option<&'a str> {
-    let mut rest = attributes;
-    loop {
-        rest = rest.trim_start();
-        if rest.is_empty() {
-            return None;
-        }
-
-        let name_end = rest
-            .find(|c: char| c == '=' || c.is_whitespace())
-            .unwrap_or(rest.len());
-        let (attribute_name, after_name) = rest.split_at(name_end);
-        let after_name = after_name.trim_start();
-
-        let Some(after_eq) = after_name.strip_prefix('=') else {
-            // A valueless attribute; the rest of `after_name` is the next one.
-            if attribute_name.eq_ignore_ascii_case(name) {
-                return Some("");
-            }
-            rest = after_name;
-            continue;
-        };
-
-        let after_eq = after_eq.trim_start();
-        let (value, remainder) = match after_eq.chars().next() {
-            Some(quote @ ('"' | '\'')) => {
-                let inner = &after_eq[quote.len_utf8()..];
-                match inner.find(quote) {
-                    Some(end) => (&inner[..end], &inner[end + quote.len_utf8()..]),
-                    None => (inner, ""),
-                }
-            }
-            _ => {
-                let end = after_eq.find(char::is_whitespace).unwrap_or(after_eq.len());
-                after_eq.split_at(end)
-            }
-        };
-
-        if attribute_name.eq_ignore_ascii_case(name) {
-            return Some(value);
-        }
-        rest = remainder;
-    }
 }
 
 fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
@@ -433,16 +382,12 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
         _ => {}
     }
 
-    // The attribute region runs from here to the `>` the list stops at, so the
-    // `lang` lookup below reads a span the parser has already delimited.
-    let attributes_start = p.cur_range().start();
-    AttributeList.parse_list(p);
-    let attributes = p
-        .source_text()
-        .get(usize::from(attributes_start)..usize::from(p.cur_range().start()))
-        .unwrap_or_default();
+    // Only a top-level block of a single-file component asks about `lang`, so
+    // the list looks for it there and nowhere else.
+    let mut attributes = AttributeList::new(is_sfc_block);
+    attributes.parse_list(p);
     let is_raw_text_block = is_sfc_block
-        && is_vue_raw_text_block(name_kind, attributes)
+        && is_vue_raw_text_block(name_kind, attributes.has_lang_value)
         && has_closing_tag(p.source_text(), p.cur_range().end(), &opening_tag_name);
     let is_raw_text = is_embedded_language_tag || is_raw_text_block;
 
@@ -655,7 +600,23 @@ impl ParseNodeList for ElementList {
 }
 
 #[derive(Default)]
-struct AttributeList;
+struct AttributeList {
+    /// Whether to watch for a `lang` attribute. Off unless the caller asks, so
+    /// that ordinary attribute parsing doesn't pay for the name comparison.
+    track_lang: bool,
+    /// Whether the list held a `lang` attribute carrying a value. Always false
+    /// without [`Self::track_lang`].
+    has_lang_value: bool,
+}
+
+impl AttributeList {
+    fn new(track_lang: bool) -> Self {
+        Self {
+            track_lang,
+            has_lang_value: false,
+        }
+    }
+}
 
 impl ParseNodeList for AttributeList {
     type Kind = HtmlSyntaxKind;
@@ -663,7 +624,22 @@ impl ParseNodeList for AttributeList {
     const LIST_KIND: Self::Kind = HTML_ATTRIBUTE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_attribute(p)
+        let is_lang =
+            self.track_lang && p.cur() == HTML_LITERAL && p.cur_text().eq_ignore_ascii_case("lang");
+
+        // A value left over from the attribute before this one must not be read
+        // as belonging to this one.
+        p.take_attribute_value();
+
+        let parsed = parse_attribute(p);
+
+        if is_lang {
+            // `lang` on its own and `lang=""` both name no language, and
+            // prettier keeps reading such a block as markup.
+            self.has_lang_value |= p.take_attribute_value().is_some_and(|it| !it.is_empty());
+        }
+
+        parsed
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -848,6 +824,7 @@ fn parse_attribute_string_literal(p: &mut HtmlParser) -> ParsedSyntax {
     }
     let m = p.start();
 
+    p.set_attribute_value(p.cur_range());
     p.bump_with_context(HTML_STRING_LITERAL, inside_tag_context(p));
 
     Present(m.complete(p, HTML_STRING))
@@ -1237,37 +1214,6 @@ fn is_at_keyword(p: &mut HtmlParser) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn find_attribute_value_reads_quoted_and_bare_values() {
-        assert_eq!(find_attribute_value(r#"lang="pug""#, "lang"), Some("pug"));
-        assert_eq!(find_attribute_value("lang='pug'", "lang"), Some("pug"));
-        assert_eq!(find_attribute_value("lang=pug", "lang"), Some("pug"));
-        assert_eq!(find_attribute_value("LANG=\"pug\"", "lang"), Some("pug"));
-        assert_eq!(
-            find_attribute_value(r#"  lang = "pug"  "#, "lang"),
-            Some("pug")
-        );
-    }
-
-    #[test]
-    fn find_attribute_value_skips_other_attributes() {
-        assert_eq!(
-            find_attribute_value(r#"src="a.pug" lang="pug" scoped"#, "lang"),
-            Some("pug")
-        );
-        // A `lang=` inside another attribute's value is not an attribute.
-        assert_eq!(find_attribute_value(r#"title="lang=pug""#, "lang"), None);
-        assert_eq!(find_attribute_value("scoped src=a", "lang"), None);
-        assert_eq!(find_attribute_value("", "lang"), None);
-    }
-
-    #[test]
-    fn find_attribute_value_reports_a_valueless_attribute_as_empty() {
-        assert_eq!(find_attribute_value("lang", "lang"), Some(""));
-        assert_eq!(find_attribute_value("scoped lang", "lang"), Some(""));
-        assert_eq!(find_attribute_value(r#"lang="""#, "lang"), Some(""));
-    }
 
     #[test]
     fn has_closing_tag_matches_only_the_whole_name() {

@@ -16,8 +16,12 @@ info: vue/custom-blocks.vue
   .bla
 </template>
 
-<template lang="html">
-<div    class="b"   >lang="html" is still markup</div>
+<template lang="">
+<div    class="b"   >an empty lang names no preprocessor, so this is markup</div>
+</template>
+
+<template lang>
+<div    class="c"   >and so does no value at all</div>
 </template>
 
 <docs>
@@ -50,8 +54,12 @@ const foo =            "</"
   .bla
 </template>
 
-<template lang="html">
-	<div class="b">lang="html" is still markup</div>
+<template lang="">
+	<div class="b">an empty lang names no preprocessor, so this is markup</div>
+</template>
+
+<template lang>
+	<div class="c">and so does no value at all</div>
 </template>
 
 <docs>
@@ -75,6 +83,6 @@ const foo =            "</"
 ## Unimplemented nodes/tokens
 
 "\n  .test\n    #foo\n  .bla\n" => 87..112
-"\nThis block is prose, and it may mention a `<my-component>` without closing it.\n" => 217..297
-"\n{\n  \"en\":   { \"hello\":   \"Hello\" }\n}\n" => 312..350
-"\nconst foo =            \"</\"\n" => 385..414
+"\nThis block is prose, and it may mention a `<my-component>` without closing it.\n" => 319..399
+"\n{\n  \"en\":   { \"hello\":   \"Hello\" }\n}\n" => 414..452
+"\nconst foo =            \"</\"\n" => 487..516

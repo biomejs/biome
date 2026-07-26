@@ -8,8 +8,12 @@
   .bla
 </template>
 
-<template lang="html">
-<div    class="b"   >lang="html" is still markup</div>
+<template lang="">
+<div    class="b"   >an empty lang names no preprocessor, so this is markup</div>
+</template>
+
+<template lang>
+<div    class="c"   >and so does no value at all</div>
 </template>
 
 <docs>
