@@ -39,7 +39,7 @@ new Vue({el: '#app'})
 # Output
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <body>
     <div v-if="foo ===    'foo'"></div>
