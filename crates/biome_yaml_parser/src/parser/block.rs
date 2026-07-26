@@ -54,11 +54,8 @@ pub(crate) fn parse_any_block_node(p: &mut YamlParser) -> ParsedSyntax {
 fn parse_block_map_entry_value(p: &mut YamlParser) -> ParsedSyntax {
     /// The flow scalar tokens that, following bare own-line properties,
     /// mark them as the next entry's key properties
-    const FLOW_SCALARS: TokenSet<YamlSyntaxKind> = token_set![
-        PLAIN_LITERAL,
-        DOUBLE_QUOTED_LITERAL,
-        SINGLE_QUOTED_LITERAL
-    ];
+    const FLOW_SCALARS: TokenSet<YamlSyntaxKind> =
+        token_set![PLAIN_LITERAL, DOUBLE_QUOTED_LITERAL, SINGLE_QUOTED_LITERAL];
 
     if is_at_property(p)
         && p.has_preceding_line_break()
