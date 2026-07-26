@@ -26,7 +26,7 @@ use biome_formatter::comments::{
 };
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{FormatResult, FormatRule, write};
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxTriviaPieceComments};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxTriviaPieceComments, TextRange};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
 
 pub type CssComments = Comments<CssLanguage>;
@@ -526,8 +526,7 @@ fn handle_declaration_important_comment(
 fn handle_component_value_boundary_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
-    if comment.kind() != CommentKind::InlineBlock
-        || CssCommentStyle::is_suppression(comment.piece().text())
+    if !comment.kind().is_inline_block() || CssCommentStyle::is_suppression(comment.piece().text())
     {
         return CommentPlacement::Default(comment);
     }

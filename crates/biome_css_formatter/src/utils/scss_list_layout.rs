@@ -1,5 +1,9 @@
 use crate::prelude::*;
+use crate::scss::lists::list_expression_element_list::ScssListElementLayout;
 use crate::utils::comment_trivia::has_inline_trailing_comment;
+use crate::utils::component_value_list::{
+    ValueListLayout, get_value_list_layout, has_value_boundary_comments,
+};
 use crate::utils::scss_closing_comments::{
     ClosingCommentSpacing, owns_include_closing_comments, write_include_closing_comments,
 };
@@ -11,7 +15,7 @@ use biome_css_syntax::{
     scss_include_keyword_argument_owner, single_expression_item, unwrap_single_expression_item,
 };
 use biome_formatter::{format_args, write};
-use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList};
 
 /// Layout for SCSS list expressions.
 pub(crate) struct ScssListLayout<'a> {
@@ -83,6 +87,13 @@ impl<'a> ScssListLayout<'a> {
                         .should_expand(true)
                 ]
             );
+        }
+
+        if should_preserve_source_group_breaks(self.node, f) {
+            let elements = elements
+                .format()
+                .with_options(ScssListElementLayout::PreserveSourceBreaks);
+            return write!(f, [group(&format_args![soft_line_break(), elements])]);
         }
 
         write!(
@@ -203,6 +214,43 @@ impl<'a> ScssListLayout<'a> {
     pub(crate) fn owns_dangling_comments(&self, f: &CssFormatter) -> bool {
         owns_include_closing_comments(self.node.syntax(), f)
     }
+}
+
+/// Returns whether an SCSS declaration value preserves source breaks between
+/// comma groups.
+///
+/// ```scss
+/// a {
+///   grid-template-columns: $a/* boundary */$b,
+///   $c $d;
+/// }
+/// ```
+///
+/// The boundary comment can expand the first group. Preserving the source
+/// break keeps `$c $d` aligned with that group instead of nesting it under the
+/// expanded content.
+fn should_preserve_source_group_breaks(node: &ScssListExpression, f: &CssFormatter) -> bool {
+    let elements = node.elements();
+    let Some(items) = node.parent::<ScssExpressionItemList>() else {
+        return false;
+    };
+
+    elements.len() > 1
+        && matches!(
+            get_value_list_layout(&items, f.comments(), f),
+            ValueListLayout::PreserveInline
+        )
+        && elements.iter().filter_map(Result::ok).any(|element| {
+            let Ok(value) = element.value() else {
+                return false;
+            };
+            let Some(expression) = value.as_scss_expression() else {
+                return false;
+            };
+
+            let items = expression.items();
+            has_value_boundary_comments(f.comments().dangling_comments(items.syntax()))
+        })
 }
 
 /// Detects `@include mix($arg: (a, b) /* end */)`, where comments force expansion.
