@@ -61,29 +61,56 @@ enum SortKey {
     },
 }
 
-/// The ascending property-order indices a candidate's declarations
-/// touch — the primary Tailwind sort key. Candidates order by the first
-/// differing index after their shared prefix; a candidate whose list is
-/// a prefix of the other's sorts after it (`size-4` = height+width
-/// precedes `h-4` = height alone).
-#[derive(Clone, Debug, Eq, PartialEq)]
+/// The set of CSS properties a candidate's declarations set, encoded as
+/// ascending indices into Tailwind's canonical property order — the
+/// order in which properties first appear in Tailwind's generated
+/// stylesheet. The config analyzer captures these lists verbatim from
+/// the `propertySort` that Tailwind's `compileAstNodes` computes per
+/// candidate.
+///
+/// This is the primary Tailwind sort key; `count`, name, and importance
+/// only break signature ties. The `Ord` impl compares the index lists:
+/// the first differing index after the shared prefix decides, and when
+/// one list is a prefix of the other, the longer list sorts first.
+/// `size-4` (height + width) shares its height index with `h-4` (height
+/// alone) and wins by length, while `w-4` (width alone) sorts after
+/// both on the later width index.
+#[derive(Clone, Debug)]
 enum Signature {
     /// A generated `SIGNATURE_POOL` entry.
     Pool(&'static [u16]),
     /// A single property, for arbitrary-property candidates
     /// (`[display:block]`).
-    Property([u16; 1]),
+    Property(u16),
 }
 
 impl Signature {
     fn as_slice(&self) -> &[u16] {
         match self {
             Self::Pool(indices) => indices,
-            Self::Property(index) => index,
+            Self::Property(index) => std::slice::from_ref(index),
         }
     }
+}
 
-    fn compare(&self, other: &Self) -> Ordering {
+/// Equality goes through `as_slice` so that, per the `Ord` contract, a
+/// `Pool` and a `Property` holding the same indices are equal.
+impl PartialEq for Signature {
+    fn eq(&self, other: &Self) -> bool {
+        self.as_slice() == other.as_slice()
+    }
+}
+
+impl Eq for Signature {}
+
+impl PartialOrd for Signature {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Signature {
+    fn cmp(&self, other: &Self) -> Ordering {
         let (a, b) = (self.as_slice(), other.as_slice());
         let mut i = 0;
         while i < a.len() && i < b.len() && a[i] == b[i] {
@@ -177,7 +204,7 @@ impl SortKey {
                 };
                 PROPERTY_INDEX
                     .get(property_token.text_trimmed())
-                    .map(|&property_idx| (Signature::Property([property_idx]), 1))
+                    .map(|&property_idx| (Signature::Property(property_idx), 1))
             }
             AnyTwCandidate::TwBogusCandidate(_) => None,
 
@@ -285,7 +312,7 @@ fn compare(a: &SortKey, b: &SortKey) -> Ordering {
                 important: i2,
             },
         ) => s1
-            .compare(s2)
+            .cmp(s2)
             // Wider utilities (e.g. `sr-only` setting 9 properties) win
             // a signature tie so they sort before narrower utilities.
             .then_with(|| c2.cmp(c1))
@@ -465,7 +492,7 @@ mod tests {
 
     fn known(property_idx: u16, property_count: u8) -> SortKey {
         SortKey::Known {
-            signature: Signature::Property([property_idx]),
+            signature: Signature::Property(property_idx),
             count: property_count,
             name: NameKey::default(),
             important: false,
@@ -558,7 +585,7 @@ mod tests {
     fn compare_breaks_exact_key_tie_plain_before_important() {
         let plain = known(5, 1);
         let important = SortKey::Known {
-            signature: Signature::Property([5]),
+            signature: Signature::Property(5),
             count: 1,
             name: NameKey::default(),
             important: true,
@@ -780,7 +807,7 @@ mod tests {
         else {
             panic!("expected a plain known key");
         };
-        assert_eq!(*signature, Signature::Property([display_idx]));
+        assert_eq!(*signature, Signature::Property(display_idx));
         assert_eq!(*count, 1);
         assert_eq!(name_text(&key), "[display:block]");
     }
