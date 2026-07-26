@@ -4,6 +4,11 @@
 ? multiline
   scalar key
 : kept
+? !!str inline property
+: converted
+? !!str
+  property on its own line
+: kept
 ? - seq
   - key
 : - seq

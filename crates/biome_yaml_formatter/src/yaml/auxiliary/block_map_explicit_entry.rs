@@ -5,8 +5,8 @@ use biome_formatter::comments::SourceComment;
 use biome_formatter::{format_args, write};
 use biome_rowan::{AstNode, TextSize};
 use biome_yaml_syntax::{
-    AnyYamlBlockNode, AnyYamlFlowNode, AnyYamlProperty, YamlBlockInBlockNode,
-    YamlBlockMapExplicitEntry, YamlBlockMapExplicitEntryFields, YamlLanguage,
+    AnyYamlBlockNode, AnyYamlFlowNode, YamlBlockMapExplicitEntry, YamlBlockMapExplicitEntryFields,
+    YamlLanguage,
 };
 
 #[derive(Debug, Clone, Default)]
@@ -56,6 +56,16 @@ impl FormatNodeRule<YamlBlockMapExplicitEntry> for FormatYamlBlockMapExplicitEnt
         let keep_explicit = match &key {
             None => false,
             Some(key_node @ AnyYamlBlockNode::YamlFlowInBlockNode(_)) => {
+                // `text_trimmed` spans the key's first token to its last, so
+                // a break inside a token, as in a multiline scalar, counts,
+                // and so does one in the trivia between the key's properties
+                // and its content:
+                //
+                // ```yaml
+                // ? !!str
+                //   foo
+                // : bar
+                // ```
                 let text = key_node.syntax().text_trimmed();
                 !key_node.is_flow_collection()
                     && (text.contains_char('\n') || text.contains_char('\r'))
@@ -93,7 +103,7 @@ impl FormatNodeRule<YamlBlockMapExplicitEntry> for FormatYamlBlockMapExplicitEnt
 
         let keep_explicit = keep_explicit
             || !(before_colon.is_empty() || key_trailing_inline)
-            || (value.is_none() && (in_set_mapping(node) || key_has_inline_trailing))
+            || (value.is_none() && (node.is_in_set_mapping() || key_has_inline_trailing))
             || key_comments_force_explicit;
 
         if !keep_explicit && (key.is_some() || value.is_some()) {
@@ -299,27 +309,6 @@ fn split_comments(
         .position(|comment| comment.piece().text_range().start() >= boundary)
         .unwrap_or(comments.len());
     comments.split_at(index)
-}
-
-/// Whether the mapping this entry belongs to is tagged `!!set`
-fn in_set_mapping(node: &YamlBlockMapExplicitEntry) -> bool {
-    node.syntax()
-        .ancestors()
-        .find_map(YamlBlockInBlockNode::cast)
-        .is_some_and(|block| {
-            block.properties().iter().any(|property| {
-                matches!(
-                    &property,
-                    AnyYamlProperty::YamlTagProperty(tag)
-                        if tag.value_token().is_ok_and(|token| {
-                            matches!(
-                                token.text_trimmed(),
-                                "!!set" | "!<tag:yaml.org,2002:set>"
-                            )
-                        })
-                )
-            })
-        })
 }
 
 /// Whether a `:` placed directly after this key would be lexed as part of

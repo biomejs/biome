@@ -364,11 +364,12 @@ impl Format<YamlFormatContext> for FormatEntryDanglingComments<'_> {
     }
 }
 
-/// Formats a list of comments, each opened by the line break its position in
-/// the source calls for: a blank line when one separated it from the content
-/// before, otherwise a plain break. With `inline_first`, a first comment
-/// that started on the line of the preceding content stays there, after a
-/// space
+/// Formats a list of comments, one per line.
+///
+/// Every comment is preceded by a line break, or by a blank line when the
+/// source has one in front of it. With `inline_first`, the first comment
+/// instead stays on the line of the content it follows, after a space, if
+/// the source has it on that line
 pub(crate) struct FormatCommentsSlice<'a> {
     pub(crate) comments: &'a [SourceComment<YamlLanguage>],
     pub(crate) inline_first: bool,

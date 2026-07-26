@@ -12,6 +12,11 @@ info: yaml/block_mapping/explicit_entries.yaml
 ? multiline
   scalar key
 : kept
+? !!str inline property
+: converted
+? !!str
+  property on its own line
+: kept
 ? - seq
   - key
 : - seq
@@ -32,6 +37,10 @@ simple: value
 valueless:
 ? multiline
   scalar key
+: kept
+!!str inline property: converted
+? !!str
+  property on its own line
 : kept
 ? - seq
   - key
