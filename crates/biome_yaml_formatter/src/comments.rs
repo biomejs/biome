@@ -91,13 +91,12 @@ impl CommentStyle for YamlCommentStyle {
 fn handle_middle_comment(
     comment: DecoratedComment<YamlLanguage>,
 ) -> CommentPlacement<YamlLanguage> {
+    /// How far above the comment the node owning the properties can sit
+    const MAX_OWNER_DEPTH: usize = 5;
+
     let range = comment.piece().text_range();
-    // The node owning the properties the comment sits between is at most a
-    // few levels up — the enclosing flow node, or the block-in-block node
-    // whose properties the parser flattened onto its mapping's first key —
-    // so the walk is capped rather than climbing to the root
-    for node in comment.enclosing_node().ancestors().take(5) {
-        if let Some((start, end)) = middle_comment_region(&node)
+    for node in comment.enclosing_node().ancestors().take(MAX_OWNER_DEPTH) {
+        if let Some((start, end)) = FormatMiddleComments::region(&node)
             && start <= range.start()
             && range.end() <= end
         {
@@ -105,60 +104,6 @@ fn handle_middle_comment(
         }
     }
     CommentPlacement::Default(comment)
-}
-
-/// The source range between `node`'s properties and its content, in which a
-/// comment is a middle comment of the node. For a block node whose
-/// properties the parser flattened onto the first key of its mapping, the
-/// region reaches down to the start of the key's own line.
-fn middle_comment_region(node: &YamlSyntaxNode) -> Option<(TextSize, TextSize)> {
-    match node.kind() {
-        YamlSyntaxKind::YAML_FLOW_YAML_NODE => {
-            let node = YamlFlowYamlNode::cast_ref(node)?;
-            let skipped = AnyYamlMappingImplicitKey::YamlFlowYamlNode(node.clone())
-                .enclosing_mapping_property_count();
-            let last = node.properties().iter().skip(skipped).last()?;
-            let content = node.content()?;
-            Some((last.range().end(), content.range().start()))
-        }
-        YamlSyntaxKind::YAML_FLOW_JSON_NODE => {
-            let node = YamlFlowJsonNode::cast_ref(node)?;
-            let skipped = AnyYamlMappingImplicitKey::YamlFlowJsonNode(node.clone())
-                .enclosing_mapping_property_count();
-            let last = node.properties().iter().skip(skipped).last()?;
-            let content = node.content().ok()?;
-            Some((last.range().end(), content.range().start()))
-        }
-        YamlSyntaxKind::YAML_BLOCK_IN_BLOCK_NODE => {
-            let node = YamlBlockInBlockNode::cast_ref(node)?;
-            if let Some((properties, count)) = node.properties_on_first_key() {
-                let last = properties.iter().nth(count.saturating_sub(1))?;
-                // The key's own line, where the mapping's content begins
-                let rest_start = properties
-                    .iter()
-                    .nth(count)
-                    .map(|property| property.range().start())
-                    .or_else(|| {
-                        let key = last.syntax().parent()?.parent()?;
-                        match AnyYamlMappingImplicitKey::cast(key)? {
-                            AnyYamlMappingImplicitKey::YamlFlowYamlNode(node) => {
-                                Some(node.content()?.range().start())
-                            }
-                            AnyYamlMappingImplicitKey::YamlFlowJsonNode(node) => {
-                                Some(node.content().ok()?.range().start())
-                            }
-                            AnyYamlMappingImplicitKey::YamlAliasNode(_) => None,
-                        }
-                    })?;
-                Some((last.range().end(), rest_start))
-            } else {
-                let last = node.properties().iter().last()?;
-                let content = node.content().ok()?;
-                Some((last.range().end(), content.range().start()))
-            }
-        }
-        _ => None,
-    }
 }
 
 /// Formats the middle comments of a node, its dangling comments sitting
@@ -172,6 +117,60 @@ pub(crate) struct FormatMiddleComments<'a> {
 impl<'a> FormatMiddleComments<'a> {
     pub(crate) fn new(node: &'a YamlSyntaxNode) -> Self {
         Self { node }
+    }
+
+    /// The source range between `node`'s properties and its content, in
+    /// which a comment is a middle comment of the node. For a block node
+    /// whose properties the parser flattened onto the first key of its
+    /// mapping, the region reaches down to the start of the key's own line
+    fn region(node: &YamlSyntaxNode) -> Option<(TextSize, TextSize)> {
+        match node.kind() {
+            YamlSyntaxKind::YAML_FLOW_YAML_NODE => {
+                let node = YamlFlowYamlNode::cast_ref(node)?;
+                let skipped = AnyYamlMappingImplicitKey::YamlFlowYamlNode(node.clone())
+                    .enclosing_mapping_property_count();
+                let last = node.properties().iter().skip(skipped).last()?;
+                let content = node.content()?;
+                Some((last.range().end(), content.range().start()))
+            }
+            YamlSyntaxKind::YAML_FLOW_JSON_NODE => {
+                let node = YamlFlowJsonNode::cast_ref(node)?;
+                let skipped = AnyYamlMappingImplicitKey::YamlFlowJsonNode(node.clone())
+                    .enclosing_mapping_property_count();
+                let last = node.properties().iter().skip(skipped).last()?;
+                let content = node.content().ok()?;
+                Some((last.range().end(), content.range().start()))
+            }
+            YamlSyntaxKind::YAML_BLOCK_IN_BLOCK_NODE => {
+                let node = YamlBlockInBlockNode::cast_ref(node)?;
+                if let Some((properties, count)) = node.properties_on_first_key() {
+                    let last = properties.iter().nth(count.saturating_sub(1))?;
+                    // The key's own line, where the mapping's content begins
+                    let rest_start = properties
+                        .iter()
+                        .nth(count)
+                        .map(|property| property.range().start())
+                        .or_else(|| {
+                            let key = last.syntax().parent()?.parent()?;
+                            match AnyYamlMappingImplicitKey::cast(key)? {
+                                AnyYamlMappingImplicitKey::YamlFlowYamlNode(node) => {
+                                    Some(node.content()?.range().start())
+                                }
+                                AnyYamlMappingImplicitKey::YamlFlowJsonNode(node) => {
+                                    Some(node.content().ok()?.range().start())
+                                }
+                                AnyYamlMappingImplicitKey::YamlAliasNode(_) => None,
+                            }
+                        })?;
+                    Some((last.range().end(), rest_start))
+                } else {
+                    let last = node.properties().iter().last()?;
+                    let content = node.content().ok()?;
+                    Some((last.range().end(), content.range().start()))
+                }
+            }
+            _ => None,
+        }
     }
 }
 
