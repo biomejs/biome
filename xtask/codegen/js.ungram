@@ -55,6 +55,7 @@ AnyJsRoot =
 	| TsDeclarationModule
 	| JsExpressionTemplateRoot
 	| JsSvelteSnippetRoot
+	| JsSvelteDeclarationRoot
 
 JsScript =
 	bom: 'UNICODE_BOM'?
@@ -89,6 +90,12 @@ JsExpressionTemplateRoot =
 JsSvelteSnippetRoot =
 		name: AnyJsBinding
 		parameters: JsParameters
+		eof: 'EOF'
+
+// Special root created for Svelte declaration tags
+JsSvelteDeclarationRoot =
+		declaration: JsVariableDeclaration
+		semicolon: ';'?
 		eof: 'EOF'
 
 JsDirective =

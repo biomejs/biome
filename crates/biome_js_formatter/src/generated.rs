@@ -4690,6 +4690,44 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSuperExpression {
         )
     }
 }
+impl FormatRule<biome_js_syntax::JsSvelteDeclarationRoot>
+    for crate::js::auxiliary::svelte_declaration_root::FormatJsSvelteDeclarationRoot
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::JsSvelteDeclarationRoot,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::JsSvelteDeclarationRoot>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsSvelteDeclarationRoot {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::JsSvelteDeclarationRoot,
+        crate::js::auxiliary::svelte_declaration_root::FormatJsSvelteDeclarationRoot,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::js::auxiliary::svelte_declaration_root::FormatJsSvelteDeclarationRoot::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSvelteDeclarationRoot {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::JsSvelteDeclarationRoot,
+        crate::js::auxiliary::svelte_declaration_root::FormatJsSvelteDeclarationRoot,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::js::auxiliary::svelte_declaration_root::FormatJsSvelteDeclarationRoot::default(),
+        )
+    }
+}
 impl FormatRule<biome_js_syntax::JsSvelteSnippetRoot>
     for crate::js::auxiliary::svelte_snippet_root::FormatJsSvelteSnippetRoot
 {

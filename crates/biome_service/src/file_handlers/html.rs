@@ -548,10 +548,19 @@ fn format_embedded(
                 let formatted =
                     biome_js_formatter::format_node_with_offset(js_options, &node).ok()?;
 
-                Some(wrap_document(
-                    formatted.into_document(),
-                    !file_source.as_embedding_kind().is_astro_frontmatter(),
-                ))
+                let document = formatted.into_document();
+                if file_source.is_svelte_declaration() {
+                    Some(Document::new(vec![
+                        FormatElement::Token { text: "{" },
+                        FormatElement::Interned(Interned::new(document.into_elements())),
+                        FormatElement::Token { text: "}" },
+                    ]))
+                } else {
+                    Some(wrap_document(
+                        document,
+                        !file_source.as_embedding_kind().is_astro_frontmatter(),
+                    ))
+                }
             }
             DocumentFileSource::Json(_) => {
                 let json_options =

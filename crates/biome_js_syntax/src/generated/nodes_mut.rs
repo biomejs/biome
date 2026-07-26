@@ -3096,6 +3096,26 @@ impl JsSuperExpression {
         )
     }
 }
+impl JsSvelteDeclarationRoot {
+    pub fn with_declaration(self, element: JsVariableDeclaration) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_semicolon_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(element.map(|element| element.into()))),
+        )
+    }
+    pub fn with_eof_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+}
 impl JsSvelteSnippetRoot {
     pub fn with_name(self, element: AnyJsBinding) -> Self {
         Self::unwrap_cast(
