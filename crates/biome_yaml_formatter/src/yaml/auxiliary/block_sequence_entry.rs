@@ -11,9 +11,9 @@ impl FormatNodeRule<YamlBlockSequenceEntry> for FormatYamlBlockSequenceEntry {
         let minus_token = minus_token?;
         write!(f, [minus_token.format()])?;
 
-        // An entry without a value but with a comment on its line gets the
-        // space that would separate the value from the `-` even though
-        // there is none, matching Prettier: `-  # comment`
+        // An entry without a value but with a comment on its line still gets
+        // the space that would separate the value from the `-`, so the
+        // comment ends up two columns over: `-  # comment`
         if value.is_none()
             && f.comments()
                 .dangling_comments(node.syntax())

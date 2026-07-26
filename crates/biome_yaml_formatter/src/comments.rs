@@ -123,10 +123,9 @@ const FLOW_COLLECTIONS: TokenSet<YamlSyntaxKind> = token_set![
 ///   1, 2]
 /// ```
 ///
-/// Prettier treats it as ending the key's line: the comment becomes a
-/// trailing comment of the key, and the collection moves to its own line
-/// below. A comment in a collection that starts on its own line stays
-/// inside it.
+/// Such a comment ends the key's line: it becomes a trailing comment of the
+/// key, and the collection moves to its own line below. A comment in a
+/// collection that starts on its own line stays inside it.
 fn handle_flow_collection_open_comment(
     comment: DecoratedComment<YamlLanguage>,
 ) -> CommentPlacement<YamlLanguage> {

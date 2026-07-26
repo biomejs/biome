@@ -57,7 +57,7 @@ impl FormatNodeRule<YamlFlowYamlNode> for FormatYamlFlowYamlNode {
         } else if has_own_properties {
             // The space that would separate the content is printed even
             // though there is none. Before a line break it is dropped, but
-            // in a flow collection it survives, matching Prettier:
+            // in a flow collection it survives:
             //
             // ```yaml
             // { foo: !!str , !!str : bar }

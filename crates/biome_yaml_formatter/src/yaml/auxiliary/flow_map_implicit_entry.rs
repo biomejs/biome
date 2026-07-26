@@ -189,8 +189,8 @@ impl Format<YamlFormatContext> for FormatImplicitEntryBody<'_> {
 
         write!(f, [colon_token.format()])?;
 
-        // In the single-pair form inside a flow sequence, Prettier prints
-        // the space that would separate the value even when there is none:
+        // In the single-pair form inside a flow sequence, the space that
+        // would separate the value is printed even when there is none:
         // `[ : ]` becomes `[: ]`
         if self.value.is_none() && !self.in_flow_mapping {
             write!(f, [space()])?;
