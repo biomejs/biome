@@ -12,8 +12,8 @@ pub(crate) fn needs_space_before_colon(key: &AnyYamlMappingImplicitKey) -> bool 
     }
 }
 
-/// Formats a run of node properties joined by spaces, with the tag before
-/// the anchor, the order Prettier normalizes properties to.
+/// Formats the properties of a node joined by spaces, normalized to put the
+/// tag before the anchor whatever order they appear in.
 ///
 /// Takes the properties as a clonable iterator so call sites can pass lazy
 /// `skip`/`chain` adapters over the property lists without collecting them
