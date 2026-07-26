@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Fixed a bug where the HTML formatter collapsed the whitespace inside `<textarea>`, `<xmp>` and `<plaintext>`, changing what the page renders. Because `<textarea>` is rendered with `white-space: pre-wrap`, its text is the value of the form field, so the newlines were being edited out of the field:
+Fixed a bug where the HTML formatter collapsed the whitespace inside `<textarea>`, `<xmp>` and `<plaintext>`, changing what the page renders.
 
 ```diff
 - <textarea>

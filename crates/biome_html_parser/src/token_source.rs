@@ -175,10 +175,10 @@ pub(crate) enum HtmlEmbeddedLanguage {
     Script,
     Style,
     /// An element whose text the user-agent stylesheet renders with a
-    /// `white-space` value that keeps newlines and runs of spaces. Lexing the
-    /// text as a single literal is what lets the formatter reproduce it
-    /// byte for byte; splitting it into markup would lose the whitespace to
-    /// trivia.
+    /// `white-space` value that keeps newlines and consecutive spaces.
+    /// Lexing the text as a single literal is what lets the formatter
+    /// reproduce it byte for byte; splitting it into markup would lose the
+    /// whitespace to trivia.
     Preformatted(PreformattedElement),
 }
 

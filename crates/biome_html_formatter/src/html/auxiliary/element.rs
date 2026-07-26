@@ -18,12 +18,11 @@ use super::{
 
 /// Whether the content of `tag_name` has to be printed exactly as it appears in the source.
 ///
-/// `script` and `style` hold an embedded language, which is either handed to the
-/// matching formatter or left alone. Everything else in this set is
-/// preformatted: the user-agent stylesheet gives it a `white-space` value that
-/// keeps newlines and runs of spaces, so reflowing the content would change
-/// what the page renders. `<textarea>` is the sharpest example, since its text
-/// is the value of a form field.
+/// Returns true for `script` and `style` because they hold an embedded language, and
+/// for any tag that has a `white-space` value that preserves content, as defined by
+/// browser user-agent CSS.
+///
+/// See also: <https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/white-space>
 fn is_verbatim_tag(tag_name: &str) -> bool {
     tag_name.eq_ignore_ascii_case("script")
         || tag_name.eq_ignore_ascii_case("style")

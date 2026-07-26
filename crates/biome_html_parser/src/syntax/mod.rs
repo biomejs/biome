@@ -114,11 +114,6 @@ const EMBEDDED_LANGUAGE_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(
 
 /// The subset of [`EMBEDDED_LANGUAGE_ELEMENTS`] that is raw text because it is
 /// preformatted rather than because it hosts another language.
-///
-/// `listing` renders as `white-space: pre` too, but it has no tag keyword and
-/// so reaches us as `HTML_UNKNOWN_TAG`. It is therefore left to the formatter,
-/// which still prints its content verbatim but cannot recover the leading and
-/// trailing whitespace the lexer files away as trivia.
 const PREFORMATTED_ELEMENTS: TokenSet<HtmlSyntaxKind> =
     token_set!(T![pre], T![textarea], T![xmp], T![plaintext]);
 
