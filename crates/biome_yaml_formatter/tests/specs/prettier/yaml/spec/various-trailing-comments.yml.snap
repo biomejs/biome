@@ -31,13 +31,9 @@ block: > # lala
 ```diff
 --- Prettier
 +++ Biome
-@@ -2,14 +2,14 @@
-   quotes" # lala
- b: plain
-   value # lala
--c: #lala
--  d
-+c: d #lala
+@@ -5,11 +5,12 @@
+ c: #lala
+   d
  ? # lala
 -  - seq1
 + - seq1
@@ -61,7 +57,8 @@ a: "double
   quotes" # lala
 b: plain
   value # lala
-c: d #lala
+c: #lala
+  d
 ? # lala
  - seq1
 : # lala

@@ -220,13 +220,8 @@ foobar: !sexy
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,12 +1,11 @@
- ---
- # Collection Types #############################################################
- ################################################################################
--
- # http://yaml.org/type/map.html -----------------------------------------------#
--
+@@ -6,7 +6,8 @@
+ 
  map:
    # Unordered set of key: value pairs.
 -  Block style: !!map
@@ -235,7 +230,7 @@ foobar: !sexy
      Clark: Evans
      Ingy: döt Net
      Oren: Ben-Kiki
-@@ -16,11 +15,12 @@
+@@ -16,7 +17,8 @@
  
  omap:
    # Explicitly typed ordered map (dictionary).
@@ -245,12 +240,7 @@ foobar: !sexy
      - aardvark: African pig-like ant eater. Ugly.
      - anteater: South-American ant eater. Two species.
      - anaconda: South-American constrictor snake. Scaly.
--    # Etc.
-+  # Etc.
-   # Flow style
-   Numbers: !!omap [one: 1, two: 2, three: 3]
- 
-@@ -28,7 +28,8 @@
+@@ -28,7 +30,8 @@
  
  pairs:
    # Explicitly typed pairs.
@@ -260,7 +250,7 @@ foobar: !sexy
      - meeting: with team.
      - meeting: with boss.
      - break: lunch.
-@@ -39,7 +40,8 @@
+@@ -39,7 +42,8 @@
  
  set:
    # Explicitly typed set.
@@ -270,7 +260,7 @@ foobar: !sexy
      ? Mark McGwire
      ? Sammy Sosa
      ? Ken Griffey
-@@ -50,7 +52,8 @@
+@@ -50,7 +54,8 @@
  
  seq:
    # Ordered sequence of nodes
@@ -280,7 +270,7 @@ foobar: !sexy
      - Mercury # Rotates - no light/dark sides.
      - Venus # Deadliest. Aptly named.
      - Earth # Mostly dirt.
-@@ -204,6 +207,7 @@
+@@ -204,6 +209,7 @@
  #
  # result = jsyaml.load(yourData, { schema: SEXY_SCHEMA });
  
@@ -297,7 +287,9 @@ foobar: !sexy
 ---
 # Collection Types #############################################################
 ################################################################################
+
 # http://yaml.org/type/map.html -----------------------------------------------#
+
 map:
   # Unordered set of key: value pairs.
   Block style:
@@ -316,7 +308,7 @@ omap:
     - aardvark: African pig-like ant eater. Ugly.
     - anteater: South-American ant eater. Two species.
     - anaconda: South-American constrictor snake. Scaly.
-  # Etc.
+    # Etc.
   # Flow style
   Numbers: !!omap [one: 1, two: 2, three: 3]
 
