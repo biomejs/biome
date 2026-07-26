@@ -20,6 +20,12 @@ impl AnyYamlBlockScalar {
     }
 }
 
+declare_node_union! {
+    /// The value of a mapping entry: a flow node in a flow mapping, or the
+    /// block node that wraps one in a block mapping
+    pub AnyYamlEntryValue = AnyYamlFlowNode | AnyYamlBlockNode
+}
+
 impl AnyYamlBlockNode {
     pub fn is_nested_block_collection(&self) -> bool {
         matches!(

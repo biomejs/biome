@@ -1,4 +1,4 @@
-use crate::comments::{FormatCommentsSlice, SourceColumn, subtree_has_comments};
+use crate::comments::{FormatCommentsSlice, SourceColumn};
 use crate::prelude::*;
 use crate::yaml::auxiliary::block_map_implicit_entry::FormatEntryValue;
 use crate::yaml::auxiliary::flow_map_implicit_entry::FormatCollectionKeyEntry;
@@ -103,9 +103,9 @@ impl FormatNodeRule<YamlBlockMapExplicitEntry> for FormatYamlBlockMapExplicitEnt
             || (value.is_none() && (node.is_in_set_mapping() || key_has_inline_trailing))
             || key_comments_force_explicit;
 
-        // A flow collection key converting to the implicit form gets the
-        // group that reflows it onto one line when it fits and synthesizes
-        // the explicit `?` form again when it doesn't
+        // A flow collection key that converts to the implicit form goes
+        // through the group that reflows it onto one line. When the key
+        // doesn't fit, that group synthesizes the explicit `?` form again.
         if !keep_explicit
             && let Some(key_node @ AnyYamlBlockNode::YamlFlowInBlockNode(flow_in_block)) = &key
             && key_node.is_flow_collection()
@@ -129,8 +129,7 @@ impl FormatNodeRule<YamlBlockMapExplicitEntry> for FormatYamlBlockMapExplicitEnt
                 [FormatCollectionKeyEntry {
                     key: &implicit_key,
                     colon_token: colon,
-                    value: &value_node.format(),
-                    value_has_comments: subtree_has_comments(f.comments(), value_node.syntax()),
+                    value: value_node.clone().into(),
                 }]
             )?;
             if let Ok(flow_end) = flow_in_block.flow_end_token() {

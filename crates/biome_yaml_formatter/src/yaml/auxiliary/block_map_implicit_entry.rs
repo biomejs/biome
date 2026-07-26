@@ -40,8 +40,7 @@ impl FormatNodeRule<YamlBlockMapImplicitEntry> for FormatYamlBlockMapImplicitEnt
                 [FormatCollectionKeyEntry {
                     key: entry_key,
                     colon_token,
-                    value: &entry_value.format(),
-                    value_has_comments: subtree_has_comments(f.comments(), entry_value.syntax()),
+                    value: entry_value.clone().into(),
                 }]
             );
         }

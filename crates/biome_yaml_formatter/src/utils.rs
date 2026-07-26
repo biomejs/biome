@@ -112,13 +112,9 @@ pub(crate) fn lines_before_through_end_tokens(node: &YamlSyntaxNode) -> usize {
     }
 }
 
-/// A key that is a plain scalar spanning multiple lines, which only the
-/// explicit `? key : value` entry form can represent, together with its
-/// value token
-pub(crate) fn multiline_plain_key(
-    key: Option<&AnyYamlMappingImplicitKey>,
-) -> Option<(&AnyYamlMappingImplicitKey, YamlSyntaxToken)> {
-    let key = key?;
+/// Returns the scalar token when `key` is an unqualified multiline plain
+/// scalar, which only the explicit `? key : value` entry form can represent.
+pub(crate) fn multiline_plain_key(key: &AnyYamlMappingImplicitKey) -> Option<YamlSyntaxToken> {
     let AnyYamlMappingImplicitKey::YamlFlowYamlNode(node) = key else {
         return None;
     };
@@ -126,10 +122,7 @@ pub(crate) fn multiline_plain_key(
         return None;
     }
     let token = node.content()?.value_token().ok()?;
-    token
-        .text_trimmed()
-        .contains(['\n', '\r'])
-        .then_some((key, token))
+    token.text_trimmed().contains(['\n', '\r']).then_some(token)
 }
 
 /// Formats a flow mapping entry whose key is a multiline plain scalar in the
@@ -150,13 +143,16 @@ pub(crate) struct FormatMultilineKeyEntry<'a> {
     /// is printed without one
     pub(crate) question_mark_token: Option<&'a YamlSyntaxToken>,
     pub(crate) key: &'a AnyYamlMappingImplicitKey,
-    pub(crate) key_token: &'a YamlSyntaxToken,
     pub(crate) colon_token: &'a YamlSyntaxToken,
     pub(crate) value: &'a Option<AnyYamlFlowNode>,
 }
 
 impl Format<YamlFormatContext> for FormatMultilineKeyEntry<'_> {
     fn fmt(&self, f: &mut YamlFormatter) -> FormatResult<()> {
+        let Some(scalar_token) = multiline_plain_key(self.key) else {
+            return Err(FormatError::SyntaxError);
+        };
+
         // The key is written as text rather than through its formatting
         // rule, so its nodes must be marked as checked for suppression
         // comments by hand
@@ -170,7 +166,7 @@ impl Format<YamlFormatContext> for FormatMultilineKeyEntry<'_> {
         }
 
         let key = format_with(|f| {
-            let value_text = self.key_token.text_trimmed().trim_end();
+            let value_text = scalar_token.text_trimmed().trim_end();
             for (index, line) in ContentLines::new(value_text).enumerate() {
                 if index == 0 {
                     write!(f, [text(line.trim_end(), None)])?;
@@ -179,6 +175,9 @@ impl Format<YamlFormatContext> for FormatMultilineKeyEntry<'_> {
                         f,
                         [
                             literal_line_break_without_parent(),
+                            // Literal breaks reset indentation to the document
+                            // root. Four spaces return to the scalar's column
+                            // after the `{ ? ` prefix.
                             text("    ", None),
                             text(line.trim(), None)
                         ]
@@ -187,12 +186,13 @@ impl Format<YamlFormatContext> for FormatMultilineKeyEntry<'_> {
             }
             Ok(())
         });
-        write!(f, [format_replaced(self.key_token, &key)])?;
+        write!(f, [format_replaced(&scalar_token, &key)])?;
 
         write!(
             f,
             [
                 literal_line_break_without_parent(),
+                // Two spaces align `:` with `?` after the `{ ` prefix.
                 text("  ", None),
                 self.colon_token.format()
             ]

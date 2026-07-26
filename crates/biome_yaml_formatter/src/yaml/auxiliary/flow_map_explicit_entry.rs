@@ -29,15 +29,14 @@ impl FormatNodeRule<YamlFlowMapExplicitEntry> for FormatYamlFlowMapExplicitEntry
         // A key spanning multiple lines can only be held by the explicit
         // form, which is kept
         if !has_dangling_comments
-            && let Some((entry_key, key_token)) = multiline_plain_key(key.as_ref())
-            && let Some(colon_token) = &colon_token
+            && key.as_ref().and_then(multiline_plain_key).is_some()
+            && let (Some(entry_key), Some(colon_token)) = (&key, &colon_token)
         {
             return write!(
                 f,
                 [FormatMultilineKeyEntry {
                     question_mark_token: Some(&question_mark_token),
                     key: entry_key,
-                    key_token: &key_token,
                     colon_token,
                     value: &value,
                 }]
