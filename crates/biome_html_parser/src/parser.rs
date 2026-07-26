@@ -3,7 +3,7 @@ use crate::token_source::{
     TextExpressionKind,
 };
 use biome_html_factory::HtmlSyntaxFactory;
-use biome_html_syntax::{HtmlLanguage, HtmlSyntaxKind};
+use biome_html_syntax::{HtmlLanguage, HtmlSyntaxKind, TextRange, unquote};
 use biome_languages::HtmlFileSource;
 use biome_languages::html::{HtmlTextExpressions, HtmlVariant};
 use biome_parser::diagnostic::{ParseDiagnostic, merge_diagnostics};
@@ -24,6 +24,11 @@ pub(crate) struct HtmlParser<'source> {
     /// single-file component. Only true for the outermost element list, so
     /// that a `<docs>` nested inside a `<template>` stays ordinary markup.
     at_vue_sfc_top_level: bool,
+    /// The value of the attribute currently being parsed. Recorded because a
+    /// value is only reachable as a token while it is being consumed, and the
+    /// attribute list has to read one back out to answer whether a single-file
+    /// component block names a preprocessor.
+    attribute_value: Option<TextRange>,
 }
 
 impl<'source> HtmlParser<'source> {
@@ -34,6 +39,7 @@ impl<'source> HtmlParser<'source> {
             source_text: source,
             options,
             at_vue_sfc_top_level: false,
+            attribute_value: None,
         }
     }
 
@@ -53,6 +59,24 @@ impl<'source> HtmlParser<'source> {
 
     pub(crate) fn set_at_vue_sfc_top_level(&mut self, value: bool) {
         self.at_vue_sfc_top_level = value;
+    }
+
+    /// Records the range of the attribute value being consumed. Called as the
+    /// value token is bumped, which is the only point at which it is known.
+    pub(crate) fn set_attribute_value(&mut self, range: TextRange) {
+        self.attribute_value = Some(range);
+    }
+
+    /// The text of the value of the attribute that was just parsed, without the
+    /// quotes around it, or `None` if the attribute had no value.
+    ///
+    /// Clears the recorded range, so that an attribute written without a value
+    /// doesn't read back the one before it.
+    pub(crate) fn take_attribute_value(&mut self) -> Option<&'source str> {
+        let range = self.attribute_value.take()?;
+        self.source_text
+            .get(usize::from(range.start())..usize::from(range.end()))
+            .map(unquote)
     }
 
     pub fn finish(
