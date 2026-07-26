@@ -1,18 +1,19 @@
+mod comma_groups;
+
 use crate::CssFormatter;
-use crate::comments::CssComments;
+use crate::comments::{CssCommentStyle, CssComments};
 use crate::prelude::*;
 use crate::utils::case::{
     identifier_has_escape, is_author_owned_property_value, value_identifier_case,
 };
-use crate::utils::scss_declaration_list::scss_declaration_list_group;
+use crate::utils::scss_declaration_list::find_scss_declaration_list_group;
 use biome_css_syntax::{
     CssFunction, CssGenericDelimiter, CssGenericProperty, CssIdentifier, CssLanguage,
     CssSyntaxKind, CssSyntaxNode, ScssExpression, ScssIncludeArgumentList,
     css_grid_template_property,
 };
-use biome_formatter::{
-    CstFormatContext, FormatOptions, FormatResult, FormatWithRule, format_args, write,
-};
+use biome_formatter::comments::{CommentKind, CommentStyle, SourceComment};
+use biome_formatter::{CstFormatContext, FormatOptions, FormatResult, FormatWithRule, write};
 use biome_rowan::{AstNode, AstNodeList, Text, TextSize};
 use std::cmp;
 
@@ -65,101 +66,22 @@ pub(crate) fn is_comma_separated_declaration_value_list(node: &CssSyntaxNode) ->
                 .is_some_and(|parent| CssGenericProperty::can_cast(parent.kind()))
                 && node.children().any(|child| is_comma_delimiter(&child))
         }
-        CssSyntaxKind::SCSS_EXPRESSION_ITEM_LIST => scss_declaration_list_group(node).is_some(),
+        CssSyntaxKind::SCSS_EXPRESSION_ITEM_LIST => {
+            find_scss_declaration_list_group(node).is_some()
+        }
         _ => false,
     }
 }
 
-/// Applies a Prettier-like wrapping strategy for comma-separated *declaration values* when using
-/// `ValueListLayout::Fill`.
-///
-/// `Fill` may break at any `soft_line_break_or_space()`, which can split a comma-group across lines.
-/// For declaration values with **top-level commas**, we instead group on commas and fill **groups**
-/// so wrapping prefers breaking between groups (at commas).
-///
-/// Example:
-/// ```css
-/// /* Before (can break inside a group) */
-/// --shadow: 0 2px 4px rgba(...), 0 8px
-///   16px rgba(...);
-///
-/// /* After (prefer breaking at the comma) */
-/// --shadow:
-///   0 2px 4px rgba(...),
-///   0 8px 16px rgba(...);
-/// ```
-fn try_write_fill_comma_groups<N, I>(
-    node: &N,
-    layout: ValueListLayout,
-    f: &mut Formatter<'_, CssFormatContext>,
-) -> Option<FormatResult<()>>
-where
-    N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
-    I: AstNode<Language = CssLanguage> + Clone + IntoFormat<CssFormatContext>,
-    I::Format: FormatWithRule<CssFormatContext, Item = I>,
-{
-    if !matches!(layout, ValueListLayout::Fill)
-        || node.parent::<CssGenericProperty>().is_none()
-        || !is_comma_separated_declaration_value_list(node.syntax())
-    {
-        return None;
-    }
-
-    Some(write_fill_comma_groups(node, f))
+/// Returns whether a movable block comment separates declaration values.
+pub(crate) fn is_value_boundary_comment(comment: &SourceComment<CssLanguage>) -> bool {
+    comment.kind() == CommentKind::InlineBlock
+        && !CssCommentStyle::is_suppression(comment.piece().text())
 }
 
-/// Formats a comma-separated declaration value as a sequence of comma-groups.
-///
-/// Each comma-group is formatted using a nested `Fill`, and the groups themselves are then
-/// `Fill`-joined with `soft_line_break_or_space()`. This means:
-/// - If the whole value fits on one line, it stays inline.
-/// - If it doesn't fit, wrapping prefers splitting between groups (at commas), while still allowing
-///   a single long group to wrap internally if necessary.
-fn write_fill_comma_groups<N, I>(
-    node: &N,
-    f: &mut Formatter<'_, CssFormatContext>,
-) -> FormatResult<()>
-where
-    N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
-    I: AstNode<Language = CssLanguage> + Clone + IntoFormat<CssFormatContext>,
-    I::Format: FormatWithRule<CssFormatContext, Item = I>,
-{
-    let mut elements = node.iter().peekable();
-    let group_separator = soft_line_break_or_space();
-    let mut groups = f.fill();
-
-    while elements.peek().is_some() {
-        let content = format_once(|f: &mut Formatter<'_, CssFormatContext>| {
-            let mut values = f.fill();
-
-            for element in elements.by_ref() {
-                let is_comma = is_comma_delimiter(element.syntax());
-                let formatted = element.into_format().with_text_case(CssCase::Preserve);
-
-                values.entry(
-                    &format_once(|f| {
-                        // Avoid inserting a separator before commas (e.g. `value , value`).
-                        if !is_comma {
-                            write!(f, [soft_line_break_or_space()])?;
-                        }
-                        Ok(())
-                    }),
-                    &formatted,
-                );
-
-                if is_comma {
-                    break;
-                }
-            }
-
-            values.finish()
-        });
-
-        // Group each comma-group so wrapping prefers breaking between groups (at commas).
-        groups.entry(&group_separator, &group(&content));
-    }
-
-    groups.finish()
+/// Returns whether comments contain a movable boundary such as `a/* comment */b`.
+pub(crate) fn has_value_boundary_comments(comments: &[SourceComment<CssLanguage>]) -> bool {
+    comments.iter().any(is_value_boundary_comment)
 }
 
 pub(crate) fn write_component_value_list<N, I>(node: &N, f: &mut CssFormatter) -> FormatResult<()>
@@ -168,8 +90,12 @@ where
     I: AstNode<Language = CssLanguage> + Clone + IntoFormat<CssFormatContext>,
     I::Format: FormatWithRule<CssFormatContext, Item = I>,
 {
-    let layout = get_value_list_layout(node, f.context().comments(), f);
+    let comments = f.context().comments().clone();
+    let layout = get_value_list_layout(node, &comments, f);
     let lowercase_css_wide_keyword = should_lowercase_css_wide_keyword(node);
+    let boundary_comments = comments.dangling_comments(node.syntax());
+    let has_boundary_comments = has_value_boundary_comments(boundary_comments);
+    let is_scss_list_group = find_scss_declaration_list_group(node.syntax()).is_some();
 
     // Check if any of the elements in the list have a leading newline.
     // We skip the first element because it is the first element in the list and should not be considered.
@@ -186,6 +112,16 @@ where
     };
 
     let values = format_with(|f: &mut Formatter<'_, CssFormatContext>| {
+        if comma_groups::is_applicable(node, layout, boundary_comments) {
+            return comma_groups::format(
+                node,
+                layout,
+                boundary_comments,
+                lowercase_css_wide_keyword,
+                f,
+            );
+        }
+
         if node.len() == 1 {
             let mut builder = f.join_nodes_with_soft_line();
 
@@ -197,17 +133,6 @@ where
 
             builder.finish()
         } else {
-            // Prefer breaking at top-level commas in declaration values (Prettier-like)
-            // by filling comma-separated groups instead of individual tokens.
-            // This keeps each box-shadow-like group intact:
-            //
-            // box-shadow:
-            //   0px 8px 16px,
-            //   0px 4px 8px;
-            if let Some(result) = try_write_fill_comma_groups(node, layout, f) {
-                return result;
-            }
-
             let mut fill = f.fill();
             let mut at_group_boundary = false;
 
@@ -216,53 +141,16 @@ where
                     format_component_value_element(element.clone(), lowercase_css_wide_keyword);
                 fill.entry(
                     &format_once(|f| {
-                        // If the current element is not a comma, insert a soft line break or a space.
-                        // Consider the CSS example: `font: first , second;`
-                        // The desired format is: `font: first, second;`
-                        // A separator should not be added before the comma because the comma acts as a `CssGenericDelimiter`.
                         let is_comma = is_comma_delimiter(element.syntax());
+                        layout.fmt_separator(
+                            is_comma,
+                            element.syntax().has_leading_newline(),
+                            at_group_boundary,
+                            f,
+                        )?;
 
-                        if !is_comma {
-                            if matches!(
-                                layout,
-                                ValueListLayout::PreserveInline | ValueListLayout::OnePerLine
-                            ) {
-                                let has_leading_newline = element.syntax().has_leading_newline();
-
-                                if has_leading_newline {
-                                    write!(f, [hard_line_break()])?;
-                                } else {
-                                    write!(f, [space()])?;
-                                }
-                            } else if at_group_boundary {
-                                write!(f, [hard_line_break()])?;
-                            } else {
-                                write!(f, [soft_line_break_or_space()])?
-                            }
-                        }
-
-                        // If the layout is OneGroupPerLine, insert a hard line break as a `separator`
-                        // between two adjacent groups.
-                        //
-                        // Consider the CSS example: `font: group one, group_two, group 3;`
-                        // The desired format is:
-                        // font:
-                        //   group one,
-                        //   group_two,
-                        //   group 3;
-                        //
-                        // A hard line break is inserted between:
-                        // 1. `group one,` and `group_two,`
-                        // 2. `group_two,` and `group 3;`
-                        //
-                        // Caveat:
-                        // We also need to add a hard line break before the first group,
-                        // but `FillBuilder.entry` will ignore any `separator` for the first item in the list,
-                        // To address this, we prepend the hard line break after composing `values`.
-                        //
-                        // This is also why `at_group_boundary` is initialized to `false` even when
-                        // the layout is OneGroupPerLine: because the line break would be ignored
-                        // if `at_group_boundary` were set to `true` initially.
+                        // The outer layout adds the initial hard break because
+                        // `FillBuilder` ignores its first separator.
                         at_group_boundary = is_comma
                             && matches!(
                                 layout,
@@ -286,6 +174,8 @@ where
                 if has_newline {
                     // Add line break before the first element if we have more than two lines.
                     write!(f, [hard_line_break()])?;
+                } else if has_boundary_comments {
+                    write!(f, [soft_line_break()])?;
                 }
                 write!(f, [values])
             });
@@ -299,7 +189,12 @@ where
                 }
                 Ok(())
             });
-            write!(f, [indent(&group(&format_args![with_line_break, &values]))])
+            let content = format_once(|f| write!(f, [with_line_break, &values]));
+            if is_scss_list_group && has_boundary_comments {
+                write!(f, [group(&content)])
+            } else {
+                write!(f, [indent(&group(&content))])
+            }
         }
         ValueListLayout::SingleValue => {
             write!(f, [values])
@@ -470,6 +365,37 @@ pub(crate) enum ValueListLayout {
     ///     sans-serif;
     /// ```
     OneGroupPerLineWithDanglingComments,
+}
+
+impl ValueListLayout {
+    fn is_source_break_preserving(self) -> bool {
+        matches!(self, Self::PreserveInline | Self::OnePerLine)
+    }
+
+    fn fmt_separator(
+        self,
+        is_comma: bool,
+        starts_on_new_line: bool,
+        at_group_boundary: bool,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        if is_comma {
+            return Ok(());
+        }
+
+        match self {
+            Self::PreserveInline | Self::OnePerLine if starts_on_new_line => {
+                hard_line_break().fmt(f)
+            }
+            Self::PreserveInline | Self::OnePerLine => space().fmt(f),
+            Self::OneGroupPerLine | Self::OneGroupPerLineWithDanglingComments
+                if at_group_boundary =>
+            {
+                hard_line_break().fmt(f)
+            }
+            _ => soft_line_break_or_space().fmt(f),
+        }
+    }
 }
 
 fn should_preceded_by_softline<N, I>(node: &N) -> bool

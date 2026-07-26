@@ -2,7 +2,7 @@ use biome_css_syntax::{
     CssGenericProperty, CssSyntaxKind, CssSyntaxNode, ScssExpression, ScssExpressionItemList,
     ScssListExpression, ScssListExpressionElement, ScssListExpressionElementList,
 };
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, AstSeparatedList};
 
 /// Finds the nearest SCSS declaration-list group containing `node`.
 ///
@@ -14,7 +14,9 @@ use biome_rowan::AstNode;
 ///   box-shadow: $x $y, $z $w;
 /// }
 /// ```
-pub(crate) fn scss_declaration_list_group(node: &CssSyntaxNode) -> Option<ScssExpressionItemList> {
+pub(crate) fn find_scss_declaration_list_group(
+    node: &CssSyntaxNode,
+) -> Option<ScssExpressionItemList> {
     let items = ScssListExpressionElement::cast_ref(node)
         .and_then(|element| element.value().ok())
         .and_then(|value| value.as_scss_expression().map(ScssExpression::items))
@@ -42,9 +44,8 @@ fn is_declaration_list_group(items: &ScssExpressionItemList) -> bool {
     };
 
     elements
-        .syntax()
-        .children_with_tokens()
-        .any(|element| element.kind() == CssSyntaxKind::COMMA)
+        .separators()
+        .any(|separator| separator.is_ok_and(|token| token.kind() == CssSyntaxKind::COMMA))
         && elements
             .parent::<ScssListExpression>()
             .and_then(|list| list.parent::<ScssExpressionItemList>())
