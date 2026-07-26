@@ -141,9 +141,10 @@ pub(crate) fn multiline_plain_key(
 ///   : 20 }
 /// ```
 ///
-/// The line breaks are literal so the enclosing flow collection stays flat,
-/// as Prettier keeps it; a literal break resets the printer to the document
-/// root, so the continuation and `:` lines carry their own indentation.
+/// The line breaks are literal so that they don't expand the enclosing flow
+/// collection, which stays on one line; a literal break resets the printer to
+/// the document root, so the continuation and `:` lines carry their own
+/// indentation.
 pub(crate) struct FormatMultilineKeyEntry<'a> {
     /// The `?` of an entry already in the explicit form; a synthesized `?`
     /// is printed without one
