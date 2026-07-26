@@ -55,7 +55,9 @@ impl FormatNodeRule<YamlBlockContent> for FormatYamlBlockContent {
             (Chomping::Keep, Some(scalar_end)) => scalar_end,
             // The line break terminating the last line is printed by the
             // enclosing structure, so the line it opens isn't content
-            (Chomping::Keep, None) => stats.line_count.saturating_sub(usize::from(ends_with_break)),
+            (Chomping::Keep, None) => stats
+                .line_count
+                .saturating_sub(usize::from(ends_with_break)),
             // Trailing blank lines are dropped
             (Chomping::Clip | Chomping::Strip, _) => stats.trimmed_count,
         };
