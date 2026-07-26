@@ -79,11 +79,12 @@ impl Format<YamlFormatContext> for FormatProperties<'_> {
     }
 }
 
-/// The number of line breaks in front of `node`, counting through the
-/// zero-width end tokens (`MAPPING_END`, `FLOW_END`, ...) before it, whose
-/// leading trivia carries the line breaks that separate `node` from the
-/// content above. Stops at a comment, since the breaks above one belong to
-/// it, not to `node`
+/// The number of line breaks in front of `node`.
+///
+/// The breaks that separate `node` from the content above it can end up in
+/// the leading trivia of the zero-width end tokens (`MAPPING_END`,
+/// `FLOW_END`, ...) that precede it, so the count walks through those tokens
+/// as well. It stops at a comment, whose own leading breaks belong to it.
 pub(crate) fn lines_before_through_end_tokens(node: &YamlSyntaxNode) -> usize {
     let mut count = 0;
     let Some(mut token) = node.first_token() else {
