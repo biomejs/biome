@@ -114,8 +114,7 @@ pub(crate) fn lines_before_through_end_tokens(node: &YamlSyntaxNode) -> usize {
 
 /// Whether the last node of `root` is a literal or folded block scalar with
 /// keep chomping (`|+`). Such a scalar owns every line break that follows
-/// it, so the enclosing structures print none of their own, as Prettier
-/// does.
+/// it, so the enclosing structures print none of their own.
 pub(crate) fn ends_in_keep_chomped_scalar(root: &YamlSyntaxNode) -> bool {
     let mut current = root.clone();
     while let Some(last) = current.last_child() {

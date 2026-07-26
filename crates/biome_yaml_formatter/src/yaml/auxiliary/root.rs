@@ -17,7 +17,7 @@ impl FormatNodeRule<YamlRoot> for FormatYamlRoot {
 
         // A keep-chomped block scalar owns every line break that follows
         // it and prints them itself, so when one closes the last document,
-        // Prettier emits no final line break of its own — even after a
+        // the root emits no final line break of its own — even after a
         // `...` marker or a trailing comment that follows the scalar
         let ends_in_keep_scalar = documents
             .iter()
@@ -34,7 +34,7 @@ impl FormatNodeRule<YamlRoot> for FormatYamlRoot {
     fn fmt_leading_comments(&self, node: &YamlRoot, f: &mut YamlFormatter) -> FormatResult<()> {
         // The comments of a document without content lead the root. They
         // keep the blank lines between them, but the blank lines after the
-        // last one are dropped, as Prettier does:
+        // last one are dropped:
         //
         // ```yaml
         // # Comment
@@ -48,7 +48,10 @@ impl FormatNodeRule<YamlRoot> for FormatYamlRoot {
                     write!(f, [hard_line_break()])?;
                 }
             }
-            write!(f, [FormatRefWithRule::new(comment, FormatYamlLeadingComment)])?;
+            write!(
+                f,
+                [FormatRefWithRule::new(comment, FormatYamlLeadingComment)]
+            )?;
             comment.mark_formatted();
         }
         Ok(())

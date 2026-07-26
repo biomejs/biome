@@ -30,9 +30,8 @@ impl FormatRule<YamlDocumentList> for FormatYamlDocumentList {
                 } else if lines > 1 && ends_in_multi_entry_collection(previous) {
                     // A blank line separating a document from the next `---`
                     // marker survives when the entries above it read as a
-                    // list: Prettier keeps it only when the collection
-                    // holding the previous document's last entry has at
-                    // least two entries
+                    // list, that is when the collection holding the previous
+                    // document's last entry has at least two entries
                     write!(f, [empty_line()])?;
                 } else {
                     write!(f, [hard_line_break()])?;
