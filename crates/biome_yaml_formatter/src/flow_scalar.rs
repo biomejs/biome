@@ -172,3 +172,56 @@ fn normalize_quotes(value: &str, quote_style: QuoteStyle) -> Cow<'_, str> {
         Cow::Owned(std::format!("{preferred}{raw}{preferred}"))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn to_double(value: &str) -> String {
+        normalize_quotes(value, QuoteStyle::Double).into_owned()
+    }
+
+    fn to_single(value: &str) -> String {
+        normalize_quotes(value, QuoteStyle::Single).into_owned()
+    }
+
+    #[test]
+    fn scalar_without_quotes_is_left_alone() {
+        assert_eq!(to_double("foo"), "foo");
+        assert_eq!(to_single("foo"), "foo");
+        // A quote that opens nothing
+        assert_eq!(to_double("\""), "\"");
+        assert_eq!(to_double("'foo"), "'foo");
+    }
+
+    #[test]
+    fn quotes_become_the_preferred_style() {
+        assert_eq!(to_double("'foo'"), "\"foo\"");
+        assert_eq!(to_double("\"foo\""), "\"foo\"");
+        assert_eq!(to_single("\"foo\""), "'foo'");
+        assert_eq!(to_single("'foo'"), "'foo'");
+        assert_eq!(to_double("''"), "\"\"");
+    }
+
+    #[test]
+    fn a_quote_in_the_text_picks_the_other_style() {
+        assert_eq!(to_double("\"a \\\"b\\\" c\""), "'a \"b\" c'");
+        assert_eq!(to_double("'a \"b\" c'"), "'a \"b\" c'");
+        assert_eq!(to_single("'it''s'"), "\"it's\"");
+        assert_eq!(to_single("\"it's\""), "\"it's\"");
+    }
+
+    #[test]
+    fn both_kinds_of_quote_in_the_text_pick_single_quotes() {
+        assert_eq!(to_double("\"it's \\\"quoted\\\"\""), "'it''s \"quoted\"'");
+    }
+
+    #[test]
+    fn a_backslash_pins_the_quotes() {
+        // `\n` has no single quoted equivalent
+        assert_eq!(to_single("\"a\\nb\""), "\"a\\nb\"");
+        // The backslash is content, which double quotes would read as an
+        // escape
+        assert_eq!(to_double("'a\\nb'"), "'a\\nb'");
+    }
+}
