@@ -364,7 +364,7 @@ impl Format<YamlFormatContext> for FormatEntryDanglingComments<'_> {
     }
 }
 
-/// Formats a run of comments, each opened by the line break its position in
+/// Formats a list of comments, each opened by the line break its position in
 /// the source calls for: a blank line when one separated it from the content
 /// before, otherwise a plain break. With `inline_first`, a first comment
 /// that started on the line of the preceding content stays there, after a

@@ -63,11 +63,12 @@ impl Format<YamlFormatContext> for FormatFlowScalar<'_> {
                 if line.is_empty() {
                     // Blank lines are written as literal `\n` text because
                     // line break elements can't produce them: the printer
-                    // collapses a run of line breaks to at most one blank
+                    // collapses consecutive line breaks to at most one blank
                     // line, and it prints the current indentation after each
                     // one. A blank line here must stay completely empty, and
-                    // a run must keep its exact length, since every blank
-                    // line folds into a line feed of the scalar's value
+                    // consecutive blank lines must keep their exact count,
+                    // since every blank line folds into a line feed of the
+                    // scalar's value
                     write!(f, [text("\n", None)])?;
                     prev_empty = true;
                 } else {
