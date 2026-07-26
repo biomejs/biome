@@ -4,9 +4,11 @@ use crate::prelude::*;
 use crate::utils::case::{
     identifier_has_escape, is_author_owned_property_value, value_identifier_case,
 };
+use crate::utils::scss_declaration_list::scss_declaration_list_group;
 use biome_css_syntax::{
     CssFunction, CssGenericDelimiter, CssGenericProperty, CssIdentifier, CssLanguage,
-    CssSyntaxKind, ScssExpression, ScssIncludeArgumentList, css_grid_template_property,
+    CssSyntaxKind, CssSyntaxNode, ScssExpression, ScssIncludeArgumentList,
+    css_grid_template_property,
 };
 use biome_formatter::{
     CstFormatContext, FormatOptions, FormatResult, FormatWithRule, format_args, write,
@@ -19,11 +21,8 @@ use std::cmp;
 /// Note: commas inside nested constructs (e.g. function arguments like `rgba(0, 0, 0, 0.5)`)
 /// are represented by different lists in the AST and won't be seen by this helper when scanning
 /// the *outer* declaration value list.
-fn is_comma_delimiter<I>(node: &I) -> bool
-where
-    I: AstNode<Language = CssLanguage>,
-{
-    let token_kind = CssGenericDelimiter::cast_ref(node.syntax())
+fn is_comma_delimiter(node: &CssSyntaxNode) -> bool {
+    let token_kind = CssGenericDelimiter::cast_ref(node)
         .and_then(|node| node.value().ok())
         .map(|token| token.kind());
 
@@ -38,6 +37,37 @@ where
     I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
 {
     list.parent::<CssFunction>().is_some() || list.parent::<ScssIncludeArgumentList>().is_some()
+}
+
+/// Returns whether `node` is a comma-separated CSS declaration value list or
+/// one group within an SCSS declaration value list.
+///
+/// CSS stores the comma in the component value list:
+///
+/// ```css
+/// a {
+///   box-shadow: 1px 1px red, 2px 2px blue;
+/// }
+/// ```
+///
+/// SCSS stores `$x $y` and `$z $w` in separate expression item lists while
+/// their surrounding list owns the comma:
+///
+/// ```scss
+/// a {
+///   box-shadow: $x $y, $z $w;
+/// }
+/// ```
+pub(crate) fn is_comma_separated_declaration_value_list(node: &CssSyntaxNode) -> bool {
+    match node.kind() {
+        CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST => {
+            node.parent()
+                .is_some_and(|parent| CssGenericProperty::can_cast(parent.kind()))
+                && node.children().any(|child| is_comma_delimiter(&child))
+        }
+        CssSyntaxKind::SCSS_EXPRESSION_ITEM_LIST => scss_declaration_list_group(node).is_some(),
+        _ => false,
+    }
 }
 
 /// Applies a Prettier-like wrapping strategy for comma-separated *declaration values* when using
@@ -68,19 +98,10 @@ where
     I: AstNode<Language = CssLanguage> + Clone + IntoFormat<CssFormatContext>,
     I::Format: FormatWithRule<CssFormatContext, Item = I>,
 {
-    if !matches!(layout, ValueListLayout::Fill) {
-        return None;
-    }
-
-    // Only apply this behaviour for declaration values.
-    // This prevents the comma-group logic from leaking into unrelated list-like constructs.
-    let is_declaration_value_list = node.parent::<CssGenericProperty>().is_some();
-    if !is_declaration_value_list {
-        return None;
-    }
-
-    let has_top_level_comma = node.iter().any(|element| is_comma_delimiter(&element));
-    if !has_top_level_comma {
+    if !matches!(layout, ValueListLayout::Fill)
+        || node.parent::<CssGenericProperty>().is_none()
+        || !is_comma_separated_declaration_value_list(node.syntax())
+    {
         return None;
     }
 
@@ -112,7 +133,7 @@ where
             let mut values = f.fill();
 
             for element in elements.by_ref() {
-                let is_comma = is_comma_delimiter(&element);
+                let is_comma = is_comma_delimiter(element.syntax());
                 let formatted = element.into_format().with_text_case(CssCase::Preserve);
 
                 values.entry(
@@ -199,7 +220,7 @@ where
                         // Consider the CSS example: `font: first , second;`
                         // The desired format is: `font: first, second;`
                         // A separator should not be added before the comma because the comma acts as a `CssGenericDelimiter`.
-                        let is_comma = is_comma_delimiter(&element);
+                        let is_comma = is_comma_delimiter(element.syntax());
 
                         if !is_comma {
                             if matches!(
