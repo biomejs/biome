@@ -16,15 +16,14 @@ pub(crate) struct HtmlTokenSource<'source> {
     pub(super) trivia_list: Vec<Trivia>,
 }
 
-#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum HtmlLexContext {
     /// The default state. This state is used for lexing outside of tags.
     ///
     /// When the lexer is outside of a tag, special characters are lexed as text.
     ///
     /// The exceptions being `<` which indicates the start of a tag, and `>` which is invalid syntax if not preceded with a `<`.
-    #[default]
-    Regular,
+    Regular { framework: HtmlFramework },
     /// When the lexer is inside a tag, special characters are lexed as tag tokens.
     ///
     /// This single context covers plain HTML as well as the Vue/Svelte/Astro
@@ -222,7 +221,15 @@ impl HtmlEmbeddedLanguage {
 
 impl LexContext for HtmlLexContext {
     fn is_regular(&self) -> bool {
-        matches!(self, Self::Regular)
+        matches!(self, Self::Regular { .. })
+    }
+}
+
+impl Default for HtmlLexContext {
+    fn default() -> Self {
+        Self::Regular {
+            framework: HtmlFramework::Plain,
+        }
     }
 }
 
@@ -230,8 +237,8 @@ impl LexContext for HtmlLexContext {
 pub(crate) enum HtmlReLexContext {
     /// Specialised relex that manages certain characters such as commas, etc.
     Svelte,
-    /// Relex tokens using `HtmlLexer::consume_html_text`
-    HtmlText,
+    /// Relex tokens using `HtmlLexer::consume_html_text`.
+    HtmlText { framework: HtmlFramework },
     /// Relex tokens as if the parser was inside a tag.
     InsideTag,
     /// Relex tokens as if the parser was inside a tag in an Astro file.
@@ -249,13 +256,12 @@ pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind
 
 impl<'source> HtmlTokenSource<'source> {
     /// Creates a new token source for the given string
-    pub fn from_str(source: &'source str) -> Self {
+    pub fn from_str(source: &'source str, initial_context: HtmlLexContext) -> Self {
         let lexer = HtmlLexer::from_str(source);
-
         let buffered = BufferedLexer::new(lexer);
         let mut source = Self::new(buffered);
 
-        source.next_non_trivia_token(HtmlLexContext::Regular, true);
+        source.next_non_trivia_token(initial_context, true);
         source
     }
 
@@ -339,11 +345,11 @@ impl TokenSource for HtmlTokenSource<'_> {
     }
 
     fn bump(&mut self) {
-        self.bump_with_context(HtmlLexContext::Regular)
+        self.bump_with_context(HtmlLexContext::default())
     }
 
     fn skip_as_trivia(&mut self) {
-        self.skip_as_trivia_with_context(HtmlLexContext::Regular)
+        self.skip_as_trivia_with_context(HtmlLexContext::default())
     }
 
     fn finish(self) -> (Vec<Trivia>, Vec<ParseDiagnostic>) {

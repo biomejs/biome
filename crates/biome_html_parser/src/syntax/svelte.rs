@@ -46,7 +46,7 @@ pub(crate) fn parse_svelte_hash_block(p: &mut HtmlParser) -> ParsedSyntax {
                 let _ = ParseRecoveryTokenSet::new(HTML_BOGUS, token_set![T!['}']]).recover(p);
             }
 
-            p.expect(T!['}']);
+            p.expect_with_context(T!['}'], super::regular_context(p));
             Present(m.complete(p, SVELTE_BOGUS_BLOCK))
         }
     }
@@ -102,7 +102,7 @@ fn parse_if_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> ParsedSy
         expected_expression(p, range.sub_start(parent_marker.start()))
     });
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     SvelteElementList::new()
         .with_stop_at_curly_colon()
@@ -135,7 +135,7 @@ pub(crate) fn parse_else_if_clause(p: &mut HtmlParser) -> ParsedSyntax {
         expected_expression(p, range.sub_start(m.start()))
     });
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     SvelteElementList::new()
         .with_stop_at_curly_colon()
@@ -151,8 +151,8 @@ pub(crate) fn parse_else_clause(p: &mut HtmlParser) -> ParsedSyntax {
     }
     let m = p.start();
     p.bump_with_context(T!["{:"], HtmlLexContext::Svelte);
-    p.expect(T![else]);
-    p.expect(T!['}']);
+    p.expect_with_context(T![else], HtmlLexContext::Svelte);
+    p.expect_with_context(T!['}'], super::regular_context(p));
     SvelteElementList::new().parse_list(p);
     Present(m.complete(p, SVELTE_ELSE_CLAUSE))
 }
@@ -253,7 +253,7 @@ fn parse_each_key(p: &mut HtmlParser) -> ParsedSyntax {
     // Re-lex to Svelte context to recognize ',) and other tokens
     p.re_lex(HtmlReLexContext::Svelte);
 
-    p.expect(T![')']);
+    p.expect_with_context(T![')'], HtmlLexContext::Svelte);
 
     Present(m.complete(p, SVELTE_EACH_KEY))
 }
@@ -366,7 +366,7 @@ fn parse_each_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> (Parse
         parse_svelte_block_item(p).ok();
     }
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     (
         Present(parent_marker.complete(p, SVELTE_EACH_OPENING_BLOCK)),
@@ -411,7 +411,7 @@ pub(crate) fn parse_svelte_spread_or_expression(p: &mut HtmlParser) -> ParsedSyn
 
 pub(crate) fn parse_svelte_declaration_or_expression(p: &mut HtmlParser) -> ParsedSyntax {
     if !Svelte.is_supported(p) || !p.at(T!['{']) {
-        return parse_single_text_expression(p, HtmlLexContext::Regular);
+        return parse_single_text_expression(p, super::regular_context(p));
     }
 
     let checkpoint = p.checkpoint();
@@ -439,12 +439,12 @@ pub(crate) fn parse_svelte_declaration_or_expression(p: &mut HtmlParser) -> Pars
 
     if is_declaration {
         parse_single_text_expression_content(p).or_add_diagnostic(p, expected_text_expression);
-        p.expect_with_context(T!['}'], HtmlLexContext::Regular);
+        p.expect_with_context(T!['}'], super::regular_context(p));
         Present(m.complete(p, SVELTE_DECLARATION_BLOCK))
     } else {
         parse_single_text_expression_after_opening(
             p,
-            HtmlLexContext::Regular,
+            super::regular_context(p),
             checkpoint,
             m,
             opening_range,
@@ -531,7 +531,7 @@ fn parse_await_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> Parse
         has_catch_clause = Some(m.range(p));
     }
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     SvelteElementList::new()
         .with_stop_at_curly_colon()
@@ -668,7 +668,7 @@ fn parse_await_then_or_catch_block(
         return (Absent, BlockParsed::None);
     }
     let m = p.start();
-    p.bump(T!["{:"]);
+    p.bump_with_context(T!["{:"], HtmlLexContext::Svelte);
 
     if p.at(T![then]) {
         (
@@ -699,7 +699,7 @@ fn parse_await_then_block(
 
     parse_single_text_expression_content(p).ok();
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     SvelteElementList::new()
         .with_stop_at_curly_colon()
@@ -731,7 +731,7 @@ fn parse_await_catch_block(
 
     parse_single_text_expression_content(p).ok();
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     SvelteElementList::new()
         .with_stop_at_curly_colon()
@@ -788,7 +788,7 @@ fn parse_snippet_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> Par
         p.error(p.err_builder("Expected an expression after 'snippet'", p.cur_range()));
     }
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     SvelteElementList::new()
         .with_stop_at_curly_colon()
@@ -807,7 +807,7 @@ fn parse_curly_destructured_name(p: &mut HtmlParser) -> ParsedSyntax {
 
     SvelteBindingAssignmentBindingList.parse_list(p);
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], HtmlLexContext::Svelte);
 
     Present(m.complete(p, SVELTE_CURLY_DESTRUCTURED_NAME))
 }
@@ -847,7 +847,7 @@ pub(crate) fn parse_opening_block(
         expected_expression(p, range.sub_start(m.start()))
     });
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     Present(m.complete(p, node))
 }
@@ -868,7 +868,7 @@ pub(crate) fn parse_closing_block(
 
     p.expect_with_context(keyword, HtmlLexContext::Svelte);
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     Present(m.complete(p, node))
 }
@@ -895,7 +895,7 @@ pub(crate) fn parse_svelte_at_block(p: &mut HtmlParser) -> ParsedSyntax {
                 let _ = ParseRecoveryTokenSet::new(HTML_BOGUS, token_set![T!['}']]).recover(p);
             }
 
-            p.expect(T!['}']);
+            p.expect_with_context(T!['}'], super::regular_context(p));
             Present(m.complete(p, SVELTE_BOGUS_BLOCK))
         }
     }
@@ -908,7 +908,7 @@ pub(crate) fn parse_debug_block(p: &mut HtmlParser, marker: Marker) -> ParsedSyn
 
     BindingList.parse_list(p);
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     Present(marker.complete(p, SVELTE_DEBUG_BLOCK))
 }
@@ -921,7 +921,7 @@ pub(crate) fn parse_html_block(p: &mut HtmlParser, marker: Marker) -> ParsedSynt
 
     parse_single_text_expression_content(p).or_add_diagnostic(p, expected_text_expression);
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     Present(marker.complete(p, SVELTE_HTML_BLOCK))
 }
@@ -934,7 +934,7 @@ pub(crate) fn parse_render_block(p: &mut HtmlParser, marker: Marker) -> ParsedSy
 
     parse_single_text_expression_content(p).or_add_diagnostic(p, expected_text_expression);
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     Present(marker.complete(p, SVELTE_RENDER_BLOCK))
 }
@@ -962,7 +962,7 @@ pub(crate) fn parse_const_block(p: &mut HtmlParser, marker: Marker) -> ParsedSyn
 
     parse_single_text_expression_content(p).or_add_diagnostic(p, expected_text_expression);
 
-    p.expect(T!['}']);
+    p.expect_with_context(T!['}'], super::regular_context(p));
 
     Present(marker.complete(p, SVELTE_CONST_BLOCK))
 }
