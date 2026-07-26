@@ -2684,6 +2684,44 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteKeyOpeningBlock 
         )
     }
 }
+impl FormatRule<biome_html_syntax::SvelteLetDirective>
+    for crate::svelte::auxiliary::let_directive::FormatSvelteLetDirective
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteLetDirective,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteLetDirective>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteLetDirective {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteLetDirective,
+        crate::svelte::auxiliary::let_directive::FormatSvelteLetDirective,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::auxiliary::let_directive::FormatSvelteLetDirective::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteLetDirective {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteLetDirective,
+        crate::svelte::auxiliary::let_directive::FormatSvelteLetDirective,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::auxiliary::let_directive::FormatSvelteLetDirective::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::SvelteLiteral>
     for crate::svelte::auxiliary::literal::FormatSvelteLiteral
 {

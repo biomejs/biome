@@ -1,4 +1,5 @@
 use crate::html::auxiliary::attribute_initializer_clause::CompactKind;
+use crate::svelte::value::template_attribute_value::lone_initializer_expression;
 use crate::{
     html::auxiliary::{
         attribute_initializer_clause::FormatHtmlAttributeInitializerClauseOptions,
@@ -7,9 +8,8 @@ use crate::{
     prelude::*,
 };
 use biome_formatter::{FormatContext, FormatRuleWithOptions, write};
-use biome_html_syntax::{
-    AnyHtmlAttributeInitializer, AnyHtmlTagName, HtmlAttribute, HtmlAttributeFields,
-};
+use biome_html_syntax::{AnyHtmlTagName, HtmlAttribute, HtmlAttributeFields};
+use biome_rowan::Text;
 use std::fmt::Debug;
 
 #[derive(Debug, Clone, Default)]
@@ -48,31 +48,28 @@ impl FormatRuleWithOptions<HtmlAttribute> for FormatHtmlAttribute {
     }
 }
 
+/// The expression an attribute's value consists of, if that is all it is.
+///
+/// The quotes around a value make no difference here: `x="{x}"` says the same
+/// thing as `x={x}`, and Svelte's shorthand covers both.
+fn lone_expression_text(node: &HtmlAttribute) -> Option<Text> {
+    let expression = lone_initializer_expression(&node.initializer()?.value().ok()?)?;
+
+    expression.expression().ok()?.string_value()
+}
+
 /// Whether the formatter can write `x={x}` in `{x}`
 /// The initializer must be a text expression, and the two values must match.
 fn can_compact(node: &HtmlAttribute, f: &mut HtmlFormatter) -> bool {
-    if f.context().options().file_source().is_svelte() {
-        let name = node.name().ok().and_then(|name| name.token_text_trimmed());
-
-        let initializer_value = node.initializer().and_then(|init| init.value().ok());
-
-        let Some(AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(initializer_value)) =
-            initializer_value
-        else {
-            return false;
-        };
-
-        let initializer_value = initializer_value
-            .expression()
-            .ok()
-            .and_then(|expression| expression.string_value());
-
-        if let (Some(name), Some(initializer_value)) = (name, initializer_value) {
-            return initializer_value.text() == name.text();
-        }
+    if !f.context().options().file_source().is_svelte() {
+        return false;
     }
 
-    false
+    let Some(name) = node.name().ok().and_then(|name| name.token_text_trimmed()) else {
+        return false;
+    };
+
+    lone_expression_text(node).is_some_and(|value| value.text() == name.text())
 }
 
 impl FormatNodeRule<HtmlAttribute> for FormatHtmlAttribute {

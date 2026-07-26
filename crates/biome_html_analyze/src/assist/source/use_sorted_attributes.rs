@@ -257,6 +257,7 @@ enum SortCategory {
     SvelteInDirective,
     SvelteOutDirective,
     SvelteAnimateDirective,
+    SvelteLetDirective,
     SvelteAttachAttribute,
 
     VueDefinition,
@@ -350,6 +351,9 @@ impl SortableHtmlAttribute {
             }
             AnyHtmlAttribute::AnySvelteDirective(AnySvelteDirective::SvelteAnimateDirective(_)) => {
                 SortCategory::SvelteAnimateDirective
+            }
+            AnyHtmlAttribute::AnySvelteDirective(AnySvelteDirective::SvelteLetDirective(_)) => {
+                SortCategory::SvelteLetDirective
             }
             AnyHtmlAttribute::SvelteAttachAttribute(_) => SortCategory::SvelteAttachAttribute,
             AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueBogusDirective(_)) => {
@@ -491,6 +495,9 @@ impl SortableAttribute for SortableHtmlAttribute {
             AnyHtmlAttribute::AnySvelteDirective(AnySvelteDirective::SvelteAnimateDirective(
                 dir,
             )) => svelte_directive_value_token(&dir.value().ok()?),
+            AnyHtmlAttribute::AnySvelteDirective(AnySvelteDirective::SvelteLetDirective(dir)) => {
+                svelte_directive_value_token(&dir.value().ok()?)
+            }
             AnyHtmlAttribute::SvelteAttachAttribute(_) => None,
             AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueDirective(dir)) => {
                 match dir.name_token().ok()?.text_trimmed() {

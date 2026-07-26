@@ -24,7 +24,7 @@ info: printer/allow-shorthand-false.svelte
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,8 @@
+@@ -1,9 +1,9 @@
 -<input type="text" value={value} />
 +<input type="text" {value} />
  
@@ -34,8 +34,11 @@ info: printer/allow-shorthand-false.svelte
 -<input type="text" bind:value={value} />
 +<input type="text" bind:value />
  
- <input type="text" class:value={value} />
+-<input type="text" class:value={value} />
++<input type="text" class:value />
  
+-<input type="text" style:value={value} />
++<input type="text" style:value />
 ```
 
 # Output
@@ -47,7 +50,7 @@ info: printer/allow-shorthand-false.svelte
 
 <input type="text" bind:value />
 
-<input type="text" class:value={value} />
+<input type="text" class:value />
 
-<input type="text" style:value={value} />
+<input type="text" style:value />
 ```

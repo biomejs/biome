@@ -1,0 +1,89 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<Widget let: />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlComponentName {
+                value_token: HTML_COMPONENT_LITERAL@1..8 "Widget" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                SvelteLetDirective {
+                    let_token: LET_KW@8..11 "let" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@11..13 ":" [] [Whitespace(" ")],
+                        property: missing (required),
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: missing (optional),
+                    },
+                },
+            ],
+            slash_token: SLASH@13..14 "/" [] [],
+            r_angle_token: R_ANGLE@14..15 ">" [] [],
+        },
+    ],
+    eof_token: EOF@15..16 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..16
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..15
+    0: HTML_SELF_CLOSING_ELEMENT@0..15
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_COMPONENT_NAME@1..8
+        0: HTML_COMPONENT_LITERAL@1..8 "Widget" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@8..13
+        0: SVELTE_LET_DIRECTIVE@8..13
+          0: LET_KW@8..11 "let" [] []
+          1: SVELTE_DIRECTIVE_VALUE@11..13
+            0: COLON@11..13 ":" [] [Whitespace(" ")]
+            1: (empty)
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@13..13
+            3: (empty)
+      3: SLASH@13..14 "/" [] []
+      4: R_ANGLE@14..15 ">" [] []
+  4: EOF@15..16 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+let_missing_name.svelte:1:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+  > 1 │ <Widget let: />
+      │              ^^
+  > 2 │ 
+      │ 
+  
+  i Expected one of:
+  
+  - name
+  - closing block
+  
+```

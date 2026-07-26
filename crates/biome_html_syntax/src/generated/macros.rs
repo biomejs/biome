@@ -322,6 +322,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::SvelteKeyOpeningBlock::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::SVELTE_LET_DIRECTIVE => {
+                    let $pattern = unsafe { $crate::SvelteLetDirective::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::SVELTE_LITERAL => {
                     let $pattern = unsafe { $crate::SvelteLiteral::new_unchecked(node) };
                     $body

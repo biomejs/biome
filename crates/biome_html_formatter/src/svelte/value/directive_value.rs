@@ -3,6 +3,7 @@ use crate::html::auxiliary::attribute_initializer_clause::{
 };
 use crate::prelude::*;
 use crate::shared::FmtAnySvelteBindingProperty;
+use crate::svelte::value::template_attribute_value::lone_initializer_expression;
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_html_syntax::{
     AnySvelteBindingProperty, AnySvelteDirectiveInitializerClause, SvelteDirectiveValue,
@@ -65,7 +66,7 @@ impl FormatSvelteDirectiveValue {
             };
             let Some(initializer_value) = initializer.value().ok().and_then(|v| {
                 Some(
-                    v.as_html_attribute_single_text_expression()?
+                    lone_initializer_expression(&v)?
                         .expression()
                         .ok()?
                         .to_trimmed_text(),

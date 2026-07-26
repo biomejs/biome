@@ -1457,6 +1457,18 @@ pub fn svelte_key_opening_block(
         ],
     ))
 }
+pub fn svelte_let_directive(
+    let_token: SyntaxToken,
+    value: SvelteDirectiveValue,
+) -> SvelteLetDirective {
+    SvelteLetDirective::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_LET_DIRECTIVE,
+        [
+            Some(SyntaxElement::Token(let_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
 pub fn svelte_literal(value_token: SyntaxToken) -> SvelteLiteral {
     SvelteLiteral::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::SVELTE_LITERAL,

@@ -988,6 +988,7 @@ impl<'src> HtmlLexer<'src> {
             b"catch" => CATCH_KW,
             b"snippet" => SNIPPET_KW,
             b"bind" => BIND_KW,
+            b"let" => LET_KW,
             b"transition" => TRANSITION_KW,
             b"animate" => ANIMATE_KW,
             b"out" => OUT_KW,

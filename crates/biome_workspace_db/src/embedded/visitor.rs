@@ -1198,7 +1198,8 @@ impl EmbeddedReferencesBuilder {
                 value
             }
             AnySvelteDirective::SvelteStyleDirective(_)
-            | AnySvelteDirective::SvelteClassDirective(_) => return None,
+            | AnySvelteDirective::SvelteClassDirective(_)
+            | AnySvelteDirective::SvelteLetDirective(_) => return None,
         };
 
         self.register_svelte_binding_property(value.property().ok())

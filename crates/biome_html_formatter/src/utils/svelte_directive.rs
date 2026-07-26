@@ -7,8 +7,8 @@ use biome_formatter::write;
 use biome_formatter::{Format, FormatResult};
 use biome_html_syntax::{
     HtmlSyntaxNode, HtmlSyntaxToken, SvelteAnimateDirective, SvelteBindDirective,
-    SvelteClassDirective, SvelteDirectiveValue, SvelteInDirective, SvelteOutDirective,
-    SvelteStyleDirective, SvelteTransitionDirective, SvelteUseDirective,
+    SvelteClassDirective, SvelteDirectiveValue, SvelteInDirective, SvelteLetDirective,
+    SvelteOutDirective, SvelteStyleDirective, SvelteTransitionDirective, SvelteUseDirective,
 };
 use biome_rowan::{AstNode, SyntaxResult};
 
@@ -63,6 +63,17 @@ impl<'a> From<&'a SvelteBindDirective> for FmtSvelteDirective<'a> {
     }
 }
 
+impl<'a> From<&'a SvelteLetDirective> for FmtSvelteDirective<'a> {
+    fn from(value: &'a SvelteLetDirective) -> Self {
+        Self {
+            token: value.let_token(),
+            value: value.value(),
+            _node: value.syntax(),
+            allows_compact: true,
+        }
+    }
+}
+
 impl<'a> From<&'a SvelteTransitionDirective> for FmtSvelteDirective<'a> {
     fn from(value: &'a SvelteTransitionDirective) -> Self {
         Self {
@@ -80,7 +91,7 @@ impl<'a> From<&'a SvelteClassDirective> for FmtSvelteDirective<'a> {
             token: value.class_token(),
             value: value.value(),
             _node: value.syntax(),
-            allows_compact: false,
+            allows_compact: true,
         }
     }
 }
@@ -90,7 +101,7 @@ impl<'a> From<&'a SvelteStyleDirective> for FmtSvelteDirective<'a> {
             token: value.style_token(),
             value: value.value(),
             _node: value.syntax(),
-            allows_compact: false,
+            allows_compact: true,
         }
     }
 }

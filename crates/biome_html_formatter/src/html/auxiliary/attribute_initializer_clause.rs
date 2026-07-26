@@ -2,12 +2,10 @@ use std::fmt::Debug;
 
 use crate::prelude::*;
 use crate::shared::FmtAnyAttributeInitializer;
+use crate::svelte::value::template_attribute_value::lone_initializer_expression;
 use crate::utils::srcset::{FormatSrcsetCandidates, parse_srcset};
 use biome_formatter::{CstFormatContext, FormatRuleWithOptions, write};
-use biome_html_syntax::{
-    AnyHtmlAttributeInitializer, HtmlAttributeInitializerClause,
-    HtmlAttributeInitializerClauseFields,
-};
+use biome_html_syntax::{HtmlAttributeInitializerClause, HtmlAttributeInitializerClauseFields};
 use biome_rowan::TokenText;
 
 #[derive(Debug, Clone, Default)]
@@ -78,13 +76,13 @@ impl FormatNodeRule<HtmlAttributeInitializerClause> for FormatHtmlAttributeIniti
                 // We currently only have special formatting for when the value is a string.
                 let eq_token = eq_token?;
                 let fmt_eq_token = format_with(|f| {
+                    // The quotes around a value holding nothing but an
+                    // expression are dropped as well, so `x="{x}"` reaches here
+                    // as something that can be written as `{x}` too.
                     if self.compact.is_curly()
-                        && value.as_ref().is_ok_and(|v| {
-                            matches!(
-                                v,
-                                AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(_)
-                            )
-                        })
+                        && value
+                            .as_ref()
+                            .is_ok_and(|v| lone_initializer_expression(v).is_some())
                     {
                         format_removed(&eq_token).fmt(f)
                     } else {

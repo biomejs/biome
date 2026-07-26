@@ -581,6 +581,7 @@ SvelteSnippetClosingBlock =
 
 AnySvelteDirective =
 	SvelteBindDirective
+	| SvelteLetDirective
 	| SvelteTransitionDirective
 	| SvelteInDirective
 	| SvelteOutDirective
@@ -593,6 +594,12 @@ AnySvelteDirective =
 //      ^^^^^^^^^^^^^^^^^^
 SvelteBindDirective =
 	'bind'
+	value: SvelteDirectiveValue
+
+// <Component let:item={item} >
+//            ^^^^^^^^^^^^^^^
+SvelteLetDirective =
+	'let'
 	value: SvelteDirectiveValue
 
 // <div transition:fade|global={value} >

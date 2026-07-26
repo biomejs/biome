@@ -1,0 +1,28 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: let-unsorted.svelte
+---
+# Input
+```svelte
+<Widget let:b foo let:a />
+
+```
+
+# Diagnostics
+```
+let-unsorted.svelte:1:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+  > 1 │ <Widget let:b foo let:a />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    1   │ - <Widget·let:b·foo·let:a·/>
+      1 │ + <Widget·foo·let:a·let:b·/>
+    2 2 │   
+  
+
+```

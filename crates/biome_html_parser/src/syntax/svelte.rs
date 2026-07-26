@@ -1234,6 +1234,7 @@ pub(crate) fn parse_svelte_directive(p: &mut HtmlParser) -> ParsedSyntax {
 
     match p.cur() {
         T![bind] => parse_bind_directive(p),
+        T![let] => parse_directive(p, T![let], SVELTE_LET_DIRECTIVE, HtmlLexContext::Svelte),
         T![transition] => parse_directive(
             p,
             T![transition],
@@ -1461,6 +1462,7 @@ pub const SVELTE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
 
 const SVELTE_DIRECTIVE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
     T![bind],
+    T![let],
     T![transition],
     T![in],
     T![out],

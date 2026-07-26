@@ -1,0 +1,9 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: let-sorted.svelte
+---
+# Input
+```svelte
+<Widget foo let:a let:b />
+
+```

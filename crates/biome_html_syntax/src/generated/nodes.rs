@@ -3380,6 +3380,46 @@ pub struct SvelteKeyOpeningBlockFields {
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteLetDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteLetDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteLetDirectiveFields {
+        SvelteLetDirectiveFields {
+            let_token: self.let_token(),
+            value: self.value(),
+        }
+    }
+    pub fn let_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<SvelteDirectiveValue> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for SvelteLetDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteLetDirectiveFields {
+    pub let_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<SvelteDirectiveValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteLiteral {
     pub(crate) syntax: SyntaxNode,
 }
@@ -5428,6 +5468,7 @@ pub enum AnySvelteDirective {
     SvelteBindDirective(SvelteBindDirective),
     SvelteClassDirective(SvelteClassDirective),
     SvelteInDirective(SvelteInDirective),
+    SvelteLetDirective(SvelteLetDirective),
     SvelteOutDirective(SvelteOutDirective),
     SvelteStyleDirective(SvelteStyleDirective),
     SvelteTransitionDirective(SvelteTransitionDirective),
@@ -5455,6 +5496,12 @@ impl AnySvelteDirective {
     pub fn as_svelte_in_directive(&self) -> Option<&SvelteInDirective> {
         match &self {
             Self::SvelteInDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_svelte_let_directive(&self) -> Option<&SvelteLetDirective> {
+        match &self {
+            Self::SvelteLetDirective(item) => Some(item),
             _ => None,
         }
     }
@@ -9762,6 +9809,54 @@ impl From<SvelteKeyOpeningBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for SvelteLetDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_LET_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_LET_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteLetDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteLetDirective")
+                .field("let_token", &support::DebugSyntaxResult(self.let_token()))
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("SvelteLetDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteLetDirective> for SyntaxNode {
+    fn from(n: SvelteLetDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteLetDirective> for SyntaxElement {
+    fn from(n: SvelteLetDirective) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for SvelteLiteral {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -13050,6 +13145,11 @@ impl From<SvelteInDirective> for AnySvelteDirective {
         Self::SvelteInDirective(node)
     }
 }
+impl From<SvelteLetDirective> for AnySvelteDirective {
+    fn from(node: SvelteLetDirective) -> Self {
+        Self::SvelteLetDirective(node)
+    }
+}
 impl From<SvelteOutDirective> for AnySvelteDirective {
     fn from(node: SvelteOutDirective) -> Self {
         Self::SvelteOutDirective(node)
@@ -13076,6 +13176,7 @@ impl AstNode for AnySvelteDirective {
         .union(SvelteBindDirective::KIND_SET)
         .union(SvelteClassDirective::KIND_SET)
         .union(SvelteInDirective::KIND_SET)
+        .union(SvelteLetDirective::KIND_SET)
         .union(SvelteOutDirective::KIND_SET)
         .union(SvelteStyleDirective::KIND_SET)
         .union(SvelteTransitionDirective::KIND_SET)
@@ -13087,6 +13188,7 @@ impl AstNode for AnySvelteDirective {
                 | SVELTE_BIND_DIRECTIVE
                 | SVELTE_CLASS_DIRECTIVE
                 | SVELTE_IN_DIRECTIVE
+                | SVELTE_LET_DIRECTIVE
                 | SVELTE_OUT_DIRECTIVE
                 | SVELTE_STYLE_DIRECTIVE
                 | SVELTE_TRANSITION_DIRECTIVE
@@ -13101,6 +13203,7 @@ impl AstNode for AnySvelteDirective {
             SVELTE_BIND_DIRECTIVE => Self::SvelteBindDirective(SvelteBindDirective { syntax }),
             SVELTE_CLASS_DIRECTIVE => Self::SvelteClassDirective(SvelteClassDirective { syntax }),
             SVELTE_IN_DIRECTIVE => Self::SvelteInDirective(SvelteInDirective { syntax }),
+            SVELTE_LET_DIRECTIVE => Self::SvelteLetDirective(SvelteLetDirective { syntax }),
             SVELTE_OUT_DIRECTIVE => Self::SvelteOutDirective(SvelteOutDirective { syntax }),
             SVELTE_STYLE_DIRECTIVE => Self::SvelteStyleDirective(SvelteStyleDirective { syntax }),
             SVELTE_TRANSITION_DIRECTIVE => {
@@ -13117,6 +13220,7 @@ impl AstNode for AnySvelteDirective {
             Self::SvelteBindDirective(it) => it.syntax(),
             Self::SvelteClassDirective(it) => it.syntax(),
             Self::SvelteInDirective(it) => it.syntax(),
+            Self::SvelteLetDirective(it) => it.syntax(),
             Self::SvelteOutDirective(it) => it.syntax(),
             Self::SvelteStyleDirective(it) => it.syntax(),
             Self::SvelteTransitionDirective(it) => it.syntax(),
@@ -13129,6 +13233,7 @@ impl AstNode for AnySvelteDirective {
             Self::SvelteBindDirective(it) => it.into_syntax(),
             Self::SvelteClassDirective(it) => it.into_syntax(),
             Self::SvelteInDirective(it) => it.into_syntax(),
+            Self::SvelteLetDirective(it) => it.into_syntax(),
             Self::SvelteOutDirective(it) => it.into_syntax(),
             Self::SvelteStyleDirective(it) => it.into_syntax(),
             Self::SvelteTransitionDirective(it) => it.into_syntax(),
@@ -13143,6 +13248,7 @@ impl std::fmt::Debug for AnySvelteDirective {
             Self::SvelteBindDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::SvelteClassDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::SvelteInDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::SvelteLetDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::SvelteOutDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::SvelteStyleDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::SvelteTransitionDirective(it) => std::fmt::Debug::fmt(it, f),
@@ -13157,6 +13263,7 @@ impl From<AnySvelteDirective> for SyntaxNode {
             AnySvelteDirective::SvelteBindDirective(it) => it.into_syntax(),
             AnySvelteDirective::SvelteClassDirective(it) => it.into_syntax(),
             AnySvelteDirective::SvelteInDirective(it) => it.into_syntax(),
+            AnySvelteDirective::SvelteLetDirective(it) => it.into_syntax(),
             AnySvelteDirective::SvelteOutDirective(it) => it.into_syntax(),
             AnySvelteDirective::SvelteStyleDirective(it) => it.into_syntax(),
             AnySvelteDirective::SvelteTransitionDirective(it) => it.into_syntax(),
@@ -14427,6 +14534,11 @@ impl std::fmt::Display for SvelteKeyClosingBlock {
     }
 }
 impl std::fmt::Display for SvelteKeyOpeningBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteLetDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

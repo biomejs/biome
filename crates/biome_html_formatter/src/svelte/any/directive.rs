@@ -12,6 +12,7 @@ impl FormatRule<AnySvelteDirective> for FormatAnySvelteDirective {
             AnySvelteDirective::SvelteBindDirective(node) => node.format().fmt(f),
             AnySvelteDirective::SvelteClassDirective(node) => node.format().fmt(f),
             AnySvelteDirective::SvelteInDirective(node) => node.format().fmt(f),
+            AnySvelteDirective::SvelteLetDirective(node) => node.format().fmt(f),
             AnySvelteDirective::SvelteOutDirective(node) => node.format().fmt(f),
             AnySvelteDirective::SvelteStyleDirective(node) => node.format().fmt(f),
             AnySvelteDirective::SvelteTransitionDirective(node) => node.format().fmt(f),

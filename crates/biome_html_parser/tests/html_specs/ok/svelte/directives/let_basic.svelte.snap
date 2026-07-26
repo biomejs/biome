@@ -1,0 +1,141 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<Widget let:item let:renamed={item} let:destructured={{ id, title }} />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlComponentName {
+                value_token: HTML_COMPONENT_LITERAL@1..8 "Widget" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                SvelteLetDirective {
+                    let_token: LET_KW@8..11 "let" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@11..12 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@12..17 "item" [] [Whitespace(" ")],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: missing (optional),
+                    },
+                },
+                SvelteLetDirective {
+                    let_token: LET_KW@17..20 "let" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@20..21 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@21..28 "renamed" [] [],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@28..29 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@29..30 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@30..34 "item" [] [],
+                                },
+                                r_curly_token: R_CURLY@34..36 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+                SvelteLetDirective {
+                    let_token: LET_KW@36..39 "let" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@39..40 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@40..52 "destructured" [] [],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@52..53 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@53..54 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@54..67 "{ id, title }" [] [],
+                                },
+                                r_curly_token: R_CURLY@67..69 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@69..70 "/" [] [],
+            r_angle_token: R_ANGLE@70..71 ">" [] [],
+        },
+    ],
+    eof_token: EOF@71..72 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..72
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..71
+    0: HTML_SELF_CLOSING_ELEMENT@0..71
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_COMPONENT_NAME@1..8
+        0: HTML_COMPONENT_LITERAL@1..8 "Widget" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@8..69
+        0: SVELTE_LET_DIRECTIVE@8..17
+          0: LET_KW@8..11 "let" [] []
+          1: SVELTE_DIRECTIVE_VALUE@11..17
+            0: COLON@11..12 ":" [] []
+            1: SVELTE_NAME@12..17
+              0: IDENT@12..17 "item" [] [Whitespace(" ")]
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@17..17
+            3: (empty)
+        1: SVELTE_LET_DIRECTIVE@17..36
+          0: LET_KW@17..20 "let" [] []
+          1: SVELTE_DIRECTIVE_VALUE@20..36
+            0: COLON@20..21 ":" [] []
+            1: SVELTE_NAME@21..28
+              0: IDENT@21..28 "renamed" [] []
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@28..28
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@28..36
+              0: EQ@28..29 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@29..36
+                0: L_CURLY@29..30 "{" [] []
+                1: HTML_TEXT_EXPRESSION@30..34
+                  0: HTML_LITERAL@30..34 "item" [] []
+                2: R_CURLY@34..36 "}" [] [Whitespace(" ")]
+        2: SVELTE_LET_DIRECTIVE@36..69
+          0: LET_KW@36..39 "let" [] []
+          1: SVELTE_DIRECTIVE_VALUE@39..69
+            0: COLON@39..40 ":" [] []
+            1: SVELTE_NAME@40..52
+              0: IDENT@40..52 "destructured" [] []
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@52..52
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@52..69
+              0: EQ@52..53 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@53..69
+                0: L_CURLY@53..54 "{" [] []
+                1: HTML_TEXT_EXPRESSION@54..67
+                  0: HTML_LITERAL@54..67 "{ id, title }" [] []
+                2: R_CURLY@67..69 "}" [] [Whitespace(" ")]
+      3: SLASH@69..70 "/" [] []
+      4: R_ANGLE@70..71 ">" [] []
+  4: EOF@71..72 "" [Newline("\n")] []
+
+```

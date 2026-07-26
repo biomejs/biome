@@ -35,6 +35,7 @@ pub(crate) mod in_directive;
 pub(crate) mod key_block;
 pub(crate) mod key_closing_block;
 pub(crate) mod key_opening_block;
+pub(crate) mod let_directive;
 pub(crate) mod literal;
 pub(crate) mod member_property;
 pub(crate) mod name;

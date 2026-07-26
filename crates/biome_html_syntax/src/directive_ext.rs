@@ -22,6 +22,7 @@ impl AnySvelteDirective {
     pub fn initializer(&self) -> Option<AnySvelteDirectiveInitializerClause> {
         match self {
             Self::SvelteBindDirective(dir) => dir.value().ok()?.initializer(),
+            Self::SvelteLetDirective(dir) => dir.value().ok()?.initializer(),
             Self::SvelteTransitionDirective(dir) => dir.value().ok()?.initializer(),
             Self::SvelteInDirective(dir) => dir.value().ok()?.initializer(),
             Self::SvelteOutDirective(dir) => dir.value().ok()?.initializer(),
