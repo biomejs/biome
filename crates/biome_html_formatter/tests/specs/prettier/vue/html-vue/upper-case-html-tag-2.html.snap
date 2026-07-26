@@ -26,8 +26,7 @@ new Vue({el: '#app'})
 --- Prettier
 +++ Biome
 @@ -1,9 +1,9 @@
--<!doctype html>
-+<!DOCTYPE html>
+ <!doctype html>
  <html>
    <body>
 -    <div v-if="foo === 'foo'"></div>
@@ -43,7 +42,7 @@ new Vue({el: '#app'})
 # Output
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <body>
     <div v-if="foo ===    'foo'"></div>

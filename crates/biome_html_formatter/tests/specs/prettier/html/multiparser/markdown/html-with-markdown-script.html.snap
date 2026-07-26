@@ -27,9 +27,7 @@ info: html/multiparser/markdown/html-with-markdown-script.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,11 +1,10 @@
--<!doctype html>
-+<!DOCTYPE html>
+@@ -2,10 +2,9 @@
  <html lang="en">
    <head>
      <script type="text/markdown">
@@ -48,7 +46,7 @@ info: html/multiparser/markdown/html-with-markdown-script.html
 # Output
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <script type="text/markdown">

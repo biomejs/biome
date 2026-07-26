@@ -3200,7 +3200,7 @@ fn html_enabled_by_arg_check() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, file_path, "<!DOCTYPE html>\n");
+    assert_file_contents(&fs, file_path, "<!doctype html>\n");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

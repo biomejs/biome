@@ -50,12 +50,6 @@ info: html/svg/svg.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,4 +1,4 @@
--<!doctype html>
-+<!DOCTYPE html>
- <html>
-   <head>
-     <title>SVG</title>
 @@ -19,7 +19,6 @@
  
  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
@@ -69,7 +63,7 @@ info: html/svg/svg.html
 # Output
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <title>SVG</title>
