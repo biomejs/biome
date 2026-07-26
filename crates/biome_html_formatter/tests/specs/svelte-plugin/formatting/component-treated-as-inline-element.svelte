@@ -1,0 +1,5 @@
+<p><ExternalLink href="https://www.buymeacoffee.com">buy</ExternalLink>!</p>
+
+<p><ExternalLink href="https://www.buymeacoffee.com">buy me a</ExternalLink>!</p>
+
+<p><ExternalLink href="https://www.buymeacoffee.com">buy me a coffee</ExternalLink>!</p>

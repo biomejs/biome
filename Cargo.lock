@@ -920,6 +920,7 @@ dependencies = [
  "mimalloc",
  "schemars",
  "serde",
+ "serde_json",
  "similar-asserts",
  "tests_macros",
  "tikv-jemallocator",
