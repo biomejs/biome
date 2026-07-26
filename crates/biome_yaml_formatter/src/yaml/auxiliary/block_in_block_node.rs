@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use crate::utils::FormatProperties;
 use biome_formatter::{format_args, write};
-use biome_rowan::AstNodeList;
 use biome_yaml_syntax::{
     AnyYamlBlockInBlockContent, YamlBlockInBlockNode, YamlBlockInBlockNodeFields, YamlSyntaxKind,
 };
@@ -16,14 +15,11 @@ impl FormatNodeRule<YamlBlockInBlockNode> for FormatYamlBlockInBlockNode {
 
         // The properties of a block mapping that the parser attached to the
         // mapping's first key are printed here, up on the mapping's own line
-        let pulled_up = node
-            .properties_on_first_key()
-            .into_iter()
-            .flat_map(|(key_properties, count)| key_properties.iter().take(count));
-        let effective_properties = properties.iter().chain(pulled_up);
-        let last_property = effective_properties.clone().last();
+        let node_properties =
+            FormatProperties::with_first_key(&properties, node.properties_on_first_key());
+        let last_property = node_properties.last();
 
-        write!(f, [FormatProperties(effective_properties)])?;
+        write!(f, [node_properties])?;
 
         // The parser can produce a node that has properties but no content and
         // no diagnostic, e.g. for `--- !!str` with its scalar on the next line

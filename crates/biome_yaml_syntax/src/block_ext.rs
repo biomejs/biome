@@ -1,8 +1,8 @@
 use crate::{
-    AnyYamlBlockInBlockContent, AnyYamlBlockMapEntry, AnyYamlBlockNode, AnyYamlFlowNode,
-    AnyYamlJsonContent, AnyYamlMappingImplicitKey, AnyYamlProperty, YamlBlockHeaderList,
-    YamlBlockInBlockNode, YamlBlockMapExplicitEntry, YamlFoldedScalar, YamlLiteralScalar,
-    YamlPropertyList, YamlSyntaxKind, YamlSyntaxNode,
+    AnyYamlBlockInBlockContent, AnyYamlBlockNode, AnyYamlFlowNode, AnyYamlJsonContent,
+    AnyYamlMappingImplicitKey, AnyYamlProperty, YamlBlockHeaderList, YamlBlockInBlockNode,
+    YamlBlockMapExplicitEntry, YamlFoldedScalar, YamlLiteralScalar, YamlPropertyList,
+    YamlSyntaxKind, YamlSyntaxNode,
 };
 use biome_rowan::{AstNode, AstNodeList, declare_node_union};
 
@@ -122,14 +122,10 @@ impl YamlBlockInBlockNode {
     /// leading properties that belong to the mapping, or `None` when the
     /// content is not a block mapping or every property is the key's own.
     pub fn properties_on_first_key(&self) -> Option<(YamlPropertyList, usize)> {
-        let Ok(AnyYamlBlockInBlockContent::YamlBlockMapping(mapping)) = self.content() else {
-            return None;
-        };
-        let AnyYamlBlockMapEntry::YamlBlockMapImplicitEntry(entry) = mapping.entries().first()?
-        else {
-            return None;
-        };
-        let key = entry.key()?;
+        let content = self.content().ok()?;
+        let mapping = content.as_yaml_block_mapping()?;
+        let first_entry = mapping.entries().first()?;
+        let key = first_entry.as_yaml_block_map_implicit_entry()?.key()?;
         let count = key.enclosing_mapping_property_count();
         if count == 0 {
             return None;
@@ -198,6 +194,7 @@ impl AnyYamlMappingImplicitKey {
 
 /// Whether the node's first token begins a new line, i.e. has a line break
 /// in its leading trivia
+#[inline]
 fn starts_own_line(node: &YamlSyntaxNode) -> bool {
     node.first_token().is_some_and(|token| {
         token

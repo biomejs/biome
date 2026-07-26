@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use crate::utils::FormatProperties;
 use biome_formatter::write;
-use biome_rowan::AstNodeList;
 use biome_yaml_syntax::{AnyYamlMappingImplicitKey, YamlFlowJsonNode, YamlFlowJsonNodeFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatYamlFlowJsonNode;
@@ -24,10 +23,10 @@ impl FormatNodeRule<YamlFlowJsonNode> for FormatYamlFlowJsonNode {
         // ```
         let skipped = AnyYamlMappingImplicitKey::YamlFlowJsonNode(node.clone())
             .enclosing_mapping_property_count();
-        let own_properties = properties.iter().skip(skipped);
+        let own_properties = FormatProperties::own(&properties, skipped);
 
-        if own_properties.clone().next().is_some() {
-            write!(f, [FormatProperties(own_properties), space()])?;
+        if !own_properties.is_empty() {
+            write!(f, [own_properties, space()])?;
         }
 
         write!(f, [content.format()])
