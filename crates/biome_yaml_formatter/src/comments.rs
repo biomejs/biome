@@ -11,10 +11,9 @@ use biome_rowan::AstNodeList;
 use biome_rowan::{SyntaxTriviaPieceComments, TextSize};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
 use biome_yaml_syntax::{
-    AnyYamlMappingImplicitKey, YamlBlockInBlockNode, YamlBlockMapExplicitEntry,
-    YamlDocument, YamlFlowJsonNode, YamlFlowMapExplicitEntry,
-    YamlFlowYamlNode, YamlFoldedScalar, YamlLanguage, YamlLiteralScalar, YamlRoot, YamlSyntaxKind,
-    YamlSyntaxNode, YamlSyntaxToken,
+    AnyYamlMappingImplicitKey, YamlBlockInBlockNode, YamlBlockMapExplicitEntry, YamlDocument,
+    YamlFlowJsonNode, YamlFlowMapExplicitEntry, YamlFlowYamlNode, YamlFoldedScalar, YamlLanguage,
+    YamlLiteralScalar, YamlRoot, YamlSyntaxKind, YamlSyntaxNode, YamlSyntaxToken,
 };
 
 use crate::prelude::*;
@@ -88,8 +87,7 @@ impl CommentStyle for YamlCommentStyle {
 /// Handles a middle comment, one sitting between a node's properties and its
 /// content. It becomes a dangling comment of the node that owns the
 /// properties, whose format rule keeps a single one on the properties' line
-/// and moves a group onto their own lines above the content, as Prettier
-/// does.
+/// and moves two or more onto their own lines above the content.
 fn handle_middle_comment(
     comment: DecoratedComment<YamlLanguage>,
 ) -> CommentPlacement<YamlLanguage> {
