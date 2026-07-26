@@ -13,10 +13,10 @@ info: yaml/block_mapping/explicit_entries.yaml
   scalar key
 : kept
 ? !!str inline property
-: converted
+: value
 ? !!str
-  property on its own line
-: kept
+  own line property
+: value
 ? - seq
   - key
 : - seq
@@ -38,10 +38,10 @@ valueless:
 ? multiline
   scalar key
 : kept
-!!str inline property: converted
+!!str inline property: value
 ? !!str
-  property on its own line
-: kept
+  own line property
+: value
 ? - seq
   - key
 : - seq

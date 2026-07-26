@@ -5,10 +5,10 @@
   scalar key
 : kept
 ? !!str inline property
-: converted
+: value
 ? !!str
-  property on its own line
-: kept
+  own line property
+: value
 ? - seq
   - key
 : - seq
