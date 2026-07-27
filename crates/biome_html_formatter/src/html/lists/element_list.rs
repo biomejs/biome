@@ -491,6 +491,9 @@ impl FormatHtmlElementList {
             let mut borrowed_word_r_angle: Option<HtmlSyntaxToken> = None;
 
             let mut is_first_child = true;
+            // Whether the borrowed closing tag was printed as part of the last
+            // word, in which case it must not be printed again below.
+            let mut closing_tag_hugs_text = false;
 
             // It is **critically important** in this loop to check external whitespace sensitivity for the
             // current and next item to ensure we don't accidentally add whitespace where none is allowed!
@@ -538,12 +541,11 @@ impl FormatHtmlElementList {
 
                         // when we encounter a word, we need to collect all subsequent words
                         // so we can use fill to format them together.
-                        let mut fill = f.fill();
-                        fill.entry(&soft_line_break_or_space(), word);
+                        let mut words = vec![word];
                         loop {
                             match children_iter.peek() {
                                 Some(HtmlChild::Word(next_word)) => {
-                                    fill.entry(&soft_line_break_or_space(), next_word);
+                                    words.push(next_word);
                                     children_iter.next();
                                 }
                                 Some(
@@ -570,6 +572,42 @@ impl FormatHtmlElementList {
                                     break;
                                 }
                             }
+                        }
+
+                        // The closing tag borrowed from the container rides
+                        // along on the last word rather than following the
+                        // fill. A fill weighs one entry at a time, so this is
+                        // what lets it see that the word and the tag together
+                        // no longer fit and move both down a line.
+                        //
+                        // ```html
+                        // <a-long-long-long-element
+                        //   >foo bar foo bar foo bar foo bar foo bar foo bar foo
+                        //   bar</a-long-long-long-element
+                        // >
+                        // ```
+                        // Only where the container renders the whitespace at
+                        // its edges: elsewhere the closing tag simply follows
+                        // the text and is allowed to run past the line.
+                        let hugged_closing_tag = (children_iter.peek().is_none()
+                            && self.is_container_whitespace_sensitive)
+                            .then_some(self.borrowed_tokens.borrowed_closing_tag.as_ref())
+                            .flatten();
+                        closing_tag_hugs_text = hugged_closing_tag.is_some();
+
+                        let mut fill = f.fill();
+                        let last_word = words.len() - 1;
+                        for (index, word) in words.into_iter().enumerate() {
+                            match hugged_closing_tag {
+                                Some(closing_tag) if index == last_word => fill.entry(
+                                    &soft_line_break_or_space(),
+                                    &format_with(|f| {
+                                        write!(f, [word])?;
+                                        format_partial_closing_tag(f, closing_tag)
+                                    }),
+                                ),
+                                _ => fill.entry(&soft_line_break_or_space(), word),
+                            };
                         }
                         fill.finish()?;
 
@@ -1039,7 +1077,9 @@ impl FormatHtmlElementList {
             }
 
             // Print borrowed closing tag
-            if let Some(ref closing_tag) = self.borrowed_tokens.borrowed_closing_tag {
+            if let Some(ref closing_tag) = self.borrowed_tokens.borrowed_closing_tag
+                && !closing_tag_hugs_text
+            {
                 let closing_tag_format =
                     format_with(|f| format_partial_closing_tag(f, closing_tag));
                 write!(f, [closing_tag_format])?;

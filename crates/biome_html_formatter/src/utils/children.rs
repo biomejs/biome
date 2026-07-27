@@ -358,7 +358,13 @@ where
                             if whitespace.contains('\n')
                                 && matches!(chunks.peek(), Some(&(_, HtmlTextChunk::Comment(_))))
                             {
-                                builder.entry(HtmlChild::Newline)
+                                // A comment that follows a blank line keeps it,
+                                // the same way text and elements do.
+                                if whitespace.bytes().filter(|byte| *byte == b'\n').count() > 1 {
+                                    builder.entry(HtmlChild::EmptyLine)
+                                } else {
+                                    builder.entry(HtmlChild::Newline)
+                                }
                             } else {
                                 builder.entry(HtmlChild::Whitespace)
                             }
@@ -575,6 +581,17 @@ impl PendingWhitespace {
 /// 2. Don't push a new element [HtmlChild::EmptyLine], [HtmlChild::Newline], [HtmlChild::Whitespace] if previous one is [HtmlChild::EmptyLine], [HtmlChild::Newline], [HtmlChild::Whitespace]
 ///
 /// [Prettier applies]: https://github.com/prettier/prettier/blob/b0d9387b95cdd4e9d50f5999d3be53b0b5d03a97/src/language-js/print/jsx.js#L144-L180
+/// How much a piece of whitespace says about the layout the author wrote, used
+/// to pick a winner when two of them end up next to each other.
+fn whitespace_rank(child: &HtmlChild) -> u8 {
+    match child {
+        HtmlChild::Whitespace => 0,
+        HtmlChild::Newline => 1,
+        HtmlChild::EmptyLine => 2,
+        _ => 0,
+    }
+}
+
 #[derive(Debug)]
 struct HtmlSplitChildrenBuilder {
     buffer: Vec<HtmlChild>,
@@ -588,16 +605,21 @@ impl HtmlSplitChildrenBuilder {
     fn entry(&mut self, child: HtmlChild) {
         match self.buffer.last_mut() {
             Some(last @ (HtmlChild::EmptyLine | HtmlChild::Newline | HtmlChild::Whitespace)) => {
-                if matches!(child, HtmlChild::Whitespace) {
-                    *last = child;
-                } else if matches!(
-                    child,
+                match child {
+                    // Whitespace that meets whitespace collapses to whichever
+                    // of the two says the most. A space sitting next to a line
+                    // break adds nothing the break hasn't already said, and
+                    // letting it win loses the break: `<defs /> \n\n<g>` has a
+                    // blank line in it, trailing space or not.
+                    HtmlChild::EmptyLine | HtmlChild::Newline | HtmlChild::Whitespace => {
+                        if whitespace_rank(&child) > whitespace_rank(last) {
+                            *last = child;
+                        }
+                    }
                     HtmlChild::NonText(_)
-                        | HtmlChild::Word(_)
-                        | HtmlChild::Comment(_)
-                        | HtmlChild::Verbatim(_)
-                ) {
-                    self.buffer.push(child);
+                    | HtmlChild::Word(_)
+                    | HtmlChild::Comment(_)
+                    | HtmlChild::Verbatim(_) => self.buffer.push(child),
                 }
             }
             _ => self.buffer.push(child),
