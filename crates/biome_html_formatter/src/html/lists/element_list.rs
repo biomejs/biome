@@ -1046,8 +1046,22 @@ impl FormatHtmlElementList {
                             last_nontext_had_trailing_line = false;
                         }
 
+                        // Nothing at all goes between a self-closing element
+                        // and a sibling that touches it. The two can't be put
+                        // on separate lines, so the only place left to break is
+                        // inside the tag's own attributes, and offering a break
+                        // here instead would render a space between them.
+                        //
+                        // ```html
+                        // <img src="./1.jpg" /><img src="./1.jpg" /><img
+                        //   src="./2.jpg"
+                        // /><img src="./3.jpg" />
+                        // ```
+                        let next_hugs_self_closing = next_is_adjacent_inline
+                            && matches!(non_text, AnyHtmlElement::HtmlSelfClosingElement(_));
+
                         // Track this element's group ID if it's followed by another adjacent inline element
-                        if next_is_adjacent_inline {
+                        if next_is_adjacent_inline && !next_hugs_self_closing {
                             prev_inline_group_id = Some(non_text_group_id);
                             // Store the closing r_angle token from this element for the next sibling
                             if next_can_borrow {
