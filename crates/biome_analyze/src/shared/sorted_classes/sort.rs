@@ -1,4 +1,4 @@
-use biome_rowan::{TextRange, TokenText};
+use biome_rowan::TokenText;
 use std::cmp::Ordering;
 
 use super::{
@@ -143,13 +143,4 @@ pub fn sort_class_name_from_slice(classes: &[&str], sort_config: &SortConfig) ->
 pub fn sort_class_name(class_name: &TokenText, sort_config: &SortConfig) -> String {
     let classes: Vec<&str> = class_name.split_whitespace().collect();
     sort_class_name_from_slice(&classes, sort_config)
-}
-
-/// Get the range of the class name to be sorted.
-pub fn get_sort_class_name_range(
-    class_name: &TokenText,
-    range: &TextRange,
-) -> Option<TextRange> {
-    let _ = class_name;
-    Some(*range)
 }

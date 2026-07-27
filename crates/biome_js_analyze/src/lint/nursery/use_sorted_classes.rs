@@ -1,18 +1,14 @@
-mod presets;
 mod sort;
-mod sort_config;
 pub mod sort_v4;
 mod tailwind_preset_v4;
 mod tailwind_preset_v4_types;
 mod arbitrary_value_match;
 
-use self::{
-    presets::UseSortedClassesPreset, sort::get_sort_class_name_range, sort::sort_class_name,
-    sort_config::SortConfig,
-};
+use self::sort::{get_sort_class_name_range, sort_class_name};
 use crate::JsRuleAction;
 use crate::shared::any_class_string_like::AnyClassStringLike;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::shared::sorted_classes::sort_config::DEFAULT_SORT_CONFIG;
 use biome_console::markup;
 use biome_js_factory::make::{
     js_literal_member_name, js_string_literal, js_string_literal_expression,
@@ -20,8 +16,6 @@ use biome_js_factory::make::{
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
-use presets::get_config_preset;
-use std::sync::LazyLock;
 
 declare_lint_rule! {
     /// Enforce the sorting of CSS utility classes.
@@ -160,9 +154,6 @@ declare_lint_rule! {
     }
 }
 
-static SORT_CONFIG: LazyLock<SortConfig> =
-    LazyLock::new(|| SortConfig::new(&get_config_preset(&UseSortedClassesPreset::default())));
-
 impl Rule for UseSortedClasses {
     type Query = Ast<AnyClassStringLike>;
     type State = Box<str>;
@@ -177,7 +168,7 @@ impl Rule for UseSortedClasses {
             && let Some(value) = node.value()
         {
             let template_ctx = sort::get_template_literal_space_context(node);
-            let sorted_value: String = sort_class_name(&value, &SORT_CONFIG, &template_ctx);
+            let sorted_value: String = sort_class_name(&value, &DEFAULT_SORT_CONFIG, &template_ctx);
             if sorted_value.is_empty() {
                 return None;
             }

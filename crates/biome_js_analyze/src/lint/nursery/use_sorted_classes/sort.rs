@@ -2,7 +2,7 @@ use biome_analyze::shared::sorted_classes::sort as shared_sort;
 use biome_js_syntax::{JsTemplateChunkElement, JsTemplateElement};
 use biome_rowan::{AstNode, TextRange, TextSize, TokenText};
 
-use super::sort_config::SortConfig;
+use biome_analyze::shared::sorted_classes::sort_config::SortConfig;
 use crate::shared::any_class_string_like::AnyClassStringLike;
 
 /// Sort the given class string according to the given sort config.

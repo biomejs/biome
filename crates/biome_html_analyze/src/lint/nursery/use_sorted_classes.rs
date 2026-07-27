@@ -1,12 +1,9 @@
-use std::sync::LazyLock;
-
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule,
 };
 use biome_analyze::shared::sorted_classes::{
-    presets::{UseSortedClassesPreset, get_config_preset},
     sort::sort_class_name,
-    sort_config::SortConfig,
+    sort_config::DEFAULT_SORT_CONFIG,
 };
 use biome_console::markup;
 use biome_html_factory::make;
@@ -53,9 +50,6 @@ declare_lint_rule! {
     }
 }
 
-static SORT_CONFIG: LazyLock<SortConfig> =
-    LazyLock::new(|| SortConfig::new(&get_config_preset(&UseSortedClassesPreset::default())));
-
 impl Rule for UseSortedClasses {
     type Query = Ast<HtmlAttribute>;
     type State = HtmlSortedClassesState;
@@ -78,7 +72,7 @@ impl Rule for UseSortedClasses {
         let inner_text = inner_string_text(&value_token);
         let value_str = inner_text.text();
 
-        let sorted_value = sort_class_name(&inner_text, &SORT_CONFIG);
+        let sorted_value = sort_class_name(&inner_text, &DEFAULT_SORT_CONFIG);
         if sorted_value.is_empty() {
             return None;
         }
