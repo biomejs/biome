@@ -210,6 +210,9 @@ pub fn get_css_display(tag_name: &str) -> CssDisplay {
             CssDisplay::InlineBlock
         }
 
+        // https://html.spec.whatwg.org/multipage/rendering.html#the-marquee-element-2
+        "marquee" => CssDisplay::InlineBlock,
+
         // Replaced/embedded content (inline or inline-block depending on context)
         "img" | "embed" | "iframe" | "canvas" | "template" => CssDisplay::Inline,
 
