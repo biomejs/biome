@@ -16,9 +16,9 @@ use biome_formatter::{Format, FormatResult, format_args, write};
 use biome_markdown_syntax::list_ext::{AnyListItem, ListMarker, OrderedListDelimiter};
 use biome_markdown_syntax::thematic_break_ext::MdThematicBreakMarker;
 use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdCodeBlock, AnyMdLeafBlock, MarkdownLanguage, MdBlockList, MdBullet,
+    AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, MarkdownLanguage, MdBlockList, MdBullet,
     MdBulletFields, MdBulletList, MdBulletListItem, MdContinuationIndent, MdIndentCodeBlock,
-    MdOrderedListItem, MdQuotePrefix,
+    MdIndentTokenList, MdOrderedListItem, MdQuotePrefix,
 };
 use biome_rowan::{AstNode, AstNodeList, AstNodeListIterator, Direction};
 use std::collections::VecDeque;
@@ -223,6 +223,15 @@ impl ListBullet {
                     .any(|s| MdIndentCodeBlock::can_cast(s.kind()))
             })
     }
+
+    fn is_nested(&self) -> bool {
+        self.node
+            .syntax()
+            .ancestors()
+            .filter(|ancestor| MdBullet::can_cast(ancestor.kind()))
+            .nth(1)
+            .is_some()
+    }
 }
 
 impl Format<MarkdownFormatContext> for ListBullet {
@@ -251,20 +260,33 @@ impl Format<MarkdownFormatContext> for ListBullet {
             .as_ref()
             .map_or_else(|| marker.text_trimmed().len(), |target| target.width());
 
-        let keep_pre_marker = self.keep_pre_marker();
+        let source_pre_marker_width = indent_width(&prefix.pre_marker_indent())?;
+        let keep_pre_marker = self.keep_pre_marker() && !self.is_nested();
         let pre_marker_width = if keep_pre_marker {
-            prefix.pre_marker_indent().len() as u8
+            source_pre_marker_width
         } else {
             0
         };
-        let min_post_marker_len =
-            if is_ordered_marker && has_indented_code_block_after_content(&content) {
-                // CommonMark indented code blocks use four spaces:
-                // https://spec.commonmark.org/0.31.2/#indented-code-blocks
-                4usize.saturating_sub(marker_width)
-            } else {
-                0
-            };
+        let mut min_post_marker_len = if let Some(post_marker_len) =
+            first_indented_code_post_marker_len(
+                &content,
+                source_pre_marker_width + marker.text_trimmed().len(),
+            )?
+        {
+            post_marker_len
+        } else if is_ordered_marker && has_indented_code_block_after_content(&content) {
+            // CommonMark indented code blocks use four spaces:
+            // https://spec.commonmark.org/0.31.2/#indented-code-blocks
+            4usize.saturating_sub(marker_width)
+        } else {
+            0
+        };
+        if keep_pre_marker {
+            let source_content_column =
+                marker.text_trimmed().len() + prefix.post_marker_len().unwrap_or(0);
+            min_post_marker_len =
+                min_post_marker_len.max(source_content_column.saturating_sub(marker_width));
+        }
 
         write!(
             f,
@@ -280,15 +302,62 @@ impl Format<MarkdownFormatContext> for ListBullet {
         // The alignment is the sum of the pre-marker width, the marker width and the post-marker width.
         let post_marker_len = prefix
             .post_marker_len()
-            .unwrap_or(2)
-            .max(min_post_marker_len) as u8;
-        let alignment = pre_marker_width + (marker_width as u8) + post_marker_len;
+            .unwrap_or(0)
+            .max(min_post_marker_len);
+        let alignment = pre_marker_width + marker_width + post_marker_len;
 
         let content = ListBlockList {
             content: content.clone(),
         };
-        write!(f, [align(" ".repeat(alignment as usize), &content),])
+        write!(f, [align(" ".repeat(alignment), &content),])
     }
+}
+
+fn indent_width(indent: &MdIndentTokenList) -> FormatResult<usize> {
+    let mut width = 0;
+
+    for indent in indent.iter() {
+        // The token text is the indentation payload; trimming it would discard
+        // the columns this function measures.
+        for char in indent.md_indent_char_token()?.text().chars() {
+            width += if char == '\t' { 4 - width % 4 } else { 1 };
+        }
+    }
+
+    Ok(width)
+}
+
+fn first_indented_code_post_marker_len(
+    content: &MdBlockList,
+    marker_end_column: usize,
+) -> FormatResult<Option<usize>> {
+    let Some(AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::AnyMdCodeBlock(
+        AnyMdCodeBlock::MdIndentCodeBlock(code_block),
+    ))) = content
+        .iter()
+        .find(|block| !block.is_newline())
+    else {
+        return Ok(None);
+    };
+
+    let mut column = marker_end_column;
+    for item in code_block.content().iter() {
+        let AnyMdInline::MdTextual(textual) = item else {
+            break;
+        };
+        for char in textual.value_token()?.text().chars() {
+            match char {
+                ' ' => column += 1,
+                '\t' => column += 4 - column % 4,
+                _ => {
+                    let indentation = column - marker_end_column;
+                    return Ok(Some(indentation.saturating_sub(4).max(1)));
+                }
+            }
+        }
+    }
+
+    Ok(Some(1))
 }
 
 /// Returns true if the first block in `content` is a thematic break using `-`.
