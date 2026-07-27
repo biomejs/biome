@@ -95,6 +95,7 @@ pub(crate) mod root;
 pub(crate) mod root_item;
 pub(crate) mod rule;
 pub(crate) mod rule_block;
+pub(crate) mod rule_list_item;
 pub(crate) mod scope_range;
 pub(crate) mod selector;
 pub(crate) mod selector_custom_identifier;

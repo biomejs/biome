@@ -15247,6 +15247,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssRuleBlock {
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssRuleListItem {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssRuleListItem,
+        crate::css::any::rule_list_item::FormatAnyCssRuleListItem,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::rule_list_item::FormatAnyCssRuleListItem::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssRuleListItem {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssRuleListItem,
+        crate::css::any::rule_list_item::FormatAnyCssRuleListItem,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::rule_list_item::FormatAnyCssRuleListItem::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssScopeRange {
     type Format<'a> = FormatRefWithRule<
         'a,
