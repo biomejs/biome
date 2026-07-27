@@ -7,7 +7,6 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, JsCallArgumentList, JsCallExpression,
     JsConditionalExpression, JsNewExpression, JsSyntaxKind,
 };
-use biome_js_type_info::InferredType;
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
 use biome_rule_options::no_misused_promises::NoMisusedPromisesOptions;
 
@@ -109,8 +108,7 @@ impl Rule for NoMisusedPromises {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let expression = ctx.query();
         if let Some(state) = misused_promise_expression_state(expression) {
-            let ty = ctx.inferred_type_of_expression(expression)?;
-            return (ty.is_promise_instance() == Some(true)).then_some(state);
+            return (ctx.expression_is_promise(expression) == Some(true)).then_some(state);
         }
         if expression.as_any_js_literal_expression().is_some()
             || !expression
@@ -121,11 +119,10 @@ impl Rule for NoMisusedPromises {
             return None;
         }
 
-        let ty = ctx.inferred_type_of_expression(expression)?;
-        if !ty.is_function() {
+        if ctx.expression_function_returns_promise(expression) != Some(true) {
             return None;
         }
-        find_misused_promise_returning_callback(ctx, expression, ty)
+        find_misused_promise_returning_callback(ctx, expression)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -246,12 +243,7 @@ fn misused_promise_expression_state(
 fn find_misused_promise_returning_callback(
     ctx: &RuleContext<NoMisusedPromises>,
     expression: &AnyJsExpression,
-    ty: InferredType,
 ) -> Option<NoMisusedPromisesState> {
-    if ty.function_returns_promise() != Some(true) {
-        return None;
-    }
-
     let argument = expression
         .syntax()
         .ancestors()
@@ -267,7 +259,7 @@ fn find_misused_promise_returning_callback(
         .skip(1)
         .find_map(JsCallExpression::cast)
     {
-        ctx.inferred_expected_argument_type_for_arguments(
+        ctx.expected_argument_type(
             &call_expression.callee().ok()?,
             &argument_list,
             argument_index,
@@ -279,7 +271,7 @@ fn find_misused_promise_returning_callback(
         .skip(1)
         .find_map(JsNewExpression::cast)
     {
-        ctx.inferred_expected_argument_type_for_arguments(
+        ctx.expected_argument_type(
             &new_expression.callee().ok()?,
             &argument_list,
             argument_index,

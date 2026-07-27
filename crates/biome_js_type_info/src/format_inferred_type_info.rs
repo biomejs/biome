@@ -73,7 +73,6 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeData<'db> {
         let db = f.context().db();
         match *self {
             Self::Unknown => write!(f, [token("unknown")]),
-            Self::Divergent(_) => write!(f, [token("divergent")]),
             Self::Global => write!(f, [token("globalThis")]),
             Self::BigInt => write!(f, [token("BigInt")]),
             Self::Boolean => write!(f, [token("boolean")]),

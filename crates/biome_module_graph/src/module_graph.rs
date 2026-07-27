@@ -48,7 +48,7 @@ pub fn resolve_js_module(
     enable_type_inference: bool,
 ) -> (JsModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
     let inference_mode = if enable_type_inference {
-        TypeInferenceMode::Complete
+        TypeInferenceMode::RawTypesOnly
     } else {
         TypeInferenceMode::Disabled
     };

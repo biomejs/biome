@@ -14,6 +14,15 @@ impl FormatNodeRule<YamlFlowYamlNode> for FormatYamlFlowYamlNode {
 
         if let Some(content) = content {
             if !properties.is_empty() {
+                // A line break between the properties and the content is
+                // kept: the parser attaches the properties of a following
+                // block collection to its first key, so joining the lines
+                // would move them onto the key for real:
+                //
+                // ```yaml
+                // - !circle
+                //   center: 1
+                // ```
                 if get_lines_before(content.syntax()) > 0 {
                     write!(f, [hard_line_break()])?;
                 } else {

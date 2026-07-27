@@ -101,8 +101,9 @@ impl ThemeNamespace {
 pub struct UtilityEntry {
     pub property_idx: u16,
     pub property_count: u8,
-    pub registration_idx: u16,
-    pub negative_registration_idx: Option<u16>,
+    /// Whether Tailwind registers a negative form (`-m-px` exists,
+    /// `-flex` does not).
+    pub has_negative: bool,
 }
 
 // Named-path dispatch branches inside a functional utility's compileFn.
@@ -136,7 +137,6 @@ pub enum ArbitraryBranch {
 
 #[derive(Copy, Clone)]
 pub struct FunctionalEntry {
-    pub registration_idx: u16,
     pub named_branches: &'static [NamedBranch],
     pub arbitrary_branches: &'static [ArbitraryBranch],
     pub negative: Option<Negative>,
@@ -144,11 +144,8 @@ pub struct FunctionalEntry {
 
 #[derive(Copy, Clone)]
 pub enum Negative {
-    SameBranches {
-        registration_idx: u16,
-    },
+    SameBranches,
     Distinct {
-        registration_idx: u16,
         named_branches: &'static [NamedBranch],
         arbitrary_branches: &'static [ArbitraryBranch],
     },

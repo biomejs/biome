@@ -1,0 +1,65 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/vue/filter.vue
+---
+
+# Input
+
+```vue
+<!-- vue filters are only allowed in v-bind and interpolation -->
+<template>
+  <div class="allowed">{{value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird}}</div>
+  <div class="allowed" v-bind:something='value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird'></div>
+  <div class="allowed" :class='value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird'></div>
+  <div class="not-allowed" v-if='value | thisIsARealSuperLongBitwiseOr("arg1", arg2) | anotherBitwiseOrLongJustForFun | bitwiseOrTheThird'></div>
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,7 @@
+ <!-- vue filters are only allowed in v-bind and interpolation -->
+ <template>
+   <div class="allowed">
+-    {{value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird}}
++    {{ value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird }}
+   </div>
+   <div
+     class="allowed"
+```
+
+# Output
+
+```vue
+<!-- vue filters are only allowed in v-bind and interpolation -->
+<template>
+  <div class="allowed">
+    {{ value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird }}
+  </div>
+  <div
+    class="allowed"
+    v-bind:something='value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird'
+  ></div>
+  <div
+    class="allowed"
+    :class='value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird'
+  ></div>
+  <div
+    class="not-allowed"
+    v-if='value | thisIsARealSuperLongBitwiseOr("arg1", arg2) | anotherBitwiseOrLongJustForFun | bitwiseOrTheThird'
+  ></div>
+</template>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    4:     {{ value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird }}
+    8:     v-bind:something='value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird'
+   12:     :class='value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird'
+   16:     v-if='value | thisIsARealSuperLongBitwiseOr("arg1", arg2) | anotherBitwiseOrLongJustForFun | bitwiseOrTheThird'
+```

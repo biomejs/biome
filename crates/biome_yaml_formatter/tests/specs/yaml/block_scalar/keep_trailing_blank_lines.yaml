@@ -1,0 +1,7 @@
+keep-in-mapping: |+
+  content
+
+
+after: value
+keep-blanks-only-line: |+
+  content

@@ -457,7 +457,7 @@ fn check_condition_necessity(
                 return Some(IssueKind::AlwaysFalsyCondition(expr.range()));
             }
 
-            let ty = ctx.inferred_type_of_expression(expr)?;
+            let ty = ctx.type_of_expression(expr)?;
             if ty.is_always_truthy() {
                 return Some(IssueKind::AlwaysTruthyCondition(expr.range()));
             } else if ty.is_always_falsy() {
@@ -491,7 +491,7 @@ fn check_condition_necessity(
                 return None;
             }
 
-            let ty = ctx.inferred_type_of_expression(expr)?;
+            let ty = ctx.type_of_expression(expr)?;
             if ty.is_always_truthy() {
                 return Some(IssueKind::AlwaysTruthyCondition(expr.range()));
             } else if ty.is_always_falsy() {
@@ -545,7 +545,7 @@ fn check_nullish_necessity(
     }
 
     // Type-aware path: report when the left-hand side is statically non-nullish.
-    let ty = ctx.inferred_type_of_expression(expr)?;
+    let ty = ctx.type_of_expression(expr)?;
     if ty.is_non_nullish() {
         return Some(IssueKind::UnnecessaryCoalescing(
             expr.range(),
@@ -579,7 +579,7 @@ fn check_optional_chain_necessity(
     }
 
     // Type-aware path: report when the object is statically non-nullish.
-    let ty = ctx.inferred_type_of_expression(expr)?;
+    let ty = ctx.type_of_expression(expr)?;
     if ty.is_non_nullish() {
         return Some(IssueKind::UnnecessaryOptionalChain(
             expr.range(),
@@ -738,7 +738,7 @@ fn check_comparison_necessity(
         _ => return None,
     };
 
-    let ty = ctx.inferred_type_of_expression(typed_side)?;
+    let ty = ctx.type_of_expression(typed_side)?;
 
     // Is the non-null side known to be non-nullish? Then the comparison is unnecessary
     // for any equality operator: `x === null`, `x !== undefined`, `x == null` are
@@ -829,7 +829,7 @@ fn check_case_clause_reachability(
         .find_map(JsSwitchStatement::cast)?;
     let discriminant = switch_stmt.discriminant().ok()?;
 
-    let discriminant_ty = ctx.inferred_type_of_expression(&discriminant)?;
+    let discriminant_ty = ctx.type_of_expression(&discriminant)?;
     if type_could_equal_literal(discriminant_ty, &case_literal) {
         None
     } else {

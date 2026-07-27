@@ -21,14 +21,7 @@ info: yaml/block_scalar/scalar_with_indentation_indicator.yaml
 - |1-
  xyz
 
-- >-4
+- >4-
     xyz
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-" |1-\n xy" => 1..9
-" >-4\n    xy" => 13..24

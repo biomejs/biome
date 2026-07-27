@@ -11,7 +11,7 @@ use biome_js_type_info::{
     FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter, MAX_FLATTEN_DEPTH,
     Module, Namespace, RawTypeData, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeData, TypeId,
     TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
-    TypeResolver, TypeResolverLevel, TypeStore, UnionCollector,
+    TypeResolver, TypeResolverLevel, TypeStore, UnionCollector, interned_types::LocalTypeId,
 };
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
 use indexmap::IndexMap;
@@ -20,6 +20,7 @@ use rustc_hash::FxHashMap;
 use super::{
     Exports, ImportSymbol, Imports, JsExport, JsImport, JsModuleInfo, JsModuleInfoDiagnostic,
     JsModuleInfoInner, JsOwnExport, JsReexport, ResolvedPath, binding::JsBindingData,
+    is_named_type_declaration,
 };
 use crate::js_module_info::{scope::TsBindingReferenceExt, utils::reached_too_many_types};
 use crate::{BindingTypeData, JsImportPath, JsImportPhase};
@@ -1195,6 +1196,23 @@ impl JsModuleInfo {
     ) -> Self {
         collector.inference_mode = inference_mode;
         let finalised = collector.finalise(&semantic_model);
+        let mut named_type_ids = finalised
+            .raw_binding_types
+            .iter()
+            .filter_map(|(range, reference)| {
+                let binding = semantic_model.as_binding_by_range(*range)?;
+                if !is_named_type_declaration(binding.declaration_kind()) {
+                    return None;
+                }
+                let TypeReference::Resolved(resolved_id) = reference else {
+                    return None;
+                };
+                (resolved_id.level() == TypeResolverLevel::Thin)
+                    .then(|| LocalTypeId::new(resolved_id.index()))
+            })
+            .collect::<Vec<_>>();
+        named_type_ids.sort_unstable();
+        named_type_ids.dedup();
 
         Self(Arc::new(JsModuleInfoInner {
             static_imports: Imports(collector.static_imports),
@@ -1208,6 +1226,7 @@ impl JsModuleInfo {
             raw_types: finalised.raw_types,
             raw_expressions: finalised.raw_expressions,
             raw_binding_types: finalised.raw_binding_types,
+            named_type_ids: named_type_ids.into_boxed_slice(),
             expressions: collector.parsed_expressions,
             types: collector.types.into(),
             diagnostics: collector.diagnostics.into_iter().map(Into::into).collect(),

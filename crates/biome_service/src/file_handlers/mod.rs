@@ -1007,6 +1007,11 @@ pub(crate) struct UpdateSnippetsNodes {
     /// host's nesting level. When `false`, `new_code` already has the
     /// right shape and can be spliced back as-is.
     pub(crate) needs_reindent: bool,
+    /// Ranges inside `new_code` that must not be re-indented: the bodies of
+    /// template literals and multi-line block comments. Lines that begin
+    /// inside one of these ranges are left as-is instead of receiving the
+    /// host element's indentation prefix.
+    pub(crate) verbatim_ranges: Vec<TextRange>,
 }
 
 type Lint = fn(LintParams) -> LintResults;
@@ -1229,17 +1234,17 @@ impl Features {
                 // `.svelte.ts` / `.svelte.js` are full JS/TS modules with Svelte
                 // semantics; `.svelte` component documents still use the Svelte handler.
                 JsEmbeddingKind::Svelte {
-                    kind: SvelteFileKind::SourceModule,
+                    file_kind: SvelteFileKind::SourceModule,
                     ..
                 } => self.js.capabilities(),
                 #[cfg(feature = "lang_html")]
                 JsEmbeddingKind::Svelte {
-                    kind: SvelteFileKind::Component,
+                    file_kind: SvelteFileKind::Component,
                     ..
                 } => self.svelte.capabilities(),
                 #[cfg(not(feature = "lang_html"))]
                 JsEmbeddingKind::Svelte {
-                    kind: SvelteFileKind::Component,
+                    file_kind: SvelteFileKind::Component,
                     ..
                 } => self.js.capabilities(),
                 JsEmbeddingKind::None => self.js.capabilities(),

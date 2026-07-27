@@ -1,8 +1,7 @@
-use super::{BindingTypeData, InferredModuleTypes, globals::global_type, lookup::module_for_key};
-use crate::db::queries::infer_module_types;
+use super::{BindingTypeData, InferredModuleTypes, globals::global_type};
+use crate::db::queries::{LocalTypeInput, infer_local_type, infer_module_types};
 use crate::module_graph::ModuleInfo;
-use crate::{JsModuleInfo, ModuleDb};
-use biome_js_semantic::JsDeclarationKind;
+use crate::{JsModuleInfo, ModuleDb, module_for_key};
 use biome_js_type_info::{
     GlobalTypeId, RawTypeData, ResolvedTypeId, ScopeId, TypeId, TypeReference,
     TypeReferenceQualifier, TypeResolverLevel,
@@ -12,31 +11,39 @@ use biome_js_type_info::{
 };
 use rustc_hash::{FxHashMap, FxHashSet};
 use salsa::plumbing::AsId;
+use std::cell::Cell;
 
 /// Unlike the other limits, this one guards actual stack recursion: each level
 /// of `ResolutionCtx::resolve` clones a raw type and runs the conversion walk,
 /// so the frames are heavy. Named declarations already short-circuit to
 /// `TypeData::Local` handles, which leaves only structural nesting within a
 /// single declaration on the stack -- real-world code stays well below this.
-const MAX_RAW_TYPE_RESOLUTION_DEPTH: usize = 64;
+pub(super) const MAX_RAW_TYPE_RESOLUTION_DEPTH: usize = 64;
 const MAX_INFERRED_EXPRESSION_WRAPPER_STEPS: usize = 64;
 const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 
+/// Selects how a resolution context follows references into imported modules.
+///
+/// Regular queries resolve only the requested imported symbol. Salsa cycle
+/// recovery cannot recursively request members of the strongly connected
+/// component that caused the cycle, so it uses materialized module tables and
+/// treats that component as unavailable instead.
 #[derive(Clone, Copy)]
 pub(in crate::db) enum ImportResolution<'a> {
-    Full,
+    /// Resolves imported symbols through export discovery and leaf queries.
+    OnDemand,
+    /// Reads imports from module tables while blocking the active cyclic component.
     CycleFallback(&'a FxHashSet<ModuleInfo>),
 }
 
-pub(in crate::db::type_inference) struct ResolutionCtx<'db, 'a> {
+pub(in crate::db) struct ResolutionCtx<'db, 'a> {
     pub(in crate::db::type_inference) db: &'db dyn ModuleDb,
     pub(in crate::db::type_inference) module_key: ModuleKey,
     pub(in crate::db::type_inference) js_info: &'a JsModuleInfo,
     pub(in crate::db::type_inference) import_resolution: ImportResolution<'a>,
-    pub(in crate::db::type_inference) named_type_ids: FxHashSet<TypeId>,
     pub(in crate::db::type_inference) resolved: FxHashMap<TypeId, InferredTypeData<'db>>,
     pub(in crate::db::type_inference) in_progress: FxHashSet<TypeId>,
-    pub(in crate::db::type_inference) resolution_depth: usize,
+    pub(in crate::db::type_inference) resolution_depth: Cell<usize>,
 }
 
 pub(in crate::db) fn resolve_raw_types<'db>(
@@ -45,25 +52,7 @@ pub(in crate::db) fn resolve_raw_types<'db>(
     js_info: &JsModuleInfo,
     import_resolution: ImportResolution<'_>,
 ) -> InferredModuleTypes<'db> {
-    let module_key = ModuleKey::new(module.as_id());
-    let named_type_ids = named_type_ids(js_info);
-    let mut ctx = ResolutionCtx {
-        db,
-        module_key,
-        js_info,
-        import_resolution,
-        named_type_ids,
-        resolved: FxHashMap::default(),
-        in_progress: FxHashSet::default(),
-        resolution_depth: 0,
-    };
-
-    let mut named_type_ids = ctx
-        .named_type_ids
-        .iter()
-        .map(|type_id| LocalTypeId::new(type_id.index()))
-        .collect::<Vec<_>>();
-    named_type_ids.sort_unstable();
+    let mut ctx = ResolutionCtx::new(db, module, js_info, import_resolution);
 
     let types = (0..js_info.raw_types.len())
         .map(|index| ctx.resolve_raw_type_id(TypeId::new(index)))
@@ -89,44 +78,32 @@ pub(in crate::db) fn resolve_raw_types<'db>(
         .collect();
 
     InferredModuleTypes {
-        module_key,
-        named_type_ids: named_type_ids.into_boxed_slice(),
+        module_key: ctx.module_key,
+        named_type_ids: js_info.named_type_ids.clone(),
         types,
         expressions,
         binding_type_data,
     }
 }
 
-fn named_type_ids(js_info: &JsModuleInfo) -> FxHashSet<TypeId> {
-    js_info
-        .raw_binding_types
-        .iter()
-        .filter_map(|(range, reference)| {
-            let binding = js_info.semantic_model.as_binding_by_range(*range)?;
-            if !is_named_type_declaration(binding.declaration_kind()) {
-                return None;
-            }
-            let TypeReference::Resolved(resolved_id) = reference else {
-                return None;
-            };
-            (resolved_id.level() == TypeResolverLevel::Thin).then(|| resolved_id.id())
-        })
-        .collect()
-}
+impl<'db, 'a> ResolutionCtx<'db, 'a> {
+    pub(in crate::db) fn new(
+        db: &'db dyn ModuleDb,
+        module: ModuleInfo,
+        js_info: &'a JsModuleInfo,
+        import_resolution: ImportResolution<'a>,
+    ) -> Self {
+        Self {
+            db,
+            module_key: ModuleKey::new(module.as_id()),
+            js_info,
+            import_resolution,
+            resolved: FxHashMap::default(),
+            in_progress: FxHashSet::default(),
+            resolution_depth: Cell::new(0),
+        }
+    }
 
-fn is_named_type_declaration(declaration_kind: JsDeclarationKind) -> bool {
-    matches!(
-        declaration_kind,
-        JsDeclarationKind::Class
-            | JsDeclarationKind::Enum
-            | JsDeclarationKind::Interface
-            | JsDeclarationKind::Module
-            | JsDeclarationKind::Namespace
-            | JsDeclarationKind::Type
-    )
-}
-
-impl<'db> ResolutionCtx<'db, '_> {
     /// Infers `module` as a dependency of the module currently being resolved.
     ///
     /// The tracked query records the imported result as a dependency of the
@@ -137,7 +114,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         module: ModuleInfo,
     ) -> Option<&'db InferredModuleTypes<'db>> {
         match self.import_resolution {
-            ImportResolution::Full => infer_module_types(self.db, module),
+            ImportResolution::OnDemand => infer_module_types(self.db, module),
             ImportResolution::CycleFallback(blocked) => {
                 if blocked.contains(&module) {
                     None
@@ -148,21 +125,19 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
-    pub(in crate::db::type_inference) fn resolve(
-        &mut self,
-        reference: &TypeReference,
-    ) -> InferredTypeData<'db> {
-        if self.resolution_depth >= MAX_RAW_TYPE_RESOLUTION_DEPTH {
+    pub(in crate::db) fn resolve(&mut self, reference: &TypeReference) -> InferredTypeData<'db> {
+        let resolution_depth = self.resolution_depth.get();
+        if resolution_depth >= MAX_RAW_TYPE_RESOLUTION_DEPTH {
             return InferredTypeData::Unknown;
         }
 
-        self.resolution_depth += 1;
+        self.resolution_depth.set(resolution_depth + 1);
         let resolved = match reference {
             TypeReference::Resolved(resolved_id) => self.resolve_resolved_id(*resolved_id),
             TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),
             TypeReference::Import(import) => self.resolve_import(import),
         };
-        self.resolution_depth -= 1;
+        self.resolution_depth.set(resolution_depth);
         resolved
     }
 
@@ -179,7 +154,7 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     fn resolve_raw_type_reference(&mut self, type_id: TypeId) -> InferredTypeData<'db> {
-        if self.named_type_ids.contains(&type_id) {
+        if self.js_info.is_named_type(type_id) {
             return self.local_type(type_id);
         }
 
@@ -194,7 +169,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         ))
     }
 
-    fn resolve_raw_type_id(&mut self, type_id: TypeId) -> InferredTypeData<'db> {
+    pub(in crate::db) fn resolve_raw_type_id(&mut self, type_id: TypeId) -> InferredTypeData<'db> {
         if let Some(ty) = self.resolved.get(&type_id) {
             return *ty;
         }
@@ -281,7 +256,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                     }
                 }
                 InferredTypeData::Unknown
-                | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
                 | InferredTypeData::BigInt
@@ -342,8 +316,10 @@ impl<'db> ResolutionCtx<'db, '_> {
                 self.resolve_raw_type_id(TypeId::new(local_type_id.index()))
             } else {
                 module_for_key(self.db, module_key)
-                    .and_then(|module| self.infer_imported_module(module))
-                    .and_then(|types| types.types.get(local_type_id.index()).copied())
+                    .and_then(|module| {
+                        let input = LocalTypeInput::new(self.db, module, local_type_id);
+                        infer_local_type(self.db, input)
+                    })
                     .unwrap_or(InferredTypeData::Unknown)
             };
         }

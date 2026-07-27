@@ -19,19 +19,13 @@ info: yaml/spec/spec-example-7-2-empty-content.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1 +1,4 @@
+@@ -1 +1 @@
 -{ foo: !!str , !!str : bar }
-+{
-+  foo : !!str,
-+  !!str : bar,
-+}
++{ foo: !!str, !!str : bar }
 ```
 
 # Output
 
 ```yml
-{
-  foo : !!str,
-  !!str : bar,
-}
+{ foo: !!str, !!str : bar }
 ```

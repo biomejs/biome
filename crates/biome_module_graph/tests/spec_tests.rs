@@ -26,9 +26,10 @@ use biome_module_graph::{
     HtmlEmbeddedContent, ImportSymbol, JsExport, JsExportedSymbolLookup, JsImport, JsImportPath,
     JsImportPhase, JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic,
     ModuleInfo, ModuleInfoKind, ModuleResolver, PathInfoCache, ResolvedPath, SymbolFromModuleInfo,
-    find_js_exported_symbol, is_class_referenced_by_importers, resolve_css_module,
-    resolve_html_module, resolve_js_module, transitive_importers_of,
-    traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
+    TypeInferenceMode, find_js_exported_symbol, is_class_referenced_by_importers,
+    resolve_css_module, resolve_html_module, resolve_js_module_with_inference_mode,
+    transitive_importers_of, traverse_import_tree_for_classes,
+    traverse_import_tree_for_html_classes,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
@@ -52,14 +53,19 @@ fn build_js_db(
     let db = WorkspaceDb::default();
     let path_info_cache = PathInfoCache::default();
     for (path, root, semantic_model) in added_paths {
-        let (module_info, _, _) = resolve_js_module(
+        let inference_mode = if infer_types {
+            TypeInferenceMode::Complete
+        } else {
+            TypeInferenceMode::Disabled
+        };
+        let (module_info, _, _) = resolve_js_module_with_inference_mode(
             root.clone(),
             path,
             fs,
             layout,
             semantic_model.clone(),
             &path_info_cache,
-            infer_types,
+            inference_mode,
         );
         let md = ModuleInfo::new(
             &db,
@@ -110,14 +116,19 @@ fn add_js_modules(
 ) {
     let path_info_cache = PathInfoCache::default();
     for (path, root, semantic_model) in added_paths {
-        let (module_info, _, _) = resolve_js_module(
+        let inference_mode = if infer_types {
+            TypeInferenceMode::Complete
+        } else {
+            TypeInferenceMode::Disabled
+        };
+        let (module_info, _, _) = resolve_js_module_with_inference_mode(
             root.clone(),
             path,
             fs,
             layout,
             semantic_model.clone(),
             &path_info_cache,
-            infer_types,
+            inference_mode,
         );
         let md = ModuleInfo::new(
             db,

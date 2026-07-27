@@ -1,0 +1,144 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/vue/style.vue
+---
+
+# Input
+
+```vue
+<script>
+</script>
+
+<style>
+#foo1{ color: #f00;
+}
+</style>
+<style scoped>
+#foo2{ color: #f00;
+}
+</style>
+
+<style lang="css">
+#foo3{ color: #f00;
+}
+</style>
+<style lang="css" scoped>
+#foo4{ color: #f00;
+}
+</style>
+
+<style lang="less">
+#foo5{ color: #f00;
+}
+</style>
+<style lang="less" scoped>
+#foo6{ 
+         @color: #f00;
+  color: @color;
+}
+</style>
+
+
+<style lang="scss">
+#foo8{ 
+         $color: #f00;
+  color: $color;
+}
+</style>
+<style lang="scss" scoped>
+#foo8{ 
+         $color: #f00;
+  color: $color;
+}
+</style>
+
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,5 @@
+-<script></script>
++<script>
++</script>
+ 
+ <style>
+ #foo1{ color: #f00;
+@@ -23,20 +24,20 @@
+ }
+ </style>
+ <style lang="less" scoped>
+-#foo6{
++#foo6{ 
+          @color: #f00;
+   color: @color;
+ }
+ </style>
+ 
+ <style lang="scss">
+-#foo8{
++#foo8{ 
+          $color: #f00;
+   color: $color;
+ }
+ </style>
+ <style lang="scss" scoped>
+-#foo8{
++#foo8{ 
+          $color: #f00;
+   color: $color;
+ }
+```
+
+# Output
+
+```vue
+<script>
+</script>
+
+<style>
+#foo1{ color: #f00;
+}
+</style>
+<style scoped>
+#foo2{ color: #f00;
+}
+</style>
+
+<style lang="css">
+#foo3{ color: #f00;
+}
+</style>
+<style lang="css" scoped>
+#foo4{ color: #f00;
+}
+</style>
+
+<style lang="less">
+#foo5{ color: #f00;
+}
+</style>
+<style lang="less" scoped>
+#foo6{ 
+         @color: #f00;
+  color: @color;
+}
+</style>
+
+<style lang="scss">
+#foo8{ 
+         $color: #f00;
+  color: $color;
+}
+</style>
+<style lang="scss" scoped>
+#foo8{ 
+         $color: #f00;
+  color: $color;
+}
+</style>
+```
