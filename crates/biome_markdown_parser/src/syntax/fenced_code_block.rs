@@ -24,7 +24,6 @@
 
 use crate::lexer::MarkdownReLexContext;
 use crate::parser::MarkdownParser;
-use crate::syntax::parse_error::unterminated_fenced_code;
 use crate::syntax::quote::try_bump_quote_marker;
 use crate::syntax::{MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES, is_whitespace_only};
 use crate::token_source::find_line_start;
@@ -190,11 +189,6 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
     let text = p.cur_text();
     let (fence_char, fence_len) = detect_fence(text).unwrap_or(('`', MIN_FENCE_LENGTH));
     let is_tilde_fence = fence_char == '~';
-    let fence_type = if is_tilde_fence { "~~~" } else { "```" };
-
-    // Record opening fence range for diagnostic
-    let opening_range = p.cur_range();
-
     // Opening fence (``` or ~~~)
     bump_fence(p, is_tilde_fence);
 
@@ -204,8 +198,7 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
     // Content (everything until closing fence)
     parse_code_content(p, is_tilde_fence, fence_len, fence_indent);
 
-    // Closing fence - emit specific diagnostic if missing
-    // Must match the opening fence type
+    // The closing fence is optional at the end of its containing block.
     let has_closing = at_closing_fence(p, is_tilde_fence, fence_len);
 
     if has_closing {
@@ -219,8 +212,6 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
         p.emit_line_indent(max);
         bump_fence(p, is_tilde_fence);
     } else {
-        // Emit diagnostic for unterminated code block
-        p.error(unterminated_fenced_code(p, opening_range, fence_type));
         // Emit empty r_fence_indent list to satisfy grammar slot
         let empty_m = p.start();
         empty_m.complete(p, MD_INDENT_TOKEN_LIST);

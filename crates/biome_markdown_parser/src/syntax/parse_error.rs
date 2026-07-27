@@ -80,34 +80,6 @@ pub(crate) fn too_many_hashes(
     .with_hint("Use 1-6 `#` characters for headings. This will be parsed as a paragraph.")
 }
 
-/// Unterminated fenced code block.
-///
-/// ```markdown
-/// ```rust
-/// fn main() {}
-/// <EOF>
-/// ^ expected closing ```
-/// ```
-pub(crate) fn unterminated_fenced_code(
-    p: &MarkdownParser,
-    opening_range: TextRange,
-    fence_type: &str,
-) -> ParseDiagnostic {
-    let fence_name = if fence_type == "```" {
-        "triple backticks (```)"
-    } else {
-        "triple tildes (~~~)"
-    };
-    p.err_builder(
-        format!("Unterminated fenced code block, expected closing {fence_name}."),
-        opening_range,
-    )
-    .with_detail(opening_range, "code block started here")
-    .with_hint(format!(
-        "Add closing {fence_name} at the start of a new line."
-    ))
-}
-
 /// Backtick fence info string contains a backtick.
 ///
 /// Per CommonMark §4.5, the info string of a backtick-fenced code block must

@@ -253,6 +253,7 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
         let mut prev_was_html_block = false;
         let mut prev_was_indent_code_block = false;
         let mut prev_was_fenced_code_block = false;
+        let mut prev_was_quote_ending_with_fenced_code_block = false;
         let mut prev_was_link_reference_definition = false;
         let mut prev_was_thematic_break = false;
         let mut prev_was_newline = false;
@@ -452,6 +453,11 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                     && !prev_was_newline
                 {
                     joiner.entry(&empty_line());
+                } else if prev_was_quote_ending_with_fenced_code_block
+                    && !was_leading
+                    && !prev_was_newline
+                {
+                    joiner.entry(&hard_line_break());
                 }
 
                 still_leading = false;
@@ -471,6 +477,8 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                     ))
                 );
                 prev_was_fenced_code_block = node.is_fenced_block();
+                prev_was_quote_ending_with_fenced_code_block =
+                    quote_ends_with_fenced_code_block(&node);
                 prev_ends_with_line_break = node
                     .as_any_list_item()
                     .is_some_and(|item| list_ends_with_line_break(&item));
@@ -490,6 +498,21 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
 
         joiner.finish()
     }
+}
+
+fn quote_ends_with_fenced_code_block(block: &AnyMdBlock) -> bool {
+    let AnyMdBlock::AnyMdContainerBlock(quote) = block else {
+        return false;
+    };
+    let Some(quote) = quote.as_md_quote() else {
+        return false;
+    };
+    quote
+        .content()
+        .iter()
+        .rev()
+        .find(|block| !block.is_newline())
+        .is_some_and(|block| block.is_fenced_block())
 }
 
 fn next_content_block_is_list(
