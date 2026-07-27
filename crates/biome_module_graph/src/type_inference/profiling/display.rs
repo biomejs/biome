@@ -293,24 +293,32 @@ mod tests {
 
     #[test]
     fn location_uses_relative_path_and_text_range() {
+        let workspace = if cfg!(windows) {
+            Utf8Path::new("C:\\workspace")
+        } else {
+            Utf8Path::new("/workspace")
+        };
+        let other = if cfg!(windows) {
+            Utf8Path::new("C:\\other")
+        } else {
+            Utf8Path::new("/other")
+        };
         let location = TypeInferenceProfileLocation {
-            path: "/workspace/packages/example.ts".into(),
+            path: workspace
+                .join("packages")
+                .join("example.ts")
+                .into_string()
+                .into(),
             range: Some(TextRange::new(2.into(), 8.into())),
             attribution: TypeInferenceLocationAttribution::Exact,
         };
 
         assert_eq!(
-            render(SourceLocation::new(
-                &location,
-                Some(Utf8Path::new("/workspace"))
-            )),
-            "packages/example.ts:2..8"
+            render(SourceLocation::new(&location, Some(workspace))),
+            format!("{}:2..8", Utf8Path::new("packages").join("example.ts"))
         );
         assert_eq!(
-            render(SourceLocation::new(
-                &location,
-                Some(Utf8Path::new("/other"))
-            )),
+            render(SourceLocation::new(&location, Some(other))),
             "<external>/example.ts:2..8"
         );
     }
