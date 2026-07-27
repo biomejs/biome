@@ -92,11 +92,20 @@
 	"w-full! w-full w-10",   // important static twin sorts plain-first
 	"w-full/50 w-full w-10", // statics take no modifier → w-full/50 is Unknown
 
-	// Divergence from prettier-plugin-tailwindcss 0.8.0: the plugin
-	// emits `size-*` before `h-*` (its size bucket sorts by the first
-	// declaration, height), while the preset records width as the sort
-	// property for `size`. Same-bucket name order is otherwise exact.
-	"size-full size-4 w-4 h-4",
+	// ─── property signatures ───────────────────────────────────────
+	// A candidate's primary sort key is the ascending property-order
+	// index list of everything it declares; the first differing index
+	// decides, and the longer list wins a shared prefix. Expected order
+	// cross-checked against prettier-plugin-tailwindcss 0.8.0.
+
+	"size-full size-4 w-4 h-4",       // size = height+width precedes h, then w
+	"container flex p-4",             // container's sentinel property precedes display
+	"container mx-auto px-4",         // classic container header combo
+	"font-medium text-sm whitespace-nowrap transition-all outline-none", // font-weight rides its own signature
+	"font-medium font-sans text-sm",  // font-family, font-size, font-weight buckets
+	"sr-only not-sr-only absolute",   // both sr signatures extend position's
+	"truncate text-clip overflow-hidden", // truncate leads its overflow prefix group
+	"group peer flex p-4",            // group/peer are no utilities — unknown-front parity
 
 	// ─── unknown classes ───────────────────────────────────────────
 	// Tokens that resolve to no branch float to the front and keep

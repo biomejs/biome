@@ -1180,11 +1180,9 @@ impl JsModuleInfoCollector {
 pub enum TypeInferenceMode {
     /// No type inference at all.
     Disabled,
-    /// Collects the raw type table for the salsa-backed inference engine,
-    /// without running the legacy resolution and flattening passes.
+    /// Collects raw type tables without resolving and flattening complete tables.
     RawTypesOnly,
-    /// Collects the raw type table and runs the legacy resolution and
-    /// flattening passes.
+    /// Collects raw type tables and eagerly resolves and flattens complete tables.
     Complete,
 }
 
