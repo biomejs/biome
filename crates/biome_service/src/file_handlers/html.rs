@@ -36,6 +36,7 @@ use biome_configuration::html::{
     HtmlLinterConfiguration, HtmlLinterEnabled, HtmlParseInterpolation, HtmlParseVue,
     HtmlParserConfiguration,
 };
+#[cfg(feature = "html_embeds")]
 use biome_css_parser::{CssParserOptions, parse_css};
 #[cfg(feature = "html_embeds")]
 use biome_css_syntax::CssLanguage;
@@ -62,18 +63,17 @@ use biome_html_formatter::{
 use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::{AnyEmbeddedContent, AnyHtmlTagElement};
 use biome_html_syntax::{HtmlAttribute, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
+#[cfg(feature = "html_embeds")]
 use biome_js_parser::{JsParserOptions, parse as parse_js};
 #[cfg(feature = "html_embeds")]
-use biome_js_syntax::JsLanguage;
-use biome_js_syntax::JsTemplateChunkElement;
+use biome_js_syntax::{JsLanguage, JsTemplateChunkElement};
 #[cfg(feature = "html_embeds")]
 use biome_json_syntax::JsonLanguage;
 #[cfg(feature = "html_embeds")]
 use biome_languages::HtmlFileSource;
-use biome_languages::{CssFileSource, JsFileSource};
 #[cfg(feature = "html_embeds")]
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, BatchMutation, Direction, NodeCache, SendNode, TextRange, TextSize};
+use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode, TextRange, TextSize};
 use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 use std::borrow::Cow;
@@ -1103,8 +1103,13 @@ fn content_indent_prefix(leading_trivia: &str) -> &str {
 /// Returns byte ranges in `code` whose content must not receive an extra
 /// indentation prefix during re-indentation: template literal bodies and
 /// multi-line block comments in JS/TS source.
+#[cfg(feature = "html_embeds")]
 pub(crate) fn js_verbatim_ranges(code: &str) -> Vec<TextRange> {
-    let parsed = parse_js(code, JsFileSource::js_module(), JsParserOptions::default());
+    let parsed = parse_js(
+        code,
+        biome_languages::JsFileSource::js_module(),
+        JsParserOptions::default(),
+    );
     let root = parsed.syntax();
     let mut ranges = Vec::new();
 
@@ -1117,7 +1122,7 @@ pub(crate) fn js_verbatim_ranges(code: &str) -> Vec<TextRange> {
         }
     }
 
-    for token in root.descendants_tokens(Direction::Next) {
+    for token in root.descendants_tokens(biome_rowan::Direction::Next) {
         for piece in token
             .leading_trivia()
             .pieces()
@@ -1137,6 +1142,7 @@ pub(crate) fn js_verbatim_ranges(code: &str) -> Vec<TextRange> {
 /// Returns byte ranges in `code` whose content must not receive an extra
 /// indentation prefix during re-indentation: multi-line block comments in
 /// CSS source.
+#[cfg(feature = "html_embeds")]
 pub(crate) fn css_verbatim_ranges(code: &str) -> Vec<TextRange> {
     let parsed = parse_css(code, CssFileSource::css(), CssParserOptions::default());
     let root = parsed.syntax();
