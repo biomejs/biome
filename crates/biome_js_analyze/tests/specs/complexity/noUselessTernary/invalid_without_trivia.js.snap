@@ -152,7 +152,7 @@ invalid_without_trivia.js:6:9 lint/complexity/noUselessTernary  FIXABLE  ━━�
      4  4 │   var a = foo()?false:true;
      5  5 │   var a = foo?false:true;
      6    │ - var·a·=·foo===1?false:true;
-        6 │ + var·a·=·foo!==1;
+        6 │ + var·a·=·foo·!==·1;
      7  7 │   var a = foo+1?false:true;
      8  8 │   
   

@@ -18,3 +18,6 @@ var a = x instanceof foo ? true : false;
 
 var a = 'make' in car ? true : false;
 var a = 'make' in car ? false : true;
+var a = x.indexOf('y') > -1 ? true : false;
+var b = obj.prop instanceof Foo ? true : false;
+var c = 'key' in someObject ? true : false;

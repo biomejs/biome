@@ -154,10 +154,13 @@ impl Rule for NoUselessTernary {
                         .ok()?
                         .kind();
 
+                    // The operator carries a space on each side, so the
+                    // operands must not keep the whitespace that surrounded
+                    // the original operator or it ends up doubled.
                     new_node = AnyJsExpression::from(make::js_binary_expression(
-                        left,
+                        left.trim_trailing_trivia()?,
                         make::token_decorated_with_space(operator),
-                        right,
+                        right.trim_leading_trivia()?,
                     ));
                 }
                 JsSyntaxKind::JS_INSTANCEOF_EXPRESSION => {
@@ -174,9 +177,9 @@ impl Rule for NoUselessTernary {
                         .right()
                         .ok()?;
                     new_node = make::js_instanceof_expression(
-                        left,
+                        left.trim_trailing_trivia()?,
                         make::token_decorated_with_space(T![instanceof]),
-                        right,
+                        right.trim_leading_trivia()?,
                     )
                     .into();
                 }
@@ -184,9 +187,9 @@ impl Rule for NoUselessTernary {
                     let property = node.test().ok()?.as_js_in_expression()?.property().ok()?;
                     let object = node.test().ok()?.as_js_in_expression()?.object().ok()?;
                     new_node = make::js_in_expression(
-                        property,
+                        property.trim_trailing_trivia()?,
                         make::token_decorated_with_space(T![in]),
-                        object,
+                        object.trim_leading_trivia()?,
                     )
                     .into();
                 }
@@ -266,10 +269,12 @@ fn invert_expression(expression: &AnyJsExpression) -> Option<AnyJsExpression> {
         if let Some(operator) = suggested_operator {
             let left = expression.as_js_binary_expression()?.left().ok()?;
             let right = expression.as_js_binary_expression()?.right().ok()?;
+            // Same as above: the replacement operator brings its own spacing,
+            // so the operands must not carry the original operator's.
             let new_node = AnyJsExpression::from(make::js_binary_expression(
-                left,
-                make::token(operator),
-                right,
+                left.trim_trailing_trivia()?,
+                make::token_decorated_with_space(operator),
+                right.trim_leading_trivia()?,
             ));
 
             return Some(new_node);
