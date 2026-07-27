@@ -241,6 +241,7 @@ impl<'a> Format<MarkdownFormatContext> for QuoteParagraph<'a> {
         let mut joiner = f.join();
         let mut after_quote_continuation_newline = false;
         let mut after_removed_continuation_prefix = false;
+        let mut after_indented_continuation_newline = false;
 
         for (index, item) in self.paragraph.list().iter().enumerate() {
             match item {
@@ -267,6 +268,7 @@ impl<'a> Format<MarkdownFormatContext> for QuoteParagraph<'a> {
                         }));
                         after_quote_continuation_newline = false;
                         after_removed_continuation_prefix = false;
+                        after_indented_continuation_newline = false;
                     } else if textual.is_newline()?
                         && should_format_quote_continuation_after_newline(
                             self.paragraph,
@@ -291,11 +293,40 @@ impl<'a> Format<MarkdownFormatContext> for QuoteParagraph<'a> {
                         }));
                         after_quote_continuation_newline = true;
                         after_removed_continuation_prefix = false;
+                        after_indented_continuation_newline = false;
+                    } else if textual.is_newline()?
+                        && has_indented_quote_continuation_after_newline(self.paragraph, index + 1)?
+                    {
+                        joiner.entry(&format_with(|f| {
+                            write!(
+                                f,
+                                [
+                                    textual.format().with_options(FormatMdTextualOptions {
+                                        print_mode: TextPrintMode::Remove,
+                                        ..FormatMdTextualOptions::default()
+                                    }),
+                                    space()
+                                ]
+                            )
+                        }));
+                        after_quote_continuation_newline = false;
+                        after_removed_continuation_prefix = false;
+                        after_indented_continuation_newline = true;
                     } else {
                         joiner.entry(&textual.format());
                         after_quote_continuation_newline = false;
                         after_removed_continuation_prefix = false;
+                        after_indented_continuation_newline = false;
                     }
+                }
+                AnyMdInline::MdIndentToken(indent) if after_indented_continuation_newline => {
+                    let token = indent.md_indent_char_token()?;
+                    joiner.entry(&format_with(|f: &mut MarkdownFormatter| {
+                        f.context()
+                            .comments()
+                            .mark_suppression_checked(indent.syntax());
+                        format_removed(&token).fmt(f)
+                    }));
                 }
                 AnyMdInline::MdQuotePrefix(prefix) if after_quote_continuation_newline => {
                     joiner.entry(&prefix.format().with_options(FormatMdQuotePrefixOptions {
@@ -313,6 +344,7 @@ impl<'a> Format<MarkdownFormatContext> for QuoteParagraph<'a> {
                     );
                     after_quote_continuation_newline = false;
                     after_removed_continuation_prefix = false;
+                    after_indented_continuation_newline = false;
                 }
                 AnyMdInline::MdInlineItalic(italic) => {
                     joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
@@ -320,11 +352,13 @@ impl<'a> Format<MarkdownFormatContext> for QuoteParagraph<'a> {
                     }));
                     after_quote_continuation_newline = false;
                     after_removed_continuation_prefix = false;
+                    after_indented_continuation_newline = false;
                 }
                 item => {
                     joiner.entry(&item.format());
                     after_quote_continuation_newline = false;
                     after_removed_continuation_prefix = false;
+                    after_indented_continuation_newline = false;
                 }
             }
         }
@@ -423,9 +457,44 @@ fn should_format_quote_paragraph(paragraph: &MdParagraph) -> FormatResult<bool> 
     for (index, item) in paragraph.list().iter().enumerate() {
         if let AnyMdInline::MdTextual(text) = item
             && text.is_newline()?
-            && should_format_quote_continuation_after_newline(paragraph, index + 1)?
+            && (should_format_quote_continuation_after_newline(paragraph, index + 1)?
+                || has_indented_quote_continuation_after_newline(paragraph, index + 1)?)
         {
             return Ok(true);
+        }
+    }
+
+    Ok(false)
+}
+
+fn has_indented_quote_continuation_after_newline(
+    paragraph: &MdParagraph,
+    start: usize,
+) -> FormatResult<bool> {
+    if paragraph
+        .syntax()
+        .ancestors()
+        .any(|ancestor| MdBullet::can_cast(ancestor.kind()))
+    {
+        return Ok(false);
+    }
+
+    let mut has_indent = false;
+
+    for item in paragraph.list().iter().skip(start) {
+        match item {
+            AnyMdInline::MdIndentToken(_) => has_indent = true,
+            AnyMdInline::MdTextual(text) => {
+                if text.is_newline()? {
+                    return Ok(false);
+                }
+
+                if !text.is_empty()? {
+                    return Ok(has_indent);
+                }
+            }
+            AnyMdInline::MdHardLine(_) | AnyMdInline::MdQuotePrefix(_) => return Ok(false),
+            _ => return Ok(has_indent),
         }
     }
 
