@@ -37,22 +37,17 @@ fn flags_duplicate_operation_defined_in_another_file() {
     };
 
     let options = AnalyzerOptions::default().with_file_path("schema_b.graphql");
-    let services = biome_graphql_analyze::GraphqlAnalyzerServices::default()
-        .with_module_db(db.rc_module_db());
+    let services =
+        biome_graphql_analyze::GraphqlAnalyzerServices::default().with_module_db(db.rc_module_db());
 
     let mut has_diagnostic = false;
-    let (_, errors) = biome_graphql_analyze::analyze(
-        &parsed.tree(),
-        filter,
-        &options,
-        services,
-        |signal| {
+    let (_, errors) =
+        biome_graphql_analyze::analyze(&parsed.tree(), filter, &options, services, |signal| {
             if signal.diagnostic().is_some() {
                 has_diagnostic = true;
             }
             ControlFlow::<Never>::Continue(())
-        },
-    );
+        });
 
     assert!(errors.is_empty());
     assert!(has_diagnostic);

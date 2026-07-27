@@ -16,12 +16,12 @@ use crate::file_handlers::{SvelteFileHandler, VueFileHandler};
 use crate::module_graph::ModuleDependencies;
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
 use crate::module_graph::resolve_css_module;
+#[cfg(all(feature = "module_graph", feature = "lang_graphql"))]
+use crate::module_graph::resolve_graphql_module;
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
 use crate::module_graph::resolve_js_module;
 #[cfg(all(feature = "module_graph", feature = "lang_html"))]
 use crate::module_graph::{HtmlEmbeddedContent, resolve_html_module};
-#[cfg(all(feature = "module_graph", feature = "lang_graphql"))]
-use crate::module_graph::resolve_graphql_module;
 #[cfg(feature = "module_graph")]
 use crate::module_graph::{ModuleDb, ModuleInfoKind};
 use crate::projects::{GetFileFeaturesParams, ProjectKey, Projects};
@@ -64,10 +64,10 @@ use biome_diagnostics::{
 };
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
-#[cfg(all(feature = "module_graph", feature = "lang_html"))]
-use biome_html_syntax::HtmlRoot;
 #[cfg(all(feature = "module_graph", feature = "lang_graphql"))]
 use biome_graphql_syntax::GraphqlRoot;
+#[cfg(all(feature = "module_graph", feature = "lang_html"))]
+use biome_html_syntax::HtmlRoot;
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
 use biome_js_semantic::{SemanticModel, js_semantic_model};
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]

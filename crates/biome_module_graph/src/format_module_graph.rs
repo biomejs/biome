@@ -873,7 +873,12 @@ impl Format<FormatTypeContext> for ModuleInfoKind {
             ),
             Self::Graphql(graphql) => write!(
                 f,
-                [&format_args![token("Graphql"), token("("), graphql, token(")")]]
+                [&format_args![
+                    token("Graphql"),
+                    token("("),
+                    graphql,
+                    token(")")
+                ]]
             ),
         }
     }
@@ -939,12 +944,7 @@ impl Format<FormatTypeContext> for GraphqlTypeKey {
     ) -> FormatResult<()> {
         write!(
             f,
-            [
-                self.kind,
-                token("("),
-                text(&self.name, None),
-                token(")")
-            ]
+            [self.kind, token("("), text(&self.name, None), token(")")]
         )
     }
 }

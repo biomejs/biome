@@ -586,34 +586,34 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         &analyzer_options,
         graphql_analyzer_services(&workspace_db, project_layout.clone()),
         |signal| {
-        if compute_actions {
-            actions.extend(
-                signal
-                    .actions(ActionFilter::all())
-                    .into_code_action_iter()
-                    .map(|item| CodeAction {
-                        category: item.category.clone(),
-                        rule_name: item
+            if compute_actions {
+                actions.extend(
+                    signal
+                        .actions(ActionFilter::all())
+                        .into_code_action_iter()
+                        .map(|item| CodeAction {
+                            category: item.category.clone(),
+                            rule_name: item
+                                .rule_name
+                                .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                            applicability: Some(item.suggestion.applicability),
+                            suggestion: Some(item.suggestion),
+                            offset: action_offset,
+                        }),
+                );
+            } else {
+                actions.extend(signal.actions_metadata().into_iter().map(|meta| {
+                    CodeAction {
+                        category: meta.category,
+                        rule_name: meta
                             .rule_name
-                            .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                        applicability: Some(item.suggestion.applicability),
-                        suggestion: Some(item.suggestion),
+                            .map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
+                        applicability: Some(meta.applicability),
+                        suggestion: None,
                         offset: action_offset,
-                    }),
-            );
-        } else {
-            actions.extend(signal.actions_metadata().into_iter().map(|meta| {
-                CodeAction {
-                    category: meta.category,
-                    rule_name: meta
-                        .rule_name
-                        .map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
-                    applicability: Some(meta.applicability),
-                    suggestion: None,
-                    offset: action_offset,
-                }
-            }));
-        }
+                    }
+                }));
+            }
 
             ControlFlow::<Never>::Continue(())
         },
