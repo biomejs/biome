@@ -3392,6 +3392,38 @@ pub fn js_super_expression(super_token: SyntaxToken) -> JsSuperExpression {
         [Some(SyntaxElement::Token(super_token))],
     ))
 }
+pub fn js_svelte_declaration_root(
+    declaration: JsVariableDeclaration,
+    eof_token: SyntaxToken,
+) -> JsSvelteDeclarationRootBuilder {
+    JsSvelteDeclarationRootBuilder {
+        declaration,
+        eof_token,
+        semicolon_token: None,
+    }
+}
+pub struct JsSvelteDeclarationRootBuilder {
+    declaration: JsVariableDeclaration,
+    eof_token: SyntaxToken,
+    semicolon_token: Option<SyntaxToken>,
+}
+impl JsSvelteDeclarationRootBuilder {
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
+        self
+    }
+    pub fn build(self) -> JsSvelteDeclarationRoot {
+        JsSvelteDeclarationRoot::unwrap_cast(SyntaxNode::new_detached(
+            JsSyntaxKind::JS_SVELTE_DECLARATION_ROOT,
+            [
+                Some(SyntaxElement::Node(self.declaration.into_syntax())),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Token(self.eof_token)),
+            ],
+        ))
+    }
+}
 pub fn js_svelte_snippet_root(
     name: AnyJsBinding,
     parameters: JsParameters,

@@ -1,7 +1,7 @@
 //! Top level functions for parsing a script or module, also includes module specific items.
 
 use super::module::parse_module_body;
-use super::stmt::parse_statements;
+use super::stmt::{VariableDeclarationParent, parse_statements, parse_variable_declaration};
 use crate::JsParser;
 use crate::prelude::*;
 use crate::state::{ChangeParserState, EnableStrictMode, SignatureFlags};
@@ -11,8 +11,8 @@ use crate::syntax::function::{ParameterContext, parse_parameter_list};
 use crate::syntax::js_parse_error;
 use crate::syntax::stmt::parse_directives;
 use crate::syntax::typescript::TypeContext;
-use biome_js_syntax::JsSyntaxKind;
 use biome_js_syntax::JsSyntaxKind::*;
+use biome_js_syntax::{JsSyntaxKind, T};
 use biome_languages::javascript::ModuleKind;
 // test_err js unterminated_unicode_codepoint
 // let s = "\u{200";
@@ -37,6 +37,10 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
     // are handlers, and all other expressions are inline statements.
     if p.source_type().is_vue_event_handler() {
         return parse_vue_event_handler(p, m);
+    }
+
+    if p.source_type().is_svelte_declaration() {
+        return parse_svelte_declaration(p, m);
     }
 
     // Handle template expressions (Vue {{ }}, Svelte { }, Astro { })
@@ -70,6 +74,29 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
     }
 
     result
+}
+
+fn parse_svelte_declaration(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    if !p.at(T![let]) && !p.at(T![const]) {
+        p.error(p.err_builder("Expected a `let` or `const` declaration", p.cur_range()));
+    }
+    parse_variable_declaration(p, VariableDeclarationParent::VariableStatement)
+        .or_add_diagnostic(p, |p, range| {
+            p.err_builder("Expected a `let` or `const` declaration", range)
+        });
+    p.eat(T![;]);
+
+    if !p.at(EOF) {
+        p.error(js_parse_error::template_expression_trailing_code(
+            p,
+            p.cur_range(),
+        ));
+        while !p.at(EOF) {
+            p.bump_any();
+        }
+    }
+
+    m.complete(p, JS_SVELTE_DECLARATION_ROOT)
 }
 
 /// Parses template expressions like Vue {{ expr }}, Svelte { expr }, or Astro { expr }.

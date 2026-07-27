@@ -87,6 +87,7 @@ pub(crate) enum SvelteBlockKind {
     Render,
     Snippet,
     Const,
+    Declaration,
 }
 
 impl From<&AnySvelteBlock> for EmbedBlockKind {
@@ -100,6 +101,7 @@ impl From<&AnySvelteBlock> for EmbedBlockKind {
             | AnySvelteBlock::SvelteIfBlock(_)
             | AnySvelteBlock::SvelteKeyBlock(_) => Self::Neutral,
             AnySvelteBlock::SvelteConstBlock(_) => Self::Svelte(SvelteBlockKind::Const),
+            AnySvelteBlock::SvelteDeclarationBlock(_) => Self::Svelte(SvelteBlockKind::Declaration),
             AnySvelteBlock::SvelteRenderBlock(_) => Self::Svelte(SvelteBlockKind::Render),
             AnySvelteBlock::SvelteSnippetBlock(_) => Self::Svelte(SvelteBlockKind::Snippet),
         }
