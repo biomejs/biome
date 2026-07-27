@@ -1,8 +1,4 @@
 //! Export traversal and exported-type queries.
-//!
-//! Origin and namespace queries inspect module graph data without resolving
-//! inferred types. Exported-type lookup builds on that traversal separately so
-//! graph discovery does not become part of an inference cycle.
 
 use crate::db::type_inference::{
     ExportOriginResult, collect_namespace_export_names, find_export_origin,
