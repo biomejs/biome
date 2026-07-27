@@ -129,7 +129,7 @@ ignore                       = "0.4.25"
 indexmap                     = { version = "2.14.0" }
 insta                        = "1.48.0"
 jiff                         = "0.2.35"
-libc                         = "0.2.186"
+libc                         = "0.2.189"
 mimalloc                     = "0.1.48"
 notify                       = "8.2.0"
 papaya                       = "0.2.4"
