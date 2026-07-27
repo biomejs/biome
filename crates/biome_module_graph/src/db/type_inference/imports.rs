@@ -501,6 +501,13 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// named `shared`, the namespace keeps `local` and omits `shared`:
     ///
     /// ```ts
+    /// // left.ts
+    /// export const shared = 1;
+    ///
+    /// // right.ts
+    /// export const shared = "right";
+    ///
+    /// // index.ts
     /// export * from "./left";
     /// export * from "./right";
     /// export const local = 1;

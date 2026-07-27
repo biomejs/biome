@@ -125,8 +125,7 @@ impl<'db> InferredModuleTypes<'db> {
     /// of a class. Type arguments from instances are substituted into the
     /// member type. Compound types may produce a union from the branches that
     /// define `name`; branches without that member do not make the lookup fail.
-    /// Work is bounded, so a returned union may contain only the members found
-    /// before the limit, and `None` does not prove that `name` is absent.
+    /// Work is bounded, and exhausting the work limit returns `Unknown`.
     ///
     /// For example, looking up `value` on `Text | Count | Empty` returns
     /// `string | number`; the `Empty` branch contributes no member:
@@ -151,8 +150,8 @@ impl<'db> InferredModuleTypes<'db> {
     /// class the value represents. A class value exposes static members; an
     /// instance exposes non-static members. Other object-like values expose
     /// their ordinary members. Type arguments from instances are substituted
-    /// into the member type. Compound types and the work limit can produce the
-    /// same partial results described by [`Self::find_member_type`].
+    /// into the member type. Compound types and the work limit follow the same
+    /// rules as [`Self::find_member_type`].
     ///
     /// In this example, value lookup on `Box` can find `kind` but not `value`;
     /// lookup on a `Box` instance can find `value` but not `kind`:

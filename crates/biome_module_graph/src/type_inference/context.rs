@@ -99,8 +99,8 @@ impl<'db> TypeInferenceRequestContext<'db> {
     /// Resolves a named member through own properties, inheritance, and compound types.
     ///
     /// Members found in separate union, intersection, or merged-reference
-    /// branches are combined. Lookup has a work limit. If it reaches that limit,
-    /// it returns the members found before the limit, or `None` if it found none.
+    /// branches are combined. Lookup returns `Unknown` when it reaches its work
+    /// limit without completing traversal.
     pub(crate) fn member_type(
         &self,
         ty: InferredTypeData<'db>,
@@ -112,8 +112,8 @@ impl<'db> TypeInferenceRequestContext<'db> {
     /// Resolves a named member available on a runtime value.
     ///
     /// Static members are considered for class values and instance members for
-    /// object-like values. Lookup has a work limit. If it reaches that limit, it
-    /// returns the members found before the limit, or `None` if it found none.
+    /// object-like values. Lookup returns `Unknown` when it reaches its work
+    /// limit without completing traversal.
     pub(crate) fn value_member_type(
         &self,
         ty: InferredTypeData<'db>,

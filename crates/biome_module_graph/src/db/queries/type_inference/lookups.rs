@@ -169,9 +169,11 @@ fn infer_local_type_cycle_result<'db>(
 /// Lookup follows inheritance, prototypes, generic constraints, and compound
 /// types. Generic arguments are substituted into the result. Members found on
 /// multiple union, intersection, or merged-reference branches are combined.
-/// Traversal is bounded, so a returned union may contain only members found
-/// before the limit. `None` means no member was found in the supported portion
-/// that was traversed; it does not prove that `name` is absent.
+/// The returned type is not normalized and may contain unresolved local handles
+/// or structural wrappers. Call [`super::normalize_type`] when normalized output
+/// is required.
+/// Traversal is bounded. Reaching the work limit returns `Unknown`. `None` means
+/// a completed traversal found no supported member.
 ///
 /// For this class, lookup may find either `create` or `value`.
 ///
@@ -195,9 +197,8 @@ pub fn find_member_type<'db>(
 ///
 /// A class value exposes static members, while a class instance exposes
 /// instance members. Lookup otherwise follows the same inheritance, compound
-/// type, generic substitution, and bounded partial-result rules as
-/// [`find_member_type`]. `None` does not prove that the value lacks `name` when
-/// traversal reaches its work limit.
+/// type, generic substitution, work-limit, and normalization rules as
+/// [`find_member_type`].
 ///
 /// In this example, the value `Counter` exposes `create`, and `counter` exposes
 /// `value`.

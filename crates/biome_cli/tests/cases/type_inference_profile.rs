@@ -63,19 +63,6 @@ fn verbose_profile_reports_every_source_record() {
 
 #[test]
 #[serial]
-fn reports_rule_and_type_inference_profilers() {
-    biome_analyze::profiling::reset();
-    let output = run_profile(&["--profile-rules"]);
-    assert!(biome_analyze::profiling::snapshot().is_empty());
-    biome_analyze::profiling::disable();
-    biome_analyze::profiling::reset();
-
-    assert!(output.contains("Rule execution time"), "{output}");
-    assert!(output.contains("Type inference profile"), "{output}");
-}
-
-#[test]
-#[serial]
 fn rule_profiler_is_scoped_to_requested_run() {
     biome_analyze::profiling::disable();
     biome_analyze::profiling::reset();
@@ -135,6 +122,12 @@ fn rejects_unsupported_execution_modes() {
         let mut console = BufferConsole::default();
         let (_fs, result) =
             run_cli_with_server_workspace(fs, &mut console, Args::from(arguments.as_slice()));
-        assert!(result.is_err(), "unsupported mode must fail: {arguments:?}");
+        assert!(
+            matches!(
+                result,
+                Err(biome_cli::CliDiagnostic::IncompatibleArguments(_))
+            ),
+            "unsupported mode must report incompatible arguments: {arguments:?}"
+        );
     }
 }

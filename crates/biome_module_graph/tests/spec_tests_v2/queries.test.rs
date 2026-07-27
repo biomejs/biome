@@ -821,3 +821,20 @@ fn test_binding_query_handles_long_import_chains() {
     let ty = infer_binding_type(&db, input).expect("value type must be inferred");
     assert!(is_inferred_number(&db, ty));
 }
+
+#[test]
+fn test_member_lookup_exhaustion_returns_unknown() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), "");
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let mut ty = InferredTypeData::Object(InferredObject::new(&db, None, Box::default()));
+
+    for _ in 0..1025 {
+        ty = InferredTypeData::Object(InferredObject::new(&db, Some(ty), Box::default()));
+    }
+
+    assert_eq!(
+        find_value_member_type(&db, ty, "missing"),
+        Some(InferredTypeData::Unknown)
+    );
+}

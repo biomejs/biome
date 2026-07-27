@@ -104,7 +104,7 @@ impl ExpectedArgumentInput {
 ///
 /// In this call, `"sync"` selects the first overload. A request for argument 1
 /// returns `() => void`. A request for argument 0 returns `None` because
-/// `"sync" | "async"` is not callable.
+/// the selected `"async"` parameter is not callable.
 ///
 /// ```ts
 /// declare function schedule(kind: "sync", task: () => void): void;

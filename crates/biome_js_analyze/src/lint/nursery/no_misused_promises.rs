@@ -109,9 +109,15 @@ impl Rule for NoMisusedPromises {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let expression = ctx.query();
         if let Some(state) = misused_promise_expression_state(expression) {
-            return (ctx.classify_expression_as_promise(expression)
-                == TypeInferenceClassification::Match)
-                .then_some(state);
+            return match ctx.classify_expression_as_promise(expression) {
+                TypeInferenceClassification::Match => Some(state),
+                TypeInferenceClassification::NoMatch => None,
+                TypeInferenceClassification::Indeterminate => (ctx
+                    .type_of_expression(expression)?
+                    .is_promise_instance()
+                    == Some(true))
+                .then_some(state),
+            };
         }
         if expression.as_any_js_literal_expression().is_some()
             || !expression

@@ -111,12 +111,8 @@ impl<'db> TypeInferenceRequest<'db> for FunctionReturnTypeRequest {
 /// A callable member with an ordinary return type yields that return type. A
 /// non-callable member, or a callable with a predicate or assertion return,
 /// yields the member's own type instead. An unavailable parent or a member not
-/// found by the bounded lookup returns `None`. An unresolved type is normalized
-/// to `Unknown`.
-///
-/// Lookup may stop after a fixed number of distinct types. For a compound
-/// parent type, the fallback can therefore contain only members found before
-/// that limit.
+/// found by the bounded lookup returns `None`. An unresolved type or exhausted
+/// member lookup is normalized to `Unknown`.
 ///
 /// For `checks.isString`, the request returns the function type
 /// `(value: unknown) => value is string`, not `string` or `boolean`.

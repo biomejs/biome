@@ -46,7 +46,7 @@ pub(in crate::db) fn resolve_local_type_on_demand<'db>(
 ///
 /// Local handles are resolved through lookup queries. Inherited and compound
 /// types are traversed subject to the work limit documented on
-/// [`find_member_type_with_resolver`]. The result may be partial.
+/// [`find_member_type_with_resolver`].
 pub(in crate::db) fn find_member_type_on_demand<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
@@ -294,8 +294,8 @@ impl<'db> MemberLookupState<'db> {
 /// Traversal processes at most 1024 distinct states. A state includes the type,
 /// lookup mode, accumulated substitutions, and whether a compound or instance
 /// boundary has been crossed. Repeated states do not consume work. If the limit
-/// is reached, members collected before the limit are returned as a partial
-/// result.
+/// is reached, the result is `Unknown` because unvisited states may contain a
+/// different member type.
 ///
 /// For example, lookup of `item` on `Left | Right | Missing` returns
 /// `string | number`, even though `Missing` has no `item`:
@@ -334,7 +334,7 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
         // Deduplicated entries above don't count against the budget, so the
         // limit measures distinct traversal states rather than queue churn.
         if remaining_steps == 0 {
-            break;
+            return Some(InferredTypeData::Unknown);
         }
         remaining_steps -= 1;
 

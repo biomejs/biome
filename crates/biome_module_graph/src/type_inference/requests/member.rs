@@ -16,10 +16,9 @@ use super::super::{
 /// [`TypeInferenceClassification::Indeterminate`]. A missing or conclusively
 /// non-callable member produces [`TypeInferenceClassification::NoMatch`].
 ///
-/// Member lookup visits at most a fixed number of distinct types. For a union,
-/// intersection, or merged reference, reaching that limit classifies only the
-/// members found so far. If none were found before the limit, the result is
-/// `NoMatch`; it does not prove that an unvisited branch lacks the member.
+/// Member lookup visits at most a fixed number of distinct types. Reaching that
+/// limit produces [`TypeInferenceClassification::Indeterminate`] because an
+/// unvisited branch may contain a matching member.
 pub struct CallableMemberRequest<'name> {
     module: ModuleInfo,
     expression: TextRange,

@@ -25,14 +25,15 @@ pub use display::DisplayTypeInferenceProfile;
 use std::cell::{Cell, RefCell};
 use std::cmp;
 use std::collections::HashMap;
+use std::sync::LazyLock;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{LazyLock, Mutex};
 use std::time::Duration;
 #[cfg(not(target_arch = "wasm32"))]
 use std::time::Instant;
 
 use crate::{ModuleDb, ModuleInfo, ModuleInfoKind};
 use biome_rowan::TextRange;
+use parking_lot::Mutex;
 
 use super::{
     TypeInferenceCaller, TypeInferenceCodeReference, TypeInferenceRequestMetadata,
@@ -392,10 +393,8 @@ fn breadth_profile(metric: &BreadthMetric) -> TypeInferenceBreadthProfile {
 fn with_profiler<R>(f: impl FnOnce(&mut TypeInferenceProfiler) -> R) -> Option<R> {
     #[cfg(not(target_arch = "wasm32"))]
     let start = Instant::now();
-    let result = match PROFILER.lock() {
-        Ok(mut profiler) if is_recording() => Some(f(&mut profiler)),
-        Ok(_) | Err(_) => None,
-    };
+    let mut profiler = PROFILER.lock();
+    let result = is_recording().then(|| f(&mut profiler));
     #[cfg(not(target_arch = "wasm32"))]
     PROFILING_OVERHEAD.with(|overhead| {
         overhead.set(overhead.get().saturating_add(start.elapsed()));
@@ -454,9 +453,7 @@ fn initialize_profile_documents(db: &dyn ModuleDb) -> bool {
         return true;
     }
 
-    let Ok(initialization_guard) = PROFILE_DOCUMENT_INITIALIZATION.lock() else {
-        return false;
-    };
+    let initialization_guard = PROFILE_DOCUMENT_INITIALIZATION.lock();
     if profile_documents_are_initialized() {
         return true;
     }
@@ -521,9 +518,7 @@ impl TypeInferenceProfilerGuard {
     /// function does not reject a second live guard; callers must uphold the
     /// single-guard invariant documented on [`TypeInferenceProfilerGuard`].
     pub fn start() -> Self {
-        let mut profiler = PROFILER
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        let mut profiler = PROFILER.lock();
         *profiler = TypeInferenceProfiler::default();
         RECORDING.store(true, Ordering::Release);
         Self(())
@@ -556,12 +551,9 @@ impl Drop for TypeInferenceProfilerGuard {
 }
 
 fn clear_profiler() {
-    if let Ok(mut profiler) = PROFILER.lock() {
-        RECORDING.store(false, Ordering::Release);
-        *profiler = TypeInferenceProfiler::default();
-    } else {
-        RECORDING.store(false, Ordering::Release);
-    }
+    let mut profiler = PROFILER.lock();
+    RECORDING.store(false, Ordering::Release);
+    *profiler = TypeInferenceProfiler::default();
     REQUEST_STACK.with(|stack| stack.borrow_mut().clear());
     QUERY_STACK.with(|stack| stack.borrow_mut().clear());
     WHOLE_MODULE_STACK.with(|stack| stack.borrow_mut().clear());

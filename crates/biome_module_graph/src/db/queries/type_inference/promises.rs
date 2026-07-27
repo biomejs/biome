@@ -217,10 +217,12 @@ pub fn is_array_of_promise_type<'db>(
 /// Classifies whether `ty` is callable and returns a Promise.
 ///
 /// Returns `Some(true)` when a reachable callable has a Promise-like return
-/// type. Returns `Some(false)` when every reachable type is conclusively
-/// non-callable or returns a non-Promise type. Returns `None` when an unresolved
-/// or recursive branch, or exhausted traversal, prevents a conclusive result.
-/// Callable parameters and unrelated nested types are not resolved.
+/// type. Returns `Some(false)` when traversal finds no supported direct function
+/// with a Promise-like return. Callable object and interface shapes are not
+/// inspected and may therefore return `Some(false)`. Returns `None` when an
+/// unresolved or recursive branch, or exhausted traversal, prevents a
+/// conclusive result. Callable parameters and unrelated nested types are not
+/// resolved.
 pub fn function_returns_promise<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,

@@ -1553,6 +1553,7 @@ dependencies = [
  "mimalloc",
  "once_cell",
  "papaya",
+ "parking_lot",
  "rustc-hash 2.1.3",
  "salsa",
  "schemars",
