@@ -405,11 +405,11 @@ impl Rule for NoUnusedVariables {
 
         // Ignore name prefixed with `_`
         let is_underscore_prefixed = binding_name.starts_with('_');
-        // Skip this for the `<script>` block itself: its own declarations are
-        // in the embedded-binding set, so the name check would always match and
-        // suppress every diagnostic. Template usage is handled by the
-        // reference check below.
+        // Source and declaration snippets contribute their own declarations to
+        // the embedded-binding set. Checking that set would make every local
+        // binding appear used. Template usage is handled by the reference check.
         let is_defined_in_embedded_binding = !file_source.is_embedded_source()
+            && !file_source.is_svelte_declaration()
             && embedded.contains_binding(binding_token_text.clone())
             && binding
                 .declaration()

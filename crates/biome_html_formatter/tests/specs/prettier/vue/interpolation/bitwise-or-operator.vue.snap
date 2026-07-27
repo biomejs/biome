@@ -1,0 +1,75 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/interpolation/bitwise-or-operator.vue
+---
+
+# Input
+
+```vue
+<template>
+  <div>
+    {{
+      fn(
+        bitwise | or | operator | a_long_long_long_long_long_long_long_long_long_long_variable
+      )
+      | filter1
+      | filter2
+      | filter3
+      | filter4
+    }}
+  </div>
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,16 +1,11 @@
+ <template>
+   <div>
+-    {{
+-      fn(
+-        bitwise |
+-          or |
+-          operator |
+-          a_long_long_long_long_long_long_long_long_long_long_variable,
++    {{ fn(
++        bitwise | or | operator | a_long_long_long_long_long_long_long_long_long_long_variable
+       )
+-        | filter1
+-        | filter2
+-        | filter3
+-        | filter4
+-    }}
++      | filter1
++      | filter2
++      | filter3
++      | filter4 }}
+   </div>
+ </template>
+```
+
+# Output
+
+```vue
+<template>
+  <div>
+    {{ fn(
+        bitwise | or | operator | a_long_long_long_long_long_long_long_long_long_long_variable
+      )
+      | filter1
+      | filter2
+      | filter3
+      | filter4 }}
+  </div>
+</template>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    4:         bitwise | or | operator | a_long_long_long_long_long_long_long_long_long_long_variable
+```

@@ -1,3 +1,4 @@
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::is_nth_at_identifier;
 use crate::syntax::scss::is_nth_at_scss_interpolation;
@@ -19,35 +20,26 @@ pub(crate) fn is_nth_at_scss_interpolated_identifier(p: &mut CssParser, n: usize
     is_nth_at_identifier(p, n) || is_nth_at_scss_interpolation(p, n)
 }
 
-/// Returns `true` when the current token continues an interpolated identifier
-/// with no separating trivia.
+/// Parses source-tight identifier parts after `first_part` until whitespace or
+/// unsupported syntax ends the identifier.
 ///
-/// Examples:
-/// - `foo#{$bar}`
-/// - `#{$a}-#{$b}`
-#[inline]
-pub(super) fn is_at_identifier_continuation(p: &mut CssParser) -> bool {
-    is_at_adjacent_identifier(p) || is_at_identifier_hyphen(p)
-}
-
-/// Parses adjacent identifier parts after the first parsed part.
-///
-/// Examples: `foo#{$bar}`, `#{$a}-#{$b}`.
+/// Both interpolations and the intervening hyphens belong to one selector
+/// identifier:
+/// ```scss
+/// .#{$block}--#{$modifier} {}
+/// ```
 pub(super) fn parse_scss_interpolated_identifier_parts(
     p: &mut CssParser,
-    first_fragment: CompletedMarker,
+    first_part: CompletedMarker,
     mut parse_part: impl FnMut(&mut CssParser) -> ParsedSyntax,
 ) -> CompletedMarker {
-    let list = first_fragment.precede(p);
+    let list = first_part.precede(p);
     let mut progress = ParserProgress::default();
 
-    while !p.at(EOF) && is_at_identifier_continuation(p) {
+    while !p.at(EOF) && !p.has_preceding_whitespace() {
         progress.assert_progressing(p);
 
-        if is_at_identifier_hyphen(p) {
-            // Safe: guarded by `is_at_identifier_hyphen`.
-            parse_identifier_hyphen(p).ok();
-        } else if parse_part(p).is_absent() {
+        if parse_part(p).is_absent() {
             break;
         }
     }
@@ -55,13 +47,12 @@ pub(super) fn parse_scss_interpolated_identifier_parts(
     list.complete(p, SCSS_INTERPOLATED_IDENTIFIER_PART_LIST)
 }
 
-#[inline]
-fn is_at_adjacent_identifier(p: &mut CssParser) -> bool {
-    !p.has_preceding_whitespace() && is_nth_at_scss_interpolated_identifier(p, 0)
-}
-
-/// Returns `true` when `-` belongs to the current interpolated identifier,
-/// such as the hyphen in `#{$a}-#{$b}`.
+/// Returns `true` when `-` belongs to the current interpolated identifier.
+///
+/// Example:
+/// ```scss
+/// .#{$block}-#{$element} {}
+/// ```
 #[inline]
 pub(super) fn is_at_identifier_hyphen(p: &mut CssParser) -> bool {
     is_at_identifier_hyphen_part(p)
@@ -70,18 +61,31 @@ pub(super) fn is_at_identifier_hyphen(p: &mut CssParser) -> bool {
         && !p.has_nth_preceding_whitespace(1)
 }
 
+/// Parses a source-tight hyphen that continues an interpolated identifier.
+///
+/// Example:
+/// ```scss
+/// .#{$block}-#{$element} {}
+/// ```
 #[inline]
 pub(super) fn parse_identifier_hyphen(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_identifier_hyphen(p) {
         return Absent;
     }
 
-    parse_identifier_hyphen_part(p)
+    parse_identifier_hyphen_part(p, CssLexContext::Regular)
 }
 
 /// Returns whether the token at `n` is a raw interpolated-identifier hyphen.
 ///
-/// Callers still own context checks like `#{$a}-#{$b}` or `--#{$prop}`.
+/// Callers still own the context checks used by selectors and declarations:
+/// ```scss
+/// .-#{$name} {}
+///
+/// :root {
+///   --#{$prop}: 10px;
+/// }
+/// ```
 #[inline]
 pub(super) fn is_nth_at_identifier_hyphen_part(p: &mut CssParser, n: usize) -> bool {
     p.nth_at(n, T![-])
@@ -94,14 +98,20 @@ fn is_at_identifier_hyphen_part(p: &mut CssParser) -> bool {
 
 /// Parses a raw `-` as one interpolated-identifier hyphen part.
 ///
-/// Call only after a context-specific guard accepts the hyphen.
+/// Call only after a context-specific guard accepts the hyphen:
+/// ```scss
+/// .-#{$name} {}
+/// ```
 #[inline]
-pub(super) fn parse_identifier_hyphen_part(p: &mut CssParser) -> ParsedSyntax {
+pub(super) fn parse_identifier_hyphen_part(
+    p: &mut CssParser,
+    context: CssLexContext,
+) -> ParsedSyntax {
     if !is_at_identifier_hyphen_part(p) {
         return Absent;
     }
 
     let m = p.start();
-    p.bump(T![-]);
+    p.bump_with_context(T![-], context);
     Present(m.complete(p, SCSS_INTERPOLATED_IDENTIFIER_HYPHEN))
 }

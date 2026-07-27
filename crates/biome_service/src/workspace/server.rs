@@ -1398,10 +1398,30 @@ impl WorkspaceServerWithDb<'_> {
                 errors += snippet_errors;
                 skipped_suggested_fixes += snippet_skipped_suggested_fixes;
                 if reconstruct_snippet {
+                    let verbatim_ranges = cfg_select! {
+                        feature = "html_embeds" => {
+                            if should_format {
+                                // Use the trimmed code — the same slice passed to
+                                // reindent_embedded_code — so byte offsets match.
+                                let trimmed = new_code.trim();
+                                match document_file_source {
+                                    DocumentFileSource::Js(_) => crate::file_handlers::html::js_verbatim_ranges(trimmed),
+                                    DocumentFileSource::Css(_) => crate::file_handlers::html::css_verbatim_ranges(trimmed),
+                                    _ => vec![],
+                                }
+                            } else {
+                                vec![]
+                            }
+                        }
+                        _ => {
+                            vec![]
+                        }
+                    };
                     new_snippets.push(UpdateSnippetsNodes {
                         range: embedded_snippet.element_range(&state.db),
                         new_code,
                         needs_reindent: should_format,
+                        verbatim_ranges,
                     });
                 }
             }

@@ -3,13 +3,15 @@ use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::AnyJsRoot;
 use biome_js_type_info::interned_types::{
-    CallArgumentType as InferredCallArgumentType, TypeData as InferredTypeData,
+    CallArgumentType as InferredCallArgumentType, LocalTypeId, TypeData as InferredTypeData,
 };
 use biome_languages::JsFileSource;
 use biome_module_graph::{
-    CallArgumentTypeInput, ModuleDb, ModuleInfo, ModuleInfoKind, NormalizeTypeInput, PathInfoCache,
-    TypeInferenceMode, infer_call_argument_type, infer_module_types, infer_module_types_bottom_up,
-    normalize_type, resolve_js_module_with_inference_mode,
+    BindingTypeInput, CallArgumentTypeInput, ExpressionTypeInput, LocalTypeInput, ModuleDb,
+    ModuleInfo, ModuleInfoKind, NormalizeTypeInput, PathInfoCache, SymbolFromModuleInfo,
+    TypeInferenceMode, infer_binding_type, infer_call_argument_type, infer_export_type,
+    infer_expression_is_promise, infer_expression_type, infer_local_type, infer_module_types,
+    infer_module_types_bottom_up, normalize_type, resolve_js_module_with_inference_mode,
 };
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextRange;
@@ -180,6 +182,87 @@ fn bench_infer_argument_type_many_overloads(bencher: Bencher) {
         .bench_local_refs(|(db, module, callee_range, callback_range)| {
             let input = overload_benchmark_input(&*db, *module, *callee_range, *callback_range, 31);
             divan::black_box(infer_call_argument_type(&*db, input));
+        });
+}
+
+#[divan::bench(name = "bench_distinct_binding_lookup_queries", sample_size = 1)]
+fn bench_distinct_binding_lookup_queries(bencher: Bencher) {
+    bencher
+        .with_inputs(|| {
+            let (db, module) = build_source_db("bindings.ts", &declaration_heavy_source(128));
+            let ModuleInfoKind::Js(info) = module.kind(&db) else {
+                panic!("module must contain JavaScript information");
+            };
+            let ranges = info.raw_binding_types.keys().copied().collect::<Vec<_>>();
+            (db, module, ranges)
+        })
+        .bench_local_refs(|(db, module, ranges)| {
+            for range in ranges {
+                let input = BindingTypeInput::new(&*db, *module, *range);
+                divan::black_box(infer_binding_type(&*db, input));
+            }
+        });
+}
+
+#[divan::bench(name = "bench_distinct_local_type_lookup_queries", sample_size = 1)]
+fn bench_distinct_local_type_lookup_queries(bencher: Bencher) {
+    bencher
+        .with_inputs(|| {
+            let (db, module) = build_source_db("local_types.ts", &declaration_heavy_source(128));
+            let ModuleInfoKind::Js(info) = module.kind(&db) else {
+                panic!("module must contain JavaScript information");
+            };
+            let type_count = info.raw_types.len();
+            (db, module, type_count)
+        })
+        .bench_local_refs(|(db, module, type_count)| {
+            for index in 0..*type_count {
+                let input = LocalTypeInput::new(&*db, *module, LocalTypeId::new(index));
+                divan::black_box(infer_local_type(&*db, input));
+            }
+        });
+}
+
+#[divan::bench(name = "bench_distinct_export_lookup_queries", sample_size = 1)]
+fn bench_distinct_export_lookup_queries(bencher: Bencher) {
+    bencher
+        .with_inputs(|| {
+            let (db, module) = build_source_db("exports.ts", &declaration_heavy_source(128));
+            let ModuleInfoKind::Js(info) = module.kind(&db) else {
+                panic!("module must contain JavaScript information");
+            };
+            let names = info.exports.keys().cloned().collect::<Vec<_>>();
+            (db, module, names)
+        })
+        .bench_local_refs(|(db, module, names)| {
+            for name in names {
+                let input = SymbolFromModuleInfo::new(&*db, name.to_string(), *module);
+                divan::black_box(infer_export_type(&*db, input));
+            }
+        });
+}
+
+#[divan::bench(name = "bench_distinct_expression_lookup_queries", sample_size = 1)]
+fn bench_distinct_expression_lookup_queries(bencher: Bencher) {
+    bencher
+        .with_inputs(|| expression_query_inputs(128))
+        .bench_local_refs(|(db, module, ranges)| {
+            for range in ranges {
+                let input = ExpressionTypeInput::new(&*db, *module, *range);
+                divan::black_box(infer_expression_type(&*db, input));
+            }
+        });
+}
+
+#[divan::bench(name = "bench_distinct_selective_promise_queries", sample_size = 1)]
+fn bench_distinct_selective_promise_queries(bencher: Bencher) {
+    bencher
+        .with_inputs(|| expression_query_inputs(128))
+        .bench_local_refs(|(db, module, ranges)| {
+            for range in ranges {
+                let input = ExpressionTypeInput::new(&*db, *module, *range);
+                divan::black_box(infer_expression_is_promise(&*db, input));
+            }
         });
 }
 
@@ -464,6 +547,30 @@ fn overloaded_function_source(overload_count: usize) -> String {
     }
     source.push_str("export const callback = () => {};\n");
     source
+}
+
+fn declaration_heavy_source(declaration_count: usize) -> String {
+    let mut source = String::new();
+    for index in 0..declaration_count {
+        source.push_str(&format!(
+            "export interface Value{index} {{ field: number; }}\n\
+             export const value{index}: Value{index} = {{ field: {index} }};\n"
+        ));
+    }
+    source
+}
+
+fn expression_query_inputs(count: usize) -> (WorkspaceDb, ModuleInfo, Vec<TextRange>) {
+    let mut source = String::new();
+    for index in 0..count {
+        source.push_str(&format!("Promise.resolve({index});\n"));
+    }
+    let (db, module) = build_source_db("promises.ts", &source);
+    let ModuleInfoKind::Js(info) = module.kind(&db) else {
+        panic!("module must contain JavaScript information");
+    };
+    let ranges = info.raw_expressions.keys().copied().collect();
+    (db, module, ranges)
 }
 
 fn build_inferred_db(name: &str) -> (WorkspaceDb, ModuleInfo, ModuleInfoKind) {

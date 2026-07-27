@@ -11,6 +11,7 @@ import type {
 	ExtractedUtilities,
 	FunctionalUtility,
 	NamedBranch,
+	PropertySort,
 } from "./extract-utilities.js";
 import {
 	THEME_NAMESPACES,
@@ -58,18 +59,74 @@ ${items}
 `;
 }
 
+// Build the deduplicated signature pool from every placement's
+// property-order list (statics, branches, and negative branches). Pool
+// entries are unique ascending index lists, addressed by the stable
+// index stored in each placement.
+function collectSignaturePool(utils: ExtractedUtilities): {
+	pool: number[][];
+	idxOf: (sort: PropertySort) => number;
+} {
+	const pool: number[][] = [];
+	const byKey = new Map<string, number>();
+	const intern = (sort: PropertySort): number => {
+		const key = sort.order.join(".");
+		let idx = byKey.get(key);
+		if (idx === undefined) {
+			idx = pool.length;
+			byKey.set(key, idx);
+			pool.push(sort.order);
+		}
+		return idx;
+	};
+	const internBranches = (
+		named: NamedBranch[],
+		arbitrary: ArbitraryBranch[],
+	) => {
+		for (const b of named) intern(b.sort);
+		for (const b of arbitrary) intern(b.sort);
+	};
+	for (const u of utils.static) intern(u.sort);
+	for (const u of utils.functional) {
+		internBranches(u.namedBranches, u.arbitraryBranches);
+		if (u.negative?.kind === "Distinct") {
+			internBranches(u.negative.namedBranches, u.negative.arbitraryBranches);
+		}
+	}
+	return { pool, idxOf: intern };
+}
+
+function checked(
+	sort: PropertySort,
+	idx: number,
+): { sig: number; count: number } {
+	if (idx > 0xffff) throw new Error(`signature pool index ${idx} exceeds u16`);
+	if (sort.count > 0xff)
+		throw new Error(`declaration count ${sort.count} exceeds u8`);
+	return { sig: idx, count: sort.count };
+}
+
+function renderSignaturePool(pool: number[][]): string {
+	const items = pool.map((order) => {
+		for (const i of order) {
+			if (i > 0xffff) throw new Error(`property-order index ${i} exceeds u16`);
+		}
+		return `    &[${order.join(", ")}],`;
+	});
+	return `pub(super) static SIGNATURE_POOL: &[&[u16]] = &[
+${items.join("\n")}
+];
+`;
+}
+
 function renderStaticUtilities(
 	utils: ExtractedUtilities,
-	propIdx: Map<string, number>,
-	propCount: number,
+	sigIdx: (sort: PropertySort) => number,
 ): string {
 	const lines = utils.static.map((u) => {
-		const idx = propIdx.get(u.sort_property) ?? propCount;
-		const negReg =
-			u.negative_registration_idx === null
-				? "None"
-				: `Some(${u.negative_registration_idx})`;
-		return `    ${rustString(u.name)} => UtilityEntry { property_idx: ${idx}, property_count: ${u.property_count}, registration_idx: ${u.registration_idx}, negative_registration_idx: ${negReg} },`;
+		const { sig, count } = checked(u.sort, sigIdx(u.sort));
+		const hasNegative = u.negative_registration_idx !== null;
+		return `    ${rustString(u.name)} => UtilityEntry { sig: ${sig}, count: ${count}, has_negative: ${hasNegative} },`;
 	});
 	return `pub static STATIC_UTILITIES: phf::Map<&'static str, UtilityEntry> = phf_map! {
 ${lines.join("\n")}
@@ -115,33 +172,27 @@ ${items.join("\n")}
 function renderNamedBranchList(
 	indent: string,
 	branches: NamedBranch[],
-	propIdx: Map<string, number>,
-	propCount: number,
+	sigIdx: (sort: PropertySort) => number,
 	keywordIdx: Map<string, number>,
 ): string {
 	return branches
-		.map(
-			(b) =>
-				`${indent}${formatNamedBranch(b, propIdx, propCount, keywordIdx)},`,
-		)
+		.map((b) => `${indent}${formatNamedBranch(b, sigIdx, keywordIdx)},`)
 		.join("\n");
 }
 
 function renderArbitraryBranchList(
 	indent: string,
 	branches: ArbitraryBranch[],
-	propIdx: Map<string, number>,
-	propCount: number,
+	sigIdx: (sort: PropertySort) => number,
 ): string {
 	return branches
-		.map((b) => `${indent}${formatArbitraryBranch(b, propIdx, propCount)},`)
+		.map((b) => `${indent}${formatArbitraryBranch(b, sigIdx)},`)
 		.join("\n");
 }
 
 function renderNegative(
 	u: FunctionalUtility,
-	propIdx: Map<string, number>,
-	propCount: number,
+	sigIdx: (sort: PropertySort) => number,
 	keywordIdx: Map<string, number>,
 ): string {
 	if (u.negative === null) {
@@ -149,23 +200,20 @@ function renderNegative(
 	}
 	switch (u.negative.kind) {
 		case "SameBranches":
-			return `        negative: Some(SameBranches { registration_idx: ${u.negative.registration_idx} }),`;
+			return "        negative: Some(SameBranches),";
 		case "Distinct": {
 			const namedItems = renderNamedBranchList(
 				"                ",
 				u.negative.namedBranches,
-				propIdx,
-				propCount,
+				sigIdx,
 				keywordIdx,
 			);
 			const arbitraryItems = renderArbitraryBranchList(
 				"                ",
 				u.negative.arbitraryBranches,
-				propIdx,
-				propCount,
+				sigIdx,
 			);
 			return `        negative: Some(Distinct {
-            registration_idx: ${u.negative.registration_idx},
 ${renderBranchSlice("            ", "named_branches", namedItems)}
 ${renderBranchSlice("            ", "arbitrary_branches", arbitraryItems)}
         }),`;
@@ -175,8 +223,7 @@ ${renderBranchSlice("            ", "arbitrary_branches", arbitraryItems)}
 
 function renderFunctionalUtilities(
 	utils: ExtractedUtilities,
-	propIdx: Map<string, number>,
-	propCount: number,
+	sigIdx: (sort: PropertySort) => number,
 	keywordIdx: Map<string, number>,
 ): string {
 	const populated = utils.functional.filter(
@@ -189,19 +236,16 @@ function renderFunctionalUtilities(
 		const namedItems = renderNamedBranchList(
 			"            ",
 			u.namedBranches,
-			propIdx,
-			propCount,
+			sigIdx,
 			keywordIdx,
 		);
 		const arbitraryItems = renderArbitraryBranchList(
 			"            ",
 			u.arbitraryBranches,
-			propIdx,
-			propCount,
+			sigIdx,
 		);
-		const negative = renderNegative(u, propIdx, propCount, keywordIdx);
+		const negative = renderNegative(u, sigIdx, keywordIdx);
 		return `    ${rustString(u.basename)} => FunctionalEntry {
-        registration_idx: ${u.registration_idx},
 ${renderBranchSlice("        ", "named_branches", namedItems)}
 ${renderBranchSlice("        ", "arbitrary_branches", arbitraryItems)}
 ${negative}
@@ -228,14 +272,13 @@ ${indent}],`;
 
 function formatNamedBranch(
 	b: NamedBranch,
-	propIdx: Map<string, number>,
-	propCount: number,
+	sigIdx: (sort: PropertySort) => number,
 	keywordIdx: Map<string, number>,
 ): string {
-	const idx = propIdx.get(b.sort_property) ?? propCount;
+	const { sig, count } = checked(b.sort, sigIdx(b.sort));
 	switch (b.kind) {
 		case "Theme":
-			return `NamedBranch::Theme(ThemeNamespace::${b.namespace}, ${idx}, ${b.property_count})`;
+			return `NamedBranch::Theme(ThemeNamespace::${b.namespace}, ${sig}, ${count})`;
 		case "Keyword": {
 			const key = b.keywords.join("\0");
 			const pool = keywordIdx.get(key);
@@ -244,24 +287,23 @@ function formatNamedBranch(
 					`keyword pool missing entry for: ${b.keywords.join(",")}`,
 				);
 			}
-			return `NamedBranch::Keyword(${pool}, ${idx}, ${b.property_count})`;
+			return `NamedBranch::Keyword(${pool}, ${sig}, ${count})`;
 		}
 		case "Typed":
-			return `NamedBranch::Typed(NamedValueType::${b.value_type}, ${idx}, ${b.property_count})`;
+			return `NamedBranch::Typed(NamedValueType::${b.value_type}, ${sig}, ${count})`;
 	}
 }
 
 function formatArbitraryBranch(
 	b: ArbitraryBranch,
-	propIdx: Map<string, number>,
-	propCount: number,
+	sigIdx: (sort: PropertySort) => number,
 ): string {
-	const idx = propIdx.get(b.sort_property) ?? propCount;
+	const { sig, count } = checked(b.sort, sigIdx(b.sort));
 	switch (b.kind) {
 		case "Typed":
-			return `ArbitraryBranch::Typed(CssDataType::${b.value_type}, ${idx}, ${b.property_count})`;
+			return `ArbitraryBranch::Typed(CssDataType::${b.value_type}, ${sig}, ${count})`;
 		case "Fallback":
-			return `ArbitraryBranch::Fallback(${idx}, ${b.property_count})`;
+			return `ArbitraryBranch::Fallback(${sig}, ${count})`;
 	}
 }
 
@@ -287,11 +329,10 @@ export function renderRust(input: {
 	themeKeys: Map<ThemeNamespacePrefix, Set<string>>;
 	utilities: ExtractedUtilities;
 }): string {
-	// One Map<property, idx> built once and threaded through emitters,
-	// instead of repeated linear `Array.indexOf` lookups per branch.
-	const propIdx = new Map(input.propertyOrder.map((p, i) => [p, i] as const));
-	const propCount = input.propertyOrder.length;
 	const { pool: keywordPool, idxOf: keywordIdx } = collectKeywordPool(
+		input.utilities,
+	);
+	const { pool: signaturePool, idxOf: sigIdx } = collectSignaturePool(
 		input.utilities,
 	);
 
@@ -299,8 +340,9 @@ export function renderRust(input: {
 		HEADER,
 		renderPropertyIndex(input.propertyOrder),
 		renderKeywordPool(keywordPool),
-		renderStaticUtilities(input.utilities, propIdx, propCount),
-		renderFunctionalUtilities(input.utilities, propIdx, propCount, keywordIdx),
+		renderSignaturePool(signaturePool),
+		renderStaticUtilities(input.utilities, sigIdx),
+		renderFunctionalUtilities(input.utilities, sigIdx, keywordIdx),
 		renderThemeKeys(input.themeKeys),
 	].join("\n");
 }

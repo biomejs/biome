@@ -1,18 +1,86 @@
 use super::{InferredModuleTypes, collected_type_result};
-use crate::ModuleDb;
-use crate::db::queries::infer_module_types;
-use crate::module_graph::ModuleInfo;
+use crate::db::queries::{LocalTypeInput, infer_local_type, infer_module_types};
+use crate::{ModuleDb, module_for_key};
 use biome_js_type_info::interned_types::{
-    Literal as InferredLiteral, LocalTypeHandle, ModuleKey, ReturnType as InferredReturnType,
+    Literal as InferredLiteral, LocalTypeHandle, ReturnType as InferredReturnType,
     TypeData as InferredTypeData, TypeMember as InferredTypeMember,
     TypeMemberKind as InferredTypeMemberKind, TypeSubstitution as InferredTypeSubstitution,
     TypeTransformResult,
 };
 use rustc_hash::FxHashSet;
-use salsa::plumbing::{AsId, FromId};
 
 const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 const MAX_MEMBER_LOOKUP_STEPS: usize = 1024;
+
+/// Follows local type handles through lookup queries.
+///
+/// Returns the first non-local type. A cycle returns the repeated local handle,
+/// and a missing module or local type returns `Unknown`. At most 1024 handle
+/// resolutions are performed; if the chain is still local, the next handle is
+/// returned unresolved.
+pub(in crate::db) fn resolve_local_type_on_demand<'db>(
+    db: &'db dyn ModuleDb,
+    mut ty: InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    let mut seen = FxHashSet::default();
+
+    for _ in 0..MAX_LOCAL_TYPE_RESOLUTION_STEPS {
+        let InferredTypeData::Local(local) = ty else {
+            return ty;
+        };
+        let key = (local.module(db), local.type_id(db));
+        if !seen.insert(key) {
+            return ty;
+        }
+        let Some(module) = module_for_key(db, key.0) else {
+            return InferredTypeData::Unknown;
+        };
+        let input = LocalTypeInput::new(db, module, key.1);
+        ty = infer_local_type(db, input).unwrap_or(InferredTypeData::Unknown);
+    }
+
+    ty
+}
+
+/// Finds a member without distinguishing class values from class instances.
+///
+/// Local handles are resolved through lookup queries. Inherited and compound
+/// types are traversed subject to the work limit documented on
+/// [`find_member_type_with_resolver`].
+pub(in crate::db) fn find_member_type_on_demand<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    name: &str,
+) -> Option<InferredTypeData<'db>> {
+    find_member_type_with_resolver(
+        db,
+        &mut OnDemandMemberLookupResolver,
+        ty,
+        name,
+        MemberLookupMode::Any,
+    )
+}
+
+/// Finds a member that is available on a value.
+///
+/// A class value exposes static members, while a class instance exposes
+/// non-static members. This differs from [`find_member_type_on_demand`], which
+/// accepts either side. Local handles are resolved through lookup queries, and
+/// inherited and compound types are subject to the work limit documented on
+/// [`find_member_type_with_resolver`].
+pub(in crate::db) fn find_value_member_type_on_demand<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    name: &str,
+) -> Option<InferredTypeData<'db>> {
+    find_member_type_with_resolver(
+        db,
+        &mut OnDemandMemberLookupResolver,
+        ty,
+        name,
+        MemberLookupMode::Value,
+    )
+}
 
 impl<'db> InferredModuleTypes<'db> {
     pub(in crate::db::type_inference) fn resolve_type_iterative(
@@ -155,6 +223,29 @@ impl<'db> MemberLookupResolver<'db> for &InferredModuleTypes<'db> {
     }
 }
 
+struct OnDemandMemberLookupResolver;
+
+impl<'db> MemberLookupResolver<'db> for OnDemandMemberLookupResolver {
+    fn resolve_type(
+        &mut self,
+        db: &'db dyn ModuleDb,
+        ty: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        resolve_local_type_on_demand(db, ty)
+    }
+
+    fn finalize_member_type(
+        &mut self,
+        db: &'db dyn ModuleDb,
+        ty: InferredTypeData<'db>,
+        _is_optional: bool,
+        substitutions: &[InferredTypeSubstitution<'db>],
+        _crossed_instance: bool,
+    ) -> InferredTypeData<'db> {
+        apply_substitutions(db, ty, substitutions)
+    }
+}
+
 #[derive(Clone)]
 struct MemberLookupState<'db> {
     ty: InferredTypeData<'db>,
@@ -195,9 +286,25 @@ impl<'db> MemberLookupState<'db> {
 ///
 /// Instance wrappers contribute substitutions that are applied while the
 /// lookup advances. Members found through unions, intersections, or merged
-/// references are collected into a union. Returns `None` when no traversed
-/// type exposes `name` within the requested `mode`. Traversal is bounded;
-/// reaching the limit returns any members collected so far.
+/// references are collected into a union. A branch without `name` contributes
+/// nothing; it does not discard members found on other branches. Consequently,
+/// `Some` may describe only part of a compound type, and `None` means only that
+/// no member was found in the supported portion that was traversed.
+///
+/// Traversal processes at most 1024 distinct states. A state includes the type,
+/// lookup mode, accumulated substitutions, and whether a compound or instance
+/// boundary has been crossed. Repeated states do not consume work. If the limit
+/// is reached, the result is `Unknown` because unvisited states may contain a
+/// different member type.
+///
+/// For example, lookup of `item` on `Left | Right | Missing` returns
+/// `string | number`, even though `Missing` has no `item`:
+///
+/// ```ts
+/// type Left = { item: string };
+/// type Right = { item: number };
+/// type Missing = {};
+/// ```
 pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
     db: &'db dyn ModuleDb,
     resolver: &mut impl MemberLookupResolver<'db>,
@@ -224,10 +331,10 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
             continue;
         }
 
-        // Deduplicated entries above don't count against the budget, so
-        // the limit measures distinct types visited, not queue churn.
+        // Deduplicated entries above don't count against the budget, so the
+        // limit measures distinct traversal states rather than queue churn.
         if remaining_steps == 0 {
-            break;
+            return Some(InferredTypeData::Unknown);
         }
         remaining_steps -= 1;
 
@@ -319,7 +426,6 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
                 );
             }
             InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
@@ -397,7 +503,6 @@ fn declared_type_parameters<'db>(
         InferredTypeData::InstanceOf(instance) => Some(instance.type_parameters(db)),
         InferredTypeData::Interface(interface) => Some(interface.type_parameters(db)),
         InferredTypeData::Unknown
-        | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
         | InferredTypeData::GlobalType(_)
         | InferredTypeData::BigInt
@@ -467,7 +572,6 @@ fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> Inf
     match ty {
         InferredTypeData::InstanceOf(instance) => instance.ty(db),
         ty @ (InferredTypeData::Unknown
-        | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
         | InferredTypeData::GlobalType(_)
         | InferredTypeData::BigInt
@@ -503,15 +607,6 @@ fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> Inf
         | InferredTypeData::UnknownKeyword
         | InferredTypeData::VoidKeyword) => ty,
     }
-}
-
-pub(in crate::db::type_inference) fn module_for_key(
-    db: &dyn ModuleDb,
-    module_key: ModuleKey,
-) -> Option<ModuleInfo> {
-    let module = ModuleInfo::from_id(module_key.as_id());
-    let current = db.module_for_path(module.path(db))?;
-    (ModuleKey::new(current.as_id()) == module_key).then_some(current)
 }
 
 /// Finds a member defined directly on `ty` without traversing related types.
@@ -586,7 +681,6 @@ fn find_own_member_type<'db>(
             find(object.members(db), mode, mode.allows_index_signature())
         }
         InferredTypeData::Unknown
-        | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
         | InferredTypeData::GlobalType(_)
         | InferredTypeData::BigInt

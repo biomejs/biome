@@ -214,14 +214,14 @@ fn run_binary_expression(
     let right = node.right().ok()?;
 
     if ctx
-        .inferred_type_of_expression(&left)
+        .type_of_expression(&left)
         .is_some_and(InferredType::is_all_string_like)
     {
         return check_expression(ctx, &right, DiagnosticKind::BaseToString);
     }
 
     if ctx
-        .inferred_type_of_expression(&right)
+        .type_of_expression(&right)
         .is_some_and(InferredType::is_all_string_like)
     {
         return check_expression(ctx, &left, DiagnosticKind::BaseToString);
@@ -294,7 +294,7 @@ fn type_of_assignment<'a>(
         match current {
             AnyJsAssignment::JsIdentifierAssignment(identifier) => {
                 let name = identifier.name_token().ok()?;
-                return ctx.inferred_type_of_named_value(
+                return ctx.type_of_named_value(
                     name.text_trimmed_range(),
                     name.text_trimmed(),
                 );
@@ -330,7 +330,7 @@ fn check_expression(
         return None;
     }
 
-    let ty = ctx.inferred_type_of_expression(expression)?;
+    let ty = ctx.type_of_expression(expression)?;
     let ignored_type_names = ctx
         .options()
         .ignored_type_names

@@ -398,24 +398,6 @@ impl Default for RawGlobalTypes {
         builder.set_manual_type_data(INSTANCEOF_SYMBOL_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_SYMBOL_ID))
         });
-        builder.set_manual_type_data(SYMBOL_ID_GLOBAL_TYPE_ID, || {
-            TypeData::Class(Box::new(Class {
-                name: Some(Text::new_static(SYMBOL_ID_NAME)),
-                type_parameters: Box::default(),
-                extends: None,
-                implements: Box::default(),
-                members: Box::new([
-                    static_member("dispose", SYMBOL_DISPOSE_ID),
-                    static_member("asyncDispose", SYMBOL_ASYNC_DISPOSE_ID),
-                ]),
-            }))
-        });
-        builder.set_manual_type_data(SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID, || TypeData::Symbol);
-        builder.set_manual_type_data(SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID, || TypeData::Symbol);
-        // `Disposable`, `AsyncDisposable`, and their `[Symbol.(async)Dispose]` helpers are
-        // supplied by the generated global types (see `MIGRATED_PREDEFINED_IDS`), which encode
-        // the members as computed keys instead of the index-signature hack this used to carry.
-
         builder.build()
     }
 }
@@ -716,5 +698,29 @@ mod tests {
             panic!("Promise must be a class");
         };
         assert!(!promise.members(&db).is_empty());
+    }
+
+    #[test]
+    fn generated_symbol_globals_keep_static_members() {
+        let db = TestDb::default();
+        let globals = global_types(&db);
+        let InferredTypeData::Class(symbol) = globals.get(SYMBOL_ID_GLOBAL_TYPE_ID) else {
+            panic!("Symbol must be a class");
+        };
+        let members = symbol.members(&db);
+        assert_eq!(members.len(), 2);
+
+        for (name, global_type_id) in [
+            ("dispose", SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID),
+            ("asyncDispose", SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID),
+        ] {
+            let member = members
+                .iter()
+                .find(|member| member.kind.has_name(name))
+                .unwrap_or_else(|| panic!("Symbol.{name} must exist"));
+            assert!(member.kind.is_static());
+            assert_eq!(member.ty, InferredTypeData::GlobalType(global_type_id));
+            assert_eq!(globals.get(global_type_id), InferredTypeData::Symbol);
+        }
     }
 }

@@ -128,8 +128,8 @@ hashbrown                    = { version = "0.15.5", default-features = false }
 ignore                       = "0.4.25"
 indexmap                     = { version = "2.14.0" }
 insta                        = "1.48.0"
-jiff                         = "0.2.32"
-libc                         = "0.2.186"
+jiff                         = "0.2.35"
+libc                         = "0.2.189"
 mimalloc                     = "0.1.48"
 notify                       = "8.2.0"
 papaya                       = "0.2.4"
@@ -137,12 +137,12 @@ path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_
 phf                          = { version = "0.13.1", features = ["macros"] }
 prettyplease                 = "0.2.37"
 proc-macro-error2            = { version = "2.0.1", default-features = false }
-proc-macro2                  = "1.0.106"
+proc-macro2                  = "1.0.107"
 quickcheck                   = "1.1.0"
 quickcheck_macros            = "1.2.0"
 quote                        = "1.0.47"
 rayon                        = "1.12.0"
-regex                        = "1.13.0"
+regex                        = "1.13.1"
 reqwest                      = { version = "0.12.19", default-features = false }
 rust-lapper                  = "1.2.0"
 rustc-hash                   = "2.1.3"

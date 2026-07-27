@@ -47,6 +47,7 @@ mod reporter_terminal;
 mod rules_via_dependencies;
 mod suppressions;
 mod tailwind_directives;
+mod type_inference_profile;
 mod unknown_files;
 mod vcs_ignored_files;
 mod vue_cross_language_rules;

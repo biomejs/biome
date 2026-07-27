@@ -176,10 +176,10 @@ pub fn find_jsdoc_for_exported_symbol<'db>(
 /// Generic symbol used by queries to track a generic "symbol", which can represent everything (variable name, class name, etc.)
 pub struct SymbolFromModuleInfo {
     #[returns(clone)]
-    name: String,
+    pub(crate) name: String,
 
     #[returns(ref)]
-    module: ModuleInfo,
+    pub(crate) module: ModuleInfo,
 }
 
 // #endregion

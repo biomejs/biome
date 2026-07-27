@@ -17,8 +17,7 @@ after: value
 # Formatted
 
 ```yaml
-planets:
-  !!seq
+planets: !!seq
   - Mercury # Rotates
   - Pluto # You call this a planet?
 after: value

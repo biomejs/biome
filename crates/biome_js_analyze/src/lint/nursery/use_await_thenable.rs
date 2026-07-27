@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::JsAwaitExpression;
+use biome_module_graph::type_inference::TypeInferenceClassification;
 use biome_rowan::AstNode;
 use biome_rule_options::use_await_thenable::UseAwaitThenableOptions;
 
@@ -54,7 +55,7 @@ impl Rule for UseAwaitThenable {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let expression = node.argument().ok()?;
-        let ty = ctx.inferred_type_of_expression(&expression)?;
+        let ty = ctx.type_of_expression(&expression)?;
 
         // Uncomment the following line for debugging convenience:
         //let printed = format!("type of {expression:?} = {ty:?}");
@@ -64,7 +65,11 @@ impl Rule for UseAwaitThenable {
             Some(false) => {}
         }
 
-        (!ctx.inferred_expression_has_callable_member(&expression, "then")?).then_some(())
+        match ctx.classify_callable_member(&expression, "then") {
+            TypeInferenceClassification::NoMatch => Some(()),
+            TypeInferenceClassification::Match
+            | TypeInferenceClassification::Indeterminate => None,
+        }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {

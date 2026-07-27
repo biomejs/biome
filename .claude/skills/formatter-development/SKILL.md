@@ -14,18 +14,6 @@ Use this skill when implementing or modifying Biome's formatters. It covers the 
 2. Language-specific crates must exist: `biome_{lang}_syntax`, `biome_{lang}_formatter`
 3. For Prettier comparison: Install `bun` and run `pnpm install` in repo root
 
-## Code Standards
-
-**CRITICAL: No Emojis**
-
-Emojis are BANNED in all formatter code:
-- NO emojis in code comments
-- NO emojis in rustdoc documentation
-- NO emojis in test files
-- NO emojis in debug output or error messages
-
-Keep all code professional and emoji-free.
-
 ## Common Workflows
 
 ### Generate Formatter Boilerplate
@@ -167,6 +155,12 @@ echo 'const x = 1' | bun packages/prettier-compare/bin/prettier-compare.js --reb
 ```
 
 **Always use `--rebuild`** to ensure WASM bundle matches your Rust changes.
+
+Tips:
+- Pass code snippets in single quotes to avoid shell interpretation.
+- A literal backslash-n in a CLI argument is not converted to a newline — use a real newline or a file (`-f`).
+- Safe to run in read-only or planning mode: `--rebuild` only rebuilds the Biome WASM bundle and does not modify source files.
+- See `packages/prettier-compare/README.md` for full CLI details.
 
 ### Format and Build
 

@@ -41,6 +41,7 @@ jobs:
       configuration: ${{ steps.outputs.outputs.configuration }}
       manifests: ${{ steps.outputs.outputs.manifests }}
       module_graph: ${{ steps.outputs.outputs.module_graph }}
+      service: ${{ steps.outputs.outputs.service }}
     steps:
       - name: Checkout Branch
         if: github.event_name == 'push'
@@ -146,6 +147,20 @@ jobs:
               - 'Cargo.lock'
               - 'crates/biome_module_graph/**/*.rs'
               - 'crates/biome_rowan/**/*.rs'
+            service:
+              - '.github/workflows/benchmark.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_analyze/**/*.rs'
+              - 'crates/biome_configuration/**/*.rs'
+              - 'crates/biome_fs/**/*.rs'
+              - 'crates/biome_js_*/**/*.rs'
+              - 'crates/biome_module_graph/**/*.rs'
+              - 'crates/biome_parser/**/*.rs'
+              - 'crates/biome_project_layout/**/*.rs'
+              - 'crates/biome_resolver/**/*.rs'
+              - 'crates/biome_rowan/**/*.rs'
+              - 'crates/biome_service/**/*.rs'
+              - 'crates/biome_workspace_db/**/*.rs'
 
       - name: Set change outputs
         id: outputs
@@ -162,6 +177,7 @@ jobs:
           CONFIGURATION: ${{ steps.filter.outputs.configuration }}
           MANIFESTS: ${{ steps.filter.outputs.manifests }}
           MODULE_GRAPH: ${{ steps.filter.outputs.module_graph }}
+          SERVICE: ${{ steps.filter.outputs.service }}
         run: |
           if [ "$EVENT_NAME" = 'workflow_dispatch' ] || [ "$EVENT_NAME" = 'merge_group' ]; then
             JS=true
@@ -175,6 +191,7 @@ jobs:
             CONFIGURATION=true
             MANIFESTS=true
             MODULE_GRAPH=true
+            SERVICE=true
           fi
 
           echo "js=$JS" >> "$GITHUB_OUTPUT"
@@ -188,6 +205,7 @@ jobs:
           echo "configuration=$CONFIGURATION" >> "$GITHUB_OUTPUT"
           echo "manifests=$MANIFESTS" >> "$GITHUB_OUTPUT"
           echo "module_graph=$MODULE_GRAPH" >> "$GITHUB_OUTPUT"
+          echo "service=$SERVICE" >> "$GITHUB_OUTPUT"
 
   js:
     needs: changes
@@ -231,6 +249,44 @@ jobs:
         with:
           mode: simulation
           run: cargo codspeed run
+          token: ${{ secrets.CODSPEED_TOKEN }}
+
+  service:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.service == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Bench Service
+    runs-on: depot-ubuntu-24.04-arm-16
+    steps:
+      - name: Checkout PR Branch
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
+        with:
+          channel: stable
+          cache-target: release
+          bins: cargo-codspeed
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compile
+        timeout-minutes: 20
+        run: cargo codspeed build -p biome_service --bench pull_diagnostics --features type_inference
+        env:
+          CARGO_BUILD_JOBS: 3
+
+      - name: Run the benchmarks
+        uses: CodSpeedHQ/action@f99becdce5e5d51fd556489ebef684f4ecfd6286 # v4.18.5
+        timeout-minutes: 50
+        with:
+          mode: simulation
+          run: cargo codspeed run -p biome_service --bench pull_diagnostics
           token: ${{ secrets.CODSPEED_TOKEN }}
 
   json:
