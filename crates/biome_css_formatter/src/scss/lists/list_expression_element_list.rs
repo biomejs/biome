@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use biome_css_syntax::ScssListExpressionElementList;
-use biome_formatter::FormatRuleWithOptions;
 use biome_formatter::separated::TrailingSeparator;
+use biome_formatter::{FormatRuleWithOptions, write};
 use biome_rowan::AstSeparatedList;
 
 #[derive(Debug, Clone, Default)]
@@ -44,12 +44,12 @@ impl FormatRule<ScssListExpressionElementList> for FormatScssListExpressionEleme
                         .node()
                         .is_ok_and(|element| element.syntax().has_leading_newline())
                 {
-                    hard_line_break().fmt(f)?;
+                    write!(f, [hard_line_break()])?;
                 } else {
-                    soft_line_break_or_space().fmt(f)?;
+                    write!(f, [soft_line_break_or_space()])?;
                 }
             }
-            formatted.fmt(f)?;
+            write!(f, [formatted])?;
         }
 
         Ok(())

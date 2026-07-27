@@ -10,39 +10,32 @@ use biome_formatter::{FormatResult, FormatWithRule, RemoveSoftLinesBuffer, forma
 use biome_rowan::{AstNode, AstNodeList, AstNodeListIterator, TextSize};
 use std::{iter::Peekable, slice};
 
-pub(super) fn is_applicable<N, I>(
-    node: &N,
+pub(super) fn format_if_applicable<'a, N, I>(
+    node: &'a N,
     layout: ValueListLayout,
-    comments: &[SourceComment<CssLanguage>],
-) -> bool
+    comments: &'a [SourceComment<CssLanguage>],
+    lowercase_css_wide_keyword: bool,
+) -> Option<impl Format<CssFormatContext> + 'a>
 where
     N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
-    I: AstNode<Language = CssLanguage>,
+    I: AstNode<Language = CssLanguage>
+        + IntoFormat<CssFormatContext, Format: FormatWithRule<CssFormatContext, Item = I>>,
 {
     if !is_comma_separated_declaration_value_list(node.syntax()) {
-        return false;
+        return None;
     }
 
-    match layout {
+    let is_applicable = match layout {
         ValueListLayout::Fill if node.parent::<CssGenericProperty>().is_some() => true,
         ValueListLayout::PreserveInline | ValueListLayout::OnePerLine => true,
         _ => has_value_boundary_comments(comments),
-    }
-}
+    };
 
-pub(super) fn format<N, I>(
-    node: &N,
-    layout: ValueListLayout,
-    comments: &[SourceComment<CssLanguage>],
-    lowercase_css_wide_keyword: bool,
-    f: &mut Formatter<'_, CssFormatContext>,
-) -> FormatResult<()>
-where
-    N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
-    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
-    I::Format: FormatWithRule<CssFormatContext, Item = I>,
-{
-    CommaGroupsWriter::new(node, layout, comments, lowercase_css_wide_keyword).write(f)
+    is_applicable.then(|| {
+        format_with(move |f| {
+            CommaGroupsWriter::new(node, layout, comments, lowercase_css_wide_keyword).write(f)
+        })
+    })
 }
 
 /// Merges comma-list elements and dangling comments in source order.
@@ -168,7 +161,7 @@ where
         while let Some(info) = self.cursor.preview_group() {
             let layout = self.layout;
             let group_separator =
-                format_once(move |f| layout.fmt_separator(false, info.starts_on_new_line, true, f));
+                format_once(move |f| layout.fmt_group_separator(info.starts_on_new_line, f));
             let formatted_group = format_once(|f| self.write_next_group(f));
 
             if info.has_value_boundary_comment {
@@ -225,7 +218,11 @@ where
                     let has_source_hard_separator =
                         !is_comma && starts_on_new_line && layout.is_source_break_preserving();
                     let separator = format_once(move |f| {
-                        layout.fmt_separator(is_comma, starts_on_new_line, false, f)
+                        if is_comma {
+                            Ok(())
+                        } else {
+                            layout.fmt_value_separator(starts_on_new_line, f)
+                        }
                     });
                     let formatted_element =
                         format_component_value_element(element, lowercase_css_wide_keyword);

@@ -112,14 +112,13 @@ where
     };
 
     let values = format_with(|f: &mut Formatter<'_, CssFormatContext>| {
-        if comma_groups::is_applicable(node, layout, boundary_comments) {
-            return comma_groups::format(
-                node,
-                layout,
-                boundary_comments,
-                lowercase_css_wide_keyword,
-                f,
-            );
+        if let Some(comma_groups) = comma_groups::format_if_applicable(
+            node,
+            layout,
+            boundary_comments,
+            lowercase_css_wide_keyword,
+        ) {
+            return write!(f, [comma_groups]);
         }
 
         if node.len() == 1 {
@@ -142,12 +141,14 @@ where
                 fill.entry(
                     &format_once(|f| {
                         let is_comma = is_comma_delimiter(element.syntax());
-                        layout.fmt_separator(
-                            is_comma,
-                            element.syntax().has_leading_newline(),
-                            at_group_boundary,
-                            f,
-                        )?;
+                        if !is_comma {
+                            let starts_on_new_line = element.syntax().has_leading_newline();
+                            if at_group_boundary {
+                                layout.fmt_group_separator(starts_on_new_line, f)?;
+                            } else {
+                                layout.fmt_value_separator(starts_on_new_line, f)?;
+                            }
+                        }
 
                         // The outer layout adds the initial hard break because
                         // `FillBuilder` ignores its first separator.
@@ -372,28 +373,30 @@ impl ValueListLayout {
         matches!(self, Self::PreserveInline | Self::OnePerLine)
     }
 
-    fn fmt_separator(
+    fn fmt_value_separator(
         self,
-        is_comma: bool,
         starts_on_new_line: bool,
-        at_group_boundary: bool,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        if is_comma {
-            return Ok(());
-        }
-
         match self {
             Self::PreserveInline | Self::OnePerLine if starts_on_new_line => {
                 hard_line_break().fmt(f)
             }
             Self::PreserveInline | Self::OnePerLine => space().fmt(f),
-            Self::OneGroupPerLine | Self::OneGroupPerLineWithDanglingComments
-                if at_group_boundary =>
-            {
+            _ => soft_line_break_or_space().fmt(f),
+        }
+    }
+
+    fn fmt_group_separator(
+        self,
+        starts_on_new_line: bool,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        match self {
+            Self::OneGroupPerLine | Self::OneGroupPerLineWithDanglingComments => {
                 hard_line_break().fmt(f)
             }
-            _ => soft_line_break_or_space().fmt(f),
+            _ => self.fmt_value_separator(starts_on_new_line, f),
         }
     }
 }
