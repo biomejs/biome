@@ -15,10 +15,11 @@ use biome_js_syntax::{
     AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsRoot, AnyJsStatement,
     AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression, JsCallExpression, JsExport,
     JsImport, JsLanguage, JsModuleItemList, JsReferenceIdentifier, JsStaticMemberExpression,
-    JsSvelteGenericsRoot, JsSvelteSnippetRoot, JsVariableStatement, JsxReferenceIdentifier,
+    JsSvelteDeclarationRoot, JsSvelteGenericsRoot, JsSvelteSnippetRoot, JsVariableStatement,
+    JsxReferenceIdentifier,
 };
 use biome_languages::html::HtmlVariant;
-use biome_languages::javascript::JsEmbeddingKind;
+use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind};
 use biome_languages::{HtmlFileSource, JsFileSource, LanguageDb};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
@@ -36,6 +37,7 @@ enum SvelteBlockKind {
     Render,
     Snippet,
     Const,
+    Declaration,
 }
 
 impl From<&AnySvelteBlock> for EmbeddedBlockKind {
@@ -49,6 +51,7 @@ impl From<&AnySvelteBlock> for EmbeddedBlockKind {
             | AnySvelteBlock::SvelteIfBlock(_)
             | AnySvelteBlock::SvelteKeyBlock(_) => Self::Neutral,
             AnySvelteBlock::SvelteConstBlock(_) => Self::Svelte(SvelteBlockKind::Const),
+            AnySvelteBlock::SvelteDeclarationBlock(_) => Self::Svelte(SvelteBlockKind::Declaration),
             AnySvelteBlock::SvelteRenderBlock(_) => Self::Svelte(SvelteBlockKind::Render),
             AnySvelteBlock::SvelteSnippetBlock(_) => Self::Svelte(SvelteBlockKind::Snippet),
         }
@@ -208,13 +211,17 @@ fn any_js_root_from_snippet(parsed: &AnyParse) -> Option<AnyJsRoot> {
 fn block_kind_from_js_source(source: &JsFileSource) -> Option<EmbeddedBlockKind> {
     match source.as_embedding_kind() {
         JsEmbeddingKind::Svelte {
-            is_function_signature: true,
+            embedding_kind: SvelteEmbeddingKind::SnippetSignature,
             ..
         } => Some(EmbeddedBlockKind::Svelte(SvelteBlockKind::Snippet)),
         JsEmbeddingKind::Svelte {
-            is_const_block: true,
+            embedding_kind: SvelteEmbeddingKind::LegacyConst,
             ..
         } => Some(EmbeddedBlockKind::Svelte(SvelteBlockKind::Const)),
+        JsEmbeddingKind::Svelte {
+            embedding_kind: SvelteEmbeddingKind::Declaration,
+            ..
+        } => Some(EmbeddedBlockKind::Svelte(SvelteBlockKind::Declaration)),
         _ => None,
     }
 }
@@ -497,6 +504,10 @@ impl EmbeddedBindingsBuilder {
                         && host_file_source.is_svelte()
                     {
                         self.visit_svelte_snippet_declaration(&root, embed_block_kind);
+                    } else if let Some(root) = JsSvelteDeclarationRoot::cast_ref(&node)
+                        && host_file_source.is_svelte()
+                    {
+                        self.visit_svelte_declaration(&root, embed_block_kind);
                     }
                 }
                 WalkEvent::Leave(_) => {}
@@ -550,6 +561,22 @@ impl EmbeddedBindingsBuilder {
         None
     }
 
+    fn visit_svelte_declaration(
+        &mut self,
+        root: &JsSvelteDeclarationRoot,
+        embed_block_kind: Option<&EmbeddedBlockKind>,
+    ) -> Option<()> {
+        let EmbeddedBlockKind::Svelte(SvelteBlockKind::Declaration) = embed_block_kind? else {
+            return None;
+        };
+
+        for declarator in root.declaration().ok()?.declarators().iter().flatten() {
+            self.visit_any_js_binding_pattern(&declarator.id().ok()?)?;
+        }
+
+        Some(())
+    }
+
     fn visit_svelte_block_call_expressions(
         &mut self,
         call_expression: &JsCallExpression,
@@ -584,7 +611,7 @@ impl EmbeddedBindingsBuilder {
                         }
                     }
                 }
-                SvelteBlockKind::Const => {}
+                SvelteBlockKind::Const | SvelteBlockKind::Declaration => {}
             },
             EmbeddedBlockKind::Neutral => return None,
         }

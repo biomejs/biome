@@ -22,7 +22,7 @@ foo:
  &a: key: &a value
 -foo: *a:
 +foo:
-+  *a:
++  *a :
 ```
 
 # Output
@@ -30,5 +30,5 @@ foo:
 ```yml
 &a: key: &a value
 foo:
-  *a:
+  *a :
 ```

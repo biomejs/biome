@@ -777,7 +777,7 @@ fn ensure_known_string_type(
     ctx: &RuleContext<UseStringStartsEndsWith>,
     expression: &AnyJsExpression,
 ) -> bool {
-    ctx.inferred_type_of_expression(expression)
+    ctx.type_of_expression(expression)
         .is_some_and(|ty| ty.is_all_string_like())
 }
 
@@ -785,7 +785,7 @@ fn is_zero_number_expression(
     ctx: &RuleContext<UseStringStartsEndsWith>,
     expression: &AnyJsExpression,
 ) -> bool {
-    ctx.inferred_type_of_expression(expression)
+    ctx.type_of_expression(expression)
         .is_some_and(|ty| ty.is_number_literal(0.0))
 }
 
@@ -937,7 +937,7 @@ fn build_method_call_with_regex_literal(
     method: PreferredMethod,
     negated: bool,
 ) -> Option<AnyJsExpression> {
-    let (pattern, flags) = ctx.inferred_type_of_expression(regex)?.regexp_literal()?;
+    let (pattern, flags) = ctx.type_of_expression(regex)?.regexp_literal()?;
 
     if !flags.text().is_empty() {
         return None;
@@ -1034,7 +1034,7 @@ fn matches_length_expression(
     if let Some(expected_len) = compared_string_utf16_len(value) {
         // Literal strings are the easy case: the target length is known up front.
         return ctx
-            .inferred_type_of_expression(expression)
+            .type_of_expression(expression)
             .is_some_and(|ty| ty.is_number_literal(expected_len as f64));
     }
 
@@ -1193,7 +1193,7 @@ fn extract_plain_anchored_regex(
     expression: &AnyJsExpression,
 ) -> Option<PreferredMethod> {
     let (pattern, flags) = ctx
-        .inferred_type_of_expression(expression)?
+        .type_of_expression(expression)?
         .regexp_literal()?;
 
     if !flags.text().is_empty() {

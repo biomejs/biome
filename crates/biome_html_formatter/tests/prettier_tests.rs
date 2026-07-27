@@ -8,7 +8,7 @@ use std::env;
 
 mod language;
 
-tests_macros::gen_tests! {"tests/specs/prettier/**/*.html", crate::test_snapshot, ""}
+tests_macros::gen_tests! {"tests/specs/prettier/**/*.{html,vue}", crate::test_snapshot, ""}
 
 fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     countme::enable(true);
@@ -19,9 +19,9 @@ fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     ));
 
     let test_file = PrettierTestFile::new(input, root_path);
-    let source_type = HtmlFileSource::html();
+    let source_type: HtmlFileSource = test_file.input_file().try_into().unwrap();
 
-    let options = HtmlFormatOptions::new(HtmlFileSource::html())
+    let options = HtmlFormatOptions::new(source_type)
         .with_indent_style(IndentStyle::Space)
         .with_indent_width(IndentWidth::default())
         .with_self_close_void_elements(SelfCloseVoidElements::Always);

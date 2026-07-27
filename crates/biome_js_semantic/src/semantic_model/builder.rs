@@ -81,6 +81,7 @@ impl SemanticModelBuilder {
             JS_MODULE
             | JS_SCRIPT
             | JS_EXPRESSION_TEMPLATE_ROOT
+            | JS_SVELTE_DECLARATION_ROOT
             | JS_SVELTE_SNIPPET_ROOT
             | TS_DECLARATION_MODULE
             | JS_FUNCTION_DECLARATION

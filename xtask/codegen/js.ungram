@@ -55,6 +55,7 @@ AnyJsRoot =
 	| TsDeclarationModule
 	| JsExpressionTemplateRoot
 	| JsSvelteSnippetRoot
+	| JsSvelteDeclarationRoot
 	| JsSvelteGenericsRoot
 
 JsScript =
@@ -90,6 +91,12 @@ JsExpressionTemplateRoot =
 JsSvelteSnippetRoot =
 		name: AnyJsBinding
 		parameters: JsParameters
+		eof: 'EOF'
+
+// Special root created for Svelte declaration tags
+JsSvelteDeclarationRoot =
+		declaration: JsVariableDeclaration
+		semicolon: ';'?
 		eof: 'EOF'
 
 // Special root created for Svelte's `<script generics="...">` attribute

@@ -1,0 +1,117 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+const value: { answer: number } = { answer: 42 };
+
+```
+
+
+## AST
+
+```
+JsSvelteDeclarationRoot {
+    declaration: JsVariableDeclaration {
+        await_token: missing (optional),
+        kind: CONST_KW@0..6 "const" [] [Whitespace(" ")],
+        declarators: JsVariableDeclaratorList [
+            JsVariableDeclarator {
+                id: JsIdentifierBinding {
+                    name_token: IDENT@6..11 "value" [] [],
+                },
+                variable_annotation: TsTypeAnnotation {
+                    colon_token: COLON@11..13 ":" [] [Whitespace(" ")],
+                    ty: TsObjectType {
+                        l_curly_token: L_CURLY@13..15 "{" [] [Whitespace(" ")],
+                        members: TsTypeMemberList [
+                            TsPropertySignatureTypeMember {
+                                readonly_token: missing (optional),
+                                name: JsLiteralMemberName {
+                                    value: IDENT@15..21 "answer" [] [],
+                                },
+                                optional_token: missing (optional),
+                                type_annotation: TsTypeAnnotation {
+                                    colon_token: COLON@21..23 ":" [] [Whitespace(" ")],
+                                    ty: TsNumberType {
+                                        number_token: NUMBER_KW@23..30 "number" [] [Whitespace(" ")],
+                                    },
+                                },
+                                separator_token: missing (optional),
+                            },
+                        ],
+                        r_curly_token: R_CURLY@30..32 "}" [] [Whitespace(" ")],
+                    },
+                },
+                initializer: JsInitializerClause {
+                    eq_token: EQ@32..34 "=" [] [Whitespace(" ")],
+                    expression: JsObjectExpression {
+                        l_curly_token: L_CURLY@34..36 "{" [] [Whitespace(" ")],
+                        members: JsObjectMemberList [
+                            JsPropertyObjectMember {
+                                name: JsLiteralMemberName {
+                                    value: IDENT@36..42 "answer" [] [],
+                                },
+                                colon_token: COLON@42..44 ":" [] [Whitespace(" ")],
+                                value: JsNumberLiteralExpression {
+                                    value_token: JS_NUMBER_LITERAL@44..47 "42" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                        r_curly_token: R_CURLY@47..48 "}" [] [],
+                    },
+                },
+            },
+        ],
+    },
+    semicolon_token: SEMICOLON@48..49 ";" [] [],
+    eof_token: EOF@49..50 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_DECLARATION_ROOT@0..50
+  0: JS_VARIABLE_DECLARATION@0..48
+    0: (empty)
+    1: CONST_KW@0..6 "const" [] [Whitespace(" ")]
+    2: JS_VARIABLE_DECLARATOR_LIST@6..48
+      0: JS_VARIABLE_DECLARATOR@6..48
+        0: JS_IDENTIFIER_BINDING@6..11
+          0: IDENT@6..11 "value" [] []
+        1: TS_TYPE_ANNOTATION@11..32
+          0: COLON@11..13 ":" [] [Whitespace(" ")]
+          1: TS_OBJECT_TYPE@13..32
+            0: L_CURLY@13..15 "{" [] [Whitespace(" ")]
+            1: TS_TYPE_MEMBER_LIST@15..30
+              0: TS_PROPERTY_SIGNATURE_TYPE_MEMBER@15..30
+                0: (empty)
+                1: JS_LITERAL_MEMBER_NAME@15..21
+                  0: IDENT@15..21 "answer" [] []
+                2: (empty)
+                3: TS_TYPE_ANNOTATION@21..30
+                  0: COLON@21..23 ":" [] [Whitespace(" ")]
+                  1: TS_NUMBER_TYPE@23..30
+                    0: NUMBER_KW@23..30 "number" [] [Whitespace(" ")]
+                4: (empty)
+            2: R_CURLY@30..32 "}" [] [Whitespace(" ")]
+        2: JS_INITIALIZER_CLAUSE@32..48
+          0: EQ@32..34 "=" [] [Whitespace(" ")]
+          1: JS_OBJECT_EXPRESSION@34..48
+            0: L_CURLY@34..36 "{" [] [Whitespace(" ")]
+            1: JS_OBJECT_MEMBER_LIST@36..47
+              0: JS_PROPERTY_OBJECT_MEMBER@36..47
+                0: JS_LITERAL_MEMBER_NAME@36..42
+                  0: IDENT@36..42 "answer" [] []
+                1: COLON@42..44 ":" [] [Whitespace(" ")]
+                2: JS_NUMBER_LITERAL_EXPRESSION@44..47
+                  0: JS_NUMBER_LITERAL@44..47 "42" [] [Whitespace(" ")]
+            2: R_CURLY@47..48 "}" [] []
+  1: SEMICOLON@48..49 ";" [] []
+  2: EOF@49..50 "" [Newline("\n")] []
+
+```

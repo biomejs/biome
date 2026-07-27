@@ -12,11 +12,23 @@ mod expressions;
 mod globals;
 mod imports;
 mod lookup;
+mod promise_classification;
 mod qualifiers;
 mod resolver;
 
-pub(in crate::db) use lookup::{apply_substitutions_to_root_body, substitutions_for_instance};
-pub(in crate::db) use resolver::{ImportResolution, resolve_raw_types};
+pub(in crate::db) use imports::{
+    ExportOriginResult, collect_namespace_export_names, find_export_origin,
+    resolve_export_type_on_demand,
+};
+pub(in crate::db) use lookup::{
+    apply_substitutions_to_root_body, find_member_type_on_demand, find_value_member_type_on_demand,
+    resolve_local_type_on_demand, substitutions_for_instance,
+};
+pub(in crate::db) use promise_classification::{
+    PromiseClassification, classify_expression_array_promise, classify_expression_function_return,
+    classify_expression_promise,
+};
+pub(in crate::db) use resolver::{ImportResolution, ResolutionCtx, resolve_raw_types};
 
 /// Type information attached to one binding declaration.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, salsa::Update)]

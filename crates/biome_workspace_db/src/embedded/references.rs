@@ -130,7 +130,7 @@ mod tests {
     use biome_db::{Db, ParsedSnippet, ParsedSource};
     use biome_html_parser::{HtmlParserOptions, parse_html};
     use biome_js_parser::JsParserOptions;
-    use biome_languages::javascript::{JsEmbeddingKind, SvelteFileKind};
+    use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
     use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
     use biome_rowan::{RawSyntaxKind, TextRange, TextSize};
     use camino::{Utf8Path, Utf8PathBuf};
@@ -191,20 +191,14 @@ mod tests {
                 4 => DocumentFileSource::Html(HtmlFileSource::svelte()),
                 5 => DocumentFileSource::Js(JsFileSource::ts().with_embedding_kind(
                     JsEmbeddingKind::Svelte {
-                        is_source: true,
-                        is_function_signature: false,
-                        kind: SvelteFileKind::Component,
-                        is_const_block: false,
-                        is_generics_declaration: false,
+                        file_kind: SvelteFileKind::Component,
+                        embedding_kind: SvelteEmbeddingKind::Source,
                     },
                 )),
                 6 => DocumentFileSource::Js(JsFileSource::ts().with_embedding_kind(
                     JsEmbeddingKind::Svelte {
-                        is_source: false,
-                        is_function_signature: false,
-                        kind: SvelteFileKind::Component,
-                        is_const_block: false,
-                        is_generics_declaration: true,
+                        file_kind: SvelteFileKind::Component,
+                        embedding_kind: SvelteEmbeddingKind::GenericsDeclaration,
                     },
                 )),
                 _ => DocumentFileSource::Js(JsFileSource::ts().with_embedding_kind(
@@ -339,11 +333,8 @@ import type {{ FilterFieldDef, FilterValue }} from './types';
         let script_snippet_parse = biome_js_parser::parse(
             js_source,
             JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Svelte {
-                is_source: true,
-                is_function_signature: false,
-                kind: SvelteFileKind::Component,
-                is_const_block: false,
-                is_generics_declaration: false,
+                file_kind: SvelteFileKind::Component,
+                embedding_kind: SvelteEmbeddingKind::Source,
             }),
             JsParserOptions::default(),
         )
@@ -365,15 +356,12 @@ import type {{ FilterFieldDef, FilterValue }} from './types';
 
         // Mirrors how `parse_embedded_nodes` extracts the `generics` attribute
         // value: parsed with its own offset, as a standalone snippet, using
-        // the `is_generics_declaration` embedding kind.
+        // the `SvelteEmbeddingKind::GenericsDeclaration` embedding kind.
         let generics_snippet_parse = biome_js_parser::parse(
             generics_source,
             JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Svelte {
-                is_source: false,
-                is_function_signature: false,
-                kind: SvelteFileKind::Component,
-                is_const_block: false,
-                is_generics_declaration: true,
+                file_kind: SvelteFileKind::Component,
+                embedding_kind: SvelteEmbeddingKind::GenericsDeclaration,
             }),
             JsParserOptions::default(),
         )
@@ -441,11 +429,8 @@ import type {{ FilterFieldDef, FilterValue }} from './types';
         let generics_snippet_parse = biome_js_parser::parse(
             generics_source,
             JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Svelte {
-                is_source: false,
-                is_function_signature: false,
-                kind: SvelteFileKind::Component,
-                is_const_block: false,
-                is_generics_declaration: true,
+                file_kind: SvelteFileKind::Component,
+                embedding_kind: SvelteEmbeddingKind::GenericsDeclaration,
             }),
             JsParserOptions::default(),
         )

@@ -12,6 +12,20 @@ interface ErrorConstructor {
 
 declare var Error: ErrorConstructor;
 
+interface Symbol {}
+
+interface SymbolConstructor {
+    readonly prototype: Symbol;
+}
+
+interface SymbolConstructor {
+    readonly [Symbol.iterator]: unique symbol;
+    readonly dispose: unique symbol;
+    readonly asyncDispose: unique symbol;
+}
+
+declare var Symbol: SymbolConstructor;
+
 interface Disposable {
     [Symbol.dispose](): void;
 }

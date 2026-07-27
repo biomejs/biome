@@ -10421,29 +10421,14 @@ Source-level embeds (`<script>`) use `true`; directives and text expressions use
 	  }
 	| {
 			Svelte: {
+				embedding_kind: SvelteEmbeddingKind;
 				/**
-				 * Whether this is a `{@const name = value}` block.
-				 */
-				is_const_block: boolean;
-				/**
-				 * Whether this is the declaration of a function, usually declared in `#snippet`
-				 */
-				is_function_signature: boolean;
-				/**
-				 * Whether this is the value of a `<script generics="...">` attribute.
-				 */
-				is_generics_declaration: boolean;
-				/**
-				 * Where the bindings are defined
-				 */
-				is_source: boolean;
-				/**
-	* `kind` models whether the Svelte file is a component document or a
+	* `file_kind` models whether the Svelte file is a component document or a
 source module. That distinction controls whether downstream code
 extracts `<script>` content or treats the file as a standalone JS/TS
-module, while `is_source` still tracks where bindings come from. 
+module. 
 	 */
-				kind: SvelteFileKind;
+				file_kind: SvelteFileKind;
 			};
 	  };
 export type Language =
@@ -10491,6 +10476,18 @@ export type HtmlVariant =
 	| "Svelte"
 	| "Angular";
 export type GritVariant = "Standard";
+/**
+	* Identifies the parser contract for JavaScript embedded in a Svelte file.
+
+Each mode selects the root syntax expected by the parser and records how
+bindings and references from the snippet participate in the host document. 
+	 */
+export type SvelteEmbeddingKind =
+	| "Source"
+	| "Expression"
+	| "SnippetSignature"
+	| "LegacyConst"
+	| "Declaration";
 export type SvelteFileKind = "Component" | "SourceModule";
 export type EmbeddingHtmlKind =
 	| "None"

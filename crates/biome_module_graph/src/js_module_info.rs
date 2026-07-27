@@ -11,7 +11,7 @@ use crate::css_module_info::CssClassReference;
 use biome_js_semantic::{JsDeclarationKind, ScopeId};
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{
-    FormatTypeContext, ImportSymbol, RawTypeData, ResolvedTypeId, TypeData, TypeReference,
+    FormatTypeContext, ImportSymbol, RawTypeData, ResolvedTypeId, TypeData, TypeId, TypeReference,
     TypeResolverLevel, interned_types::LocalTypeId,
 };
 use biome_resolver::ResolvedPath;
@@ -164,6 +164,10 @@ impl JsModuleInfo {
     }
 
     pub fn local_type_name(&self, type_id: LocalTypeId) -> Option<Text> {
+        if self.named_type_ids.binary_search(&type_id).is_err() {
+            return None;
+        }
+
         self.raw_binding_types
             .iter()
             .find_map(|(range, reference)| {
@@ -184,9 +188,15 @@ impl JsModuleInfo {
                 Some(binding.syntax().text_trimmed().into_text())
             })
     }
+
+    pub(crate) fn is_named_type(&self, type_id: TypeId) -> bool {
+        self.named_type_ids
+            .binary_search(&LocalTypeId::new(type_id.index()))
+            .is_ok()
+    }
 }
 
-fn is_named_type_declaration(declaration_kind: JsDeclarationKind) -> bool {
+pub(super) fn is_named_type_declaration(declaration_kind: JsDeclarationKind) -> bool {
     matches!(
         declaration_kind,
         JsDeclarationKind::Class
@@ -274,6 +284,9 @@ pub struct JsModuleInfoInner {
 
     /// Raw binding references collected before module-level resolution and flattening.
     pub raw_binding_types: FxHashMap<TextRange, TypeReference>,
+
+    /// Sorted local IDs for declarations that retain their symbolic identity.
+    pub(crate) named_type_ids: Box<[LocalTypeId]>,
 
     /// Parsed expressions, mapped from their range to their type ID.
     pub(crate) expressions: FxHashMap<TextRange, ResolvedTypeId>,

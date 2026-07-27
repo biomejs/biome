@@ -14,10 +14,19 @@ input:  sr-only block flex absolute relative
 sorted: sr-only absolute relative block flex
 ---
 input:  pointer-events-none collapse static visible
-sorted: pointer-events-none visible collapse static
+sorted: pointer-events-none collapse visible static
 ---
 input:  flex
 sorted: flex
+---
+input:  inline flex block hidden grid table contents
+sorted: block contents flex grid hidden inline table
+---
+input:  visible collapse invisible
+sorted: collapse invisible visible
+---
+input:  sticky static relative fixed absolute
+sorted: absolute fixed relative static sticky
 ---
 input:  bg-red-500 flex p-4
 sorted: flex bg-red-500 p-4
@@ -53,10 +62,10 @@ input:  w-1/2 flex p-4
 sorted: flex w-1/2 p-4
 ---
 input:  w-full flex p-4
-sorted: w-full flex p-4
+sorted: flex w-full p-4
 ---
 input:  w-screen w-10 w-full
-sorted: w-screen w-full w-10
+sorted: w-10 w-full w-screen
 ---
 input:  aspect-square flex
 sorted: flex aspect-square
@@ -87,6 +96,60 @@ sorted: -z-10 flex p-4
 ---
 input:  flex p-4 -flex
 sorted: -flex flex p-4
+---
+input:  w-px w-full w-screen w-10 w-4 w-auto
+sorted: w-4 w-10 w-auto w-full w-px w-screen
+---
+input:  m-auto m-4 m-px m-2
+sorted: m-2 m-4 m-auto m-px
+---
+input:  h-full h-4 h-screen
+sorted: h-4 h-full h-screen
+---
+input:  flex-none flex-1 flex-auto
+sorted: flex-1 flex-auto flex-none
+---
+input:  justify-center items-center flex
+sorted: flex items-center justify-center
+---
+input:  table-caption inline-block flow-root block
+sorted: block flow-root inline-block table-caption
+---
+input:  inline-flex inline-grid inline-table inline
+sorted: inline inline-flex inline-grid inline-table
+---
+input:  truncate text-clip text-ellipsis
+sorted: truncate text-clip text-ellipsis
+---
+input:  col-span-full col-span-2 col-auto
+sorted: col-auto col-span-2 col-span-full
+---
+input:  grid-cols-subgrid grid-cols-2
+sorted: grid-cols-2 grid-cols-subgrid
+---
+input:  order-none order-first order-2 order-1 order-last
+sorted: order-1 order-2 order-first order-last order-none
+---
+input:  overflow-x-hidden overflow-hidden overflow-auto
+sorted: overflow-auto overflow-hidden overflow-x-hidden
+---
+input:  aspect-video aspect-square aspect-auto aspect-9/16
+sorted: aspect-9/16 aspect-auto aspect-square aspect-video
+---
+input:  -m-px m-px -m-4 m-4
+sorted: -m-4 -m-px m-4 m-px
+---
+input:  -w-full flex
+sorted: -w-full flex
+---
+input:  w-full! w-full w-10
+sorted: w-10 w-full w-full!
+---
+input:  w-full/50 w-full w-10
+sorted: w-full/50 w-10 w-full
+---
+input:  size-full size-4 w-4 h-4
+sorted: h-4 size-4 size-full w-4
 ---
 input:  p-4 foo flex
 sorted: foo flex p-4
@@ -257,7 +320,7 @@ input:  not-a-class! flex
 sorted: not-a-class! flex
 ---
 input:  shadow-sm text-card-foreground border bg-card gap-6 py-6 rounded-xl flex flex-col
-sorted: text-card-foreground border bg-card flex-col flex gap-6 rounded-xl py-6 shadow-sm
+sorted: text-card-foreground border bg-card flex flex-col gap-6 rounded-xl py-6 shadow-sm
 ---
 input:  bg-accent animate-pulse rounded-md
 sorted: bg-accent animate-pulse rounded-md
@@ -272,4 +335,4 @@ input:  hover:text-accent-foreground border bg-background shadow-xs hover:bg-acc
 sorted: hover:text-accent-foreground border bg-background hover:bg-accent dark:border-input dark:bg-input/30 dark:hover:bg-input/50 shadow-xs
 ---
 input:  items-center [&_svg]:pointer-events-none inline-flex disabled:opacity-50 gap-2 focus-visible:border-ring justify-center rounded-md text-sm shrink-0 transition-all font-medium outline-none whitespace-nowrap focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:shrink-0
-sorted: items-center [&_svg]:pointer-events-none inline-flex disabled:opacity-50 focus-visible:border-ring justify-center outline-none whitespace-nowrap focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:shrink-0 shrink-0 gap-2 rounded-md text-sm transition-all font-medium
+sorted: [&_svg]:pointer-events-none disabled:opacity-50 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:shrink-0 inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm whitespace-nowrap transition-all font-medium outline-none

@@ -1,0 +1,83 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/vue-3/style-variables.vue
+---
+
+# Input
+
+```vue
+<style vars></style>
+<style vars="     foo"></style>
+<style vars="     {row   }"></style>
+<style vars="{destructuring:{   a:{b}}}"></style>
+
+<!-- Not style -->
+<custom vars="     {row   }">Not A style</custom>
+<script vars="     {row   }"></script>
+
+<!-- Not root block -->
+<template>
+<style vars="     {row   }"></style>
+</template> 
+
+<!-- Not attribute -->
+<style>
+<vars>{not:{a:attribute}}</vars>
+</style>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,13 +1,7 @@
+ <style vars></style>
+-<style vars="foo"></style>
+-<style vars="{ row }"></style>
+-<style
+-  vars="{
+-    destructuring: {
+-      a: { b },
+-    },
+-  }"
+-></style>
++<style vars="     foo"></style>
++<style vars="     {row   }"></style>
++<style vars="{destructuring:{   a:{b}}}"></style>
+ 
+ <!-- Not style -->
+ <custom vars="     {row   }">Not A style</custom>
+@@ -17,7 +11,6 @@
+ <template>
+   <style vars="     {row   }"></style>
+ </template>
+-
+ <!-- Not attribute -->
+ <style>
+ <vars>{not:{a:attribute}}</vars>
+```
+
+# Output
+
+```vue
+<style vars></style>
+<style vars="     foo"></style>
+<style vars="     {row   }"></style>
+<style vars="{destructuring:{   a:{b}}}"></style>
+
+<!-- Not style -->
+<custom vars="     {row   }">Not A style</custom>
+<script vars="     {row   }"></script>
+
+<!-- Not root block -->
+<template>
+  <style vars="     {row   }"></style>
+</template>
+<!-- Not attribute -->
+<style>
+<vars>{not:{a:attribute}}</vars>
+</style>
+```

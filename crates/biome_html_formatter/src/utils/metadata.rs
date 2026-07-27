@@ -889,6 +889,7 @@ pub(crate) fn get_element_css_display(element: &AnyHtmlElement) -> CssDisplay {
             | AnySvelteBlock::SvelteKeyBlock(_)
             | AnySvelteBlock::SvelteSnippetBlock(_)
             | AnySvelteBlock::SvelteConstBlock(_)
+            | AnySvelteBlock::SvelteDeclarationBlock(_)
             | AnySvelteBlock::SvelteDebugBlock(_)
             | AnySvelteBlock::SvelteBogusBlock(_) => CssDisplay::Block,
         };

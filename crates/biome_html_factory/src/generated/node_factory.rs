@@ -1046,6 +1046,20 @@ pub fn svelte_debug_block(
         ],
     ))
 }
+pub fn svelte_declaration_block(
+    l_curly_token: SyntaxToken,
+    declaration: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+) -> SvelteDeclarationBlock {
+    SvelteDeclarationBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_DECLARATION_BLOCK,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(declaration.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
 pub fn svelte_directive_modifier(
     bitwise_or_token: SyntaxToken,
     name: SvelteName,

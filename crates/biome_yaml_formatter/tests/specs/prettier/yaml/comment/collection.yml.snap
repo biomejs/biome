@@ -44,13 +44,7 @@ empty_content:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,29 +1,28 @@
--a: # a.trailingComment
--  123
--  # implicitMappingValue
-+a: 123 # a.trailingComment
-+# implicitMappingValue
- 
+@@ -5,7 +5,7 @@
  ? b
    # explicitMappingKey
  : c
@@ -59,37 +53,14 @@ empty_content:
  
  d:
    - 123
--  # sequence
-+# sequence
- 
- e:
-   - 123
--    # sequenceItem
-+# sequenceItem
- 
- f:
-   - a
-   # b.leadingComments
-   - b
--    # b.endComments
-+  # b.endComments
-   - c
--    # c.endComments
--  # sequence.endComments
-+# c.endComments
-+# sequence.endComments
- # documentBody.children
- 
- empty_content:
--  # hello world
-+# hello world
 ```
 
 # Output
 
 ```yml
-a: 123 # a.trailingComment
-# implicitMappingValue
+a: # a.trailingComment
+  123
+  # implicitMappingValue
 
 ? b
   # explicitMappingKey
@@ -98,22 +69,22 @@ a: 123 # a.trailingComment
 
 d:
   - 123
-# sequence
+  # sequence
 
 e:
   - 123
-# sequenceItem
+    # sequenceItem
 
 f:
   - a
   # b.leadingComments
   - b
-  # b.endComments
+    # b.endComments
   - c
-# c.endComments
-# sequence.endComments
+    # c.endComments
+  # sequence.endComments
 # documentBody.children
 
 empty_content:
-# hello world
+  # hello world
 ```

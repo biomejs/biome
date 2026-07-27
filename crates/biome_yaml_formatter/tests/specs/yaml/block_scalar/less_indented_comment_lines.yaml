@@ -1,0 +1,4 @@
+glommed: |-
+  # content line
+ # comment line the lexer includes in the scalar
+next: value
