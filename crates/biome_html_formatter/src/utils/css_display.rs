@@ -198,11 +198,11 @@ pub fn get_css_display(tag_name: &str) -> CssDisplay {
 
         // Hidden elements (display: none)
         "area" | "base" | "basefont" | "datalist" | "head" | "link" | "meta" | "noembed"
-        | "noframes" | "script" | "style" | "title" | "noscript" => CssDisplay::None,
+        | "noframes" | "script" | "style" | "title" => CssDisplay::None,
 
         // Media elements - these have special handling but are essentially block-like
         // for formatting purposes when considering children
-        "audio" | "video" | "object" | "svg" => CssDisplay::InlineBlock,
+        "svg" => CssDisplay::InlineBlock,
         "param" => CssDisplay::Block,
 
         // Form elements - inline-block

@@ -93,16 +93,18 @@ info: printer/single-attribute-per-line.svelte
  >
  
  <div
-@@ -59,7 +60,8 @@
+@@ -59,8 +60,10 @@
  
  <svelte:fragment
      slot="named"
 -    let:foo><p>hi</p></svelte:fragment
 +    let:foo
-+    ><p>hi</p></svelte:fragment
  >
++    <p>hi</p>
++</svelte:fragment>
  
  <svelte:window
+     on:event={handler}
 ```
 
 # Output
@@ -171,8 +173,9 @@ info: printer/single-attribute-per-line.svelte
 <svelte:fragment
     slot="named"
     let:foo
-    ><p>hi</p></svelte:fragment
 >
+    <p>hi</p>
+</svelte:fragment>
 
 <svelte:window
     on:event={handler}

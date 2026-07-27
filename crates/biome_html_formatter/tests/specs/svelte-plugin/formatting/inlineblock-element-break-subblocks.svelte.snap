@@ -1,0 +1,37 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/inlineblock-element-break-subblocks.svelte
+---
+
+# Input
+
+```svelte
+<span><div>hi</div><span>hi</span>hi<p>hi</p><span>hi</span>hi<span>hi</span></span>
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+-<span
+-    ><div>hi</div>
++<span>
++    <div>hi</div>
+     <span>hi</span>hi
+     <p>hi</p>
+     <span>hi</span>hi<span>hi</span></span
+```
+
+# Output
+
+```svelte
+<span>
+    <div>hi</div>
+    <span>hi</span>hi
+    <p>hi</p>
+    <span>hi</span>hi<span>hi</span></span
+>
+```

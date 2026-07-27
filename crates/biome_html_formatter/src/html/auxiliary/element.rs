@@ -1,6 +1,6 @@
 use crate::html::lists::element_list::{FormatHtmlElementListOptions, HtmlChildListLayout};
 use crate::utils::css_display::{CssDisplay, get_css_display, get_css_display_from_tag};
-use crate::utils::metadata::get_css_whitespace;
+use crate::utils::metadata::{get_css_whitespace, get_element_css_display};
 use crate::verbatim::{format_html_leading_comments, format_html_leading_comments_for_block};
 use crate::{html::lists::element_list::FormatHtmlElementList, prelude::*};
 use biome_formatter::{CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, write};
@@ -251,16 +251,32 @@ impl FormatHtmlElement {
         //
         // Elements that force break children (like `select`, `ul`, `ol`, table elements)
         // should NOT borrow tokens because their children are always multiline.
+        // A tag is only worth borrowing to a child that would render the space
+        // the break puts there. A block-like child, `<param>` or `<track>` for
+        // instance, sits on its own line either way, so the tag keeps its `>`.
         let should_borrow_opening_r_angle = is_element_internally_whitespace_sensitive
             && !children.is_empty()
             && !content_has_leading_whitespace
             && !should_be_verbatim
-            && !should_format_embedded_nodes;
-        let should_borrow_closing_tag = is_element_internally_whitespace_sensitive
-            && !children.is_empty()
+            && !should_format_embedded_nodes
+            && children
+                .iter()
+                .next()
+                .is_none_or(|child| hugs_adjacent_tag(&child, f));
+        let should_borrow_closing_tag = !children.is_empty()
             && !content_has_trailing_whitespace
             && !should_be_verbatim
-            && !should_format_embedded_nodes;
+            && !should_format_embedded_nodes
+            // Once something after this element has taken its closing `>`, the
+            // closing tag has to stay with the last child whatever the element
+            // is: a break before it would render the space the borrowed `>`
+            // exists to avoid.
+            && (self.closing_r_angle_borrowed
+                || (is_element_internally_whitespace_sensitive
+                    && children
+                        .iter()
+                        .last()
+                        .is_none_or(|child| hugs_adjacent_tag(&child, f))));
 
         let borrowed_r_angle = if should_borrow_opening_r_angle {
             opening_element.r_angle_token().ok()
@@ -376,6 +392,13 @@ fn should_force_break_content(node: &HtmlElement) -> bool {
     // but I'm pretty sure we handle that elsewhere. Remains to be seen.
 
     false
+}
+
+/// Whether whitespace between `child` and the tag next to it would be rendered,
+/// which is what makes borrowing that tag worthwhile. A block-like child,
+/// `<param>` or `<track>` for instance, sits on a line of its own either way.
+fn hugs_adjacent_tag(child: &AnyHtmlElement, f: &HtmlFormatter) -> bool {
+    get_element_css_display(child).is_internally_whitespace_sensitive(f)
 }
 
 fn has_non_text_child(node: &HtmlElementList) -> bool {

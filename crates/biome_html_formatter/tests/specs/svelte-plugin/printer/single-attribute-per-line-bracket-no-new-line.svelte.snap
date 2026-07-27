@@ -98,9 +98,9 @@ info: printer/single-attribute-per-line-bracket-no-new-line.svelte
  <svelte:fragment
      slot="named"
 -    let:foo><p>hi</p></svelte:fragment>
-+    let:foo
-+    ><p>hi</p></svelte:fragment
-+>
++    let:foo>
++    <p>hi</p>
++</svelte:fragment>
  
  <svelte:window
      on:event={handler}
@@ -164,9 +164,9 @@ info: printer/single-attribute-per-line-bracket-no-new-line.svelte
 
 <svelte:fragment
     slot="named"
-    let:foo
-    ><p>hi</p></svelte:fragment
->
+    let:foo>
+    <p>hi</p>
+</svelte:fragment>
 
 <svelte:window
     on:event={handler}
