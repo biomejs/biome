@@ -136,6 +136,7 @@ dependencies = [
  "biome_string_case",
  "biome_suppression",
  "biome_text_edit",
+ "bitvec",
  "camino",
  "either",
  "enumflags2",
