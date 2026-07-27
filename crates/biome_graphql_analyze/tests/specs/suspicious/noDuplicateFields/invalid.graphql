@@ -25,3 +25,15 @@ query test {
     email: somethingElse
   }
 }
+
+query test {
+  users {
+    name
+    ...UserFields
+  }
+}
+
+fragment UserFields on User {
+  id
+  name
+}

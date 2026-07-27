@@ -257,6 +257,7 @@ fn resolve_import_definition(
             }
         }
         ModuleInfoKind::Css(_) => {}
+        ModuleInfoKind::Graphql(_) => {}
         ModuleInfoKind::Html(module_info) => {
             let resolved_path = module_info
                 .static_import_paths

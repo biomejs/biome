@@ -9,6 +9,7 @@
 pub(crate) mod fs_proxy;
 
 use crate::css_module_info::{CssModuleInfo, CssModuleVisitor, SerializedCssModuleInfo};
+use crate::graphql_module_info::{GraphqlModuleInfo, collect_graphql_module_info};
 use crate::html_module_info::{
     HtmlEmbeddedContent, HtmlModuleInfo, HtmlModuleVisitor, SerializedHtmlModuleInfo,
 };
@@ -19,6 +20,7 @@ use crate::{
 };
 use biome_css_syntax::AnyCssRoot;
 use biome_fs::BiomePath;
+use biome_graphql_syntax::GraphqlRoot;
 use biome_html_syntax::HtmlRoot;
 use biome_js_syntax::AnyJsRoot;
 use biome_project_layout::ProjectLayout;
@@ -158,6 +160,18 @@ pub fn resolve_html_module(
     (module, dependencies, Vec::new())
 }
 
+pub fn resolve_graphql_module(
+    root: GraphqlRoot,
+    _path: &BiomePath,
+    _path_info_cache: &PathInfoCache,
+) -> (GraphqlModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
+    (
+        collect_graphql_module_info(root),
+        ModuleDependencies::default(),
+        Vec::new(),
+    )
+}
+
 // #endregion
 
 // #region: Types (Salsa input, enums, serialization, dependencies)
@@ -176,6 +190,7 @@ pub enum ModuleInfoKind {
     Js(JsModuleInfo),
     Css(CssModuleInfo),
     Html(HtmlModuleInfo),
+    Graphql(GraphqlModuleInfo),
 }
 
 #[derive(Debug)]
@@ -186,6 +201,7 @@ pub enum SerializedModuleInfo {
     Js(SerializedJsModuleInfo),
     Css(SerializedCssModuleInfo),
     Html(SerializedHtmlModuleInfo),
+    Graphql(GraphqlModuleInfo),
 }
 
 impl SerializedModuleInfo {
@@ -209,6 +225,13 @@ impl SerializedModuleInfo {
             _ => None,
         }
     }
+
+    pub fn as_graphql_module_info(&self) -> Option<&GraphqlModuleInfo> {
+        match self {
+            Self::Graphql(module) => Some(module),
+            _ => None,
+        }
+    }
 }
 
 impl From<JsModuleInfo> for ModuleInfoKind {
@@ -229,12 +252,19 @@ impl From<HtmlModuleInfo> for ModuleInfoKind {
     }
 }
 
+impl From<GraphqlModuleInfo> for ModuleInfoKind {
+    fn from(info: GraphqlModuleInfo) -> Self {
+        Self::Graphql(info)
+    }
+}
+
 impl ModuleInfoKind {
     pub fn dump(&self) -> SerializedModuleInfo {
         match self {
             Self::Js(module) => SerializedModuleInfo::Js(module.dump()),
             Self::Css(module) => SerializedModuleInfo::Css(module.dump()),
             Self::Html(module) => SerializedModuleInfo::Html(module.dump()),
+            Self::Graphql(module) => SerializedModuleInfo::Graphql(module.clone()),
         }
     }
 
@@ -255,6 +285,13 @@ impl ModuleInfoKind {
     pub fn as_html_module_info(&self) -> Option<&HtmlModuleInfo> {
         match self {
             Self::Html(module) => Some(module),
+            _ => None,
+        }
+    }
+
+    pub fn as_graphql_module_info(&self) -> Option<&GraphqlModuleInfo> {
+        match self {
+            Self::Graphql(module) => Some(module),
             _ => None,
         }
     }

@@ -29,7 +29,7 @@ use biome_formatter::{
     QuoteStyle, TrailingNewline,
 };
 use biome_fs::BiomePath;
-use biome_graphql_analyze::analyze;
+use biome_graphql_analyze::{GraphqlAnalyzerServices, analyze};
 use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_formatter::format_node;
 use biome_graphql_parser::parse_graphql_with_cache;
@@ -511,9 +511,13 @@ fn lint(params: LintParams) -> LintResults {
 
     let mut process_lint = ProcessLint::new(&params);
 
-    let (_, analyze_diagnostics) = analyze(&tree, filter, &analyzer_options, |signal| {
-        process_lint.process_signal(signal)
-    });
+    let (_, analyze_diagnostics) = analyze(
+        &tree,
+        filter,
+        &analyzer_options,
+        graphql_analyzer_services(&params.workspace_db, params.project_layout.clone()),
+        |signal| process_lint.process_signal(signal),
+    );
 
     process_lint.into_result(
         params.parsed_source.serde_diagnostics(&params.workspace_db),
@@ -562,7 +566,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         .with_skip(skip)
         .with_path(path.as_path())
         .with_enabled_selectors(rules)
-        .with_project_layout(project_layout)
+        .with_project_layout(project_layout.clone())
         .with_cache(analyzer_cache)
         .finish();
 
@@ -576,7 +580,12 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
     info!("GraphQL runs the analyzer");
 
-    analyze(&tree, filter, &analyzer_options, |signal| {
+    analyze(
+        &tree,
+        filter,
+        &analyzer_options,
+        graphql_analyzer_services(&workspace_db, project_layout.clone()),
+        |signal| {
         if compute_actions {
             actions.extend(
                 signal
@@ -606,8 +615,9 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             }));
         }
 
-        ControlFlow::<Never>::Continue(())
-    });
+            ControlFlow::<Never>::Continue(())
+        },
+    );
 
     PullActionsResult { actions }
 }
@@ -657,13 +667,19 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         loop {
             let mut pending_actions = Vec::new();
 
-            let (_, _) = analyze(&tree, filter, &analyzer_options, |signal| {
-                if params.collect_final_diagnostics {
-                    process_fix_all.collect_signal(signal, &mut pending_actions)
-                } else {
-                    process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions)
-                }
-            });
+            let (_, _) = analyze(
+                &tree,
+                filter,
+                &analyzer_options,
+                graphql_analyzer_services(&params.workspace_db, params.project_layout.clone()),
+                |signal| {
+                    if params.collect_final_diagnostics {
+                        process_fix_all.collect_signal(signal, &mut pending_actions)
+                    } else {
+                        process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions)
+                    }
+                },
+            );
 
             let result = process_fix_all.process_batch_actions(pending_actions, |root| {
                 tree = match GraphqlRoot::cast(root) {
@@ -692,9 +708,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
     loop {
         let mut pending_actions = Vec::new();
 
-        let (_, _) = analyze(&tree, fixable_filter, &analyzer_options, |signal| {
-            process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions)
-        });
+        let (_, _) = analyze(
+            &tree,
+            fixable_filter,
+            &analyzer_options,
+            graphql_analyzer_services(&params.workspace_db, params.project_layout.clone()),
+            |signal| process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions),
+        );
 
         let result = process_fix_all.process_batch_actions(pending_actions, |root| {
             tree = match GraphqlRoot::cast(root) {
@@ -711,12 +731,34 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
 
     // Phase 2: all rules for final diagnostics
     if params.collect_final_diagnostics {
-        let (_, _) = analyze(&tree, filter, &analyzer_options, |signal| {
-            process_fix_all.collect_diagnostic_only(signal)
-        });
+        let (_, _) = analyze(
+            &tree,
+            filter,
+            &analyzer_options,
+            graphql_analyzer_services(&params.workspace_db, params.project_layout.clone()),
+            |signal| process_fix_all.collect_diagnostic_only(signal),
+        );
     }
 
     Ok(Some(
         process_fix_all.finish(tree.syntax().as_send().unwrap()),
     ))
+}
+
+fn graphql_analyzer_services(
+    workspace_db: &WorkspaceDb,
+    project_layout: std::sync::Arc<biome_project_layout::ProjectLayout>,
+) -> GraphqlAnalyzerServices {
+    #[cfg(feature = "module_graph")]
+    {
+        GraphqlAnalyzerServices::default()
+            .with_module_db(workspace_db.rc_module_db())
+            .with_project_layout(project_layout)
+    }
+
+    #[cfg(not(feature = "module_graph"))]
+    {
+        let _ = workspace_db;
+        GraphqlAnalyzerServices::default().with_project_layout(project_layout)
+    }
 }

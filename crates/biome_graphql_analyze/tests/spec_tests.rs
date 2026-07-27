@@ -104,7 +104,12 @@ pub(crate) fn analyze_and_snap(
     let options =
         create_analyzer_options::<GraphqlLanguage>(input_file, working_directory, &mut diagnostics);
 
-    let (_, errors) = biome_graphql_analyze::analyze(&root, filter, &options, |event| {
+    let (_, errors) = biome_graphql_analyze::analyze(
+        &root,
+        filter,
+        &options,
+        biome_graphql_analyze::GraphqlAnalyzerServices::default(),
+        |event| {
         if let Some(mut diag) = event.diagnostic() {
             for action in event.actions(ActionFilter::all()) {
                 if check_action_type.is_suppression() {
@@ -135,7 +140,8 @@ pub(crate) fn analyze_and_snap(
         }
 
         ControlFlow::<Never>::Continue(())
-    });
+        },
+    );
 
     for error in errors {
         diagnostics.push(diagnostic_to_string(file_name, input_code, error));

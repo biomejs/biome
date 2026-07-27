@@ -94,6 +94,7 @@ impl<'a> Iterator for ImportTreeTraversal<'a> {
                             .chain(html_info.static_import_paths.values())
                             .chain(html_info.dynamic_import_paths.values())
                             .any(|p| p.as_path() == Some(current_path.as_path())),
+                        ModuleInfoKind::Graphql(_) => false,
                         ModuleInfoKind::Css(_) => false,
                     };
 
@@ -144,6 +145,7 @@ impl<'a> Iterator for ImportTreeTraversal<'a> {
                         });
                         steps
                     }
+                    ModuleInfoKind::Graphql(_) => Vec::new(),
                     ModuleInfoKind::Css(_) => Vec::new(),
                 });
             }

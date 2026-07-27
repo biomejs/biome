@@ -8,6 +8,7 @@ pub mod css_module_info;
 mod db;
 mod diagnostics;
 mod format_module_graph;
+pub mod graphql_module_info;
 mod html_module_info;
 pub mod js_module_info;
 mod module_graph;
@@ -26,6 +27,7 @@ pub use css_module_info::{
 pub use db::queries::*;
 pub use db::{ModuleDb, ModuleGraphGeneration, TypeDb, module_for_key};
 pub use diagnostics::ModuleDiagnostic;
+pub use graphql_module_info::{GraphqlModuleInfo, GraphqlTypeKey, GraphqlTypeKind};
 pub use html_module_info::{HtmlEmbeddedContent, HtmlModuleInfo, SerializedHtmlModuleInfo};
 pub use js_module_info::{
     BindingTypeData, JsExport, JsExportedSymbolLookup, JsImport, JsImportPath, JsImportPhase,
@@ -34,7 +36,7 @@ pub use js_module_info::{
 };
 pub use module_graph::{
     ModuleDependencies, ModuleInfo, ModuleInfoKind, SUPPORTED_EXTENSIONS, SerializedModuleInfo,
-    resolve_css_module, resolve_html_module, resolve_js_module,
+    resolve_css_module, resolve_graphql_module, resolve_html_module, resolve_js_module,
     resolve_js_module_with_inference_mode,
 };
 pub use path_info_cache::PathInfoCache;

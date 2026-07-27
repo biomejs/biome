@@ -21,6 +21,8 @@ biome_diagnostics        = { workspace = true }
 biome_graphql_factory    = { workspace = true }
 biome_graphql_syntax     = { workspace = true }
 biome_languages          = { workspace = true, features = ["lang_graphql"] }
+biome_module_graph       = { workspace = true }
+biome_project_layout     = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_rule_options       = { workspace = true }
 biome_string_case        = { workspace = true }
@@ -34,6 +36,7 @@ serde                    = { workspace = true, features = ["derive"] }
 biome_graphql_parser = { path = "../biome_graphql_parser" }
 biome_languages      = { path = "../biome_languages", features = ["lang_graphql"] }
 biome_test_utils     = { path = "../biome_test_utils", features = ["lang_graphql"] }
+biome_workspace_db   = { path = "../biome_workspace_db", features = ["module_graph"] }
 camino               = { workspace = true }
 insta                = { workspace = true, features = ["glob"] }
 tests_macros         = { path = "../tests_macros" }

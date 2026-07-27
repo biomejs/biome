@@ -1,4 +1,5 @@
 use crate::css_module_info::{CssClassDefinition, CssClassReference, CssImport, CssImports};
+use crate::graphql_module_info::{GraphqlModuleInfo, GraphqlTypeKey, GraphqlTypeKind};
 use crate::html_module_info::HtmlModuleInfoInner;
 use crate::js_module_info::{Exports, Imports, JsBindingData};
 use crate::module_graph::ModuleInfoKind;
@@ -870,7 +871,95 @@ impl Format<FormatTypeContext> for ModuleInfoKind {
                 f,
                 [&format_args![token("Html"), token("("), html, token(")")]]
             ),
+            Self::Graphql(graphql) => write!(
+                f,
+                [&format_args![token("Graphql"), token("("), graphql, token(")")]]
+            ),
         }
+    }
+}
+
+impl Format<FormatTypeContext> for GraphqlModuleInfo {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        let mut entries: Vec<_> = self.type_fields.iter().collect();
+        entries.sort_by(|(left_key, _), (right_key, _)| {
+            let left_kind = match left_key.kind {
+                GraphqlTypeKind::Object => 0,
+                GraphqlTypeKind::Interface => 1,
+                GraphqlTypeKind::InputObject => 2,
+            };
+            let right_kind = match right_key.kind {
+                GraphqlTypeKind::Object => 0,
+                GraphqlTypeKind::Interface => 1,
+                GraphqlTypeKind::InputObject => 2,
+            };
+
+            left_kind
+                .cmp(&right_kind)
+                .then_with(|| left_key.name.cmp(&right_key.name))
+        });
+
+        let mut content = String::from("{");
+        let mut first_entry = true;
+        for (key, fields) in entries {
+            if !first_entry {
+                content.push_str(", ");
+            }
+            first_entry = false;
+
+            let mut sorted_fields = fields.iter().map(String::as_str).collect::<Vec<_>>();
+            sorted_fields.sort_unstable();
+
+            let kind = match key.kind {
+                GraphqlTypeKind::Object => "Object",
+                GraphqlTypeKind::Interface => "Interface",
+                GraphqlTypeKind::InputObject => "InputObject",
+            };
+
+            content.push_str(kind);
+            content.push('(');
+            content.push_str(&key.name);
+            content.push_str("): [");
+            content.push_str(&sorted_fields.join(", "));
+            content.push(']');
+        }
+        content.push('}');
+
+        write!(f, [text(&content, None)])
+    }
+}
+
+impl Format<FormatTypeContext> for GraphqlTypeKey {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        write!(
+            f,
+            [
+                self.kind,
+                token("("),
+                text(&self.name, None),
+                token(")")
+            ]
+        )
+    }
+}
+
+impl Format<FormatTypeContext> for GraphqlTypeKind {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        let kind = match self {
+            GraphqlTypeKind::Object => "Object",
+            GraphqlTypeKind::Interface => "Interface",
+            GraphqlTypeKind::InputObject => "InputObject",
+        };
+        write!(f, [text(kind, None)])
     }
 }
 
