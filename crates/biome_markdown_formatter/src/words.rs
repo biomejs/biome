@@ -280,10 +280,14 @@ impl Format<MarkdownFormatContext> for FormatWordGroup<'_> {
         }
 
         if self.escape == WordGroupEscape::EmptyStrongWithEscapedMarker {
-            return fmt_empty_strong_delimiter_run(self.atoms, f);
+            return fmt_empty_strong_delimiter(self.atoms, f);
         }
 
-        if fmt_unmatched_underscore_delimiter_run(self.atoms, f)? {
+        if fmt_literal_leading_underscore(self.atoms, f)? {
+            return Ok(());
+        }
+
+        if fmt_unmatched_underscore_delimiter(self.atoms, f)? {
             return Ok(());
         }
 
@@ -299,6 +303,29 @@ impl Format<MarkdownFormatContext> for FormatWordGroup<'_> {
     }
 }
 
+fn fmt_literal_leading_underscore(
+    atoms: &[ProseAtom],
+    f: &mut Formatter<MarkdownFormatContext>,
+) -> FormatResult<bool> {
+    let [ProseAtom::Word(leading), ProseAtom::Word(trailing)] = atoms else {
+        return Ok(false);
+    };
+    let trailing_text = trailing.text.text();
+    let Some(remainder) = trailing_text.strip_prefix('_') else {
+        return Ok(false);
+    };
+    if !remainder.contains('_')
+        || !leading.text.text().chars().next_back().is_some_and(|char| {
+            !char.is_alphanumeric() && !char.is_whitespace() && !matches!(char, '*' | '_')
+        })
+    {
+        return Ok(false);
+    }
+
+    write!(f, [leading, token("\\"), trailing])?;
+    Ok(true)
+}
+
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq)]
 pub(crate) enum WordGroupEscape {
     /// Print the word group normally.
@@ -312,7 +339,7 @@ pub(crate) enum WordGroupEscape {
     EmptyStrongWithEscapedMarker,
 }
 
-fn fmt_unmatched_underscore_delimiter_run(
+fn fmt_unmatched_underscore_delimiter(
     atoms: &[ProseAtom],
     f: &mut Formatter<MarkdownFormatContext>,
 ) -> FormatResult<bool> {
@@ -660,7 +687,7 @@ fn word_group_escape(stream: &[ProseItem], index: usize) -> WordGroupEscape {
     }
 }
 
-fn fmt_empty_strong_delimiter_run(
+fn fmt_empty_strong_delimiter(
     atoms: &[ProseAtom],
     f: &mut Formatter<MarkdownFormatContext>,
 ) -> FormatResult<()> {
