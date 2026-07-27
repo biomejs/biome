@@ -144,51 +144,32 @@ impl Rule for NoUselessTernary {
         } else if is_boolean_expression(&node.test().ok()?)? {
             match node_expression_kind {
                 JsSyntaxKind::JS_BINARY_EXPRESSION => {
-                    let left = node.test().ok()?.as_js_binary_expression()?.left().ok()?;
-                    let right = node.test().ok()?.as_js_binary_expression()?.right().ok()?;
-                    let operator = node
-                        .test()
-                        .ok()?
-                        .as_js_binary_expression()?
-                        .operator_token()
-                        .ok()?
-                        .kind();
+                    let binary = node.test().ok()?.as_js_binary_expression()?.clone();
+                    let left = binary.left().ok()?;
+                    let operator_token = binary.operator_token().ok()?;
+                    let right = binary.right().ok()?;
 
                     new_node = AnyJsExpression::from(make::js_binary_expression(
                         left,
-                        make::token_decorated_with_space(operator),
+                        operator_token,
                         right,
                     ));
                 }
                 JsSyntaxKind::JS_INSTANCEOF_EXPRESSION => {
-                    let left = node
-                        .test()
-                        .ok()?
-                        .as_js_instanceof_expression()?
-                        .left()
-                        .ok()?;
-                    let right = node
-                        .test()
-                        .ok()?
-                        .as_js_instanceof_expression()?
-                        .right()
-                        .ok()?;
-                    new_node = make::js_instanceof_expression(
-                        left,
-                        make::token_decorated_with_space(T![instanceof]),
-                        right,
-                    )
-                    .into();
+                    let instanceof = node.test().ok()?.as_js_instanceof_expression()?.clone();
+                    let left = instanceof.left().ok()?;
+                    let instanceof_token = instanceof.instanceof_token().ok()?;
+                    let right = instanceof.right().ok()?;
+
+                    new_node = make::js_instanceof_expression(left, instanceof_token, right).into();
                 }
                 JsSyntaxKind::JS_IN_EXPRESSION => {
-                    let property = node.test().ok()?.as_js_in_expression()?.property().ok()?;
-                    let object = node.test().ok()?.as_js_in_expression()?.object().ok()?;
-                    new_node = make::js_in_expression(
-                        property,
-                        make::token_decorated_with_space(T![in]),
-                        object,
-                    )
-                    .into();
+                    let in_expr = node.test().ok()?.as_js_in_expression()?.clone();
+                    let property = in_expr.property().ok()?;
+                    let in_token = in_expr.in_token().ok()?;
+                    let object = in_expr.object().ok()?;
+
+                    new_node = make::js_in_expression(property, in_token, object).into();
                 }
                 JsSyntaxKind::JS_UNARY_EXPRESSION => {
                     let argument = node
