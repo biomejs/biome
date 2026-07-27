@@ -23,10 +23,6 @@ use crate::context::YamlFormatContext;
 ///
 /// These nodes and tokens get tracked as [VerbatimKind::Verbatim], useful to understand
 /// if these nodes still need to have their own implementation.
-///
-/// Nothing in the handwritten rules calls this; it stays because
-/// `just gen-formatter` emits implementations for new syntax nodes that do,
-/// as `format_verbatim_node` via the prelude
 #[expect(dead_code)]
 pub fn format_yaml_verbatim_node(node: &YamlSyntaxNode) -> FormatYamlVerbatimNode<'_> {
     FormatYamlVerbatimNode {
