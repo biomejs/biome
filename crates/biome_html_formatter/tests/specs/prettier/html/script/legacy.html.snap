@@ -29,21 +29,17 @@ alert(2)
 +++ Biome
 @@ -1,11 +1,11 @@
  <script>
--  <!--
+   <!--
 -  alert(1);
--  -->
-+<!--
 +alert(1)
-+-->
+   -->
  </script>
  
  <script>
--  <!--
+   <!--
 -  alert(2);
--  //-->
-+<!--
 +alert(2)
-+//-->
+   //-->
  </script>
 ```
 
@@ -51,14 +47,14 @@ alert(2)
 
 ```html
 <script>
-<!--
+  <!--
 alert(1)
--->
+  -->
 </script>
 
 <script>
-<!--
+  <!--
 alert(2)
-//-->
+  //-->
 </script>
 ```

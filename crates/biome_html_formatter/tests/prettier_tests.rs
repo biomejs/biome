@@ -67,7 +67,7 @@ fn format_through_workspace(
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
-            configuration: configuration(),
+            configuration: configuration(source_type),
             workspace_directory: None,
             extended_configurations: vec![],
             module_graph_resolution_kind: Default::default(),
@@ -103,7 +103,7 @@ fn format_through_workspace(
 /// These have to say the same thing as the [`HtmlFormatOptions`] above, or the
 /// host document and the snippets inside it come out formatted to two different
 /// sets of options.
-fn configuration() -> Configuration {
+fn configuration(source_type: HtmlFileSource) -> Configuration {
     Configuration {
         formatter: Some(FormatterConfiguration {
             indent_style: Some(IndentStyle::Space),
@@ -122,6 +122,9 @@ fn configuration() -> Configuration {
             formatter: Some(HtmlFormatterConfiguration {
                 enabled: Some(true.into()),
                 self_close_void_elements: Some(SelfCloseVoidElements::Always),
+                // Prettier always indents in HTML, and defaults to not
+                // indenting the top-level blocks of a single-file component.
+                indent_script_and_style: Some(source_type.is_html().into()),
                 ..Default::default()
             }),
             ..Default::default()

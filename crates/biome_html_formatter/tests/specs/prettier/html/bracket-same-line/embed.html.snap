@@ -28,25 +28,25 @@ alert(1)</script>
    long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
  >
 -  alert(1)
-+alert(1);
++  alert(1);
  </script>
  <style
    long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
  >
 -  .a{color: #f00}
-+.a {
-+  color: #f00;
-+}
++  .a {
++    color: #f00;
++  }
  </style>
  <script>
 -  alert(1)
-+alert(1);
++  alert(1);
  </script>
  <style>
 -  .a{color: #f00}
-+.a {
-+  color: #f00;
-+}
++  .a {
++    color: #f00;
++  }
  </style>
 ```
 
@@ -56,22 +56,22 @@ alert(1)</script>
 <script
   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
 >
-alert(1);
+  alert(1);
 </script>
 <style
   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
 >
-.a {
-  color: #f00;
-}
+  .a {
+    color: #f00;
+  }
 </style>
 <script>
-alert(1);
+  alert(1);
 </script>
 <style>
-.a {
-  color: #f00;
-}
+  .a {
+    color: #f00;
+  }
 </style>
 ```
 

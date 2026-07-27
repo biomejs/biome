@@ -47,21 +47,14 @@ info: html/css/scss.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,15 +1,15 @@
+@@ -1,5 +1,5 @@
  <style type="text/x-scss">
 -  $font-stack: Helvetica, sans-serif;
--  $primary-color: #333;
-+$font-stack:    Helvetica, sans-serif;
-+$primary-color: #333;
++  $font-stack:    Helvetica, sans-serif;
+   $primary-color: #333;
  
--  body {
--    font: 100% $font-stack;
--    color: $primary-color;
--  }
-+body {
-+  font: 100% $font-stack;
-+  color: $primary-color;
-+}
+   body {
+@@ -9,7 +9,7 @@
  </style>
  
  <style lang="scss">
@@ -94,13 +87,13 @@ info: html/css/scss.html
 
 ```html
 <style type="text/x-scss">
-$font-stack:    Helvetica, sans-serif;
-$primary-color: #333;
+  $font-stack:    Helvetica, sans-serif;
+  $primary-color: #333;
 
-body {
-  font: 100% $font-stack;
-  color: $primary-color;
-}
+  body {
+    font: 100% $font-stack;
+    color: $primary-color;
+  }
 </style>
 
 <style lang="scss">
