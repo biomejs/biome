@@ -687,10 +687,7 @@ fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
 fn build_js_template_candidate(expr: &JsTemplateExpression) -> Option<EmbedCandidate> {
     let tag_kind = template_expression_to_template_tag(expr)?;
 
-    let is_html = matches!(&tag_kind, TemplateTagKind::Identifier(name) if name.text() == "html");
-
     if expr.elements().len() == 1 {
-        // Single-chunk template: use the existing path
         let Some(AnyJsTemplateElement::JsTemplateChunkElement(chunk)) = expr.elements().first()
         else {
             return None;
@@ -706,21 +703,18 @@ fn build_js_template_candidate(expr: &JsTemplateExpression) -> Option<EmbedCandi
             },
             combined_chunks: None,
         })
-    } else if is_html {
-        // Multi-chunk HTML template (has interpolations): build combined text with placeholders
+    } else if matches!(&tag_kind, TemplateTagKind::Identifier(name) if name.text() == "html") {
+        // Multi-chunk HTML template: build combined text with __BIOME_N__ placeholders.
         let mut combined_text = String::new();
         let mut slices = Vec::new();
         let mut interp_index = 0u32;
-
         let mut first_chunk: Option<EmbedContent> = None;
 
         for element in expr.elements() {
             if let AnyJsTemplateElement::JsTemplateChunkElement(chunk) = element {
                 let content_token = chunk.template_chunk_token().ok()?;
-                let token_text = content_token.text();
                 let start = TextSize::from(combined_text.len() as u32);
-
-                combined_text.push_str(token_text);
+                combined_text.push_str(&content_token.text());
                 let end = TextSize::from(combined_text.len() as u32);
 
                 let chunk_content = EmbedContent {
@@ -729,19 +723,16 @@ fn build_js_template_candidate(expr: &JsTemplateExpression) -> Option<EmbedCandi
                     content_offset: content_token.text_range().start(),
                     text: content_token.token_text(),
                 };
-
                 if first_chunk.is_none() {
                     first_chunk = Some(chunk_content.clone());
                 }
-
                 slices.push(PlaceholderSlice {
                     chunk_range: content_token.text_range(),
                     combined_start: start,
                     combined_end: end,
                 });
             } else {
-                // Interpolation: insert placeholder
-                let placeholder = format!("$BIOME_{interp_index}$");
+                let placeholder = format!("__BIOME_{interp_index}__");
                 combined_text.push_str(&placeholder);
                 interp_index += 1;
             }
@@ -759,7 +750,6 @@ fn build_js_template_candidate(expr: &JsTemplateExpression) -> Option<EmbedCandi
             }),
         })
     } else {
-        // Multi-chunk non-HTML template (CSS/GraphQL): skip embedded formatting
         None
     }
 }
@@ -1697,11 +1687,10 @@ fn format_embedded(
                     let printed = formatted.print().ok()?;
                     let code = printed.as_code();
 
-                    if code.contains("$BIOME_") {
-                        // Multi-chunk template: split formatted output at placeholders.
+                    if code.contains("__BIOME_") {
                         let root_range = node.inner().text_range();
 
-                        // Find all sibling chunks by matching the same parse root.
+                        // Find sibling chunks that share the same parse root.
                         let mut sibling_ranges: Vec<TextRange> = snippets
                             .iter()
                             .filter(|(_, s)| {
@@ -1717,21 +1706,20 @@ fn format_embedded(
                             .collect();
                         sibling_ranges.sort_by_key(|r| r.start());
 
-                        // Split formatting at $BIOME_N$ markers.
-                        // Each placeholder is "$BIOME_" followed by digits, then "$".
+                        // Split formatted output at __BIOME_N__ markers.
                         let mut slices: Vec<&str> = Vec::new();
                         let mut remaining: &str = code;
-                        while let Some(pos) = remaining.find("$BIOME_") {
+                        while let Some(pos) = remaining.find("__BIOME_") {
                             slices.push(&remaining[..pos]);
-                            // Skip past "$BIOME_" + digits + "$"
-                            let after_prefix = &remaining[pos + 7..];
+                            let after_prefix = &remaining[pos + 8..]; // skip "__BIOME_"
                             let digits_end = after_prefix
                                 .bytes()
                                 .position(|b| !b.is_ascii_digit())
                                 .unwrap_or(after_prefix.len());
                             let after_digits = &after_prefix[digits_end..];
-                            if after_digits.starts_with('$') {
-                                remaining = &after_digits[1..];
+                            // skip "__" (2 chars)
+                            if after_digits.starts_with("__") {
+                                remaining = &after_digits[2..];
                             } else {
                                 break;
                             }

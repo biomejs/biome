@@ -9,11 +9,11 @@ ${name}
 `;
 
 const b = html`
-	<div @click="
+	<div @click=
 ${() => {
 		console.log("clicked");
 	}}
-	">click me</div>
+	>click me</div>
 `;
 
 const c = html`
