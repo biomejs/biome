@@ -126,7 +126,11 @@ impl Finalizer for DefaultFinalizer {
             summary,
             verbose: cli_options.verbose,
         };
-        let mut visitor = ProfilersReporterVisitor::new(fs.working_directory().clone());
+        let mut visitor = ProfilersReporterVisitor::new(
+            fs.working_directory().clone(),
+            execution.is_rule_profiling_enabled(),
+            execution.is_type_inference_profiling_enabled(),
+        );
         reporter.write(&mut ConsoleReporterWriter(console), &mut visitor)?;
 
         // Processing emitted error diagnostics, exit with a non-zero code

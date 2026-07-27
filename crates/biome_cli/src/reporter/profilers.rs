@@ -35,11 +35,21 @@ impl Reporter for ProfilersReporter<'_> {
 
 pub(crate) struct ProfilersReporterVisitor {
     working_directory: Option<Utf8PathBuf>,
+    rule_profiler: bool,
+    type_profiler: bool,
 }
 
 impl ProfilersReporterVisitor {
-    pub(crate) fn new(working_directory: Option<Utf8PathBuf>) -> Self {
-        Self { working_directory }
+    pub(crate) fn new(
+        working_directory: Option<Utf8PathBuf>,
+        rule_profiler: bool,
+        type_profiler: bool,
+    ) -> Self {
+        Self {
+            working_directory,
+            rule_profiler,
+            type_profiler,
+        }
     }
 }
 
@@ -52,11 +62,14 @@ impl ReporterVisitor for ProfilersReporterVisitor {
         verbose: bool,
     ) -> io::Result<()> {
         let rule_profiles = biome_analyze::profiling::drain_sorted_by_total(true);
-        if !rule_profiles.is_empty() {
+        if !rule_profiles.is_empty() && self.rule_profiler {
             writer.log(markup! {{ DisplayProfiles(rule_profiles, None) }});
         }
+        biome_analyze::profiling::disable();
 
-        if let Some(profile) = execution.take_type_inference_profile() {
+        if self.type_profiler
+            && let Some(profile) = execution.take_type_inference_profile()
+        {
             let display = DisplayTypeInferenceProfile::new(
                 &profile,
                 self.working_directory.as_deref(),

@@ -5,7 +5,7 @@ use biome_fs::MemoryFileSystem;
 use bpaf::Args;
 use serial_test::serial;
 
-fn run_profile(extra_arguments: &[&str]) -> String {
+fn run_lint(extra_arguments: &[&str]) -> String {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let file_path = "file.ts";
@@ -13,11 +13,7 @@ fn run_profile(extra_arguments: &[&str]) -> String {
         file_path.into(),
         "async function returnsPromise() {}\nreturnsPromise();\n",
     );
-    let mut arguments = vec![
-        "lint",
-        "--profile-type-inference",
-        "--only=nursery/noFloatingPromises",
-    ];
+    let mut arguments = vec!["lint", "--only=nursery/noFloatingPromises"];
     arguments.extend_from_slice(extra_arguments);
     arguments.push(file_path);
 
@@ -29,6 +25,12 @@ fn run_profile(extra_arguments: &[&str]) -> String {
         .iter()
         .map(|message| markup_to_string(markup! {{ message.content }}))
         .collect()
+}
+
+fn run_profile(extra_arguments: &[&str]) -> String {
+    let mut arguments = vec!["--profile-type-inference"];
+    arguments.extend_from_slice(extra_arguments);
+    run_lint(&arguments)
 }
 
 #[test]
@@ -70,6 +72,26 @@ fn reports_rule_and_type_inference_profilers() {
 
     assert!(output.contains("Rule execution time"), "{output}");
     assert!(output.contains("Type inference profile"), "{output}");
+}
+
+#[test]
+#[serial]
+fn rule_profiler_is_scoped_to_requested_run() {
+    biome_analyze::profiling::disable();
+    biome_analyze::profiling::reset();
+
+    let profiled_output = run_lint(&["--profile-rules"]);
+    assert!(
+        profiled_output.contains("Rule execution time"),
+        "{profiled_output}"
+    );
+
+    let regular_output = run_lint(&[]);
+    assert!(
+        !regular_output.contains("Rule execution time"),
+        "{regular_output}"
+    );
+    assert!(!biome_analyze::profiling::is_enabled());
 }
 
 #[test]

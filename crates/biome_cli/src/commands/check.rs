@@ -74,6 +74,8 @@ struct CheckExecution {
     /// Skip the given lint rule, assist action, group of rules and actions, or domain
     skip: Vec<AnalyzerSelector>,
 
+    profile_rules: bool,
+
     /// Profiler for type inference
     type_inference_profile: Option<TypeInferenceProfilerGuard>,
 }
@@ -108,6 +110,14 @@ impl Execution for CheckExecution {
 
     fn is_check(&self) -> bool {
         true
+    }
+
+    fn is_rule_profiling_enabled(&self) -> bool {
+        self.profile_rules
+    }
+
+    fn is_type_inference_profiling_enabled(&self) -> bool {
+        self.type_inference_profile.is_some()
     }
 
     fn take_type_inference_profile(
@@ -224,6 +234,7 @@ impl TraversalCommand for CheckCommandPayload {
             skip_parse_errors: cli_options.skip_parse_errors,
             only: self.only.clone(),
             skip: self.skip.clone(),
+            profile_rules: self.profile_rules,
             type_inference_profile,
         }))
     }

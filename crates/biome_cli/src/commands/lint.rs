@@ -83,6 +83,8 @@ struct LintExecution {
     /// It skips parse errors
     skip_parse_errors: bool,
 
+    profile_rules: bool,
+
     /// The type inference profiler
     type_inference_profile: Option<TypeInferenceProfilerGuard>,
 }
@@ -161,6 +163,14 @@ impl Execution for LintExecution {
         true
     }
 
+    fn is_rule_profiling_enabled(&self) -> bool {
+        self.profile_rules
+    }
+
+    fn is_type_inference_profiling_enabled(&self) -> bool {
+        self.type_inference_profile.is_some()
+    }
+
     fn take_type_inference_profile(&self) -> Option<TypeInferenceProfileSnapshot> {
         self.type_inference_profile
             .as_ref()
@@ -230,6 +240,7 @@ impl TraversalCommand for LintCommandPayload {
             suppress: self.suppress,
             suppression_reason: self.suppression_reason.clone(),
             skip_parse_errors: cli_options.skip_parse_errors,
+            profile_rules: self.profile_rules,
             type_inference_profile,
         }))
     }
