@@ -22,6 +22,7 @@ impl SyntaxFactory for JsSyntaxFactory {
             | JS_BOGUS_MEMBER
             | JS_BOGUS_NAMED_IMPORT_SPECIFIER
             | JS_BOGUS_PARAMETER
+            | JS_BOGUS_ROOT
             | JS_BOGUS_STATEMENT
             | TS_BOGUS_TYPE => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
             JS_ACCESSOR_MODIFIER => {

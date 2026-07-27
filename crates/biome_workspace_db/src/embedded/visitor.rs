@@ -14,14 +14,13 @@ use biome_js_syntax::{
     AnyJsIdentifierUsage, AnyJsModuleItem, AnyJsObjectAssignmentPatternMember,
     AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsRoot, AnyJsStatement,
     AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression, JsCallExpression, JsExport,
-    JsImport, JsLanguage, JsModuleItemList, JsReferenceIdentifier, JsStaticMemberExpression,
-    JsSvelteDeclarationRoot, JsSvelteGenericsRoot, JsSvelteSnippetRoot, JsVariableStatement,
-    JsxReferenceIdentifier,
+    JsImport, JsModuleItemList, JsReferenceIdentifier, JsStaticMemberExpression,
+    JsSvelteDeclarationRoot, JsSvelteGenericsRoot, JsSvelteSnippetRoot, JsSyntaxNode,
+    JsVariableStatement, JsxReferenceIdentifier,
 };
 use biome_languages::html::HtmlVariant;
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind};
 use biome_languages::{HtmlFileSource, JsFileSource, LanguageDb};
-use biome_parser::AnyParse;
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
 use std::collections::{HashSet, VecDeque};
 
@@ -173,14 +172,7 @@ fn collect_embedded_references(
         // one module and share a top-level scope, so a binding used only in
         // the other block must still count as used.
         if !js_file_source.is_embedded_source() || is_svelte {
-            // Severely malformed content (e.g. a stray unrecoverable token in
-            // the generics list) can make list recovery produce a shape the
-            // node factory rejects, collapsing the whole root to a bogus
-            // node. Cast fallibly instead of `.tree()`'s panicking cast so
-            // that case is skipped rather than crashing the analysis.
-            let Some(root) = any_js_root_from_snippet(snippet.parsed(db)) else {
-                continue;
-            };
+            let root: AnyJsRoot = snippet.parsed(db).tree();
             if let Some(generics_root) = root.as_js_svelte_generics_root() {
                 builder.visit_svelte_generics_root(generics_root);
             } else {
@@ -197,15 +189,6 @@ fn collect_embedded_references(
     }
 
     Some(builder)
-}
-
-fn any_js_root_from_snippet(parsed: &AnyParse) -> Option<AnyJsRoot> {
-    let syntax = if parsed.is_embedded_node_parse() {
-        parsed.clone().embedded_syntax::<JsLanguage>().node
-    } else {
-        parsed.syntax::<JsLanguage>()
-    };
-    AnyJsRoot::cast(syntax)
 }
 
 fn block_kind_from_js_source(source: &JsFileSource) -> Option<EmbeddedBlockKind> {
@@ -1327,14 +1310,9 @@ impl EmbeddedReferencesBuilder {
         Some(())
     }
 
-    /// Visits the type parameter list parsed from a Svelte
-    /// `<script generics="T extends unknown">` attribute.
-    ///
-    /// A type parameter's own name is in scope for the constraints and
-    /// defaults of the whole list (e.g. `<T, U extends T>`), so those
-    /// self-references must be excluded: otherwise an unrelated import that
-    /// happens to share the same single-letter name would be misreported as
-    /// used.
+    /// A type parameter's own name is in scope for the rest of the list
+    /// (e.g. `<T, U extends T>`), so it must not be registered as a
+    /// reference to an unrelated import of the same name.
     fn visit_svelte_generics_root(&mut self, root: &JsSvelteGenericsRoot) {
         let declared_type_parameters: HashSet<TokenText> = root
             .type_parameters()
@@ -1348,16 +1326,20 @@ impl EmbeddedReferencesBuilder {
             let WalkEvent::Enter(node) = event else {
                 continue;
             };
-            let Some(reference) = JsReferenceIdentifier::cast_ref(&node) else {
-                continue;
-            };
-            let Ok(name_token) = reference.value_token() else {
-                continue;
-            };
-            if declared_type_parameters.contains(&name_token.token_text_trimmed()) {
-                continue;
-            }
-            self.visit_reference_identifier(reference);
+            self.visit_svelte_generics_reference(&node, &declared_type_parameters);
         }
+    }
+
+    fn visit_svelte_generics_reference(
+        &mut self,
+        node: &JsSyntaxNode,
+        declared_type_parameters: &HashSet<TokenText>,
+    ) -> Option<()> {
+        let reference = JsReferenceIdentifier::cast_ref(node)?;
+        let name_token = reference.value_token().ok()?;
+        if declared_type_parameters.contains(&name_token.token_text_trimmed()) {
+            return None;
+        }
+        self.visit_reference_identifier(reference)
     }
 }

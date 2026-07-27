@@ -15377,6 +15377,7 @@ impl AnyJsPropertyModifier {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsRoot {
+    JsBogusRoot(JsBogusRoot),
     JsExpressionSnippet(JsExpressionSnippet),
     JsExpressionTemplateRoot(JsExpressionTemplateRoot),
     JsModule(JsModule),
@@ -15387,6 +15388,12 @@ pub enum AnyJsRoot {
     TsDeclarationModule(TsDeclarationModule),
 }
 impl AnyJsRoot {
+    pub fn as_js_bogus_root(&self) -> Option<&JsBogusRoot> {
+        match &self {
+            Self::JsBogusRoot(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_js_expression_snippet(&self) -> Option<&JsExpressionSnippet> {
         match &self {
             Self::JsExpressionSnippet(item) => Some(item),
@@ -37329,6 +37336,11 @@ impl From<AnyJsPropertyModifier> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsBogusRoot> for AnyJsRoot {
+    fn from(node: JsBogusRoot) -> Self {
+        Self::JsBogusRoot(node)
+    }
+}
 impl From<JsExpressionSnippet> for AnyJsRoot {
     fn from(node: JsExpressionSnippet) -> Self {
         Self::JsExpressionSnippet(node)
@@ -37371,7 +37383,8 @@ impl From<TsDeclarationModule> for AnyJsRoot {
 }
 impl AstNode for AnyJsRoot {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = JsExpressionSnippet::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = JsBogusRoot::KIND_SET
+        .union(JsExpressionSnippet::KIND_SET)
         .union(JsExpressionTemplateRoot::KIND_SET)
         .union(JsModule::KIND_SET)
         .union(JsScript::KIND_SET)
@@ -37382,7 +37395,8 @@ impl AstNode for AnyJsRoot {
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            JS_EXPRESSION_SNIPPET
+            JS_BOGUS_ROOT
+                | JS_EXPRESSION_SNIPPET
                 | JS_EXPRESSION_TEMPLATE_ROOT
                 | JS_MODULE
                 | JS_SCRIPT
@@ -37394,6 +37408,7 @@ impl AstNode for AnyJsRoot {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            JS_BOGUS_ROOT => Self::JsBogusRoot(JsBogusRoot { syntax }),
             JS_EXPRESSION_SNIPPET => Self::JsExpressionSnippet(JsExpressionSnippet { syntax }),
             JS_EXPRESSION_TEMPLATE_ROOT => {
                 Self::JsExpressionTemplateRoot(JsExpressionTemplateRoot { syntax })
@@ -37412,6 +37427,7 @@ impl AstNode for AnyJsRoot {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::JsBogusRoot(it) => it.syntax(),
             Self::JsExpressionSnippet(it) => it.syntax(),
             Self::JsExpressionTemplateRoot(it) => it.syntax(),
             Self::JsModule(it) => it.syntax(),
@@ -37424,6 +37440,7 @@ impl AstNode for AnyJsRoot {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::JsBogusRoot(it) => it.into_syntax(),
             Self::JsExpressionSnippet(it) => it.into_syntax(),
             Self::JsExpressionTemplateRoot(it) => it.into_syntax(),
             Self::JsModule(it) => it.into_syntax(),
@@ -37438,6 +37455,7 @@ impl AstNode for AnyJsRoot {
 impl std::fmt::Debug for AnyJsRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::JsBogusRoot(it) => std::fmt::Debug::fmt(it, f),
             Self::JsExpressionSnippet(it) => std::fmt::Debug::fmt(it, f),
             Self::JsExpressionTemplateRoot(it) => std::fmt::Debug::fmt(it, f),
             Self::JsModule(it) => std::fmt::Debug::fmt(it, f),
@@ -37452,6 +37470,7 @@ impl std::fmt::Debug for AnyJsRoot {
 impl From<AnyJsRoot> for SyntaxNode {
     fn from(n: AnyJsRoot) -> Self {
         match n {
+            AnyJsRoot::JsBogusRoot(it) => it.into_syntax(),
             AnyJsRoot::JsExpressionSnippet(it) => it.into_syntax(),
             AnyJsRoot::JsExpressionTemplateRoot(it) => it.into_syntax(),
             AnyJsRoot::JsModule(it) => it.into_syntax(),
@@ -42949,6 +42968,62 @@ impl From<JsBogusParameter> for SyntaxElement {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct JsBogusRoot {
+    syntax: SyntaxNode,
+}
+impl JsBogusRoot {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for JsBogusRoot {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_BOGUS_ROOT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_BOGUS_ROOT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsBogusRoot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("JsBogusRoot")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<JsBogusRoot> for SyntaxNode {
+    fn from(n: JsBogusRoot) -> Self {
+        n.syntax
+    }
+}
+impl From<JsBogusRoot> for SyntaxElement {
+    fn from(n: JsBogusRoot) -> Self {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct JsBogusStatement {
     syntax: SyntaxNode,
 }
@@ -43060,7 +43135,7 @@ impl From<TsBogusType> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyJsBogusNode = JsBogus | JsBogusAssignment | JsBogusBinding | JsBogusExpression | JsBogusImportAssertionEntry | JsBogusMember | JsBogusNamedImportSpecifier | JsBogusParameter | JsBogusStatement | TsBogusType }
+biome_rowan::declare_node_union! { pub AnyJsBogusNode = JsBogus | JsBogusAssignment | JsBogusBinding | JsBogusExpression | JsBogusImportAssertionEntry | JsBogusMember | JsBogusNamedImportSpecifier | JsBogusParameter | JsBogusRoot | JsBogusStatement | TsBogusType }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct JsArrayAssignmentPatternElementList {
     syntax_list: SyntaxList,

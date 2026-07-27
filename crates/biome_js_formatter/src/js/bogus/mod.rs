@@ -9,4 +9,5 @@ pub(crate) mod bogus_import_assertion_entry;
 pub(crate) mod bogus_member;
 pub(crate) mod bogus_named_import_specifier;
 pub(crate) mod bogus_parameter;
+pub(crate) mod bogus_root;
 pub(crate) mod bogus_statement;

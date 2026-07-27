@@ -10,10 +10,11 @@ use crate::syntax::expr::{ExpressionContext, parse_expression};
 use crate::syntax::function::{ParameterContext, parse_parameter_list};
 use crate::syntax::js_parse_error;
 use crate::syntax::stmt::parse_directives;
-use crate::syntax::typescript::{TypeContext, parse_ts_type_parameter_list};
+use crate::syntax::typescript::{TsTypeParameterList, TypeContext};
 use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::{JsSyntaxKind, T};
 use biome_languages::javascript::ModuleKind;
+use biome_parser::parse_lists::ParseSeparatedList;
 // test_err js unterminated_unicode_codepoint
 // let s = "\u{200";
 
@@ -239,7 +240,7 @@ fn parse_snippet_signature(p: &mut JsParser, m: Marker) -> CompletedMarker {
 /// Parses the value of a Svelte `<script generics="T extends unknown">` attribute:
 /// a bare, comma-separated list of type parameters with no surrounding `<` `>`.
 fn parse_svelte_generics(p: &mut JsParser, m: Marker) -> CompletedMarker {
-    parse_ts_type_parameter_list(p, TypeContext::default());
+    TsTypeParameterList(TypeContext::default()).parse_list(p);
 
     if !p.at(EOF) {
         p.error(js_parse_error::template_expression_trailing_code(
@@ -283,9 +284,6 @@ mod tests {
 
     #[test]
     fn svelte_generics_declaration_reports_syntax_errors() {
-        // Typo: `extnds` instead of `extends`. A well-formed type parameter
-        // list cannot contain a second identifier here, so the parser must
-        // report a real diagnostic instead of silently accepting the input.
         let parse = crate::parse(
             "T extnds Something",
             generics_source_type(),

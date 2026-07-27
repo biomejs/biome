@@ -412,12 +412,6 @@ import type {{ FilterFieldDef, FilterValue }} from './types';
         ));
     }
 
-    /// Regression test: a `generics` value with unrecoverable content (a
-    /// stray `)` right after a separator) makes the type parameter list's
-    /// error recovery produce a shape the node factory rejects, so the whole
-    /// snippet root collapses to a generic bogus node instead of
-    /// `JsSvelteGenericsRoot`. Extracting references from it must degrade
-    /// gracefully instead of panicking on the `AnyJsRoot` cast.
     #[test]
     fn svelte_generics_attribute_with_unrecoverable_content_does_not_panic() {
         let db = TestDb::new();
