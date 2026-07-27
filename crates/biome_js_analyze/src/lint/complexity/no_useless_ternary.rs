@@ -244,12 +244,15 @@ fn invert_expression(expression: &AnyJsExpression) -> Option<AnyJsExpression> {
             _ => None,
         };
 
-        if let Some(operator) = suggested_operator {
+        if let Some(suggested_operator) = suggested_operator {
             let left = expression.as_js_binary_expression()?.left().ok()?;
             let right = expression.as_js_binary_expression()?.right().ok()?;
+            let suggested_operator = make::token(suggested_operator)
+                .with_leading_trivia_pieces(operator.leading_trivia().pieces())
+                .with_trailing_trivia_pieces(operator.trailing_trivia().pieces());
             let new_node = AnyJsExpression::from(make::js_binary_expression(
                 left,
-                make::token(operator),
+                suggested_operator,
                 right,
             ));
 

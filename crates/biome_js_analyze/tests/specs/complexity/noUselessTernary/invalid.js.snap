@@ -24,8 +24,6 @@ var a = x instanceof foo ? true : false;
 
 var a = 'make' in car ? true : false;
 var a = 'make' in car ? false : true;
-
-// Regression test: no double space before operator (biome#11092)
 const pauseEventLane = document.cookie.indexOf('cid_debug=false') > -1 ? true : false;
 ```
 
@@ -154,7 +152,7 @@ invalid.js:6:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━�
      4  4 │   var a = foo() ? false : true;
      5  5 │   var a = foo ? false : true;
      6    │ - var·a·=·foo·===·1·?·false·:·true;
-        6 │ + var·a·=·foo·!==1;
+        6 │ + var·a·=·foo·!==·1;
      7  7 │   var a = foo + 1 ? false : true;
      8  8 │   
   
@@ -386,7 +384,7 @@ invalid.js:19:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━
   > 19 │ var a = 'make' in car ? true : false;
        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     20 │ var a = 'make' in car ? false : true;
-    21 │ 
+    21 │ const pauseEventLane = document.cookie.indexOf('cid_debug=false') > -1 ? true : false;
   
   i Simplify your code by directly assigning the result without using a ternary operator.
   
@@ -408,8 +406,7 @@ invalid.js:20:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━
     19 │ var a = 'make' in car ? true : false;
   > 20 │ var a = 'make' in car ? false : true;
        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    21 │ 
-    22 │ // Regression test: no double space before operator (biome#11092)
+    21 │ const pauseEventLane = document.cookie.indexOf('cid_debug=false') > -1 ? true : false;
   
   i Simplify your code by directly assigning the result without using a ternary operator.
   
@@ -422,19 +419,19 @@ invalid.js:20:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━
     19 19 │   var a = 'make' in car ? true : false;
     20    │ - var·a·=·'make'·in·car·?·false·:·true;
        20 │ + var·a·=·!('make'·in·car·);
-    21 21 │   
-    22 22 │   // Regression test: no double space before operator (biome#11092)
+    21 21 │   const pauseEventLane = document.cookie.indexOf('cid_debug=false') > -1 ? true : false;
   
 
 ```
 
 ```
-invalid.js:23:24 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:24 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unnecessary use of boolean literals in conditional expression.
   
-    22 │ // Regression test: no double space before operator (biome#11092)
-  > 23 │ const pauseEventLane = document.cookie.indexOf('cid_debug=false') > -1 ? true : false;
+    19 │ var a = 'make' in car ? true : false;
+    20 │ var a = 'make' in car ? false : true;
+  > 21 │ const pauseEventLane = document.cookie.indexOf('cid_debug=false') > -1 ? true : false;
        │                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
   i Simplify your code by directly assigning the result without using a ternary operator.
@@ -444,7 +441,7 @@ invalid.js:23:24 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━�
   
   i Unsafe fix: Remove the conditional expression with
   
-    23 │ const·pauseEventLane·=·document.cookie.indexOf('cid_debug=false')·>·-1·?·true·:·false;
+    21 │ const·pauseEventLane·=·document.cookie.indexOf('cid_debug=false')·>·-1·?·true·:·false;
        │                                                                       --------------- 
 
 ```
