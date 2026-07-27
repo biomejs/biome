@@ -30,6 +30,7 @@ impl Format<MarkdownFormatContext> for FormatSourceLine<'_> {
                 ProseItem::Space | ProseItem::SoftBreak | ProseItem::HardBreak(_) => {
                     needs_space = true;
                 }
+                ProseItem::OutdentedLineStart => {}
             }
         }
         Ok(())
@@ -46,7 +47,10 @@ fn strip_spaces_after_soft_breaks(stream: &mut Vec<ProseItem>) {
     let mut i = 0;
     while i < stream.len() {
         if matches!(stream[i], ProseItem::SoftBreak) {
-            let start = i + 1;
+            let mut start = i + 1;
+            while start < stream.len() && matches!(stream[start], ProseItem::OutdentedLineStart) {
+                start += 1;
+            }
             let mut end = start;
             while end < stream.len() && matches!(stream[end], ProseItem::Space) {
                 end += 1;
