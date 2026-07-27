@@ -1,17 +1,20 @@
-//! Selective Promise classification for raw expression types.
+//! Answers narrow Promise-related questions from raw expression types.
 //!
-//! Expression inference normally converts complete raw types into their
-//! interned representation. Promise classification needs less information: the
-//! references and selected members between an expression and its relevant outer
-//! type. Function-return classification additionally follows the selected
-//! function's return type. Keeping these projections in the raw type graph
-//! avoids resolving sibling object members and function parameters.
+//! Callers ask whether an expression, a function return, or an awaited value has
+//! a particular Promise shape. Answering that question usually needs only the
+//! references and selected members along one path. The classifier follows that
+//! path in the raw type graph instead of inferring sibling object members and
+//! function parameters.
 //!
 //! A classification state identifies the module that owns a raw reference, the
 //! value or instance side used for member lookup, and the unconsumed member
-//! path. The traversal is linear and iterative. Unsupported expression forms,
-//! inherited members, accessors, ambiguous exports, cycles, and exhausted work
-//! budgets are indeterminate.
+//! path. Named-member traversal examines only members declared directly on the
+//! current type. A member available only from a base type is therefore
+//! indeterminate. Function-return classification has one narrower inheritance
+//! case: an interface with no call signature may follow its single base
+//! interface. Traversal visits at most 1024 distinct classification states.
+//! Unsupported expression forms, accessors, ambiguous exports, cycles, and an
+//! exhausted work limit are indeterminate.
 
 use super::{ImportResolution, ResolutionCtx, find_value_member_type_on_demand};
 use crate::db::queries::{
@@ -30,14 +33,19 @@ use rustc_hash::FxHashSet;
 
 const MAX_PROMISE_CLASSIFICATION_STATES: usize = 1024;
 
-/// Result of testing a projected expression value or function return for a Promise shape.
+/// Result of a narrow Promise-related classification.
+///
+/// The question may concern the expression itself, a function return, an array
+/// element, or a value after `await`. The variant names are shared by all of
+/// these questions and must be read as yes, no, or unknown for the requested
+/// classification.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(in crate::db) enum PromiseClassification {
-    /// The selected value is a `Promise` or `PromiseLike` instance.
+    /// The requested Promise shape is present.
     ReturnsPromise,
-    /// The selected value is conclusively not Promise-like.
+    /// The requested Promise shape is conclusively absent.
     DoesNotReturnPromise,
-    /// The projection cannot classify the expression without broader inference.
+    /// Selective traversal cannot answer the question.
     Indeterminate,
 }
 

@@ -1,7 +1,7 @@
-//! Origin-by-origin terminal rendering for type-inference profiles.
+//! Detailed terminal output for type-inference profiles.
 //!
-//! The verbose report preserves every captured request, query, and whole-module
-//! record together with interpretation and implementation references.
+//! The report prints every captured source record, a short interpretation of
+//! the largest timings, and the Rust locations that produced the records.
 
 use std::collections::BTreeSet;
 use std::io;

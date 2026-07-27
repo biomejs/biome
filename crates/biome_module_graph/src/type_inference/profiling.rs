@@ -1,15 +1,22 @@
 //! Opt-in profiling for analyzer-facing type-inference requests.
 //!
-//! Request scopes describe why inference runs. Query scopes describe which
-//! tracked query bodies execute. Whole-module scopes record when inference
-//! widens from individual lookups to complete module tables. Synchronous,
-//! thread-local operation stacks propagate request origins and widening triggers
-//! through nested query execution.
+//! A **request** is one operation started by an analyzer, including all database
+//! work it calls. A **query** record is created when a tracked database query
+//! body actually runs; a cached result does not run the body. A **whole-module**
+//! record marks a request that had to infer complete type tables instead of
+//! answering with individual lookups.
 //!
-//! One process-wide profiler records the application's module database.
-//! Document paths are initialized outside tracked queries so instrumentation
-//! does not add Salsa dependencies. Disabled entry points stop after one atomic
-//! recording-state check.
+//! Timings are inclusive: a request's time includes its queries, and a query's
+//! time includes nested queries. These values must not be added together.
+//! **Aborted** means the operation unwound before completion. **Breadth** counts
+//! modules and type-table slots visited by completed whole-module operations.
+//! The request **origin** is the analyzer's source range; the **trigger** is the
+//! narrower query location that caused whole-module inference when one exists.
+//!
+//! Recording state and metrics are shared by the process. Thread-local stacks
+//! connect nested operations to the request running on each thread. Document
+//! paths are captured before tracked queries run so profiling does not create
+//! extra database dependencies.
 
 mod display;
 
@@ -59,12 +66,10 @@ pub(crate) enum TypeInferenceProfileOrigin {
 }
 
 impl TypeInferenceProfileOrigin {
-    /// Creates an exact source origin.
     pub(crate) const fn exact(module: ModuleInfo, range: TextRange) -> Self {
         Self::Exact(TypeInferenceRequestOrigin::new(module, range))
     }
 
-    /// Creates a document-wide source origin.
     pub(crate) const fn document(module: ModuleInfo) -> Self {
         Self::Document(module)
     }
@@ -498,11 +503,23 @@ fn collect_profile_documents(db: &dyn ModuleDb) -> (HashMap<ModuleInfo, Document
     (documents, dropped_documents)
 }
 
-/// Exclusive process-wide ownership of inference profiling.
+/// Guard for the process-wide type-inference profiler.
+///
+/// Callers must keep at most one guard alive and keep it alive until all
+/// profiled work on every thread has finished. The type system does not enforce
+/// this invariant. Starting another guard resets shared metrics, and dropping
+/// either guard disables recording for the entire process. Dropping a guard also
+/// discards undrained metrics and clears profiling stacks on the thread that
+/// drops it; no profiling scope may remain active on another thread at that
+/// point.
 pub struct TypeInferenceProfilerGuard(());
 
 impl TypeInferenceProfilerGuard {
-    /// Starts the process-wide profiler with empty metrics.
+    /// Enables process-wide recording after discarding any existing metrics.
+    ///
+    /// The returned guard must outlive all work intended for the profile. This
+    /// function does not reject a second live guard; callers must uphold the
+    /// single-guard invariant documented on [`TypeInferenceProfilerGuard`].
     pub fn start() -> Self {
         let mut profiler = PROFILER
             .lock()
@@ -512,7 +529,11 @@ impl TypeInferenceProfilerGuard {
         Self(())
     }
 
-    /// Returns and clears the process-wide profile state.
+    /// Returns the recorded metrics and resets the profiler for another interval.
+    ///
+    /// Records in the snapshot are sorted by total time. Recording remains
+    /// enabled, so later requests accumulate in a new profile. If recording was
+    /// already disabled, this returns an empty snapshot.
     pub fn drain(&self) -> TypeInferenceProfileSnapshot {
         if !is_recording() {
             return TypeInferenceProfileSnapshot::default();
@@ -974,14 +995,12 @@ pub struct TypeInferenceProfileSnapshot {
 }
 
 impl TypeInferenceProfileSnapshot {
-    /// Returns whether the snapshot contains no request, query, or whole-module records.
     fn is_empty(&self) -> bool {
         self.requests.is_empty()
             && self.queries.is_empty()
             && self.whole_module_inferences.is_empty()
     }
 
-    /// Sorts each record category by descending total time and stable tie-breakers.
     fn sort_by_total(&mut self) {
         self.requests.sort_by(|left, right| {
             right

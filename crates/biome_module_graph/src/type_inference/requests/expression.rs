@@ -1,7 +1,8 @@
-//! Normalized expression and binding type requests.
+//! Normalized types for expressions and bindings.
 //!
-//! These requests pair one table lookup with structural normalization while
-//! retaining the analyzer's source origin separately from the lookup key.
+//! A binding request may attribute profiling to a different source range from
+//! the binding it looks up. This allows an analyzer to record the use that
+//! caused inference rather than the declaration being inspected.
 
 use biome_js_type_info::interned_types::TypeData as InferredTypeData;
 use biome_rowan::TextRange;
@@ -16,7 +17,9 @@ use super::super::{
 /// Resolves and normalizes the type of one expression.
 ///
 /// Returns `None` when the module cannot provide inference or the expression
-/// was not collected. Cyclic or otherwise indeterminate types remain `Unknown`.
+/// was not collected. Salsa query cycles, failed structural rebuilds, and
+/// normalization work-limit exhaustion return `Unknown`. A local-handle cycle
+/// retains the repeated symbolic handle.
 pub struct NormalizedExpressionTypeRequest {
     module: ModuleInfo,
     expression: TextRange,
@@ -58,7 +61,9 @@ impl<'db> TypeInferenceRequest<'db> for NormalizedExpressionTypeRequest {
 /// Resolves and normalizes the type of one binding.
 ///
 /// Returns `None` when the module cannot provide inference or the binding was
-/// not collected. Cyclic or otherwise indeterminate types remain `Unknown`.
+/// not collected. Salsa query cycles, failed structural rebuilds, and
+/// normalization work-limit exhaustion return `Unknown`. A local-handle cycle
+/// retains the repeated symbolic handle.
 pub struct NormalizedBindingTypeRequest {
     module: ModuleInfo,
     origin: TextRange,

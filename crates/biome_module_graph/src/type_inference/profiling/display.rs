@@ -1,8 +1,8 @@
-//! Console rendering for type-inference profiles.
+//! Terminal output for type-inference profiles.
 //!
-//! The display selects a bounded aggregate report by default and an
-//! origin-by-origin report for verbose output. Shared timing, location, and
-//! capacity displays keep both modes consistent.
+//! The default report groups related records and limits the number shown. The
+//! verbose report prints every captured source record and the Rust location of
+//! the code that produced it.
 
 mod compact;
 mod verbose;
@@ -43,7 +43,10 @@ impl<'a> DisplayTypeInferenceProfile<'a> {
         }
     }
 
-    /// Selects the origin-by-origin report instead of the bounded aggregate report.
+    /// Selects the report format.
+    ///
+    /// `true` prints every captured source record and its code reference.
+    /// `false` groups records and limits the ranked request and query sections.
     pub const fn with_verbose(mut self, verbose: bool) -> Self {
         self.verbose = verbose;
         self

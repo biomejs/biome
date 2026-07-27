@@ -1,9 +1,9 @@
-//! Expected argument-type requests for calls and constructors.
+//! Callable parameter types expected by calls and constructors.
 //!
-//! Both requests resolve the callee and source arguments before delegating
-//! signature selection to the call-query family. They remain distinct request
-//! types because call and constructor signature selection produce different
-//! results and use different tracked queries.
+//! These requests support analyzers that inspect callbacks passed as arguments.
+//! They select a call or constructor signature from the other arguments, then
+//! return the requested parameter only when its type is callable. Calls and
+//! constructors use separate request types because their signatures differ.
 
 use biome_js_type_info::interned_types::{
     CallArgumentType as InferredCallArgumentType, TypeData as InferredTypeData,
@@ -94,11 +94,23 @@ impl ExpectedArgumentInput {
     }
 }
 
-/// Resolves the expected type of one call argument.
+/// Returns the callable type expected for one call argument.
 ///
-/// Returns `None` when the callee or a sibling argument is unavailable, or no
-/// supported call signature provides an expected type. An indeterminate
-/// expected type remains `Unknown`.
+/// All source arguments participate in signature selection, except that the
+/// requested argument's type is ignored. Returns `None` when the callee or any
+/// argument type is unavailable, no supported signature matches, the requested
+/// index is out of bounds, or the selected parameter is not one unambiguous
+/// callable type.
+///
+/// In this call, `"sync"` selects the first overload. A request for argument 1
+/// returns `() => void`. A request for argument 0 returns `None` because
+/// `"sync" | "async"` is not callable.
+///
+/// ```ts
+/// declare function schedule(kind: "sync", task: () => void): void;
+/// declare function schedule(kind: "async", task: () => Promise<void>): void;
+/// schedule("sync", async () => {});
+/// ```
 pub struct ExpectedCallArgumentTypeRequest(ExpectedArgumentInput);
 
 impl ExpectedCallArgumentTypeRequest {
@@ -146,11 +158,24 @@ impl<'db> TypeInferenceRequest<'db> for ExpectedCallArgumentTypeRequest {
     }
 }
 
-/// Resolves the expected type of one constructor argument.
+/// Returns the callable type expected for one constructor argument.
 ///
-/// Returns `None` when the callee or a sibling argument is unavailable, or no
-/// supported constructor signature provides an expected type. An indeterminate
-/// expected type remains `Unknown`.
+/// All source arguments participate in signature selection, except that the
+/// requested argument's type is ignored. Returns `None` when the callee or any
+/// argument type is unavailable, no supported constructor matches, the
+/// requested index is out of bounds, or the selected parameter is not one
+/// unambiguous callable type.
+///
+/// In this construction, `"sync"` selects the first signature. A request for
+/// argument 1 returns `() => void`.
+///
+/// ```ts
+/// declare const Job: {
+///     new (kind: "sync", task: () => void): object;
+///     new (kind: "async", task: () => Promise<void>): object;
+/// };
+/// new Job("sync", async () => {});
+/// ```
 pub struct ExpectedConstructorArgumentTypeRequest(ExpectedArgumentInput);
 
 impl ExpectedConstructorArgumentTypeRequest {

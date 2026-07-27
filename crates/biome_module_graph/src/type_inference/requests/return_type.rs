@@ -1,7 +1,8 @@
-//! Normalized function and member return-type requests.
+//! Return types used by analyzers.
 //!
-//! A request may start from an expression, binding, or default export, but all
-//! sources share callable extraction and normalization semantics.
+//! A request can start from an expression, binding, or default export. Function
+//! requests require an ordinary declared return type. Member requests fall back
+//! to the member's own type when it is not such a function.
 
 use biome_js_type_info::interned_types::{
     ReturnType as InferredReturnType, TypeData as InferredTypeData,
@@ -41,8 +42,26 @@ impl TypeInferenceSource {
 
 /// Resolves and normalizes the return type of one function.
 ///
-/// Returns `None` when the source is unavailable, is not callable, or has no
-/// concrete type return. Indeterminate return types remain `Unknown`.
+/// Returns `None` when the source is unavailable, is not callable, or declares
+/// a type predicate or assertion instead of an ordinary return type. A return
+/// type that cannot be resolved conclusively is normalized to `Unknown`.
+///
+/// For this function, the request returns `None` because `value is string` is a
+/// predicate, not an ordinary return type.
+///
+/// ```ts
+/// function isString(value: unknown): value is string {
+///     return typeof value === "string";
+/// }
+/// ```
+///
+/// The same applies to an assertion return such as this one.
+///
+/// ```ts
+/// function assertString(value: unknown): asserts value is string {
+///     if (typeof value !== "string") throw new Error();
+/// }
+/// ```
 pub struct FunctionReturnTypeRequest {
     module: ModuleInfo,
     origin: TextRange,
@@ -89,10 +108,26 @@ impl<'db> TypeInferenceRequest<'db> for FunctionReturnTypeRequest {
 
 /// Resolves and normalizes the return type of one class or object member.
 ///
-/// A callable member with a concrete type return yields that return type;
-/// otherwise the request yields the normalized member type. Missing or
-/// structurally unresolvable parents and members return `None`; a resolved
-/// indeterminate type remains `Unknown`.
+/// A callable member with an ordinary return type yields that return type. A
+/// non-callable member, or a callable with a predicate or assertion return,
+/// yields the member's own type instead. An unavailable parent or a member not
+/// found by the bounded lookup returns `None`. An unresolved type is normalized
+/// to `Unknown`.
+///
+/// Lookup may stop after a fixed number of distinct types. For a compound
+/// parent type, the fallback can therefore contain only members found before
+/// that limit.
+///
+/// For `checks.isString`, the request returns the function type
+/// `(value: unknown) => value is string`, not `string` or `boolean`.
+///
+/// ```ts
+/// const checks = {
+///     isString(value: unknown): value is string {
+///         return typeof value === "string";
+///     },
+/// };
+/// ```
 pub struct MemberReturnTypeRequest<'name> {
     module: ModuleInfo,
     origin: TextRange,

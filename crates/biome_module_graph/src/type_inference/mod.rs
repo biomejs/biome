@@ -1,10 +1,10 @@
-//! Analyzer-facing request flows for Salsa-backed type inference.
+//! Type-inference operations used by analyzers.
 //!
-//! A request represents the semantic result a consumer asks the type engine to
-//! compute. Request implementations compose tracked query primitives through a
-//! shared context, keeping consumer intent separate from query implementation.
-//! This boundary gives profiling and contributor tooling one stable place to
-//! attach caller, source, and implementation metadata.
+//! An analyzer submits a request for one result, such as the type of an
+//! expression or whether a function returns a Promise. The request records the
+//! analyzer and source location that need the result. Its implementation uses a
+//! shared context to run the database queries needed to answer it. Profiling can
+//! therefore attribute all of those queries to the original analyzer request.
 
 mod classification;
 mod context;

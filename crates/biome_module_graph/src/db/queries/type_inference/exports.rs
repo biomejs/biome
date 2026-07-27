@@ -13,12 +13,24 @@ use biome_rowan::Text;
 
 // #region EXPORT QUERIES
 
-/// Finds the module and local name that own an exported symbol.
+/// Follows re-exports to the module and local name that define an export.
 ///
-/// This query reads only module graph inputs and never resolves inferred types.
-/// Keeping export discovery independent of inference prevents it from joining
-/// an inference cycle. The caller resolves the type stored at the returned
-/// origin.
+/// This query reads only module graph inputs and does not infer the export's
+/// type. Separating these steps prevents export discovery from joining a type
+/// inference cycle. Returns `Missing` when no reachable declaration owns the
+/// name, `Ambiguous` when different `export *` paths provide it, and
+/// `Indeterminate` when traversal reaches its work limit.
+///
+/// In the following example, resolving `result` from `facade.ts` returns the
+/// `source.ts` module and the local name `value`.
+///
+/// ```ts
+/// // source.ts
+/// export const value = 1;
+///
+/// // facade.ts
+/// export { value as result } from "./source";
+/// ```
 #[salsa::tracked(returns(ref))]
 pub(crate) fn resolved_export_origin<'db>(
     db: &'db dyn ModuleDb,
@@ -55,11 +67,25 @@ pub fn infer_export_type<'db>(
     )
 }
 
-/// Collects the export names visible through a module namespace.
+/// Lists the names available when a module is imported as a namespace.
 ///
-/// This query reads only module graph inputs. An unresolved blanket re-export,
-/// unsupported module, disabled inference, or exhausted traversal budget makes
-/// the namespace indeterminate.
+/// The search follows `export *`, but those exports do not include `default`.
+/// Returns `None` when an `export *` path cannot be resolved, a traversed module
+/// is not JavaScript, inference is disabled for a traversed module, or the
+/// search reaches its work limit.
+///
+/// In the following example, the namespace of `facade.ts` contains `local` and
+/// `value`. A default export is not included through `export *`.
+///
+/// ```ts
+/// // source.ts
+/// export const value = 1;
+/// export default 2;
+///
+/// // facade.ts
+/// export const local = 3;
+/// export * from "./source";
+/// ```
 #[salsa::tracked(returns(ref))]
 pub(crate) fn namespace_export_names(db: &dyn ModuleDb, module: ModuleInfo) -> Option<Box<[Text]>> {
     execute_query(

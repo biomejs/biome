@@ -61,11 +61,13 @@ impl ReporterVisitor for ProfilersReporterVisitor {
         _summary: TraversalSummary,
         verbose: bool,
     ) -> io::Result<()> {
-        let rule_profiles = biome_analyze::profiling::drain_sorted_by_total(true);
-        if !rule_profiles.is_empty() && self.rule_profiler {
-            writer.log(markup! {{ DisplayProfiles(rule_profiles, None) }});
+        if self.rule_profiler {
+            let rule_profiles = biome_analyze::profiling::drain_sorted_by_total(true);
+            if !rule_profiles.is_empty() {
+                writer.log(markup! {{ DisplayProfiles(rule_profiles, None) }});
+            }
+            biome_analyze::profiling::disable();
         }
-        biome_analyze::profiling::disable();
 
         if self.type_profiler
             && let Some(profile) = execution.take_type_inference_profile()

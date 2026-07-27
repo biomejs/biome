@@ -1,8 +1,8 @@
-//! Aggregated terminal rendering for project-wide inference profiles.
+//! Grouped terminal output for type-inference profiles.
 //!
-//! The compact report groups source-attributed records by semantic consumer or
-//! query body. It retains one representative source location per group and
-//! bounds the ranked request and query sections independently.
+//! The report groups requests by analyzer and queries by the Rust function that
+//! ran. Each group shows its slowest source location. Request and query groups
+//! have separate display limits.
 
 use std::collections::BTreeMap;
 use std::io;

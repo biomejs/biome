@@ -164,7 +164,25 @@ fn infer_local_type_cycle_result<'db>(
 
 // #region TYPE HELPERS
 
-/// Finds a named member while resolving local types through lookup queries.
+/// Finds a named member on either the class or instance side of `ty`.
+///
+/// Lookup follows inheritance, prototypes, generic constraints, and compound
+/// types. Generic arguments are substituted into the result. Members found on
+/// multiple union, intersection, or merged-reference branches are combined.
+/// Traversal is bounded, so a returned union may contain only members found
+/// before the limit. `None` means no member was found in the supported portion
+/// that was traversed; it does not prove that `name` is absent.
+///
+/// For this class, lookup may find either `create` or `value`.
+///
+/// ```ts
+/// class Counter {
+///     static create(): Counter {
+///         return new Counter();
+///     }
+///     value = 0;
+/// }
+/// ```
 pub fn find_member_type<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
@@ -173,8 +191,26 @@ pub fn find_member_type<'db>(
     find_member_type_impl(db, ty, name)
 }
 
-/// Finds a named member available on a value while resolving local types
-/// through lookup queries.
+/// Finds a named member available on a value of type `ty`.
+///
+/// A class value exposes static members, while a class instance exposes
+/// instance members. Lookup otherwise follows the same inheritance, compound
+/// type, generic substitution, and bounded partial-result rules as
+/// [`find_member_type`]. `None` does not prove that the value lacks `name` when
+/// traversal reaches its work limit.
+///
+/// In this example, the value `Counter` exposes `create`, and `counter` exposes
+/// `value`.
+///
+/// ```ts
+/// class Counter {
+///     static create(): Counter {
+///         return new Counter();
+///     }
+///     value = 0;
+/// }
+/// const counter = Counter.create();
+/// ```
 pub fn find_value_member_type<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
@@ -184,6 +220,18 @@ pub fn find_value_member_type<'db>(
 }
 
 /// Resolves only the wrappers needed to reach one unambiguous callable type.
+///
+/// An interface or object must have exactly one call signature. An interface
+/// without an own call signature may extend exactly one type. Returns `None`
+/// for ambiguous, recursive, unresolved, or over-budget traversal.
+///
+/// In this example, resolving `Formatter` reaches its single call signature.
+///
+/// ```ts
+/// interface Formatter {
+///     (value: number): string;
+/// }
+/// ```
 pub fn resolve_callable_type<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,

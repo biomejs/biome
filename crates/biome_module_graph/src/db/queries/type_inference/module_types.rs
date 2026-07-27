@@ -1,8 +1,13 @@
 //! Complete module inference and dependency scheduling.
 //!
 //! [`infer_module_types`] resolves every raw type table for one module. The
-//! untracked bottom-up entry point schedules imported modules explicitly before
-//! invoking that query, which keeps long import chains off the Rust call stack.
+//! untracked bottom-up entry point schedules resolved static imports and
+//! re-exports explicitly before invoking that query. This keeps long acyclic
+//! dependency chains off the Rust call stack.
+//!
+//! Complete module inference resolves every collected type, including types
+//! imported from other modules. Prefer a lookup query when only one type is
+//! needed.
 
 use crate::db::type_inference::{
     ImportResolution, InferredModuleTypes, infer_module_types_cycle_result, resolve_raw_types,
@@ -22,8 +27,11 @@ use rustc_hash::FxHashSet;
 
 /// Infers the complete type tables for a module.
 ///
-/// The query returns `None` for non-JavaScript modules, modules whose type
-/// inference is disabled, and dependency cycles that Salsa cannot recover.
+/// Returns `None` for non-JavaScript modules and modules whose type inference is
+/// disabled. When imports form a cycle, inference blocks imports within that
+/// cycle and continues with the information available from outside it. Types
+/// that depend on a blocked import may be `Unknown`.
+///
 /// Prefer the expression, binding, or local-type query when only one entry is
 /// required.
 ///
@@ -73,12 +81,14 @@ pub fn infer_module_types<'db>(
 
 // The scheduler remains untracked because `infer_module_types` caches each
 // module result while this explicit work list prevents recursive stack growth.
-/// Infers a module after preparing every module it imports or re-exports.
+/// Infers a module after preparing its resolved static import and re-export
+/// dependencies.
 ///
 /// This is the entry point for work initiated outside a database query, such
 /// as a lint rule requesting type information after a file changes. It visits
-/// dependencies before importers and uses an explicit work list, so long
-/// import chains cannot overflow the Rust call stack.
+/// acyclic dependencies before importers and uses an explicit work list, so
+/// long import chains cannot overflow the Rust call stack. Cyclic dependencies
+/// use the cycle recovery described by [`infer_module_types`].
 ///
 /// For example, requesting types for `main.ts` prepares `values.ts` first:
 ///

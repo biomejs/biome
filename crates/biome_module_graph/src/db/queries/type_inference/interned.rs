@@ -1,9 +1,8 @@
-//! Interned compound keys used by tracked type-inference queries.
+//! Interned compound inputs for tracked type-inference queries.
 //!
-//! Salsa identifies compound query arguments by their interned identity. The
-//! types in this module group the module, source range, and inferred-type data
-//! needed by a query without making those fields part of every query signature.
-//! Interning a key does not cache the query result.
+//! Salsa tracks an interned input by identity. These types keep related query
+//! arguments in one key without implying that the query result itself is
+//! cached by interning.
 
 use crate::ModuleInfo;
 use biome_js_type_info::interned_types::{
@@ -18,7 +17,6 @@ use biome_rowan::TextRange;
 #[salsa::interned]
 #[derive(Debug)]
 pub struct ExpressionTypeInput<'db> {
-    /// Module containing the expression.
     pub module: ModuleInfo,
     /// Source location that identifies the expression in the module's raw table.
     pub expression: TextRange,
@@ -28,7 +26,6 @@ pub struct ExpressionTypeInput<'db> {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct BindingTypeInput<'db> {
-    /// Module containing the binding.
     pub module: ModuleInfo,
     /// Source range used to identify the binding.
     pub range: TextRange,
@@ -38,9 +35,7 @@ pub struct BindingTypeInput<'db> {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct LocalTypeInput<'db> {
-    /// Module owning the local type table.
     pub module: ModuleInfo,
-    /// Index of the requested local type.
     pub type_id: InferredLocalTypeId,
 }
 
@@ -50,7 +45,6 @@ pub struct LocalTypeInput<'db> {
 pub struct CallExpressionTypeInput<'db> {
     /// Module used to resolve local callee and return types.
     pub module: ModuleInfo,
-    /// Inferred type of the expression being called.
     pub callee: InferredTypeData<'db>,
     /// Definite positional argument types in source order.
     #[returns(ref)]
@@ -61,7 +55,6 @@ pub struct CallExpressionTypeInput<'db> {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct CallArgumentTypeInput<'db> {
-    /// Inferred type of the function or constructor being invoked.
     pub callee: InferredTypeData<'db>,
     /// Source arguments in order, including unexpanded spread arguments.
     #[returns(ref)]
@@ -76,7 +69,6 @@ pub struct CallArgumentTypeInput<'db> {
 pub struct NormalizeTypeInput<'db> {
     /// Module used to resolve local type handles.
     pub module: ModuleInfo,
-    /// Root type to normalize.
     pub ty: InferredTypeData<'db>,
 }
 

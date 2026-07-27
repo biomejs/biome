@@ -48,6 +48,18 @@ pub(in crate::db) fn infer_call_expression_return_type<'db>(
 }
 
 /// Infers a call result after optional and spread arguments are resolved.
+///
+/// A union of callable types produces a union of their return types. A `null`
+/// or `undefined` member contributes `undefined`. Other non-callable members
+/// are omitted. The result is `Unknown` when no supported callable member
+/// remains.
+///
+/// In this example, the result is `string | number`.
+///
+/// ```ts
+/// declare const read: (() => string) | (() => number);
+/// const result = read();
+/// ```
 pub(in crate::db) fn infer_call_expression_return_type_from_args<'db>(
     db: &'db dyn ModuleDb,
     callee: InferredTypeData<'db>,
@@ -88,9 +100,11 @@ fn infer_function_call_type<'db>(
             infer_function_call_type(db, target, args)
         }
         InferredTypeData::Interface(interface) => {
-            infer_call_signature_type(db, interface.members(db), args)
+            select_call_signature(db, interface.members(db), args)
+                .and_then(|function| infer_function_return_type(db, function, args))
         }
-        InferredTypeData::Object(object) => infer_call_signature_type(db, object.members(db), args),
+        InferredTypeData::Object(object) => select_call_signature(db, object.members(db), args)
+            .and_then(|function| infer_function_return_type(db, function, args)),
         InferredTypeData::Union(union) => collected_type_result(
             db,
             union
@@ -115,15 +129,6 @@ fn infer_function_call_type<'db>(
     }
 }
 
-fn infer_call_signature_type<'db>(
-    db: &'db dyn ModuleDb,
-    members: &[InferredTypeMember<'db>],
-    args: &[ResolvedCallArgument<'db>],
-) -> Option<InferredTypeData<'db>> {
-    select_call_signature(db, members, args)
-        .and_then(|function| infer_function_return_type(db, function, args))
-}
-
 fn select_call_signature<'db>(
     db: &'db dyn ModuleDb,
     members: &[InferredTypeMember<'db>],
@@ -144,6 +149,26 @@ fn select_call_signature<'db>(
         .find(|function| signature_accepts_arguments(db, *function, args))
 }
 
+/// Expands tuple spreads and maps a source argument index to the expanded list.
+///
+/// Required tuple elements become positional arguments. Optional elements may
+/// be absent, and tuple rest elements remain spreads. A non-tuple spread also
+/// remains a spread. Cyclic or over-budget tuple branches become unknown
+/// spreads.
+///
+/// In this example, `enabled` has source index 1 and expanded index 2 because
+/// `args` contributes two entries.
+///
+/// ```ts
+/// declare function run(
+///     name: string,
+///     countOrEnabled: number | boolean | undefined,
+///     enabled?: boolean,
+/// ): void;
+/// const args: [string, number?] = ["task"];
+/// const enabled = true;
+/// run(...args, enabled);
+/// ```
 pub(in crate::db) fn resolved_call_arguments<'db>(
     db: &'db dyn ModuleDb,
     args: &[InferredCallArgumentType<'db>],
@@ -218,8 +243,9 @@ fn tuple_expansion_item<'db>(
 
 /// Expands nested tuple and tuple-alias elements into argument-order entries.
 ///
-/// A branch that is cyclic or exceeds the shared expansion budget becomes an
-/// `Unknown` spread. Definite non-tuple spreads retain their element type.
+/// Required and optional tuple elements retain their order. Tuple rest
+/// elements and non-tuple inputs remain variable-length spreads. A branch that
+/// is cyclic or exceeds its expansion budget becomes an `Unknown` spread.
 fn expanded_tuple_sequence<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
@@ -339,6 +365,22 @@ fn push_resolved_spread_type<'db>(
     }));
 }
 
+/// Infers the expected type of one argument in a function call.
+///
+/// When the function has overloads, the argument being examined is not used to
+/// choose one. Its expected type is the result being inferred. The other
+/// arguments must match an overload. Returns `None` when the called value is not
+/// supported, a union branch cannot provide a type, no overload matches, or
+/// inference reaches its work limit.
+///
+/// In the following example, the first argument selects the `sync` overload.
+/// The expected type of the second argument is `() => void`.
+///
+/// ```ts
+/// declare function schedule(kind: "sync", task: () => void): void;
+/// declare function schedule(kind: "async", task: () => Promise<void>): void;
+/// schedule("sync", async () => {});
+/// ```
 pub(in crate::db) fn infer_function_argument_type<'db>(
     db: &'db dyn ModuleDb,
     callee: InferredTypeData<'db>,
@@ -395,7 +437,25 @@ fn infer_call_signature_argument_type<'db>(
         .find_map(|function| infer_parameter_type_for_argument(db, function, args, argument_index))
 }
 
-pub(in crate::db) fn infer_constructor_argument_type_inner<'db>(
+/// Infers the expected type of one argument in a constructor call.
+///
+/// The value being constructed may be a class or another type that defines a
+/// constructor. When it has overloads, the argument being examined is not used
+/// to choose one. The other arguments must match an overload. Returns `None`
+/// when the value cannot be constructed, a union branch cannot provide a type,
+/// no overload matches, or inference reaches its work limit.
+///
+/// In the following example, the first argument selects the `sync` constructor.
+/// The expected type of the second argument is `() => void`.
+///
+/// ```ts
+/// declare const Job: {
+///     new (kind: "sync", task: () => void): object;
+///     new (kind: "async", task: () => Promise<void>): object;
+/// };
+/// new Job("sync", async () => {});
+/// ```
+pub(in crate::db) fn infer_constructor_argument_type<'db>(
     db: &'db dyn ModuleDb,
     callee: InferredTypeData<'db>,
     args: &[ResolvedCallArgument<'db>],
@@ -503,6 +563,24 @@ fn infer_argument_type<'db>(
     None
 }
 
+/// Selects a constructor and returns the requested parameter type.
+///
+/// A type with one constructor uses that constructor directly. Overloaded
+/// constructors are checked in declaration order. The argument being examined
+/// is ignored during that check, while every other argument must match. Returns
+/// the first matching parameter type, or `None` if no constructor matches.
+///
+/// In the following example, `"named"` selects the second constructor. The
+/// expected type of the second argument is `string`.
+///
+/// ```ts
+/// declare const Entry: {
+///     new (kind: "indexed", value: number): object;
+///     new (kind: "named", value: string): object;
+/// };
+/// const value: string = "item";
+/// new Entry("named", value);
+/// ```
 fn select_constructor_argument_type<'db>(
     db: &'db dyn ModuleDb,
     members: &[InferredTypeMember<'db>],
@@ -614,6 +692,21 @@ fn infer_parameter_type_for_argument<'db>(
     infer_parameter_type_for_resolved_argument(db, parameters.as_slice(), args, argument_index)
 }
 
+/// Finds the parameter that receives one call argument and returns its type.
+///
+/// Arguments and parameters usually match by position. Optional parameters and
+/// spread values can shift that position, so every possible match is checked.
+/// If the argument can reach several parameters, their types are combined. The
+/// argument being examined is ignored while the remaining arguments are
+/// checked.
+///
+/// In the following example, the second and third arguments both map to the
+/// `values` rest parameter. Their expected type is `number`.
+///
+/// ```ts
+/// declare function record(label: string, ...values: number[]): void;
+/// record("total", 1, 2);
+/// ```
 fn infer_parameter_type_for_resolved_argument<'db>(
     db: &'db dyn ModuleDb,
     parameters: &[ResolvedParameter<'db>],
@@ -1363,11 +1456,30 @@ fn infer_function_return_type<'db>(
     }
 }
 
-/// Substitutes generic return references from arguments and callback results.
-/// Type parameters left unsubstituted fall back to their declared defaults;
-/// a default resolves through the substitutions accumulated before it, so a
-/// default referencing an earlier type parameter follows that parameter's
-/// argument binding or default instead of leaving the bare generic behind.
+/// Substitutes generic references in a function's return type.
+///
+/// A direct generic parameter is inferred from its argument. A generic in a
+/// callback return type is inferred from the callback's return type. An
+/// unbound parameter uses its declared default. Defaults are processed in
+/// declaration order, so a default may refer to an earlier parameter.
+/// Parameters with no inferred value or default remain generic. A failed type
+/// transformation returns `Unknown`.
+///
+/// In this example, `value` is `number` because `T` is inferred from the
+/// callback's return type.
+///
+/// ```ts
+/// declare function produce<T>(callback: () => T): T;
+/// const value = produce(() => 1);
+/// ```
+///
+/// In this example, both tuple elements are `string`. `T` uses its default,
+/// then the default for `U` resolves through `T`.
+///
+/// ```ts
+/// declare function defaults<T = string, U = T>(): [T, U];
+/// const value = defaults();
+/// ```
 fn infer_generic_return_type<'db>(
     db: &'db dyn ModuleDb,
     function: InferredFunction<'db>,
@@ -1490,11 +1602,12 @@ fn infer_generic_return_type<'db>(
 /// Determines the value produced by a callback with a generic return type.
 ///
 /// When a callback may return either `T` or `Promise<T>`, a Promise result uses
-/// its inner value:
+/// its inner value. In this example, `value` is `number` rather than
+/// `Promise<number>`.
 ///
 /// ```ts
 /// declare function unwrap<T>(callback: () => T | Promise<T>): T;
-/// const value = unwrap(async () => 1); // number
+/// const value = unwrap(async () => 1);
 /// ```
 fn collect_callback_return_replacements<'db>(
     db: &'db dyn ModuleDb,
@@ -1585,7 +1698,6 @@ impl<'db> ResolvedCallArgument<'db> {
         matches!(self, Self::Spread(_))
     }
 
-    /// Returns the type carried by this argument entry.
     pub(in crate::db) fn ty(self) -> InferredTypeData<'db> {
         match self {
             Self::Argument(ty) | Self::Optional(ty) | Self::Spread(ty) => ty,

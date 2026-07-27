@@ -1280,12 +1280,13 @@ impl<'db> ResolutionCtx<'db, '_> {
         find_member_type_with_resolver(self.db, self, ty, member_name, mode)
     }
 
-    /// Synthesizes the signature of a `Promise.prototype` method for an
-    /// instance of `target` with the given type arguments.
+    /// Builds the simplified `Promise` method type used by call inference.
     ///
-    /// With `V` for the receiver's value type (its first type argument,
-    /// `Unknown` when absent), the signatures mirror the TypeScript library
-    /// declarations:
+    /// `V` is the receiver's first type argument, or `Unknown` when it has no
+    /// type argument. The model keeps one fulfillment type and one rejection
+    /// type and accepts either a direct value or a `Promise` from each handler.
+    /// It omits the library overloads and the `null` and `undefined` alternatives
+    /// accepted for handlers. Call inference uses these shapes:
     ///
     /// - `then<F = V, R = never>(onfulfilled?: (value: V) => F | Promise<F>,
     ///   onrejected?: (reason: any) => R | Promise<R>): Promise<F | R>`
@@ -1293,10 +1294,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     ///   Promise<V | R>`
     /// - `finally(onfinally?: () => void): Promise<V>`
     ///
-    /// The handler value generics carry defaults so that calls without
-    /// handlers still produce a usable Promise type: return type inference
-    /// substitutes generics from arguments first and falls back to the
-    /// declared defaults for the rest.
+    /// The handler types default to `V` and `never`. Calls with an omitted
+    /// handler therefore retain the receiver value type instead of leaving an
+    /// unresolved generic in the result.
     fn promise_instance_method_type(
         &self,
         target: InferredTypeData<'db>,
@@ -1407,9 +1407,11 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
-    /// Synthesizes the signature of the static `Promise.resolve` method,
-    /// `<T>(value: T) => Promise<T>`, where the returned Promise is an
-    /// instance of `target`.
+    /// Builds the single `<T>(value: T) => Promise<T>` shape used for
+    /// `Promise.resolve` call inference.
+    ///
+    /// This omits the overload and unwrapping details of the TypeScript library
+    /// declarations. The returned `Promise` is an instance of `target`.
     fn promise_resolve_type(&self, target: InferredTypeData<'db>) -> InferredTypeData<'db> {
         let value = InferredTypeData::Generic(InferredGenericTypeParameter::new(
             self.db,

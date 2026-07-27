@@ -1,7 +1,7 @@
-//! Promise classification requests.
+//! Checks for Promise-like values without resolving complete types.
 //!
-//! These requests expose selective Promise classifications without resolving
-//! unrelated type structure.
+//! The requests return `Indeterminate` rather than guessing when the selected
+//! part of a type is unavailable or ambiguous.
 
 use super::super::{
     Sealed, TypeInferenceClassification, TypeInferenceCodeReference, TypeInferenceRequest,
@@ -12,8 +12,18 @@ use biome_rowan::TextRange;
 
 /// Classifies whether an expression is Promise-like.
 ///
-/// Missing expressions, disabled inference, unsupported or ambiguous shapes,
-/// cycles, and exhausted budgets are indeterminate.
+/// A missing expression, disabled inference, an unresolved or ambiguous export,
+/// an `unknown` type, a dependency cycle, or an exhausted work limit produces
+/// [`TypeInferenceClassification::Indeterminate`]. An unresolved import path or
+/// unavailable imported module produces [`TypeInferenceClassification::NoMatch`].
+///
+/// This expression is indeterminate because its declared type gives no evidence
+/// for or against a Promise shape.
+///
+/// ```ts
+/// declare const value: unknown;
+/// value;
+/// ```
 pub struct PromiseClassificationRequest {
     module: ModuleInfo,
     expression: TextRange,
@@ -50,8 +60,18 @@ impl<'db> TypeInferenceRequest<'db> for PromiseClassificationRequest {
 
 /// Classifies whether an expression is an array of Promise-like values.
 ///
-/// Missing expressions, disabled inference, unsupported or ambiguous shapes,
-/// cycles, and exhausted budgets are indeterminate.
+/// A missing expression, disabled inference, an unresolved or ambiguous export,
+/// an `unknown` outer type, an ambiguous overloaded call, a dependency cycle,
+/// or an exhausted work limit produces
+/// [`TypeInferenceClassification::Indeterminate`]. An unresolved import path or
+/// unavailable imported module produces [`TypeInferenceClassification::NoMatch`].
+///
+/// This expression is indeterminate because its outer type is unknown.
+///
+/// ```ts
+/// declare const values: unknown;
+/// values;
+/// ```
 pub struct ArrayOfPromisesClassificationRequest {
     module: ModuleInfo,
     expression: TextRange,
@@ -91,8 +111,19 @@ impl<'db> TypeInferenceRequest<'db> for ArrayOfPromisesClassificationRequest {
 
 /// Classifies whether calling an expression returns a Promise-like value.
 ///
-/// Missing expressions, disabled inference, unsupported or ambiguous shapes,
-/// cycles, and exhausted budgets are indeterminate.
+/// A missing expression, disabled inference, an unresolved or ambiguous export,
+/// an `unknown` callable, any recognized overload set, a dependency cycle, or
+/// an exhausted work limit produces [`TypeInferenceClassification::Indeterminate`].
+/// Overload return types are not compared. An unresolved import path or
+/// unavailable imported module produces [`TypeInferenceClassification::NoMatch`].
+///
+/// This function is indeterminate because it has an overload set.
+///
+/// ```ts
+/// declare function load(): void;
+/// declare function load(id: string): Promise<void>;
+/// load;
+/// ```
 pub struct PromiseReturningFunctionClassificationRequest {
     module: ModuleInfo,
     expression: TextRange,

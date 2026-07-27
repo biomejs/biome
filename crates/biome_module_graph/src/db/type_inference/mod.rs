@@ -108,7 +108,9 @@ impl<'db> InferredModuleTypes<'db> {
     /// Resolves a chain of local type handles to its first non-local type.
     ///
     /// A cycle leaves the repeated local handle unresolved. A missing local
-    /// type resolves to `Unknown`.
+    /// type resolves to `Unknown`. At most 1024 handle resolutions are
+    /// performed; if the chain is still local, the next handle is returned
+    /// unresolved.
     pub fn resolve_type(
         &self,
         db: &'db dyn ModuleDb,
@@ -119,8 +121,21 @@ impl<'db> InferredModuleTypes<'db> {
 
     /// Finds a named member on a type or one of its inherited types.
     ///
-    /// Type arguments from instances are substituted into the member type.
-    /// Returns `None` when no reachable supported type defines `name`.
+    /// This lookup does not distinguish between the static and instance sides
+    /// of a class. Type arguments from instances are substituted into the
+    /// member type. Compound types may produce a union from the branches that
+    /// define `name`; branches without that member do not make the lookup fail.
+    /// Work is bounded, so a returned union may contain only the members found
+    /// before the limit, and `None` does not prove that `name` is absent.
+    ///
+    /// For example, looking up `value` on `Text | Count | Empty` returns
+    /// `string | number`; the `Empty` branch contributes no member:
+    ///
+    /// ```ts
+    /// type Text = { value: string };
+    /// type Count = { value: number };
+    /// type Empty = { other: boolean };
+    /// ```
     pub fn find_member_type(
         &self,
         db: &'db dyn ModuleDb,
@@ -132,9 +147,22 @@ impl<'db> InferredModuleTypes<'db> {
 
     /// Finds a named member available on a value of `ty`.
     ///
-    /// Class values expose static members, while instances expose non-static
-    /// members. Type arguments from instances are substituted into the member
-    /// type. Returns `None` when no reachable supported type defines `name`.
+    /// Unlike [`Self::find_member_type`], this lookup respects which side of a
+    /// class the value represents. A class value exposes static members; an
+    /// instance exposes non-static members. Other object-like values expose
+    /// their ordinary members. Type arguments from instances are substituted
+    /// into the member type. Compound types and the work limit can produce the
+    /// same partial results described by [`Self::find_member_type`].
+    ///
+    /// In this example, value lookup on `Box` can find `kind` but not `value`;
+    /// lookup on a `Box` instance can find `value` but not `kind`:
+    ///
+    /// ```ts
+    /// class Box {
+    ///     static kind: string;
+    ///     value: number;
+    /// }
+    /// ```
     pub fn find_value_member_type(
         &self,
         db: &'db dyn ModuleDb,
@@ -190,13 +218,19 @@ pub(super) fn infer_module_types_cycle_result<'db>(
     ))
 }
 
-/// Returns the inferable modules in the strongly connected component containing
-/// `root`.
+/// Returns the modules to block during cycle fallback for `root`.
 ///
 /// The cycle fallback blocks imports within this set to stop recursive Salsa
-/// queries while continuing to infer dependencies outside the cycle. A module
-/// belongs to the set when it is reachable from `root` and can also reach
-/// `root`.
+/// queries while continuing to infer dependencies outside the cycle. When both
+/// graph walks complete, the set is the strongly connected component containing
+/// `root`: every member is reachable from `root` and can also reach `root`.
+///
+/// The forward and reverse walks each have their own work limit. If the forward
+/// walk reaches its limit, the exact cycle is unknown and the function returns
+/// every reachable module discovered so far, conservatively blocking acyclic
+/// dependencies too. If the reverse walk reaches its limit, the function
+/// returns the part of the cycle discovered so far. In either walk, the module
+/// that exhausts the limit is included but is not expanded.
 fn inference_scc(
     db: &dyn ModuleDb,
     root: ModuleInfo,

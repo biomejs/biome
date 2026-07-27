@@ -1,7 +1,4 @@
-//! Callable-member classification requests.
-//!
-//! Member classification normalizes the receiver and selected member while
-//! preserving indeterminate results for structure that cannot be inferred.
+//! Checks for callable members on runtime values.
 
 use biome_js_type_info::InferredType;
 use biome_rowan::TextRange;
@@ -15,8 +12,14 @@ use super::super::{
 
 /// Classifies whether an expression has a callable member.
 ///
-/// Unavailable or structurally indeterminate receiver and member types produce
-/// an indeterminate result.
+/// An unavailable expression or an `Unknown` receiver or member produces
+/// [`TypeInferenceClassification::Indeterminate`]. A missing or conclusively
+/// non-callable member produces [`TypeInferenceClassification::NoMatch`].
+///
+/// Member lookup visits at most a fixed number of distinct types. For a union,
+/// intersection, or merged reference, reaching that limit classifies only the
+/// members found so far. If none were found before the limit, the result is
+/// `NoMatch`; it does not prove that an unvisited branch lacks the member.
 pub struct CallableMemberRequest<'name> {
     module: ModuleInfo,
     expression: TextRange,

@@ -1,8 +1,8 @@
-//! Query operations available to analyzer-facing requests.
+//! Database operations available to type-inference requests.
 //!
-//! Request implementations compose these operations instead of constructing
-//! Salsa keys directly. This keeps query selection and post-processing shared
-//! when several request types need the same inference primitive.
+//! Request implementations use these methods instead of constructing database
+//! query inputs themselves. This keeps shared lookup and result-processing
+//! behavior consistent between requests.
 
 use biome_js_type_info::interned_types::{
     CallArgumentType as InferredCallArgumentType, TypeData as InferredTypeData,
@@ -33,7 +33,6 @@ impl<'db> TypeInferenceRequestContext<'db> {
         infer_expression_type(db, ExpressionTypeInput::new(db, module, range))
     }
 
-    /// Classifies an expression as Promise-like.
     pub(crate) fn classify_expression_as_promise(
         &self,
         module: ModuleInfo,
@@ -43,7 +42,6 @@ impl<'db> TypeInferenceRequestContext<'db> {
         infer_expression_is_promise(db, ExpressionTypeInput::new(db, module, range))
     }
 
-    /// Classifies an expression as an array of Promise-like values.
     pub(crate) fn classify_expression_as_array_of_promises(
         &self,
         module: ModuleInfo,
@@ -53,7 +51,6 @@ impl<'db> TypeInferenceRequestContext<'db> {
         infer_expression_is_array_of_promises(db, ExpressionTypeInput::new(db, module, range))
     }
 
-    /// Classifies whether calling an expression returns a Promise-like value.
     pub(crate) fn classify_expression_as_promise_returning_function(
         &self,
         module: ModuleInfo,
@@ -85,7 +82,11 @@ impl<'db> TypeInferenceRequestContext<'db> {
         infer_export_type(db, SymbolFromModuleInfo::new(db, "default", module))
     }
 
-    /// Recursively resolves and simplifies `ty` in `module`.
+    /// Resolves local references inside `ty` and simplifies its structure.
+    ///
+    /// Local-handle cycles retain the repeated symbolic handle. Salsa query
+    /// cycles, failed structural rebuilds, and normalization work-limit
+    /// exhaustion return `Unknown`.
     pub(crate) fn normalize_type(
         &self,
         module: ModuleInfo,
@@ -95,9 +96,11 @@ impl<'db> TypeInferenceRequestContext<'db> {
         normalize_type(db, NormalizeTypeInput::new(db, module, ty))
     }
 
-    /// Resolves a named member from any supported structural type.
+    /// Resolves a named member through own properties, inheritance, and compound types.
     ///
-    /// Returns `None` when the type has no resolvable member with that name.
+    /// Members found in separate union, intersection, or merged-reference
+    /// branches are combined. Lookup has a work limit. If it reaches that limit,
+    /// it returns the members found before the limit, or `None` if it found none.
     pub(crate) fn member_type(
         &self,
         ty: InferredTypeData<'db>,
@@ -106,9 +109,11 @@ impl<'db> TypeInferenceRequestContext<'db> {
         find_member_type(self.db(), ty, member_name)
     }
 
-    /// Resolves a named member from a runtime value shape.
+    /// Resolves a named member available on a runtime value.
     ///
-    /// Returns `None` when the value has no resolvable member with that name.
+    /// Static members are considered for class values and instance members for
+    /// object-like values. Lookup has a work limit. If it reaches that limit, it
+    /// returns the members found before the limit, or `None` if it found none.
     pub(crate) fn value_member_type(
         &self,
         ty: InferredTypeData<'db>,
@@ -117,9 +122,10 @@ impl<'db> TypeInferenceRequestContext<'db> {
         find_value_member_type(self.db(), ty, member_name)
     }
 
-    /// Selects a call signature and resolves one expected argument type.
+    /// Selects a call signature and returns one callable parameter type.
     ///
-    /// Returns `None` when no signature can be selected conclusively.
+    /// Returns `None` when no signature can be selected or the selected
+    /// parameter type is not one unambiguous callable type.
     pub(crate) fn call_argument_type(
         &self,
         callee: InferredTypeData<'db>,
@@ -132,9 +138,10 @@ impl<'db> TypeInferenceRequestContext<'db> {
         resolve_callable_type(db, ty)
     }
 
-    /// Selects a constructor signature and resolves one expected argument type.
+    /// Selects a constructor signature and returns one callable parameter type.
     ///
-    /// Returns `None` when no signature can be selected conclusively.
+    /// Returns `None` when no signature can be selected or the selected
+    /// parameter type is not one unambiguous callable type.
     pub(crate) fn constructor_argument_type(
         &self,
         callee: InferredTypeData<'db>,

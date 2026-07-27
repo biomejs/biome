@@ -1,9 +1,8 @@
-//! Request contracts and their execution boundary.
+//! Contracts and execution for type-inference requests.
 //!
-//! A request combines one registered semantic contract with a source origin
-//! and canonical implementation reference. Executing through this module gives
-//! the complete query composition one caller and, when enabled, one profiling
-//! scope.
+//! Each request defines one result and the source location that needs it.
+//! Executing a request also records which analyzer made it and where the request
+//! is implemented, so a profile can connect nested database work to its cause.
 
 use biome_rowan::TextRange;
 
@@ -93,16 +92,15 @@ impl TypeInferenceRequestOrigin {
 }
 
 mod private {
-    //! The request trait is public because analyzer-facing request types cross
-    //! crate boundaries, but implementations belong to `biome_module_graph`.
-    //! Sealing prevents downstream implementations from depending on an
-    //! internal orchestration API whose methods and invariants may change.
+    //! Request types cross crate boundaries, but only `biome_module_graph` may
+    //! define them. This keeps the execution and profiling rules under this
+    //! crate's control.
 
     /// Supertrait that restricts `TypeInferenceRequest` implementations to this crate.
     pub trait Sealed {}
 }
 
-/// Stable profile identity declared by one semantic request type.
+/// Profile identity declared by one request type.
 ///
 /// A runtime option cannot select a different identity. Inputs that produce
 /// different result contracts require distinct request types that each
@@ -115,12 +113,11 @@ pub trait TypeInferenceRequestMetadata {
     const LABEL: &'static str;
 }
 
-/// Declares one analyzer-facing inference flow.
+/// Defines one type-inference result available to analyzers.
 ///
-/// Implementations compose operations through [`TypeInferenceRequestContext`].
-/// Consumers execute requests with [`execute_type_inference_request`] so the
-/// complete flow has one caller, source origin, and statically declared profile
-/// identity.
+/// Implementations use [`TypeInferenceRequestContext`] for database operations.
+/// Consumers use [`execute_type_inference_request`] so profiling can attribute
+/// the complete operation to one caller and source location.
 pub trait TypeInferenceRequest<'db>: private::Sealed + TypeInferenceRequestMetadata {
     /// Result returned to the analyzer-facing caller.
     type Output;
@@ -145,7 +142,6 @@ impl<'db> TypeInferenceRequestContext<'db> {
         Self { db }
     }
 
-    /// Returns the module database used by this request.
     pub(crate) const fn db(&self) -> &'db dyn ModuleDb {
         self.db
     }

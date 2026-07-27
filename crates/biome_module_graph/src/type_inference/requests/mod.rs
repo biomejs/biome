@@ -1,7 +1,4 @@
-//! Registered analyzer-facing inference request implementations.
-//!
-//! Requests are grouped by the semantic result they return. Analyzer rules
-//! reuse these types rather than defining rule-specific inference flows.
+//! Type-inference requests available to analyzers.
 
 mod call;
 mod expression;

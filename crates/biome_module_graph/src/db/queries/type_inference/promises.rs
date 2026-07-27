@@ -1,8 +1,9 @@
-//! Promise-specific classification queries and type predicates.
+//! Promise-specific classification queries.
 //!
 //! These queries traverse only the type shapes needed to distinguish promises,
-//! arrays of promises, and promise-returning functions. Indeterminate shapes
-//! remain distinct from conclusive non-matches for analyzer consumers.
+//! arrays of promises, and promise-returning functions. When the available type
+//! information is insufficient for a conclusive result, they return
+//! `Indeterminate` rather than `NoMatch`.
 
 use super::ExpressionTypeInput;
 use crate::ModuleDb;
@@ -56,7 +57,19 @@ pub fn infer_expression_is_promise<'db>(
 /// Classifies whether an expression is an array of Promise-like values without
 /// resolving unrelated members.
 ///
-/// Unsupported or inconclusive shapes are indeterminate rather than non-matches.
+/// Returns [`TypeInferenceClassification::Match`] for a supported array whose
+/// element type is `Promise` or `PromiseLike`.
+/// [`TypeInferenceClassification::NoMatch`] means the expression is
+/// conclusively not an array of Promise-like values. Missing expressions,
+/// disabled inference, unsupported or ambiguous shapes, dependency cycles, and
+/// exhausted traversal budgets are indeterminate.
+///
+/// In this example, classifying the `pending` expression produces a match.
+///
+/// ```ts
+/// const pending: Promise<number>[] = [Promise.resolve(1)];
+/// pending;
+/// ```
 #[salsa::tracked(cycle_result=infer_expression_is_array_of_promises_cycle_result)]
 pub fn infer_expression_is_array_of_promises<'db>(
     db: &'db dyn ModuleDb,
@@ -96,10 +109,10 @@ pub fn infer_expression_is_array_of_promises<'db>(
 /// expressions, disabled inference, unsupported or ambiguous type shapes,
 /// dependency cycles, and exhausted traversal budgets are indeterminate.
 ///
-/// Requesting `callbacks.callback` produces a match without resolving `other`:
+/// Requesting `callbacks.callback` produces a match without resolving `other`.
 ///
 /// ```ts
-/// const callbacks = { callback: async () => {}, other: unknown };
+/// const callbacks = { callback: async () => {}, other: 0 };
 /// callbacks.callback;
 /// ```
 #[salsa::tracked(cycle_result=infer_expression_function_returns_promise_cycle_result)]
@@ -173,15 +186,25 @@ fn classify_promise_result(classification: PromiseClassification) -> TypeInferen
     }
 }
 
-/// Returns whether `ty` is a Promise without resolving unrelated nested types.
+/// Classifies `ty` as a Promise without resolving unrelated nested types.
+///
+/// Returns `Some(true)` when a reachable branch is a `Promise` or
+/// `PromiseLike` instance. Returns `Some(false)` when every reachable branch is
+/// conclusively not Promise-like. Returns `None` for unresolved or recursive
+/// types, ambiguous callables, and exhausted traversal.
 pub fn is_promise_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> Option<bool> {
     InferredType::new(db, ty).is_promise_instance_with(|ty| {
         resolve_local_type_on_demand(db, ty).expand_structural_global(db)
     })
 }
 
-/// Returns whether `ty` is an array of Promises without resolving unrelated
-/// nested types.
+/// Classifies `ty` as an array of Promises without resolving unrelated nested
+/// types.
+///
+/// Returns `Some(true)` for a supported array with a Promise-like element type.
+/// Returns `Some(false)` for a conclusive non-array or a supported array with a
+/// non-Promise element type. Returns `None` when the outer type or element type
+/// cannot be resolved conclusively, is recursive, or exhausts traversal.
 pub fn is_array_of_promise_type<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
@@ -191,8 +214,13 @@ pub fn is_array_of_promise_type<'db>(
     })
 }
 
-/// Returns whether `ty` is callable and returns a Promise without resolving
-/// callable parameters or unrelated nested types.
+/// Classifies whether `ty` is callable and returns a Promise.
+///
+/// Returns `Some(true)` when a reachable callable has a Promise-like return
+/// type. Returns `Some(false)` when every reachable type is conclusively
+/// non-callable or returns a non-Promise type. Returns `None` when an unresolved
+/// or recursive branch, or exhausted traversal, prevents a conclusive result.
+/// Callable parameters and unrelated nested types are not resolved.
 pub fn function_returns_promise<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,

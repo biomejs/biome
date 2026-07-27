@@ -1,8 +1,9 @@
 //! Call and constructor inference queries.
 //!
-//! These tracked entry points map Salsa inputs to the call-inference algorithms
-//! in [`implementation`]. Keeping the algorithms in a child module leaves this
-//! file as the incremental boundary for the call query family.
+//! Call matching is needed both by these tracked queries and by expression
+//! inference, which already runs inside a broader query. The tracked entry
+//! points define the incremental inputs and adapt matching results for their
+//! callers. The reusable matching code lives in [`implementation`].
 
 mod implementation;
 
@@ -11,7 +12,8 @@ pub(in crate::db) use implementation::{
 };
 
 use self::implementation::{
-    infer_call_expression_return_type, infer_constructor_argument_type_inner,
+    infer_call_expression_return_type,
+    infer_constructor_argument_type as infer_constructor_argument_type_impl,
     infer_function_argument_type, resolved_call_arguments,
 };
 use super::{CallArgumentTypeInput, CallExpressionTypeInput, NormalizeTypeInput, normalize_type};
@@ -31,9 +33,11 @@ use biome_js_type_info::{global_types, interned_types::TypeData as InferredTypeD
 /// in declaration order. If no supported signature matches, the result is
 /// `Unknown`.
 ///
+/// In this example, the inferred type of `result` is `number`.
+///
 /// ```ts
 /// declare function parse(value: string): number;
-/// const result = parse("1"); // number
+/// const result = parse("1");
 /// ```
 #[salsa::tracked]
 pub fn infer_call_expression_type<'db>(
@@ -63,10 +67,11 @@ pub fn infer_call_expression_type<'db>(
 /// arguments still select among overloads. Returns `None` when no supported
 /// call signature can provide an expected type.
 ///
+/// In this example, the expected type of the second argument is `() => void`.
+///
 /// ```ts
 /// declare function consume(value: string, callback: () => void): void;
 /// consume("value", async () => {});
-/// // The expected type for argument 1 is `() => void`.
 /// ```
 #[salsa::tracked]
 pub fn infer_call_argument_type<'db>(
@@ -88,16 +93,17 @@ pub fn infer_call_argument_type<'db>(
 /// Infers the expected constructor parameter type for one argument.
 ///
 /// This has the same argument-index and overload-selection behavior as
-/// [`infer_call_argument_type`], but searches class, interface, and object
-/// constructor signatures. Returns `None` when no supported signature can
-/// provide an expected type.
+/// [`infer_call_argument_type`], but searches constructor signatures. It
+/// follows supported local, global, instance, union, and `typeof` wrappers.
+/// Returns `None` when no supported signature can provide an expected type.
+///
+/// In this example, the expected type of the argument is `() => void`.
 ///
 /// ```ts
 /// declare class Job {
 ///     constructor(callback: () => void);
 /// }
 /// new Job(async () => {});
-/// // The expected type for argument 0 is `() => void`.
 /// ```
 #[salsa::tracked]
 pub fn infer_constructor_argument_type<'db>(
@@ -112,7 +118,7 @@ pub fn infer_constructor_argument_type<'db>(
             let (args, argument_index) =
                 resolved_call_arguments(db, input.args(db), input.argument_index(db));
             let ty =
-                infer_constructor_argument_type_inner(db, input.callee(db), &args, argument_index)?;
+                infer_constructor_argument_type_impl(db, input.callee(db), &args, argument_index)?;
             Some(match ty {
                 InferredTypeData::GlobalType(id) => global_types(db).get(id),
                 ty => ty,

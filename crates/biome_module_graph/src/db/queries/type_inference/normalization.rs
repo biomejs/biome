@@ -1,8 +1,9 @@
-//! Structural type normalization.
+//! Normalization of types returned by inference queries.
 //!
-//! The tracked normalization query resolves local handles and rebuilds the
-//! structural wrappers that can contain them. Types without such wrappers are
-//! returned unchanged.
+//! Inferred types may contain local handles and structural global references.
+//! Normalization resolves those references throughout wrappers such as unions,
+//! intersections, tuples, instances, merged references, and `typeof` types.
+//! Types that cannot contain these references are returned unchanged.
 
 use super::NormalizeTypeInput;
 use crate::ModuleDb;
@@ -16,10 +17,11 @@ use biome_js_type_info::interned_types::TypeData as InferredTypeData;
 
 // #region NORMALIZATION QUERIES
 
-/// Resolves local handles and simplifies structural wrappers in `input`.
+/// Resolves local handles and simplifies structural wrappers in `input.ty`.
 ///
-/// A cycle, invalid structural rebuild, or exhausted normalization budget
-/// returns [`InferredTypeData::Unknown`].
+/// A local-handle cycle retains the repeated symbolic handle. A Salsa query
+/// cycle, invalid structural rebuild, or exhausted normalization budget returns
+/// [`InferredTypeData::Unknown`].
 #[salsa::tracked(cycle_result=normalize_type_cycle_result)]
 pub fn normalize_type<'db>(
     db: &'db dyn ModuleDb,
@@ -31,7 +33,7 @@ pub fn normalize_type<'db>(
         "normalize_type",
         || {
             let ty = input.ty(db);
-            if !needs_type_normalization(ty) {
+            if !type_needs_normalization(ty) {
                 return ty;
             }
             normalize_structural_type(db, ty, |ty| resolve_local_type_on_demand(db, ty))
@@ -44,7 +46,7 @@ pub fn normalize_type<'db>(
 
 // #region QUERY HELPER FUNCTIONS
 
-fn needs_type_normalization(ty: InferredTypeData<'_>) -> bool {
+fn type_needs_normalization(ty: InferredTypeData<'_>) -> bool {
     matches!(
         ty,
         InferredTypeData::InstanceOf(_)
