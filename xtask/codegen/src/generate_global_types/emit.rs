@@ -23,6 +23,7 @@ const GLOBAL_ID_EMIT_ORDER: &[&str] = &[
     "DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID",
     "ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID",
     "ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
+    "WEAK_MAP_ID_GLOBAL_TYPE_ID",
     "ERROR_ID_GLOBAL_TYPE_ID",
     "ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID",
     "ERROR_CALL_ID_GLOBAL_TYPE_ID",
@@ -105,14 +106,30 @@ fn render_class(class: &LoweredClass) -> String {
     format!(
         "crate::TypeData::Class(Box::new(crate::Class {{
             name: Some(biome_rowan::Text::new_static({name})),
-            type_parameters: Box::default(),
+            type_parameters: {type_parameters},
             extends: None,
             implements: Box::default(),
             members: Box::new([{members}]),
         }}))",
         name = rust_string_literal(class.name()),
+        type_parameters = render_type_references(class.type_parameters()),
         members = render_members(class.members()),
     )
+}
+
+/// Builds a boxed type-reference expression list.
+fn render_type_references(references: &[LoweredTypeReference]) -> String {
+    if references.is_empty() {
+        return "Box::default()".to_string();
+    }
+
+    let mut rendered = String::from("Box::new([");
+    for reference in references {
+        rendered.push_str(&render_type_reference(reference));
+        rendered.push(',');
+    }
+    rendered.push_str("])");
+    rendered
 }
 
 /// Builds a `TypeData::Interface` expression.

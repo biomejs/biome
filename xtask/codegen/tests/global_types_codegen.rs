@@ -528,7 +528,7 @@ fn fixture_git_repo_with_malformed_lib() -> Result<FixtureRepo> {
     })
 }
 
-/// Builds a fixture repo with Error, Disposable, and AsyncDisposable declarations.
+/// Builds a fixture repo from the generated-globals declaration fixture.
 fn fixture_git_repo_with_generated_globals() -> Result<FixtureRepo> {
     let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
     write_profile_root_placeholders(repo.path())?;
@@ -1339,6 +1339,38 @@ mod tests {
         ));
 
         Ok(())
+    }
+
+    #[test]
+    fn lowerer_lowers_weak_map_global() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.disposables.d.ts")?;
+
+        let weak_map = lowered
+            .global("WeakMap")
+            .expect("WeakMap should be lowered");
+        assert_eq!(weak_map.id_constant(), "WEAK_MAP_ID_GLOBAL_TYPE_ID");
+        let LoweredTypeData::Class(weak_map_class) = weak_map.data() else {
+            bail!("WeakMap should lower to class data");
+        };
+        assert_eq!(weak_map_class.name(), "WeakMap");
+        assert_eq!(
+            weak_map_class.type_parameters(),
+            &[
+                LoweredTypeReference::Predefined("GLOBAL_T_ID"),
+                LoweredTypeReference::Predefined("GLOBAL_U_ID"),
+            ]
+        );
+        assert!(weak_map_class.members().is_empty());
+
+        Ok(())
+    }
+
+    #[test]
+    fn lowerer_rejects_wrong_weak_map_type_parameter_count() -> Result<()> {
+        expect_error_contains(
+            lowered_from_fixture("manifest.weak-map-wrong-type-parameters.d.ts"),
+            "WeakMap interface has 1 type parameters, expected 2",
+        )
     }
 
     #[test]

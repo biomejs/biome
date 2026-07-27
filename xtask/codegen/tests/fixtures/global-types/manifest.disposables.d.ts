@@ -33,3 +33,5 @@ interface Disposable {
 interface AsyncDisposable {
     [Symbol.asyncDispose](): PromiseLike<void>;
 }
+
+interface WeakMap<K, V> {}
