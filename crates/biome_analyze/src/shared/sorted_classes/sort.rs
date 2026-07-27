@@ -1,4 +1,4 @@
-use biome_rowan::{TextRange, TextSize, TokenText};
+use biome_rowan::{TextRange, TokenText};
 use std::cmp::Ordering;
 
 use super::{

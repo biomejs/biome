@@ -1,10 +1,7 @@
-mod class_info;
-pub mod class_lexer;
 mod presets;
 mod sort;
 mod sort_config;
 pub mod sort_v4;
-mod tailwind_preset;
 mod tailwind_preset_v4;
 mod tailwind_preset_v4_types;
 mod arbitrary_value_match;

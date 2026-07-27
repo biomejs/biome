@@ -8,7 +8,6 @@ use super::{
 
 #[derive(Default)]
 pub enum UseSortedClassesPreset {
-    #[expect(unused)]
     None,
     #[default]
     TailwindCSS,

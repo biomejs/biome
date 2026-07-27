@@ -132,7 +132,7 @@ impl Rule for UseSortedClasses {
     }
 }
 
-struct HtmlSortedClassesState {
+pub(crate) struct HtmlSortedClassesState {
     html_string: HtmlString,
     sorted: Box<str>,
     is_single_quote: bool,
