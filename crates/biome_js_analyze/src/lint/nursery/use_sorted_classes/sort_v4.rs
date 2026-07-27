@@ -69,12 +69,7 @@ enum SortKey {
 /// candidate.
 ///
 /// This is the primary Tailwind sort key; `count`, name, and importance
-/// only break signature ties. The `Ord` impl compares the index lists:
-/// the first differing index after the shared prefix decides, and when
-/// one list is a prefix of the other, the longer list sorts first.
-/// `size-4` (height + width) shares its height index with `h-4` (height
-/// alone) and wins by length, while `w-4` (width alone) sorts after
-/// both on the later width index.
+/// only break signature ties.
 #[derive(Clone, Debug)]
 enum Signature {
     /// A generated `SIGNATURE_POOL` entry.
@@ -109,6 +104,17 @@ impl PartialOrd for Signature {
     }
 }
 
+/// Compares the index lists: the first differing index after the shared
+/// prefix decides, and when one list is a prefix of the other, the longer
+/// list sorts first. `size-4` (height + width) shares its height index
+/// with `h-4` (height alone) and wins by length, while `w-4` (width
+/// alone) sorts after both on the later width index.
+///
+/// This walks the shared prefix rather than delegating to slice's own
+/// lexicographic `Ord` because the tie-break is inverted: slice order
+/// treats a shorter prefix as lesser, but a candidate whose signature is
+/// a prefix of another's must sort first here. The walk itself is cheap
+/// regardless — `SIGNATURE_POOL` entries top out at 8 indices.
 impl Ord for Signature {
     fn cmp(&self, other: &Self) -> Ordering {
         let (a, b) = (self.as_slice(), other.as_slice());
