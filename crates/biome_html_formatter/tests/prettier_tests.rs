@@ -24,7 +24,9 @@ fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     let options = HtmlFormatOptions::new(source_type)
         .with_indent_style(IndentStyle::Space)
         .with_indent_width(IndentWidth::default())
-        .with_self_close_void_elements(SelfCloseVoidElements::Always);
+        .with_self_close_void_elements(SelfCloseVoidElements::Always)
+        // Prettier always indents in vanilla HTML
+        .with_indent_script_and_style(source_type.is_html().into());
 
     let language = language::HtmlTestFormatLanguage::new(source_type);
 

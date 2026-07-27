@@ -54,15 +54,15 @@ text
        long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
      >
 -      new Vue({el: '#js-app'})
-+    new Vue({ el: "#js-app" });
++      new Vue({ el: "#js-app" });
      </script>
      <style
        long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
      >
 -      .a {color: #f00}
-+    .a {
-+      color: #f00;
-+    }
++      .a {
++        color: #f00;
++      }
      </style>
    </body>
  </html>
@@ -110,14 +110,14 @@ text
     <script
       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
     >
-    new Vue({ el: "#js-app" });
+      new Vue({ el: "#js-app" });
     </script>
     <style
       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
     >
-    .a {
-      color: #f00;
-    }
+      .a {
+        color: #f00;
+      }
     </style>
   </body>
 </html>

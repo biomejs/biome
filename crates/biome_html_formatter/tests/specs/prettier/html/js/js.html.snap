@@ -42,27 +42,8 @@ info: html/js/js.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,29 +1,29 @@
- <script type="text/javascript">
--  var message = "Alert!";
-+var message = "Alert!";
- 
--  alert(message);
-+alert(message);
- </script>
- <script type="application/javascript">
--  var message = "Alert!";
-+var message = "Alert!";
- 
--  alert(message);
-+alert(message);
- </script>
- <script>
--  var message = "Alert!";
-+var message = "Alert!";
- 
--  alert(message);
-+alert(message);
+@@ -14,10 +14,10 @@
+   alert(message);
  </script>
  <script type="text/babel">
 -  const someJS = "this should be formatted";
@@ -74,35 +55,25 @@ info: html/js/js.html
  </script>
  
  <script type="module">
--  import lib from "./lib.js";
-+import lib from "./lib.js";
- 
--  function myFunction() {
--    return "foo";
--  }
-+function myFunction() {
-+  return "foo";
-+}
- </script>
 ```
 
 # Output
 
 ```html
 <script type="text/javascript">
-var message = "Alert!";
+  var message = "Alert!";
 
-alert(message);
+  alert(message);
 </script>
 <script type="application/javascript">
-var message = "Alert!";
+  var message = "Alert!";
 
-alert(message);
+  alert(message);
 </script>
 <script>
-var message = "Alert!";
+  var message = "Alert!";
 
-alert(message);
+  alert(message);
 </script>
 <script type="text/babel">
             const    someJS    =   'this should be formatted'
@@ -112,10 +83,10 @@ alert(message);
 </script>
 
 <script type="module">
-import lib from "./lib.js";
+  import lib from "./lib.js";
 
-function myFunction() {
-  return "foo";
-}
+  function myFunction() {
+    return "foo";
+  }
 </script>
 ```
