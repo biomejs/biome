@@ -53,7 +53,6 @@ biome_tailwind_parser     = { workspace = true }
 biome_tailwind_syntax     = { workspace = true }
 biome_unicode_table       = { workspace = true }
 biome_workspace_db        = { workspace = true, features = ["html_embeds"] }
-bitvec                    = "1.0.1"
 camino                    = { workspace = true }
 either                    = { workspace = true }
 enumflags2                = { workspace = true }
