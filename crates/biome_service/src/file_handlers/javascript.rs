@@ -57,6 +57,10 @@ use biome_fs::BiomePath;
 use biome_graphql_parser::parse_graphql_with_offset_and_cache;
 #[cfg(all(feature = "js_embeds", feature = "lang_graphql"))]
 use biome_graphql_syntax::GraphqlLanguage;
+#[cfg(all(feature = "js_embeds", feature = "lang_html"))]
+use biome_html_parser::parse_html_with_offset_and_cache;
+#[cfg(all(feature = "js_embeds", feature = "lang_html"))]
+use biome_html_syntax::HtmlLanguage;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{
     ControlFlowGraph, JsAnalyzerServices, analyze, analyze_with_inspect_matcher,
@@ -90,6 +94,8 @@ use biome_js_type_info::{GlobalsResolver, RawTypeCollector, ScopeId, TypeData, T
 use biome_languages::CssFileSource;
 #[cfg(all(feature = "js_embeds", feature = "lang_graphql"))]
 use biome_languages::GraphqlFileSource;
+#[cfg(all(feature = "js_embeds", feature = "lang_html"))]
+use biome_languages::HtmlFileSource;
 #[cfg(feature = "js_embeds")]
 use biome_languages::css::CssEmbeddingKind;
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
@@ -785,6 +791,20 @@ fn parse_js_matched_embed(
             );
 
             Some((parse.into(), content, file_source))
+        }
+
+        #[cfg(feature = "lang_html")]
+        GuestLanguage::Html => {
+            let file_source = DocumentFileSource::Html(HtmlFileSource::html());
+            let options = settings.parse_options::<HtmlLanguage>(biome_path, &file_source);
+            let parse = parse_html_with_offset_and_cache(
+                content.text.text(),
+                content.content_offset,
+                cache,
+                options,
+            );
+
+            Some((parse.into(), content.clone(), file_source))
         }
     }
 }
@@ -1584,6 +1604,18 @@ fn format_embedded(
                     let formatted =
                         biome_graphql_formatter::format_node_with_offset(graphql_options, &node)
                             .ok()?;
+                    Some(wrap_document(formatted.into_document()))
+                }
+                #[cfg(feature = "lang_html")]
+                DocumentFileSource::Html(_) => {
+                    let html_options =
+                        settings.format_options::<HtmlLanguage>(biome_path, &snippet_file_source);
+                    let node = snippet
+                        .parsed_origin()
+                        .parse(&workspace_db)
+                        .embedded_syntax::<HtmlLanguage>();
+                    let formatted =
+                        biome_html_formatter::format_node_with_offset(html_options, &node).ok()?;
                     Some(wrap_document(formatted.into_document()))
                 }
                 _ => None,

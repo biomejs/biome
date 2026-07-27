@@ -9,10 +9,15 @@ pub use parser::HtmlParserOptions;
 
 use crate::parser::{HtmlLosslessTreeSink, HtmlParser};
 use crate::syntax::parse_root;
-use biome_html_syntax::{HtmlRoot, HtmlSyntaxNode};
+use biome_html_factory::HtmlSyntaxFactory;
+use biome_html_syntax::{HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_parser::{AnyParse, NodeParse};
-use biome_rowan::{AstNode, NodeCache};
+use biome_parser::tree_sink::OffsetLosslessTreeSink;
+use biome_parser::{AnyParse, EmbeddedNodeParse, NodeParse};
+use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset, TextSize};
+
+pub(crate) type HtmlOffsetLosslessTreeSink<'source> =
+    OffsetLosslessTreeSink<'source, HtmlLanguage, HtmlSyntaxFactory>;
 
 /// Parses the provided string as HTML program using the provided node cache.
 pub fn parse_html_with_cache(
@@ -112,4 +117,92 @@ impl From<HtmlParse> for AnyParse {
         )
         .into()
     }
+}
+
+/// A utility struct for managing the result of an offset-aware HTML parser job
+#[derive(Clone, Debug)]
+pub struct HtmlOffsetParse {
+    root: SyntaxNodeWithOffset<HtmlLanguage>,
+    diagnostics: Vec<ParseDiagnostic>,
+}
+
+impl HtmlOffsetParse {
+    pub fn new(
+        root: SyntaxNodeWithOffset<HtmlLanguage>,
+        diagnostics: Vec<ParseDiagnostic>,
+    ) -> Self {
+        Self { root, diagnostics }
+    }
+
+    /// The offset-aware syntax node represented by this Parse result
+    pub fn syntax(&self) -> SyntaxNodeWithOffset<HtmlLanguage> {
+        self.root.clone()
+    }
+
+    /// Get the diagnostics which occurred when parsing
+    pub fn diagnostics(&self) -> &[ParseDiagnostic] {
+        &self.diagnostics
+    }
+
+    /// Get the diagnostics which occurred when parsing
+    pub fn into_diagnostics(self) -> Vec<ParseDiagnostic> {
+        self.diagnostics
+    }
+
+    /// Returns [true] if the parser encountered some errors during the parsing.
+    pub fn has_errors(&self) -> bool {
+        self.diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.is_error())
+    }
+
+    /// Convert this parse into a typed AST node.
+    ///
+    /// # Panics
+    /// Panics if the node represented by this parse result mismatches.
+    pub fn tree(&self) -> HtmlRoot {
+        HtmlRoot::unwrap_cast(self.root.inner().clone())
+    }
+
+    /// Get the base offset applied to this parse result
+    pub fn base_offset(&self) -> TextSize {
+        self.root.base_offset()
+    }
+
+    /// Convert back to the underlying parse result, discarding offset information
+    pub fn into_inner(self) -> HtmlParse {
+        HtmlParse::new(self.root.into_inner(), self.diagnostics)
+    }
+}
+
+impl From<HtmlOffsetParse> for AnyParse {
+    fn from(parse: HtmlOffsetParse) -> Self {
+        let root = parse.syntax();
+        let diagnostics = parse.into_diagnostics();
+        EmbeddedNodeParse::new(root.as_embedded_send(), diagnostics).into()
+    }
+}
+
+/// Parses HTML code with an offset and cache for embedded content.
+///
+/// This function is designed for parsing embedded HTML content in JavaScript
+/// template literals, where source positions need to be adjusted relative
+/// to the parent document.
+pub fn parse_html_with_offset_and_cache(
+    source: &str,
+    base_offset: TextSize,
+    cache: &mut NodeCache,
+    options: HtmlParserOptions,
+) -> HtmlOffsetParse {
+    let mut parser = HtmlParser::new(source, options);
+
+    parse_root(&mut parser);
+
+    let (events, diagnostics, trivia) = parser.finish();
+
+    let mut tree_sink = HtmlOffsetLosslessTreeSink::with_cache(source, &trivia, cache, base_offset);
+    biome_parser::event::process(&mut tree_sink, events, diagnostics);
+    let (offset_node, parse_diagnostics) = tree_sink.finish();
+
+    HtmlOffsetParse::new(offset_node, parse_diagnostics)
 }

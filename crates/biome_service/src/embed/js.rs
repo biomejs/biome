@@ -1,5 +1,5 @@
 use super::EmbedContent;
-use biome_languages::{CssFileSource, DocumentFileSource, GraphqlFileSource};
+use biome_languages::{CssFileSource, DocumentFileSource, GraphqlFileSource, HtmlFileSource};
 use biome_rowan::TokenText;
 
 /// Language that can be embedded inside JavaScript template literals.
@@ -7,6 +7,7 @@ use biome_rowan::TokenText;
 pub(crate) enum GuestLanguage {
     Css,
     GraphQL,
+    Html,
 }
 
 impl From<GuestLanguage> for DocumentFileSource {
@@ -14,6 +15,7 @@ impl From<GuestLanguage> for DocumentFileSource {
         match value {
             GuestLanguage::Css => CssFileSource::css().into(),
             GuestLanguage::GraphQL => GraphqlFileSource::graphql().into(),
+            GuestLanguage::Html => HtmlFileSource::html().into(),
         }
     }
 }
@@ -140,7 +142,7 @@ impl EmbedTarget {
     }
 }
 
-static JS_DETECTORS: [EmbedDetector; 5] = [
+static JS_DETECTORS: [EmbedDetector; 6] = [
     EmbedDetector::TemplateTag {
         tag: "css",
         target: EmbedTarget::Static(GuestLanguage::Css),
@@ -160,5 +162,9 @@ static JS_DETECTORS: [EmbedDetector; 5] = [
     EmbedDetector::TemplateExpression {
         object: "graphql",
         target: EmbedTarget::Static(GuestLanguage::GraphQL),
+    },
+    EmbedDetector::TemplateTag {
+        tag: "html",
+        target: EmbedTarget::Static(GuestLanguage::Html),
     },
 ];

@@ -11,7 +11,7 @@ use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{CstFormatContext, FormatOwnedWithRule, FormatRefWithRule, prelude::*};
 use biome_formatter::{FormatLanguage, FormatResult, Formatted, write};
 use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode, HtmlSyntaxToken};
-use biome_rowan::{AstNode, SyntaxToken, TextRange};
+use biome_rowan::{AstNode, SyntaxNodeWithOffset, SyntaxToken, TextRange};
 use comments::HtmlCommentStyle;
 use context::HtmlFormatContext;
 pub use context::HtmlFormatOptions;
@@ -46,6 +46,16 @@ pub fn format_node(
         HtmlFormatLanguage::new(options),
         delegate_fmt_embedded_nodes,
     )
+}
+
+/// Formats an offset-aware HTML syntax tree.
+///
+/// It returns the [Formatted] document that can be printed to a string.
+pub fn format_node_with_offset(
+    options: HtmlFormatOptions,
+    root: &SyntaxNodeWithOffset<HtmlLanguage>,
+) -> FormatResult<Formatted<HtmlFormatContext>> {
+    biome_formatter::format_node_with_offset(root, HtmlFormatLanguage::new(options), false)
 }
 
 /// Used to get an object that knows how to format this object.
