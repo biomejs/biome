@@ -375,6 +375,22 @@ impl QuoteLinePrefix {
             Ok(())
         })
     }
+
+    pub(crate) fn format_quote_markers(&self) -> impl Format<MarkdownFormatContext> + '_ {
+        format_with(move |f| {
+            let mut first = true;
+            for part in &self.parts {
+                if matches!(part, QuoteLinePrefixPart::Quote) {
+                    if !first {
+                        write!(f, [space()])?;
+                    }
+                    write!(f, [token(">")])?;
+                    first = false;
+                }
+            }
+            Ok(())
+        })
+    }
 }
 
 pub(crate) fn quote_line_prefix(syntax: &MarkdownSyntaxNode) -> FormatResult<QuoteLinePrefix> {
