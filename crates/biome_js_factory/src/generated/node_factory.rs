@@ -7584,13 +7584,6 @@ where
         slots,
     ))
 }
-pub fn js_bogus_root<I>(slots: I) -> JsBogusRoot
-where
-    I: IntoIterator<Item = Option<SyntaxElement>>,
-    I::IntoIter: ExactSizeIterator,
-{
-    JsBogusRoot::unwrap_cast(SyntaxNode::new_detached(JsSyntaxKind::JS_BOGUS_ROOT, slots))
-}
 pub fn js_bogus_statement<I>(slots: I) -> JsBogusStatement
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,

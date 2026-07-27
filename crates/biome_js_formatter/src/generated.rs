@@ -11369,38 +11369,6 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogusParameter {
         )
     }
 }
-impl FormatRule<biome_js_syntax::JsBogusRoot> for crate::js::bogus::bogus_root::FormatJsBogusRoot {
-    type Context = JsFormatContext;
-    #[inline(always)]
-    fn fmt(&self, node: &biome_js_syntax::JsBogusRoot, f: &mut JsFormatter) -> FormatResult<()> {
-        FormatBogusNodeRule::<biome_js_syntax::JsBogusRoot>::fmt(self, node, f)
-    }
-}
-impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusRoot {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_js_syntax::JsBogusRoot,
-        crate::js::bogus::bogus_root::FormatJsBogusRoot,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::js::bogus::bogus_root::FormatJsBogusRoot::default(),
-        )
-    }
-}
-impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogusRoot {
-    type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsBogusRoot,
-        crate::js::bogus::bogus_root::FormatJsBogusRoot,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::js::bogus::bogus_root::FormatJsBogusRoot::default(),
-        )
-    }
-}
 impl FormatRule<biome_js_syntax::JsBogusStatement>
     for crate::js::bogus::bogus_statement::FormatJsBogusStatement
 {

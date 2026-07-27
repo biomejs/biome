@@ -111,7 +111,6 @@ impl biome_rowan::SyntaxKind for JsSyntaxKind {
                 | JS_BOGUS_IMPORT_ASSERTION_ENTRY
                 | JS_BOGUS_NAMED_IMPORT_SPECIFIER
                 | JS_BOGUS_ASSIGNMENT
-                | JS_BOGUS_ROOT
                 | TS_BOGUS_TYPE
         )
     }
@@ -129,11 +128,6 @@ impl biome_rowan::SyntaxKind for JsSyntaxKind {
             kind if AnyJsImportAssertionEntry::can_cast(*kind) => JS_BOGUS_IMPORT_ASSERTION_ENTRY,
             kind if AnyJsParameter::can_cast(*kind) => JS_BOGUS_PARAMETER,
             kind if AnyTsType::can_cast(*kind) => TS_BOGUS_TYPE,
-            // A root that fails to parse into its expected shape still needs
-            // to stay castable as `AnyJsRoot`: every embedded snippet is
-            // fetched through `AnyParse::tree::<AnyJsRoot>()`, which panics
-            // if the top-level node isn't one of `AnyJsRoot`'s variants.
-            kind if AnyJsRoot::can_cast(*kind) => JS_BOGUS_ROOT,
 
             _ => JS_BOGUS,
         }

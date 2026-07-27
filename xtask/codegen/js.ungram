@@ -46,7 +46,6 @@ JsBogusAssignment = SyntaxElement*
 JsBogusParameter = SyntaxElement*
 JsBogusImportAssertionEntry = SyntaxElement*
 JsBogusNamedImportSpecifier = SyntaxElement*
-JsBogusRoot = SyntaxElement*
 TsBogusType = SyntaxElement*
 
 AnyJsRoot =
@@ -58,7 +57,6 @@ AnyJsRoot =
 	| JsSvelteSnippetRoot
 	| JsSvelteDeclarationRoot
 	| JsSvelteGenericsRoot
-	| JsBogusRoot
 
 JsScript =
 	bom: 'UNICODE_BOM'?

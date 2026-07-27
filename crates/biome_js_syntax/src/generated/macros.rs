@@ -1307,10 +1307,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsBogusParameter::new_unchecked(node) };
                     $body
                 }
-                $crate::JsSyntaxKind::JS_BOGUS_ROOT => {
-                    let $pattern = unsafe { $crate::JsBogusRoot::new_unchecked(node) };
-                    $body
-                }
                 $crate::JsSyntaxKind::JS_BOGUS_STATEMENT => {
                     let $pattern = unsafe { $crate::JsBogusStatement::new_unchecked(node) };
                     $body
