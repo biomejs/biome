@@ -13,11 +13,10 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use salsa::plumbing::AsId;
 use std::cell::Cell;
 
-/// Unlike the other limits, this one guards actual stack recursion: each level
-/// of `ResolutionCtx::resolve` clones a raw type and runs the conversion walk,
-/// so the frames are heavy. Named declarations already short-circuit to
-/// `TypeData::Local` handles, which leaves only structural nesting within a
-/// single declaration on the stack -- real-world code stays well below this.
+// This limit guards Rust stack recursion. Each `ResolutionCtx::resolve` frame
+// clones a raw type and runs a conversion walk. Named declarations become local
+// handles before recursion, so the remaining depth comes from structural types
+// nested within one declaration.
 pub(super) const MAX_RAW_TYPE_RESOLUTION_DEPTH: usize = 64;
 const MAX_INFERRED_EXPRESSION_WRAPPER_STEPS: usize = 64;
 const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
@@ -26,11 +25,12 @@ const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 ///
 /// Regular queries resolve only the requested imported symbol. Salsa cycle
 /// recovery cannot recursively request members of the strongly connected
-/// component that caused the cycle, so it uses materialized module tables and
-/// treats that component as unavailable instead.
+/// component that caused the cycle. Cycle fallback therefore reads complete
+/// inferred tables for dependencies outside that component and treats imports
+/// into the component as unavailable.
 #[derive(Clone, Copy)]
 pub(in crate::db) enum ImportResolution<'a> {
-    /// Resolves imported symbols through export discovery and leaf queries.
+    /// Resolves imported symbols through export and lookup queries.
     OnDemand,
     /// Reads imports from module tables while blocking the active cyclic component.
     CycleFallback(&'a FxHashSet<ModuleInfo>),
@@ -125,6 +125,13 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
         }
     }
 
+    /// Converts a raw type reference to an inferred type.
+    ///
+    /// Recursive conversion is limited to 64 active calls shared by resolved
+    /// IDs, qualifiers, and imports in this context. A reference that would
+    /// exceed the limit resolves to `Unknown`; its caller may still construct a
+    /// surrounding type containing that `Unknown`. Named declarations usually
+    /// avoid this recursion by resolving to symbolic local handles.
     pub(in crate::db) fn resolve(&mut self, reference: &TypeReference) -> InferredTypeData<'db> {
         let resolution_depth = self.resolution_depth.get();
         if resolution_depth >= MAX_RAW_TYPE_RESOLUTION_DEPTH {

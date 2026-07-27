@@ -12,10 +12,12 @@ use rustc_hash::FxHashSet;
 const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 const MAX_MEMBER_LOOKUP_STEPS: usize = 1024;
 
-/// Resolves local handles through leaf queries until reaching a concrete type.
+/// Follows local type handles through lookup queries.
 ///
-/// Repeated handles remain symbolic. Missing modules or local types resolve to
-/// `Unknown`.
+/// Returns the first non-local type. A cycle returns the repeated local handle,
+/// and a missing module or local type returns `Unknown`. At most 1024 handle
+/// resolutions are performed; if the chain is still local, the next handle is
+/// returned unresolved.
 pub(in crate::db) fn resolve_local_type_on_demand<'db>(
     db: &'db dyn ModuleDb,
     mut ty: InferredTypeData<'db>,
@@ -40,7 +42,11 @@ pub(in crate::db) fn resolve_local_type_on_demand<'db>(
     ty
 }
 
-/// Finds a member while resolving local handles through leaf queries.
+/// Finds a member without distinguishing class values from class instances.
+///
+/// Local handles are resolved through lookup queries. Inherited and compound
+/// types are traversed subject to the work limit documented on
+/// [`find_member_type_with_resolver`].
 pub(in crate::db) fn find_member_type_on_demand<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
@@ -55,7 +61,13 @@ pub(in crate::db) fn find_member_type_on_demand<'db>(
     )
 }
 
-/// Finds a value member while resolving local handles through leaf queries.
+/// Finds a member that is available on a value.
+///
+/// A class value exposes static members, while a class instance exposes
+/// non-static members. This differs from [`find_member_type_on_demand`], which
+/// accepts either side. Local handles are resolved through lookup queries, and
+/// inherited and compound types are subject to the work limit documented on
+/// [`find_member_type_with_resolver`].
 pub(in crate::db) fn find_value_member_type_on_demand<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
@@ -274,9 +286,25 @@ impl<'db> MemberLookupState<'db> {
 ///
 /// Instance wrappers contribute substitutions that are applied while the
 /// lookup advances. Members found through unions, intersections, or merged
-/// references are collected into a union. Returns `None` when no traversed
-/// type exposes `name` within the requested `mode`. Traversal is bounded;
-/// reaching the limit returns any members collected so far.
+/// references are collected into a union. A branch without `name` contributes
+/// nothing; it does not discard members found on other branches. Consequently,
+/// `Some` may describe only part of a compound type, and `None` means only that
+/// no member was found in the supported portion that was traversed.
+///
+/// Traversal processes at most 1024 distinct states. A state includes the type,
+/// lookup mode, accumulated substitutions, and whether a compound or instance
+/// boundary has been crossed. Repeated states do not consume work. If the limit
+/// is reached, the result is `Unknown` because unvisited states may contain a
+/// different member type.
+///
+/// For example, lookup of `item` on `Left | Right | Missing` returns
+/// `string | number`, even though `Missing` has no `item`:
+///
+/// ```ts
+/// type Left = { item: string };
+/// type Right = { item: number };
+/// type Missing = {};
+/// ```
 pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
     db: &'db dyn ModuleDb,
     resolver: &mut impl MemberLookupResolver<'db>,
@@ -303,10 +331,10 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
             continue;
         }
 
-        // Deduplicated entries above don't count against the budget, so
-        // the limit measures distinct types visited, not queue churn.
+        // Deduplicated entries above don't count against the budget, so the
+        // limit measures distinct traversal states rather than queue churn.
         if remaining_steps == 0 {
-            break;
+            return Some(InferredTypeData::Unknown);
         }
         remaining_steps -= 1;
 

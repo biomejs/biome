@@ -1,12 +1,15 @@
 use super::*;
-use biome_module_graph::{ExpressionTypeInput, infer_expression_function_returns_promise};
+use biome_module_graph::{
+    ExpressionTypeInput, infer_expression_function_returns_promise,
+    type_inference::TypeInferenceClassification,
+};
 
 fn expression_function_returns_promise(
     db: &TestModuleDb,
     module: ModuleInfo,
     source: &str,
     expression: &str,
-) -> Option<bool> {
+) -> TypeInferenceClassification {
     let ModuleInfoKind::Js(js_info) = module.kind(db) else {
         panic!("module must contain JavaScript information");
     };
@@ -40,11 +43,11 @@ fn test_expression_function_return_classifies_selected_object_members() {
 
     assert_eq!(
         expression_function_returns_promise(&db, module, SOURCE, "callbacks.selected"),
-        Some(true)
+        TypeInferenceClassification::Match
     );
     assert_eq!(
         expression_function_returns_promise(&db, module, SOURCE, "callbacks.cacheDir"),
-        Some(false)
+        TypeInferenceClassification::NoMatch
     );
     assert_eq!(
         expression_function_returns_promise(
@@ -53,7 +56,7 @@ fn test_expression_function_return_classifies_selected_object_members() {
             SOURCE,
             r#"{ selected: async () => {}, cacheDir: "/tmp" }"#,
         ),
-        Some(false)
+        TypeInferenceClassification::NoMatch
     );
 }
 
@@ -78,11 +81,11 @@ fn test_expression_function_return_classifies_local_aliases_and_static_members()
 
     assert_eq!(
         expression_function_returns_promise(&db, module, SOURCE, "alias"),
-        Some(true)
+        TypeInferenceClassification::Match
     );
     assert_eq!(
         expression_function_returns_promise(&db, module, SOURCE, "Callbacks.selected"),
-        Some(true)
+        TypeInferenceClassification::Match
     );
 }
 
@@ -105,7 +108,7 @@ fn test_expression_function_return_classifies_promise_like_returns() {
 
     assert_eq!(
         expression_function_returns_promise(&db, module, SOURCE, "callback"),
-        Some(true)
+        TypeInferenceClassification::Match
     );
 }
 
@@ -136,11 +139,11 @@ fn test_expression_function_return_classifies_this_member_chains() {
 
     assert_eq!(
         expression_function_returns_promise(&db, module, SOURCE, "this.#settings.config.callback",),
-        Some(true)
+        TypeInferenceClassification::Match
     );
     assert_eq!(
         expression_function_returns_promise(&db, module, SOURCE, "this.#settings.config.cacheDir",),
-        Some(false)
+        TypeInferenceClassification::NoMatch
     );
 }
 
@@ -166,11 +169,11 @@ fn test_expression_function_return_classifies_imported_named_aliases() {
 
     assert_eq!(
         expression_function_returns_promise(&db, module, INDEX, "importedCallback"),
-        Some(true)
+        TypeInferenceClassification::Match
     );
     assert_eq!(
         expression_function_returns_promise(&db, module, INDEX, "importedCallbacks.selected"),
-        Some(true)
+        TypeInferenceClassification::Match
     );
 }
 
@@ -194,7 +197,7 @@ fn test_expression_function_return_keeps_member_path_in_cycle_identity() {
 
     assert_eq!(
         expression_function_returns_promise(&db, module, SOURCE, "root.next.callback"),
-        Some(true)
+        TypeInferenceClassification::Match
     );
 }
 
@@ -265,17 +268,23 @@ fn test_expression_function_return_classifies_callable_interfaces_conservatively
         .expect("module must exist");
 
     for (expression, expected) in [
-        ("asyncCallback", Some(true)),
-        ("syncCallback", Some(false)),
-        ("inheritedAsyncCallback", Some(true)),
-        ("overloadedCallback", None),
-        ("mixedCallback", None),
-        ("cyclicCallback", Some(true)),
-        ("asyncObject", Some(true)),
-        ("syncObject", Some(false)),
-        ("overloadedObject", None),
-        ("mixedObject", None),
-        ("unionCallback", None),
+        ("asyncCallback", TypeInferenceClassification::Match),
+        ("syncCallback", TypeInferenceClassification::NoMatch),
+        ("inheritedAsyncCallback", TypeInferenceClassification::Match),
+        (
+            "overloadedCallback",
+            TypeInferenceClassification::Indeterminate,
+        ),
+        ("mixedCallback", TypeInferenceClassification::Indeterminate),
+        ("cyclicCallback", TypeInferenceClassification::Match),
+        ("asyncObject", TypeInferenceClassification::Match),
+        ("syncObject", TypeInferenceClassification::NoMatch),
+        (
+            "overloadedObject",
+            TypeInferenceClassification::Indeterminate,
+        ),
+        ("mixedObject", TypeInferenceClassification::Indeterminate),
+        ("unionCallback", TypeInferenceClassification::Indeterminate),
     ] {
         assert_eq!(
             expression_function_returns_promise(&db, module, SOURCE, expression),
