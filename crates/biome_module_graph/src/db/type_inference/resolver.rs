@@ -26,11 +26,11 @@ const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 ///
 /// Regular queries resolve only the requested imported symbol. Salsa cycle
 /// recovery cannot recursively request members of the strongly connected
-/// component that caused the cycle, so it uses materialized module tables and
+/// component that caused the cycle, so it uses complete inferred module tables and
 /// treats that component as unavailable instead.
 #[derive(Clone, Copy)]
 pub(in crate::db) enum ImportResolution<'a> {
-    /// Resolves imported symbols through export discovery and leaf queries.
+    /// Resolves imported symbols through export and lookup queries.
     OnDemand,
     /// Reads imports from module tables while blocking the active cyclic component.
     CycleFallback(&'a FxHashSet<ModuleInfo>),

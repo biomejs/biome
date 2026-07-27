@@ -16,6 +16,7 @@ use biome_console::{Console, MarkupBuf};
 use biome_deserialize::Merge;
 use biome_diagnostics::{Category, category};
 use biome_fs::FileSystem;
+use biome_module_graph::type_inference::profiling::TypeInferenceProfilerGuard;
 use biome_service::workspace::{
     FeatureKind, FeatureName, FeaturesBuilder, FeaturesSupported, FixFileMode, ScanKind,
     SupportKind,
@@ -46,6 +47,7 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) skip: Vec<AnalyzerSelector>,
     pub(crate) watch: bool,
     pub(crate) profile_rules: bool,
+    pub(crate) profile_type_inference: bool,
 }
 
 struct CheckExecution {
@@ -71,6 +73,9 @@ struct CheckExecution {
     only: Vec<AnalyzerSelector>,
     /// Skip the given lint rule, assist action, group of rules and actions, or domain
     skip: Vec<AnalyzerSelector>,
+
+    /// Profiler for type inference
+    type_inference_profile: Option<TypeInferenceProfilerGuard>,
 }
 
 impl Execution for CheckExecution {
@@ -103,6 +108,14 @@ impl Execution for CheckExecution {
 
     fn is_check(&self) -> bool {
         true
+    }
+
+    fn take_type_inference_profile(
+        &self,
+    ) -> Option<biome_module_graph::type_inference::profiling::TypeInferenceProfileSnapshot> {
+        self.type_inference_profile
+            .as_ref()
+            .map(TypeInferenceProfilerGuard::drain)
     }
 
     fn as_diagnostic_category(&self) -> &'static Category {
@@ -180,6 +193,25 @@ impl TraversalCommand for CheckCommandPayload {
             unsafe_: self.unsafe_,
         })?;
 
+        let type_inference_profile = if self.profile_type_inference {
+            if cli_options.use_server {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--profile-type-inference",
+                    "--use-server",
+                    "Type-inference profiling is available only for in-process CLI analysis.",
+                ));
+            }
+            if self.stdin_file_path.is_some() {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--profile-type-inference",
+                    "--stdin-file-path",
+                    "Type-inference profiles require files processed by the CLI traversal.",
+                ));
+            }
+            Some(TypeInferenceProfilerGuard::start())
+        } else {
+            None
+        };
         if self.profile_rules {
             biome_analyze::profiling::enable();
         }
@@ -192,6 +224,7 @@ impl TraversalCommand for CheckCommandPayload {
             skip_parse_errors: cli_options.skip_parse_errors,
             only: self.only.clone(),
             skip: self.skip.clone(),
+            type_inference_profile,
         }))
     }
 

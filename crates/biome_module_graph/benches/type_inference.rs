@@ -185,8 +185,8 @@ fn bench_infer_argument_type_many_overloads(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_distinct_binding_leaf_queries", sample_size = 1)]
-fn bench_distinct_binding_leaf_queries(bencher: Bencher) {
+#[divan::bench(name = "bench_distinct_binding_lookup_queries", sample_size = 1)]
+fn bench_distinct_binding_lookup_queries(bencher: Bencher) {
     bencher
         .with_inputs(|| {
             let (db, module) = build_source_db("bindings.ts", &declaration_heavy_source(128));
@@ -204,8 +204,8 @@ fn bench_distinct_binding_leaf_queries(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_distinct_local_type_leaf_queries", sample_size = 1)]
-fn bench_distinct_local_type_leaf_queries(bencher: Bencher) {
+#[divan::bench(name = "bench_distinct_local_type_lookup_queries", sample_size = 1)]
+fn bench_distinct_local_type_lookup_queries(bencher: Bencher) {
     bencher
         .with_inputs(|| {
             let (db, module) = build_source_db("local_types.ts", &declaration_heavy_source(128));
@@ -223,8 +223,8 @@ fn bench_distinct_local_type_leaf_queries(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_distinct_export_leaf_queries", sample_size = 1)]
-fn bench_distinct_export_leaf_queries(bencher: Bencher) {
+#[divan::bench(name = "bench_distinct_export_lookup_queries", sample_size = 1)]
+fn bench_distinct_export_lookup_queries(bencher: Bencher) {
     bencher
         .with_inputs(|| {
             let (db, module) = build_source_db("exports.ts", &declaration_heavy_source(128));
@@ -242,8 +242,8 @@ fn bench_distinct_export_leaf_queries(bencher: Bencher) {
         });
 }
 
-#[divan::bench(name = "bench_distinct_expression_leaf_queries", sample_size = 1)]
-fn bench_distinct_expression_leaf_queries(bencher: Bencher) {
+#[divan::bench(name = "bench_distinct_expression_lookup_queries", sample_size = 1)]
+fn bench_distinct_expression_lookup_queries(bencher: Bencher) {
     bencher
         .with_inputs(|| expression_query_inputs(128))
         .bench_local_refs(|(db, module, ranges)| {

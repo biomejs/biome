@@ -7,6 +7,7 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, JsCallArgumentList, JsCallExpression,
     JsConditionalExpression, JsNewExpression, JsSyntaxKind,
 };
+use biome_module_graph::type_inference::TypeInferenceClassification;
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
 use biome_rule_options::no_misused_promises::NoMisusedPromisesOptions;
 
@@ -108,7 +109,9 @@ impl Rule for NoMisusedPromises {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let expression = ctx.query();
         if let Some(state) = misused_promise_expression_state(expression) {
-            return (ctx.expression_is_promise(expression) == Some(true)).then_some(state);
+            return (ctx.classify_expression_as_promise(expression)
+                == TypeInferenceClassification::Match)
+                .then_some(state);
         }
         if expression.as_any_js_literal_expression().is_some()
             || !expression
@@ -119,7 +122,9 @@ impl Rule for NoMisusedPromises {
             return None;
         }
 
-        if ctx.expression_function_returns_promise(expression) != Some(true) {
+        if ctx.classify_expression_as_promise_returning_function(expression)
+            != TypeInferenceClassification::Match
+        {
             return None;
         }
         find_misused_promise_returning_callback(ctx, expression)

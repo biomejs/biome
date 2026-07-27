@@ -217,6 +217,7 @@ dependencies = [
  "biome_languages",
  "biome_lsp",
  "biome_migrate",
+ "biome_module_graph",
  "biome_package",
  "biome_resolver",
  "biome_rowan",

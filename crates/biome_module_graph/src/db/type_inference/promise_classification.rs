@@ -99,7 +99,7 @@ struct ClassificationState {
     projection: Projection,
 }
 
-/// Classifies a raw expression's Promise shape without materializing its enclosing type.
+/// Classifies a raw expression's Promise shape without inferring all module tables.
 ///
 /// The projection follows lexical bindings, imports, exports, aliases, `this`,
 /// calls, and own named members. Unsupported expression forms remain
@@ -121,7 +121,7 @@ pub(in crate::db) fn classify_expression_array_promise(
     classify_expression(db, module, reference, Projection::ArrayPromise)
 }
 
-/// Classifies a raw expression's function return without materializing its enclosing type.
+/// Classifies a raw expression's function return without inferring all module tables.
 ///
 /// The projection follows lexical bindings, imports, exports, aliases, `this`,
 /// and own named members. Only the selected function's return reference enters

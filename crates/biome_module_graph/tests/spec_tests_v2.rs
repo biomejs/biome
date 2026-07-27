@@ -54,6 +54,8 @@ mod normalization;
 mod promises;
 #[path = "spec_tests_v2/queries.test.rs"]
 mod queries;
+#[path = "spec_tests_v2/requests.test.rs"]
+mod requests;
 #[path = "spec_tests_v2/substitutions.test.rs"]
 mod substitutions;
 

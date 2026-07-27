@@ -12,7 +12,7 @@ use rustc_hash::FxHashSet;
 const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 const MAX_MEMBER_LOOKUP_STEPS: usize = 1024;
 
-/// Resolves local handles through leaf queries until reaching a concrete type.
+/// Resolves local handles through lookup queries until reaching a concrete type.
 ///
 /// Repeated handles remain symbolic. Missing modules or local types resolve to
 /// `Unknown`.
@@ -40,7 +40,7 @@ pub(in crate::db) fn resolve_local_type_on_demand<'db>(
     ty
 }
 
-/// Finds a member while resolving local handles through leaf queries.
+/// Finds a member while resolving local handles through lookup queries.
 pub(in crate::db) fn find_member_type_on_demand<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
@@ -55,7 +55,7 @@ pub(in crate::db) fn find_member_type_on_demand<'db>(
     )
 }
 
-/// Finds a value member while resolving local handles through leaf queries.
+/// Finds a value member while resolving local handles through lookup queries.
 pub(in crate::db) fn find_value_member_type_on_demand<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,

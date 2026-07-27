@@ -1,6 +1,7 @@
 #![deny(clippy::wildcard_enum_match_arm)]
 
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
+use crate::type_inference::profiling::record_cycle_recovery;
 use crate::{JsExport, JsModuleInfo, JsOwnExport, ModuleDb};
 use biome_css_syntax::TextRange;
 use biome_js_type_info::interned_types::{
@@ -179,6 +180,7 @@ pub(super) fn infer_module_types_cycle_result<'db>(
         return None;
     }
 
+    record_cycle_recovery();
     let blocked = inference_scc(db, module, &js_info);
     Some(resolve_raw_types(
         db,

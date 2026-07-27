@@ -5,9 +5,10 @@ use super::{
 };
 use crate::db::queries::{
     BindingTypeInput, LocalTypeInput, SymbolFromModuleInfo, infer_binding_type, infer_local_type,
-    infer_module_types_bottom_up, namespace_export_names, resolved_export_origin,
+    infer_module_types_bottom_up_for_import_depth, namespace_export_names, resolved_export_origin,
 };
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
+use crate::type_inference::TypeInferenceCodeReference;
 use crate::{JsExport, JsImport, JsOwnExport, ModuleDb, ResolvedPath};
 use biome_js_type_info::{
     GlobalTypeId, ImportSymbol, Path, ResolvedTypeId, TypeImportQualifier, TypeReference,
@@ -307,7 +308,7 @@ fn find_export_origin_in_module(
     }
 }
 
-/// Resolves one exported type through export-discovery and leaf queries.
+/// Resolves one exported type through export and lookup queries.
 pub(in crate::db) fn resolve_export_type_on_demand<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
@@ -345,7 +346,7 @@ impl<'db> ResolutionCtx<'db, '_> {
     ///
     /// Cycle fallback uses this path because its blocked strongly connected
     /// component is local to the active module query and cannot be cached by
-    /// the on-demand leaf queries.
+    /// the on-demand lookup queries.
     fn resolve_import_symbol_from_tables(
         &self,
         module: ModuleInfo,
@@ -363,12 +364,12 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
-    /// Resolves only the requested import through export-discovery and leaf queries.
+    /// Resolves only the requested import through export and lookup queries.
     ///
     /// Unlike [`Self::resolve_import_symbol_from_tables`], this path does not
-    /// materialize the imported module's complete inferred tables. Import
-    /// chains that exceed the recursion budget switch to iterative table
-    /// materialization to remain stack-safe.
+    /// infer the imported module's complete type tables. Import chains that
+    /// exceed the recursion budget switch to iterative whole-module inference
+    /// to remain stack-safe.
     fn resolve_import_symbol_on_demand(
         &self,
         module: ModuleInfo,
@@ -400,13 +401,21 @@ impl<'db> ResolutionCtx<'db, '_> {
 
         let Some(_depth_guard) = OnDemandImportGuard::enter() else {
             // Whole-module inference has an explicit dependency work list. It
-            // bounds the Rust stack for import chains too deep for leaf-query
-            // recursion while retaining leaf queries for ordinary chains.
+            // bounds the Rust stack for import chains too deep for lookup-query
+            // recursion while retaining lookup queries for ordinary chains.
             let _fallback_guard = IterativeImportFallbackGuard::enter();
-            return infer_module_types_bottom_up(self.db, module)
-                .map_or(InferredTypeData::Unknown, |types| {
-                    self.resolve_import_symbol_from_tables(module, types, symbol)
-                });
+            return infer_module_types_bottom_up_for_import_depth(
+                self.db,
+                module,
+                TypeInferenceCodeReference::new(
+                    file!(),
+                    line!(),
+                    "ResolutionCtx::resolve_import_symbol",
+                ),
+            )
+            .map_or(InferredTypeData::Unknown, |types| {
+                self.resolve_import_symbol_from_tables(module, types, symbol)
+            });
         };
 
         self.resolve_import_symbol_on_demand(module, symbol)
@@ -427,7 +436,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         result
     }
 
-    /// Builds a namespace by resolving each discovered export through leaf queries.
+    /// Builds a namespace by resolving each discovered export through lookup queries.
     fn namespace_for_module_on_demand(&self, module: ModuleInfo) -> InferredTypeData<'db> {
         let Some(names) = namespace_export_names(self.db, module) else {
             return InferredTypeData::Unknown;
@@ -451,7 +460,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         ))
     }
 
-    /// Resolves one exported name without materializing an inferred module table.
+    /// Resolves one exported name without inferring complete module tables.
     pub(in crate::db) fn resolve_export_name_on_demand(
         &self,
         module: ModuleInfo,
@@ -771,7 +780,7 @@ fn inferred_type_from_binding_on_demand<'db>(
     infer_binding_type(db, input).unwrap_or(InferredTypeData::Unknown)
 }
 
-/// Resolves an exported type ID from an already materialized module table.
+/// Resolves an exported type ID from complete inferred module tables.
 fn inferred_type_from_resolved_id_from_tables<'db>(
     db: &'db dyn ModuleDb,
     inferred_types: &InferredModuleTypes<'db>,
@@ -804,10 +813,10 @@ fn inferred_type_from_resolved_id_from_tables<'db>(
     }
 }
 
-/// Resolves an exported type ID without materializing its module table.
+/// Resolves an exported type ID without inferring complete module tables.
 ///
 /// Named declarations remain symbolic local handles so recursive types retain
-/// their module identity. Other local types are requested through the leaf
+/// their module identity. Other local types are requested through the lookup
 /// query.
 fn inferred_type_from_resolved_id_on_demand<'db>(
     db: &'db dyn ModuleDb,

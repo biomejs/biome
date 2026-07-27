@@ -4,7 +4,7 @@ use biome_module_graph::{
     function_returns_promise, infer_binding_type, infer_export_type,
     infer_expression_function_returns_promise, infer_expression_is_array_of_promises,
     infer_expression_is_promise, infer_expression_type, infer_local_type, is_array_of_promise_type,
-    is_promise_type, resolve_callable_type,
+    is_promise_type, resolve_callable_type, type_inference::TypeInferenceClassification,
 };
 
 fn local_type_id_by_name(db: &dyn ModuleDb, module: ModuleInfo, name: &str) -> InferredLocalTypeId {
@@ -39,7 +39,7 @@ fn expression_range_by_source(
 }
 
 #[test]
-fn test_binding_query_does_not_materialize_the_module() {
+fn test_binding_query_does_not_infer_complete_module_tables() {
     let fs = MemoryFileSystem::default();
     fs.insert("/src/index.ts".into(), "export const value = 1;");
 
@@ -60,7 +60,7 @@ fn test_binding_query_does_not_materialize_the_module() {
 }
 
 #[test]
-fn test_binding_query_resolves_imports_without_materializing_modules() {
+fn test_binding_query_resolves_imports_without_complete_module_inference() {
     let fs = MemoryFileSystem::default();
     fs.insert("/src/source.ts".into(), "export const value = 1;");
     fs.insert(
@@ -138,7 +138,7 @@ fn test_namespace_query_keeps_named_exports_symbolic() {
 }
 
 #[test]
-fn test_member_lookup_resolves_local_types_without_materializing_the_module() {
+fn test_member_lookup_resolves_local_types_without_complete_module_inference() {
     let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
@@ -362,11 +362,11 @@ fn test_expression_function_return_query_skips_expression_and_sibling_type_queri
     db.clear_salsa_events();
     assert_eq!(
         infer_expression_function_returns_promise(&db, object),
-        Some(false)
+        TypeInferenceClassification::NoMatch
     );
     assert_eq!(
         infer_expression_function_returns_promise(&db, cache_dir),
-        Some(false)
+        TypeInferenceClassification::NoMatch
     );
     let events = db.take_salsa_events();
 
@@ -418,11 +418,11 @@ fn test_expression_function_return_query_follows_only_interface_call_signature()
     db.clear_salsa_events();
     assert_eq!(
         infer_expression_function_returns_promise(&db, expression),
-        Some(true)
+        TypeInferenceClassification::Match
     );
     assert_eq!(
         infer_expression_function_returns_promise(&db, object_expression),
-        Some(true)
+        TypeInferenceClassification::Match
     );
     let events = db.take_salsa_events();
 
@@ -461,7 +461,7 @@ fn test_expression_array_promise_query_skips_sibling_type_queries() {
     db.clear_salsa_events();
     assert_eq!(
         infer_expression_is_array_of_promises(&db, expression),
-        Some(true)
+        TypeInferenceClassification::Match
     );
     let events = db.take_salsa_events();
 
@@ -501,12 +501,24 @@ fn test_expression_array_promise_query_unwraps_awaited_function_returns_selectiv
         .module_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
     let inputs = [
-        ("await asyncValues(null as never)", Some(true)),
-        ("await syncValues(null as never)", Some(true)),
-        ("await directValues", Some(true)),
-        ("await await asyncValues(null as never)", Some(true)),
-        ("await uncertain", Some(false)),
-        ("await overloaded()", None),
+        (
+            "await asyncValues(null as never)",
+            TypeInferenceClassification::Match,
+        ),
+        (
+            "await syncValues(null as never)",
+            TypeInferenceClassification::Match,
+        ),
+        ("await directValues", TypeInferenceClassification::Match),
+        (
+            "await await asyncValues(null as never)",
+            TypeInferenceClassification::Match,
+        ),
+        ("await uncertain", TypeInferenceClassification::NoMatch),
+        (
+            "await overloaded()",
+            TypeInferenceClassification::Indeterminate,
+        ),
     ]
     .map(|(source, expected)| {
         (
@@ -582,10 +594,13 @@ fn test_expression_promise_queries_follow_imported_interface_members() {
     );
 
     db.clear_salsa_events();
-    assert_eq!(infer_expression_is_promise(&db, expression), Some(false));
+    assert_eq!(
+        infer_expression_is_promise(&db, expression),
+        TypeInferenceClassification::NoMatch
+    );
     assert_eq!(
         infer_expression_is_array_of_promises(&db, expression),
-        Some(false)
+        TypeInferenceClassification::NoMatch
     );
     let events = db.take_salsa_events();
 
@@ -620,10 +635,13 @@ fn test_expression_promise_queries_match_unknown_node_builtin_imports() {
     );
 
     db.clear_salsa_events();
-    assert_eq!(infer_expression_is_promise(&db, expression), Some(false));
+    assert_eq!(
+        infer_expression_is_promise(&db, expression),
+        TypeInferenceClassification::NoMatch
+    );
     assert_eq!(
         infer_expression_is_array_of_promises(&db, expression),
-        Some(false)
+        TypeInferenceClassification::NoMatch
     );
     let events = db.take_salsa_events();
 
@@ -631,7 +649,7 @@ fn test_expression_promise_queries_match_unknown_node_builtin_imports() {
 }
 
 #[test]
-fn test_export_query_does_not_materialize_the_module() {
+fn test_export_query_does_not_infer_complete_module_tables() {
     let fs = MemoryFileSystem::default();
     fs.insert("/src/index.ts".into(), "export const value = 1;");
 
