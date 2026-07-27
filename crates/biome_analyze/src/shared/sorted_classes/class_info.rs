@@ -596,9 +596,7 @@ mod get_class_info_tests {
     use bitvec::bitvec;
 
     use super::*;
-    use crate::shared::sorted_classes::{
-        presets::ConfigPreset, sort_config::UtilityLayer,
-    };
+    use crate::shared::sorted_classes::{presets::ConfigPreset, sort_config::UtilityLayer};
 
     #[test]
     fn test_get_class_info() {

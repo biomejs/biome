@@ -7125,7 +7125,7 @@
 					]
 				},
 				"useSortedClasses": {
-					"description": "Enforce the sorting of CSS utility classes.\nSee https://biomejs.dev/linter/rules/use-sorted-classes",
+					"description": "Enforce the sorting of CSS utility classes in HTML class attributes.\nSee https://biomejs.dev/linter/rules/use-sorted-classes",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSortedClassesConfiguration" },
 						{ "type": "null" }

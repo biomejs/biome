@@ -2732,7 +2732,7 @@ See https://biomejs.dev/linter/rules/use-scoped-styles
 	 */
 	useScopedStyles?: UseScopedStylesConfiguration;
 	/**
-	* Enforce the sorting of CSS utility classes.
+	* Enforce the sorting of CSS utility classes in HTML class attributes.
 See https://biomejs.dev/linter/rules/use-sorted-classes 
 	 */
 	useSortedClasses?: UseSortedClassesConfiguration;
