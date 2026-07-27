@@ -440,7 +440,7 @@ struct ParsedEmbed {
     /// The parsed snippet + file source, ready to push to `nodes`.
     node: (AnyParse, EmbedContent, DocumentFileSource),
     /// If JS was parsed, the resolved JsFileSource (for `embedded_file_source` capture).
-    js_file_source: Option<JsFileSource>,
+    js_file_source: Option<biome_languages::JsFileSource>,
 }
 
 /// Shared parsing context passed to `parse_matched_embed`.
@@ -1144,11 +1144,15 @@ pub(crate) fn js_verbatim_ranges(code: &str) -> Vec<TextRange> {
 /// CSS source.
 #[cfg(feature = "html_embeds")]
 pub(crate) fn css_verbatim_ranges(code: &str) -> Vec<TextRange> {
-    let parsed = parse_css(code, CssFileSource::css(), CssParserOptions::default());
+    let parsed = parse_css(
+        code,
+        biome_languages::CssFileSource::css(),
+        CssParserOptions::default(),
+    );
     let root = parsed.syntax();
     let mut ranges = Vec::new();
 
-    for token in root.descendants_tokens(Direction::Next) {
+    for token in root.descendants_tokens(biome_rowan::Direction::Next) {
         for piece in token
             .leading_trivia()
             .pieces()
