@@ -13,7 +13,8 @@ use crate::configuration::to_analyzer_rules;
 use crate::embed::EmbedContent;
 #[cfg(feature = "js_embeds")]
 use crate::embed::js::{
-    EmbedCandidate, EmbedDetectorsRegistry, EmbedMatch, GuestLanguage, TemplateTagKind,
+    CombinedEmbedContent, EmbedCandidate, EmbedDetectorsRegistry, EmbedMatch, GuestLanguage,
+    PlaceholderSlice, TemplateTagKind,
 };
 use crate::file_handlers::FixAllParams;
 use crate::file_handlers::javascript::go_to::{resolve_binding, resolve_definition};
@@ -646,10 +647,32 @@ fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
         .filter_map(|expr| {
             let candidate = build_js_template_candidate(&expr)?;
             let embed_match = EmbedDetectorsRegistry::detect_match(&candidate, file_source)?;
-            let (snippet, content, doc_source) =
+            let result =
                 parse_js_matched_embed(&candidate, &embed_match, node_cache, path, settings)?;
-            Some((snippet, content, doc_source))
+
+            if let Some(combined) = candidate.combined_chunks() {
+                let parse = result.0;
+                let file_source = result.2;
+                Some(
+                    combined
+                        .slices
+                        .iter()
+                        .map(|slice| {
+                            let content = EmbedContent {
+                                element_range: slice.chunk_range,
+                                content_range: slice.chunk_range,
+                                content_offset: slice.combined_start,
+                                text: result.1.text.clone(),
+                            };
+                            (parse.clone(), content, file_source.clone())
+                        })
+                        .collect::<Vec<_>>(),
+                )
+            } else {
+                Some(vec![result])
+            }
         })
+        .flatten()
         .collect();
 
     ParseEmbedResult { nodes }
@@ -662,27 +685,83 @@ fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
 /// - The tag can't be classified (unknown pattern)
 #[cfg(feature = "js_embeds")]
 fn build_js_template_candidate(expr: &JsTemplateExpression) -> Option<EmbedCandidate> {
-    // TODO: Interpolations are not supported yet.
-    if expr.elements().len() != 1 {
-        return None;
-    }
-
-    let Some(AnyJsTemplateElement::JsTemplateChunkElement(chunk)) = expr.elements().first() else {
-        return None;
-    };
-
     let tag_kind = template_expression_to_template_tag(expr)?;
 
-    let content_token = chunk.template_chunk_token().ok()?;
-    Some(EmbedCandidate::TaggedTemplate {
-        tag: tag_kind,
-        content: EmbedContent {
-            element_range: chunk.range(),
-            content_range: content_token.text_range(),
-            content_offset: content_token.text_range().start(),
-            text: content_token.token_text(),
-        },
-    })
+    let is_html = matches!(&tag_kind, TemplateTagKind::Identifier(name) if name.text() == "html");
+
+    if expr.elements().len() == 1 {
+        // Single-chunk template: use the existing path
+        let Some(AnyJsTemplateElement::JsTemplateChunkElement(chunk)) = expr.elements().first()
+        else {
+            return None;
+        };
+        let content_token = chunk.template_chunk_token().ok()?;
+        Some(EmbedCandidate::TaggedTemplate {
+            tag: tag_kind,
+            content: EmbedContent {
+                element_range: chunk.range(),
+                content_range: content_token.text_range(),
+                content_offset: content_token.text_range().start(),
+                text: content_token.token_text(),
+            },
+            combined_chunks: None,
+        })
+    } else if is_html {
+        // Multi-chunk HTML template (has interpolations): build combined text with placeholders
+        let mut combined_text = String::new();
+        let mut slices = Vec::new();
+        let mut interp_index = 0u32;
+
+        let mut first_chunk: Option<EmbedContent> = None;
+
+        for element in expr.elements() {
+            if let AnyJsTemplateElement::JsTemplateChunkElement(chunk) = element {
+                let content_token = chunk.template_chunk_token().ok()?;
+                let token_text = content_token.text();
+                let start = TextSize::from(combined_text.len() as u32);
+
+                combined_text.push_str(token_text);
+                let end = TextSize::from(combined_text.len() as u32);
+
+                let chunk_content = EmbedContent {
+                    element_range: chunk.range(),
+                    content_range: content_token.text_range(),
+                    content_offset: content_token.text_range().start(),
+                    text: content_token.token_text(),
+                };
+
+                if first_chunk.is_none() {
+                    first_chunk = Some(chunk_content.clone());
+                }
+
+                slices.push(PlaceholderSlice {
+                    chunk_range: content_token.text_range(),
+                    combined_start: start,
+                    combined_end: end,
+                });
+            } else {
+                // Interpolation: insert placeholder
+                let placeholder = format!("$BIOME_{interp_index}$");
+                combined_text.push_str(&placeholder);
+                interp_index += 1;
+            }
+        }
+
+        let first = first_chunk?;
+        let base_offset = first.content_offset;
+        Some(EmbedCandidate::TaggedTemplate {
+            tag: tag_kind,
+            content: first,
+            combined_chunks: Some(CombinedEmbedContent {
+                combined_text,
+                slices,
+                base_offset,
+            }),
+        })
+    } else {
+        // Multi-chunk non-HTML template (CSS/GraphQL): skip embedded formatting
+        None
+    }
 }
 
 /// Classify a template expression's tag into a `TemplateTagKind`.
@@ -763,6 +842,7 @@ fn parse_js_matched_embed(
     settings: &SettingsWithEditor,
 ) -> Option<(AnyParse, EmbedContent, DocumentFileSource)> {
     let content = candidate.content();
+    let combined_text = &candidate.combined_text();
 
     match embed_match.guest {
         GuestLanguage::Css => {
@@ -771,7 +851,7 @@ fn parse_js_matched_embed(
             );
             let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
             let parse = parse_css_with_offset_and_cache(
-                content.text.text(),
+                combined_text,
                 file_source.to_css_file_source().unwrap_or_default(),
                 content.content_offset,
                 cache,
@@ -784,11 +864,8 @@ fn parse_js_matched_embed(
         #[cfg(feature = "lang_graphql")]
         GuestLanguage::GraphQL => {
             let file_source = DocumentFileSource::Graphql(GraphqlFileSource::graphql());
-            let parse = parse_graphql_with_offset_and_cache(
-                content.text.text(),
-                content.content_offset,
-                cache,
-            );
+            let parse =
+                parse_graphql_with_offset_and_cache(combined_text, content.content_offset, cache);
 
             Some((parse.into(), content, file_source))
         }
@@ -798,7 +875,7 @@ fn parse_js_matched_embed(
             let file_source = DocumentFileSource::Html(HtmlFileSource::html());
             let options = settings.parse_options::<HtmlLanguage>(biome_path, &file_source);
             let parse = parse_html_with_offset_and_cache(
-                content.text.text(),
+                combined_text,
                 content.content_offset,
                 cache,
                 options,
@@ -1610,13 +1687,80 @@ fn format_embedded(
                 DocumentFileSource::Html(_) => {
                     let html_options =
                         settings.format_options::<HtmlLanguage>(biome_path, &snippet_file_source);
+                    let indent_width = html_options.indent_width();
                     let node = snippet
                         .parsed_origin()
                         .parse(&workspace_db)
                         .embedded_syntax::<HtmlLanguage>();
                     let formatted =
                         biome_html_formatter::format_node_with_offset(html_options, &node).ok()?;
-                    Some(wrap_document(formatted.into_document()))
+                    let printed = formatted.print().ok()?;
+                    let code = printed.as_code();
+
+                    if code.contains("$BIOME_") {
+                        // Multi-chunk template: split formatted output at placeholders.
+                        let root_range = node.inner().text_range();
+
+                        // Find all sibling chunks by matching the same parse root.
+                        let mut sibling_ranges: Vec<TextRange> = snippets
+                            .iter()
+                            .filter(|(_, s)| {
+                                s.file_source(&workspace_db) == Some(snippet_file_source)
+                                    && s.parsed_origin()
+                                        .parse(&workspace_db)
+                                        .embedded_syntax::<HtmlLanguage>()
+                                        .inner()
+                                        .text_range()
+                                        == root_range
+                            })
+                            .map(|(r, _)| *r)
+                            .collect();
+                        sibling_ranges.sort_by_key(|r| r.start());
+
+                        // Split formatting at $BIOME_N$ markers.
+                        // Each placeholder is "$BIOME_" followed by digits, then "$".
+                        let mut slices: Vec<&str> = Vec::new();
+                        let mut remaining: &str = code;
+                        while let Some(pos) = remaining.find("$BIOME_") {
+                            slices.push(&remaining[..pos]);
+                            // Skip past "$BIOME_" + digits + "$"
+                            let after_prefix = &remaining[pos + 7..];
+                            let digits_end = after_prefix
+                                .bytes()
+                                .position(|b| !b.is_ascii_digit())
+                                .unwrap_or(after_prefix.len());
+                            let after_digits = &after_prefix[digits_end..];
+                            if after_digits.starts_with('$') {
+                                remaining = &after_digits[1..];
+                            } else {
+                                break;
+                            }
+                        }
+                        if !remaining.is_empty() {
+                            slices.push(remaining);
+                        }
+
+                        let my_slice = sibling_ranges
+                            .iter()
+                            .position(|r| *r == range)
+                            .and_then(|i| slices.get(i).copied())?;
+
+                        Some(Document::new(vec![
+                            FormatElement::Line(LineMode::Hard),
+                            FormatElement::Tag(Tag::StartIndent),
+                            FormatElement::Line(LineMode::Hard),
+                            FormatElement::Text {
+                                text: my_slice.to_string().into_boxed_str(),
+                                text_width: biome_formatter::format_element::TextWidth::from_text(
+                                    my_slice,
+                                    indent_width,
+                                ),
+                            },
+                            FormatElement::Tag(Tag::EndIndent),
+                        ]))
+                    } else {
+                        Some(wrap_document(formatted.into_document()))
+                    }
                 }
                 _ => None,
             }

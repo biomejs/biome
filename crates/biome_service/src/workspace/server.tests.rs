@@ -1619,6 +1619,176 @@ const Baz = graphql`
 }
 
 #[test]
+fn format_js_with_embedded_html() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"const a = html`<div       > hello </div     >`;
+
+const b = html`
+  <p    attr="val"    >ich bin ein
+
+  text  </p>
+`;
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code());
+}
+
+#[test]
+fn format_js_with_embedded_html_with_interpolations_is_skipped() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"const a = html`<div       > hello ${name} </div     >`;
+
+const b = html`
+  <div @click=${() => {
+  	console.log("clicked");
+  }}>click me</div>
+`;
+
+const c = html`
+  <ul>
+    ${items.map(item => html`<li>${item}</li>`)}
+  </ul>
+`;
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code());
+}
+
+#[test]
+fn format_js_with_embedded_html_and_css_mixed() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"const h = html`<div       > hello </div     >`;
+
+const c = css` color : red   ; `;
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code());
+}
+
+#[test]
 fn issue_9131() {
     const FILE_PATH: &str = "/project/file.js";
     const FILE_CONTENT: &str = r#"

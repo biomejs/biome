@@ -1,0 +1,11 @@
+---
+source: crates/biome_service/src/workspace/server.tests.rs
+expression: result.as_code()
+---
+const a = html`
+	<div>hello</div>
+`;
+
+const b = html`
+	<p attr="val">ich bin ein text</p>
+`;

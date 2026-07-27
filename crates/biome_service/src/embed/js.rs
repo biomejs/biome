@@ -1,6 +1,6 @@
 use super::EmbedContent;
 use biome_languages::{CssFileSource, DocumentFileSource, GraphqlFileSource, HtmlFileSource};
-use biome_rowan::TokenText;
+use biome_rowan::{TextRange, TextSize, TokenText};
 
 /// Language that can be embedded inside JavaScript template literals.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -25,6 +25,9 @@ pub(crate) enum EmbedCandidate {
     TaggedTemplate {
         tag: TemplateTagKind,
         content: EmbedContent,
+        /// For templates with interpolations, the combined text with placeholders
+        /// and per-chunk slice info. `None` for single-chunk templates.
+        combined_chunks: Option<CombinedEmbedContent>,
     },
 }
 
@@ -34,6 +37,48 @@ impl EmbedCandidate {
             Self::TaggedTemplate { content, .. } => content.clone(),
         }
     }
+
+    /// Returns the text to parse for this candidate.
+    /// For single-chunk templates, returns the chunk's text.
+    /// For multi-chunk templates, returns the combined text with placeholders.
+    pub fn combined_text(&self) -> String {
+        match self {
+            Self::TaggedTemplate {
+                combined_chunks: Some(combined),
+                ..
+            } => combined.combined_text.clone(),
+            Self::TaggedTemplate { content, .. } => content.text.text().to_string(),
+        }
+    }
+
+    /// Returns the combined content info, if this is a multi-chunk template.
+    pub fn combined_chunks(&self) -> Option<&CombinedEmbedContent> {
+        match self {
+            Self::TaggedTemplate {
+                combined_chunks, ..
+            } => combined_chunks.as_ref(),
+        }
+    }
+}
+
+/// Information about a placeholder in the combined embedded text.
+#[derive(Debug, Clone)]
+pub(crate) struct PlaceholderSlice {
+    /// The original chunk's text range in the source document.
+    pub chunk_range: TextRange,
+    /// The byte offset where this chunk's text starts in the combined text.
+    pub combined_start: TextSize,
+    /// The byte offset where this chunk's text ends in the combined text.
+    pub combined_end: TextSize,
+}
+
+/// Combined embedded content for templates with interpolations.
+/// Contains the full concatenated text with placeholders and slice positions.
+#[derive(Debug, Clone)]
+pub(crate) struct CombinedEmbedContent {
+    pub combined_text: String,
+    pub slices: Vec<PlaceholderSlice>,
+    pub base_offset: TextSize,
 }
 
 /// Describes how a JavaScript template tag was classified.
