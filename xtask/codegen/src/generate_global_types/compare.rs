@@ -10,6 +10,12 @@ use super::lower::{
 /// Number of `Error` class members expected in generated output.
 const ERROR_MEMBER_COUNT: usize = 6;
 const SYMBOL_MEMBER_COUNT: usize = 2;
+const MAP_TYPE_PARAMETERS: &[LoweredTypeReference] = &[
+    LoweredTypeReference::Predefined("GLOBAL_T_ID"),
+    LoweredTypeReference::Predefined("GLOBAL_U_ID"),
+];
+const SET_TYPE_PARAMETERS: &[LoweredTypeReference] =
+    &[LoweredTypeReference::Predefined("GLOBAL_T_ID")];
 const WEAK_MAP_TYPE_PARAMETERS: &[LoweredTypeReference] = &[
     LoweredTypeReference::Predefined("GLOBAL_T_ID"),
     LoweredTypeReference::Predefined("GLOBAL_U_ID"),
@@ -81,6 +87,8 @@ pub fn compare_lowered_globals(lowered: &LoweredGlobalTypes) -> Result<()> {
         "DATE_ID_GLOBAL_TYPE_ID",
         DATE_TYPE_PARAMETERS,
     )?;
+    assert_memberless_class_shape(lowered, "Map", "MAP_ID_GLOBAL_TYPE_ID", MAP_TYPE_PARAMETERS)?;
+    assert_memberless_class_shape(lowered, "Set", "SET_ID_GLOBAL_TYPE_ID", SET_TYPE_PARAMETERS)?;
     assert_memberless_class_shape(
         lowered,
         "WeakMap",

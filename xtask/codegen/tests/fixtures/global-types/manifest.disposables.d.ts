@@ -48,4 +48,8 @@ interface Date {
     valueOf(): number;
 }
 
+interface Map<K, V> {}
+
+interface Set<T> {}
+
 interface WeakMap<K, V> {}

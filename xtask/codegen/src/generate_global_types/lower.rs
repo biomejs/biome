@@ -270,6 +270,8 @@ pub fn lower_global_types(
         ASYNC_DISPOSABLE_GLOBAL,
     )?;
     lower_memberless_class_global(manifest, &mut source_cache, &mut globals, DATE_GLOBAL)?;
+    lower_memberless_class_global(manifest, &mut source_cache, &mut globals, MAP_GLOBAL)?;
+    lower_memberless_class_global(manifest, &mut source_cache, &mut globals, SET_GLOBAL)?;
     lower_memberless_class_global(manifest, &mut source_cache, &mut globals, WEAK_MAP_GLOBAL)?;
 
     Ok(LoweredGlobalTypes {
@@ -462,6 +464,18 @@ const DATE_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
     name: "Date",
     id_constant: "DATE_ID_GLOBAL_TYPE_ID",
     type_parameter_ids: &[],
+};
+
+const MAP_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
+    name: "Map",
+    id_constant: "MAP_ID_GLOBAL_TYPE_ID",
+    type_parameter_ids: &["GLOBAL_T_ID", "GLOBAL_U_ID"],
+};
+
+const SET_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
+    name: "Set",
+    id_constant: "SET_ID_GLOBAL_TYPE_ID",
+    type_parameter_ids: &["GLOBAL_T_ID"],
 };
 
 const WEAK_MAP_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
