@@ -7,6 +7,7 @@ pub(crate) mod import;
 pub(crate) mod media_query_comments;
 pub(crate) mod scss_closing_comments;
 pub(crate) mod scss_control_condition;
+pub(crate) mod scss_declaration_list;
 pub(crate) mod scss_each;
 pub(crate) mod scss_expression;
 pub(crate) mod scss_include_comments;
