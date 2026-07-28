@@ -10,16 +10,22 @@ use biome_formatter::{FormatResult, FormatWithRule, RemoveSoftLinesBuffer, forma
 use biome_rowan::{AstNode, AstNodeList, AstNodeListIterator, TextSize};
 use std::{iter::Peekable, slice};
 
-pub(super) fn format_if_applicable<'a, N, I>(
-    node: &'a N,
+/// Returns grouped formatting when a declaration value's layout or comments
+/// require comma groups to break independently.
+///
+/// ```css
+/// a { box-shadow: 1px /* boundary */ 1px red, 2px 2px blue; }
+/// ```
+pub(super) fn format_if_applicable<'a, List, Item>(
+    node: &'a List,
     layout: ValueListLayout,
     comments: &'a [SourceComment<CssLanguage>],
     lowercase_css_wide_keyword: bool,
 ) -> Option<impl Format<CssFormatContext> + 'a>
 where
-    N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
-    I: AstNode<Language = CssLanguage>
-        + IntoFormat<CssFormatContext, Format: FormatWithRule<CssFormatContext, Item = I>>,
+    List: AstNodeList<Language = CssLanguage, Node = Item> + AstNode<Language = CssLanguage>,
+    Item: AstNode<Language = CssLanguage>
+        + IntoFormat<CssFormatContext, Format: FormatWithRule<CssFormatContext, Item = Item>>,
 {
     let is_applicable = match layout {
         ValueListLayout::Fill if node.parent::<CssGenericProperty>().is_some() => true,
@@ -36,23 +42,23 @@ where
     }))
 }
 
-/// Merges comma-list elements and dangling comments in source order.
-struct CommaGroupCursor<'a, I>
+/// Merges typed list elements and dangling comments in source order.
+struct CommaGroupCursor<'a, Item>
 where
-    I: AstNode<Language = CssLanguage>,
+    Item: AstNode<Language = CssLanguage>,
 {
-    elements: Peekable<AstNodeListIterator<CssLanguage, I>>,
+    elements: Peekable<AstNodeListIterator<CssLanguage, Item>>,
     comments: Peekable<slice::Iter<'a, SourceComment<CssLanguage>>>,
     list_end: TextSize,
 }
 
-impl<'a, I> CommaGroupCursor<'a, I>
+impl<'a, Item> CommaGroupCursor<'a, Item>
 where
-    I: AstNode<Language = CssLanguage>,
+    Item: AstNode<Language = CssLanguage>,
 {
-    fn new<N>(node: &N, comments: &'a [SourceComment<CssLanguage>]) -> Self
+    fn new<List>(node: &List, comments: &'a [SourceComment<CssLanguage>]) -> Self
     where
-        N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
+        List: AstNodeList<Language = CssLanguage, Node = Item> + AstNode<Language = CssLanguage>,
     {
         Self {
             elements: node.iter().peekable(),
@@ -92,11 +98,11 @@ where
     }
 }
 
-impl<'a, I> Iterator for CommaGroupCursor<'a, I>
+impl<'a, Item> Iterator for CommaGroupCursor<'a, Item>
 where
-    I: AstNode<Language = CssLanguage>,
+    Item: AstNode<Language = CssLanguage>,
 {
-    type Item = CommaGroupEntry<'a, I>;
+    type Item = CommaGroupEntry<'a, Item>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let element_start = self.elements.peek()?.syntax().text_trimmed_range().start();
@@ -112,9 +118,9 @@ where
     }
 }
 
-enum CommaGroupEntry<'a, I> {
+enum CommaGroupEntry<'a, Item> {
     Comment(&'a SourceComment<CssLanguage>),
-    Element(I),
+    Element(Item),
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -128,28 +134,28 @@ struct CommaGroupPreview {
 /// ```css
 /// a { margin: 1px/* boundary */2px, 3px; }
 /// ```
-struct CommaGroupsWriter<'a, I>
+struct CommaGroupsWriter<'a, Item>
 where
-    I: AstNode<Language = CssLanguage>,
+    Item: AstNode<Language = CssLanguage>,
 {
-    cursor: CommaGroupCursor<'a, I>,
+    cursor: CommaGroupCursor<'a, Item>,
     layout: ValueListLayout,
     lowercase_css_wide_keyword: bool,
 }
 
-impl<'a, I> CommaGroupsWriter<'a, I>
+impl<'a, Item> CommaGroupsWriter<'a, Item>
 where
-    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
-    I::Format: FormatWithRule<CssFormatContext, Item = I>,
+    Item: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
+    Item::Format: FormatWithRule<CssFormatContext, Item = Item>,
 {
-    fn new<N>(
-        node: &N,
+    fn new<List>(
+        node: &List,
         layout: ValueListLayout,
         comments: &'a [SourceComment<CssLanguage>],
         lowercase_css_wide_keyword: bool,
     ) -> Self
     where
-        N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
+        List: AstNodeList<Language = CssLanguage, Node = Item> + AstNode<Language = CssLanguage>,
     {
         Self {
             cursor: CommaGroupCursor::new(node, comments),
@@ -265,8 +271,10 @@ where
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 enum CommaGroupValueState {
+    /// No value has been formatted in the current comma group.
     #[default]
     Empty,
+    /// No boundary-comment continuation is active.
     Normal,
     /// A boundary comment was emitted and the following value starts its indented segment.
     BoundaryStart,

@@ -20,7 +20,6 @@ pub(crate) fn find_scss_declaration_list_group(
     let items = ScssListExpressionElement::cast_ref(node)
         .and_then(|element| element.value().ok())
         .and_then(|value| value.as_scss_expression().map(ScssExpression::items))
-        .or_else(|| ScssExpressionItemList::cast_ref(node))
         .or_else(|| node.ancestors().find_map(ScssExpressionItemList::cast))?;
     is_declaration_list_group(&items).then_some(items)
 }

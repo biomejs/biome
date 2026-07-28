@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use crate::scss::lists::list_expression_element_list::ScssListElementLayout;
 use crate::utils::comment_trivia::has_inline_trailing_comment;
 use crate::utils::component_value_list::{
     ValueListLayout, get_value_list_layout, has_value_boundary_comments,
@@ -14,6 +13,7 @@ use biome_css_syntax::{
     is_scss_map_key, is_scss_map_outer_parenthesized_value_list,
     scss_include_keyword_argument_owner, single_expression_item, unwrap_single_expression_item,
 };
+use biome_formatter::separated::TrailingSeparator;
 use biome_formatter::{format_args, write};
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList};
 
@@ -90,9 +90,7 @@ impl<'a> ScssListLayout<'a> {
         }
 
         if should_preserve_source_group_breaks(self.node, f) {
-            let elements = elements
-                .format()
-                .with_options(ScssListElementLayout::PreserveSourceBreaks);
+            let elements = format_elements_with_source_breaks(&elements);
             return write!(f, [group(&format_args![soft_line_break(), elements])]);
         }
 
@@ -214,6 +212,32 @@ impl<'a> ScssListLayout<'a> {
     pub(crate) fn owns_dangling_comments(&self, f: &CssFormatter) -> bool {
         owns_include_closing_comments(self.node.syntax(), f)
     }
+}
+
+fn format_elements_with_source_breaks(
+    elements: &ScssListExpressionElementList,
+) -> impl Format<CssFormatContext> + '_ {
+    format_with(|f| {
+        let separated = elements
+            .format_separated(",")
+            .with_trailing_separator(TrailingSeparator::Omit);
+
+        for (index, (element, formatted)) in elements.elements().zip(separated).enumerate() {
+            if index > 0 {
+                if element
+                    .node()
+                    .is_ok_and(|element| element.syntax().has_leading_newline())
+                {
+                    write!(f, [hard_line_break()])?;
+                } else {
+                    write!(f, [soft_line_break_or_space()])?;
+                }
+            }
+            write!(f, [formatted])?;
+        }
+
+        Ok(())
+    })
 }
 
 /// Returns whether an SCSS declaration value preserves source breaks between
