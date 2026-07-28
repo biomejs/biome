@@ -41,9 +41,9 @@ pub(crate) use function_name::{
     add_scss_variable_member_function_name_diagnostic, parse_scss_function_name,
 };
 pub(crate) use identifiers::{
-    is_at_scss_interpolated_dashed_identifier, is_at_scss_interpolated_identifier,
-    is_at_scss_interpolated_selector_identifier, is_at_scss_module_member_access,
-    is_at_scss_namespaced_variable, is_at_scss_variable,
+    complete_scss_interpolated_identifier, is_at_scss_interpolated_dashed_identifier,
+    is_at_scss_interpolated_identifier, is_at_scss_interpolated_selector_identifier,
+    is_at_scss_module_member_access, is_at_scss_namespaced_variable, is_at_scss_variable,
     is_nth_at_scss_hyphen_interpolated_identifier, is_nth_at_scss_interpolated_dashed_identifier,
     is_nth_at_scss_interpolated_identifier, is_nth_at_scss_interpolated_selector_identifier,
     is_nth_at_scss_module_member_access, parse_scss_hyphen_interpolated_identifier,
