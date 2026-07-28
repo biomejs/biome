@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: typeofGuardNarrowing.ts
+---
+# Input
+```ts
+function alwaysTruthyAfterGuard(x: number | (() => void)) {
+	if (typeof x === "function") {
+		// `x` is narrowed to a function here, so this condition is always truthy.
+		if (x) {
+			x();
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+typeofGuardNarrowing.ts:4:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    2 │ 	if (typeof x === "function") {
+    3 │ 		// `x` is narrowed to a function here, so this condition is always truthy.
+  > 4 │ 		if (x) {
+      │ 		    ^
+    5 │ 			x();
+    6 │ 		}
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```

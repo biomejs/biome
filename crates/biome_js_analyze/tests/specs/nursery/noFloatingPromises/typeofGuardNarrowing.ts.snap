@@ -1,0 +1,110 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: typeofGuardNarrowing.ts
+---
+# Input
+```ts
+function narrowedToPromise(x: number | Promise<void>) {
+	if (typeof x === "object") {
+		// `x` is narrowed to `Promise<void>` here, so the bare statement floats.
+		x;
+	}
+}
+
+function guardedCall(x: number | (() => Promise<void>)) {
+	if (typeof x === "function") {
+		// `x` is narrowed to `() => Promise<void>` here, so the call floats.
+		x();
+	}
+}
+
+function reversedOperands(x: number | (() => Promise<void>)) {
+	if ("function" === typeof x) {
+		x();
+	}
+}
+
+function looseEquality(x: number | (() => Promise<void>)) {
+	if (typeof x == "function") {
+		x();
+	}
+}
+
+```
+
+# Diagnostics
+```
+typeofGuardNarrowing.ts:4:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    2 │ 	if (typeof x === "object") {
+    3 │ 		// `x` is narrowed to `Promise<void>` here, so the bare statement floats.
+  > 4 │ 		x;
+      │ 		^^
+    5 │ 	}
+    6 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+typeofGuardNarrowing.ts:11:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+     9 │ 	if (typeof x === "function") {
+    10 │ 		// `x` is narrowed to `() => Promise<void>` here, so the call floats.
+  > 11 │ 		x();
+       │ 		^^^^
+    12 │ 	}
+    13 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+typeofGuardNarrowing.ts:17:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    15 │ function reversedOperands(x: number | (() => Promise<void>)) {
+    16 │ 	if ("function" === typeof x) {
+  > 17 │ 		x();
+       │ 		^^^^
+    18 │ 	}
+    19 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+typeofGuardNarrowing.ts:23:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    21 │ function looseEquality(x: number | (() => Promise<void>)) {
+    22 │ 	if (typeof x == "function") {
+  > 23 │ 		x();
+       │ 		^^^^
+    24 │ 	}
+    25 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
