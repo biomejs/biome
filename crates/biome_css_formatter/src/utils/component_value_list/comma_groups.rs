@@ -38,7 +38,12 @@ where
     }
 
     Some(format_with(move |f| {
-        CommaGroupsWriter::new(node, layout, comments, lowercase_css_wide_keyword).write(f)
+        CommaGroupsWriter {
+            cursor: CommaGroupCursor::new(node, comments),
+            layout,
+            lowercase_css_wide_keyword,
+        }
+        .write(f)
     }))
 }
 
@@ -148,22 +153,6 @@ where
     Node: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
     Node::Format: FormatWithRule<CssFormatContext, Item = Node>,
 {
-    fn new<List>(
-        node: &List,
-        layout: ValueListLayout,
-        comments: &'a [SourceComment<CssLanguage>],
-        lowercase_css_wide_keyword: bool,
-    ) -> Self
-    where
-        List: AstNodeList<Language = CssLanguage, Node = Node> + AstNode<Language = CssLanguage>,
-    {
-        Self {
-            cursor: CommaGroupCursor::new(node, comments),
-            layout,
-            lowercase_css_wide_keyword,
-        }
-    }
-
     fn write(mut self, f: &mut Formatter<'_, CssFormatContext>) -> FormatResult<()> {
         let mut groups = f.fill();
 
