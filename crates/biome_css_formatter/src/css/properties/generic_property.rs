@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::comments::CssCommentStyle;
 use crate::prelude::*;
 use crate::utils::case::{is_css_modules_import_export_declaration, is_supports_test_declaration};
@@ -12,7 +14,7 @@ use biome_css_syntax::{
 use biome_formatter::comments::{CommentStyle, SourceComment};
 use biome_formatter::trivia::format_dangling_comment;
 use biome_formatter::{format_args, write};
-use biome_rowan::{AstNodeList, SyntaxResult, TextRange};
+use biome_rowan::{AstNodeList, SyntaxResult};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssGenericProperty;
@@ -306,36 +308,28 @@ impl<'a> CssPropertyColonComments<'a> {
     }
 }
 
-/// Returns the source whitespace after the final line break before `comment`.
-fn source_indent_before_comment(comment: &SourceComment<CssLanguage>) -> Option<String> {
+/// Recovers the horizontal source indentation of an own-line comment.
+///
+/// [`SourceComment`] records vertical spacing but not the exact spaces or tabs
+/// before a comment. For `color:\n        // comment`, this returns eight
+/// spaces. The caller resets structural indentation and aligns the comment
+/// with this prefix.
+fn source_indent_before_comment(comment: &SourceComment<CssLanguage>) -> Option<AlignedStr> {
     let comment_piece = comment.piece().as_piece();
     let token = comment_piece.token();
-    let comment_range = comment_piece.text_range();
+    let comment_start =
+        usize::from(comment_piece.text_range().start() - token.text_range().start());
+    let source_before_comment = token.text().get(..comment_start)?;
+    let (_, source_indent) = source_before_comment.rsplit_once(['\n', '\r', '\u{000c}'])?;
 
-    for trivia in [token.leading_trivia(), token.trailing_trivia()] {
-        let mut indentation_range: Option<TextRange> = None;
-
-        for piece in trivia.pieces() {
-            if piece.text_range() == comment_range {
-                let indentation_range = indentation_range?;
-                let relative_range = indentation_range - token.text_range().start();
-                return Some(token.text()[relative_range].to_string());
-            }
-
-            if piece.is_newline() {
-                indentation_range = Some(TextRange::empty(piece.text_range().end()));
-            } else if piece.is_whitespace() {
-                if let Some(indentation_range) = &mut indentation_range {
-                    *indentation_range =
-                        TextRange::new(indentation_range.start(), piece.text_range().end());
-                }
-            } else {
-                indentation_range = None;
-            }
-        }
+    if !source_indent
+        .bytes()
+        .all(|byte| matches!(byte, b' ' | b'\t'))
+    {
+        return None;
     }
 
-    None
+    Some(AlignedStr::Owned(Rc::<str>::from(source_indent)))
 }
 
 fn is_empty_custom_property_value(
