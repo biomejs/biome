@@ -8,8 +8,8 @@ use crate::{HtmlFormatContext, HtmlFormatter};
 use biome_formatter::{
     Buffer as _,
     prelude::{
-        Format, FormatResult, if_group_breaks, if_group_fits_on_line, located_token_text,
-        soft_line_break_or_space, token,
+        Format, FormatResult, format_with, if_group_breaks, if_group_fits_on_line,
+        located_token_text, soft_line_break_or_space, token,
     },
     write,
 };
@@ -209,43 +209,44 @@ impl Format<HtmlFormatContext> for FormatSrcsetCandidates<'_> {
             .max()
             .unwrap_or(0);
 
-        let mut candidates = self.candidates.iter().peekable();
-        while let Some(candidate) = candidates.next() {
-            let url = self.content.clone().slice(candidate.url);
-            write!(
-                f,
-                [located_token_text(
-                    self.value_token,
-                    url.source_range(self.value_token.text_range())
-                )]
-            )?;
-
-            if let Some(descriptor) = candidate.descriptor {
-                // One space of separation, plus whatever it takes to line the
-                // decimal points up with the widest candidate.
-                let padding =
-                    widest_url - text[candidate.url].len() + 1 + widest_descriptor_integer
-                        - descriptor_integer_len(&text[descriptor]);
-                let descriptor = self.content.clone().slice(descriptor);
+        let separator = format_with(|f| write!(f, [token(","), soft_line_break_or_space()]));
+        let mut candidates = f.join_with(separator);
+        for candidate in self.candidates {
+            candidates.entry(&format_with(|f| {
+                let url = self.content.clone().slice(candidate.url);
                 write!(
                     f,
-                    [
-                        if_group_breaks(&token(spaces(padding))),
-                        if_group_fits_on_line(&token(" ")),
-                        located_token_text(
-                            self.value_token,
-                            descriptor.source_range(self.value_token.text_range())
-                        )
-                    ]
+                    [located_token_text(
+                        self.value_token,
+                        url.source_range(self.value_token.text_range())
+                    )]
                 )?;
-            }
 
-            if candidates.peek().is_some() {
-                write!(f, [token(","), soft_line_break_or_space()])?;
-            }
+                if let Some(descriptor) = candidate.descriptor {
+                    // One space of separation, plus whatever it takes to line the
+                    // decimal points up with the widest candidate.
+                    let padding =
+                        widest_url - text[candidate.url].len() + 1 + widest_descriptor_integer
+                            - descriptor_integer_len(&text[descriptor]);
+                    let descriptor = self.content.clone().slice(descriptor);
+                    write!(
+                        f,
+                        [
+                            if_group_breaks(&token(spaces(padding))),
+                            if_group_fits_on_line(&token(" ")),
+                            located_token_text(
+                                self.value_token,
+                                descriptor.source_range(self.value_token.text_range())
+                            )
+                        ]
+                    )?;
+                }
+
+                Ok(())
+            }));
         }
 
-        Ok(())
+        candidates.finish()
     }
 }
 
