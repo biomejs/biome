@@ -1,4 +1,4 @@
-use std::collections::LinkedList;
+use std::collections::{LinkedList, VecDeque};
 
 use biome_parser::{
     TokenSet,
@@ -25,7 +25,7 @@ pub(crate) struct YamlLexer<'src> {
     scopes: Vec<BlockScope>,
 
     /// Cache of tokens to be emitted to the parser
-    tokens: LinkedList<LexToken>,
+    tokens: VecDeque<LexToken>,
 }
 
 impl<'src> YamlLexer<'src> {
@@ -35,7 +35,7 @@ impl<'src> YamlLexer<'src> {
             diagnostics: Vec::new(),
             scopes: Default::default(),
             current_coordinate: Default::default(),
-            tokens: LexToken::default().into(),
+            tokens: VecDeque::from([LexToken::default()]),
         }
     }
 
@@ -62,7 +62,7 @@ impl<'src> YamlLexer<'src> {
                     return EOF;
                 }
             }
-            match self.tokens.iter().nth(index).map(|token| token.kind) {
+            match self.tokens.get(index).map(|token| token.kind) {
                 Some(kind) if SKIPPED.contains(kind) => index += 1,
                 Some(kind) => return kind,
                 None => return EOF,
@@ -82,8 +82,8 @@ impl<'src> YamlLexer<'src> {
     /// ```
     fn consume_tokens(&mut self) {
         let Some(current) = self.current_byte() else {
-            let mut tokens = self.close_all_scopes();
-            self.tokens.append(&mut tokens);
+            let tokens = self.close_all_scopes();
+            self.tokens.extend(tokens);
             self.tokens
                 .push_back(LexToken::pseudo(EOF, self.current_coordinate));
             return;
@@ -91,7 +91,7 @@ impl<'src> YamlLexer<'src> {
 
         let start = self.text_position();
 
-        let mut tokens = match current {
+        let tokens = match current {
             c if is_break(c) => self.evaluate_block_scope(),
             c if is_space(c) => self.consume_whitespace_token().into(),
             b'#' => self.consume_comment().into(),
@@ -111,7 +111,7 @@ impl<'src> YamlLexer<'src> {
             b'|' | b'>' => self.consume_block_scalar(current),
             _ => self.consume_unexpected_token().into(),
         };
-        self.tokens.append(&mut tokens);
+        self.tokens.extend(tokens);
 
         debug_assert!(self.text_position() > start, "Lexer did not advance");
     }
