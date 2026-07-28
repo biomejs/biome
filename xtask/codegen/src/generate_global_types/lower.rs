@@ -443,6 +443,7 @@ const ASYNC_DISPOSABLE_GLOBAL: DisposableGlobalSpec = DisposableGlobalSpec {
     return_kind: DisposableReturnKind::PromiseLikeVoid,
 };
 
+/// Configuration for lowering a global interface to a class without members.
 #[derive(Clone, Copy)]
 struct MemberlessClassSpec {
     name: &'static str,
