@@ -1368,7 +1368,7 @@ mod tests {
 
     #[test]
     fn lowerer_lowers_date_global() -> Result<()> {
-        let lowered = lowered_from_fixture("manifest.disposables.d.ts")?;
+        let lowered = lowered_from_fixture("manifest.date.d.ts")?;
 
         let date = lowered.global("Date").expect("Date should be lowered");
         assert_eq!(date.id_constant(), "DATE_ID_GLOBAL_TYPE_ID");

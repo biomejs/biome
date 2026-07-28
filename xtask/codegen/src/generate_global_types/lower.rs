@@ -257,10 +257,33 @@ pub fn lower_global_types(
     source_files: &[DiscoveredFile],
 ) -> Result<LoweredGlobalTypes> {
     let mut source_cache = ParsedSourceCache::new(source_files);
+    let mut globals = Vec::new();
+
+    lower_error_globals(manifest, &mut source_cache, &mut globals)?;
+    lower_symbol_globals(manifest, &mut source_cache, &mut globals)?;
+    lower_disposable_global(manifest, &mut source_cache, &mut globals, DISPOSABLE_GLOBAL)?;
+    lower_disposable_global(
+        manifest,
+        &mut source_cache,
+        &mut globals,
+        ASYNC_DISPOSABLE_GLOBAL,
+    )?;
+    lower_memberless_class_global(manifest, &mut source_cache, &mut globals, DATE_GLOBAL)?;
+    lower_memberless_class_global(manifest, &mut source_cache, &mut globals, WEAK_MAP_GLOBAL)?;
+
+    Ok(LoweredGlobalTypes {
+        globals: globals.into_boxed_slice(),
+    })
+}
+
+/// Lowers `Error` and its constructor and call helpers when present.
+fn lower_error_globals(
+    manifest: &GlobalManifest,
+    source_cache: &mut ParsedSourceCache,
+    globals: &mut Vec<LoweredGlobal>,
+) -> Result<()> {
     let Some(error_group) = manifest.global_group("Error") else {
-        return Ok(LoweredGlobalTypes {
-            globals: Box::default(),
-        });
+        return Ok(());
     };
     if !error_group.has_role(GlobalDeclarationRole::Type) {
         bail!("Error global must have a type-side declaration");
@@ -268,7 +291,7 @@ pub fn lower_global_types(
     if !error_group.has_role(GlobalDeclarationRole::Value) {
         bail!("Error global must have a value-side declaration");
     }
-    ensure_error_value_references_constructor(error_group.declarations(), &mut source_cache)?;
+    ensure_error_value_references_constructor(error_group.declarations(), source_cache)?;
 
     let Some(error_constructor_group) = manifest.global_group("ErrorConstructor") else {
         bail!("Error global value side references missing ErrorConstructor group");
@@ -312,10 +335,7 @@ pub fn lower_global_types(
         constructor,
         call,
         prototype,
-    } = lower_error_constructor_signatures(
-        error_constructor_group.declarations(),
-        &mut source_cache,
-    )?;
+    } = lower_error_constructor_signatures(error_constructor_group.declarations(), source_cache)?;
 
     members.push(LoweredTypeMember {
         name: Text::from("constructor"),
@@ -331,7 +351,6 @@ pub fn lower_global_types(
         members.push(prototype);
     }
 
-    let mut globals = Vec::new();
     globals.push(LoweredGlobal {
         name: Text::from("Error"),
         id_constant: "ERROR_ID_GLOBAL_TYPE_ID",
@@ -352,20 +371,7 @@ pub fn lower_global_types(
         data: LoweredTypeData::Function(call),
     });
 
-    lower_symbol_globals(manifest, &mut source_cache, &mut globals)?;
-    lower_disposable_global(manifest, &mut source_cache, &mut globals, DISPOSABLE_GLOBAL)?;
-    lower_disposable_global(
-        manifest,
-        &mut source_cache,
-        &mut globals,
-        ASYNC_DISPOSABLE_GLOBAL,
-    )?;
-    lower_memberless_class_global(manifest, &mut source_cache, &mut globals, DATE_GLOBAL)?;
-    lower_memberless_class_global(manifest, &mut source_cache, &mut globals, WEAK_MAP_GLOBAL)?;
-
-    Ok(LoweredGlobalTypes {
-        globals: globals.into_boxed_slice(),
-    })
+    Ok(())
 }
 
 /// Lowered pieces extracted from `interface ErrorConstructor`.
