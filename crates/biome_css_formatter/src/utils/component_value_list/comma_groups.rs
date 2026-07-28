@@ -1,13 +1,13 @@
 use super::{
-    ValueListLayout, format_component_value_element, has_value_boundary_comments,
-    is_comma_delimiter, is_comma_separated_declaration_value_list, is_value_boundary_comment,
+    ValueListLayout, has_value_boundary_comments, is_comma_delimiter,
+    is_comma_separated_declaration_value_list, is_value_boundary_comment,
 };
 use crate::prelude::*;
-use biome_css_syntax::{CssGenericProperty, CssLanguage};
+use biome_css_syntax::{CssGenericProperty, CssIdentifier, CssLanguage, CssSyntaxNode};
 use biome_formatter::comments::SourceComment;
 use biome_formatter::trivia::format_dangling_comment;
-use biome_formatter::{FormatResult, FormatWithRule, RemoveSoftLinesBuffer, format_args, write};
-use biome_rowan::{AstNode, AstNodeList, AstNodeListIterator, TextSize};
+use biome_formatter::{FormatResult, RemoveSoftLinesBuffer, format_args, write};
+use biome_rowan::{SyntaxNodeChildren, TextSize};
 use std::{iter::Peekable, slice};
 
 /// Returns grouped formatting when a declaration value's layout or comments
@@ -16,24 +16,24 @@ use std::{iter::Peekable, slice};
 /// ```css
 /// a { box-shadow: 1px /* boundary */ 1px red, 2px 2px blue; }
 /// ```
-pub(super) fn format_if_applicable<'a, List, Node>(
-    node: &'a List,
+pub(super) fn format_if_applicable<'a>(
+    node: &'a CssSyntaxNode,
     layout: ValueListLayout,
     comments: &'a [SourceComment<CssLanguage>],
-    lowercase_css_wide_keyword: bool,
-) -> Option<impl Format<CssFormatContext> + 'a>
-where
-    List: AstNodeList<Language = CssLanguage, Node = Node> + AstNode<Language = CssLanguage>,
-    Node: AstNode<Language = CssLanguage>
-        + IntoFormat<CssFormatContext, Format: FormatWithRule<CssFormatContext, Item = Node>>,
-{
+) -> Option<impl Format<CssFormatContext> + 'a> {
     let is_applicable = match layout {
-        ValueListLayout::Fill if node.parent::<CssGenericProperty>().is_some() => true,
+        ValueListLayout::Fill
+            if node
+                .parent()
+                .is_some_and(|parent| CssGenericProperty::can_cast(parent.kind())) =>
+        {
+            true
+        }
         ValueListLayout::PreserveInline | ValueListLayout::OnePerLine => true,
         _ => has_value_boundary_comments(comments),
     };
 
-    if !is_applicable || !is_comma_separated_declaration_value_list(node.syntax()) {
+    if !is_applicable || !is_comma_separated_declaration_value_list(node) {
         return None;
     }
 
@@ -41,50 +41,37 @@ where
         CommaGroupsWriter {
             cursor: CommaGroupCursor::new(node, comments),
             layout,
-            lowercase_css_wide_keyword,
         }
         .write(f)
     }))
 }
 
-/// Merges typed list elements and dangling comments in source order.
-struct CommaGroupCursor<'a, Node>
-where
-    Node: AstNode<Language = CssLanguage>,
-{
-    elements: Peekable<AstNodeListIterator<CssLanguage, Node>>,
+/// Merges list elements and dangling comments in source order.
+struct CommaGroupCursor<'a> {
+    elements: Peekable<SyntaxNodeChildren<CssLanguage>>,
     comments: Peekable<slice::Iter<'a, SourceComment<CssLanguage>>>,
     list_end: TextSize,
 }
 
-impl<'a, Node> CommaGroupCursor<'a, Node>
-where
-    Node: AstNode<Language = CssLanguage>,
-{
-    fn new<List>(node: &List, comments: &'a [SourceComment<CssLanguage>]) -> Self
-    where
-        List: AstNodeList<Language = CssLanguage, Node = Node> + AstNode<Language = CssLanguage>,
-    {
+impl<'a> CommaGroupCursor<'a> {
+    fn new(node: &CssSyntaxNode, comments: &'a [SourceComment<CssLanguage>]) -> Self {
         Self {
-            elements: node.iter().peekable(),
+            elements: node.children().peekable(),
             comments: comments.iter().peekable(),
-            list_end: node.syntax().text_trimmed_range().end(),
+            list_end: node.text_trimmed_range().end(),
         }
     }
 
     fn preview_group(&mut self) -> Option<CommaGroupPreview> {
-        let starts_on_new_line = self.elements.peek()?.syntax().has_leading_newline();
+        let starts_on_new_line = self.elements.peek()?.has_leading_newline();
         let has_value_boundary_comment = if self.comments.peek().is_none() {
             false
         } else {
             let group_end = self
                 .elements
                 .clone()
-                .find(|element| is_comma_delimiter(element.syntax()))
-                .map_or_else(
-                    || self.list_end,
-                    |comma| comma.syntax().text_trimmed_range().end(),
-                );
+                .find(is_comma_delimiter)
+                .map_or_else(|| self.list_end, |comma| comma.text_trimmed_range().end());
 
             self.comments
                 .clone()
@@ -103,14 +90,11 @@ where
     }
 }
 
-impl<'a, Node> Iterator for CommaGroupCursor<'a, Node>
-where
-    Node: AstNode<Language = CssLanguage>,
-{
-    type Item = CommaGroupEntry<'a, Node>;
+impl<'a> Iterator for CommaGroupCursor<'a> {
+    type Item = CommaGroupEntry<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let element_start = self.elements.peek()?.syntax().text_trimmed_range().start();
+        let element_start = self.elements.peek()?.text_trimmed_range().start();
 
         if let Some(comment) = self
             .comments
@@ -123,12 +107,11 @@ where
     }
 }
 
-enum CommaGroupEntry<'a, Node> {
+enum CommaGroupEntry<'a> {
     Comment(&'a SourceComment<CssLanguage>),
-    Element(Node),
+    Element(CssSyntaxNode),
 }
 
-#[derive(Clone, Copy, Debug)]
 struct CommaGroupPreview {
     starts_on_new_line: bool,
     has_value_boundary_comment: bool,
@@ -139,20 +122,12 @@ struct CommaGroupPreview {
 /// ```css
 /// a { margin: 1px/* boundary */2px, 3px; }
 /// ```
-struct CommaGroupsWriter<'a, Node>
-where
-    Node: AstNode<Language = CssLanguage>,
-{
-    cursor: CommaGroupCursor<'a, Node>,
+struct CommaGroupsWriter<'a> {
+    cursor: CommaGroupCursor<'a>,
     layout: ValueListLayout,
-    lowercase_css_wide_keyword: bool,
 }
 
-impl<'a, Node> CommaGroupsWriter<'a, Node>
-where
-    Node: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
-    Node::Format: FormatWithRule<CssFormatContext, Item = Node>,
-{
+impl CommaGroupsWriter<'_> {
     fn write(mut self, f: &mut Formatter<'_, CssFormatContext>) -> FormatResult<()> {
         let mut groups = f.fill();
 
@@ -193,7 +168,6 @@ where
         let mut values = f.fill();
         let mut state = CommaGroupValueState::Empty;
         let layout = self.layout;
-        let lowercase_css_wide_keyword = self.lowercase_css_wide_keyword;
 
         for entry in self.cursor.by_ref() {
             match entry {
@@ -211,8 +185,8 @@ where
                     }
                 }
                 CommaGroupEntry::Element(element) => {
-                    let is_comma = is_comma_delimiter(element.syntax());
-                    let starts_on_new_line = element.syntax().has_leading_newline();
+                    let is_comma = is_comma_delimiter(&element);
+                    let starts_on_new_line = element.has_leading_newline();
                     let has_source_hard_separator =
                         !is_comma && starts_on_new_line && layout.is_source_break_preserving();
                     let separator = format_once(move |f| {
@@ -222,8 +196,7 @@ where
                             layout.fmt_value_separator(starts_on_new_line, f)
                         }
                     });
-                    let formatted_element =
-                        format_component_value_element(element, lowercase_css_wide_keyword);
+                    let formatted_element = format_element(element);
 
                     match state {
                         CommaGroupValueState::BoundaryStart if !is_comma => {
@@ -258,10 +231,23 @@ where
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+/// Formats a type-erased comma-group element.
+///
+/// Direct identifiers need an explicit preserve policy because SCSS expression
+/// item lists also reach this path.
+fn format_element(element: CssSyntaxNode) -> impl Format<CssFormatContext> {
+    format_with(move |f| {
+        if let Some(identifier) = CssIdentifier::cast_ref(&element) {
+            write!(f, [identifier.format().with_text_case(CssCase::Preserve)])
+        } else {
+            write!(f, [element.format()])
+        }
+    })
+}
+
+#[derive(Clone, Copy, Eq, PartialEq)]
 enum CommaGroupValueState {
     /// No value has been formatted in the current comma group.
-    #[default]
     Empty,
     /// No boundary-comment continuation is active.
     Normal,

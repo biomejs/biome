@@ -113,12 +113,9 @@ where
     };
 
     let values = format_with(|f: &mut Formatter<'_, CssFormatContext>| {
-        if let Some(comma_groups) = comma_groups::format_if_applicable(
-            node,
-            layout,
-            boundary_comments,
-            lowercase_css_wide_keyword,
-        ) {
+        if let Some(comma_groups) =
+            comma_groups::format_if_applicable(node.syntax(), layout, boundary_comments)
+        {
             return write!(f, [comma_groups]);
         }
 
@@ -381,10 +378,10 @@ impl ValueListLayout {
     ) -> FormatResult<()> {
         match self {
             Self::PreserveInline | Self::OnePerLine if starts_on_new_line => {
-                hard_line_break().fmt(f)
+                write!(f, [hard_line_break()])
             }
-            Self::PreserveInline | Self::OnePerLine => space().fmt(f),
-            _ => soft_line_break_or_space().fmt(f),
+            Self::PreserveInline | Self::OnePerLine => write!(f, [space()]),
+            _ => write!(f, [soft_line_break_or_space()]),
         }
     }
 
@@ -395,7 +392,7 @@ impl ValueListLayout {
     ) -> FormatResult<()> {
         match self {
             Self::OneGroupPerLine | Self::OneGroupPerLineWithDanglingComments => {
-                hard_line_break().fmt(f)
+                write!(f, [hard_line_break()])
             }
             _ => self.fmt_value_separator(starts_on_new_line, f),
         }
