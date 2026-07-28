@@ -16,7 +16,7 @@ use biome_formatter::{
 use biome_html_syntax::HtmlSyntaxToken;
 use biome_rowan::{TextRange, TextSize, TokenText};
 use biome_unicode_table::{
-    Dispatch::{COM, DIG, PRD, WHS, ZER},
+    Dispatch::{COM, DIG, WHS, ZER},
     lookup_byte,
 };
 
@@ -165,18 +165,51 @@ fn parse_descriptor_kind(descriptor: &str) -> Option<DescriptorKind> {
             is_positive_integer.then_some(kind)
         }
         // A density is any non-negative number, and `1.5x` is ordinary.
-        DescriptorKind::Density => {
-            let is_non_negative = number
-                .parse::<f64>()
-                .is_ok_and(|density| density.is_finite() && density >= 0.0);
-            // `parse::<f64>` also accepts `inf`, `NaN` and a leading `+`,
-            // none of which are numbers as far as HTML is concerned.
-            let is_numeric = number
-                .bytes()
-                .all(|byte| matches!(lookup_byte(byte), ZER | DIG | PRD));
-            (is_non_negative && is_numeric).then_some(kind)
+        DescriptorKind::Density => is_valid_non_negative_float(number).then_some(kind),
+    }
+}
+
+/// Check if `number` is a valid floating-point number according to the HTML spec, and is also non-negative.
+///
+/// See: <https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#floating-point-numbers>
+fn is_valid_non_negative_float(number: &str) -> bool {
+    let bytes = number.as_bytes();
+    let mut position = 0;
+
+    let integer_start = position;
+    while position < bytes.len() && matches!(lookup_byte(bytes[position]), ZER | DIG) {
+        position += 1;
+    }
+    let has_integer = position > integer_start;
+
+    if matches!(bytes.get(position), Some(b'.')) {
+        position += 1;
+        let fraction_start = position;
+        while position < bytes.len() && matches!(lookup_byte(bytes[position]), ZER | DIG) {
+            position += 1;
+        }
+        if position == fraction_start {
+            return false;
+        }
+    } else if !has_integer {
+        return false;
+    }
+
+    if matches!(bytes.get(position), Some(b'e' | b'E')) {
+        position += 1;
+        if matches!(bytes.get(position), Some(b'+' | b'-')) {
+            position += 1;
+        }
+        let exponent_start = position;
+        while position < bytes.len() && matches!(lookup_byte(bytes[position]), ZER | DIG) {
+            position += 1;
+        }
+        if position == exponent_start {
+            return false;
         }
     }
+
+    position == bytes.len()
 }
 
 /// Prints the candidates of a `srcset`, separated by `, ` while they fit on
@@ -298,6 +331,18 @@ mod tests {
     }
 
     #[test]
+    fn parses_density_descriptors_with_exponents() {
+        assert_eq!(
+            candidates("a.png 1e2x, b.png 1E+2x, c.png .5e-1x"),
+            Some(vec![
+                "a.png|1e2x".into(),
+                "b.png|1E+2x".into(),
+                "c.png|.5e-1x".into()
+            ])
+        );
+    }
+
+    #[test]
     fn a_url_may_contain_commas() {
         // Regression shape from prettier's #8150: the comma belongs to the
         // path, and only whitespace ends the URL.
@@ -342,6 +387,11 @@ mod tests {
         assert_eq!(candidates("a.png 1.5w"), None);
         assert_eq!(candidates("a.png -1x"), None);
         assert_eq!(candidates("a.png 1x 2x"), None);
+        assert_eq!(candidates("a.png 1.x"), None);
+        assert_eq!(candidates("a.png +1e2x"), None);
+        assert_eq!(candidates("a.png 1ex"), None);
+        assert_eq!(candidates("a.png 1e+x"), None);
+        assert_eq!(candidates("a.png 1e2e3x"), None);
     }
 
     #[test]

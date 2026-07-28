@@ -13,6 +13,8 @@ info: attributes/srcset.html
              /media/examples/surfer-240-200.jpg
 ">
 <img srcset="/a.png    0.5x, /b.png     1111x, /c.png     2x, /d.png     3.3333x" alt="">
+<img srcset="/a.png 1e2x, /b.png 1E+2x, /c.png .5e-1x">
+<img srcset="/a.png   1e2x,   /b.png  1E+2x, /c.png   .5e-1x">
 <img srcset="scale,w_200.jpg 200w,  scale,w_1400.jpg 1400w" alt="">
 <img srcset="a.png 1x,,  b.png 2x">
 <!-- too long for one line: one candidate per line, descriptors aligned on the decimal point -->
@@ -41,6 +43,8 @@ info: attributes/srcset.html
 <img srcset="/media/examples/surfer-240-200.jpg">
 <img srcset="/media/examples/surfer-240-200.jpg">
 <img srcset="/a.png 0.5x, /b.png 1111x, /c.png 2x, /d.png 3.3333x" alt="">
+<img srcset="/a.png 1e2x, /b.png 1E+2x, /c.png .5e-1x">
+<img srcset="/a.png 1e2x, /b.png 1E+2x, /c.png .5e-1x">
 <img srcset="scale,w_200.jpg 200w, scale,w_1400.jpg 1400w" alt="">
 <img srcset="a.png 1x, b.png 2x">
 <!-- too long for one line: one candidate per line, descriptors aligned on the decimal point -->
@@ -85,5 +89,5 @@ info: attributes/srcset.html
 
 # Lines exceeding max width of 80 characters
 ```
-    8: <!-- too long for one line: one candidate per line, descriptors aligned on the decimal point -->
+   10: <!-- too long for one line: one candidate per line, descriptors aligned on the decimal point -->
 ```
