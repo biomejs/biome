@@ -1,8 +1,9 @@
 use crate::{
     AnyYamlBlockInBlockContent, AnyYamlBlockNode, AnyYamlFlowNode, AnyYamlJsonContent,
-    YamlBlockHeaderList, YamlFoldedScalar, YamlLiteralScalar,
+    AnyYamlProperty, YamlBlockHeaderList, YamlBlockInBlockNode, YamlBlockMapExplicitEntry,
+    YamlFoldedScalar, YamlLiteralScalar,
 };
-use biome_rowan::{AstNodeList, declare_node_union};
+use biome_rowan::{AstNode, AstNodeList, declare_node_union};
 
 declare_node_union! {
     /// A block scalar, the node a `YamlBlockContent` sits in
@@ -73,5 +74,37 @@ impl AnyYamlBlockNode {
             ),
             _ => false,
         }
+    }
+}
+
+/// The tag of a [set](https://yaml.org/type/set.html), as a
+/// [shorthand](https://yaml.org/spec/1.2.2/#691-node-tags) and in verbatim
+/// form
+const SET_TAGS: [&str; 2] = ["!!set", "!<tag:yaml.org,2002:set>"];
+
+impl YamlBlockMapExplicitEntry {
+    /// Whether the mapping this entry belongs to is tagged as a set, whose
+    /// entries are keys without values:
+    ///
+    /// ```yaml
+    /// !!set
+    /// ? a
+    /// ? b
+    /// ```
+    pub fn is_in_set_mapping(&self) -> bool {
+        self.syntax()
+            .ancestors()
+            .find_map(YamlBlockInBlockNode::cast)
+            .is_some_and(|block| {
+                block.properties().iter().any(|property| {
+                    matches!(
+                        &property,
+                        AnyYamlProperty::YamlTagProperty(tag)
+                            if tag.value_token().is_ok_and(|token| {
+                                SET_TAGS.contains(&token.text_trimmed())
+                            })
+                    )
+                })
+            })
     }
 }
