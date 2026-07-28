@@ -5,6 +5,10 @@
 //! descriptor begins and ends.
 
 use biome_rowan::{TextRange, TextSize};
+use biome_unicode_table::{
+    Dispatch::{COM, DIG, PRD, WHS, ZER},
+    lookup_byte,
+};
 
 /// One candidate of a `srcset` attribute: where an image lives, and the
 /// descriptor saying when a browser should pick it.
@@ -52,21 +56,21 @@ pub(crate) fn parse_srcset(value: &str) -> Option<Vec<SrcsetCandidate>> {
     while position < bytes.len() {
         // Whitespace and commas between candidates carry no meaning. Skipping
         // commas here is also what drops an empty candidate such as `a.png,,`.
-        if is_srcset_whitespace(bytes[position]) || bytes[position] == b',' {
+        if matches!(lookup_byte(bytes[position]), WHS | COM) {
             position += 1;
             continue;
         }
 
         let url_start = position;
-        while position < bytes.len() && !is_srcset_whitespace(bytes[position]) {
+        while position < bytes.len() && !matches!(lookup_byte(bytes[position]), WHS) {
             position += 1;
         }
         let mut url_end = position;
 
         // A URL that ends in commas ends its candidate too, and that candidate
         // has no descriptor.
-        if bytes[url_end - 1] == b',' {
-            while url_end > url_start && bytes[url_end - 1] == b',' {
+        if matches!(lookup_byte(bytes[url_end - 1]), COM) {
+            while url_end > url_start && matches!(lookup_byte(bytes[url_end - 1]), COM) {
                 url_end -= 1;
             }
             candidates.push(SrcsetCandidate {
@@ -79,15 +83,17 @@ pub(crate) fn parse_srcset(value: &str) -> Option<Vec<SrcsetCandidate>> {
             continue;
         }
 
-        while position < bytes.len() && is_srcset_whitespace(bytes[position]) {
+        while position < bytes.len() && matches!(lookup_byte(bytes[position]), WHS) {
             position += 1;
         }
         let descriptor_start = position;
-        while position < bytes.len() && bytes[position] != b',' {
+        while position < bytes.len() && !matches!(lookup_byte(bytes[position]), COM) {
             position += 1;
         }
         let mut descriptor_end = position;
-        while descriptor_end > descriptor_start && is_srcset_whitespace(bytes[descriptor_end - 1]) {
+        while descriptor_end > descriptor_start
+            && matches!(lookup_byte(bytes[descriptor_end - 1]), WHS)
+        {
             descriptor_end -= 1;
         }
 
@@ -138,11 +144,14 @@ fn parse_descriptor_kind(descriptor: &str) -> Option<DescriptorKind> {
 
     match kind {
         // A width or a height is a positive integer; zero would select an
-        // image that can never be drawn.
+        // image that can never be drawn. Requiring a digit other than zero
+        // also rejects a descriptor that is nothing but its unit, since an
+        // empty number holds no such digit.
         DescriptorKind::Width | DescriptorKind::Height => {
-            let is_positive_integer = !number.is_empty()
-                && number.bytes().all(|byte| byte.is_ascii_digit())
-                && number.bytes().any(|byte| byte != b'0');
+            let is_positive_integer = number
+                .bytes()
+                .all(|byte| matches!(lookup_byte(byte), ZER | DIG))
+                && number.bytes().any(|byte| matches!(lookup_byte(byte), DIG));
             is_positive_integer.then_some(kind)
         }
         // A density is any non-negative number, and `1.5x` is ordinary.
@@ -154,15 +163,10 @@ fn parse_descriptor_kind(descriptor: &str) -> Option<DescriptorKind> {
             // none of which are numbers as far as HTML is concerned.
             let is_numeric = number
                 .bytes()
-                .all(|byte| byte.is_ascii_digit() || byte == b'.');
+                .all(|byte| matches!(lookup_byte(byte), ZER | DIG | PRD));
             (is_non_negative && is_numeric).then_some(kind)
         }
     }
-}
-
-/// The whitespace that separates the parts of a `srcset`, per the HTML spec.
-fn is_srcset_whitespace(byte: u8) -> bool {
-    matches!(byte, b' ' | b'\t' | b'\n' | b'\r' | b'\x0C')
 }
 
 #[cfg(test)]
@@ -214,6 +218,15 @@ mod tests {
                 "img_c_scale,w_379.jpg|379w".into()
             ])
         );
+    }
+
+    #[test]
+    fn any_whitespace_byte_ends_a_url() {
+        // HTML counts a form feed as whitespace but not a vertical tab. The
+        // byte dispatch groups the two, so both end the URL, which leaves
+        // `b.png` to be rejected as a descriptor and the value left alone.
+        assert_eq!(candidates("a\x0Cb.png"), None);
+        assert_eq!(candidates("a\x0Bb.png"), None);
     }
 
     #[test]
