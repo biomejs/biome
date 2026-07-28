@@ -107,3 +107,6 @@ markdown/spec/example-235.md
 
 # Prettier changes spacing of inline code, breaking semantics
 markdown/spec/example-268.md
+
+# Prettier doesn't convert the setex header
+markdown/spec/example-83.md
