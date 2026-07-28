@@ -19,7 +19,7 @@ pub(crate) use at_rule::{
     parse_scss_if_at_rule, parse_scss_import_at_rule, parse_scss_include_at_rule,
     parse_scss_interpolated_media_in_parens, parse_scss_interpolated_query_feature,
     parse_scss_keyframes_name, parse_scss_keyframes_selector, parse_scss_media_condition,
-    parse_scss_media_query, parse_scss_media_query_or_condition_query, parse_scss_mixin_at_rule,
+    parse_scss_media_condition_from_query, parse_scss_media_query, parse_scss_mixin_at_rule,
     parse_scss_return_at_rule, parse_scss_supports_interpolated_condition, parse_scss_use_at_rule,
     parse_scss_warn_at_rule, parse_scss_while_at_rule,
 };
@@ -46,11 +46,12 @@ pub(crate) use identifiers::{
     is_at_scss_module_member_access, is_at_scss_namespaced_variable, is_at_scss_variable,
     is_nth_at_scss_hyphen_interpolated_identifier, is_nth_at_scss_interpolated_dashed_identifier,
     is_nth_at_scss_interpolated_identifier, is_nth_at_scss_interpolated_selector_identifier,
-    is_nth_at_scss_module_member_access, parse_scss_hyphen_interpolated_identifier,
-    parse_scss_interpolated_dashed_identifier, parse_scss_interpolated_identifier,
-    parse_scss_interpolated_name, parse_scss_interpolation_or_identifier,
-    parse_scss_module_member_access, parse_scss_namespaced_variable,
-    parse_scss_selector_custom_identifier, parse_scss_selector_identifier, parse_scss_variable,
+    is_nth_at_scss_module_member_access, is_nth_source_tight,
+    parse_scss_hyphen_interpolated_identifier, parse_scss_interpolated_dashed_identifier,
+    parse_scss_interpolated_identifier, parse_scss_interpolated_name,
+    parse_scss_interpolation_or_identifier, parse_scss_module_member_access,
+    parse_scss_namespaced_variable, parse_scss_selector_custom_identifier,
+    parse_scss_selector_identifier, parse_scss_variable,
 };
 pub(crate) use parse_error::{
     expected_scss_expression, expected_scss_variable_modifier, scss_ellipsis_not_allowed,

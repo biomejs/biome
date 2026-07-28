@@ -704,7 +704,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssKeywordArgument" => &[("name", 0), ("value", 2)],
         "ScssMapExpression" => &[("pairs", 1)],
         "ScssMapExpressionPair" => &[("key", 0), ("value", 2)],
-        "ScssMediaQuery" => &[("query", 0)],
+        "ScssMediaQuery" => &[("head", 0), ("tail", 1)],
         "ScssMixinAtRule" => &[("name", 1), ("parameters", 2), ("block", 3)],
         "ScssModuleConfiguration" => &[("name", 0), ("value", 2), ("modifier", 3)],
         "ScssModuleMemberAccess" => &[("module", 0), ("member", 2)],
