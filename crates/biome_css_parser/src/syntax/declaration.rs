@@ -12,12 +12,34 @@ use crate::syntax::scss::{
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
-use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
+use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{CompletedMarker, Parser, SyntaxFeature, TokenSet, token_set};
+use biome_parser::{CompletedMarker, Parser, SyntaxFeature, TokenSet};
 
-pub(crate) struct DeclarationList;
+pub(crate) struct DeclarationList {
+    end_kind: CssSyntaxKind,
+}
+
+impl DeclarationList {
+    pub(crate) fn new(end_kind: CssSyntaxKind) -> Self {
+        Self { end_kind }
+    }
+}
+
+struct DeclarationListParseRecovery {
+    end_kind: CssSyntaxKind,
+}
+
+impl ParseRecovery for DeclarationListParseRecovery {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(self.end_kind)
+    }
+}
 
 impl ParseNodeList for DeclarationList {
     type Kind = CssSyntaxKind;
@@ -45,7 +67,7 @@ impl ParseNodeList for DeclarationList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T!['}'])
+        p.at(self.end_kind)
     }
 
     fn recover(
@@ -53,9 +75,11 @@ impl ParseNodeList for DeclarationList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover_with_token_set(
+        parsed_element.or_recover(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set!(T!['}'])),
+            &DeclarationListParseRecovery {
+                end_kind: self.end_kind,
+            },
             expected_declaration_item,
         )
     }

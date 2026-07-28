@@ -82,10 +82,15 @@ impl SyntaxFeature for CssSyntaxFeatures {
 pub(crate) fn parse_root(p: &mut CssParser) {
     let m = p.start();
     match p.source_type.as_embedding_kind() {
-        CssEmbeddingKind::Styled | CssEmbeddingKind::HtmlStyleAttribute => {
+        CssEmbeddingKind::Styled => {
             DeclarationOrRuleList::new(EOF).parse_list(p);
 
             m.complete(p, CSS_SNIPPET_ROOT);
+        }
+        CssEmbeddingKind::HtmlStyleAttribute => {
+            DeclarationList::new(EOF).parse_list(p);
+
+            m.complete(p, CSS_DECLARATION_SNIPPET_ROOT);
         }
         CssEmbeddingKind::None | CssEmbeddingKind::Html(_) => {
             p.eat(UNICODE_BOM);
