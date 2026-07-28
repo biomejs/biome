@@ -27,12 +27,19 @@ impl FormatNodeRule<HtmlRoot> for FormatHtmlRoot {
 
         html.format().fmt(f)?;
 
+        write!(f, [format_trailing_comments(node.syntax())])?;
+
+        write!(f, [format_removed(&eof_token?)])?;
+
         if f.options().trailing_newline().value() {
             write!(f, [hard_line_break()])?;
         }
 
-        write!(f, [format_removed(&eof_token?)])?;
+        Ok(())
+    }
 
+    fn fmt_trailing_comments(&self, _: &HtmlRoot, _: &mut HtmlFormatter) -> FormatResult<()> {
+        // Formatted as part of `fmt_fields`.
         Ok(())
     }
 }
