@@ -58,11 +58,6 @@ impl<'a> FormatProperties<'a> {
         )
     }
 
-    /// The property the content follows
-    pub(crate) fn last(&self) -> Option<AnyYamlProperty> {
-        self.iter().last()
-    }
-
     pub(crate) fn is_empty(&self) -> bool {
         self.iter().next().is_none()
     }
