@@ -2,11 +2,11 @@ use std::fmt::Debug;
 
 use crate::prelude::*;
 use crate::shared::FmtAnyAttributeInitializer;
-use crate::utils::srcset::{SrcsetCandidate, descriptor_integer_len, parse_srcset};
+use crate::utils::srcset::{FormatSrcsetCandidates, parse_srcset};
 use biome_formatter::{CstFormatContext, FormatRuleWithOptions, write};
 use biome_html_syntax::{
     AnyHtmlAttributeInitializer, HtmlAttributeInitializerClause,
-    HtmlAttributeInitializerClauseFields, HtmlSyntaxToken,
+    HtmlAttributeInitializerClauseFields,
 };
 use biome_rowan::TokenText;
 
@@ -206,83 +206,4 @@ impl FormatNodeRule<HtmlAttributeInitializerClause> for FormatHtmlAttributeIniti
             }
         }
     }
-}
-
-/// Prints the candidates of a `srcset`, separated by `, ` while they fit on
-/// one line and one per line once they do not.
-///
-/// When broken, each descriptor is pushed right so that every decimal point
-/// lands in the same column, which is what turns a wall of URLs into a table
-/// of sizes. The padding only applies to the broken form; laid out flat, a
-/// single space separates a URL from its descriptor.
-struct FormatSrcsetCandidates<'a> {
-    candidates: &'a [SrcsetCandidate],
-    content: &'a TokenText,
-    value_token: &'a HtmlSyntaxToken,
-}
-
-impl Format<HtmlFormatContext> for FormatSrcsetCandidates<'_> {
-    fn fmt(&self, f: &mut HtmlFormatter) -> FormatResult<()> {
-        let text = self.content.text();
-        let widest_url = self
-            .candidates
-            .iter()
-            .map(|candidate| text[candidate.url].len())
-            .max()
-            .unwrap_or(0);
-        let widest_descriptor_integer = self
-            .candidates
-            .iter()
-            .filter_map(|candidate| candidate.descriptor)
-            .map(|descriptor| descriptor_integer_len(&text[descriptor]))
-            .max()
-            .unwrap_or(0);
-
-        let mut candidates = self.candidates.iter().peekable();
-        while let Some(candidate) = candidates.next() {
-            let url = self.content.clone().slice(candidate.url);
-            write!(
-                f,
-                [located_token_text(
-                    self.value_token,
-                    url.source_range(self.value_token.text_range())
-                )]
-            )?;
-
-            if let Some(descriptor) = candidate.descriptor {
-                // One space of separation, plus whatever it takes to line the
-                // decimal points up with the widest candidate.
-                let padding =
-                    widest_url - text[candidate.url].len() + 1 + widest_descriptor_integer
-                        - descriptor_integer_len(&text[descriptor]);
-                let descriptor = self.content.clone().slice(descriptor);
-                write!(
-                    f,
-                    [
-                        if_group_breaks(&token(spaces(padding))),
-                        if_group_fits_on_line(&token(" ")),
-                        located_token_text(
-                            self.value_token,
-                            descriptor.source_range(self.value_token.text_range())
-                        )
-                    ]
-                )?;
-            }
-
-            if candidates.peek().is_some() {
-                write!(f, [token(","), soft_line_break_or_space()])?;
-            }
-        }
-
-        Ok(())
-    }
-}
-
-/// A run of `count` spaces, for aligning descriptors.
-///
-/// Slicing a literal keeps the result `'static`, which is what the token
-/// builder takes.
-fn spaces(count: usize) -> &'static str {
-    const SPACES: &str = "                                                                ";
-    &SPACES[..count.min(SPACES.len())]
 }
