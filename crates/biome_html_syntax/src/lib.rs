@@ -126,7 +126,7 @@ impl TryFrom<HtmlSyntaxKind> for TriviaPieceKind {
 ///
 /// A lone quote leaves `next_back` empty, so a single character is correctly
 /// not treated as quoted.
-pub fn is_quoted(text: &str) -> bool {
+pub(crate) fn is_quoted(text: &str) -> bool {
     let mut characters = text.chars();
     matches!(
         (characters.next(), characters.next_back()),
@@ -136,7 +136,7 @@ pub fn is_quoted(text: &str) -> bool {
 
 /// `text` without the quotes that delimit it. Text that isn't quoted, such as an
 /// unquoted attribute value, is returned unchanged.
-pub fn unquote(text: &str) -> &str {
+pub(crate) fn unquote(text: &str) -> &str {
     if is_quoted(text) {
         // Both quotes are ASCII, so this can't split a character.
         &text[1..text.len() - 1]
