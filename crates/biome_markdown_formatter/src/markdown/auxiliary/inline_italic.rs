@@ -103,7 +103,9 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
         {
             let emphasis_l_fence = emphasis.l_fence()?;
             let emphasis_r_fence = emphasis.r_fence()?;
-            f.context().comments().is_suppressed(emphasis.syntax());
+            f.context()
+                .comments()
+                .mark_suppression_checked(emphasis.syntax());
             return write!(
                 f,
                 [
@@ -157,7 +159,9 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
                 }
 
                 if content_token.text() == "*" {
-                    f.context().comments().is_suppressed(textual.syntax());
+                    f.context()
+                        .comments()
+                        .mark_suppression_checked(textual.syntax());
                     return write!(
                         f,
                         [
