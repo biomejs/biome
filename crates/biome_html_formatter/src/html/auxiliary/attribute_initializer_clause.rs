@@ -281,9 +281,7 @@ impl Format<HtmlFormatContext> for FormatSrcsetCandidates<'_> {
 /// A run of `count` spaces, for aligning descriptors.
 ///
 /// Slicing a literal keeps the result `'static`, which is what the token
-/// builder takes. A `srcset` whose alignment would run past the end of the
-/// literal is already far wider than any line limit, so the padding is simply
-/// capped there.
+/// builder takes.
 fn spaces(count: usize) -> &'static str {
     const SPACES: &str = "                                                                ";
     &SPACES[..count.min(SPACES.len())]
