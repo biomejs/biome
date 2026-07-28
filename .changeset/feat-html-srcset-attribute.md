@@ -15,5 +15,3 @@ The HTML formatter now lays out the `srcset` attribute of `<img>` and `<source>`
 +   "
 + />
 ```
-
-The attribute is left untouched when it holds no candidates, when a descriptor is malformed, or when the descriptors mix widths with pixel densities.
