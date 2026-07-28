@@ -866,6 +866,18 @@ pub fn css_declaration_or_rule_block(
         ],
     ))
 }
+pub fn css_declaration_snippet_root(
+    declarations: CssDeclarationList,
+    eof_token: SyntaxToken,
+) -> CssDeclarationSnippetRoot {
+    CssDeclarationSnippetRoot::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_DECLARATION_SNIPPET_ROOT,
+        [
+            Some(SyntaxElement::Node(declarations.into_syntax())),
+            Some(SyntaxElement::Token(eof_token)),
+        ],
+    ))
+}
 pub fn css_declaration_with_semicolon(
     declaration: CssDeclaration,
 ) -> CssDeclarationWithSemicolonBuilder {

@@ -220,6 +220,14 @@ fn html_style_attribute_is_parsed_as_css() {
 }
 
 #[test]
+fn html_style_attribute_rejects_qualified_rules() {
+    assert_diagnostics(
+        "/project/file.html",
+        r#"<div style="a { color: red }"></div>"#,
+    );
+}
+
+#[test]
 fn html_non_style_attribute_is_not_parsed_as_css() {
     assert_no_diagnostics(
         "/project/file.html",

@@ -71,6 +71,7 @@ CssBogusIfTestBooleanExpr = SyntaxElement*
 AnyCssRoot =
 	CssRoot
 	| CssSnippetRoot
+	| CssDeclarationSnippetRoot
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -79,6 +80,10 @@ CssRoot =
 
 CssSnippetRoot =
 	items: CssDeclarationOrRuleList
+	eof: 'EOF'
+
+CssDeclarationSnippetRoot =
+	declarations: CssDeclarationList
 	eof: 'EOF'
 
 CssRootItemList = AnyCssRootItem*

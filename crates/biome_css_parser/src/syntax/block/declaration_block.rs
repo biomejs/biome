@@ -1,8 +1,8 @@
 use crate::parser::CssParser;
 use crate::syntax::block::ParseBlockBody;
 use crate::syntax::{DeclarationList, is_at_any_declaration};
-use biome_css_syntax::CssSyntaxKind;
 use biome_css_syntax::CssSyntaxKind::*;
+use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::CompletedMarker;
 use biome_parser::parse_lists::ParseNodeList;
 
@@ -20,6 +20,6 @@ impl ParseBlockBody for DeclarationBlock {
     }
 
     fn parse_list(&mut self, p: &mut CssParser) {
-        DeclarationList.parse_list(p);
+        DeclarationList::new(T!['}']).parse_list(p);
     }
 }
