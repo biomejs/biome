@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: html/basics/with-colon.html
 ---
 
@@ -142,7 +143,7 @@ e-wrap </html:textarea>
 ```diff
 --- Prettier
 +++ Biome
-@@ -9,14 +9,9 @@
+@@ -9,14 +9,10 @@
      <div>block</div>
      <div>block</div>
      <div>block</div>
@@ -156,11 +157,12 @@ e-wrap </html:textarea>
 -    >
 +    <pre> pre pr
 +e</pre>
-+    <textarea>pre-wrap pr e-wrap</textarea>
++    <textarea> pre-wrap pr
++e-wrap </textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -49,14 +44,9 @@
+@@ -49,14 +45,10 @@
      <div>block</div>
      <div>block</div>
      <div>block</div>
@@ -174,11 +176,12 @@ e-wrap </html:textarea>
 -    >
 +    <pre> pre pr
 +e</pre>
-+    <textarea>pre-wrap pr e-wrap</textarea>
++    <textarea> pre-wrap pr
++e-wrap </textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -89,14 +79,9 @@
+@@ -89,14 +81,10 @@
      <div>block</div>
      <div>block</div>
      <div>block</div>
@@ -192,11 +195,12 @@ e-wrap </html:textarea>
 -    >
 +    <pre> pre pr
 +e</pre>
-+    <textarea>pre-wrap pr e-wrap</textarea>
++    <textarea> pre-wrap pr
++e-wrap </textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -129,14 +114,9 @@
+@@ -129,14 +117,10 @@
      <div>block</div>
      <div>block</div>
      <div>block</div>
@@ -210,11 +214,12 @@ e-wrap </html:textarea>
 -    >
 +    <pre> pre pr
 +e</pre>
-+    <textarea>pre-wrap pr e-wrap</textarea>
++    <textarea> pre-wrap pr
++e-wrap </textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -169,14 +149,9 @@
+@@ -169,14 +153,10 @@
      <div>block</div>
      <div>block</div>
      <div>block</div>
@@ -228,11 +233,12 @@ e-wrap </html:textarea>
 -    >
 +    <pre> pre pr
 +e</pre>
-+    <textarea>pre-wrap pr e-wrap</textarea>
++    <textarea> pre-wrap pr
++e-wrap </textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -206,53 +181,25 @@
+@@ -206,53 +186,25 @@
      </h1>
    </div>
    <script>
@@ -312,7 +318,8 @@ e-wrap </html:textarea>
     <div>block</div>
     <pre> pre pr
 e</pre>
-    <textarea>pre-wrap pr e-wrap</textarea>
+    <textarea> pre-wrap pr
+e-wrap </textarea>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
@@ -347,7 +354,8 @@ e</pre>
     <div>block</div>
     <pre> pre pr
 e</pre>
-    <textarea>pre-wrap pr e-wrap</textarea>
+    <textarea> pre-wrap pr
+e-wrap </textarea>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
@@ -382,7 +390,8 @@ e</pre>
     <div>block</div>
     <pre> pre pr
 e</pre>
-    <textarea>pre-wrap pr e-wrap</textarea>
+    <textarea> pre-wrap pr
+e-wrap </textarea>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
@@ -417,7 +426,8 @@ e</pre>
     <div>block</div>
     <pre> pre pr
 e</pre>
-    <textarea>pre-wrap pr e-wrap</textarea>
+    <textarea> pre-wrap pr
+e-wrap </textarea>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
@@ -452,7 +462,8 @@ e</pre>
     <div>block</div>
     <pre> pre pr
 e</pre>
-    <textarea>pre-wrap pr e-wrap</textarea>
+    <textarea> pre-wrap pr
+e-wrap </textarea>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
