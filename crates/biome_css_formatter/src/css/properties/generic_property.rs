@@ -1,3 +1,4 @@
+use crate::comments::CssCommentStyle;
 use crate::prelude::*;
 use crate::utils::case::{is_css_modules_import_export_declaration, is_supports_test_declaration};
 use crate::utils::comment_trivia::has_source_gap_before_token;
@@ -8,10 +9,10 @@ use biome_css_syntax::{
     CssGenericPropertyFields, CssIdentifier, CssIfStyleTest, CssLanguage,
     CssSupportsFeatureDeclaration, TwPluginAtRule,
 };
-use biome_formatter::comments::SourceComment;
+use biome_formatter::comments::{CommentStyle, SourceComment};
 use biome_formatter::trivia::format_dangling_comment;
 use biome_formatter::{format_args, write};
-use biome_rowan::{AstNodeList, SyntaxResult};
+use biome_rowan::{AstNodeList, SyntaxResult, TextRange};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssGenericProperty;
@@ -246,6 +247,18 @@ impl<'a> CssPropertyColonComments<'a> {
 
         if comment.lines_before() > 0 {
             if comment.kind().is_line() {
+                if !CssCommentStyle::is_suppression(comment.piece().text())
+                    && let Some(source_indent) = source_indent_before_comment(comment)
+                {
+                    return write!(
+                        f,
+                        [dedent_to_root(&align(
+                            source_indent,
+                            &format_args![hard_line_break(), formatted]
+                        ))]
+                    );
+                }
+
                 return write!(f, [hard_line_break(), formatted]);
             }
 
@@ -291,6 +304,38 @@ impl<'a> CssPropertyColonComments<'a> {
                 .any(|piece| piece.is_whitespace() || piece.is_newline())
         })
     }
+}
+
+/// Returns the source whitespace after the final line break before `comment`.
+fn source_indent_before_comment(comment: &SourceComment<CssLanguage>) -> Option<String> {
+    let comment_piece = comment.piece().as_piece();
+    let token = comment_piece.token();
+    let comment_range = comment_piece.text_range();
+
+    for trivia in [token.leading_trivia(), token.trailing_trivia()] {
+        let mut indentation_range: Option<TextRange> = None;
+
+        for piece in trivia.pieces() {
+            if piece.text_range() == comment_range {
+                let indentation_range = indentation_range?;
+                let relative_range = indentation_range - token.text_range().start();
+                return Some(token.text()[relative_range].to_string());
+            }
+
+            if piece.is_newline() {
+                indentation_range = Some(TextRange::empty(piece.text_range().end()));
+            } else if piece.is_whitespace() {
+                if let Some(indentation_range) = &mut indentation_range {
+                    *indentation_range =
+                        TextRange::new(indentation_range.start(), piece.text_range().end());
+                }
+            } else {
+                indentation_range = None;
+            }
+        }
+    }
+
+    None
 }
 
 fn is_empty_custom_property_value(
