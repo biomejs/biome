@@ -19,4 +19,5 @@ info: svelte/comments/render.svelte
 <!-- 1 -->
 {@render sum(1, 2)}
 <!-- 2 -->
+
 ```

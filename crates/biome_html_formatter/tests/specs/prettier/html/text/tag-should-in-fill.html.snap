@@ -25,9 +25,7 @@ info: html/text/tag-should-in-fill.html
 -  bar</a-long-long-long-element
 +  >foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar</a-long-long-long-element
  >
--<!-- The end tag should stay in 80 print width -->
-+<!-- The end tag should stay in 80 print width -->
-\ No newline at end of file
+ <!-- The end tag should stay in 80 print width -->
 ```
 
 # Output
@@ -36,7 +34,8 @@ info: html/text/tag-should-in-fill.html
 <a-long-long-long-element
   >foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar</a-long-long-long-element
 >
-<!-- The end tag should stay in 80 print width -->```
+<!-- The end tag should stay in 80 print width -->
+```
 
 # Lines exceeding max width of 80 characters
 ```
