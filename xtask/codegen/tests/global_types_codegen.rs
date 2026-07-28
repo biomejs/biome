@@ -1006,6 +1006,7 @@ mod tests {
         assert!(
             generated.contains("crate::globals::ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID")
         );
+        assert!(generated.contains("crate::globals::DATE_ID_GLOBAL_TYPE_ID"));
         assert!(generated.contains("builder.set_type_data("));
         assert!(generated.contains("crate::TypeData::Interface("));
         assert!(generated.contains("crate::TypeData::Constructor("));
@@ -1363,6 +1364,38 @@ mod tests {
         assert!(weak_map_class.members().is_empty());
 
         Ok(())
+    }
+
+    #[test]
+    fn lowerer_lowers_date_global() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.disposables.d.ts")?;
+
+        let date = lowered.global("Date").expect("Date should be lowered");
+        assert_eq!(date.id_constant(), "DATE_ID_GLOBAL_TYPE_ID");
+        let LoweredTypeData::Class(date_class) = date.data() else {
+            bail!("Date should lower to class data");
+        };
+        assert_eq!(date_class.name(), "Date");
+        assert!(date_class.type_parameters().is_empty());
+        assert!(date_class.members().is_empty());
+
+        Ok(())
+    }
+
+    #[test]
+    fn lowerer_rejects_date_extends_clause() -> Result<()> {
+        expect_error_contains(
+            lowered_from_fixture("manifest.date-extends.d.ts"),
+            "Date interface extends clauses are not supported",
+        )
+    }
+
+    #[test]
+    fn lowerer_rejects_date_type_parameters() -> Result<()> {
+        expect_error_contains(
+            lowered_from_fixture("manifest.date-type-parameters.d.ts"),
+            "Date interface has 1 type parameters, expected 0",
+        )
     }
 
     #[test]

@@ -34,4 +34,12 @@ interface AsyncDisposable {
     [Symbol.asyncDispose](): PromiseLike<void>;
 }
 
+interface Date {
+    toString(): string;
+}
+
+interface Date {
+    valueOf(): number;
+}
+
 interface WeakMap<K, V> {}
