@@ -652,16 +652,6 @@ impl AnyEmbeddedContent {
 }
 
 /// Whether the value of a `style` attribute should be read as CSS.
-///
-/// The formatter and the code that parses embedded snippets both ask this, and
-/// they have to give the same answer: the formatter leaves a hole for the CSS
-/// document, so a value it accepts but nothing parsed would print as an empty
-/// attribute.
-///
-/// A value has to hold at least one `:` to be a declaration at all, which
-/// keeps prop-like values such as `<Card style="primary" />` out. An
-/// interpolation is not CSS either, and reformatting around one tends to move
-/// the braces somewhere they no longer mean anything.
 pub fn is_css_style_attribute_value(value: &str) -> bool {
     !value.trim().is_empty() && value.contains(':') && !value.contains("{{")
 }

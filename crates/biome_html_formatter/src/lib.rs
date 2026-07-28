@@ -260,10 +260,14 @@ where
                 state.track_token(&token);
             }
 
-            f.write_elements(vec![
-                FormatElement::Tag(StartEmbedded(range)),
-                FormatElement::Tag(EndEmbedded),
-            ])?;
+            let format_embedded = format_with(|f| {
+                f.write_elements(vec![
+                    FormatElement::Tag(StartEmbedded(range)),
+                    FormatElement::Tag(EndEmbedded),
+                ])
+            });
+
+            self.fmt_embedded_node(node, &format_embedded, f)?;
         } else {
             self.fmt_fields(node, f)?;
         }
@@ -274,6 +278,18 @@ where
     /// If so, the function must return the range of the nodes that will be formatted in the second phase.
     fn embedded_node_range(&self, _node: &N, _f: &mut HtmlFormatter) -> Option<TextRange> {
         None
+    }
+
+    /// Formats the host syntax around the embedded document.
+    ///
+    /// The default implementation replaces the entire node with the embedded document.
+    fn fmt_embedded_node(
+        &self,
+        _node: &N,
+        embedded: &dyn Format<HtmlFormatContext>,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        embedded.fmt(f)
     }
 
     /// Formats the node's fields.
