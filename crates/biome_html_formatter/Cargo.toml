@@ -9,6 +9,7 @@ license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
 publish              = true
+include = ["src/**/*"]
 
 [[bench]]
 harness = false

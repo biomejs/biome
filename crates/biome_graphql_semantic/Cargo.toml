@@ -10,6 +10,7 @@ license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
 publish              = true
+include = ["src/**/*", "!**/tests/**/*"]
 
 [dependencies]
 biome_graphql_syntax = { workspace = true }
