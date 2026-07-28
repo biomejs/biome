@@ -4,6 +4,8 @@
 
 /// Predefined global IDs whose `TypeData` is supplied by this generated module.
 pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
+    crate::globals::REGEXP_ID_GLOBAL_TYPE_ID,
+    crate::globals::REGEXP_EXEC_ID_GLOBAL_TYPE_ID,
     crate::globals::SYMBOL_ID_GLOBAL_TYPE_ID,
     crate::globals::SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID,
     crate::globals::SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
@@ -22,6 +24,25 @@ pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
 pub(crate) fn set_generated_global_type_data(
     builder: &mut crate::globals_builder::GlobalsResolverBuilder,
 ) {
+    let data = crate::TypeData::Class(Box::new(crate::Class {
+        name: Some(biome_rowan::Text::new_static("RegExp")),
+        type_parameters: Box::default(),
+        extends: None,
+        implements: Box::default(),
+        members: Box::new([crate::TypeMember {
+            kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("exec")),
+            ty: crate::globals::GLOBAL_REGEXP_EXEC_ID.into(),
+        }]),
+    }));
+    builder.set_type_data(crate::globals::REGEXP_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("RegExp.exec")),
+        parameters: Box::new([]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_REGEXP_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::REGEXP_EXEC_ID_GLOBAL_TYPE_ID, data);
     let data = crate::TypeData::Class(Box::new(crate::Class {
         name: Some(biome_rowan::Text::new_static("Symbol")),
         type_parameters: Box::default(),
