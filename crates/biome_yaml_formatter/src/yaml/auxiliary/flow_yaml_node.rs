@@ -1,6 +1,7 @@
 use crate::prelude::*;
+use crate::utils::FormatProperties;
 use biome_formatter::write;
-use biome_yaml_syntax::{YamlFlowYamlNode, YamlFlowYamlNodeFields};
+use biome_yaml_syntax::{AnyYamlMappingImplicitKey, YamlFlowYamlNode, YamlFlowYamlNodeFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatYamlFlowYamlNode;
 impl FormatNodeRule<YamlFlowYamlNode> for FormatYamlFlowYamlNode {
@@ -10,24 +11,30 @@ impl FormatNodeRule<YamlFlowYamlNode> for FormatYamlFlowYamlNode {
             content,
         } = node.as_fields();
 
-        write!(f, [properties.format()])?;
+        // Properties the parser flattened onto this node but that belong to
+        // the enclosing block mapping are printed by that mapping's node
+        // instead. Printing them here would move them onto the key for real:
+        //
+        // ```yaml
+        // - !circle
+        //   center: 1
+        // ```
+        //
+        // must not become `- !circle center: 1`, where the tag applies to
+        // the key instead of the mapping
+        let skipped = AnyYamlMappingImplicitKey::YamlFlowYamlNode(node.clone())
+            .enclosing_mapping_property_count();
+        let own_properties = FormatProperties::own(&properties, skipped);
+        let has_own_properties = !own_properties.is_empty();
+
+        write!(f, [own_properties])?;
 
         if let Some(content) = content {
-            if !properties.is_empty() {
-                // A line break between the properties and the content is
-                // kept: the parser attaches the properties of a following
-                // block collection to its first key, so joining the lines
-                // would move them onto the key for real:
-                //
-                // ```yaml
-                // - !circle
-                //   center: 1
-                // ```
-                if get_lines_before(content.syntax()) > 0 {
-                    write!(f, [hard_line_break()])?;
-                } else {
-                    write!(f, [space()])?;
-                }
+            // The content joins the properties' line even when the source
+            // had a line break between them: `!!str\nfoo` becomes
+            // `!!str foo`
+            if has_own_properties {
+                write!(f, [space()])?;
             }
 
             write!(f, [content.format()])?;

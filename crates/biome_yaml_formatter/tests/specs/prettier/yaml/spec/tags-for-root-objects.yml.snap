@@ -18,11 +18,11 @@ e
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
 @@ -5,5 +5,6 @@
  !!seq
  - !!str c
@@ -31,19 +31,54 @@ e
 +!!str
 +d
  e
-```
 
-# Output
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -5,28 +5,32 @@
+   source_position(4),
+   "!!map",
+   hard_line_break,
+-  source_position(10),
++  source_position(12),
+   "a",
+-  source_position(11),
+-  ": ",
+-  indent([source_position(13), "b"]),
++  source_position(14),
++  ":",
++  indent([]),
++  " ",
++  indent([source_position(16), "b"]),
++  indent([]),
+   hard_line_break,
+-  source_position(15),
++  source_position(18),
+   "---",
+   hard_line_break,
+-  source_position(19),
++  source_position(22),
+   "!!seq",
+   hard_line_break,
+-  source_position(25),
++  source_position(28),
+   "- ",
+-  align("  ", [source_position(27), "!!str ", source_position(33), "c"]),
++  align("  ", [source_position(30), "!!str ", source_position(36), "c"]),
+   hard_line_break,
+-  source_position(35),
++  source_position(38),
+   "---",
+   hard_line_break,
+-  source_position(39),
+-  "!!str ",
+-  source_position(45),
++  source_position(42),
++  "!!str",
++  hard_line_break,
++  source_position(48),
+   "d",
+   hard_line_break,
+   "e",
 
-```yml
----
-!!map
-a: b
----
-!!seq
-- !!str c
----
-!!str
-d
-e
 ```

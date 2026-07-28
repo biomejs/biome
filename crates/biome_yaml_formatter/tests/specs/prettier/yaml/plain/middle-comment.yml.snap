@@ -1,0 +1,30 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/plain/middle-comment.yml
+---
+
+# Input
+
+```yml
+!!str # comment
+hello
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1 @@
+-!!str # comment
+-hello
++!!str hello # comment
+```
+
+# Output
+
+```yml
+!!str hello # comment
+```

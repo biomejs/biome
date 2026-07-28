@@ -3,7 +3,7 @@ use crate::prelude::*;
 use crate::yaml::auxiliary::block_map_implicit_entry::FormatEntryValue;
 use biome_formatter::comments::SourceComment;
 use biome_formatter::{format_args, write};
-use biome_rowan::{AstNode, TextSize};
+use biome_rowan::{AstNode, Direction, TextSize};
 use biome_yaml_syntax::{
     AnyYamlBlockNode, AnyYamlFlowNode, YamlBlockMapExplicitEntry, YamlBlockMapExplicitEntryFields,
     YamlLanguage,
@@ -56,19 +56,15 @@ impl FormatNodeRule<YamlBlockMapExplicitEntry> for FormatYamlBlockMapExplicitEnt
         let keep_explicit = match &key {
             None => false,
             Some(key_node @ AnyYamlBlockNode::YamlFlowInBlockNode(_)) => {
-                // `text_trimmed` spans the key's first token to its last, so
-                // a break inside a token, as in a multiline scalar, counts,
-                // and so does one in the trivia between the key's properties
-                // and its content:
-                //
-                // ```yaml
-                // ? !!str
-                //   foo
-                // : bar
-                // ```
-                let text = key_node.syntax().text_trimmed();
+                // Only a break inside a token keeps the key off a single
+                // line, as in a multiline scalar. The properties and the
+                // content of the key are joined onto one line, so the breaks
+                // in the trivia between them don't reach the output
                 !key_node.is_flow_collection()
-                    && (text.contains_char('\n') || text.contains_char('\r'))
+                    && key_node
+                        .syntax()
+                        .descendants_tokens(Direction::Next)
+                        .any(|token| token.text_trimmed().contains(['\n', '\r']))
             }
             Some(_) => true,
         };
