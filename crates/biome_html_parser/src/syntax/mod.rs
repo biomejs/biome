@@ -38,7 +38,7 @@ use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
 use biome_parser::{Marker, Parser};
-use biome_rowan::{TextRange, TextSize};
+use biome_rowan::TextRange;
 use biome_string_case::StrLikeExtension;
 
 pub(crate) enum HtmlSyntaxFeatures {
@@ -144,9 +144,10 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
     // Only a real `.vue` document has single-file-component blocks. Plain HTML
     // parsed with the Vue extensions turned on keeps ordinary element nesting,
     // where an unknown top-level tag is a custom element rather than a block.
-    p.set_at_vue_sfc_top_level(Vue.is_supported(p) && !p.options().is_html());
-    ElementList.parse_list(p);
-    p.set_at_vue_sfc_top_level(false);
+    ElementList {
+        vue_sfc_top_level: Vue.is_supported(p) && !p.options().is_html(),
+    }
+    .parse_list(p);
 
     m.complete(p, HTML_ROOT);
 }
@@ -313,41 +314,43 @@ fn parse_processing_instruction(p: &mut HtmlParser) -> ParsedSyntax {
 /// page that happens to carry a `.vue` extension, not a component.
 ///
 /// See <https://vuejs.org/api/sfc-spec.html#custom-blocks>.
-fn is_vue_raw_text_block(name_kind: HtmlSyntaxKind, has_lang_value: bool) -> bool {
+fn is_vue_raw_text_block(name_kind: HtmlSyntaxKind, names_a_language: bool) -> bool {
     match name_kind {
         T![script] | T![style] | T![html] => false,
-        T![template] => has_lang_value,
+        T![template] => names_a_language,
         _ => true,
     }
 }
 
-/// Whether a closing tag for `name` appears anywhere after `from`.
-///
-/// A raw-text block runs to its closing tag, so one that is never closed would
-/// swallow the rest of the file and turn a single typo into a cascade of
-/// errors. Custom blocks can be named anything, which makes that easy to hit
-/// by accident, so an unclosed block falls back to ordinary element parsing
-/// and its diagnostics stay where the mistake is.
-fn has_closing_tag(source: &str, from: TextSize, name: &str) -> bool {
-    let Some(rest) = source.get(usize::from(from)..) else {
-        return false;
-    };
-
-    rest.match_indices("</").any(|(index, _)| {
-        let after_slash = &rest[index + "</".len()..];
-        after_slash
-            .get(..name.len())
-            .is_some_and(|candidate| candidate.eq_ignore_ascii_case(name))
-            && after_slash[name.len()..]
-                .trim_start_matches([' ', '\t', '\n', '\r', '\x0C'])
-                .starts_with('>')
-    })
-}
-
-fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_element(p: &mut HtmlParser, at_vue_sfc_top_level: bool) -> ParsedSyntax {
     if !p.at(T![<]) {
         return Absent;
     }
+
+    if at_vue_sfc_top_level {
+        // A block of a single-file component runs to its closing tag, so one
+        // that is never closed would swallow the rest of the file and turn a
+        // single typo into a cascade of errors. Custom blocks can be named
+        // anything, which makes that easy to hit by accident. Read the block,
+        // and if it turns out to be unclosed, parse the element again as
+        // ordinary markup so that its diagnostics stay where the mistake is.
+        let checkpoint = p.checkpoint();
+        match parse_element_allowing_sfc_blocks(p, true) {
+            block @ Present(_) => return block,
+            Absent => p.rewind(checkpoint),
+        }
+    }
+
+    parse_element_allowing_sfc_blocks(p, false)
+}
+
+/// Parses an element, reading its content as opaque text when it opens a block
+/// of a Vue single-file component and `sfc_blocks` allows it.
+///
+/// Returns `Absent` only when such a block turned out to have no closing tag.
+/// The caller has already established that the parser is at a `<`, so nothing
+/// else can make this fail.
+fn parse_element_allowing_sfc_blocks(p: &mut HtmlParser, sfc_blocks: bool) -> ParsedSyntax {
     let m = p.start();
 
     p.bump_with_context(T![<], inside_tag_context(p));
@@ -357,10 +360,6 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     let name_range = p.cur_range();
     let opening_tag_name = p.cur_text().to_string();
     let should_be_self_closing = VOID_ELEMENTS.contains(name_kind);
-    // Consumed below, once it is known whether this element opens a block of a
-    // Vue single-file component. Nested elements are ordinary markup.
-    let is_sfc_block = p.at_sfc_top_level();
-    p.set_at_vue_sfc_top_level(false);
     // In Svelte files, the preformatted elements must be parsed as regular
     // elements so that Svelte expressions inside them ({@html expr}, {expr})
     // are visible as AST nodes for variable-reference tracking. The formatter
@@ -384,17 +383,15 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
 
     // Only a top-level block of a single-file component asks about `lang`, so
     // the list looks for it there and nowhere else.
-    let mut attributes = AttributeList::new(is_sfc_block);
+    let mut attributes = AttributeList::new(sfc_blocks);
     attributes.parse_list(p);
-    let is_raw_text_block = is_sfc_block
-        && is_vue_raw_text_block(name_kind, attributes.has_lang_value)
-        && has_closing_tag(p.source_text(), p.cur_range().end(), &opening_tag_name);
+    let is_raw_text_block =
+        sfc_blocks && is_vue_raw_text_block(name_kind, attributes.names_a_language);
     let is_raw_text = is_embedded_language_tag || is_raw_text_block;
 
     if p.at(T![/]) {
         p.bump_with_context(T![/], inside_tag_context(p));
         p.expect_with_context(T![>], HtmlLexContext::Regular);
-        p.set_at_vue_sfc_top_level(is_sfc_block);
         Present(m.complete(p, HTML_SELF_CLOSING_ELEMENT))
     } else {
         if should_be_self_closing {
@@ -402,7 +399,6 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
                 p.bump_with_context(T![/], inside_tag_context(p));
             }
             p.expect_with_context(T![>], HtmlLexContext::Regular);
-            p.set_at_vue_sfc_top_level(is_sfc_block);
             return Present(m.complete(p, HTML_SELF_CLOSING_ELEMENT));
         }
         p.expect_with_context(
@@ -447,10 +443,17 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
             }
             list.complete(p, HTML_ELEMENT_LIST);
 
-            parse_closing_tag(p).or_add_diagnostic(p, expected_closing_tag);
+            let closing_tag = parse_closing_tag(p);
+            if is_raw_text_block && closing_tag.is_absent() {
+                // The lexer read to the end of the file looking for the closing
+                // tag, so the block is unclosed. Give up and let the caller
+                // parse the element as ordinary markup.
+                return Absent;
+            }
+            closing_tag.or_add_diagnostic(p, expected_closing_tag);
         } else {
             loop {
-                ElementList.parse_list(p);
+                ElementList::default().parse_list(p);
                 if let Some(mut closing) =
                     parse_closing_tag(p).or_add_diagnostic(p, expected_closing_tag)
                 {
@@ -470,7 +473,6 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
                 break;
             }
         }
-        p.set_at_vue_sfc_top_level(is_sfc_block);
         let previous = opening.precede(p);
 
         Present(previous.complete(p, HTML_ELEMENT))
@@ -525,11 +527,11 @@ fn is_void_closing_tag(p: &HtmlParser, closing: &CompletedMarker) -> bool {
 }
 
 #[inline]
-pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
+pub(crate) fn parse_html_element(p: &mut HtmlParser, at_vue_sfc_top_level: bool) -> ParsedSyntax {
     match p.cur() {
         T!["<![CDATA["] => parse_cdata_section(p),
         T![<?] => parse_processing_instruction(p),
-        T![<] => parse_element(p),
+        T![<] => parse_element(p, at_vue_sfc_top_level),
         T!["{{"] => HtmlSyntaxFeatures::DoubleTextExpressions.parse_exclusive_syntax(
             p,
             |p| parse_double_text_expression(p, HtmlLexContext::Regular),
@@ -568,7 +570,12 @@ pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
 }
 
 #[derive(Default)]
-struct ElementList;
+struct ElementList {
+    /// Whether this list holds the top-level blocks of a Vue single-file
+    /// component. Only the outermost list, so that a `<docs>` nested inside a
+    /// `<template>` stays ordinary markup.
+    vue_sfc_top_level: bool,
+}
 
 impl ParseNodeList for ElementList {
     type Kind = HtmlSyntaxKind;
@@ -576,7 +583,7 @@ impl ParseNodeList for ElementList {
     const LIST_KIND: Self::Kind = HTML_ELEMENT_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_html_element(p)
+        parse_html_element(p, self.vue_sfc_top_level)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -602,18 +609,18 @@ impl ParseNodeList for ElementList {
 #[derive(Default)]
 struct AttributeList {
     /// Whether to watch for a `lang` attribute. Off unless the caller asks, so
-    /// that ordinary attribute parsing doesn't pay for the name comparison.
+    /// that ordinary attribute parsing doesn't pay for the lookahead.
     track_lang: bool,
-    /// Whether the list held a `lang` attribute carrying a value. Always false
+    /// Whether the list held a `lang` attribute naming a language. Always false
     /// without [`Self::track_lang`].
-    has_lang_value: bool,
+    names_a_language: bool,
 }
 
 impl AttributeList {
     fn new(track_lang: bool) -> Self {
         Self {
             track_lang,
-            has_lang_value: false,
+            names_a_language: false,
         }
     }
 }
@@ -624,22 +631,11 @@ impl ParseNodeList for AttributeList {
     const LIST_KIND: Self::Kind = HTML_ATTRIBUTE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        let is_lang =
-            self.track_lang && p.cur() == HTML_LITERAL && p.cur_text().eq_ignore_ascii_case("lang");
-
-        // A value left over from the attribute before this one must not be read
-        // as belonging to this one.
-        p.take_attribute_value();
-
-        let parsed = parse_attribute(p);
-
-        if is_lang {
-            // `lang` on its own and `lang=""` both name no language, and
-            // prettier keeps reading such a block as markup.
-            self.has_lang_value |= p.take_attribute_value().is_some_and(|it| !it.is_empty());
+        if self.track_lang {
+            self.names_a_language |= is_at_lang_naming_a_language(p);
         }
 
-        parsed
+        parse_attribute(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -657,6 +653,31 @@ impl ParseNodeList for AttributeList {
             expected_attribute,
         )
     }
+}
+
+/// Whether the parser sits at a `lang` attribute that names a language, as in
+/// `lang="pug"`.
+///
+/// The value is only reachable as a token while it is being consumed, so this
+/// looks ahead over it instead of reading it back once the attribute has been
+/// parsed. The lookahead bumps the same tokens in the same contexts that
+/// [`parse_attribute_initializer`] does, so it sees the same value.
+fn is_at_lang_naming_a_language(p: &mut HtmlParser) -> bool {
+    if !p.at(HTML_LITERAL) || !p.cur_text().eq_ignore_ascii_case("lang") {
+        return false;
+    }
+
+    p.lookahead(|p| {
+        p.bump_with_context(HTML_LITERAL, inside_tag_context(p));
+        if !p.at(T![=]) {
+            return false;
+        }
+        p.bump_with_context(T![=], HtmlLexContext::AttributeValue);
+
+        // `lang`, `lang=""` and `lang=''` all name no language, and prettier
+        // keeps reading such a block as markup.
+        p.at(HTML_STRING_LITERAL) && !matches!(p.cur_text(), "" | "\"\"" | "''")
+    })
 }
 
 fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
@@ -824,7 +845,6 @@ fn parse_attribute_string_literal(p: &mut HtmlParser) -> ParsedSyntax {
     }
     let m = p.start();
 
-    p.set_attribute_value(p.cur_range());
     p.bump_with_context(HTML_STRING_LITERAL, inside_tag_context(p));
 
     Present(m.complete(p, HTML_STRING))
@@ -1209,33 +1229,4 @@ const HTML_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(T![html], T![doctype]
 #[inline]
 fn is_at_keyword(p: &mut HtmlParser) -> bool {
     p.at_ts(ALL_POSSIBLE_KEYWORDS)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn has_closing_tag_matches_only_the_whole_name() {
-        let from = TextSize::from(0);
-        assert!(has_closing_tag("x </docs>", from, "docs"));
-        assert!(has_closing_tag("x </DOCS>", from, "docs"));
-        assert!(has_closing_tag("x </docs   >", from, "docs"));
-        // A longer name that merely starts with `docs` is a different tag.
-        assert!(!has_closing_tag("x </docsy>", from, "docs"));
-        assert!(!has_closing_tag("x </doc>", from, "docs"));
-        assert!(!has_closing_tag("x <docs>", from, "docs"));
-        assert!(!has_closing_tag("nothing here", from, "docs"));
-    }
-
-    #[test]
-    fn has_closing_tag_starts_looking_at_the_offset() {
-        // The closing tag sits before the offset, so it does not count.
-        assert!(!has_closing_tag("</docs> rest", TextSize::from(7), "docs"));
-        assert!(has_closing_tag(
-            "</docs> </docs>",
-            TextSize::from(7),
-            "docs"
-        ));
-    }
 }

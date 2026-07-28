@@ -586,3 +586,17 @@ fn pascal_case_tag_is_a_component_in_frameworks() {
         R_ANGLE: 1,
     }
 }
+
+#[test]
+fn is_at_closing_tag_matches_only_the_whole_name() {
+    let is_at = |source, name| HtmlLexer::from_str(source).is_at_closing_tag(name);
+
+    assert!(is_at("</docs>", "docs"));
+    assert!(is_at("</DOCS>", "docs"));
+    assert!(is_at("</docs   >", "docs"));
+    // A longer name that merely starts with `docs` is a different tag.
+    assert!(!is_at("</docsy>", "docs"));
+    assert!(!is_at("</doc>", "docs"));
+    assert!(!is_at("<docs>", "docs"));
+    assert!(!is_at("nothing here", "docs"));
+}

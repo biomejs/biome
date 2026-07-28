@@ -203,7 +203,8 @@ pub(crate) enum PreformattedElement {
 impl HtmlEmbeddedLanguage {
     /// The name of the tag that ends this content, e.g. `script` for a
     /// `<script>` element. A raw-text block can be named anything, so its name
-    /// is read back out of `source`.
+    /// is read back out of `source`, which is the same text its range was taken
+    /// from.
     pub fn closing_tag_name<'a>(&self, source: &'a str) -> &'a str {
         match self {
             Self::Script => "script",
@@ -214,9 +215,7 @@ impl HtmlEmbeddedLanguage {
                 PreformattedElement::Xmp => "xmp",
                 PreformattedElement::Plaintext => "plaintext",
             },
-            Self::RawTextBlock { name } => source
-                .get(usize::from(name.start())..usize::from(name.end()))
-                .unwrap_or_default(),
+            Self::RawTextBlock { name } => &source[*name],
         }
     }
 }
