@@ -4,6 +4,8 @@ use crate::shared::{TextContext, TextPrintMode};
 use biome_formatter::write;
 use biome_markdown_syntax::{MdSetextHeader, MdSetextHeaderFields};
 
+use crate::context::ProseWrap;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdSetextHeader;
 impl FormatNodeRule<MdSetextHeader> for FormatMdSetextHeader {
@@ -15,7 +17,10 @@ impl FormatNodeRule<MdSetextHeader> for FormatMdSetextHeader {
 
         let underline_token = underline_token?;
 
-        if content.will_break() {
+        let prose_wrap = f.options().prose_wrap();
+        if prose_wrap == ProseWrap::Always
+            || prose_wrap == ProseWrap::Preserve && content.will_break()
+        {
             write!(
                 f,
                 [

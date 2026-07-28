@@ -2,40 +2,64 @@ use crate::markdown::auxiliary::textual::FormatMdTextualOptions;
 use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions;
 use crate::prelude::*;
 use crate::shared::{TextContext, TextPrintMode};
-use biome_formatter::write;
+use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{
     AnyMdInline, MarkdownLanguage, MarkdownSyntaxToken, MdLinkTitle, MdLinkTitleFields, MdTextual,
 };
 use biome_rowan::{AstNode, AstNodeListIterator, TextRange, TextSize};
 use std::borrow::Cow;
 
-#[derive(Debug, Clone, Default)]
-pub(crate) struct FormatMdLinkTitle;
+#[derive(Debug, Clone)]
+pub(crate) struct FormatMdLinkTitle {
+    leading_space: bool,
+}
+
+impl Default for FormatMdLinkTitle {
+    fn default() -> Self {
+        Self {
+            leading_space: true,
+        }
+    }
+}
 impl FormatNodeRule<MdLinkTitle> for FormatMdLinkTitle {
     fn fmt_fields(&self, node: &MdLinkTitle, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let MdLinkTitleFields { content } = node.as_fields();
 
         let Some(normalization) = LinkTitleNormalization::from_node(node) else {
-            return write!(
-                f,
-                [
-                    space(),
-                    content
-                        .format()
-                        .with_options(FormatMdFormatInlineItemListOptions {
-                            print_mode: TextPrintMode::trim_all(),
-                            keep_fences_in_italics: false,
-                            text_context: TextContext::Neutral,
-                        })
-                ]
-            );
+            let content = content
+                .format()
+                .with_options(FormatMdFormatInlineItemListOptions {
+                    print_mode: TextPrintMode::trim_all(),
+                    keep_fences_in_italics: false,
+                    text_context: TextContext::Neutral,
+                });
+            return if self.leading_space {
+                write!(f, [space(), content])
+            } else {
+                write!(f, [content])
+            };
         };
 
         if normalization.is_empty() {
             write!(f, [normalization])
-        } else {
+        } else if self.leading_space {
             write!(f, [space(), normalization])
+        } else {
+            write!(f, [normalization])
         }
+    }
+}
+
+pub(crate) struct FormatMdLinkTitleOptions {
+    pub(crate) leading_space: bool,
+}
+
+impl FormatRuleWithOptions<MdLinkTitle> for FormatMdLinkTitle {
+    type Options = FormatMdLinkTitleOptions;
+
+    fn with_options(mut self, options: Self::Options) -> Self {
+        self.leading_space = options.leading_space;
+        self
     }
 }
 
@@ -131,6 +155,10 @@ impl<'a> LinkTitleNormalization<'a> {
     fn is_empty(&self) -> bool {
         self.analysis.is_empty
     }
+}
+
+pub(crate) fn is_empty_link_title(title: &MdLinkTitle) -> bool {
+    LinkTitleNormalization::from_node(title).is_some_and(|normalization| normalization.is_empty())
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
