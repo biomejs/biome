@@ -21,6 +21,12 @@ info: markdown/setext_not_header.md
 \===
     \===
 
+\===
+    === ===
+
+\---
+    --- ---
+
 ```
 
 
@@ -41,5 +47,11 @@ info: markdown/setext_not_header.md
 
 \===
 \===
+
+\===
+=== ===
+
+\---
+\--- ---
 
 ```

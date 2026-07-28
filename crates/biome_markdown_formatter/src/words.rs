@@ -617,6 +617,11 @@ fn outdented_setext_word_group(line: &[ProseItem]) -> Option<usize> {
             }
             ProseItem::Space => {}
             ProseItem::WordGroup { atoms, .. } if has_removed_indent => {
+                // Space-separated dashes can form a thematic break, but
+                // space-separated equals signs cannot form block syntax.
+                if first_word_group.is_some() && delimiter == Some(b'=') {
+                    return None;
+                }
                 first_word_group.get_or_insert(index);
                 for atom in atoms {
                     let ProseAtom::Word(word) = atom else {

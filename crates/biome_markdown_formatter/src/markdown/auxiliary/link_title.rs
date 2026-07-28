@@ -153,7 +153,10 @@ impl Format<MarkdownFormatContext> for LinkTitleNormalization {
             return Ok(());
         };
 
-        if !self.is_empty {
+        let remaining = if self.is_empty {
+            self.textuals.as_slice()
+        } else {
+            f.context().comments().is_suppressed(first.syntax());
             let first_token = first.value_token()?;
             let replacement = syntax_token_cow_slice(
                 Cow::Owned(self.normalized.clone()),
@@ -161,10 +164,11 @@ impl Format<MarkdownFormatContext> for LinkTitleNormalization {
                 first_token.text_trimmed_range().start(),
             )
             .with_literal_line_breaks();
-            replacement.fmt(f)?;
-        }
+            format_replaced(&first_token, &replacement).fmt(f)?;
+            &self.textuals[1..]
+        };
 
-        for textual in &self.textuals {
+        for textual in remaining {
             textual
                 .format()
                 .with_options(FormatMdTextualOptions {
