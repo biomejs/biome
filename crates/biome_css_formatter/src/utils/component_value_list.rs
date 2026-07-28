@@ -95,7 +95,8 @@ where
     let lowercase_css_wide_keyword = should_lowercase_css_wide_keyword(node);
     let boundary_comments = comments.dangling_comments(node.syntax());
     let has_boundary_comments = has_value_boundary_comments(boundary_comments);
-    let is_scss_list_group = find_scss_declaration_list_group(node.syntax()).is_some();
+    let is_scss_list_group =
+        has_boundary_comments && find_scss_declaration_list_group(node.syntax()).is_some();
 
     // Check if any of the elements in the list have a leading newline.
     // We skip the first element because it is the first element in the list and should not be considered.
@@ -191,7 +192,7 @@ where
                 Ok(())
             });
             let content = format_once(|f| write!(f, [with_line_break, &values]));
-            if is_scss_list_group && has_boundary_comments {
+            if is_scss_list_group {
                 write!(f, [group(&content)])
             } else {
                 write!(f, [indent(&group(&content))])

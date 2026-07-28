@@ -21,21 +21,19 @@ where
     I: AstNode<Language = CssLanguage>
         + IntoFormat<CssFormatContext, Format: FormatWithRule<CssFormatContext, Item = I>>,
 {
-    if !is_comma_separated_declaration_value_list(node.syntax()) {
-        return None;
-    }
-
     let is_applicable = match layout {
         ValueListLayout::Fill if node.parent::<CssGenericProperty>().is_some() => true,
         ValueListLayout::PreserveInline | ValueListLayout::OnePerLine => true,
         _ => has_value_boundary_comments(comments),
     };
 
-    is_applicable.then(|| {
-        format_with(move |f| {
-            CommaGroupsWriter::new(node, layout, comments, lowercase_css_wide_keyword).write(f)
-        })
-    })
+    if !is_applicable || !is_comma_separated_declaration_value_list(node.syntax()) {
+        return None;
+    }
+
+    Some(format_with(move |f| {
+        CommaGroupsWriter::new(node, layout, comments, lowercase_css_wide_keyword).write(f)
+    }))
 }
 
 /// Merges comma-list elements and dangling comments in source order.
@@ -63,20 +61,25 @@ where
         }
     }
 
-    fn preview_group(&self) -> Option<CommaGroupPreview> {
-        let mut elements = self.elements.clone();
-        let starts_on_new_line = elements.peek()?.syntax().has_leading_newline();
-        let group_end = elements
-            .find(|element| is_comma_delimiter(element.syntax()))
-            .map_or_else(
-                || self.list_end,
-                |comma| comma.syntax().text_trimmed_range().end(),
-            );
-        let has_value_boundary_comment = self
-            .comments
-            .clone()
-            .take_while(|comment| comment.piece().text_range().end() <= group_end)
-            .any(is_value_boundary_comment);
+    fn preview_group(&mut self) -> Option<CommaGroupPreview> {
+        let starts_on_new_line = self.elements.peek()?.syntax().has_leading_newline();
+        let has_value_boundary_comment = if self.comments.peek().is_none() {
+            false
+        } else {
+            let group_end = self
+                .elements
+                .clone()
+                .find(|element| is_comma_delimiter(element.syntax()))
+                .map_or_else(
+                    || self.list_end,
+                    |comma| comma.syntax().text_trimmed_range().end(),
+                );
+
+            self.comments
+                .clone()
+                .take_while(|comment| comment.piece().text_range().end() <= group_end)
+                .any(is_value_boundary_comment)
+        };
 
         Some(CommaGroupPreview {
             starts_on_new_line,
