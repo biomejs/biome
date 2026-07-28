@@ -831,6 +831,26 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                     &expr.right
                 ])]]
             ),
+            Self::Narrowed(expr) => {
+                write!(
+                    f,
+                    [&format_args![
+                        token("Narrowed"),
+                        token("("),
+                        token("typeof"),
+                        space(),
+                        token("=="),
+                        space(),
+                        token("\""),
+                        text(expr.tag.as_str(), None),
+                        token("\""),
+                        token(","),
+                        space(),
+                        &expr.ty,
+                        token(")")
+                    ]]
+                )
+            }
             Self::New(expr) => write!(
                 f,
                 [&format_args![

@@ -14,8 +14,8 @@ use biome_js_semantic::ScopeId;
 use biome_js_type_info::{
     CallArgumentType as RawCallArgumentType, DestructureField as RawDestructureField,
     Literal as RawLiteral, Path, RawTypeData, TypeId, TypeReference, TypeReferenceQualifier,
-    TypeResolverLevel, TypeofExpression as RawTypeofExpression, global_type_id_for_qualifier,
-    global_types,
+    TypeResolverLevel, TypeofExpression as RawTypeofExpression, TypeofTag,
+    global_type_id_for_qualifier, global_types,
     interned_types::{
         CallArgumentType as InferredCallArgumentType, ConditionalSubset, ConditionalType,
         InternedClass as InferredClass, InternedConstructor as InferredConstructor,
@@ -161,6 +161,13 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let right = self.resolve(&expression.right);
                 self.resolve_logical_or_expression(left, right)
             }
+            RawTypeofExpression::Narrowed(expression) => {
+                let ty = self.resolve(&expression.ty);
+                Some(
+                    self.filter_type_to_subset(ty, ConditionalSubset::Typeof(expression.tag))
+                        .unwrap_or(ty),
+                )
+            }
             RawTypeofExpression::New(expression) => {
                 let callee = self.resolve(&expression.callee);
                 let arguments = self.resolve_call_arguments(&expression.arguments);
@@ -257,6 +264,13 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeofExpression::LogicalOr(expression) => {
                 self.resolve_logical_or_expression(expression.left, expression.right)
             }
+            InferredTypeofExpression::Narrowed(expression) => Some(
+                self.filter_type_to_subset(
+                    expression.ty,
+                    ConditionalSubset::Typeof(expression.tag),
+                )
+                .unwrap_or(expression.ty),
+            ),
             InferredTypeofExpression::New(expression) => {
                 let arguments = self.resolve_inferred_call_arguments(&expression.arguments);
                 let arguments = arguments
@@ -2220,6 +2234,14 @@ impl<'db> ResolutionCtx<'db, '_> {
                         let target = self.resolve_inferred_type(instance.ty(self.db));
                         if target.should_flatten_instance(instance.type_parameters(self.db)) {
                             pending.push(target);
+                        } else if let ConditionalSubset::Typeof(tag) = subset {
+                            match self.instance_typeof_tag(target) {
+                                Some(known_tag) if known_tag == tag => types.push(ty),
+                                Some(_) => {}
+                                // We cannot determine the tag statically, so
+                                // we cannot rule the type out.
+                                None => types.push(ty),
+                            }
                         } else {
                             types.push(ty);
                         }
@@ -2382,6 +2404,107 @@ impl<'db> ResolutionCtx<'db, '_> {
                     FilterAction::Stripped
                 }
             }
+            ConditionalSubset::Typeof(tag) => {
+                match self.typeof_tag_of(ty) {
+                    Some(known_tag) if known_tag == tag => FilterAction::Retained,
+                    Some(_) => FilterAction::Stripped,
+                    // We cannot determine the tag statically, so we cannot
+                    // rule the type out.
+                    None => FilterAction::Retained,
+                }
+            }
+        }
+    }
+
+    /// Returns the tag the `typeof` operator evaluates to for values of the
+    /// given type, or `None` if the tag cannot be determined statically.
+    ///
+    /// This mirrors [`Self::resolve_typeof_operator()`], except that types
+    /// with call signatures map to the `function` tag, following TypeScript's
+    /// narrowing semantics.
+    fn typeof_tag_of(&self, ty: InferredTypeData<'db>) -> Option<TypeofTag> {
+        match ty {
+            InferredTypeData::BigInt => Some(TypeofTag::Bigint),
+            InferredTypeData::Boolean => Some(TypeofTag::Boolean),
+            // A class value is a constructor function at runtime.
+            InferredTypeData::Class(_)
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Function(_) => Some(TypeofTag::Function),
+            InferredTypeData::Literal(literal) => match literal.literal(self.db) {
+                InferredLiteral::BigInt(_) => Some(TypeofTag::Bigint),
+                InferredLiteral::Boolean(_) => Some(TypeofTag::Boolean),
+                InferredLiteral::Object(_) | InferredLiteral::RegExp(_) => Some(TypeofTag::Object),
+                InferredLiteral::Number(_) => Some(TypeofTag::Number),
+                InferredLiteral::String(_) | InferredLiteral::Template(_) => {
+                    Some(TypeofTag::String)
+                }
+            },
+            InferredTypeData::Null => Some(TypeofTag::Object),
+            InferredTypeData::Number => Some(TypeofTag::Number),
+            InferredTypeData::Interface(interface) => {
+                if has_call_signature(interface.members(self.db)) {
+                    Some(TypeofTag::Function)
+                } else if interface.extends(self.db).is_empty() {
+                    Some(TypeofTag::Object)
+                } else {
+                    // A base interface could contribute a call signature.
+                    None
+                }
+            }
+            InferredTypeData::Object(object) => {
+                if has_call_signature(object.members(self.db)) {
+                    Some(TypeofTag::Function)
+                } else {
+                    Some(TypeofTag::Object)
+                }
+            }
+            InferredTypeData::Tuple(_) => Some(TypeofTag::Object),
+            InferredTypeData::String => Some(TypeofTag::String),
+            InferredTypeData::Symbol => Some(TypeofTag::Symbol),
+            InferredTypeData::Undefined => Some(TypeofTag::Undefined),
+            // A canonical global handle classifies as its definition.
+            InferredTypeData::GlobalType(_) => {
+                let expanded = ty.expand_canonical_global(self.db);
+                if matches!(expanded, InferredTypeData::GlobalType(_)) {
+                    None
+                } else {
+                    self.typeof_tag_of(expanded)
+                }
+            }
+            InferredTypeData::Unknown
+            | InferredTypeData::Global
+            | InferredTypeData::Conditional
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::InstanceOf(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::VoidKeyword => None,
+        }
+    }
+
+    /// Returns the tag the `typeof` operator evaluates to for instances of
+    /// the given `target` type, or `None` if the tag cannot be determined
+    /// statically.
+    fn instance_typeof_tag(&self, target: InferredTypeData<'db>) -> Option<TypeofTag> {
+        let target = target.expand_canonical_global(self.db);
+        // A class value is itself a function, but its instances are objects.
+        if matches!(target, InferredTypeData::Class(_)) {
+            Some(TypeofTag::Object)
+        } else {
+            self.typeof_tag_of(target)
         }
     }
 
@@ -2457,6 +2580,11 @@ fn rest_member_mode_allows(member: &InferredTypeMember<'_>, mode: RestMemberMode
         RestMemberMode::Instance => !member.kind.is_static(),
         RestMemberMode::ClassStatic => member.kind.is_static() && !member.kind.is_constructor(),
     }
+}
+
+/// Returns whether the given members contain a call signature.
+fn has_call_signature(members: &[InferredTypeMember<'_>]) -> bool {
+    members.iter().any(|member| member.kind.is_call_signature())
 }
 
 enum FilterAction<'db> {
