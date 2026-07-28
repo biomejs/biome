@@ -12,6 +12,7 @@ expression: redactor(content)
 
 ```html
 <div style="color: #fff; background: red"></div>
+<div style='color: red'></div>
 <div
 	style="
 		all: initial;

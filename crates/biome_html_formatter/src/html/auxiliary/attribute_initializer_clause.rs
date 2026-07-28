@@ -6,9 +6,9 @@ use crate::utils::srcset::{FormatSrcsetCandidates, parse_srcset};
 use biome_formatter::{CstFormatContext, FormatRuleWithOptions, write};
 use biome_html_syntax::{
     AnyHtmlAttributeInitializer, HtmlAttributeInitializerClause,
-    HtmlAttributeInitializerClauseFields, element_ext::is_css_style_attribute_value,
+    HtmlAttributeInitializerClauseFields,
 };
-use biome_rowan::{TextRange, TokenText};
+use biome_rowan::TokenText;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlAttributeInitializerClause {
@@ -186,52 +186,19 @@ impl FormatNodeRule<HtmlAttributeInitializerClause> for FormatHtmlAttributeIniti
                                 ]
                             )
                         }
-                        // A `style` attribute holds a list of CSS declarations,
-                        // so it is handed to the CSS formatter the same way a
-                        // `<style>` element is.
-                        //
-                        // Before:
-                        // ```html
-                        // <div style="color:#fFf;  background:red"></div>
-                        // ```
-                        //
-                        // After:
-                        // ```html
-                        // <div style="color: #fff; background: red"></div>
-                        // ```
-                        (_, Some("style")) if f.context().should_delegate_fmt_embedded_nodes() => {
+                        (_, Some(attribute_name))
+                            if attribute_name.eq_ignore_ascii_case("style") =>
+                        {
                             let content = html_string.inner_string_text()?;
-                            let value_token = html_string.value_token()?;
-                            let range = content.source_range(value_token.text_range());
-
-                            // A value that is only whitespace declares nothing,
-                            // so the whitespace goes with it.
                             if content.text().trim().is_empty() {
-                                return write!(
+                                let value_token = html_string.value_token()?;
+                                write!(
                                     f,
                                     [fmt_eq_token, format_removed(&value_token), token("\"\"")]
-                                );
+                                )
+                            } else {
+                                write!(f, [fmt_eq_token, value.format()])
                             }
-
-                            // A hole may only be left where a CSS document is
-                            // waiting, since one that nothing fills would print
-                            // as an empty attribute and lose the declarations.
-                            if !is_css_style_attribute_value(content.text())
-                                || !f.context().has_embedded_node(range)
-                            {
-                                return write!(f, [fmt_eq_token, value.format()]);
-                            }
-
-                            write!(
-                                f,
-                                [
-                                    fmt_eq_token,
-                                    format_removed(&value_token),
-                                    token("\""),
-                                    group(&soft_block_indent(&FormatEmbeddedRange(range))),
-                                    token("\"")
-                                ]
-                            )
                         }
                         _ => {
                             write!(f, [fmt_eq_token, value.format()])
@@ -252,18 +219,5 @@ impl FormatNodeRule<HtmlAttributeInitializerClause> for FormatHtmlAttributeIniti
                 Ok(())
             }
         }
-    }
-}
-
-/// Leaves a hole for `range`, which a later pass fills with the document
-/// produced by another language's formatter.
-struct FormatEmbeddedRange(TextRange);
-
-impl Format<HtmlFormatContext> for FormatEmbeddedRange {
-    fn fmt(&self, f: &mut HtmlFormatter) -> FormatResult<()> {
-        f.write_elements(vec![
-            FormatElement::Tag(Tag::StartEmbedded(self.0)),
-            FormatElement::Tag(Tag::EndEmbedded),
-        ])
     }
 }

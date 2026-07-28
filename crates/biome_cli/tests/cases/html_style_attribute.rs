@@ -22,6 +22,7 @@ fn formats_style_attribute_as_css() {
     fs.insert(
         file.into(),
         r#"<div style="color:#fFf;  background:red"></div>
+<div style='color:red'></div>
 <div style="all: initial;display:block;contain:content;text-align:center;max-width:500px;margin:0 auto"></div>
 "#
         .as_bytes(),
