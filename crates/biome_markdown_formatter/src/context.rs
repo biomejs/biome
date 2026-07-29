@@ -191,6 +191,6 @@ impl fmt::Display for MdFormatOptions {
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
         writeln!(f, "Trailing newline: {}", self.trailing_newline.value())?;
-        writeln!(f, "Prose Wrap: {}", self.prose_wrap)
+        writeln!(f, "Prose wrap: {}", self.prose_wrap)
     }
 }

@@ -980,16 +980,24 @@ impl FormatMdInlineItemList {
     }
 
     fn format_fill_segment(items: &[ProseItem], f: &mut MarkdownFormatter) -> FormatResult<()> {
+        let no_separator = format_with(|_| Ok(()));
         let mut fill = f.fill();
+        let mut has_separator = false;
 
         for item in items {
-            let ProseItem::WordGroup(group) = item else {
-                continue;
-            };
-            if group.starts_with_block_marker() {
-                fill.entry(&space(), group);
-            } else {
-                fill.entry(&soft_line_break_or_space(), group);
+            match item {
+                ProseItem::Space | ProseItem::SoftBreak => has_separator = true,
+                ProseItem::WordGroup(group) => {
+                    if group.starts_with_block_marker() {
+                        fill.entry(&space(), group);
+                    } else if has_separator {
+                        fill.entry(&soft_line_break_or_space(), group);
+                    } else {
+                        fill.entry(&no_separator, group);
+                    }
+                    has_separator = false;
+                }
+                ProseItem::HardBreak(_) | ProseItem::OutdentedLineStart => {}
             }
         }
 
