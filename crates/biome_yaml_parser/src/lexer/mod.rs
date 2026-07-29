@@ -828,15 +828,17 @@ impl<'src> YamlLexer<'src> {
                 return self.consume_potential_mapping_start(current, properties, start_coordinate);
             }
 
-            // The content sits on a line of its own, left of the
-            // properties. A mapping key there opens a mapping that doesn't
-            // own the properties, but a plain flow value is the content of
-            // the properties' own node:
+            // The value can be on the line below its properties:
             //
             // ```yaml
             // key: &anchor
             //   value
             // ```
+            //
+            // Read the value to check whether `:` follows it. If so, the value
+            // is actually the key of a nested mapping. Move back so it can be
+            // read again as a key, and remove any errors found during the
+            // first read so they are not reported twice.
             let saved_coordinate = self.current_coordinate;
             let saved_diagnostics = self.diagnostics.len();
             let mut value_tokens = self.consume_potential_mapping_key(current);
