@@ -18,3 +18,7 @@ This block is prose, and it may mention a `<my-component>` without closing it.
 <custom lang="javascript">
 const foo = "</"
 </custom>
+
+<div>
+	This is custom, not a div.
+</div>
