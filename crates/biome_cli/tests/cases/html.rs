@@ -1,5 +1,5 @@
 use crate::run_cli;
-use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
+use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
@@ -566,6 +566,41 @@ fn should_lint_a_html_file() {
         console,
         result,
     ));
+}
+
+#[test]
+fn should_handle_htm_file() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let htm_file = Utf8Path::new("index.htm");
+    fs.insert(
+        htm_file.into(),
+        r#"<main><h1>Hello</h1></main>
+"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "html": {
+        "formatter": {
+            "enabled": true
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", htm_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, htm_file, "<main><h1>Hello</h1></main>\n");
 }
 
 #[test]
