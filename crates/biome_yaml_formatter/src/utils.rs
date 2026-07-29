@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use biome_rowan::AstNodeList;
-use biome_yaml_syntax::{AnyYamlMappingImplicitKey, AnyYamlProperty, YamlPropertyList};
+use biome_yaml_syntax::{
+    AnyYamlMappingImplicitKey, AnyYamlProperty, YamlPropertyList, YamlSyntaxNode,
+};
 
 /// Whether a `:` placed directly after this key would be lexed as part of
 /// the key's last token. Alias, anchor, and tag tokens may all contain `:`
@@ -74,5 +76,35 @@ impl Format<YamlFormatContext> for FormatProperties<'_> {
         f.join_with(space())
             .entries(tags.chain(anchors).map(|property| property.into_format()))
             .finish()
+    }
+}
+
+/// The number of line breaks in front of `node`.
+///
+/// The breaks that separate `node` from the content above it can end up in
+/// the leading trivia of the zero-width end tokens (`MAPPING_END`,
+/// `FLOW_END`, ...) that precede it, so the count walks through those tokens
+/// as well. It stops at a comment, whose own leading breaks belong to it.
+pub(crate) fn lines_before_through_end_tokens(node: &YamlSyntaxNode) -> usize {
+    let mut count = 0;
+    let Some(mut token) = node.first_token() else {
+        return 0;
+    };
+    loop {
+        for piece in token.leading_trivia().pieces().rev() {
+            if piece.is_comments() {
+                return count;
+            }
+            if piece.is_newline() {
+                count += 1;
+            }
+        }
+        let Some(prev) = token.prev_token() else {
+            return count;
+        };
+        if !prev.text_trimmed().is_empty() {
+            return count;
+        }
+        token = prev;
     }
 }
