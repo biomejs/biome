@@ -5,9 +5,10 @@ use super::{
 };
 use crate::db::queries::{
     BindingTypeInput, LocalTypeInput, SymbolFromModuleInfo, infer_binding_type, infer_local_type,
-    infer_module_types_bottom_up, namespace_export_names, resolved_export_origin,
+    infer_module_types_bottom_up_for_import_depth, namespace_export_names, resolved_export_origin,
 };
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
+use crate::type_inference::TypeInferenceCodeReference;
 use crate::{JsExport, JsImport, JsOwnExport, ModuleDb, ResolvedPath};
 use biome_js_type_info::{
     GlobalTypeId, ImportSymbol, Path, ResolvedTypeId, TypeImportQualifier, TypeReference,
@@ -72,16 +73,25 @@ impl Drop for IterativeImportFallbackGuard {
     }
 }
 
-/// Result of following a named export through its re-export chain.
+/// Result of searching for the declaration behind a named export.
 #[derive(Clone, Debug, Eq, PartialEq, salsa::Update)]
 pub(crate) enum ExportOriginResult {
-    /// No reachable module owns the requested export.
+    /// The completed search found no declaration.
+    ///
+    /// Unresolved paths, unavailable modules, non-JavaScript modules, and
+    /// modules with type inference disabled are skipped, so `Missing` does not
+    /// prove that the export is absent from source code.
     Missing,
-    /// The module and local name of the declaration that owns the export.
+    /// The module and local export name of the declaration.
+    ///
+    /// The local name may differ from the requested name after a named
+    /// re-export.
     Found { module: ModuleInfo, name: Text },
-    /// Distinct declarations export the same name through blanket re-exports.
+    /// Blanket re-exports lead to more than one distinct declaration.
+    ///
+    /// Reaching the same declaration through multiple paths is not ambiguous.
     Ambiguous,
-    /// The traversal stopped before it could determine an origin.
+    /// The work limit was reached before the search completed.
     Indeterminate,
 }
 
@@ -139,7 +149,25 @@ enum ExportOriginStep {
     Found(ExportOrigin),
 }
 
-/// Follows re-export metadata without resolving any inferred types.
+/// Finds the declaration behind `root_name` without resolving its type.
+///
+/// Explicit re-exports follow the selected source name. Blanket re-exports are
+/// searched only when a module has no explicit export with the requested name.
+/// Distinct declarations reached through blanket re-exports are ambiguous;
+/// repeated paths to the same declaration are accepted. Cycles are skipped.
+/// The search returns [`ExportOriginResult::Indeterminate`] after 1024 distinct
+/// module-and-name steps beyond the root.
+///
+/// For example, searching for `Public` below returns the declaration named
+/// `Internal` from `source.ts`:
+///
+/// ```ts
+/// // source.ts
+/// export type Internal = string;
+///
+/// // index.ts
+/// export { Internal as Public } from "./source";
+/// ```
 pub(in crate::db) fn find_export_origin(
     db: &dyn ModuleDb,
     root_module: ModuleInfo,
@@ -187,7 +215,27 @@ pub(in crate::db) fn find_export_origin(
     })
 }
 
-/// Collects namespace export names without resolving their inferred types.
+/// Collects the names visible on a module namespace without resolving types.
+///
+/// Explicit exports from the root include `default`. Names reached through
+/// `export *` exclude `default`, and duplicate names are returned once. The
+/// function returns `None` if any traversed module is unsupported, has type
+/// inference disabled, has an unavailable blanket re-export, or if traversal
+/// needs more than 1024 blanket-reexported modules beyond the root. It does not
+/// return a partial list in those cases.
+///
+/// Thus the namespace for `index.ts` contains `default` and `named`, but not the
+/// default export from `source.ts`:
+///
+/// ```ts
+/// // source.ts
+/// export default 1;
+/// export const named = 2;
+///
+/// // index.ts
+/// export default 3;
+/// export * from "./source";
+/// ```
 pub(in crate::db) fn collect_namespace_export_names(
     db: &dyn ModuleDb,
     module: ModuleInfo,
@@ -307,7 +355,13 @@ fn find_export_origin_in_module(
     }
 }
 
-/// Resolves one exported type through export-discovery and leaf queries.
+/// Resolves one exported type without inferring the module's complete tables.
+///
+/// Returns `None` when `module` is not a JavaScript module or has type inference
+/// disabled. Once inference is supported, the function returns `Some`; a
+/// missing, ambiguous, or indeterminate origin is represented by
+/// `Some(Unknown)`. A declaration whose binding or local type cannot be inferred
+/// also produces `Some(Unknown)`.
 pub(in crate::db) fn resolve_export_type_on_demand<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
@@ -345,7 +399,7 @@ impl<'db> ResolutionCtx<'db, '_> {
     ///
     /// Cycle fallback uses this path because its blocked strongly connected
     /// component is local to the active module query and cannot be cached by
-    /// the on-demand leaf queries.
+    /// the on-demand lookup queries.
     fn resolve_import_symbol_from_tables(
         &self,
         module: ModuleInfo,
@@ -363,12 +417,13 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
-    /// Resolves only the requested import through export-discovery and leaf queries.
+    /// Resolves only the requested import through export and lookup queries.
     ///
     /// Unlike [`Self::resolve_import_symbol_from_tables`], this path does not
-    /// materialize the imported module's complete inferred tables. Import
-    /// chains that exceed the recursion budget switch to iterative table
-    /// materialization to remain stack-safe.
+    /// infer the imported module's complete type tables. After 128 nested
+    /// on-demand import resolutions, resolution switches to bottom-up
+    /// whole-module inference for the remaining dependency chain. The fallback
+    /// returns `Unknown` if those module tables cannot be inferred.
     fn resolve_import_symbol_on_demand(
         &self,
         module: ModuleInfo,
@@ -400,13 +455,21 @@ impl<'db> ResolutionCtx<'db, '_> {
 
         let Some(_depth_guard) = OnDemandImportGuard::enter() else {
             // Whole-module inference has an explicit dependency work list. It
-            // bounds the Rust stack for import chains too deep for leaf-query
-            // recursion while retaining leaf queries for ordinary chains.
+            // bounds the Rust stack for import chains too deep for lookup-query
+            // recursion while retaining lookup queries for ordinary chains.
             let _fallback_guard = IterativeImportFallbackGuard::enter();
-            return infer_module_types_bottom_up(self.db, module)
-                .map_or(InferredTypeData::Unknown, |types| {
-                    self.resolve_import_symbol_from_tables(module, types, symbol)
-                });
+            return infer_module_types_bottom_up_for_import_depth(
+                self.db,
+                module,
+                TypeInferenceCodeReference::new(
+                    file!(),
+                    line!(),
+                    "ResolutionCtx::resolve_import_symbol",
+                ),
+            )
+            .map_or(InferredTypeData::Unknown, |types| {
+                self.resolve_import_symbol_from_tables(module, types, symbol)
+            });
         };
 
         self.resolve_import_symbol_on_demand(module, symbol)
@@ -427,7 +490,28 @@ impl<'db> ResolutionCtx<'db, '_> {
         result
     }
 
-    /// Builds a namespace by resolving each discovered export through leaf queries.
+    /// Builds a namespace by resolving each discovered export through lookup queries.
+    ///
+    /// Missing and ambiguous exports are omitted, so the namespace may be
+    /// partial. An indeterminate export makes the entire namespace `Unknown`.
+    /// Export-name discovery can also make the entire namespace `Unknown`; see
+    /// [`collect_namespace_export_names`].
+    ///
+    /// For example, if two blanket re-exports provide different declarations
+    /// named `shared`, the namespace keeps `local` and omits `shared`:
+    ///
+    /// ```ts
+    /// // left.ts
+    /// export const shared = 1;
+    ///
+    /// // right.ts
+    /// export const shared = "right";
+    ///
+    /// // index.ts
+    /// export * from "./left";
+    /// export * from "./right";
+    /// export const local = 1;
+    /// ```
     fn namespace_for_module_on_demand(&self, module: ModuleInfo) -> InferredTypeData<'db> {
         let Some(names) = namespace_export_names(self.db, module) else {
             return InferredTypeData::Unknown;
@@ -451,7 +535,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         ))
     }
 
-    /// Resolves one exported name without materializing an inferred module table.
+    /// Resolves one exported name without inferring complete module tables.
+    ///
+    /// Missing, ambiguous, indeterminate, and unresolved exports all return
+    /// `Unknown`.
     pub(in crate::db) fn resolve_export_name_on_demand(
         &self,
         module: ModuleInfo,
@@ -506,6 +593,10 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     /// Builds a namespace from whole-module tables during cycle fallback.
+    ///
+    /// Missing and ambiguous exports are omitted. An unavailable dependency,
+    /// failed name collection, exhausted work limit, or indeterminate export
+    /// makes the entire namespace `Unknown`.
     fn namespace_for_module_from_tables(
         &self,
         module: ModuleInfo,
@@ -771,7 +862,7 @@ fn inferred_type_from_binding_on_demand<'db>(
     infer_binding_type(db, input).unwrap_or(InferredTypeData::Unknown)
 }
 
-/// Resolves an exported type ID from an already materialized module table.
+/// Resolves an exported type ID from complete inferred module tables.
 fn inferred_type_from_resolved_id_from_tables<'db>(
     db: &'db dyn ModuleDb,
     inferred_types: &InferredModuleTypes<'db>,
@@ -804,10 +895,10 @@ fn inferred_type_from_resolved_id_from_tables<'db>(
     }
 }
 
-/// Resolves an exported type ID without materializing its module table.
+/// Resolves an exported type ID without inferring complete module tables.
 ///
 /// Named declarations remain symbolic local handles so recursive types retain
-/// their module identity. Other local types are requested through the leaf
+/// their module identity. Other local types are requested through the lookup
 /// query.
 fn inferred_type_from_resolved_id_on_demand<'db>(
     db: &'db dyn ModuleDb,

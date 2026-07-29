@@ -9642,7 +9642,9 @@ impl SyntaxFactory for CssSyntaxFactory {
             CSS_ROOT_ITEM_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssRootItem::can_cast)
             }
-            CSS_RULE_LIST => Self::make_node_list_syntax(kind, children, AnyCssRule::can_cast),
+            CSS_RULE_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyCssRuleListItem::can_cast)
+            }
             CSS_SELECTOR_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,

@@ -79,11 +79,11 @@ See console log:
 +-->
 +</ul>
  <span
--  ><!--
+   ><!--
 ---><span>a</span
 -  ><!--
 ---><span>b</span
-   ><!--
+-  ><!--
 ---></span>
 +--><span>a</span><!--
 +--><span>b</span><!--
@@ -103,9 +103,9 @@ See console log:
 +>
  
  <span
--  ><!--
--1 --><span>a</span
    ><!--
+-1 --><span>a</span
+-  ><!--
 -2 --><span>b</span
 -  ><!--
 +1 --><span>a</span><!--
@@ -116,13 +116,6 @@ See console log:
  123<!---->456 123<!--x-->456
  
  <!-- A
-@@ -68,4 +64,4 @@
- 
-     See console log:
-     TypeError: Cannot read property 'name' of null in [null]
---->
-+-->
-\ No newline at end of file
 ```
 
 # Output
@@ -194,4 +187,5 @@ See console log:
 
     See console log:
     TypeError: Cannot read property 'name' of null in [null]
--->```
+-->
+```

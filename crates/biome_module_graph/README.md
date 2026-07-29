@@ -1,5 +1,7 @@
 # Biome module graph
 
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) before adding type-inference requests or queries.
+
 In Biome, a module is conventionally a file. A module a is a known file that imports and exports data, which is used
 inside a project.
 

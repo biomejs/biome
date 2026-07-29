@@ -51,8 +51,8 @@ double: "
   folded
 
   line"
-single: 'a
-  b'
+single: "a
+  b"
 ---
 top
 level

@@ -56,6 +56,41 @@ recover from the code itself?**
 When editing later, the same test applies in reverse: a comment that no longer
 passes it should be deleted, not left to rot.
 
+## Behavior Documentation
+
+Write documentation for a human reader, not as a translation of the
+implementation.
+
+- Start with a plain-language description of what the function returns or
+  accomplishes.
+- Use short or medium-length sentences. Keep one main idea per sentence.
+- Avoid internal jargon. If a technical term is necessary, explain what it means
+  in the same paragraph.
+- Describe business-logic caveats that can surprise callers. Examples include
+  fallback behavior, work limits, ambiguous results, overload ordering, and
+  conditions that return `None`, `Unknown`, or an indeterminate result.
+- Do not describe implementation details unless callers need them to understand
+  the behavior.
+
+Add an example when the behavior depends on relationships that the function
+signature cannot show clearly. Common cases include:
+
+- overload selection;
+- mapping arguments to optional or rest parameters;
+- following imports or re-exports across files;
+- fallback behavior for ambiguous or incomplete information;
+- a result whose meaning is not obvious from its type.
+
+Introduce the example before the code block. State what the example demonstrates
+and what result is expected.
+
+Keep snippets minimal and self-contained.
+
+Module documentation should describe a durable concept or design reason. Do not
+list individual functions or queries merely to summarize the file. Such lists
+become stale as items are added or renamed. If the module has no durable concept
+to explain, use a brief one-line description.
+
 ## Banned Patterns
 
 **Narrating the next line.** Delete these on sight:

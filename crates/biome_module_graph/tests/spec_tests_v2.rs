@@ -14,7 +14,7 @@ use biome_js_type_info::{
     interned_types::{
         CallArgumentType as InferredCallArgumentType,
         FunctionParameter as InferredFunctionParameter, InternedInterface as InferredInterface,
-        InternedMergedReference as InferredMergedReference,
+        InternedMergedReference as InferredMergedReference, InternedObject as InferredObject,
         InternedTypeofType as InferredTypeofType, InternedUnion as InferredUnion,
         Literal as InferredLiteral, LocalTypeId as InferredLocalTypeId,
         ModuleKey as InferredModuleKey, ReturnType as InferredReturnType,
@@ -26,7 +26,8 @@ use biome_languages::JsFileSource;
 use biome_module_graph::{
     CallArgumentTypeInput, CallExpressionTypeInput, InferredModuleTypes, JsExport, JsOwnExport,
     ModuleDb, ModuleInfo, ModuleInfoKind, NormalizeTypeInput, PathInfoCache,
-    infer_call_argument_type, infer_call_expression_type as infer_call_expression_type_query,
+    find_value_member_type, infer_call_argument_type,
+    infer_call_expression_type as infer_call_expression_type_query,
     infer_constructor_argument_type, infer_module_types, infer_module_types_bottom_up,
     module_for_key, normalize_type as normalize_type_query, resolve_js_module,
 };
@@ -54,6 +55,8 @@ mod normalization;
 mod promises;
 #[path = "spec_tests_v2/queries.test.rs"]
 mod queries;
+#[path = "spec_tests_v2/requests.test.rs"]
+mod requests;
 #[path = "spec_tests_v2/substitutions.test.rs"]
 mod substitutions;
 

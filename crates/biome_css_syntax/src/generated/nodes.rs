@@ -16504,6 +16504,25 @@ impl AnyCssRuleBlock {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssRuleListItem {
+    AnyCssRule(AnyCssRule),
+    ScssVariableDeclaration(ScssVariableDeclaration),
+}
+impl AnyCssRuleListItem {
+    pub fn as_any_css_rule(&self) -> Option<&AnyCssRule> {
+        match &self {
+            Self::AnyCssRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_variable_declaration(&self) -> Option<&ScssVariableDeclaration> {
+        match &self {
+            Self::ScssVariableDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssScopeRange {
     CssBogusScopeRange(CssBogusScopeRange),
     CssScopeRangeEnd(CssScopeRangeEnd),
@@ -42495,6 +42514,71 @@ impl From<AnyCssRuleBlock> for SyntaxElement {
         node.into()
     }
 }
+impl From<ScssVariableDeclaration> for AnyCssRuleListItem {
+    fn from(node: ScssVariableDeclaration) -> Self {
+        Self::ScssVariableDeclaration(node)
+    }
+}
+impl AstNode for AnyCssRuleListItem {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssRule::KIND_SET.union(ScssVariableDeclaration::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            SCSS_VARIABLE_DECLARATION => true,
+            k if AnyCssRule::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SCSS_VARIABLE_DECLARATION => {
+                Self::ScssVariableDeclaration(ScssVariableDeclaration { syntax })
+            }
+            _ => {
+                if let Some(any_css_rule) = AnyCssRule::cast(syntax) {
+                    return Some(Self::AnyCssRule(any_css_rule));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::ScssVariableDeclaration(it) => it.syntax(),
+            Self::AnyCssRule(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::ScssVariableDeclaration(it) => it.into_syntax(),
+            Self::AnyCssRule(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssRuleListItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssRule(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssRuleListItem> for SyntaxNode {
+    fn from(n: AnyCssRuleListItem) -> Self {
+        match n {
+            AnyCssRuleListItem::AnyCssRule(it) => it.into_syntax(),
+            AnyCssRuleListItem::ScssVariableDeclaration(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssRuleListItem> for SyntaxElement {
+    fn from(n: AnyCssRuleListItem) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusScopeRange> for AnyCssScopeRange {
     fn from(node: CssBogusScopeRange) -> Self {
         Self::CssBogusScopeRange(node)
@@ -46837,6 +46921,11 @@ impl std::fmt::Display for AnyCssRule {
     }
 }
 impl std::fmt::Display for AnyCssRuleBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssRuleListItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -53181,7 +53270,7 @@ impl Serialize for CssRuleList {
 }
 impl AstNodeList for CssRuleList {
     type Language = Language;
-    type Node = AnyCssRule;
+    type Node = AnyCssRuleListItem;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -53196,15 +53285,15 @@ impl Debug for CssRuleList {
     }
 }
 impl IntoIterator for &CssRuleList {
-    type Item = AnyCssRule;
-    type IntoIter = AstNodeListIterator<Language, AnyCssRule>;
+    type Item = AnyCssRuleListItem;
+    type IntoIter = AstNodeListIterator<Language, AnyCssRuleListItem>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 impl IntoIterator for CssRuleList {
-    type Item = AnyCssRule;
-    type IntoIter = AstNodeListIterator<Language, AnyCssRule>;
+    type Item = AnyCssRuleListItem;
+    type IntoIter = AstNodeListIterator<Language, AnyCssRuleListItem>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
