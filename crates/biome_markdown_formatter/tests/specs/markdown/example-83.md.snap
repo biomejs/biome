@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: markdown/spec/example-83.md
+info: markdown/example-83.md
 ---
 
 # Input
@@ -16,25 +16,7 @@ Heading
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1,9 +1,7 @@
- # Heading
- 
-     foo
--
--Heading
--------
-+## Heading
- 
-     foo
- 
-```
-
-# Output
+# Formatted
 
 ```md
 # Heading
@@ -45,4 +27,5 @@ Heading
     foo
 
 ---
+
 ```

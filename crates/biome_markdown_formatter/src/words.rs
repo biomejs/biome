@@ -67,6 +67,8 @@ pub(crate) enum ProseItem {
     /// Hard line break (  \n or \\\n) — always breaks, segments the fill.
     /// Carries the original node so it can be formatted with proper token tracking.
     HardBreak(MdHardLine),
+    /// Marks a source-line indent removed by structural prose formatting.
+    OutdentedLineStart,
 }
 
 /// Result of building the word stream.
@@ -93,6 +95,7 @@ pub(crate) fn build_word_stream_flat(
     }
 
     mark_words_that_need_escaping(&mut stream);
+    mark_outdented_setext_markers(&mut stream);
 
     Ok(WordStreamResult { stream })
 }
@@ -217,6 +220,11 @@ fn build_word_stream(
                 f.context().comments().is_suppressed(indent.syntax());
                 let token = indent.md_indent_char_token()?;
                 format_removed(&token).fmt(f).ok();
+                if current_word_group.is_empty()
+                    && matches!(stream.last(), Some(ProseItem::SoftBreak))
+                {
+                    stream.push(ProseItem::OutdentedLineStart);
+                }
             }
 
             AnyMdInline::MdHtmlBlock(html_block) => {
@@ -267,11 +275,19 @@ impl Format<MarkdownFormatContext> for FormatWordGroup<'_> {
             return Ok(());
         }
 
-        if self.escape == WordGroupEscape::EmptyStrongWithEscapedMarker {
-            return fmt_empty_strong_delimiter_run(self.atoms, f);
+        if self.escape == WordGroupEscape::EscapeLeadingMarker {
+            write!(f, [token("\\")])?;
         }
 
-        if fmt_unmatched_underscore_delimiter_run(self.atoms, f)? {
+        if self.escape == WordGroupEscape::EmptyStrongWithEscapedMarker {
+            return fmt_empty_strong_delimiter(self.atoms, f);
+        }
+
+        if fmt_literal_leading_underscore(self.atoms, f)? {
+            return Ok(());
+        }
+
+        if fmt_unmatched_underscore_delimiter(self.atoms, f)? {
             return Ok(());
         }
 
@@ -287,6 +303,29 @@ impl Format<MarkdownFormatContext> for FormatWordGroup<'_> {
     }
 }
 
+fn fmt_literal_leading_underscore(
+    atoms: &[ProseAtom],
+    f: &mut Formatter<MarkdownFormatContext>,
+) -> FormatResult<bool> {
+    let [ProseAtom::Word(leading), ProseAtom::Word(trailing)] = atoms else {
+        return Ok(false);
+    };
+    let trailing_text = trailing.text.text();
+    let Some(remainder) = trailing_text.strip_prefix('_') else {
+        return Ok(false);
+    };
+    if !remainder.contains('_')
+        || !leading.text.text().chars().next_back().is_some_and(|char| {
+            !char.is_alphanumeric() && !char.is_whitespace() && !matches!(char, '*' | '_')
+        })
+    {
+        return Ok(false);
+    }
+
+    write!(f, [leading, token("\\"), trailing])?;
+    Ok(true)
+}
+
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq)]
 pub(crate) enum WordGroupEscape {
     /// Print the word group normally.
@@ -294,11 +333,13 @@ pub(crate) enum WordGroupEscape {
     None,
     /// Prefix each marker atom with a backslash.
     EscapeEachMarker,
+    /// Prefix the first marker in the word group with a backslash.
+    EscapeLeadingMarker,
     /// Print a five-marker delimiter run as strong emphasis around an escaped marker.
     EmptyStrongWithEscapedMarker,
 }
 
-fn fmt_unmatched_underscore_delimiter_run(
+fn fmt_unmatched_underscore_delimiter(
     atoms: &[ProseAtom],
     f: &mut Formatter<MarkdownFormatContext>,
 ) -> FormatResult<bool> {
@@ -539,6 +580,71 @@ fn mark_words_that_need_escaping(stream: &mut [ProseItem]) {
     }
 }
 
+fn mark_outdented_setext_markers(stream: &mut [ProseItem]) {
+    let mut line_start = 0;
+
+    for line_end in 0..=stream.len() {
+        let is_line_end = line_end == stream.len()
+            || matches!(
+                stream[line_end],
+                ProseItem::SoftBreak | ProseItem::HardBreak(_)
+            );
+        if !is_line_end {
+            continue;
+        }
+
+        if let Some(relative_index) = outdented_setext_word_group(&stream[line_start..line_end]) {
+            let ProseItem::WordGroup { escape, .. } = &mut stream[line_start + relative_index]
+            else {
+                unreachable!();
+            };
+            *escape = WordGroupEscape::EscapeLeadingMarker;
+        }
+
+        line_start = line_end + 1;
+    }
+}
+
+fn outdented_setext_word_group(line: &[ProseItem]) -> Option<usize> {
+    let mut has_removed_indent = false;
+    let mut first_word_group = None;
+    let mut delimiter = None;
+
+    for (index, item) in line.iter().enumerate() {
+        match item {
+            ProseItem::OutdentedLineStart if first_word_group.is_none() => {
+                has_removed_indent = true;
+            }
+            ProseItem::Space => {}
+            ProseItem::WordGroup { atoms, .. } if has_removed_indent => {
+                // Space-separated dashes can form a thematic break, but
+                // space-separated equals signs cannot form block syntax.
+                if first_word_group.is_some() && delimiter == Some(b'=') {
+                    return None;
+                }
+                first_word_group.get_or_insert(index);
+                for atom in atoms {
+                    let ProseAtom::Word(word) = atom else {
+                        return None;
+                    };
+                    for byte in word.text.text().bytes() {
+                        if !matches!(byte, b'=' | b'-') {
+                            return None;
+                        }
+                        if delimiter.is_some_and(|delimiter| delimiter != byte) {
+                            return None;
+                        }
+                        delimiter = Some(byte);
+                    }
+                }
+            }
+            _ => return None,
+        }
+    }
+
+    delimiter.and(first_word_group)
+}
+
 /// Returns how a word group should print marker-only text.
 ///
 /// A word group needs special escaping when every atom is plain text, the whole
@@ -586,7 +692,7 @@ fn word_group_escape(stream: &[ProseItem], index: usize) -> WordGroupEscape {
     }
 }
 
-fn fmt_empty_strong_delimiter_run(
+fn fmt_empty_strong_delimiter(
     atoms: &[ProseAtom],
     f: &mut Formatter<MarkdownFormatContext>,
 ) -> FormatResult<()> {

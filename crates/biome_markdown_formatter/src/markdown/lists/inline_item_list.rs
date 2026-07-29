@@ -30,6 +30,7 @@ impl Format<MarkdownFormatContext> for FormatSourceLine<'_> {
                 ProseItem::Space | ProseItem::SoftBreak | ProseItem::HardBreak(_) => {
                     needs_space = true;
                 }
+                ProseItem::OutdentedLineStart => {}
             }
         }
         Ok(())
@@ -46,7 +47,10 @@ fn strip_spaces_after_soft_breaks(stream: &mut Vec<ProseItem>) {
     let mut i = 0;
     while i < stream.len() {
         if matches!(stream[i], ProseItem::SoftBreak) {
-            let start = i + 1;
+            let mut start = i + 1;
+            while start < stream.len() && matches!(stream[start], ProseItem::OutdentedLineStart) {
+                start += 1;
+            }
             let mut end = start;
             while end < stream.len() && matches!(stream[end], ProseItem::Space) {
                 end += 1;
@@ -62,8 +66,9 @@ fn strip_spaces_after_soft_breaks(stream: &mut Vec<ProseItem>) {
 fn outdented_list_marker_lines(
     node: &MdInlineItemList,
     content_indent: usize,
-) -> FormatResult<Vec<usize>> {
+) -> FormatResult<(Vec<usize>, Vec<usize>)> {
     let mut lines = Vec::new();
+    let mut indented_lines = Vec::new();
     let mut line_index = 0;
     let mut at_line_start = true;
     let mut leading_spaces = 0;
@@ -92,6 +97,9 @@ fn outdented_list_marker_lines(
                     && starts_with_list_marker(text)
                 {
                     lines.push(line_index);
+                    if leading_spaces > 0 {
+                        indented_lines.push(line_index);
+                    }
                 }
 
                 at_line_start = false;
@@ -108,7 +116,7 @@ fn outdented_list_marker_lines(
         }
     }
 
-    Ok(lines)
+    Ok((lines, indented_lines))
 }
 
 fn starts_with_list_marker(text: &str) -> bool {
@@ -859,13 +867,13 @@ impl FormatMdInlineItemList {
     ) -> FormatResult<()> {
         let WordStreamResult { mut stream } = build_word_stream_flat(node, f)?;
         let inside_list = text_context.is_list();
-        let outdented_lines = if inside_list {
+        let (outdented_lines, indented_outdented_lines) = if inside_list {
             enclosing_list_content_indent(node)
                 .map(|content_indent| outdented_list_marker_lines(node, content_indent))
                 .transpose()?
                 .unwrap_or_default()
         } else {
-            Vec::new()
+            (Vec::new(), Vec::new())
         };
 
         if inside_list {
@@ -905,6 +913,8 @@ impl FormatMdInlineItemList {
                 ProseItem::SoftBreak => {
                     let line_items = &stream[line_start..i];
                     if !line_items.is_empty() {
+                        let next_line_is_outdented_list_marker =
+                            indented_outdented_lines.contains(&(line_index + 1));
                         format_source_line(
                             line_items,
                             line_index,
@@ -913,7 +923,12 @@ impl FormatMdInlineItemList {
                             &outdented_lines,
                             f,
                         )?;
-                        is_first_line = false;
+                        if next_line_is_outdented_list_marker {
+                            write!(f, [space()])?;
+                            is_first_line = true;
+                        } else {
+                            is_first_line = false;
+                        }
                     }
                     line_start = i + 1;
                     line_index += 1;

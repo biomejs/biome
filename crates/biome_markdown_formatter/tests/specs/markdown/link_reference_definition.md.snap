@@ -71,8 +71,8 @@ Use [foo] in text.
 ```md
 [foo]: /url
 [foo]: /url "title"
-[foo]: /url 'title'
-[foo]: /url (title)
+[foo]: /url "title"
+[foo]: /url "title"
 [foo]: /url "title with spaces"
 [Foo Bar]: /url
 [foo]: /url
@@ -95,7 +95,7 @@ Use [foo] in text.
 [foo]: /url
 [foo]: /url
 [foo]: /url " "
-[foo]: /url ' '
+[foo]: /url " "
 [foo]: /url "a"
 [CapitalCase]: /url
 [MiXeD CaSe]: /url

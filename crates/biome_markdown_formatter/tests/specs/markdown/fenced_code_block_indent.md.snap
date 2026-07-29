@@ -1,0 +1,48 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: markdown/fenced_code_block_indent.md
+---
+
+# Input
+
+```md
+## Canonical
+
+```
+aaa
+ aaa
+aaa
+```
+
+## Unformatted
+
+   ```
+   aaa
+    aaa
+  aaa
+  ```
+
+```
+
+
+# Formatted
+
+```md
+## Canonical
+
+```
+aaa
+ aaa
+aaa
+```
+
+## Unformatted
+
+```
+aaa
+ aaa
+aaa
+```
+
+```
