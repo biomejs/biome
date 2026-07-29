@@ -964,7 +964,7 @@ impl FormatMdInlineItemList {
                 continue;
             };
 
-            format_fill_segment(&items[segment_start..index], f)?;
+            Self::format_fill_segment(&items[segment_start..index], f)?;
             write!(
                 f,
                 [hard_break
@@ -976,28 +976,25 @@ impl FormatMdInlineItemList {
             segment_start = index + 1;
         }
 
-        format_fill_segment(&items[segment_start..], f)
-    }
-}
-
-fn format_fill_segment(items: &[ProseItem], f: &mut MarkdownFormatter) -> FormatResult<()> {
-    let wrap_separator = soft_line_break_or_space();
-    let marker_separator = space();
-    let mut fill = f.fill();
-
-    for item in items {
-        let ProseItem::WordGroup(group) = item else {
-            continue;
-        };
-        let separator = if group.starts_with_block_marker() {
-            &marker_separator as &dyn Format<MarkdownFormatContext>
-        } else {
-            &wrap_separator
-        };
-        fill.entry(separator, group);
+        Self::format_fill_segment(&items[segment_start..], f)
     }
 
-    fill.finish()
+    fn format_fill_segment(items: &[ProseItem], f: &mut MarkdownFormatter) -> FormatResult<()> {
+        let mut fill = f.fill();
+
+        for item in items {
+            let ProseItem::WordGroup(group) = item else {
+                continue;
+            };
+            let separator = if group.starts_with_block_marker() {
+                fill.entry(&space(), group);
+            } else {
+                fill.entry(&soft_line_break_or_space(), group);
+            };
+        }
+
+        fill.finish()
+    }
 }
 
 /// Business-level items for fenced code content inside lists.
