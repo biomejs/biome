@@ -855,7 +855,7 @@ impl<L: Language> SyntaxNodePtr<L> {
         if node.is_some() || !self.range.is_empty() {
             node
         } else {
-            root.descendants()
+            root.pruned_descendents(|it| it.text_range_with_trivia().contains_range(self.range))
                 .find(|it| it.text_range_with_trivia() == self.range && it.kind() == self.kind)
         }
     }
