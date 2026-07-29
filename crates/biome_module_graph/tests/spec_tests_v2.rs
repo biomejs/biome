@@ -49,6 +49,8 @@ mod globals;
 mod imports;
 #[path = "spec_tests_v2/intersections.test.rs"]
 mod intersections;
+#[path = "spec_tests_v2/js_doc.test.rs"]
+mod js_doc;
 #[path = "spec_tests_v2/normalization.test.rs"]
 mod normalization;
 #[path = "spec_tests_v2/promises.test.rs"]
