@@ -190,8 +190,10 @@ impl Rule for NoParameterAssign {
             ) {
                 let param_reassignments: Vec<_> = binding
                     .all_writes(model)
-                    .map(|expression| {
-                        ProblemType::ParameterAssignment(expression.syntax().text_trimmed_range())
+                    .filter_map(|expression| {
+                        Some(ProblemType::ParameterAssignment(
+                            expression.syntax()?.text_trimmed_range(),
+                        ))
                     })
                     .collect();
 
@@ -240,7 +242,7 @@ impl Rule for NoParameterAssign {
 
 fn extract_statement_from_reference(reference: &Reference) -> Option<JsExpressionStatement> {
     reference
-        .syntax()
+        .syntax()?
         .ancestors()
         .skip(2) // skip the reference identifier and its expression
         .skip_while(|node| AnyJsAssignmentLike::can_cast(node.kind()))

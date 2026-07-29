@@ -92,7 +92,7 @@ impl Rule for NoUselessThisAlias {
             .skip(1)
             .find_map(AnyJsControlFlowRoot::cast)?;
         for write in id.all_writes(model) {
-            let assign = JsAssignmentExpression::cast(write.syntax().parent()?)?;
+            let assign = JsAssignmentExpression::cast(write.syntax()?.parent()?)?;
             let assign_right = assign.right().ok()?.omit_parentheses();
             if !JsThisExpression::can_cast(assign_right.syntax().kind()) {
                 return None;
@@ -105,7 +105,7 @@ impl Rule for NoUselessThisAlias {
         }
         for reference in id.all_references(model) {
             let current_this_scope = reference
-                .syntax()
+                .syntax()?
                 .ancestors()
                 .skip(1)
                 .filter(|x| !JsArrowFunctionExpression::can_cast(x.kind()))
@@ -146,13 +146,13 @@ impl Rule for NoUselessThisAlias {
         let this_expr = AnyJsExpression::from(make::js_this_expression(make::token(T![this])));
         for read in id.all_reads(model) {
             let syntax = read.syntax();
-            let syntax = syntax.parent()?;
+            let syntax = syntax?.parent()?;
             let expr = JsIdentifierExpression::cast(syntax)?;
             mutation.replace_node(expr.into(), this_expr.clone());
         }
         for write in id.all_writes(model) {
             let syntax = write.syntax();
-            let syntax = syntax.parent()?;
+            let syntax = syntax?.parent()?;
             let statement = JsExpressionStatement::cast(syntax.parent()?)?;
             mutation.remove_node(statement);
         }

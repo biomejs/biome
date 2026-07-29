@@ -132,8 +132,9 @@ impl Rule for NoShoutyConstants {
             },
         );
 
-        let node = state.reference.syntax();
-        diag = diag.detail(node.text_trimmed_range(), "Used here.");
+        if let Some(node) = state.reference.syntax() {
+            diag = diag.detail(node.text_trimmed_range(), "Used here.");
+        }
 
         let diag = diag.note(
             markup! {"You should avoid declaring constants with a string that's the same
@@ -154,7 +155,7 @@ impl Rule for NoShoutyConstants {
 
         if let Some(node) = state
             .reference
-            .syntax()
+            .syntax()?
             .parent()?
             .cast::<JsIdentifierExpression>()
         {
@@ -164,7 +165,7 @@ impl Rule for NoShoutyConstants {
             );
         } else if let Some(node) = state
             .reference
-            .syntax()
+            .syntax()?
             .parent()?
             .cast::<JsShorthandPropertyObjectMember>()
         {
@@ -173,7 +174,7 @@ impl Rule for NoShoutyConstants {
                 AnyJsObjectMemberName::JsLiteralMemberName(js_literal_member_name(
                     SyntaxToken::new_detached(
                         JsSyntaxKind::JS_LITERAL_MEMBER_NAME,
-                        JsReferenceIdentifier::cast_ref(&state.reference.syntax())?
+                        JsReferenceIdentifier::cast_ref(&state.reference.syntax()?)?
                             .value_token()
                             .ok()?
                             .text_trimmed(),

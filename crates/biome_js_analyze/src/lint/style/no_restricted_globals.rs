@@ -82,7 +82,7 @@ impl Rule for NoRestrictedGlobals {
         unresolved_reference_nodes
             .chain(global_references_nodes)
             .filter_map(|node| {
-                let node = AnyJsIdentifierUsage::unwrap_cast(node);
+                let node = AnyJsIdentifierUsage::cast(node?)?;
                 let (token, binding) = match node {
                     AnyJsIdentifierUsage::JsReferenceIdentifier(node) => {
                         (node.value_token(), node.binding(model))

@@ -111,7 +111,7 @@ impl Rule for NoClassAssign {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                reference.syntax().text_trimmed_range(),
+                reference.syntax()?.text_trimmed_range(),
                 markup! {"'"{class_name}"' is a class."},
             )
             .detail(

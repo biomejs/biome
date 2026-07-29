@@ -146,11 +146,13 @@ impl Rule for NoDuplicateSelectors {
 
                     let is_at_rule = matches!(
                         rule.node(&root),
+                        Some(
                         AnyRuleStart::CssMediaAtRule(_)
                             | AnyRuleStart::CssSupportsAtRule(_)
                             | AnyRuleStart::CssContainerAtRule(_)
                             | AnyRuleStart::CssScopeAtRule(_)
                             | AnyRuleStart::CssStartingStyleAtRule(_)
+                        )
                     );
 
                     if is_at_rule {

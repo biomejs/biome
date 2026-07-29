@@ -125,7 +125,7 @@ impl Rule for NoRedeclare {
 
 fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<Redeclaration>) {
     let mut declarations = FxHashMap::<TokenText, (TextRange, AnyJsBindingDeclaration)>::default();
-    if scope.syntax().kind() == JsSyntaxKind::JS_FUNCTION_BODY {
+    if scope.syntax().is_some_and(|syntax| syntax.kind() == JsSyntaxKind::JS_FUNCTION_BODY) {
         // Handle cases where a variable/type redeclares a parameter or type parameter.
         // For example:
         //
@@ -148,7 +148,9 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
         // ```
         if let Some(function_scope) = scope.parent() {
             for binding in function_scope.bindings() {
-                let id_binding = binding.tree();
+                let Some(id_binding) = binding.tree() else {
+                    continue;
+                };
                 if let Some(decl) = id_binding.declaration() {
                     // Ignore the function itself.
                     if !matches!(decl, AnyJsBindingDeclaration::JsFunctionExpression(_)) {
@@ -165,7 +167,9 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
         }
     }
     for binding in scope.bindings() {
-        let id_binding = binding.tree();
+        let Some(id_binding) = binding.tree() else {
+            continue;
+        };
 
         // We consider only binding of a declaration
         // This allows to skip function parameters, methods, ...

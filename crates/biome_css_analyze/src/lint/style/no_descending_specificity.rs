@@ -143,7 +143,10 @@ fn find_descending_selector(
     }
 
     for selector in rule.selectors() {
-        let Some(casted_selector) = AnyCssSelector::cast(selector.node(root).syntax().clone())
+        let Some(selector_node) = selector.node(root) else {
+            continue;
+        };
+        let Some(casted_selector) = AnyCssSelector::cast(selector_node.syntax().clone())
         else {
             continue;
         };

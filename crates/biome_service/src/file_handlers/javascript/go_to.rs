@@ -47,9 +47,9 @@ pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<Definition
         if let Some(reference) = JsReferenceIdentifier::cast_ref(&ancestor)
             && let Some(binding) = semantic_model.binding(&reference)
         {
-            let binding_syntax = binding.syntax();
+            let binding_syntax = binding.syntax()?;
             if let Some(specifier) = is_under_import_clause(&binding_syntax) {
-                let name = binding.syntax().text_trimmed().to_string();
+                let name = binding_syntax.text_trimmed().to_string();
                 return Some(DefinitionReference::Import {
                     local_name: name,
                     specifier: specifier.to_string(),
@@ -59,14 +59,14 @@ pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<Definition
                 return Some(result);
             }
             return Some(DefinitionReference::Local {
-                range: binding.syntax().text_trimmed_range(),
+                range: binding_syntax.text_trimmed_range(),
             });
         }
 
         if let Some(reference) = JsxReferenceIdentifier::cast_ref(&ancestor)
             && let Some(binding) = semantic_model.binding(&reference)
         {
-            let binding_syntax = binding.syntax();
+            let binding_syntax = binding.syntax()?;
             if let Some(specifier) = is_under_import_clause(&binding_syntax) {
                 let name = binding_syntax.text_trimmed().to_string();
                 return Some(DefinitionReference::Import {

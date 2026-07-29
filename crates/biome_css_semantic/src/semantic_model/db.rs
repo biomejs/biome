@@ -163,6 +163,28 @@ mod tests {
     }
 
     #[test]
+    fn incomplete_value_does_not_panic_during_recomputation() {
+        let mut db = TestDb::new();
+        let file = make_file(&db, ".incomplete { height: 1px }");
+        assert_eq!(rule_count(&db, file), 1);
+
+        let new_parsed = parse_css(
+            ".incomplete { height: }",
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        )
+        .into();
+        salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+
+        db.clear_salsa_events();
+        assert_eq!(rule_count(&db, file), 1);
+        let events = db.take_salsa_events();
+
+        assert_function_query_was_run(&db, css_model_from_parsed_source, file, &events);
+        assert_function_query_was_run(&db, rule_count, file, &events);
+    }
+
+    #[test]
     fn declaration_count_change_does_recompute_downstream() {
         let mut db = TestDb::new();
         let file = make_file(&db, "p { color: red; }");

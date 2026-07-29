@@ -306,9 +306,7 @@ fn classify_expression(
                                     projection: state.projection,
                                 };
                             }
-                            let Some(reference) = js_info
-                                .raw_binding_types
-                                .get(&binding.syntax().text_trimmed_range())
+                            let Some(reference) = js_info.raw_binding_types.get(&binding.range())
                             else {
                                 return Indeterminate;
                             };

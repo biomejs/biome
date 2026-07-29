@@ -47,7 +47,10 @@ impl Rule for NoArguments {
         let mut found_arguments = vec![];
 
         for unresolved_reference in model.all_unresolved_references() {
-            let name = unresolved_reference.syntax().text_trimmed();
+            let Some(syntax) = unresolved_reference.syntax() else {
+                continue;
+            };
+            let name = syntax.text_trimmed();
             if name == "arguments" {
                 found_arguments.push(unresolved_reference.range());
             }

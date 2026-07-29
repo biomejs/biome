@@ -641,9 +641,11 @@ fn capture_needs_to_be_in_the_dependency_list(
                 0,
             ),
             AnyExpressionCandidate::JsReferenceIdentifier(reference_identifier) => {
-                if let Some(binding) = model.binding(reference_identifier) {
+                if let Some(binding) = model.binding(reference_identifier)
+                    && let Some(binding) = binding.tree()
+                {
                     is_stable_binding(
-                        &binding.tree(),
+                        &binding,
                         None,
                         component_function_range,
                         model,
@@ -655,9 +657,11 @@ fn capture_needs_to_be_in_the_dependency_list(
                 }
             }
             AnyExpressionCandidate::JsxReferenceIdentifier(reference_identifier) => {
-                if let Some(binding) = model.binding(reference_identifier) {
+                if let Some(binding) = model.binding(reference_identifier)
+                    && let Some(binding) = binding.tree()
+                {
                     is_stable_binding(
-                        &binding.tree(),
+                        &binding,
                         None,
                         component_function_range,
                         model,
@@ -935,7 +939,9 @@ fn is_stable_expression(
             if let Ok(name) = identifier.name()
                 && let Some(binding) = model.binding(&name)
             {
-                let binding = &binding.tree();
+                let Some(binding) = binding.tree() else {
+                    return true;
+                };
                 let declaration = binding.declaration();
                 let declaration_node = if let Some(
                     AnyJsBindingDeclaration::JsArrowFunctionExpression(arrow_function),
@@ -959,7 +965,7 @@ fn is_stable_expression(
                 }
 
                 is_stable_binding(
-                    binding,
+                    &binding,
                     member,
                     component_function_range,
                     model,
@@ -1108,7 +1114,7 @@ fn is_out_of_function_scope(
 ) -> Option<bool> {
     let identifier_name = identifier.as_js_identifier_expression()?.name().ok()?;
 
-    let declaration = model.binding(&identifier_name)?.tree().declaration()?;
+    let declaration = model.binding(&identifier_name)?.tree()?.declaration()?;
 
     Some(
         model
@@ -1132,7 +1138,7 @@ fn determine_unstable_dependency(
 ) -> Option<UnstableDependencyKind> {
     let identifier_name = dependency.as_js_identifier_expression()?.name().ok()?;
 
-    let declaration = model.binding(&identifier_name)?.tree().declaration()?;
+    let declaration = model.binding(&identifier_name)?.tree()?.declaration()?;
     match declaration {
         AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
         | AnyJsBindingDeclaration::JsFunctionDeclaration(_) => {
@@ -1236,7 +1242,7 @@ fn get_relevant_capture_nodes(
     if let AnyJsExpression::JsIdentifierExpression(identifier) = &closure_expression
         && let Ok(identifier_name) = identifier.name()
         && let Some(binding) = model.binding(&identifier_name)
-        && let AnyJsIdentifierBinding::JsIdentifierBinding(identifier_binding) = binding.tree()
+        && let Some(AnyJsIdentifierBinding::JsIdentifierBinding(identifier_binding)) = binding.tree()
         && let Some(declaration) = identifier_binding.declaration()
     {
         if identifier_binding

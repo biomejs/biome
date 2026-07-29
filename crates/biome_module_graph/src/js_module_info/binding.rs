@@ -27,8 +27,7 @@ impl std::fmt::Debug for JsBinding {
         let name = self
             .semantic_binding
             .tree()
-            .name_token()
-            .ok()
+            .and_then(|binding| binding.name_token().ok())
             .map(|t| t.text_trimmed().to_string());
         f.debug_struct("JsBinding").field("name", &name).finish()
     }
@@ -60,8 +59,7 @@ impl JsBinding {
     pub fn name(&self) -> Text {
         self.semantic_binding
             .tree()
-            .name_token()
-            .ok()
+            .and_then(|binding| binding.name_token().ok())
             .map(|t| t.token_text_trimmed().into())
             .unwrap_or_default()
     }
@@ -80,7 +78,7 @@ impl JsBinding {
     /// a default unknown type when no augmentation data exists.
     pub fn ty(&self) -> TypeReference {
         // Look up type augmentation data by binding range
-        let binding_range = self.semantic_binding.syntax().text_trimmed_range();
+        let binding_range = self.semantic_binding.range();
         self.data
             .binding_type_data
             .get(&binding_range)

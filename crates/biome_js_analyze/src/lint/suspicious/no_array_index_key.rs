@@ -149,7 +149,7 @@ impl Rule for NoArrayIndexKey {
             // and navigate up to the closest call expression.
             let Some(parameter) = model
                 .binding(&reference)
-                .and_then(|declaration| declaration.syntax().parent())
+                .and_then(|declaration| declaration.syntax()?.parent())
                 .and_then(JsFormalParameter::cast)
             else {
                 continue;

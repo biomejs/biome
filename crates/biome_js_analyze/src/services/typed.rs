@@ -64,7 +64,7 @@ impl TypedService {
             }
             scope = scope.parent()?;
         };
-        Some(binding.tree().syntax().text_trimmed_range())
+        Some(binding.range())
     }
 
     /// Returns the Salsa-inferred type for an expression.

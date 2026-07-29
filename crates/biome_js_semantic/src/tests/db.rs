@@ -4,12 +4,16 @@
 //! we care re-use the same semantic model, if the information that belong to the semantic model didn't change
 
 use crate::db::semantic_model_from_source;
-use crate::{SemanticModel, semantic_model};
+use crate::{
+    SemanticEventExtractor, SemanticModel, SemanticModelBuilder, SemanticModelOptions,
+    semantic_model,
+};
 use biome_db::ParsedSource;
 use biome_db::testing::{Events, assert_function_query_was_not_run, assert_function_query_was_run};
 use biome_js_parser::parse;
 use biome_js_syntax::AnyJsRoot;
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
+use biome_rowan::AstNode;
 use camino::{Utf8Path, Utf8PathBuf};
 use salsa::Storage;
 
@@ -17,6 +21,123 @@ fn build_model(source: &str) -> SemanticModel {
     let parsed = parse(source, JsFileSource::js_module(), Default::default());
     let parsed: AnyJsRoot = parsed.tree();
     semantic_model(&parsed, Default::default())
+}
+
+fn assert_pointers_resolve(source: &str, source_type: JsFileSource) {
+    let parsed = parse(source, source_type, Default::default());
+    let root: AnyJsRoot = parsed.tree();
+    let model = semantic_model(&root, SemanticModelOptions::from(&source_type));
+    let syntax = root.syntax();
+
+    for pointer in model.data.binding_node_by_start.values() {
+        assert!(
+            pointer.try_to_node(syntax).is_some(),
+            "unresolved binding pointer for {source:?}: {pointer:?}"
+        );
+    }
+    for pointer in model.data.scope_node_by_range.values() {
+        assert!(
+            pointer.try_to_node(syntax).is_some(),
+            "unresolved scope pointer for {source:?}: {pointer:?}"
+        );
+    }
+    for scope in model.scopes() {
+        assert!(scope.syntax().is_some(), "unresolved scope for {source:?}");
+    }
+    for binding in model.all_bindings() {
+        assert!(
+            binding.syntax().is_some(),
+            "unresolved binding for {source:?}"
+        );
+        assert!(
+            binding.tree().is_some(),
+            "unresolved binding tree for {source:?}"
+        );
+        for reference in binding.all_references() {
+            assert!(
+                reference.syntax().is_some(),
+                "unresolved reference for {source:?}"
+            );
+        }
+    }
+    for reference in model.all_global_references() {
+        assert!(
+            reference.syntax().is_some(),
+            "unresolved global reference for {source:?}"
+        );
+    }
+    for reference in model.all_unresolved_references() {
+        assert!(
+            reference.syntax().is_some(),
+            "unresolved reference for {source:?}"
+        );
+    }
+}
+
+#[test]
+fn pointers_resolve_for_partial_sources() {
+    let cases = [
+        (
+            "export function example(value) { const result = value + external; return result; }",
+            JsFileSource::js_module(),
+        ),
+        (
+            "interface Example<T> { value: T } const element = <Component value={external} />;",
+            JsFileSource::tsx(),
+        ),
+    ];
+
+    for (source, source_type) in cases {
+        for end in source
+            .char_indices()
+            .map(|(index, _)| index)
+            .chain(std::iter::once(source.len()))
+        {
+            assert_pointers_resolve(&source[..end], source_type);
+        }
+    }
+}
+
+#[test]
+fn accessors_return_none_for_foreign_nodes() {
+    let model_root: AnyJsRoot = parse("", JsFileSource::js_module(), Default::default()).tree();
+    let foreign_root: AnyJsRoot = parse(
+        "let value = external;",
+        JsFileSource::js_module(),
+        Default::default(),
+    )
+    .tree();
+    let mut extractor = SemanticEventExtractor::default();
+    let mut builder = SemanticModelBuilder::new(model_root);
+
+    for event in foreign_root.syntax().preorder() {
+        match event {
+            biome_js_syntax::WalkEvent::Enter(node) => {
+                builder.push_node(&node);
+                extractor.enter(&node);
+            }
+            biome_js_syntax::WalkEvent::Leave(node) => extractor.leave(&node),
+        }
+    }
+    while let Some(event) = extractor.pop() {
+        builder.push_event(event);
+    }
+
+    let model = builder.build();
+    let binding = model.all_bindings().next().unwrap();
+    assert!(binding.syntax().is_none());
+    assert!(binding.tree().is_none());
+    assert!(
+        binding
+            .all_references()
+            .all(|reference| reference.syntax().is_none())
+    );
+    assert!(model.scopes().all(|scope| scope.syntax().is_none()));
+    assert!(
+        model
+            .all_unresolved_references()
+            .all(|reference| reference.syntax().is_none())
+    );
 }
 
 #[test]

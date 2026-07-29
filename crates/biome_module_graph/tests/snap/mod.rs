@@ -152,8 +152,8 @@ impl<'a> ModuleGraphSnapshot<'a> {
                                     let binding_name = data
                                         .semantic_model
                                         .all_bindings()
-                                        .find(|b| b.syntax().text_trimmed_range() == binding_range)
-                                        .and_then(|b| b.tree().name_token().ok())
+                                        .find(|binding| binding.range() == binding_range)
+                                        .and_then(|binding| binding.tree()?.name_token().ok())
                                         .map_or_else(|| "<unknown>".to_string(), |b| b.to_string());
 
                                     content.push_str(&format!(

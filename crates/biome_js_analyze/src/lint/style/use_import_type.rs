@@ -838,7 +838,7 @@ fn is_only_used_as_type(
     let mut all_type_only = true;
     for reference in binding.all_references(model) {
         has_reference = true;
-        if let Some(reference) = AnyJsIdentifierUsage::cast_ref(&reference.syntax())
+        if let Some(reference) = reference.syntax().as_ref().and_then(AnyJsIdentifierUsage::cast_ref)
             && !reference.is_only_type()
         {
             all_type_only = false;

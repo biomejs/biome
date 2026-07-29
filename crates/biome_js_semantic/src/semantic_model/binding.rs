@@ -531,6 +531,11 @@ impl Display for Binding {
 }
 
 impl Binding {
+    /// Returns the range associated with this binding.
+    pub fn range(&self) -> TextRange {
+        self.data.binding(self.id).range
+    }
+
     /// Returns the scope of this binding
     pub fn scope(&self) -> Scope {
         let binding = self.data.binding(self.id);
@@ -545,16 +550,20 @@ impl Binding {
         self.data.binding(self.id).declaration_kind
     }
 
-    /// Returns the syntax node associated with this binding.
-    pub fn syntax(&self) -> JsSyntaxNode {
+    /// Returns the syntax node associated with this binding, or `None` if the
+    /// stored pointer cannot be resolved against the model's syntax tree.
+    pub fn syntax(&self) -> Option<JsSyntaxNode> {
         let binding = self.data.binding(self.id);
-        self.data.binding_node_by_start[&binding.range.start()]
-            .to_node(self.data.to_root().syntax())
+        self.data
+            .binding_node_by_start
+            .get(&binding.range.start())?
+            .try_to_node(self.data.to_root().syntax())
     }
 
-    /// Returns the typed AST node associated with this binding.
-    pub fn tree(&self) -> AnyJsIdentifierBinding {
-        AnyJsIdentifierBinding::unwrap_cast(self.syntax().clone())
+    /// Returns the typed AST node associated with this binding, or `None` if the
+    /// stored pointer cannot be resolved against the model's syntax tree.
+    pub fn tree(&self) -> Option<AnyJsIdentifierBinding> {
+        AnyJsIdentifierBinding::cast(self.syntax()?)
     }
 
     /// Returns an iterator to all references of this binding.
@@ -611,16 +620,18 @@ impl Binding {
             self.data
                 .binding_node_by_start
                 .get(&export_start.start())
-                .map(|ptr| ptr.to_node(self.data.to_root().syntax()))
+                .and_then(|ptr| ptr.try_to_node(self.data.to_root().syntax()))
         })
     }
 
     pub fn is_imported(&self) -> bool {
-        super::is_imported(&self.syntax())
+        self.syntax()
+            .is_some_and(|syntax| super::is_imported(&syntax))
     }
 
     pub fn is_exported(&self) -> bool {
-        self.data.is_exported(self.syntax().text_trimmed_range())
+        self.syntax()
+            .is_some_and(|syntax| self.data.is_exported(syntax.text_trimmed_range()))
     }
 
     /// Returns the JSDoc comment associated with this binding, if any.

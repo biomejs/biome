@@ -115,13 +115,15 @@ impl JsModuleInfoCollector {
         let mut bindings = Vec::new();
 
         for binding in semantic_model.all_bindings() {
-            let name = binding
-                .tree()
+            let Some(tree) = binding.tree() else {
+                continue;
+            };
+            let name = tree
                 .name_token()
                 .ok()
                 .map(|t| t.token_text_trimmed().into())
                 .unwrap_or_default();
-            let range = binding.syntax().text_trimmed_range();
+            let range = binding.range();
 
             bindings.push(JsBindingData {
                 name,
@@ -439,7 +441,7 @@ impl JsModuleInfoCollector {
             let binding = &self.bindings[index];
             if let Some(node) = semantic_model
                 .as_binding_by_range(binding.range)
-                .map(|b| b.syntax().clone())
+                .and_then(|binding| binding.syntax())
             {
                 let scope_id = semantic_model.scope_for_range(binding.range).id();
                 let ty = self.infer_type(&node, binding.clone(), scope_id, semantic_model);
@@ -587,7 +589,9 @@ impl JsModuleInfoCollector {
         union_collector.add(ty.clone());
         let mut saw_widening_reference = false;
         for reference in references {
-            let node = reference.syntax();
+            let Some(node) = reference.syntax() else {
+                continue;
+            };
             let reference_scope = reference.scope().id();
 
             // We don't want to widen types inside the same scope

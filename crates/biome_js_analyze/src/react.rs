@@ -284,13 +284,14 @@ pub(crate) fn jsx_reference_identifier_is_fragment(
 fn is_react_export(binding: &Binding, lib: ReactLibrary) -> bool {
     binding
         .syntax()
-        .ancestors()
+        .into_iter()
+        .flat_map(|syntax| syntax.ancestors())
         .find_map(|ancestor| JsImport::cast(ancestor)?.source_text().ok())
         .is_some_and(|source| lib.import_names().contains(&source.text()))
 }
 
 fn is_named_react_export(binding: &Binding, lib: ReactLibrary, name: &str) -> Option<bool> {
-    let ident = JsIdentifierBinding::cast_ref(&binding.syntax())?;
+    let ident = JsIdentifierBinding::cast_ref(&binding.syntax()?)?;
     let import_specifier = ident.parent::<AnyJsNamedImportSpecifier>()?;
     let name_token = match &import_specifier {
         AnyJsNamedImportSpecifier::JsNamedImportSpecifier(named_import) => {

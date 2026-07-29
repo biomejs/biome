@@ -139,7 +139,7 @@ impl Rule for UseConst {
             let binding_name = binding.name_token().ok()?;
             if let Some(write) = binding.all_writes(ctx.model()).next() {
                 diag = diag.detail(
-                    write.syntax().text_trimmed_range(),
+                    write.syntax()?.text_trimmed_range(),
                     markup! {
                         "'"{ binding_name.text_trimmed() }"' is only assigned here."
                     },
@@ -240,7 +240,7 @@ fn check_binding_can_be_const(
         return None;
     }
     let host = write
-        .syntax()
+        .syntax()?
         .ancestors()
         .find_map(DestructuringHost::cast)?;
     if host.has_member_expr_assignment() || host.has_outer_variables(&write.scope()) {

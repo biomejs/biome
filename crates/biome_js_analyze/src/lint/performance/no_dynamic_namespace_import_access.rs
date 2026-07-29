@@ -113,7 +113,7 @@ fn find_dynamic_namespace_import_accesses(
     let ranges = reads
         .into_iter()
         .filter_map(|read| {
-            let syntax = read.syntax().parent()?.parent()?;
+            let syntax = read.syntax()?.parent()?.parent()?;
             let node = JsComputedMemberExpression::cast(syntax)?;
 
             Some(node.range())

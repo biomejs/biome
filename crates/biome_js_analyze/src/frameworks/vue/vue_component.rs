@@ -812,7 +812,8 @@ impl AnyVueSetupDeclaration {
                     && let Some(binding) = model.binding(&ident_ref)
                     && let Some(declarator) = binding
                         .syntax()
-                        .ancestors()
+                        .into_iter()
+                        .flat_map(|syntax| syntax.ancestors())
                         .skip(1)
                         .find_map(|syntax| JsVariableDeclarator::try_cast(syntax).ok())
                     && let Some(decl_initializer) = declarator.initializer()

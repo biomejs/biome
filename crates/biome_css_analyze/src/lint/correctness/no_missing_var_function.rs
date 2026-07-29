@@ -174,7 +174,8 @@ impl Rule for NoMissingVarFunction {
         if rule
             .declarations()
             .iter()
-            .flat_map(|decl| decl.property(&root).value())
+            .filter_map(|decl| decl.property(&root))
+            .flat_map(|property| property.value())
             .any(|value| value.text() == custom_variable_name.text())
         {
             return Some(node.clone());
@@ -186,7 +187,8 @@ impl Rule for NoMissingVarFunction {
             if parent_rule
                 .declarations()
                 .iter()
-                .flat_map(|decl| decl.property(&root).value())
+                .filter_map(|decl| decl.property(&root))
+                .flat_map(|property| property.value())
                 .any(|value| value.text() == custom_variable_name.text())
             {
                 return Some(node.clone());

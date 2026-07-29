@@ -133,7 +133,7 @@ impl Rule for NoAccumulatingSpread {
 fn is_known_accumulator(reference: &JsReferenceIdentifier, model: &SemanticModel) -> Option<bool> {
     let parameter = model
         .binding(reference)
-        .and_then(|declaration| declaration.syntax().parent())
+        .and_then(|declaration| declaration.syntax()?.parent())
         .and_then(JsFormalParameter::cast)?;
     let function = parameter
         .parent::<JsParameterList>()

@@ -51,7 +51,7 @@ impl Rule for NoLabelVar {
         // if we find a binding that has its name equal to label name, then we found a  `LabelVar` issue.
         for scope in model.scope(label_statement.syntax()).ancestors() {
             if let Some(binding) = scope.get_binding(name) {
-                return Some((binding.syntax().clone(), label_token));
+                return Some((binding.syntax()?, label_token));
             }
         }
         None

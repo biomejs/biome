@@ -197,7 +197,7 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
         if is_builtin {
             let binding = model.binding(&class_ref)?;
             let imported_from = binding
-                .syntax()
+                .syntax()?
                 .ancestors()
                 .skip(1)
                 .find_map(JsImport::cast)

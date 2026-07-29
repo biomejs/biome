@@ -85,10 +85,9 @@ impl Format<FormatSemanticModelContext> for SemanticModel {
 
         let mut builder = f.join_nodes_with_hardline();
         for selector in &selectors {
-            builder.entry(
-                selector.node(&root).syntax(),
-                &SelectorWithRoot(selector, &root),
-            );
+            if let Some(node) = selector.node(&root) {
+                builder.entry(node.syntax(), &SelectorWithRoot(selector, &root));
+            }
         }
         builder.finish()
     }

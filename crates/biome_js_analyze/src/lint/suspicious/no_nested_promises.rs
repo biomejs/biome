@@ -220,7 +220,9 @@ fn references_outer_scope(
             if let Some(binding) = model.binding(&ident) {
                 // Check if the binding is defined outside the nested callback
                 // by checking if the binding's syntax node is NOT a descendant of the nested callback
-                let binding_syntax = binding.syntax();
+                let Some(binding_syntax) = binding.syntax() else {
+                    continue;
+                };
 
                 // If the binding is not inside the nested callback, it's an outer scope reference
                 if !is_descendant_of(&binding_syntax, nested_callback.syntax()) {

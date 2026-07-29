@@ -145,8 +145,9 @@ impl Rule for NoFunctionAssign {
 
         let mut hoisted_quantity = 0;
         for reference in state.all_writes.iter() {
-            let node = reference.syntax();
-            diag = diag.detail(node.text_trimmed_range(), "Reassigned here.");
+            if let Some(node) = reference.syntax() {
+                diag = diag.detail(node.text_trimmed_range(), "Reassigned here.");
+            }
 
             hoisted_quantity += i32::from(reference.is_using_hoisted_declaration());
         }

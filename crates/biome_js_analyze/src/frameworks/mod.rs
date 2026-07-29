@@ -56,7 +56,8 @@ pub(crate) fn is_framework_api_reference(
 pub(crate) fn is_framework_lib_export(binding: &Binding, package_names: &[&str]) -> bool {
     binding
         .syntax()
-        .ancestors()
+        .into_iter()
+        .flat_map(|syntax| syntax.ancestors())
         .skip(1)
         .find_map(|ancestor| JsImport::cast(ancestor)?.source_text().ok())
         .is_some_and(|source| package_names.contains(&source.text()))
@@ -67,7 +68,7 @@ pub(crate) fn is_named_framework_lib_export(
     name: &str,
     package_names: &[&str],
 ) -> Option<bool> {
-    let ident = JsIdentifierBinding::cast_ref(&binding.syntax())?;
+    let ident = JsIdentifierBinding::cast_ref(&binding.syntax()?)?;
     let import_specifier = ident.parent::<AnyJsNamedImportSpecifier>()?;
     let name_token = match &import_specifier {
         AnyJsNamedImportSpecifier::JsNamedImportSpecifier(named_import) => {

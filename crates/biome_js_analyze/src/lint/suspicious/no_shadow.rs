@@ -1,5 +1,5 @@
 use biome_analyze::{
-    QueryMatch, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -154,13 +154,13 @@ impl Rule for NoShadow {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                state.binding.tree().range(),
+                state.binding.range(),
                 markup! {
                     "This variable shadows another variable with the same name in the outer scope."
                 },
             )
             .detail(
-                state.shadowed_binding.tree().range(),
+                state.shadowed_binding.range(),
                 markup!(
                     "This is the shadowed variable, which is now inaccessible in the inner scope."
                 ),
@@ -198,7 +198,7 @@ fn check_shadowing(
 
     let name = get_binding_name(&binding)?;
     let binding_hoisted_scope = model
-        .scope_hoisted_to(&binding.syntax())
+        .scope_hoisted_to(&binding.syntax()?)
         .unwrap_or(binding.scope());
 
     for upper in binding_hoisted_scope.ancestors().skip(1) {
@@ -236,17 +236,23 @@ fn evaluate_shadowing(
         return false;
     }
     if is_declaration(binding) && is_declaration(upper_binding) {
+        let Some(binding_syntax) = binding.syntax() else {
+            return false;
+        };
+        let Some(upper_binding_syntax) = upper_binding.syntax() else {
+            return false;
+        };
         let binding_hoisted_scope = model
-            .scope_hoisted_to(&binding.syntax())
+            .scope_hoisted_to(&binding_syntax)
             .unwrap_or(binding.scope());
         let upper_binding_hoisted_scope = model
-            .scope_hoisted_to(&upper_binding.syntax())
+            .scope_hoisted_to(&upper_binding_syntax)
             .unwrap_or(upper_binding.scope());
         if binding_hoisted_scope == upper_binding_hoisted_scope {
             // redeclarations are not shadowing, they get caught by `noRedeclare`
             return false;
         }
-        if upper_binding.syntax().text_range().start() >= binding_hoisted_scope.range().end() {
+        if upper_binding.range().start() >= binding_hoisted_scope.range().end() {
             // the shadowed binding must be declared before the shadowing one
             return false;
         }
@@ -259,7 +265,7 @@ fn evaluate_shadowing(
 }
 
 fn get_binding_name(binding: &Binding) -> Option<TokenText> {
-    let node = binding.syntax();
+    let node = binding.syntax()?;
     if let Some(ident) = node.clone().cast::<JsIdentifierBinding>() {
         let name = ident.name_token().ok()?;
         return Some(name.token_text_trimmed());
@@ -295,7 +301,7 @@ declare_node_union! {
 /// var a = function() { function a() {} };
 /// ```
 fn is_on_initializer(a: &Binding, b: &Binding) -> bool {
-    let b_declarator = b.tree().declaration().and_then(|decl| {
+    let b_declarator = b.tree().and_then(|tree| tree.declaration()).and_then(|decl| {
         let decl = decl.parent_binding_pattern_declaration().unwrap_or(decl);
         match decl {
             AnyJsBindingDeclaration::JsVariableDeclarator(d) => Some(d),
@@ -305,7 +311,7 @@ fn is_on_initializer(a: &Binding, b: &Binding) -> bool {
     if let Some(b_initializer_expression) = b_declarator
         .and_then(|d| d.initializer())
         .and_then(|i| i.expression().ok())
-        && let Some(a_parent) = a.tree().parent::<AnyIdentifiableExpression>()
+        && let Some(a_parent) = a.tree().and_then(|tree| tree.parent::<AnyIdentifiableExpression>())
         && a_parent.syntax() == b_initializer_expression.syntax()
     {
         return true;
@@ -325,7 +331,7 @@ fn is_on_initializer(a: &Binding, b: &Binding) -> bool {
 /// const [e] = arr;
 /// ```
 fn is_declaration(binding: &Binding) -> bool {
-    let Some(decl) = binding.tree().declaration() else {
+    let Some(decl) = binding.tree().and_then(|tree| tree.declaration()) else {
         return false;
     };
     let decl = decl.parent_binding_pattern_declaration().unwrap_or(decl);
@@ -337,7 +343,7 @@ fn is_declaration(binding: &Binding) -> bool {
 }
 
 fn is_type_only_declaration(binding: &Binding) -> bool {
-    let Some(decl) = binding.tree().declaration() else {
+    let Some(decl) = binding.tree().and_then(|tree| tree.declaration()) else {
         return false;
     };
     matches!(
@@ -353,7 +359,8 @@ fn is_type_only_declaration(binding: &Binding) -> bool {
 fn is_inside_type_parameter(binding: &Binding) -> bool {
     binding
         .syntax()
-        .ancestors()
+        .into_iter()
+        .flat_map(|syntax| syntax.ancestors())
         .skip(1)
         .any(|ancestor| ancestor.cast::<TsTypeParameter>().is_some())
 }
@@ -361,7 +368,8 @@ fn is_inside_type_parameter(binding: &Binding) -> bool {
 fn is_inside_type_member(binding: &Binding) -> bool {
     binding
         .syntax()
-        .ancestors()
+        .into_iter()
+        .flat_map(|syntax| syntax.ancestors())
         .skip(1)
         .any(|ancestor| ancestor.cast::<TsPropertySignatureTypeMember>().is_some())
 }
@@ -369,13 +377,14 @@ fn is_inside_type_member(binding: &Binding) -> bool {
 fn is_inside_function_parameters(binding: &Binding) -> bool {
     binding
         .syntax()
-        .ancestors()
+        .into_iter()
+        .flat_map(|syntax| syntax.ancestors())
         .skip(1)
         .any(|ancestor| ancestor.cast::<JsParameterList>().is_some())
 }
 
 fn get_parameter_parent_function(binding: &Binding) -> Option<AnyJsParameterParentFunction> {
-    let id = binding.syntax().cast::<JsIdentifierBinding>()?;
+    let id = binding.syntax()?.cast::<JsIdentifierBinding>()?;
     id.parent::<JsFormalParameter>()
         .and_then(|p| p.parent_function())
         .or_else(|| {

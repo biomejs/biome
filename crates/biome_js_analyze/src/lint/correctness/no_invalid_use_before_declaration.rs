@@ -105,7 +105,9 @@ impl Rule for NoInvalidUseBeforeDeclaration {
             return Box::default();
         }
         for binding in model.all_bindings() {
-            let id = binding.tree();
+            let Some(id) = binding.tree() else {
+                continue;
+            };
             if matches!(
                 id,
                 AnyJsIdentifierBinding::TsIdentifierBinding(_)
@@ -137,7 +139,9 @@ impl Rule for NoInvalidUseBeforeDeclaration {
                 .find(|ancestor| AnyJsVariableScope::can_cast(ancestor.kind()));
             for reference in binding.all_references() {
                 if reference.range_start() < declaration_end {
-                    let reference_syntax = reference.syntax();
+                    let Some(reference_syntax) = reference.syntax() else {
+                        continue;
+                    };
                     // References that are exports, such as `export { a }` are always valid,
                     // even when they appear before the declaration.
                     // For example:

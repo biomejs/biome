@@ -466,7 +466,7 @@ fn collect_class_names_from_expression(
         AnyJsExpression::JsIdentifierExpression(ident_expr) => {
             let name = ident_expr.name().ok()?;
             let binding = model.binding(&name)?;
-            let decl = binding.tree().declaration()?;
+            let decl = binding.tree()?.declaration()?;
             let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) = decl else {
                 return None;
             };

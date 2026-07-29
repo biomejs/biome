@@ -568,7 +568,7 @@ impl Rule for UseHookAtTopLevel {
                 {
                     for call in calls_iter {
                         calls.push(CallPath {
-                            call: call.tree(),
+                            call: call.tree()?,
                             path: path.clone(),
                             is_enclosed_in_component_or_hook: enclosed,
                         });

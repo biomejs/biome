@@ -137,7 +137,9 @@ fn is_inside_component_or_hook(call: &JsCallExpression, model: &SemanticModel) -
             && is_from_qwik(&binding)
         {
             // Walk up to find the import specifier
-            let mut current = binding.syntax().clone();
+            let Some(mut current) = binding.syntax() else {
+                return false;
+            };
             while let Some(parent) = current.parent() {
                 // Check if we've reached an import specifier that contains "component$"
                 let text = parent.text_trimmed();
@@ -209,7 +211,8 @@ fn is_from_qwik(binding: &biome_js_semantic::Binding) -> bool {
     const QWIK_IMPORT_NAMES: [&str; 2] = ["@builder.io/qwik", "qwik"];
     binding
         .syntax()
-        .ancestors()
+        .into_iter()
+        .flat_map(|syntax| syntax.ancestors())
         .find_map(|ancestor| JsImport::cast(ancestor)?.source_text().ok())
         .is_some_and(|source| {
             let source_text = source.text();

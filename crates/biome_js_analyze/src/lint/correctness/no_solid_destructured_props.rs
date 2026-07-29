@@ -221,7 +221,7 @@ fn is_binding_used_in_jsx(binding: &AnyJsBinding, model: &SemanticModel) -> Opti
     {
         for reference in binding.all_reads() {
             if reference
-                .syntax()
+                .syntax()?
                 .ancestors()
                 .skip(1)
                 .any(|ancestor| {
@@ -229,7 +229,7 @@ fn is_binding_used_in_jsx(binding: &AnyJsBinding, model: &SemanticModel) -> Opti
                         || JsxExpressionChild::can_cast(ancestor.kind())
                 })
             {
-                return Some(reference.syntax().text_trimmed_range());
+                return Some(reference.syntax()?.text_trimmed_range());
             }
         }
     }

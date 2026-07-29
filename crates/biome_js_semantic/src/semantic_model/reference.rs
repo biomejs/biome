@@ -70,9 +70,13 @@ impl Reference {
         }
     }
 
-    /// Returns the node of this reference
-    pub fn syntax(&self) -> JsSyntaxNode {
-        self.data.binding_node_by_start[&self.range_start()].to_node(self.data.to_root().syntax())
+    /// Returns the node of this reference, or `None` if the stored pointer cannot
+    /// be resolved against the model's syntax tree.
+    pub fn syntax(&self) -> Option<JsSyntaxNode> {
+        self.data
+            .binding_node_by_start
+            .get(&self.range_start())?
+            .try_to_node(self.data.to_root().syntax())
     }
 
     /// Returns the binding of this reference
@@ -106,7 +110,7 @@ impl Reference {
 
     /// Returns this reference as a [FunctionCall] if possible
     pub fn as_call(&self) -> Option<FunctionCall> {
-        let call = self.syntax().ancestors().find(|x| {
+        let call = self.syntax()?.ancestors().find(|x| {
             !matches!(
                 x.kind(),
                 JsSyntaxKind::JS_REFERENCE_IDENTIFIER | JsSyntaxKind::JS_IDENTIFIER_EXPRESSION
@@ -136,24 +140,26 @@ impl FunctionCall {
         self.data.reference(self.id).range_start
     }
 
-    /// Returns the node of this reference
-    pub fn syntax(&self) -> JsSyntaxNode {
-        self.data.binding_node_by_start[&self.range_start()].to_node(self.data.to_root().syntax())
+    /// Returns the node of this reference, or `None` if the stored pointer cannot
+    /// be resolved against the model's syntax tree.
+    pub fn syntax(&self) -> Option<JsSyntaxNode> {
+        self.data
+            .binding_node_by_start
+            .get(&self.range_start())?
+            .try_to_node(self.data.to_root().syntax())
     }
 
-    /// Returns the typed AST node of this reference
-    pub fn tree(&self) -> JsCallExpression {
-        let node = self.syntax();
+    /// Returns the typed AST node of this reference, or `None` if its syntax node
+    /// cannot be resolved against the model's syntax tree.
+    pub fn tree(&self) -> Option<JsCallExpression> {
+        let node = self.syntax()?;
         let call = node.ancestors().find(|x| {
             !matches!(
                 x.kind(),
                 JsSyntaxKind::JS_REFERENCE_IDENTIFIER | JsSyntaxKind::JS_IDENTIFIER_EXPRESSION
             )
         });
-        debug_assert!(matches!(&call,
-            Some(call) if call.kind() == JsSyntaxKind::JS_CALL_EXPRESSION
-        ));
-        JsCallExpression::unwrap_cast(call.unwrap())
+        JsCallExpression::cast(call?)
     }
 }
 
@@ -187,14 +193,20 @@ pub struct UnresolvedReference {
 }
 
 impl UnresolvedReference {
-    pub fn syntax(&self) -> JsSyntaxNode {
+    /// Returns the node of this reference, or `None` if the stored pointer cannot
+    /// be resolved against the model's syntax tree.
+    pub fn syntax(&self) -> Option<JsSyntaxNode> {
         let reference = &self.data.unresolved_reference(self.id);
-        self.data.binding_node_by_start[&reference.range.start()]
-            .to_node(self.data.to_root().syntax())
+        self.data
+            .binding_node_by_start
+            .get(&reference.range.start())?
+            .try_to_node(self.data.to_root().syntax())
     }
 
-    pub fn tree(&self) -> AnyJsIdentifierUsage {
-        AnyJsIdentifierUsage::unwrap_cast(self.syntax().clone())
+    /// Returns the typed AST node of this reference, or `None` if its syntax node
+    /// cannot be resolved against the model's syntax tree.
+    pub fn tree(&self) -> Option<AnyJsIdentifierUsage> {
+        AnyJsIdentifierUsage::cast(self.syntax()?)
     }
 
     pub fn range(&self) -> TextRange {

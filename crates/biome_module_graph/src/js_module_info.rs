@@ -185,7 +185,7 @@ impl JsModuleInfo {
                     return None;
                 }
 
-                Some(binding.syntax().text_trimmed().into_text())
+                Some(binding.syntax()?.text_trimmed().into_text())
             })
     }
 
@@ -385,7 +385,7 @@ impl JsModuleInfoInner {
             // Check if this scope has a binding with the given name
             if let Some(binding) = scope.get_binding(name) {
                 // Return the binding's range for type data lookup
-                return Some(binding.syntax().text_trimmed_range());
+                return Some(binding.range());
             }
 
             // Move to parent scope

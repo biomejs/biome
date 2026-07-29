@@ -156,7 +156,7 @@ fn find_param_mutation(
         .take_while(|reference| !reference.is_write())
         .filter_map(|reference| {
             reference
-                .syntax()
+                .syntax()?
                 .ancestors()
                 .find_map(AnyJsStatement::cast)
                 .and_then(|stmt| match stmt {

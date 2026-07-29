@@ -456,7 +456,7 @@ fn is_reference_in_recursive_call(
     let ref_node = reference.syntax();
 
     // Walk up the tree to find if we're inside a call expression
-    let mut current = ref_node.parent();
+    let mut current = ref_node?.parent();
     while let Some(node) = current {
         // Check if this is a call expression
         if let Some(call_expr) = JsCallExpression::cast_ref(&node) {

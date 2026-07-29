@@ -221,7 +221,7 @@ fn has_shadowed_math(model: &SemanticModel, conditional: &JsConditionalExpressio
     model.scope(conditional.syntax()).ancestors().any(|scope| {
         scope
             .get_binding("Math")
-            .is_some_and(|binding| binding.tree().declaration().is_some())
+            .is_some_and(|binding| binding.tree().is_some_and(|tree| tree.declaration().is_some()))
     })
 }
 
@@ -584,7 +584,7 @@ fn has_unsupported_identifier_operand(
     let identifier = unwrapped.as_js_identifier_expression()?;
     let reference = identifier.name().ok()?;
     let binding = model.binding(&reference)?;
-    let declaration = binding.tree().declaration()?;
+    let declaration = binding.tree()?.declaration()?;
 
     Some(
         match declaration

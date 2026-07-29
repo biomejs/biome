@@ -87,7 +87,7 @@ impl SemanticModel {
     }
 
     pub fn is_media_rule(&self, rule: &Rule) -> bool {
-        matches!(rule.node(&self.root()), AnyRuleStart::CssMediaAtRule(_))
+        rule.node.syntax_node_ptr().kind() == CssSyntaxKind::CSS_MEDIA_AT_RULE
     }
 
     fn rule(&self, id: RuleId) -> Option<Rule> {
@@ -157,6 +157,7 @@ impl PartialEq for SemanticModel {
 pub(crate) struct RuleData {
     pub(crate) id: RuleId,
     pub(crate) node: AstPtr<AnyRuleStart>,
+    pub(crate) range: TextRange,
     /// The selectors associated with this rule.
     pub(crate) selectors: Vec<SelectorData>,
     /// The declarations within this rule.
@@ -168,15 +169,6 @@ pub(crate) struct RuleData {
     /// Specificity context of this rule
     /// See https://drafts.csswg.org/selectors-4/#specificity-rules
     pub(crate) specificity: Specificity,
-}
-
-impl RuleData {
-    pub(crate) fn range(&self, css_root: &AnyCssRoot) -> TextRange {
-        self.node
-            .to_node(css_root.syntax())
-            .syntax()
-            .text_trimmed_range()
-    }
 }
 
 /// Represents a CSS rule set, including its selectors, declarations, and nested rules.
@@ -200,6 +192,7 @@ pub struct Rule {
     pub(crate) data: Arc<SemanticModelData>,
     pub(crate) id: RuleId,
     pub(crate) node: AstPtr<AnyRuleStart>,
+    pub(crate) range: TextRange,
     /// The selectors associated with this rule.
     pub(crate) selectors: Vec<Selector>,
     /// The declarations within this rule.
@@ -253,6 +246,7 @@ impl Rule {
             data,
             id: rule.id,
             node: rule.node.clone(),
+            range: rule.range,
             selectors,
             declarations,
             parent_id: rule.parent_id,
@@ -265,15 +259,14 @@ impl Rule {
         self.id
     }
 
-    pub fn node(&self, _css_root: &AnyCssRoot) -> AnyRuleStart {
-        self.node.to_node(self.data.root().syntax())
+    /// Returns the syntax node associated with this rule, or `None` if the stored
+    /// pointer cannot be resolved against the model's syntax tree.
+    pub fn node(&self, _css_root: &AnyCssRoot) -> Option<AnyRuleStart> {
+        self.node.try_to_node(self.data.root().syntax())
     }
 
     pub fn range(&self, _css_root: &AnyCssRoot) -> TextRange {
-        self.node
-            .to_node(self.data.root().syntax())
-            .syntax()
-            .text_trimmed_range()
+        self.range
     }
 
     pub fn selectors(&self) -> &[Selector] {
@@ -527,6 +520,7 @@ impl std::fmt::Display for ResolvedSelector {
 #[derive(Debug, Clone)]
 pub(crate) struct SelectorData {
     pub(crate) node: AstPtr<AnyCssSelectorLike>,
+    pub(crate) range: TextRange,
     /// The resolved selector, accounting for nesting and `&` references.
     /// For top-level selectors this is the token sequence from the source.
     /// For nested selectors each `&` is replaced by the parent token sequence,
@@ -548,6 +542,7 @@ pub(crate) struct SelectorData {
 pub struct Selector {
     pub(crate) data: Arc<SemanticModelData>,
     pub(crate) node: AstPtr<AnyCssSelectorLike>,
+    pub(crate) range: TextRange,
     /// The resolved selector, accounting for nesting and `&` references.
     /// For top-level selectors this is the token sequence from the source.
     /// For nested selectors each `&` is replaced by the parent token sequence,
@@ -561,11 +556,13 @@ impl Selector {
     fn new(data: Arc<SemanticModelData>, rule_id: RuleId, index: usize) -> Self {
         let selector = &data.all_rules[rule_id.index()].selectors[index];
         let node = selector.node.clone();
+        let range = selector.range;
         let resolved = selector.resolved.clone();
         let specificity = selector.specificity;
         Self {
             data,
             node,
+            range,
             resolved,
             specificity,
         }
@@ -579,8 +576,10 @@ impl PartialEq for Selector {
 }
 
 impl Selector {
-    pub fn node(&self, _root: &AnyCssRoot) -> AnyCssSelectorLike {
-        self.node.to_node(self.data.root().syntax())
+    /// Returns the syntax node associated with this selector, or `None` if the
+    /// stored pointer cannot be resolved against the model's syntax tree.
+    pub fn node(&self, _root: &AnyCssRoot) -> Option<AnyCssSelectorLike> {
+        self.node.try_to_node(self.data.root().syntax())
     }
 
     /// Returns the resolved selector, accounting for CSS nesting and `&` references.
@@ -589,10 +588,7 @@ impl Selector {
     }
 
     pub fn range(&self, _root: &AnyCssRoot) -> TextRange {
-        self.node
-            .to_node(self.data.root().syntax())
-            .syntax()
-            .text_trimmed_range()
+        self.range
     }
 
     pub fn specificity(&self) -> Specificity {
@@ -721,12 +717,16 @@ impl CssModelDeclaration {
         }
     }
 
-    pub fn declaration(&self, _root: &AnyCssRoot) -> CssDeclaration {
-        self.declaration.to_node(self.data.root().syntax())
+    /// Returns the syntax node associated with this declaration, or `None` if
+    /// the stored pointer cannot be resolved against the model's syntax tree.
+    pub fn declaration(&self, _root: &AnyCssRoot) -> Option<CssDeclaration> {
+        self.declaration.try_to_node(self.data.root().syntax())
     }
 
-    pub fn property(&self, _root: &AnyCssRoot) -> CssProperty {
-        self.property.to_node(self.data.root().syntax())
+    /// Returns the property associated with this declaration, or `None` if the
+    /// stored pointer cannot be resolved against the model's syntax tree.
+    pub fn property(&self, _root: &AnyCssRoot) -> Option<CssProperty> {
+        self.property.try_to_node(self.data.root().syntax())
     }
 
     pub fn value(&self) -> &CssPropertyInitialValue {
@@ -764,25 +764,65 @@ impl CssPropertyInitialValueKind {
     fn semantic_eq(&self, other: &Self, self_root: &AnyCssRoot, other_root: &AnyCssRoot) -> bool {
         match (self, other) {
             (Self::GenericComponent(a), Self::GenericComponent(b)) => {
-                let a = a.to_node(self_root.syntax());
-                let b = b.to_node(other_root.syntax());
-                semantic_value_tokens(a.syntax()) == semantic_value_tokens(b.syntax())
+                match (
+                    a.try_to_node(self_root.syntax()),
+                    b.try_to_node(other_root.syntax()),
+                ) {
+                    (Some(a), Some(b)) => {
+                        semantic_value_tokens(a.syntax()) == semantic_value_tokens(b.syntax())
+                    }
+                    (None, None) => {
+                        a.syntax_node_ptr().text_range().is_empty()
+                            && b.syntax_node_ptr().text_range().is_empty()
+                    }
+                    _ => false,
+                }
             }
             (Self::CustomProperty(a), Self::CustomProperty(b)) => {
-                let a = a.to_node(self_root.syntax());
-                let b = b.to_node(other_root.syntax());
-                semantic_custom_property_tokens(a.syntax())
-                    == semantic_custom_property_tokens(b.syntax())
+                match (
+                    a.try_to_node(self_root.syntax()),
+                    b.try_to_node(other_root.syntax()),
+                ) {
+                    (Some(a), Some(b)) => {
+                        semantic_custom_property_tokens(a.syntax())
+                            == semantic_custom_property_tokens(b.syntax())
+                    }
+                    (None, None) => {
+                        a.syntax_node_ptr().text_range().is_empty()
+                            && b.syntax_node_ptr().text_range().is_empty()
+                    }
+                    _ => false,
+                }
             }
             (Self::Composes(a), Self::Composes(b)) => {
-                let a = a.to_node(self_root.syntax());
-                let b = b.to_node(other_root.syntax());
-                semantic_value_tokens(a.syntax()) == semantic_value_tokens(b.syntax())
+                match (
+                    a.try_to_node(self_root.syntax()),
+                    b.try_to_node(other_root.syntax()),
+                ) {
+                    (Some(a), Some(b)) => {
+                        semantic_value_tokens(a.syntax()) == semantic_value_tokens(b.syntax())
+                    }
+                    (None, None) => {
+                        a.syntax_node_ptr().text_range().is_empty()
+                            && b.syntax_node_ptr().text_range().is_empty()
+                    }
+                    _ => false,
+                }
             }
             (Self::ScssExpression(a), Self::ScssExpression(b)) => {
-                let a = a.to_node(self_root.syntax());
-                let b = b.to_node(other_root.syntax());
-                semantic_value_tokens(a.syntax()) == semantic_value_tokens(b.syntax())
+                match (
+                    a.try_to_node(self_root.syntax()),
+                    b.try_to_node(other_root.syntax()),
+                ) {
+                    (Some(a), Some(b)) => {
+                        semantic_value_tokens(a.syntax()) == semantic_value_tokens(b.syntax())
+                    }
+                    (None, None) => {
+                        a.syntax_node_ptr().text_range().is_empty()
+                            && b.syntax_node_ptr().text_range().is_empty()
+                    }
+                    _ => false,
+                }
             }
             _ => false,
         }

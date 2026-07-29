@@ -184,12 +184,12 @@ fn list_initializer_references(
             }
 
             if let Some(AnyJsObjectMember::JsShorthandPropertyObjectMember(expr)) =
-                AnyJsObjectMember::cast(reference.syntax().parent()?)
+                AnyJsObjectMember::cast(reference.syntax()?.parent()?)
             {
                 return Some(AnyBindingExpression::from(expr));
             }
 
-            AnyBindingExpression::try_from(AnyJsExpression::cast(reference.syntax().parent()?)?)
+            AnyBindingExpression::try_from(AnyJsExpression::cast(reference.syntax()?.parent()?)?)
                 .ok()
         })
         .collect()

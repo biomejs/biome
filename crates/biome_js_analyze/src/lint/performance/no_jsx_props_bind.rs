@@ -115,7 +115,7 @@ impl Rule for NoJsxPropsBind {
                 let model = ctx.model();
                 let binding: Binding = model.binding(&identifier.name().ok()?)?;
 
-                let declaration = binding.tree().declaration()?;
+                let declaration = binding.tree()?.declaration()?;
 
                 match &declaration {
                     AnyJsBindingDeclaration::JsFunctionDeclaration(_) => {

@@ -20,10 +20,14 @@ pub struct GlobalReference {
 }
 
 impl GlobalReference {
-    pub fn syntax(&self) -> JsSyntaxNode {
+    /// Returns the node of this reference, or `None` if the stored pointer cannot
+    /// be resolved against the model's syntax tree.
+    pub fn syntax(&self) -> Option<JsSyntaxNode> {
         let reference = &self.data.global(self.global_id).references[self.id as usize];
-        self.data.binding_node_by_start[&reference.range_start]
-            .to_node(self.data.to_root().syntax())
+        self.data
+            .binding_node_by_start
+            .get(&reference.range_start)?
+            .try_to_node(self.data.to_root().syntax())
     }
 
     /// Returns if this reference is just reading its binding

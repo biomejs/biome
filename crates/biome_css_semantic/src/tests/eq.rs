@@ -35,6 +35,38 @@ fn comment_change_is_eq() {
 }
 
 #[test]
+fn empty_property_value_is_eq() {
+    assert_eq!(
+        build_model(".incomplete { height: }"),
+        build_model(".incomplete  {  height:  }"),
+    );
+}
+
+#[test]
+fn empty_property_value_is_not_eq_to_non_empty_value() {
+    assert_ne!(
+        build_model(".incomplete { height: }"),
+        build_model(".incomplete { height: 1px }"),
+    );
+}
+
+#[test]
+fn empty_scss_custom_property_value_is_eq() {
+    assert_eq!(
+        build_scss_model("a { --empty:; }"),
+        build_scss_model("a  {  --empty:;  }"),
+    );
+}
+
+#[test]
+fn empty_scss_custom_property_value_is_not_eq_to_non_empty_value() {
+    assert_ne!(
+        build_scss_model("a { --empty:; }"),
+        build_scss_model("a { --empty:value; }"),
+    );
+}
+
+#[test]
 fn selector_change_is_not_eq() {
     assert_ne!(
         build_model("p { color: red; }"),

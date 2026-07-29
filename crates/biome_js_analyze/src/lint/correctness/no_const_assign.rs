@@ -68,7 +68,7 @@ impl Rule for NoConstAssign {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
-        let id_binding = model.binding(node)?.tree();
+        let id_binding = model.binding(node)?.tree()?;
         let decl = id_binding.declaration()?;
         if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
             decl.parent_binding_pattern_declaration().unwrap_or(decl)
@@ -100,7 +100,7 @@ impl Rule for NoConstAssign {
         let node = ctx.query();
         let model = ctx.model();
         let mut mutation = ctx.root().begin();
-        let decl = model.binding(node)?.tree().declaration()?;
+        let decl = model.binding(node)?.tree()?.declaration()?;
         if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
             decl.parent_binding_pattern_declaration().unwrap_or(decl)
         {

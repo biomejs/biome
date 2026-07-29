@@ -60,9 +60,12 @@ impl Rule for NoGlobalAssign {
         let global_refs = ctx.query().all_unresolved_references();
         let mut result = Vec::new();
         for global_ref in global_refs {
-            let is_write = global_ref.syntax().kind() == JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT;
+            let Some(syntax) = global_ref.syntax() else {
+                continue;
+            };
+            let is_write = syntax.kind() == JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT;
             if is_write {
-                let identifier = global_ref.syntax().text_trimmed();
+                let identifier = syntax.text_trimmed();
                 let is_global_var = is_js_global(identifier.into_text().text());
                 if is_global_var {
                     result.push(global_ref.range());

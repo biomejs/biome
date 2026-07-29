@@ -526,9 +526,9 @@ fn resolve_binding_as_import(
         .semantic_model
         .scope_from_id(ScopeId::GLOBAL)
         .bindings()
-        .find(|b| b.syntax().text_trimmed_range() == binding_range)?;
+        .find(|binding| binding.range() == binding_range)?;
 
-    let name = binding.syntax().text_trimmed().into_text();
+    let name = binding.syntax()?.text_trimmed().into_text();
 
     // Check if this binding is an import
     if !module.is_binding_imported(name.text(), ScopeId::GLOBAL) {

@@ -21,7 +21,8 @@ impl NextUtility {
 pub(crate) fn is_next_import(binding: &Binding, lib: NextUtility) -> bool {
     binding
         .syntax()
-        .ancestors()
+        .into_iter()
+        .flat_map(|syntax| syntax.ancestors())
         .find_map(|ancestor| JsImport::cast(ancestor)?.source_text().ok())
         .is_some_and(|source| lib.import_names().contains(&source.text()))
 }

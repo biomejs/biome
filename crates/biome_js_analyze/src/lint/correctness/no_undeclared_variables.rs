@@ -79,7 +79,7 @@ impl Rule for NoUndeclaredVariables {
         model
             .all_unresolved_references()
             .filter_map(|reference| {
-                let identifier = reference.tree();
+                let identifier = reference.tree()?;
                 let under_as_expression = identifier
                     .parent::<TsReferenceType>()
                     .and_then(|ty| ty.parent::<TsAsExpression>())

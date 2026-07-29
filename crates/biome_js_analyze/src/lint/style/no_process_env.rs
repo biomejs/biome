@@ -106,7 +106,8 @@ const PROCESS_MODULE_NAMES: [&str; 2] = ["process", "node:process"];
 fn is_process_module_import(binding: &biome_js_semantic::Binding) -> bool {
     binding
         .syntax()
-        .ancestors()
+        .into_iter()
+        .flat_map(|syntax| syntax.ancestors())
         .find_map(|ancestor| JsImport::cast(ancestor)?.source_text().ok())
         .is_some_and(|source| PROCESS_MODULE_NAMES.contains(&source.text()))
 }
@@ -120,7 +121,7 @@ fn is_env_from_process(binding: &biome_js_semantic::Binding) -> bool {
 /// Whether `binding` refers to the `env` export, e.g. `import { env }` (with an
 /// optional alias) or `const { env } = ...`.
 fn is_env_named_binding(binding: &biome_js_semantic::Binding) -> bool {
-    binding.syntax().ancestors().skip(1).any(|n| {
+    binding.syntax().is_some_and(|syntax| syntax.ancestors().skip(1).any(|n| {
         if let Some(specifier) = AnyJsNamedImportSpecifier::cast(n.clone()) {
             return specifier
                 .imported_name()
@@ -130,7 +131,7 @@ fn is_env_named_binding(binding: &biome_js_semantic::Binding) -> bool {
             .and_then(|property| property.identifier().ok())
             .and_then(|id| id.as_js_identifier_binding()?.name_token().ok())
             .is_some_and(|name| name.text_trimmed() == "env")
-    })
+    }))
 }
 
 /// Whether `binding` originates from the `process`/`node:process` module,
@@ -139,7 +140,8 @@ fn is_env_named_binding(binding: &biome_js_semantic::Binding) -> bool {
 fn is_from_process_module(binding: &biome_js_semantic::Binding) -> bool {
     binding
         .syntax()
-        .ancestors()
+        .into_iter()
+        .flat_map(|syntax| syntax.ancestors())
         .skip(1)
         .find_map(|node| {
             if let Some(import) = JsImport::cast(node.clone()) {

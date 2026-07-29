@@ -69,7 +69,7 @@ impl Rule for NoUnsafeDeclarationMerging {
         let scope = model.scope(ts_interface.syntax()).parent()?;
         for binding in scope.bindings() {
             if let Some(AnyJsBindingDeclaration::JsClassDeclaration(class)) =
-                binding.tree().declaration()
+                binding.tree()?.declaration()
             {
                 // This is not unsafe of merging an interface and an ambient class.
                 if !class.is_ambient()

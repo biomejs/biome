@@ -140,7 +140,7 @@ fn check_expression(expr: &NoVueRefAsOperandQuery, model: &SemanticModel) -> Opt
     match expr {
         NoVueRefAsOperandQuery::JsIdentifierExpression(ident_expr) => {
             let reference = ident_expr.name().ok()?;
-            let binding = model.binding(&reference)?.tree();
+            let binding = model.binding(&reference)?.tree()?;
             let declarator = binding
                 .syntax()
                 .ancestors()
@@ -240,7 +240,7 @@ fn check_expression(expr: &NoVueRefAsOperandQuery, model: &SemanticModel) -> Opt
             None
         }
         NoVueRefAsOperandQuery::JsIdentifierAssignment(ident_assignment) => {
-            let binding = model.binding(ident_assignment)?.tree();
+            let binding = model.binding(ident_assignment)?.tree()?;
             let declarator = binding
                 .syntax()
                 .ancestors()
@@ -378,7 +378,7 @@ fn is_emit_call_in_setup(callee_expr: &AnyJsExpression, model: &SemanticModel) -
                 && ident_name == "emit"
                 && let Some(binding) = model.binding(&reference)
             {
-                is_emit_in_setup_method(&binding.tree())
+                binding.tree().is_some_and(|binding| is_emit_in_setup_method(&binding))
             } else {
                 false
             }
@@ -394,7 +394,7 @@ fn is_emit_call_in_setup(callee_expr: &AnyJsExpression, model: &SemanticModel) -
                 && let Ok(reference) = ident.name()
                 && let Some(binding) = model.binding(&reference)
             {
-                is_emit_in_setup_method(&binding.tree())
+                binding.tree().is_some_and(|binding| is_emit_in_setup_method(&binding))
             } else {
                 false
             }
@@ -419,7 +419,7 @@ fn is_emit_call_by_macro(callee: &AnyJsExpression, model: &SemanticModel) -> boo
     if let Some(ident_expr) = callee.as_js_identifier_expression()
         && let Ok(reference) = ident_expr.name()
         && let Some(binding) = model.binding(&reference)
-        && let Some(parent) = binding.syntax().parent()
+        && let Some(parent) = binding.syntax().and_then(|syntax| syntax.parent())
         && let Some(decl) = parent.cast::<JsVariableDeclarator>()
         && let Some(init) = decl.initializer()
         && let Some(expr) = init.expression().ok()

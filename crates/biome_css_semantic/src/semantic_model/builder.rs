@@ -8,7 +8,6 @@ use super::model::{
     SelectorData, SemanticModel, SemanticModelData, Specificity, selector_tokens,
 };
 use crate::events::SemanticEvent;
-use crate::model::AnyRuleStart;
 
 pub struct SemanticModelBuilder {
     root: AnyCssRoot,
@@ -49,12 +48,11 @@ impl SemanticModelBuilder {
             if let Some(parent_id) = &current_parent_id {
                 let rule = self.all_rules.get(parent_id.index());
                 if let Some(rule) = rule {
-                    let typed_node = rule.node.to_node(self.root.syntax());
                     if matches!(
-                        typed_node,
-                        AnyRuleStart::CssMediaAtRule(_)
-                            | AnyRuleStart::CssScopeAtRule(_)
-                            | AnyRuleStart::CssSupportsAtRule(_)
+                        rule.node.syntax_node_ptr().kind(),
+                        CssSyntaxKind::CSS_MEDIA_AT_RULE
+                            | CssSyntaxKind::CSS_SCOPE_AT_RULE
+                            | CssSyntaxKind::CSS_SUPPORTS_AT_RULE
                     ) {
                         current_parent_id = iterator
                             .next()
@@ -84,12 +82,11 @@ impl SemanticModelBuilder {
             if let Some(parent_id) = &current_parent_id {
                 let rule = self.all_rules.get(parent_id.index());
                 if let Some(rule) = rule {
-                    let typed_node = rule.node.to_node(self.root.syntax());
                     if matches!(
-                        typed_node,
-                        AnyRuleStart::CssMediaAtRule(_)
-                            | AnyRuleStart::CssScopeAtRule(_)
-                            | AnyRuleStart::CssSupportsAtRule(_)
+                        rule.node.syntax_node_ptr().kind(),
+                        CssSyntaxKind::CSS_MEDIA_AT_RULE
+                            | CssSyntaxKind::CSS_SCOPE_AT_RULE
+                            | CssSyntaxKind::CSS_SUPPORTS_AT_RULE
                     ) {
                         current_parent_id = iterator
                             .next()
@@ -137,6 +134,7 @@ impl SemanticModelBuilder {
                 let new_rule = RuleData {
                     id: new_rule_id,
                     node: AstPtr::new(&node),
+                    range: node.text_trimmed_range(),
                     selectors: Vec::new(),
                     declarations: Vec::new(),
                     parent_id,
@@ -155,7 +153,7 @@ impl SemanticModelBuilder {
             }
             SemanticEvent::RuleEnd => {
                 if let Some(completed_rule_id) = self.current_rule_stack.pop() {
-                    let range = self.all_rules[completed_rule_id.index()].range(&self.root);
+                    let range = self.all_rules[completed_rule_id.index()].range;
                     self.range_to_rule_id.insert(range, completed_rule_id);
 
                     if self.current_rule_stack.is_empty() {
@@ -209,6 +207,7 @@ impl SemanticModelBuilder {
                     for resolved in resolved_selectors {
                         current_rule.selectors.push(SelectorData {
                             node: AstPtr::new(&node),
+                            range: node.syntax().text_trimmed_range(),
                             resolved,
                             specificity: combined,
                         });

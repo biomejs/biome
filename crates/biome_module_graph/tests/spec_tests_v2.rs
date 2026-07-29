@@ -556,15 +556,15 @@ fn inferred_binding_ty_by_name<'db>(
         return None;
     };
     let binding = info.semantic_model.all_bindings().find(|binding| {
-        binding
-            .tree()
-            .name_token()
-            .is_ok_and(|token| token.text_trimmed() == name)
+        binding.tree().is_some_and(|tree| {
+            tree.name_token()
+                .is_ok_and(|token| token.text_trimmed() == name)
+        })
     })?;
 
     inferred
         .binding_type_data
-        .get(&binding.syntax().text_trimmed_range())
+        .get(&binding.range())
         .map(|data| data.ty)
 }
 
@@ -674,15 +674,15 @@ fn inferred_overload_ty_by_name<'db>(
     info.semantic_model
         .all_bindings()
         .filter(|binding| {
-            binding
-                .tree()
-                .name_token()
-                .is_ok_and(|token| token.text_trimmed() == name)
+            binding.tree().is_some_and(|tree| {
+                tree.name_token()
+                    .is_ok_and(|token| token.text_trimmed() == name)
+            })
         })
         .filter_map(|binding| {
             inferred
                 .binding_type_data
-                .get(&binding.syntax().text_trimmed_range())
+                .get(&binding.range())
                 .map(|data| inferred.resolve_type(db, data.ty))
         })
         .find(|ty| {
@@ -747,7 +747,7 @@ fn write_inferred_type_rows<'db>(
         let binding_name = info
             .semantic_model
             .as_binding_by_range(*range)
-            .and_then(|binding| binding.tree().name_token().ok())
+            .and_then(|binding| binding.tree()?.name_token().ok())
             .map_or_else(
                 || "<unknown>".to_string(),
                 |token| token.text_trimmed().to_string(),
@@ -923,14 +923,13 @@ fn binding_range_by_name(db: &dyn ModuleDb, module: ModuleInfo, name: &str) -> T
         .semantic_model
         .all_bindings()
         .find(|binding| {
-            binding
-                .tree()
-                .name_token()
-                .is_ok_and(|token| token.text_trimmed() == name)
+            binding.tree().is_some_and(|tree| {
+                tree.name_token()
+                    .is_ok_and(|token| token.text_trimmed() == name)
+            })
         })
         .unwrap_or_else(|| panic!("{name} binding must exist"))
-        .syntax()
-        .text_trimmed_range()
+        .range()
 }
 
 #[test]

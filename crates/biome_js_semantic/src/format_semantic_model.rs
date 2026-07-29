@@ -98,7 +98,7 @@ impl Format<FormatSemanticModelContext> for Scope {
         // this is easier to read and maintain.
         children.sort_by_key(|item| match item {
             ScopeOrBinding::Scope(scope) => scope.range().start(),
-            ScopeOrBinding::Binding(binding) => binding.syntax().text_range_with_trivia().start(),
+            ScopeOrBinding::Binding(binding) => binding.range().start(),
         });
 
         let formatted_scope_info = format_with(|f| {
@@ -139,6 +139,9 @@ impl Format<FormatSemanticModelContext> for Scope {
 
 impl Format<FormatSemanticModelContext> for Binding {
     fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
+        let Some(syntax) = self.syntax() else {
+            return Ok(());
+        };
         let is_imported = format_with(|f| {
             if self.is_imported() {
                 write!(f, [token("Imported: true"), hard_line_break()])
@@ -156,7 +159,7 @@ impl Format<FormatSemanticModelContext> for Binding {
         });
 
         let formatted_binding_info = format_with(|f| {
-            let range = std::format!("{:?}", self.syntax().text_trimmed_range());
+            let range = std::format!("{:?}", self.range());
 
             write!(
                 f,
@@ -174,7 +177,7 @@ impl Format<FormatSemanticModelContext> for Binding {
                 f,
                 [token("Kind: "), self.declaration_kind(), hard_line_break()]
             )?;
-            let full_text = self.syntax().text_trimmed().into_text();
+            let full_text = syntax.text_trimmed().into_text();
             write!(
                 f,
                 [token("ident: "), text(&full_text, None), hard_line_break()]

@@ -399,7 +399,7 @@ pub(crate) fn is_playwright_call_chain_or_resolved(
     if binding.all_writes().next().is_some() {
         return false;
     }
-    let Some(decl) = binding.tree().declaration() else {
+    let Some(decl) = binding.tree().and_then(|tree| tree.declaration()) else {
         return false;
     };
     let decl = decl.parent_binding_pattern_declaration().unwrap_or(decl);

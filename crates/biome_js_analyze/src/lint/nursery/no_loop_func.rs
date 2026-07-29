@@ -377,7 +377,7 @@ fn is_safe_capture(loop_node: &AnyLoopStatement, capture: &Capture, model: &Sema
 /// Returns the variable declaration that created a binding, when the binding comes from a
 /// declaration the rule knows how to classify.
 fn binding_declaration(binding: &Binding) -> Option<AnyJsVariableDeclaration> {
-    let declaration = binding.tree().declaration()?;
+    let declaration = binding.tree()?.declaration()?;
     let declaration = declaration
         .parent_binding_pattern_declaration()
         .unwrap_or(declaration);
@@ -405,7 +405,7 @@ fn is_constant_binding(binding: &Binding) -> bool {
 fn capture_name(capture: &Capture) -> Option<TokenText> {
     capture
         .binding()
-        .tree()
+        .tree()?
         .name_token()
         .ok()
         .map(|token| token.token_text_trimmed())

@@ -113,7 +113,7 @@ impl Rule for UseInlineScriptId {
                                 if let Ok(reference) = ident_expr.name()
                                     && let Some(binding) = semantic_model.binding(&reference)
                                     && let Some(declarator) = binding
-                                        .syntax()
+                                        .syntax()?
                                         .ancestors()
                                         .find_map(JsVariableDeclarator::cast)
                                     && let Some(initializer) = declarator.initializer()

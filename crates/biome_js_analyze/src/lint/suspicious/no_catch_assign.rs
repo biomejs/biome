@@ -74,7 +74,7 @@ impl Rule for NoCatchAssign {
                 let mut invalid_assignment = Vec::new();
                 for reference in identifier_binding.all_writes(model) {
                     invalid_assignment.push((
-                        reference.syntax().text_trimmed_range(),
+                        reference.syntax()?.text_trimmed_range(),
                         catch_binding_syntax.text_trimmed_range(),
                     ));
                 }

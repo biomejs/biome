@@ -457,14 +457,13 @@ fn binding_range_by_name(db: &dyn ModuleDb, module: ModuleInfo, name: &str) -> T
     info.semantic_model
         .all_bindings()
         .find(|binding| {
-            binding
-                .tree()
-                .name_token()
-                .is_ok_and(|token| token.text_trimmed() == name)
+            binding.tree().is_some_and(|tree| {
+                tree.name_token()
+                    .is_ok_and(|token| token.text_trimmed() == name)
+            })
         })
         .unwrap_or_else(|| panic!("{name} binding must exist"))
-        .syntax()
-        .text_trimmed_range()
+        .range()
 }
 
 fn overload_binding_range_by_name(
@@ -480,13 +479,13 @@ fn overload_binding_range_by_name(
     info.semantic_model
         .all_bindings()
         .filter(|binding| {
-            binding
-                .tree()
-                .name_token()
-                .is_ok_and(|token| token.text_trimmed() == name)
+            binding.tree().is_some_and(|tree| {
+                tree.name_token()
+                    .is_ok_and(|token| token.text_trimmed() == name)
+            })
         })
         .find_map(|binding| {
-            let range = binding.syntax().text_trimmed_range();
+            let range = binding.range();
             let ty = inferred
                 .binding_type_data
                 .get(&range)

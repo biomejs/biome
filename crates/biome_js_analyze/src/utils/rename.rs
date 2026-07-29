@@ -30,13 +30,13 @@ impl RenamableNode for TsIdentifierBinding {
 
 impl RenamableNode for JsReferenceIdentifier {
     fn binding(&self, model: &SemanticModel) -> Option<JsSyntaxNode> {
-        Some(model.binding(self)?.syntax().clone())
+        model.binding(self)?.syntax()
     }
 }
 
 impl RenamableNode for JsIdentifierAssignment {
     fn binding(&self, model: &SemanticModel) -> Option<JsSyntaxNode> {
-        Some(model.binding(self)?.syntax().clone())
+        model.binding(self)?.syntax()
     }
 }
 
@@ -252,7 +252,9 @@ impl RenameSymbolExtensions for BatchMutation<JsLanguage> {
                 return false;
             }
 
-            let reference_syntax = reference.syntax();
+            let Some(reference_syntax) = reference.syntax() else {
+                continue;
+            };
             let Some(id_usage) = AnyJsIdentifierUsage::cast_ref(&reference_syntax) else {
                 continue;
             };

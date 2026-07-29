@@ -636,7 +636,9 @@ fn is_namespace_merged_with_used_value(
     let scope = model.scope(&statement_list);
 
     for scope_binding in scope.bindings() {
-        let other = scope_binding.tree();
+        let Some(other) = scope_binding.tree() else {
+            continue;
+        };
         if let Some(is_used) = is_namespace_merge_value_used(model, binding, &other, name) {
             return Some(is_used);
         }
@@ -657,7 +659,7 @@ fn is_value_merged_with_exported_namespace(
 
     // Namespace declarations must follow the value they merge with, so the
     // scope name lookup points directly at the merged namespace when it exists.
-    let namespace = scope.get_binding(name)?.tree();
+    let namespace = scope.get_binding(name)?.tree()?;
     if namespace.syntax().text_trimmed_range() == binding.syntax().text_trimmed_range() {
         return Some(false);
     }
@@ -765,7 +767,7 @@ pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> boo
     let unused_by_refs = binding
         .all_references(model)
         .filter_map(|reference| {
-            let ref_parent = reference.syntax().parent()?;
+            let ref_parent = reference.syntax()?.parent()?;
             if reference.is_write() {
                 // Skip self assignment such as `a += 1` and `a++`.
                 // Ensure that the assignment is not used in an used expression.

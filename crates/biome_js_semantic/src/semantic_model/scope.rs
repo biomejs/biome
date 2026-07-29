@@ -166,8 +166,13 @@ impl Scope {
         self.data.scopes[self.id.index()].range
     }
 
-    pub fn syntax(&self) -> JsSyntaxNode {
-        self.data.scope_node_by_range[&self.range()].to_node(self.data.to_root().syntax())
+    /// Returns the node associated with this scope, or `None` if the stored
+    /// pointer cannot be resolved against the model's syntax tree.
+    pub fn syntax(&self) -> Option<JsSyntaxNode> {
+        self.data
+            .scope_node_by_range
+            .get(&self.range())?
+            .try_to_node(self.data.to_root().syntax())
     }
 
     /// Return the [Closure] associated with this scope if

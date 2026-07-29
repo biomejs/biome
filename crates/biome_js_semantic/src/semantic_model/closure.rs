@@ -133,10 +133,17 @@ impl Iterator for AllCapturesIter {
                 let binding = &self.data.binding(binding_id);
                 if !self.closure_range.contains(binding.range.start()) {
                     let reference = &binding.references[reference.index()];
+                    let Some(node) = self
+                        .data
+                        .binding_node_by_start
+                        .get(&reference.range_start)
+                        .and_then(|pointer| pointer.try_to_node(self.data.to_root().syntax()))
+                    else {
+                        continue 'references;
+                    };
                     return Some(Capture {
                         data: self.data.clone(),
-                        node: self.data.binding_node_by_start[&reference.range_start]
-                            .to_node(self.data.to_root().syntax()), // TODO change node to store the range
+                        node,
                         ty: CaptureType::ByReference,
                         binding_id,
                     });

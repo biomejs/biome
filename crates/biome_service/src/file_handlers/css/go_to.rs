@@ -45,7 +45,9 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
         let semantic_model = css_semantic_model(&params.workspace_db, &params.parsed_source);
         for rule in semantic_model.rules() {
             for selector in rule.selectors() {
-                let node = selector.node(&semantic_model.root());
+                let Some(node) = selector.node(&semantic_model.root()) else {
+                    continue;
+                };
                 for class_sel in node
                     .syntax()
                     .descendants()

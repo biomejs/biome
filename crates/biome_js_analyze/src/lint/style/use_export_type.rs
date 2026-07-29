@@ -560,8 +560,12 @@ fn export_named_fix(
                     if model
                         .global_scope()
                         .bindings()
-                        .filter(|binding| binding.syntax().text_trimmed() == local_name)
-                        .all(|binding| binding.tree().is_type_only())
+                        .filter_map(|binding| {
+                            (binding.syntax()?.text_trimmed() == local_name)
+                                .then(|| binding.tree())
+                                .flatten()
+                        })
+                        .all(|binding| binding.is_type_only())
                         && !references.is_used_as_value(token.token_text_trimmed())
                     {
                         specifiers_requiring_type_marker.push(specifier.into());
