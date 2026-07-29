@@ -75,6 +75,7 @@ pub enum LoweredTypeData {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LoweredClass {
     name: Text,
+    type_parameters: Box<[LoweredTypeReference]>,
     members: Box<[LoweredTypeMember]>,
 }
 
@@ -82,6 +83,11 @@ impl LoweredClass {
     /// Class name.
     pub fn name(&self) -> &str {
         self.name.text()
+    }
+
+    /// Class type parameters in declaration order.
+    pub fn type_parameters(&self) -> &[LoweredTypeReference] {
+        &self.type_parameters
     }
 
     /// Class members in declaration order.
@@ -251,10 +257,33 @@ pub fn lower_global_types(
     source_files: &[DiscoveredFile],
 ) -> Result<LoweredGlobalTypes> {
     let mut source_cache = ParsedSourceCache::new(source_files);
+    let mut globals = Vec::new();
+
+    lower_error_globals(manifest, &mut source_cache, &mut globals)?;
+    lower_symbol_globals(manifest, &mut source_cache, &mut globals)?;
+    lower_disposable_global(manifest, &mut source_cache, &mut globals, DISPOSABLE_GLOBAL)?;
+    lower_disposable_global(
+        manifest,
+        &mut source_cache,
+        &mut globals,
+        ASYNC_DISPOSABLE_GLOBAL,
+    )?;
+    lower_memberless_class_global(manifest, &mut source_cache, &mut globals, DATE_GLOBAL)?;
+    lower_memberless_class_global(manifest, &mut source_cache, &mut globals, WEAK_MAP_GLOBAL)?;
+
+    Ok(LoweredGlobalTypes {
+        globals: globals.into_boxed_slice(),
+    })
+}
+
+/// Lowers `Error` and its constructor and call helpers when present.
+fn lower_error_globals(
+    manifest: &GlobalManifest,
+    source_cache: &mut ParsedSourceCache,
+    globals: &mut Vec<LoweredGlobal>,
+) -> Result<()> {
     let Some(error_group) = manifest.global_group("Error") else {
-        return Ok(LoweredGlobalTypes {
-            globals: Box::default(),
-        });
+        return Ok(());
     };
     if !error_group.has_role(GlobalDeclarationRole::Type) {
         bail!("Error global must have a type-side declaration");
@@ -262,7 +291,7 @@ pub fn lower_global_types(
     if !error_group.has_role(GlobalDeclarationRole::Value) {
         bail!("Error global must have a value-side declaration");
     }
-    ensure_error_value_references_constructor(error_group.declarations(), &mut source_cache)?;
+    ensure_error_value_references_constructor(error_group.declarations(), source_cache)?;
 
     let Some(error_constructor_group) = manifest.global_group("ErrorConstructor") else {
         bail!("Error global value side references missing ErrorConstructor group");
@@ -306,10 +335,7 @@ pub fn lower_global_types(
         constructor,
         call,
         prototype,
-    } = lower_error_constructor_signatures(
-        error_constructor_group.declarations(),
-        &mut source_cache,
-    )?;
+    } = lower_error_constructor_signatures(error_constructor_group.declarations(), source_cache)?;
 
     members.push(LoweredTypeMember {
         name: Text::from("constructor"),
@@ -325,12 +351,12 @@ pub fn lower_global_types(
         members.push(prototype);
     }
 
-    let mut globals = Vec::new();
     globals.push(LoweredGlobal {
         name: Text::from("Error"),
         id_constant: "ERROR_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Class(LoweredClass {
             name: Text::from("Error"),
+            type_parameters: Box::default(),
             members: members.into_boxed_slice(),
         }),
     });
@@ -345,18 +371,7 @@ pub fn lower_global_types(
         data: LoweredTypeData::Function(call),
     });
 
-    lower_symbol_globals(manifest, &mut source_cache, &mut globals)?;
-    lower_disposable_global(manifest, &mut source_cache, &mut globals, DISPOSABLE_GLOBAL)?;
-    lower_disposable_global(
-        manifest,
-        &mut source_cache,
-        &mut globals,
-        ASYNC_DISPOSABLE_GLOBAL,
-    )?;
-
-    Ok(LoweredGlobalTypes {
-        globals: globals.into_boxed_slice(),
-    })
+    Ok(())
 }
 
 /// Lowered pieces extracted from `interface ErrorConstructor`.
@@ -434,6 +449,26 @@ const ASYNC_DISPOSABLE_GLOBAL: DisposableGlobalSpec = DisposableGlobalSpec {
     return_kind: DisposableReturnKind::PromiseLikeVoid,
 };
 
+/// Configuration for lowering a global interface to a class without members.
+#[derive(Clone, Copy)]
+struct MemberlessClassSpec {
+    name: &'static str,
+    id_constant: &'static str,
+    type_parameter_ids: &'static [&'static str],
+}
+
+const DATE_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
+    name: "Date",
+    id_constant: "DATE_ID_GLOBAL_TYPE_ID",
+    type_parameter_ids: &[],
+};
+
+const WEAK_MAP_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
+    name: "WeakMap",
+    id_constant: "WEAK_MAP_ID_GLOBAL_TYPE_ID",
+    type_parameter_ids: &["GLOBAL_T_ID", "GLOBAL_U_ID"],
+};
+
 struct ParsedSource<'a> {
     repo_relative: &'a str,
     module: TsDeclarationModule,
@@ -490,6 +525,7 @@ fn lower_symbol_globals(
         id_constant: "SYMBOL_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Class(LoweredClass {
             name: Text::from("Symbol"),
+            type_parameters: Box::default(),
             members: Box::new([
                 LoweredTypeMember {
                     name: Text::from("dispose"),
@@ -578,6 +614,93 @@ fn validate_symbol_constructor_reference(
     };
     if identifier.value_token()?.token_text_trimmed().text() != "SymbolConstructor" {
         bail!("declare var Symbol must reference SymbolConstructor");
+    }
+
+    Ok(())
+}
+
+fn lower_memberless_class_global(
+    manifest: &GlobalManifest,
+    source_cache: &mut ParsedSourceCache,
+    globals: &mut Vec<LoweredGlobal>,
+    spec: MemberlessClassSpec,
+) -> Result<()> {
+    let Some(group) = manifest.global_group(spec.name) else {
+        return Ok(());
+    };
+    if !group.has_role(GlobalDeclarationRole::Type) {
+        bail!("{} global must have a type-side declaration", spec.name);
+    }
+
+    let mut saw_interface = false;
+    for record in group.declarations() {
+        match &record.kind {
+            DeclarationKind::Interface => {
+                saw_interface = true;
+                let declaration = source_cache
+                    .find_interface_declaration(record)?
+                    .with_context(|| {
+                        format!(
+                            "failed to find interface declaration {} at {:?}",
+                            record.declared_name.text(),
+                            record.text_range
+                        )
+                    })?;
+                validate_memberless_class_interface(&declaration, spec)?;
+            }
+            DeclarationKind::TypeAlias => {
+                bail!("type aliases are not supported in the {} global", spec.name)
+            }
+            DeclarationKind::DeclareFunction
+            | DeclarationKind::VariableDeclarator { .. }
+            | DeclarationKind::ImportEquals => {}
+        }
+    }
+    if !saw_interface {
+        bail!("{} global must include an interface declaration", spec.name);
+    }
+
+    globals.push(LoweredGlobal {
+        name: Text::from(spec.name),
+        id_constant: spec.id_constant,
+        data: LoweredTypeData::Class(LoweredClass {
+            name: Text::from(spec.name),
+            type_parameters: spec
+                .type_parameter_ids
+                .iter()
+                .map(|id| LoweredTypeReference::Predefined(id))
+                .collect(),
+            members: Box::default(),
+        }),
+    });
+
+    Ok(())
+}
+
+fn validate_memberless_class_interface(
+    declaration: &TsInterfaceDeclaration,
+    spec: MemberlessClassSpec,
+) -> Result<()> {
+    if declaration.extends_clause().is_some() {
+        bail!("{} interface extends clauses are not supported", spec.name);
+    }
+
+    let mut type_parameter_count = 0;
+    if let Some(type_parameters) = declaration.type_parameters() {
+        for type_parameter in type_parameters.items() {
+            type_parameter.with_context(|| {
+                format!("{} interface has a malformed type parameter", spec.name)
+            })?;
+            type_parameter_count += 1;
+        }
+    }
+
+    let expected_type_parameter_count = spec.type_parameter_ids.len();
+    if type_parameter_count != expected_type_parameter_count {
+        bail!(
+            "{} interface has {type_parameter_count} type parameters, expected {expected_type_parameter_count}",
+            spec.name
+        );
     }
 
     Ok(())

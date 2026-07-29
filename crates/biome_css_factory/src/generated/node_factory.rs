@@ -5382,7 +5382,7 @@ where
 }
 pub fn css_rule_list<I>(items: I) -> CssRuleList
 where
-    I: IntoIterator<Item = AnyCssRule>,
+    I: IntoIterator<Item = AnyCssRuleListItem>,
     I::IntoIter: ExactSizeIterator,
 {
     CssRuleList::unwrap_cast(SyntaxNode::new_detached(

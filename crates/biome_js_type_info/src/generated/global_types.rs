@@ -11,6 +11,8 @@ pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
     crate::globals::DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID,
     crate::globals::ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID,
     crate::globals::ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
+    crate::globals::DATE_ID_GLOBAL_TYPE_ID,
+    crate::globals::WEAK_MAP_ID_GLOBAL_TYPE_ID,
     crate::globals::ERROR_ID_GLOBAL_TYPE_ID,
     crate::globals::ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
     crate::globals::ERROR_CALL_ID_GLOBAL_TYPE_ID,
@@ -86,6 +88,25 @@ pub(crate) fn set_generated_global_type_data(
         crate::globals::ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
         data,
     );
+    let data = crate::TypeData::Class(Box::new(crate::Class {
+        name: Some(biome_rowan::Text::new_static("Date")),
+        type_parameters: Box::default(),
+        extends: None,
+        implements: Box::default(),
+        members: Box::new([]),
+    }));
+    builder.set_type_data(crate::globals::DATE_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Class(Box::new(crate::Class {
+        name: Some(biome_rowan::Text::new_static("WeakMap")),
+        type_parameters: Box::new([
+            crate::globals::GLOBAL_T_ID.into(),
+            crate::globals::GLOBAL_U_ID.into(),
+        ]),
+        extends: None,
+        implements: Box::default(),
+        members: Box::new([]),
+    }));
+    builder.set_type_data(crate::globals::WEAK_MAP_ID_GLOBAL_TYPE_ID, data);
     let data = crate::TypeData::Class(Box::new(crate::Class {
         name: Some(biome_rowan::Text::new_static("Error")),
         type_parameters: Box::default(),

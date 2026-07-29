@@ -5,8 +5,6 @@ use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
 use crate::embed::EmbedContent;
 #[cfg(feature = "lang_js")]
 use crate::file_handlers::AstroFileHandler;
-#[cfg(feature = "lang_html")]
-use crate::file_handlers::html::{css_verbatim_ranges, js_verbatim_ranges};
 use crate::file_handlers::{
     AnalyzerVisitorCache, Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, Features,
     FixAllParams, FixedFileResult, LintParams, LintResults, ParseEmbeddedParams, ParseResult,
@@ -1401,14 +1399,14 @@ impl WorkspaceServerWithDb<'_> {
                 skipped_suggested_fixes += snippet_skipped_suggested_fixes;
                 if reconstruct_snippet {
                     let verbatim_ranges = cfg_select! {
-                        feature = "lang_html" => {
+                        feature = "html_embeds" => {
                             if should_format {
                                 // Use the trimmed code — the same slice passed to
                                 // reindent_embedded_code — so byte offsets match.
                                 let trimmed = new_code.trim();
                                 match document_file_source {
-                                    DocumentFileSource::Js(_) => js_verbatim_ranges(trimmed),
-                                    DocumentFileSource::Css(_) => css_verbatim_ranges(trimmed),
+                                    DocumentFileSource::Js(_) => crate::file_handlers::html::js_verbatim_ranges(trimmed),
+                                    DocumentFileSource::Css(_) => crate::file_handlers::html::css_verbatim_ranges(trimmed),
                                     _ => vec![],
                                 }
                             } else {

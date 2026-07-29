@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/property/tag_before_anchor.yaml
+---
+
+# Input
+
+```yaml
+- !!str &a a
+- &b !!int 2
+- !!int &c 4
+---
+!!str &a1 scalar1
+---
+&a2
+!!str
+scalar2
+
+```
+
+
+# Formatted
+
+```yaml
+- !!str &a a
+- !!int &b 2
+- !!int &c 4
+---
+!!str &a1 scalar1
+---
+!!str &a2 scalar2
+
+```

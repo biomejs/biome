@@ -14,7 +14,7 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::{DeclarationOrRuleList, parse_declaration_or_rule_list_block};
 use crate::syntax::parse_error::{
-    expected_any_rule, expected_non_css_wide_keyword_identifier,
+    expected_any_rule, expected_any_rule_list_item, expected_non_css_wide_keyword_identifier,
     inconsistent_scss_bracketed_list_separators, scss_only_syntax_error, tailwind_disabled,
 };
 use crate::syntax::property::color::{is_at_color, parse_color};
@@ -164,7 +164,7 @@ impl RuleList {
 
 #[inline]
 pub(crate) fn is_at_rule_list_element(p: &mut CssParser) -> bool {
-    is_at_at_rule(p) || is_at_qualified_rule(p)
+    is_at_at_rule(p) || is_at_scss_variable_declaration(p) || is_at_qualified_rule(p)
 }
 
 struct RuleListParseRecovery {
@@ -195,6 +195,14 @@ impl ParseNodeList for RuleList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if is_at_at_rule(p) {
             parse_at_rule(p)
+        } else if is_at_scss_variable_declaration(p) {
+            CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                p,
+                parse_scss_variable_declaration,
+                |p, marker| {
+                    scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
+                },
+            )
         } else if is_at_qualified_rule(p) {
             parse_qualified_rule(p)
         } else {
@@ -214,7 +222,7 @@ impl ParseNodeList for RuleList {
         parsed_element.or_recover(
             p,
             &RuleListParseRecovery::new(self.end_kind),
-            expected_any_rule,
+            expected_any_rule_list_item,
         )
     }
 }

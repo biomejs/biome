@@ -6,6 +6,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsName, JsExpressionStatement, JsSyntaxKind, T,
 };
+use biome_module_graph::type_inference::TypeInferenceClassification;
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
 use biome_rule_options::no_floating_promises::NoFloatingPromisesOptions;
 
@@ -179,14 +180,16 @@ impl Rule for NoFloatingPromises {
 
         // Uncomment the following line for debugging convenience:
         //let printed = format!("type of {expression:?} = {ty:?}");
-        let is_array_of_promises = ctx.expression_is_array_of_promises(&expression);
-        if is_array_of_promises == Some(true) {
+        let array_classification = ctx.classify_expression_as_array_of_promises(&expression);
+        if array_classification == TypeInferenceClassification::Match {
             return Some(NoFloatingPromisesState::ArrayOfPromises);
         }
 
-        let is_promise = ctx.expression_is_promise(&expression);
-        if is_promise != Some(true) {
-            if is_array_of_promises == Some(false) && is_promise == Some(false) {
+        let promise_classification = ctx.classify_expression_as_promise(&expression);
+        if promise_classification != TypeInferenceClassification::Match {
+            if array_classification == TypeInferenceClassification::NoMatch
+                && promise_classification == TypeInferenceClassification::NoMatch
+            {
                 return None;
             }
 

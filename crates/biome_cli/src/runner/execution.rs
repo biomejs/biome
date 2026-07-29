@@ -95,6 +95,21 @@ pub(crate) trait Execution: Send + Sync + std::panic::RefUnwindSafe {
         false
     }
 
+    fn is_rule_profiling_enabled(&self) -> bool {
+        false
+    }
+
+    fn is_type_inference_profiling_enabled(&self) -> bool {
+        false
+    }
+
+    /// Drains the type-inference profile owned by this execution.
+    fn take_type_inference_profile(
+        &self,
+    ) -> Option<biome_module_graph::type_inference::profiling::TypeInferenceProfileSnapshot> {
+        None
+    }
+
     /// The [Category] that should be used when running the command.
     fn as_diagnostic_category(&self) -> &'static Category;
 

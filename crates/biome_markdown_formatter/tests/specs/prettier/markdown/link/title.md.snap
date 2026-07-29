@@ -44,87 +44,58 @@ info: markdown/link/title.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,29 +1,29 @@
- [hello](#world "title")
--[hello](#world "title")
--[hello](#world "title")
-+[hello](#world 'title')
-+[hello](#world (title))
- 
--[a](https://example.com '"')
--[a](https://example.com '"')
--[a](https://example.com '"')
-+[a](https://example.com "\"")
-+[a](https://example.com '\"')
-+[a](https://example.com (\"))
- 
--[a](https://example.com "'")
--[a](https://example.com "'")
--[a](https://example.com "'")
-+[a](https://example.com "\'")
-+[a](https://example.com '\'')
-+[a](https://example.com (\'))
- 
--[a](https://example.com "'")
--[a](https://example.com ")")
--[a](https://example.com ")")
-+[a](https://example.com "\'")
-+[a](https://example.com '\)')
-+[a](https://example.com (\)))
+@@ -14,13 +14,13 @@
+ [a](https://example.com ")")
+ [a](https://example.com ")")
  
 -[a](https://example.com '"')
 -[a](https://example.com "'")
 -[a](https://example.com ")")
-+[a](https://example.com "\\\"")
-+[a](https://example.com '\\\'')
-+[a](https://example.com (\\\)))
++[a](https://example.com '\\"')
++[a](https://example.com "\\'")
++[a](https://example.com "\\)")
  
 -[a](https://example.com "'")
 -[a](https://example.com '"')
 -[a](https://example.com '"')
 +[a](https://example.com "\\'")
 +[a](https://example.com '\\"')
-+[a](https://example.com (\\"))
++[a](https://example.com '\\"')
  
  <!-- magical incantations -->
  
- [a](https://example.com "\"')")
--[a](https://example.com "\"')")
--[a](https://example.com "\"')")
-+[a](https://example.com '"\')')
-+[a](https://example.com ("'\)))
 ```
 
 # Output
 
 ```md
 [hello](#world "title")
-[hello](#world 'title')
-[hello](#world (title))
+[hello](#world "title")
+[hello](#world "title")
 
-[a](https://example.com "\"")
-[a](https://example.com '\"')
-[a](https://example.com (\"))
+[a](https://example.com '"')
+[a](https://example.com '"')
+[a](https://example.com '"')
 
-[a](https://example.com "\'")
-[a](https://example.com '\'')
-[a](https://example.com (\'))
+[a](https://example.com "'")
+[a](https://example.com "'")
+[a](https://example.com "'")
 
-[a](https://example.com "\'")
-[a](https://example.com '\)')
-[a](https://example.com (\)))
+[a](https://example.com "'")
+[a](https://example.com ")")
+[a](https://example.com ")")
 
-[a](https://example.com "\\\"")
-[a](https://example.com '\\\'')
-[a](https://example.com (\\\)))
+[a](https://example.com '\\"')
+[a](https://example.com "\\'")
+[a](https://example.com "\\)")
 
 [a](https://example.com "\\'")
 [a](https://example.com '\\"')
-[a](https://example.com (\\"))
+[a](https://example.com '\\"')
 
 <!-- magical incantations -->
 
 [a](https://example.com "\"')")
-[a](https://example.com '"\')')
-[a](https://example.com ("'\)))
+[a](https://example.com "\"')")
+[a](https://example.com "\"')")
 ```

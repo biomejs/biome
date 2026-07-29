@@ -53,6 +53,11 @@ const v = reqCache.p ? "yes" : "no";
 declare const roCache: Readonly<{p: Promise<string>}>;
 if (roCache.p) console.log("cached");
 
+declare const directUnion: boolean | Promise<boolean>;
+if (directUnion) {
+  // Do something
+}
+
 ```
 
 # Diagnostics
@@ -356,6 +361,27 @@ checksConditionalsInvalid.ts:48:5 lint/nursery/noMisusedPromises ━━━━━
   > 48 │ if (roCache.p) console.log("cached");
        │     ^^^^^^^^^
     49 │ 
+    50 │ declare const directUnion: boolean | Promise<boolean>;
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+checksConditionalsInvalid.ts:51:5 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a conditional was expected.
+  
+    50 │ declare const directUnion: boolean | Promise<boolean>;
+  > 51 │ if (directUnion) {
+       │     ^^^^^^^^^^^
+    52 │   // Do something
+    53 │ }
   
   i A Promise is always truthy, so this is most likely a mistake.
   

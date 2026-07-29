@@ -92,11 +92,35 @@
 	"w-full! w-full w-10",   // important static twin sorts plain-first
 	"w-full/50 w-full w-10", // statics take no modifier → w-full/50 is Unknown
 
-	// Divergence from prettier-plugin-tailwindcss 0.8.0: the plugin
-	// emits `size-*` before `h-*` (its size bucket sorts by the first
-	// declaration, height), while the preset records width as the sort
-	// property for `size`. Same-bucket name order is otherwise exact.
-	"size-full size-4 w-4 h-4",
+	// ─── property signatures ───────────────────────────────────────
+	// A candidate's primary sort key is the ascending property-order
+	// index list of everything it declares; the first differing index
+	// decides, and the longer list wins a shared prefix. Expected order
+	// cross-checked against prettier-plugin-tailwindcss 0.8.0.
+
+	"size-full size-4 w-4 h-4",       // size = height+width precedes h, then w
+	"container flex p-4",             // container's sentinel property precedes display
+	"container mx-auto px-4",         // classic container header combo
+	"font-medium text-sm whitespace-nowrap transition-all outline-none", // font-weight rides its own signature
+	"font-medium font-sans text-sm",  // font-family, font-size, font-weight buckets
+	"sr-only not-sr-only absolute",   // both sr signatures extend position's
+	"truncate text-clip overflow-hidden", // truncate leads its overflow prefix group
+	"group peer flex p-4",            // group/peer are no utilities — unknown-front parity
+
+	// ─── bare functional defaults ──────────────────────────────────
+	// Utilities with a default compile bare without a static
+	// registration (`border` = 1px, `ring` = 1px, `shadow` = the theme
+	// default); the bare placement supplies their signature. Expected
+	// order cross-checked against prettier-plugin-tailwindcss 0.8.0.
+
+	"border border-4 border-x border-x-4 flex",       // bare, valued, and dashed-bare forms
+	"ring ring-2 ring-inset shadow",                  // shadow's signature precedes ring's
+	"shadow shadow-lg shadow-none rounded",           // border-radius precedes the shadow family
+	"rounded rounded-lg rounded-none border",         // radius family, then bare border
+	"transition transition-all transition-none grow", // flex-grow precedes transition
+	"grow grow-0 shrink shrink-0",                    // flex-shrink precedes flex-grow
+	"outline outline-2 outline-none border-t",        // border-top before the outline family
+	"blur blur-sm grayscale invert",                  // filter utilities in signature order
 
 	// ─── unknown classes ───────────────────────────────────────────
 	// Tokens that resolve to no branch float to the front and keep

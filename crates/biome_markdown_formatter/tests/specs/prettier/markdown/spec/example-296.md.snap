@@ -22,7 +22,7 @@ info: markdown/spec/example-296.md
  [foo]
  
 -[foo]: /bar* "ti*tle"
-+[foo]: /bar\* "ti\*tle"
++[foo]: /bar\* "ti*tle"
 ```
 
 # Output
@@ -30,5 +30,5 @@ info: markdown/spec/example-296.md
 ```md
 [foo]
 
-[foo]: /bar\* "ti\*tle"
+[foo]: /bar\* "ti*tle"
 ```

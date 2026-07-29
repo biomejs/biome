@@ -9,6 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["README.md", "src/**/*"]
 publish              = true
 
 [[bench]]
@@ -42,6 +43,7 @@ cfg-if               = { workspace = true }
 indexmap             = { workspace = true }
 once_cell            = "1.21.4"  # Use `std::sync::OnceLock::get_or_try_init` when it is stable.
 papaya               = { workspace = true }
+parking_lot          = { workspace = true }
 rustc-hash           = { workspace = true }
 salsa                = { workspace = true }
 schemars             = { workspace = true, optional = true }

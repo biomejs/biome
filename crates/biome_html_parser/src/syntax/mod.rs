@@ -27,7 +27,8 @@ use crate::syntax::vue::{
     parse_vue_v_on_shorthand_directive, parse_vue_v_slot_shorthand_directive,
 };
 use crate::token_source::{
-    HtmlEmbeddedLanguage, HtmlFramework, HtmlLexContext, HtmlReLexContext, TextExpressionKind,
+    HtmlEmbeddedLanguage, HtmlFramework, HtmlLexContext, HtmlReLexContext, PreformattedElement,
+    TextExpressionKind,
 };
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
@@ -99,9 +100,22 @@ const VOID_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(
 );
 
 /// Elements whose content is treated as raw text / an embedded language. `script`
-/// and `style` share their kinds between HTML and SVG.
-const EMBEDDED_LANGUAGE_ELEMENTS: TokenSet<HtmlSyntaxKind> =
-    token_set!(T![script], T![style], T![pre]);
+/// and `style` share their kinds between HTML and SVG. The rest are
+/// preformatted: their text is whitespace-sensitive, and lexing it as one
+/// literal keeps the whitespace in the token instead of losing it to trivia.
+const EMBEDDED_LANGUAGE_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(
+    T![script],
+    T![style],
+    T![pre],
+    T![textarea],
+    T![xmp],
+    T![plaintext]
+);
+
+/// The subset of [`EMBEDDED_LANGUAGE_ELEMENTS`] that is raw text because it is
+/// preformatted rather than because it hosts another language.
+const PREFORMATTED_ELEMENTS: TokenSet<HtmlSyntaxKind> =
+    token_set!(T![pre], T![textarea], T![xmp], T![plaintext]);
 
 pub(crate) fn parse_root(p: &mut HtmlParser) {
     let m = p.start();
@@ -292,14 +306,14 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     let name_kind = p.cur();
     let opening_tag_name = p.cur_text().to_string();
     let should_be_self_closing = VOID_ELEMENTS.contains(name_kind);
-    // In Svelte files, <pre> must be parsed as a regular element so that
-    // Svelte expressions inside it ({@html expr}, {expr}) are visible as AST
-    // nodes for variable-reference tracking.  The HTML formatter's
-    // HTML_VERBATIM_TAGS list independently ensures <pre> content is still
-    // printed verbatim, so removing <pre> from the embedded-language path
-    // here has no effect on formatting output.
+    // In Svelte files, the preformatted elements must be parsed as regular
+    // elements so that Svelte expressions inside them ({@html expr}, {expr})
+    // are visible as AST nodes for variable-reference tracking. The formatter
+    // decides verbatim printing on its own, so keeping them off the
+    // embedded-language path here costs nothing but the leading and trailing
+    // whitespace, which ends up as trivia.
     let is_embedded_language_tag = EMBEDDED_LANGUAGE_ELEMENTS.contains(name_kind)
-        && !(name_kind == T![pre] && Svelte.is_supported(p));
+        && !(PREFORMATTED_ELEMENTS.contains(name_kind) && Svelte.is_supported(p));
 
     parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
 
@@ -333,7 +347,14 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
                 HtmlLexContext::EmbeddedLanguage(match name_kind {
                     T![script] => HtmlEmbeddedLanguage::Script,
                     T![style] => HtmlEmbeddedLanguage::Style,
-                    T![pre] => HtmlEmbeddedLanguage::Preformatted,
+                    T![pre] => HtmlEmbeddedLanguage::Preformatted(PreformattedElement::Pre),
+                    T![textarea] => {
+                        HtmlEmbeddedLanguage::Preformatted(PreformattedElement::Textarea)
+                    }
+                    T![xmp] => HtmlEmbeddedLanguage::Preformatted(PreformattedElement::Xmp),
+                    T![plaintext] => {
+                        HtmlEmbeddedLanguage::Preformatted(PreformattedElement::Plaintext)
+                    }
                     _ => unreachable!(),
                 })
             } else {

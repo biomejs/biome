@@ -20,7 +20,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// Only single-identifier qualifiers match; the identifier's binding is
     /// searched upward through the scope chain. Returns `None` when the
     /// binding is missing, its type reference is not a thin resolved ID, or
-    /// the referenced type is not currently in progress.
+    /// the referenced type is not currently in progress. The search examines
+    /// at most 1024 scopes and also returns `None` if it cannot reach the root
+    /// scope within that limit.
     pub(super) fn resolve_in_progress_this_qualifier(
         &self,
         qualifier: &TypeReferenceQualifier,
@@ -64,6 +66,17 @@ impl<'db> ResolutionCtx<'db, '_> {
         None
     }
 
+    /// Resolves a scoped name such as `ns.Widget<T>`.
+    ///
+    /// The first path segment is searched from `qualifier.scope_id` toward the
+    /// root scope. When it names a binding, the remaining segments are looked
+    /// up as static members and the supplied type arguments are applied to the
+    /// result. Built-in utility types and global names are considered only
+    /// after the search reaches the root without finding a binding.
+    ///
+    /// At most 1024 scopes are examined. If the root is deeper than that, the
+    /// result is `Unknown`; global fallback is not attempted because an unseen
+    /// lexical binding could shadow the global name.
     pub(in crate::db::type_inference) fn resolve_qualifier(
         &mut self,
         qualifier: &TypeReferenceQualifier,

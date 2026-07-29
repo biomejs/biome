@@ -356,9 +356,6 @@ impl Default for RawGlobalTypes {
         builder.set_manual_type_data(INSTANCEOF_DATE_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_DATE_ID))
         });
-        builder.set_manual_type_data(DATE_ID_GLOBAL_TYPE_ID, || {
-            class(DATE_ID_NAME, Box::default())
-        });
         builder.set_manual_type_data(INSTANCEOF_MAP_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_MAP_ID))
         });
@@ -379,15 +376,6 @@ impl Default for RawGlobalTypes {
         });
         builder.set_manual_type_data(INSTANCEOF_WEAK_MAP_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_WEAK_MAP_ID))
-        });
-        builder.set_manual_type_data(WEAK_MAP_ID_GLOBAL_TYPE_ID, || {
-            class(
-                WEAK_MAP_ID_NAME,
-                Box::new([
-                    TypeReference::from(GLOBAL_T_ID),
-                    TypeReference::from(GLOBAL_U_ID),
-                ]),
-            )
         });
         builder.set_manual_type_data(INSTANCEOF_ERROR_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_ERROR_ID))
@@ -722,5 +710,44 @@ mod tests {
             assert_eq!(member.ty, InferredTypeData::GlobalType(global_type_id));
             assert_eq!(globals.get(global_type_id), InferredTypeData::Symbol);
         }
+    }
+
+    #[test]
+    fn generated_weak_map_global_keeps_type_parameters() {
+        let db = TestDb::default();
+        let InferredTypeData::Class(weak_map) = global_types(&db).get(WEAK_MAP_ID_GLOBAL_TYPE_ID)
+        else {
+            panic!("WeakMap must be a class");
+        };
+        assert_eq!(
+            weak_map.type_parameters(&db).as_ref(),
+            &[
+                InferredTypeData::GlobalType(T_ID_GLOBAL_TYPE_ID),
+                InferredTypeData::GlobalType(U_ID_GLOBAL_TYPE_ID),
+            ]
+        );
+        assert!(weak_map.members(&db).is_empty());
+    }
+
+    #[test]
+    fn generated_date_global_keeps_existing_shape() {
+        let TypeData::Class(raw_date) = raw_global_type(DATE_ID_GLOBAL_TYPE_ID) else {
+            panic!("Date must be a class");
+        };
+        assert_eq!(raw_date.name.as_ref().map(Text::text), Some("Date"));
+        assert!(raw_date.type_parameters.is_empty());
+        assert!(raw_date.extends.is_none());
+        assert!(raw_date.implements.is_empty());
+        assert!(raw_date.members.is_empty());
+
+        let db = TestDb::default();
+        let InferredTypeData::Class(date) = global_types(&db).get(DATE_ID_GLOBAL_TYPE_ID) else {
+            panic!("Date must be a class");
+        };
+        assert_eq!(date.name(&db).as_ref().map(Text::text), Some("Date"));
+        assert!(date.type_parameters(&db).is_empty());
+        assert!(date.extends(&db).is_none());
+        assert!(date.implements(&db).is_empty());
+        assert!(date.members(&db).is_empty());
     }
 }

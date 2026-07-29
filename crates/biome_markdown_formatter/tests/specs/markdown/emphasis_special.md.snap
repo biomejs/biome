@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/emphasis_special.md
+---
+
+# Input
+
+```md
+!_1_2
+
+！_1_2
+
+0_1_!
+
+0_1_！
+
+1 ***2*** 3
+
+1***2***3
+
+```
+
+
+# Formatted
+
+```md
+!\_1_2
+
+！\_1_2
+
+0_1_!
+
+0_1_！
+
+1 **_2_** 3
+
+1***2***3
+
+```

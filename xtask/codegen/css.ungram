@@ -88,7 +88,11 @@ AnyCssRootItem =
 	| ScssVariableDeclaration
 	| CssBogus
 
-CssRuleList = AnyCssRule*
+CssRuleList = AnyCssRuleListItem*
+
+AnyCssRuleListItem =
+	AnyCssRule
+	| ScssVariableDeclaration
 
 AnyCssRule =
 	CssQualifiedRule
