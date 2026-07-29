@@ -1,6 +1,6 @@
 use crate::content_lines::ContentLines;
 use crate::prelude::*;
-use biome_formatter::write;
+use biome_formatter::{format_args, write};
 use biome_parser::{TokenSet, token_set};
 use biome_rowan::AstNode;
 use biome_yaml_syntax::{
@@ -33,18 +33,6 @@ impl FormatNodeRule<YamlBlockContent> for FormatYamlBlockContent {
         // content starts after its line break
         let lines = lines.skip(1);
 
-        let stats = ContentStats::new(lines.clone());
-
-        let kept_lines = match chomping {
-            // The line break terminating the last line is printed by the
-            // enclosing structure, so the line it opens isn't content
-            Chomping::Keep => stats
-                .line_count
-                .saturating_sub(usize::from(ends_with_break)),
-            // Trailing blank lines are dropped
-            Chomping::Clip | Chomping::Strip => stats.trimmed_count,
-        };
-
         // The number of block collections the node is nested in, which the
         // absolute indentation of explicitly indented content is computed from
         let ancestors = node
@@ -53,24 +41,30 @@ impl FormatNodeRule<YamlBlockContent> for FormatYamlBlockContent {
             .skip(1)
             .filter(|ancestor| BLOCK_COLLECTIONS.contains(ancestor.kind()))
             .count();
-        let base_indent = match indicator {
-            Some(indicator) => indicator.saturating_sub(1).saturating_add(ancestors),
-            None => stats.first_indent,
+        // An explicit indicator makes the content indentation absolute
+        let explicit_indent =
+            indicator.map(|indicator| indicator.saturating_sub(1).saturating_add(ancestors));
+
+        let stats = ContentStats::new(lines.clone(), explicit_indent);
+        let base_indent = explicit_indent.unwrap_or(stats.first_indent);
+        let scalar_end = stats.scalar_end;
+
+        let kept_lines = match (chomping, scalar_end) {
+            // With a trailing comment region the token continues past the
+            // content, whose trailing blank lines all belong to it
+            (Chomping::Keep, Some(scalar_end)) => scalar_end,
+            // The line break terminating the last line is printed by the
+            // enclosing structure, so the line it opens isn't content
+            (Chomping::Keep, None) => stats
+                .line_count
+                .saturating_sub(usize::from(ends_with_break)),
+            // Trailing blank lines are dropped
+            (Chomping::Clip | Chomping::Strip, _) => stats.trimmed_count,
         };
 
-        // FIXME: A non-empty line that is indented less than the base ends
-        // the scalar per the spec, but the lexer includes such lines
-        // (trailing comment lines, in practice) in the content token.
-        // Re-indenting them would promote them to actual scalar content, so
-        // the content is kept exactly as is for now. Once the lexer ends the
-        // scalar at such lines, this fallback can be removed
-        if stats.min_indent < base_indent {
-            return format_verbatim_node(node.syntax()).fmt(f);
-        }
-
         let is_last = closes_last_document(node);
+        let state = std::cell::Cell::new(LineState::default());
         let content = format_with(|f| {
-            let state = std::cell::Cell::new(LineState::default());
             for line in lines.clone().take(kept_lines) {
                 write!(
                     f,
@@ -87,6 +81,7 @@ impl FormatNodeRule<YamlBlockContent> for FormatYamlBlockContent {
             // leaves them in the leading trivia of the next token, so they
             // are recovered from there
             if chomping == Chomping::Keep
+                && scalar_end.is_none()
                 && !token_text.is_empty()
                 && !ends_with_break
                 && let Some(next_token) = value_token.next_token()
@@ -130,7 +125,20 @@ impl FormatNodeRule<YamlBlockContent> for FormatYamlBlockContent {
             //   foo
             //
             // ```
-            if chomping == Chomping::Keep && is_last && state.get().any_line {
+            //
+            // A comment following the scalar prints the blank line above
+            // itself instead, so the scalar adds none of its own
+            let comments_follow = value_token.next_token().is_some_and(|next| {
+                next.leading_trivia()
+                    .pieces()
+                    .any(|piece| piece.is_comments())
+            });
+            if chomping == Chomping::Keep
+                && scalar_end.is_none()
+                && is_last
+                && !comments_follow
+                && state.get().any_line
+            {
                 write!(f, [text("\n", None)])?;
             }
 
@@ -146,6 +154,7 @@ impl FormatNodeRule<YamlBlockContent> for FormatYamlBlockContent {
             //
             // ```
             if chomping == Chomping::Keep
+                && scalar_end.is_none()
                 && token_text.is_empty()
                 && is_last
                 && let Some(next_token) = value_token.next_token()
@@ -164,18 +173,55 @@ impl FormatNodeRule<YamlBlockContent> for FormatYamlBlockContent {
             Ok(())
         });
 
-        match indicator {
+        // The blank lines the chomping dropped and the trailing comment
+        // lines after them, printed after the scalar at the document root,
+        // where the comments live:
+        //
+        // ```yaml
+        // strip: |-
+        //   # text
+        //
+        // # comment
+        // ```
+        let trailing = format_with(|f| {
+            if scalar_end.is_none() {
+                return Ok(());
+            }
+            for line in lines.clone().skip(kept_lines) {
+                write!(
+                    f,
+                    [FormatContentLine {
+                        line,
+                        // Strips all the indentation, putting the comments
+                        // at column zero
+                        base_indent: usize::MAX,
+                        state: &state
+                    }]
+                )?;
+            }
+            Ok(())
+        });
+
+        match explicit_indent {
             // Content one level deeper than the parent node
-            None => write!(f, [format_replaced(&value_token, &indent(&content))]),
+            None => write!(
+                f,
+                [format_replaced(
+                    &value_token,
+                    &format_args![indent(&content), dedent_to_root(&trailing)]
+                )]
+            ),
             // An explicit indicator makes the content indentation absolute
-            Some(indicator) => {
-                let align_spaces =
-                    " ".repeat(indicator.saturating_sub(1).saturating_add(ancestors));
+            Some(explicit_indent) => {
+                let align_spaces = " ".repeat(explicit_indent);
                 write!(
                     f,
                     [format_replaced(
                         &value_token,
-                        &dedent_to_root(&align(align_spaces, &content))
+                        &format_args![
+                            dedent_to_root(&align(align_spaces, &content)),
+                            dedent_to_root(&trailing)
+                        ]
                     )]
                 )
             }
@@ -292,36 +338,55 @@ fn leading_spaces(line: &str) -> usize {
 struct ContentStats {
     /// The number of lines
     line_count: usize,
-    /// The number of lines that remain after dropping the trailing empty
-    /// lines
+    /// The number of content lines that remain after dropping the trailing
+    /// empty lines: those holding only whitespace up to the base indentation
     trimmed_count: usize,
     /// The leading spaces of the first non-blank line, `usize::MAX` when
     /// every line is blank
     first_indent: usize,
-    /// The smallest leading spaces of any non-blank line, `usize::MAX` when
-    /// every line is blank
-    min_indent: usize,
+    /// The index of the first non-blank line indented less than the base,
+    /// which ends the scalar per the spec. The lexer includes such lines
+    /// (trailing comment lines, in practice) in the content token, so
+    /// everything from this line on is not content
+    scalar_end: Option<usize>,
 }
 
 impl ContentStats {
-    fn new<'a>(lines: impl Iterator<Item = &'a str>) -> Self {
+    fn new<'a>(lines: impl Iterator<Item = &'a str>, explicit_indent: Option<usize>) -> Self {
         let mut stats = Self {
             line_count: 0,
             trimmed_count: 0,
             first_indent: usize::MAX,
-            min_indent: usize::MAX,
+            scalar_end: None,
         };
+        // The base indentation the lines are measured against: the explicit
+        // one, or the first non-blank line's once that line is reached. The
+        // blank lines before it can't end the scalar, and whether they are
+        // empty can't matter: the non-blank line after them always sits past
+        // them in `trimmed_count`
+        let mut base_indent = explicit_indent;
         for line in lines {
             stats.line_count += 1;
-            if !line.is_empty() {
-                stats.trimmed_count = stats.line_count;
+            // The trailing comment region reaches to the end of the token;
+            // only the total line count is still of interest
+            if stats.scalar_end.is_some() {
+                continue;
             }
             let spaces = leading_spaces(line);
             if spaces < line.len() {
                 if stats.first_indent == usize::MAX {
                     stats.first_indent = spaces;
                 }
-                stats.min_indent = stats.min_indent.min(spaces);
+                let base_indent = *base_indent.get_or_insert(spaces);
+                if spaces < base_indent {
+                    stats.scalar_end = Some(stats.line_count.saturating_sub(1));
+                } else {
+                    stats.trimmed_count = stats.line_count;
+                }
+            } else if base_indent.is_some_and(|base_indent| spaces > base_indent) {
+                // A line holding only whitespace up to the base indentation
+                // is an empty line; more whitespace than that is content
+                stats.trimmed_count = stats.line_count;
             }
         }
         stats
