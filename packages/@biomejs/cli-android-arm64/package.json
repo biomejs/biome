@@ -1,0 +1,23 @@
+{
+  "name": "@biomejs/cli-android-arm64",
+  "version": "2.5.10",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/biomejs/biome.git",
+    "directory": "packages/@biomejs/biome/cli-android-arm64"
+  },
+  "engines": {
+    "node": ">=14.21.3"
+  },
+  "homepage": "https://biomejs.dev",
+  "os": [
+    "android"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "publishConfig": {
+    "provenance": true
+  }
+}
