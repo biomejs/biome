@@ -1,5 +1,5 @@
 use crate::run_cli;
-use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
+use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
@@ -576,7 +576,7 @@ fn should_handle_htm_file() {
     let htm_file = Utf8Path::new("index.htm");
     fs.insert(
         htm_file.into(),
-        r#"<main><h1>Hello</h1></main>
+        r#"<main class = "content"><h1>Hello</h1></main>
 "#
         .as_bytes(),
     );
@@ -596,11 +596,18 @@ fn should_handle_htm_file() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", htm_file.as_str()].as_slice()),
+        Args::from(["check", htm_file.as_str()].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_file_contents(&fs, htm_file, "<main><h1>Hello</h1></main>\n");
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_handle_htm_file",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]
