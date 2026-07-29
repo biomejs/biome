@@ -9,7 +9,8 @@ use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssGenericPropertyValueOrExpression, CssContainerStyleInParens,
     CssContainerStyleQueryInParens, CssDeclaration, CssFontFeatureValuesItem, CssGenericProperty,
     CssGenericPropertyFields, CssIdentifier, CssIfStyleTest, CssLanguage,
-    CssSupportsFeatureDeclaration, TwPluginAtRule,
+    CssSupportsFeatureDeclaration, TwPluginAtRule, is_css_horizontal_whitespace_byte,
+    is_css_newline_byte,
 };
 use biome_formatter::comments::{CommentStyle, SourceComment};
 use biome_formatter::trivia::format_dangling_comment;
@@ -320,12 +321,12 @@ fn source_indent_before_comment(comment: &SourceComment<CssLanguage>) -> Option<
     let comment_start =
         usize::from(comment_piece.text_range().start() - token.text_range().start());
     let source_before_comment = token.text().get(..comment_start)?;
-    let (_, source_indent) = source_before_comment.rsplit_once(['\n', '\r', '\u{000c}'])?;
-
-    if !source_indent
+    let newline = source_before_comment
         .bytes()
-        .all(|byte| matches!(byte, b' ' | b'\t'))
-    {
+        .rposition(is_css_newline_byte)?;
+    let source_indent = &source_before_comment[newline + 1..];
+
+    if !source_indent.bytes().all(is_css_horizontal_whitespace_byte) {
         return None;
     }
 
