@@ -27,6 +27,10 @@ This block is prose, and it may mention a `<my-component>` without closing it.
 const foo = "</"
 </custom>
 
+<div>
+	This is custom, not a div.
+</div>
+
 ```
 
 
@@ -209,19 +213,42 @@ HtmlRoot {
                 r_angle_token: R_ANGLE@296..297 ">" [] [],
             },
         },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@297..300 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@300..303 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@303..304 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@304..333 "\n\tThis is custom, not a div.\n" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@333..334 "<" [] [],
+                slash_token: SLASH@334..335 "/" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@335..338 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@338..339 ">" [] [],
+            },
+        },
     ],
-    eof_token: EOF@297..298 "" [Newline("\n")] [],
+    eof_token: EOF@339..340 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: HTML_ROOT@0..298
+0: HTML_ROOT@0..340
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..297
+  3: HTML_ELEMENT_LIST@0..339
     0: HTML_ELEMENT@0..51
       0: HTML_OPENING_ELEMENT@0..10
         0: L_ANGLE@0..1 "<" [] []
@@ -337,6 +364,22 @@ HtmlRoot {
         2: HTML_TAG_NAME@290..296
           0: HTML_UNKNOWN_TAG@290..296 "custom" [] []
         3: R_ANGLE@296..297 ">" [] []
-  4: EOF@297..298 "" [Newline("\n")] []
+    5: HTML_ELEMENT@297..339
+      0: HTML_OPENING_ELEMENT@297..304
+        0: L_ANGLE@297..300 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@300..303
+          0: DIV_KW@300..303 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@303..303
+        3: R_ANGLE@303..304 ">" [] []
+      1: HTML_ELEMENT_LIST@304..333
+        0: HTML_EMBEDDED_CONTENT@304..333
+          0: HTML_LITERAL@304..333 "\n\tThis is custom, not a div.\n" [] []
+      2: HTML_CLOSING_ELEMENT@333..339
+        0: L_ANGLE@333..334 "<" [] []
+        1: SLASH@334..335 "/" [] []
+        2: HTML_TAG_NAME@335..338
+          0: DIV_KW@335..338 "div" [] []
+        3: R_ANGLE@338..339 ">" [] []
+  4: EOF@339..340 "" [Newline("\n")] []
 
 ```
