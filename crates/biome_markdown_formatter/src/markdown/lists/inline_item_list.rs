@@ -986,11 +986,11 @@ impl FormatMdInlineItemList {
             let ProseItem::WordGroup(group) = item else {
                 continue;
             };
-            let separator = if group.starts_with_block_marker() {
+            if group.starts_with_block_marker() {
                 fill.entry(&space(), group);
             } else {
                 fill.entry(&soft_line_break_or_space(), group);
-            };
+            }
         }
 
         fill.finish()
