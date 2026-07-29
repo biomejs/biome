@@ -136,26 +136,52 @@ struct SanitizeAdapter<W> {
     error: io::Result<()>,
 }
 
+impl<W> SanitizeAdapter<W>
+where
+    W: WriteColor,
+{
+    /// Writes `bytes` verbatim.
+    fn write_verbatim(&mut self, bytes: &[u8]) -> fmt::Result {
+        if bytes.is_empty() {
+            return Ok(());
+        }
+
+        if let Err(err) = self.writer.write_all(bytes) {
+            self.error = Err(err);
+            return Err(fmt::Error);
+        }
+
+        Ok(())
+    }
+}
+
 impl<W> fmt::Write for SanitizeAdapter<W>
 where
     W: WriteColor,
 {
     fn write_str(&mut self, content: &str) -> fmt::Result {
         let mut buffer = [0; 4];
+        // Start of the current stretch of bytes that can be written verbatim
+        // (i.e. need no replacement). Flushed in one `write_all` call
+        // whenever a grapheme needing replacement is found, instead of
+        // writing one character at a time: most content (source code,
+        // punctuation, plain ASCII text) needs no sanitization at all, so
+        // this keeps the common case to a single write per `write_str`
+        // call rather than one per character.
+        let mut segment_start = 0;
 
-        for grapheme in content.graphemes(true) {
+        for (offset, grapheme) in content.grapheme_indices(true) {
             let width = UnicodeWidthStr::width(grapheme);
             let is_whitespace = grapheme_is_whitespace(grapheme);
 
             if !is_whitespace && width == 0 {
+                self.write_verbatim(&content.as_bytes()[segment_start..offset])?;
+
                 let char_to_write = char::REPLACEMENT_CHARACTER;
                 char_to_write.encode_utf8(&mut buffer);
+                self.write_verbatim(&buffer[..char_to_write.len_utf8()])?;
 
-                if let Err(err) = self.writer.write_all(&buffer[..char_to_write.len_utf8()]) {
-                    self.error = Err(err);
-                    return Err(fmt::Error);
-                }
-
+                segment_start = offset + grapheme.len();
                 continue;
             }
 
@@ -169,48 +195,37 @@ where
             if !is_ascii {
                 if cfg!(windows) {
                     // On Windows, always convert all non-ASCII graphemes due to poor terminal support
+                    self.write_verbatim(&content.as_bytes()[segment_start..offset])?;
+
                     let replacement = unicode_to_ascii(grapheme.chars().nth(0).unwrap());
-
                     replacement.encode_utf8(&mut buffer);
+                    self.write_verbatim(&buffer[..replacement.len_utf8()])?;
 
-                    if let Err(err) = self.writer.write_all(&buffer[..replacement.len_utf8()]) {
-                        self.error = Err(err);
-                        return Err(fmt::Error);
-                    }
-
-                    continue;
+                    segment_start = offset + grapheme.len();
                 } else if !self.writer.supports_color() {
                     // On non-Windows with colors disabled:
                     // Only convert single-codepoint graphemes (diagnostic symbols)
                     // Multi-codepoint graphemes (like emoji with modifiers) are preserved for source code fidelity
-                    let chars: Vec<char> = grapheme.chars().collect();
-                    if chars.len() == 1 {
-                        let replacement = unicode_to_ascii(chars[0]);
+                    let mut chars = grapheme.chars();
+                    let first = chars.next();
+                    if let (Some(character), None) = (first, chars.next()) {
+                        self.write_verbatim(&content.as_bytes()[segment_start..offset])?;
 
+                        let replacement = unicode_to_ascii(character);
                         replacement.encode_utf8(&mut buffer);
+                        self.write_verbatim(&buffer[..replacement.len_utf8()])?;
 
-                        if let Err(err) = self.writer.write_all(&buffer[..replacement.len_utf8()]) {
-                            self.error = Err(err);
-                            return Err(fmt::Error);
-                        }
-
-                        continue;
+                        segment_start = offset + grapheme.len();
                     }
                     // Multi-codepoint graphemes fall through to be written as-is below
                 }
             }
 
-            for char in grapheme.chars() {
-                char.encode_utf8(&mut buffer);
-
-                if let Err(err) = self.writer.write_all(&buffer[..char.len_utf8()]) {
-                    self.error = Err(err);
-                    return Err(fmt::Error);
-                }
-            }
+            // ASCII grapheme, or a non-ASCII one that isn't being replaced:
+            // leave it as part of the current verbatim stretch.
         }
 
-        Ok(())
+        self.write_verbatim(&content.as_bytes()[segment_start..])
     }
 }
 
@@ -234,7 +249,11 @@ fn unicode_to_ascii(c: char) -> char {
 
 #[cfg(test)]
 mod tests {
-    use std::{fmt::Write, str::from_utf8};
+    use std::{
+        fmt::Write,
+        io::{self, Write as IoWrite},
+        str::from_utf8,
+    };
 
     use biome_markup::markup;
     use termcolor::Ansi;
@@ -352,5 +371,73 @@ mod tests {
                 EXPECTED, actual
             );
         }
+    }
+
+    /// Counts how many times [io::Write::write] is called.
+    #[derive(Default)]
+    struct TestWriter {
+        buffer: Vec<u8>,
+        write_count: usize,
+    }
+
+    impl IoWrite for TestWriter {
+        fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+            self.write_count += 1;
+            self.buffer.write(buf)
+        }
+
+        fn flush(&mut self) -> io::Result<()> {
+            self.buffer.flush()
+        }
+    }
+
+    #[test]
+    fn test_clean_content_is_written_in_a_single_call() {
+        const INPUT: &str = "the quick brown fox jumps over the lazy dog, 42 times.";
+
+        let mut counting = TestWriter::default();
+
+        {
+            let writer = termcolor::Ansi::new(&mut counting);
+            let mut adapter = SanitizeAdapter {
+                writer,
+                error: Ok(()),
+            };
+
+            adapter.write_str(INPUT).unwrap();
+            adapter.error.unwrap();
+        }
+
+        assert_eq!(from_utf8(&counting.buffer).unwrap(), INPUT);
+        assert_eq!(
+            counting.write_count, 1,
+            "clean content should be flushed in a single write, not one per character"
+        );
+    }
+
+    #[test]
+    fn test_mixed_content_batches_clean_runs() {
+        // Two zero-width characters (replaced) surrounded by three runs of
+        // plain ASCII text (batched): 3 clean-run writes + 2 replacement
+        // writes = 5, regardless of how long the surrounding clean runs are.
+        const INPUT: &str = "some reasonably long clean run of text\0another fairly long clean run of text\0and a final clean run";
+
+        let mut counting = TestWriter::default();
+
+        {
+            let writer = termcolor::Ansi::new(&mut counting);
+            let mut adapter = SanitizeAdapter {
+                writer,
+                error: Ok(()),
+            };
+
+            adapter.write_str(INPUT).unwrap();
+            adapter.error.unwrap();
+        }
+
+        assert_eq!(
+            counting.write_count, 5,
+            "expected one write per clean run plus one per replaced character"
+        );
     }
 }
