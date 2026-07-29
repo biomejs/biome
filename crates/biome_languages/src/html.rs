@@ -48,8 +48,7 @@ impl HtmlFileSource {
         }
     }
 
-    /// Returns `true` if the current file is `.html` and doesn't support
-    /// any text expression capability
+    /// Returns `true` for standard HTML sources without text-expression support.
     pub const fn is_html(&self) -> bool {
         matches!(self.variant, HtmlVariant::Standard(_))
     }
