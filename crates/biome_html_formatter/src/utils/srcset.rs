@@ -59,7 +59,7 @@ enum DescriptorKind {
 /// See <https://html.spec.whatwg.org/multipage/images.html#parsing-a-srcset-attribute>.
 pub(crate) fn parse_srcset(value: &str) -> Option<Vec<SrcsetCandidate>> {
     let bytes = value.as_bytes();
-    let mut candidates: Vec<SrcsetCandidate> = Vec::new();
+    let mut candidates = Vec::new();
     let mut kind = None;
     let mut position = 0;
 
@@ -265,7 +265,12 @@ impl Format<HtmlFormatContext> for FormatSrcsetCandidates<'_> {
                     write!(
                         f,
                         [
-                            if_group_breaks(&token(spaces(padding))),
+                            if_group_breaks(&format_with(|f| {
+                                for _ in 0..padding {
+                                    write!(f, [token(" ")])?;
+                                }
+                                Ok(())
+                            })),
                             if_group_fits_on_line(&token(" ")),
                             located_token_text(
                                 self.value_token,
@@ -281,15 +286,6 @@ impl Format<HtmlFormatContext> for FormatSrcsetCandidates<'_> {
 
         candidates.finish()
     }
-}
-
-/// A sequence of `count` spaces, for aligning descriptors.
-///
-/// Slicing a literal keeps the result `'static`, which is what the token
-/// builder takes.
-fn spaces(count: usize) -> &'static str {
-    const SPACES: &str = "                                                                ";
-    &SPACES[..count.min(SPACES.len())]
 }
 
 #[cfg(test)]
