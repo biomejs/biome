@@ -222,8 +222,8 @@ fn print_to_reporter(params: PrintToReporter) -> Result<(), CliDiagnostic> {
         }
         CliReporterKind::Json | CliReporterKind::JsonPretty => {
             console_reporter_writer.error(markup! {
-                            <Warn>"The "<Emphasis>"--json"</Emphasis>" option is "<Underline>"unstable/experimental"</Underline>" and its output might change between patches/minor releases."</Warn>
-                        });
+                <Warn>"The `json` and `json-pretty` reporters are experimental and may change in patch releases."</Warn>
+            });
             let reporter = JsonReporter {
                 summary,
                 diagnostics_payload,
