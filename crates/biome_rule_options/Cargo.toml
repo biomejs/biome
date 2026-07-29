@@ -9,8 +9,8 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["!**/*_test.*", "!**/*_tests.*", "src/**/*"]
 publish              = true
-include = ["src/**/*", "!**/*_test.*", "!**/*_tests.*"]
 
 [dependencies]
 biome_console            = { workspace = true }

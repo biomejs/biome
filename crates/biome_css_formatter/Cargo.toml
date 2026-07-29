@@ -9,8 +9,8 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["!**/*_test.*", "README.md", "src/**/*"]
 publish              = true
-include = ["src/**/*", "README.md", "!**/*_test.*"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

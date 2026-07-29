@@ -9,8 +9,8 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["!**/*_test.*", "!**/*_tests.*", "build.rs", "src/**/*"]
 publish              = true
-include = ["src/**/*", "build.rs", "!**/*_test.*", "!**/*_tests.*"]
 
 [[bench]]
 harness = false

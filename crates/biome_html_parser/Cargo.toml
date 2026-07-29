@@ -9,8 +9,8 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["src/**/*"]
 publish              = true
-include = ["src/**/*"]
 
 [[bench]]
 harness = false
