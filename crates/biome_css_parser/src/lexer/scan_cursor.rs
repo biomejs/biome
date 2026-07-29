@@ -1,8 +1,5 @@
-use super::{
-    CssStringQuote,
-    source_cursor::{SourceCursor, is_newline_byte},
-};
-use biome_css_syntax::{TextRange, TextSize};
+use super::{CssStringQuote, source_cursor::SourceCursor};
+use biome_css_syntax::{TextRange, TextSize, is_css_newline_byte, is_css_whitespace_byte};
 use biome_unicode_table::{Dispatch::*, is_css_non_ascii, lookup_byte};
 use std::char::REPLACEMENT_CHARACTER;
 
@@ -187,10 +184,7 @@ impl<'src> CssScanCursor<'src> {
             offset += 1;
         }
 
-        if self
-            .byte_at(offset)
-            .is_some_and(|byte| matches!(byte, b'\t' | b' ' | b'\n' | b'\r' | 0x0C))
-        {
+        if self.byte_at(offset).is_some_and(is_css_whitespace_byte) {
             offset += 1;
         }
 
@@ -364,7 +358,7 @@ impl<'src> CssScanCursor<'src> {
         self.advance(1);
 
         match self.current_byte() {
-            Some(byte) if is_newline_byte(byte) => {
+            Some(byte) if is_css_newline_byte(byte) => {
                 let len = if byte == b'\r' && self.peek_byte() == Some(b'\n') {
                     2
                 } else {
@@ -464,10 +458,7 @@ impl<'src> CssScanCursor<'src> {
         debug_assert!(self.current_byte() == Some(b'/') && self.peek_byte() == Some(b'/'));
         self.advance(2);
 
-        let starts_like_comment = matches!(
-            self.current_byte(),
-            Some(b'\t' | b' ' | b'\n' | b'\r' | 0x0C)
-        );
+        let starts_like_comment = self.current_byte().is_some_and(is_css_whitespace_byte);
 
         while let Some(current) = self.current_byte() {
             match current {
@@ -508,10 +499,7 @@ impl<'src> CssScanCursor<'src> {
 
     /// Skips CSS whitespace without consuming comments.
     fn skip_whitespace(&mut self) {
-        while self
-            .current_byte()
-            .is_some_and(|byte| matches!(byte, b'\t' | b' ' | b'\n' | b'\r' | 0x0C))
-        {
+        while self.current_byte().is_some_and(is_css_whitespace_byte) {
             self.advance(1);
         }
     }
@@ -843,7 +831,7 @@ impl<'src> ScssStringScanner<'src> {
                         ));
                     }
                 }
-                WHS if is_newline_byte(byte) => {
+                WHS if is_css_newline_byte(byte) => {
                     let len = if byte == b'\r' && self.cursor.peek_byte() == Some(b'\n') {
                         2
                     } else {
@@ -1025,7 +1013,7 @@ impl<'src> UrlBodyScanner<'src> {
                         return false;
                     }
                 }
-                b'\t' | b' ' | b'\n' | b'\r' | 0x0C => {
+                _ if is_css_whitespace_byte(current) => {
                     self.cursor.skip_whitespace();
                     return self.cursor.current_byte() == Some(b')');
                 }
