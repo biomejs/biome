@@ -8,6 +8,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["src/**/*"]
 
 [dependencies]
 biome_formatter        = { workspace = true }
