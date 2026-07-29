@@ -1,6 +1,5 @@
 use std::rc::Rc;
 
-use crate::comments::CssCommentStyle;
 use crate::prelude::*;
 use crate::utils::case::{is_css_modules_import_export_declaration, is_supports_test_declaration};
 use crate::utils::comment_trivia::has_source_gap_before_token;
@@ -12,7 +11,7 @@ use biome_css_syntax::{
     CssSupportsFeatureDeclaration, TwPluginAtRule, is_css_horizontal_whitespace_byte,
     is_css_newline_byte,
 };
-use biome_formatter::comments::{CommentStyle, SourceComment};
+use biome_formatter::comments::SourceComment;
 use biome_formatter::trivia::format_dangling_comment;
 use biome_formatter::{format_args, write};
 use biome_rowan::{AstNodeList, SyntaxResult};
@@ -250,9 +249,7 @@ impl<'a> CssPropertyColonComments<'a> {
 
         if comment.lines_before() > 0 {
             if comment.kind().is_line() {
-                if !CssCommentStyle::is_suppression(comment.piece().text())
-                    && let Some(source_indent) = source_indent_before_comment(comment)
-                {
+                if let Some(source_indent) = source_indent_before_comment(comment) {
                     return write!(
                         f,
                         [dedent_to_root(&align(
