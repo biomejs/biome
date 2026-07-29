@@ -14,7 +14,7 @@ function getName(platform, arch, prefix = "cli") {
 	return format(`${prefix}-${platform}`, arch);
 }
 
-function copyBinaryToNativePackage(platform, arch) {
+function copyBinaryToNativePackage(platform, arch, binaryPlatform = platform) {
 	const os = platform.split("-")[0];
 	const buildName = getName(platform, arch);
 	const packageRoot = resolve(PACKAGES_ROOT, buildName);
@@ -52,7 +52,7 @@ function copyBinaryToNativePackage(platform, arch) {
 	const ext = os === "win32" ? ".exe" : "";
 	const binarySource = resolve(
 		REPO_ROOT,
-		`${getName(platform, arch, "biome")}${ext}`,
+		`${getName(binaryPlatform, arch, "biome")}${ext}`,
 	);
 	const binaryTarget = resolve(packageRoot, `biome${ext}`);
 
@@ -136,6 +136,12 @@ for (const platform of PLATFORMS) {
 	for (const arch of ARCHITECTURES) {
 		copyBinaryToNativePackage(platform, arch);
 	}
+}
+
+// The Android (Termux) packages have no dedicated build; they reuse the
+// static musl binaries, which run unmodified on Android.
+for (const arch of ARCHITECTURES) {
+	copyBinaryToNativePackage("android-%s", arch, "linux-%s-musl");
 }
 
 for (const jsPackage of JS_PACKAGES) {
