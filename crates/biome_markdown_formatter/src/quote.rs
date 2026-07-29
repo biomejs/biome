@@ -1,4 +1,5 @@
 use crate::bullet_list::FmtAnyList;
+use crate::context::ProseWrap;
 use crate::markdown::auxiliary::hard_line::FormatMdFormatHardLineOptions;
 use crate::markdown::auxiliary::inline_italic::FormatMdInlineItalicOptions;
 use crate::markdown::auxiliary::paragraph::FormatMdParagraphOptions;
@@ -101,6 +102,7 @@ impl Format<MarkdownFormatContext> for QuoteBlockList {
         f.context().comments().is_suppressed(self.content.syntax());
 
         let quote_trim_range = quote_boundary_trim_range(&self.content, self.quote_boundary_trim);
+        let prose_wrap = f.options().prose_wrap();
         let mut prev_content = PrevContentBlock::None;
         let mut iter = self.content.iter().enumerate().peekable();
         let mut joiner = f.join();
@@ -118,7 +120,11 @@ impl Format<MarkdownFormatContext> for QuoteBlockList {
                         joiner.entry(&QuoteParagraph { paragraph });
                     } else {
                         joiner.entry(&paragraph.format().with_options(FormatMdParagraphOptions {
-                            trim_mode: TextPrintMode::Pristine,
+                            trim_mode: if prose_wrap == ProseWrap::Preserve {
+                                TextPrintMode::Pristine
+                            } else {
+                                TextPrintMode::fill()
+                            },
                             text_context: TextContext::Neutral,
                         }));
                     }

@@ -272,6 +272,7 @@ dependencies = [
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_markdown_formatter",
  "biome_plugin_loader",
  "biome_resolver",
  "biome_rowan",
@@ -1422,6 +1423,8 @@ name = "biome_markdown_formatter"
 version = "0.0.1"
 dependencies = [
  "biome_configuration",
+ "biome_deserialize",
+ "biome_deserialize_macros",
  "biome_formatter",
  "biome_formatter_test",
  "biome_fs",

@@ -1,3 +1,4 @@
+use crate::context::ProseWrap;
 use crate::prelude::*;
 use biome_formatter::write;
 use biome_markdown_syntax::{
@@ -239,6 +240,29 @@ impl CodeSpanNormalization {
             0
         }
     }
+
+    fn replace_line_endings_with_spaces(text: &str) -> Cow<'_, str> {
+        if !text.contains(['\r', '\n']) {
+            return Cow::Borrowed(text);
+        }
+
+        let mut normalized = String::with_capacity(text.len());
+        let mut chars = text.chars().peekable();
+        while let Some(char) = chars.next() {
+            match char {
+                '\r' => {
+                    if chars.peek() == Some(&'\n') {
+                        chars.next();
+                    }
+                    normalized.push(' ');
+                }
+                '\n' => normalized.push(' '),
+                char => normalized.push(char),
+            }
+        }
+
+        Cow::Owned(normalized)
+    }
 }
 
 impl Format<MarkdownFormatContext> for CodeSpanNormalization {
@@ -248,21 +272,24 @@ impl Format<MarkdownFormatContext> for CodeSpanNormalization {
         }
 
         let last_index = self.textuals.len().saturating_sub(1);
+        let prose_wrap = f.options().prose_wrap();
 
         for (index, textual) in self.textuals.iter().enumerate() {
-            if !self.trim_boundaries || (index != 0 && index != last_index) {
+            if prose_wrap == ProseWrap::Preserve
+                && (!self.trim_boundaries || (index != 0 && index != last_index))
+            {
                 write!(f, [textual.format()])?;
                 continue;
             }
 
             let value_token = textual.value_token()?;
             let token_text = value_token.text();
-            let start = if index == 0 {
+            let start = if self.trim_boundaries && index == 0 {
                 Self::leading_space_or_line_ending_len(token_text)
             } else {
                 0
             };
-            let end = if index == last_index {
+            let end = if self.trim_boundaries && index == last_index {
                 token_text.len() - Self::trailing_space_or_line_ending_len(token_text)
             } else {
                 token_text.len()
@@ -274,8 +301,14 @@ impl Format<MarkdownFormatContext> for CodeSpanNormalization {
             if start == end {
                 format_removed(&value_token).fmt(f)?;
             } else {
+                let content = &token_text[start..end];
+                let content = if prose_wrap == ProseWrap::Preserve {
+                    Cow::Borrowed(content)
+                } else {
+                    Self::replace_line_endings_with_spaces(content)
+                };
                 let replacement = syntax_token_cow_slice(
-                    Cow::Borrowed(&token_text[start..end]),
+                    content,
                     &value_token,
                     value_token.text_range().start() + TextSize::from(start as u32),
                 )

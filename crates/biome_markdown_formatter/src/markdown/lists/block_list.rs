@@ -1,6 +1,8 @@
 use crate::bullet_list::FmtAnyList;
+use crate::context::ProseWrap;
 use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
 use crate::markdown::auxiliary::paragraph::FormatMdParagraphOptions;
+use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
 use crate::prelude::*;
 use crate::shared::{TextContext, TextPrintMode, format_removed_quote_boundary};
 use biome_formatter::FormatRuleWithOptions;
@@ -18,6 +20,7 @@ pub(crate) struct FormatMdBlockList {
 impl FormatRule<MdBlockList> for FormatMdBlockList {
     type Context = MarkdownFormatContext;
     fn fmt(&self, node: &MdBlockList, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        let prose_wrap = f.options().prose_wrap();
         let mut joiner = f.join();
 
         let text_context = if node
@@ -50,7 +53,11 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
                     AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph)) => {
                         prev_content = PrevContentBlock::Paragraph;
                         joiner.entry(&paragraph.format().with_options(FormatMdParagraphOptions {
-                            trim_mode: TextPrintMode::Pristine,
+                            trim_mode: if prose_wrap == ProseWrap::Preserve {
+                                TextPrintMode::Pristine
+                            } else {
+                                TextPrintMode::fill()
+                            },
                             text_context,
                         }));
                     }
@@ -71,6 +78,12 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
                             joiner.entry(&node.format());
                         }
                         prev_content = PrevContentBlock::Other;
+                    }
+
+                    AnyMdBlock::MdQuotePrefix(prefix) if prose_wrap != ProseWrap::Preserve => {
+                        joiner.entry(&prefix.format().with_options(FormatMdQuotePrefixOptions {
+                            should_remove: true,
+                        }));
                     }
 
                     AnyMdBlock::MdQuotePrefix(prefix)

@@ -1,6 +1,7 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline};
+use biome_markdown_formatter::context::ProseWrap;
 #[cfg(feature = "cli")]
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -68,4 +69,12 @@ pub struct MarkdownFormatterConfiguration {
     #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
+
+    /// Controls whether Biome keeps, adds, or removes line breaks in Markdown paragraphs.
+    ///
+    /// Manual line breaks are always kept. In Markdown, a manual line break is created by ending a
+    /// line with two spaces or a backslash.
+    #[cfg_attr(all(feature = "cli", feature = "lang_md"), bpaf(hide))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prose_wrap: Option<ProseWrap>,
 }
