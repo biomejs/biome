@@ -570,15 +570,9 @@ impl TypeData {
             AnyJsExpression::JsNewExpression(expr) => {
                 Self::from_js_new_expression(resolver, scope_id, expr).unwrap_or_default()
             }
-            AnyJsExpression::JsObjectExpression(expr) => Self::object_with_members(
-                expr.members()
-                    .into_iter()
-                    .flatten()
-                    .filter_map(|member| {
-                        TypeMember::from_any_js_object_member(resolver, scope_id, &member)
-                    })
-                    .collect(),
-            ),
+            AnyJsExpression::JsObjectExpression(expr) => {
+                Self::from_js_object_expression(resolver, scope_id, expr)
+            }
             AnyJsExpression::JsParenthesizedExpression(expr) => expr
                 .expression()
                 .map(|expr| resolver.resolve_expression(scope_id, &expr).into_owned())
@@ -1143,19 +1137,35 @@ impl TypeData {
         }))
     }
 
+    /// Infers the type of an object literal from the members it writes.
+    ///
+    /// Source members that inference cannot turn into a [`TypeMember`], such as
+    /// a spread, are left out of the result and recorded through
+    /// [`Object::has_unknown_members`] so callers can tell an object that is
+    /// missing a name from one that was only partially modelled.
     pub fn from_js_object_expression(
         resolver: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &JsObjectExpression,
     ) -> Self {
-        Self::object_with_members(
-            expr.members()
-                .into_iter()
-                .filter_map(|member| {
-                    TypeMember::from_any_js_object_member(resolver, scope_id, &member.ok()?)
-                })
-                .collect(),
-        )
+        let mut has_unknown_members = false;
+        let members = expr
+            .members()
+            .into_iter()
+            .filter_map(|member| {
+                let member = member.ok().and_then(|member| {
+                    TypeMember::from_any_js_object_member(resolver, scope_id, &member)
+                });
+                has_unknown_members |= member.is_none();
+                member
+            })
+            .collect();
+
+        Self::Object(Box::new(Object {
+            prototype: None,
+            members,
+            has_unknown_members,
+        }))
     }
 
     pub fn from_js_reference_identifier(scope_id: ScopeId, id: &JsReferenceIdentifier) -> Self {
@@ -1376,6 +1386,7 @@ impl TypeData {
         Self::Object(Box::new(Object {
             prototype: None,
             members,
+            has_unknown_members: false,
         }))
     }
 
@@ -3099,6 +3110,7 @@ fn apply_deep_const_inner(
                     ty: apply_deep_const_reference(resolver, &member.ty, depth + 1),
                 })
                 .collect(),
+            has_unknown_members: object.has_unknown_members,
         })),
         _ => inner_type,
     }

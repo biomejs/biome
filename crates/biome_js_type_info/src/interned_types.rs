@@ -1055,6 +1055,7 @@ impl<'db> TypeData<'db> {
                 db,
                 object.prototype.as_ref().map(&mut *resolve_reference),
                 convert_type_members(db, &object.members, resolve_reference),
+                object.has_unknown_members,
             )),
             raw::TypeData::Tuple(tuple) => Self::Tuple(InternedTuple::new(
                 db,
@@ -1231,6 +1232,7 @@ impl<'db> TypeData<'db> {
             Self::Object(object) => raw::TypeData::Object(Box::new(raw::Object {
                 prototype: self.raw_reference_from_option(db, object.prototype(db)),
                 members: raw_type_members_from_types(db, object.members(db)),
+                has_unknown_members: object.has_unknown_members(db),
             })),
             Self::Tuple(tuple) => raw::TypeData::Tuple(Box::new(raw::Tuple(
                 tuple
@@ -1673,6 +1675,7 @@ impl<'db> TypeDataSlotReplacements<'db> {
                 db,
                 self.take_optional_type(object.prototype(db))?,
                 self.rebuild_type_members(object.members(db))?,
+                object.has_unknown_members(db),
             )),
             TypeData::Tuple(tuple) => TypeData::Tuple(InternedTuple::new(
                 db,
@@ -2482,6 +2485,11 @@ pub struct InternedObject<'db> {
     pub prototype: Option<TypeData<'db>>,
     #[returns(ref)]
     pub members: Box<[TypeMember<'db>]>,
+
+    /// Whether the object may carry members beyond those in `members`.
+    ///
+    /// See [`crate::type_data::Object::has_unknown_members`].
+    pub has_unknown_members: bool,
 }
 
 #[salsa::interned]
@@ -3745,6 +3753,15 @@ mod tests {
                 &db,
                 Some(s.next()),
                 boxed([named_member(s)]),
+                false,
+            ))
+        });
+        assert_identity(&db, |s| {
+            TypeData::Object(InternedObject::new(
+                &db,
+                Some(s.next()),
+                boxed([named_member(s)]),
+                true,
             ))
         });
         assert_identity(&db, |s| {

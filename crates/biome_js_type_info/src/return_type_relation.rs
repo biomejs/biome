@@ -1043,6 +1043,7 @@ mod tests {
                 kind: TypeMemberKind::Named(text("value")),
                 ty,
             }]) as Box<[_]>,
+            false,
         ))
     }
 
@@ -1054,6 +1055,7 @@ mod tests {
                 kind: TypeMemberKind::IndexSignature(TypeData::String),
                 ty,
             }]) as Box<[_]>,
+            false,
         ))
     }
 

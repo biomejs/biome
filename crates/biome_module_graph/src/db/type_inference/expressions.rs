@@ -7,7 +7,9 @@ use super::{
     normalize_structural_type,
     resolver::ResolutionCtx,
 };
-use crate::db::queries::{ResolvedCallArgument, infer_call_expression_return_type_from_args};
+use crate::db::queries::{
+    ResolvedCallArgument, infer_call_expression_return_type_from_args, resolve_callable_function,
+};
 use biome_js_semantic::ScopeId;
 use biome_js_type_info::{
     CallArgumentType as RawCallArgumentType, DestructureField as RawDestructureField,
@@ -36,6 +38,7 @@ const MAX_PROMISE_UNWRAP_STEPS: usize = 64;
 const MAX_REST_MEMBER_STEPS: usize = 1024;
 const MAX_AWAIT_EXPRESSION_STEPS: usize = 1024;
 const MAX_CALL_CALLEE_STEPS: usize = 64;
+const MAX_ELEMENT_INDEX_STEPS: usize = 1024;
 
 /// `Promise.prototype` methods that receive synthesized signatures during
 /// member lookup, parsed from the member name.
@@ -785,7 +788,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
             }
 
-            let Some(parameter_function) = parameter_ty.callable_function(self.db) else {
+            let Some(parameter_function) = resolve_callable_function(self.db, parameter_ty) else {
                 continue;
             };
             let InferredReturnType::Type(parameter_return_ty) =
@@ -793,7 +796,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             else {
                 continue;
             };
-            let Some(argument_function) = arg.callable_function(self.db) else {
+            let Some(argument_function) = resolve_callable_function(self.db, *arg) else {
                 continue;
             };
             let InferredReturnType::Type(argument_return_ty) =
@@ -1552,78 +1555,107 @@ impl<'db> ResolutionCtx<'db, '_> {
         false
     }
 
+    /// Resolves the type held at a fixed index of `subject`.
+    ///
+    /// Each member of a union contributes the type it holds at that index, and
+    /// the contributions are collected into a union. A member that holds
+    /// nothing there, which includes `null` and `undefined`, contributes
+    /// nothing rather than discarding what the other members contributed. In
+    /// this example the result is `string | number`:
+    ///
+    /// ```ts
+    /// declare const rows: string[] | number[] | null;
+    /// rows?.[0];
+    /// ```
+    ///
+    /// The result is `None` when nothing contributes. Nesting deeper than the
+    /// work limit yields `Unknown`, because the unvisited members may hold any
+    /// type.
     fn resolve_element_type_at_index(
         &mut self,
         subject: InferredTypeData<'db>,
         index: usize,
     ) -> Option<InferredTypeData<'db>> {
-        match self.resolve_inferred_type(subject) {
-            InferredTypeData::Tuple(tuple) => {
-                let element = tuple.elements(self.db).get(index)?;
-                Some(self.optional_element_type(element.ty, element.is_optional || element.is_rest))
+        let mut seen = FxHashSet::default();
+        let mut pending = Vec::from([subject]);
+        let mut cursor = 0;
+        let mut remaining_steps = MAX_ELEMENT_INDEX_STEPS;
+        let mut types = Vec::new();
+
+        // Members are read in order so the collected union keeps the order the
+        // source wrote them in.
+        while cursor < pending.len() {
+            let subject = self.resolve_inferred_type(pending[cursor]);
+            cursor += 1;
+            if !seen.insert(subject) {
+                continue;
             }
-            InferredTypeData::InstanceOf(instance)
-                if self
-                    .resolve_inferred_type(instance.ty(self.db))
-                    .is_array_class(self.db) =>
-            {
-                instance
-                    .type_parameters(self.db)
-                    .first()
-                    .map(|ty| self.optional_element_type(*ty, true))
+            if remaining_steps == 0 {
+                return Some(InferredTypeData::Unknown);
             }
-            InferredTypeData::Union(union) => {
-                let mut types = Vec::new();
-                for ty in union.types(self.db) {
-                    if matches!(
-                        self.resolve_inferred_type(*ty),
-                        InferredTypeData::Null
-                            | InferredTypeData::Undefined
-                            | InferredTypeData::VoidKeyword
-                    ) {
-                        continue;
-                    }
-                    if let Some(element_ty) = self.resolve_element_type_at_index(*ty, index) {
+            remaining_steps -= 1;
+
+            match subject {
+                InferredTypeData::Tuple(tuple) => {
+                    if let Some(element) = tuple.elements(self.db).get(index) {
+                        let element_ty = self.optional_element_type(
+                            element.ty,
+                            element.is_optional || element.is_rest,
+                        );
                         types.push(element_ty);
                     }
                 }
-                collected_type_result(self.db, types)
+                InferredTypeData::InstanceOf(instance)
+                    if self
+                        .resolve_inferred_type(instance.ty(self.db))
+                        .is_array_class(self.db) =>
+                {
+                    if let Some(ty) = instance.type_parameters(self.db).first() {
+                        let element_ty = self.optional_element_type(*ty, true);
+                        types.push(element_ty);
+                    }
+                }
+                InferredTypeData::Union(union) => {
+                    pending.extend(union.types(self.db).iter().copied());
+                }
+                InferredTypeData::Unknown
+                | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
+                | InferredTypeData::BigInt
+                | InferredTypeData::Boolean
+                | InferredTypeData::Null
+                | InferredTypeData::Number
+                | InferredTypeData::String
+                | InferredTypeData::Symbol
+                | InferredTypeData::Undefined
+                | InferredTypeData::Conditional
+                | InferredTypeData::Class(_)
+                | InferredTypeData::Constructor(_)
+                | InferredTypeData::Function(_)
+                | InferredTypeData::Interface(_)
+                | InferredTypeData::Module(_)
+                | InferredTypeData::Namespace(_)
+                | InferredTypeData::Object(_)
+                | InferredTypeData::Generic(_)
+                | InferredTypeData::Local(_)
+                | InferredTypeData::Intersection(_)
+                | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::Literal(_)
+                | InferredTypeData::InstanceOf(_)
+                | InferredTypeData::MergedReference(_)
+                | InferredTypeData::TypeofExpression(_)
+                | InferredTypeData::TypeofType(_)
+                | InferredTypeData::TypeofValue(_)
+                | InferredTypeData::AnyKeyword
+                | InferredTypeData::NeverKeyword
+                | InferredTypeData::ObjectKeyword
+                | InferredTypeData::ThisKeyword
+                | InferredTypeData::UnknownKeyword
+                | InferredTypeData::VoidKeyword => {}
             }
-            InferredTypeData::Unknown
-            | InferredTypeData::Global
-            | InferredTypeData::GlobalType(_)
-            | InferredTypeData::BigInt
-            | InferredTypeData::Boolean
-            | InferredTypeData::Null
-            | InferredTypeData::Number
-            | InferredTypeData::String
-            | InferredTypeData::Symbol
-            | InferredTypeData::Undefined
-            | InferredTypeData::Conditional
-            | InferredTypeData::Class(_)
-            | InferredTypeData::Constructor(_)
-            | InferredTypeData::Function(_)
-            | InferredTypeData::Interface(_)
-            | InferredTypeData::Module(_)
-            | InferredTypeData::Namespace(_)
-            | InferredTypeData::Object(_)
-            | InferredTypeData::Generic(_)
-            | InferredTypeData::Local(_)
-            | InferredTypeData::Intersection(_)
-            | InferredTypeData::TypeOperator(_)
-            | InferredTypeData::Literal(_)
-            | InferredTypeData::InstanceOf(_)
-            | InferredTypeData::MergedReference(_)
-            | InferredTypeData::TypeofExpression(_)
-            | InferredTypeData::TypeofType(_)
-            | InferredTypeData::TypeofValue(_)
-            | InferredTypeData::AnyKeyword
-            | InferredTypeData::NeverKeyword
-            | InferredTypeData::ObjectKeyword
-            | InferredTypeData::ThisKeyword
-            | InferredTypeData::UnknownKeyword
-            | InferredTypeData::VoidKeyword => None,
         }
+
+        collected_type_result(self.db, types)
     }
 
     fn resolve_element_types_from_index(

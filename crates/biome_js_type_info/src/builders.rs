@@ -187,7 +187,12 @@ pub(crate) fn object_from_members<'db>(
     db: &'db dyn TypeDb,
     members: Vec<TypeMember<'db>>,
 ) -> TypeData<'db> {
-    TypeData::Object(InternedObject::new(db, None, members.into_boxed_slice()))
+    TypeData::Object(InternedObject::new(
+        db,
+        None,
+        members.into_boxed_slice(),
+        false,
+    ))
 }
 
 pub(crate) fn pick_members<'db>(
@@ -474,9 +479,12 @@ impl<'db> MergedType<'db> {
                 Path::from(Text::new_static("")),
             )),
             Self::Never => TypeData::NeverKeyword,
-            Self::Object(members) => {
-                TypeData::Object(InternedObject::new(db, None, members.into_boxed_slice()))
-            }
+            Self::Object(members) => TypeData::Object(InternedObject::new(
+                db,
+                None,
+                members.into_boxed_slice(),
+                false,
+            )),
             Self::Primitive(primitive) => primitive,
             Self::Unknown => TypeData::Unknown,
         }

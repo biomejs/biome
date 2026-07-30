@@ -676,12 +676,13 @@ fn test_infer_module_types_preserves_optional_chain_short_circuit_types_on_build
 
             export declare function getUsage(): Promise<Usage | null>;
             export declare function getLogs(): Promise<LogEntry[]>;
+            export declare function getRows(): Promise<string[] | null>;
         "#,
     );
     fs.insert(
         "/src/index.ts".into(),
         r#"
-            import { getLogs, getUsage } from "./data.ts";
+            import { getLogs, getRows, getUsage } from "./data.ts";
 
             export async function read() {
                 const usage = await getUsage();
@@ -692,7 +693,10 @@ fn test_infer_module_types_preserves_optional_chain_short_circuit_types_on_build
                 const [first] = logs;
                 const byDestructuring = first?.createdAt.toISOString();
 
-                return { startDate, byIndex, byDestructuring };
+                const rows = await getRows();
+                const byNullableIndex = rows?.[0];
+
+                return { startDate, byIndex, byDestructuring, byNullableIndex };
             }
         "#,
     );
@@ -703,7 +707,7 @@ fn test_infer_module_types_preserves_optional_chain_short_circuit_types_on_build
         .expect("module must exist");
     let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
 
-    for name in ["startDate", "byIndex", "byDestructuring"] {
+    for name in ["startDate", "byIndex", "byDestructuring", "byNullableIndex"] {
         let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
             .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
         let ty = inferred.resolve_type(&db, ty);

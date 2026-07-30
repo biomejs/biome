@@ -18,6 +18,7 @@ export interface LogEntry {
 
 export declare function getUsage(): Promise<Usage | null>;
 export declare function getLogs(): Promise<LogEntry[]>;
+export declare function getRows(): Promise<string[] | null>;
 ```
 
 ## Inferred types
@@ -72,6 +73,14 @@ Binding getLogs "getLogs" => sync Function "getLogs" {
   }
   returns: instanceof Promise<instanceof Array<instanceof LogEntry>>
 }
+
+Binding getRows "getRows" => sync Function "getRows" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof Array<string> | null>
+}
 ```
 
 # `/src/index.ts`
@@ -79,7 +88,7 @@ Binding getLogs "getLogs" => sync Function "getLogs" {
 ## Source
 
 ```ts
-import { getLogs, getUsage } from "./data.ts";
+import { getLogs, getRows, getUsage } from "./data.ts";
 
 export async function read() {
 	const usage = await getUsage();
@@ -90,7 +99,10 @@ export async function read() {
 	const [first] = logs;
 	const byDestructuring = first?.createdAt.toISOString();
 
-	return { startDate, byIndex, byDestructuring };
+	const rows = await getRows();
+	const byNullableIndex = rows?.[0];
+
+	return { startDate, byIndex, byDestructuring, byNullableIndex };
 }
 ```
 
@@ -103,6 +115,14 @@ Binding getLogs "getLogs" => sync Function "getLogs" {
     type_args: []
   }
   returns: instanceof Promise<instanceof Array<instanceof LogEntry>>
+}
+
+Binding getRows "getRows" => sync Function "getRows" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof Array<string> | null>
 }
 
 Binding getUsage "getUsage" => sync Function "getUsage" {
@@ -123,7 +143,8 @@ Binding read "read" => async Function "read" {
     members: [
       "startDate": typeof startDate,
       "byIndex": typeof byIndex,
-      "byDestructuring": typeof byDestructuring
+      "byDestructuring": typeof byDestructuring,
+      "byNullableIndex": typeof byNullableIndex
     ]
   }>
 }
@@ -215,12 +236,35 @@ Expression "first?.createdAt.toISOString" =>
 
 Expression "first?.createdAt.toISOString()" => string | undefined
 
-Expression "{ startDate, byIndex, byDestructuring }" => Object {
+Binding rows "rows" => instanceof Array<string> | null
+
+Expression "await getRows()" => instanceof Array<string> | null
+
+Expression "getRows" => sync Function "getRows" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof Array<string> | null>
+}
+
+Expression "getRows()" => instanceof Promise<instanceof Array<string> | null>
+
+Binding byNullableIndex "byNullableIndex" => string | undefined
+
+Expression "rows" => instanceof Array<string> | null
+
+Expression "rows?.[0]" => string | undefined
+
+Expression "0" => number: 0
+
+Expression "{ startDate, byIndex, byDestructuring, byNullableIndex }" => Object {
   prototype: No prototype
   members: [
     "startDate": typeof startDate,
     "byIndex": typeof byIndex,
-    "byDestructuring": typeof byDestructuring
+    "byDestructuring": typeof byDestructuring,
+    "byNullableIndex": typeof byNullableIndex
   ]
 }
 ```

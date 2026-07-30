@@ -180,6 +180,15 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for InternedObject<'db> {
                 write!(f, [token("No prototype")])
             }
         });
+        // Objects with a complete member list are the common case, so the
+        // marker is only printed when it carries information.
+        let unknown_members = format_with(|f| {
+            if self.has_unknown_members(db) {
+                write!(f, [token("unknown members"), hard_line_break()])
+            } else {
+                Ok(())
+            }
+        });
         write!(
             f,
             [&format_args![
@@ -187,6 +196,7 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for InternedObject<'db> {
                 space(),
                 token("{"),
                 &group(&block_indent(&format_args![
+                    unknown_members,
                     token("prototype:"),
                     space(),
                     prototype,

@@ -1,0 +1,159 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+interface Options {
+	initial?: string;
+}
+interface DefinedOptions extends Options {
+	initial: string;
+}
+
+declare function query(options: DefinedOptions): number;
+declare function query(options: Options): string;
+
+declare const defaults: DefinedOptions;
+
+export const fromSpread = query({ ...defaults });
+export const fromEmpty = query({});
+```
+
+## Inferred types
+
+```
+Binding Options "Options" => interface "Options" {
+  extends: []
+  type_args: []
+  members: ["initial"?: string | undefined]
+}
+
+Binding DefinedOptions "DefinedOptions" => interface "DefinedOptions" {
+  extends: [instanceof Options]
+  type_args: []
+  members: ["initial": string]
+}
+
+Binding query "query" => sync Function "query" {
+  accepts: {
+    params: [
+      required options: instanceof DefinedOptions
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Binding options "options" => instanceof DefinedOptions
+
+Binding query "query" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "query" {
+        accepts: {
+          params: [
+            required options: instanceof DefinedOptions
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "query" {
+        accepts: {
+          params: [
+            required options: instanceof Options
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Binding options "options" => instanceof Options
+
+Binding defaults "defaults" => instanceof DefinedOptions
+
+Binding fromSpread "fromSpread" => number
+
+Expression "query" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "query" {
+        accepts: {
+          params: [
+            required options: instanceof DefinedOptions
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "query" {
+        accepts: {
+          params: [
+            required options: instanceof Options
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Expression "query({ ...defaults })" => number
+
+Expression "{ ...defaults }" => Object {
+  unknown members
+  prototype: No prototype
+  members: []
+}
+
+Expression "defaults" => instanceof DefinedOptions
+
+Binding fromEmpty "fromEmpty" => string
+
+Expression "query" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "query" {
+        accepts: {
+          params: [
+            required options: instanceof DefinedOptions
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "query" {
+        accepts: {
+          params: [
+            required options: instanceof Options
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Expression "query({})" => string
+
+Expression "{}" => Object {
+  prototype: No prototype
+  members: []
+}
+```
