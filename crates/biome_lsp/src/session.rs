@@ -157,6 +157,66 @@ pub(crate) struct Session {
     /// Cached configuration status per base path to avoid reloading on every request.
     configuration_status_by_path:
         TokioRwLock<FxHashMap<ConfigurationCacheKey, ConfigurationStatus>>,
+
+    /// Dynamic capabilities already registered with the client (id -> method + options).
+    registered_dynamic_capabilities: RwLock<FxHashMap<String, RegisteredDynamicCapability>>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct RegisteredDynamicCapability {
+    method: String,
+    register_options: Option<Value>,
+}
+
+fn diff_capability_registrations(
+    capabilities: CapabilitySet,
+    registered: &FxHashMap<String, RegisteredDynamicCapability>,
+) -> (
+    Vec<Unregistration>,
+    Vec<Registration>,
+    FxHashMap<String, RegisteredDynamicCapability>,
+) {
+    let mut unregistrations = Vec::new();
+    let mut registrations = Vec::new();
+    let mut next_registered = registered.clone();
+
+    for (id, (method, status)) in capabilities.registry {
+        let id_string = id.to_string();
+        match status {
+            CapabilityStatus::Enable(register_options) => {
+                let entry = RegisteredDynamicCapability {
+                    method: method.to_string(),
+                    register_options,
+                };
+                if registered.get(&id_string) == Some(&entry) {
+                    continue;
+                }
+                if registered.contains_key(&id_string) {
+                    unregistrations.push(Unregistration {
+                        id: id_string.clone(),
+                        method: method.to_string(),
+                    });
+                }
+                registrations.push(Registration {
+                    id: id_string.clone(),
+                    method: method.to_string(),
+                    register_options: entry.register_options.clone(),
+                });
+                next_registered.insert(id_string, entry);
+            }
+            CapabilityStatus::Disable => {
+                if registered.contains_key(&id_string) {
+                    next_registered.remove(&id_string);
+                    unregistrations.push(Unregistration {
+                        id: id_string,
+                        method: method.to_string(),
+                    });
+                }
+            }
+        }
+    }
+
+    (unregistrations, registrations, next_registered)
 }
 
 /// The parameters provided by the client in the "initialize" request
@@ -274,6 +334,7 @@ impl Session {
             loading_operations: Default::default(),
             configuration_status_by_path: Default::default(),
             workspace_folders: Default::default(),
+            registered_dynamic_capabilities: Default::default(),
         }
     }
 
@@ -361,53 +422,51 @@ impl Session {
 
     /// Register a set of capabilities with the client
     pub(crate) async fn register_capabilities(&self, capabilities: CapabilitySet) {
-        let mut registrations = Vec::new();
-        let mut unregistrations = Vec::new();
+        let registered = self.registered_dynamic_capabilities.read().clone();
+        let (unregistrations, registrations, next_registered) =
+            diff_capability_registrations(capabilities, &registered);
 
-        let mut register_methods = String::new();
+        if unregistrations.is_empty() && registrations.is_empty() {
+            return;
+        }
+
         let mut unregister_methods = String::new();
+        let mut register_methods = String::new();
 
-        for (id, (method, status)) in capabilities.registry {
-            unregistrations.push(Unregistration {
-                id: id.to_string(),
-                method: method.to_string(),
-            });
-
+        for unregistration in &unregistrations {
             if !unregister_methods.is_empty() {
                 unregister_methods.push_str(", ");
             }
-
-            unregister_methods.push_str(method);
-
-            if let CapabilityStatus::Enable(register_options) = status {
-                registrations.push(Registration {
-                    id: id.to_string(),
-                    method: method.to_string(),
-                    register_options,
-                });
-
-                if !register_methods.is_empty() {
-                    register_methods.push_str(", ");
-                }
-
-                register_methods.push_str(method);
-            }
+            unregister_methods.push_str(&unregistration.method);
         }
 
-        if let Err(e) = self.client.unregister_capability(unregistrations).await {
-            error!(
-                "Error unregistering {unregister_methods:?} capabilities: {}",
-                e
-            );
-        } else {
+        for registration in &registrations {
+            if !register_methods.is_empty() {
+                register_methods.push_str(", ");
+            }
+            register_methods.push_str(&registration.method);
+        }
+
+        if !unregistrations.is_empty() {
+            if let Err(e) = self.client.unregister_capability(unregistrations).await {
+                error!(
+                    "Error unregistering {unregister_methods:?} capabilities: {}",
+                    e
+                );
+                return;
+            }
             info!("Unregister capabilities {unregister_methods:?}");
         }
 
-        if let Err(e) = self.client.register_capability(registrations).await {
-            error!("Error registering {register_methods:?} capabilities: {}", e);
-        } else {
+        if !registrations.is_empty() {
+            if let Err(e) = self.client.register_capability(registrations).await {
+                error!("Error registering {register_methods:?} capabilities: {}", e);
+                return;
+            }
             info!("Register capabilities {register_methods:?}");
         }
+
+        *self.registered_dynamic_capabilities.write() = next_registered;
     }
 
     /// Returns the key for the project that should be used for a given path.
@@ -1660,5 +1719,77 @@ mod tests {
             .expect("expected a project match");
 
         assert_eq!(selected, nested_key);
+    }
+
+    #[test]
+    fn diff_capability_registrations_skips_unregister_on_first_register() {
+        let mut capabilities = CapabilitySet::default();
+        capabilities.add_capability(
+            "biome_formatting",
+            "textDocument/formatting",
+            CapabilityStatus::Enable(None),
+        );
+
+        let (unregistrations, registrations, next_registered) =
+            diff_capability_registrations(capabilities, &FxHashMap::default());
+
+        assert!(unregistrations.is_empty());
+        assert_eq!(registrations.len(), 1);
+        assert_eq!(registrations[0].id, "biome_formatting");
+        assert_eq!(next_registered.len(), 1);
+    }
+
+    #[test]
+    fn diff_capability_registrations_skips_noop_refresh() {
+        let mut capabilities = CapabilitySet::default();
+        capabilities.add_capability(
+            "biome_formatting",
+            "textDocument/formatting",
+            CapabilityStatus::Enable(None),
+        );
+
+        let registered = FxHashMap::from_iter([
+            (
+                "biome_formatting".to_string(),
+                RegisteredDynamicCapability {
+                    method: "textDocument/formatting".to_string(),
+                    register_options: None,
+                },
+            ),
+        ]);
+
+        let (unregistrations, registrations, next_registered) =
+            diff_capability_registrations(capabilities, &registered);
+
+        assert!(unregistrations.is_empty());
+        assert!(registrations.is_empty());
+        assert_eq!(next_registered, registered);
+    }
+
+    #[test]
+    fn diff_capability_registrations_unregisters_on_disable() {
+        let mut capabilities = CapabilitySet::default();
+        capabilities.add_capability(
+            "biome_formatting",
+            "textDocument/formatting",
+            CapabilityStatus::Disable,
+        );
+
+        let registered = FxHashMap::from_iter([
+            (
+                "biome_formatting".to_string(),
+                RegisteredDynamicCapability {
+                    method: "textDocument/formatting".to_string(),
+                    register_options: None,
+                },
+            ),
+        ]);
+
+        let (unregistrations, registrations, next_registered) =
+            diff_capability_registrations(capabilities, &registered);
+
+        assert_eq!(unregistrations.len(), 1);
+        assert!(registrations.is_empty());
+        assert!(next_registered.is_empty());
     }
 }
