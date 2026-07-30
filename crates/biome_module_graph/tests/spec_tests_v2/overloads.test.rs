@@ -61,9 +61,11 @@ fn test_infer_module_types_keeps_overloads_viable_for_partially_modelled_argumen
             declare function query(options: Options): string;
 
             declare const defaults: DefinedOptions;
+            declare function tag<T>(value: T): T & { tagged: true };
 
             export const fromSpread = query({ ...defaults });
             export const fromEmpty = query({});
+            export const fromIntersection = query(tag({ ...defaults }));
         "#,
     );
 
@@ -89,6 +91,16 @@ fn test_infer_module_types_keeps_overloads_viable_for_partially_modelled_argumen
     assert!(is_inferred_string(
         &db,
         inferred.resolve_type(&db, from_empty_ty)
+    ));
+
+    // Intersecting the spread carries the missing members into the result, so
+    // the first overload stays viable there too.
+    let from_intersection_ty =
+        inferred_binding_ty_by_name(&db, index_module, inferred, "fromIntersection")
+            .expect("fromIntersection binding type must be inferred");
+    assert!(is_inferred_number(
+        &db,
+        inferred.resolve_type(&db, from_intersection_ty)
     ));
 
     assert_inferred_type_snapshot(

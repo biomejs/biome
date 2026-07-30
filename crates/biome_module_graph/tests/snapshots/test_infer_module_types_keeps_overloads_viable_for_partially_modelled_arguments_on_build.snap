@@ -19,9 +19,11 @@ declare function query(options: DefinedOptions): number;
 declare function query(options: Options): string;
 
 declare const defaults: DefinedOptions;
+declare function tag<T>(value: T): T & { tagged: true };
 
 export const fromSpread = query({ ...defaults });
 export const fromEmpty = query({});
+export const fromIntersection = query(tag({ ...defaults }));
 ```
 
 ## Inferred types
@@ -81,6 +83,24 @@ Binding query "query" => Object {
 Binding options "options" => instanceof Options
 
 Binding defaults "defaults" => instanceof DefinedOptions
+
+Binding tag "tag" => sync Function "tag" {
+  accepts: {
+    params: [
+      required value: instanceof T
+    ]
+    type_args: [T]
+  }
+  returns: instanceof T
+  & Object {
+    prototype: No prototype
+    members: ["tagged": bool: true]
+  }
+}
+
+Binding T "T" => T
+
+Binding value "value" => instanceof T
 
 Binding fromSpread "fromSpread" => number
 
@@ -156,4 +176,63 @@ Expression "{}" => Object {
   prototype: No prototype
   members: []
 }
+
+Binding fromIntersection "fromIntersection" => number
+
+Expression "query" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "query" {
+        accepts: {
+          params: [
+            required options: instanceof DefinedOptions
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "query" {
+        accepts: {
+          params: [
+            required options: instanceof Options
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Expression "query(tag({ ...defaults }))" => number
+
+Expression "tag" => sync Function "tag" {
+  accepts: {
+    params: [
+      required value: instanceof T
+    ]
+    type_args: [T]
+  }
+  returns: instanceof T
+  & Object {
+    prototype: No prototype
+    members: ["tagged": bool: true]
+  }
+}
+
+Expression "tag({ ...defaults })" => Object {
+  unknown members
+  prototype: No prototype
+  members: ["tagged": bool: true]
+}
+
+Expression "{ ...defaults }" => Object {
+  unknown members
+  prototype: No prototype
+  members: []
+}
+
+Expression "defaults" => instanceof DefinedOptions
 ```
