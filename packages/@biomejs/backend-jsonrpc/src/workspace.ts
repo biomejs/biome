@@ -13,7 +13,7 @@ export interface SupportsFeatureParams {
 }
 export type FeatureName = FeatureKind[];
 /**
- * The configuration that is contained inside the file `biome.json`
+ * The configuration contained in `biome.json`.
  */
 export interface Configuration {
 	/**
@@ -21,11 +21,11 @@ export interface Configuration {
 	 */
 	$schema?: Schema;
 	/**
-	 * Specific configuration for assists
+	 * The assist configuration.
 	 */
 	assist?: AssistConfiguration;
 	/**
-	 * Specific configuration for the Css language
+	 * Configuration specific to CSS.
 	 */
 	css?: CssConfiguration;
 	/**
@@ -33,39 +33,39 @@ export interface Configuration {
 	 */
 	extends?: Extends;
 	/**
-	 * The configuration of the filesystem
+	 * The file handling configuration.
 	 */
 	files?: FilesConfiguration;
 	/**
-	 * The configuration of the formatter
+	 * The formatter configuration.
 	 */
 	formatter?: FormatterConfiguration;
 	/**
-	 * Specific configuration for the GraphQL language
+	 * Configuration specific to GraphQL.
 	 */
 	graphql?: GraphqlConfiguration;
 	/**
-	 * Specific configuration for the GraphQL language
+	 * Configuration specific to GritQL.
 	 */
 	grit?: GritConfiguration;
 	/**
-	 * Specific configuration for the HTML language
+	 * Configuration specific to HTML.
 	 */
 	html?: HtmlConfiguration;
 	/**
-	 * Specific configuration for the JavaScript language
+	 * Configuration specific to JavaScript.
 	 */
 	javascript?: JsConfiguration;
 	/**
-	 * Specific configuration for the Json language
+	 * Configuration specific to JSON.
 	 */
 	json?: JsonConfiguration;
 	/**
-	 * The configuration for the linter
+	 * The linter configuration.
 	 */
 	linter?: LinterConfiguration;
 	/**
-	 * A list of granular patterns that should be applied only to a sub set of files
+	 * A list of granular patterns applied only to a subset of files.
 	 */
 	overrides?: Overrides;
 	/**
@@ -78,7 +78,7 @@ project. By default, this is `true`.
 	 */
 	root?: Bool;
 	/**
-	 * The configuration of the VCS integration
+	 * The version control integration configuration.
 	 */
 	vcs?: VcsConfiguration;
 }
@@ -108,33 +108,33 @@ match these patterns.
 	includes?: NormalizedGlob[];
 }
 /**
- * Options applied to CSS files
+ * Options applied to CSS files.
  */
 export interface CssConfiguration {
 	/**
-	 * CSS assist options
+	 * CSS assist options.
 	 */
 	assist?: CssAssistConfiguration;
 	/**
-	 * CSS formatter options
+	 * CSS formatter options.
 	 */
 	formatter?: CssFormatterConfiguration;
 	/**
-	 * CSS globals
+	 * CSS globals.
 	 */
 	globals?: string[];
 	/**
-	 * CSS linter options
+	 * CSS linter options.
 	 */
 	linter?: CssLinterConfiguration;
 	/**
-	 * CSS parsing options
+	 * CSS parsing options.
 	 */
 	parser?: CssParserConfiguration;
 }
 export type Extends = string[] | string;
 /**
- * The configuration of the filesystem
+ * The file handling configuration.
  */
 export interface FilesConfiguration {
 	/**
@@ -146,17 +146,16 @@ Biome's scanner.
 	 */
 	experimentalScannerIgnores?: string[];
 	/**
-	 * Tells Biome to not emit diagnostics when handling files that it doesn't know
+	 * Prevents Biome from emitting diagnostics for unrecognized file types.
 	 */
 	ignoreUnknown?: Bool;
 	/**
-	* A list of glob patterns. Biome will handle only those files/folders that will
-match these patterns. 
+	* A list of glob patterns. Biome handles only files and directories that match these
+patterns. 
 	 */
 	includes?: NormalizedGlob[];
 	/**
-	* The maximum allowed size for source code files in bytes. Files above
-this limit will be ignored for performance reasons. Defaults to 1 MiB 
+	 * The maximum source file size in bytes. Biome ignores larger files. Defaults to `1 MiB`.
 	 */
 	maxSize?: MaxSize;
 }
@@ -165,38 +164,43 @@ this limit will be ignored for performance reasons. Defaults to 1 MiB
  */
 export interface FormatterConfiguration {
 	/**
-	 * The attribute position style in HTML-ish languages. Defaults to auto.
+	 * The attribute position style in HTML-like languages. Defaults to `auto`.
 	 */
 	attributePosition?: AttributePosition;
 	/**
-	 * Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+	* Places the `>` of a multiline HTML or JSX element at the end of the last line instead of on
+the next line. Self-closing elements are unaffected. Defaults to `false`. 
 	 */
 	bracketSameLine?: BracketSameLine;
 	/**
-	 * Whether to insert spaces around brackets in object literals. Defaults to true.
+	 * Whether to insert spaces inside braces in object literals. Defaults to `true`.
 	 */
 	bracketSpacing?: BracketSpacing;
 	/**
-	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
-closing delimiter), such as parentheses, brackets, angle brackets, and template literal
-interpolations. Spaces are not added before the opening delimiter, and empty delimiters
-are not affected. Only applies when the content fits on a single line. The specific
-delimiters affected depend on the language. Defaults to false. 
+	* Controls spaces immediately inside supported delimiters when their content fits on one line.
+It doesn't add spaces before opening delimiters or inside empty delimiters.
+
+The affected delimiters vary by language. Defaults to `false`. 
 	 */
 	delimiterSpacing?: DelimiterSpacing;
 	enabled?: Bool;
 	/**
-	* Whether to expand arrays and objects on multiple lines.
-When set to `auto`, object literals are formatted on multiple lines if the first property has a newline,
-and array literals are formatted on a single line if it fits in the line.
-When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
-When set to `never`, these literals are formatted on a single line if it fits in the line.
-When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto". 
+	* Controls whether arrays and objects are formatted on one line or multiple lines.
+
+`auto` formats objects on multiple lines if the first property has a newline, and arrays on
+one line if they fit.
+
+`always` formats arrays and objects on multiple lines.
+
+`never` formats arrays and objects on one line if they fit.
+
+Defaults to `auto`.
+
+When formatting `package.json`, Biome uses `always` unless configured otherwise. 
 	 */
 	expand?: Expand;
 	/**
-	* Whether formatting should be allowed to proceed if a given file
-has syntax errors 
+	 * Allows formatting files that contain syntax errors when set to `true`. Defaults to `false`.
 	 */
 	formatWithErrors?: Bool;
 	/**
@@ -205,92 +209,88 @@ match these patterns.
 	 */
 	includes?: NormalizedGlob[];
 	/**
-	 * The indent style.
+	 * Uses tabs or spaces for indentation. Defaults to `tab`.
 	 */
 	indentStyle?: IndentStyle;
 	/**
-	 * The size of the indentation, 2 by default
+	 * The indentation width. Defaults to `2`.
 	 */
 	indentWidth?: IndentWidth;
 	/**
-	 * The type of line ending.
+	 * Selects the line ending. `auto` uses the platform convention. Defaults to `lf`.
 	 */
 	lineEnding?: LineEnding;
 	/**
-	 * What's the max width of a line. Defaults to 80.
+	 * The maximum line width. Defaults to `80`.
 	 */
 	lineWidth?: LineWidth;
 	/**
-	* Whether to add a trailing newline at the end of the file.
-
-Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-- https://thoughtbot.com/blog/no-newline-at-end-of-file
-- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
-- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
-
-Disable the option at your own risk.
-
-Defaults to true. 
+	* Whether to add a trailing newline at the end of the file. Defaults to `true`; disabling
+this option can cause compatibility problems with other tools. 
 	 */
 	trailingNewline?: TrailingNewline;
 	/**
-	* Use any `.editorconfig` files to configure the formatter. Configuration
-in `biome.json` will override `.editorconfig` configuration.
-
-Default: `false`. 
+	* Uses `.editorconfig` files to configure the formatter. Settings in `biome.json` or
+`biome.jsonc` override `.editorconfig` settings. Defaults to `false`. 
 	 */
 	useEditorconfig?: Bool;
 }
 /**
- * Options applied to GraphQL files
+ * Options applied to GraphQL files.
  */
 export interface GraphqlConfiguration {
 	/**
-	 * Assist options
+	 * GraphQL assist options.
 	 */
 	assist?: GraphqlAssistConfiguration;
 	/**
-	 * GraphQL formatter options
+	 * GraphQL formatter options.
 	 */
 	formatter?: GraphqlFormatterConfiguration;
+	/**
+	 * GraphQL linter options.
+	 */
 	linter?: GraphqlLinterConfiguration;
 }
 /**
- * Options applied to GritQL files
+ * Options applied to GritQL files.
  */
 export interface GritConfiguration {
 	/**
-	 * Assist options
+	 * GritQL assist options.
 	 */
 	assist?: GritAssistConfiguration;
 	/**
-	 * Formatting options
+	 * GritQL formatter options.
 	 */
 	formatter?: GritFormatterConfiguration;
 	/**
-	 * Formatting options
+	 * GritQL linter options.
 	 */
 	linter?: GritLinterConfiguration;
 }
 /**
- * Options applied to HTML files
+ * Options applied to HTML files.
  */
 export interface HtmlConfiguration {
+	/**
+	 * HTML assist options.
+	 */
 	assist?: HtmlAssistConfiguration;
 	/**
-	 * Enables full support for HTML, Vue, Svelte and Astro files.
+	 * Enables full support for HTML, Vue, Svelte, and Astro files.
 	 */
 	experimentalFullSupportEnabled?: Bool;
 	/**
-	 * HTML formatter options
+	 * HTML formatter options.
 	 */
 	formatter?: HtmlFormatterConfiguration;
 	/**
-	 * HTML linter options
+	 * HTML linter options.
 	 */
 	linter?: HtmlLinterConfiguration;
 	/**
-	 * HTML parsing options
+	 * HTML parsing options.
 	 */
 	parser?: HtmlParserConfiguration;
 }
@@ -377,33 +377,34 @@ export type Overrides = OverridePattern[];
 export type Plugins = PluginConfiguration[];
 export type Bool = boolean;
 /**
- * Set of properties to integrate Biome with a VCS software.
+ * Settings for integrating Biome with version control.
  */
 export interface VcsConfiguration {
 	/**
-	 * The kind of client.
+	 * The version control client.
 	 */
 	clientKind?: VcsClientKind;
 	/**
-	 * The main branch of the project
+	 * The project's default branch.
 	 */
 	defaultBranch?: string;
 	/**
-	 * Whether Biome should integrate itself with the VCS client
+	 * Whether Biome should integrate with the version control client.
 	 */
 	enabled?: Bool;
 	/**
-	* The folder where Biome should check for VCS files. By default, Biome will use the same
-folder where `biome.json` was found.
+	* Sets the directory where Biome checks for version control files.
 
-If Biome can't find the configuration, it will attempt to use the current working directory.
-If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic
-will be emitted 
+Defaults to the directory containing `biome.json` or `biome.jsonc`. If no configuration is
+found, Biome uses the current working directory.
+
+If neither directory is available, Biome disables version control integration and emits a
+diagnostic. 
 	 */
 	root?: string;
 	/**
-	* Whether Biome should use VCS ignore files. When [true], Biome will ignore files
-specified in `.gitignore`, `.ignore`, and Git's local exclude file. 
+	* When `true`, Biome ignores files listed in `.gitignore`, `.ignore`, and Git's local
+exclude file. 
 	 */
 	useIgnoreFile?: Bool;
 }
@@ -423,82 +424,79 @@ export interface Actions {
  */
 export type NormalizedGlob = string;
 /**
- * Options that changes how the CSS assist behaves
+ * Options that change how CSS assist behaves.
  */
 export interface CssAssistConfiguration {
 	/**
-	 * Control the assist for CSS files.
+	 * Controls assist actions for CSS files.
 	 */
 	enabled?: Bool;
 }
 /**
- * Options that changes how the CSS formatter behaves
+ * Options that change how the CSS formatter behaves.
  */
 export interface CssFormatterConfiguration {
 	/**
-	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
-closing delimiter). Only applies when the content fits on a single line, and empty
-delimiters are not affected. For CSS, affects parentheses (e.g., `rgb( 0, 0, 0 )`) and
-square brackets (e.g., `[ data-attr ]`). Defaults to false. 
+	* Controls spaces inside CSS parentheses and square brackets when their content fits on one
+line. When enabled, `rgb(0, 0, 0)` becomes `rgb( 0, 0, 0 )` and `[data-attr]` becomes
+`[ data-attr ]`. Empty delimiters are unchanged.
+
+If unset, inherits the global delimiter spacing setting. 
 	 */
 	delimiterSpacing?: DelimiterSpacing;
 	/**
-	 * Control the formatter for CSS (and its super languages) files.
+	 * Controls the formatter for CSS and languages that extend it.
 	 */
 	enabled?: Bool;
 	/**
-	 * The indent style applied to CSS (and its super languages) files.
+	* The indent style applied to CSS and languages that extend it. If unset, inherits the global
+indentation style. 
 	 */
 	indentStyle?: IndentStyle;
 	/**
-	 * The size of the indentation applied to CSS (and its super languages) files. Default to 2.
+	* The indentation width applied to CSS and languages that extend it. If unset, inherits the
+global indentation width. 
 	 */
 	indentWidth?: IndentWidth;
 	/**
-	 * The type of line ending applied to CSS (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
+	* The line ending applied to CSS and languages that extend it. If unset, inherits the global
+line ending. 
 	 */
 	lineEnding?: LineEnding;
 	/**
-	 * What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.
+	* The maximum line width for CSS and languages that extend it. If unset, inherits the global
+line width. 
 	 */
 	lineWidth?: LineWidth;
 	/**
-	 * The type of quotes used in CSS code. Defaults to double.
+	 * The type of quotes used in CSS code. Defaults to `double`.
 	 */
 	quoteStyle?: QuoteStyle;
 	/**
-	* Whether to add a trailing newline at the end of the file.
-
-Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-- https://thoughtbot.com/blog/no-newline-at-end-of-file
-- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
-- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
-
-Disable the option at your own risk.
-
-Defaults to true. 
+	* Whether to add a trailing newline at the end of the file. If unset, inherits the global
+trailing newline setting. 
 	 */
 	trailingNewline?: TrailingNewline;
 }
 /**
- * Options that changes how the CSS linter behaves
+ * Options that change how the CSS linter behaves.
  */
 export interface CssLinterConfiguration {
 	/**
-	 * Control the linter for CSS files.
+	 * Controls the linter for CSS files.
 	 */
 	enabled?: Bool;
 }
 /**
- * Options that changes how the CSS parser behaves
+ * Options that change how the CSS parser behaves.
  */
 export interface CssParserConfiguration {
 	/**
-	 * Allow comments to appear on incorrect lines in `.css` files
+	 * Allows comments to appear on incorrect lines in `.css` files.
 	 */
 	allowWrongLineComments?: Bool;
 	/**
-	* Enables parsing of CSS Modules specific features. Enable this feature only
+	* Enables parsing of CSS Modules-specific features. Enable this feature only
 when your files don't end in `.module.css`. 
 	 */
 	cssModules?: Bool;
@@ -534,57 +532,51 @@ The allowed range of values is 1..=320
 export type LineWidth = number;
 export type TrailingNewline = boolean;
 /**
- * Options that changes how the GraphQL linter behaves
+ * Options that change how GraphQL assist behaves.
  */
 export interface GraphqlAssistConfiguration {
 	/**
-	 * Control the formatter for GraphQL files.
+	 * Controls assist actions for GraphQL files.
 	 */
 	enabled?: Bool;
 }
 /**
- * Options that changes how the GraphQL formatter behaves
+ * Options that change how the GraphQL formatter behaves.
  */
 export interface GraphqlFormatterConfiguration {
 	/**
-	 * Whether to insert spaces around brackets in object literals. Defaults to true.
+	* Whether to insert spaces inside braces in object literals. If unset, inherits the global
+bracket spacing setting. 
 	 */
 	bracketSpacing?: BracketSpacing;
 	/**
-	 * Control the formatter for GraphQL files.
+	 * Controls the formatter for GraphQL files.
 	 */
 	enabled?: Bool;
 	/**
-	 * The indent style applied to GraphQL files.
+	 * The indent style applied to GraphQL files. If unset, inherits the global indentation style.
 	 */
 	indentStyle?: IndentStyle;
 	/**
-	 * The size of the indentation applied to GraphQL files. Default to 2.
+	* The indentation width applied to GraphQL files. If unset, inherits the global indentation
+width. 
 	 */
 	indentWidth?: IndentWidth;
 	/**
-	 * The type of line ending applied to GraphQL files. `auto` uses CRLF on Windows and LF on other platforms.
+	 * The line ending applied to GraphQL files. If unset, inherits the global line ending.
 	 */
 	lineEnding?: LineEnding;
 	/**
-	 * What's the max width of a line applied to GraphQL files. Defaults to 80.
+	 * The maximum line width for GraphQL files. If unset, inherits the global line width.
 	 */
 	lineWidth?: LineWidth;
 	/**
-	 * The type of quotes used in GraphQL code. Defaults to double.
+	 * The type of quotes used in GraphQL code. Defaults to `double`.
 	 */
 	quoteStyle?: QuoteStyle;
 	/**
-	* Whether to add a trailing newline at the end of the file.
-
-Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-- https://thoughtbot.com/blog/no-newline-at-end-of-file
-- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
-- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
-
-Disable the option at your own risk.
-
-Defaults to true. 
+	* Whether to add a trailing newline at the end of the file. If unset, inherits the global
+trailing newline setting. 
 	 */
 	trailingNewline?: TrailingNewline;
 }
@@ -593,143 +585,147 @@ Defaults to true.
  */
 export interface GraphqlLinterConfiguration {
 	/**
-	 * Control the formatter for GraphQL files.
-	 */
-	enabled?: Bool;
-}
-export interface GritAssistConfiguration {
-	/**
-	 * Control the assist functionality for Grit files.
-	 */
-	enabled?: Bool;
-}
-export interface GritFormatterConfiguration {
-	/**
-	 * Control the formatter for Grit files.
-	 */
-	enabled?: Bool;
-	/**
-	 * The indent style applied to Grit files.
-	 */
-	indentStyle?: IndentStyle;
-	/**
-	 * The size of the indentation applied to Grit files. Default to 2.
-	 */
-	indentWidth?: IndentWidth;
-	/**
-	 * The type of line ending applied to Grit files.
-	 */
-	lineEnding?: LineEnding;
-	/**
-	 * What's the max width of a line applied to Grit files. Defaults to 80.
-	 */
-	lineWidth?: LineWidth;
-	/**
-	* Whether to add a trailing newline at the end of the file.
-
-Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-- https://thoughtbot.com/blog/no-newline-at-end-of-file
-- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
-- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
-
-Disable the option at your own risk.
-
-Defaults to true. 
-	 */
-	trailingNewline?: TrailingNewline;
-}
-export interface GritLinterConfiguration {
-	/**
-	 * Control the linter for Grit files.
+	 * Controls the linter for GraphQL files.
 	 */
 	enabled?: Bool;
 }
 /**
- * Options that changes how the HTML assist behaves
+ * Options that change how GritQL assist behaves.
+ */
+export interface GritAssistConfiguration {
+	/**
+	 * Controls assist actions for GritQL files.
+	 */
+	enabled?: Bool;
+}
+/**
+ * Options that change how the GritQL formatter behaves.
+ */
+export interface GritFormatterConfiguration {
+	/**
+	 * Controls the formatter for GritQL files.
+	 */
+	enabled?: Bool;
+	/**
+	 * The indent style applied to GritQL files. If unset, inherits the global indentation style.
+	 */
+	indentStyle?: IndentStyle;
+	/**
+	* The indentation width applied to GritQL files. If unset, inherits the global indentation
+width. 
+	 */
+	indentWidth?: IndentWidth;
+	/**
+	 * The line ending applied to GritQL files. If unset, inherits the global line ending.
+	 */
+	lineEnding?: LineEnding;
+	/**
+	 * The maximum line width for GritQL files. If unset, inherits the global line width.
+	 */
+	lineWidth?: LineWidth;
+	/**
+	* Whether to add a trailing newline at the end of the file. If unset, inherits the global
+trailing newline setting. 
+	 */
+	trailingNewline?: TrailingNewline;
+}
+/**
+ * Options that change how the GritQL linter behaves.
+ */
+export interface GritLinterConfiguration {
+	/**
+	 * Controls the linter for GritQL files.
+	 */
+	enabled?: Bool;
+}
+/**
+ * Options that change how HTML assist behaves.
  */
 export interface HtmlAssistConfiguration {
 	/**
-	 * Control the assist for HTML (and its super languages) files.
+	 * Controls assist actions for HTML and languages that extend it.
 	 */
 	enabled?: Bool;
 }
 /**
- * Options that changes how the HTML formatter behaves
+ * Options that change how the HTML formatter behaves.
  */
 export interface HtmlFormatterConfiguration {
 	/**
-	 * The attribute position style in HTML elements. Defaults to auto.
+	* The attribute position style in HTML elements. If unset, inherits the global attribute
+position setting. 
 	 */
 	attributePosition?: AttributePosition;
 	/**
-	 * Whether to hug the closing bracket of multiline HTML tags to the end of the last line, rather than being alone on the following line. Defaults to false.
+	* Whether to place the closing bracket of a multiline HTML tag at the end of the last line
+instead of on its own line. If unset, inherits the global `bracketSameLine` setting. 
 	 */
 	bracketSameLine?: BracketSameLine;
 	/**
-	 * Control the formatter for HTML (and its super languages) files.
+	 * Controls the formatter for HTML and languages that extend it.
 	 */
 	enabled?: Bool;
 	/**
-	 * Whether to indent the `<script>` and `<style>` tags for HTML (and its super languages). Defaults to false.
+	* Whether to indent `<script>` and `<style>` tags in HTML and languages that extend it.
+Defaults to `false`. 
 	 */
 	indentScriptAndStyle?: IndentScriptAndStyle;
 	/**
-	 * The indent style applied to HTML (and its super languages) files.
+	* The indent style applied to HTML and languages that extend it. If unset, inherits the global
+indentation style. 
 	 */
 	indentStyle?: IndentStyle;
 	/**
-	 * The size of the indentation applied to HTML (and its super languages) files. Default to 2.
+	* The indentation width applied to HTML and languages that extend it. If unset, inherits the
+global indentation width. 
 	 */
 	indentWidth?: IndentWidth;
 	/**
-	 * The type of line ending applied to HTML (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
+	* The line ending applied to HTML and languages that extend it. If unset, inherits the global
+line ending. 
 	 */
 	lineEnding?: LineEnding;
 	/**
-	 * What's the max width of a line applied to HTML (and its super languages) files. Defaults to 80.
+	* The maximum line width for HTML and languages that extend it. If unset, inherits the global
+line width. 
 	 */
 	lineWidth?: LineWidth;
 	/**
-	 * Whether void elements should be self-closed. Defaults to never.
+	 * Controls whether void elements are self-closed. Defaults to `never`.
 	 */
 	selfCloseVoidElements?: SelfCloseVoidElements;
 	/**
-	* Whether to add a trailing newline at the end of the file.
-
-Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-- https://thoughtbot.com/blog/no-newline-at-end-of-file
-- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
-- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
-
-Disable the option at your own risk.
-
-Defaults to true. 
+	* Whether to add a trailing newline at the end of the file. Unlike other language-specific
+trailing newline settings, this option defaults to `true` instead of inheriting the global
+setting. 
 	 */
 	trailingNewline?: TrailingNewline;
 	/**
-	 * Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to "css".
+	* Whether to account for whitespace sensitivity when formatting HTML and languages that
+extend it. Defaults to `css`. 
 	 */
 	whitespaceSensitivity?: WhitespaceSensitivity;
 }
 /**
- * Options that changes how the HTML linter behaves
+ * Options that change how the HTML linter behaves.
  */
 export interface HtmlLinterConfiguration {
 	/**
-	 * Control the linter for HTML (and its super languages) files.
+	 * Controls the linter for HTML and languages that extend it.
 	 */
 	enabled?: Bool;
 }
 /**
- * Options that changes how the HTML parser behaves
+ * Options that change how the HTML parser behaves.
  */
 export interface HtmlParserConfiguration {
 	/**
-	 * Enables the parsing of double text expressions such as `{{ expression }}` inside `.html` files
+	 * Enables parsing double text expressions such as `{{ expression }}` inside `.html` files.
 	 */
 	interpolation?: Bool;
 	/**
-	* Enables parsing of Vue syntax (v-if, v-bind, etc.) in `.html` files. If this option is enabled, it also enables `interpolation` implicitly.
+	* Enables parsing Vue syntax (`v-if`, `v-bind`, etc.) in `.html` files. Enabling this option
+also enables `interpolation` implicitly.
 
 Biome will already automatically enable Vue parsing in `.vue` files, so you probably don't need
 to enable this option. This only affects `.html` files, and does not change how `.vue`, `.svelte`,
@@ -742,7 +738,7 @@ or `.astro` files are parsed.
  */
 export interface JsAssistConfiguration {
 	/**
-	 * Control the assist for JavaScript (and its super languages) files.
+	 * Controls assist actions for JavaScript and languages that extend it.
 	 */
 	enabled?: Bool;
 }
@@ -751,97 +747,98 @@ export interface JsAssistConfiguration {
  */
 export interface JsFormatterConfiguration {
 	/**
-	 * Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
+	 * Whether to add parentheses around arrow function parameters. Defaults to `always`.
 	 */
 	arrowParentheses?: ArrowParentheses;
 	/**
-	 * The attribute position style in JSX elements. Defaults to auto.
+	* The attribute position style in JSX elements. If unset, inherits the global attribute
+position setting. 
 	 */
 	attributePosition?: AttributePosition;
 	/**
-	 * Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
+	* Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line,
+rather than being alone on the following line. If unset, inherits the global bracket
+placement setting. 
 	 */
 	bracketSameLine?: BracketSameLine;
 	/**
-	 * Whether to insert spaces around brackets in object literals. Defaults to true.
+	* Whether to insert spaces inside braces in object literals. If unset, inherits the global
+bracket spacing setting. 
 	 */
 	bracketSpacing?: BracketSpacing;
 	/**
-	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
-closing delimiter). Only applies when the content fits on a single line. Spaces are not
-added before the opening delimiter (e.g., `function f()` stays `function f()`, not
-`function f ()`), and empty delimiters are not affected (e.g., `fn()` stays `fn()`).
-For JavaScript and TypeScript, affects parentheses (e.g., `foo( a, b )`), square brackets
-(e.g., `[ a, b ]`), template literal interpolations (e.g., `${ expr }`), TypeScript angle
-brackets (e.g., `foo< T >()`), JSX expression braces (e.g., `{ value }`), and the logical
-NOT operator (e.g., `! x`, but in chains only after the last one: `!! x`). Defaults to
-false. 
+	* Controls spaces immediately inside supported JavaScript and TypeScript delimiters when their
+content fits on one line. It doesn't add spaces before opening delimiters or inside empty
+delimiters.
+
+It affects parentheses, square brackets, template interpolations, TypeScript angle brackets,
+JSX expression braces, and logical NOT. In operator chains, only the final operator receives
+a following space.
+
+If unset, inherits the global delimiter spacing setting. 
 	 */
 	delimiterSpacing?: DelimiterSpacing;
 	/**
-	 * Control the formatter for JavaScript (and its super languages) files.
+	 * Controls the formatter for JavaScript and languages that extend it.
 	 */
 	enabled?: Bool;
 	/**
-	* Whether to expand arrays and objects on multiple lines.
-When set to `auto`, object literals are formatted on multiple lines if the first property has a newline,
-and array literals are formatted on a single line if it fits in the line.
-When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
-When set to `never`, these literals are formatted on a single line if it fits in the line.
-When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto". 
+	* Uses the same `auto`, `always`, and `never` behavior as the global expansion setting.
+
+If unset, inherits the global expansion setting. 
 	 */
 	expand?: Expand;
 	/**
-	 * The indent style applied to JavaScript (and its super languages) files.
+	* The indent style applied to JavaScript and languages that extend it. If unset, inherits the
+global indentation style. 
 	 */
 	indentStyle?: IndentStyle;
 	/**
-	 * The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
+	* The indentation width applied to JavaScript and languages that extend it. If unset,
+inherits the global indentation width. 
 	 */
 	indentWidth?: IndentWidth;
 	/**
-	 * The type of quotes used in JSX. Defaults to double.
+	 * The type of quotes used in JSX. Defaults to `double`.
 	 */
 	jsxQuoteStyle?: QuoteStyle;
 	/**
-	 * The type of line ending applied to JavaScript (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
+	* The line ending applied to JavaScript and languages that extend it. If unset, inherits the
+global line ending. 
 	 */
 	lineEnding?: LineEnding;
 	/**
-	 * What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.
+	* The maximum line width applied to JavaScript and languages that extend it. If unset,
+inherits the global line width. 
 	 */
 	lineWidth?: LineWidth;
 	/**
-	 * When breaking binary expressions into multiple lines, whether to break them before or after the binary operator. Defaults to "after".
+	* When breaking binary expressions into multiple lines, whether to break them before or after
+the binary operator. Defaults to `after`. 
 	 */
 	operatorLinebreak?: OperatorLinebreak;
 	/**
-	 * When properties in objects are quoted. Defaults to asNeeded.
+	* Controls when object properties are quoted. Defaults to `asNeeded` in configuration
+(`as-needed` on the CLI). 
 	 */
 	quoteProperties?: QuoteProperties;
 	/**
-	 * The type of quotes used in JavaScript code. Defaults to double.
+	 * The type of quotes used in JavaScript code. Defaults to `double`.
 	 */
 	quoteStyle?: QuoteStyle;
 	/**
-	 * Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.
+	* Prints semicolons after every statement or only where needed to avoid automatic semicolon
+insertion hazards. Defaults to `always`. 
 	 */
 	semicolons?: Semicolons;
 	/**
-	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
+	* Prints trailing commas wherever possible in multiline comma-separated structures. Defaults
+to `all`. 
 	 */
 	trailingCommas?: JsTrailingCommas;
 	/**
-	* Whether to add a trailing newline at the end of the file.
-
-Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-- https://thoughtbot.com/blog/no-newline-at-end-of-file
-- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
-- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
-
-Disable the option at your own risk.
-
-Defaults to true. 
+	* Whether to add a trailing newline at the end of the file. If unset, inherits the global
+trailing newline setting. 
 	 */
 	trailingNewline?: TrailingNewline;
 }
@@ -854,12 +851,12 @@ export type JsxRuntime = "transparent" | "reactClassic";
  */
 export interface JsLinterConfiguration {
 	/**
-	 * Control the linter for JavaScript (and its super languages) files.
+	 * Controls the linter for JavaScript and languages that extend it.
 	 */
 	enabled?: Bool;
 }
 /**
- * Options that changes how the JavaScript parser behaves
+ * Options that change how the JavaScript parser behaves.
  */
 export interface JsParserConfiguration {
 	/**
@@ -868,9 +865,8 @@ Defaults to `false`.
 	 */
 	gritMetavariables?: Bool;
 	/**
-	* When enabled, files like `.js`/`.mjs`/`.cjs` may contain JSX syntax.
-
-Defaults to `true`. 
+	* When enabled, files such as `.js`, `.mjs`, and `.cjs` may contain JSX syntax. Defaults to
+`true`. 
 	 */
 	jsxEverywhere?: Bool;
 	/**
@@ -907,7 +903,7 @@ Limitations:
 - Biome only reads top-level `catalog` / `catalogs` mappings and scalar
   string entries.
 
-Default: `false`. 
+Defaults to `false`. 
 	 */
 	experimentalPnpmCatalogs?: Bool;
 }
@@ -916,66 +912,63 @@ Default: `false`.
  */
 export interface JsonAssistConfiguration {
 	/**
-	 * Control the assist for JSON (and its super languages) files.
+	 * Controls assist actions for JSON and languages that extend it.
 	 */
 	enabled?: Bool;
 }
 export interface JsonFormatterConfiguration {
 	/**
-	 * Whether to insert spaces around brackets in object literals. Defaults to true.
+	* Whether to insert spaces inside braces in object literals. If unset, inherits the global
+bracket spacing setting. 
 	 */
 	bracketSpacing?: BracketSpacing;
 	/**
-	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
-closing delimiter). Only applies when the content fits on a single line, and empty
-brackets are not affected. For JSON, affects square brackets (e.g., `[ 1, 2, 3 ]`).
-Defaults to false. 
+	* Controls spaces inside JSON square brackets when their content fits on one line. When
+enabled, `[1, 2, 3]` becomes `[ 1, 2, 3 ]`. Empty brackets are unchanged.
+
+If unset, inherits the global delimiter spacing setting. 
 	 */
 	delimiterSpacing?: DelimiterSpacing;
 	/**
-	 * Control the formatter for JSON (and its super languages) files.
+	 * Controls the formatter for JSON and languages that extend it.
 	 */
 	enabled?: Bool;
 	/**
-	* Whether to expand arrays and objects on multiple lines.
-When set to `auto`, object literals are formatted on multiple lines if the first property has a newline,
-and array literals are formatted on a single line if it fits in the line.
-When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
-When set to `never`, these literals are formatted on a single line if it fits in the line.
-When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto". 
+	* Uses the same `auto`, `always`, and `never` behavior as the global expansion setting.
+
+If unset, inherits the global expansion setting.
+
+When formatting `package.json`, Biome uses `always` unless configured otherwise. 
 	 */
 	expand?: Expand;
 	/**
-	 * The indent style applied to JSON (and its super languages) files.
+	* The indent style applied to JSON and languages that extend it. If unset, inherits the global
+indentation style. 
 	 */
 	indentStyle?: IndentStyle;
 	/**
-	 * The size of the indentation applied to JSON (and its super languages) files. Default to 2.
+	* The indentation width applied to JSON and languages that extend it. If unset, inherits the
+global indentation width. 
 	 */
 	indentWidth?: IndentWidth;
 	/**
-	 * The type of line ending applied to JSON (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
+	* The line ending applied to JSON and languages that extend it. If unset, inherits the global
+line ending. 
 	 */
 	lineEnding?: LineEnding;
 	/**
-	 * What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.
+	* The maximum line width applied to JSON and languages that extend it. If unset, inherits the
+global line width. 
 	 */
 	lineWidth?: LineWidth;
 	/**
-	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
+	* Prints trailing commas wherever possible in multiline comma-separated structures. Defaults
+to `none`. 
 	 */
 	trailingCommas?: JsonTrailingCommas;
 	/**
-	* Whether to add a trailing newline at the end of the file.
-
-Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-- https://thoughtbot.com/blog/no-newline-at-end-of-file
-- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
-- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
-
-Disable the option at your own risk.
-
-Defaults to true. 
+	* Whether to add a trailing newline at the end of the file. If unset, inherits the global
+trailing newline setting. 
 	 */
 	trailingNewline?: TrailingNewline;
 }
@@ -984,20 +977,20 @@ Defaults to true.
  */
 export interface JsonLinterConfiguration {
 	/**
-	 * Control the linter for JSON (and its super languages) files.
+	 * Controls the linter for JSON and languages that extend it.
 	 */
 	enabled?: Bool;
 }
 /**
- * Options that changes how the JSON parser behaves
+ * Options that change how the JSON parser behaves.
  */
 export interface JsonParserConfiguration {
 	/**
-	 * Allow parsing comments in `.json` files
+	 * Allows parsing comments in `.json` files.
 	 */
 	allowComments?: Bool;
 	/**
-	 * Allow parsing trailing commas in `.json` files
+	 * Allows parsing trailing commas in `.json` files.
 	 */
 	allowTrailingCommas?: Bool;
 }
@@ -1260,21 +1253,26 @@ export interface OverrideFormatterConfiguration {
 	 */
 	bracketSpacing?: BracketSpacing;
 	/**
-	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
-closing delimiter), such as parentheses, brackets, angle brackets, and template literal
-interpolations. Spaces are not added before the opening delimiter, and empty delimiters
-are not affected. Only applies when the content fits on a single line. The specific
-delimiters affected depend on the language. Defaults to false. 
+	* Controls spaces immediately inside supported delimiters when their content fits on one line.
+It doesn't add spaces before opening delimiters or inside empty delimiters.
+
+The affected delimiters vary by language. If unset, uses the configured formatter setting. 
 	 */
 	delimiterSpacing?: DelimiterSpacing;
 	enabled?: Bool;
 	/**
-	* Whether to expand arrays and objects on multiple lines.
-When set to `auto`, object literals are formatted on multiple lines if the first property has a newline,
-and array literals are formatted on a single line if it fits in the line.
-When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
-When set to `never`, these literals are formatted on a single line if it fits in the line.
-When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto". 
+	* Controls whether arrays and objects are formatted on one line or multiple lines.
+
+`auto` formats objects on multiple lines if the first property has a newline, and arrays on
+one line if they fit.
+
+`always` formats arrays and objects on multiple lines.
+
+`never` formats arrays and objects on one line if they fit.
+
+If unset, uses the configured formatter setting.
+
+When formatting `package.json`, Biome uses `always` unless configured otherwise. 
 	 */
 	expand?: Expand;
 	/**
