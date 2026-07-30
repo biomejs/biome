@@ -5,8 +5,8 @@
 //! resolved argument representations with expression inference.
 
 use crate::db::type_inference::{
-    apply_substitutions_to_root_body, collected_type_result, resolve_local_type_on_demand,
-    substitutions_for_instance,
+    apply_substitutions_to_root_body, collected_type_result, find_member_type_on_demand,
+    resolve_local_type_on_demand, substitutions_for_instance,
 };
 use crate::module_graph::ModuleInfoKind;
 use crate::{ModuleDb, module_for_key};
@@ -998,8 +998,12 @@ impl<'db> ArgumentTypeCompatibility<'db> {
 
     /// Decomposes a nontrivial relation into conjunctive or alternative requirements.
     fn action(self, db: &'db dyn ModuleDb) -> ArgumentMatchAction<'db> {
-        let parameter_ty = self.parameter_ty;
-        let arg_ty = self.argument_ty;
+        let parameter_ty = resolve_local_type_on_demand(db, self.parameter_ty);
+        let arg_ty = resolve_local_type_on_demand(db, self.argument_ty);
+
+        if parameter_ty != self.parameter_ty || arg_ty != self.argument_ty {
+            return ArgumentMatchAction::All(Vec::from([self.with_types(parameter_ty, arg_ty)]));
+        }
 
         match (parameter_ty, arg_ty) {
             (InferredTypeData::Generic(generic), arg_ty) => {
@@ -1121,6 +1125,12 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                 Vec::from([self.with_types(parameter_ty, argument.ty(db))]),
             ),
             (
+                InferredTypeData::Interface(_) | InferredTypeData::Object(_),
+                InferredTypeData::Interface(_)
+                | InferredTypeData::Object(_)
+                | InferredTypeData::Literal(_),
+            ) => self.structural_object_action(db),
+            (
                 InferredTypeData::BigInt
                 | InferredTypeData::Boolean
                 | InferredTypeData::Null
@@ -1213,6 +1223,27 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                 | InferredTypeData::Tuple(_),
             ) => ArgumentMatchAction::Mismatch,
         }
+    }
+
+    fn structural_object_action(self, db: &'db dyn ModuleDb) -> ArgumentMatchAction<'db> {
+        let Some(required_names) = required_structural_member_names(db, self.parameter_ty) else {
+            return ArgumentMatchAction::Match;
+        };
+        let mut requirements = Vec::with_capacity(required_names.len());
+        for name in required_names {
+            let Some(parameter_member) =
+                find_member_type_on_demand(db, self.parameter_ty, name.text())
+            else {
+                continue;
+            };
+            let Some(argument_member) =
+                find_member_type_on_demand(db, self.argument_ty, name.text())
+            else {
+                return ArgumentMatchAction::Mismatch;
+            };
+            requirements.push(self.with_types(parameter_member, argument_member));
+        }
+        ArgumentMatchAction::All(requirements)
     }
 
     fn argument_extends_local_parameter(
@@ -1342,6 +1373,56 @@ impl<'db> ArgumentTypeCompatibility<'db> {
 
         false
     }
+}
+
+fn required_structural_member_names<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+) -> Option<Vec<biome_rowan::Text>> {
+    let mut names = Vec::new();
+    let mut seen_types = FxHashSet::default();
+    let mut pending = Vec::from([ty]);
+
+    for _ in 0..MAX_ARGUMENT_MATCH_STEPS {
+        let Some(ty) = pending.pop() else {
+            return Some(names);
+        };
+        let ty = resolve_local_type_on_demand(db, ty);
+        if !seen_types.insert(ty) {
+            continue;
+        }
+
+        let members = match ty {
+            InferredTypeData::Interface(interface) => {
+                pending.extend(interface.extends(db).iter().copied());
+                interface.members(db)
+            }
+            InferredTypeData::InstanceOf(instance) => {
+                pending.push(instance.ty(db));
+                continue;
+            }
+            InferredTypeData::Object(object) => {
+                if let Some(prototype) = object.prototype(db) {
+                    pending.push(prototype);
+                }
+                object.members(db)
+            }
+            _ => return None,
+        };
+
+        for member in members {
+            if member.kind.is_optional() || member.kind.is_static() {
+                continue;
+            }
+            if let Some(name) = member.kind.name()
+                && !names.contains(&name)
+            {
+                names.push(name);
+            }
+        }
+    }
+
+    None
 }
 
 fn raw_local_extends_class_name<'db>(
