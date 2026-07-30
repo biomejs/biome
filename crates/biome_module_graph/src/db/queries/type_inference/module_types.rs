@@ -22,6 +22,43 @@ use crate::{
     JsExport, JsOwnExport, ModuleDb, ResolvedPath, type_inference::TypeInferenceCodeReference,
 };
 use rustc_hash::FxHashSet;
+use std::cell::Cell;
+
+// The bottom-up work list prepares acyclic dependencies before their
+// importers, but modules inside a strongly connected component cannot be
+// prepared ahead of one another. Without a bound, the first inferred member
+// of a large component would pull the entire component onto the Rust stack
+// through recursive `infer_module_types` executions. Each level costs roughly
+// twenty stack frames, so large dependency cycles — such as a package whose
+// modules all import a barrel file that re-exports them — could overflow the
+// stack of a worker thread.
+const MAX_NESTED_MODULE_INFERENCE_DEPTH: usize = 32;
+
+thread_local! {
+    static NESTED_MODULE_INFERENCE_DEPTH: Cell<usize> = const { Cell::new(0) };
+}
+
+struct NestedModuleInferenceGuard;
+
+impl NestedModuleInferenceGuard {
+    fn enter() -> Option<Self> {
+        NESTED_MODULE_INFERENCE_DEPTH.with(|depth| {
+            let current = depth.get();
+            if current >= MAX_NESTED_MODULE_INFERENCE_DEPTH {
+                None
+            } else {
+                depth.set(current + 1);
+                Some(Self)
+            }
+        })
+    }
+}
+
+impl Drop for NestedModuleInferenceGuard {
+    fn drop(&mut self) {
+        NESTED_MODULE_INFERENCE_DEPTH.with(|depth| depth.set(depth.get() - 1));
+    }
+}
 
 // #region COMPLETE MODULE QUERY
 
@@ -73,6 +110,22 @@ pub fn infer_module_types<'db>(
             Some(result)
         },
     )
+}
+
+/// Infers module types as a dependency of an already executing inference.
+///
+/// A cache hit returns without recursion, so prepared dependencies do not
+/// consume the depth budget. Executing an uncached module recurses on the
+/// Rust stack; after 32 nested executions the dependency is treated as
+/// unavailable and the function returns `None`, in addition to the cases
+/// documented on [`infer_module_types`]. Types that depend on such a module
+/// may be `Unknown`, mirroring how imports blocked by cycle recovery behave.
+pub(in crate::db) fn infer_module_types_nested<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+) -> Option<&'db InferredModuleTypes<'db>> {
+    let _depth_guard = NestedModuleInferenceGuard::enter()?;
+    infer_module_types(db, module)
 }
 
 // #endregion

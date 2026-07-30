@@ -1,5 +1,5 @@
 use super::{InferredModuleTypes, collected_type_result};
-use crate::db::queries::{LocalTypeInput, infer_local_type, infer_module_types};
+use crate::db::queries::{LocalTypeInput, infer_local_type, infer_module_types_nested};
 use crate::{ModuleDb, module_for_key};
 use biome_js_type_info::interned_types::{
     Literal as InferredLiteral, LocalTypeHandle, ReturnType as InferredReturnType,
@@ -121,7 +121,8 @@ impl<'db> InferredModuleTypes<'db> {
         }
 
         let module = module_for_key(db, module_key)?;
-        infer_module_types(db, module).and_then(|types| types.types.get(type_id.index()).copied())
+        infer_module_types_nested(db, module)
+            .and_then(|types| types.types.get(type_id.index()).copied())
     }
 
     pub(in crate::db::type_inference) fn find_member_type_iterative(

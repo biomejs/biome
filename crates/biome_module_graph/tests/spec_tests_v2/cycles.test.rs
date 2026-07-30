@@ -234,6 +234,62 @@ fn test_infer_module_types_bounds_mutual_namespace_reexports() {
 }
 
 #[test]
+fn test_infer_module_types_bounds_stack_depth_across_a_large_component() {
+    // Models an SDK whose declaration files form one large dependency cycle:
+    // every module declares a branded type plus a constructor function whose
+    // return type refers to the next module in the cycle. On-demand import
+    // resolution switches to the iterative fallback after 128 nested
+    // resolutions, but the fallback itself used to execute one nested
+    // `infer_module_types` per remaining cycle member on the Rust stack, so
+    // components larger than the remaining stack overflowed it. The thread's
+    // explicit stack size keeps the previous overflow deterministic.
+    const COMPONENT_SIZE: usize = 300;
+
+    let fs = MemoryFileSystem::default();
+    let mut paths = Vec::with_capacity(COMPONENT_SIZE + 1);
+    for index in 0..COMPONENT_SIZE {
+        let next = (index + 1) % COMPONENT_SIZE;
+        let path = format!("/src/id{index}.ts");
+        fs.insert(
+            path.clone().into(),
+            format!(
+                r#"
+                    import type {{ Id{next} }} from "./id{next}.ts";
+                    export type Id{index} = string & {{ Id{index}: void }};
+                    export declare function Id{index}(value: string): Id{next} | Id{index};
+                "#
+            ),
+        );
+        paths.push(path);
+    }
+    fs.insert(
+        "/src/main.ts".into(),
+        r#"
+            import { Id0 } from "./id0.ts";
+            export const value = Id0("id");
+        "#,
+    );
+    paths.push("/src/main.ts".to_string());
+
+    std::thread::Builder::new()
+        .stack_size(4 * 1024 * 1024)
+        .spawn(move || {
+            let path_refs = paths.iter().map(String::as_str).collect::<Vec<_>>();
+            let db = build_js_test_module_db(&fs, &path_refs, true);
+            let main_module = db
+                .module_for_path(Utf8Path::new("/src/main.ts"))
+                .expect("main module must exist");
+            let inferred =
+                infer_module_types_bottom_up(&db, main_module).expect("types must be inferred");
+            inferred_binding_ty_by_name(&db, main_module, inferred, "value")
+                .expect("value binding type must be inferred");
+        })
+        .expect("worker thread must spawn")
+        .join()
+        .expect("inference must complete without overflowing the stack");
+}
+
+#[test]
 fn test_binding_query_preserves_acyclic_data_next_to_an_import_cycle() {
     let fs = MemoryFileSystem::default();
     fs.insert(

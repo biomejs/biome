@@ -1,5 +1,5 @@
 use super::{BindingTypeData, InferredModuleTypes, globals::global_type};
-use crate::db::queries::{LocalTypeInput, infer_local_type, infer_module_types};
+use crate::db::queries::{LocalTypeInput, infer_local_type, infer_module_types_nested};
 use crate::module_graph::ModuleInfo;
 use crate::{JsModuleInfo, ModuleDb, module_for_key};
 use biome_js_type_info::{
@@ -108,18 +108,19 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
     ///
     /// The tracked query records the imported result as a dependency of the
     /// current inference. Returns `None` for unsupported modules, disabled type
-    /// inference, or an import cycle.
+    /// inference, an import cycle, or when the nested inference depth limit is
+    /// reached.
     pub(in crate::db::type_inference) fn infer_imported_module(
         &self,
         module: ModuleInfo,
     ) -> Option<&'db InferredModuleTypes<'db>> {
         match self.import_resolution {
-            ImportResolution::OnDemand => infer_module_types(self.db, module),
+            ImportResolution::OnDemand => infer_module_types_nested(self.db, module),
             ImportResolution::CycleFallback(blocked) => {
                 if blocked.contains(&module) {
                     None
                 } else {
-                    infer_module_types(self.db, module)
+                    infer_module_types_nested(self.db, module)
                 }
             }
         }

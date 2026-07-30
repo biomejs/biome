@@ -48,6 +48,7 @@ pub use lookups::{
     infer_local_type, resolve_callable_type,
 };
 pub(crate) use module_types::infer_module_types_bottom_up_for_import_depth;
+pub(in crate::db) use module_types::infer_module_types_nested;
 pub use module_types::{infer_module_types, infer_module_types_bottom_up};
 pub use normalization::normalize_type;
 pub use promises::{
