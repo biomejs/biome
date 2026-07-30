@@ -4,19 +4,21 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsExpression, JsArrayBindingPatternElement, JsFormalParameter,
+    AnyJsExpression, AnyTsReturnType, AnyTsType, JsArrayBindingPatternElement, JsFormalParameter,
     JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsVariableStatement,
     JsYieldArgument,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText, declare_node_union};
 use biome_rule_options::no_useless_undefined::NoUselessUndefinedOptions;
 
-use crate::JsRuleAction;
+use crate::{JsRuleAction, services::control_flow::AnyJsControlFlowRoot};
 
 declare_lint_rule! {
     /// Disallow the use of useless `undefined`.
     ///
     /// `undefined` is the default value for new variables, parameters, return statements, etc., so specifying it doesn't make any difference.
+    ///
+    /// `return undefined` is allowed when the enclosing function has an explicit return type other than `undefined` or `void`.
     ///
     /// ## Examples
     ///
@@ -66,6 +68,12 @@ declare_lint_rule! {
     /// foo();
     /// ```
     ///
+    /// ```ts
+    /// function foo(): string | undefined {
+    ///   return undefined;
+    /// }
+    /// ```
+    ///
     pub NoUselessUndefined {
         version: "2.0.0",
         name: "noUselessUndefined",
@@ -96,6 +104,43 @@ fn find_undefined_range(expr: Option<&AnyJsExpression>) -> Option<TextRange> {
     } else {
         None
     }
+}
+
+fn enclosing_function_return_type(statement: &JsReturnStatement) -> Option<AnyTsReturnType> {
+    let control_flow_root = statement
+        .syntax()
+        .ancestors()
+        .find_map(AnyJsControlFlowRoot::cast)?;
+
+    match control_flow_root {
+        AnyJsControlFlowRoot::AnyJsFunction(function) => {
+            function.return_type_annotation()?.ty().ok()
+        }
+        AnyJsControlFlowRoot::JsGetterClassMember(function) => Some(AnyTsReturnType::AnyTsType(
+            function.return_type()?.ty().ok()?,
+        )),
+        AnyJsControlFlowRoot::JsGetterObjectMember(function) => Some(AnyTsReturnType::AnyTsType(
+            function.return_type()?.ty().ok()?,
+        )),
+        AnyJsControlFlowRoot::JsMethodClassMember(function) => {
+            function.return_type_annotation()?.ty().ok()
+        }
+        AnyJsControlFlowRoot::JsMethodObjectMember(function) => {
+            function.return_type_annotation()?.ty().ok()
+        }
+        _ => None,
+    }
+}
+
+fn is_useless_return_undefined(statement: &JsReturnStatement) -> bool {
+    let Some(return_type) = enclosing_function_return_type(statement) else {
+        return true;
+    };
+
+    matches!(
+        return_type.as_any_ts_type(),
+        Some(AnyTsType::TsUndefinedType(_) | AnyTsType::TsVoidType(_))
+    )
 }
 
 pub struct RuleState {
@@ -191,7 +236,9 @@ impl Rule for NoUselessUndefined {
             // return undefined
             AnyUndefinedNode::JsReturnStatement(js_return_statement) => {
                 let expr = js_return_statement.argument();
-                if let Some(range) = find_undefined_range(expr.as_ref()) {
+                if let Some(range) = find_undefined_range(expr.as_ref())
+                    && is_useless_return_undefined(js_return_statement)
+                {
                     signals.push(RuleState {
                         binding_text: None,
                         diagnostic_range: range,
