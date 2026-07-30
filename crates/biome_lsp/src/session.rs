@@ -43,6 +43,7 @@ use std::sync::atomic::Ordering;
 use std::sync::atomic::{AtomicBool, AtomicI32};
 use std::time::Duration;
 use tokio::spawn;
+use tokio::sync::Mutex as TokioMutex;
 use tokio::sync::Notify;
 use tokio::sync::OnceCell;
 use tokio::sync::RwLock as TokioRwLock;
@@ -160,6 +161,10 @@ pub(crate) struct Session {
 
     /// Dynamic capabilities already registered with the client (id -> method + options).
     registered_dynamic_capabilities: RwLock<FxHashMap<String, RegisteredDynamicCapability>>,
+
+    /// Serialises capability unregister/register so concurrent refreshes cannot
+    /// race and duplicate client registrations.
+    capability_registration_lock: TokioMutex<()>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -191,10 +196,10 @@ fn diff_capability_registrations(
                 if registered.get(&id_string) == Some(&entry) {
                     continue;
                 }
-                if registered.contains_key(&id_string) {
+                if let Some(previous) = registered.get(&id_string) {
                     unregistrations.push(Unregistration {
                         id: id_string.clone(),
-                        method: method.to_string(),
+                        method: previous.method.clone(),
                     });
                 }
                 registrations.push(Registration {
@@ -205,11 +210,11 @@ fn diff_capability_registrations(
                 next_registered.insert(id_string, entry);
             }
             CapabilityStatus::Disable => {
-                if registered.contains_key(&id_string) {
+                if let Some(previous) = registered.get(&id_string) {
                     next_registered.remove(&id_string);
                     unregistrations.push(Unregistration {
                         id: id_string,
-                        method: method.to_string(),
+                        method: previous.method.clone(),
                     });
                 }
             }
@@ -335,6 +340,7 @@ impl Session {
             configuration_status_by_path: Default::default(),
             workspace_folders: Default::default(),
             registered_dynamic_capabilities: Default::default(),
+            capability_registration_lock: TokioMutex::new(()),
         }
     }
 
@@ -422,8 +428,10 @@ impl Session {
 
     /// Register a set of capabilities with the client
     pub(crate) async fn register_capabilities(&self, capabilities: CapabilitySet) {
+        let _guard = self.capability_registration_lock.lock().await;
+
         let registered = self.registered_dynamic_capabilities.read().clone();
-        let (unregistrations, registrations, next_registered) =
+        let (unregistrations, registrations, _) =
             diff_capability_registrations(capabilities, &registered);
 
         if unregistrations.is_empty() && registrations.is_empty() {
@@ -448,6 +456,8 @@ impl Session {
         }
 
         if !unregistrations.is_empty() {
+            let removed_ids: Vec<String> =
+                unregistrations.iter().map(|entry| entry.id.clone()).collect();
             if let Err(e) = self.client.unregister_capability(unregistrations).await {
                 error!(
                     "Error unregistering {unregister_methods:?} capabilities: {}",
@@ -456,17 +466,39 @@ impl Session {
                 return;
             }
             info!("Unregister capabilities {unregister_methods:?}");
+            {
+                let mut map = self.registered_dynamic_capabilities.write();
+                for id in removed_ids {
+                    map.remove(&id);
+                }
+            }
         }
 
         if !registrations.is_empty() {
+            let added: Vec<(String, RegisteredDynamicCapability)> = registrations
+                .iter()
+                .map(|registration| {
+                    (
+                        registration.id.clone(),
+                        RegisteredDynamicCapability {
+                            method: registration.method.clone(),
+                            register_options: registration.register_options.clone(),
+                        },
+                    )
+                })
+                .collect();
             if let Err(e) = self.client.register_capability(registrations).await {
                 error!("Error registering {register_methods:?} capabilities: {}", e);
                 return;
             }
             info!("Register capabilities {register_methods:?}");
+            {
+                let mut map = self.registered_dynamic_capabilities.write();
+                for (id, entry) in added {
+                    map.insert(id, entry);
+                }
+            }
         }
-
-        *self.registered_dynamic_capabilities.write() = next_registered;
     }
 
     /// Returns the key for the project that should be used for a given path.
@@ -1789,7 +1821,74 @@ mod tests {
             diff_capability_registrations(capabilities, &registered);
 
         assert_eq!(unregistrations.len(), 1);
+        assert_eq!(unregistrations[0].method, "textDocument/formatting");
         assert!(registrations.is_empty());
         assert!(next_registered.is_empty());
+    }
+
+    #[test]
+    fn diff_capability_registrations_replaces_changed_options() {
+        let mut capabilities = CapabilitySet::default();
+        capabilities.add_capability(
+            "biome_did_change_watched_files",
+            "workspace/didChangeWatchedFiles",
+            CapabilityStatus::Enable(Some(serde_json::json!({"watchers": []}))),
+        );
+
+        let registered = FxHashMap::from_iter([(
+            "biome_did_change_watched_files".to_string(),
+            RegisteredDynamicCapability {
+                method: "workspace/didChangeWatchedFiles".to_string(),
+                register_options: Some(serde_json::json!({"watchers": [{"glob": "**/*"}]})),
+            },
+        )]);
+
+        let (unregistrations, registrations, next_registered) =
+            diff_capability_registrations(capabilities, &registered);
+
+        assert_eq!(unregistrations.len(), 1);
+        assert_eq!(unregistrations[0].method, "workspace/didChangeWatchedFiles");
+        assert_eq!(registrations.len(), 1);
+        assert_eq!(
+            registrations[0].register_options,
+            Some(serde_json::json!({"watchers": []}))
+        );
+        assert_eq!(
+            next_registered
+                .get("biome_did_change_watched_files")
+                .unwrap()
+                .register_options,
+            Some(serde_json::json!({"watchers": []}))
+        );
+    }
+
+    #[test]
+    fn diff_capability_registrations_unregisters_previous_method_on_replace() {
+        let mut capabilities = CapabilitySet::default();
+        capabilities.add_capability(
+            "biome_formatting",
+            "textDocument/formatting",
+            CapabilityStatus::Enable(None),
+        );
+
+        let registered = FxHashMap::from_iter([(
+            "biome_formatting".to_string(),
+            RegisteredDynamicCapability {
+                method: "textDocument/legacyFormatting".to_string(),
+                register_options: None,
+            },
+        )]);
+
+        let (unregistrations, registrations, next_registered) =
+            diff_capability_registrations(capabilities, &registered);
+
+        assert_eq!(unregistrations.len(), 1);
+        assert_eq!(unregistrations[0].method, "textDocument/legacyFormatting");
+        assert_eq!(registrations.len(), 1);
+        assert_eq!(registrations[0].method, "textDocument/formatting");
+        assert_eq!(
+            next_registered.get("biome_formatting").unwrap().method,
+            "textDocument/formatting"
+        );
     }
 }
