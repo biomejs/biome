@@ -1765,7 +1765,7 @@ async fn pull_diagnostics_for_htm_files() -> Result<()> {
     let fs = MemoryFileSystem::default();
     let config = r#"{
         "html": {
-            "formatter": { "enabled": true }
+            "linter": { "enabled": true }
         }
     }"#;
 
@@ -1785,9 +1785,10 @@ async fn pull_diagnostics_for_htm_files() -> Result<()> {
 
     server.load_configuration().await?;
 
-    let incorrect_config = r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="red" /></svg>"#;
+    let invalid_html = r#"<div scope="col"></div>"#;
     server
-        .open_named_document(incorrect_config, uri!("document.htm"), "html")
+        // VS Code assigns the `html` language identifier to `.htm` files.
+        .open_named_document(invalid_html, uri!("document.htm"), "html")
         .await?;
 
     let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
@@ -1802,22 +1803,24 @@ async fn pull_diagnostics_for_htm_files() -> Result<()> {
                     range: Range {
                         start: Position {
                             line: 0,
-                            character: 0,
+                            character: 5,
                         },
                         end: Position {
                             line: 0,
-                            character: 112,
+                            character: 16,
                         },
                     },
                     severity: Some(DiagnosticSeverity::ERROR),
                     code: Some(NumberOrString::String(String::from(
-                        "lint/a11y/noSvgWithoutTitle"
+                        "lint/a11y/noHeaderScope"
                     ))),
                     code_description: Some(CodeDescription {
-                        href: "https://biomejs.dev/linter/rules/no-svg-without-title".parse()?
+                        href: "https://biomejs.dev/linter/rules/no-header-scope".parse()?
                     }),
                     source: Some(String::from("biome")),
-                    message: String::from("Alternative text title element cannot be empty",),
+                    message: String::from(
+                        "Avoid using the scope attribute on elements other than th elements.",
+                    ),
                     related_information: None,
                     tags: None,
                     data: None,

@@ -576,7 +576,7 @@ fn should_handle_htm_file() {
     let htm_file = Utf8Path::new("index.htm");
     fs.insert(
         htm_file.into(),
-        r#"<main class = "content"><h1>Hello</h1></main>
+        r#"<div scope = "col"></div>
 "#
         .as_bytes(),
     );
@@ -586,6 +586,9 @@ fn should_handle_htm_file() {
         r#"{
     "html": {
         "formatter": {
+            "enabled": true
+        },
+        "linter": {
             "enabled": true
         }
     }
