@@ -187,11 +187,14 @@ impl Rule for NoLeakedRender {
                 Some(())
             }
             NoLeakedRenderQuery::JsConditionalExpression(expr) => {
-                let alternate = expr.alternate().ok()?;
-                let is_alternate_identifier =
-                    matches!(alternate, AnyJsExpression::JsIdentifierExpression(_));
-                let is_jsx_element_alt = matches!(alternate, AnyJsExpression::JsxTagExpression(_));
-                if !is_alternate_identifier || is_jsx_element_alt {
+                let alternate = expr.alternate().ok()?.omit_parentheses();
+                // `undefined` is the only identifier alternate treated as a leak.
+                // Any other identifier resolves to a value this rule cannot
+                // inspect, so assuming it renders is a guess, not a finding.
+                let AnyJsExpression::JsIdentifierExpression(ident) = alternate else {
+                    return None;
+                };
+                if !ident.name().ok()?.is_undefined() {
                     return None;
                 }
 

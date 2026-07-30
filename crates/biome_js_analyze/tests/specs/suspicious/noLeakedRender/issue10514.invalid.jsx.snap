@@ -1,0 +1,54 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue10514.invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+const Component1 = ({ userId }) => {
+	return <div>{userId ? 1 : undefined}</div>;
+};
+
+const Component2 = ({ userId }) => {
+	return <div>{userId ? 1 : (undefined)}</div>;
+};
+
+```
+
+# Diagnostics
+```
+issue10514.invalid.jsx:3:15 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Potential leaked value that might cause unintended rendering.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const Component1 = ({ userId }) => {
+  > 3 │ 	return <div>{userId ? 1 : undefined}</div>;
+      │ 	             ^^^^^^^^^^^^^^^^^^^^^^
+    4 │ };
+    5 │ 
+  
+  i This happens when you use ternary operators in JSX with alternate values that could be variables.
+  
+  i Replace with a safe alternate value like an empty string , null or another JSX element.
+  
+
+```
+
+```
+issue10514.invalid.jsx:7:15 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Potential leaked value that might cause unintended rendering.
+  
+    6 │ const Component2 = ({ userId }) => {
+  > 7 │ 	return <div>{userId ? 1 : (undefined)}</div>;
+      │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ };
+    9 │ 
+  
+  i This happens when you use ternary operators in JSX with alternate values that could be variables.
+  
+  i Replace with a safe alternate value like an empty string , null or another JSX element.
+  
+
+```
