@@ -139,6 +139,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let object = self.resolve(&expression.object);
                 self.resolve_element_type_at_index(object, expression.index)
             }
+            RawTypeofExpression::OptionalChainIndex(expression) => {
+                let object = self.resolve(&expression.object);
+                self.resolve_element_type_at_index(object, expression.index)
+                    .map(|result| self.optional_chain_result(object, result))
+            }
             RawTypeofExpression::IterableValueOf(expression) => {
                 let ty = self.resolve(&expression.ty);
                 self.resolve_iterable_value_type(ty)
@@ -170,6 +175,11 @@ impl<'db> ResolutionCtx<'db, '_> {
             RawTypeofExpression::StaticMember(expression) => {
                 let object = self.resolve_static_member_object(&expression.object);
                 self.resolve_static_member_expression(object, expression.member.text())
+            }
+            RawTypeofExpression::OptionalChainStaticMember(expression) => {
+                let object = self.resolve_static_member_object(&expression.object);
+                self.resolve_static_member_expression(object, expression.member.text())
+                    .map(|result| self.optional_chain_result(object, result))
             }
             RawTypeofExpression::Super(expression) => {
                 let parent = self.resolve(&expression.parent);
@@ -232,6 +242,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeofExpression::Index(expression) => {
                 self.resolve_element_type_at_index(expression.object, expression.index)
             }
+            InferredTypeofExpression::OptionalChainIndex(expression) => self
+                .resolve_element_type_at_index(expression.object, expression.index)
+                .map(|result| self.optional_chain_result(expression.object, result)),
             InferredTypeofExpression::IterableValueOf(expression) => {
                 self.resolve_iterable_value_type(expression.ty)
             }
@@ -255,6 +268,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeofExpression::StaticMember(expression) => {
                 self.resolve_static_member_expression(expression.object, expression.member.text())
             }
+            InferredTypeofExpression::OptionalChainStaticMember(expression) => self
+                .resolve_static_member_expression(expression.object, expression.member.text())
+                .map(|result| self.optional_chain_result(expression.object, result)),
             InferredTypeofExpression::Super(expression) => {
                 Some(self.resolve_super_expression(expression.parent))
             }
@@ -1464,6 +1480,78 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
+    fn optional_chain_result(
+        &mut self,
+        object: InferredTypeData<'db>,
+        result: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        if self.type_contains_nullish(object) {
+            InferredTypeData::union_from_types(
+                self.db,
+                Vec::from([result, InferredTypeData::Undefined]),
+            )
+        } else {
+            result
+        }
+    }
+
+    fn type_contains_nullish(&mut self, ty: InferredTypeData<'db>) -> bool {
+        let mut seen = FxHashSet::default();
+        let mut pending = Vec::from([ty]);
+
+        for _ in 0..MAX_CONDITIONAL_TYPE_STEPS {
+            let Some(ty) = pending.pop() else {
+                return false;
+            };
+            let ty = self.resolve_inferred_type(ty);
+            if !seen.insert(ty) {
+                continue;
+            }
+            match ty {
+                InferredTypeData::Null
+                | InferredTypeData::Undefined
+                | InferredTypeData::VoidKeyword => return true,
+                InferredTypeData::Union(union) => {
+                    pending.extend(union.types(self.db).iter().copied());
+                }
+                InferredTypeData::Unknown
+                | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
+                | InferredTypeData::BigInt
+                | InferredTypeData::Boolean
+                | InferredTypeData::Number
+                | InferredTypeData::String
+                | InferredTypeData::Symbol
+                | InferredTypeData::Conditional
+                | InferredTypeData::Class(_)
+                | InferredTypeData::Constructor(_)
+                | InferredTypeData::Function(_)
+                | InferredTypeData::Interface(_)
+                | InferredTypeData::Module(_)
+                | InferredTypeData::Namespace(_)
+                | InferredTypeData::Object(_)
+                | InferredTypeData::Tuple(_)
+                | InferredTypeData::Generic(_)
+                | InferredTypeData::Local(_)
+                | InferredTypeData::Intersection(_)
+                | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::Literal(_)
+                | InferredTypeData::InstanceOf(_)
+                | InferredTypeData::MergedReference(_)
+                | InferredTypeData::TypeofExpression(_)
+                | InferredTypeData::TypeofType(_)
+                | InferredTypeData::TypeofValue(_)
+                | InferredTypeData::AnyKeyword
+                | InferredTypeData::NeverKeyword
+                | InferredTypeData::ObjectKeyword
+                | InferredTypeData::ThisKeyword
+                | InferredTypeData::UnknownKeyword => {}
+            }
+        }
+
+        false
+    }
+
     fn resolve_element_type_at_index(
         &mut self,
         subject: InferredTypeData<'db>,
@@ -1483,6 +1571,23 @@ impl<'db> ResolutionCtx<'db, '_> {
                     .type_parameters(self.db)
                     .first()
                     .map(|ty| self.optional_element_type(*ty, true))
+            }
+            InferredTypeData::Union(union) => {
+                let mut types = Vec::new();
+                for ty in union.types(self.db) {
+                    if matches!(
+                        self.resolve_inferred_type(*ty),
+                        InferredTypeData::Null
+                            | InferredTypeData::Undefined
+                            | InferredTypeData::VoidKeyword
+                    ) {
+                        continue;
+                    }
+                    if let Some(element_ty) = self.resolve_element_type_at_index(*ty, index) {
+                        types.push(element_ty);
+                    }
+                }
+                collected_type_result(self.db, types)
             }
             InferredTypeData::Unknown
             | InferredTypeData::Global
@@ -1505,7 +1610,6 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::Generic(_)
             | InferredTypeData::Local(_)
             | InferredTypeData::Intersection(_)
-            | InferredTypeData::Union(_)
             | InferredTypeData::TypeOperator(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::InstanceOf(_)

@@ -496,6 +496,15 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     ]]
                 )
             }
+            Self::OptionalChainIndex(expr) => {
+                write!(
+                    f,
+                    [&format_args![
+                        &expr.object,
+                        text(&std::format!("?.[{}]", expr.index), None),
+                    ]]
+                )
+            }
             Self::IterableValueOf(expr) => {
                 write!(
                     f,
@@ -547,6 +556,9 @@ impl Format<FormatTypeContext> for TypeofExpression {
             }
             Self::StaticMember(expr) => {
                 write!(f, [&format_args![&expr.object, token("."), &expr.member]])
+            }
+            Self::OptionalChainStaticMember(expr) => {
+                write!(f, [&format_args![&expr.object, token("?."), &expr.member]])
             }
             Self::Super(_) => write!(f, [&format_args![token("super")]]),
             Self::This(_) => write!(f, [&format_args![token("this")]]),

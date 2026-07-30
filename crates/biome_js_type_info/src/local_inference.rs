@@ -500,13 +500,16 @@ impl TypeData {
                         )),
                     ) => unescaped_text_from_token(member.value_token())
                         .map(|member| {
-                            Self::from(TypeofExpression::StaticMember(
-                                TypeofStaticMemberExpression {
-                                    object: resolver
-                                        .reference_to_resolved_expression(scope_id, &object),
-                                    member,
-                                },
-                            ))
+                            let expression = TypeofStaticMemberExpression {
+                                object: resolver
+                                    .reference_to_resolved_expression(scope_id, &object),
+                                member,
+                            };
+                            Self::from(if expr.is_optional_chain() {
+                                TypeofExpression::OptionalChainStaticMember(expression)
+                            } else {
+                                TypeofExpression::StaticMember(expression)
+                            })
                         })
                         .unwrap_or_default(),
                     (
@@ -517,11 +520,16 @@ impl TypeData {
                     ) => unescaped_text_from_token(member.value_token())
                         .map(|member| match member.parse() {
                             Ok(index) => {
-                                Self::from(TypeofExpression::Index(TypeofIndexExpression {
+                                let expression = TypeofIndexExpression {
                                     object: resolver
                                         .reference_to_resolved_expression(scope_id, &object),
                                     index,
-                                }))
+                                };
+                                Self::from(if expr.is_optional_chain() {
+                                    TypeofExpression::OptionalChainIndex(expression)
+                                } else {
+                                    TypeofExpression::Index(expression)
+                                })
                             }
                             Err(_) => Self::unknown(),
                         })
@@ -585,13 +593,15 @@ impl TypeData {
             {
                 (Ok(object), Ok(member)) => text_from_any_js_name(member)
                     .map(|member| {
-                        Self::from(TypeofExpression::StaticMember(
-                            TypeofStaticMemberExpression {
-                                object: resolver
-                                    .reference_to_resolved_expression(scope_id, &object),
-                                member,
-                            },
-                        ))
+                        let expression = TypeofStaticMemberExpression {
+                            object: resolver.reference_to_resolved_expression(scope_id, &object),
+                            member,
+                        };
+                        Self::from(if expr.is_optional_chain() {
+                            TypeofExpression::OptionalChainStaticMember(expression)
+                        } else {
+                            TypeofExpression::StaticMember(expression)
+                        })
                     })
                     .unwrap_or_default(),
                 _ => Self::unknown(),
