@@ -9,6 +9,9 @@ use crate::lexer::YamlLexer;
 pub(crate) struct YamlTokenSource<'source> {
     lexer: YamlLexer<'source>,
     trivia_list: Vec<Trivia>,
+    /// Whether a line break trivia sits between the current token and the
+    /// one before it
+    preceding_line_break: bool,
 }
 
 impl<'source> YamlTokenSource<'source> {
@@ -16,6 +19,7 @@ impl<'source> YamlTokenSource<'source> {
         Self {
             lexer,
             trivia_list: Vec::new(),
+            preceding_line_break: false,
         }
     }
 
@@ -27,8 +31,15 @@ impl<'source> YamlTokenSource<'source> {
         source
     }
 
+    /// The kind of the first upcoming token that is neither a property nor
+    /// trivia
+    pub(crate) fn kind_after_properties(&mut self) -> YamlSyntaxKind {
+        self.lexer.kind_after_properties()
+    }
+
     fn next_non_trivia_token(&mut self, first_token: bool) {
         let mut trailing = !first_token;
+        self.preceding_line_break = false;
 
         loop {
             let kind = self.lexer.next_token(());
@@ -43,6 +54,7 @@ impl<'source> YamlTokenSource<'source> {
                 Ok(trivia_kind) => {
                     if trivia_kind.is_newline() {
                         trailing = false;
+                        self.preceding_line_break = true;
                     }
 
                     self.trivia_list
@@ -69,7 +81,7 @@ impl TokenSource for YamlTokenSource<'_> {
     }
 
     fn has_preceding_line_break(&self) -> bool {
-        self.lexer.has_preceding_line_break()
+        self.preceding_line_break
     }
 
     fn bump(&mut self) {
