@@ -2409,6 +2409,11 @@ See https://biomejs.dev/linter/rules/no-excessive-selector-classes
 	 */
 	noExcessiveSelectorClasses?: NoExcessiveSelectorClassesConfiguration;
 	/**
+	* Disallow extending the prototype of built-in objects.
+See https://biomejs.dev/linter/rules/no-extend-native 
+	 */
+	noExtendNative?: NoExtendNativeConfiguration;
+	/**
 	* Require Promise-like statements to be handled appropriately.
 See https://biomejs.dev/linter/rules/no-floating-promises 
 	 */
@@ -4672,6 +4677,9 @@ export type NoExcessiveNestedCallbacksConfiguration =
 export type NoExcessiveSelectorClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveSelectorClassesOptions;
+export type NoExtendNativeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExtendNativeOptions;
 export type NoFloatingPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFloatingPromisesOptions;
@@ -6523,6 +6531,10 @@ export interface RuleWithNoExcessiveSelectorClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoExcessiveSelectorClassesOptions;
 }
+export interface RuleWithNoExtendNativeOptions {
+	level: RulePlainConfiguration;
+	options?: NoExtendNativeOptions;
+}
 export interface RuleWithNoFloatingPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8311,6 +8323,16 @@ Use `0` to disallow class selectors entirely.
 	 */
 	maxClasses?: number;
 }
+/**
+ * Options for the `noExtendNative` rule.
+ */
+export interface NoExtendNativeOptions {
+	/**
+	* Built-in names to ignore. Extending the prototype of an ignored
+name will not trigger this rule. 
+	 */
+	ignore?: string[];
+}
 export type NoFloatingPromisesOptions = {};
 export type NoIdenticalTestTitleOptions = {};
 export type NoImpliedEvalOptions = {};
@@ -9762,6 +9784,7 @@ export type Category =
 	| "lint/nursery/noEmptyObjectKeys"
 	| "lint/nursery/noExcessiveNestedCallbacks"
 	| "lint/nursery/noExcessiveSelectorClasses"
+	| "lint/nursery/noExtendNative"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noIdenticalTestTitle"
 	| "lint/nursery/noImplicitCoercion"

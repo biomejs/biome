@@ -4106,6 +4106,24 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoExtendNativeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoExtendNativeOptions" }
+			]
+		},
+		"NoExtendNativeOptions": {
+			"description": "Options for the `noExtendNative` rule.",
+			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "Built-in names to ignore. Extending the prototype of an ignored\nname will not trigger this rule.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoExtraBooleanCastConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6671,6 +6689,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExtendNative": {
+					"description": "Disallow extending the prototype of built-in objects.\nSee https://biomejs.dev/linter/rules/no-extend-native",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoExtendNativeConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noFloatingPromises": {
 					"description": "Require Promise-like statements to be handled appropriately.\nSee https://biomejs.dev/linter/rules/no-floating-promises",
 					"anyOf": [
@@ -8843,6 +8868,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoExportsInTestOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoExtendNativeOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoExtendNativeOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
