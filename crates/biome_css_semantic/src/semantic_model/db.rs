@@ -163,6 +163,24 @@ mod tests {
     }
 
     #[test]
+    fn incomplete_property_value_does_not_panic() {
+        let mut db = TestDb::new();
+        let file = make_file(&db, ".incomplete {\n  height: 1px\n}\n");
+
+        assert_eq!(rule_count(&db, file), 1);
+
+        let new_parsed = parse_css(
+            ".incomplete {\n  height:\n}\n",
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        )
+        .into();
+        salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+
+        assert_eq!(rule_count(&db, file), 1);
+    }
+
+    #[test]
     fn declaration_count_change_does_recompute_downstream() {
         let mut db = TestDb::new();
         let file = make_file(&db, "p { color: red; }");
