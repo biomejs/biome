@@ -138,7 +138,10 @@ fn is_useless_return_undefined(statement: &JsReturnStatement) -> bool {
     };
 
     matches!(
-        return_type.as_any_ts_type(),
+        return_type
+            .as_any_ts_type()
+            .cloned()
+            .map(AnyTsType::omit_parentheses),
         Some(AnyTsType::TsUndefinedType(_) | AnyTsType::TsVoidType(_))
     )
 }
