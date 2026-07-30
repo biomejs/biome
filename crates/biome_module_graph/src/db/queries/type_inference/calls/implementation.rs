@@ -890,6 +890,47 @@ fn merged_reference_targets<'db>(
     .collect()
 }
 
+fn resolve_callable_function<'db>(
+    db: &'db dyn ModuleDb,
+    mut ty: InferredTypeData<'db>,
+) -> Option<InferredFunction<'db>> {
+    let mut seen = FxHashSet::default();
+
+    for _ in 0..MAX_ARGUMENT_TYPE_STEPS {
+        ty = resolve_local_type_on_demand(db, ty);
+        if !seen.insert(ty) {
+            return None;
+        }
+
+        ty = match ty {
+            InferredTypeData::Function(function) => return Some(function),
+            InferredTypeData::InstanceOf(instance) => {
+                let target = resolve_local_type_on_demand(db, instance.ty(db));
+                let substitutions =
+                    substitutions_for_instance(db, target, instance.type_parameters(db), &[]);
+                apply_substitutions_to_root_body(db, target, &substitutions)
+            }
+            InferredTypeData::Interface(interface) => {
+                interface
+                    .members(db)
+                    .iter()
+                    .find(|member| member.kind.is_call_signature())?
+                    .ty
+            }
+            InferredTypeData::Object(object) => {
+                object
+                    .members(db)
+                    .iter()
+                    .find(|member| member.kind.is_call_signature())?
+                    .ty
+            }
+            _ => return None,
+        };
+    }
+
+    None
+}
+
 /// A directional relation between an expected parameter type and an actual argument type.
 ///
 /// Union and intersection decomposition depend on which side contains the
@@ -919,8 +960,8 @@ impl<'db> ArgumentTypeCompatibility<'db> {
         }
 
         match (
-            self.parameter_ty.callable_function(db),
-            self.argument_ty.callable_function(db),
+            resolve_callable_function(db, self.parameter_ty),
+            resolve_callable_function(db, self.argument_ty),
         ) {
             (Some(parameter_function), Some(argument_function)) => {
                 parameter_function.returns_promise(db) == argument_function.returns_promise(db)
