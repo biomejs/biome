@@ -106,6 +106,7 @@ pub mod no_excessive_selector_classes;
 pub mod no_explicit_any;
 pub mod no_exported_imports;
 pub mod no_exports_in_test;
+pub mod no_extend_native;
 pub mod no_extra_boolean_cast;
 pub mod no_extra_non_null_assertion;
 pub mod no_fallthrough_switch_clause;
