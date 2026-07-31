@@ -23,9 +23,10 @@ anchored: &default # This key
 
 ```yaml
 single: !!str # comment
-123
-plain2: !!str # one
-# two
+  123
+plain2: !!str
+  # one
+  # two
   hello
 flowtag: !!map # comment
   {}

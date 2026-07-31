@@ -1,8 +1,10 @@
-use std::collections::LinkedList;
+use std::collections::{LinkedList, VecDeque};
 
 use biome_parser::{
+    TokenSet,
     diagnostic::ParseDiagnostic,
     lexer::{Lexer, LexerCheckpoint},
+    token_set,
 };
 use biome_rowan::{TextLen, TextRange, TextSize};
 use biome_unicode_table::{Dispatch::WHS, lookup_byte};
@@ -23,7 +25,7 @@ pub(crate) struct YamlLexer<'src> {
     scopes: Vec<BlockScope>,
 
     /// Cache of tokens to be emitted to the parser
-    tokens: LinkedList<LexToken>,
+    tokens: VecDeque<LexToken>,
 }
 
 impl<'src> YamlLexer<'src> {
@@ -33,7 +35,38 @@ impl<'src> YamlLexer<'src> {
             diagnostics: Vec::new(),
             scopes: Default::default(),
             current_coordinate: Default::default(),
-            tokens: LexToken::default().into(),
+            tokens: VecDeque::from([LexToken::default()]),
+        }
+    }
+
+    /// The kind of the first buffered token that is neither a property nor
+    /// trivia, lexing further ahead as needed. The tokens stay buffered, so
+    /// consuming them later is unaffected
+    pub(crate) fn kind_after_properties(&mut self) -> YamlSyntaxKind {
+        /// The tokens the lookahead skips over: the properties themselves
+        /// and the trivia between them
+        const SKIPPED: TokenSet<YamlSyntaxKind> = token_set![
+            ANCHOR_PROPERTY_LITERAL,
+            TAG_PROPERTY_LITERAL,
+            WHITESPACE,
+            NEWLINE,
+            COMMENT
+        ];
+
+        let mut index = 0;
+        loop {
+            while self.tokens.len() <= index {
+                let before = self.tokens.len();
+                self.consume_tokens();
+                if self.tokens.len() == before {
+                    return EOF;
+                }
+            }
+            match self.tokens.get(index).map(|token| token.kind) {
+                Some(kind) if SKIPPED.contains(kind) => index += 1,
+                Some(kind) => return kind,
+                None => return EOF,
+            }
         }
     }
 
@@ -49,8 +82,8 @@ impl<'src> YamlLexer<'src> {
     /// ```
     fn consume_tokens(&mut self) {
         let Some(current) = self.current_byte() else {
-            let mut tokens = self.close_all_scopes();
-            self.tokens.append(&mut tokens);
+            let tokens = self.close_all_scopes();
+            self.tokens.extend(tokens);
             self.tokens
                 .push_back(LexToken::pseudo(EOF, self.current_coordinate));
             return;
@@ -58,7 +91,7 @@ impl<'src> YamlLexer<'src> {
 
         let start = self.text_position();
 
-        let mut tokens = match current {
+        let tokens = match current {
             c if is_break(c) => self.evaluate_block_scope(),
             c if is_space(c) => self.consume_whitespace_token().into(),
             b'#' => self.consume_comment().into(),
@@ -78,7 +111,7 @@ impl<'src> YamlLexer<'src> {
             b'|' | b'>' => self.consume_block_scalar(current),
             _ => self.consume_unexpected_token().into(),
         };
-        self.tokens.append(&mut tokens);
+        self.tokens.extend(tokens);
 
         debug_assert!(self.text_position() > start, "Lexer did not advance");
     }
@@ -139,6 +172,23 @@ impl<'src> YamlLexer<'src> {
     ) -> LinkedList<LexToken> {
         debug_assert!(maybe_at_mapping_start(current, self.peek_byte()));
 
+        // When the properties sit on lines of their own above the key, they
+        // belong to the mapping rather than the key, and the mapping's
+        // indentation is set by the key's column, not theirs:
+        //
+        // ```yaml
+        // key: &anchor
+        //   a: 1
+        // ```
+        let key_coordinate = self.current_coordinate;
+        let same_line = start_coordinate.offset - start_coordinate.column
+            == key_coordinate.offset - key_coordinate.column;
+        let scope_coordinate = if same_line {
+            start_coordinate
+        } else {
+            key_coordinate
+        };
+
         let mut tokens = properties;
         let mut potential_mapping_keys = self.consume_potential_mapping_key(current);
         tokens.append(&mut potential_mapping_keys);
@@ -151,14 +201,14 @@ impl<'src> YamlLexer<'src> {
         if self
             .scopes
             .last()
-            .is_none_or(|scope| scope.indent(start_coordinate))
+            .is_none_or(|scope| scope.indent(scope_coordinate))
         {
             if self.is_at_mapping_indicator() {
                 let indicator = self.consume_byte_as_token(T![:]);
                 tokens.push_front(LexToken::pseudo(MAPPING_START, start_coordinate));
                 tokens.push_back(indicator);
                 self.scopes
-                    .push(BlockScope::new_mapping_scope(start_coordinate));
+                    .push(BlockScope::new_mapping_scope(scope_coordinate));
             } else {
                 // Just a normal flow value
                 tokens.push_front(LexToken::pseudo(FLOW_START, start_coordinate));
@@ -772,14 +822,40 @@ impl<'src> YamlLexer<'src> {
             return properties;
         }
 
-        if maybe_at_mapping_start(current, self.peek_byte())
-            && self.current_coordinate.column >= start_column
-        {
-            // properties of flow collection/scalar that could be a mapping key
-            self.consume_potential_mapping_start(current, properties, start_coordinate)
-        } else {
-            properties
+        if maybe_at_mapping_start(current, self.peek_byte()) {
+            if self.current_coordinate.column >= start_column {
+                // properties of flow collection/scalar that could be a mapping key
+                return self.consume_potential_mapping_start(current, properties, start_coordinate);
+            }
+
+            // The value can be on the line below its properties:
+            //
+            // ```yaml
+            // key: &anchor
+            //   value
+            // ```
+            //
+            // Read the value to check whether `:` follows it. If so, the value
+            // is actually the key of a nested mapping. Move back so it can be
+            // read again as a key, and remove any errors found during the
+            // first read so they are not reported twice.
+            let saved_coordinate = self.current_coordinate;
+            let saved_diagnostics = self.diagnostics.len();
+            let mut value_tokens = self.consume_potential_mapping_key(current);
+            let mut trivia = self.consume_trivia(true);
+            if self.is_at_mapping_indicator() {
+                self.current_coordinate = saved_coordinate;
+                self.diagnostics.truncate(saved_diagnostics);
+                return properties;
+            }
+            let mut tokens = properties;
+            tokens.push_front(LexToken::pseudo(FLOW_START, start_coordinate));
+            tokens.append(&mut value_tokens);
+            tokens.append(&mut trivia);
+            tokens.push_back(LexToken::pseudo(FLOW_END, self.current_coordinate));
+            return tokens;
         }
+        properties
     }
 
     fn consume_alias_node(&mut self) -> LexToken {
