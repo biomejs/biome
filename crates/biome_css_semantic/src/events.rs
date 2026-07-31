@@ -1,9 +1,13 @@
 use biome_css_syntax::{
-    AnyCssDashedIdentifier, AnyCssDeclarationName, AnyCssGenericPropertyValueOrExpression,
-    AnyCssProperty, AnyCssSelector, CssDeclaration, CssPropertyAtRule, CssRelativeSelector,
-    CssSyntaxKind::*,
+    AnyCssDashedIdentifier, AnyCssDeclarationName, AnyCssGenericComponentValue,
+    AnyCssGenericPropertyValueOrExpression, AnyCssProperty, AnyCssSelector, AnyCssValue,
+    CssDashedIdentifier, CssDeclaration, CssPropertyAtRule, CssRelativeSelector, CssSyntaxKind::*,
 };
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeOptionExt, TextRange};
+use biome_property_codec::{
+    PropertySyntaxDiagnostic, PropertySyntaxErrorKind, PropertySyntaxParseDiagnostic,
+    PropertySyntaxResult, encode,
+};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxNodeOptionExt, TextRange};
 use std::collections::VecDeque;
 
 use crate::model::{AnyCssSelectorLike, AnyRuleStart};
@@ -34,9 +38,9 @@ pub enum SemanticEvent {
     RootSelectorEnd,
     /// Indicates the start of an `@property` rule
     AtProperty {
-        property: CssProperty,
+        property: CssDashedIdentifier,
         initial_value: Option<CssPropertyInitialValueKind>,
-        syntax: Option<String>,
+        syntax: PropertySyntaxResult,
         inherits: Option<bool>,
         range: TextRange,
     },
@@ -222,7 +226,7 @@ impl SemanticEventExtractor {
         };
 
         let mut initial_value = None;
-        let mut syntax = None;
+        let mut syntax = PropertySyntaxResult::Missing;
         let mut inherits = None;
 
         for declaration in decls.declarations().into_iter().filter_map(|d| {
@@ -233,42 +237,45 @@ impl SemanticEventExtractor {
                 declaration.property()
                 && let Ok(prop_name) = prop.name()
             {
-                match prop_name.to_trimmed_string().as_str() {
-                    "initial-value" => {
-                        let Ok(value) = prop.value() else {
-                            continue;
-                        };
-                        initial_value = Some(match value {
-                            AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(value) => {
-                                CssPropertyInitialValueKind::from(value)
-                            }
-                            AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(
-                                list,
-                            ) => CssPropertyInitialValueKind::from(list),
-                            AnyCssGenericPropertyValueOrExpression::ScssExpression(expr) => {
-                                CssPropertyInitialValueKind::from(expr)
-                            }
-                        });
-                    }
-                    "syntax" => {
-                        let Ok(value) = prop.value() else {
-                            continue;
-                        };
-                        syntax = Some(value.to_trimmed_string().clone());
-                    }
-                    "inherits" => {
-                        let Ok(value) = prop.value() else {
-                            continue;
-                        };
-                        inherits = Some(value.to_trimmed_string().eq_ignore_ascii_case("true"));
-                    }
-                    _ => {}
+                let prop_name = prop_name.to_trimmed_string();
+                if prop_name.eq_ignore_ascii_case("initial-value") {
+                    let Ok(value) = prop.value() else {
+                        continue;
+                    };
+                    initial_value = Some(match value {
+                        AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(value) => {
+                            CssPropertyInitialValueKind::from(value)
+                        }
+                        AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(
+                            list,
+                        ) => CssPropertyInitialValueKind::from(list),
+                        AnyCssGenericPropertyValueOrExpression::ScssExpression(expr) => {
+                            CssPropertyInitialValueKind::from(expr)
+                        }
+                    });
+                } else if prop_name.eq_ignore_ascii_case("syntax") {
+                    let Ok(value) = prop.value() else {
+                        continue;
+                    };
+                    syntax = parse_property_syntax(value);
+                } else if prop_name.eq_ignore_ascii_case("inherits") {
+                    let Ok(value) = prop.value() else {
+                        continue;
+                    };
+                    let value = value.to_trimmed_string();
+                    inherits = if value.eq_ignore_ascii_case("true") {
+                        Some(true)
+                    } else if value.eq_ignore_ascii_case("false") {
+                        Some(false)
+                    } else {
+                        None
+                    };
                 }
             }
         }
 
         self.stash.push_back(SemanticEvent::AtProperty {
-            property: CssProperty::from(property_name),
+            property: property_name,
             initial_value,
             syntax,
             inherits,
@@ -303,4 +310,27 @@ impl SemanticEventExtractor {
     pub fn pop(&mut self) -> Option<SemanticEvent> {
         self.stash.pop_front()
     }
+}
+
+fn parse_property_syntax(value: AnyCssGenericPropertyValueOrExpression) -> PropertySyntaxResult {
+    let range = value.range();
+    let Some(list) = value.as_css_generic_component_value_list() else {
+        return invalid_property_syntax(range);
+    };
+    let mut components = list.iter();
+    let Some(AnyCssGenericComponentValue::AnyCssValue(AnyCssValue::CssString(string))) =
+        components.next()
+    else {
+        return invalid_property_syntax(range);
+    };
+    if components.next().is_some() {
+        return invalid_property_syntax(range);
+    }
+    encode(&string)
+}
+
+fn invalid_property_syntax(range: TextRange) -> PropertySyntaxResult {
+    PropertySyntaxResult::Error(PropertySyntaxDiagnostic::Parse(
+        PropertySyntaxParseDiagnostic::new(PropertySyntaxErrorKind::ExpectedString, range),
+    ))
 }

@@ -4,8 +4,8 @@ use rustc_hash::FxHashMap;
 use std::collections::BTreeMap;
 
 use super::model::{
-    CssGlobalCustomVariableData, CssModelDeclarationData, ResolvedSelector, RuleData, RuleId,
-    SelectorData, SemanticModel, SemanticModelData, Specificity, selector_tokens,
+    CssGlobalCustomVariableData, CssModelDeclarationData, CssPropertyAtRuleData, ResolvedSelector,
+    RuleData, RuleId, SelectorData, SemanticModel, SemanticModelData, Specificity, selector_tokens,
 };
 use crate::events::SemanticEvent;
 use crate::model::AnyRuleStart;
@@ -231,15 +231,16 @@ impl SemanticModelBuilder {
                     && let Ok(property_name) = property.value()
                 {
                     if is_global_var {
-                        self.global_custom_variables.insert(
-                            property_name.clone(),
-                            CssGlobalCustomVariableData::Root(CssModelDeclarationData {
-                                declaration: AstPtr::new(&node),
-                                property: AstPtr::new(&property),
-                                value: value.clone(),
-                                property_name: property_name.clone(),
-                            }),
-                        );
+                        let variable = self
+                            .global_custom_variables
+                            .entry(property_name.clone())
+                            .or_default();
+                        variable.root = Some(CssModelDeclarationData {
+                            declaration: AstPtr::new(&node),
+                            property: AstPtr::new(&property),
+                            value: value.clone(),
+                            property_name: property_name.clone(),
+                        });
                     }
                     let current_rule = &mut self.all_rules[current_rule_id.index()];
                     current_rule.declarations.push(CssModelDeclarationData {
@@ -263,17 +264,19 @@ impl SemanticModelBuilder {
                 inherits,
                 range,
             } => {
-                if let Ok(property_name) = property.value() {
-                    self.global_custom_variables.insert(
-                        property_name,
-                        CssGlobalCustomVariableData::AtProperty {
-                            _property: AstPtr::new(&property),
-                            initial_value,
-                            syntax,
-                            inherits,
-                            _range: range,
-                        },
-                    );
+                if let Ok(property_name) = property.value_token() {
+                    let property_name = property_name.token_text_trimmed();
+                    let variable = self
+                        .global_custom_variables
+                        .entry(property_name)
+                        .or_default();
+                    variable.at_property = Some(CssPropertyAtRuleData {
+                        property: AstPtr::new(&property),
+                        initial_value,
+                        syntax,
+                        inherits,
+                        range,
+                    });
                 }
             }
         }

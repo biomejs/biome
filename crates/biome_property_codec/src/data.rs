@@ -7,7 +7,6 @@ use biome_formatter::{
     write,
 };
 use biome_rowan::TextRange;
-use biome_unicode_table::is_css_non_ascii;
 
 // #region Data structure definition
 
@@ -20,6 +19,30 @@ pub enum PropertySyntaxResult {
     Error(PropertySyntaxDiagnostic),
     /// The parsed and normalized descriptor value.
     Value(PropertySyntax),
+}
+
+impl PropertySyntaxResult {
+    /// Compares parsed descriptor semantics without considering source ranges.
+    pub fn semantic_eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Missing, Self::Missing) => true,
+            (Self::Error(left), Self::Error(right)) => left.kind() == right.kind(),
+            (
+                Self::Value(PropertySyntax::Universal { .. }),
+                Self::Value(PropertySyntax::Universal { .. }),
+            ) => true,
+            (
+                Self::Value(PropertySyntax::Components(left)),
+                Self::Value(PropertySyntax::Components(right)),
+            ) => {
+                left.len() == right.len()
+                    && left.iter().zip(right).all(|(left, right)| {
+                        left.name == right.name && left.multiplier == right.multiplier
+                    })
+            }
+            _ => false,
+        }
+    }
 }
 
 /// A diagnostic produced while processing an `@property` `syntax` descriptor.
@@ -60,7 +83,8 @@ pub struct PropertySyntaxParseDiagnostic {
 }
 
 impl PropertySyntaxParseDiagnostic {
-    pub(crate) const fn new(kind: PropertySyntaxErrorKind, range: TextRange) -> Self {
+    /// Creates a parse diagnostic for `kind` at an absolute source `range`.
+    pub const fn new(kind: PropertySyntaxErrorKind, range: TextRange) -> Self {
         Self { kind, range }
     }
 }
@@ -72,6 +96,8 @@ pub enum PropertySyntaxErrorKind {
     Empty,
     /// A component is missing where the grammar requires one.
     ExpectedComponent,
+    /// The descriptor value is not a CSS string.
+    ExpectedString,
     /// Adjacent components are not separated by `|`.
     ExpectedPipe,
     /// A data type name is missing, malformed, or unsupported.
@@ -91,6 +117,7 @@ impl std::fmt::Display for PropertySyntaxErrorKind {
         match self {
             Self::Empty => fmt.write_str("The property syntax cannot be empty."),
             Self::ExpectedComponent => fmt.write_str("Expected a property syntax component."),
+            Self::ExpectedString => fmt.write_str("Use a string for the property syntax."),
             Self::ExpectedPipe => fmt.write_str("Separate property syntax components with `|`."),
             Self::ExpectedTypeName => fmt.write_str("Use a supported property syntax type."),
             Self::InvalidCustomIdentifier => {
@@ -114,6 +141,7 @@ impl biome_console::fmt::Display for PropertySyntaxErrorKind {
         match self {
             Self::Empty => fmt.write_str("The property syntax cannot be empty."),
             Self::ExpectedComponent => fmt.write_str("Expected a property syntax component."),
+            Self::ExpectedString => fmt.write_str("Use a string for the property syntax."),
             Self::ExpectedPipe => fmt.write_markup(biome_console::markup! {
                 "Separate property syntax components with "<Emphasis>"|"</Emphasis>"."
             }),
@@ -151,6 +179,7 @@ impl Advices for PropertySyntaxErrorKind {
                     ", or a custom identifier at this position."
                 },
             ),
+            Self::ExpectedString => Ok(()),
             Self::ExpectedTypeName => {
                 visitor.record_log(
                     LogCategory::Info,
@@ -312,27 +341,6 @@ impl PropertySyntaxType {
             Self::Url => "url",
         }
     }
-
-    pub(crate) fn from_name(name: &[u8]) -> Option<Self> {
-        Some(match name {
-            b"angle" => Self::Angle,
-            b"color" => Self::Color,
-            b"custom-ident" => Self::CustomIdent,
-            b"image" => Self::Image,
-            b"integer" => Self::Integer,
-            b"length" => Self::Length,
-            b"length-percentage" => Self::LengthPercentage,
-            b"number" => Self::Number,
-            b"percentage" => Self::Percentage,
-            b"resolution" => Self::Resolution,
-            b"string" => Self::String,
-            b"time" => Self::Time,
-            b"transform-function" => Self::TransformFunction,
-            b"transform-list" => Self::TransformList,
-            b"url" => Self::Url,
-            _ => return None,
-        })
-    }
 }
 
 impl biome_console::fmt::Display for PropertySyntaxType {
@@ -478,8 +486,7 @@ impl Format<PropertyFmtContext> for FormatCustomIdentifier<'_> {
             let requires_hex_escape = byte <= 0x1f
                 || byte == 0x7f
                 || (index == 0 && byte.is_ascii_digit())
-                || (index == 1 && bytes[0] == b'-' && byte.is_ascii_digit())
-                || (byte >= 0x80 && !char::from_u32(code_point).is_some_and(is_css_non_ascii));
+                || (index == 1 && bytes[0] == b'-' && byte.is_ascii_digit());
             let requires_simple_escape = (bytes.len() == 1 && byte == b'-')
                 || (byte.is_ascii()
                     && !byte.is_ascii_alphanumeric()

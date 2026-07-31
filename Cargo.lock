@@ -447,6 +447,7 @@ dependencies = [
  "biome_db",
  "biome_formatter",
  "biome_languages",
+ "biome_property_codec",
  "biome_rowan",
  "biome_string_case",
  "camino",
