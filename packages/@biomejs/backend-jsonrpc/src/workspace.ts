@@ -10519,7 +10519,8 @@ export type SvelteEmbeddingKind =
 	| "Expression"
 	| "SnippetSignature"
 	| "LegacyConst"
-	| "Declaration";
+	| "Declaration"
+	| "GenericsDeclaration";
 export type SvelteFileKind = "Component" | "SourceModule";
 export type EmbeddingHtmlKind =
 	| "None"

@@ -56,6 +56,7 @@ AnyJsRoot =
 	| JsExpressionTemplateRoot
 	| JsSvelteSnippetRoot
 	| JsSvelteDeclarationRoot
+	| JsSvelteGenericsRoot
 
 JsScript =
 	bom: 'UNICODE_BOM'?
@@ -96,6 +97,11 @@ JsSvelteSnippetRoot =
 JsSvelteDeclarationRoot =
 		declaration: JsVariableDeclaration
 		semicolon: ';'?
+		eof: 'EOF'
+
+// Special root created for Svelte's `<script generics="...">` attribute
+JsSvelteGenericsRoot =
+		type_parameters: TsTypeParameterList
 		eof: 'EOF'
 
 JsDirective =

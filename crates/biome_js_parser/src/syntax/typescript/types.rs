@@ -245,7 +245,7 @@ pub(crate) fn parse_ts_type_parameters(p: &mut JsParser, context: TypeContext) -
     Present(m.complete(p, TS_TYPE_PARAMETERS))
 }
 
-struct TsTypeParameterList(TypeContext);
+pub(crate) struct TsTypeParameterList(pub(crate) TypeContext);
 
 impl ParseSeparatedList for TsTypeParameterList {
     type Kind = JsSyntaxKind;

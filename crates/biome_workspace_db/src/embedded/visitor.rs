@@ -15,13 +15,14 @@ use biome_js_syntax::{
     AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsRoot, AnyJsStatement,
     AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression, JsCallExpression, JsExport,
     JsImport, JsModuleItemList, JsReferenceIdentifier, JsStaticMemberExpression,
-    JsSvelteDeclarationRoot, JsSvelteSnippetRoot, JsVariableStatement, JsxReferenceIdentifier,
+    JsSvelteDeclarationRoot, JsSvelteGenericsRoot, JsSvelteSnippetRoot, JsSyntaxNode,
+    JsVariableStatement, JsxReferenceIdentifier,
 };
 use biome_languages::html::HtmlVariant;
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind};
 use biome_languages::{HtmlFileSource, JsFileSource, LanguageDb};
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
-use std::collections::VecDeque;
+use std::collections::{HashSet, VecDeque};
 
 #[derive(Debug, Default, Clone, Copy)]
 enum EmbeddedBlockKind {
@@ -171,7 +172,12 @@ fn collect_embedded_references(
         // one module and share a top-level scope, so a binding used only in
         // the other block must still count as used.
         if !js_file_source.is_embedded_source() || is_svelte {
-            builder.visit_non_source_snippet(&snippet.parsed(db).tree());
+            let root: AnyJsRoot = snippet.parsed(db).tree();
+            if let Some(generics_root) = root.as_js_svelte_generics_root() {
+                builder.visit_svelte_generics_root(generics_root);
+            } else {
+                builder.visit_non_source_snippet(&root);
+            }
         }
     }
 
@@ -1302,5 +1308,38 @@ impl EmbeddedReferencesBuilder {
             self.visit_reference_identifier(reference.clone())?;
         }
         Some(())
+    }
+
+    /// A type parameter's own name is in scope for the rest of the list
+    /// (e.g. `<T, U extends T>`), so it must not be registered as a
+    /// reference to an unrelated import of the same name.
+    fn visit_svelte_generics_root(&mut self, root: &JsSvelteGenericsRoot) {
+        let declared_type_parameters: HashSet<TokenText> = root
+            .type_parameters()
+            .iter()
+            .flatten()
+            .filter_map(|parameter| parameter.name().and_then(|name| name.ident_token()).ok())
+            .map(|token| token.token_text_trimmed())
+            .collect();
+
+        for event in root.syntax().preorder() {
+            let WalkEvent::Enter(node) = event else {
+                continue;
+            };
+            self.visit_svelte_generics_reference(&node, &declared_type_parameters);
+        }
+    }
+
+    fn visit_svelte_generics_reference(
+        &mut self,
+        node: &JsSyntaxNode,
+        declared_type_parameters: &HashSet<TokenText>,
+    ) -> Option<()> {
+        let reference = JsReferenceIdentifier::cast_ref(node)?;
+        let name_token = reference.value_token().ok()?;
+        if declared_type_parameters.contains(&name_token.token_text_trimmed()) {
+            return None;
+        }
+        self.visit_reference_identifier(reference)
     }
 }

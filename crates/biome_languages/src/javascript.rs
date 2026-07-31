@@ -161,6 +161,9 @@ pub enum SvelteEmbeddingKind {
     /// The snippet includes the keyword and must contain one `let` or `const`
     /// variable declaration, an optional semicolon, and no trailing code.
     Declaration,
+    /// The value of a `<script generics="...">` attribute, a bare comma-separated
+    /// list of type parameters with no surrounding `<` `>`.
+    GenericsDeclaration,
 }
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -244,6 +247,15 @@ impl JsEmbeddingKind {
             self,
             Self::Svelte {
                 embedding_kind: SvelteEmbeddingKind::SnippetSignature,
+                ..
+            }
+        )
+    }
+    pub const fn is_svelte_generics_declaration(&self) -> bool {
+        matches!(
+            self,
+            Self::Svelte {
+                embedding_kind: SvelteEmbeddingKind::GenericsDeclaration,
                 ..
             }
         )
@@ -479,7 +491,8 @@ impl JsFileSource {
             JsEmbeddingKind::Svelte {
                 embedding_kind: SvelteEmbeddingKind::Expression
                     | SvelteEmbeddingKind::SnippetSignature
-                    | SvelteEmbeddingKind::LegacyConst,
+                    | SvelteEmbeddingKind::LegacyConst
+                    | SvelteEmbeddingKind::GenericsDeclaration,
                 ..
             } | JsEmbeddingKind::Vue {
                 allow_statements: false,

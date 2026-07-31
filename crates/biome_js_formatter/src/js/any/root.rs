@@ -13,6 +13,7 @@ impl FormatRule<AnyJsRoot> for FormatAnyJsRoot {
             AnyJsRoot::JsModule(node) => node.format().fmt(f),
             AnyJsRoot::JsScript(node) => node.format().fmt(f),
             AnyJsRoot::JsSvelteDeclarationRoot(node) => node.format().fmt(f),
+            AnyJsRoot::JsSvelteGenericsRoot(node) => node.format().fmt(f),
             AnyJsRoot::JsSvelteSnippetRoot(node) => node.format().fmt(f),
             AnyJsRoot::TsDeclarationModule(node) => node.format().fmt(f),
         }

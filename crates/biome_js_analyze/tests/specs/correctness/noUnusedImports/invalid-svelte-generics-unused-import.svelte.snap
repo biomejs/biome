@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid-svelte-generics-unused-import.svelte
+---
+# Input
+```svelte
+<script lang="ts" generics="T extends UsedType">
+import type { UnusedType, UsedType } from "./types";
+</script>
+
+<div></div>
+
+```
+
+# Diagnostics
+```
+invalid-svelte-generics-unused-import.svelte:2:15 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+    1 │ <script lang="ts" generics="T extends UsedType">
+  > 2 │ import type { UnusedType, UsedType } from "./types";
+      │               ^^^^^^^^^^
+    3 │ </script>
+    4 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    2 │ import·type·{·UnusedType,·UsedType·}·from·"./types";
+      │               ------------                          
+
+```

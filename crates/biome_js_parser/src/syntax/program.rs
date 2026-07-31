@@ -10,10 +10,11 @@ use crate::syntax::expr::{ExpressionContext, parse_expression};
 use crate::syntax::function::{ParameterContext, parse_parameter_list};
 use crate::syntax::js_parse_error;
 use crate::syntax::stmt::parse_directives;
-use crate::syntax::typescript::TypeContext;
+use crate::syntax::typescript::{TsTypeParameterList, TypeContext};
 use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::{JsSyntaxKind, T};
 use biome_languages::javascript::ModuleKind;
+use biome_parser::parse_lists::ParseSeparatedList;
 // test_err js unterminated_unicode_codepoint
 // let s = "\u{200";
 
@@ -109,6 +110,12 @@ fn parse_template_expression(p: &mut JsParser, m: Marker) -> CompletedMarker {
         .is_svelte_function_signature()
     {
         return parse_snippet_signature(p, m);
+    }
+    if p.source_type()
+        .as_embedding_kind()
+        .is_svelte_generics_declaration()
+    {
+        return parse_svelte_generics(p, m);
     }
     // Parse as a single expression with default context
     // This allows { } to be parsed as object literals, not block statements
@@ -228,4 +235,60 @@ fn parse_snippet_signature(p: &mut JsParser, m: Marker) -> CompletedMarker {
     }
 
     m.complete(p, JS_SVELTE_SNIPPET_ROOT)
+}
+
+/// Parses the value of a Svelte `<script generics="T extends unknown">` attribute:
+/// a bare, comma-separated list of type parameters with no surrounding `<` `>`.
+fn parse_svelte_generics(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    TsTypeParameterList(TypeContext::default()).parse_list(p);
+
+    if !p.at(EOF) {
+        p.error(js_parse_error::template_expression_trailing_code(
+            p,
+            p.cur_range(),
+        ));
+        while !p.at(EOF) {
+            p.bump_any();
+        }
+    }
+
+    m.complete(p, JS_SVELTE_GENERICS_ROOT)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::JsParserOptions;
+    use biome_languages::JsFileSource;
+    use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
+
+    fn generics_source_type() -> JsFileSource {
+        JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Svelte {
+            file_kind: SvelteFileKind::Component,
+            embedding_kind: SvelteEmbeddingKind::GenericsDeclaration,
+        })
+    }
+
+    #[test]
+    fn svelte_generics_declaration_parses_bare_type_parameter_list() {
+        let parse = crate::parse(
+            "T extends unknown, U = string",
+            generics_source_type(),
+            JsParserOptions::default(),
+        );
+        assert!(
+            !parse.has_errors(),
+            "expected no diagnostics, got {:?}",
+            parse.diagnostics()
+        );
+    }
+
+    #[test]
+    fn svelte_generics_declaration_reports_syntax_errors() {
+        let parse = crate::parse(
+            "T extnds Something",
+            generics_source_type(),
+            JsParserOptions::default(),
+        );
+        assert!(parse.has_errors());
+    }
 }
