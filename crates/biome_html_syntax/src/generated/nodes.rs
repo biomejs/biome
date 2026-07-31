@@ -325,6 +325,136 @@ pub struct AngularDeferBlockFields {
     pub error_clause: Option<AngularErrorClause>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularDeferHydrateNeverClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularDeferHydrateNeverClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularDeferHydrateNeverClauseFields {
+        AngularDeferHydrateNeverClauseFields {
+            hydrate_token: self.hydrate_token(),
+            never_token: self.never_token(),
+        }
+    }
+    pub fn hydrate_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn never_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for AngularDeferHydrateNeverClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularDeferHydrateNeverClauseFields {
+    pub hydrate_token: SyntaxResult<SyntaxToken>,
+    pub never_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularDeferHydrateOnClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularDeferHydrateOnClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularDeferHydrateOnClauseFields {
+        AngularDeferHydrateOnClauseFields {
+            hydrate_token: self.hydrate_token(),
+            on_token: self.on_token(),
+            expression: self.expression(),
+        }
+    }
+    pub fn hydrate_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn on_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AngularDeferHydrateOnClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularDeferHydrateOnClauseFields {
+    pub hydrate_token: SyntaxResult<SyntaxToken>,
+    pub on_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<HtmlTextExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularDeferHydrateWhenClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularDeferHydrateWhenClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularDeferHydrateWhenClauseFields {
+        AngularDeferHydrateWhenClauseFields {
+            hydrate_token: self.hydrate_token(),
+            when_token: self.when_token(),
+            expression: self.expression(),
+        }
+    }
+    pub fn hydrate_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn when_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AngularDeferHydrateWhenClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularDeferHydrateWhenClauseFields {
+    pub hydrate_token: SyntaxResult<SyntaxToken>,
+    pub when_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<HtmlTextExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AngularDeferOnClause {
     pub(crate) syntax: SyntaxNode,
 }
@@ -6546,12 +6676,33 @@ impl AnyAngularDefaultClauseBody {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyAngularDeferClause {
+    AngularDeferHydrateNeverClause(AngularDeferHydrateNeverClause),
+    AngularDeferHydrateOnClause(AngularDeferHydrateOnClause),
+    AngularDeferHydrateWhenClause(AngularDeferHydrateWhenClause),
     AngularDeferOnClause(AngularDeferOnClause),
     AngularDeferPrefetchOnClause(AngularDeferPrefetchOnClause),
     AngularDeferPrefetchWhenClause(AngularDeferPrefetchWhenClause),
     AngularDeferWhenClause(AngularDeferWhenClause),
 }
 impl AnyAngularDeferClause {
+    pub fn as_angular_defer_hydrate_never_clause(&self) -> Option<&AngularDeferHydrateNeverClause> {
+        match &self {
+            Self::AngularDeferHydrateNeverClause(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_angular_defer_hydrate_on_clause(&self) -> Option<&AngularDeferHydrateOnClause> {
+        match &self {
+            Self::AngularDeferHydrateOnClause(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_angular_defer_hydrate_when_clause(&self) -> Option<&AngularDeferHydrateWhenClause> {
+        match &self {
+            Self::AngularDeferHydrateWhenClause(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_angular_defer_on_clause(&self) -> Option<&AngularDeferOnClause> {
         match &self {
             Self::AngularDeferOnClause(item) => Some(item),
@@ -7839,6 +7990,164 @@ impl From<AngularDeferBlock> for SyntaxNode {
 }
 impl From<AngularDeferBlock> for SyntaxElement {
     fn from(n: AngularDeferBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularDeferHydrateNeverClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_DEFER_HYDRATE_NEVER_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_DEFER_HYDRATE_NEVER_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularDeferHydrateNeverClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularDeferHydrateNeverClause")
+                .field(
+                    "hydrate_token",
+                    &support::DebugSyntaxResult(self.hydrate_token()),
+                )
+                .field(
+                    "never_token",
+                    &support::DebugSyntaxResult(self.never_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularDeferHydrateNeverClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularDeferHydrateNeverClause> for SyntaxNode {
+    fn from(n: AngularDeferHydrateNeverClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularDeferHydrateNeverClause> for SyntaxElement {
+    fn from(n: AngularDeferHydrateNeverClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularDeferHydrateOnClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_DEFER_HYDRATE_ON_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_DEFER_HYDRATE_ON_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularDeferHydrateOnClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularDeferHydrateOnClause")
+                .field(
+                    "hydrate_token",
+                    &support::DebugSyntaxResult(self.hydrate_token()),
+                )
+                .field("on_token", &support::DebugSyntaxResult(self.on_token()))
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .finish()
+        } else {
+            f.debug_struct("AngularDeferHydrateOnClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularDeferHydrateOnClause> for SyntaxNode {
+    fn from(n: AngularDeferHydrateOnClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularDeferHydrateOnClause> for SyntaxElement {
+    fn from(n: AngularDeferHydrateOnClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularDeferHydrateWhenClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_DEFER_HYDRATE_WHEN_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_DEFER_HYDRATE_WHEN_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularDeferHydrateWhenClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularDeferHydrateWhenClause")
+                .field(
+                    "hydrate_token",
+                    &support::DebugSyntaxResult(self.hydrate_token()),
+                )
+                .field("when_token", &support::DebugSyntaxResult(self.when_token()))
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .finish()
+        } else {
+            f.debug_struct("AngularDeferHydrateWhenClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularDeferHydrateWhenClause> for SyntaxNode {
+    fn from(n: AngularDeferHydrateWhenClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularDeferHydrateWhenClause> for SyntaxElement {
+    fn from(n: AngularDeferHydrateWhenClause) -> Self {
         n.syntax.into()
     }
 }
@@ -15372,6 +15681,21 @@ impl From<AnyAngularDefaultClauseBody> for SyntaxElement {
         node.into()
     }
 }
+impl From<AngularDeferHydrateNeverClause> for AnyAngularDeferClause {
+    fn from(node: AngularDeferHydrateNeverClause) -> Self {
+        Self::AngularDeferHydrateNeverClause(node)
+    }
+}
+impl From<AngularDeferHydrateOnClause> for AnyAngularDeferClause {
+    fn from(node: AngularDeferHydrateOnClause) -> Self {
+        Self::AngularDeferHydrateOnClause(node)
+    }
+}
+impl From<AngularDeferHydrateWhenClause> for AnyAngularDeferClause {
+    fn from(node: AngularDeferHydrateWhenClause) -> Self {
+        Self::AngularDeferHydrateWhenClause(node)
+    }
+}
 impl From<AngularDeferOnClause> for AnyAngularDeferClause {
     fn from(node: AngularDeferOnClause) -> Self {
         Self::AngularDeferOnClause(node)
@@ -15394,14 +15718,20 @@ impl From<AngularDeferWhenClause> for AnyAngularDeferClause {
 }
 impl AstNode for AnyAngularDeferClause {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AngularDeferOnClause::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AngularDeferHydrateNeverClause::KIND_SET
+        .union(AngularDeferHydrateOnClause::KIND_SET)
+        .union(AngularDeferHydrateWhenClause::KIND_SET)
+        .union(AngularDeferOnClause::KIND_SET)
         .union(AngularDeferPrefetchOnClause::KIND_SET)
         .union(AngularDeferPrefetchWhenClause::KIND_SET)
         .union(AngularDeferWhenClause::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            ANGULAR_DEFER_ON_CLAUSE
+            ANGULAR_DEFER_HYDRATE_NEVER_CLAUSE
+                | ANGULAR_DEFER_HYDRATE_ON_CLAUSE
+                | ANGULAR_DEFER_HYDRATE_WHEN_CLAUSE
+                | ANGULAR_DEFER_ON_CLAUSE
                 | ANGULAR_DEFER_PREFETCH_ON_CLAUSE
                 | ANGULAR_DEFER_PREFETCH_WHEN_CLAUSE
                 | ANGULAR_DEFER_WHEN_CLAUSE
@@ -15409,6 +15739,15 @@ impl AstNode for AnyAngularDeferClause {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            ANGULAR_DEFER_HYDRATE_NEVER_CLAUSE => {
+                Self::AngularDeferHydrateNeverClause(AngularDeferHydrateNeverClause { syntax })
+            }
+            ANGULAR_DEFER_HYDRATE_ON_CLAUSE => {
+                Self::AngularDeferHydrateOnClause(AngularDeferHydrateOnClause { syntax })
+            }
+            ANGULAR_DEFER_HYDRATE_WHEN_CLAUSE => {
+                Self::AngularDeferHydrateWhenClause(AngularDeferHydrateWhenClause { syntax })
+            }
             ANGULAR_DEFER_ON_CLAUSE => Self::AngularDeferOnClause(AngularDeferOnClause { syntax }),
             ANGULAR_DEFER_PREFETCH_ON_CLAUSE => {
                 Self::AngularDeferPrefetchOnClause(AngularDeferPrefetchOnClause { syntax })
@@ -15425,6 +15764,9 @@ impl AstNode for AnyAngularDeferClause {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::AngularDeferHydrateNeverClause(it) => it.syntax(),
+            Self::AngularDeferHydrateOnClause(it) => it.syntax(),
+            Self::AngularDeferHydrateWhenClause(it) => it.syntax(),
             Self::AngularDeferOnClause(it) => it.syntax(),
             Self::AngularDeferPrefetchOnClause(it) => it.syntax(),
             Self::AngularDeferPrefetchWhenClause(it) => it.syntax(),
@@ -15433,6 +15775,9 @@ impl AstNode for AnyAngularDeferClause {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::AngularDeferHydrateNeverClause(it) => it.into_syntax(),
+            Self::AngularDeferHydrateOnClause(it) => it.into_syntax(),
+            Self::AngularDeferHydrateWhenClause(it) => it.into_syntax(),
             Self::AngularDeferOnClause(it) => it.into_syntax(),
             Self::AngularDeferPrefetchOnClause(it) => it.into_syntax(),
             Self::AngularDeferPrefetchWhenClause(it) => it.into_syntax(),
@@ -15443,6 +15788,9 @@ impl AstNode for AnyAngularDeferClause {
 impl std::fmt::Debug for AnyAngularDeferClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::AngularDeferHydrateNeverClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::AngularDeferHydrateOnClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::AngularDeferHydrateWhenClause(it) => std::fmt::Debug::fmt(it, f),
             Self::AngularDeferOnClause(it) => std::fmt::Debug::fmt(it, f),
             Self::AngularDeferPrefetchOnClause(it) => std::fmt::Debug::fmt(it, f),
             Self::AngularDeferPrefetchWhenClause(it) => std::fmt::Debug::fmt(it, f),
@@ -15453,6 +15801,9 @@ impl std::fmt::Debug for AnyAngularDeferClause {
 impl From<AnyAngularDeferClause> for SyntaxNode {
     fn from(n: AnyAngularDeferClause) -> Self {
         match n {
+            AnyAngularDeferClause::AngularDeferHydrateNeverClause(it) => it.into_syntax(),
+            AnyAngularDeferClause::AngularDeferHydrateOnClause(it) => it.into_syntax(),
+            AnyAngularDeferClause::AngularDeferHydrateWhenClause(it) => it.into_syntax(),
             AnyAngularDeferClause::AngularDeferOnClause(it) => it.into_syntax(),
             AnyAngularDeferClause::AngularDeferPrefetchOnClause(it) => it.into_syntax(),
             AnyAngularDeferClause::AngularDeferPrefetchWhenClause(it) => it.into_syntax(),
@@ -18056,6 +18407,21 @@ impl std::fmt::Display for AngularDefaultExpressionClause {
     }
 }
 impl std::fmt::Display for AngularDeferBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularDeferHydrateNeverClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularDeferHydrateOnClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularDeferHydrateWhenClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

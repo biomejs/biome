@@ -1391,6 +1391,9 @@ AnyAngularDeferClause =
 	| AngularDeferWhenClause
 	| AngularDeferPrefetchOnClause
 	| AngularDeferPrefetchWhenClause
+	| AngularDeferHydrateOnClause
+	| AngularDeferHydrateWhenClause
+	| AngularDeferHydrateNeverClause
 
 AngularDeferOnClause =
 	'on'
@@ -1409,6 +1412,20 @@ AngularDeferPrefetchWhenClause =
 	'prefetch'
 	'when'
 	expression: HtmlTextExpression
+
+AngularDeferHydrateOnClause =
+	'hydrate'
+	'on'
+	expression: HtmlTextExpression
+
+AngularDeferHydrateWhenClause =
+	'hydrate'
+	'when'
+	expression: HtmlTextExpression
+
+AngularDeferHydrateNeverClause =
+	'hydrate'
+	'never'
 
 // @defer (on idle; when condition; prefetch on interaction) { ... } @placeholder (minimum 500ms) { ... } @loading (after 100ms; minimum 1s) { ... } @error { ... }
 //                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

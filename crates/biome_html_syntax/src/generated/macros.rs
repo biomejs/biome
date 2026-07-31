@@ -45,6 +45,21 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::AngularDeferBlock::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::ANGULAR_DEFER_HYDRATE_NEVER_CLAUSE => {
+                    let $pattern =
+                        unsafe { $crate::AngularDeferHydrateNeverClause::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_DEFER_HYDRATE_ON_CLAUSE => {
+                    let $pattern =
+                        unsafe { $crate::AngularDeferHydrateOnClause::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_DEFER_HYDRATE_WHEN_CLAUSE => {
+                    let $pattern =
+                        unsafe { $crate::AngularDeferHydrateWhenClause::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::ANGULAR_DEFER_ON_CLAUSE => {
                     let $pattern = unsafe { $crate::AngularDeferOnClause::new_unchecked(node) };
                     $body

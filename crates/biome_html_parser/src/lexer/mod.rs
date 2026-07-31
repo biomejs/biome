@@ -1030,6 +1030,8 @@ impl<'src> HtmlLexer<'src> {
             b"on" => ON_KW,
             b"after" => AFTER_KW,
             b"track" => TRACK_KW,
+            b"hydrate" => HYDRATE_KW,
+            b"never" => NEVER_KW,
 
             _ => {
                 self.position = starting_position;

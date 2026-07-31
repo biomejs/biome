@@ -142,6 +142,46 @@ impl AngularDeferBlockBuilder {
         ))
     }
 }
+pub fn angular_defer_hydrate_never_clause(
+    hydrate_token: SyntaxToken,
+    never_token: SyntaxToken,
+) -> AngularDeferHydrateNeverClause {
+    AngularDeferHydrateNeverClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_DEFER_HYDRATE_NEVER_CLAUSE,
+        [
+            Some(SyntaxElement::Token(hydrate_token)),
+            Some(SyntaxElement::Token(never_token)),
+        ],
+    ))
+}
+pub fn angular_defer_hydrate_on_clause(
+    hydrate_token: SyntaxToken,
+    on_token: SyntaxToken,
+    expression: HtmlTextExpression,
+) -> AngularDeferHydrateOnClause {
+    AngularDeferHydrateOnClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_DEFER_HYDRATE_ON_CLAUSE,
+        [
+            Some(SyntaxElement::Token(hydrate_token)),
+            Some(SyntaxElement::Token(on_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_defer_hydrate_when_clause(
+    hydrate_token: SyntaxToken,
+    when_token: SyntaxToken,
+    expression: HtmlTextExpression,
+) -> AngularDeferHydrateWhenClause {
+    AngularDeferHydrateWhenClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_DEFER_HYDRATE_WHEN_CLAUSE,
+        [
+            Some(SyntaxElement::Token(hydrate_token)),
+            Some(SyntaxElement::Token(when_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+        ],
+    ))
+}
 pub fn angular_defer_on_clause(
     on_token: SyntaxToken,
     expression: HtmlTextExpression,

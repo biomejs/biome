@@ -266,6 +266,102 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferBlock {
         )
     }
 }
+impl FormatRule<biome_html_syntax::AngularDeferHydrateNeverClause>
+    for crate::angular::auxiliary::defer_hydrate_never_clause::FormatAngularDeferHydrateNeverClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularDeferHydrateNeverClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularDeferHydrateNeverClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferHydrateNeverClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularDeferHydrateNeverClause,
+        crate::angular::auxiliary::defer_hydrate_never_clause::FormatAngularDeferHydrateNeverClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: angular :: auxiliary :: defer_hydrate_never_clause :: FormatAngularDeferHydrateNeverClause :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferHydrateNeverClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularDeferHydrateNeverClause,
+        crate::angular::auxiliary::defer_hydrate_never_clause::FormatAngularDeferHydrateNeverClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: angular :: auxiliary :: defer_hydrate_never_clause :: FormatAngularDeferHydrateNeverClause :: default ())
+    }
+}
+impl FormatRule<biome_html_syntax::AngularDeferHydrateOnClause>
+    for crate::angular::auxiliary::defer_hydrate_on_clause::FormatAngularDeferHydrateOnClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularDeferHydrateOnClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularDeferHydrateOnClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferHydrateOnClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularDeferHydrateOnClause,
+        crate::angular::auxiliary::defer_hydrate_on_clause::FormatAngularDeferHydrateOnClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: angular :: auxiliary :: defer_hydrate_on_clause :: FormatAngularDeferHydrateOnClause :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferHydrateOnClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularDeferHydrateOnClause,
+        crate::angular::auxiliary::defer_hydrate_on_clause::FormatAngularDeferHydrateOnClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: angular :: auxiliary :: defer_hydrate_on_clause :: FormatAngularDeferHydrateOnClause :: default ())
+    }
+}
+impl FormatRule<biome_html_syntax::AngularDeferHydrateWhenClause>
+    for crate::angular::auxiliary::defer_hydrate_when_clause::FormatAngularDeferHydrateWhenClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularDeferHydrateWhenClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularDeferHydrateWhenClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferHydrateWhenClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularDeferHydrateWhenClause,
+        crate::angular::auxiliary::defer_hydrate_when_clause::FormatAngularDeferHydrateWhenClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: angular :: auxiliary :: defer_hydrate_when_clause :: FormatAngularDeferHydrateWhenClause :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferHydrateWhenClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularDeferHydrateWhenClause,
+        crate::angular::auxiliary::defer_hydrate_when_clause::FormatAngularDeferHydrateWhenClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: angular :: auxiliary :: defer_hydrate_when_clause :: FormatAngularDeferHydrateWhenClause :: default ())
+    }
+}
 impl FormatRule<biome_html_syntax::AngularDeferOnClause>
     for crate::angular::auxiliary::defer_on_clause::FormatAngularDeferOnClause
 {

@@ -8,6 +8,9 @@ impl FormatRule<AnyAngularDeferClause> for FormatAnyAngularDeferClause {
     type Context = HtmlFormatContext;
     fn fmt(&self, node: &AnyAngularDeferClause, f: &mut HtmlFormatter) -> FormatResult<()> {
         match node {
+            AnyAngularDeferClause::AngularDeferHydrateNeverClause(node) => node.format().fmt(f),
+            AnyAngularDeferClause::AngularDeferHydrateOnClause(node) => node.format().fmt(f),
+            AnyAngularDeferClause::AngularDeferHydrateWhenClause(node) => node.format().fmt(f),
             AnyAngularDeferClause::AngularDeferOnClause(node) => node.format().fmt(f),
             AnyAngularDeferClause::AngularDeferPrefetchOnClause(node) => node.format().fmt(f),
             AnyAngularDeferClause::AngularDeferPrefetchWhenClause(node) => node.format().fmt(f),

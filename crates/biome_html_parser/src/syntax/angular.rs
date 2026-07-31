@@ -34,6 +34,9 @@ pub const ANGULAR_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
     T![after],
     T![as],
     T![of],
+    T![track],
+    T![hydrate],
+    T![never],
 );
 
 pub(crate) fn parse_angular_event_binding(p: &mut HtmlParser) -> ParsedSyntax {
@@ -424,7 +427,7 @@ pub(crate) fn parse_switch_block(p: &mut HtmlParser, marker: Marker) -> ParsedSy
         if p.at(T![@]) {
             let m = p.start();
             p.bump_remap(HTML_LITERAL);
-            m.complete(p, HTML_CONTENT);
+            m.complete(p, HTML_BOGUS);
             continue;
         }
 
@@ -434,7 +437,7 @@ pub(crate) fn parse_switch_block(p: &mut HtmlParser, marker: Marker) -> ParsedSy
 
         let m = p.start();
         p.bump_remap(HTML_LITERAL);
-        m.complete(p, HTML_CONTENT);
+        m.complete(p, HTML_BOGUS);
     }
 
     p.expect(T!['}']);
@@ -784,6 +787,7 @@ fn parse_any_angular_defer_clause(p: &mut HtmlParser) -> ParsedSyntax {
         T![on] => parse_angular_defer_on_clause(p),
         T![when] => parse_angular_defer_when_clause(p),
         T![prefetch] => parse_angular_defer_prefetch_clause(p),
+        T![hydrate] => parse_angular_defer_hydrate_clause(p),
         _ => Absent,
     }
 }
@@ -851,6 +855,49 @@ fn parse_angular_defer_prefetch_clause(p: &mut HtmlParser) -> ParsedSyntax {
         parse_angular_expression_into_angular_context(p)
             .or_add_diagnostic(p, |p, range| expected_expression(p, range));
         Present(m.complete(p, ANGULAR_DEFER_PREFETCH_WHEN_CLAUSE))
+    }
+}
+
+fn parse_angular_defer_hydrate_clause(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T![hydrate]) {
+        return Absent;
+    }
+
+    let next = p.lookahead(|p| {
+        p.bump_with_context(T![hydrate], HtmlLexContext::Angular);
+        p.cur()
+    });
+
+    let m = p.start();
+    p.bump_with_context(T![hydrate], HtmlLexContext::Angular);
+
+    match next {
+        T![on] => {
+            p.bump_with_context(
+                T![on],
+                HtmlLexContext::restricted_expression(RestrictedExpressionStopAt::Semicolon),
+            );
+            parse_angular_expression_into_angular_context(p)
+                .or_add_diagnostic(p, |p, range| expected_expression(p, range));
+            Present(m.complete(p, ANGULAR_DEFER_HYDRATE_ON_CLAUSE))
+        }
+        T![when] => {
+            p.bump_with_context(
+                T![when],
+                HtmlLexContext::restricted_expression(RestrictedExpressionStopAt::Semicolon),
+            );
+            parse_angular_expression_into_angular_context(p)
+                .or_add_diagnostic(p, |p, range| expected_expression(p, range));
+            Present(m.complete(p, ANGULAR_DEFER_HYDRATE_WHEN_CLAUSE))
+        }
+        T![never] => {
+            p.bump_with_context(T![never], HtmlLexContext::Angular);
+            Present(m.complete(p, ANGULAR_DEFER_HYDRATE_NEVER_CLAUSE))
+        }
+        _ => {
+            p.error(expected_angular_name(p, p.cur_range()));
+            Present(m.complete(p, ANGULAR_DEFER_HYDRATE_NEVER_CLAUSE))
+        }
     }
 }
 
@@ -1096,6 +1143,8 @@ impl ParseNodeList for AngularElseIfClauseList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        re_lex_angular_clause_start(p);
+
         if !p.at(T![@]) {
             return true;
         }
