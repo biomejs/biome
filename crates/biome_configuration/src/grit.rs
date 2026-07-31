@@ -5,13 +5,13 @@ use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingN
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
-/// Options applied to GritQL files
+/// Options applied to GritQL files.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct GritConfiguration {
-    /// Formatting options
+    /// GritQL formatter options.
     #[cfg_attr(
         feature = "cli",
         bpaf(external(grit_formatter_configuration), optional)
@@ -19,12 +19,12 @@ pub struct GritConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<GritFormatterConfiguration>,
 
-    /// Formatting options
+    /// GritQL linter options.
     #[cfg_attr(feature = "cli", bpaf(external(grit_linter_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub linter: Option<GritLinterConfiguration>,
 
-    /// Assist options
+    /// GritQL assist options.
     #[cfg_attr(feature = "cli", bpaf(external(grit_assist_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub assist: Option<GritAssistConfiguration>,
@@ -32,12 +32,13 @@ pub struct GritConfiguration {
 
 pub type GritFormatterEnabled = Bool<true>;
 
+/// Options that change how the GritQL formatter behaves.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct GritFormatterConfiguration {
-    /// Control the formatter for Grit files.
+    /// Controls the formatter for GritQL files.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("grit-formatter-enabled"), argument("true|false"), optional)
@@ -45,7 +46,7 @@ pub struct GritFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<GritFormatterEnabled>,
 
-    /// The indent style applied to Grit files.
+    /// The indent style applied to GritQL files. If unset, inherits the global indentation style.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("grit-formatter-indent-style"), argument("tab|space"), optional)
@@ -53,7 +54,8 @@ pub struct GritFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_style: Option<IndentStyle>,
 
-    /// The size of the indentation applied to Grit files. Default to 2.
+    /// The indentation width applied to GritQL files. If unset, inherits the global indentation
+    /// width.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("grit-formatter-indent-width"), argument("NUMBER"), optional)
@@ -61,15 +63,19 @@ pub struct GritFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
-    /// The type of line ending applied to Grit files.
+    /// The line ending applied to GritQL files. If unset, inherits the global line ending.
     #[cfg_attr(
         feature = "cli",
-        bpaf(long("grit-formatter-line-ending"), argument("lf|crlf|cr"), optional)
+        bpaf(
+            long("grit-formatter-line-ending"),
+            argument("lf|crlf|cr|auto"),
+            optional
+        )
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 
-    /// What's the max width of a line applied to Grit files. Defaults to 80.
+    /// The maximum line width for GritQL files. If unset, inherits the global line width.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("grit-formatter-line-width"), argument("NUMBER"), optional)
@@ -77,16 +83,8 @@ pub struct GritFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
 
-    /// Whether to add a trailing newline at the end of the file.
-    ///
-    /// Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-    /// - https://thoughtbot.com/blog/no-newline-at-end-of-file
-    /// - https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
-    /// - https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
-    ///
-    /// Disable the option at your own risk.
-    ///
-    /// Defaults to true.
+    /// Whether to add a trailing newline at the end of the file. If unset, inherits the global
+    /// trailing newline setting.
     #[cfg_attr(
         feature = "cli",
         bpaf(
@@ -101,12 +99,13 @@ pub struct GritFormatterConfiguration {
 
 pub type GritLinterEnabled = Bool<true>;
 
+/// Options that change how the GritQL linter behaves.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct GritLinterConfiguration {
-    /// Control the linter for Grit files.
+    /// Controls the linter for GritQL files.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("grit-linter-enabled"), argument("true|false"), optional)
@@ -116,12 +115,14 @@ pub struct GritLinterConfiguration {
 }
 
 pub type GritAssistEnabled = Bool<true>;
+
+/// Options that change how GritQL assist behaves.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct GritAssistConfiguration {
-    /// Control the assist functionality for Grit files.
+    /// Controls assist actions for GritQL files.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("grit-assist-enabled"), argument("true|false"), optional)

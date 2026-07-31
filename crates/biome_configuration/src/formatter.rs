@@ -23,8 +23,7 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<FormatterEnabled>,
 
-    /// Whether formatting should be allowed to proceed if a given file
-    /// has syntax errors
+    /// Allows formatting files that contain syntax errors when set to `true`. Defaults to `false`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("format-with-errors"), argument("true|false"))
@@ -32,17 +31,17 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub format_with_errors: Option<FormatWithErrorsEnabled>,
 
-    /// The indent style.
+    /// Uses tabs or spaces for indentation. Defaults to `tab`.
     #[cfg_attr(feature = "cli", bpaf(long("indent-style"), argument("tab|space")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_style: Option<IndentStyle>,
 
-    /// The size of the indentation, 2 by default
+    /// The indentation width. Defaults to `2`.
     #[cfg_attr(feature = "cli", bpaf(long("indent-width"), argument("NUMBER")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
-    /// The type of line ending.
+    /// Selects the line ending. `auto` uses the platform convention. Defaults to `lf`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("line-ending"), argument("lf|crlf|cr|auto"))
@@ -50,12 +49,12 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 
-    /// What's the max width of a line. Defaults to 80.
+    /// The maximum line width. Defaults to `80`.
     #[cfg_attr(feature = "cli", bpaf(long("line-width"), argument("NUMBER")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
 
-    /// The attribute position style in HTML-ish languages. Defaults to auto.
+    /// The attribute position style in HTML-like languages. Defaults to `auto`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("attribute-position"), argument("multiline|auto"))
@@ -63,7 +62,8 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub attribute_position: Option<AttributePosition>,
 
-    /// Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+    /// Places the `>` of a multiline HTML or JSX element at the end of the last line instead of on
+    /// the next line. Self-closing elements are unaffected. Defaults to `false`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("bracket-same-line"), argument("true|false"))
@@ -71,16 +71,15 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_same_line: Option<BracketSameLine>,
 
-    /// Whether to insert spaces around brackets in object literals. Defaults to true.
+    /// Whether to insert spaces inside braces in object literals. Defaults to `true`.
     #[cfg_attr(feature = "cli", bpaf(long("bracket-spacing"), argument("true|false")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_spacing: Option<BracketSpacing>,
 
-    /// Whether to insert spaces inside delimiters (after the opening delimiter and before the
-    /// closing delimiter), such as parentheses, brackets, angle brackets, and template literal
-    /// interpolations. Spaces are not added before the opening delimiter, and empty delimiters
-    /// are not affected. Only applies when the content fits on a single line. The specific
-    /// delimiters affected depend on the language. Defaults to false.
+    /// Controls spaces immediately inside supported delimiters when their content fits on one line.
+    /// It doesn't add spaces before opening delimiters or inside empty delimiters.
+    ///
+    /// The affected delimiters vary by language. Defaults to `false`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("delimiter-spacing"), argument("true|false"))
@@ -88,26 +87,24 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub delimiter_spacing: Option<DelimiterSpacing>,
 
-    /// Whether to expand arrays and objects on multiple lines.
-    /// When set to `auto`, object literals are formatted on multiple lines if the first property has a newline,
-    /// and array literals are formatted on a single line if it fits in the line.
-    /// When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
-    /// When set to `never`, these literals are formatted on a single line if it fits in the line.
-    /// When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
+    /// Controls whether arrays and objects are formatted on one line or multiple lines.
+    ///
+    /// `auto` formats objects on multiple lines if the first property has a newline, and arrays on
+    /// one line if they fit.
+    ///
+    /// `always` formats arrays and objects on multiple lines.
+    ///
+    /// `never` formats arrays and objects on one line if they fit.
+    ///
+    /// Defaults to `auto`.
+    ///
+    /// When formatting `package.json`, Biome uses `always` unless configured otherwise.
     #[cfg_attr(feature = "cli", bpaf(long("expand"), argument("auto|always|never")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub expand: Option<Expand>,
 
-    /// Whether to add a trailing newline at the end of the file.
-    ///
-    /// Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-    /// - https://thoughtbot.com/blog/no-newline-at-end-of-file
-    /// - https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
-    /// - https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
-    ///
-    /// Disable the option at your own risk.
-    ///
-    /// Defaults to true.
+    /// Whether to add a trailing newline at the end of the file. Defaults to `true`; disabling
+    /// this option can cause compatibility problems with other tools.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("trailing-newline"), argument("true|false"))
@@ -115,10 +112,8 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trailing_newline: Option<TrailingNewline>,
 
-    /// Use any `.editorconfig` files to configure the formatter. Configuration
-    /// in `biome.json` will override `.editorconfig` configuration.
-    ///
-    /// Default: `false`.
+    /// Uses `.editorconfig` files to configure the formatter. Settings in `biome.json` or
+    /// `biome.jsonc` override `.editorconfig` settings. Defaults to `false`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("use-editorconfig"), argument("true|false"))
