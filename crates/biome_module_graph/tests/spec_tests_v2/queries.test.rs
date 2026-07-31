@@ -827,10 +827,10 @@ fn test_member_lookup_exhaustion_returns_unknown() {
     let fs = MemoryFileSystem::default();
     fs.insert("/src/index.ts".into(), "");
     let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
-    let mut ty = InferredTypeData::Object(InferredObject::new(&db, None, Box::default()));
+    let mut ty = InferredTypeData::Object(InferredObject::new(&db, None, Box::default(), false));
 
     for _ in 0..1025 {
-        ty = InferredTypeData::Object(InferredObject::new(&db, Some(ty), Box::default()));
+        ty = InferredTypeData::Object(InferredObject::new(&db, Some(ty), Box::default(), false));
     }
 
     assert_eq!(

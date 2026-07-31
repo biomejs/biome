@@ -765,6 +765,15 @@ pub struct Object {
 
     /// The object's own members.
     pub members: Box<[TypeMember]>,
+
+    /// Whether the object may carry members beyond those in `members`.
+    ///
+    /// Object expressions can contain parts that inference cannot expand into
+    /// individual members, such as a spread of another value. `members` then
+    /// lists only what could be modelled, and the absence of a name is no proof
+    /// that the object lacks it. Consumers that draw conclusions from a missing
+    /// member must treat such an object as inconclusive.
+    pub has_unknown_members: bool,
 }
 
 /// Object literal used as a type.
@@ -1285,12 +1294,14 @@ pub enum TypeofExpression {
     Conditional(TypeofConditionalExpression),
     Destructure(TypeofDestructureExpression),
     Index(TypeofIndexExpression),
+    OptionalChainIndex(TypeofIndexExpression),
     IterableValueOf(TypeofIterableValueOfExpression),
     LogicalAnd(TypeofLogicalAndExpression),
     LogicalOr(TypeofLogicalOrExpression),
     New(TypeofNewExpression),
     NullishCoalescing(TypeofNullishCoalescingExpression),
     StaticMember(TypeofStaticMemberExpression),
+    OptionalChainStaticMember(TypeofStaticMemberExpression),
     Super(TypeofThisOrSuperExpression),
     This(TypeofThisOrSuperExpression),
     Typeof(TypeofTypeofExpression),

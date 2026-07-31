@@ -150,6 +150,15 @@ impl Format<FormatTypeContext> for Object {
                 write!(f, [token("No prototype")])
             }
         });
+        // Objects with a complete member list are the common case, so the
+        // marker is only printed when it carries information.
+        let unknown_members = format_with(|f| {
+            if self.has_unknown_members {
+                write!(f, [token("unknown members"), hard_line_break()])
+            } else {
+                Ok(())
+            }
+        });
         write!(
             f,
             [&format_args![
@@ -157,6 +166,7 @@ impl Format<FormatTypeContext> for Object {
                 space(),
                 token("{"),
                 &group(&block_indent(&format_args![
+                    unknown_members,
                     token("prototype:"),
                     space(),
                     prototype,
@@ -496,6 +506,15 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     ]]
                 )
             }
+            Self::OptionalChainIndex(expr) => {
+                write!(
+                    f,
+                    [&format_args![
+                        &expr.object,
+                        text(&std::format!("?.[{}]", expr.index), None),
+                    ]]
+                )
+            }
             Self::IterableValueOf(expr) => {
                 write!(
                     f,
@@ -547,6 +566,9 @@ impl Format<FormatTypeContext> for TypeofExpression {
             }
             Self::StaticMember(expr) => {
                 write!(f, [&format_args![&expr.object, token("."), &expr.member]])
+            }
+            Self::OptionalChainStaticMember(expr) => {
+                write!(f, [&format_args![&expr.object, token("?."), &expr.member]])
             }
             Self::Super(_) => write!(f, [&format_args![token("super")]]),
             Self::This(_) => write!(f, [&format_args![token("this")]]),

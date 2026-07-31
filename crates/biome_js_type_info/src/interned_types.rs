@@ -1055,6 +1055,7 @@ impl<'db> TypeData<'db> {
                 db,
                 object.prototype.as_ref().map(&mut *resolve_reference),
                 convert_type_members(db, &object.members, resolve_reference),
+                object.has_unknown_members,
             )),
             raw::TypeData::Tuple(tuple) => Self::Tuple(InternedTuple::new(
                 db,
@@ -1231,6 +1232,7 @@ impl<'db> TypeData<'db> {
             Self::Object(object) => raw::TypeData::Object(Box::new(raw::Object {
                 prototype: self.raw_reference_from_option(db, object.prototype(db)),
                 members: raw_type_members_from_types(db, object.members(db)),
+                has_unknown_members: object.has_unknown_members(db),
             })),
             Self::Tuple(tuple) => raw::TypeData::Tuple(Box::new(raw::Tuple(
                 tuple
@@ -1522,7 +1524,10 @@ impl<'db> TypeDataSlots<'db> {
                     .extend([expression.test, expression.consequent, expression.alternate]);
             }
             TypeofExpression::Destructure(expression) => self.slots.push(expression.ty),
-            TypeofExpression::Index(expression) => self.slots.push(expression.object),
+            TypeofExpression::Index(expression)
+            | TypeofExpression::OptionalChainIndex(expression) => {
+                self.slots.push(expression.object);
+            }
             TypeofExpression::IterableValueOf(expression) => self.slots.push(expression.ty),
             TypeofExpression::LogicalAnd(expression) => {
                 self.slots.extend([expression.left, expression.right]);
@@ -1537,7 +1542,8 @@ impl<'db> TypeDataSlots<'db> {
             TypeofExpression::NullishCoalescing(expression) => {
                 self.slots.extend([expression.left, expression.right]);
             }
-            TypeofExpression::StaticMember(expression) => {
+            TypeofExpression::StaticMember(expression)
+            | TypeofExpression::OptionalChainStaticMember(expression) => {
                 self.slots.push(expression.object);
             }
             TypeofExpression::Super(expression) | TypeofExpression::This(expression) => {
@@ -1669,6 +1675,7 @@ impl<'db> TypeDataSlotReplacements<'db> {
                 db,
                 self.take_optional_type(object.prototype(db))?,
                 self.rebuild_type_members(object.members(db))?,
+                object.has_unknown_members(db),
             )),
             TypeData::Tuple(tuple) => TypeData::Tuple(InternedTuple::new(
                 db,
@@ -1908,6 +1915,12 @@ impl<'db> TypeDataSlotReplacements<'db> {
                 object: self.take_type()?,
                 index: expression.index,
             }),
+            TypeofExpression::OptionalChainIndex(expression) => {
+                TypeofExpression::OptionalChainIndex(TypeofIndexExpression {
+                    object: self.take_type()?,
+                    index: expression.index,
+                })
+            }
             TypeofExpression::IterableValueOf(_) => {
                 TypeofExpression::IterableValueOf(TypeofIterableValueOfExpression {
                     ty: self.take_type()?,
@@ -1937,6 +1950,12 @@ impl<'db> TypeDataSlotReplacements<'db> {
             }
             TypeofExpression::StaticMember(expression) => {
                 TypeofExpression::StaticMember(TypeofStaticMemberExpression {
+                    object: self.take_type()?,
+                    member: expression.member.clone(),
+                })
+            }
+            TypeofExpression::OptionalChainStaticMember(expression) => {
+                TypeofExpression::OptionalChainStaticMember(TypeofStaticMemberExpression {
                     object: self.take_type()?,
                     member: expression.member.clone(),
                 })
@@ -2260,12 +2279,14 @@ pub enum TypeofExpression<'db> {
     Conditional(TypeofConditionalExpression<'db>),
     Destructure(TypeofDestructureExpression<'db>),
     Index(TypeofIndexExpression<'db>),
+    OptionalChainIndex(TypeofIndexExpression<'db>),
     IterableValueOf(TypeofIterableValueOfExpression<'db>),
     LogicalAnd(TypeofLogicalAndExpression<'db>),
     LogicalOr(TypeofLogicalOrExpression<'db>),
     New(TypeofNewExpression<'db>),
     NullishCoalescing(TypeofNullishCoalescingExpression<'db>),
     StaticMember(TypeofStaticMemberExpression<'db>),
+    OptionalChainStaticMember(TypeofStaticMemberExpression<'db>),
     Super(TypeofThisOrSuperExpression<'db>),
     This(TypeofThisOrSuperExpression<'db>),
     Typeof(TypeofTypeofExpression<'db>),
@@ -2464,6 +2485,11 @@ pub struct InternedObject<'db> {
     pub prototype: Option<TypeData<'db>>,
     #[returns(ref)]
     pub members: Box<[TypeMember<'db>]>,
+
+    /// Whether the object may carry members beyond those in `members`.
+    ///
+    /// See [`crate::type_data::Object::has_unknown_members`].
+    pub has_unknown_members: bool,
 }
 
 #[salsa::interned]
@@ -2801,6 +2827,12 @@ fn convert_typeof_expression<'db>(
                 index: expression.index,
             })
         }
+        raw::TypeofExpression::OptionalChainIndex(expression) => {
+            TypeofExpression::OptionalChainIndex(TypeofIndexExpression {
+                object: resolve_reference(&expression.object),
+                index: expression.index,
+            })
+        }
         raw::TypeofExpression::IterableValueOf(expression) => {
             TypeofExpression::IterableValueOf(TypeofIterableValueOfExpression {
                 ty: resolve_reference(&expression.ty),
@@ -2830,6 +2862,12 @@ fn convert_typeof_expression<'db>(
         }
         raw::TypeofExpression::StaticMember(expression) => {
             TypeofExpression::StaticMember(TypeofStaticMemberExpression {
+                object: resolve_reference(&expression.object),
+                member: expression.member.clone(),
+            })
+        }
+        raw::TypeofExpression::OptionalChainStaticMember(expression) => {
+            TypeofExpression::OptionalChainStaticMember(TypeofStaticMemberExpression {
                 object: resolve_reference(&expression.object),
                 member: expression.member.clone(),
             })
@@ -3077,6 +3115,12 @@ fn raw_typeof_expression_from_type<'db>(
                 index: expression.index,
             })
         }
+        TypeofExpression::OptionalChainIndex(expression) => {
+            raw::TypeofExpression::OptionalChainIndex(raw::TypeofIndexExpression {
+                object: expression.object.to_raw_reference_lossy(),
+                index: expression.index,
+            })
+        }
         TypeofExpression::IterableValueOf(expression) => {
             raw::TypeofExpression::IterableValueOf(raw::TypeofIterableValueOfExpression {
                 ty: expression.ty.to_raw_reference_lossy(),
@@ -3106,6 +3150,12 @@ fn raw_typeof_expression_from_type<'db>(
         }
         TypeofExpression::StaticMember(expression) => {
             raw::TypeofExpression::StaticMember(raw::TypeofStaticMemberExpression {
+                object: expression.object.to_raw_reference_lossy(),
+                member: expression.member.clone(),
+            })
+        }
+        TypeofExpression::OptionalChainStaticMember(expression) => {
+            raw::TypeofExpression::OptionalChainStaticMember(raw::TypeofStaticMemberExpression {
                 object: expression.object.to_raw_reference_lossy(),
                 member: expression.member.clone(),
             })
@@ -3703,6 +3753,15 @@ mod tests {
                 &db,
                 Some(s.next()),
                 boxed([named_member(s)]),
+                false,
+            ))
+        });
+        assert_identity(&db, |s| {
+            TypeData::Object(InternedObject::new(
+                &db,
+                Some(s.next()),
+                boxed([named_member(s)]),
+                true,
             ))
         });
         assert_identity(&db, |s| {
@@ -3832,6 +3891,15 @@ mod tests {
         assert_identity(&db, |s| {
             typeof_type(
                 &db,
+                TypeofExpression::OptionalChainIndex(TypeofIndexExpression {
+                    object: s.next(),
+                    index: 1,
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
                 TypeofExpression::IterableValueOf(TypeofIterableValueOfExpression { ty: s.next() }),
             )
         });
@@ -3879,6 +3947,15 @@ mod tests {
             typeof_type(
                 &db,
                 TypeofExpression::StaticMember(TypeofStaticMemberExpression {
+                    object: s.next(),
+                    member: text("member"),
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::OptionalChainStaticMember(TypeofStaticMemberExpression {
                     object: s.next(),
                     member: text("member"),
                 }),

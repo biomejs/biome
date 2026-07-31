@@ -208,7 +208,7 @@ impl Rule for NoUnnecessaryConditions {
             }
             AnyConditionLike::JsStaticMemberExpression(member_expr) => {
                 // Check if this uses optional chaining unnecessarily
-                if member_expr.is_optional_chain() {
+                if member_expr.is_optional() {
                     let object = member_expr.object().ok()?;
                     check_optional_chain_necessity(
                         &object,
@@ -221,7 +221,7 @@ impl Rule for NoUnnecessaryConditions {
             }
             AnyConditionLike::JsComputedMemberExpression(member_expr) => {
                 // Check if this uses optional chaining unnecessarily
-                if member_expr.is_optional_chain() {
+                if member_expr.is_optional() {
                     let object = member_expr.object().ok()?;
                     check_optional_chain_necessity(
                         &object,
@@ -234,7 +234,7 @@ impl Rule for NoUnnecessaryConditions {
             }
             AnyConditionLike::JsCallExpression(call_expr) => {
                 // Check if this uses optional chaining unnecessarily
-                if call_expr.is_optional_chain() {
+                if call_expr.is_optional() {
                     let callee = call_expr.callee().ok()?;
                     check_optional_chain_necessity(
                         &callee,
