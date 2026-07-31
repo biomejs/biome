@@ -4,19 +4,13 @@ use biome_css_syntax::AnyCssRoot;
 use biome_db::{AnyParsedSource, Db, ParsedSnippet, ParsedSource};
 
 #[salsa::tracked(returns(ref))]
-pub(crate) fn css_model_from_parsed_source(
-    db: &dyn Db,
-    file: ParsedSource,
-) -> SemanticModel {
+pub(crate) fn css_model_from_parsed_source(db: &dyn Db, file: ParsedSource) -> SemanticModel {
     let parsed: AnyCssRoot = file.parsed(db).tree();
     semantic_model(&parsed)
 }
 
 #[salsa::tracked(returns(ref))]
-pub(crate) fn css_model_from_parsed_snippet(
-    db: &dyn Db,
-    file: ParsedSnippet,
-) -> SemanticModel {
+pub(crate) fn css_model_from_parsed_snippet(db: &dyn Db, file: ParsedSnippet) -> SemanticModel {
     let parsed: AnyCssRoot = file.parsed(db).tree();
     semantic_model(&parsed)
 }
