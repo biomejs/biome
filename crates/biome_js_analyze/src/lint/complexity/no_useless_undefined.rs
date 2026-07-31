@@ -18,7 +18,7 @@ declare_lint_rule! {
     ///
     /// `undefined` is the default value for new variables, parameters, return statements, etc., so specifying it doesn't make any difference.
     ///
-    /// `return undefined` is allowed when the enclosing function has an explicit return type other than `undefined` or `void`.
+    /// `return undefined` is allowed when the enclosing function has a return type annotation other than `undefined` or `void`.
     ///
     /// ## Examples
     ///

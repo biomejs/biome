@@ -1,3 +1,4 @@
+// Tests adapted from https://github.com/sindresorhus/eslint-plugin-unicorn/blob/488d5e30d4df02634bab336a55436f4e7479ca21/test/no-useless-undefined.js.
 /* should not generate diagnostics */
 async function foo(bar: boolean): Promise<string | undefined> {
 	await new Promise(() => {});
