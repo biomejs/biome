@@ -75,6 +75,12 @@ importers:
 
   packages/@biomejs/biome:
     optionalDependencies:
+      '@biomejs/cli-android-arm64':
+        specifier: 2.5.5
+        version: link:../cli-android-arm64
+      '@biomejs/cli-android-x64':
+        specifier: 2.5.5
+        version: link:../cli-android-x64
       '@biomejs/cli-darwin-arm64':
         specifier: 2.5.5
         version: link:../cli-darwin-arm64
@@ -99,6 +105,10 @@ importers:
       '@biomejs/cli-win32-x64':
         specifier: 2.5.5
         version: link:../cli-win32-x64
+
+  packages/@biomejs/cli-android-arm64: {}
+
+  packages/@biomejs/cli-android-x64: {}
 
   packages/@biomejs/cli-darwin-arm64: {}
 
