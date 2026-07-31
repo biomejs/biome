@@ -87,7 +87,7 @@ pub struct JsResolverConfiguration {
     /// - Biome only reads top-level `catalog` / `catalogs` mappings and scalar
     ///   string entries.
     ///
-    /// Default: `false`.
+    /// Defaults to `false`.
     #[cfg_attr(feature = "cli", bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub experimental_pnpm_catalogs: Option<ExperimentalPnpmCatalogsEnabled>,
@@ -97,7 +97,7 @@ pub type UnsafeParameterDecoratorsEnabled = Bool<false>;
 pub type JsxEverywhere = Bool<true>;
 pub type JsGritMetavariable = Bool<false>;
 
-/// Options that changes how the JavaScript parser behaves
+/// Options that change how the JavaScript parser behaves.
 #[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -116,9 +116,8 @@ pub struct JsParserConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub grit_metavariables: Option<JsGritMetavariable>,
 
-    /// When enabled, files like `.js`/`.mjs`/`.cjs` may contain JSX syntax.
-    ///
-    /// Defaults to `true`.
+    /// When enabled, files such as `.js`, `.mjs`, and `.cjs` may contain JSX syntax. Defaults to
+    /// `true`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("jsx-everywhere"), argument("true|false"), optional)
@@ -171,7 +170,7 @@ pub type JsLinterEnabled = Bool<true>;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsLinterConfiguration {
-    /// Control the linter for JavaScript (and its super languages) files.
+    /// Controls the linter for JavaScript and languages that extend it.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("javascript-linter-enabled"), argument("true|false"))
@@ -188,7 +187,7 @@ pub type JsAssistEnabled = Bool<true>;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsAssistConfiguration {
-    /// Control the assist for JavaScript (and its super languages) files.
+    /// Controls assist actions for JavaScript and languages that extend it.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("javascript-assist-enabled"), argument("true|false"))

@@ -907,13 +907,13 @@ impl FromStr for TrailingNewline {
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum Expand {
-    /// Objects are expanded when the first property has a leading newline. Arrays are always
-    /// expanded if they are shorter than the line width.
+    /// Objects are expanded when the first property has a leading newline. Arrays remain on one
+    /// line if they fit.
     #[default]
     Auto,
     /// Objects and arrays are always expanded.
     Always,
-    /// Objects and arrays are never expanded, if they are shorter than the line width.
+    /// Objects and arrays remain on one line if they fit.
     Never,
 }
 
