@@ -1752,7 +1752,7 @@ mod tests {
     #[test]
     fn stringification_combines_compound_types_iteratively() {
         let db = TestDb::default();
-        let object = TypeData::Object(InternedObject::new(&db, None, Box::default()));
+        let object = TypeData::Object(InternedObject::new(&db, None, Box::default(), false));
         let custom_object = TypeData::Object(InternedObject::new(
             &db,
             None,
@@ -1761,6 +1761,7 @@ mod tests {
                 ty: TypeData::String,
             }])
             .into_boxed_slice(),
+            false,
         ));
         let union = TypeData::Union(InternedUnion::new(
             &db,

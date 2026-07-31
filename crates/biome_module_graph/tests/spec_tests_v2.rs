@@ -51,6 +51,8 @@ mod imports;
 mod intersections;
 #[path = "spec_tests_v2/normalization.test.rs"]
 mod normalization;
+#[path = "spec_tests_v2/overloads.test.rs"]
+mod overloads;
 #[path = "spec_tests_v2/promises.test.rs"]
 mod promises;
 #[path = "spec_tests_v2/queries.test.rs"]

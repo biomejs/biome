@@ -33,7 +33,9 @@ mod module_types;
 mod normalization;
 mod promises;
 
-pub(in crate::db) use calls::{ResolvedCallArgument, infer_call_expression_return_type_from_args};
+pub(in crate::db) use calls::{
+    ResolvedCallArgument, infer_call_expression_return_type_from_args, resolve_callable_function,
+};
 pub use calls::{
     infer_call_argument_type, infer_call_expression_type, infer_constructor_argument_type,
 };

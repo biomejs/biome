@@ -860,6 +860,7 @@ impl Resolvable for TypeReference {
                                         ty: value_type,
                                     }]
                                     .into(),
+                                    has_unknown_members: false,
                                 })));
                             Self::Resolved(resolved_id)
                         } else if (qualifier.is_pick() || qualifier.is_omit())
@@ -915,6 +916,7 @@ impl Resolvable for TypeReference {
                                     TypeData::Object(Box::new(Object {
                                         prototype: None,
                                         members: members.into(),
+                                        has_unknown_members: false,
                                     })),
                                 );
                                 Self::Resolved(resolved_id)
@@ -983,6 +985,7 @@ impl Resolvable for TypeReference {
                                     TypeData::Object(Box::new(Object {
                                         prototype: None,
                                         members: members.into(),
+                                        has_unknown_members: false,
                                     })),
                                 );
                                 Self::Resolved(resolved_id)
@@ -1023,6 +1026,7 @@ impl Resolvable for TypeReference {
                                     TypeData::Object(Box::new(Object {
                                         prototype: None,
                                         members: members.into(),
+                                        has_unknown_members: false,
                                     })),
                                 );
                                 Self::Resolved(resolved_id)

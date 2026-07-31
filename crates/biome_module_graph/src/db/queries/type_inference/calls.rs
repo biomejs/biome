@@ -8,7 +8,7 @@
 mod implementation;
 
 pub(in crate::db) use implementation::{
-    ResolvedCallArgument, infer_call_expression_return_type_from_args,
+    ResolvedCallArgument, infer_call_expression_return_type_from_args, resolve_callable_function,
 };
 
 use self::implementation::{

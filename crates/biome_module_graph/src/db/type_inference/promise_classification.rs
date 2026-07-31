@@ -509,15 +509,18 @@ fn classify_expression(
                         }
                     }
                     RawTypeData::TypeofExpression(expression) => match expression.as_ref() {
-                        TypeofExpression::StaticMember(expression) => ClassificationState {
-                            module: state.module,
-                            target: ClassificationTarget::Reference(expression.object.clone()),
-                            mode: MemberLookupMode::Value,
-                            members: std::iter::once(expression.member.clone())
-                                .chain(state.members.iter().cloned())
-                                .collect(),
-                            projection: state.projection,
-                        },
+                        TypeofExpression::StaticMember(expression)
+                        | TypeofExpression::OptionalChainStaticMember(expression) => {
+                            ClassificationState {
+                                module: state.module,
+                                target: ClassificationTarget::Reference(expression.object.clone()),
+                                mode: MemberLookupMode::Value,
+                                members: std::iter::once(expression.member.clone())
+                                    .chain(state.members.iter().cloned())
+                                    .collect(),
+                                projection: state.projection,
+                            }
+                        }
                         TypeofExpression::This(expression) => ClassificationState {
                             module: state.module,
                             target: ClassificationTarget::Reference(expression.parent.clone()),
@@ -580,6 +583,7 @@ fn classify_expression(
                         | TypeofExpression::Conditional(_)
                         | TypeofExpression::Destructure(_)
                         | TypeofExpression::Index(_)
+                        | TypeofExpression::OptionalChainIndex(_)
                         | TypeofExpression::IterableValueOf(_)
                         | TypeofExpression::LogicalAnd(_)
                         | TypeofExpression::LogicalOr(_)

@@ -180,6 +180,15 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for InternedObject<'db> {
                 write!(f, [token("No prototype")])
             }
         });
+        // Objects with a complete member list are the common case, so the
+        // marker is only printed when it carries information.
+        let unknown_members = format_with(|f| {
+            if self.has_unknown_members(db) {
+                write!(f, [token("unknown members"), hard_line_break()])
+            } else {
+                Ok(())
+            }
+        });
         write!(
             f,
             [&format_args![
@@ -187,6 +196,7 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for InternedObject<'db> {
                 space(),
                 token("{"),
                 &group(&block_indent(&format_args![
+                    unknown_members,
                     token("prototype:"),
                     space(),
                     prototype,
@@ -782,6 +792,13 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                     text(&std::format!("[{}]", expr.index), None)
                 ]]
             ),
+            Self::OptionalChainIndex(expr) => write!(
+                f,
+                [&format_args![
+                    &expr.object,
+                    text(&std::format!("?.[{}]", expr.index), None)
+                ]]
+            ),
             Self::IterableValueOf(expr) => write!(
                 f,
                 [&format_args![&group(&format_args![
@@ -835,6 +852,9 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
             ),
             Self::StaticMember(expr) => {
                 write!(f, [&format_args![&expr.object, token("."), &expr.member]])
+            }
+            Self::OptionalChainStaticMember(expr) => {
+                write!(f, [&format_args![&expr.object, token("?."), &expr.member]])
             }
             Self::Super(_) => write!(f, [token("super")]),
             Self::This(_) => write!(f, [token("this")]),

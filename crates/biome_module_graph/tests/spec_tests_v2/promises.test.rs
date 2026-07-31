@@ -663,6 +663,74 @@ fn test_infer_module_types_evaluates_await_union_expressions_on_build() {
 }
 
 #[test]
+fn test_infer_module_types_preserves_optional_chain_short_circuit_types_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/data.ts".into(),
+        r#"
+            export interface Usage { range: { startDate: string } }
+            export interface LogEntry {
+                id: string;
+                createdAt: { toISOString(): string };
+            }
+
+            export declare function getUsage(): Promise<Usage | null>;
+            export declare function getLogs(): Promise<LogEntry[]>;
+            export declare function getRows(): Promise<string[] | null>;
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import { getLogs, getRows, getUsage } from "./data.ts";
+
+            export async function read() {
+                const usage = await getUsage();
+                const startDate = usage?.range.startDate;
+
+                const logs = await getLogs();
+                const byIndex = logs[0]?.id;
+                const [first] = logs;
+                const byDestructuring = first?.createdAt.toISOString();
+
+                const rows = await getRows();
+                const byNullableIndex = rows?.[0];
+
+                return { startDate, byIndex, byDestructuring, byNullableIndex };
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/data.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    for name in ["startDate", "byIndex", "byDestructuring", "byNullableIndex"] {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        let ty = inferred.resolve_type(&db, ty);
+        assert!(
+            contains_inferred_string(&db, ty),
+            "{name} must contain string, got {}",
+            format_inferred_type(&db, ty)
+        );
+        assert!(
+            contains_inferred_undefined(&db, ty),
+            "{name} must contain undefined, got {}",
+            format_inferred_type(&db, ty)
+        );
+    }
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_preserves_optional_chain_short_circuit_types_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
 fn test_infer_call_expression_type_substitutes_generic_inside_promise_union_return_type() {
     let fs = MemoryFileSystem::default();
     fs.insert(
