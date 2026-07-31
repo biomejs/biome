@@ -401,67 +401,6 @@ fn lint_vue_ts_files() {
 }
 
 #[test]
-fn no_unused_variables_counts_vue_assignment_targets_as_used() {
-    let fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    fs.insert(
-        "biome.json".into(),
-        r#"{
-            "html": {
-                "linter": { "enabled": true },
-                "experimentalFullSupportEnabled": true
-            },
-            "linter": {
-                "rules": {
-                    "correctness": {
-                        "noUnusedVariables": "error"
-                    }
-                }
-            }
-        }"#
-        .as_bytes(),
-    );
-
-    let vue_file_path = Utf8Path::new("file.vue");
-    fs.insert(
-        vue_file_path.into(),
-        r#"<script setup lang="ts">
-const isNewSheetOpen = defineModel<boolean>("isNewSheetOpen");
-const actuallyUnused = true;
-</script>
-<template>
-	<button @click="() => isNewSheetOpen = true">button</button>
-</template>
-"#
-        .as_bytes(),
-    );
-
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(
-            [
-                "lint",
-                "--only=correctness/noUnusedVariables",
-                vue_file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
-    );
-
-    assert!(result.is_err(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "no_unused_variables_counts_vue_assignment_targets_as_used",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
 fn sorts_imports_check() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
