@@ -110,6 +110,7 @@ fn enclosing_function_return_type(statement: &JsReturnStatement) -> Option<AnyTs
     let control_flow_root = statement
         .syntax()
         .ancestors()
+        .skip(1)
         .find_map(AnyJsControlFlowRoot::cast)?;
 
     match control_flow_root {
@@ -133,17 +134,18 @@ fn enclosing_function_return_type(statement: &JsReturnStatement) -> Option<AnyTs
 }
 
 fn is_useless_return_undefined(statement: &JsReturnStatement) -> bool {
-    let Some(return_type) = enclosing_function_return_type(statement) else {
-        return true;
-    };
-
-    matches!(
+    enclosing_function_return_type(statement).is_none_or(|return_type| {
         return_type
             .as_any_ts_type()
             .cloned()
-            .map(AnyTsType::omit_parentheses),
-        Some(AnyTsType::TsUndefinedType(_) | AnyTsType::TsVoidType(_))
-    )
+            .map(AnyTsType::omit_parentheses)
+            .is_some_and(|return_type| {
+                matches!(
+                    return_type,
+                    AnyTsType::TsUndefinedType(_) | AnyTsType::TsVoidType(_)
+                )
+            })
+    })
 }
 
 pub struct RuleState {
