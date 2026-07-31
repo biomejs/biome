@@ -1,0 +1,13 @@
+@defer (on interaction; prefetch on idle(500)) {
+  <!-- deferred template fragment -->
+  <calendar-cmp />
+} @placeholder (minimum 500ms) {
+  <!-- placeholder template fragment -->
+  <p>Placeholder</p>
+} @loading (after 100ms; minimum 1s) {
+  <!-- loading template fragment -->
+  <img alt="loading image" src="loading.gif" />
+} @error {
+  <!-- error template fragment -->
+  <p>An loading error occurred</p>
+}

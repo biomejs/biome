@@ -1,0 +1,67 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```angular
+@let name = user.name
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        AngularLetBlock {
+            at_token: AT@0..1 "@" [] [],
+            let_token: LET_KW@1..4 "let" [] [],
+            expression: HtmlTextExpression {
+                html_literal_token: HTML_LITERAL@4..21 " name = user.name" [] [],
+            },
+            semicolon_token: missing (required),
+        },
+    ],
+    eof_token: EOF@21..21 "" [] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..21
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..21
+    0: ANGULAR_LET_BLOCK@0..21
+      0: AT@0..1 "@" [] []
+      1: LET_KW@1..4 "let" [] []
+      2: HTML_TEXT_EXPRESSION@4..21
+        0: HTML_LITERAL@4..21 " name = user.name" [] []
+      3: (empty)
+  4: EOF@21..21 "" [] []
+
+```
+
+## Diagnostics
+
+```
+let.component.html:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead the file ends
+  
+  > 1 │ @let name = user.name
+      │                      
+  
+  i the file ends here
+  
+  > 1 │ @let name = user.name
+      │                      
+  
+```

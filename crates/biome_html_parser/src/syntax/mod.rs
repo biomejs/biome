@@ -9,8 +9,9 @@ use crate::syntax::HtmlSyntaxFeatures::{
     Angular, Astro, DoubleTextExpressions, SingleTextExpressions, Svelte, Vue,
 };
 use crate::syntax::angular::{
-    parse_angular_event_binding, parse_angular_property_binding,
-    parse_angular_structural_directive, parse_angular_template_ref, parse_angular_two_way_binding,
+    ANGULAR_KEYWORDS, parse_angular_block, parse_angular_event_binding,
+    parse_angular_property_binding, parse_angular_structural_directive, parse_angular_template_ref,
+    parse_angular_two_way_binding,
 };
 use crate::syntax::astro::{
     is_at_astro_directive_keyword, is_at_astro_directive_start, parse_astro_directive,
@@ -473,6 +474,11 @@ pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
             p.bump_remap(HTML_LITERAL);
             Present(m.complete(p, HTML_CONTENT))
         }),
+        T![@] => HtmlSyntaxFeatures::Angular.parse_exclusive_syntax(
+            p,
+            |p| parse_angular_block(p),
+            |p, m| disabled_angular(p, m.range(p)),
+        ),
         T!["}}"] | T!['}'] => {
             // The closing text expression should be handled by other functions.
             // If we're here, we assume that text expressions are enabled and
@@ -489,6 +495,10 @@ pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
             p.bump_with_context(HTML_LITERAL, HtmlLexContext::Regular);
             Present(m.complete(p, HTML_CONTENT))
         }
+        HTML_LITERAL if looks_like_angular_block_start(p) => {
+            p.re_lex(HtmlReLexContext::Angular);
+            parse_html_element(p)
+        }
         HTML_LITERAL => {
             let m = p.start();
             p.bump_with_context(HTML_LITERAL, HtmlLexContext::Regular);
@@ -496,6 +506,23 @@ pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
         }
         _ => Absent,
     }
+}
+
+fn looks_like_angular_block_start(p: &mut HtmlParser) -> bool {
+    if !Angular.is_supported(p) || !p.cur_text().starts_with('@') {
+        return false;
+    }
+
+    p.lookahead(|p| {
+        p.re_lex(HtmlReLexContext::Angular);
+
+        if !p.at(T![@]) {
+            return false;
+        }
+
+        p.bump_with_context(T![@], HtmlLexContext::Angular);
+        p.at_ts(token_set![T![if], T![for], T![switch], T![let], T![defer]])
+    })
 }
 
 #[derive(Default)]
@@ -1100,8 +1127,10 @@ impl TextExpression {
     }
 }
 
-const ALL_POSSIBLE_KEYWORDS: TokenSet<HtmlSyntaxKind> =
-    HTML_KEYWORDS.union(SVELTE_KEYWORDS).union(VUE_KEYWORDS);
+const ALL_POSSIBLE_KEYWORDS: TokenSet<HtmlSyntaxKind> = HTML_KEYWORDS
+    .union(SVELTE_KEYWORDS)
+    .union(VUE_KEYWORDS)
+    .union(ANGULAR_KEYWORDS);
 
 const HTML_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(T![html], T![doctype]);
 

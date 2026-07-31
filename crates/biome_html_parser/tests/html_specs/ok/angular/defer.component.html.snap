@@ -1,0 +1,350 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```angular
+@defer (on interaction; prefetch on idle(500)) {
+  <!-- deferred template fragment -->
+  <calendar-cmp />
+} @placeholder (minimum 500ms) {
+  <!-- placeholder template fragment -->
+  <p>Placeholder</p>
+} @loading (after 100ms; minimum 1s) {
+  <!-- loading template fragment -->
+  <img alt="loading image" src="loading.gif" />
+} @error {
+  <!-- error template fragment -->
+  <p>An loading error occurred</p>
+}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        AngularDeferBlock {
+            opening_block: AngularDeferOpeningBlock {
+                at_token: AT@0..1 "@" [] [],
+                defer_token: DEFER_KW@1..7 "defer" [] [Whitespace(" ")],
+                parameters: AngularDeferParameters {
+                    l_paren_token: L_PAREN@7..8 "(" [] [],
+                    clauses: AngularDeferClauseList [
+                        AngularDeferOnClause {
+                            on_token: ON_KW@8..10 "on" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@10..22 " interaction" [] [],
+                            },
+                        },
+                        SEMICOLON@22..24 ";" [] [Whitespace(" ")],
+                        AngularDeferPrefetchOnClause {
+                            prefetch_token: PREFETCH_KW@24..33 "prefetch" [] [Whitespace(" ")],
+                            on_token: ON_KW@33..35 "on" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@35..45 " idle(500)" [] [],
+                            },
+                        },
+                    ],
+                    r_paren_token: R_PAREN@45..47 ")" [] [Whitespace(" ")],
+                },
+                children: AngularBlockBody {
+                    l_curly_token: L_CURLY@47..48 "{" [] [],
+                    children: HtmlElementList [
+                        HtmlSelfClosingElement {
+                            l_angle_token: L_ANGLE@48..90 "<" [Newline("\n"), Whitespace("  "), Comments("<!-- deferred templat ..."), Newline("\n"), Whitespace("  ")] [],
+                            name: HtmlComponentName {
+                                value_token: HTML_COMPONENT_LITERAL@90..103 "calendar-cmp" [] [Whitespace(" ")],
+                            },
+                            attributes: HtmlAttributeList [],
+                            slash_token: SLASH@103..104 "/" [] [],
+                            r_angle_token: R_ANGLE@104..105 ">" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@105..108 "}" [Newline("\n")] [Whitespace(" ")],
+                },
+            },
+            placeholder_clause: AngularPlaceholderClause {
+                at_token: AT@108..109 "@" [] [],
+                placeholder_token: PLACEHOLDER_KW@109..121 "placeholder" [] [Whitespace(" ")],
+                parameters: AngularPlaceholderParameters {
+                    l_paren_token: L_PAREN@121..122 "(" [] [],
+                    clause: AngularMinimumTimeClause {
+                        minimum_token: MINIMUM_KW@122..129 "minimum" [] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@129..135 " 500ms" [] [],
+                        },
+                    },
+                    r_paren_token: R_PAREN@135..137 ")" [] [Whitespace(" ")],
+                },
+                children: AngularBlockBody {
+                    l_curly_token: L_CURLY@137..138 "{" [] [],
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@138..183 "<" [Newline("\n"), Whitespace("  "), Comments("<!-- placeholder temp ..."), Newline("\n"), Whitespace("  ")] [],
+                                name: HtmlTagName {
+                                    value_token: P_KW@183..184 "p" [] [],
+                                },
+                                attributes: HtmlAttributeList [],
+                                r_angle_token: R_ANGLE@184..185 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@185..196 "Placeholder" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@196..197 "<" [] [],
+                                slash_token: SLASH@197..198 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@198..199 "p" [] [],
+                                },
+                                r_angle_token: R_ANGLE@199..200 ">" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@200..203 "}" [Newline("\n")] [Whitespace(" ")],
+                },
+            },
+            loading_clause: AngularLoadingClause {
+                at_token: AT@203..204 "@" [] [],
+                loading_token: LOADING_KW@204..212 "loading" [] [Whitespace(" ")],
+                parameters: AngularLoadingParameters {
+                    l_paren_token: L_PAREN@212..213 "(" [] [],
+                    clauses: AngularLoadingParameterClauseList [
+                        AngularAfterTimeClause {
+                            after_token: AFTER_KW@213..218 "after" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@218..224 " 100ms" [] [],
+                            },
+                        },
+                        SEMICOLON@224..226 ";" [] [Whitespace(" ")],
+                        AngularMinimumTimeClause {
+                            minimum_token: MINIMUM_KW@226..233 "minimum" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@233..236 " 1s" [] [],
+                            },
+                        },
+                    ],
+                    r_paren_token: R_PAREN@236..238 ")" [] [Whitespace(" ")],
+                },
+                children: AngularBlockBody {
+                    l_curly_token: L_CURLY@238..239 "{" [] [],
+                    children: HtmlElementList [
+                        HtmlSelfClosingElement {
+                            l_angle_token: L_ANGLE@239..280 "<" [Newline("\n"), Whitespace("  "), Comments("<!-- loading template ..."), Newline("\n"), Whitespace("  ")] [],
+                            name: HtmlTagName {
+                                value_token: IMG_KW@280..284 "img" [] [Whitespace(" ")],
+                            },
+                            attributes: HtmlAttributeList [
+                                HtmlAttribute {
+                                    name: HtmlAttributeName {
+                                        value_token: HTML_LITERAL@284..287 "alt" [] [],
+                                    },
+                                    initializer: HtmlAttributeInitializerClause {
+                                        eq_token: EQ@287..288 "=" [] [],
+                                        value: HtmlString {
+                                            value_token: HTML_STRING_LITERAL@288..304 "\"loading image\"" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                },
+                                HtmlAttribute {
+                                    name: HtmlAttributeName {
+                                        value_token: HTML_LITERAL@304..307 "src" [] [],
+                                    },
+                                    initializer: HtmlAttributeInitializerClause {
+                                        eq_token: EQ@307..308 "=" [] [],
+                                        value: HtmlString {
+                                            value_token: HTML_STRING_LITERAL@308..322 "\"loading.gif\"" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                },
+                            ],
+                            slash_token: SLASH@322..323 "/" [] [],
+                            r_angle_token: R_ANGLE@323..324 ">" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@324..327 "}" [Newline("\n")] [Whitespace(" ")],
+                },
+            },
+            error_clause: AngularErrorClause {
+                at_token: AT@327..328 "@" [] [],
+                error_token: ERROR_KW@328..334 "error" [] [Whitespace(" ")],
+                children: AngularBlockBody {
+                    l_curly_token: L_CURLY@334..335 "{" [] [],
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@335..374 "<" [Newline("\n"), Whitespace("  "), Comments("<!-- error template f ..."), Newline("\n"), Whitespace("  ")] [],
+                                name: HtmlTagName {
+                                    value_token: P_KW@374..375 "p" [] [],
+                                },
+                                attributes: HtmlAttributeList [],
+                                r_angle_token: R_ANGLE@375..376 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@376..401 "An loading error occurred" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@401..402 "<" [] [],
+                                slash_token: SLASH@402..403 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@403..404 "p" [] [],
+                                },
+                                r_angle_token: R_ANGLE@404..405 ">" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@405..407 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@407..408 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..408
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..407
+    0: ANGULAR_DEFER_BLOCK@0..407
+      0: ANGULAR_DEFER_OPENING_BLOCK@0..108
+        0: AT@0..1 "@" [] []
+        1: DEFER_KW@1..7 "defer" [] [Whitespace(" ")]
+        2: ANGULAR_DEFER_PARAMETERS@7..47
+          0: L_PAREN@7..8 "(" [] []
+          1: ANGULAR_DEFER_CLAUSE_LIST@8..45
+            0: ANGULAR_DEFER_ON_CLAUSE@8..22
+              0: ON_KW@8..10 "on" [] []
+              1: HTML_TEXT_EXPRESSION@10..22
+                0: HTML_LITERAL@10..22 " interaction" [] []
+            1: SEMICOLON@22..24 ";" [] [Whitespace(" ")]
+            2: ANGULAR_DEFER_PREFETCH_ON_CLAUSE@24..45
+              0: PREFETCH_KW@24..33 "prefetch" [] [Whitespace(" ")]
+              1: ON_KW@33..35 "on" [] []
+              2: HTML_TEXT_EXPRESSION@35..45
+                0: HTML_LITERAL@35..45 " idle(500)" [] []
+          2: R_PAREN@45..47 ")" [] [Whitespace(" ")]
+        3: ANGULAR_BLOCK_BODY@47..108
+          0: L_CURLY@47..48 "{" [] []
+          1: HTML_ELEMENT_LIST@48..105
+            0: HTML_SELF_CLOSING_ELEMENT@48..105
+              0: L_ANGLE@48..90 "<" [Newline("\n"), Whitespace("  "), Comments("<!-- deferred templat ..."), Newline("\n"), Whitespace("  ")] []
+              1: HTML_COMPONENT_NAME@90..103
+                0: HTML_COMPONENT_LITERAL@90..103 "calendar-cmp" [] [Whitespace(" ")]
+              2: HTML_ATTRIBUTE_LIST@103..103
+              3: SLASH@103..104 "/" [] []
+              4: R_ANGLE@104..105 ">" [] []
+          2: R_CURLY@105..108 "}" [Newline("\n")] [Whitespace(" ")]
+      1: ANGULAR_PLACEHOLDER_CLAUSE@108..203
+        0: AT@108..109 "@" [] []
+        1: PLACEHOLDER_KW@109..121 "placeholder" [] [Whitespace(" ")]
+        2: ANGULAR_PLACEHOLDER_PARAMETERS@121..137
+          0: L_PAREN@121..122 "(" [] []
+          1: ANGULAR_MINIMUM_TIME_CLAUSE@122..135
+            0: MINIMUM_KW@122..129 "minimum" [] []
+            1: HTML_TEXT_EXPRESSION@129..135
+              0: HTML_LITERAL@129..135 " 500ms" [] []
+          2: R_PAREN@135..137 ")" [] [Whitespace(" ")]
+        3: ANGULAR_BLOCK_BODY@137..203
+          0: L_CURLY@137..138 "{" [] []
+          1: HTML_ELEMENT_LIST@138..200
+            0: HTML_ELEMENT@138..200
+              0: HTML_OPENING_ELEMENT@138..185
+                0: L_ANGLE@138..183 "<" [Newline("\n"), Whitespace("  "), Comments("<!-- placeholder temp ..."), Newline("\n"), Whitespace("  ")] []
+                1: HTML_TAG_NAME@183..184
+                  0: P_KW@183..184 "p" [] []
+                2: HTML_ATTRIBUTE_LIST@184..184
+                3: R_ANGLE@184..185 ">" [] []
+              1: HTML_ELEMENT_LIST@185..196
+                0: HTML_CONTENT@185..196
+                  0: HTML_LITERAL@185..196 "Placeholder" [] []
+              2: HTML_CLOSING_ELEMENT@196..200
+                0: L_ANGLE@196..197 "<" [] []
+                1: SLASH@197..198 "/" [] []
+                2: HTML_TAG_NAME@198..199
+                  0: HTML_LITERAL@198..199 "p" [] []
+                3: R_ANGLE@199..200 ">" [] []
+          2: R_CURLY@200..203 "}" [Newline("\n")] [Whitespace(" ")]
+      2: ANGULAR_LOADING_CLAUSE@203..327
+        0: AT@203..204 "@" [] []
+        1: LOADING_KW@204..212 "loading" [] [Whitespace(" ")]
+        2: ANGULAR_LOADING_PARAMETERS@212..238
+          0: L_PAREN@212..213 "(" [] []
+          1: ANGULAR_LOADING_PARAMETER_CLAUSE_LIST@213..236
+            0: ANGULAR_AFTER_TIME_CLAUSE@213..224
+              0: AFTER_KW@213..218 "after" [] []
+              1: HTML_TEXT_EXPRESSION@218..224
+                0: HTML_LITERAL@218..224 " 100ms" [] []
+            1: SEMICOLON@224..226 ";" [] [Whitespace(" ")]
+            2: ANGULAR_MINIMUM_TIME_CLAUSE@226..236
+              0: MINIMUM_KW@226..233 "minimum" [] []
+              1: HTML_TEXT_EXPRESSION@233..236
+                0: HTML_LITERAL@233..236 " 1s" [] []
+          2: R_PAREN@236..238 ")" [] [Whitespace(" ")]
+        3: ANGULAR_BLOCK_BODY@238..327
+          0: L_CURLY@238..239 "{" [] []
+          1: HTML_ELEMENT_LIST@239..324
+            0: HTML_SELF_CLOSING_ELEMENT@239..324
+              0: L_ANGLE@239..280 "<" [Newline("\n"), Whitespace("  "), Comments("<!-- loading template ..."), Newline("\n"), Whitespace("  ")] []
+              1: HTML_TAG_NAME@280..284
+                0: IMG_KW@280..284 "img" [] [Whitespace(" ")]
+              2: HTML_ATTRIBUTE_LIST@284..322
+                0: HTML_ATTRIBUTE@284..304
+                  0: HTML_ATTRIBUTE_NAME@284..287
+                    0: HTML_LITERAL@284..287 "alt" [] []
+                  1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@287..304
+                    0: EQ@287..288 "=" [] []
+                    1: HTML_STRING@288..304
+                      0: HTML_STRING_LITERAL@288..304 "\"loading image\"" [] [Whitespace(" ")]
+                1: HTML_ATTRIBUTE@304..322
+                  0: HTML_ATTRIBUTE_NAME@304..307
+                    0: HTML_LITERAL@304..307 "src" [] []
+                  1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@307..322
+                    0: EQ@307..308 "=" [] []
+                    1: HTML_STRING@308..322
+                      0: HTML_STRING_LITERAL@308..322 "\"loading.gif\"" [] [Whitespace(" ")]
+              3: SLASH@322..323 "/" [] []
+              4: R_ANGLE@323..324 ">" [] []
+          2: R_CURLY@324..327 "}" [Newline("\n")] [Whitespace(" ")]
+      3: ANGULAR_ERROR_CLAUSE@327..407
+        0: AT@327..328 "@" [] []
+        1: ERROR_KW@328..334 "error" [] [Whitespace(" ")]
+        2: ANGULAR_BLOCK_BODY@334..407
+          0: L_CURLY@334..335 "{" [] []
+          1: HTML_ELEMENT_LIST@335..405
+            0: HTML_ELEMENT@335..405
+              0: HTML_OPENING_ELEMENT@335..376
+                0: L_ANGLE@335..374 "<" [Newline("\n"), Whitespace("  "), Comments("<!-- error template f ..."), Newline("\n"), Whitespace("  ")] []
+                1: HTML_TAG_NAME@374..375
+                  0: P_KW@374..375 "p" [] []
+                2: HTML_ATTRIBUTE_LIST@375..375
+                3: R_ANGLE@375..376 ">" [] []
+              1: HTML_ELEMENT_LIST@376..401
+                0: HTML_CONTENT@376..401
+                  0: HTML_LITERAL@376..401 "An loading error occurred" [] []
+              2: HTML_CLOSING_ELEMENT@401..405
+                0: L_ANGLE@401..402 "<" [] []
+                1: SLASH@402..403 "/" [] []
+                2: HTML_TAG_NAME@403..404
+                  0: HTML_LITERAL@403..404 "p" [] []
+                3: R_ANGLE@404..405 ">" [] []
+          2: R_CURLY@405..407 "}" [Newline("\n")] []
+  4: EOF@407..408 "" [Newline("\n")] []
+
+```

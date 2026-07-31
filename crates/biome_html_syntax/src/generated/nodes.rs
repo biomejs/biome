@@ -20,6 +20,46 @@ use std::fmt::{Debug, Formatter};
 #[doc = r" the slots are not statically known."]
 pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularAfterTimeClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularAfterTimeClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularAfterTimeClauseFields {
+        AngularAfterTimeClauseFields {
+            after_token: self.after_token(),
+            expression: self.expression(),
+        }
+    }
+    pub fn after_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for AngularAfterTimeClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularAfterTimeClauseFields {
+    pub after_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<HtmlTextExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AngularBindingName {
     pub(crate) syntax: SyntaxNode,
 }
@@ -53,6 +93,691 @@ impl Serialize for AngularBindingName {
 #[derive(Serialize)]
 pub struct AngularBindingNameFields {
     pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularBlockBody {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularBlockBody {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularBlockBodyFields {
+        AngularBlockBodyFields {
+            l_curly_token: self.l_curly_token(),
+            children: self.children(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn children(&self) -> HtmlElementList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AngularBlockBody {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularBlockBodyFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub children: HtmlElementList,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularCaseClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularCaseClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularCaseClauseFields {
+        AngularCaseClauseFields {
+            at_token: self.at_token(),
+            case_token: self.case_token(),
+            parameters: self.parameters(),
+            children: self.children(),
+        }
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn case_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn parameters(&self) -> SyntaxResult<AngularSwitchParameters> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn children(&self) -> Option<AngularBlockBody> {
+        support::node(&self.syntax, 3usize)
+    }
+}
+impl Serialize for AngularCaseClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularCaseClauseFields {
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub case_token: SyntaxResult<SyntaxToken>,
+    pub parameters: SyntaxResult<AngularSwitchParameters>,
+    pub children: Option<AngularBlockBody>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularDefaultClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularDefaultClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularDefaultClauseFields {
+        AngularDefaultClauseFields {
+            at_token: self.at_token(),
+            default_token: self.default_token(),
+            children: self.children(),
+        }
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn default_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn children(&self) -> SyntaxResult<AnyAngularDefaultClauseBody> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AngularDefaultClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularDefaultClauseFields {
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub default_token: SyntaxResult<SyntaxToken>,
+    pub children: SyntaxResult<AnyAngularDefaultClauseBody>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularDefaultExpressionClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularDefaultExpressionClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularDefaultExpressionClauseFields {
+        AngularDefaultExpressionClauseFields {
+            expression: self.expression(),
+            semicolon_token: self.semicolon_token(),
+        }
+    }
+    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for AngularDefaultExpressionClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularDefaultExpressionClauseFields {
+    pub expression: SyntaxResult<HtmlTextExpression>,
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularDeferBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularDeferBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularDeferBlockFields {
+        AngularDeferBlockFields {
+            opening_block: self.opening_block(),
+            placeholder_clause: self.placeholder_clause(),
+            loading_clause: self.loading_clause(),
+            error_clause: self.error_clause(),
+        }
+    }
+    pub fn opening_block(&self) -> SyntaxResult<AngularDeferOpeningBlock> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn placeholder_clause(&self) -> Option<AngularPlaceholderClause> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn loading_clause(&self) -> Option<AngularLoadingClause> {
+        support::node(&self.syntax, 2usize)
+    }
+    pub fn error_clause(&self) -> Option<AngularErrorClause> {
+        support::node(&self.syntax, 3usize)
+    }
+}
+impl Serialize for AngularDeferBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularDeferBlockFields {
+    pub opening_block: SyntaxResult<AngularDeferOpeningBlock>,
+    pub placeholder_clause: Option<AngularPlaceholderClause>,
+    pub loading_clause: Option<AngularLoadingClause>,
+    pub error_clause: Option<AngularErrorClause>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularDeferOnClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularDeferOnClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularDeferOnClauseFields {
+        AngularDeferOnClauseFields {
+            on_token: self.on_token(),
+            expression: self.expression(),
+        }
+    }
+    pub fn on_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for AngularDeferOnClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularDeferOnClauseFields {
+    pub on_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<HtmlTextExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularDeferOpeningBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularDeferOpeningBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularDeferOpeningBlockFields {
+        AngularDeferOpeningBlockFields {
+            at_token: self.at_token(),
+            defer_token: self.defer_token(),
+            parameters: self.parameters(),
+            children: self.children(),
+        }
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn defer_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn parameters(&self) -> Option<AngularDeferParameters> {
+        support::node(&self.syntax, 2usize)
+    }
+    pub fn children(&self) -> SyntaxResult<AngularBlockBody> {
+        support::required_node(&self.syntax, 3usize)
+    }
+}
+impl Serialize for AngularDeferOpeningBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularDeferOpeningBlockFields {
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub defer_token: SyntaxResult<SyntaxToken>,
+    pub parameters: Option<AngularDeferParameters>,
+    pub children: SyntaxResult<AngularBlockBody>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularDeferParameters {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularDeferParameters {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularDeferParametersFields {
+        AngularDeferParametersFields {
+            l_paren_token: self.l_paren_token(),
+            clauses: self.clauses(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn clauses(&self) -> AngularDeferClauseList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AngularDeferParameters {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularDeferParametersFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub clauses: AngularDeferClauseList,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularDeferPrefetchOnClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularDeferPrefetchOnClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularDeferPrefetchOnClauseFields {
+        AngularDeferPrefetchOnClauseFields {
+            prefetch_token: self.prefetch_token(),
+            on_token: self.on_token(),
+            expression: self.expression(),
+        }
+    }
+    pub fn prefetch_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn on_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AngularDeferPrefetchOnClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularDeferPrefetchOnClauseFields {
+    pub prefetch_token: SyntaxResult<SyntaxToken>,
+    pub on_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<HtmlTextExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularDeferPrefetchWhenClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularDeferPrefetchWhenClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularDeferPrefetchWhenClauseFields {
+        AngularDeferPrefetchWhenClauseFields {
+            prefetch_token: self.prefetch_token(),
+            when_token: self.when_token(),
+            expression: self.expression(),
+        }
+    }
+    pub fn prefetch_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn when_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AngularDeferPrefetchWhenClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularDeferPrefetchWhenClauseFields {
+    pub prefetch_token: SyntaxResult<SyntaxToken>,
+    pub when_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<HtmlTextExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularDeferWhenClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularDeferWhenClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularDeferWhenClauseFields {
+        AngularDeferWhenClauseFields {
+            when_token: self.when_token(),
+            expression: self.expression(),
+        }
+    }
+    pub fn when_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for AngularDeferWhenClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularDeferWhenClauseFields {
+    pub when_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<HtmlTextExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularElseClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularElseClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularElseClauseFields {
+        AngularElseClauseFields {
+            at_token: self.at_token(),
+            else_token: self.else_token(),
+            children: self.children(),
+        }
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn else_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn children(&self) -> SyntaxResult<AngularBlockBody> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AngularElseClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularElseClauseFields {
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub else_token: SyntaxResult<SyntaxToken>,
+    pub children: SyntaxResult<AngularBlockBody>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularElseIfClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularElseIfClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularElseIfClauseFields {
+        AngularElseIfClauseFields {
+            at_token: self.at_token(),
+            else_token: self.else_token(),
+            if_token: self.if_token(),
+            condition: self.condition(),
+            children: self.children(),
+        }
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn else_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn if_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn condition(&self) -> SyntaxResult<AngularIfParameters> {
+        support::required_node(&self.syntax, 3usize)
+    }
+    pub fn children(&self) -> SyntaxResult<AngularBlockBody> {
+        support::required_node(&self.syntax, 4usize)
+    }
+}
+impl Serialize for AngularElseIfClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularElseIfClauseFields {
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub else_token: SyntaxResult<SyntaxToken>,
+    pub if_token: SyntaxResult<SyntaxToken>,
+    pub condition: SyntaxResult<AngularIfParameters>,
+    pub children: SyntaxResult<AngularBlockBody>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularEmptyClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularEmptyClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularEmptyClauseFields {
+        AngularEmptyClauseFields {
+            at_token: self.at_token(),
+            empty_token: self.empty_token(),
+            children: self.children(),
+        }
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn empty_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn children(&self) -> SyntaxResult<AngularBlockBody> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AngularEmptyClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularEmptyClauseFields {
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub empty_token: SyntaxResult<SyntaxToken>,
+    pub children: SyntaxResult<AngularBlockBody>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularErrorClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularErrorClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularErrorClauseFields {
+        AngularErrorClauseFields {
+            at_token: self.at_token(),
+            error_token: self.error_token(),
+            children: self.children(),
+        }
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn error_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn children(&self) -> SyntaxResult<AngularBlockBody> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AngularErrorClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularErrorClauseFields {
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub error_token: SyntaxResult<SyntaxToken>,
+    pub children: SyntaxResult<AngularBlockBody>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AngularEventBinding {
@@ -103,6 +828,756 @@ pub struct AngularEventBindingFields {
     pub name: SyntaxResult<AngularBindingName>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
     pub initializer: Option<HtmlAttributeInitializerClause>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularForBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularForBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularForBlockFields {
+        AngularForBlockFields {
+            opening_block: self.opening_block(),
+            empty_clause: self.empty_clause(),
+        }
+    }
+    pub fn opening_block(&self) -> SyntaxResult<AngularForOpeningBlock> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn empty_clause(&self) -> Option<AngularEmptyClause> {
+        support::node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for AngularForBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularForBlockFields {
+    pub opening_block: SyntaxResult<AngularForOpeningBlock>,
+    pub empty_clause: Option<AngularEmptyClause>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularForExpression {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularForExpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularForExpressionFields {
+        AngularForExpressionFields {
+            variable: self.variable(),
+            of_token: self.of_token(),
+            iterable: self.iterable(),
+        }
+    }
+    pub fn variable(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn of_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn iterable(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AngularForExpression {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularForExpressionFields {
+    pub variable: SyntaxResult<HtmlTextExpression>,
+    pub of_token: SyntaxResult<SyntaxToken>,
+    pub iterable: SyntaxResult<HtmlTextExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularForLetClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularForLetClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularForLetClauseFields {
+        AngularForLetClauseFields {
+            semicolon_token: self.semicolon_token(),
+            let_token: self.let_token(),
+            bindings: self.bindings(),
+        }
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn let_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn bindings(&self) -> AngularForLetBindingList {
+        support::list(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AngularForLetClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularForLetClauseFields {
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
+    pub let_token: SyntaxResult<SyntaxToken>,
+    pub bindings: AngularForLetBindingList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularForOpeningBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularForOpeningBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularForOpeningBlockFields {
+        AngularForOpeningBlockFields {
+            at_token: self.at_token(),
+            for_token: self.for_token(),
+            parameters: self.parameters(),
+            children: self.children(),
+        }
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn for_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn parameters(&self) -> SyntaxResult<AngularForParameters> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn children(&self) -> SyntaxResult<AngularBlockBody> {
+        support::required_node(&self.syntax, 3usize)
+    }
+}
+impl Serialize for AngularForOpeningBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularForOpeningBlockFields {
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub for_token: SyntaxResult<SyntaxToken>,
+    pub parameters: SyntaxResult<AngularForParameters>,
+    pub children: SyntaxResult<AngularBlockBody>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularForParameters {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularForParameters {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularForParametersFields {
+        AngularForParametersFields {
+            l_paren_token: self.l_paren_token(),
+            expression: self.expression(),
+            semicolon_token: self.semicolon_token(),
+            track_clause: self.track_clause(),
+            let_clause: self.let_clause(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<AngularForExpression> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn track_clause(&self) -> SyntaxResult<AngularForTrackClause> {
+        support::required_node(&self.syntax, 3usize)
+    }
+    pub fn let_clause(&self) -> Option<AngularForLetClause> {
+        support::node(&self.syntax, 4usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 5usize)
+    }
+}
+impl Serialize for AngularForParameters {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularForParametersFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<AngularForExpression>,
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
+    pub track_clause: SyntaxResult<AngularForTrackClause>,
+    pub let_clause: Option<AngularForLetClause>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularForTrackClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularForTrackClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularForTrackClauseFields {
+        AngularForTrackClauseFields {
+            track_token: self.track_token(),
+            expression: self.expression(),
+        }
+    }
+    pub fn track_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for AngularForTrackClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularForTrackClauseFields {
+    pub track_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<HtmlTextExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularIfAsClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularIfAsClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularIfAsClauseFields {
+        AngularIfAsClauseFields {
+            semicolon_token: self.semicolon_token(),
+            as_token: self.as_token(),
+            binding: self.binding(),
+        }
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn as_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn binding(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AngularIfAsClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularIfAsClauseFields {
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
+    pub as_token: SyntaxResult<SyntaxToken>,
+    pub binding: SyntaxResult<HtmlTextExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularIfBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularIfBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularIfBlockFields {
+        AngularIfBlockFields {
+            opening_block: self.opening_block(),
+            else_if_clauses: self.else_if_clauses(),
+            else_clause: self.else_clause(),
+        }
+    }
+    pub fn opening_block(&self) -> SyntaxResult<AngularIfOpeningBlock> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn else_if_clauses(&self) -> AngularElseIfClauseList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn else_clause(&self) -> Option<AngularElseClause> {
+        support::node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AngularIfBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularIfBlockFields {
+    pub opening_block: SyntaxResult<AngularIfOpeningBlock>,
+    pub else_if_clauses: AngularElseIfClauseList,
+    pub else_clause: Option<AngularElseClause>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularIfOpeningBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularIfOpeningBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularIfOpeningBlockFields {
+        AngularIfOpeningBlockFields {
+            at_token: self.at_token(),
+            if_token: self.if_token(),
+            condition: self.condition(),
+            children: self.children(),
+        }
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn if_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn condition(&self) -> SyntaxResult<AngularIfParameters> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn children(&self) -> SyntaxResult<AngularBlockBody> {
+        support::required_node(&self.syntax, 3usize)
+    }
+}
+impl Serialize for AngularIfOpeningBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularIfOpeningBlockFields {
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub if_token: SyntaxResult<SyntaxToken>,
+    pub condition: SyntaxResult<AngularIfParameters>,
+    pub children: SyntaxResult<AngularBlockBody>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularIfParameters {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularIfParameters {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularIfParametersFields {
+        AngularIfParametersFields {
+            l_paren_token: self.l_paren_token(),
+            expression: self.expression(),
+            as_clause: self.as_clause(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn as_clause(&self) -> Option<AngularIfAsClause> {
+        support::node(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for AngularIfParameters {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularIfParametersFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<HtmlTextExpression>,
+    pub as_clause: Option<AngularIfAsClause>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularLetBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularLetBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularLetBlockFields {
+        AngularLetBlockFields {
+            at_token: self.at_token(),
+            let_token: self.let_token(),
+            expression: self.expression(),
+            semicolon_token: self.semicolon_token(),
+        }
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn let_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for AngularLetBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularLetBlockFields {
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub let_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<HtmlTextExpression>,
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularLoadingClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularLoadingClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularLoadingClauseFields {
+        AngularLoadingClauseFields {
+            at_token: self.at_token(),
+            loading_token: self.loading_token(),
+            parameters: self.parameters(),
+            children: self.children(),
+        }
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn loading_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn parameters(&self) -> Option<AngularLoadingParameters> {
+        support::node(&self.syntax, 2usize)
+    }
+    pub fn children(&self) -> SyntaxResult<AngularBlockBody> {
+        support::required_node(&self.syntax, 3usize)
+    }
+}
+impl Serialize for AngularLoadingClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularLoadingClauseFields {
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub loading_token: SyntaxResult<SyntaxToken>,
+    pub parameters: Option<AngularLoadingParameters>,
+    pub children: SyntaxResult<AngularBlockBody>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularLoadingParameters {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularLoadingParameters {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularLoadingParametersFields {
+        AngularLoadingParametersFields {
+            l_paren_token: self.l_paren_token(),
+            clauses: self.clauses(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn clauses(&self) -> AngularLoadingParameterClauseList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AngularLoadingParameters {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularLoadingParametersFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub clauses: AngularLoadingParameterClauseList,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularMinimumTimeClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularMinimumTimeClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularMinimumTimeClauseFields {
+        AngularMinimumTimeClauseFields {
+            minimum_token: self.minimum_token(),
+            expression: self.expression(),
+        }
+    }
+    pub fn minimum_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for AngularMinimumTimeClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularMinimumTimeClauseFields {
+    pub minimum_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<HtmlTextExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularPlaceholderClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularPlaceholderClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularPlaceholderClauseFields {
+        AngularPlaceholderClauseFields {
+            at_token: self.at_token(),
+            placeholder_token: self.placeholder_token(),
+            parameters: self.parameters(),
+            children: self.children(),
+        }
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn placeholder_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn parameters(&self) -> Option<AngularPlaceholderParameters> {
+        support::node(&self.syntax, 2usize)
+    }
+    pub fn children(&self) -> SyntaxResult<AngularBlockBody> {
+        support::required_node(&self.syntax, 3usize)
+    }
+}
+impl Serialize for AngularPlaceholderClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularPlaceholderClauseFields {
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub placeholder_token: SyntaxResult<SyntaxToken>,
+    pub parameters: Option<AngularPlaceholderParameters>,
+    pub children: SyntaxResult<AngularBlockBody>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularPlaceholderParameters {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularPlaceholderParameters {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularPlaceholderParametersFields {
+        AngularPlaceholderParametersFields {
+            l_paren_token: self.l_paren_token(),
+            clause: self.clause(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn clause(&self) -> SyntaxResult<AngularMinimumTimeClause> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AngularPlaceholderParameters {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularPlaceholderParametersFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub clause: SyntaxResult<AngularMinimumTimeClause>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AngularPropertyBinding {
@@ -198,6 +1673,151 @@ pub struct AngularStructuralDirectiveFields {
     pub star_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<AngularBindingName>,
     pub initializer: Option<HtmlAttributeInitializerClause>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularSwitchBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularSwitchBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularSwitchBlockFields {
+        AngularSwitchBlockFields {
+            opening_block: self.opening_block(),
+            l_curly_token: self.l_curly_token(),
+            cases: self.cases(),
+            default_clause: self.default_clause(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn opening_block(&self) -> SyntaxResult<AngularSwitchOpeningBlock> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn cases(&self) -> AngularCaseClauseList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn default_clause(&self) -> Option<AngularDefaultClause> {
+        support::node(&self.syntax, 3usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+}
+impl Serialize for AngularSwitchBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularSwitchBlockFields {
+    pub opening_block: SyntaxResult<AngularSwitchOpeningBlock>,
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub cases: AngularCaseClauseList,
+    pub default_clause: Option<AngularDefaultClause>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularSwitchOpeningBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularSwitchOpeningBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularSwitchOpeningBlockFields {
+        AngularSwitchOpeningBlockFields {
+            at_token: self.at_token(),
+            switch_token: self.switch_token(),
+            parameters: self.parameters(),
+        }
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn switch_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn parameters(&self) -> SyntaxResult<AngularSwitchParameters> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AngularSwitchOpeningBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularSwitchOpeningBlockFields {
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub switch_token: SyntaxResult<SyntaxToken>,
+    pub parameters: SyntaxResult<AngularSwitchParameters>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularSwitchParameters {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularSwitchParameters {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularSwitchParametersFields {
+        AngularSwitchParametersFields {
+            l_paren_token: self.l_paren_token(),
+            expression: self.expression(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn expression(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AngularSwitchParameters {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularSwitchParametersFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub expression: SyntaxResult<HtmlTextExpression>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AngularTemplateRefVariable {
@@ -4866,6 +6486,117 @@ impl AnyAngularBinding {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyAngularBlock {
+    AngularDeferBlock(AngularDeferBlock),
+    AngularForBlock(AngularForBlock),
+    AngularIfBlock(AngularIfBlock),
+    AngularLetBlock(AngularLetBlock),
+    AngularSwitchBlock(AngularSwitchBlock),
+}
+impl AnyAngularBlock {
+    pub fn as_angular_defer_block(&self) -> Option<&AngularDeferBlock> {
+        match &self {
+            Self::AngularDeferBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_angular_for_block(&self) -> Option<&AngularForBlock> {
+        match &self {
+            Self::AngularForBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_angular_if_block(&self) -> Option<&AngularIfBlock> {
+        match &self {
+            Self::AngularIfBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_angular_let_block(&self) -> Option<&AngularLetBlock> {
+        match &self {
+            Self::AngularLetBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_angular_switch_block(&self) -> Option<&AngularSwitchBlock> {
+        match &self {
+            Self::AngularSwitchBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyAngularDefaultClauseBody {
+    AngularBlockBody(AngularBlockBody),
+    AngularDefaultExpressionClause(AngularDefaultExpressionClause),
+}
+impl AnyAngularDefaultClauseBody {
+    pub fn as_angular_block_body(&self) -> Option<&AngularBlockBody> {
+        match &self {
+            Self::AngularBlockBody(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_angular_default_expression_clause(&self) -> Option<&AngularDefaultExpressionClause> {
+        match &self {
+            Self::AngularDefaultExpressionClause(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyAngularDeferClause {
+    AngularDeferOnClause(AngularDeferOnClause),
+    AngularDeferPrefetchOnClause(AngularDeferPrefetchOnClause),
+    AngularDeferPrefetchWhenClause(AngularDeferPrefetchWhenClause),
+    AngularDeferWhenClause(AngularDeferWhenClause),
+}
+impl AnyAngularDeferClause {
+    pub fn as_angular_defer_on_clause(&self) -> Option<&AngularDeferOnClause> {
+        match &self {
+            Self::AngularDeferOnClause(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_angular_defer_prefetch_on_clause(&self) -> Option<&AngularDeferPrefetchOnClause> {
+        match &self {
+            Self::AngularDeferPrefetchOnClause(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_angular_defer_prefetch_when_clause(&self) -> Option<&AngularDeferPrefetchWhenClause> {
+        match &self {
+            Self::AngularDeferPrefetchWhenClause(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_angular_defer_when_clause(&self) -> Option<&AngularDeferWhenClause> {
+        match &self {
+            Self::AngularDeferWhenClause(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyAngularLoadingParameterClause {
+    AngularAfterTimeClause(AngularAfterTimeClause),
+    AngularMinimumTimeClause(AngularMinimumTimeClause),
+}
+impl AnyAngularLoadingParameterClause {
+    pub fn as_angular_after_time_clause(&self) -> Option<&AngularAfterTimeClause> {
+        match &self {
+            Self::AngularAfterTimeClause(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_angular_minimum_time_clause(&self) -> Option<&AngularMinimumTimeClause> {
+        match &self {
+            Self::AngularMinimumTimeClause(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyAstroDirective {
     AstroClassDirective(AstroClassDirective),
     AstroClientDirective(AstroClientDirective),
@@ -5186,12 +6917,19 @@ impl AnyHtmlTagName {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlTextExpression {
+    AnyAngularBlock(AnyAngularBlock),
     AnySvelteBlock(AnySvelteBlock),
     HtmlBogusTextExpression(HtmlBogusTextExpression),
     HtmlDoubleTextExpression(HtmlDoubleTextExpression),
     HtmlSingleTextExpression(HtmlSingleTextExpression),
 }
 impl AnyHtmlTextExpression {
+    pub fn as_any_angular_block(&self) -> Option<&AnyAngularBlock> {
+        match &self {
+            Self::AnyAngularBlock(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_any_svelte_block(&self) -> Option<&AnySvelteBlock> {
         match &self {
             Self::AnySvelteBlock(item) => Some(item),
@@ -5733,6 +7471,57 @@ impl AnyVueVForOperator {
         }
     }
 }
+impl AstNode for AngularAfterTimeClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_AFTER_TIME_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_AFTER_TIME_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularAfterTimeClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularAfterTimeClause")
+                .field(
+                    "after_token",
+                    &support::DebugSyntaxResult(self.after_token()),
+                )
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .finish()
+        } else {
+            f.debug_struct("AngularAfterTimeClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularAfterTimeClause> for SyntaxNode {
+    fn from(n: AngularAfterTimeClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularAfterTimeClause> for SyntaxElement {
+    fn from(n: AngularAfterTimeClause) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for AngularBindingName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5780,6 +7569,791 @@ impl From<AngularBindingName> for SyntaxNode {
 }
 impl From<AngularBindingName> for SyntaxElement {
     fn from(n: AngularBindingName) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularBlockBody {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_BLOCK_BODY as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_BLOCK_BODY
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularBlockBody {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularBlockBody")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("children", &self.children())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularBlockBody").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularBlockBody> for SyntaxNode {
+    fn from(n: AngularBlockBody) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularBlockBody> for SyntaxElement {
+    fn from(n: AngularBlockBody) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularCaseClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_CASE_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_CASE_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularCaseClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularCaseClause")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field("case_token", &support::DebugSyntaxResult(self.case_token()))
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .field("children", &support::DebugOptionalElement(self.children()))
+                .finish()
+        } else {
+            f.debug_struct("AngularCaseClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularCaseClause> for SyntaxNode {
+    fn from(n: AngularCaseClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularCaseClause> for SyntaxElement {
+    fn from(n: AngularCaseClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularDefaultClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_DEFAULT_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_DEFAULT_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularDefaultClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularDefaultClause")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field(
+                    "default_token",
+                    &support::DebugSyntaxResult(self.default_token()),
+                )
+                .field("children", &support::DebugSyntaxResult(self.children()))
+                .finish()
+        } else {
+            f.debug_struct("AngularDefaultClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularDefaultClause> for SyntaxNode {
+    fn from(n: AngularDefaultClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularDefaultClause> for SyntaxElement {
+    fn from(n: AngularDefaultClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularDefaultExpressionClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_DEFAULT_EXPRESSION_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_DEFAULT_EXPRESSION_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularDefaultExpressionClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularDefaultExpressionClause")
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularDefaultExpressionClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularDefaultExpressionClause> for SyntaxNode {
+    fn from(n: AngularDefaultExpressionClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularDefaultExpressionClause> for SyntaxElement {
+    fn from(n: AngularDefaultExpressionClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularDeferBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_DEFER_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_DEFER_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularDeferBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularDeferBlock")
+                .field(
+                    "opening_block",
+                    &support::DebugSyntaxResult(self.opening_block()),
+                )
+                .field(
+                    "placeholder_clause",
+                    &support::DebugOptionalElement(self.placeholder_clause()),
+                )
+                .field(
+                    "loading_clause",
+                    &support::DebugOptionalElement(self.loading_clause()),
+                )
+                .field(
+                    "error_clause",
+                    &support::DebugOptionalElement(self.error_clause()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularDeferBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularDeferBlock> for SyntaxNode {
+    fn from(n: AngularDeferBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularDeferBlock> for SyntaxElement {
+    fn from(n: AngularDeferBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularDeferOnClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_DEFER_ON_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_DEFER_ON_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularDeferOnClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularDeferOnClause")
+                .field("on_token", &support::DebugSyntaxResult(self.on_token()))
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .finish()
+        } else {
+            f.debug_struct("AngularDeferOnClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularDeferOnClause> for SyntaxNode {
+    fn from(n: AngularDeferOnClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularDeferOnClause> for SyntaxElement {
+    fn from(n: AngularDeferOnClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularDeferOpeningBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_DEFER_OPENING_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_DEFER_OPENING_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularDeferOpeningBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularDeferOpeningBlock")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field(
+                    "defer_token",
+                    &support::DebugSyntaxResult(self.defer_token()),
+                )
+                .field(
+                    "parameters",
+                    &support::DebugOptionalElement(self.parameters()),
+                )
+                .field("children", &support::DebugSyntaxResult(self.children()))
+                .finish()
+        } else {
+            f.debug_struct("AngularDeferOpeningBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularDeferOpeningBlock> for SyntaxNode {
+    fn from(n: AngularDeferOpeningBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularDeferOpeningBlock> for SyntaxElement {
+    fn from(n: AngularDeferOpeningBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularDeferParameters {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_DEFER_PARAMETERS as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_DEFER_PARAMETERS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularDeferParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularDeferParameters")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("clauses", &self.clauses())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularDeferParameters").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularDeferParameters> for SyntaxNode {
+    fn from(n: AngularDeferParameters) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularDeferParameters> for SyntaxElement {
+    fn from(n: AngularDeferParameters) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularDeferPrefetchOnClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_DEFER_PREFETCH_ON_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_DEFER_PREFETCH_ON_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularDeferPrefetchOnClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularDeferPrefetchOnClause")
+                .field(
+                    "prefetch_token",
+                    &support::DebugSyntaxResult(self.prefetch_token()),
+                )
+                .field("on_token", &support::DebugSyntaxResult(self.on_token()))
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .finish()
+        } else {
+            f.debug_struct("AngularDeferPrefetchOnClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularDeferPrefetchOnClause> for SyntaxNode {
+    fn from(n: AngularDeferPrefetchOnClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularDeferPrefetchOnClause> for SyntaxElement {
+    fn from(n: AngularDeferPrefetchOnClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularDeferPrefetchWhenClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_DEFER_PREFETCH_WHEN_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_DEFER_PREFETCH_WHEN_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularDeferPrefetchWhenClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularDeferPrefetchWhenClause")
+                .field(
+                    "prefetch_token",
+                    &support::DebugSyntaxResult(self.prefetch_token()),
+                )
+                .field("when_token", &support::DebugSyntaxResult(self.when_token()))
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .finish()
+        } else {
+            f.debug_struct("AngularDeferPrefetchWhenClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularDeferPrefetchWhenClause> for SyntaxNode {
+    fn from(n: AngularDeferPrefetchWhenClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularDeferPrefetchWhenClause> for SyntaxElement {
+    fn from(n: AngularDeferPrefetchWhenClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularDeferWhenClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_DEFER_WHEN_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_DEFER_WHEN_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularDeferWhenClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularDeferWhenClause")
+                .field("when_token", &support::DebugSyntaxResult(self.when_token()))
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .finish()
+        } else {
+            f.debug_struct("AngularDeferWhenClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularDeferWhenClause> for SyntaxNode {
+    fn from(n: AngularDeferWhenClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularDeferWhenClause> for SyntaxElement {
+    fn from(n: AngularDeferWhenClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularElseClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_ELSE_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_ELSE_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularElseClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularElseClause")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field("else_token", &support::DebugSyntaxResult(self.else_token()))
+                .field("children", &support::DebugSyntaxResult(self.children()))
+                .finish()
+        } else {
+            f.debug_struct("AngularElseClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularElseClause> for SyntaxNode {
+    fn from(n: AngularElseClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularElseClause> for SyntaxElement {
+    fn from(n: AngularElseClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularElseIfClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_ELSE_IF_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_ELSE_IF_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularElseIfClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularElseIfClause")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field("else_token", &support::DebugSyntaxResult(self.else_token()))
+                .field("if_token", &support::DebugSyntaxResult(self.if_token()))
+                .field("condition", &support::DebugSyntaxResult(self.condition()))
+                .field("children", &support::DebugSyntaxResult(self.children()))
+                .finish()
+        } else {
+            f.debug_struct("AngularElseIfClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularElseIfClause> for SyntaxNode {
+    fn from(n: AngularElseIfClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularElseIfClause> for SyntaxElement {
+    fn from(n: AngularElseIfClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularEmptyClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_EMPTY_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_EMPTY_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularEmptyClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularEmptyClause")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field(
+                    "empty_token",
+                    &support::DebugSyntaxResult(self.empty_token()),
+                )
+                .field("children", &support::DebugSyntaxResult(self.children()))
+                .finish()
+        } else {
+            f.debug_struct("AngularEmptyClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularEmptyClause> for SyntaxNode {
+    fn from(n: AngularEmptyClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularEmptyClause> for SyntaxElement {
+    fn from(n: AngularEmptyClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularErrorClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_ERROR_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_ERROR_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularErrorClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularErrorClause")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field(
+                    "error_token",
+                    &support::DebugSyntaxResult(self.error_token()),
+                )
+                .field("children", &support::DebugSyntaxResult(self.children()))
+                .finish()
+        } else {
+            f.debug_struct("AngularErrorClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularErrorClause> for SyntaxNode {
+    fn from(n: AngularErrorClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularErrorClause> for SyntaxElement {
+    fn from(n: AngularErrorClause) -> Self {
         n.syntax.into()
     }
 }
@@ -5839,6 +8413,871 @@ impl From<AngularEventBinding> for SyntaxNode {
 }
 impl From<AngularEventBinding> for SyntaxElement {
     fn from(n: AngularEventBinding) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularForBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_FOR_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_FOR_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularForBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularForBlock")
+                .field(
+                    "opening_block",
+                    &support::DebugSyntaxResult(self.opening_block()),
+                )
+                .field(
+                    "empty_clause",
+                    &support::DebugOptionalElement(self.empty_clause()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularForBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularForBlock> for SyntaxNode {
+    fn from(n: AngularForBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularForBlock> for SyntaxElement {
+    fn from(n: AngularForBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularForExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_FOR_EXPRESSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_FOR_EXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularForExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularForExpression")
+                .field("variable", &support::DebugSyntaxResult(self.variable()))
+                .field("of_token", &support::DebugSyntaxResult(self.of_token()))
+                .field("iterable", &support::DebugSyntaxResult(self.iterable()))
+                .finish()
+        } else {
+            f.debug_struct("AngularForExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularForExpression> for SyntaxNode {
+    fn from(n: AngularForExpression) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularForExpression> for SyntaxElement {
+    fn from(n: AngularForExpression) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularForLetClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_FOR_LET_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_FOR_LET_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularForLetClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularForLetClause")
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .field("let_token", &support::DebugSyntaxResult(self.let_token()))
+                .field("bindings", &self.bindings())
+                .finish()
+        } else {
+            f.debug_struct("AngularForLetClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularForLetClause> for SyntaxNode {
+    fn from(n: AngularForLetClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularForLetClause> for SyntaxElement {
+    fn from(n: AngularForLetClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularForOpeningBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_FOR_OPENING_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_FOR_OPENING_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularForOpeningBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularForOpeningBlock")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field("for_token", &support::DebugSyntaxResult(self.for_token()))
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .field("children", &support::DebugSyntaxResult(self.children()))
+                .finish()
+        } else {
+            f.debug_struct("AngularForOpeningBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularForOpeningBlock> for SyntaxNode {
+    fn from(n: AngularForOpeningBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularForOpeningBlock> for SyntaxElement {
+    fn from(n: AngularForOpeningBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularForParameters {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_FOR_PARAMETERS as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_FOR_PARAMETERS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularForParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularForParameters")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .field(
+                    "track_clause",
+                    &support::DebugSyntaxResult(self.track_clause()),
+                )
+                .field(
+                    "let_clause",
+                    &support::DebugOptionalElement(self.let_clause()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularForParameters").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularForParameters> for SyntaxNode {
+    fn from(n: AngularForParameters) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularForParameters> for SyntaxElement {
+    fn from(n: AngularForParameters) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularForTrackClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_FOR_TRACK_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_FOR_TRACK_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularForTrackClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularForTrackClause")
+                .field(
+                    "track_token",
+                    &support::DebugSyntaxResult(self.track_token()),
+                )
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .finish()
+        } else {
+            f.debug_struct("AngularForTrackClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularForTrackClause> for SyntaxNode {
+    fn from(n: AngularForTrackClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularForTrackClause> for SyntaxElement {
+    fn from(n: AngularForTrackClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularIfAsClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_IF_AS_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_IF_AS_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularIfAsClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularIfAsClause")
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .field("as_token", &support::DebugSyntaxResult(self.as_token()))
+                .field("binding", &support::DebugSyntaxResult(self.binding()))
+                .finish()
+        } else {
+            f.debug_struct("AngularIfAsClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularIfAsClause> for SyntaxNode {
+    fn from(n: AngularIfAsClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularIfAsClause> for SyntaxElement {
+    fn from(n: AngularIfAsClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularIfBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_IF_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_IF_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularIfBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularIfBlock")
+                .field(
+                    "opening_block",
+                    &support::DebugSyntaxResult(self.opening_block()),
+                )
+                .field("else_if_clauses", &self.else_if_clauses())
+                .field(
+                    "else_clause",
+                    &support::DebugOptionalElement(self.else_clause()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularIfBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularIfBlock> for SyntaxNode {
+    fn from(n: AngularIfBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularIfBlock> for SyntaxElement {
+    fn from(n: AngularIfBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularIfOpeningBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_IF_OPENING_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_IF_OPENING_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularIfOpeningBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularIfOpeningBlock")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field("if_token", &support::DebugSyntaxResult(self.if_token()))
+                .field("condition", &support::DebugSyntaxResult(self.condition()))
+                .field("children", &support::DebugSyntaxResult(self.children()))
+                .finish()
+        } else {
+            f.debug_struct("AngularIfOpeningBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularIfOpeningBlock> for SyntaxNode {
+    fn from(n: AngularIfOpeningBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularIfOpeningBlock> for SyntaxElement {
+    fn from(n: AngularIfOpeningBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularIfParameters {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_IF_PARAMETERS as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_IF_PARAMETERS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularIfParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularIfParameters")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "as_clause",
+                    &support::DebugOptionalElement(self.as_clause()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularIfParameters").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularIfParameters> for SyntaxNode {
+    fn from(n: AngularIfParameters) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularIfParameters> for SyntaxElement {
+    fn from(n: AngularIfParameters) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularLetBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_LET_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_LET_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularLetBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularLetBlock")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field("let_token", &support::DebugSyntaxResult(self.let_token()))
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularLetBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularLetBlock> for SyntaxNode {
+    fn from(n: AngularLetBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularLetBlock> for SyntaxElement {
+    fn from(n: AngularLetBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularLoadingClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_LOADING_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_LOADING_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularLoadingClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularLoadingClause")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field(
+                    "loading_token",
+                    &support::DebugSyntaxResult(self.loading_token()),
+                )
+                .field(
+                    "parameters",
+                    &support::DebugOptionalElement(self.parameters()),
+                )
+                .field("children", &support::DebugSyntaxResult(self.children()))
+                .finish()
+        } else {
+            f.debug_struct("AngularLoadingClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularLoadingClause> for SyntaxNode {
+    fn from(n: AngularLoadingClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularLoadingClause> for SyntaxElement {
+    fn from(n: AngularLoadingClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularLoadingParameters {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_LOADING_PARAMETERS as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_LOADING_PARAMETERS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularLoadingParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularLoadingParameters")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("clauses", &self.clauses())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularLoadingParameters").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularLoadingParameters> for SyntaxNode {
+    fn from(n: AngularLoadingParameters) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularLoadingParameters> for SyntaxElement {
+    fn from(n: AngularLoadingParameters) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularMinimumTimeClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_MINIMUM_TIME_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_MINIMUM_TIME_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularMinimumTimeClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularMinimumTimeClause")
+                .field(
+                    "minimum_token",
+                    &support::DebugSyntaxResult(self.minimum_token()),
+                )
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .finish()
+        } else {
+            f.debug_struct("AngularMinimumTimeClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularMinimumTimeClause> for SyntaxNode {
+    fn from(n: AngularMinimumTimeClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularMinimumTimeClause> for SyntaxElement {
+    fn from(n: AngularMinimumTimeClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularPlaceholderClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_PLACEHOLDER_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_PLACEHOLDER_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularPlaceholderClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularPlaceholderClause")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field(
+                    "placeholder_token",
+                    &support::DebugSyntaxResult(self.placeholder_token()),
+                )
+                .field(
+                    "parameters",
+                    &support::DebugOptionalElement(self.parameters()),
+                )
+                .field("children", &support::DebugSyntaxResult(self.children()))
+                .finish()
+        } else {
+            f.debug_struct("AngularPlaceholderClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularPlaceholderClause> for SyntaxNode {
+    fn from(n: AngularPlaceholderClause) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularPlaceholderClause> for SyntaxElement {
+    fn from(n: AngularPlaceholderClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularPlaceholderParameters {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_PLACEHOLDER_PARAMETERS as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_PLACEHOLDER_PARAMETERS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularPlaceholderParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularPlaceholderParameters")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("clause", &support::DebugSyntaxResult(self.clause()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularPlaceholderParameters").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularPlaceholderParameters> for SyntaxNode {
+    fn from(n: AngularPlaceholderParameters) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularPlaceholderParameters> for SyntaxElement {
+    fn from(n: AngularPlaceholderParameters) -> Self {
         n.syntax.into()
     }
 }
@@ -5950,6 +9389,176 @@ impl From<AngularStructuralDirective> for SyntaxNode {
 }
 impl From<AngularStructuralDirective> for SyntaxElement {
     fn from(n: AngularStructuralDirective) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularSwitchBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_SWITCH_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_SWITCH_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularSwitchBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularSwitchBlock")
+                .field(
+                    "opening_block",
+                    &support::DebugSyntaxResult(self.opening_block()),
+                )
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("cases", &self.cases())
+                .field(
+                    "default_clause",
+                    &support::DebugOptionalElement(self.default_clause()),
+                )
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularSwitchBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularSwitchBlock> for SyntaxNode {
+    fn from(n: AngularSwitchBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularSwitchBlock> for SyntaxElement {
+    fn from(n: AngularSwitchBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularSwitchOpeningBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_SWITCH_OPENING_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_SWITCH_OPENING_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularSwitchOpeningBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularSwitchOpeningBlock")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field(
+                    "switch_token",
+                    &support::DebugSyntaxResult(self.switch_token()),
+                )
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .finish()
+        } else {
+            f.debug_struct("AngularSwitchOpeningBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularSwitchOpeningBlock> for SyntaxNode {
+    fn from(n: AngularSwitchOpeningBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularSwitchOpeningBlock> for SyntaxElement {
+    fn from(n: AngularSwitchOpeningBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularSwitchParameters {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_SWITCH_PARAMETERS as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_SWITCH_PARAMETERS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularSwitchParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularSwitchParameters")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularSwitchParameters").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularSwitchParameters> for SyntaxNode {
+    fn from(n: AngularSwitchParameters) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularSwitchParameters> for SyntaxElement {
+    fn from(n: AngularSwitchParameters) -> Self {
         n.syntax.into()
     }
 }
@@ -11601,6 +15210,329 @@ impl From<AnyAngularBinding> for SyntaxElement {
         node.into()
     }
 }
+impl From<AngularDeferBlock> for AnyAngularBlock {
+    fn from(node: AngularDeferBlock) -> Self {
+        Self::AngularDeferBlock(node)
+    }
+}
+impl From<AngularForBlock> for AnyAngularBlock {
+    fn from(node: AngularForBlock) -> Self {
+        Self::AngularForBlock(node)
+    }
+}
+impl From<AngularIfBlock> for AnyAngularBlock {
+    fn from(node: AngularIfBlock) -> Self {
+        Self::AngularIfBlock(node)
+    }
+}
+impl From<AngularLetBlock> for AnyAngularBlock {
+    fn from(node: AngularLetBlock) -> Self {
+        Self::AngularLetBlock(node)
+    }
+}
+impl From<AngularSwitchBlock> for AnyAngularBlock {
+    fn from(node: AngularSwitchBlock) -> Self {
+        Self::AngularSwitchBlock(node)
+    }
+}
+impl AstNode for AnyAngularBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = AngularDeferBlock::KIND_SET
+        .union(AngularForBlock::KIND_SET)
+        .union(AngularIfBlock::KIND_SET)
+        .union(AngularLetBlock::KIND_SET)
+        .union(AngularSwitchBlock::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            ANGULAR_DEFER_BLOCK
+                | ANGULAR_FOR_BLOCK
+                | ANGULAR_IF_BLOCK
+                | ANGULAR_LET_BLOCK
+                | ANGULAR_SWITCH_BLOCK
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            ANGULAR_DEFER_BLOCK => Self::AngularDeferBlock(AngularDeferBlock { syntax }),
+            ANGULAR_FOR_BLOCK => Self::AngularForBlock(AngularForBlock { syntax }),
+            ANGULAR_IF_BLOCK => Self::AngularIfBlock(AngularIfBlock { syntax }),
+            ANGULAR_LET_BLOCK => Self::AngularLetBlock(AngularLetBlock { syntax }),
+            ANGULAR_SWITCH_BLOCK => Self::AngularSwitchBlock(AngularSwitchBlock { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::AngularDeferBlock(it) => it.syntax(),
+            Self::AngularForBlock(it) => it.syntax(),
+            Self::AngularIfBlock(it) => it.syntax(),
+            Self::AngularLetBlock(it) => it.syntax(),
+            Self::AngularSwitchBlock(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::AngularDeferBlock(it) => it.into_syntax(),
+            Self::AngularForBlock(it) => it.into_syntax(),
+            Self::AngularIfBlock(it) => it.into_syntax(),
+            Self::AngularLetBlock(it) => it.into_syntax(),
+            Self::AngularSwitchBlock(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyAngularBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AngularDeferBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::AngularForBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::AngularIfBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::AngularLetBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::AngularSwitchBlock(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyAngularBlock> for SyntaxNode {
+    fn from(n: AnyAngularBlock) -> Self {
+        match n {
+            AnyAngularBlock::AngularDeferBlock(it) => it.into_syntax(),
+            AnyAngularBlock::AngularForBlock(it) => it.into_syntax(),
+            AnyAngularBlock::AngularIfBlock(it) => it.into_syntax(),
+            AnyAngularBlock::AngularLetBlock(it) => it.into_syntax(),
+            AnyAngularBlock::AngularSwitchBlock(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyAngularBlock> for SyntaxElement {
+    fn from(n: AnyAngularBlock) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<AngularBlockBody> for AnyAngularDefaultClauseBody {
+    fn from(node: AngularBlockBody) -> Self {
+        Self::AngularBlockBody(node)
+    }
+}
+impl From<AngularDefaultExpressionClause> for AnyAngularDefaultClauseBody {
+    fn from(node: AngularDefaultExpressionClause) -> Self {
+        Self::AngularDefaultExpressionClause(node)
+    }
+}
+impl AstNode for AnyAngularDefaultClauseBody {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AngularBlockBody::KIND_SET.union(AngularDefaultExpressionClause::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, ANGULAR_BLOCK_BODY | ANGULAR_DEFAULT_EXPRESSION_CLAUSE)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            ANGULAR_BLOCK_BODY => Self::AngularBlockBody(AngularBlockBody { syntax }),
+            ANGULAR_DEFAULT_EXPRESSION_CLAUSE => {
+                Self::AngularDefaultExpressionClause(AngularDefaultExpressionClause { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::AngularBlockBody(it) => it.syntax(),
+            Self::AngularDefaultExpressionClause(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::AngularBlockBody(it) => it.into_syntax(),
+            Self::AngularDefaultExpressionClause(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyAngularDefaultClauseBody {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AngularBlockBody(it) => std::fmt::Debug::fmt(it, f),
+            Self::AngularDefaultExpressionClause(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyAngularDefaultClauseBody> for SyntaxNode {
+    fn from(n: AnyAngularDefaultClauseBody) -> Self {
+        match n {
+            AnyAngularDefaultClauseBody::AngularBlockBody(it) => it.into_syntax(),
+            AnyAngularDefaultClauseBody::AngularDefaultExpressionClause(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyAngularDefaultClauseBody> for SyntaxElement {
+    fn from(n: AnyAngularDefaultClauseBody) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<AngularDeferOnClause> for AnyAngularDeferClause {
+    fn from(node: AngularDeferOnClause) -> Self {
+        Self::AngularDeferOnClause(node)
+    }
+}
+impl From<AngularDeferPrefetchOnClause> for AnyAngularDeferClause {
+    fn from(node: AngularDeferPrefetchOnClause) -> Self {
+        Self::AngularDeferPrefetchOnClause(node)
+    }
+}
+impl From<AngularDeferPrefetchWhenClause> for AnyAngularDeferClause {
+    fn from(node: AngularDeferPrefetchWhenClause) -> Self {
+        Self::AngularDeferPrefetchWhenClause(node)
+    }
+}
+impl From<AngularDeferWhenClause> for AnyAngularDeferClause {
+    fn from(node: AngularDeferWhenClause) -> Self {
+        Self::AngularDeferWhenClause(node)
+    }
+}
+impl AstNode for AnyAngularDeferClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = AngularDeferOnClause::KIND_SET
+        .union(AngularDeferPrefetchOnClause::KIND_SET)
+        .union(AngularDeferPrefetchWhenClause::KIND_SET)
+        .union(AngularDeferWhenClause::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            ANGULAR_DEFER_ON_CLAUSE
+                | ANGULAR_DEFER_PREFETCH_ON_CLAUSE
+                | ANGULAR_DEFER_PREFETCH_WHEN_CLAUSE
+                | ANGULAR_DEFER_WHEN_CLAUSE
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            ANGULAR_DEFER_ON_CLAUSE => Self::AngularDeferOnClause(AngularDeferOnClause { syntax }),
+            ANGULAR_DEFER_PREFETCH_ON_CLAUSE => {
+                Self::AngularDeferPrefetchOnClause(AngularDeferPrefetchOnClause { syntax })
+            }
+            ANGULAR_DEFER_PREFETCH_WHEN_CLAUSE => {
+                Self::AngularDeferPrefetchWhenClause(AngularDeferPrefetchWhenClause { syntax })
+            }
+            ANGULAR_DEFER_WHEN_CLAUSE => {
+                Self::AngularDeferWhenClause(AngularDeferWhenClause { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::AngularDeferOnClause(it) => it.syntax(),
+            Self::AngularDeferPrefetchOnClause(it) => it.syntax(),
+            Self::AngularDeferPrefetchWhenClause(it) => it.syntax(),
+            Self::AngularDeferWhenClause(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::AngularDeferOnClause(it) => it.into_syntax(),
+            Self::AngularDeferPrefetchOnClause(it) => it.into_syntax(),
+            Self::AngularDeferPrefetchWhenClause(it) => it.into_syntax(),
+            Self::AngularDeferWhenClause(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyAngularDeferClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AngularDeferOnClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::AngularDeferPrefetchOnClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::AngularDeferPrefetchWhenClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::AngularDeferWhenClause(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyAngularDeferClause> for SyntaxNode {
+    fn from(n: AnyAngularDeferClause) -> Self {
+        match n {
+            AnyAngularDeferClause::AngularDeferOnClause(it) => it.into_syntax(),
+            AnyAngularDeferClause::AngularDeferPrefetchOnClause(it) => it.into_syntax(),
+            AnyAngularDeferClause::AngularDeferPrefetchWhenClause(it) => it.into_syntax(),
+            AnyAngularDeferClause::AngularDeferWhenClause(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyAngularDeferClause> for SyntaxElement {
+    fn from(n: AnyAngularDeferClause) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<AngularAfterTimeClause> for AnyAngularLoadingParameterClause {
+    fn from(node: AngularAfterTimeClause) -> Self {
+        Self::AngularAfterTimeClause(node)
+    }
+}
+impl From<AngularMinimumTimeClause> for AnyAngularLoadingParameterClause {
+    fn from(node: AngularMinimumTimeClause) -> Self {
+        Self::AngularMinimumTimeClause(node)
+    }
+}
+impl AstNode for AnyAngularLoadingParameterClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AngularAfterTimeClause::KIND_SET.union(AngularMinimumTimeClause::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            ANGULAR_AFTER_TIME_CLAUSE | ANGULAR_MINIMUM_TIME_CLAUSE
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            ANGULAR_AFTER_TIME_CLAUSE => {
+                Self::AngularAfterTimeClause(AngularAfterTimeClause { syntax })
+            }
+            ANGULAR_MINIMUM_TIME_CLAUSE => {
+                Self::AngularMinimumTimeClause(AngularMinimumTimeClause { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::AngularAfterTimeClause(it) => it.syntax(),
+            Self::AngularMinimumTimeClause(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::AngularAfterTimeClause(it) => it.into_syntax(),
+            Self::AngularMinimumTimeClause(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyAngularLoadingParameterClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AngularAfterTimeClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::AngularMinimumTimeClause(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyAngularLoadingParameterClause> for SyntaxNode {
+    fn from(n: AnyAngularLoadingParameterClause) -> Self {
+        match n {
+            AnyAngularLoadingParameterClause::AngularAfterTimeClause(it) => it.into_syntax(),
+            AnyAngularLoadingParameterClause::AngularMinimumTimeClause(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyAngularLoadingParameterClause> for SyntaxElement {
+    fn from(n: AnyAngularLoadingParameterClause) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<AstroClassDirective> for AnyAstroDirective {
     fn from(node: AstroClassDirective) -> Self {
         Self::AstroClassDirective(node)
@@ -12416,7 +16348,8 @@ impl From<HtmlSingleTextExpression> for AnyHtmlTextExpression {
 }
 impl AstNode for AnyHtmlTextExpression {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnySvelteBlock::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AnyAngularBlock::KIND_SET
+        .union(AnySvelteBlock::KIND_SET)
         .union(HtmlBogusTextExpression::KIND_SET)
         .union(HtmlDoubleTextExpression::KIND_SET)
         .union(HtmlSingleTextExpression::KIND_SET);
@@ -12425,6 +16358,7 @@ impl AstNode for AnyHtmlTextExpression {
             HTML_BOGUS_TEXT_EXPRESSION
             | HTML_DOUBLE_TEXT_EXPRESSION
             | HTML_SINGLE_TEXT_EXPRESSION => true,
+            k if AnyAngularBlock::can_cast(k) => true,
             k if AnySvelteBlock::can_cast(k) => true,
             _ => false,
         }
@@ -12441,6 +16375,12 @@ impl AstNode for AnyHtmlTextExpression {
                 Self::HtmlSingleTextExpression(HtmlSingleTextExpression { syntax })
             }
             _ => {
+                let syntax = match AnyAngularBlock::try_cast(syntax) {
+                    Ok(any_angular_block) => {
+                        return Some(Self::AnyAngularBlock(any_angular_block));
+                    }
+                    Err(syntax) => syntax,
+                };
                 if let Some(any_svelte_block) = AnySvelteBlock::cast(syntax) {
                     return Some(Self::AnySvelteBlock(any_svelte_block));
                 }
@@ -12454,6 +16394,7 @@ impl AstNode for AnyHtmlTextExpression {
             Self::HtmlBogusTextExpression(it) => it.syntax(),
             Self::HtmlDoubleTextExpression(it) => it.syntax(),
             Self::HtmlSingleTextExpression(it) => it.syntax(),
+            Self::AnyAngularBlock(it) => it.syntax(),
             Self::AnySvelteBlock(it) => it.syntax(),
         }
     }
@@ -12462,6 +16403,7 @@ impl AstNode for AnyHtmlTextExpression {
             Self::HtmlBogusTextExpression(it) => it.into_syntax(),
             Self::HtmlDoubleTextExpression(it) => it.into_syntax(),
             Self::HtmlSingleTextExpression(it) => it.into_syntax(),
+            Self::AnyAngularBlock(it) => it.into_syntax(),
             Self::AnySvelteBlock(it) => it.into_syntax(),
         }
     }
@@ -12469,6 +16411,7 @@ impl AstNode for AnyHtmlTextExpression {
 impl std::fmt::Debug for AnyHtmlTextExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::AnyAngularBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::AnySvelteBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlBogusTextExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlDoubleTextExpression(it) => std::fmt::Debug::fmt(it, f),
@@ -12479,6 +16422,7 @@ impl std::fmt::Debug for AnyHtmlTextExpression {
 impl From<AnyHtmlTextExpression> for SyntaxNode {
     fn from(n: AnyHtmlTextExpression) -> Self {
         match n {
+            AnyHtmlTextExpression::AnyAngularBlock(it) => it.into_syntax(),
             AnyHtmlTextExpression::AnySvelteBlock(it) => it.into_syntax(),
             AnyHtmlTextExpression::HtmlBogusTextExpression(it) => it.into_syntax(),
             AnyHtmlTextExpression::HtmlDoubleTextExpression(it) => it.into_syntax(),
@@ -13931,6 +17875,26 @@ impl std::fmt::Display for AnyAngularBinding {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyAngularBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyAngularDefaultClauseBody {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyAngularDeferClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyAngularLoadingParameterClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyAstroDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -14061,12 +18025,172 @@ impl std::fmt::Display for AnyVueVForOperator {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AngularAfterTimeClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AngularBindingName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AngularBlockBody {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularCaseClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularDefaultClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularDefaultExpressionClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularDeferBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularDeferOnClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularDeferOpeningBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularDeferParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularDeferPrefetchOnClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularDeferPrefetchWhenClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularDeferWhenClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularElseClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularElseIfClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularEmptyClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularErrorClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AngularEventBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularForBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularForExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularForLetClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularForOpeningBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularForParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularForTrackClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularIfAsClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularIfBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularIfOpeningBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularIfParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularLetBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularLoadingClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularLoadingParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularMinimumTimeClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularPlaceholderClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularPlaceholderParameters {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -14077,6 +18201,21 @@ impl std::fmt::Display for AngularPropertyBinding {
     }
 }
 impl std::fmt::Display for AngularStructuralDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularSwitchBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularSwitchOpeningBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularSwitchParameters {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -15050,6 +19189,416 @@ impl From<VueBogusDirectiveArgument> for SyntaxElement {
     }
 }
 biome_rowan::declare_node_union! { pub AnyHtmlBogusNode = AstroBogusFrontmatter | HtmlBogus | HtmlBogusAttribute | HtmlBogusElement | HtmlBogusTextExpression | SvelteBogusBlock | VueBogusDirective | VueBogusDirectiveArgument }
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct AngularCaseClauseList {
+    syntax_list: SyntaxList,
+}
+impl AngularCaseClauseList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for AngularCaseClauseList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_CASE_CLAUSE_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_CASE_CLAUSE_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for AngularCaseClauseList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for AngularCaseClauseList {
+    type Language = Language;
+    type Node = AngularCaseClause;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for AngularCaseClauseList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("AngularCaseClauseList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &AngularCaseClauseList {
+    type Item = AngularCaseClause;
+    type IntoIter = AstNodeListIterator<Language, AngularCaseClause>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for AngularCaseClauseList {
+    type Item = AngularCaseClause;
+    type IntoIter = AstNodeListIterator<Language, AngularCaseClause>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct AngularDeferClauseList {
+    syntax_list: SyntaxList,
+}
+impl AngularDeferClauseList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for AngularDeferClauseList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_DEFER_CLAUSE_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_DEFER_CLAUSE_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for AngularDeferClauseList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for AngularDeferClauseList {
+    type Language = Language;
+    type Node = AnyAngularDeferClause;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for AngularDeferClauseList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("AngularDeferClauseList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for AngularDeferClauseList {
+    type Item = SyntaxResult<AnyAngularDeferClause>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyAngularDeferClause>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &AngularDeferClauseList {
+    type Item = SyntaxResult<AnyAngularDeferClause>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyAngularDeferClause>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct AngularElseIfClauseList {
+    syntax_list: SyntaxList,
+}
+impl AngularElseIfClauseList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for AngularElseIfClauseList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_ELSE_IF_CLAUSE_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_ELSE_IF_CLAUSE_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for AngularElseIfClauseList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for AngularElseIfClauseList {
+    type Language = Language;
+    type Node = AngularElseIfClause;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for AngularElseIfClauseList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("AngularElseIfClauseList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &AngularElseIfClauseList {
+    type Item = AngularElseIfClause;
+    type IntoIter = AstNodeListIterator<Language, AngularElseIfClause>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for AngularElseIfClauseList {
+    type Item = AngularElseIfClause;
+    type IntoIter = AstNodeListIterator<Language, AngularElseIfClause>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct AngularForLetBindingList {
+    syntax_list: SyntaxList,
+}
+impl AngularForLetBindingList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for AngularForLetBindingList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_FOR_LET_BINDING_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_FOR_LET_BINDING_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for AngularForLetBindingList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for AngularForLetBindingList {
+    type Language = Language;
+    type Node = HtmlTextExpression;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for AngularForLetBindingList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("AngularForLetBindingList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for AngularForLetBindingList {
+    type Item = SyntaxResult<HtmlTextExpression>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, HtmlTextExpression>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &AngularForLetBindingList {
+    type Item = SyntaxResult<HtmlTextExpression>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, HtmlTextExpression>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct AngularLoadingParameterClauseList {
+    syntax_list: SyntaxList,
+}
+impl AngularLoadingParameterClauseList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for AngularLoadingParameterClauseList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_LOADING_PARAMETER_CLAUSE_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_LOADING_PARAMETER_CLAUSE_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for AngularLoadingParameterClauseList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for AngularLoadingParameterClauseList {
+    type Language = Language;
+    type Node = AnyAngularLoadingParameterClause;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for AngularLoadingParameterClauseList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("AngularLoadingParameterClauseList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for AngularLoadingParameterClauseList {
+    type Item = SyntaxResult<AnyAngularLoadingParameterClause>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyAngularLoadingParameterClause>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &AngularLoadingParameterClauseList {
+    type Item = SyntaxResult<AnyAngularLoadingParameterClause>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyAngularLoadingParameterClause>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct HtmlAttributeList {
     syntax_list: SyntaxList,

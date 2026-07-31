@@ -1,5 +1,5 @@
 use crate::lexer::HtmlLexer;
-use biome_html_syntax::HtmlSyntaxKind::{AS_KW, CATCH_KW, EOF, THEN_KW};
+use biome_html_syntax::HtmlSyntaxKind::{AS_KW, CATCH_KW, EOF, OF_KW, THEN_KW};
 use biome_html_syntax::{HtmlSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{BufferedLexer, LexContext};
@@ -63,6 +63,12 @@ pub(crate) enum HtmlLexContext {
     ///
     /// Outside of this context, the lexer doesn't yield any particular keywords.
     Svelte,
+
+    /// Context to be used when parsing the contents of Angular blocks. Angular blocks usually start with `@`.
+    /// When lexing using this context, specific tokens are emitted such as `defer`, `loading`, `placeholder`, etc.
+    ///
+    /// Outside of this context, the lexer doesn't yield any particular keywords.
+    Angular,
 
     /// The binding properties in Svelte are special and require a special lexing. They accept everything until `=` is found.
     SvelteBindingLiteral,
@@ -142,6 +148,8 @@ pub(crate) enum RestrictedExpressionStopAt {
     Comma,
     /// Stops at `)`
     ClosingParen,
+    /// Stops at `;`
+    Semicolon,
     /// Stops at `then` or `catch` keywords
     ThenOrCatch,
     /// Like `AsOrComma`, but skips the first occurrence of `as` and stops at
@@ -149,6 +157,8 @@ pub(crate) enum RestrictedExpressionStopAt {
     /// expression contains a TypeScript `as const` assertion before the Svelte
     /// binding `as`.
     AsOrCommaSkipFirstAs,
+    /// Stops at `of` keyword (for Angular @for blocks)
+    Of,
 }
 
 impl RestrictedExpressionStopAt {
@@ -156,7 +166,9 @@ impl RestrictedExpressionStopAt {
         match self {
             Self::AsOrComma | Self::Comma | Self::AsOrCommaSkipFirstAs => byte == b',',
             Self::ClosingParen => byte == b')',
+            Self::Semicolon => byte == b';',
             Self::ThenOrCatch => false,
+            Self::Of => false,
         }
     }
 
@@ -165,7 +177,9 @@ impl RestrictedExpressionStopAt {
             Self::AsOrComma | Self::AsOrCommaSkipFirstAs => keyword == AS_KW,
             Self::Comma => false,
             Self::ClosingParen => false,
+            Self::Semicolon => false,
             Self::ThenOrCatch => keyword == THEN_KW || keyword == CATCH_KW,
+            Self::Of => keyword == OF_KW,
         }
     }
 }
@@ -226,6 +240,8 @@ pub(crate) enum HtmlReLexContext {
     InsideTagAstro,
     /// Relex tokens as if the parser was inside a tag in a Svelte file.
     InsideTagSvelte,
+    /// Relex tokens as Angular control-flow syntax.
+    Angular,
     /// Re-tokenize the current quote token (`DOUBLE_QUOTE` or `SINGLE_QUOTE`)
     /// as a full `HTML_STRING_LITERAL`. Used when a Svelte attribute value was
     /// speculatively parsed as a template but turned out to have no

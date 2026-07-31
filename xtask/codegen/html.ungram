@@ -87,6 +87,7 @@ AnyHtmlTextExpression =
 	HtmlDoubleTextExpression
 	| HtmlSingleTextExpression
 	| AnySvelteBlock
+	| AnyAngularBlock
 	| HtmlBogusTextExpression
 
 
@@ -1191,3 +1192,277 @@ AngularTemplateRefVariable =
 	initializer: HtmlAttributeInitializerClause?
 
 AngularBindingName = value: 'html_literal'
+
+AnyAngularBlock =
+	AngularIfBlock
+	| AngularForBlock
+	| AngularSwitchBlock
+	| AngularLetBlock
+	| AngularDeferBlock
+
+// @if (cond; as items) { ... } @else if (other) { ... } @else { ... }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularIfBlock =
+	opening_block: AngularIfOpeningBlock
+	else_if_clauses: AngularElseIfClauseList
+	else_clause: AngularElseClause?
+
+// @if (cond; as items) { ... } @else if (other) { ... } @else { ... }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularIfOpeningBlock =
+	'@'
+	'if'
+	condition: AngularIfParameters
+	children: AngularBlockBody
+
+// @if (cond; as items) { ... } @else if (other) { ... } @else { ... }
+//     ^^^^^^^^^^^^^^^^
+AngularIfParameters =
+	'('
+	expression: HtmlTextExpression
+	as_clause: AngularIfAsClause?
+	')'
+
+// @if (cond; as items) { ... } @else if (other) { ... } @else { ... }
+//          ^^^^^^^^^^
+AngularIfAsClause =
+	';'
+	'as'
+	binding: HtmlTextExpression
+
+AngularElseIfClauseList = AngularElseIfClause*
+
+// @if (cond; as items) { ... } @else if (other) { ... } @else { ... }
+//                              ^^^^^^^^^^^^^^^^^^^^^^^^
+AngularElseIfClause =
+	'@'
+	'else'
+	'if'
+	condition: AngularIfParameters
+	children: AngularBlockBody
+
+// @if (cond; as items) { ... } @else if (other) { ... } @else { ... }
+//                                                       ^^^^^^^^^^^^^
+AngularElseClause =
+	'@'
+	'else'
+	children: AngularBlockBody
+
+// @for (item of items; track item.id; let i = $index) { ... } @empty { ... }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularForBlock =
+	opening_block: AngularForOpeningBlock
+	empty_clause: AngularEmptyClause?
+
+// @for (item of items; track item.id; let i = $index) { ... } @empty { ... }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularForOpeningBlock =
+	'@'
+	'for'
+	parameters: AngularForParameters
+	children: AngularBlockBody
+
+// @for (item of items; track item.id; let i = $index) { ... } @empty { ... }
+//      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularForParameters =
+	'('
+	expression: AngularForExpression
+	';'
+	track_clause: AngularForTrackClause
+	let_clause: AngularForLetClause?
+	')'
+
+// @for (item of items; track item.id; let i = $index) { ... } @empty { ... }
+//       ^^^^^^^^^^^^^
+AngularForExpression =
+	variable: HtmlTextExpression
+	'of'
+	iterable: HtmlTextExpression
+
+// @for (item of items; track item.id; let i = $index) { ... } @empty { ... }
+//                      ^^^^^^^^^^^^^
+AngularForTrackClause =
+	'track'
+	expression: HtmlTextExpression
+
+// @for (item of items; track item.id; let i = $index) { ... } @empty { ... }
+//                                   ^^^^^^^^^^^^^^^^
+AngularForLetClause =
+	';'
+	'let'
+	bindings: AngularForLetBindingList
+
+AngularForLetBindingList = (HtmlTextExpression (',' HtmlTextExpression)*)
+
+// @for (item of items; track item.id; let i = $index) { ... } @empty { ... }
+//                                                             ^^^^^^^^^^^^^^
+AngularEmptyClause =
+	'@'
+	'empty'
+	children: AngularBlockBody
+
+// @switch (expr) { @case (a) { ... } @default { ... } }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularSwitchBlock =
+	opening_block: AngularSwitchOpeningBlock
+	'{'
+	cases: AngularCaseClauseList
+	default_clause: AngularDefaultClause?
+	'}'
+
+// @switch (expr) { @case (a) { ... } @default { ... } }
+// ^^^^^^^^^^^^^^
+AngularSwitchOpeningBlock =
+	'@'
+	'switch'
+	parameters: AngularSwitchParameters
+
+// @switch (expr) { @case (a) { ... } @default { ... } }
+//         ^^^^^^
+AngularSwitchParameters =
+	'('
+	expression: HtmlTextExpression
+	')'
+
+AngularCaseClauseList = AngularCaseClause*
+
+// @switch (expr) { @case (a) { ... } @default { ... } }
+//                  ^^^^^^^^^^^^^^^^^
+AngularCaseClause =
+	'@'
+	'case'
+	parameters: AngularSwitchParameters
+	children: AngularBlockBody?
+
+// @switch (expr) { @case (a) { ... } @default { ... } }
+//                                    ^^^^^^^^^^^^^^^^
+AngularDefaultClause =
+	'@'
+	'default'
+	children: AnyAngularDefaultClauseBody
+
+// @switch (expr) { @case (a) { ... } @default { ... } }
+//                                             ^^^^^^^
+AnyAngularDefaultClauseBody =
+	AngularBlockBody
+	| AngularDefaultExpressionClause
+
+// @switch (expr) { @case (a) { ... } @default never; }
+//                                             ^^^^^^
+AngularDefaultExpressionClause =
+	expression: HtmlTextExpression
+	';'
+
+// @let name = expression;
+// ^^^^^^^^^^^^^^^^^^^^^^^
+AngularLetBlock =
+	'@'
+	'let'
+	expression: HtmlTextExpression
+	';'
+
+// @defer (on idle; when condition; prefetch on interaction) { ... } @placeholder (minimum 500ms) { ... } @loading (after 100ms; minimum 1s) { ... } @error { ... }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularDeferBlock =
+	opening_block: AngularDeferOpeningBlock
+	placeholder_clause: AngularPlaceholderClause?
+	loading_clause: AngularLoadingClause?
+	error_clause: AngularErrorClause?
+
+// @defer (on idle; when condition; prefetch on interaction) { ... } @placeholder (minimum 500ms) { ... } @loading (after 100ms; minimum 1s) { ... } @error { ... }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularDeferOpeningBlock =
+	'@'
+	'defer'
+	parameters: AngularDeferParameters?
+	children: AngularBlockBody
+
+// @defer (on idle; when condition; prefetch on interaction) { ... } @placeholder (minimum 500ms) { ... } @loading (after 100ms; minimum 1s) { ... } @error { ... }
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularDeferParameters =
+	'('
+	clauses: AngularDeferClauseList
+	')'
+
+AngularDeferClauseList = (AnyAngularDeferClause (';' AnyAngularDeferClause)* ';'?)
+
+AnyAngularDeferClause =
+	AngularDeferOnClause
+	| AngularDeferWhenClause
+	| AngularDeferPrefetchOnClause
+	| AngularDeferPrefetchWhenClause
+
+AngularDeferOnClause =
+	'on'
+	expression: HtmlTextExpression
+
+AngularDeferWhenClause =
+	'when'
+	expression: HtmlTextExpression
+
+AngularDeferPrefetchOnClause =
+	'prefetch'
+	'on'
+	expression: HtmlTextExpression
+
+AngularDeferPrefetchWhenClause =
+	'prefetch'
+	'when'
+	expression: HtmlTextExpression
+
+// @defer (on idle; when condition; prefetch on interaction) { ... } @placeholder (minimum 500ms) { ... } @loading (after 100ms; minimum 1s) { ... } @error { ... }
+//                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularPlaceholderClause =
+	'@'
+	'placeholder'
+	parameters: AngularPlaceholderParameters?
+	children: AngularBlockBody
+
+// @defer (on idle; when condition; prefetch on interaction) { ... } @placeholder (minimum 500ms) { ... } @loading (after 100ms; minimum 1s) { ... } @error { ... }
+//                                                                                ^^^^^^^^^^^^^^^
+AngularPlaceholderParameters =
+	'('
+	clause: AngularMinimumTimeClause
+	')'
+
+// @defer (on idle; when condition; prefetch on interaction) { ... } @placeholder (minimum 500ms) { ... } @loading (after 100ms; minimum 1s) { ... } @error { ... }
+//                                                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularLoadingClause =
+	'@'
+	'loading'
+	parameters: AngularLoadingParameters?
+	children: AngularBlockBody
+
+// @defer (on idle; when condition; prefetch on interaction) { ... } @placeholder (minimum 500ms) { ... } @loading (after 100ms; minimum 1s) { ... } @error { ... }
+//                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularLoadingParameters =
+	'('
+	clauses: AngularLoadingParameterClauseList
+	')'
+
+AngularLoadingParameterClauseList = (AnyAngularLoadingParameterClause (';' AnyAngularLoadingParameterClause)* ';'?)
+
+AnyAngularLoadingParameterClause =
+	AngularAfterTimeClause
+	| AngularMinimumTimeClause
+
+AngularAfterTimeClause =
+	'after'
+	expression: HtmlTextExpression
+
+AngularMinimumTimeClause =
+	'minimum'
+	expression: HtmlTextExpression
+
+// @defer (on idle; when condition; prefetch on interaction) { ... } @placeholder (minimum 500ms) { ... } @loading (after 100ms; minimum 1s) { ... } @error { ... }
+//                                                                                                                                                   ^^^^^^^^^^^^^^
+AngularErrorClause =
+	'@'
+	'error'
+	children: AngularBlockBody
+
+// { ... } body used by Angular control-flow blocks.
+AngularBlockBody =
+	'{'
+	children: HtmlElementList
+	'}'
