@@ -76,6 +76,7 @@ biome_json_syntax            = { path = "./crates/biome_json_syntax", version = 
 biome_json_value             = { path = "./crates/biome_json_value", version = "0.1.0" }
 biome_line_index             = { path = "./crates/biome_line_index", version = "0.1.0" }
 biome_lsp                    = { path = "./crates/biome_lsp" }
+biome_property_codec         = { path = "./crates/biome_property_codec", version = "0.1.0" }
 biome_lsp_converters         = { path = "./crates/biome_lsp_converters", version = "0.1.0" }
 biome_markdown_factory       = { path = "./crates/biome_markdown_factory", version = "0.0.1" }
 biome_markdown_formatter     = { path = "./crates/biome_markdown_formatter", version = "0.0.1" }
@@ -260,7 +261,8 @@ unused_macro_rules             = "warn"
 
 # Dev optimisations
 [profile.dev]
-debug = "line-tables-only"
+debug           = "line-tables-only"
+split-debuginfo = "unpacked"
 
 [profile.dev.package."*"]
 debug = false
