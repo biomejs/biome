@@ -1,6 +1,9 @@
 use super::SymbolFromModuleInfo;
-use crate::css_module_info::traverse::{CssClassStep, ImportTreeTraversal};
-use crate::{ImportTreeNode, ModuleDb, ModuleInfo, ModuleInfoKind};
+use crate::css_module_info::traverse::{
+    CssClassStep, CssClassTraversalPolicy, CssPropertyBranch, CssPropertyTraversalPolicy,
+    UpwardTraversal, last_property_in_css_context,
+};
+use crate::{CssPropertyDefinition, ImportTreeNode, ModuleDb, ModuleInfo, ModuleInfoKind};
 use biome_css_syntax::{TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexMap;
@@ -99,7 +102,12 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
     result
 }
 
-/// Returns CSS class steps for the given JS file by traversing its imports.
+/// Returns CSS classes reachable from a JavaScript module and its importers.
+///
+/// Direct CSS imports of `module` are returned first. The query then traverses
+/// JavaScript and HTML modules that transitively import it, collecting their
+/// direct CSS imports and global HTML style classes. Each importer is visited at
+/// most once, including when the module graph contains cycles.
 #[salsa::tracked(returns(deref))]
 pub fn traverse_import_tree_for_classes(
     db: &dyn ModuleDb,
@@ -120,21 +128,22 @@ pub fn traverse_import_tree_for_classes(
         }
     }
 
-    let stack = vec![module.path(db).to_path_buf()];
-    let mut visited = FxHashSet::default();
-    visited.insert(module.path(db).to_path_buf());
-
-    let traversal = ImportTreeTraversal {
-        module_database: db,
-        stack,
-        visited,
-        current_css_iter: None,
-    };
+    let traversal = UpwardTraversal::new(
+        db,
+        module.path(db).to_path_buf(),
+        CssClassTraversalPolicy::new(module.path(db)),
+        (),
+    );
     results.extend(traversal);
     results
 }
 
-/// Returns CSS class steps for the given HTML file.
+/// Returns CSS classes reachable from an HTML module and its importers.
+///
+/// The result includes the module's inline classes and linked stylesheets,
+/// followed by CSS classes discovered through JavaScript and HTML importers.
+/// Each importer is visited at most once, including when the module graph
+/// contains cycles.
 #[salsa::tracked(returns(deref))]
 pub fn traverse_import_tree_for_html_classes(
     db: &dyn ModuleDb,
@@ -183,20 +192,51 @@ pub fn traverse_import_tree_for_html_classes(
         }
     }
 
-    let stack = vec![module.path(db).to_path_buf()];
-    let mut visited = FxHashSet::default();
-    visited.insert(module.path(db).to_path_buf());
-
     inline_steps
         .into_iter()
         .chain(linked_steps)
-        .chain(ImportTreeTraversal {
-            module_database: db,
-            stack,
-            visited,
-            current_css_iter: None,
-        })
+        .chain(UpwardTraversal::new(
+            db,
+            module.path(db).to_path_buf(),
+            CssClassTraversalPolicy::new(module.path(db)),
+            (),
+        ))
         .collect()
+}
+
+/// Returns the nearest visible `@property` definitions for a CSS module.
+///
+/// The current stylesheet's local definition takes precedence over definitions
+/// reached through its imports. Every importer is then traversed as an
+/// independent branch. A branch stops at its first visible definition, and only
+/// sibling imports authored before the child edge are visible.
+/// Definitions reached through the same authored rule are deduplicated, while
+/// definitions from separate branches remain separate. Result order is
+/// unspecified.
+#[salsa::tracked(returns(deref))]
+pub fn css_property_definitions<'db>(
+    db: &'db dyn ModuleDb,
+    property: SymbolFromModuleInfo<'db>,
+) -> Vec<CssPropertyDefinition> {
+    let module = *property.module(db);
+    if !matches!(module.kind(db), ModuleInfoKind::Css(_)) {
+        return Vec::new();
+    }
+
+    let path = module.path(db);
+    let name = property.name(db);
+    let mut ancestry = FxHashSet::default();
+    if let Some(definition) = last_property_in_css_context(db, path, &name, &mut ancestry) {
+        return vec![definition];
+    }
+
+    UpwardTraversal::new(
+        db,
+        path.to_path_buf(),
+        CssPropertyTraversalPolicy::new(&name),
+        CssPropertyBranch::new(path.to_path_buf()),
+    )
+    .collect()
 }
 
 /// Returns `true` if the given CSS `class_name` is referenced in any

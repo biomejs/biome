@@ -1,12 +1,11 @@
 use crate::model::SemanticModel;
 use crate::semantic_model;
 use biome_css_syntax::AnyCssRoot;
-use biome_db::{AnyParsedSource, ParsedSnippet, ParsedSource};
-use biome_languages::LanguageDb;
+use biome_db::{AnyParsedSource, Db, ParsedSnippet, ParsedSource};
 
 #[salsa::tracked(returns(ref))]
 pub(crate) fn css_model_from_parsed_source(
-    db: &dyn LanguageDb,
+    db: &dyn Db,
     file: ParsedSource,
 ) -> SemanticModel {
     let parsed: AnyCssRoot = file.parsed(db).tree();
@@ -15,17 +14,14 @@ pub(crate) fn css_model_from_parsed_source(
 
 #[salsa::tracked(returns(ref))]
 pub(crate) fn css_model_from_parsed_snippet(
-    db: &dyn LanguageDb,
+    db: &dyn Db,
     file: ParsedSnippet,
 ) -> SemanticModel {
     let parsed: AnyCssRoot = file.parsed(db).tree();
     semantic_model(&parsed)
 }
 
-pub fn css_semantic_model<'db, Db>(db: &'db Db, file: &'db AnyParsedSource) -> &'db SemanticModel
-where
-    Db: LanguageDb,
-{
+pub fn css_semantic_model<'db>(db: &'db dyn Db, file: &AnyParsedSource) -> &'db SemanticModel {
     match file {
         AnyParsedSource::ParsedSource(s) => css_model_from_parsed_source(db, *s),
         AnyParsedSource::ParsedSnippet(s) => css_model_from_parsed_snippet(db, *s),

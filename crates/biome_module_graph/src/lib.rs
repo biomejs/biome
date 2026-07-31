@@ -20,8 +20,8 @@ pub use biome_js_type_info::{
 };
 pub use biome_resolver::ResolvedPath;
 pub use css_module_info::{
-    CssClassReference, CssClassStep, CssImport, CssImports, CssModuleInfo, CssTraversalStep,
-    ImportTreeDisplay, ImportTreeNode,
+    CssClassReference, CssClassStep, CssImport, CssImports, CssModuleInfo, CssPropertyDefinition,
+    CssTraversalStep, ImportTreeDisplay, ImportTreeNode,
 };
 pub use db::queries::*;
 pub use db::{ModuleDb, ModuleGraphGeneration, TypeDb, module_for_key};

@@ -520,12 +520,12 @@ impl Format<FormatTypeContext> for CssImports {
             return write!(f, [token("No imports")]);
         }
         let mut joiner = f.join();
-        for (specifier, import) in &self.0 {
+        for (_, import) in &self.0 {
             let entry = format_with(|f| {
                 write!(
                     f,
                     [&format_args![
-                        text(&std::format!("{:?}", specifier.text()), None),
+                        text(&std::format!("{:?}", import.specifier), None),
                         space(),
                         token("=>"),
                         space(),
