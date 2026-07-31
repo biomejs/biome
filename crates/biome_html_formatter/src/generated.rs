@@ -6,6 +6,44 @@ use crate::{
     AsFormat, FormatBogusNodeRule, FormatNodeRule, HtmlFormatContext, HtmlFormatter, IntoFormat,
 };
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult, FormatRule};
+impl FormatRule<biome_html_syntax::AngularAfterTimeClause>
+    for crate::angular::auxiliary::after_time_clause::FormatAngularAfterTimeClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularAfterTimeClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularAfterTimeClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularAfterTimeClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularAfterTimeClause,
+        crate::angular::auxiliary::after_time_clause::FormatAngularAfterTimeClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::after_time_clause::FormatAngularAfterTimeClause::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularAfterTimeClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularAfterTimeClause,
+        crate::angular::auxiliary::after_time_clause::FormatAngularAfterTimeClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::after_time_clause::FormatAngularAfterTimeClause::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::AngularBindingName>
     for crate::angular::auxiliary::binding_name::FormatAngularBindingName
 {
@@ -41,6 +79,560 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularBindingName {
         FormatOwnedWithRule::new(
             self,
             crate::angular::auxiliary::binding_name::FormatAngularBindingName::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularBlockBody>
+    for crate::angular::auxiliary::block_body::FormatAngularBlockBody
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularBlockBody,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularBlockBody>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularBlockBody {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularBlockBody,
+        crate::angular::auxiliary::block_body::FormatAngularBlockBody,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::block_body::FormatAngularBlockBody::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularBlockBody {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularBlockBody,
+        crate::angular::auxiliary::block_body::FormatAngularBlockBody,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::block_body::FormatAngularBlockBody::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularCaseClause>
+    for crate::angular::auxiliary::case_clause::FormatAngularCaseClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularCaseClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularCaseClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularCaseClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularCaseClause,
+        crate::angular::auxiliary::case_clause::FormatAngularCaseClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::case_clause::FormatAngularCaseClause::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularCaseClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularCaseClause,
+        crate::angular::auxiliary::case_clause::FormatAngularCaseClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::case_clause::FormatAngularCaseClause::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularDefaultClause>
+    for crate::angular::auxiliary::default_clause::FormatAngularDefaultClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularDefaultClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularDefaultClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularDefaultClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularDefaultClause,
+        crate::angular::auxiliary::default_clause::FormatAngularDefaultClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::default_clause::FormatAngularDefaultClause::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularDefaultClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularDefaultClause,
+        crate::angular::auxiliary::default_clause::FormatAngularDefaultClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::default_clause::FormatAngularDefaultClause::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularDefaultExpressionClause>
+    for crate::angular::auxiliary::default_expression_clause::FormatAngularDefaultExpressionClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularDefaultExpressionClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularDefaultExpressionClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularDefaultExpressionClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularDefaultExpressionClause,
+        crate::angular::auxiliary::default_expression_clause::FormatAngularDefaultExpressionClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: angular :: auxiliary :: default_expression_clause :: FormatAngularDefaultExpressionClause :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularDefaultExpressionClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularDefaultExpressionClause,
+        crate::angular::auxiliary::default_expression_clause::FormatAngularDefaultExpressionClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: angular :: auxiliary :: default_expression_clause :: FormatAngularDefaultExpressionClause :: default ())
+    }
+}
+impl FormatRule<biome_html_syntax::AngularDeferBlock>
+    for crate::angular::auxiliary::defer_block::FormatAngularDeferBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularDeferBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularDeferBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularDeferBlock,
+        crate::angular::auxiliary::defer_block::FormatAngularDeferBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::defer_block::FormatAngularDeferBlock::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularDeferBlock,
+        crate::angular::auxiliary::defer_block::FormatAngularDeferBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::defer_block::FormatAngularDeferBlock::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularDeferOnClause>
+    for crate::angular::auxiliary::defer_on_clause::FormatAngularDeferOnClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularDeferOnClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularDeferOnClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferOnClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularDeferOnClause,
+        crate::angular::auxiliary::defer_on_clause::FormatAngularDeferOnClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::defer_on_clause::FormatAngularDeferOnClause::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferOnClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularDeferOnClause,
+        crate::angular::auxiliary::defer_on_clause::FormatAngularDeferOnClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::defer_on_clause::FormatAngularDeferOnClause::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularDeferOpeningBlock>
+    for crate::angular::auxiliary::defer_opening_block::FormatAngularDeferOpeningBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularDeferOpeningBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularDeferOpeningBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferOpeningBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularDeferOpeningBlock,
+        crate::angular::auxiliary::defer_opening_block::FormatAngularDeferOpeningBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::defer_opening_block::FormatAngularDeferOpeningBlock::default(
+            ),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferOpeningBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularDeferOpeningBlock,
+        crate::angular::auxiliary::defer_opening_block::FormatAngularDeferOpeningBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::defer_opening_block::FormatAngularDeferOpeningBlock::default(
+            ),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularDeferParameters>
+    for crate::angular::auxiliary::defer_parameters::FormatAngularDeferParameters
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularDeferParameters,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularDeferParameters>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferParameters {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularDeferParameters,
+        crate::angular::auxiliary::defer_parameters::FormatAngularDeferParameters,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::defer_parameters::FormatAngularDeferParameters::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferParameters {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularDeferParameters,
+        crate::angular::auxiliary::defer_parameters::FormatAngularDeferParameters,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::defer_parameters::FormatAngularDeferParameters::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularDeferPrefetchOnClause>
+    for crate::angular::auxiliary::defer_prefetch_on_clause::FormatAngularDeferPrefetchOnClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularDeferPrefetchOnClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularDeferPrefetchOnClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferPrefetchOnClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularDeferPrefetchOnClause,
+        crate::angular::auxiliary::defer_prefetch_on_clause::FormatAngularDeferPrefetchOnClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: angular :: auxiliary :: defer_prefetch_on_clause :: FormatAngularDeferPrefetchOnClause :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferPrefetchOnClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularDeferPrefetchOnClause,
+        crate::angular::auxiliary::defer_prefetch_on_clause::FormatAngularDeferPrefetchOnClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: angular :: auxiliary :: defer_prefetch_on_clause :: FormatAngularDeferPrefetchOnClause :: default ())
+    }
+}
+impl FormatRule<biome_html_syntax::AngularDeferPrefetchWhenClause>
+    for crate::angular::auxiliary::defer_prefetch_when_clause::FormatAngularDeferPrefetchWhenClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularDeferPrefetchWhenClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularDeferPrefetchWhenClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferPrefetchWhenClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularDeferPrefetchWhenClause,
+        crate::angular::auxiliary::defer_prefetch_when_clause::FormatAngularDeferPrefetchWhenClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: angular :: auxiliary :: defer_prefetch_when_clause :: FormatAngularDeferPrefetchWhenClause :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferPrefetchWhenClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularDeferPrefetchWhenClause,
+        crate::angular::auxiliary::defer_prefetch_when_clause::FormatAngularDeferPrefetchWhenClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: angular :: auxiliary :: defer_prefetch_when_clause :: FormatAngularDeferPrefetchWhenClause :: default ())
+    }
+}
+impl FormatRule<biome_html_syntax::AngularDeferWhenClause>
+    for crate::angular::auxiliary::defer_when_clause::FormatAngularDeferWhenClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularDeferWhenClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularDeferWhenClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferWhenClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularDeferWhenClause,
+        crate::angular::auxiliary::defer_when_clause::FormatAngularDeferWhenClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::defer_when_clause::FormatAngularDeferWhenClause::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferWhenClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularDeferWhenClause,
+        crate::angular::auxiliary::defer_when_clause::FormatAngularDeferWhenClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::defer_when_clause::FormatAngularDeferWhenClause::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularElseClause>
+    for crate::angular::auxiliary::else_clause::FormatAngularElseClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularElseClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularElseClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularElseClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularElseClause,
+        crate::angular::auxiliary::else_clause::FormatAngularElseClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::else_clause::FormatAngularElseClause::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularElseClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularElseClause,
+        crate::angular::auxiliary::else_clause::FormatAngularElseClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::else_clause::FormatAngularElseClause::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularElseIfClause>
+    for crate::angular::auxiliary::else_if_clause::FormatAngularElseIfClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularElseIfClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularElseIfClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularElseIfClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularElseIfClause,
+        crate::angular::auxiliary::else_if_clause::FormatAngularElseIfClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::else_if_clause::FormatAngularElseIfClause::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularElseIfClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularElseIfClause,
+        crate::angular::auxiliary::else_if_clause::FormatAngularElseIfClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::else_if_clause::FormatAngularElseIfClause::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularEmptyClause>
+    for crate::angular::auxiliary::empty_clause::FormatAngularEmptyClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularEmptyClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularEmptyClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularEmptyClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularEmptyClause,
+        crate::angular::auxiliary::empty_clause::FormatAngularEmptyClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::empty_clause::FormatAngularEmptyClause::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularEmptyClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularEmptyClause,
+        crate::angular::auxiliary::empty_clause::FormatAngularEmptyClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::empty_clause::FormatAngularEmptyClause::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularErrorClause>
+    for crate::angular::auxiliary::error_clause::FormatAngularErrorClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularErrorClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularErrorClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularErrorClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularErrorClause,
+        crate::angular::auxiliary::error_clause::FormatAngularErrorClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::error_clause::FormatAngularErrorClause::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularErrorClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularErrorClause,
+        crate::angular::auxiliary::error_clause::FormatAngularErrorClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::error_clause::FormatAngularErrorClause::default(),
         )
     }
 }
@@ -80,6 +672,614 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularEventBinding {
             self,
             crate::angular::auxiliary::event_binding::FormatAngularEventBinding::default(),
         )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularForBlock>
+    for crate::angular::auxiliary::for_block::FormatAngularForBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularForBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularForBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularForBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularForBlock,
+        crate::angular::auxiliary::for_block::FormatAngularForBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::for_block::FormatAngularForBlock::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularForBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularForBlock,
+        crate::angular::auxiliary::for_block::FormatAngularForBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::for_block::FormatAngularForBlock::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularForExpression>
+    for crate::angular::auxiliary::for_expression::FormatAngularForExpression
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularForExpression,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularForExpression>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularForExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularForExpression,
+        crate::angular::auxiliary::for_expression::FormatAngularForExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::for_expression::FormatAngularForExpression::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularForExpression {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularForExpression,
+        crate::angular::auxiliary::for_expression::FormatAngularForExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::for_expression::FormatAngularForExpression::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularForLetClause>
+    for crate::angular::auxiliary::for_let_clause::FormatAngularForLetClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularForLetClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularForLetClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularForLetClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularForLetClause,
+        crate::angular::auxiliary::for_let_clause::FormatAngularForLetClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::for_let_clause::FormatAngularForLetClause::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularForLetClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularForLetClause,
+        crate::angular::auxiliary::for_let_clause::FormatAngularForLetClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::for_let_clause::FormatAngularForLetClause::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularForOpeningBlock>
+    for crate::angular::auxiliary::for_opening_block::FormatAngularForOpeningBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularForOpeningBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularForOpeningBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularForOpeningBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularForOpeningBlock,
+        crate::angular::auxiliary::for_opening_block::FormatAngularForOpeningBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::for_opening_block::FormatAngularForOpeningBlock::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularForOpeningBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularForOpeningBlock,
+        crate::angular::auxiliary::for_opening_block::FormatAngularForOpeningBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::for_opening_block::FormatAngularForOpeningBlock::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularForParameters>
+    for crate::angular::auxiliary::for_parameters::FormatAngularForParameters
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularForParameters,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularForParameters>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularForParameters {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularForParameters,
+        crate::angular::auxiliary::for_parameters::FormatAngularForParameters,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::for_parameters::FormatAngularForParameters::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularForParameters {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularForParameters,
+        crate::angular::auxiliary::for_parameters::FormatAngularForParameters,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::for_parameters::FormatAngularForParameters::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularForTrackClause>
+    for crate::angular::auxiliary::for_track_clause::FormatAngularForTrackClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularForTrackClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularForTrackClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularForTrackClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularForTrackClause,
+        crate::angular::auxiliary::for_track_clause::FormatAngularForTrackClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::for_track_clause::FormatAngularForTrackClause::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularForTrackClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularForTrackClause,
+        crate::angular::auxiliary::for_track_clause::FormatAngularForTrackClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::for_track_clause::FormatAngularForTrackClause::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularIfAsClause>
+    for crate::angular::auxiliary::if_as_clause::FormatAngularIfAsClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularIfAsClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularIfAsClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularIfAsClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularIfAsClause,
+        crate::angular::auxiliary::if_as_clause::FormatAngularIfAsClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::if_as_clause::FormatAngularIfAsClause::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularIfAsClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularIfAsClause,
+        crate::angular::auxiliary::if_as_clause::FormatAngularIfAsClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::if_as_clause::FormatAngularIfAsClause::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularIfBlock>
+    for crate::angular::auxiliary::if_block::FormatAngularIfBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularIfBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularIfBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularIfBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularIfBlock,
+        crate::angular::auxiliary::if_block::FormatAngularIfBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::if_block::FormatAngularIfBlock::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularIfBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularIfBlock,
+        crate::angular::auxiliary::if_block::FormatAngularIfBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::if_block::FormatAngularIfBlock::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularIfOpeningBlock>
+    for crate::angular::auxiliary::if_opening_block::FormatAngularIfOpeningBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularIfOpeningBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularIfOpeningBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularIfOpeningBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularIfOpeningBlock,
+        crate::angular::auxiliary::if_opening_block::FormatAngularIfOpeningBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::if_opening_block::FormatAngularIfOpeningBlock::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularIfOpeningBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularIfOpeningBlock,
+        crate::angular::auxiliary::if_opening_block::FormatAngularIfOpeningBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::if_opening_block::FormatAngularIfOpeningBlock::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularIfParameters>
+    for crate::angular::auxiliary::if_parameters::FormatAngularIfParameters
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularIfParameters,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularIfParameters>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularIfParameters {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularIfParameters,
+        crate::angular::auxiliary::if_parameters::FormatAngularIfParameters,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::if_parameters::FormatAngularIfParameters::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularIfParameters {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularIfParameters,
+        crate::angular::auxiliary::if_parameters::FormatAngularIfParameters,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::if_parameters::FormatAngularIfParameters::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularLetBlock>
+    for crate::angular::auxiliary::let_block::FormatAngularLetBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularLetBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularLetBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularLetBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularLetBlock,
+        crate::angular::auxiliary::let_block::FormatAngularLetBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::let_block::FormatAngularLetBlock::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularLetBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularLetBlock,
+        crate::angular::auxiliary::let_block::FormatAngularLetBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::let_block::FormatAngularLetBlock::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularLoadingClause>
+    for crate::angular::auxiliary::loading_clause::FormatAngularLoadingClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularLoadingClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularLoadingClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularLoadingClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularLoadingClause,
+        crate::angular::auxiliary::loading_clause::FormatAngularLoadingClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::loading_clause::FormatAngularLoadingClause::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularLoadingClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularLoadingClause,
+        crate::angular::auxiliary::loading_clause::FormatAngularLoadingClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::loading_clause::FormatAngularLoadingClause::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularLoadingParameters>
+    for crate::angular::auxiliary::loading_parameters::FormatAngularLoadingParameters
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularLoadingParameters,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularLoadingParameters>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularLoadingParameters {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularLoadingParameters,
+        crate::angular::auxiliary::loading_parameters::FormatAngularLoadingParameters,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::loading_parameters::FormatAngularLoadingParameters::default(
+            ),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularLoadingParameters {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularLoadingParameters,
+        crate::angular::auxiliary::loading_parameters::FormatAngularLoadingParameters,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::loading_parameters::FormatAngularLoadingParameters::default(
+            ),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularMinimumTimeClause>
+    for crate::angular::auxiliary::minimum_time_clause::FormatAngularMinimumTimeClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularMinimumTimeClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularMinimumTimeClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularMinimumTimeClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularMinimumTimeClause,
+        crate::angular::auxiliary::minimum_time_clause::FormatAngularMinimumTimeClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::minimum_time_clause::FormatAngularMinimumTimeClause::default(
+            ),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularMinimumTimeClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularMinimumTimeClause,
+        crate::angular::auxiliary::minimum_time_clause::FormatAngularMinimumTimeClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::minimum_time_clause::FormatAngularMinimumTimeClause::default(
+            ),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularPlaceholderClause>
+    for crate::angular::auxiliary::placeholder_clause::FormatAngularPlaceholderClause
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularPlaceholderClause,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularPlaceholderClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularPlaceholderClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularPlaceholderClause,
+        crate::angular::auxiliary::placeholder_clause::FormatAngularPlaceholderClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::placeholder_clause::FormatAngularPlaceholderClause::default(
+            ),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularPlaceholderClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularPlaceholderClause,
+        crate::angular::auxiliary::placeholder_clause::FormatAngularPlaceholderClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::placeholder_clause::FormatAngularPlaceholderClause::default(
+            ),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularPlaceholderParameters>
+    for crate::angular::auxiliary::placeholder_parameters::FormatAngularPlaceholderParameters
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularPlaceholderParameters,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularPlaceholderParameters>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularPlaceholderParameters {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularPlaceholderParameters,
+        crate::angular::auxiliary::placeholder_parameters::FormatAngularPlaceholderParameters,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: angular :: auxiliary :: placeholder_parameters :: FormatAngularPlaceholderParameters :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularPlaceholderParameters {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularPlaceholderParameters,
+        crate::angular::auxiliary::placeholder_parameters::FormatAngularPlaceholderParameters,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: angular :: auxiliary :: placeholder_parameters :: FormatAngularPlaceholderParameters :: default ())
     }
 }
 impl FormatRule<biome_html_syntax::AngularPropertyBinding>
@@ -150,6 +1350,114 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularStructuralDirec
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: angular :: auxiliary :: structural_directive :: FormatAngularStructuralDirective :: default ())
+    }
+}
+impl FormatRule<biome_html_syntax::AngularSwitchBlock>
+    for crate::angular::auxiliary::switch_block::FormatAngularSwitchBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularSwitchBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularSwitchBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularSwitchBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularSwitchBlock,
+        crate::angular::auxiliary::switch_block::FormatAngularSwitchBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::switch_block::FormatAngularSwitchBlock::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularSwitchBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularSwitchBlock,
+        crate::angular::auxiliary::switch_block::FormatAngularSwitchBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::switch_block::FormatAngularSwitchBlock::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::AngularSwitchOpeningBlock>
+    for crate::angular::auxiliary::switch_opening_block::FormatAngularSwitchOpeningBlock
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularSwitchOpeningBlock,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularSwitchOpeningBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularSwitchOpeningBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularSwitchOpeningBlock,
+        crate::angular::auxiliary::switch_opening_block::FormatAngularSwitchOpeningBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: angular :: auxiliary :: switch_opening_block :: FormatAngularSwitchOpeningBlock :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularSwitchOpeningBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularSwitchOpeningBlock,
+        crate::angular::auxiliary::switch_opening_block::FormatAngularSwitchOpeningBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: angular :: auxiliary :: switch_opening_block :: FormatAngularSwitchOpeningBlock :: default ())
+    }
+}
+impl FormatRule<biome_html_syntax::AngularSwitchParameters>
+    for crate::angular::auxiliary::switch_parameters::FormatAngularSwitchParameters
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::AngularSwitchParameters,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::AngularSwitchParameters>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularSwitchParameters {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularSwitchParameters,
+        crate::angular::auxiliary::switch_parameters::FormatAngularSwitchParameters,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::auxiliary::switch_parameters::FormatAngularSwitchParameters::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularSwitchParameters {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularSwitchParameters,
+        crate::angular::auxiliary::switch_parameters::FormatAngularSwitchParameters,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::auxiliary::switch_parameters::FormatAngularSwitchParameters::default(),
+        )
     }
 }
 impl FormatRule<biome_html_syntax::AngularTemplateRefVariable>
@@ -3906,6 +5214,118 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueVSlotShorthandDirec
         FormatOwnedWithRule :: new (self , crate :: vue :: auxiliary :: v_slot_shorthand_directive :: FormatVueVSlotShorthandDirective :: default ())
     }
 }
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularCaseClauseList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularCaseClauseList,
+        crate::angular::lists::case_clause_list::FormatAngularCaseClauseList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::lists::case_clause_list::FormatAngularCaseClauseList::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularCaseClauseList {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularCaseClauseList,
+        crate::angular::lists::case_clause_list::FormatAngularCaseClauseList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::lists::case_clause_list::FormatAngularCaseClauseList::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferClauseList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularDeferClauseList,
+        crate::angular::lists::defer_clause_list::FormatAngularDeferClauseList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::lists::defer_clause_list::FormatAngularDeferClauseList::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularDeferClauseList {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularDeferClauseList,
+        crate::angular::lists::defer_clause_list::FormatAngularDeferClauseList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::lists::defer_clause_list::FormatAngularDeferClauseList::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularElseIfClauseList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularElseIfClauseList,
+        crate::angular::lists::else_if_clause_list::FormatAngularElseIfClauseList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::lists::else_if_clause_list::FormatAngularElseIfClauseList::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularElseIfClauseList {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularElseIfClauseList,
+        crate::angular::lists::else_if_clause_list::FormatAngularElseIfClauseList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::lists::else_if_clause_list::FormatAngularElseIfClauseList::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularForLetBindingList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AngularForLetBindingList,
+        crate::angular::lists::for_let_binding_list::FormatAngularForLetBindingList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::lists::for_let_binding_list::FormatAngularForLetBindingList::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularForLetBindingList {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AngularForLetBindingList,
+        crate::angular::lists::for_let_binding_list::FormatAngularForLetBindingList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::lists::for_let_binding_list::FormatAngularForLetBindingList::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AngularLoadingParameterClauseList {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_html_syntax :: AngularLoadingParameterClauseList , crate :: angular :: lists :: loading_parameter_clause_list :: FormatAngularLoadingParameterClauseList > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: angular :: lists :: loading_parameter_clause_list :: FormatAngularLoadingParameterClauseList :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AngularLoadingParameterClauseList {
+    type Format = FormatOwnedWithRule < biome_html_syntax :: AngularLoadingParameterClauseList , crate :: angular :: lists :: loading_parameter_clause_list :: FormatAngularLoadingParameterClauseList > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: angular :: lists :: loading_parameter_clause_list :: FormatAngularLoadingParameterClauseList :: default ())
+    }
+}
 impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlAttributeList {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -4452,6 +5872,100 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyAngularBinding {
             self,
             crate::angular::any::binding::FormatAnyAngularBinding::default(),
         )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyAngularBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnyAngularBlock,
+        crate::angular::any::block::FormatAnyAngularBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::any::block::FormatAnyAngularBlock::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyAngularBlock {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnyAngularBlock,
+        crate::angular::any::block::FormatAnyAngularBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::any::block::FormatAnyAngularBlock::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyAngularDefaultClauseBody {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnyAngularDefaultClauseBody,
+        crate::angular::any::default_clause_body::FormatAnyAngularDefaultClauseBody,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::any::default_clause_body::FormatAnyAngularDefaultClauseBody::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyAngularDefaultClauseBody {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnyAngularDefaultClauseBody,
+        crate::angular::any::default_clause_body::FormatAnyAngularDefaultClauseBody,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::any::default_clause_body::FormatAnyAngularDefaultClauseBody::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyAngularDeferClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnyAngularDeferClause,
+        crate::angular::any::defer_clause::FormatAnyAngularDeferClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::angular::any::defer_clause::FormatAnyAngularDeferClause::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyAngularDeferClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnyAngularDeferClause,
+        crate::angular::any::defer_clause::FormatAnyAngularDeferClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::angular::any::defer_clause::FormatAnyAngularDeferClause::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyAngularLoadingParameterClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnyAngularLoadingParameterClause,
+        crate::angular::any::loading_parameter_clause::FormatAnyAngularLoadingParameterClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: angular :: any :: loading_parameter_clause :: FormatAnyAngularLoadingParameterClause :: default ())
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyAngularLoadingParameterClause {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnyAngularLoadingParameterClause,
+        crate::angular::any::loading_parameter_clause::FormatAnyAngularLoadingParameterClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: angular :: any :: loading_parameter_clause :: FormatAnyAngularLoadingParameterClause :: default ())
     }
 }
 impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyAstroDirective {
