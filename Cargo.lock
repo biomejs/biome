@@ -141,6 +141,7 @@ dependencies = [
  "enumflags2",
  "indexmap",
  "insta",
+ "parking_lot",
  "rustc-hash 2.1.3",
  "schemars",
  "serde",
