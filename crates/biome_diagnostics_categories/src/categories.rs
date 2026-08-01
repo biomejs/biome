@@ -224,6 +224,7 @@ define_categories! {
     "lint/nursery/noMissingGenericFamilyKeyword": "https://biomejs.dev/linter/rules/no-missing-generic-family-keyword",
     "lint/nursery/noMisusedPromises": "https://biomejs.dev/linter/rules/no-misused-promises",
     "lint/nursery/noNegationInEqualityCheck": "https://biomejs.dev/linter/rules/no-negation-in-equality-check",
+    "lint/nursery/noNonScalableViewport": "https://biomejs.dev/linter/rules/no-non-scalable-viewport",
     "lint/nursery/noPlaywrightElementHandle": "https://biomejs.dev/linter/rules/no-playwright-element-handle",
     "lint/nursery/noPlaywrightEval": "https://biomejs.dev/linter/rules/no-playwright-eval",
     "lint/nursery/noPlaywrightForceOption": "https://biomejs.dev/linter/rules/no-playwright-force-option",

@@ -265,6 +265,7 @@ pub enum RuleName {
     NoNodejsModules,
     NoNonNullAssertedOptionalChain,
     NoNonNullAssertion,
+    NoNonScalableViewport,
     NoNoninteractiveElementInteractions,
     NoNoninteractiveElementToInteractiveRole,
     NoNoninteractiveTabindex,
@@ -785,6 +786,7 @@ impl RuleName {
             Self::NoNodejsModules => "noNodejsModules",
             Self::NoNonNullAssertedOptionalChain => "noNonNullAssertedOptionalChain",
             Self::NoNonNullAssertion => "noNonNullAssertion",
+            Self::NoNonScalableViewport => "noNonScalableViewport",
             Self::NoNoninteractiveElementInteractions => "noNoninteractiveElementInteractions",
             Self::NoNoninteractiveElementToInteractiveRole => {
                 "noNoninteractiveElementToInteractiveRole"
@@ -1305,6 +1307,7 @@ impl RuleName {
             Self::NoNodejsModules => RuleGroup::Correctness,
             Self::NoNonNullAssertedOptionalChain => RuleGroup::Suspicious,
             Self::NoNonNullAssertion => RuleGroup::Style,
+            Self::NoNonScalableViewport => RuleGroup::Nursery,
             Self::NoNoninteractiveElementInteractions => RuleGroup::A11y,
             Self::NoNoninteractiveElementToInteractiveRole => RuleGroup::A11y,
             Self::NoNoninteractiveTabindex => RuleGroup::A11y,
@@ -1830,6 +1833,7 @@ impl std::str::FromStr for RuleName {
             "noNodejsModules" => Ok(Self::NoNodejsModules),
             "noNonNullAssertedOptionalChain" => Ok(Self::NoNonNullAssertedOptionalChain),
             "noNonNullAssertion" => Ok(Self::NoNonNullAssertion),
+            "noNonScalableViewport" => Ok(Self::NoNonScalableViewport),
             "noNoninteractiveElementInteractions" => Ok(Self::NoNoninteractiveElementInteractions),
             "noNoninteractiveElementToInteractiveRole" => {
                 Ok(Self::NoNoninteractiveElementToInteractiveRole)

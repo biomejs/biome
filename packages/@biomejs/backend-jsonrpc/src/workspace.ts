@@ -2462,6 +2462,11 @@ See https://biomejs.dev/linter/rules/no-negation-in-equality-check
 	 */
 	noNegationInEqualityCheck?: NoNegationInEqualityCheckConfiguration;
 	/**
+	* Disallow disabling zoom with user-scalable=no in the \<meta name="viewport"> element.
+See https://biomejs.dev/linter/rules/no-non-scalable-viewport
+	 */
+	noNonScalableViewport?: NoNonScalableViewportConfiguration;
+	/**
 	* Disallow usage of element handles (page.$() and page.$$()).
 See https://biomejs.dev/linter/rules/no-playwright-element-handle 
 	 */
@@ -4708,6 +4713,9 @@ export type NoMisusedPromisesConfiguration =
 export type NoNegationInEqualityCheckConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNegationInEqualityCheckOptions;
+export type NoNonScalableViewportConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNonScalableViewportOptions;
 export type NoPlaywrightElementHandleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightElementHandleOptions;
@@ -6578,6 +6586,10 @@ export interface RuleWithNoNegationInEqualityCheckOptions {
 	level: RulePlainConfiguration;
 	options?: NoNegationInEqualityCheckOptions;
 }
+export interface RuleWithNoNonScalableViewportOptions {
+	level: RulePlainConfiguration;
+	options?: NoNonScalableViewportOptions;
+}
 export interface RuleWithNoPlaywrightElementHandleOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8346,6 +8358,7 @@ export type NoLoopFuncOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
+export type NoNonScalableViewportOptions = {};
 export type NoPlaywrightElementHandleOptions = {};
 export type NoPlaywrightEvalOptions = {};
 export type NoPlaywrightForceOptionOptions = {};
@@ -9800,6 +9813,7 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNegationInEqualityCheck"
+	| "lint/nursery/noNonScalableViewport"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
