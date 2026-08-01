@@ -1668,6 +1668,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_property_codec"
+version = "0.1.0"
+dependencies = [
+ "biome_console",
+ "biome_css_syntax",
+ "biome_diagnostics",
+ "biome_formatter",
+ "biome_rowan",
+ "biome_unicode_table",
+ "insta",
+]
+
+[[package]]
 name = "biome_resolver"
 version = "0.1.0"
 dependencies = [
