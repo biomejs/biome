@@ -319,9 +319,9 @@ impl ModuleDb for TestModuleDb {
         self.modules.get(path).copied()
     }
 
-    fn for_each_module(&self, f: &mut dyn FnMut(&Utf8Path, &ModuleInfoKind)) {
-        for (path, module) in &self.modules {
-            f(path, &module.kind(self));
+    fn for_each_module(&self, f: &mut dyn FnMut(ModuleInfo)) {
+        for module in self.modules.values() {
+            f(*module);
         }
     }
 }

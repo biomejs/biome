@@ -450,14 +450,13 @@ impl ModuleDb for WorkspaceDb {
         self.get_module(path)
     }
 
-    fn for_each_module(&self, f: &mut dyn FnMut(&Utf8Path, &ModuleInfoKind)) {
+    fn for_each_module(&self, f: &mut dyn FnMut(ModuleInfo)) {
         // Read the generation before reading the module data.
         let _ = self.module_graph_generation();
         let modules = self.modules.pin();
         let iter = modules.iter();
-        for (path, module_info) in iter {
-            let kind = module_info.kind(self);
-            f(path.as_path(), &kind);
+        for (_, module) in iter {
+            f(*module);
         }
     }
 }
