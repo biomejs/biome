@@ -9,6 +9,7 @@ mod db;
 mod diagnostics;
 mod format_module_graph;
 mod html_module_info;
+mod import_path_map;
 pub mod js_module_info;
 mod module_graph;
 mod path_info_cache;
@@ -28,9 +29,10 @@ pub use db::queries::*;
 pub use db::{ModuleDb, ModuleGraphGeneration, TypeDb, module_for_key};
 pub use diagnostics::ModuleDiagnostic;
 pub use html_module_info::{HtmlEmbeddedContent, HtmlModuleInfo, SerializedHtmlModuleInfo};
+pub use import_path_map::{ImportPathMap, ImportPathMapIterator};
 pub use js_module_info::{
-    BindingTypeData, JsExport, JsExportedSymbolLookup, JsImport, JsImportPath, JsImportPhase,
-    JsModuleInfo, JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleResolver,
+    BindingTypeData, JsExport, JsExportedSymbolLookup, JsImport, JsImportKind, JsImportPath,
+    JsImportPhase, JsModuleInfo, JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleResolver,
     SerializedJsModuleInfo, TypeInferenceMode,
 };
 pub use module_graph::{

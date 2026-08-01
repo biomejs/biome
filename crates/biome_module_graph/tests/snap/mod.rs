@@ -92,8 +92,9 @@ impl<'a> ModuleGraphSnapshot<'a> {
                             .collect();
 
                         let side_effect_paths: Vec<_> = data
-                            .static_import_paths
-                            .iter()
+                            .import_paths
+                            .named_iter()
+                            .filter(|(_, import)| import.kind.is_static())
                             .filter(|(specifier, _)| {
                                 let s = specifier.text().to_string();
                                 !named_import_specifiers.contains(&s)

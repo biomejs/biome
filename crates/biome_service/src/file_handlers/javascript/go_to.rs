@@ -219,10 +219,7 @@ fn resolve_import_definition(
     let module_info = module_db.module_info_for_path(current_path)?;
     match module_info {
         ModuleInfoKind::Js(module_info) => {
-            let import_path = module_info
-                .static_import_paths
-                .get(specifier)
-                .or(module_info.dynamic_import_paths.get(specifier))?;
+            let import_path = module_info.import_paths.get(specifier)?;
 
             let target_path = import_path.resolved_path.as_path()?;
 
@@ -258,10 +255,7 @@ fn resolve_import_definition(
         }
         ModuleInfoKind::Css(_) => {}
         ModuleInfoKind::Html(module_info) => {
-            let resolved_path = module_info
-                .static_import_paths
-                .get(specifier)
-                .or(module_info.dynamic_import_paths.get(specifier))?;
+            let resolved_path = module_info.import_paths.get(specifier)?;
 
             let target_path = resolved_path.as_path()?;
 

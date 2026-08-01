@@ -1,6 +1,7 @@
 pub(crate) mod traverse;
 mod visitor;
 
+use crate::ImportPathMap;
 use biome_languages::css::EmbeddingStyleApplicability;
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange, TextSize, TokenText};
@@ -8,7 +9,7 @@ use camino::Utf8PathBuf;
 use indexmap::IndexMap;
 use std::collections::BTreeSet;
 use std::hash::{Hash, Hasher};
-use std::ops::{Deref, DerefMut};
+use std::ops::Deref;
 use std::sync::Arc;
 pub use traverse::{CssClassStep, CssTraversalStep, ImportTreeDisplay, ImportTreeNode};
 pub(crate) use visitor::CssModuleVisitor;
@@ -135,7 +136,7 @@ impl CssModuleInfo {
                 .0
                 .imports
                 .iter()
-                .map(|(_, static_import)| static_import.specifier.to_string())
+                .map(|import| import.specifier.to_string())
                 .collect(),
             classes: self
                 .0
@@ -151,10 +152,8 @@ impl CssModuleInfo {
 pub struct CssModuleInfoInner {
     /// Map of all static imports found in the module.
     ///
-    /// Maps each import occurrence's source range to a [CssImport], preserving
-    /// duplicate imports and source order. The resolved path may be looked up as
-    /// a key in the [ModuleGraph::data] map, although it is not required to exist
-    /// (for instance, if the path is outside the project's scope).
+    /// Preserves duplicate imports and source order. Resolved paths may be
+    /// looked up in the module graph, although they are not required to exist.
     pub imports: CssImports,
 
     /// Map of all CSS class names to their selector ranges in this file.
@@ -168,22 +167,7 @@ pub struct CssModuleInfoInner {
     pub classes: IndexMap<TextRange, TokenText>,
 }
 
-#[derive(Debug, Default, Clone)]
-pub struct CssImports(pub(crate) IndexMap<TextRange, CssImport>);
-
-impl Deref for CssImports {
-    type Target = IndexMap<TextRange, CssImport>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for CssImports {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
+pub type CssImports = ImportPathMap<CssImport>;
 
 /// Represents an import to one or more symbols from an external path.
 ///
@@ -191,6 +175,9 @@ impl DerefMut for CssImports {
 /// images, and so on.
 #[derive(Clone, Debug, PartialEq, Hash, Eq)]
 pub struct CssImport {
+    /// Source range of this import occurrence.
+    pub range: TextRange,
+
     /// The specifier for the imported as it appeared in the source text.
     pub specifier: Text,
 

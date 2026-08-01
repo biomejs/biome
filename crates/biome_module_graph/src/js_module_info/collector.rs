@@ -23,7 +23,20 @@ use super::{
     is_named_type_declaration,
 };
 use crate::js_module_info::{scope::TsBindingReferenceExt, utils::reached_too_many_types};
-use crate::{BindingTypeData, JsImportPath, JsImportPhase};
+use crate::{BindingTypeData, ImportPathMap, JsImportKind, JsImportPath, JsImportPhase};
+
+fn merge_import_paths(previous: &JsImportPath, current: &mut JsImportPath) {
+    if previous.kind.is_static() && !current.kind.is_static() {
+        current.phase = previous.phase;
+    }
+    current.kind = previous.kind.union(current.kind);
+    if current.phase == JsImportPhase::Type
+        && previous.kind.is_static()
+        && previous.phase != JsImportPhase::Type
+    {
+        current.phase = previous.phase;
+    }
+}
 
 /// Responsible for collecting all the information from which to build the
 /// [`JsModuleInfo`].
@@ -45,13 +58,8 @@ pub(super) struct JsModuleInfoCollector {
     /// Map of parsed declarations, for caching purposes.
     parsed_expressions: FxHashMap<TextRange, ResolvedTypeId>,
 
-    /// Map with all static import paths, from the source specifier to the
-    /// resolved path.
-    static_import_paths: IndexMap<Text, JsImportPath>,
-
-    /// Map with all dynamic import paths, from the import source to the
-    /// resolved path.
-    dynamic_import_paths: IndexMap<Text, JsImportPath>,
+    /// Static and dynamic import paths in source order.
+    import_paths: ImportPathMap<JsImportPath>,
 
     /// All collected exports.
     ///
@@ -138,8 +146,7 @@ impl JsModuleInfoCollector {
             function_parameters: FxHashMap::default(),
             variable_declarations: FxHashMap::default(),
             parsed_expressions: FxHashMap::default(),
-            static_import_paths: IndexMap::new(),
-            dynamic_import_paths: IndexMap::new(),
+            import_paths: ImportPathMap::default(),
             exports: Vec::new(),
             blanket_reexports: Vec::new(),
             types: TypeStore::default(),
@@ -199,8 +206,7 @@ impl JsModuleInfoCollector {
                 let source = node.source().ok()?;
                 let source_token = source.as_js_module_source()?.value_token().ok()?;
                 let source = inner_string_text(&source_token);
-                let JsImportPath { resolved_path, .. } =
-                    self.static_import_paths.get(source.text())?;
+                let JsImportPath { resolved_path, .. } = self.import_paths.get(source.text())?;
 
                 let default_specifier = node.default_specifier().ok()?;
                 let local_name = default_specifier.local_name().ok()?;
@@ -255,8 +261,7 @@ impl JsModuleInfoCollector {
                 let source = node.source().ok()?;
                 let source_token = source.as_js_module_source()?.value_token().ok()?;
                 let source = inner_string_text(&source_token);
-                let JsImportPath { resolved_path, .. } =
-                    self.static_import_paths.get(source.text())?;
+                let JsImportPath { resolved_path, .. } = self.import_paths.get(source.text())?;
 
                 let local_name = node.default_specifier().ok()?.local_name().ok()?;
                 let local_name = local_name.as_js_identifier_binding()?;
@@ -274,8 +279,7 @@ impl JsModuleInfoCollector {
                 let source = node.source().ok()?;
                 let source_token = source.as_js_module_source()?.value_token().ok()?;
                 let source = inner_string_text(&source_token);
-                let JsImportPath { resolved_path, .. } =
-                    self.static_import_paths.get(source.text())?;
+                let JsImportPath { resolved_path, .. } = self.import_paths.get(source.text())?;
 
                 for specifier in node.named_specifiers().ok()?.specifiers() {
                     let specifier = specifier.ok()?;
@@ -300,8 +304,7 @@ impl JsModuleInfoCollector {
                 let source = node.source().ok()?;
                 let source_token = source.as_js_module_source()?.value_token().ok()?;
                 let source = inner_string_text(&source_token);
-                let JsImportPath { resolved_path, .. } =
-                    self.static_import_paths.get(source.text())?;
+                let JsImportPath { resolved_path, .. } = self.import_paths.get(source.text())?;
 
                 let specifier = node.namespace_specifier().ok()?;
                 let local_name = specifier.local_name().ok()?;
@@ -356,13 +359,13 @@ impl JsModuleInfoCollector {
         resolved_path: ResolvedPath,
         phase: JsImportPhase,
     ) {
-        self.static_import_paths.insert(
-            specifier.into(),
-            JsImportPath {
-                resolved_path,
-                phase,
-            },
-        );
+        let import_path = JsImportPath {
+            resolved_path,
+            phase,
+            kind: JsImportKind::Static,
+        };
+        self.import_paths
+            .insert_with(specifier.into(), import_path, merge_import_paths);
     }
 
     pub fn register_dynamic_import_path(
@@ -371,13 +374,13 @@ impl JsModuleInfoCollector {
         resolved_path: ResolvedPath,
         phase: JsImportPhase,
     ) {
-        self.dynamic_import_paths.insert(
-            specifier.into(),
-            JsImportPath {
-                resolved_path,
-                phase,
-            },
-        );
+        let import_path = JsImportPath {
+            resolved_path,
+            phase,
+            kind: JsImportKind::Dynamic,
+        };
+        self.import_paths
+            .insert_with(specifier.into(), import_path, merge_import_paths);
     }
 
     fn finalise(&mut self, semantic_model: &SemanticModel) -> FinalisedModuleTypes {
@@ -1214,8 +1217,7 @@ impl JsModuleInfo {
 
         Self(Arc::new(JsModuleInfoInner {
             static_imports: Imports(collector.static_imports),
-            static_import_paths: collector.static_import_paths,
-            dynamic_import_paths: collector.dynamic_import_paths,
+            import_paths: collector.import_paths,
             exports: Exports(finalised.exports),
             raw_exports: Exports(finalised.raw_exports),
             blanket_reexports: collector.blanket_reexports,
