@@ -16,6 +16,8 @@ use crate::file_handlers::{SvelteFileHandler, VueFileHandler};
 use crate::module_graph::ModuleDependencies;
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
 use crate::module_graph::resolve_css_module;
+#[cfg(all(feature = "module_graph", feature = "lang_graphql"))]
+use crate::module_graph::resolve_graphql_module;
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
 use crate::module_graph::resolve_js_module;
 #[cfg(all(feature = "module_graph", feature = "lang_html"))]
@@ -62,6 +64,8 @@ use biome_diagnostics::{
 };
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
+#[cfg(all(feature = "module_graph", feature = "lang_graphql"))]
+use biome_graphql_syntax::GraphqlRoot;
 #[cfg(all(feature = "module_graph", feature = "lang_html"))]
 use biome_html_syntax::HtmlRoot;
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
@@ -229,6 +233,8 @@ enum ExtractedModuleInputs {
     Css(AnyCssRoot),
     #[cfg(feature = "lang_html")]
     Html(HtmlRoot, Vec<HtmlEmbeddedContent>),
+    #[cfg(feature = "lang_graphql")]
+    Graphql(GraphqlRoot),
     Removed,
     Unsupported,
 }
@@ -2100,6 +2106,11 @@ impl WorkspaceServerWithDb<'_> {
                     return Ok(ExtractedModuleInputs::Html(html_root, embedded_content));
                 }
 
+                #[cfg(feature = "lang_graphql")]
+                if let Some(graphql_root) = root.clone().into_language_root::<GraphqlRoot>(db) {
+                    return Ok(ExtractedModuleInputs::Graphql(graphql_root));
+                }
+
                 let _ = root;
                 Ok(ExtractedModuleInputs::Unsupported)
             }
@@ -2159,6 +2170,16 @@ impl WorkspaceServerWithDb<'_> {
                 );
                 ResolvedModuleGraphUpdate::Upsert {
                     kind: ModuleInfoKind::Html(module_info),
+                    dependencies,
+                    diagnostics: diagnostics.into_iter().map(Into::into).collect(),
+                }
+            }
+            #[cfg(feature = "lang_graphql")]
+            ExtractedModuleInputs::Graphql(graphql_root) => {
+                let (module_info, dependencies, diagnostics) =
+                    resolve_graphql_module(graphql_root, path, &self.db_state.path_info_cache);
+                ResolvedModuleGraphUpdate::Upsert {
+                    kind: ModuleInfoKind::Graphql(module_info),
                     dependencies,
                     diagnostics: diagnostics.into_iter().map(Into::into).collect(),
                 }

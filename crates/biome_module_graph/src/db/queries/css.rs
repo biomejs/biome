@@ -81,6 +81,7 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
                             .values()
                             .any(|p| p.as_path() == Some(current.as_path()))
                 }
+                ModuleInfoKind::Graphql(_) => false,
             };
 
             if imports_current && !visited.contains(file_path) {
@@ -88,6 +89,7 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
                     ModuleInfoKind::Js(_) | ModuleInfoKind::Html(_) => {
                         result.push(file_path.to_path_buf());
                     }
+                    ModuleInfoKind::Graphql(_) => {}
                     ModuleInfoKind::Css(_) => {
                         queue.push_back(file_path.to_path_buf());
                     }
@@ -385,6 +387,7 @@ fn is_class_used_in_component_tree<'db>(
                     return true;
                 }
             }
+            ModuleInfoKind::Graphql(_) => {}
             ModuleInfoKind::Css(_) => {}
         }
     }
@@ -454,6 +457,7 @@ pub(crate) fn build_parent_nodes(
                 .chain(html_info.static_import_paths.values())
                 .chain(html_info.dynamic_import_paths.values())
                 .any(|p| p.as_path() == Some(current_path)),
+            ModuleInfoKind::Graphql(_) => false,
             ModuleInfoKind::Css(_) => false,
         };
 
@@ -479,6 +483,7 @@ pub(crate) fn build_parent_nodes(
                         Some(path.to_path_buf())
                     })
                     .collect(),
+                ModuleInfoKind::Graphql(_) => Vec::new(),
                 ModuleInfoKind::Css(_) => Vec::new(),
             };
 

@@ -1,6 +1,8 @@
 //! Salsa database traits and tracked module-graph queries.
 
-use crate::{CssModuleInfo, HtmlModuleInfo, JsModuleInfo, ModuleInfo, ModuleInfoKind};
+use crate::{
+    CssModuleInfo, GraphqlModuleInfo, HtmlModuleInfo, JsModuleInfo, ModuleInfo, ModuleInfoKind,
+};
 pub use biome_js_type_info::TypeDb;
 use biome_js_type_info::interned_types::ModuleKey;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -108,6 +110,15 @@ pub trait ModuleDb: TypeDb {
     fn module_info_for_path(&self, path: &Utf8Path) -> Option<ModuleInfoKind> {
         self.module_for_path(path)
             .map(|info| info.kind(self).clone())
+    }
+
+    /// Returns the GraphQL module info for the given `path`.
+    fn graphql_module_info_for_path(&self, path: &Utf8Path) -> Option<GraphqlModuleInfo> {
+        self.module_for_path(path)
+            .and_then(|info| match info.kind(self) {
+                ModuleInfoKind::Graphql(module_info) => Some(module_info.clone()),
+                _ => None,
+            })
     }
 
     /// Collects all module paths and their kinds.

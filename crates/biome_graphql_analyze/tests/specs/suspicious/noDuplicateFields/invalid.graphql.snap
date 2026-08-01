@@ -1,5 +1,6 @@
 ---
 source: crates/biome_graphql_analyze/tests/spec_tests.rs
+assertion_line: 84
 expression: invalid.graphql
 ---
 # Input
@@ -30,6 +31,18 @@ query test {
     email
     email: somethingElse
   }
+}
+
+query test {
+  users {
+    name
+    ...UserFields
+  }
+}
+
+fragment UserFields on User {
+  id
+  name
 }
 
 ```
@@ -94,6 +107,23 @@ invalid.graphql:25:5 lint/suspicious/noDuplicateFields ━━━━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^
     26 │   }
     27 │ }
+  
+  i Remove the duplicated field.
+  
+
+```
+
+```
+invalid.graphql:32:5 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Field `name` defined multiple times.
+  
+    30 │   users {
+    31 │     name
+  > 32 │     ...UserFields
+       │     ^^^^^^^^^^^^^
+    33 │   }
+    34 │ }
   
   i Remove the duplicated field.
   

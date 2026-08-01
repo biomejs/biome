@@ -10637,7 +10637,8 @@ export interface GetModuleGraphResult {
 export type SerializedModuleInfo =
 	| { js: SerializedJsModuleInfo }
 	| { css: SerializedCssModuleInfo }
-	| { html: SerializedHtmlModuleInfo };
+	| { html: SerializedHtmlModuleInfo }
+	| { graphql: GraphqlModuleInfo };
 export interface SerializedJsModuleInfo {
 	/**
 	 * Dynamic imports.
@@ -10696,6 +10697,10 @@ export interface SerializedHtmlModuleInfo {
 	 * CSS class names defined in `<style>` blocks.
 	 */
 	styleClasses: string[];
+}
+export interface GraphqlModuleInfo {
+	operationNames: string[];
+	typeFields: Record<string, string[]>;
 }
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;

@@ -3,6 +3,7 @@
 mod assist;
 mod lint;
 mod registry;
+mod services;
 mod suppression_action;
 
 pub use crate::registry::visit_registry;
@@ -15,11 +16,45 @@ use biome_analyze::{
 use biome_deserialize::TextRange;
 use biome_diagnostics::Error;
 use biome_graphql_syntax::GraphqlLanguage;
+use biome_module_graph::ModuleDb;
+use biome_project_layout::ProjectLayout;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
+use std::rc::Rc;
+use std::sync::Arc;
 use std::sync::LazyLock;
 
 pub(crate) type GraphqlRuleAction = RuleAction<GraphqlLanguage>;
+
+#[derive(Clone, Default)]
+pub struct GraphqlAnalyzerServices {
+    pub module_db: Option<Rc<dyn ModuleDb>>,
+    pub project_layout: Option<Arc<ProjectLayout>>,
+}
+
+impl std::fmt::Debug for GraphqlAnalyzerServices {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GraphqlAnalyzerServices")
+            .field("module_db", &self.module_db.as_ref().map(|_| "..."))
+            .field(
+                "project_layout",
+                &self.project_layout.as_ref().map(|_| "..."),
+            )
+            .finish()
+    }
+}
+
+impl GraphqlAnalyzerServices {
+    pub fn with_module_db(mut self, module_db: Rc<dyn ModuleDb>) -> Self {
+        self.module_db = Some(module_db);
+        self
+    }
+
+    pub fn with_project_layout(mut self, project_layout: Arc<ProjectLayout>) -> Self {
+        self.project_layout = Some(project_layout);
+        self
+    }
+}
 
 pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
     let mut metadata = MetadataRegistry::default();
@@ -34,13 +69,26 @@ pub fn analyze<'a, F, B>(
     root: &LanguageRoot<GraphqlLanguage>,
     filter: AnalysisFilter,
     options: &'a AnalyzerOptions,
+    services: GraphqlAnalyzerServices,
     emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
     F: FnMut(&dyn AnalyzerSignal<GraphqlLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    analyze_with_inspect_matcher(root, filter, |_| {}, options, emit_signal)
+    let module_db = services.module_db.clone();
+    analyze_with_inspect_matcher(
+        root,
+        filter,
+        move |_| {
+            if let Some(db) = module_db.as_ref() {
+                db.unwind_if_revision_cancelled();
+            }
+        },
+        options,
+        services,
+        emit_signal,
+    )
 }
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
@@ -54,6 +102,7 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     filter: AnalysisFilter,
     inspect_matcher: V,
     options: &'a AnalyzerOptions,
+    graphql_services: GraphqlAnalyzerServices,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
@@ -90,7 +139,7 @@ where
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
-    let (registry, services, diagnostics, visitors) = registry.build();
+    let (registry, mut services, diagnostics, visitors) = registry.build();
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
@@ -104,6 +153,13 @@ where
         Box::new(GraphqlSuppressionAction),
         &mut emit_signal,
     );
+
+    if let Some(module_db) = graphql_services.module_db {
+        services.insert_service(module_db);
+    }
+    if let Some(project_layout) = graphql_services.project_layout {
+        services.insert_service(project_layout);
+    }
 
     for ((phase, _), visitor) in visitors {
         analyzer.add_visitor(phase, visitor);
@@ -122,7 +178,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::analyze;
+    use crate::{GraphqlAnalyzerServices, analyze};
     use biome_analyze::{
         ActionFilter, AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter,
     };
@@ -160,6 +216,7 @@ mod tests {
                 ..AnalysisFilter::default()
             },
             &options,
+            GraphqlAnalyzerServices::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     error_ranges.push(diag.location().span.unwrap());
