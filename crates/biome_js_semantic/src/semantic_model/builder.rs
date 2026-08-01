@@ -1,7 +1,7 @@
 use super::*;
 use biome_js_syntax::{
     AnyJsDeclaration, AnyJsRoot, JsExport, JsIdentifierAssignment, JsSyntaxNode, TextRange,
-    TsConditionalType, TsTypeParameterName,
+    TsConditionalType, TsDeclareStatement, TsTypeParameterName,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::SyntaxNodePtr;
@@ -485,6 +485,8 @@ fn find_jsdoc(node: &JsSyntaxNode) -> Option<JsdocComment> {
     node.ancestors().find_map(|ancestor| {
         if let Some(export) = JsExport::cast_ref(&ancestor) {
             JsdocComment::try_from(export.syntax()).ok()
+        } else if let Some(decl) = TsDeclareStatement::cast_ref(&ancestor) {
+            JsdocComment::try_from(decl.syntax()).ok()
         } else if let Some(decl) = AnyJsDeclaration::cast(ancestor) {
             JsdocComment::try_from(decl.syntax()).ok()
         } else {
