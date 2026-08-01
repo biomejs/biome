@@ -1,7 +1,5 @@
 use super::SymbolFromModuleInfo;
-use crate::css_module_info::traverse::{
-    CssClassStep, CssClassTraversal, CssPropertyTraversal, last_property_in_css_context,
-};
+use crate::css_module_info::traverse::{CssClassStep, CssClassTraversal, CssPropertyTraversal};
 use crate::traverse::UpwardTraversal;
 use crate::{CssPropertyDefinition, ImportTreeNode, ModuleDb, ModuleInfo, ModuleInfoKind};
 use biome_css_syntax::{TextRange, TextSize};
@@ -196,12 +194,15 @@ pub fn traverse_import_tree_for_html_classes(
         .collect()
 }
 
-/// Returns the nearest visible `@property` definitions for a CSS module.
+/// Returns the nearest visible `@property` definitions for a CSS or HTML-like module.
 ///
-/// The current stylesheet's local definition takes precedence over definitions
-/// reached through its imports. Every importer is then traversed as an
-/// independent branch. A branch stops at its first visible definition, and only
-/// sibling imports authored before the child edge are visible.
+/// A CSS module's local definition takes precedence over definitions reached
+/// through its imports. An HTML-like module first searches all of its embedded
+/// styles, including component-scoped styles, before its linked stylesheets and
+/// imports. Every importer is then traversed as an independent branch. A branch
+/// stops at its first visible definition, and only sibling imports authored
+/// before the child edge are visible. Component-scoped styles do not escape an
+/// HTML-like importer.
 /// Definitions reached through the same authored rule are deduplicated, while
 /// definitions from separate branches remain separate. Result order is
 /// unspecified.
@@ -211,20 +212,19 @@ pub fn css_property_definitions<'db>(
     property: SymbolFromModuleInfo<'db>,
 ) -> Vec<CssPropertyDefinition> {
     let module = *property.module(db);
-    if !matches!(module.kind(db), ModuleInfoKind::Css(_)) {
-        return Vec::new();
-    }
-
     let path = module.path(db);
     let name = property.name(db);
-    let mut ancestry = FxHashSet::default();
-    if let Some(definition) = last_property_in_css_context(db, path, &name, &mut ancestry) {
+    let traversal = CssPropertyTraversal::new(db, path, &name);
+    let definition = match module.kind(db) {
+        ModuleInfoKind::Css(_) => traversal.last_property_in_css_context(path),
+        ModuleInfoKind::Html(_) => traversal.last_property_in_html_context(path),
+        ModuleInfoKind::Js(_) => return Vec::new(),
+    };
+    if let Some(definition) = definition {
         return vec![definition];
     }
 
-    CssPropertyTraversal::new(db, path, &name)
-        .into_upward_iter()
-        .collect()
+    traversal.into_upward_iter().collect()
 }
 
 /// Returns `true` if the given CSS `class_name` is referenced in any

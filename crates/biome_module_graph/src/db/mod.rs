@@ -3,6 +3,7 @@
 use crate::{CssModuleInfo, HtmlModuleInfo, JsModuleInfo, ModuleInfo, ModuleInfoKind};
 pub use biome_js_type_info::TypeDb;
 use biome_js_type_info::interned_types::ModuleKey;
+use biome_languages::LanguageDb;
 use camino::{Utf8Path, Utf8PathBuf};
 use salsa::plumbing::{AsId, FromId};
 
@@ -35,9 +36,9 @@ pub struct ModuleGraphGeneration {
     pub value: u64,
 }
 
-/// Extends `TypeDb` with module-graph-specific lookups.
+/// Extends `TypeDb` and `LanguageDb` with module-graph-specific lookups.
 #[salsa::db]
-pub trait ModuleDb: TypeDb {
+pub trait ModuleDb: TypeDb + LanguageDb {
     /// Returns the generation used when reading modules by file path.
     ///
     /// A database that can add, remove, or change the module associated with a

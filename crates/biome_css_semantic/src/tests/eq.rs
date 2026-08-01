@@ -229,6 +229,35 @@ fn at_property_inherits_change_is_not_eq() {
 }
 
 #[test]
+fn shadowed_at_property_change_is_not_eq() {
+    assert_ne!(
+        build_model(
+            r#"@property --foo { syntax: "<color>"; inherits: true; initial-value: red; }
+@property --foo { syntax: "<length>"; inherits: true; initial-value: 1px; }"#
+        ),
+        build_model(
+            r#"@property --foo { syntax: "<number>"; inherits: true; initial-value: 1; }
+@property --foo { syntax: "<length>"; inherits: true; initial-value: 1px; }"#
+        ),
+        "shadowed @property rules remain part of semantic equality"
+    );
+}
+
+#[test]
+fn shadowed_at_property_count_is_not_eq() {
+    assert_ne!(
+        build_model(
+            r#"@property --foo { syntax: "<color>"; inherits: true; initial-value: red; }
+@property --foo { syntax: "<length>"; inherits: true; initial-value: 1px; }"#
+        ),
+        build_model(
+            r#"@property --foo { syntax: "<length>"; inherits: true; initial-value: 1px; }"#
+        ),
+        "authored @property rule count remains part of semantic equality"
+    );
+}
+
+#[test]
 fn same_nested_structure_value_change_is_not_eq() {
     assert_ne!(
         build_model(".parent { color: red; .child { font-size: 12px; } }"),

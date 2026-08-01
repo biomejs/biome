@@ -11,11 +11,12 @@ use biome_resolver::ResolveError;
 
 use crate::snap::ModuleGraphSnapshot;
 use biome_configuration::{Configuration, HtmlConfiguration};
-use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css};
-use biome_db::{Db, ParsedSource};
+use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css, parse_css_with_offset};
+use biome_db::{Db, ParsedSnippet, ParsedSource};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem, normalize_path};
 use biome_html_parser::HtmlParserOptions;
+use biome_js_parser::JsParserOptions;
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::AnyJsRoot;
 use biome_js_type_info::{TypeData, TypeResolver};
@@ -191,6 +192,122 @@ fn build_css_property_db(files: &[(&str, &str)]) -> WorkspaceDb {
     db
 }
 
+fn build_html_property_db(
+    path: &str,
+    source: &str,
+    file_source: HtmlFileSource,
+    styles: &[(&str, CssFileSource)],
+    scripts: &[&str],
+    external_css: &[(&str, &str)],
+) -> WorkspaceDb {
+    let fs = MemoryFileSystem::default();
+    fs.insert(path.into(), source);
+    for (path, source) in external_css {
+        fs.insert((*path).into(), *source);
+    }
+
+    let mut db = WorkspaceDb::default();
+    let layout = ProjectLayout::default();
+    let path_info_cache = PathInfoCache::default();
+    let host_path = BiomePath::new(path);
+    let host_parse = biome_html_parser::parse_html(source, HtmlParserOptions::from(&file_source));
+    let host_root = host_parse.tree();
+    let mut snippets = Vec::new();
+    let mut embedded = Vec::new();
+    let mut search_offset = 0;
+
+    for (style, css_source) in styles {
+        let relative_offset = source[search_offset..].find(style).unwrap();
+        let start = search_offset + relative_offset;
+        let end = start + style.len();
+        search_offset = end;
+        let start = TextSize::from(start as u32);
+        let range = TextRange::new(start, TextSize::from(end as u32));
+        let parse = parse_css_with_offset(style, *css_source, start, CssParserOptions::default());
+        embedded.push(HtmlEmbeddedContent::Css(parse.tree(), *css_source, start));
+        let source_index = db.insert_source((*css_source).into());
+        snippets.push(ParsedSnippet::new(
+            &db,
+            parse.into(),
+            range,
+            range,
+            start,
+            source_index,
+        ));
+    }
+
+    for script in scripts {
+        let start = source.find(script).unwrap();
+        let end = start + script.len();
+        let start = TextSize::from(start as u32);
+        let range = TextRange::new(start, TextSize::from(end as u32));
+        let parse = biome_js_parser::parse(
+            script,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        embedded.push(HtmlEmbeddedContent::Js(parse.tree()));
+        let source_index = db.insert_source(JsFileSource::js_module().into());
+        snippets.push(ParsedSnippet::new(
+            &db,
+            parse.into(),
+            range,
+            range,
+            start,
+            source_index,
+        ));
+    }
+    snippets.sort_by_key(|snippet| snippet.content_offset(&db));
+
+    let host_source_index = db.insert_source(file_source.into());
+    let parsed = ParsedSource::new(
+        &db,
+        host_path.as_path().to_path_buf(),
+        host_parse.into(),
+        host_source_index,
+        snippets,
+    );
+    db.insert_file(host_path.as_path(), parsed);
+    let (module_info, _, _) = resolve_html_module(
+        host_root,
+        &embedded,
+        &host_path,
+        &fs,
+        &layout,
+        &path_info_cache,
+    );
+    let module = ModuleInfo::new(
+        &db,
+        host_path.as_path().to_path_buf(),
+        ModuleInfoKind::Html(module_info),
+    );
+    db.insert_module(host_path.as_path().to_path_buf(), module);
+
+    for (path, source) in external_css {
+        let path = BiomePath::new(*path);
+        let parse = parse_css(source, CssFileSource::css(), CssParserOptions::default());
+        let root = parse.tree();
+        let source_index = db.insert_source(CssFileSource::css().into());
+        let parsed = ParsedSource::new(
+            &db,
+            path.as_path().to_path_buf(),
+            parse.into(),
+            source_index,
+            Vec::new(),
+        );
+        db.insert_file(path.as_path(), parsed);
+        let (module_info, _, _) = resolve_css_module(root, &path, &fs, &layout, &path_info_cache);
+        let module = ModuleInfo::new(
+            &db,
+            path.as_path().to_path_buf(),
+            ModuleInfoKind::Css(module_info),
+        );
+        db.insert_module(path.as_path().to_path_buf(), module);
+    }
+
+    db
+}
+
 #[test]
 fn css_property_query_uses_last_local_definition() {
     let source = r#"
@@ -308,6 +425,14 @@ fn css_property_query_continues_through_empty_parents() {
     assert_eq!(definitions[0].module_path, Utf8Path::new("/app.css"));
 }
 
+// This tests make sure that we resolve the same property. Given
+//                    /left.css
+//                   /         \
+// /leaf.css <-------           /root.css
+//                   \         /  defines --value
+//                    \right.css
+//
+// The definition defined in root.css should be the same and one.
 #[test]
 fn css_property_query_deduplicates_diamonds_and_stops_cycles() {
     let db = build_css_property_db(&[
@@ -364,8 +489,6 @@ fn css_property_query_reads_the_current_semantic_model() {
 
 #[test]
 fn css_property_query_skips_non_css_sibling_imports() {
-    use biome_js_parser::JsParserOptions;
-
     let mut db = build_css_property_db(&[("/leaf.css", ".leaf { color: var(--value); }")]);
     let fs = MemoryFileSystem::default();
     fs.insert("/leaf.css".into(), b".leaf { color: var(--value); }");
@@ -399,6 +522,285 @@ fn css_property_query_skips_non_css_sibling_imports() {
     let module = db.module_for_path(Utf8Path::new("/leaf.css")).unwrap();
     let property = SymbolFromModuleInfo::new(&db, "--value", module);
     assert!(css_property_definitions(&db, property).is_empty());
+}
+
+#[test]
+fn css_property_query_reads_html_like_embedded_styles() {
+    let style = r#"@property --value { syntax: "<color>"; inherits: true; initial-value: red; }"#;
+    let cases = [
+        ("/index.html", HtmlFileSource::html(), html_css_source()),
+        (
+            "/Component.vue",
+            HtmlFileSource::vue(),
+            vue_scoped_css_source(),
+        ),
+        (
+            "/Component.svelte",
+            HtmlFileSource::svelte(),
+            svelte_local_css_source(),
+        ),
+        (
+            "/Component.astro",
+            HtmlFileSource::astro(),
+            astro_local_css_source(),
+        ),
+    ];
+
+    for (path, file_source, css_source) in cases {
+        let source = format!("<style>{style}</style>");
+        let db =
+            build_html_property_db(path, &source, file_source, &[(style, css_source)], &[], &[]);
+        let module = db.module_for_path(Utf8Path::new(path)).unwrap();
+        let property = SymbolFromModuleInfo::new(&db, "--value", module);
+
+        let definitions = css_property_definitions(&db, property);
+
+        assert_eq!(definitions.len(), 1, "{path}");
+        assert_eq!(definitions[0].module_path, Utf8Path::new(path), "{path}");
+        assert!(
+            definitions[0].range.start()
+                >= TextSize::from(source.find("@property").unwrap() as u32),
+            "{path}"
+        );
+        assert!(
+            definitions[0].range.end() <= TextSize::from(source.find("</style>").unwrap() as u32),
+            "{path}"
+        );
+    }
+}
+
+#[test]
+fn css_property_query_tracks_html_style_offsets() {
+    let style = r#"@property --value { syntax: "<color>"; inherits: true; initial-value: red; }"#;
+    let source = format!("<style>{style}</style>");
+    let mut db = build_html_property_db(
+        "/index.html",
+        &source,
+        HtmlFileSource::html(),
+        &[(style, html_css_source())],
+        &[],
+        &[],
+    );
+    let original_range = {
+        let module = db.module_for_path(Utf8Path::new("/index.html")).unwrap();
+        let property = SymbolFromModuleInfo::new(&db, "--value", module);
+        css_property_definitions(&db, property)[0].range
+    };
+
+    let parsed = db
+        .parsed_source_for_path(Utf8Path::new("/index.html"))
+        .unwrap();
+    let snippet = parsed.snippets(&db)[0];
+    let next_offset = snippet.content_offset(&db) + TextSize::from(1);
+    let replacement = parse_css_with_offset(
+        style,
+        html_css_source(),
+        next_offset,
+        CssParserOptions::default(),
+    );
+    salsa::Setter::to(snippet.set_parsed(&mut db), replacement.into());
+    salsa::Setter::to(snippet.set_content_offset(&mut db), next_offset);
+
+    let module = db.module_for_path(Utf8Path::new("/index.html")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", module);
+    let definitions = css_property_definitions(&db, property);
+    assert_eq!(definitions[0].range, original_range + TextSize::from(1));
+}
+
+#[test]
+fn css_property_query_ignores_html_script_snippets() {
+    let style = r#"@property --value { syntax: "<color>"; inherits: true; initial-value: red; }"#;
+    let source = format!("<style>{style}</style><script>const value = 1;</script>");
+    let mut db = build_html_property_db(
+        "/index.html",
+        &source,
+        HtmlFileSource::html(),
+        &[(style, html_css_source())],
+        &[],
+        &[],
+    );
+    {
+        let module = db.module_for_path(Utf8Path::new("/index.html")).unwrap();
+        let property = SymbolFromModuleInfo::new(&db, "--value", module);
+        assert_eq!(css_property_definitions(&db, property).len(), 1);
+    }
+    let parsed = db
+        .parsed_source_for_path(Utf8Path::new("/index.html"))
+        .unwrap();
+    let mut snippets = parsed.snippets(&db).clone();
+    let script = biome_js_parser::parse(
+        "const value = 1;",
+        JsFileSource::js_module(),
+        JsParserOptions::default(),
+    );
+    let script_source = db.insert_source(JsFileSource::js_module().into());
+    snippets.push(ParsedSnippet::new(
+        &db,
+        script.into(),
+        TextRange::default(),
+        TextRange::default(),
+        TextSize::default(),
+        script_source,
+    ));
+    salsa::Setter::to(parsed.set_snippets(&mut db), snippets);
+
+    let module = db.module_for_path(Utf8Path::new("/index.html")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", module);
+    assert_eq!(css_property_definitions(&db, property).len(), 1);
+}
+
+#[test]
+fn css_property_query_tracks_html_style_parse_changes() {
+    let style = r#"@property --value { syntax: "<color>"; inherits: true; initial-value: red; }"#;
+    let source = format!("<style>{style}</style>");
+    let mut db = build_html_property_db(
+        "/index.html",
+        &source,
+        HtmlFileSource::html(),
+        &[(style, html_css_source())],
+        &[],
+        &[],
+    );
+    {
+        let module = db.module_for_path(Utf8Path::new("/index.html")).unwrap();
+        let property = SymbolFromModuleInfo::new(&db, "--value", module);
+        assert_eq!(css_property_definitions(&db, property).len(), 1);
+    }
+
+    let parsed = db
+        .parsed_source_for_path(Utf8Path::new("/index.html"))
+        .unwrap();
+    let snippet = parsed.snippets(&db)[0];
+    let replacement = parse_css_with_offset(
+        ".value { color: red; }",
+        html_css_source(),
+        snippet.content_offset(&db),
+        CssParserOptions::default(),
+    );
+    salsa::Setter::to(snippet.set_parsed(&mut db), replacement.into());
+
+    let module = db.module_for_path(Utf8Path::new("/index.html")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", module);
+    assert!(css_property_definitions(&db, property).is_empty());
+}
+
+#[test]
+fn css_property_query_uses_last_html_style_definition() {
+    let first = r#"@property --value { syntax: "<color>"; inherits: true; initial-value: red; }"#;
+    let second = r#"@property --value { syntax: "<length>"; inherits: true; initial-value: 0px; }"#;
+    let source = format!("<style>{first}</style><style>{second}</style>");
+    let db = build_html_property_db(
+        "/index.html",
+        &source,
+        HtmlFileSource::html(),
+        &[(first, html_css_source()), (second, html_css_source())],
+        &[],
+        &[],
+    );
+    let module = db.module_for_path(Utf8Path::new("/index.html")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", module);
+
+    let definitions = css_property_definitions(&db, property);
+
+    assert_eq!(definitions.len(), 1);
+    assert!(
+        definitions[0].range.start() >= TextSize::from(source.rfind("@property").unwrap() as u32)
+    );
+}
+
+#[test]
+fn css_property_query_only_exposes_global_html_importer_styles() {
+    let property_style =
+        r#"@property --value { syntax: "<color>"; inherits: true; initial-value: red; }"#;
+    let leaf = ".leaf { color: var(--value); }";
+    let source =
+        format!("<link rel=\"stylesheet\" href=\"./leaf.css\"><style>{property_style}</style>");
+
+    let mut db = build_html_property_db(
+        "/Global.vue",
+        &source,
+        HtmlFileSource::vue(),
+        &[(property_style, vue_global_css_source())],
+        &[],
+        &[("/leaf.css", leaf)],
+    );
+    let module = db.module_for_path(Utf8Path::new("/leaf.css")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", module);
+    let definitions = css_property_definitions(&db, property);
+    assert_eq!(definitions.len(), 1);
+    assert_eq!(definitions[0].module_path, Utf8Path::new("/Global.vue"));
+
+    let parsed = db
+        .parsed_source_for_path(Utf8Path::new("/Global.vue"))
+        .unwrap();
+    let snippet = parsed.snippets(&db)[0];
+    let local_source = db.insert_source(vue_scoped_css_source().into());
+    salsa::Setter::to(snippet.set_document_source_index(&mut db), local_source);
+    let module = db.module_for_path(Utf8Path::new("/leaf.css")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", module);
+    assert!(css_property_definitions(&db, property).is_empty());
+
+    let db = build_html_property_db(
+        "/Local.vue",
+        &source,
+        HtmlFileSource::vue(),
+        &[(property_style, vue_scoped_css_source())],
+        &[],
+        &[("/leaf.css", leaf)],
+    );
+    let module = db.module_for_path(Utf8Path::new("/leaf.css")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", module);
+    assert!(css_property_definitions(&db, property).is_empty());
+}
+
+#[test]
+fn css_property_query_follows_stylesheets_linked_from_html() {
+    let property_style =
+        r#"@property --value { syntax: "<color>"; inherits: true; initial-value: red; }"#;
+    let source = "<link rel=\"stylesheet\" href=\"./theme.css\">";
+    let db = build_html_property_db(
+        "/index.html",
+        source,
+        HtmlFileSource::html(),
+        &[],
+        &[],
+        &[("/theme.css", property_style)],
+    );
+    let module = db.module_for_path(Utf8Path::new("/index.html")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", module);
+
+    let definitions = css_property_definitions(&db, property);
+
+    assert_eq!(definitions.len(), 1);
+    assert_eq!(definitions[0].module_path, Utf8Path::new("/theme.css"));
+}
+
+#[test]
+fn css_property_query_follows_stylesheets_imported_from_html_scripts() {
+    let property_style =
+        r#"@property --value { syntax: "<color>"; inherits: true; initial-value: red; }"#;
+    for script in ["import './theme.css';", "import('./theme.css');"] {
+        let source = format!("<script>{script}</script>");
+        let db = build_html_property_db(
+            "/index.html",
+            &source,
+            HtmlFileSource::html(),
+            &[],
+            &[script],
+            &[("/theme.css", property_style)],
+        );
+        let module = db.module_for_path(Utf8Path::new("/index.html")).unwrap();
+        let property = SymbolFromModuleInfo::new(&db, "--value", module);
+
+        let definitions = css_property_definitions(&db, property);
+
+        assert_eq!(definitions.len(), 1, "{script}");
+        assert_eq!(
+            definitions[0].module_path,
+            Utf8Path::new("/theme.css"),
+            "{script}"
+        );
+    }
 }
 
 #[test]
