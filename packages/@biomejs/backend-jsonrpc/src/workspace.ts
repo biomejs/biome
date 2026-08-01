@@ -2463,7 +2463,7 @@ See https://biomejs.dev/linter/rules/no-negation-in-equality-check
 	noNegationInEqualityCheck?: NoNegationInEqualityCheckConfiguration;
 	/**
 	* Disallow disabling zoom with user-scalable=no in the \<meta name="viewport"> element.
-See https://biomejs.dev/linter/rules/no-non-scalable-viewport
+See https://biomejs.dev/linter/rules/no-non-scalable-viewport 
 	 */
 	noNonScalableViewport?: NoNonScalableViewportConfiguration;
 	/**
