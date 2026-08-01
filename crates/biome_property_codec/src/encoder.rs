@@ -3,60 +3,220 @@ use crate::data::{
     PropertySyntaxErrorKind, PropertySyntaxMultiplier, PropertySyntaxParseDiagnostic,
     PropertySyntaxResult, PropertySyntaxType, RESERVED_CUSTOM_IDENTIFIERS,
 };
-use biome_css_syntax::{is_css_newline_byte, is_css_whitespace_byte};
-use biome_rowan::{TextRange, TextSize};
+use biome_css_syntax::{CssString, is_css_newline_byte, is_css_whitespace_byte};
+use biome_rowan::{AstNode, TextRange, TextSize};
 use biome_unicode_table::{
     Dispatch::{DIG, IDT, MIN, ZER},
-    is_css_non_ascii, lookup_byte,
+    lookup_byte,
 };
 
-/// Parses the decoded value of an `@property` `syntax` descriptor.
-///
-/// `range` must be the absolute source range occupied by `value`. Returned
-/// diagnostics and syntax components use absolute source ranges within it.
+/// Decodes and parses the value of a CSS string used as an `@property`
+/// `syntax` descriptor.
 ///
 /// The grammar follows the CSS Properties and Values API
 /// [syntax-string parsing algorithms](https://drafts.css-houdini.org/css-properties-values-api-1/#parsing-syntax).
-pub fn encode(value: &str, range: TextRange) -> PropertySyntaxResult {
-    match Encoder::new(value, range).encode() {
+pub fn encode(string: &CssString) -> PropertySyntaxResult {
+    let range = string.range();
+    let Ok(token) = string.value_token() else {
+        return invalid_css_string(range);
+    };
+    let Ok(value) = string.inner_string_text() else {
+        return invalid_css_string(range);
+    };
+    let source_start = token.text_trimmed_range().start() + TextSize::from(1);
+
+    match Encoder::new(DecodedCursor::new_css_string(value.text(), source_start)).encode() {
         Ok(value) => PropertySyntaxResult::Value(value),
         Err(diagnostic) => PropertySyntaxResult::Error(PropertySyntaxDiagnostic::Parse(diagnostic)),
     }
 }
 
-struct Encoder<'source> {
+#[cfg(test)]
+pub(crate) fn encode_decoded(value: &str, range: TextRange) -> PropertySyntaxResult {
+    match Encoder::new(DecodedCursor::new(value, range.start())).encode() {
+        Ok(value) => PropertySyntaxResult::Value(value),
+        Err(diagnostic) => PropertySyntaxResult::Error(PropertySyntaxDiagnostic::Parse(diagnostic)),
+    }
+}
+
+fn invalid_css_string(range: TextRange) -> PropertySyntaxResult {
+    PropertySyntaxResult::Error(PropertySyntaxDiagnostic::Parse(
+        PropertySyntaxParseDiagnostic::new(PropertySyntaxErrorKind::ExpectedString, range),
+    ))
+}
+
+fn decode_css_code_point(value: u32) -> char {
+    if value == 0 || value > 0x0010_ffff || (0xd800..=0xdfff).contains(&value) {
+        '\u{fffd}'
+    } else {
+        // SAFETY: The invalid scalar value ranges are rejected above.
+        char::from_u32(value).expect("the escape should decode to a character")
+    }
+}
+
+#[derive(Clone, Copy)]
+struct DecodedCharacter {
+    value: char,
+    source_start: usize,
+    source_end: usize,
+}
+
+#[derive(Clone)]
+struct DecodedCursor<'source> {
     source: &'source str,
-    bytes: &'source [u8],
+    source_start: TextSize,
     position: usize,
-    source_range: TextRange,
+    decode_css_escapes: bool,
+}
+
+impl<'source> DecodedCursor<'source> {
+    #[cfg(test)]
+    fn new(source: &'source str, source_start: TextSize) -> Self {
+        Self {
+            source,
+            source_start,
+            position: 0,
+            decode_css_escapes: false,
+        }
+    }
+
+    fn new_css_string(source: &'source str, source_start: TextSize) -> Self {
+        Self {
+            source,
+            source_start,
+            position: 0,
+            decode_css_escapes: true,
+        }
+    }
+
+    fn source_range(&self, start: usize, end: usize) -> TextRange {
+        TextRange::new(
+            self.source_start + TextSize::from(start as u32),
+            self.source_start + TextSize::from(end as u32),
+        )
+    }
+}
+
+impl Iterator for DecodedCursor<'_> {
+    type Item = DecodedCharacter;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            let source_start = self.position;
+            let character = self.source.get(self.position..)?.chars().next()?;
+            self.position += character.len_utf8();
+
+            if !self.decode_css_escapes || character != '\\' {
+                return Some(DecodedCharacter {
+                    value: if self.decode_css_escapes && character == '\0' {
+                        '\u{fffd}'
+                    } else {
+                        character
+                    },
+                    source_start,
+                    source_end: self.position,
+                });
+            }
+
+            let Some(escaped) = self.source.get(self.position..)?.chars().next() else {
+                return Some(DecodedCharacter {
+                    value: '\u{fffd}',
+                    source_start,
+                    source_end: self.position,
+                });
+            };
+            if is_css_newline(escaped) {
+                self.position += escaped.len_utf8();
+                if escaped == '\r'
+                    && self
+                        .source
+                        .get(self.position..)
+                        .is_some_and(|rest| rest.starts_with('\n'))
+                {
+                    self.position += 1;
+                }
+                continue;
+            }
+
+            let value = if escaped.is_ascii_hexdigit() {
+                let mut code_point = 0_u32;
+                let mut digits = 0;
+                while digits < 6 {
+                    let Some(character) = self.source.get(self.position..)?.chars().next() else {
+                        break;
+                    };
+                    let Some(digit) = character.to_digit(16) else {
+                        break;
+                    };
+                    code_point = code_point * 16 + digit;
+                    self.position += character.len_utf8();
+                    digits += 1;
+                }
+                if let Some(whitespace) = self.source.get(self.position..)?.chars().next()
+                    && is_css_whitespace(whitespace)
+                {
+                    self.position += whitespace.len_utf8();
+                    if whitespace == '\r'
+                        && self
+                            .source
+                            .get(self.position..)
+                            .is_some_and(|rest| rest.starts_with('\n'))
+                    {
+                        self.position += 1;
+                    }
+                }
+                decode_css_code_point(code_point)
+            } else {
+                self.position += escaped.len_utf8();
+                escaped
+            };
+
+            return Some(DecodedCharacter {
+                value,
+                source_start,
+                source_end: self.position,
+            });
+        }
+    }
+}
+
+struct Encoder<'source> {
+    cursor: DecodedCursor<'source>,
+    current: Option<DecodedCharacter>,
+    source_end: usize,
 }
 
 impl<'source> Encoder<'source> {
-    fn new(source: &'source str, range: TextRange) -> Self {
+    fn new(mut cursor: DecodedCursor<'source>) -> Self {
+        let source_end = cursor.source.len();
+        let current = cursor.next();
         Self {
-            source,
-            bytes: source.as_bytes(),
-            position: 0,
-            source_range: range,
+            cursor,
+            current,
+            source_end,
         }
     }
 
     fn encode(mut self) -> Result<PropertySyntax, PropertySyntaxParseDiagnostic> {
         self.consume_whitespace();
-        let content_start = self.position;
+        let content_start = self.position();
         let content_end = self.trimmed_end();
 
         if content_start == content_end {
-            return Err(self.error(PropertySyntaxErrorKind::Empty, 0, self.bytes.len()));
+            return Err(self.error(PropertySyntaxErrorKind::Empty, 0, self.source_end));
         }
 
-        if self.byte_range(content_start, content_end) == [b'*'] {
+        if self.current_character() == '*'
+            && self
+                .current
+                .is_some_and(|current| current.source_end == content_end)
+        {
             return Ok(PropertySyntax::Universal {
                 range: self.range(content_start, content_end),
             });
         }
 
-        if self.byte_at(content_start) == b'*' {
+        if self.current_character() == '*' {
             return Err(self.error(
                 PropertySyntaxErrorKind::InvalidUniversalSyntax,
                 content_start,
@@ -67,31 +227,32 @@ impl<'source> Encoder<'source> {
         let mut components = Vec::new();
         loop {
             components.push(self.consume_component(content_start, content_end)?);
-            let component_end = self.position;
+            let component_end = self.position();
             self.consume_whitespace_until(content_end);
-            if self.position == content_end {
+            if self.at_end(content_end) {
                 break;
             }
-            let current = self.current_byte();
-            if current != b'|' {
-                let kind = if self.position > component_end && matches!(current, b'+' | b'#') {
+            let current = self.current_character();
+            if current != '|' {
+                let position = self.position();
+                let kind = if position > component_end && matches!(current, '+' | '#') {
                     PropertySyntaxErrorKind::UnexpectedWhitespace
                 } else {
                     PropertySyntaxErrorKind::ExpectedPipe
                 };
                 let (start, end) = if kind == PropertySyntaxErrorKind::UnexpectedWhitespace {
-                    (component_end, self.position)
+                    (component_end, position)
                 } else {
-                    (self.position, content_end)
+                    (position, content_end)
                 };
                 return Err(self.error(kind, start, end));
             }
-            self.position += 1;
-            if self.position == content_end {
+            let pipe = self.bump();
+            if self.at_end(content_end) {
                 return Err(self.error(
                     PropertySyntaxErrorKind::ExpectedComponent,
-                    self.position - 1,
-                    self.position,
+                    pipe.source_start,
+                    pipe.source_end,
                 ));
             }
         }
@@ -105,14 +266,15 @@ impl<'source> Encoder<'source> {
         content_end: usize,
     ) -> Result<PropertySyntaxComponent, PropertySyntaxParseDiagnostic> {
         self.consume_whitespace_until(content_end);
-        if self.position == content_end {
+        if self.at_end(content_end) {
+            let position = self.position();
             return Err(self.error(
                 PropertySyntaxErrorKind::ExpectedComponent,
-                self.position,
-                self.position,
+                position,
+                position,
             ));
         }
-        if self.current_byte() == b'*' {
+        if self.current_character() == '*' {
             return Err(self.error(
                 PropertySyntaxErrorKind::InvalidUniversalSyntax,
                 content_start,
@@ -120,17 +282,18 @@ impl<'source> Encoder<'source> {
             ));
         }
 
-        let start = self.position;
-        let name = if self.current_byte() == b'<' {
+        let start = self.position();
+        let name = if self.current_character() == '<' {
             PropertySyntaxComponentName::Type(self.consume_type(content_end)?)
         } else if self.would_start_identifier(content_end) {
             let identifier = self.consume_identifier(content_end)?;
             PropertySyntaxComponentName::CustomIdentifier(identifier.into_boxed_str())
         } else {
+            let current = self.current();
             return Err(self.error(
                 PropertySyntaxErrorKind::ExpectedComponent,
-                self.position,
-                self.position + self.current_len(),
+                current.source_start,
+                current.source_end,
             ));
         };
 
@@ -139,25 +302,26 @@ impl<'source> Encoder<'source> {
             PropertySyntaxComponentName::Type(PropertySyntaxType::TransformList)
         );
         if pre_multiplied
-            && self.position < content_end
-            && matches!(self.current_byte(), b'+' | b'#')
+            && !self.at_end(content_end)
+            && matches!(self.current_character(), '+' | '#')
         {
+            let current = self.current();
             return Err(self.error(
                 PropertySyntaxErrorKind::MultiplierAfterTransformList,
-                self.position,
-                self.position + 1,
+                current.source_start,
+                current.source_end,
             ));
         }
-        let multiplier = if pre_multiplied || self.position == content_end {
+        let multiplier = if pre_multiplied || self.at_end(content_end) {
             PropertySyntaxMultiplier::None
         } else {
-            match self.current_byte() {
-                b'+' => {
-                    self.position += 1;
+            match self.current_character() {
+                '+' => {
+                    self.bump();
                     PropertySyntaxMultiplier::SpaceSeparated
                 }
-                b'#' => {
-                    self.position += 1;
+                '#' => {
+                    self.bump();
                     PropertySyntaxMultiplier::CommaSeparated
                 }
                 _ => PropertySyntaxMultiplier::None,
@@ -167,7 +331,7 @@ impl<'source> Encoder<'source> {
         Ok(PropertySyntaxComponent {
             name,
             multiplier,
-            range: self.range(start, self.position),
+            range: self.range(start, self.position()),
         })
     }
 
@@ -175,34 +339,48 @@ impl<'source> Encoder<'source> {
         &mut self,
         content_end: usize,
     ) -> Result<PropertySyntaxType, PropertySyntaxParseDiagnostic> {
-        let start = self.position;
-        self.position += 1;
-        let name_start = self.position;
+        let start = self.position();
+        self.bump();
+        let mut candidates = [true; PropertySyntaxType::ALL.len()];
+        let mut name_len = 0;
 
-        while self.position < content_end {
-            let byte = self.current_byte();
-            if byte == b'>' {
-                let Some(ty) =
-                    PropertySyntaxType::from_name(self.byte_range(name_start, self.position))
+        while !self.at_end(content_end) {
+            let current = self.current();
+            let character = current.value;
+            if character == '>' {
+                let Some(ty) = candidates
+                    .iter()
+                    .copied()
+                    .zip(PropertySyntaxType::ALL)
+                    .find_map(|(candidate, syntax_type)| {
+                        (candidate && syntax_type.name().len() == name_len).then_some(syntax_type)
+                    })
                 else {
                     return Err(self.error(
                         PropertySyntaxErrorKind::ExpectedTypeName,
                         start,
-                        self.position + 1,
+                        current.source_end,
                     ));
                 };
-                self.position += 1;
+                self.bump();
                 return Ok(ty);
             }
-            if !matches!(lookup_byte(byte), IDT | MIN | DIG | ZER) {
-                let kind = if is_css_whitespace_byte(byte) {
+            if !character.is_ascii()
+                || !matches!(lookup_byte(character as u8), IDT | MIN | DIG | ZER)
+            {
+                let kind = if is_css_whitespace(character) {
                     PropertySyntaxErrorKind::UnexpectedWhitespace
                 } else {
                     PropertySyntaxErrorKind::ExpectedTypeName
                 };
-                return Err(self.error(kind, self.position, self.position + self.current_len()));
+                return Err(self.error(kind, current.source_start, current.source_end));
             }
-            self.position += 1;
+            for (candidate, syntax_type) in candidates.iter_mut().zip(PropertySyntaxType::ALL) {
+                *candidate &=
+                    syntax_type.name().as_bytes().get(name_len) == Some(&(character as u8));
+            }
+            name_len += 1;
+            self.bump();
         }
 
         Err(self.error(
@@ -218,25 +396,22 @@ impl<'source> Encoder<'source> {
         &mut self,
         content_end: usize,
     ) -> Result<String, PropertySyntaxParseDiagnostic> {
-        let start = self.position;
+        let start = self.position();
         let mut identifier = String::new();
-        while self.position < content_end {
-            let byte = self.current_byte();
-            if matches!(lookup_byte(byte), IDT | MIN | DIG | ZER) {
-                identifier.push(byte as char);
-                self.position += 1;
-            } else if byte == 0 {
-                identifier.push('\u{fffd}');
-                self.position += 1;
-            } else if byte == b'\\' && self.starts_valid_escape(content_end) {
-                identifier.push(self.consume_escaped_code_point(content_end));
-            } else if byte >= 0x80 {
-                let character = self.char_at(self.position);
-                if !is_css_non_ascii(character) {
-                    break;
-                }
+        while !self.at_end(content_end) {
+            let character = self.current_character();
+            if character.is_ascii() && matches!(lookup_byte(character as u8), IDT | MIN | DIG | ZER)
+            {
                 identifier.push(character);
-                self.position += character.len_utf8();
+                self.bump();
+            } else if character == '\0' {
+                identifier.push('\u{fffd}');
+                self.bump();
+            } else if character == '\\' && self.starts_valid_escape(content_end) {
+                identifier.push(self.consume_escaped_code_point(content_end));
+            } else if is_css_identifier_non_ascii(character) {
+                identifier.push(character);
+                self.bump();
             } else {
                 break;
             }
@@ -246,7 +421,7 @@ impl<'source> Encoder<'source> {
             return Err(self.error(
                 PropertySyntaxErrorKind::InvalidCustomIdentifier,
                 start,
-                self.position,
+                self.position(),
             ));
         }
 
@@ -256,63 +431,73 @@ impl<'source> Encoder<'source> {
     /// Implements CSS Syntax's
     /// [ident sequence lookahead](https://drafts.csswg.org/css-syntax-3/#would-start-an-identifier).
     fn would_start_identifier(&self, content_end: usize) -> bool {
-        let first = self.current_byte();
-        if first == 0 {
+        let first = self.current_character();
+        if first == '\0' {
             return true;
         }
-        if lookup_byte(first) == IDT || first >= 0x80 {
-            return first < 0x80 || is_css_non_ascii(self.char_at(self.position));
+        if (first.is_ascii() && lookup_byte(first as u8) == IDT)
+            || is_css_identifier_non_ascii(first)
+        {
+            return true;
         }
-        if first == b'\\' {
+        if first == '\\' {
             return self.starts_valid_escape(content_end);
         }
-        if first != b'-' || self.position + 1 >= content_end {
+        if first != '-' {
             return false;
         }
 
-        let second = self.byte_at(self.position + 1);
-        second == b'-'
-            || second == 0
-            || lookup_byte(second) == IDT
-            || (second >= 0x80 && is_css_non_ascii(self.char_at(self.position + 1)))
-            || (second == b'\\'
-                && self.position + 2 < content_end
-                && !is_css_newline_byte(self.byte_at(self.position + 2)))
+        let Some(second) = self
+            .nth(1)
+            .filter(|second| second.source_start < content_end)
+        else {
+            return false;
+        };
+        second.value == '-'
+            || second.value == '\0'
+            || (second.value.is_ascii() && lookup_byte(second.value as u8) == IDT)
+            || is_css_identifier_non_ascii(second.value)
+            || (second.value == '\\'
+                && self.nth(2).is_some_and(|third| {
+                    third.source_start < content_end && !is_css_newline(third.value)
+                }))
     }
 
     fn starts_valid_escape(&self, content_end: usize) -> bool {
-        self.position + 1 < content_end && !is_css_newline_byte(self.byte_at(self.position + 1))
+        self.nth(1)
+            .is_some_and(|next| next.source_start < content_end && !is_css_newline(next.value))
     }
 
     /// Implements CSS Syntax's
     /// [escaped code point algorithm](https://drafts.csswg.org/css-syntax-3/#consume-escaped-code-point).
     fn consume_escaped_code_point(&mut self, content_end: usize) -> char {
-        self.position += 1;
-        let first = self.current_byte();
+        self.bump();
+        let first = self.current_character();
         if !first.is_ascii_hexdigit() {
-            let character = self.char_at(self.position);
-            self.position += character.len_utf8();
+            let character = self.bump().value;
             return char::from_u32(preprocess_code_point(character as u32)).unwrap_or('\u{fffd}');
         }
 
         let mut value = 0_u32;
         let mut digits = 0;
-        while self.position < content_end && digits < 6 {
-            let Some(digit) = char::from(self.current_byte()).to_digit(16) else {
+        while !self.at_end(content_end) && digits < 6 {
+            let Some(digit) = self.current_character().to_digit(16) else {
                 break;
             };
             value = value * 16 + digit;
-            self.position += 1;
+            self.bump();
             digits += 1;
         }
-        if self.position < content_end && is_css_whitespace_byte(self.current_byte()) {
-            if self.current_byte() == b'\r'
-                && self.position + 1 < content_end
-                && self.byte_at(self.position + 1) == b'\n'
+        if !self.at_end(content_end) && is_css_whitespace(self.current_character()) {
+            if self.current_character() == '\r'
+                && self
+                    .nth(1)
+                    .is_some_and(|next| next.source_start < content_end && next.value == '\n')
             {
-                self.position += 2;
+                self.bump();
+                self.bump();
             } else {
-                self.position += 1;
+                self.bump();
             }
         }
 
@@ -320,75 +505,66 @@ impl<'source> Encoder<'source> {
     }
 
     fn consume_whitespace(&mut self) {
-        while self.position < self.bytes.len() && is_css_whitespace_byte(self.current_byte()) {
-            self.position += 1;
+        while self.current.is_some() && is_css_whitespace(self.current_character()) {
+            self.bump();
         }
     }
 
     fn consume_whitespace_until(&mut self, end: usize) {
-        while self.position < end && is_css_whitespace_byte(self.current_byte()) {
-            self.position += 1;
+        while !self.at_end(end) && is_css_whitespace(self.current_character()) {
+            self.bump();
         }
     }
 
     fn trimmed_end(&self) -> usize {
-        let mut end = self.bytes.len();
-        while end > self.position && is_css_whitespace_byte(self.byte_at(end - 1)) {
-            end -= 1;
+        let mut current = self.current;
+        let mut cursor = self.cursor.clone();
+        let mut end = self.position();
+        while let Some(character) = current {
+            if !is_css_whitespace(character.value) {
+                end = character.source_end;
+            }
+            current = cursor.next();
         }
         end
     }
 
-    fn current_len(&self) -> usize {
-        if self.position == self.bytes.len() {
-            0
-        } else if self.current_byte() < 0x80 {
-            1
-        } else {
-            self.char_at(self.position).len_utf8()
+    fn at_end(&self, end: usize) -> bool {
+        self.current
+            .is_none_or(|current| current.source_start >= end)
+    }
+
+    fn position(&self) -> usize {
+        self.current
+            .map_or(self.source_end, |current| current.source_start)
+    }
+
+    fn current(&self) -> DecodedCharacter {
+        debug_assert!(self.current.is_some());
+        // SAFETY: Parser operations call this only after checking the content
+        // boundary or otherwise establishing that the cursor is not at EOF.
+        self.current.expect("the cursor should not be at EOF")
+    }
+
+    fn current_character(&self) -> char {
+        self.current().value
+    }
+
+    fn bump(&mut self) -> DecodedCharacter {
+        let current = self.current();
+        self.current = self.cursor.next();
+        current
+    }
+
+    fn nth(&self, index: usize) -> Option<DecodedCharacter> {
+        if index == 0 {
+            return self.current;
         }
-    }
-
-    /// Returns the byte at the current non-EOF parser position.
-    fn current_byte(&self) -> u8 {
-        self.byte_at(self.position)
-    }
-
-    /// Returns the byte at a non-EOF parser position.
-    fn byte_at(&self, position: usize) -> u8 {
-        debug_assert!(position < self.bytes.len());
-        // SAFETY: Callers check the applicable input boundary before passing
-        // a byte position.
-        self.bytes[position]
-    }
-
-    /// Returns the bytes in a parser range.
-    fn byte_range(&self, start: usize, end: usize) -> &[u8] {
-        debug_assert!(start <= end);
-        debug_assert!(end <= self.bytes.len());
-        // SAFETY: Parser ranges are ordered byte offsets bounded by the input.
-        &self.bytes[start..end]
-    }
-
-    /// Returns the character at a non-EOF UTF-8 byte boundary.
-    fn char_at(&self, position: usize) -> char {
-        debug_assert!(position < self.source.len());
-        debug_assert!(self.source.is_char_boundary(position));
-        // SAFETY: Callers provide non-EOF positions reached by advancing over
-        // ASCII bytes or complete UTF-8 characters.
-        self.source[position..]
-            .chars()
-            .next()
-            .expect("the position should point to a character")
+        self.cursor.clone().nth(index - 1)
     }
 
     fn range(&self, start: usize, end: usize) -> TextRange {
-        let range = TextRange::new(
-            self.source_range.start() + TextSize::from(start as u32),
-            self.source_range.start() + TextSize::from(end as u32),
-        );
-        debug_assert!(range.end() <= self.source_range.end());
-        range
+        self.cursor.source_range(start, end)
     }
 
     fn error(
@@ -399,6 +575,18 @@ impl<'source> Encoder<'source> {
     ) -> PropertySyntaxParseDiagnostic {
         PropertySyntaxParseDiagnostic::new(kind, self.range(start, end))
     }
+}
+
+fn is_css_whitespace(character: char) -> bool {
+    character.is_ascii() && is_css_whitespace_byte(character as u8)
+}
+
+fn is_css_newline(character: char) -> bool {
+    character.is_ascii() && is_css_newline_byte(character as u8)
+}
+
+fn is_css_identifier_non_ascii(character: char) -> bool {
+    character >= '\u{80}'
 }
 
 fn is_invalid_custom_identifier(identifier: &str) -> bool {
@@ -422,7 +610,7 @@ mod tests {
     use biome_diagnostics::{DiagnosticExt, print_diagnostic_to_string};
 
     fn encode_value(value: &str) -> PropertySyntax {
-        match encode(
+        match encode_decoded(
             value,
             TextRange::new(10.into(), (10 + value.len() as u32).into()),
         ) {
@@ -432,7 +620,7 @@ mod tests {
     }
 
     fn encode_error(value: &str) -> PropertySyntaxDiagnostic {
-        match encode(
+        match encode_decoded(
             value,
             TextRange::new(10.into(), (10 + value.len() as u32).into()),
         ) {
@@ -527,7 +715,7 @@ mod tests {
 
     #[test]
     fn encodes_non_ascii_identifiers_using_byte_offsets() {
-        let PropertySyntax::Components(components) = encode_value("éclair | 色") else {
+        let PropertySyntax::Components(components) = encode_value("éclair | 色 | \u{80}") else {
             panic!("expected components");
         };
         assert_eq!(
@@ -538,6 +726,10 @@ mod tests {
         assert_eq!(
             components[1].name,
             PropertySyntaxComponentName::CustomIdentifier("色".into())
+        );
+        assert_eq!(
+            components[2].name,
+            PropertySyntaxComponentName::CustomIdentifier("\u{80}".into())
         );
     }
 
@@ -568,7 +760,7 @@ mod tests {
         for source in valid {
             assert!(
                 matches!(
-                    encode(
+                    encode_decoded(
                         source,
                         TextRange::new(0.into(), (source.len() as u32).into())
                     ),
@@ -638,7 +830,7 @@ mod tests {
         for source in invalid {
             assert!(
                 matches!(
-                    encode(
+                    encode_decoded(
                         source,
                         TextRange::new(0.into(), (source.len() as u32).into())
                     ),
@@ -653,6 +845,29 @@ mod tests {
     fn diagnostics_use_absolute_byte_ranges() {
         let diagnostic = encode_error("é | ?");
         assert_eq!(diagnostic.range(), TextRange::new(15.into(), 16.into()));
+    }
+
+    #[test]
+    fn css_string_cursor_decodes_source_spans() {
+        let mut cursor = DecodedCursor::new_css_string(r"\3c color\3e ", TextSize::from(10));
+
+        assert_eq!(
+            cursor.next().map(|character| (
+                character.value,
+                character.source_start,
+                character.source_end
+            )),
+            Some(('<', 0, 4))
+        );
+        assert_eq!(
+            cursor.next().map(|character| (
+                character.value,
+                character.source_start,
+                character.source_end
+            )),
+            Some(('c', 4, 5))
+        );
+        assert_eq!(cursor.last().map(|character| character.value), Some('>'));
     }
 
     #[test]
@@ -683,7 +898,7 @@ mod tests {
             let prefix = "@property --foo {\n  syntax: \"";
             let source = format!("{prefix}{value}\";\n}}\n");
             let start = prefix.len() as u32;
-            let diagnostic = match encode(
+            let diagnostic = match encode_decoded(
                 value,
                 TextRange::new(start.into(), (start + value.len() as u32).into()),
             ) {
