@@ -951,10 +951,8 @@ impl<'db> TypeData<'db> {
     }
 
     pub fn instance_of(db: &'db dyn TypeDb, ty: Self, type_parameters: Box<[Self]>) -> Self {
-        if type_parameters.is_empty()
-            && let Self::InstanceOf(instance) = ty
-        {
-            return Self::InstanceOf(instance);
+        if type_parameters.is_empty() && matches!(ty, Self::InstanceOf(_) | Self::Union(_)) {
+            return ty;
         }
 
         Self::InstanceOf(InternedTypeInstance::new(db, ty, type_parameters))

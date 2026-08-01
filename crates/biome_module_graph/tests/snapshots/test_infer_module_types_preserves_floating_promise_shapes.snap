@@ -346,7 +346,7 @@ Expression "doWork" => async Function "doWork" {
   returns: instanceof Promise<void>
 }
 
-Binding maybeDoWork "maybeDoWork" => instanceof typeof async Function "doWork" {
+Binding maybeDoWork "maybeDoWork" => typeof async Function "doWork" {
   accepts: {
     params: []
     type_args: []
@@ -364,7 +364,7 @@ Expression "doWork" => async Function "doWork" {
 
 Binding optional "optional" => instanceof Promise<void> | undefined
 
-Expression "maybeDoWork" => instanceof typeof async Function "doWork" {
+Expression "maybeDoWork" => typeof async Function "doWork" {
   accepts: {
     params: []
     type_args: []
