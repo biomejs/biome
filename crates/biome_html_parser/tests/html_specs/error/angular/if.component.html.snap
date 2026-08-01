@@ -1,0 +1,260 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```angular
+@if (a > b) {
+  <p>{{a}} is greater than {{b}}</p>
+} @else if (b > a) {
+  <p>{{a}} is less than {{b}}</p>
+} @else
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        AngularIfBlock {
+            opening_block: AngularIfOpeningBlock {
+                at_token: AT@0..1 "@" [] [],
+                if_token: IF_KW@1..4 "if" [] [Whitespace(" ")],
+                condition: AngularIfParameters {
+                    l_paren_token: L_PAREN@4..5 "(" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@5..10 "a > b" [] [],
+                    },
+                    as_clause: missing (optional),
+                    r_paren_token: R_PAREN@10..12 ")" [] [Whitespace(" ")],
+                },
+                children: AngularBlockBody {
+                    l_curly_token: L_CURLY@12..13 "{" [] [],
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@13..17 "<" [Newline("\n"), Whitespace("  ")] [],
+                                name: HtmlTagName {
+                                    value_token: P_KW@17..18 "p" [] [],
+                                },
+                                attributes: HtmlAttributeList [],
+                                r_angle_token: R_ANGLE@18..19 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlDoubleTextExpression {
+                                    l_double_curly_token: L_DOUBLE_CURLY@19..21 "{{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@21..22 "a" [] [],
+                                    },
+                                    r_double_curly_token: R_DOUBLE_CURLY@22..25 "}}" [] [Whitespace(" ")],
+                                },
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@25..41 "is greater than" [] [Whitespace(" ")],
+                                },
+                                HtmlDoubleTextExpression {
+                                    l_double_curly_token: L_DOUBLE_CURLY@41..43 "{{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@43..44 "b" [] [],
+                                    },
+                                    r_double_curly_token: R_DOUBLE_CURLY@44..46 "}}" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@46..47 "<" [] [],
+                                slash_token: SLASH@47..48 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@48..49 "p" [] [],
+                                },
+                                r_angle_token: R_ANGLE@49..50 ">" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@50..53 "}" [Newline("\n")] [Whitespace(" ")],
+                },
+            },
+            else_if_clauses: AngularElseIfClauseList [
+                AngularElseIfClause {
+                    at_token: AT@53..54 "@" [] [],
+                    else_token: ELSE_KW@54..59 "else" [] [Whitespace(" ")],
+                    if_token: IF_KW@59..62 "if" [] [Whitespace(" ")],
+                    condition: AngularIfParameters {
+                        l_paren_token: L_PAREN@62..63 "(" [] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@63..68 "b > a" [] [],
+                        },
+                        as_clause: missing (optional),
+                        r_paren_token: R_PAREN@68..70 ")" [] [Whitespace(" ")],
+                    },
+                    children: AngularBlockBody {
+                        l_curly_token: L_CURLY@70..71 "{" [] [],
+                        children: HtmlElementList [
+                            HtmlElement {
+                                opening_element: HtmlOpeningElement {
+                                    l_angle_token: L_ANGLE@71..75 "<" [Newline("\n"), Whitespace("  ")] [],
+                                    name: HtmlTagName {
+                                        value_token: P_KW@75..76 "p" [] [],
+                                    },
+                                    attributes: HtmlAttributeList [],
+                                    r_angle_token: R_ANGLE@76..77 ">" [] [],
+                                },
+                                children: HtmlElementList [
+                                    HtmlDoubleTextExpression {
+                                        l_double_curly_token: L_DOUBLE_CURLY@77..79 "{{" [] [],
+                                        expression: HtmlTextExpression {
+                                            html_literal_token: HTML_LITERAL@79..80 "a" [] [],
+                                        },
+                                        r_double_curly_token: R_DOUBLE_CURLY@80..83 "}}" [] [Whitespace(" ")],
+                                    },
+                                    HtmlContent {
+                                        value_token: HTML_LITERAL@83..96 "is less than" [] [Whitespace(" ")],
+                                    },
+                                    HtmlDoubleTextExpression {
+                                        l_double_curly_token: L_DOUBLE_CURLY@96..98 "{{" [] [],
+                                        expression: HtmlTextExpression {
+                                            html_literal_token: HTML_LITERAL@98..99 "b" [] [],
+                                        },
+                                        r_double_curly_token: R_DOUBLE_CURLY@99..101 "}}" [] [],
+                                    },
+                                ],
+                                closing_element: HtmlClosingElement {
+                                    l_angle_token: L_ANGLE@101..102 "<" [] [],
+                                    slash_token: SLASH@102..103 "/" [] [],
+                                    name: HtmlTagName {
+                                        value_token: HTML_LITERAL@103..104 "p" [] [],
+                                    },
+                                    r_angle_token: R_ANGLE@104..105 ">" [] [],
+                                },
+                            },
+                        ],
+                        r_curly_token: R_CURLY@105..108 "}" [Newline("\n")] [Whitespace(" ")],
+                    },
+                },
+            ],
+            else_clause: AngularElseClause {
+                at_token: AT@108..109 "@" [] [],
+                else_token: ELSE_KW@109..113 "else" [] [],
+                children: missing (required),
+            },
+        },
+    ],
+    eof_token: EOF@113..114 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..114
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..113
+    0: ANGULAR_IF_BLOCK@0..113
+      0: ANGULAR_IF_OPENING_BLOCK@0..53
+        0: AT@0..1 "@" [] []
+        1: IF_KW@1..4 "if" [] [Whitespace(" ")]
+        2: ANGULAR_IF_PARAMETERS@4..12
+          0: L_PAREN@4..5 "(" [] []
+          1: HTML_TEXT_EXPRESSION@5..10
+            0: HTML_LITERAL@5..10 "a > b" [] []
+          2: (empty)
+          3: R_PAREN@10..12 ")" [] [Whitespace(" ")]
+        3: ANGULAR_BLOCK_BODY@12..53
+          0: L_CURLY@12..13 "{" [] []
+          1: HTML_ELEMENT_LIST@13..50
+            0: HTML_ELEMENT@13..50
+              0: HTML_OPENING_ELEMENT@13..19
+                0: L_ANGLE@13..17 "<" [Newline("\n"), Whitespace("  ")] []
+                1: HTML_TAG_NAME@17..18
+                  0: P_KW@17..18 "p" [] []
+                2: HTML_ATTRIBUTE_LIST@18..18
+                3: R_ANGLE@18..19 ">" [] []
+              1: HTML_ELEMENT_LIST@19..46
+                0: HTML_DOUBLE_TEXT_EXPRESSION@19..25
+                  0: L_DOUBLE_CURLY@19..21 "{{" [] []
+                  1: HTML_TEXT_EXPRESSION@21..22
+                    0: HTML_LITERAL@21..22 "a" [] []
+                  2: R_DOUBLE_CURLY@22..25 "}}" [] [Whitespace(" ")]
+                1: HTML_CONTENT@25..41
+                  0: HTML_LITERAL@25..41 "is greater than" [] [Whitespace(" ")]
+                2: HTML_DOUBLE_TEXT_EXPRESSION@41..46
+                  0: L_DOUBLE_CURLY@41..43 "{{" [] []
+                  1: HTML_TEXT_EXPRESSION@43..44
+                    0: HTML_LITERAL@43..44 "b" [] []
+                  2: R_DOUBLE_CURLY@44..46 "}}" [] []
+              2: HTML_CLOSING_ELEMENT@46..50
+                0: L_ANGLE@46..47 "<" [] []
+                1: SLASH@47..48 "/" [] []
+                2: HTML_TAG_NAME@48..49
+                  0: HTML_LITERAL@48..49 "p" [] []
+                3: R_ANGLE@49..50 ">" [] []
+          2: R_CURLY@50..53 "}" [Newline("\n")] [Whitespace(" ")]
+      1: ANGULAR_ELSE_IF_CLAUSE_LIST@53..108
+        0: ANGULAR_ELSE_IF_CLAUSE@53..108
+          0: AT@53..54 "@" [] []
+          1: ELSE_KW@54..59 "else" [] [Whitespace(" ")]
+          2: IF_KW@59..62 "if" [] [Whitespace(" ")]
+          3: ANGULAR_IF_PARAMETERS@62..70
+            0: L_PAREN@62..63 "(" [] []
+            1: HTML_TEXT_EXPRESSION@63..68
+              0: HTML_LITERAL@63..68 "b > a" [] []
+            2: (empty)
+            3: R_PAREN@68..70 ")" [] [Whitespace(" ")]
+          4: ANGULAR_BLOCK_BODY@70..108
+            0: L_CURLY@70..71 "{" [] []
+            1: HTML_ELEMENT_LIST@71..105
+              0: HTML_ELEMENT@71..105
+                0: HTML_OPENING_ELEMENT@71..77
+                  0: L_ANGLE@71..75 "<" [Newline("\n"), Whitespace("  ")] []
+                  1: HTML_TAG_NAME@75..76
+                    0: P_KW@75..76 "p" [] []
+                  2: HTML_ATTRIBUTE_LIST@76..76
+                  3: R_ANGLE@76..77 ">" [] []
+                1: HTML_ELEMENT_LIST@77..101
+                  0: HTML_DOUBLE_TEXT_EXPRESSION@77..83
+                    0: L_DOUBLE_CURLY@77..79 "{{" [] []
+                    1: HTML_TEXT_EXPRESSION@79..80
+                      0: HTML_LITERAL@79..80 "a" [] []
+                    2: R_DOUBLE_CURLY@80..83 "}}" [] [Whitespace(" ")]
+                  1: HTML_CONTENT@83..96
+                    0: HTML_LITERAL@83..96 "is less than" [] [Whitespace(" ")]
+                  2: HTML_DOUBLE_TEXT_EXPRESSION@96..101
+                    0: L_DOUBLE_CURLY@96..98 "{{" [] []
+                    1: HTML_TEXT_EXPRESSION@98..99
+                      0: HTML_LITERAL@98..99 "b" [] []
+                    2: R_DOUBLE_CURLY@99..101 "}}" [] []
+                2: HTML_CLOSING_ELEMENT@101..105
+                  0: L_ANGLE@101..102 "<" [] []
+                  1: SLASH@102..103 "/" [] []
+                  2: HTML_TAG_NAME@103..104
+                    0: HTML_LITERAL@103..104 "p" [] []
+                  3: R_ANGLE@104..105 ">" [] []
+            2: R_CURLY@105..108 "}" [Newline("\n")] [Whitespace(" ")]
+      2: ANGULAR_ELSE_CLAUSE@108..113
+        0: AT@108..109 "@" [] []
+        1: ELSE_KW@109..113 "else" [] []
+        2: (empty)
+  4: EOF@113..114 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+if.component.html:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a block body.
+  
+    4 │   <p>{{a}} is less than {{b}}</p>
+    5 │ } @else
+  > 6 │ 
+      │ 
+  
+```

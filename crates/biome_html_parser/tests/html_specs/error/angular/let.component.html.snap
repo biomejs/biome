@@ -19,21 +19,19 @@ HtmlRoot {
     frontmatter: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
-        AnyAngularBlock {
-            angular_let_block: AngularLetBlock {
-                at_token: AT@0..1 "@" [] [],
-                let_token: LET_KW@1..5 "let" [] [Whitespace(" ")],
-                name: AngularBindingName {
-                    value_token: HTML_LITERAL@5..10 "name" [] [Whitespace(" ")],
-                },
-                initializer: AngularLetInitializerClause {
-                    eq_token: EQ@10..11 "=" [] [],
-                    expression: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@11..22 " user.name\n" [] [],
-                    },
-                },
-                semicolon_token: missing (required),
+        AngularLetBlock {
+            at_token: AT@0..1 "@" [] [],
+            let_token: LET_KW@1..5 "let" [] [Whitespace(" ")],
+            name: AngularBindingName {
+                value_token: HTML_LITERAL@5..10 "name" [] [Whitespace(" ")],
             },
+            initializer: AngularLetInitializerClause {
+                eq_token: EQ@10..11 "=" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@11..22 " user.name\n" [] [],
+                },
+            },
+            semicolon_token: missing (required),
         },
     ],
     eof_token: EOF@22..22 "" [] [],
@@ -48,17 +46,16 @@ HtmlRoot {
   1: (empty)
   2: (empty)
   3: HTML_ELEMENT_LIST@0..22
-    0: ANY_ANGULAR_BLOCK@0..22
-      0: ANGULAR_LET_BLOCK@0..22
-        0: AT@0..1 "@" [] []
-        1: LET_KW@1..5 "let" [] [Whitespace(" ")]
-        2: ANGULAR_BINDING_NAME@5..10
-          0: HTML_LITERAL@5..10 "name" [] [Whitespace(" ")]
-        3: ANGULAR_LET_INITIALIZER_CLAUSE@10..22
-          0: EQ@10..11 "=" [] []
-          1: HTML_TEXT_EXPRESSION@11..22
-            0: HTML_LITERAL@11..22 " user.name\n" [] []
-        4: (empty)
+    0: ANGULAR_LET_BLOCK@0..22
+      0: AT@0..1 "@" [] []
+      1: LET_KW@1..5 "let" [] [Whitespace(" ")]
+      2: ANGULAR_BINDING_NAME@5..10
+        0: HTML_LITERAL@5..10 "name" [] [Whitespace(" ")]
+      3: ANGULAR_LET_INITIALIZER_CLAUSE@10..22
+        0: EQ@10..11 "=" [] []
+        1: HTML_TEXT_EXPRESSION@11..22
+          0: HTML_LITERAL@11..22 " user.name\n" [] []
+      4: (empty)
   4: EOF@22..22 "" [] []
 
 ```
