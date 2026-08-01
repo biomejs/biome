@@ -1,0 +1,412 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```angular
+@switch (condition) {
+  @case ('a') {
+    <p>a</p>
+  }
+  @case ('b')
+  @case ('c') {
+    <p>b & c</p>
+  }
+  @default {
+    <p>default</p>
+  }
+}
+
+@switch (state.mode) {
+	@case ('show') {
+		{{ state.menu }}
+	}
+	@case ('hide') {}
+	@default never;
+}
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        AngularSwitchBlock {
+            opening_block: AngularSwitchOpeningBlock {
+                at_token: AT@0..1 "@" [] [],
+                switch_token: SWITCH_KW@1..8 "switch" [] [Whitespace(" ")],
+                parameters: AngularSwitchParameters {
+                    l_paren_token: L_PAREN@8..9 "(" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@9..18 "condition" [] [],
+                    },
+                    r_paren_token: R_PAREN@18..20 ")" [] [Whitespace(" ")],
+                },
+            },
+            l_curly_token: L_CURLY@20..21 "{" [] [],
+            cases: AngularCaseClauseList [
+                AngularCaseClause {
+                    at_token: AT@21..25 "@" [Newline("\n"), Whitespace("  ")] [],
+                    case_token: CASE_KW@25..30 "case" [] [Whitespace(" ")],
+                    parameters: AngularSwitchParameters {
+                        l_paren_token: L_PAREN@30..31 "(" [] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@31..34 "'a'" [] [],
+                        },
+                        r_paren_token: R_PAREN@34..36 ")" [] [Whitespace(" ")],
+                    },
+                    children: AngularBlockBody {
+                        l_curly_token: L_CURLY@36..37 "{" [] [],
+                        children: HtmlElementList [
+                            HtmlElement {
+                                opening_element: HtmlOpeningElement {
+                                    l_angle_token: L_ANGLE@37..43 "<" [Newline("\n"), Whitespace("    ")] [],
+                                    name: HtmlTagName {
+                                        value_token: P_KW@43..44 "p" [] [],
+                                    },
+                                    attributes: HtmlAttributeList [],
+                                    r_angle_token: R_ANGLE@44..45 ">" [] [],
+                                },
+                                children: HtmlElementList [
+                                    HtmlContent {
+                                        value_token: HTML_LITERAL@45..46 "a" [] [],
+                                    },
+                                ],
+                                closing_element: HtmlClosingElement {
+                                    l_angle_token: L_ANGLE@46..47 "<" [] [],
+                                    slash_token: SLASH@47..48 "/" [] [],
+                                    name: HtmlTagName {
+                                        value_token: HTML_LITERAL@48..49 "p" [] [],
+                                    },
+                                    r_angle_token: R_ANGLE@49..50 ">" [] [],
+                                },
+                            },
+                        ],
+                        r_curly_token: R_CURLY@50..54 "}" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                },
+                AngularCaseClause {
+                    at_token: AT@54..58 "@" [Newline("\n"), Whitespace("  ")] [],
+                    case_token: CASE_KW@58..63 "case" [] [Whitespace(" ")],
+                    parameters: AngularSwitchParameters {
+                        l_paren_token: L_PAREN@63..64 "(" [] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@64..67 "'b'" [] [],
+                        },
+                        r_paren_token: R_PAREN@67..68 ")" [] [],
+                    },
+                    children: missing (optional),
+                },
+                AngularCaseClause {
+                    at_token: AT@68..72 "@" [Newline("\n"), Whitespace("  ")] [],
+                    case_token: CASE_KW@72..77 "case" [] [Whitespace(" ")],
+                    parameters: AngularSwitchParameters {
+                        l_paren_token: L_PAREN@77..78 "(" [] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@78..81 "'c'" [] [],
+                        },
+                        r_paren_token: R_PAREN@81..83 ")" [] [Whitespace(" ")],
+                    },
+                    children: AngularBlockBody {
+                        l_curly_token: L_CURLY@83..84 "{" [] [],
+                        children: HtmlElementList [
+                            HtmlElement {
+                                opening_element: HtmlOpeningElement {
+                                    l_angle_token: L_ANGLE@84..90 "<" [Newline("\n"), Whitespace("    ")] [],
+                                    name: HtmlTagName {
+                                        value_token: P_KW@90..91 "p" [] [],
+                                    },
+                                    attributes: HtmlAttributeList [],
+                                    r_angle_token: R_ANGLE@91..92 ">" [] [],
+                                },
+                                children: HtmlElementList [
+                                    HtmlContent {
+                                        value_token: HTML_LITERAL@92..97 "b & c" [] [],
+                                    },
+                                ],
+                                closing_element: HtmlClosingElement {
+                                    l_angle_token: L_ANGLE@97..98 "<" [] [],
+                                    slash_token: SLASH@98..99 "/" [] [],
+                                    name: HtmlTagName {
+                                        value_token: HTML_LITERAL@99..100 "p" [] [],
+                                    },
+                                    r_angle_token: R_ANGLE@100..101 ">" [] [],
+                                },
+                            },
+                        ],
+                        r_curly_token: R_CURLY@101..105 "}" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                },
+            ],
+            default_clause: AngularDefaultClause {
+                at_token: AT@105..109 "@" [Newline("\n"), Whitespace("  ")] [],
+                default_token: DEFAULT_KW@109..117 "default" [] [Whitespace(" ")],
+                children: AngularBlockBody {
+                    l_curly_token: L_CURLY@117..118 "{" [] [],
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@118..124 "<" [Newline("\n"), Whitespace("    ")] [],
+                                name: HtmlTagName {
+                                    value_token: P_KW@124..125 "p" [] [],
+                                },
+                                attributes: HtmlAttributeList [],
+                                r_angle_token: R_ANGLE@125..126 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@126..133 "default" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@133..134 "<" [] [],
+                                slash_token: SLASH@134..135 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@135..136 "p" [] [],
+                                },
+                                r_angle_token: R_ANGLE@136..137 ">" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@137..141 "}" [Newline("\n"), Whitespace("  ")] [],
+                },
+            },
+            r_curly_token: R_CURLY@141..143 "}" [Newline("\n")] [],
+        },
+        AngularSwitchBlock {
+            opening_block: AngularSwitchOpeningBlock {
+                at_token: AT@143..146 "@" [Newline("\n"), Newline("\n")] [],
+                switch_token: SWITCH_KW@146..153 "switch" [] [Whitespace(" ")],
+                parameters: AngularSwitchParameters {
+                    l_paren_token: L_PAREN@153..154 "(" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@154..164 "state.mode" [] [],
+                    },
+                    r_paren_token: R_PAREN@164..166 ")" [] [Whitespace(" ")],
+                },
+            },
+            l_curly_token: L_CURLY@166..167 "{" [] [],
+            cases: AngularCaseClauseList [
+                AngularCaseClause {
+                    at_token: AT@167..170 "@" [Newline("\n"), Whitespace("\t")] [],
+                    case_token: CASE_KW@170..175 "case" [] [Whitespace(" ")],
+                    parameters: AngularSwitchParameters {
+                        l_paren_token: L_PAREN@175..176 "(" [] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@176..182 "'show'" [] [],
+                        },
+                        r_paren_token: R_PAREN@182..184 ")" [] [Whitespace(" ")],
+                    },
+                    children: AngularBlockBody {
+                        l_curly_token: L_CURLY@184..185 "{" [] [],
+                        children: HtmlElementList [
+                            HtmlDoubleTextExpression {
+                                l_double_curly_token: L_DOUBLE_CURLY@185..190 "{{" [Newline("\n"), Whitespace("\t\t")] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@190..202 " state.menu " [] [],
+                                },
+                                r_double_curly_token: R_DOUBLE_CURLY@202..204 "}}" [] [],
+                            },
+                        ],
+                        r_curly_token: R_CURLY@204..207 "}" [Newline("\n"), Whitespace("\t")] [],
+                    },
+                },
+                AngularCaseClause {
+                    at_token: AT@207..210 "@" [Newline("\n"), Whitespace("\t")] [],
+                    case_token: CASE_KW@210..215 "case" [] [Whitespace(" ")],
+                    parameters: AngularSwitchParameters {
+                        l_paren_token: L_PAREN@215..216 "(" [] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@216..222 "'hide'" [] [],
+                        },
+                        r_paren_token: R_PAREN@222..224 ")" [] [Whitespace(" ")],
+                    },
+                    children: AngularBlockBody {
+                        l_curly_token: L_CURLY@224..225 "{" [] [],
+                        children: HtmlElementList [],
+                        r_curly_token: R_CURLY@225..226 "}" [] [],
+                    },
+                },
+            ],
+            default_clause: AngularDefaultClause {
+                at_token: AT@226..229 "@" [Newline("\n"), Whitespace("\t")] [],
+                default_token: DEFAULT_KW@229..237 "default" [] [Whitespace(" ")],
+                children: AngularDefaultExpressionClause {
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@237..242 "never" [] [],
+                    },
+                    semicolon_token: SEMICOLON@242..243 ";" [] [],
+                },
+            },
+            r_curly_token: R_CURLY@243..245 "}" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@245..245 "" [] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..245
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..245
+    0: ANGULAR_SWITCH_BLOCK@0..143
+      0: ANGULAR_SWITCH_OPENING_BLOCK@0..20
+        0: AT@0..1 "@" [] []
+        1: SWITCH_KW@1..8 "switch" [] [Whitespace(" ")]
+        2: ANGULAR_SWITCH_PARAMETERS@8..20
+          0: L_PAREN@8..9 "(" [] []
+          1: HTML_TEXT_EXPRESSION@9..18
+            0: HTML_LITERAL@9..18 "condition" [] []
+          2: R_PAREN@18..20 ")" [] [Whitespace(" ")]
+      1: L_CURLY@20..21 "{" [] []
+      2: ANGULAR_CASE_CLAUSE_LIST@21..105
+        0: ANGULAR_CASE_CLAUSE@21..54
+          0: AT@21..25 "@" [Newline("\n"), Whitespace("  ")] []
+          1: CASE_KW@25..30 "case" [] [Whitespace(" ")]
+          2: ANGULAR_SWITCH_PARAMETERS@30..36
+            0: L_PAREN@30..31 "(" [] []
+            1: HTML_TEXT_EXPRESSION@31..34
+              0: HTML_LITERAL@31..34 "'a'" [] []
+            2: R_PAREN@34..36 ")" [] [Whitespace(" ")]
+          3: ANGULAR_BLOCK_BODY@36..54
+            0: L_CURLY@36..37 "{" [] []
+            1: HTML_ELEMENT_LIST@37..50
+              0: HTML_ELEMENT@37..50
+                0: HTML_OPENING_ELEMENT@37..45
+                  0: L_ANGLE@37..43 "<" [Newline("\n"), Whitespace("    ")] []
+                  1: HTML_TAG_NAME@43..44
+                    0: P_KW@43..44 "p" [] []
+                  2: HTML_ATTRIBUTE_LIST@44..44
+                  3: R_ANGLE@44..45 ">" [] []
+                1: HTML_ELEMENT_LIST@45..46
+                  0: HTML_CONTENT@45..46
+                    0: HTML_LITERAL@45..46 "a" [] []
+                2: HTML_CLOSING_ELEMENT@46..50
+                  0: L_ANGLE@46..47 "<" [] []
+                  1: SLASH@47..48 "/" [] []
+                  2: HTML_TAG_NAME@48..49
+                    0: HTML_LITERAL@48..49 "p" [] []
+                  3: R_ANGLE@49..50 ">" [] []
+            2: R_CURLY@50..54 "}" [Newline("\n"), Whitespace("  ")] []
+        1: ANGULAR_CASE_CLAUSE@54..68
+          0: AT@54..58 "@" [Newline("\n"), Whitespace("  ")] []
+          1: CASE_KW@58..63 "case" [] [Whitespace(" ")]
+          2: ANGULAR_SWITCH_PARAMETERS@63..68
+            0: L_PAREN@63..64 "(" [] []
+            1: HTML_TEXT_EXPRESSION@64..67
+              0: HTML_LITERAL@64..67 "'b'" [] []
+            2: R_PAREN@67..68 ")" [] []
+          3: (empty)
+        2: ANGULAR_CASE_CLAUSE@68..105
+          0: AT@68..72 "@" [Newline("\n"), Whitespace("  ")] []
+          1: CASE_KW@72..77 "case" [] [Whitespace(" ")]
+          2: ANGULAR_SWITCH_PARAMETERS@77..83
+            0: L_PAREN@77..78 "(" [] []
+            1: HTML_TEXT_EXPRESSION@78..81
+              0: HTML_LITERAL@78..81 "'c'" [] []
+            2: R_PAREN@81..83 ")" [] [Whitespace(" ")]
+          3: ANGULAR_BLOCK_BODY@83..105
+            0: L_CURLY@83..84 "{" [] []
+            1: HTML_ELEMENT_LIST@84..101
+              0: HTML_ELEMENT@84..101
+                0: HTML_OPENING_ELEMENT@84..92
+                  0: L_ANGLE@84..90 "<" [Newline("\n"), Whitespace("    ")] []
+                  1: HTML_TAG_NAME@90..91
+                    0: P_KW@90..91 "p" [] []
+                  2: HTML_ATTRIBUTE_LIST@91..91
+                  3: R_ANGLE@91..92 ">" [] []
+                1: HTML_ELEMENT_LIST@92..97
+                  0: HTML_CONTENT@92..97
+                    0: HTML_LITERAL@92..97 "b & c" [] []
+                2: HTML_CLOSING_ELEMENT@97..101
+                  0: L_ANGLE@97..98 "<" [] []
+                  1: SLASH@98..99 "/" [] []
+                  2: HTML_TAG_NAME@99..100
+                    0: HTML_LITERAL@99..100 "p" [] []
+                  3: R_ANGLE@100..101 ">" [] []
+            2: R_CURLY@101..105 "}" [Newline("\n"), Whitespace("  ")] []
+      3: ANGULAR_DEFAULT_CLAUSE@105..141
+        0: AT@105..109 "@" [Newline("\n"), Whitespace("  ")] []
+        1: DEFAULT_KW@109..117 "default" [] [Whitespace(" ")]
+        2: ANGULAR_BLOCK_BODY@117..141
+          0: L_CURLY@117..118 "{" [] []
+          1: HTML_ELEMENT_LIST@118..137
+            0: HTML_ELEMENT@118..137
+              0: HTML_OPENING_ELEMENT@118..126
+                0: L_ANGLE@118..124 "<" [Newline("\n"), Whitespace("    ")] []
+                1: HTML_TAG_NAME@124..125
+                  0: P_KW@124..125 "p" [] []
+                2: HTML_ATTRIBUTE_LIST@125..125
+                3: R_ANGLE@125..126 ">" [] []
+              1: HTML_ELEMENT_LIST@126..133
+                0: HTML_CONTENT@126..133
+                  0: HTML_LITERAL@126..133 "default" [] []
+              2: HTML_CLOSING_ELEMENT@133..137
+                0: L_ANGLE@133..134 "<" [] []
+                1: SLASH@134..135 "/" [] []
+                2: HTML_TAG_NAME@135..136
+                  0: HTML_LITERAL@135..136 "p" [] []
+                3: R_ANGLE@136..137 ">" [] []
+          2: R_CURLY@137..141 "}" [Newline("\n"), Whitespace("  ")] []
+      4: R_CURLY@141..143 "}" [Newline("\n")] []
+    1: ANGULAR_SWITCH_BLOCK@143..245
+      0: ANGULAR_SWITCH_OPENING_BLOCK@143..166
+        0: AT@143..146 "@" [Newline("\n"), Newline("\n")] []
+        1: SWITCH_KW@146..153 "switch" [] [Whitespace(" ")]
+        2: ANGULAR_SWITCH_PARAMETERS@153..166
+          0: L_PAREN@153..154 "(" [] []
+          1: HTML_TEXT_EXPRESSION@154..164
+            0: HTML_LITERAL@154..164 "state.mode" [] []
+          2: R_PAREN@164..166 ")" [] [Whitespace(" ")]
+      1: L_CURLY@166..167 "{" [] []
+      2: ANGULAR_CASE_CLAUSE_LIST@167..226
+        0: ANGULAR_CASE_CLAUSE@167..207
+          0: AT@167..170 "@" [Newline("\n"), Whitespace("\t")] []
+          1: CASE_KW@170..175 "case" [] [Whitespace(" ")]
+          2: ANGULAR_SWITCH_PARAMETERS@175..184
+            0: L_PAREN@175..176 "(" [] []
+            1: HTML_TEXT_EXPRESSION@176..182
+              0: HTML_LITERAL@176..182 "'show'" [] []
+            2: R_PAREN@182..184 ")" [] [Whitespace(" ")]
+          3: ANGULAR_BLOCK_BODY@184..207
+            0: L_CURLY@184..185 "{" [] []
+            1: HTML_ELEMENT_LIST@185..204
+              0: HTML_DOUBLE_TEXT_EXPRESSION@185..204
+                0: L_DOUBLE_CURLY@185..190 "{{" [Newline("\n"), Whitespace("\t\t")] []
+                1: HTML_TEXT_EXPRESSION@190..202
+                  0: HTML_LITERAL@190..202 " state.menu " [] []
+                2: R_DOUBLE_CURLY@202..204 "}}" [] []
+            2: R_CURLY@204..207 "}" [Newline("\n"), Whitespace("\t")] []
+        1: ANGULAR_CASE_CLAUSE@207..226
+          0: AT@207..210 "@" [Newline("\n"), Whitespace("\t")] []
+          1: CASE_KW@210..215 "case" [] [Whitespace(" ")]
+          2: ANGULAR_SWITCH_PARAMETERS@215..224
+            0: L_PAREN@215..216 "(" [] []
+            1: HTML_TEXT_EXPRESSION@216..222
+              0: HTML_LITERAL@216..222 "'hide'" [] []
+            2: R_PAREN@222..224 ")" [] [Whitespace(" ")]
+          3: ANGULAR_BLOCK_BODY@224..226
+            0: L_CURLY@224..225 "{" [] []
+            1: HTML_ELEMENT_LIST@225..225
+            2: R_CURLY@225..226 "}" [] []
+      3: ANGULAR_DEFAULT_CLAUSE@226..243
+        0: AT@226..229 "@" [Newline("\n"), Whitespace("\t")] []
+        1: DEFAULT_KW@229..237 "default" [] [Whitespace(" ")]
+        2: ANGULAR_DEFAULT_EXPRESSION_CLAUSE@237..243
+          0: HTML_TEXT_EXPRESSION@237..242
+            0: HTML_LITERAL@237..242 "never" [] []
+          1: SEMICOLON@242..243 ";" [] []
+      4: R_CURLY@243..245 "}" [Newline("\n")] []
+  4: EOF@245..245 "" [] []
+
+```
