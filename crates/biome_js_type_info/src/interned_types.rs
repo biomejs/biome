@@ -951,12 +951,6 @@ impl<'db> TypeData<'db> {
     }
 
     pub fn instance_of(db: &'db dyn TypeDb, ty: Self, type_parameters: Box<[Self]>) -> Self {
-        // Instantiating an instance changes nothing, and a union has no
-        // instances of its own: `instanceof (A | B)` only ever means the union
-        // of its members. The union case arises because an instance target is a
-        // reference that gets resolved after the instance is built, so a target
-        // that looked opaque can turn out to be a union. Collapsing both here
-        // spares every consumer from having to see through the wrapper.
         if type_parameters.is_empty() && matches!(ty, Self::InstanceOf(_) | Self::Union(_)) {
             return ty;
         }
