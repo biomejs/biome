@@ -318,6 +318,7 @@ version = "0.5.7"
 dependencies = [
  "biome_markup",
  "biome_text_size",
+ "codspeed-criterion-compat",
  "schemars",
  "serde",
  "termcolor",

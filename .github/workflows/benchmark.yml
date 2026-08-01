@@ -42,6 +42,7 @@ jobs:
       manifests: ${{ steps.outputs.outputs.manifests }}
       module_graph: ${{ steps.outputs.outputs.module_graph }}
       service: ${{ steps.outputs.outputs.service }}
+      console: ${{ steps.outputs.outputs.console }}
     steps:
       - name: Checkout Branch
         if: github.event_name == 'push'
@@ -161,6 +162,11 @@ jobs:
               - 'crates/biome_rowan/**/*.rs'
               - 'crates/biome_service/**/*.rs'
               - 'crates/biome_workspace_db/**/*.rs'
+            console:
+              - '.github/workflows/benchmark.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_console/**/*.rs'
+              - 'crates/biome_console/Cargo.toml'
 
       - name: Set change outputs
         id: outputs
@@ -178,6 +184,7 @@ jobs:
           MANIFESTS: ${{ steps.filter.outputs.manifests }}
           MODULE_GRAPH: ${{ steps.filter.outputs.module_graph }}
           SERVICE: ${{ steps.filter.outputs.service }}
+          CONSOLE: ${{ steps.filter.outputs.console }}
         run: |
           if [ "$EVENT_NAME" = 'workflow_dispatch' ] || [ "$EVENT_NAME" = 'merge_group' ]; then
             JS=true
@@ -192,6 +199,7 @@ jobs:
             MANIFESTS=true
             MODULE_GRAPH=true
             SERVICE=true
+            CONSOLE=true
           fi
 
           echo "js=$JS" >> "$GITHUB_OUTPUT"
@@ -206,6 +214,7 @@ jobs:
           echo "manifests=$MANIFESTS" >> "$GITHUB_OUTPUT"
           echo "module_graph=$MODULE_GRAPH" >> "$GITHUB_OUTPUT"
           echo "service=$SERVICE" >> "$GITHUB_OUTPUT"
+          echo "console=$CONSOLE" >> "$GITHUB_OUTPUT"
 
   js:
     needs: changes
@@ -288,6 +297,20 @@ jobs:
           mode: simulation
           run: cargo codspeed run -p biome_service --bench pull_diagnostics
           token: ${{ secrets.CODSPEED_TOKEN }}
+
+  console:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.console == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Bench Console
+    runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_console
+    steps: *bench_steps
 
   json:
     needs: changes
