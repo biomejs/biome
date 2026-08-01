@@ -12,6 +12,7 @@ mod html_module_info;
 pub mod js_module_info;
 mod module_graph;
 mod path_info_cache;
+mod traverse;
 pub mod type_inference;
 
 pub use biome_js_type_info::{

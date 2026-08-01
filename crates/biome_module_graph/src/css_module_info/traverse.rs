@@ -1,6 +1,9 @@
 use crate::CssPropertyDefinition;
 use crate::db::ModuleDb;
-use crate::module_graph::ModuleInfoKind;
+use crate::module_graph::{ModuleInfo, ModuleInfoKind};
+use crate::traverse::{
+    UpwardTraversal, UpwardTraversalAction, UpwardTraversalVisitor, UpwardTraversalWork,
+};
 use biome_console::markup;
 use biome_css_semantic::db::css_semantic_model;
 use biome_db::AnyParsedSource;
@@ -49,200 +52,47 @@ pub struct ImportTreeNode {
     pub parent_components: Vec<Self>,
 }
 
-/// Defines how a reverse module-graph traversal recognizes and processes importers.
-///
-/// The traversal enumerates candidate modules without imposing an order. A
-/// policy filters those candidates, interprets their import relationships, and
-/// decides whether to yield items, continue upward, or both.
-///
-/// Policies own cycle detection because some searches deduplicate modules
-/// globally while others must preserve independent branches. Implementations
-/// must reject paths already visited in the relevant scope;
-/// [UpwardTraversal] does not provide independent cycle detection.
-pub(crate) trait UpwardTraversalPolicy {
-    /// State carried by a single traversal branch.
-    ///
-    /// Every continuation returned by [Self::visit_importer] supplies the state
-    /// to use when that importer becomes the current module.
-    type BranchState;
-
-    /// A value yielded by the traversal.
-    type Item;
-
-    /// Returns whether `importer` has an eligible edge to `current_path`.
-    ///
-    /// This predicate runs before the candidate's module information is cloned.
-    /// It must also reject cycles according to the policy's cycle strategy.
-    fn should_visit_importer(
-        &self,
-        current_path: &Utf8Path,
-        importer_path: &Utf8Path,
-        importer: &ModuleInfoKind,
-        state: &Self::BranchState,
-    ) -> bool;
-
-    /// Processes the eligible relationship from `importer` to `current_path`.
-    ///
-    /// Policies that distinguish authored occurrences return one action per
-    /// occurrence. Each action may yield zero or more items and may continue
-    /// with branch-specific state.
-    fn visit_importer(
-        &mut self,
-        db: &dyn ModuleDb,
-        current_path: &Utf8Path,
-        importer_path: &Utf8Path,
-        importer: &ModuleInfoKind,
-        state: &Self::BranchState,
-    ) -> Vec<UpwardTraversalAction<Self::Item, Self::BranchState>>;
-}
-
-/// One policy decision for an eligible importer relationship.
-///
-/// `items` are yielded before any pending upward traversal resumes. A
-/// `continue_with` value schedules the importer as the next module on that
-/// branch; `None` stops the branch.
-pub(crate) struct UpwardTraversalAction<Item, State> {
-    /// Values produced while processing the importer relationship.
-    pub(crate) items: Vec<Item>,
-
-    /// State for continuing upward from the importer, or `None` to stop.
-    pub(crate) continue_with: Option<State>,
-}
-
-/// A pending operation in an [UpwardTraversal].
-///
-/// Separating visits from yielded items allows the iterator to emit all items
-/// discovered at the current level before it resumes traversal through pending
-/// importers.
-enum UpwardTraversalWork<Item, State> {
-    /// Expands modules that import `path` using the policy's branch `state`.
-    Visit { path: Utf8PathBuf, state: State },
-
-    /// Emits a value previously produced by the policy.
-    Yield(Item),
-}
-
-/// Lazily traverses modules that import a starting module.
-///
-/// Traversal follows reverse import edges. Candidate importer order and yielded
-/// item order are unspecified. Edge precedence, branch termination, duplicate
-/// handling, and cycle detection are delegated to [UpwardTraversalPolicy].
-pub(crate) struct UpwardTraversal<'db, Policy>
-where
-    Policy: UpwardTraversalPolicy,
-{
-    db: &'db dyn ModuleDb,
-    policy: Policy,
-    stack: Vec<UpwardTraversalWork<Policy::Item, Policy::BranchState>>,
-}
-
-impl<'db, Policy> UpwardTraversal<'db, Policy>
-where
-    Policy: UpwardTraversalPolicy,
-{
-    /// Starts an upward traversal at `start` with policy-defined branch state.
-    pub(crate) fn new(
-        db: &'db dyn ModuleDb,
-        start: Utf8PathBuf,
-        policy: Policy,
-        state: Policy::BranchState,
-    ) -> Self {
-        Self {
-            db,
-            policy,
-            stack: vec![UpwardTraversalWork::Visit { path: start, state }],
-        }
-    }
-}
-
-impl<Policy> Iterator for UpwardTraversal<'_, Policy>
-where
-    Policy: UpwardTraversalPolicy,
-{
-    type Item = Policy::Item;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            match self.stack.pop()? {
-                UpwardTraversalWork::Yield(item) => return Some(item),
-                UpwardTraversalWork::Visit { path, state } => {
-                    let mut importers = Vec::new();
-                    self.db.for_each_module(&mut |importer_path, importer| {
-                        if self
-                            .policy
-                            .should_visit_importer(&path, importer_path, importer, &state)
-                        {
-                            importers.push((importer_path.to_path_buf(), importer.clone()));
-                        }
-                    });
-
-                    let mut items = Vec::new();
-                    let mut visits = Vec::new();
-                    for (importer_path, importer) in importers {
-                        let actions = self.policy.visit_importer(
-                            self.db,
-                            &path,
-                            &importer_path,
-                            &importer,
-                            &state,
-                        );
-                        for action in actions {
-                            for item in action.items {
-                                items.push(UpwardTraversalWork::Yield(item));
-                            }
-                            if let Some(next_state) = action.continue_with {
-                                visits.push(UpwardTraversalWork::Visit {
-                                    path: importer_path.clone(),
-                                    state: next_state,
-                                });
-                            }
-                        }
-                    }
-                    self.stack.extend(visits);
-                    self.stack.extend(items.into_iter().rev());
-                }
-            }
-        }
-    }
-}
-
 /// Traverses component importers to discover CSS classes visible to them.
 ///
 /// Modules are visited at most once across the entire traversal. Each eligible
 /// JavaScript importer contributes its static CSS imports. HTML importers
 /// contribute linked, static, and dynamic CSS imports together with classes
 /// from global inline styles.
-pub(crate) struct CssClassTraversalPolicy {
+pub(crate) struct CssClassTraversal<'db> {
+    db: &'db dyn ModuleDb,
+    stack: Vec<UpwardTraversalWork<CssClassStep, ()>>,
     visited: FxHashSet<Utf8PathBuf>,
 }
 
-impl CssClassTraversalPolicy {
+impl<'db> CssClassTraversal<'db> {
     /// Creates a class traversal with `start` already visited.
     ///
     /// Seeding the starting module prevents an import cycle from yielding its
     /// direct CSS imports a second time.
-    pub(crate) fn new(start: &Utf8Path) -> Self {
+    pub(crate) fn new(db: &'db dyn ModuleDb, start: &Utf8Path) -> Self {
         Self {
+            db,
+            stack: vec![UpwardTraversalWork::explore(start.to_path_buf(), ())],
             visited: [start.to_path_buf()].into_iter().collect(),
         }
     }
 }
 
-impl UpwardTraversalPolicy for CssClassTraversalPolicy {
-    type BranchState = ();
+impl UpwardTraversalVisitor for CssClassTraversal<'_> {
+    type Branch = ();
     type Item = CssClassStep;
 
-    /// Accepts an unvisited JavaScript or HTML module that imports `current_path`.
     fn should_visit_importer(
         &self,
-        current_path: &Utf8Path,
-        importer_path: &Utf8Path,
-        importer: &ModuleInfoKind,
-        _state: &Self::BranchState,
+        imported_path: &Utf8Path,
+        importer: ModuleInfo,
+        _branch: &Self::Branch,
     ) -> bool {
+        let importer_path = importer.path(self.db);
+        let importer = importer.kind(self.db);
         !matches!(importer, ModuleInfoKind::Css(_))
             && !self.visited.contains(importer_path)
-            && imports_path(importer, current_path)
+            && imports_path(&importer, imported_path)
     }
 
     /// Collects the importer's CSS classes and continues through its importers.
@@ -250,12 +100,13 @@ impl UpwardTraversalPolicy for CssClassTraversalPolicy {
     /// The importer is marked globally visited before traversal continues.
     fn visit_importer(
         &mut self,
-        db: &dyn ModuleDb,
-        _current_path: &Utf8Path,
-        importer_path: &Utf8Path,
-        importer: &ModuleInfoKind,
-        _state: &Self::BranchState,
-    ) -> Vec<UpwardTraversalAction<Self::Item, Self::BranchState>> {
+        _imported_path: &Utf8Path,
+        importer: ModuleInfo,
+        _branch: &Self::Branch,
+    ) -> Vec<UpwardTraversalAction<Self::Item, Self::Branch>> {
+        let db = self.db;
+        let importer_path = importer.path(db);
+        let importer = importer.kind(db);
         self.visited.insert(importer_path.to_path_buf());
 
         let items = match importer {
@@ -288,13 +139,25 @@ impl UpwardTraversalPolicy for CssClassTraversalPolicy {
     }
 }
 
+impl UpwardTraversal for CssClassTraversal<'_> {
+    fn db(&self) -> &dyn ModuleDb {
+        self.db
+    }
+
+    fn stack(&mut self) -> &mut Vec<UpwardTraversalWork<Self::Item, Self::Branch>> {
+        &mut self.stack
+    }
+}
+
 /// Traverses importer branches to resolve visible CSS `@property` definitions.
 ///
 /// Every authored edge is evaluated independently because preceding sibling
 /// imports differ by edge position. A branch stops at its nearest definition.
 /// Definitions reached through multiple paths are deduplicated by source path
 /// and range.
-pub(crate) struct CssPropertyTraversalPolicy<'name> {
+pub(crate) struct CssPropertyTraversal<'db, 'name> {
+    db: &'db dyn ModuleDb,
+    stack: Vec<UpwardTraversalWork<CssPropertyDefinition, CssPropertyBranch>>,
     name: &'name str,
     yielded: FxHashSet<CssPropertyDefinition>,
 }
@@ -313,7 +176,7 @@ struct CssPropertyBranchNode {
 
 impl CssPropertyBranch {
     /// Starts a branch with `path` as its first visited module.
-    pub(crate) fn new(path: Utf8PathBuf) -> Self {
+    fn new(path: Utf8PathBuf) -> Self {
         Self(Rc::new(CssPropertyBranchNode { path, parent: None }))
     }
 
@@ -338,10 +201,13 @@ impl CssPropertyBranch {
     }
 }
 
-impl<'name> CssPropertyTraversalPolicy<'name> {
-    /// Creates a policy that resolves definitions for `name`.
-    pub(crate) fn new(name: &'name str) -> Self {
+impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
+    /// Starts a traversal that resolves definitions for `name`.
+    pub(crate) fn new(db: &'db dyn ModuleDb, start: &Utf8Path, name: &'name str) -> Self {
+        let branch = CssPropertyBranch::new(start.to_path_buf());
         Self {
+            db,
+            stack: vec![UpwardTraversalWork::explore(start.to_path_buf(), branch)],
             name,
             yielded: FxHashSet::default(),
         }
@@ -373,45 +239,45 @@ impl<'name> CssPropertyTraversalPolicy<'name> {
     }
 }
 
-impl UpwardTraversalPolicy for CssPropertyTraversalPolicy<'_> {
-    type BranchState = CssPropertyBranch;
+impl UpwardTraversalVisitor for CssPropertyTraversal<'_, '_> {
+    type Branch = CssPropertyBranch;
     type Item = CssPropertyDefinition;
 
-    /// Accepts an importer that has not occurred in this branch's ancestry.
     fn should_visit_importer(
         &self,
-        current_path: &Utf8Path,
-        importer_path: &Utf8Path,
-        importer: &ModuleInfoKind,
-        state: &Self::BranchState,
+        imported_path: &Utf8Path,
+        importer: ModuleInfo,
+        branch: &Self::Branch,
     ) -> bool {
-        !state.contains(importer_path) && imports_path(importer, current_path)
+        let importer_path = importer.path(self.db);
+        !branch.contains(importer_path) && imports_path(&importer.kind(self.db), imported_path)
     }
 
-    /// Resolves the definition visible from each authored edge to `current_path`.
+    /// Resolves the definition visible from each authored edge to `imported_path`.
     ///
     /// CSS importers prefer their local definition, then preceding sibling
     /// imports. JavaScript and HTML importers search preceding CSS contexts.
     fn visit_importer(
         &mut self,
-        db: &dyn ModuleDb,
-        current_path: &Utf8Path,
-        importer_path: &Utf8Path,
-        importer: &ModuleInfoKind,
-        state: &Self::BranchState,
-    ) -> Vec<UpwardTraversalAction<Self::Item, Self::BranchState>> {
-        let next_branch = state.with_path(importer_path.to_path_buf());
+        imported_path: &Utf8Path,
+        importer: ModuleInfo,
+        branch: &Self::Branch,
+    ) -> Vec<UpwardTraversalAction<Self::Item, Self::Branch>> {
+        let db = self.db;
+        let importer_path = importer.path(db);
+        let next_branch = branch.with_path(importer_path.to_path_buf());
+        let importer = importer.kind(db);
         match importer {
             ModuleInfoKind::Css(info) => info
                 .imports
                 .iter()
-                .filter(|(_, import)| import.resolved_path.as_path() == Some(current_path))
+                .filter(|(_, import)| import.resolved_path.as_path() == Some(imported_path))
                 .map(|(child_range, _)| {
                     let definition = local_property_definition(db, importer_path, self.name)
                         .or_else(|| {
                             last_property_in_imports_before(
                                 db,
-                                info,
+                                &info,
                                 *child_range,
                                 self.name,
                                 &mut [importer_path.to_path_buf()].into_iter().collect(),
@@ -430,7 +296,7 @@ impl UpwardTraversalPolicy for CssPropertyTraversalPolicy<'_> {
                 self.actions_for_ordered_imports(
                     db,
                     importer_path,
-                    current_path,
+                    imported_path,
                     &imports,
                     next_branch,
                 )
@@ -446,7 +312,7 @@ impl UpwardTraversalPolicy for CssPropertyTraversalPolicy<'_> {
                 self.actions_for_ordered_imports(
                     db,
                     importer_path,
-                    current_path,
+                    imported_path,
                     &imports,
                     next_branch,
                 )
@@ -455,8 +321,8 @@ impl UpwardTraversalPolicy for CssPropertyTraversalPolicy<'_> {
     }
 }
 
-impl CssPropertyTraversalPolicy<'_> {
-    /// Evaluates every occurrence of `current_path` in an ordered import list.
+impl CssPropertyTraversal<'_, '_> {
+    /// Evaluates every occurrence of `imported_path` in an ordered import list.
     ///
     /// For each occurrence, preceding imports are searched from nearest to
     /// farthest. Imports authored after the occurrence are not visible.
@@ -464,14 +330,14 @@ impl CssPropertyTraversalPolicy<'_> {
         &mut self,
         db: &dyn ModuleDb,
         importer_path: &Utf8Path,
-        current_path: &Utf8Path,
+        imported_path: &Utf8Path,
         imports: &[&Utf8Path],
         next_branch: CssPropertyBranch,
     ) -> Vec<UpwardTraversalAction<CssPropertyDefinition, CssPropertyBranch>> {
         imports
             .iter()
             .enumerate()
-            .filter(|(_, path)| **path == current_path)
+            .filter(|(_, path)| **path == imported_path)
             .map(|(child_index, _)| {
                 let mut ancestry = [importer_path.to_path_buf()].into_iter().collect();
                 let definition = imports.iter().take(child_index).rev().find_map(|path| {
@@ -480,6 +346,16 @@ impl CssPropertyTraversalPolicy<'_> {
                 self.action(definition, next_branch.clone())
             })
             .collect()
+    }
+}
+
+impl UpwardTraversal for CssPropertyTraversal<'_, '_> {
+    fn db(&self) -> &dyn ModuleDb {
+        self.db
+    }
+
+    fn stack(&mut self) -> &mut Vec<UpwardTraversalWork<Self::Item, Self::Branch>> {
+        &mut self.stack
     }
 }
 

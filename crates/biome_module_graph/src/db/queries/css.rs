@@ -1,8 +1,8 @@
 use super::SymbolFromModuleInfo;
 use crate::css_module_info::traverse::{
-    CssClassStep, CssClassTraversalPolicy, CssPropertyBranch, CssPropertyTraversalPolicy,
-    UpwardTraversal, last_property_in_css_context,
+    CssClassStep, CssClassTraversal, CssPropertyTraversal, last_property_in_css_context,
 };
+use crate::traverse::UpwardTraversal;
 use crate::{CssPropertyDefinition, ImportTreeNode, ModuleDb, ModuleInfo, ModuleInfoKind};
 use biome_css_syntax::{TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -56,11 +56,13 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
             continue;
         }
 
-        db.for_each_module(&mut |file_path, module_info| {
+        db.for_each_module(&mut |module| {
+            let file_path = module.path(db);
+            let module_info = module.kind(db);
             if file_path == current.as_path() {
                 return;
             }
-            let imports_current = match module_info {
+            let imports_current = match &module_info {
                 ModuleInfoKind::Js(js_info) => js_info
                     .static_import_paths
                     .values()
@@ -87,7 +89,7 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
             };
 
             if imports_current && !visited.contains(file_path) {
-                match module_info {
+                match &module_info {
                     ModuleInfoKind::Js(_) | ModuleInfoKind::Html(_) => {
                         result.push(file_path.to_path_buf());
                     }
@@ -128,12 +130,7 @@ pub fn traverse_import_tree_for_classes(
         }
     }
 
-    let traversal = UpwardTraversal::new(
-        db,
-        module.path(db).to_path_buf(),
-        CssClassTraversalPolicy::new(module.path(db)),
-        (),
-    );
+    let traversal = CssClassTraversal::new(db, module.path(db)).into_upward_iter();
     results.extend(traversal);
     results
 }
@@ -195,12 +192,7 @@ pub fn traverse_import_tree_for_html_classes(
     inline_steps
         .into_iter()
         .chain(linked_steps)
-        .chain(UpwardTraversal::new(
-            db,
-            module.path(db).to_path_buf(),
-            CssClassTraversalPolicy::new(module.path(db)),
-            (),
-        ))
+        .chain(CssClassTraversal::new(db, module.path(db)).into_upward_iter())
         .collect()
 }
 
@@ -230,13 +222,9 @@ pub fn css_property_definitions<'db>(
         return vec![definition];
     }
 
-    UpwardTraversal::new(
-        db,
-        path.to_path_buf(),
-        CssPropertyTraversalPolicy::new(&name),
-        CssPropertyBranch::new(path.to_path_buf()),
-    )
-    .collect()
+    CssPropertyTraversal::new(db, path, &name)
+        .into_upward_iter()
+        .collect()
 }
 
 /// Returns `true` if the given CSS `class_name` is referenced in any
