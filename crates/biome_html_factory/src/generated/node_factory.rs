@@ -26,6 +26,68 @@ pub fn angular_block_body(
         ],
     ))
 }
+pub fn angular_case_clause(
+    at_token: SyntaxToken,
+    case_token: SyntaxToken,
+    parameters: AngularSwitchParameters,
+) -> AngularCaseClauseBuilder {
+    AngularCaseClauseBuilder {
+        at_token,
+        case_token,
+        parameters,
+        children: None,
+    }
+}
+pub struct AngularCaseClauseBuilder {
+    at_token: SyntaxToken,
+    case_token: SyntaxToken,
+    parameters: AngularSwitchParameters,
+    children: Option<AngularBlockBody>,
+}
+impl AngularCaseClauseBuilder {
+    pub fn with_children(mut self, children: AngularBlockBody) -> Self {
+        self.children = Some(children);
+        self
+    }
+    pub fn build(self) -> AngularCaseClause {
+        AngularCaseClause::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_CASE_CLAUSE,
+            [
+                Some(SyntaxElement::Token(self.at_token)),
+                Some(SyntaxElement::Token(self.case_token)),
+                Some(SyntaxElement::Node(self.parameters.into_syntax())),
+                self.children
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn angular_default_clause(
+    at_token: SyntaxToken,
+    default_token: SyntaxToken,
+    children: AnyAngularDefaultClauseBody,
+) -> AngularDefaultClause {
+    AngularDefaultClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_DEFAULT_CLAUSE,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(default_token)),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_default_expression_clause(
+    expression: HtmlTextExpression,
+    semicolon_token: SyntaxToken,
+) -> AngularDefaultExpressionClause {
+    AngularDefaultExpressionClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_DEFAULT_EXPRESSION_CLAUSE,
+        [
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
 pub fn angular_else_clause(
     at_token: SyntaxToken,
     else_token: SyntaxToken,
@@ -429,6 +491,74 @@ impl AngularStructuralDirectiveBuilder {
             ],
         ))
     }
+}
+pub fn angular_switch_block(
+    opening_block: AngularSwitchOpeningBlock,
+    l_curly_token: SyntaxToken,
+    cases: AngularCaseClauseList,
+    r_curly_token: SyntaxToken,
+) -> AngularSwitchBlockBuilder {
+    AngularSwitchBlockBuilder {
+        opening_block,
+        l_curly_token,
+        cases,
+        r_curly_token,
+        default_clause: None,
+    }
+}
+pub struct AngularSwitchBlockBuilder {
+    opening_block: AngularSwitchOpeningBlock,
+    l_curly_token: SyntaxToken,
+    cases: AngularCaseClauseList,
+    r_curly_token: SyntaxToken,
+    default_clause: Option<AngularDefaultClause>,
+}
+impl AngularSwitchBlockBuilder {
+    pub fn with_default_clause(mut self, default_clause: AngularDefaultClause) -> Self {
+        self.default_clause = Some(default_clause);
+        self
+    }
+    pub fn build(self) -> AngularSwitchBlock {
+        AngularSwitchBlock::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_SWITCH_BLOCK,
+            [
+                Some(SyntaxElement::Node(self.opening_block.into_syntax())),
+                Some(SyntaxElement::Token(self.l_curly_token)),
+                Some(SyntaxElement::Node(self.cases.into_syntax())),
+                self.default_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_curly_token)),
+            ],
+        ))
+    }
+}
+pub fn angular_switch_opening_block(
+    at_token: SyntaxToken,
+    switch_token: SyntaxToken,
+    parameters: AngularSwitchParameters,
+) -> AngularSwitchOpeningBlock {
+    AngularSwitchOpeningBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_SWITCH_OPENING_BLOCK,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(switch_token)),
+            Some(SyntaxElement::Node(parameters.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_switch_parameters(
+    l_paren_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    r_paren_token: SyntaxToken,
+) -> AngularSwitchParameters {
+    AngularSwitchParameters::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_SWITCH_PARAMETERS,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
 }
 pub fn angular_template_ref_variable(
     hash_token: SyntaxToken,
@@ -2305,6 +2435,18 @@ impl VueVSlotShorthandDirectiveBuilder {
             ],
         ))
     }
+}
+pub fn angular_case_clause_list<I>(items: I) -> AngularCaseClauseList
+where
+    I: IntoIterator<Item = AngularCaseClause>,
+    I::IntoIter: ExactSizeIterator,
+{
+    AngularCaseClauseList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_CASE_CLAUSE_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
 }
 pub fn angular_else_if_clause_list<I>(items: I) -> AngularElseIfClauseList
 where
