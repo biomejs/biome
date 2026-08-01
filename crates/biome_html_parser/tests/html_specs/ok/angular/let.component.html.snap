@@ -1,6 +1,5 @@
 ---
 source: crates/biome_html_parser/tests/spec_test.rs
-assertion_line: 155
 expression: snapshot
 ---
 
@@ -38,229 +37,201 @@ HtmlRoot {
     processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
-        AnyAngularBlock {
-            angular_let_block: AngularLetBlock {
-                at_token: AT@0..1 "@" [] [],
-                let_token: LET_KW@1..5 "let" [] [Whitespace(" ")],
-                name: AngularBindingName {
-                    value_token: HTML_LITERAL@5..10 "name" [] [Whitespace(" ")],
-                },
-                initializer: AngularLetInitializerClause {
-                    eq_token: EQ@10..11 "=" [] [],
-                    expression: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@11..21 " user.name" [] [],
-                    },
-                },
-                semicolon_token: SEMICOLON@21..22 ";" [] [],
+        AngularLetBlock {
+            at_token: AT@0..1 "@" [] [],
+            let_token: LET_KW@1..5 "let" [] [Whitespace(" ")],
+            name: AngularBindingName {
+                value_token: HTML_LITERAL@5..10 "name" [] [Whitespace(" ")],
             },
+            initializer: AngularLetInitializerClause {
+                eq_token: EQ@10..11 "=" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@11..21 " user.name" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@21..22 ";" [] [],
         },
-        AnyAngularBlock {
-            angular_let_block: AngularLetBlock {
-                at_token: AT@22..24 "@" [Newline("\n")] [],
-                let_token: LET_KW@24..28 "let" [] [Whitespace(" ")],
-                name: AngularBindingName {
-                    value_token: HTML_LITERAL@28..33 "data" [] [Whitespace(" ")],
-                },
-                initializer: AngularLetInitializerClause {
-                    eq_token: EQ@33..34 "=" [] [],
-                    expression: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@34..48 " data$ | async" [] [],
-                    },
-                },
-                semicolon_token: SEMICOLON@48..49 ";" [] [],
+        AngularLetBlock {
+            at_token: AT@22..24 "@" [Newline("\n")] [],
+            let_token: LET_KW@24..28 "let" [] [Whitespace(" ")],
+            name: AngularBindingName {
+                value_token: HTML_LITERAL@28..33 "data" [] [Whitespace(" ")],
             },
+            initializer: AngularLetInitializerClause {
+                eq_token: EQ@33..34 "=" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@34..48 " data$ | async" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@48..49 ";" [] [],
         },
-        AnyAngularBlock {
-            angular_let_block: AngularLetBlock {
-                at_token: AT@49..51 "@" [Newline("\n")] [],
-                let_token: LET_KW@51..55 "let" [] [Whitespace(" ")],
-                name: AngularBindingName {
-                    value_token: HTML_LITERAL@55..61 "count" [] [Whitespace(" ")],
-                },
-                initializer: AngularLetInitializerClause {
-                    eq_token: EQ@61..62 "=" [] [],
-                    expression: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@62..65 " 42" [] [],
-                    },
-                },
-                semicolon_token: SEMICOLON@65..66 ";" [] [],
+        AngularLetBlock {
+            at_token: AT@49..51 "@" [Newline("\n")] [],
+            let_token: LET_KW@51..55 "let" [] [Whitespace(" ")],
+            name: AngularBindingName {
+                value_token: HTML_LITERAL@55..61 "count" [] [Whitespace(" ")],
             },
+            initializer: AngularLetInitializerClause {
+                eq_token: EQ@61..62 "=" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@62..65 " 42" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@65..66 ";" [] [],
         },
-        AnyAngularBlock {
-            angular_let_block: AngularLetBlock {
-                at_token: AT@66..68 "@" [Newline("\n")] [],
-                let_token: LET_KW@68..72 "let" [] [Whitespace(" ")],
-                name: AngularBindingName {
-                    value_token: HTML_LITERAL@72..78 "ratio" [] [Whitespace(" ")],
-                },
-                initializer: AngularLetInitializerClause {
-                    eq_token: EQ@78..79 "=" [] [],
-                    expression: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@79..84 " 3.14" [] [],
-                    },
-                },
-                semicolon_token: SEMICOLON@84..85 ";" [] [],
+        AngularLetBlock {
+            at_token: AT@66..68 "@" [Newline("\n")] [],
+            let_token: LET_KW@68..72 "let" [] [Whitespace(" ")],
+            name: AngularBindingName {
+                value_token: HTML_LITERAL@72..78 "ratio" [] [Whitespace(" ")],
             },
+            initializer: AngularLetInitializerClause {
+                eq_token: EQ@78..79 "=" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@79..84 " 3.14" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@84..85 ";" [] [],
         },
-        AnyAngularBlock {
-            angular_let_block: AngularLetBlock {
-                at_token: AT@85..87 "@" [Newline("\n")] [],
-                let_token: LET_KW@87..91 "let" [] [Whitespace(" ")],
-                name: AngularBindingName {
-                    value_token: HTML_LITERAL@91..100 "negative" [] [Whitespace(" ")],
-                },
-                initializer: AngularLetInitializerClause {
-                    eq_token: EQ@100..101 "=" [] [],
-                    expression: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@101..104 " -1" [] [],
-                    },
-                },
-                semicolon_token: SEMICOLON@104..105 ";" [] [],
+        AngularLetBlock {
+            at_token: AT@85..87 "@" [Newline("\n")] [],
+            let_token: LET_KW@87..91 "let" [] [Whitespace(" ")],
+            name: AngularBindingName {
+                value_token: HTML_LITERAL@91..100 "negative" [] [Whitespace(" ")],
             },
+            initializer: AngularLetInitializerClause {
+                eq_token: EQ@100..101 "=" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@101..104 " -1" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@104..105 ";" [] [],
         },
-        AnyAngularBlock {
-            angular_let_block: AngularLetBlock {
-                at_token: AT@105..107 "@" [Newline("\n")] [],
-                let_token: LET_KW@107..111 "let" [] [Whitespace(" ")],
-                name: AngularBindingName {
-                    value_token: HTML_LITERAL@111..118 "config" [] [Whitespace(" ")],
-                },
-                initializer: AngularLetInitializerClause {
-                    eq_token: EQ@118..119 "=" [] [],
-                    expression: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@119..149 " { name: 'biome', version: 2 }" [] [],
-                    },
-                },
-                semicolon_token: SEMICOLON@149..150 ";" [] [],
+        AngularLetBlock {
+            at_token: AT@105..107 "@" [Newline("\n")] [],
+            let_token: LET_KW@107..111 "let" [] [Whitespace(" ")],
+            name: AngularBindingName {
+                value_token: HTML_LITERAL@111..118 "config" [] [Whitespace(" ")],
             },
+            initializer: AngularLetInitializerClause {
+                eq_token: EQ@118..119 "=" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@119..149 " { name: 'biome', version: 2 }" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@149..150 ";" [] [],
         },
-        AnyAngularBlock {
-            angular_let_block: AngularLetBlock {
-                at_token: AT@150..152 "@" [Newline("\n")] [],
-                let_token: LET_KW@152..156 "let" [] [Whitespace(" ")],
-                name: AngularBindingName {
-                    value_token: HTML_LITERAL@156..163 "nested" [] [Whitespace(" ")],
-                },
-                initializer: AngularLetInitializerClause {
-                    eq_token: EQ@163..164 "=" [] [],
-                    expression: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@164..194 " { a: { b: 1 }, c: [1, 2, 3] }" [] [],
-                    },
-                },
-                semicolon_token: SEMICOLON@194..195 ";" [] [],
+        AngularLetBlock {
+            at_token: AT@150..152 "@" [Newline("\n")] [],
+            let_token: LET_KW@152..156 "let" [] [Whitespace(" ")],
+            name: AngularBindingName {
+                value_token: HTML_LITERAL@156..163 "nested" [] [Whitespace(" ")],
             },
+            initializer: AngularLetInitializerClause {
+                eq_token: EQ@163..164 "=" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@164..194 " { a: { b: 1 }, c: [1, 2, 3] }" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@194..195 ";" [] [],
         },
-        AnyAngularBlock {
-            angular_let_block: AngularLetBlock {
-                at_token: AT@195..197 "@" [Newline("\n")] [],
-                let_token: LET_KW@197..201 "let" [] [Whitespace(" ")],
-                name: AngularBindingName {
-                    value_token: HTML_LITERAL@201..206 "list" [] [Whitespace(" ")],
-                },
-                initializer: AngularLetInitializerClause {
-                    eq_token: EQ@206..207 "=" [] [],
-                    expression: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@207..217 " [1, 2, 3]" [] [],
-                    },
-                },
-                semicolon_token: SEMICOLON@217..218 ";" [] [],
+        AngularLetBlock {
+            at_token: AT@195..197 "@" [Newline("\n")] [],
+            let_token: LET_KW@197..201 "let" [] [Whitespace(" ")],
+            name: AngularBindingName {
+                value_token: HTML_LITERAL@201..206 "list" [] [Whitespace(" ")],
             },
+            initializer: AngularLetInitializerClause {
+                eq_token: EQ@206..207 "=" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@207..217 " [1, 2, 3]" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@217..218 ";" [] [],
         },
-        AnyAngularBlock {
-            angular_let_block: AngularLetBlock {
-                at_token: AT@218..220 "@" [Newline("\n")] [],
-                let_token: LET_KW@220..224 "let" [] [Whitespace(" ")],
-                name: AngularBindingName {
-                    value_token: HTML_LITERAL@224..228 "sum" [] [Whitespace(" ")],
-                },
-                initializer: AngularLetInitializerClause {
-                    eq_token: EQ@228..229 "=" [] [],
-                    expression: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@229..243 " count + ratio" [] [],
-                    },
-                },
-                semicolon_token: SEMICOLON@243..244 ";" [] [],
+        AngularLetBlock {
+            at_token: AT@218..220 "@" [Newline("\n")] [],
+            let_token: LET_KW@220..224 "let" [] [Whitespace(" ")],
+            name: AngularBindingName {
+                value_token: HTML_LITERAL@224..228 "sum" [] [Whitespace(" ")],
             },
+            initializer: AngularLetInitializerClause {
+                eq_token: EQ@228..229 "=" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@229..243 " count + ratio" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@243..244 ";" [] [],
         },
-        AnyAngularBlock {
-            angular_let_block: AngularLetBlock {
-                at_token: AT@244..246 "@" [Newline("\n")] [],
-                let_token: LET_KW@246..250 "let" [] [Whitespace(" ")],
-                name: AngularBindingName {
-                    value_token: HTML_LITERAL@250..256 "first" [] [Whitespace(" ")],
-                },
-                initializer: AngularLetInitializerClause {
-                    eq_token: EQ@256..257 "=" [] [],
-                    expression: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@257..265 " list[0]" [] [],
-                    },
-                },
-                semicolon_token: SEMICOLON@265..266 ";" [] [],
+        AngularLetBlock {
+            at_token: AT@244..246 "@" [Newline("\n")] [],
+            let_token: LET_KW@246..250 "let" [] [Whitespace(" ")],
+            name: AngularBindingName {
+                value_token: HTML_LITERAL@250..256 "first" [] [Whitespace(" ")],
             },
+            initializer: AngularLetInitializerClause {
+                eq_token: EQ@256..257 "=" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@257..265 " list[0]" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@265..266 ";" [] [],
         },
-        AnyAngularBlock {
-            angular_let_block: AngularLetBlock {
-                at_token: AT@266..268 "@" [Newline("\n")] [],
-                let_token: LET_KW@268..272 "let" [] [Whitespace(" ")],
-                name: AngularBindingName {
-                    value_token: HTML_LITERAL@272..278 "label" [] [Whitespace(" ")],
-                },
-                initializer: AngularLetInitializerClause {
-                    eq_token: EQ@278..279 "=" [] [],
-                    expression: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@279..303 " isActive ? 'on' : 'off'" [] [],
-                    },
-                },
-                semicolon_token: SEMICOLON@303..304 ";" [] [],
+        AngularLetBlock {
+            at_token: AT@266..268 "@" [Newline("\n")] [],
+            let_token: LET_KW@268..272 "let" [] [Whitespace(" ")],
+            name: AngularBindingName {
+                value_token: HTML_LITERAL@272..278 "label" [] [Whitespace(" ")],
             },
+            initializer: AngularLetInitializerClause {
+                eq_token: EQ@278..279 "=" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@279..303 " isActive ? 'on' : 'off'" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@303..304 ";" [] [],
         },
-        AnyAngularBlock {
-            angular_let_block: AngularLetBlock {
-                at_token: AT@304..306 "@" [Newline("\n")] [],
-                let_token: LET_KW@306..310 "let" [] [Whitespace(" ")],
-                name: AngularBindingName {
-                    value_token: HTML_LITERAL@310..318 "message" [] [Whitespace(" ")],
-                },
-                initializer: AngularLetInitializerClause {
-                    eq_token: EQ@318..319 "=" [] [],
-                    expression: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@319..355 " `first line\nsecond line\nthird line`" [] [],
-                    },
-                },
-                semicolon_token: SEMICOLON@355..356 ";" [] [],
+        AngularLetBlock {
+            at_token: AT@304..306 "@" [Newline("\n")] [],
+            let_token: LET_KW@306..310 "let" [] [Whitespace(" ")],
+            name: AngularBindingName {
+                value_token: HTML_LITERAL@310..318 "message" [] [Whitespace(" ")],
             },
+            initializer: AngularLetInitializerClause {
+                eq_token: EQ@318..319 "=" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@319..355 " `first line\nsecond line\nthird line`" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@355..356 ";" [] [],
         },
-        AnyAngularBlock {
-            angular_let_block: AngularLetBlock {
-                at_token: AT@356..358 "@" [Newline("\n")] [],
-                let_token: LET_KW@358..362 "let" [] [Whitespace(" ")],
-                name: AngularBindingName {
-                    value_token: HTML_LITERAL@362..369 "concat" [] [Whitespace(" ")],
-                },
-                initializer: AngularLetInitializerClause {
-                    eq_token: EQ@369..370 "=" [] [],
-                    expression: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@370..389 " \"first\" + \"second\"" [] [],
-                    },
-                },
-                semicolon_token: SEMICOLON@389..390 ";" [] [],
+        AngularLetBlock {
+            at_token: AT@356..358 "@" [Newline("\n")] [],
+            let_token: LET_KW@358..362 "let" [] [Whitespace(" ")],
+            name: AngularBindingName {
+                value_token: HTML_LITERAL@362..369 "concat" [] [Whitespace(" ")],
             },
+            initializer: AngularLetInitializerClause {
+                eq_token: EQ@369..370 "=" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@370..389 " \"first\" + \"second\"" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@389..390 ";" [] [],
         },
-        AnyAngularBlock {
-            angular_let_block: AngularLetBlock {
-                at_token: AT@390..392 "@" [Newline("\n")] [],
-                let_token: LET_KW@392..396 "let" [] [Whitespace(" ")],
-                name: AngularBindingName {
-                    value_token: HTML_LITERAL@396..412 "multilineConcat" [] [Whitespace(" ")],
-                },
-                initializer: AngularLetInitializerClause {
-                    eq_token: EQ@412..413 "=" [] [],
-                    expression: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@413..459 " \"first line \" +\n\"second line \" +\n\"third line\"" [] [],
-                    },
-                },
-                semicolon_token: SEMICOLON@459..460 ";" [] [],
+        AngularLetBlock {
+            at_token: AT@390..392 "@" [Newline("\n")] [],
+            let_token: LET_KW@392..396 "let" [] [Whitespace(" ")],
+            name: AngularBindingName {
+                value_token: HTML_LITERAL@396..412 "multilineConcat" [] [Whitespace(" ")],
             },
+            initializer: AngularLetInitializerClause {
+                eq_token: EQ@412..413 "=" [] [],
+                expression: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@413..459 " \"first line \" +\n\"second line \" +\n\"third line\"" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@459..460 ";" [] [],
         },
     ],
     eof_token: EOF@460..461 "" [Newline("\n")] [],
@@ -276,160 +247,146 @@ HtmlRoot {
   2: (empty)
   3: (empty)
   4: HTML_ELEMENT_LIST@0..460
-    0: ANY_ANGULAR_BLOCK@0..22
-      0: ANGULAR_LET_BLOCK@0..22
-        0: AT@0..1 "@" [] []
-        1: LET_KW@1..5 "let" [] [Whitespace(" ")]
-        2: ANGULAR_BINDING_NAME@5..10
-          0: HTML_LITERAL@5..10 "name" [] [Whitespace(" ")]
-        3: ANGULAR_LET_INITIALIZER_CLAUSE@10..21
-          0: EQ@10..11 "=" [] []
-          1: HTML_TEXT_EXPRESSION@11..21
-            0: HTML_LITERAL@11..21 " user.name" [] []
-        4: SEMICOLON@21..22 ";" [] []
-    1: ANY_ANGULAR_BLOCK@22..49
-      0: ANGULAR_LET_BLOCK@22..49
-        0: AT@22..24 "@" [Newline("\n")] []
-        1: LET_KW@24..28 "let" [] [Whitespace(" ")]
-        2: ANGULAR_BINDING_NAME@28..33
-          0: HTML_LITERAL@28..33 "data" [] [Whitespace(" ")]
-        3: ANGULAR_LET_INITIALIZER_CLAUSE@33..48
-          0: EQ@33..34 "=" [] []
-          1: HTML_TEXT_EXPRESSION@34..48
-            0: HTML_LITERAL@34..48 " data$ | async" [] []
-        4: SEMICOLON@48..49 ";" [] []
-    2: ANY_ANGULAR_BLOCK@49..66
-      0: ANGULAR_LET_BLOCK@49..66
-        0: AT@49..51 "@" [Newline("\n")] []
-        1: LET_KW@51..55 "let" [] [Whitespace(" ")]
-        2: ANGULAR_BINDING_NAME@55..61
-          0: HTML_LITERAL@55..61 "count" [] [Whitespace(" ")]
-        3: ANGULAR_LET_INITIALIZER_CLAUSE@61..65
-          0: EQ@61..62 "=" [] []
-          1: HTML_TEXT_EXPRESSION@62..65
-            0: HTML_LITERAL@62..65 " 42" [] []
-        4: SEMICOLON@65..66 ";" [] []
-    3: ANY_ANGULAR_BLOCK@66..85
-      0: ANGULAR_LET_BLOCK@66..85
-        0: AT@66..68 "@" [Newline("\n")] []
-        1: LET_KW@68..72 "let" [] [Whitespace(" ")]
-        2: ANGULAR_BINDING_NAME@72..78
-          0: HTML_LITERAL@72..78 "ratio" [] [Whitespace(" ")]
-        3: ANGULAR_LET_INITIALIZER_CLAUSE@78..84
-          0: EQ@78..79 "=" [] []
-          1: HTML_TEXT_EXPRESSION@79..84
-            0: HTML_LITERAL@79..84 " 3.14" [] []
-        4: SEMICOLON@84..85 ";" [] []
-    4: ANY_ANGULAR_BLOCK@85..105
-      0: ANGULAR_LET_BLOCK@85..105
-        0: AT@85..87 "@" [Newline("\n")] []
-        1: LET_KW@87..91 "let" [] [Whitespace(" ")]
-        2: ANGULAR_BINDING_NAME@91..100
-          0: HTML_LITERAL@91..100 "negative" [] [Whitespace(" ")]
-        3: ANGULAR_LET_INITIALIZER_CLAUSE@100..104
-          0: EQ@100..101 "=" [] []
-          1: HTML_TEXT_EXPRESSION@101..104
-            0: HTML_LITERAL@101..104 " -1" [] []
-        4: SEMICOLON@104..105 ";" [] []
-    5: ANY_ANGULAR_BLOCK@105..150
-      0: ANGULAR_LET_BLOCK@105..150
-        0: AT@105..107 "@" [Newline("\n")] []
-        1: LET_KW@107..111 "let" [] [Whitespace(" ")]
-        2: ANGULAR_BINDING_NAME@111..118
-          0: HTML_LITERAL@111..118 "config" [] [Whitespace(" ")]
-        3: ANGULAR_LET_INITIALIZER_CLAUSE@118..149
-          0: EQ@118..119 "=" [] []
-          1: HTML_TEXT_EXPRESSION@119..149
-            0: HTML_LITERAL@119..149 " { name: 'biome', version: 2 }" [] []
-        4: SEMICOLON@149..150 ";" [] []
-    6: ANY_ANGULAR_BLOCK@150..195
-      0: ANGULAR_LET_BLOCK@150..195
-        0: AT@150..152 "@" [Newline("\n")] []
-        1: LET_KW@152..156 "let" [] [Whitespace(" ")]
-        2: ANGULAR_BINDING_NAME@156..163
-          0: HTML_LITERAL@156..163 "nested" [] [Whitespace(" ")]
-        3: ANGULAR_LET_INITIALIZER_CLAUSE@163..194
-          0: EQ@163..164 "=" [] []
-          1: HTML_TEXT_EXPRESSION@164..194
-            0: HTML_LITERAL@164..194 " { a: { b: 1 }, c: [1, 2, 3] }" [] []
-        4: SEMICOLON@194..195 ";" [] []
-    7: ANY_ANGULAR_BLOCK@195..218
-      0: ANGULAR_LET_BLOCK@195..218
-        0: AT@195..197 "@" [Newline("\n")] []
-        1: LET_KW@197..201 "let" [] [Whitespace(" ")]
-        2: ANGULAR_BINDING_NAME@201..206
-          0: HTML_LITERAL@201..206 "list" [] [Whitespace(" ")]
-        3: ANGULAR_LET_INITIALIZER_CLAUSE@206..217
-          0: EQ@206..207 "=" [] []
-          1: HTML_TEXT_EXPRESSION@207..217
-            0: HTML_LITERAL@207..217 " [1, 2, 3]" [] []
-        4: SEMICOLON@217..218 ";" [] []
-    8: ANY_ANGULAR_BLOCK@218..244
-      0: ANGULAR_LET_BLOCK@218..244
-        0: AT@218..220 "@" [Newline("\n")] []
-        1: LET_KW@220..224 "let" [] [Whitespace(" ")]
-        2: ANGULAR_BINDING_NAME@224..228
-          0: HTML_LITERAL@224..228 "sum" [] [Whitespace(" ")]
-        3: ANGULAR_LET_INITIALIZER_CLAUSE@228..243
-          0: EQ@228..229 "=" [] []
-          1: HTML_TEXT_EXPRESSION@229..243
-            0: HTML_LITERAL@229..243 " count + ratio" [] []
-        4: SEMICOLON@243..244 ";" [] []
-    9: ANY_ANGULAR_BLOCK@244..266
-      0: ANGULAR_LET_BLOCK@244..266
-        0: AT@244..246 "@" [Newline("\n")] []
-        1: LET_KW@246..250 "let" [] [Whitespace(" ")]
-        2: ANGULAR_BINDING_NAME@250..256
-          0: HTML_LITERAL@250..256 "first" [] [Whitespace(" ")]
-        3: ANGULAR_LET_INITIALIZER_CLAUSE@256..265
-          0: EQ@256..257 "=" [] []
-          1: HTML_TEXT_EXPRESSION@257..265
-            0: HTML_LITERAL@257..265 " list[0]" [] []
-        4: SEMICOLON@265..266 ";" [] []
-    10: ANY_ANGULAR_BLOCK@266..304
-      0: ANGULAR_LET_BLOCK@266..304
-        0: AT@266..268 "@" [Newline("\n")] []
-        1: LET_KW@268..272 "let" [] [Whitespace(" ")]
-        2: ANGULAR_BINDING_NAME@272..278
-          0: HTML_LITERAL@272..278 "label" [] [Whitespace(" ")]
-        3: ANGULAR_LET_INITIALIZER_CLAUSE@278..303
-          0: EQ@278..279 "=" [] []
-          1: HTML_TEXT_EXPRESSION@279..303
-            0: HTML_LITERAL@279..303 " isActive ? 'on' : 'off'" [] []
-        4: SEMICOLON@303..304 ";" [] []
-    11: ANY_ANGULAR_BLOCK@304..356
-      0: ANGULAR_LET_BLOCK@304..356
-        0: AT@304..306 "@" [Newline("\n")] []
-        1: LET_KW@306..310 "let" [] [Whitespace(" ")]
-        2: ANGULAR_BINDING_NAME@310..318
-          0: HTML_LITERAL@310..318 "message" [] [Whitespace(" ")]
-        3: ANGULAR_LET_INITIALIZER_CLAUSE@318..355
-          0: EQ@318..319 "=" [] []
-          1: HTML_TEXT_EXPRESSION@319..355
-            0: HTML_LITERAL@319..355 " `first line\nsecond line\nthird line`" [] []
-        4: SEMICOLON@355..356 ";" [] []
-    12: ANY_ANGULAR_BLOCK@356..390
-      0: ANGULAR_LET_BLOCK@356..390
-        0: AT@356..358 "@" [Newline("\n")] []
-        1: LET_KW@358..362 "let" [] [Whitespace(" ")]
-        2: ANGULAR_BINDING_NAME@362..369
-          0: HTML_LITERAL@362..369 "concat" [] [Whitespace(" ")]
-        3: ANGULAR_LET_INITIALIZER_CLAUSE@369..389
-          0: EQ@369..370 "=" [] []
-          1: HTML_TEXT_EXPRESSION@370..389
-            0: HTML_LITERAL@370..389 " \"first\" + \"second\"" [] []
-        4: SEMICOLON@389..390 ";" [] []
-    13: ANY_ANGULAR_BLOCK@390..460
-      0: ANGULAR_LET_BLOCK@390..460
-        0: AT@390..392 "@" [Newline("\n")] []
-        1: LET_KW@392..396 "let" [] [Whitespace(" ")]
-        2: ANGULAR_BINDING_NAME@396..412
-          0: HTML_LITERAL@396..412 "multilineConcat" [] [Whitespace(" ")]
-        3: ANGULAR_LET_INITIALIZER_CLAUSE@412..459
-          0: EQ@412..413 "=" [] []
-          1: HTML_TEXT_EXPRESSION@413..459
-            0: HTML_LITERAL@413..459 " \"first line \" +\n\"second line \" +\n\"third line\"" [] []
-        4: SEMICOLON@459..460 ";" [] []
+    0: ANGULAR_LET_BLOCK@0..22
+      0: AT@0..1 "@" [] []
+      1: LET_KW@1..5 "let" [] [Whitespace(" ")]
+      2: ANGULAR_BINDING_NAME@5..10
+        0: HTML_LITERAL@5..10 "name" [] [Whitespace(" ")]
+      3: ANGULAR_LET_INITIALIZER_CLAUSE@10..21
+        0: EQ@10..11 "=" [] []
+        1: HTML_TEXT_EXPRESSION@11..21
+          0: HTML_LITERAL@11..21 " user.name" [] []
+      4: SEMICOLON@21..22 ";" [] []
+    1: ANGULAR_LET_BLOCK@22..49
+      0: AT@22..24 "@" [Newline("\n")] []
+      1: LET_KW@24..28 "let" [] [Whitespace(" ")]
+      2: ANGULAR_BINDING_NAME@28..33
+        0: HTML_LITERAL@28..33 "data" [] [Whitespace(" ")]
+      3: ANGULAR_LET_INITIALIZER_CLAUSE@33..48
+        0: EQ@33..34 "=" [] []
+        1: HTML_TEXT_EXPRESSION@34..48
+          0: HTML_LITERAL@34..48 " data$ | async" [] []
+      4: SEMICOLON@48..49 ";" [] []
+    2: ANGULAR_LET_BLOCK@49..66
+      0: AT@49..51 "@" [Newline("\n")] []
+      1: LET_KW@51..55 "let" [] [Whitespace(" ")]
+      2: ANGULAR_BINDING_NAME@55..61
+        0: HTML_LITERAL@55..61 "count" [] [Whitespace(" ")]
+      3: ANGULAR_LET_INITIALIZER_CLAUSE@61..65
+        0: EQ@61..62 "=" [] []
+        1: HTML_TEXT_EXPRESSION@62..65
+          0: HTML_LITERAL@62..65 " 42" [] []
+      4: SEMICOLON@65..66 ";" [] []
+    3: ANGULAR_LET_BLOCK@66..85
+      0: AT@66..68 "@" [Newline("\n")] []
+      1: LET_KW@68..72 "let" [] [Whitespace(" ")]
+      2: ANGULAR_BINDING_NAME@72..78
+        0: HTML_LITERAL@72..78 "ratio" [] [Whitespace(" ")]
+      3: ANGULAR_LET_INITIALIZER_CLAUSE@78..84
+        0: EQ@78..79 "=" [] []
+        1: HTML_TEXT_EXPRESSION@79..84
+          0: HTML_LITERAL@79..84 " 3.14" [] []
+      4: SEMICOLON@84..85 ";" [] []
+    4: ANGULAR_LET_BLOCK@85..105
+      0: AT@85..87 "@" [Newline("\n")] []
+      1: LET_KW@87..91 "let" [] [Whitespace(" ")]
+      2: ANGULAR_BINDING_NAME@91..100
+        0: HTML_LITERAL@91..100 "negative" [] [Whitespace(" ")]
+      3: ANGULAR_LET_INITIALIZER_CLAUSE@100..104
+        0: EQ@100..101 "=" [] []
+        1: HTML_TEXT_EXPRESSION@101..104
+          0: HTML_LITERAL@101..104 " -1" [] []
+      4: SEMICOLON@104..105 ";" [] []
+    5: ANGULAR_LET_BLOCK@105..150
+      0: AT@105..107 "@" [Newline("\n")] []
+      1: LET_KW@107..111 "let" [] [Whitespace(" ")]
+      2: ANGULAR_BINDING_NAME@111..118
+        0: HTML_LITERAL@111..118 "config" [] [Whitespace(" ")]
+      3: ANGULAR_LET_INITIALIZER_CLAUSE@118..149
+        0: EQ@118..119 "=" [] []
+        1: HTML_TEXT_EXPRESSION@119..149
+          0: HTML_LITERAL@119..149 " { name: 'biome', version: 2 }" [] []
+      4: SEMICOLON@149..150 ";" [] []
+    6: ANGULAR_LET_BLOCK@150..195
+      0: AT@150..152 "@" [Newline("\n")] []
+      1: LET_KW@152..156 "let" [] [Whitespace(" ")]
+      2: ANGULAR_BINDING_NAME@156..163
+        0: HTML_LITERAL@156..163 "nested" [] [Whitespace(" ")]
+      3: ANGULAR_LET_INITIALIZER_CLAUSE@163..194
+        0: EQ@163..164 "=" [] []
+        1: HTML_TEXT_EXPRESSION@164..194
+          0: HTML_LITERAL@164..194 " { a: { b: 1 }, c: [1, 2, 3] }" [] []
+      4: SEMICOLON@194..195 ";" [] []
+    7: ANGULAR_LET_BLOCK@195..218
+      0: AT@195..197 "@" [Newline("\n")] []
+      1: LET_KW@197..201 "let" [] [Whitespace(" ")]
+      2: ANGULAR_BINDING_NAME@201..206
+        0: HTML_LITERAL@201..206 "list" [] [Whitespace(" ")]
+      3: ANGULAR_LET_INITIALIZER_CLAUSE@206..217
+        0: EQ@206..207 "=" [] []
+        1: HTML_TEXT_EXPRESSION@207..217
+          0: HTML_LITERAL@207..217 " [1, 2, 3]" [] []
+      4: SEMICOLON@217..218 ";" [] []
+    8: ANGULAR_LET_BLOCK@218..244
+      0: AT@218..220 "@" [Newline("\n")] []
+      1: LET_KW@220..224 "let" [] [Whitespace(" ")]
+      2: ANGULAR_BINDING_NAME@224..228
+        0: HTML_LITERAL@224..228 "sum" [] [Whitespace(" ")]
+      3: ANGULAR_LET_INITIALIZER_CLAUSE@228..243
+        0: EQ@228..229 "=" [] []
+        1: HTML_TEXT_EXPRESSION@229..243
+          0: HTML_LITERAL@229..243 " count + ratio" [] []
+      4: SEMICOLON@243..244 ";" [] []
+    9: ANGULAR_LET_BLOCK@244..266
+      0: AT@244..246 "@" [Newline("\n")] []
+      1: LET_KW@246..250 "let" [] [Whitespace(" ")]
+      2: ANGULAR_BINDING_NAME@250..256
+        0: HTML_LITERAL@250..256 "first" [] [Whitespace(" ")]
+      3: ANGULAR_LET_INITIALIZER_CLAUSE@256..265
+        0: EQ@256..257 "=" [] []
+        1: HTML_TEXT_EXPRESSION@257..265
+          0: HTML_LITERAL@257..265 " list[0]" [] []
+      4: SEMICOLON@265..266 ";" [] []
+    10: ANGULAR_LET_BLOCK@266..304
+      0: AT@266..268 "@" [Newline("\n")] []
+      1: LET_KW@268..272 "let" [] [Whitespace(" ")]
+      2: ANGULAR_BINDING_NAME@272..278
+        0: HTML_LITERAL@272..278 "label" [] [Whitespace(" ")]
+      3: ANGULAR_LET_INITIALIZER_CLAUSE@278..303
+        0: EQ@278..279 "=" [] []
+        1: HTML_TEXT_EXPRESSION@279..303
+          0: HTML_LITERAL@279..303 " isActive ? 'on' : 'off'" [] []
+      4: SEMICOLON@303..304 ";" [] []
+    11: ANGULAR_LET_BLOCK@304..356
+      0: AT@304..306 "@" [Newline("\n")] []
+      1: LET_KW@306..310 "let" [] [Whitespace(" ")]
+      2: ANGULAR_BINDING_NAME@310..318
+        0: HTML_LITERAL@310..318 "message" [] [Whitespace(" ")]
+      3: ANGULAR_LET_INITIALIZER_CLAUSE@318..355
+        0: EQ@318..319 "=" [] []
+        1: HTML_TEXT_EXPRESSION@319..355
+          0: HTML_LITERAL@319..355 " `first line\nsecond line\nthird line`" [] []
+      4: SEMICOLON@355..356 ";" [] []
+    12: ANGULAR_LET_BLOCK@356..390
+      0: AT@356..358 "@" [Newline("\n")] []
+      1: LET_KW@358..362 "let" [] [Whitespace(" ")]
+      2: ANGULAR_BINDING_NAME@362..369
+        0: HTML_LITERAL@362..369 "concat" [] [Whitespace(" ")]
+      3: ANGULAR_LET_INITIALIZER_CLAUSE@369..389
+        0: EQ@369..370 "=" [] []
+        1: HTML_TEXT_EXPRESSION@370..389
+          0: HTML_LITERAL@370..389 " \"first\" + \"second\"" [] []
+      4: SEMICOLON@389..390 ";" [] []
+    13: ANGULAR_LET_BLOCK@390..460
+      0: AT@390..392 "@" [Newline("\n")] []
+      1: LET_KW@392..396 "let" [] [Whitespace(" ")]
+      2: ANGULAR_BINDING_NAME@396..412
+        0: HTML_LITERAL@396..412 "multilineConcat" [] [Whitespace(" ")]
+      3: ANGULAR_LET_INITIALIZER_CLAUSE@412..459
+        0: EQ@412..413 "=" [] []
+        1: HTML_TEXT_EXPRESSION@413..459
+          0: HTML_LITERAL@413..459 " \"first line \" +\n\"second line \" +\n\"third line\"" [] []
+      4: SEMICOLON@459..460 ";" [] []
   5: EOF@460..461 "" [Newline("\n")] []
 
 ```
