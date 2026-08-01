@@ -32,8 +32,36 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::AngularElseIfClause::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::ANGULAR_EMPTY_CLAUSE => {
+                    let $pattern = unsafe { $crate::AngularEmptyClause::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::ANGULAR_EVENT_BINDING => {
                     let $pattern = unsafe { $crate::AngularEventBinding::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_FOR_BLOCK => {
+                    let $pattern = unsafe { $crate::AngularForBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_FOR_EXPRESSION => {
+                    let $pattern = unsafe { $crate::AngularForExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_FOR_LET_CLAUSE => {
+                    let $pattern = unsafe { $crate::AngularForLetClause::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_FOR_OPENING_BLOCK => {
+                    let $pattern = unsafe { $crate::AngularForOpeningBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_FOR_PARAMETERS => {
+                    let $pattern = unsafe { $crate::AngularForParameters::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_FOR_TRACK_CLAUSE => {
+                    let $pattern = unsafe { $crate::AngularForTrackClause::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::ANGULAR_IF_AS_CLAUSE => {
@@ -539,6 +567,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::ANGULAR_ELSE_IF_CLAUSE_LIST => {
                     let $pattern = unsafe { $crate::AngularElseIfClauseList::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_FOR_LET_BINDING_LIST => {
+                    let $pattern = unsafe { $crate::AngularForLetBindingList::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE_LIST => {

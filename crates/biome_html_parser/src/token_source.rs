@@ -1,5 +1,5 @@
 use crate::lexer::HtmlLexer;
-use biome_html_syntax::HtmlSyntaxKind::{AS_KW, CATCH_KW, EOF, THEN_KW};
+use biome_html_syntax::HtmlSyntaxKind::{AS_KW, CATCH_KW, EOF, OF_KW, THEN_KW};
 use biome_html_syntax::{HtmlSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{BufferedLexer, LexContext};
@@ -157,6 +157,8 @@ pub(crate) enum RestrictedExpressionStopAt {
     /// expression contains a TypeScript `as const` assertion before the Svelte
     /// binding `as`.
     AsOrCommaSkipFirstAs,
+    /// Stops at `of` keyword (for Angular @for blocks)
+    Of,
 }
 
 impl RestrictedExpressionStopAt {
@@ -166,6 +168,7 @@ impl RestrictedExpressionStopAt {
             Self::ClosingParen => byte == b')',
             Self::Semicolon => byte == b';',
             Self::ThenOrCatch => false,
+            Self::Of => false,
         }
     }
 
@@ -176,6 +179,7 @@ impl RestrictedExpressionStopAt {
             Self::ClosingParen => false,
             Self::Semicolon => false,
             Self::ThenOrCatch => keyword == THEN_KW || keyword == CATCH_KW,
+            Self::Of => keyword == OF_KW,
         }
     }
 }
