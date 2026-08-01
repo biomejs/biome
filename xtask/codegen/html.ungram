@@ -1198,6 +1198,7 @@ AnyAngularBlock =
 	| AngularIfBlock
 	| AngularForBlock
 	| AngularSwitchBlock
+	| AngularDeferBlock
 
 // @let name = expression;
 // ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1370,3 +1371,120 @@ AnyAngularDefaultClauseBody =
 AngularDefaultExpressionClause =
 	expression: HtmlTextExpression
 	';'
+
+// @defer (on idle; when condition; prefetch on interaction) { ... } @placeholder (minimum 500ms) { ... } @loading (after 100ms; minimum 1s) { ... } @error { ... }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularDeferBlock =
+	opening_block: AngularDeferOpeningBlock
+	placeholder_clause: AngularPlaceholderClause?
+	loading_clause: AngularLoadingClause?
+	error_clause: AngularErrorClause?
+
+// @defer (on idle; when condition; prefetch on interaction) { ... } @placeholder (minimum 500ms) { ... } @loading (after 100ms; minimum 1s) { ... } @error { ... }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularDeferOpeningBlock =
+	'@'
+	'defer'
+	parameters: AngularDeferParameters?
+	children: AngularBlockBody
+
+// @defer (on idle; when condition; prefetch on interaction) { ... } @placeholder (minimum 500ms) { ... } @loading (after 100ms; minimum 1s) { ... } @error { ... }
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularDeferParameters =
+	'('
+	clauses: AngularDeferClauseList
+	')'
+
+AngularDeferClauseList = (AnyAngularDeferClause (';' AnyAngularDeferClause)* ';'?)
+
+AnyAngularDeferClause =
+	AngularDeferOnClause
+	| AngularDeferWhenClause
+	| AngularDeferPrefetchOnClause
+	| AngularDeferPrefetchWhenClause
+	| AngularDeferHydrateOnClause
+	| AngularDeferHydrateWhenClause
+	| AngularDeferHydrateNeverClause
+
+AngularDeferOnClause =
+	'on'
+	expression: HtmlTextExpression
+
+AngularDeferWhenClause =
+	'when'
+	expression: HtmlTextExpression
+
+AngularDeferPrefetchOnClause =
+	'prefetch'
+	'on'
+	expression: HtmlTextExpression
+
+AngularDeferPrefetchWhenClause =
+	'prefetch'
+	'when'
+	expression: HtmlTextExpression
+
+AngularDeferHydrateOnClause =
+	'hydrate'
+	'on'
+	expression: HtmlTextExpression
+
+AngularDeferHydrateWhenClause =
+	'hydrate'
+	'when'
+	expression: HtmlTextExpression
+
+AngularDeferHydrateNeverClause =
+	'hydrate'
+	'never'
+
+// @defer (on idle; when condition; prefetch on interaction) { ... } @placeholder (minimum 500ms) { ... } @loading (after 100ms; minimum 1s) { ... } @error { ... }
+//                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularPlaceholderClause =
+	'@'
+	'placeholder'
+	parameters: AngularPlaceholderParameters?
+	children: AngularBlockBody
+
+// @defer (on idle; when condition; prefetch on interaction) { ... } @placeholder (minimum 500ms) { ... } @loading (after 100ms; minimum 1s) { ... } @error { ... }
+//                                                                                ^^^^^^^^^^^^^^^
+AngularPlaceholderParameters =
+	'('
+	clause: AngularMinimumTimeClause
+	')'
+
+// @defer (on idle; when condition; prefetch on interaction) { ... } @placeholder (minimum 500ms) { ... } @loading (after 100ms; minimum 1s) { ... } @error { ... }
+//                                                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularLoadingClause =
+	'@'
+	'loading'
+	parameters: AngularLoadingParameters?
+	children: AngularBlockBody
+
+// @defer (on idle; when condition; prefetch on interaction) { ... } @placeholder (minimum 500ms) { ... } @loading (after 100ms; minimum 1s) { ... } @error { ... }
+//                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularLoadingParameters =
+	'('
+	clauses: AngularLoadingParameterClauseList
+	')'
+
+AngularLoadingParameterClauseList = (AnyAngularLoadingParameterClause (';' AnyAngularLoadingParameterClause)* ';'?)
+
+AnyAngularLoadingParameterClause =
+	AngularAfterTimeClause
+	| AngularMinimumTimeClause
+
+AngularAfterTimeClause =
+	'after'
+	expression: HtmlTextExpression
+
+AngularMinimumTimeClause =
+	'minimum'
+	expression: HtmlTextExpression
+
+// @defer (on idle; when condition; prefetch on interaction) { ... } @placeholder (minimum 500ms) { ... } @loading (after 100ms; minimum 1s) { ... } @error { ... }
+//                                                                                                                                                   ^^^^^^^^^^^^^^
+AngularErrorClause =
+	'@'
+	'error'
+	children: AngularBlockBody

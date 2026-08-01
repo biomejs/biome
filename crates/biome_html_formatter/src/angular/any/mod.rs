@@ -3,3 +3,5 @@
 pub(crate) mod binding;
 pub(crate) mod block;
 pub(crate) mod default_clause_body;
+pub(crate) mod defer_clause;
+pub(crate) mod loading_parameter_clause;

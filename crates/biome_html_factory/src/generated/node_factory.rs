@@ -6,6 +6,18 @@ use biome_html_syntax::{
     HtmlSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
+pub fn angular_after_time_clause(
+    after_token: SyntaxToken,
+    expression: HtmlTextExpression,
+) -> AngularAfterTimeClause {
+    AngularAfterTimeClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_AFTER_TIME_CLAUSE,
+        [
+            Some(SyntaxElement::Token(after_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+        ],
+    ))
+}
 pub fn angular_binding_name(value_token: SyntaxToken) -> AngularBindingName {
     AngularBindingName::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::ANGULAR_BINDING_NAME,
@@ -88,6 +100,190 @@ pub fn angular_default_expression_clause(
         ],
     ))
 }
+pub fn angular_defer_block(opening_block: AngularDeferOpeningBlock) -> AngularDeferBlockBuilder {
+    AngularDeferBlockBuilder {
+        opening_block,
+        placeholder_clause: None,
+        loading_clause: None,
+        error_clause: None,
+    }
+}
+pub struct AngularDeferBlockBuilder {
+    opening_block: AngularDeferOpeningBlock,
+    placeholder_clause: Option<AngularPlaceholderClause>,
+    loading_clause: Option<AngularLoadingClause>,
+    error_clause: Option<AngularErrorClause>,
+}
+impl AngularDeferBlockBuilder {
+    pub fn with_placeholder_clause(mut self, placeholder_clause: AngularPlaceholderClause) -> Self {
+        self.placeholder_clause = Some(placeholder_clause);
+        self
+    }
+    pub fn with_loading_clause(mut self, loading_clause: AngularLoadingClause) -> Self {
+        self.loading_clause = Some(loading_clause);
+        self
+    }
+    pub fn with_error_clause(mut self, error_clause: AngularErrorClause) -> Self {
+        self.error_clause = Some(error_clause);
+        self
+    }
+    pub fn build(self) -> AngularDeferBlock {
+        AngularDeferBlock::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_DEFER_BLOCK,
+            [
+                Some(SyntaxElement::Node(self.opening_block.into_syntax())),
+                self.placeholder_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.loading_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.error_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn angular_defer_hydrate_never_clause(
+    hydrate_token: SyntaxToken,
+    never_token: SyntaxToken,
+) -> AngularDeferHydrateNeverClause {
+    AngularDeferHydrateNeverClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_DEFER_HYDRATE_NEVER_CLAUSE,
+        [
+            Some(SyntaxElement::Token(hydrate_token)),
+            Some(SyntaxElement::Token(never_token)),
+        ],
+    ))
+}
+pub fn angular_defer_hydrate_on_clause(
+    hydrate_token: SyntaxToken,
+    on_token: SyntaxToken,
+    expression: HtmlTextExpression,
+) -> AngularDeferHydrateOnClause {
+    AngularDeferHydrateOnClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_DEFER_HYDRATE_ON_CLAUSE,
+        [
+            Some(SyntaxElement::Token(hydrate_token)),
+            Some(SyntaxElement::Token(on_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_defer_hydrate_when_clause(
+    hydrate_token: SyntaxToken,
+    when_token: SyntaxToken,
+    expression: HtmlTextExpression,
+) -> AngularDeferHydrateWhenClause {
+    AngularDeferHydrateWhenClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_DEFER_HYDRATE_WHEN_CLAUSE,
+        [
+            Some(SyntaxElement::Token(hydrate_token)),
+            Some(SyntaxElement::Token(when_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_defer_on_clause(
+    on_token: SyntaxToken,
+    expression: HtmlTextExpression,
+) -> AngularDeferOnClause {
+    AngularDeferOnClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_DEFER_ON_CLAUSE,
+        [
+            Some(SyntaxElement::Token(on_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_defer_opening_block(
+    at_token: SyntaxToken,
+    defer_token: SyntaxToken,
+    children: AngularBlockBody,
+) -> AngularDeferOpeningBlockBuilder {
+    AngularDeferOpeningBlockBuilder {
+        at_token,
+        defer_token,
+        children,
+        parameters: None,
+    }
+}
+pub struct AngularDeferOpeningBlockBuilder {
+    at_token: SyntaxToken,
+    defer_token: SyntaxToken,
+    children: AngularBlockBody,
+    parameters: Option<AngularDeferParameters>,
+}
+impl AngularDeferOpeningBlockBuilder {
+    pub fn with_parameters(mut self, parameters: AngularDeferParameters) -> Self {
+        self.parameters = Some(parameters);
+        self
+    }
+    pub fn build(self) -> AngularDeferOpeningBlock {
+        AngularDeferOpeningBlock::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_DEFER_OPENING_BLOCK,
+            [
+                Some(SyntaxElement::Token(self.at_token)),
+                Some(SyntaxElement::Token(self.defer_token)),
+                self.parameters
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.children.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn angular_defer_parameters(
+    l_paren_token: SyntaxToken,
+    clauses: AngularDeferClauseList,
+    r_paren_token: SyntaxToken,
+) -> AngularDeferParameters {
+    AngularDeferParameters::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_DEFER_PARAMETERS,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(clauses.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn angular_defer_prefetch_on_clause(
+    prefetch_token: SyntaxToken,
+    on_token: SyntaxToken,
+    expression: HtmlTextExpression,
+) -> AngularDeferPrefetchOnClause {
+    AngularDeferPrefetchOnClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_DEFER_PREFETCH_ON_CLAUSE,
+        [
+            Some(SyntaxElement::Token(prefetch_token)),
+            Some(SyntaxElement::Token(on_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_defer_prefetch_when_clause(
+    prefetch_token: SyntaxToken,
+    when_token: SyntaxToken,
+    expression: HtmlTextExpression,
+) -> AngularDeferPrefetchWhenClause {
+    AngularDeferPrefetchWhenClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_DEFER_PREFETCH_WHEN_CLAUSE,
+        [
+            Some(SyntaxElement::Token(prefetch_token)),
+            Some(SyntaxElement::Token(when_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_defer_when_clause(
+    when_token: SyntaxToken,
+    expression: HtmlTextExpression,
+) -> AngularDeferWhenClause {
+    AngularDeferWhenClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_DEFER_WHEN_CLAUSE,
+        [
+            Some(SyntaxElement::Token(when_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+        ],
+    ))
+}
 pub fn angular_else_clause(
     at_token: SyntaxToken,
     else_token: SyntaxToken,
@@ -130,6 +326,20 @@ pub fn angular_empty_clause(
         [
             Some(SyntaxElement::Token(at_token)),
             Some(SyntaxElement::Token(empty_token)),
+            Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_error_clause(
+    at_token: SyntaxToken,
+    error_token: SyntaxToken,
+    children: AngularBlockBody,
+) -> AngularErrorClause {
+    AngularErrorClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_ERROR_CLAUSE,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(error_token)),
             Some(SyntaxElement::Node(children.into_syntax())),
         ],
     ))
@@ -421,6 +631,118 @@ pub fn angular_let_initializer_clause(
         [
             Some(SyntaxElement::Token(eq_token)),
             Some(SyntaxElement::Node(expression.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_loading_clause(
+    at_token: SyntaxToken,
+    loading_token: SyntaxToken,
+    children: AngularBlockBody,
+) -> AngularLoadingClauseBuilder {
+    AngularLoadingClauseBuilder {
+        at_token,
+        loading_token,
+        children,
+        parameters: None,
+    }
+}
+pub struct AngularLoadingClauseBuilder {
+    at_token: SyntaxToken,
+    loading_token: SyntaxToken,
+    children: AngularBlockBody,
+    parameters: Option<AngularLoadingParameters>,
+}
+impl AngularLoadingClauseBuilder {
+    pub fn with_parameters(mut self, parameters: AngularLoadingParameters) -> Self {
+        self.parameters = Some(parameters);
+        self
+    }
+    pub fn build(self) -> AngularLoadingClause {
+        AngularLoadingClause::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_LOADING_CLAUSE,
+            [
+                Some(SyntaxElement::Token(self.at_token)),
+                Some(SyntaxElement::Token(self.loading_token)),
+                self.parameters
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.children.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn angular_loading_parameters(
+    l_paren_token: SyntaxToken,
+    clauses: AngularLoadingParameterClauseList,
+    r_paren_token: SyntaxToken,
+) -> AngularLoadingParameters {
+    AngularLoadingParameters::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_LOADING_PARAMETERS,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(clauses.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn angular_minimum_time_clause(
+    minimum_token: SyntaxToken,
+    expression: HtmlTextExpression,
+) -> AngularMinimumTimeClause {
+    AngularMinimumTimeClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_MINIMUM_TIME_CLAUSE,
+        [
+            Some(SyntaxElement::Token(minimum_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_placeholder_clause(
+    at_token: SyntaxToken,
+    placeholder_token: SyntaxToken,
+    children: AngularBlockBody,
+) -> AngularPlaceholderClauseBuilder {
+    AngularPlaceholderClauseBuilder {
+        at_token,
+        placeholder_token,
+        children,
+        parameters: None,
+    }
+}
+pub struct AngularPlaceholderClauseBuilder {
+    at_token: SyntaxToken,
+    placeholder_token: SyntaxToken,
+    children: AngularBlockBody,
+    parameters: Option<AngularPlaceholderParameters>,
+}
+impl AngularPlaceholderClauseBuilder {
+    pub fn with_parameters(mut self, parameters: AngularPlaceholderParameters) -> Self {
+        self.parameters = Some(parameters);
+        self
+    }
+    pub fn build(self) -> AngularPlaceholderClause {
+        AngularPlaceholderClause::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_PLACEHOLDER_CLAUSE,
+            [
+                Some(SyntaxElement::Token(self.at_token)),
+                Some(SyntaxElement::Token(self.placeholder_token)),
+                self.parameters
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.children.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn angular_placeholder_parameters(
+    l_paren_token: SyntaxToken,
+    clause: AngularMinimumTimeClause,
+    r_paren_token: SyntaxToken,
+) -> AngularPlaceholderParameters {
+    AngularPlaceholderParameters::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_PLACEHOLDER_PARAMETERS,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(clause.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))
 }
@@ -2448,6 +2770,27 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
+pub fn angular_defer_clause_list<I, S>(items: I, separators: S) -> AngularDeferClauseList
+where
+    I: IntoIterator<Item = AnyAngularDeferClause>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = HtmlSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    AngularDeferClauseList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_DEFER_CLAUSE_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
 pub fn angular_else_if_clause_list<I>(items: I) -> AngularElseIfClauseList
 where
     I: IntoIterator<Item = AngularElseIfClause>,
@@ -2472,6 +2815,30 @@ where
     let length = items.len() + separators.len();
     AngularForLetBindingList::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::ANGULAR_FOR_LET_BINDING_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn angular_loading_parameter_clause_list<I, S>(
+    items: I,
+    separators: S,
+) -> AngularLoadingParameterClauseList
+where
+    I: IntoIterator<Item = AnyAngularLoadingParameterClause>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = HtmlSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    AngularLoadingParameterClauseList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_LOADING_PARAMETER_CLAUSE_LIST,
         (0..length).map(|index| {
             if index % 2 == 0 {
                 Some(items.next()?.into_syntax().into())
