@@ -19,6 +19,11 @@ impl FormatNodeRule<HtmlString> for FormatHtmlString {
         if let Ok(value) = value_token.as_ref() {
             let value_text = value.text_trimmed();
 
+            // Preserve unquoted attribute values containing embed placeholders.
+            if value_text.contains("__BIOME_") {
+                return value.format().fmt(f);
+            }
+
             if !(value_text.starts_with('"') && value_text.ends_with('"')) {
                 let contains_double_quote = value_text.contains('"');
 

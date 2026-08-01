@@ -1,12 +1,13 @@
 use super::EmbedContent;
-use biome_languages::{CssFileSource, DocumentFileSource, GraphqlFileSource};
-use biome_rowan::TokenText;
+use biome_languages::{CssFileSource, DocumentFileSource, GraphqlFileSource, HtmlFileSource};
+use biome_rowan::{TextRange, TextSize, TokenText};
 
 /// Language that can be embedded inside JavaScript template literals.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub(crate) enum GuestLanguage {
     Css,
     GraphQL,
+    Html,
 }
 
 impl From<GuestLanguage> for DocumentFileSource {
@@ -14,6 +15,7 @@ impl From<GuestLanguage> for DocumentFileSource {
         match value {
             GuestLanguage::Css => CssFileSource::css().into(),
             GuestLanguage::GraphQL => GraphqlFileSource::graphql().into(),
+            GuestLanguage::Html => HtmlFileSource::html().into(),
         }
     }
 }
@@ -23,6 +25,9 @@ pub(crate) enum EmbedCandidate {
     TaggedTemplate {
         tag: TemplateTagKind,
         content: EmbedContent,
+        /// For multi-chunk templates (with interpolations), contains the combined
+        /// text with placeholders and per-chunk slice positions.
+        combined_chunks: Option<CombinedEmbedContent>,
     },
 }
 
@@ -32,6 +37,40 @@ impl EmbedCandidate {
             Self::TaggedTemplate { content, .. } => content.clone(),
         }
     }
+
+    pub fn combined_text(&self) -> String {
+        match self {
+            Self::TaggedTemplate {
+                combined_chunks: Some(c),
+                ..
+            } => c.combined_text.clone(),
+            Self::TaggedTemplate { content, .. } => content.text.text().to_string(),
+        }
+    }
+
+    pub fn combined_chunks(&self) -> Option<&CombinedEmbedContent> {
+        match self {
+            Self::TaggedTemplate {
+                combined_chunks, ..
+            } => combined_chunks.as_ref(),
+        }
+    }
+}
+
+/// Per-chunk slice info for multi-chunk templates.
+#[derive(Debug, Clone)]
+pub(crate) struct PlaceholderSlice {
+    pub chunk_range: TextRange,
+    pub combined_start: TextSize,
+    pub combined_end: TextSize,
+}
+
+/// Combined embedded content for templates with interpolations.
+#[derive(Debug, Clone)]
+pub(crate) struct CombinedEmbedContent {
+    pub combined_text: String,
+    pub slices: Vec<PlaceholderSlice>,
+    pub base_offset: TextSize,
 }
 
 /// Describes how a JavaScript template tag was classified.
@@ -140,7 +179,7 @@ impl EmbedTarget {
     }
 }
 
-static JS_DETECTORS: [EmbedDetector; 5] = [
+static JS_DETECTORS: [EmbedDetector; 6] = [
     EmbedDetector::TemplateTag {
         tag: "css",
         target: EmbedTarget::Static(GuestLanguage::Css),
@@ -160,5 +199,9 @@ static JS_DETECTORS: [EmbedDetector; 5] = [
     EmbedDetector::TemplateExpression {
         object: "graphql",
         target: EmbedTarget::Static(GuestLanguage::GraphQL),
+    },
+    EmbedDetector::TemplateTag {
+        tag: "html",
+        target: EmbedTarget::Static(GuestLanguage::Html),
     },
 ];

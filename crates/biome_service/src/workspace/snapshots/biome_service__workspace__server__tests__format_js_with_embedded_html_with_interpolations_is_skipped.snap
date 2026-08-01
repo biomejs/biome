@@ -1,0 +1,29 @@
+---
+source: crates/biome_service/src/workspace/server.tests.rs
+expression: result.as_code()
+---
+const a = html`
+	<div>hello 
+${name}
+	</div>
+`;
+
+const b = html`
+	<div @click=
+${() => {
+		console.log("clicked");
+	}}
+	>click me</div>
+`;
+
+const c = html`
+	<ul>
+	
+${items.map((item) => html`
+					<li>
+				${item}
+					</li>
+				`)}
+	
+</ul>
+`;
