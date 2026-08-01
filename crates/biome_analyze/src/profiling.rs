@@ -9,7 +9,8 @@ Guidelines and design notes:
   spent querying/matching nodes or building the rule context. Integration points
   should start the timer immediately before invoking `R::run` and let it drop
   immediately after `R::run` returns.
-- It is concurrency-safe and aggregates timings across threads and files.
+- It records timings in thread-local profilers and aggregates them after the
+  traversal, avoiding contention between analyzer worker threads.
 - Profiling is disabled by default and must be explicitly enabled at runtime.
   When disabled, the overhead is near-zero (a fast boolean check).
 
@@ -25,18 +26,21 @@ namespace:
 - `enable`, `disable`, `is_enabled`
 - `start_rule`, `start_plugin_rule`
 - `record_rule_time`
+- `flush_thread_profiler`
 - `snapshot`, `reset`, `drain_sorted_by_total`
 */
 
 use crate::matcher::RuleKey;
 use crate::rule::Rule;
 use biome_console::markup;
+#[cfg(not(target_arch = "wasm32"))]
+use parking_lot::Mutex;
 use rustc_hash::FxHashMap;
+#[cfg(not(target_arch = "wasm32"))]
+use std::cell::RefCell;
 use std::cmp;
 use std::fmt;
 use std::hash::{Hash, Hasher};
-#[cfg(not(target_arch = "wasm32"))]
-use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 #[cfg(not(target_arch = "wasm32"))]
@@ -151,7 +155,7 @@ impl RuleProfile {
     }
 }
 
-/// Internal accumulator used by the global profiler.
+/// Internal accumulator used by a profiler.
 #[derive(Clone, Debug)]
 struct Metric {
     total: Duration,
@@ -179,6 +183,15 @@ impl Metric {
         self.max = cmp::max(self.max, delta);
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
+    fn merge(&mut self, other: &Self) {
+        self.total += other.total;
+        self.count = self.count.saturating_add(other.count);
+        self.min = cmp::min(self.min, other.min);
+        self.max = cmp::max(self.max, other.max);
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
     fn into_profile(self, label: RuleLabel) -> RuleProfile {
         RuleProfile {
             label,
@@ -194,8 +207,7 @@ impl Metric {
     }
 }
 
-/// Global, process-wide profiler state.
-/// Aggregates timings across all threads/files.
+/// Accumulates timings recorded by one thread.
 #[derive(Default)]
 struct RuleProfiler {
     metrics: FxHashMap<RuleLabel, Metric>,
@@ -206,6 +218,14 @@ impl RuleProfiler {
         self.metrics.entry(label).or_default().record(delta);
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
+    fn merge(&mut self, other: &Self) {
+        for (label, metric) in &other.metrics {
+            self.metrics.entry(label.clone()).or_default().merge(metric);
+        }
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
     fn snapshot(&self) -> Vec<RuleProfile> {
         self.metrics
             .iter()
@@ -213,26 +233,52 @@ impl RuleProfiler {
             .collect()
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     fn reset(&mut self) {
         self.metrics.clear();
     }
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-static PROFILER: Mutex<Option<RuleProfiler>> = Mutex::new(None);
+static AGGREGATED_PROFILER: Mutex<Option<RuleProfiler>> = Mutex::new(None);
+
 #[cfg(not(target_arch = "wasm32"))]
-fn with_profiler<R>(f: impl FnOnce(&mut RuleProfiler) -> R) -> Option<R> {
-    if let Ok(mut guard) = PROFILER.lock() {
-        let profiler = guard.get_or_insert_with(RuleProfiler::default);
-        Some(f(profiler))
-    } else {
-        None
+#[derive(Default)]
+struct ThreadRuleProfiler(RefCell<RuleProfiler>);
+
+#[cfg(not(target_arch = "wasm32"))]
+impl Drop for ThreadRuleProfiler {
+    fn drop(&mut self) {
+        flush_profiler(self.0.get_mut());
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
+thread_local! {
+    static THREAD_PROFILER: ThreadRuleProfiler = ThreadRuleProfiler::default();
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn with_thread_profiler<R>(f: impl FnOnce(&mut RuleProfiler) -> R) -> Option<R> {
+    THREAD_PROFILER.with(|profiler| Some(f(&mut profiler.0.borrow_mut())))
+}
+
 #[cfg(target_arch = "wasm32")]
-fn with_profiler<R>(_f: impl FnOnce(&mut RuleProfiler) -> R) -> Option<R> {
+fn with_thread_profiler<R>(_f: impl FnOnce(&mut RuleProfiler) -> R) -> Option<R> {
     None
+}
+
+/// Flush the given profiler and merge it into the global aggregated profiler
+#[cfg(not(target_arch = "wasm32"))]
+fn flush_profiler(thread_profiler: &mut RuleProfiler) {
+    if thread_profiler.metrics.is_empty() {
+        return;
+    }
+    let mut aggregated_profiler = AGGREGATED_PROFILER.lock();
+    aggregated_profiler
+        .get_or_insert_default()
+        .merge(thread_profiler);
+    thread_profiler.reset();
 }
 
 static ENABLED: AtomicBool = AtomicBool::new(false);
@@ -292,7 +338,7 @@ impl Drop for RuleRunTimer {
             let elapsed = self.start.elapsed();
             #[cfg(target_arch = "wasm32")]
             let elapsed = Duration::ZERO;
-            with_profiler(|p| p.record(label, elapsed));
+            with_thread_profiler(|profiler| profiler.record(label, elapsed));
         }
     }
 }
@@ -325,17 +371,36 @@ pub fn record_rule_time(label: RuleLabel, delta: Duration) {
     if !is_enabled() {
         return;
     }
-    with_profiler(|p| p.record(label, delta));
+    with_thread_profiler(|profiler| profiler.record(label, delta));
+}
+
+/// Moves metrics recorded by the current thread into the process-wide aggregate.
+///
+/// Consumers using persistent worker threads must call this function on every
+/// worker before retrieving a snapshot.
+pub fn flush_thread_profiler() {
+    #[cfg(not(target_arch = "wasm32"))]
+    THREAD_PROFILER.with(|profiler| flush_profiler(&mut profiler.0.borrow_mut()));
 }
 
 /// Returns a snapshot of all collected profiles in unspecified order.
 pub fn snapshot() -> Vec<RuleProfile> {
-    with_profiler(|p| p.snapshot()).unwrap_or_default()
+    flush_thread_profiler();
+
+    #[cfg(not(target_arch = "wasm32"))]
+    return AGGREGATED_PROFILER
+        .lock()
+        .as_ref()
+        .map(RuleProfiler::snapshot)
+        .unwrap_or_default();
+
+    #[cfg(target_arch = "wasm32")]
+    Vec::new()
 }
 
 /// Returns all profiles sorted by total time (descending).
 pub fn drain_sorted_by_total(reset_after: bool) -> Vec<RuleProfile> {
-    let mut profiles = with_profiler(|p| p.snapshot()).unwrap_or_default();
+    let mut profiles = snapshot();
 
     profiles.sort_by_key(|b| std::cmp::Reverse(b.total));
 
@@ -348,7 +413,11 @@ pub fn drain_sorted_by_total(reset_after: bool) -> Vec<RuleProfile> {
 
 /// Clears all collected metrics.
 pub fn reset() {
-    with_profiler(|p| p.reset());
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        THREAD_PROFILER.with(|profiler| profiler.0.borrow_mut().reset());
+        *AGGREGATED_PROFILER.lock() = None;
+    }
 }
 
 /// Utility for formatting a summary of rule profiles for display purposes.
@@ -593,5 +662,64 @@ mod tests {
         let rendered = render_markup(markup! {{ DisplayProfiles(profiles, None) }});
 
         insta::assert_snapshot!(rendered);
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[test]
+    fn thread_local_profilers_do_not_contend_and_are_combined() {
+        use super::{
+            THREAD_PROFILER, flush_thread_profiler, reset, snapshot, with_thread_profiler,
+        };
+        use std::sync::mpsc::sync_channel;
+        use std::thread;
+
+        reset();
+
+        let (locked_sender, locked_receiver) = sync_channel(0);
+        let (release_sender, release_receiver) = sync_channel(0);
+        let first_thread = thread::spawn(move || {
+            THREAD_PROFILER.with(|profiler| {
+                let mut profiler = profiler.0.borrow_mut();
+                profiler.record(
+                    RuleLabel::builtin("test/threadLocal", "combined"),
+                    Duration::from_millis(2),
+                );
+                locked_sender.send(()).unwrap();
+                release_receiver.recv().unwrap();
+            });
+            flush_thread_profiler();
+        });
+
+        locked_receiver.recv().unwrap();
+
+        let (recorded_sender, recorded_receiver) = sync_channel(0);
+        let second_thread = thread::spawn(move || {
+            with_thread_profiler(|profiler| {
+                profiler.record(
+                    RuleLabel::builtin("test/threadLocal", "combined"),
+                    Duration::from_millis(3),
+                );
+            });
+            flush_thread_profiler();
+            recorded_sender.send(()).unwrap();
+        });
+
+        recorded_receiver
+            .recv_timeout(Duration::from_secs(5))
+            .expect("one thread must not wait for another thread's profiler");
+        release_sender.send(()).unwrap();
+        first_thread.join().unwrap();
+        second_thread.join().unwrap();
+
+        let profile = snapshot()
+            .into_iter()
+            .find(|profile| profile.label == RuleLabel::builtin("test/threadLocal", "combined"))
+            .unwrap();
+        assert_eq!(profile.total, Duration::from_millis(5));
+        assert_eq!(profile.count, 2);
+        assert_eq!(profile.min, Duration::from_millis(2));
+        assert_eq!(profile.max, Duration::from_millis(3));
+
+        reset();
     }
 }

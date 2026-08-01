@@ -67,6 +67,17 @@ pub struct CssClassReference {
     pub file_path: Utf8PathBuf,
 }
 
+/// An authored `@property` definition found through the module graph.
+///
+/// Descriptor data remains owned by the defining document's semantic model.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct CssPropertyDefinition {
+    /// The CSS document that contains the definition.
+    pub module_path: Utf8PathBuf,
+    /// The absolute source range of the complete `@property` rule.
+    pub range: TextRange,
+}
+
 impl CssClassReference {
     /// Creates a new CSS class reference.
     pub fn new(token: TokenText, file_path: Utf8PathBuf) -> Self {
@@ -140,9 +151,9 @@ impl CssModuleInfo {
 pub struct CssModuleInfoInner {
     /// Map of all static imports found in the module.
     ///
-    /// Maps from the import specifier to a [CssImport] with the absolute path
-    /// it resolves to. The resolved path may be looked up as key in the
-    /// [ModuleGraph::data] map, although it is not required to exist
+    /// Maps each import occurrence's source range to a [CssImport], preserving
+    /// duplicate imports and source order. The resolved path may be looked up as
+    /// a key in the [ModuleGraph::data] map, although it is not required to exist
     /// (for instance, if the path is outside the project's scope).
     pub imports: CssImports,
 
@@ -158,10 +169,10 @@ pub struct CssModuleInfoInner {
 }
 
 #[derive(Debug, Default, Clone)]
-pub struct CssImports(pub(crate) IndexMap<Text, CssImport>);
+pub struct CssImports(pub(crate) IndexMap<TextRange, CssImport>);
 
 impl Deref for CssImports {
-    type Target = IndexMap<Text, CssImport>;
+    type Target = IndexMap<TextRange, CssImport>;
 
     fn deref(&self) -> &Self::Target {
         &self.0

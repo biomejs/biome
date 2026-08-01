@@ -12,6 +12,7 @@ mod html_module_info;
 pub mod js_module_info;
 mod module_graph;
 mod path_info_cache;
+mod traverse;
 pub mod type_inference;
 
 pub use biome_js_type_info::{
@@ -20,8 +21,8 @@ pub use biome_js_type_info::{
 };
 pub use biome_resolver::ResolvedPath;
 pub use css_module_info::{
-    CssClassReference, CssClassStep, CssImport, CssImports, CssModuleInfo, CssTraversalStep,
-    ImportTreeDisplay, ImportTreeNode,
+    CssClassReference, CssClassStep, CssImport, CssImports, CssModuleInfo, CssPropertyDefinition,
+    CssTraversalStep, ImportTreeDisplay, ImportTreeNode,
 };
 pub use db::queries::*;
 pub use db::{ModuleDb, ModuleGraphGeneration, TypeDb, module_for_key};

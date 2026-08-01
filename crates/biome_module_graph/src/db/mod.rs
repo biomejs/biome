@@ -70,7 +70,7 @@ pub trait ModuleDb: TypeDb {
     fn module_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo>;
 
     /// Iterates over all indexed modules.
-    fn for_each_module(&self, f: &mut dyn FnMut(&Utf8Path, &ModuleInfoKind));
+    fn for_each_module(&self, f: &mut dyn FnMut(ModuleInfo));
 
     /// Returns whether the given `path` is indexed.
     fn contains(&self, path: &Utf8Path) -> bool {
@@ -113,8 +113,8 @@ pub trait ModuleDb: TypeDb {
     /// Collects all module paths and their kinds.
     fn all_modules(&self) -> Vec<(Utf8PathBuf, ModuleInfoKind)> {
         let mut result = Vec::new();
-        self.for_each_module(&mut |path, kind| {
-            result.push((path.to_path_buf(), kind.clone()));
+        self.for_each_module(&mut |module| {
+            result.push((module.path(self).to_path_buf(), module.kind(self).clone()));
         });
         result
     }

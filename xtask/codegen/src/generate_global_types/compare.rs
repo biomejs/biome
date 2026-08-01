@@ -74,6 +74,7 @@ pub fn compare_lowered_globals(lowered: &LoweredGlobalTypes) -> Result<()> {
     assert_error_call_shape(call)?;
 
     assert_symbol_shape(lowered)?;
+    assert_regexp_shape(lowered)?;
     assert_memberless_class_shape(
         lowered,
         "Date",
@@ -114,6 +115,60 @@ pub fn compare_lowered_globals(lowered: &LoweredGlobalTypes) -> Result<()> {
             return_type_id: "GLOBAL_INSTANCEOF_PROMISE_ID",
         },
     )?;
+
+    Ok(())
+}
+
+/// Rejects output that differs from the predefined `RegExp` projection used by the resolver.
+fn assert_regexp_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
+    let Some(regexp) = lowered.global("RegExp") else {
+        bail!("generated globals are missing the RegExp global");
+    };
+    if regexp.id_constant() != "REGEXP_ID_GLOBAL_TYPE_ID" {
+        bail!(
+            "generated RegExp global targets {}, expected REGEXP_ID_GLOBAL_TYPE_ID",
+            regexp.id_constant()
+        );
+    }
+    let LoweredTypeData::Class(class) = regexp.data() else {
+        bail!("generated RegExp global is not a class");
+    };
+    if class.name() != "RegExp" {
+        bail!(
+            "generated RegExp class has name {}, expected RegExp",
+            class.name()
+        );
+    }
+    if !class.type_parameters().is_empty() {
+        bail!("generated RegExp global must not have type parameters");
+    }
+    let [exec_member] = class.members() else {
+        bail!(
+            "generated RegExp global has {} members, expected one",
+            class.members().len()
+        );
+    };
+    if exec_member.name() != "exec"
+        || exec_member.kind() != &(LoweredMemberKind::Named { optional: false })
+        || exec_member.type_reference()
+            != &LoweredTypeReference::Predefined("GLOBAL_REGEXP_EXEC_ID")
+    {
+        bail!("generated RegExp.exec member has unexpected shape");
+    }
+
+    let exec = generated_function(lowered, "RegExp.exec", "REGEXP_EXEC_ID_GLOBAL_TYPE_ID")?;
+    if exec.is_async() {
+        bail!("generated RegExp.exec helper must not be async");
+    }
+    if exec.name() != Some("RegExp.exec") {
+        bail!("generated RegExp.exec helper has unexpected function name");
+    }
+    if !exec.parameters().is_empty() {
+        bail!("generated RegExp.exec helper must not have parameters");
+    }
+    if exec.return_type() != &LoweredTypeReference::Predefined("GLOBAL_INSTANCEOF_REGEXP_ID") {
+        bail!("generated RegExp.exec helper has unexpected return type");
+    }
 
     Ok(())
 }

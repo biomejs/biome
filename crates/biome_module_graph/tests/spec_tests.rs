@@ -11,7 +11,8 @@ use biome_resolver::ResolveError;
 
 use crate::snap::ModuleGraphSnapshot;
 use biome_configuration::{Configuration, HtmlConfiguration};
-use biome_css_parser::{CssModulesKind, CssParserOptions};
+use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css};
+use biome_db::{Db, ParsedSource};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem, normalize_path};
 use biome_html_parser::HtmlParserOptions;
@@ -26,10 +27,10 @@ use biome_module_graph::{
     HtmlEmbeddedContent, ImportSymbol, JsExport, JsExportedSymbolLookup, JsImport, JsImportPath,
     JsImportPhase, JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic,
     ModuleInfo, ModuleInfoKind, ModuleResolver, PathInfoCache, ResolvedPath, SymbolFromModuleInfo,
-    TypeInferenceMode, find_js_exported_symbol, is_class_referenced_by_importers,
-    resolve_css_module, resolve_html_module, resolve_js_module_with_inference_mode,
-    transitive_importers_of, traverse_import_tree_for_classes,
-    traverse_import_tree_for_html_classes,
+    TypeInferenceMode, css_property_definitions, find_js_exported_symbol,
+    is_class_referenced_by_importers, resolve_css_module, resolve_html_module,
+    resolve_js_module_with_inference_mode, transitive_importers_of,
+    traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
@@ -156,6 +157,293 @@ fn add_css_modules(
         );
         db.modules.pin().insert(path.as_path().to_path_buf(), md);
     }
+}
+
+fn build_css_property_db(files: &[(&str, &str)]) -> WorkspaceDb {
+    let fs = MemoryFileSystem::default();
+    for (path, source) in files {
+        fs.insert((*path).into(), source.as_bytes().to_vec());
+    }
+
+    let mut db = WorkspaceDb::default();
+    let layout = ProjectLayout::default();
+    let path_info_cache = PathInfoCache::default();
+    for (path, source) in files {
+        let path = BiomePath::new(*path);
+        let parse = parse_css(source, CssFileSource::css(), CssParserOptions::default());
+        let root = parse.tree();
+        let parsed = ParsedSource::new(
+            &db,
+            path.as_path().to_path_buf(),
+            parse.into(),
+            0,
+            Vec::new(),
+        );
+        db.insert_file(path.as_path(), parsed);
+        let (module_info, _, _) = resolve_css_module(root, &path, &fs, &layout, &path_info_cache);
+        let module = ModuleInfo::new(
+            &db,
+            path.as_path().to_path_buf(),
+            ModuleInfoKind::Css(module_info),
+        );
+        db.insert_module(path.as_path().to_path_buf(), module);
+    }
+    db
+}
+
+#[test]
+fn css_property_query_uses_last_local_definition() {
+    let source = r#"
+@property --value { syntax: "<color>"; inherits: true; initial-value: red; }
+@property --value { syntax: "<length>"; inherits: true; initial-value: 0px; }
+"#;
+    let db = build_css_property_db(&[("/value.css", source)]);
+    let module = db.module_for_path(Utf8Path::new("/value.css")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", module);
+
+    let definitions = css_property_definitions(&db, property);
+
+    assert_eq!(definitions.len(), 1);
+    assert!(
+        definitions[0].range.start() >= TextSize::from(source.rfind("@property").unwrap() as u32)
+    );
+}
+
+#[test]
+fn css_property_query_only_sees_preceding_siblings() {
+    let theme = r#"@property --value { syntax: "<color>"; inherits: true; initial-value: red; }"#;
+    let leaf = ".leaf { color: var(--value); }";
+
+    let db = build_css_property_db(&[
+        ("/theme.css", theme),
+        ("/leaf.css", leaf),
+        (
+            "/before.css",
+            "@import \"theme.css\";\n@import \"leaf.css\";",
+        ),
+    ]);
+    let leaf_module = db.module_for_path(Utf8Path::new("/leaf.css")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", leaf_module);
+    let definitions = css_property_definitions(&db, property);
+    assert_eq!(definitions.len(), 1);
+    assert_eq!(definitions[0].module_path, Utf8Path::new("/theme.css"));
+
+    let db = build_css_property_db(&[
+        ("/theme.css", theme),
+        ("/leaf.css", leaf),
+        (
+            "/after.css",
+            "@import \"leaf.css\";\n@import \"theme.css\";",
+        ),
+    ]);
+    let leaf_module = db.module_for_path(Utf8Path::new("/leaf.css")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", leaf_module);
+    assert!(css_property_definitions(&db, property).is_empty());
+}
+
+#[test]
+fn css_property_query_preserves_parent_branches() {
+    let db = build_css_property_db(&[
+        ("/leaf.css", ".leaf { color: var(--value); }"),
+        (
+            "/first.css",
+            "@import \"leaf.css\";\n@property --value { syntax: \"<color>\"; inherits: true; initial-value: red; }",
+        ),
+        (
+            "/second.css",
+            "@import \"leaf.css\";\n@property --value { syntax: \"<color>\"; inherits: true; initial-value: red; }",
+        ),
+    ]);
+    let module = db.module_for_path(Utf8Path::new("/leaf.css")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", module);
+
+    let definitions = css_property_definitions(&db, property);
+    let mut paths = definitions
+        .iter()
+        .map(|definition| definition.module_path.as_str())
+        .collect::<Vec<_>>();
+    paths.sort_unstable();
+
+    assert_eq!(paths, ["/first.css", "/second.css"]);
+}
+
+#[test]
+fn css_property_query_stops_each_branch_at_nearest_parent() {
+    let db = build_css_property_db(&[
+        ("/leaf.css", ".leaf { color: var(--value); }"),
+        (
+            "/theme.css",
+            "@import \"leaf.css\";\n@property --value { syntax: \"<color>\"; inherits: true; initial-value: red; }",
+        ),
+        (
+            "/app.css",
+            "@import \"theme.css\";\n@property --value { syntax: \"<length>\"; inherits: true; initial-value: 0px; }",
+        ),
+    ]);
+    let module = db.module_for_path(Utf8Path::new("/leaf.css")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", module);
+
+    let definitions = css_property_definitions(&db, property);
+
+    assert_eq!(definitions.len(), 1);
+    assert_eq!(definitions[0].module_path, Utf8Path::new("/theme.css"));
+}
+
+#[test]
+fn css_property_query_continues_through_empty_parents() {
+    let db = build_css_property_db(&[
+        ("/leaf.css", ".leaf { color: var(--value); }"),
+        ("/theme.css", "@import \"leaf.css\";"),
+        (
+            "/app.css",
+            "@import \"theme.css\";\n@property --value { syntax: \"<length>\"; inherits: true; initial-value: 0px; }",
+        ),
+    ]);
+    let module = db.module_for_path(Utf8Path::new("/leaf.css")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", module);
+
+    let definitions = css_property_definitions(&db, property);
+
+    assert_eq!(definitions.len(), 1);
+    assert_eq!(definitions[0].module_path, Utf8Path::new("/app.css"));
+}
+
+#[test]
+fn css_property_query_deduplicates_diamonds_and_stops_cycles() {
+    let db = build_css_property_db(&[
+        ("/leaf.css", ".leaf { color: var(--value); }"),
+        ("/left.css", "@import \"leaf.css\";"),
+        ("/right.css", "@import \"leaf.css\";"),
+        (
+            "/root.css",
+            "@import \"left.css\";\n@import \"right.css\";\n@property --value { syntax: \"<color>\"; inherits: true; initial-value: red; }",
+        ),
+    ]);
+    let module = db.module_for_path(Utf8Path::new("/leaf.css")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", module);
+    assert_eq!(css_property_definitions(&db, property).len(), 1);
+
+    let db = build_css_property_db(&[
+        ("/leaf.css", ".leaf { color: var(--missing); }"),
+        ("/left.css", "@import \"leaf.css\";\n@import \"right.css\";"),
+        ("/right.css", "@import \"left.css\";"),
+    ]);
+    let module = db.module_for_path(Utf8Path::new("/leaf.css")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--missing", module);
+    assert!(css_property_definitions(&db, property).is_empty());
+}
+
+#[test]
+fn css_property_query_reads_the_current_semantic_model() {
+    let mut db = build_css_property_db(&[(
+        "/value.css",
+        "@property --value { syntax: \"<color>\"; inherits: true; initial-value: red; }",
+    )]);
+    let original_range = {
+        let module = db.module_for_path(Utf8Path::new("/value.css")).unwrap();
+        let property = SymbolFromModuleInfo::new(&db, "--value", module);
+        css_property_definitions(&db, property)[0].range
+    };
+
+    let parsed = db
+        .parsed_source_for_path(Utf8Path::new("/value.css"))
+        .unwrap();
+    let new_parse = parse_css(
+        "\n@property --value { syntax: \"<color>\"; inherits: true; initial-value: red; }",
+        CssFileSource::css(),
+        CssParserOptions::default(),
+    );
+    salsa::Setter::to(parsed.set_parsed(&mut db), new_parse.into());
+
+    let module = db.module_for_path(Utf8Path::new("/value.css")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", module);
+    let definitions = css_property_definitions(&db, property);
+    assert_eq!(definitions.len(), 1);
+    assert_ne!(definitions[0].range, original_range);
+}
+
+#[test]
+fn css_property_query_skips_non_css_sibling_imports() {
+    use biome_js_parser::JsParserOptions;
+
+    let mut db = build_css_property_db(&[("/leaf.css", ".leaf { color: var(--value); }")]);
+    let fs = MemoryFileSystem::default();
+    fs.insert("/leaf.css".into(), b".leaf { color: var(--value); }");
+    fs.insert("/component.js".into(), b"export const component = true;");
+    fs.insert(
+        "/parent.js".into(),
+        b"import './component.js'; import './leaf.css';",
+    );
+
+    let js_paths = [
+        BiomePath::new("/component.js"),
+        BiomePath::new("/parent.js"),
+    ];
+    let js_roots = get_added_js_paths(&fs, &js_paths);
+    add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
+
+    let component_parse = biome_js_parser::parse(
+        "export const component = true;",
+        JsFileSource::js_module(),
+        JsParserOptions::default(),
+    );
+    let component = ParsedSource::new(
+        &db,
+        Utf8PathBuf::from("/component.js"),
+        component_parse.into(),
+        0,
+        Vec::new(),
+    );
+    db.insert_file(Utf8Path::new("/component.js"), component);
+
+    let module = db.module_for_path(Utf8Path::new("/leaf.css")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", module);
+    assert!(css_property_definitions(&db, property).is_empty());
+}
+
+#[test]
+fn css_imports_preserve_duplicate_occurrences() {
+    let db = build_css_property_db(&[
+        ("/theme.css", ""),
+        ("/leaf.css", ""),
+        (
+            "/parent.css",
+            "@import \"theme.css\";\n@import \"leaf.css\";\n@import \"theme.css\";",
+        ),
+    ]);
+    let info = db
+        .css_module_info_for_path(Utf8Path::new("/parent.css"))
+        .unwrap();
+
+    assert_eq!(info.imports.len(), 3);
+    assert!(info.imports.keys().is_sorted());
+}
+
+#[test]
+fn css_class_upward_traversal_does_not_revisit_the_start() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/style.css".into(), b".style {}");
+    fs.insert("/a.js".into(), b"import './b.js'; import './style.css';");
+    fs.insert("/b.js".into(), b"import './a.js';");
+
+    let db = WorkspaceDb::default();
+    let layout = ProjectLayout::default();
+    let css_paths = [BiomePath::new("/style.css")];
+    let css_roots = get_css_added_paths(&fs, &css_paths);
+    add_css_modules(&db, &fs, &layout, &css_roots);
+    let js_paths = [BiomePath::new("/a.js"), BiomePath::new("/b.js")];
+    let js_roots = get_added_js_paths(&fs, &js_paths);
+    add_js_modules(&db, &fs, &layout, &js_roots, false);
+
+    let module = db.module_for_path(Utf8Path::new("/a.js")).unwrap();
+    let steps = traverse_import_tree_for_classes(&db, module);
+    assert_eq!(
+        steps
+            .iter()
+            .filter(|step| step.css_path == Utf8Path::new("/style.css"))
+            .count(),
+        1
+    );
 }
 
 fn add_html_modules(

@@ -34,6 +34,12 @@ interface AsyncDisposable {
     [Symbol.asyncDispose](): PromiseLike<void>;
 }
 
+interface RegExpExecArray {}
+
+interface RegExp {
+    exec(string: string): RegExpExecArray | null;
+}
+
 interface Date {
     toString(): string;
 }

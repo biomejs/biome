@@ -35,6 +35,10 @@ pub fn semantic_model(root: &AnyCssRoot) -> SemanticModel {
 mod tests {
     use biome_css_parser::{CssParserOptions, parse_css};
     use biome_languages::CssFileSource;
+    use biome_property_codec::{
+        PropertySyntax, PropertySyntaxComponentName, PropertySyntaxErrorKind, PropertySyntaxResult,
+        PropertySyntaxType,
+    };
     use biome_rowan::TextRange;
 
     #[test]
@@ -238,6 +242,230 @@ mod tests {
         let item_size = global_custom_variables.contains_key("--item-size");
 
         assert!(item_size);
+    }
+
+    #[test]
+    fn test_at_property_semantic_data() {
+        let parse = parse_css(
+            r#"@property --item-size {
+  SYNTAX: "<percentage> | auto";
+  InHeRiTs: false;
+  INITIAL-VALUE: 40%;
+}"#,
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+
+        let model = super::semantic_model(&parse.tree());
+        let variable = model
+            .global_custom_variables()
+            .get("--item-size")
+            .expect("expected custom property");
+        let at_property = variable.at_property().expect("expected at-property data");
+
+        assert_eq!(at_property.name().text(), "--item-size");
+        assert_eq!(at_property.inherits(), Some(false));
+        assert!(at_property.initial_value().is_some());
+        assert_eq!(
+            at_property
+                .name_node()
+                .value_token()
+                .unwrap()
+                .text_trimmed(),
+            "--item-size"
+        );
+        let PropertySyntaxResult::Value(PropertySyntax::Components(components)) =
+            at_property.syntax()
+        else {
+            panic!("expected parsed property syntax");
+        };
+        assert_eq!(components.len(), 2);
+        assert_eq!(
+            components[0].name,
+            PropertySyntaxComponentName::Type(PropertySyntaxType::Percentage)
+        );
+        assert_eq!(
+            components[1].name,
+            PropertySyntaxComponentName::CustomIdentifier("auto".into())
+        );
+    }
+
+    #[test]
+    fn test_at_property_syntax_states() {
+        let parse = parse_css(
+            r#"@property --invalid {
+  syntax: "<unknown>";
+  inherits: true;
+}
+@property --missing {
+  inherits: true;
+}
+@property --unquoted {
+  syntax: color;
+  inherits: yes;
+}"#,
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+
+        let model = super::semantic_model(&parse.tree());
+        let variables = model.global_custom_variables();
+        let invalid = variables.get("--invalid").unwrap().at_property().unwrap();
+        let missing = variables.get("--missing").unwrap().at_property().unwrap();
+        let unquoted = variables.get("--unquoted").unwrap().at_property().unwrap();
+
+        let PropertySyntaxResult::Error(diagnostic) = invalid.syntax() else {
+            panic!("expected invalid syntax");
+        };
+        assert_eq!(diagnostic.kind(), PropertySyntaxErrorKind::ExpectedTypeName);
+        assert_eq!(missing.syntax(), &PropertySyntaxResult::Missing);
+        let PropertySyntaxResult::Error(diagnostic) = unquoted.syntax() else {
+            panic!("expected a string diagnostic, got {:#?}", unquoted.syntax());
+        };
+        assert_eq!(diagnostic.kind(), PropertySyntaxErrorKind::ExpectedString);
+        assert_eq!(unquoted.inherits(), None);
+    }
+
+    #[test]
+    fn test_at_property_decodes_css_string_escapes() {
+        let source = r#"@property --escaped {
+  syntax: "\3c color\3e ";
+  inherits: true;
+  initial-value: red;
+}
+@property --continued {
+  syntax: "<col\
+or>";
+  inherits: true;
+  initial-value: red;
+}
+@property --invalid-escaped {
+  syntax: "\3c unknown\3e ";
+  inherits: true;
+}
+@property --empty {
+  syntax: "";
+  inherits: true;
+}
+@property --identifier {
+  syntax: "\\66 oo";
+  inherits: true;
+}"#;
+        let parse = parse_css(source, CssFileSource::css(), CssParserOptions::default());
+
+        let model = super::semantic_model(&parse.tree());
+        let variables = model.global_custom_variables();
+        for name in ["--escaped", "--continued"] {
+            let at_property = variables.get(name).unwrap().at_property().unwrap();
+            let PropertySyntaxResult::Value(PropertySyntax::Components(components)) =
+                at_property.syntax()
+            else {
+                panic!("expected a parsed syntax for {name}");
+            };
+            assert_eq!(
+                components[0].name,
+                PropertySyntaxComponentName::Type(PropertySyntaxType::Color)
+            );
+        }
+
+        let escaped = variables.get("--escaped").unwrap().at_property().unwrap();
+        let PropertySyntaxResult::Value(PropertySyntax::Components(components)) = escaped.syntax()
+        else {
+            unreachable!();
+        };
+        let start = source.find("\\3c color\\3e ").unwrap() as u32;
+        let end = start + "\\3c color\\3e ".len() as u32;
+        assert_eq!(
+            components[0].range,
+            TextRange::new(start.into(), end.into())
+        );
+
+        let invalid = variables
+            .get("--invalid-escaped")
+            .unwrap()
+            .at_property()
+            .unwrap();
+        let PropertySyntaxResult::Error(diagnostic) = invalid.syntax() else {
+            panic!("expected invalid escaped syntax");
+        };
+        let start = source.find("\\3c unknown\\3e ").unwrap() as u32;
+        let end = start + "\\3c unknown\\3e ".len() as u32;
+        assert_eq!(diagnostic.kind(), PropertySyntaxErrorKind::ExpectedTypeName);
+        assert_eq!(diagnostic.range(), TextRange::new(start.into(), end.into()));
+
+        let empty = variables.get("--empty").unwrap().at_property().unwrap();
+        let PropertySyntaxResult::Error(diagnostic) = empty.syntax() else {
+            panic!("expected empty syntax");
+        };
+        assert_eq!(diagnostic.kind(), PropertySyntaxErrorKind::Empty);
+
+        let identifier = variables
+            .get("--identifier")
+            .unwrap()
+            .at_property()
+            .unwrap();
+        let PropertySyntaxResult::Value(PropertySyntax::Components(components)) =
+            identifier.syntax()
+        else {
+            panic!("expected an escaped custom identifier");
+        };
+        assert_eq!(
+            components[0].name,
+            PropertySyntaxComponentName::CustomIdentifier("foo".into())
+        );
+    }
+
+    #[test]
+    fn test_root_declaration_and_at_property_coexist() {
+        let parse = parse_css(
+            r#"@property --color {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: black;
+}
+:root {
+  --color: red;
+}"#,
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+
+        let model = super::semantic_model(&parse.tree());
+        let variable = model.global_custom_variables().get("--color").unwrap();
+
+        assert!(variable.is_at_property());
+        assert!(variable.is_root());
+        assert!(variable.at_property().is_some());
+    }
+
+    #[test]
+    fn test_last_at_property_rule_wins() {
+        let parse = parse_css(
+            r#"@property --color {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: black;
+}
+@property --color {
+  syntax: "<unknown>";
+  inherits: true;
+}"#,
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+
+        let model = super::semantic_model(&parse.tree());
+        let at_property = model
+            .global_custom_variables()
+            .get("--color")
+            .unwrap()
+            .at_property()
+            .unwrap();
+        let PropertySyntaxResult::Error(diagnostic) = at_property.syntax() else {
+            panic!("expected the last authored rule");
+        };
+
+        assert_eq!(diagnostic.kind(), PropertySyntaxErrorKind::ExpectedTypeName);
     }
 
     #[test]

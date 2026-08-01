@@ -92,7 +92,7 @@ impl<'a> CssModuleVisitor<'a> {
 
         let text: Text = specifier.into();
         imports.insert(
-            text.clone(),
+            node.range(),
             CssImport {
                 specifier: text,
                 resolved_path,

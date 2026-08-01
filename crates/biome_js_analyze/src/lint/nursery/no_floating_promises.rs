@@ -178,6 +178,16 @@ impl Rule for NoFloatingPromises {
         let node = ctx.query();
         let expression = node.expression().ok()?;
 
+        // `is_handled_promise` always treats a bare assignment
+        // statement as handled, regardless of its type, so there's no
+        // point paying for type inference just to be told that afterwards.
+        if matches!(
+            expression.clone().omit_parentheses(),
+            AnyJsExpression::JsAssignmentExpression(_)
+        ) {
+            return None;
+        }
+
         // Uncomment the following line for debugging convenience:
         //let printed = format!("type of {expression:?} = {ty:?}");
         let array_classification = ctx.classify_expression_as_array_of_promises(&expression);
