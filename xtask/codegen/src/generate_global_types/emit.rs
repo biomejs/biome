@@ -16,6 +16,8 @@ const OUTPUT_RELATIVE_PATH: &str = "crates/biome_js_type_info/src/generated/glob
 /// The index is the row position in `PREDEFINED_ID_ROWS`. This keeps
 /// `MIGRATED_PREDEFINED_IDS` sorted for the runtime `binary_search`.
 const GLOBAL_ID_EMIT_ORDER: &[&str] = &[
+    "REGEXP_ID_GLOBAL_TYPE_ID",
+    "REGEXP_EXEC_ID_GLOBAL_TYPE_ID",
     "SYMBOL_ID_GLOBAL_TYPE_ID",
     "SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID",
     "SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",

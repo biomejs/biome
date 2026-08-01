@@ -335,24 +335,6 @@ impl Default for RawGlobalTypes {
         builder.set_manual_type_data(INSTANCEOF_REGEXP_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_REGEXP_ID))
         });
-        builder.set_manual_type_data(REGEXP_ID_GLOBAL_TYPE_ID, || {
-            TypeData::Class(Box::new(Class {
-                name: Some(Text::new_static(REGEXP_ID_NAME)),
-                type_parameters: Box::default(),
-                extends: None,
-                implements: Box::default(),
-                members: Box::new([member("exec", REGEXP_EXEC_ID)]),
-            }))
-        });
-        builder.set_manual_type_data(REGEXP_EXEC_ID_GLOBAL_TYPE_ID, || {
-            TypeData::from(Function {
-                is_async: false,
-                type_parameters: Default::default(),
-                name: Some(Text::new_static(REGEXP_EXEC_ID_NAME)),
-                parameters: Default::default(),
-                return_type: ReturnType::Type(GLOBAL_INSTANCEOF_REGEXP_ID.into()),
-            })
-        });
         builder.set_manual_type_data(INSTANCEOF_DATE_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_DATE_ID))
         });
