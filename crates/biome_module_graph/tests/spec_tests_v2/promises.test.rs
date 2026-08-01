@@ -663,6 +663,48 @@ fn test_infer_module_types_evaluates_await_union_expressions_on_build() {
 }
 
 #[test]
+fn test_infer_module_types_evaluates_await_local_union_expressions_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            let promise: Promise<void> | undefined;
+
+            async function sleep(): Promise<void> {
+                return;
+            }
+
+            export async function consume() {
+                if (!promise) {
+                    promise = sleep();
+                }
+
+                const awaited = await promise;
+                return awaited;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let awaited_ty = inferred_binding_ty_by_name(&db, index_module, inferred, "awaited")
+        .expect("awaited binding type must be inferred");
+    let awaited_ty = inferred.resolve_type(&db, awaited_ty);
+    assert!(contains_inferred_undefined(&db, awaited_ty));
+    assert!(!contains_inferred_instance(&db, awaited_ty));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_evaluates_await_local_union_expressions_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
 fn test_infer_module_types_preserves_optional_chain_short_circuit_types_on_build() {
     let fs = MemoryFileSystem::default();
     fs.insert(
