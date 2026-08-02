@@ -3,15 +3,12 @@ use biome_analyze::{
     Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
 };
 use biome_css_analyze::CssAnalyzerServices;
-use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css};
+use biome_css_parser::{CssParserOptions, parse_css};
 use biome_css_semantic::semantic_model;
 use biome_css_syntax::CssLanguage;
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
-use biome_languages::{
-    CssFileSource,
-    css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability},
-};
+use biome_languages::CssFileSource;
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::AstNode;
 use biome_test_utils::{
@@ -121,18 +118,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             return;
         };
 
-        if file_name.contains(".vue.") && file_name.ends_with(".css") {
-            source_type =
-                source_type.with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue {
-                    applicability: EmbeddingStyleApplicability::Local,
-                }));
-        }
-
-        let mut parser_options = parser_options.unwrap_or(CssParserOptions::from(&source_type));
-
-        if source_type.is_vue_embedded() {
-            parser_options.css_modules = CssModulesKind::Vue;
-        }
+        let parser_options = parser_options.unwrap_or(CssParserOptions::from(&source_type));
 
         if parser_options.tailwind_directives {
             source_type = source_type.with_tailwind_directives()
