@@ -26,9 +26,7 @@ info: html/multiparser/js/html-with-js-script.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,9 @@
--<!doctype html>
-+<!DOCTYPE html>
+@@ -2,7 +2,8 @@
  <html lang="en">
    <head>
      <script type="text/javascript">
@@ -43,7 +41,7 @@ info: html/multiparser/js/html-with-js-script.html
 # Output
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <script type="text/javascript">

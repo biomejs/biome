@@ -49,12 +49,6 @@ prettier.is
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,4 +1,4 @@
--<!doctype html>
-+<!DOCTYPE html>
- <html lang="en">
-   <head>
-     <meta charset="UTF-8" />
 @@ -7,28 +7,28 @@
    </head>
    <body>
@@ -106,7 +100,7 @@ prettier.is
 # Output
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
