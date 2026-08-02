@@ -92,10 +92,13 @@ impl Visitor for SemanticModelBuilderVisitor {
     }
 
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<Self::Language>) {
+        // If a pre-built SemanticModel was already inserted (e.g. by the workspace
+        // open_file/change_file cycle), skip building a new one.
         if ctx.services.get_service::<SemanticModel>().is_some() {
             return;
         }
-        ctx.services.insert_service(self.builder.build());
+        let model = self.builder.build();
+        ctx.services.insert_service(model);
     }
 }
 
