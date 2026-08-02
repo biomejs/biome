@@ -126,7 +126,7 @@ pub fn generate_analyzer() -> Result<()> {
     )?;
     generate_analyzer_crate(
         "biome_css_analyze",
-        &["lint", "assist"],
+        &["lint", "assist", "syntax"],
         update_css_registry_builder,
     )?;
     generate_analyzer_crate(

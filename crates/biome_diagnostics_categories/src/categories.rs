@@ -562,6 +562,7 @@ define_categories! {
     "assist/source/useSortedTypeFields": "https://biomejs.dev/assist/actions/use-sorted-type-fields",
     // end assist actions
     ; // start syntax rules
+    "syntax/correctness/noInvalidPropertySyntax",
     "syntax/correctness/noTypeOnlyImportAttributes",
     "syntax/correctness/noSuperWithoutExtends",
     "syntax/correctness/noInitializerWithDefinite",

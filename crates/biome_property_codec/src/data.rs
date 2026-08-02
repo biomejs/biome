@@ -16,7 +16,7 @@ pub enum PropertySyntaxResult {
     /// The declaration has no `syntax` descriptor.
     Missing,
     /// The descriptor value does not conform to the registered property syntax grammar.
-    Error(PropertySyntaxDiagnostic),
+    Error(PropertySyntaxParseDiagnostic),
     /// The parsed and normalized descriptor value.
     Value(PropertySyntax),
 }
@@ -43,28 +43,9 @@ impl PropertySyntaxResult {
             _ => false,
         }
     }
-}
 
-/// A diagnostic produced while processing an `@property` `syntax` descriptor.
-#[derive(Clone, Debug, Diagnostic, Eq, PartialEq)]
-pub enum PropertySyntaxDiagnostic {
-    /// The descriptor value could not be parsed.
-    Parse(PropertySyntaxParseDiagnostic),
-}
-
-impl PropertySyntaxDiagnostic {
-    /// Returns the reason the descriptor could not be processed.
-    pub const fn kind(&self) -> PropertySyntaxErrorKind {
-        match self {
-            Self::Parse(diagnostic) => diagnostic.kind,
-        }
-    }
-
-    /// Returns the absolute source range associated with the diagnostic.
-    pub const fn range(&self) -> TextRange {
-        match self {
-            Self::Parse(diagnostic) => diagnostic.range,
-        }
+    pub const fn is_valid(&self) -> bool {
+        matches!(self, Self::Value(_))
     }
 }
 
@@ -86,6 +67,16 @@ impl PropertySyntaxParseDiagnostic {
     /// Creates a parse diagnostic for `kind` at an absolute source `range`.
     pub const fn new(kind: PropertySyntaxErrorKind, range: TextRange) -> Self {
         Self { kind, range }
+    }
+
+    /// Returns the reason parsing failed.
+    pub const fn kind(&self) -> PropertySyntaxErrorKind {
+        self.kind
+    }
+
+    /// Returns the absolute source range that caused the error.
+    pub const fn range(&self) -> TextRange {
+        self.range
     }
 }
 
