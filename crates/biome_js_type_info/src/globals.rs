@@ -341,20 +341,8 @@ impl Default for RawGlobalTypes {
         builder.set_manual_type_data(INSTANCEOF_MAP_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_MAP_ID))
         });
-        builder.set_manual_type_data(MAP_ID_GLOBAL_TYPE_ID, || {
-            class(
-                MAP_ID_NAME,
-                Box::new([
-                    TypeReference::from(GLOBAL_T_ID),
-                    TypeReference::from(GLOBAL_U_ID),
-                ]),
-            )
-        });
         builder.set_manual_type_data(INSTANCEOF_SET_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_SET_ID))
-        });
-        builder.set_manual_type_data(SET_ID_GLOBAL_TYPE_ID, || {
-            class(SET_ID_NAME, Box::new([TypeReference::from(GLOBAL_T_ID)]))
         });
         builder.set_manual_type_data(INSTANCEOF_WEAK_MAP_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_WEAK_MAP_ID))
