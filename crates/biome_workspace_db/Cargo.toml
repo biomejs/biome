@@ -32,7 +32,14 @@ biome_js_parser      = { path = "../biome_js_parser", features = ["tests"] }
 biome_project_layout = { path = "../biome_project_layout" }
 
 [features]
-html_embeds  = ["biome_languages/lang_html", "biome_languages/lang_js", "biome_languages/lang_css", "dep:biome_html_syntax", "dep:biome_js_syntax", "dep:biome_css_syntax"]
+html_embeds  = [
+  "biome_languages/lang_css",
+  "biome_languages/lang_html",
+  "biome_languages/lang_js",
+  "dep:biome_css_syntax",
+  "dep:biome_html_syntax",
+  "dep:biome_js_syntax"
+]
 module_graph = ["dep:biome_module_graph"]
 
 [lints]
