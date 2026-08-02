@@ -3,6 +3,7 @@
 #[macro_use]
 mod generated;
 mod import_ext;
+pub mod keywords;
 mod number_ext;
 mod property_ext;
 mod scss_ext;

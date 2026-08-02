@@ -18,6 +18,7 @@ pub struct SemanticModelBuilder {
     top_level_rule_ids: Vec<RuleId>,
     global_custom_variables: FxHashMap<TokenText, CssGlobalCustomVariableData>,
     at_property_rules: Vec<CssPropertyAtRuleData>,
+    at_property_by_range: FxHashMap<TextRange, usize>,
     last_at_property_by_name: FxHashMap<TokenText, usize>,
     /// Stack of rule IDs to keep track of the current rule hierarchy
     current_rule_stack: Vec<RuleId>,
@@ -36,6 +37,7 @@ impl SemanticModelBuilder {
             current_rule_stack: Vec::new(),
             global_custom_variables: FxHashMap::default(),
             at_property_rules: Vec::new(),
+            at_property_by_range: FxHashMap::default(),
             last_at_property_by_name: FxHashMap::default(),
             range_to_rule_id: BTreeMap::default(),
             is_in_root_selector: false,
@@ -126,6 +128,7 @@ impl SemanticModelBuilder {
             top_level_rule_ids: self.top_level_rule_ids,
             global_custom_variables: self.global_custom_variables,
             at_property_rules: self.at_property_rules,
+            at_property_by_range: self.at_property_by_range,
             last_at_property_by_name: self.last_at_property_by_name,
             range_to_rule_id: self.range_to_rule_id,
         };
@@ -284,6 +287,7 @@ impl SemanticModelBuilder {
                         inherits,
                         range,
                     });
+                    self.at_property_by_range.insert(range, index);
                     self.last_at_property_by_name.insert(property_name, index);
                 }
             }

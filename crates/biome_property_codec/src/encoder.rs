@@ -9,6 +9,7 @@ use biome_unicode_table::{
     Dispatch::{DIG, IDT, MIN, ZER},
     lookup_byte,
 };
+use std::borrow::Cow;
 
 /// Decodes and parses the value of a CSS string used as an `@property`
 /// `syntax` descriptor.
@@ -29,6 +30,19 @@ pub fn encode(string: &CssString) -> PropertySyntaxResult {
         Ok(value) => PropertySyntaxResult::Value(value),
         Err(diagnostic) => PropertySyntaxResult::Error(diagnostic),
     }
+}
+
+/// Resolves CSS escape sequences in an identifier or dimension unit.
+pub fn decode_css_identifier(value: &str) -> Cow<'_, str> {
+    if !value.contains(['\\', '\0']) {
+        return Cow::Borrowed(value);
+    }
+
+    Cow::Owned(
+        DecodedCursor::new_css_string(value, TextSize::default())
+            .map(|character| character.value)
+            .collect(),
+    )
 }
 
 #[cfg(test)]
@@ -712,6 +726,13 @@ mod tests {
                 &PropertySyntaxComponentName::CustomIdentifier("foo".into()),
             ]
         );
+    }
+
+    #[test]
+    fn decodes_css_identifier_escapes() {
+        assert_eq!(decode_css_identifier("plain"), "plain");
+        assert_eq!(decode_css_identifier(r"f\6f o"), "foo");
+        assert_eq!(decode_css_identifier(r"p\78"), "px");
     }
 
     #[test]

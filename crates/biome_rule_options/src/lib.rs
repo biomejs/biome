@@ -136,6 +136,7 @@ pub mod no_import_assign;
 pub mod no_import_cycles;
 pub mod no_important_in_keyframe;
 pub mod no_important_styles;
+pub mod no_inconsistent_property_init_value;
 pub mod no_increment_decrement;
 pub mod no_inferrable_types;
 pub mod no_inline_styles;

@@ -1,3 +1,7 @@
+mod generated;
+
+pub use self::generated::*;
+
 pub const BASIC_KEYWORDS: [&str; 5] = ["inherit", "initial", "revert", "revert-layer", "unset"];
 
 // https://drafts.csswg.org/css-fonts/#system-family-name-value
@@ -1631,6 +1635,7 @@ pub const KNOWN_PROPERTIES: &[&str] = &[
     "z-index",
     "zoom",
 ];
+
 // https://github.com/known-css/known-css-properties/blob/master/source/browsers/chrome-122.0.json
 pub const KNOWN_CHROME_PROPERTIES: [&str; 619] = [
     "-webkit-align-content",
@@ -5515,7 +5520,7 @@ pub const RESET_TO_INITIAL_PROPERTIES_BY_FONT: [&str; 13] = [
 
 // https://developer.mozilla.org/ja/docs/Web/HTML/Element
 // https://github.com/sindresorhus/html-tags/blob/main/html-tags.json
-pub(crate) const HTML_TAGS: [&str; 150] = [
+pub const HTML_TAGS: [&str; 150] = [
     "a",
     "abbr",
     "acronym",
@@ -5670,7 +5675,7 @@ pub(crate) const HTML_TAGS: [&str; 150] = [
 
 // https://developer.mozilla.org/ja/docs/Web/SVG/Element
 // https://github.com/element-io/svg-tags/blob/master/lib/svg-tags.json
-pub(crate) const SVG_TAGS: [&str; 82] = [
+pub const SVG_TAGS: [&str; 82] = [
     "a",
     "altGlyph",
     "altGlyphDef",
@@ -5756,7 +5761,7 @@ pub(crate) const SVG_TAGS: [&str; 82] = [
 ];
 
 // https://developer.mozilla.org/ja/docs/Web/MathML/Element
-pub(crate) const MATH_ML_TAGS: [&str; 32] = [
+pub const MATH_ML_TAGS: [&str; 32] = [
     "annotation",
     "annotation-xml",
     "maction",
@@ -5791,167 +5796,102 @@ pub(crate) const MATH_ML_TAGS: [&str; 32] = [
     "semantics",
 ];
 
-// CSS named colors are CssIdentifier tokens in property values.
-// We exclude them from property-value baseline checks because they're
-// universally supported regardless of baseline data.
-pub(crate) const NAMED_COLORS: &[&str] = &[
-    "aliceblue",
-    "antiquewhite",
-    "aqua",
-    "aquamarine",
-    "auto",
-    "azure",
-    "beige",
-    "bisque",
-    "black",
-    "blanchedalmond",
-    "blue",
-    "blueviolet",
-    "brown",
-    "burlywood",
-    "cadetblue",
-    "chartreuse",
-    "chocolate",
-    "coral",
-    "cornflowerblue",
-    "cornsilk",
-    "crimson",
-    "currentcolor",
-    "cyan",
-    "darkblue",
-    "darkcyan",
-    "darkgoldenrod",
-    "darkgray",
-    "darkgreen",
-    "darkgrey",
-    "darkkhaki",
-    "darkmagenta",
-    "darkolivegreen",
-    "darkorange",
-    "darkorchid",
-    "darkred",
-    "darksalmon",
-    "darkseagreen",
-    "darkslateblue",
-    "darkslategray",
-    "darkslategrey",
-    "darkturquoise",
-    "darkviolet",
-    "deeppink",
-    "deepskyblue",
-    "dimgray",
-    "dimgrey",
-    "dodgerblue",
-    "firebrick",
-    "floralwhite",
-    "forestgreen",
-    "fuchsia",
-    "gainsboro",
-    "ghostwhite",
-    "gold",
-    "goldenrod",
-    "gray",
-    "green",
-    "greenyellow",
-    "grey",
-    "honeydew",
-    "hotpink",
-    "indianred",
-    "indigo",
-    "inherit",
-    "initial",
-    "ivory",
-    "khaki",
-    "lavender",
-    "lavenderblush",
-    "lawngreen",
-    "lemonchiffon",
-    "lightblue",
-    "lightcoral",
-    "lightcyan",
-    "lightgoldenrodyellow",
-    "lightgray",
-    "lightgreen",
-    "lightgrey",
-    "lightpink",
-    "lightsalmon",
-    "lightseagreen",
-    "lightskyblue",
-    "lightslategray",
-    "lightslategrey",
-    "lightsteelblue",
-    "lightyellow",
-    "lime",
-    "limegreen",
-    "linen",
-    "magenta",
-    "maroon",
-    "mediumaquamarine",
-    "mediumblue",
-    "mediumorchid",
-    "mediumpurple",
-    "mediumseagreen",
-    "mediumslateblue",
-    "mediumspringgreen",
-    "mediumturquoise",
-    "mediumvioletred",
-    "midnightblue",
-    "mintcream",
-    "mistyrose",
-    "moccasin",
-    "navajowhite",
-    "navy",
-    "none",
-    "oldlace",
-    "olive",
-    "olivedrab",
-    "orange",
-    "orangered",
-    "orchid",
-    "palegoldenrod",
-    "palegreen",
-    "paleturquoise",
-    "palevioletred",
-    "papayawhip",
-    "peachpuff",
-    "peru",
-    "pink",
-    "plum",
-    "powderblue",
-    "purple",
-    "rebeccapurple",
-    "red",
-    "revert",
-    "revert-layer",
-    "rosybrown",
-    "royalblue",
-    "saddlebrown",
-    "salmon",
-    "sandybrown",
-    "seagreen",
-    "seashell",
-    "sienna",
-    "silver",
-    "skyblue",
-    "slateblue",
-    "slategray",
-    "slategrey",
-    "snow",
-    "springgreen",
-    "steelblue",
+pub const ANGLE_UNITS: &[&str] = &["deg", "grad", "rad", "turn"];
+
+pub const COLOR_FUNCTIONS: &[&str] = &[
+    "alpha",
+    "color",
+    "color-mix",
+    "contrast-color",
+    "device-cmyk",
+    "hsl",
+    "hsla",
+    "hwb",
+    "lab",
+    "lch",
+    "light-dark",
+    "oklab",
+    "oklch",
+    "rgb",
+    "rgba",
+];
+
+pub const IMAGE_FUNCTIONS: &[&str] = &[
+    "-webkit-image-set",
+    "conic-gradient",
+    "cross-fade",
+    "element",
+    "image",
+    "image-set",
+    "linear-gradient",
+    "paint",
+    "radial-gradient",
+    "repeating-conic-gradient",
+    "repeating-linear-gradient",
+    "repeating-radial-gradient",
+];
+
+pub const LENGTH_UNITS: &[&str] = &[
+    "cap", "ch", "cm", "cqb", "cqh", "cqi", "cqmax", "cqmin", "cqw", "dvb", "dvh", "dvi", "dvmax",
+    "dvmin", "dvw", "em", "ex", "ic", "in", "lh", "lvb", "lvh", "lvi", "lvmax", "lvmin", "lvw",
+    "mm", "pc", "pt", "px", "q", "rcap", "rch", "rem", "rex", "ric", "rlh", "svb", "svh", "svi",
+    "svmax", "svmin", "svw", "vb", "vh", "vi", "vmax", "vmin", "vw",
+];
+
+pub const MATH_FUNCTIONS: &[&str] = &[
+    "abs",
+    "acos",
+    "asin",
+    "atan",
+    "atan2",
+    "calc",
+    "clamp",
+    "cos",
+    "exp",
+    "hypot",
+    "log",
+    "max",
+    "min",
+    "mod",
+    "pow",
+    "progress",
+    "random",
+    "rem",
+    "round",
+    "sibling-count",
+    "sibling-index",
+    "sign",
+    "sin",
+    "sqrt",
     "tan",
-    "teal",
-    "thistle",
-    "tomato",
-    "transparent",
-    "turquoise",
-    "unset",
-    "violet",
-    "wheat",
-    "white",
-    "whitesmoke",
-    "yellow",
-    "yellowgreen",
+];
+
+pub const RESOLUTION_UNITS: &[&str] = &["dpcm", "dpi", "dppx", "x"];
+
+pub const TIME_UNITS: &[&str] = &["ms", "s"];
+
+pub const TRANSFORM_FUNCTIONS: &[&str] = &[
+    "matrix",
+    "matrix3d",
+    "perspective",
+    "rotate",
+    "rotate3d",
+    "rotatex",
+    "rotatey",
+    "rotatez",
+    "scale",
+    "scale3d",
+    "scalex",
+    "scaley",
+    "scalez",
+    "skew",
+    "skewx",
+    "skewy",
+    "translate",
+    "translate3d",
+    "translatex",
+    "translatey",
+    "translatez",
 ];
 
 #[cfg(test)]
@@ -5959,6 +5899,52 @@ mod tests {
     use std::collections::HashSet;
 
     use super::*;
+
+    fn assert_strictly_ordered(items: &[&str]) {
+        for items in items.windows(2) {
+            assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+        }
+    }
+
+    #[test]
+    fn test_angle_units_order() {
+        assert_strictly_ordered(ANGLE_UNITS);
+    }
+
+    #[test]
+    fn test_color_functions_order() {
+        assert_strictly_ordered(COLOR_FUNCTIONS);
+    }
+
+    #[test]
+    fn test_image_functions_order() {
+        assert_strictly_ordered(IMAGE_FUNCTIONS);
+    }
+
+    #[test]
+    fn test_length_units_order() {
+        assert_strictly_ordered(LENGTH_UNITS);
+    }
+
+    #[test]
+    fn test_math_functions_order() {
+        assert_strictly_ordered(MATH_FUNCTIONS);
+    }
+
+    #[test]
+    fn test_resolution_units_order() {
+        assert_strictly_ordered(RESOLUTION_UNITS);
+    }
+
+    #[test]
+    fn test_time_units_order() {
+        assert_strictly_ordered(TIME_UNITS);
+    }
+
+    #[test]
+    fn test_transform_functions_order() {
+        assert_strictly_ordered(TRANSFORM_FUNCTIONS);
+    }
 
     #[test]
     fn test_basic_keywords_sorted() {
@@ -6342,13 +6328,6 @@ mod tests {
     #[test]
     fn test_math_ml_tags() {
         for items in MATH_ML_TAGS.windows(2) {
-            assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
-        }
-    }
-
-    #[test]
-    fn test_color_names() {
-        for items in NAMED_COLORS.windows(2) {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }
     }

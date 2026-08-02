@@ -8,4 +8,4 @@ pub use data::{
     PropertySyntaxType,
 };
 pub use decoder::decode;
-pub use encoder::encode;
+pub use encoder::{decode_css_identifier, encode};

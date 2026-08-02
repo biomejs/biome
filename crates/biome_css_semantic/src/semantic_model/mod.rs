@@ -303,6 +303,11 @@ mod tests {
 @property --unquoted {
   syntax: color;
   inherits: yes;
+}
+@property --invalid-last {
+  syntax: "<length>";
+  syntax:;
+  inherits: true;
 }"#,
             CssFileSource::css(),
             CssParserOptions::default(),
@@ -313,6 +318,11 @@ mod tests {
         let invalid = variables.get("--invalid").unwrap().at_property().unwrap();
         let missing = variables.get("--missing").unwrap().at_property().unwrap();
         let unquoted = variables.get("--unquoted").unwrap().at_property().unwrap();
+        let invalid_last = variables
+            .get("--invalid-last")
+            .unwrap()
+            .at_property()
+            .unwrap();
 
         let PropertySyntaxResult::Error(diagnostic) = invalid.syntax() else {
             panic!("expected invalid syntax");
@@ -321,6 +331,10 @@ mod tests {
         assert_eq!(missing.syntax(), &PropertySyntaxResult::Missing);
         let PropertySyntaxResult::Error(diagnostic) = unquoted.syntax() else {
             panic!("expected a string diagnostic, got {:#?}", unquoted.syntax());
+        };
+        assert_eq!(diagnostic.kind(), PropertySyntaxErrorKind::ExpectedString);
+        let PropertySyntaxResult::Error(diagnostic) = invalid_last.syntax() else {
+            panic!("expected the final syntax descriptor to be invalid");
         };
         assert_eq!(diagnostic.kind(), PropertySyntaxErrorKind::ExpectedString);
         assert_eq!(unquoted.inherits(), None);

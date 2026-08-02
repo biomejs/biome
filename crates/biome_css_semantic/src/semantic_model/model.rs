@@ -124,6 +124,8 @@ pub(crate) struct SemanticModelData {
     /// Every authored `@property` rule in source order, including declarations
     /// shadowed by a later rule with the same name.
     pub(crate) at_property_rules: Vec<CssPropertyAtRuleData>,
+    /// Maps each authored `@property` rule range to its index.
+    pub(crate) at_property_by_range: FxHashMap<TextRange, usize>,
     /// The effective `@property` rule for each name.
     ///
     /// Each value indexes the last matching declaration in
@@ -1178,6 +1180,16 @@ impl<'a> GlobalCustomVariables<'a> {
                 data: self.data.clone(),
                 index,
             })
+    }
+
+    /// Returns the authored `@property` rule at `range`, including definitions
+    /// shadowed by a later rule with the same name.
+    pub fn at_property_by_range(&self, range: TextRange) -> Option<CustomProperty> {
+        let index = *self.data.at_property_by_range.get(&range)?;
+        Some(CustomProperty {
+            data: self.data.clone(),
+            index,
+        })
     }
 
     /// Returns all custom properties in unspecified order.

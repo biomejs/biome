@@ -661,6 +661,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noImportantStyles",
         TypeId::of::<biome_rule_options::no_important_styles::NoImportantStylesOptions>(),
     ));
+    result.push(("nursery", "noInconsistentPropertyInitValue", TypeId::of::<biome_rule_options::no_inconsistent_property_init_value::NoInconsistentPropertyInitValueOptions>()));
     result.push((
         "style",
         "noIncrementDecrement",
