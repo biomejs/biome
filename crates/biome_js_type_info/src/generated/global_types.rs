@@ -8,6 +8,18 @@ pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
     crate::globals::ARRAY_FILTER_ID_GLOBAL_TYPE_ID,
     crate::globals::ARRAY_FOREACH_ID_GLOBAL_TYPE_ID,
     crate::globals::ARRAY_MAP_ID_GLOBAL_TYPE_ID,
+    crate::globals::PROMISE_ID_GLOBAL_TYPE_ID,
+    crate::globals::PROMISE_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
+    crate::globals::PROMISE_CATCH_ID_GLOBAL_TYPE_ID,
+    crate::globals::PROMISE_FINALLY_ID_GLOBAL_TYPE_ID,
+    crate::globals::PROMISE_THEN_ID_GLOBAL_TYPE_ID,
+    crate::globals::PROMISE_ALL_ID_GLOBAL_TYPE_ID,
+    crate::globals::PROMISE_ALL_SETTLED_ID_GLOBAL_TYPE_ID,
+    crate::globals::PROMISE_ANY_ID_GLOBAL_TYPE_ID,
+    crate::globals::PROMISE_RACE_ID_GLOBAL_TYPE_ID,
+    crate::globals::PROMISE_REJECT_ID_GLOBAL_TYPE_ID,
+    crate::globals::PROMISE_RESOLVE_ID_GLOBAL_TYPE_ID,
+    crate::globals::PROMISE_TRY_ID_GLOBAL_TYPE_ID,
     crate::globals::REGEXP_ID_GLOBAL_TYPE_ID,
     crate::globals::REGEXP_EXEC_ID_GLOBAL_TYPE_ID,
     crate::globals::SYMBOL_ID_GLOBAL_TYPE_ID,
@@ -100,6 +112,156 @@ pub(crate) fn set_generated_global_type_data(
         return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_ARRAY_U_ID.into()),
     }));
     builder.set_type_data(crate::globals::ARRAY_MAP_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Class(Box::new(crate::Class {
+        name: Some(biome_rowan::Text::new_static("Promise")),
+        type_parameters: Box::new([crate::globals::GLOBAL_T_ID.into()]),
+        extends: None,
+        implements: Box::default(),
+        members: Box::new([
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Constructor,
+                ty: crate::globals::GLOBAL_PROMISE_CONSTRUCTOR_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("catch")),
+                ty: crate::globals::GLOBAL_PROMISE_CATCH_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("finally")),
+                ty: crate::globals::GLOBAL_PROMISE_FINALLY_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("then")),
+                ty: crate::globals::GLOBAL_PROMISE_THEN_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("all")),
+                ty: crate::globals::GLOBAL_PROMISE_ALL_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static(
+                    "allSettled",
+                )),
+                ty: crate::globals::GLOBAL_PROMISE_ALL_SETTLED_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("any")),
+                ty: crate::globals::GLOBAL_PROMISE_ANY_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("race")),
+                ty: crate::globals::GLOBAL_PROMISE_RACE_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("reject")),
+                ty: crate::globals::GLOBAL_PROMISE_REJECT_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("resolve")),
+                ty: crate::globals::GLOBAL_PROMISE_RESOLVE_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("try")),
+                ty: crate::globals::GLOBAL_PROMISE_TRY_ID.into(),
+            },
+        ]),
+    }));
+    builder.set_type_data(crate::globals::PROMISE_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("Promise.constructor")),
+        parameters: Box::new([crate::FunctionParameter::Pattern(
+            crate::PatternFunctionParameter {
+                bindings: Box::default(),
+                ty: crate::globals::GLOBAL_VOID_CALLBACK_ID.into(),
+                is_optional: false,
+                is_rest: false,
+            },
+        )]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_VOID_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::PROMISE_CONSTRUCTOR_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("Promise.prototype.catch")),
+        parameters: Box::new([]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_PROMISE_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::PROMISE_CATCH_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("Promise.prototype.finally")),
+        parameters: Box::new([]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_PROMISE_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::PROMISE_FINALLY_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("Promise.prototype.then")),
+        parameters: Box::new([]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_PROMISE_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::PROMISE_THEN_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("Promise.all")),
+        parameters: Box::new([]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_PROMISE_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::PROMISE_ALL_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("Promise.allSettled")),
+        parameters: Box::new([]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_PROMISE_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::PROMISE_ALL_SETTLED_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("Promise.any")),
+        parameters: Box::new([]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_PROMISE_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::PROMISE_ANY_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("Promise.race")),
+        parameters: Box::new([]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_PROMISE_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::PROMISE_RACE_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("Promise.reject")),
+        parameters: Box::new([]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_PROMISE_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::PROMISE_REJECT_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("Promise.resolve")),
+        parameters: Box::new([]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_PROMISE_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::PROMISE_RESOLVE_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("Promise.try")),
+        parameters: Box::new([]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_PROMISE_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::PROMISE_TRY_ID_GLOBAL_TYPE_ID, data);
     let data = crate::TypeData::Class(Box::new(crate::Class {
         name: Some(biome_rowan::Text::new_static("RegExp")),
         type_parameters: Box::default(),
