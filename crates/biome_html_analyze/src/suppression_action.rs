@@ -1,5 +1,5 @@
 use biome_analyze::{ApplySuppression, SuppressionAction};
-use biome_html_syntax::{HtmlLanguage, HtmlSyntaxToken};
+use biome_html_syntax::{HtmlLanguage, HtmlSyntaxKind, HtmlSyntaxToken};
 use biome_rowan::{BatchMutation, TriviaPieceKind};
 
 pub(crate) struct HtmlSuppressionAction;
@@ -17,8 +17,24 @@ impl SuppressionAction for HtmlSuppressionAction {
             should_insert_leading_newline: false,
         };
 
+        // If the token is part of a (possibly multi-line) start tag, hoist it to the
+        // tag's first token so the suppression comment is placed above the whole
+        // element instead of inside the tag, where a comment isn't valid HTML.
+        let start_token = token
+            .ancestors()
+            .find(|node| {
+                matches!(
+                    node.kind(),
+                    HtmlSyntaxKind::HTML_OPENING_ELEMENT
+                        | HtmlSyntaxKind::HTML_SELF_CLOSING_ELEMENT
+                        | HtmlSyntaxKind::HTML_BOGUS_ELEMENT
+                )
+            })
+            .and_then(|node| node.first_token())
+            .unwrap_or(token);
+
         // Find the token at the start of suppressed token's line
-        let mut current_token = token;
+        let mut current_token = start_token;
         loop {
             let trivia = current_token.leading_trivia();
             if trivia.pieces().any(|trivia| trivia.kind().is_newline()) {

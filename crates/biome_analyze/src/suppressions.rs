@@ -592,6 +592,20 @@ impl<'analyzer> Suppressions<'analyzer> {
         found
     }
 
+    /// Extends every line suppression that covers `node_range`'s start so that it covers the
+    /// whole node. See [`biome_rowan::SyntaxKind::extends_line_suppression`].
+    pub(crate) fn expand_to_node(&mut self, node_range: TextRange) {
+        let start = node_range.start();
+        for suppression in self.line_suppressions.iter_mut().rev() {
+            if suppression.text_range.end() < start {
+                break;
+            }
+            if suppression.text_range.contains(start) {
+                suppression.text_range = suppression.text_range.cover(node_range);
+            }
+        }
+    }
+
     pub(crate) fn bump_line_index(&mut self, line_index: usize) {
         self.line_index = line_index;
     }

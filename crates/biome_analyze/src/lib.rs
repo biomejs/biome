@@ -65,7 +65,7 @@ pub use crate::visitor::{NodeVisitor, Visitor, VisitorContext, VisitorFinishCont
 use biome_diagnostics::{Diagnostic, DiagnosticExt, category};
 use biome_rowan::{
     AstNode, BatchMutation, Direction, Language, SyntaxKind as _, SyntaxToken, TextRange, TextSize,
-    TokenAtOffset, TriviaPieceKind,
+    TokenAtOffset, TriviaPieceKind, WalkEvent,
 };
 use biome_suppression::{Suppression, SuppressionKind};
 pub use suppression_action::{ApplySuppression, SuppressionAction};
@@ -301,6 +301,12 @@ where
         // Iterate for syntax rules after we've established suppressions
         let iter = self.root.syntax().preorder();
         for event in iter {
+            if let WalkEvent::Enter(node) = &event
+                && node.kind().extends_line_suppression()
+            {
+                self.suppressions.expand_to_node(node.text_trimmed_range());
+            }
+
             // If this is a node event pass it to the visitors for this phase
             for visitor in self.visitors.iter_mut() {
                 let ctx = VisitorContext {

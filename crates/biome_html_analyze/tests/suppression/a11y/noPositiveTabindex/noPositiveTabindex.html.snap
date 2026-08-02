@@ -1,0 +1,48 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: noPositiveTabindex.html
+---
+# Input
+```html
+<slot
+  name="icon"
+  tabindex="2"
+></slot>
+
+```
+
+# Diagnostics
+```
+noPositiveTabindex.html:3:12 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid positive values for the tabindex attribute.
+  
+    1 │ <slot
+    2 │   name="icon"
+  > 3 │   tabindex="2"
+      │            ^^^
+    4 │ ></slot>
+    5 │ 
+  
+  i Elements with a positive tabindex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+  i Use only 0 and -1 as tabindex values. Avoid using tabindex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
+  
+  i Safe fix: Suppress rule lint/a11y/noPositiveTabindex for this line.
+  
+    1   │ - <slot
+      1 │ + <!--·biome-ignore·lint/a11y/noPositiveTabindex:·<explanation>·-->
+      2 │ + <slot
+    2 3 │     name="icon"
+    3 4 │     tabindex="2"
+  
+  i Safe fix: Suppress rule lint/a11y/noPositiveTabindex for the whole file.
+  
+    1   │ - <slot
+      1 │ + <!--·biome-ignore-all·lint/a11y/noPositiveTabindex:·<explanation>·-->
+      2 │ + <slot
+    2 3 │     name="icon"
+    3 4 │     tabindex="2"
+  
+
+```

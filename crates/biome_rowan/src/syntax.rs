@@ -56,6 +56,16 @@ pub trait SyntaxKind: fmt::Debug + PartialEq + Copy {
     fn is_allowed_before_suppressions(&self) -> bool {
         false
     }
+
+    /// Returns `true` if a line suppression that covers the start of this node should extend
+    /// over the node's whole range.
+    ///
+    /// Constructs like an HTML start tag are conceptually a single unit but may be written
+    /// across several lines. Without this, a `biome-ignore` above the tag would only cover the
+    /// tag's first line.
+    fn extends_line_suppression(&self) -> bool {
+        false
+    }
 }
 
 pub trait Language: Sized + Clone + Copy + fmt::Debug + Eq + Ord + std::hash::Hash {

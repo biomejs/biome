@@ -1,0 +1,43 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: suppressionMultiline.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<!-- biome-ignore lint/a11y/noPositiveTabindex: suppressed -->
+<slot
+  name="icon"
+  tabindex="2"
+></slot>
+
+<!-- biome-ignore lint/a11y/noPositiveTabindex: does not reach children -->
+<div>
+  <span tabindex="2"></span>
+</div>
+
+```
+
+# Diagnostics
+```
+suppressionMultiline.html:10:18 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid positive values for the tabindex attribute.
+  
+     8 │ <!-- biome-ignore lint/a11y/noPositiveTabindex: does not reach children -->
+     9 │ <div>
+  > 10 │   <span tabindex="2"></span>
+       │                  ^^^
+    11 │ </div>
+    12 │ 
+  
+  i Elements with a positive tabindex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+  i Use only 0 and -1 as tabindex values. Avoid using tabindex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    10 │ ··<span·tabindex="2"></span>
+       │         ------------        
+
+```

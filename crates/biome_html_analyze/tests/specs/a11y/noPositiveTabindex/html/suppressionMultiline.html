@@ -1,0 +1,11 @@
+<!-- should generate diagnostics -->
+<!-- biome-ignore lint/a11y/noPositiveTabindex: suppressed -->
+<slot
+  name="icon"
+  tabindex="2"
+></slot>
+
+<!-- biome-ignore lint/a11y/noPositiveTabindex: does not reach children -->
+<div>
+  <span tabindex="2"></span>
+</div>

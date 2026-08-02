@@ -99,6 +99,13 @@ impl biome_rowan::SyntaxKind for HtmlSyntaxKind {
     fn to_string(&self) -> Option<&'static str> {
         Self::to_string(self)
     }
+
+    fn extends_line_suppression(&self) -> bool {
+        matches!(
+            self,
+            Self::HTML_OPENING_ELEMENT | Self::HTML_SELF_CLOSING_ELEMENT | Self::HTML_BOGUS_ELEMENT
+        )
+    }
 }
 
 impl TryFrom<HtmlSyntaxKind> for TriviaPieceKind {
