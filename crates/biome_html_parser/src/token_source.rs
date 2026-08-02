@@ -180,6 +180,13 @@ pub(crate) enum HtmlEmbeddedLanguage {
     /// reproduce it byte for byte; splitting it into markup would lose the
     /// whitespace to trivia.
     Preformatted(PreformattedElement),
+    /// A top-level block of a Vue single-file component whose content is not
+    /// HTML: a custom block such as `<i18n>` or `<docs>`, or a `<template>`
+    /// written in another language. The tag name is arbitrary, so it is
+    /// carried as a range into the source rather than as a `&'static str`.
+    RawTextBlock {
+        name: TextRange,
+    },
 }
 
 /// The preformatted elements, each identified by the closing tag that ends its
@@ -194,16 +201,21 @@ pub(crate) enum PreformattedElement {
 }
 
 impl HtmlEmbeddedLanguage {
-    pub fn end_tag(&self) -> &'static str {
+    /// The name of the tag that ends this content, e.g. `script` for a
+    /// `<script>` element. A raw-text block can be named anything, so its name
+    /// is read back out of `source`, which is the same text its range was taken
+    /// from.
+    pub fn closing_tag_name<'a>(&self, source: &'a str) -> &'a str {
         match self {
-            Self::Script => "</script>",
-            Self::Style => "</style>",
+            Self::Script => "script",
+            Self::Style => "style",
             Self::Preformatted(element) => match element {
-                PreformattedElement::Pre => "</pre>",
-                PreformattedElement::Textarea => "</textarea>",
-                PreformattedElement::Xmp => "</xmp>",
-                PreformattedElement::Plaintext => "</plaintext>",
+                PreformattedElement::Pre => "pre",
+                PreformattedElement::Textarea => "textarea",
+                PreformattedElement::Xmp => "xmp",
+                PreformattedElement::Plaintext => "plaintext",
             },
+            Self::RawTextBlock { name } => &source[*name],
         }
     }
 }

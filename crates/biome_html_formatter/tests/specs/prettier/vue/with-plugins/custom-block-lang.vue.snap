@@ -19,16 +19,20 @@ world!
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,4 +1 @@
--<custom lang="uppercase-rocks">
+@@ -1,4 +1,4 @@
+ <custom lang="uppercase-rocks">
 -HELLO,
 -WORLD!
--</custom>
-+<custom lang="uppercase-rocks"> hello, world! </custom>
++hello,
++world!
+ </custom>
 ```
 
 # Output
 
 ```vue
-<custom lang="uppercase-rocks"> hello, world! </custom>
+<custom lang="uppercase-rocks">
+hello,
+world!
+</custom>
 ```
