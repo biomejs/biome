@@ -7,7 +7,7 @@ use biome_js_syntax::AnyJsExpression;
 use biome_rowan::Text;
 
 use crate::{
-    Class, Function, FunctionParameter, GenericTypeParameter, Literal, PatternFunctionParameter,
+    Function, FunctionParameter, GenericTypeParameter, Literal, PatternFunctionParameter,
     Resolvable, ResolvedTypeData, ResolvedTypeId, ResolverId, ReturnType, ScopeId, TypeData,
     TypeId, TypeInstance, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
     TypeStore, Union, flattening::MAX_FLATTEN_DEPTH, interned_types::TypeData as InferredTypeData,
@@ -40,17 +40,6 @@ pub struct GlobalsResolver {
 impl Default for RawGlobalTypes {
     /// Generated globals take precedence; manual definitions only fill missing slots.
     fn default() -> Self {
-        // Builds an empty-body global `Class` with `name` and `type_parameters`.
-        let class = |name: &'static str, type_parameters: Box<[TypeReference]>| {
-            TypeData::Class(Box::new(Class {
-                name: Some(Text::new_static(name)),
-                type_parameters,
-                extends: None,
-                implements: Box::default(),
-                members: Box::default(),
-            }))
-        };
-
         // Builds a string-literal `TypeData` whose value is the static text
         // `value`.
         let string_literal = |value: &'static str| -> TypeData {
@@ -190,9 +179,6 @@ impl Default for RawGlobalTypes {
         });
         builder.set_manual_type_data(INSTANCEOF_ERROR_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_ERROR_ID))
-        });
-        builder.set_manual_type_data(ERROR_ID_GLOBAL_TYPE_ID, || {
-            class(ERROR_ID_NAME, Box::default())
         });
         builder.set_manual_type_data(INSTANCEOF_SYMBOL_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_SYMBOL_ID))
