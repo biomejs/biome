@@ -1,8 +1,10 @@
-use crate::services::semantic::SemanticServices;
+use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Rule, RuleDiagnostic, declare_syntax_rule};
-use biome_css_semantic::model::CssPropertyAtRule;
+use biome_css_semantic::model::CustomProperty;
+use biome_css_syntax::CssPropertyAtRule;
 use biome_property_codec::PropertySyntaxResult;
+use biome_rowan::AstNode;
 
 declare_syntax_rule! {
     /// Parses the value of `syntax` in CSS custom at-rule `@property`
@@ -23,25 +25,25 @@ declare_syntax_rule! {
 }
 
 impl Rule for NoInvalidPropertySyntax {
-    type Query = SemanticServices;
-    type State = CssPropertyAtRule;
-    type Signals = Vec<Self::State>;
+    type Query = Semantic<CssPropertyAtRule>;
+    type State = CustomProperty;
+    type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.model();
+        let node = ctx.query();
 
         model
             .global_custom_variables()
             .at_properties()
-            .filter_map(|property| {
-                if !property.syntax().is_valid() {
+            .find_map(|property| {
+                if !property.syntax().is_valid() && property.range() == node.range() {
                     Some(property)
                 } else {
                     None
                 }
             })
-            .collect()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
