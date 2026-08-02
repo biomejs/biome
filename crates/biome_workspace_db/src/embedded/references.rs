@@ -126,12 +126,15 @@ fn svelte_store_reference_name(reference_name: &str) -> Option<&str> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css};
     use biome_db::testing::{Events, assert_function_query_was_not_run};
     use biome_db::{Db, ParsedSnippet, ParsedSource};
     use biome_html_parser::{HtmlParserOptions, parse_html};
     use biome_js_parser::JsParserOptions;
     use biome_languages::javascript::JsEmbeddingKind;
-    use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
+    use biome_languages::{
+        CssFileSource, DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb,
+    };
     use biome_rowan::{RawSyntaxKind, TextRange, TextSize};
     use camino::{Utf8Path, Utf8PathBuf};
     use papaya::HashMap;
@@ -188,7 +191,7 @@ mod tests {
         fn source_from_index(&self, index: usize) -> Option<DocumentFileSource> {
             Some(match index {
                 0 => DocumentFileSource::Html(HtmlFileSource::vue()),
-                _ => DocumentFileSource::Js(JsFileSource::ts().with_embedding_kind(
+                1 => DocumentFileSource::Js(JsFileSource::ts().with_embedding_kind(
                     JsEmbeddingKind::Vue {
                         setup: false,
                         is_source: false,
@@ -196,6 +199,7 @@ mod tests {
                         allow_statements: false,
                     },
                 )),
+                _ => DocumentFileSource::Css(CssFileSource::css()),
             })
         }
     }
@@ -335,5 +339,111 @@ mod tests {
         let events = db.take_salsa_events();
 
         assert_function_query_was_not_run(&db, embedded_references_from_source, file, &events);
+    }
+
+    fn parse_vue_source_with_css_snippet(db: &TestDb, css_source: &str) -> Utf8PathBuf {
+        let path = Utf8PathBuf::from("src/App.vue");
+        let parsed = parse_html(
+            "<template></template>",
+            HtmlParserOptions::default().with_vue(),
+        )
+        .into();
+        let options = CssParserOptions {
+            css_modules: CssModulesKind::Vue,
+            ..CssParserOptions::default()
+        };
+        let snippet_parse = parse_css(css_source, CssFileSource::css(), options).into();
+        let snippet = ParsedSnippet::new(
+            db,
+            snippet_parse,
+            TextRange::default(),
+            TextRange::default(),
+            TextSize::default(),
+            2,
+        );
+        let parsed = ParsedSource::new(db, path.clone(), parsed, 0, vec![snippet]);
+        db.insert_file(path.clone(), parsed);
+        path
+    }
+
+    fn embedded_value_reference_names(db: &TestDb, path: &Utf8Path) -> Vec<String> {
+        let file = db
+            .parsed_source_for_path(path)
+            .expect("parsed source should be stored");
+        embedded_references_from_source(db, file)
+            .iter()
+            .flatten()
+            .map(|reference| reference.text.text().to_string())
+            .collect()
+    }
+
+    #[test]
+    fn is_value_reference_used_finds_vue_css_v_bind_identifier() {
+        let db = TestDb::new();
+        let path = parse_vue_source_with_css_snippet(&db, ".a { height: v-bind(size); }");
+
+        assert_eq!(embedded_value_reference_names(&db, &path), vec!["size"]);
+        assert!(is_value_reference_used(
+            &db,
+            InternedReference::new(&db, path.clone(), token_text("size"))
+        ));
+        assert!(!is_value_reference_used(
+            &db,
+            InternedReference::new(&db, path, token_text("v-bind"))
+        ));
+    }
+
+    #[test]
+    fn is_value_reference_used_finds_vue_css_v_bind_strings() {
+        let db = TestDb::new();
+        let path = parse_vue_source_with_css_snippet(
+            &db,
+            r#".a { height: v-bind('size'); color: v-bind("theme.color"); }"#,
+        );
+
+        assert_eq!(
+            embedded_value_reference_names(&db, &path),
+            vec!["size".to_string(), "theme".to_string()]
+        );
+        assert!(is_value_reference_used(
+            &db,
+            InternedReference::new(&db, path.clone(), token_text("size"))
+        ));
+        assert!(is_value_reference_used(
+            &db,
+            InternedReference::new(&db, path, token_text("theme"))
+        ));
+    }
+
+    #[test]
+    fn vue_css_unquoted_member_expression_registers_no_reference() {
+        // Vue requires quoted expressions (`v-bind('theme.color')`), so the
+        // unquoted form must not produce a bogus reference.
+        let db = TestDb::new();
+        let path = parse_vue_source_with_css_snippet(&db, ".a { color: v-bind(theme.color); }");
+
+        assert!(embedded_value_reference_names(&db, &path).is_empty());
+    }
+
+    #[test]
+    fn vue_css_without_v_bind_does_not_register_references() {
+        let db = TestDb::new();
+        let path = parse_vue_source_with_css_snippet(
+            &db,
+            ".a { width: 10px; color: red; --custom: 4px; }",
+        );
+
+        assert!(embedded_value_reference_names(&db, &path).is_empty());
+    }
+
+    #[test]
+    fn vue_css_empty_or_numeric_v_bind_registers_no_reference() {
+        let db = TestDb::new();
+        let path = parse_vue_source_with_css_snippet(
+            &db,
+            ".a { width: v-bind(); height: v-bind(1px); margin: calc(100% - 10px); }",
+        );
+
+        assert!(embedded_value_reference_names(&db, &path).is_empty());
     }
 }
