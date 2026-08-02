@@ -32,6 +32,7 @@ impl Rule for NoInvalidPropertySyntax {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        let model = ctx.model();
 
         model
             .global_custom_variables()
