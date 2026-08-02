@@ -929,20 +929,17 @@ fn validate_array_callback(
     let array_type = required_array_callback_parameter_type(&array_parameter, owner)?;
     validate_array_type(&array_type, array_type_parameter, owner)?;
 
-    let return_type = callback.return_type()?;
+    let return_type = regular_return_type(callback.return_type()?, owner)?;
     match callback_return {
         ArrayCallbackReturn::Reference(type_parameter) => {
-            let return_type = regular_return_type(return_type, owner)?;
             validate_reference_type(&return_type, type_parameter, owner)?;
         }
         ArrayCallbackReturn::Unknown => {
-            let return_type = regular_return_type(return_type, owner)?;
             if !matches!(return_type, AnyTsType::TsUnknownType(_)) {
                 bail!("{owner} callback must return unknown");
             }
         }
         ArrayCallbackReturn::Void => {
-            let return_type = regular_return_type(return_type, owner)?;
             if !matches!(return_type, AnyTsType::TsVoidType(_)) {
                 bail!("{owner} callback must return void");
             }
