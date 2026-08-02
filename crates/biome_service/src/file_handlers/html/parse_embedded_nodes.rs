@@ -366,7 +366,6 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                     );
                 }
 
-                // Attachments: <div {@attach myAttachment}>
                 if let Some(attach) = SvelteAttachAttribute::cast_ref(&element)
                     && let Ok(expression) = attach.expression()
                     && let Some(candidate) = build_text_expression_candidate(&expression)
