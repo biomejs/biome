@@ -57,12 +57,6 @@ impl Parser for GritJsonParser {
     ) -> SnippetTree<GritTargetTree> {
         let context = format!("{prefix}{source}{postfix}");
 
-        let len = if cfg!(target_arch = "wasm32") {
-            |src: &str| src.chars().count() as u32
-        } else {
-            |src: &str| src.len() as u32
-        };
-
         let parse_result = parse_json(&context, JsonParserOptions::default().allow_metavariables());
 
         SnippetTree {
@@ -70,8 +64,8 @@ impl Parser for GritJsonParser {
             source: source.to_owned(),
             prefix,
             postfix,
-            snippet_start: (len(prefix) + len(source) - len(source.trim_start())),
-            snippet_end: (len(prefix) + len(source.trim_end())),
+            snippet_start: (prefix.len() + source.len() - source.trim_start().len()) as u32,
+            snippet_end: (prefix.len() + source.trim_end().len()) as u32,
         }
     }
 }
