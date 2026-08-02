@@ -1727,7 +1727,7 @@ pub fn css_media_or_condition(
         ],
     ))
 }
-pub fn css_media_type(value: CssIdentifier) -> CssMediaType {
+pub fn css_media_type(value: AnyCssMediaTypeName) -> CssMediaType {
     CssMediaType::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_MEDIA_TYPE,
         [Some(SyntaxElement::Node(value.into_syntax()))],
@@ -4030,11 +4030,28 @@ pub fn scss_map_expression_pair(
         ],
     ))
 }
-pub fn scss_media_query(query: ScssInterpolation) -> ScssMediaQuery {
-    ScssMediaQuery::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::SCSS_MEDIA_QUERY,
-        [Some(SyntaxElement::Node(query.into_syntax()))],
-    ))
+pub fn scss_media_query(head: CssMediaTypeQuery) -> ScssMediaQueryBuilder {
+    ScssMediaQueryBuilder { head, tail: None }
+}
+pub struct ScssMediaQueryBuilder {
+    head: CssMediaTypeQuery,
+    tail: Option<CssMediaType>,
+}
+impl ScssMediaQueryBuilder {
+    pub fn with_tail(mut self, tail: CssMediaType) -> Self {
+        self.tail = Some(tail);
+        self
+    }
+    pub fn build(self) -> ScssMediaQuery {
+        ScssMediaQuery::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_MEDIA_QUERY,
+            [
+                Some(SyntaxElement::Node(self.head.into_syntax())),
+                self.tail
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn scss_mixin_at_rule(
     mixin_token: SyntaxToken,

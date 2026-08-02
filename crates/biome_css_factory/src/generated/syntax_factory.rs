@@ -3646,7 +3646,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && CssIdentifier::can_cast(element.kind())
+                    && AnyCssMediaTypeName::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -8083,10 +8083,17 @@ impl SyntaxFactory for CssSyntaxFactory {
             }
             SCSS_MEDIA_QUERY => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && ScssInterpolation::can_cast(element.kind())
+                    && CssMediaTypeQuery::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssMediaType::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();

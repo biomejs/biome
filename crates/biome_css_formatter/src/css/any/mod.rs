@@ -72,6 +72,7 @@ pub(crate) mod media_in_parens;
 pub(crate) mod media_or_combinable_condition;
 pub(crate) mod media_query;
 pub(crate) mod media_type_condition;
+pub(crate) mod media_type_name;
 pub(crate) mod media_type_query;
 pub(crate) mod namespace_prefix;
 pub(crate) mod namespace_url;

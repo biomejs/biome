@@ -1487,10 +1487,16 @@ AnyCssMediaQuery =
 	| CssBogusMediaQuery
 	| CssMetavariable
 
-// @media #{$query} {}
-//        ^^^^^^^^^
+// @media all #{$query} {}
+//        ^^^^^^^^^^^^^
+// Parser-owned invariant: at least one media-type name contains interpolation.
 ScssMediaQuery =
-	query: ScssInterpolation
+	head: CssMediaTypeQuery
+	tail: CssMediaType?
+
+AnyCssMediaTypeName =
+	CssIdentifier
+	| ScssInterpolatedIdentifier
 
 // @media screen, (width > 500px), print {}
 // 				        ^^^^^^^^^^^^^^^
@@ -1520,7 +1526,7 @@ CssMediaTypeQuery =
 // @media not all and not (color)  { }
 //            ^^^
 CssMediaType =
-	value: CssIdentifier
+	value: AnyCssMediaTypeName
 
 AnyCssMediaTypeCondition =
 	CssMediaNotCondition

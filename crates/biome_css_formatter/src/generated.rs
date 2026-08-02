@@ -14686,6 +14686,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssMediaTypeCondition
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssMediaTypeName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssMediaTypeName,
+        crate::css::any::media_type_name::FormatAnyCssMediaTypeName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::media_type_name::FormatAnyCssMediaTypeName::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssMediaTypeName {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssMediaTypeName,
+        crate::css::any::media_type_name::FormatAnyCssMediaTypeName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::media_type_name::FormatAnyCssMediaTypeName::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssMediaTypeQuery {
     type Format<'a> = FormatRefWithRule<
         'a,

@@ -5051,7 +5051,7 @@ impl CssMediaType {
             value: self.value(),
         }
     }
-    pub fn value(&self) -> SyntaxResult<CssIdentifier> {
+    pub fn value(&self) -> SyntaxResult<AnyCssMediaTypeName> {
         support::required_node(&self.syntax, 0usize)
     }
 }
@@ -5065,7 +5065,7 @@ impl Serialize for CssMediaType {
 }
 #[derive(Serialize)]
 pub struct CssMediaTypeFields {
-    pub value: SyntaxResult<CssIdentifier>,
+    pub value: SyntaxResult<AnyCssMediaTypeName>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssMediaTypeQuery {
@@ -11471,11 +11471,15 @@ impl ScssMediaQuery {
     }
     pub fn as_fields(&self) -> ScssMediaQueryFields {
         ScssMediaQueryFields {
-            query: self.query(),
+            head: self.head(),
+            tail: self.tail(),
         }
     }
-    pub fn query(&self) -> SyntaxResult<ScssInterpolation> {
+    pub fn head(&self) -> SyntaxResult<CssMediaTypeQuery> {
         support::required_node(&self.syntax, 0usize)
+    }
+    pub fn tail(&self) -> Option<CssMediaType> {
+        support::node(&self.syntax, 1usize)
     }
 }
 impl Serialize for ScssMediaQuery {
@@ -11488,7 +11492,8 @@ impl Serialize for ScssMediaQuery {
 }
 #[derive(Serialize)]
 pub struct ScssMediaQueryFields {
-    pub query: SyntaxResult<ScssInterpolation>,
+    pub head: SyntaxResult<CssMediaTypeQuery>,
+    pub tail: Option<CssMediaType>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssMixinAtRule {
@@ -15751,6 +15756,25 @@ impl AnyCssMediaTypeCondition {
     pub fn as_css_media_not_condition(&self) -> Option<&CssMediaNotCondition> {
         match &self {
             Self::CssMediaNotCondition(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssMediaTypeName {
+    CssIdentifier(CssIdentifier),
+    ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
+}
+impl AnyCssMediaTypeName {
+    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
+        match &self {
+            Self::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
+        match &self {
+            Self::ScssInterpolatedIdentifier(item) => Some(item),
             _ => None,
         }
     }
@@ -31862,7 +31886,8 @@ impl std::fmt::Debug for ScssMediaQuery {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("ScssMediaQuery")
-                .field("query", &support::DebugSyntaxResult(self.query()))
+                .field("head", &support::DebugSyntaxResult(self.head()))
+                .field("tail", &support::DebugOptionalElement(self.tail()))
                 .finish()
         } else {
             f.debug_struct("ScssMediaQuery").finish()
@@ -40512,6 +40537,68 @@ impl From<AnyCssMediaTypeCondition> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssIdentifier> for AnyCssMediaTypeName {
+    fn from(node: CssIdentifier) -> Self {
+        Self::CssIdentifier(node)
+    }
+}
+impl From<ScssInterpolatedIdentifier> for AnyCssMediaTypeName {
+    fn from(node: ScssInterpolatedIdentifier) -> Self {
+        Self::ScssInterpolatedIdentifier(node)
+    }
+}
+impl AstNode for AnyCssMediaTypeName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssIdentifier::KIND_SET.union(ScssInterpolatedIdentifier::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            SCSS_INTERPOLATED_IDENTIFIER => {
+                Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssIdentifier(it) => it.syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssIdentifier(it) => it.into_syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssMediaTypeName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssMediaTypeName> for SyntaxNode {
+    fn from(n: AnyCssMediaTypeName) -> Self {
+        match n {
+            AnyCssMediaTypeName::CssIdentifier(it) => it.into_syntax(),
+            AnyCssMediaTypeName::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssMediaTypeName> for SyntaxElement {
+    fn from(n: AnyCssMediaTypeName) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssMediaAndTypeQuery> for AnyCssMediaTypeQuery {
     fn from(node: CssMediaAndTypeQuery) -> Self {
         Self::CssMediaAndTypeQuery(node)
@@ -46806,6 +46893,11 @@ impl std::fmt::Display for AnyCssMediaQuery {
     }
 }
 impl std::fmt::Display for AnyCssMediaTypeCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssMediaTypeName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
