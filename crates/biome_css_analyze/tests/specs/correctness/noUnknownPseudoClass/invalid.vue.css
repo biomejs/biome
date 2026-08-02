@@ -1,0 +1,3 @@
+/* should generate diagnostics */
+.parent :deep(.child) {}
+.parent :unknown {}

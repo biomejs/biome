@@ -214,6 +214,8 @@ impl Rule for NoUnknownPseudoClass {
         if is_valid_class
             || should_ignore(lower_name, ctx.options())
             || file_source.is_css_modules() && is_css_module_pseudo_class(lower_name)
+            // Vue uses `:deep()` to apply scoped styles to child components.
+            // https://vuejs.org/api/sfc-css-features.html#deep-selectors
             || file_source.is_vue_embedded() && lower_name == "deep"
         {
             None
