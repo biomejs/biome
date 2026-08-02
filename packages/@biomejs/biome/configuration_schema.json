@@ -4866,6 +4866,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoNonScalableViewportConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoNonScalableViewportOptions" }
+			]
+		},
+		"NoNonScalableViewportOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoNoninteractiveElementInteractionsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6798,6 +6808,13 @@
 					"description": "Disallow negated expressions on the left side of an equality check.\nSee https://biomejs.dev/linter/rules/no-negation-in-equality-check",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoNegationInEqualityCheckConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noNonScalableViewport": {
+					"description": "Disallow disabling zoom with user-scalable=no in the \\<meta name=\"viewport\"> element.\nSee https://biomejs.dev/linter/rules/no-non-scalable-viewport",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoNonScalableViewportConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9578,6 +9595,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoNonNullAssertionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoNonScalableViewportOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoNonScalableViewportOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
