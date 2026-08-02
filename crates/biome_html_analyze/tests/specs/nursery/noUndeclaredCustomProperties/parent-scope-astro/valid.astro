@@ -1,0 +1,14 @@
+<!-- should not generate diagnostics -->
+---
+import Child from "./invalid.astro";
+---
+
+<style is:global>
+:root { --global-color: green; }
+</style>
+<style>
+:root { --local-color: red; }
+:global(:root) { --selector-global-color: blue; }
+</style>
+
+<Child />

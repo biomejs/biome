@@ -1,0 +1,7 @@
+/* should not generate diagnostics */
+
+@import "./theme.css";
+
+.card {
+	color: var(--theme-color);
+}

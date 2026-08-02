@@ -1231,6 +1231,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noUndeclaredClasses",
         TypeId::of::<biome_rule_options::no_undeclared_classes::NoUndeclaredClassesOptions>(),
     ));
+    result.push(("nursery", "noUndeclaredCustomProperties", TypeId::of::<biome_rule_options::no_undeclared_custom_properties::NoUndeclaredCustomPropertiesOptions>()));
     result.push(("correctness", "noUndeclaredDependencies", TypeId::of::<biome_rule_options::no_undeclared_dependencies::NoUndeclaredDependenciesOptions>()));
     result.push((
         "suspicious",

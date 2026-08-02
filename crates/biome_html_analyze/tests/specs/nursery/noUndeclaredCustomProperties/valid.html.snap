@@ -1,0 +1,19 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<style>
+	.card {
+		--custom-bg: blue;
+		--escaped\2d color: green;
+	}
+</style>
+<div style="background: var(--custom-bg); content: 'var(--not-a-reference)'"></div>
+<div style="color: var(--escaped-color)"></div>
+<div style="--inline-color: red; color: var(--inline-color)"></div>
+<div style="--inherited-color: red"><span style="color: var(--inherited-color)"></span></div>
+
+```

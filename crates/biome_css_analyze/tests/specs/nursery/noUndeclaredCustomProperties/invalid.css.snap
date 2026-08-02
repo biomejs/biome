@@ -1,0 +1,78 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+
+.card {
+	background: var(--missing-background);
+	color: var(--missing-color, red);
+	border-color: v/61r(--escaped-function);
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:4:18 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The custom property --missing-background is not defined.
+  
+    3 │ .card {
+  > 4 │ 	background: var(--missing-background);
+      │ 	                ^^^^^^^^^^^^^^^^^^^^
+    5 │ 	color: var(--missing-color, red);
+    6 │ 	border-color: v/61r(--escaped-function);
+  
+  i An undefined custom property uses its fallback when present; without one, the declaration is invalid.
+  
+  i Define the custom property in an available stylesheet or correct its name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:5:13 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The custom property --missing-color is not defined.
+  
+    3 │ .card {
+    4 │ 	background: var(--missing-background);
+  > 5 │ 	color: var(--missing-color, red);
+      │ 	           ^^^^^^^^^^^^^^^
+    6 │ 	border-color: v/61r(--escaped-function);
+    7 │ }
+  
+  i An undefined custom property uses its fallback when present; without one, the declaration is invalid.
+  
+  i Define the custom property in an available stylesheet or correct its name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:6:22 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The custom property --escaped-function is not defined.
+  
+    4 │ 	background: var(--missing-background);
+    5 │ 	color: var(--missing-color, red);
+  > 6 │ 	border-color: v/61r(--escaped-function);
+      │ 	                    ^^^^^^^^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i An undefined custom property uses its fallback when present; without one, the declaration is invalid.
+  
+  i Define the custom property in an available stylesheet or correct its name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

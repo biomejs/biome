@@ -18,6 +18,8 @@ use biome_console::markup;
 use biome_css_parser::CssParserOptions;
 #[cfg(feature = "lang_css")]
 use biome_css_syntax::AnyCssRoot;
+#[cfg(all(feature = "module_graph", feature = "lang_css"))]
+use biome_db::ParsedSource;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 #[cfg(feature = "html_embeds")]
@@ -343,6 +345,27 @@ pub fn module_graph_for_css_test_file(
     let css_paths = get_css_like_paths_in_dir(Utf8Path::new(&dir));
     let css_roots = get_css_added_paths(&fs, &css_paths);
     for (path, root) in css_roots {
+        let DocumentFileSource::Css(file_source) =
+            DocumentFileSource::from_path(path.as_path(), false)
+        else {
+            continue;
+        };
+        let content = fs.read_file_from_path(path).expect("CSS test file exists");
+        let options = if file_source.is_css_modules() {
+            CssParserOptions::default().allow_css_modules()
+        } else {
+            CssParserOptions::default()
+        };
+        let parsed = biome_css_parser::parse_css(&content, file_source, options);
+        let source_index = db.insert_source(file_source.into());
+        let parsed_source = ParsedSource::new(
+            &db,
+            path.as_path().to_path_buf(),
+            parsed.into(),
+            source_index,
+            Vec::new(),
+        );
+        db.insert_file(path.as_path(), parsed_source);
         let (module_info, _, _) =
             resolve_css_module(root, path, &fs, project_layout, &path_info_cache);
         let md = biome_module_graph::ModuleInfo::new(
