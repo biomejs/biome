@@ -401,6 +401,56 @@ fn lint_vue_ts_files() {
 }
 
 #[test]
+fn lint_vue_deep_pseudo_class() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let vue_file_path = Utf8Path::new("file.vue");
+    fs.insert(
+        vue_file_path.into(),
+        r#"<template>
+  <div class="parent"><span class="child" /></div>
+</template>
+
+<style scoped>
+.parent :deep(.child) {}
+.parent :unknown {}
+</style>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--only=correctness/noUnknownPseudoClass",
+                vue_file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_vue_deep_pseudo_class",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn sorts_imports_check() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
