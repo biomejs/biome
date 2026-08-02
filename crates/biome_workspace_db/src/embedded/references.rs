@@ -441,7 +441,7 @@ mod tests {
         let db = TestDb::new();
         let path = parse_vue_source_with_css_snippet(
             &db,
-            ".a { width: v-bind(); height: v-bind(1px); margin: calc(100% - 10px); }",
+            ".a { width: v-bind(); height: v-bind(1px); margin: calc(100% - 10px); color: v-bind(''); }",
         );
 
         assert!(embedded_value_reference_names(&db, &path).is_empty());

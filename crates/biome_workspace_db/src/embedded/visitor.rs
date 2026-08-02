@@ -1191,6 +1191,11 @@ impl EmbeddedReferencesBuilder {
             if let Some(string) = CssString::cast_ref(&node) {
                 let content = string.inner_string_text().ok()?;
                 let binding = content.text().split('.').next().unwrap_or_default();
+                // An empty quoted expression such as `v-bind('')` has no
+                // identifier to reference, so don't register an empty one.
+                if binding.is_empty() {
+                    return Some(());
+                }
                 let token = string.value_token().ok()?;
                 self.register_reference(
                     token.text_trimmed_range(),
