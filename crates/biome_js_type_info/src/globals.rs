@@ -64,29 +64,6 @@ impl Default for RawGlobalTypes {
             }))
         };
 
-        // Builds a one-argument `Array.prototype` method named after `id`.
-        let array_method_definition =
-            |id: TypeId,
-             param_type_id: TypeId,
-             return_type_id: TypeId,
-             type_parameters: Box<[TypeReference]>| {
-                TypeData::from(Function {
-                    is_async: false,
-                    type_parameters,
-                    name: Some(Text::new_static(global_type_name(id).unwrap_or("unknown"))),
-                    parameters: [FunctionParameter::Pattern(PatternFunctionParameter {
-                        bindings: Default::default(),
-                        is_optional: false,
-                        is_rest: false,
-                        ty: ResolvedTypeId::new(TypeResolverLevel::Global, param_type_id).into(),
-                    })]
-                    .into(),
-                    return_type: ReturnType::Type(
-                        ResolvedTypeId::new(TypeResolverLevel::Global, return_type_id).into(),
-                    ),
-                })
-            };
-
         // Builds a zero-argument `Promise` method named after `id` that returns
         // an instance of `Promise`.
         let promise_method_definition = |id: TypeId| {
@@ -124,47 +101,6 @@ impl Default for RawGlobalTypes {
                 ty: TypeReference::from(GLOBAL_ARRAY_ID),
                 type_parameters: [GLOBAL_U_ID.into()].into(),
             })
-        });
-        builder.set_manual_type_data(ARRAY_ID_GLOBAL_TYPE_ID, || {
-            TypeData::Class(Box::new(Class {
-                name: Some(Text::new_static("Array")),
-                type_parameters: Box::new([TypeReference::from(GLOBAL_T_ID)]),
-                extends: None,
-                implements: Box::default(),
-                members: Box::new([
-                    member("filter", ARRAY_FILTER_ID),
-                    member("forEach", ARRAY_FOREACH_ID),
-                    member("map", ARRAY_MAP_ID),
-                    TypeMember {
-                        kind: TypeMemberKind::Named(Text::new_static("length")),
-                        ty: GLOBAL_NUMBER_ID.into(),
-                    },
-                ]),
-            }))
-        });
-        builder.set_manual_type_data(ARRAY_FILTER_ID_GLOBAL_TYPE_ID, || {
-            array_method_definition(
-                ARRAY_FILTER_ID,
-                CONDITIONAL_CALLBACK_ID,
-                INSTANCEOF_ARRAY_T_ID,
-                Default::default(),
-            )
-        });
-        builder.set_manual_type_data(ARRAY_FOREACH_ID_GLOBAL_TYPE_ID, || {
-            array_method_definition(
-                ARRAY_FOREACH_ID,
-                VOID_CALLBACK_ID,
-                VOID_ID,
-                Default::default(),
-            )
-        });
-        builder.set_manual_type_data(ARRAY_MAP_ID_GLOBAL_TYPE_ID, || {
-            array_method_definition(
-                ARRAY_MAP_ID,
-                MAP_CALLBACK_ID,
-                INSTANCEOF_ARRAY_U_ID,
-                [GLOBAL_U_ID.into()].into(),
-            )
         });
         builder.set_manual_type_data(GLOBAL_ID_GLOBAL_TYPE_ID, || TypeData::Global);
         builder.set_manual_type_data(INSTANCEOF_PROMISE_ID_GLOBAL_TYPE_ID, || {
