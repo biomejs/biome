@@ -1,4 +1,5 @@
 use anyhow::{Context, bail};
+use biome_string_case::StrLikeExtension;
 use proc_macro2::Literal;
 use quote::quote;
 use serde::Deserialize;
@@ -49,7 +50,7 @@ fn extract_keywords(syntax: &str) -> Result<BTreeSet<String>> {
             {
                 bail!("Expected a CSS keyword, found `{keyword}`");
             }
-            Ok(keyword.to_ascii_lowercase())
+            Ok(keyword.to_ascii_lowercase_cow().into_owned())
         })
         .collect()
 }

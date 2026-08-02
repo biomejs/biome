@@ -114,12 +114,6 @@
 	initial-value: red blue;
 }
 
-@property --css-wide-keyword {
-	syntax: "<custom-ident>";
-	inherits: false;
-	initial-value: inherit;
-}
-
 @property --decimal-integer {
 	syntax: "<integer>";
 	inherits: false;
@@ -162,4 +156,16 @@
 	syntax: "<color>";
 	inherits: false;
 	initial-value: red;
+}
+
+@property --sine-length {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: sin(1);
+}
+
+@property --safe-area-color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: env(safe-area-inset-top);
 }

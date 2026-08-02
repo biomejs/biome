@@ -5796,6 +5796,8 @@ pub const MATH_ML_TAGS: [&str; 32] = [
     "semantics",
 ];
 
+pub const ANGLE_MATH_FUNCTIONS: &[&str] = &["acos", "asin", "atan", "atan2"];
+
 pub const ANGLE_UNITS: &[&str] = &["deg", "grad", "rad", "turn"];
 
 pub const COLOR_FUNCTIONS: &[&str] = &[
@@ -5831,6 +5833,8 @@ pub const IMAGE_FUNCTIONS: &[&str] = &[
     "repeating-radial-gradient",
 ];
 
+pub const INTEGER_MATH_FUNCTIONS: &[&str] = &["sibling-count", "sibling-index"];
+
 pub const LENGTH_UNITS: &[&str] = &[
     "cap", "ch", "cm", "cqb", "cqh", "cqi", "cqmax", "cqmin", "cqw", "dvb", "dvh", "dvi", "dvmax",
     "dvmin", "dvw", "em", "ex", "ic", "in", "lh", "lvb", "lvh", "lvi", "lvmax", "lvmin", "lvw",
@@ -5838,33 +5842,22 @@ pub const LENGTH_UNITS: &[&str] = &[
     "svmax", "svmin", "svw", "vb", "vh", "vi", "vmax", "vmin", "vw",
 ];
 
-pub const MATH_FUNCTIONS: &[&str] = &[
-    "abs",
-    "acos",
-    "asin",
-    "atan",
-    "atan2",
-    "calc",
-    "clamp",
-    "cos",
-    "exp",
-    "hypot",
-    "log",
-    "max",
-    "min",
-    "mod",
-    "pow",
-    "progress",
-    "random",
-    "rem",
-    "round",
-    "sibling-count",
-    "sibling-index",
-    "sign",
-    "sin",
-    "sqrt",
-    "tan",
+pub const LENGTH_ENVIRONMENT_VARIABLES: &[&str] = &[
+    "safe-area-inset-bottom",
+    "safe-area-inset-left",
+    "safe-area-inset-right",
+    "safe-area-inset-top",
+    "safe-area-max-inset-bottom",
+    "safe-area-max-inset-left",
+    "safe-area-max-inset-right",
+    "safe-area-max-inset-top",
 ];
+
+pub const NUMBER_MATH_FUNCTIONS: &[&str] = &[
+    "cos", "exp", "log", "pow", "progress", "sign", "sin", "sqrt", "tan",
+];
+
+pub const NUMBER_ENVIRONMENT_VARIABLES: &[&str] = &["preferred-text-scale"];
 
 pub const RESOLUTION_UNITS: &[&str] = &["dpcm", "dpi", "dppx", "x"];
 
@@ -5894,6 +5887,10 @@ pub const TRANSFORM_FUNCTIONS: &[&str] = &[
     "translatez",
 ];
 
+pub const TYPED_MATH_FUNCTIONS: &[&str] = &[
+    "abs", "calc", "clamp", "hypot", "max", "min", "mod", "random", "rem", "round",
+];
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;
@@ -5912,6 +5909,11 @@ mod tests {
     }
 
     #[test]
+    fn test_angle_math_functions_order() {
+        assert_strictly_ordered(ANGLE_MATH_FUNCTIONS);
+    }
+
+    #[test]
     fn test_color_functions_order() {
         assert_strictly_ordered(COLOR_FUNCTIONS);
     }
@@ -5922,13 +5924,28 @@ mod tests {
     }
 
     #[test]
+    fn test_integer_math_functions_order() {
+        assert_strictly_ordered(INTEGER_MATH_FUNCTIONS);
+    }
+
+    #[test]
     fn test_length_units_order() {
         assert_strictly_ordered(LENGTH_UNITS);
     }
 
     #[test]
-    fn test_math_functions_order() {
-        assert_strictly_ordered(MATH_FUNCTIONS);
+    fn test_length_environment_variables_order() {
+        assert_strictly_ordered(LENGTH_ENVIRONMENT_VARIABLES);
+    }
+
+    #[test]
+    fn test_number_math_functions_order() {
+        assert_strictly_ordered(NUMBER_MATH_FUNCTIONS);
+    }
+
+    #[test]
+    fn test_number_environment_variables_order() {
+        assert_strictly_ordered(NUMBER_ENVIRONMENT_VARIABLES);
     }
 
     #[test]
@@ -5944,6 +5961,11 @@ mod tests {
     #[test]
     fn test_transform_functions_order() {
         assert_strictly_ordered(TRANSFORM_FUNCTIONS);
+    }
+
+    #[test]
+    fn test_typed_math_functions_order() {
+        assert_strictly_ordered(TYPED_MATH_FUNCTIONS);
     }
 
     #[test]

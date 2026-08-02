@@ -120,12 +120,6 @@ expression: invalid.css
 	initial-value: red blue;
 }
 
-@property --css-wide-keyword {
-	syntax: "<custom-ident>";
-	inherits: false;
-	initial-value: inherit;
-}
-
 @property --decimal-integer {
 	syntax: "<integer>";
 	inherits: false;
@@ -168,6 +162,18 @@ expression: invalid.css
 	syntax: "<color>";
 	inherits: false;
 	initial-value: red;
+}
+
+@property --sine-length {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: sin(1);
+}
+
+@property --safe-area-color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: env(safe-area-inset-top);
 }
 
 ```
@@ -577,10 +583,10 @@ invalid.css:120:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 
   i The initial-value does not match the registered property syntax.
   
-    118 │ 	syntax: "<custom-ident>";
+    118 │ 	syntax: "<integer>";
     119 │ 	inherits: false;
-  > 120 │ 	initial-value: inherit;
-        │ 	               ^^^^^^^
+  > 120 │ 	initial-value: 1.0;
+        │ 	               ^^^
     121 │ }
     122 │ 
   
@@ -600,7 +606,7 @@ invalid.css:126:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
   
     124 │ 	syntax: "<integer>";
     125 │ 	inherits: false;
-  > 126 │ 	initial-value: 1.0;
+  > 126 │ 	initial-value: 1e3;
         │ 	               ^^^
     127 │ }
     128 │ 
@@ -619,10 +625,10 @@ invalid.css:132:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 
   i The initial-value does not match the registered property syntax.
   
-    130 │ 	syntax: "<integer>";
+    130 │ 	syntax: "<resolution>";
     131 │ 	inherits: false;
-  > 132 │ 	initial-value: 1e3;
-        │ 	               ^^^
+  > 132 │ 	initial-value: 0dpi;
+        │ 	               ^^^^
     133 │ }
     134 │ 
   
@@ -642,8 +648,8 @@ invalid.css:138:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
   
     136 │ 	syntax: "<resolution>";
     137 │ 	inherits: false;
-  > 138 │ 	initial-value: 0dpi;
-        │ 	               ^^^^
+  > 138 │ 	initial-value: -1dppx;
+        │ 	               ^^^^^^
     139 │ }
     140 │ 
   
@@ -657,16 +663,16 @@ invalid.css:138:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:144:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:146:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
-    142 │ 	syntax: "<resolution>";
-    143 │ 	inherits: false;
-  > 144 │ 	initial-value: -1dppx;
-        │ 	               ^^^^^^
-    145 │ }
-    146 │ 
+    144 │ 	inherits: false;
+    145 │ 	initial-value: 1px;
+  > 146 │ 	initial-value: red;
+        │ 	               ^^^
+    147 │ }
+    148 │ 
   
   i A mismatched initial value prevents the custom property from being registered.
   
@@ -682,8 +688,8 @@ invalid.css:152:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 
   i The initial-value does not match the registered property syntax.
   
-    150 │ 	inherits: false;
-    151 │ 	initial-value: 1px;
+    150 │ 	syntax: "<length>";
+    151 │ 	inherits: false;
   > 152 │ 	initial-value: red;
         │ 	               ^^^
     153 │ }
@@ -699,16 +705,37 @@ invalid.css:152:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:158:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:164:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
-    156 │ 	syntax: "<length>";
-    157 │ 	inherits: false;
-  > 158 │ 	initial-value: red;
-        │ 	               ^^^
-    159 │ }
-    160 │ 
+    162 │ 	syntax: "<length>";
+    163 │ 	inherits: false;
+  > 164 │ 	initial-value: sin(1);
+        │ 	               ^^^^^^
+    165 │ }
+    166 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:170:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    168 │ 	syntax: "<color>";
+    169 │ 	inherits: false;
+  > 170 │ 	initial-value: env(safe-area-inset-top);
+        │ 	               ^^^^^^^^^^^^^^^^^^^^^^^^
+    171 │ }
+    172 │ 
   
   i A mismatched initial value prevents the custom property from being registered.
   

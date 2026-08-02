@@ -126,6 +126,12 @@
 	initial-value: --theme;
 }
 
+@property --css-wide-keyword {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: inherit;
+}
+
 @property --escaped-descriptors {
 	s\79 ntax: "<length>";
 	inherits: false;
@@ -259,6 +265,42 @@
 	syntax: "<time>";
 	inherits: false;
 	initial-value: calc(1s + 250ms);
+}
+
+@property --environment-length {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: env(safe-area-inset-top);
+}
+
+@property --unknown-environment-color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: env(custom-environment-color);
+}
+
+@property --indexed-scalar-environment-color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: env(safe-area-inset-top 0, red);
+}
+
+@property --text-scale {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: env(preferred-text-scale);
+}
+
+@property --sine {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: sin(1);
+}
+
+@property --inverse-sine {
+	syntax: "<angle>";
+	inherits: false;
+	initial-value: asin(0.5);
 }
 
 @property --duplicate-descriptors {

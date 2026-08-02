@@ -7,8 +7,10 @@ use biome_css_syntax::{
     AnyCssGenericPropertyValueOrExpression, AnyCssValue, CssGenericComponentValueList,
     CssPropertyAtRule,
     keywords::{
-        ANGLE_UNITS, BASIC_KEYWORDS, COLOR_FUNCTIONS, COLOR_KEYWORDS, IMAGE_FUNCTIONS,
-        LENGTH_UNITS, MATH_FUNCTIONS, RESOLUTION_UNITS, TIME_UNITS, TRANSFORM_FUNCTIONS,
+        ANGLE_MATH_FUNCTIONS, ANGLE_UNITS, BASIC_KEYWORDS, COLOR_FUNCTIONS, COLOR_KEYWORDS,
+        IMAGE_FUNCTIONS, INTEGER_MATH_FUNCTIONS, LENGTH_ENVIRONMENT_VARIABLES, LENGTH_UNITS,
+        NUMBER_ENVIRONMENT_VARIABLES, NUMBER_MATH_FUNCTIONS, RESOLUTION_UNITS, TIME_UNITS,
+        TRANSFORM_FUNCTIONS, TYPED_MATH_FUNCTIONS,
     },
 };
 use biome_property_codec::{
@@ -28,8 +30,10 @@ declare_lint_rule! {
     /// For function values, this rule checks the function name but does not check its arguments.
     /// It leaves the browser to validate:
     ///
-    /// - math functions such as `calc()`, `min()`, and `max()` used with `<angle>`, `<integer>`,
-    ///   `<length>`, `<length-percentage>`, `<number>`, `<percentage>`, `<resolution>`, or `<time>`;
+    /// - indexed or unknown `env()` values, whose result may depend on an index or fallback;
+    /// - math functions whose result depends on their arguments, such as `calc()`, `min()`, and
+    ///   `max()`, used with `<angle>`, `<integer>`, `<length>`, `<length-percentage>`, `<number>`,
+    ///   `<percentage>`, `<resolution>`, or `<time>`;
     /// - color functions such as `rgb()` and `color-mix()` used with `<color>`;
     /// - image functions such as `linear-gradient()` and `image-set()` used with `<image>`;
     /// - transform functions such as `rotate()` and `translateX()` used with
@@ -190,6 +194,22 @@ fn matches_syntax(syntax: &PropertySyntax, values: &CssGenericComponentValueList
         return true;
     };
 
+    let mut values_iter = values.iter();
+    if let Some(value) = values_iter.next()
+        && values_iter.next().is_none()
+        && value
+            .as_any_css_value()
+            .and_then(identifier_text)
+            .is_some_and(|identifier| {
+                let identifier = decode_css_identifier(identifier.text());
+                BASIC_KEYWORDS
+                    .binary_search(&identifier.to_ascii_lowercase_cow().as_ref())
+                    .is_ok()
+            })
+    {
+        return true;
+    }
+
     components
         .iter()
         .any(|component| matches_component(component, values))
@@ -273,7 +293,10 @@ fn matches_value(
 }
 
 fn matches_type(syntax_type: PropertySyntaxType, value: &AnyCssValue) -> bool {
-    if matches_function(value, MATH_FUNCTIONS) {
+    if let Some(matches) = matches_environment_function(syntax_type, value) {
+        return matches;
+    }
+    if matches_function(value, TYPED_MATH_FUNCTIONS) {
         return matches!(
             syntax_type,
             PropertySyntaxType::Angle
@@ -285,6 +308,18 @@ fn matches_type(syntax_type: PropertySyntaxType, value: &AnyCssValue) -> bool {
                 | PropertySyntaxType::Resolution
                 | PropertySyntaxType::Time
         );
+    }
+    if matches_function(value, ANGLE_MATH_FUNCTIONS) {
+        return syntax_type == PropertySyntaxType::Angle;
+    }
+    if matches_function(value, INTEGER_MATH_FUNCTIONS) {
+        return matches!(
+            syntax_type,
+            PropertySyntaxType::Integer | PropertySyntaxType::Number
+        );
+    }
+    if matches_function(value, NUMBER_MATH_FUNCTIONS) {
+        return syntax_type == PropertySyntaxType::Number;
     }
 
     match syntax_type {
@@ -323,6 +358,46 @@ fn matches_type(syntax_type: PropertySyntaxType, value: &AnyCssValue) -> bool {
         PropertySyntaxType::TransformList => matches_function(value, TRANSFORM_FUNCTIONS),
         PropertySyntaxType::Url => matches_url(value),
     }
+}
+
+fn matches_environment_function(
+    syntax_type: PropertySyntaxType,
+    value: &AnyCssValue,
+) -> Option<bool> {
+    let AnyCssValue::AnyCssFunction(AnyCssFunction::CssFunction(function)) = value else {
+        return None;
+    };
+    if !function_name_is_in(function, &["env"]) {
+        return None;
+    }
+
+    let name_token = function.items().syntax().first_token()?;
+    if name_token
+        .next_token()
+        .is_some_and(|token| !matches!(token.text_trimmed(), "," | ")"))
+    {
+        return Some(true);
+    }
+
+    let name = decode_css_identifier(name_token.text_trimmed());
+    let name = name.to_ascii_lowercase_cow();
+    if LENGTH_ENVIRONMENT_VARIABLES
+        .binary_search(&name.as_ref())
+        .is_ok()
+    {
+        return Some(matches!(
+            syntax_type,
+            PropertySyntaxType::Length | PropertySyntaxType::LengthPercentage
+        ));
+    }
+    if NUMBER_ENVIRONMENT_VARIABLES
+        .binary_search(&name.as_ref())
+        .is_ok()
+    {
+        return Some(syntax_type == PropertySyntaxType::Number);
+    }
+
+    Some(true)
 }
 
 fn is_integer(value: &str) -> bool {
