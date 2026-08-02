@@ -45,17 +45,38 @@ pub(crate) fn parse_scss_media_query(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let query = p.start();
-    let media_type_query = p.start();
+    parse_scss_media_type_query(p);
+    Present(query.complete(p, SCSS_MEDIA_QUERY))
+}
+
+/// Parses the media-type query nested in a bare interpolated media query.
+///
+/// ```scss
+/// @media #{$query} {}
+/// ```
+///
+/// `ScssMediaQuery` uses the shared media-type shape so bare interpolation and
+/// interpolated fragments have the same CST structure.
+#[inline]
+fn parse_scss_media_type_query(p: &mut CssParser) -> CompletedMarker {
+    let query = p.start();
+    parse_scss_media_type(p);
+    query.complete(p, CSS_MEDIA_TYPE_QUERY)
+}
+
+/// Parses the media type nested in a bare interpolated media query.
+///
+/// ```scss
+/// @media #{$query} {}
+/// ```
+#[inline]
+fn parse_scss_media_type(p: &mut CssParser) -> CompletedMarker {
     let media_type = p.start();
 
-    // Guarded by `is_at_scss_media_query` above.
+    // Guarded by `is_at_scss_media_query` before the enclosing query starts.
     parse_scss_interpolated_name(p).ok();
 
-    // `ScssMediaQuery` uses the shared media-type shape so bare interpolation
-    // and interpolated fragments have the same CST structure.
-    media_type.complete(p, CSS_MEDIA_TYPE);
-    media_type_query.complete(p, CSS_MEDIA_TYPE_QUERY);
-    Present(query.complete(p, SCSS_MEDIA_QUERY))
+    media_type.complete(p, CSS_MEDIA_TYPE)
 }
 
 /// Returns whether Sass interpolation starts a parenthesized media branch.
