@@ -35,6 +35,24 @@ check.css:2:14 syntax/correctness/noInvalidPropertySyntax ━━━━━━━�
     3 │     inherits: false;
     4 │ }
   
+  i Supported types:
+  
+  - <angle>
+  - <color>
+  - <custom-ident>
+  - <image>
+  - <integer>
+  - <length>
+  - <length-percentage>
+  - <number>
+  - <percentage>
+  - <resolution>
+  - <string>
+  - <time>
+  - <transform-function>
+  - <transform-list>
+  - <url>
+  
 
 ```
 

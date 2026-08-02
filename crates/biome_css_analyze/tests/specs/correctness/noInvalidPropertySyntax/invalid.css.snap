@@ -87,6 +87,8 @@ invalid.css:8:12 syntax/correctness/noInvalidPropertySyntax ━━━━━━�
      9 │   inherits: false;
     10 │ }
   
+  i Add a syntax component, such as <length>, or use * to accept any value.
+  
 
 ```
 
@@ -100,6 +102,8 @@ invalid.css:13:17 syntax/correctness/noInvalidPropertySyntax ━━━━━━�
        │                 ^
     14 │   inherits: false;
     15 │ }
+  
+  i Add a data type, such as <length>, or a custom identifier at this position.
   
 
 ```
@@ -143,6 +147,24 @@ invalid.css:28:12 syntax/correctness/noInvalidPropertySyntax ━━━━━━�
     29 │   inherits: false;
     30 │ }
   
+  i Supported types:
+  
+  - <angle>
+  - <color>
+  - <custom-ident>
+  - <image>
+  - <integer>
+  - <length>
+  - <length-percentage>
+  - <number>
+  - <percentage>
+  - <resolution>
+  - <string>
+  - <time>
+  - <transform-function>
+  - <transform-list>
+  - <url>
+  
 
 ```
 
@@ -157,6 +179,15 @@ invalid.css:33:12 syntax/correctness/noInvalidPropertySyntax ━━━━━━�
     34 │   inherits: false;
     35 │ }
   
+  i Reserved identifiers:
+  
+  - default
+  - inherit
+  - initial
+  - revert
+  - revert-layer
+  - unset
+  
 
 ```
 
@@ -170,6 +201,8 @@ invalid.css:38:12 syntax/correctness/noInvalidPropertySyntax ━━━━━━�
        │            ^^^^^^^^
     39 │   inherits: false;
     40 │ }
+  
+  i Remove * or remove the other syntax components.
   
 
 ```

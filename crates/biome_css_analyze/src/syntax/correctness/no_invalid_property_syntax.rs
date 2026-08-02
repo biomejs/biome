@@ -51,11 +51,10 @@ impl Rule for NoInvalidPropertySyntax {
                 state.range(),
                 "The property definition is missing a `syntax` descriptor.",
             )),
-            PropertySyntaxResult::Error(diagnostic) => Some(RuleDiagnostic::new(
-                rule_category!(),
-                diagnostic.range(),
-                diagnostic.kind(),
-            )),
+            PropertySyntaxResult::Error(diagnostic) => Some(
+                RuleDiagnostic::new(rule_category!(), diagnostic.range(), diagnostic.kind())
+                    .with_advices(diagnostic.kind()),
+            ),
 
             _ => None,
         }
