@@ -141,7 +141,7 @@ impl UpwardTraversalVisitor for CssClassTraversal<'_> {
     }
 }
 
-/// Finds the nearest CSS `@property` definitions available to a module.
+/// Finds the nearest CSS custom property definitions available to a module.
 ///
 /// It searches modules that import the starting module. Each import path is
 /// searched separately and stops at the first definition it finds.
@@ -370,7 +370,7 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
             .iter()
             .rev()
             .find(|definition| {
-                definition.name() == self.name
+                definition.matches(self.name)
                     && before.is_none_or(|before| definition.range().start() < before)
             })?;
         Some(CssPropertyDefinition {
@@ -415,7 +415,7 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
                 contexts.extend(
                     css_property_definitions_from_snippet(self.db, *snippet)
                         .iter()
-                        .filter(|definition| definition.name() == self.name)
+                        .filter(|definition| definition.matches(self.name))
                         .map(|definition| {
                             // Parsed snippet trees exclude their parser base offset.
                             let range = definition.range() + snippet.content_offset(self.db);

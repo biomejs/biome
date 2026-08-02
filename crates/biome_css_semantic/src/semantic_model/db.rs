@@ -1,23 +1,32 @@
 use crate::model::SemanticModel;
 use crate::semantic_model;
-use biome_css_syntax::AnyCssRoot;
+use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
+use biome_css_syntax::{
+    AnyCssRoot, CssGenericProperty, CssNestedQualifiedRule, CssQualifiedRule,
+    decode_css_identifier,
+};
 use biome_db::{AnyParsedSource, Db, ParsedSnippet, ParsedSource};
-use biome_rowan::{TextRange, TokenText};
+use biome_rowan::{AstNode, TextRange, TokenText};
 
-/// The name and source range of an `@property` registration candidate.
+/// The name and source range of a custom property definition.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CssPropertyDefinition {
     name: TokenText,
     range: TextRange,
+    globally_scoped: bool,
 }
 
 impl CssPropertyDefinition {
-    pub fn name(&self) -> &str {
-        self.name.text()
+    pub fn matches(&self, name: &str) -> bool {
+        decode_css_identifier(self.name.text()).as_ref() == name
     }
 
     pub fn range(&self) -> TextRange {
         self.range
+    }
+
+    pub fn is_globally_scoped(&self) -> bool {
+        self.globally_scoped
     }
 }
 
@@ -33,35 +42,69 @@ pub(crate) fn css_model_from_parsed_snippet(db: &dyn Db, file: ParsedSnippet) ->
     semantic_model(&parsed)
 }
 
-/// Returns `@property` registration candidates from a parsed CSS document.
+/// Returns custom property definitions from a parsed CSS document.
 #[salsa::tracked(returns(ref))]
 pub fn css_property_definitions_from_source(
     db: &dyn Db,
     file: ParsedSource,
 ) -> Vec<CssPropertyDefinition> {
-    let _ = file.parsed(db);
     collect_property_definitions(css_model_from_parsed_source(db, file))
 }
 
-/// Returns `@property` registration candidates from an embedded CSS document.
+/// Returns custom property definitions from an embedded CSS document.
 #[salsa::tracked(returns(ref))]
 pub fn css_property_definitions_from_snippet(
     db: &dyn Db,
     file: ParsedSnippet,
 ) -> Vec<CssPropertyDefinition> {
-    let _ = file.parsed(db);
     collect_property_definitions(css_model_from_parsed_snippet(db, file))
 }
 
 fn collect_property_definitions(model: &SemanticModel) -> Vec<CssPropertyDefinition> {
-    model
-        .global_custom_variables()
-        .at_property_registration_candidates()
-        .map(|property| CssPropertyDefinition {
-            name: property.name().clone(),
-            range: property.range(),
+    let root = model.root();
+    let mut definitions = root
+        .syntax()
+        .descendants()
+        .filter_map(CssGenericProperty::cast)
+        .filter_map(|property| {
+            let name = property.name().ok()?;
+            let name = name
+                .as_any_css_dashed_identifier()?
+                .as_css_dashed_identifier()?;
+            let name = name.value_token().ok()?.token_text_trimmed();
+            Some(CssPropertyDefinition {
+                name,
+                range: property.range(),
+                globally_scoped: property.syntax().ancestors().any(|ancestor| {
+                    CssQualifiedRule::cast(ancestor.clone()).is_some_and(|rule| {
+                        rule.prelude()
+                            .syntax()
+                            .descendants()
+                            .filter_map(AnyCssPseudoClassFunctionSelector::cast)
+                            .any(|selector| selector.is_global_pseudo())
+                    }) || CssNestedQualifiedRule::cast(ancestor).is_some_and(|rule| {
+                        rule.prelude()
+                            .syntax()
+                            .descendants()
+                            .filter_map(AnyCssPseudoClassFunctionSelector::cast)
+                            .any(|selector| selector.is_global_pseudo())
+                    })
+                }),
+            })
         })
-        .collect()
+        .chain(
+            model
+                .global_custom_variables()
+                .at_property_registration_candidates()
+                .map(|property| CssPropertyDefinition {
+                    name: property.name().clone(),
+                    range: property.range(),
+                    globally_scoped: false,
+                }),
+        )
+        .collect::<Vec<_>>();
+    definitions.sort_unstable_by_key(|definition| definition.range.start());
+    definitions
 }
 
 pub fn css_semantic_model<'db>(db: &'db dyn Db, file: &AnyParsedSource) -> &'db SemanticModel {

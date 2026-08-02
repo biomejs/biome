@@ -201,7 +201,7 @@ pub fn traverse_import_tree_for_html_classes(
         .collect()
 }
 
-/// Returns the nearest visible `@property` definitions for a CSS, JavaScript, or HTML-like module.
+/// Returns the nearest visible custom property definitions for a CSS, JavaScript, or HTML-like module.
 ///
 /// A CSS module's local definition takes precedence over definitions reached
 /// through its imports. A JavaScript module searches the CSS files it imports.

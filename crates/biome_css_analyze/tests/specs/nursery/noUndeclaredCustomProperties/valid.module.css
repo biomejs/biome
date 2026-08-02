@@ -1,0 +1,9 @@
+/* should not generate diagnostics */
+
+.theme {
+	--module-color: blue;
+}
+
+.card {
+	color: var(--module-color);
+}

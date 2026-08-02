@@ -1,0 +1,27 @@
+/* should not generate diagnostics */
+
+:root {
+	--root-color: red;
+	--escaped\2d color: green;
+}
+
+.theme {
+	--local-color: blue;
+}
+
+@property --registered-color {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: black;
+}
+
+.card {
+	color: var(--root-color);
+	background: var(--local-color);
+	border-color: var(--registered-color);
+	outline-color: var(--escaped-color);
+}
+
+.malformed {
+	color: var(foo(--not-a-custom-property-argument));
+}
