@@ -22,7 +22,7 @@ use biome_js_type_info::{
     },
 };
 use biome_json_parser::{JsonParserOptions, parse_json};
-use biome_languages::JsFileSource;
+use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_module_graph::{
     CallArgumentTypeInput, CallExpressionTypeInput, InferredModuleTypes, JsExport, JsOwnExport,
     ModuleDb, ModuleInfo, ModuleInfoKind, NormalizeTypeInput, PathInfoCache,
@@ -289,6 +289,13 @@ impl salsa::Database for TestModuleDb {}
 #[salsa::db]
 impl biome_db::Db for TestModuleDb {
     fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
+        None
+    }
+}
+
+#[salsa::db]
+impl LanguageDb for TestModuleDb {
+    fn source_from_index(&self, _index: usize) -> Option<DocumentFileSource> {
         None
     }
 }

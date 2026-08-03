@@ -5,8 +5,10 @@ use crate::traverse::{
     UpwardTraversal, UpwardTraversalAction, UpwardTraversalVisitor, UpwardTraversalWork,
 };
 use biome_console::markup;
-use biome_css_semantic::db::css_semantic_model;
-use biome_db::AnyParsedSource;
+use biome_css_semantic::db::{
+    css_property_definitions_from_snippet, css_property_definitions_from_source,
+};
+use biome_languages::CssFileSource;
 use biome_rowan::{TextRange, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexMap;
@@ -149,12 +151,10 @@ impl UpwardTraversal for CssClassTraversal<'_> {
     }
 }
 
-/// Traverses importer branches to resolve visible CSS `@property` definitions.
+/// Finds the nearest CSS `@property` definitions available to a module.
 ///
-/// Every authored edge is evaluated independently because preceding sibling
-/// imports differ by edge position. A branch stops at its nearest definition.
-/// Definitions reached through multiple paths are deduplicated by source path
-/// and range.
+/// It searches modules that import the starting module. Each import path is
+/// searched separately and stops at the first definition it finds.
 pub(crate) struct CssPropertyTraversal<'db, 'name> {
     db: &'db dyn ModuleDb,
     stack: Vec<UpwardTraversalWork<CssPropertyDefinition, CssPropertyBranch>>,
@@ -166,8 +166,8 @@ pub(crate) struct CssPropertyTraversal<'db, 'name> {
 ///
 /// Forking a branch shares its existing ancestry, while membership checks keep
 /// cycle detection local to that branch.
-#[derive(Clone)]
-pub(crate) struct CssPropertyBranch(Rc<CssPropertyBranchNode>);
+#[derive(Clone, Default)]
+pub(crate) struct CssPropertyBranch(Option<Rc<CssPropertyBranchNode>>);
 
 struct CssPropertyBranchNode {
     path: Utf8PathBuf,
@@ -177,12 +177,12 @@ struct CssPropertyBranchNode {
 impl CssPropertyBranch {
     /// Starts a branch with `path` as its first visited module.
     fn new(path: Utf8PathBuf) -> Self {
-        Self(Rc::new(CssPropertyBranchNode { path, parent: None }))
+        Self::default().with_path(path)
     }
 
     /// Returns whether `path` occurs in this branch's ancestry.
     fn contains(&self, path: &Utf8Path) -> bool {
-        let mut node = Some(&*self.0);
+        let mut node = self.0.as_deref();
         while let Some(current) = node {
             if current.path == path {
                 return true;
@@ -194,10 +194,10 @@ impl CssPropertyBranch {
 
     /// Forks this branch with `path` appended to its ancestry.
     fn with_path(&self, path: Utf8PathBuf) -> Self {
-        Self(Rc::new(CssPropertyBranchNode {
+        Self(Some(Rc::new(CssPropertyBranchNode {
             path,
-            parent: Some(self.0.clone()),
-        }))
+            parent: self.0.clone(),
+        })))
     }
 }
 
@@ -256,7 +256,9 @@ impl UpwardTraversalVisitor for CssPropertyTraversal<'_, '_> {
     /// Resolves the definition visible from each authored edge to `imported_path`.
     ///
     /// CSS importers prefer their local definition, then preceding sibling
-    /// imports. JavaScript and HTML importers search preceding CSS contexts.
+    /// imports. HTML importers prefer definitions from globally applicable
+    /// embedded styles, then preceding CSS contexts. JavaScript importers search
+    /// preceding CSS contexts.
     fn visit_importer(
         &mut self,
         imported_path: &Utf8Path,
@@ -273,16 +275,13 @@ impl UpwardTraversalVisitor for CssPropertyTraversal<'_, '_> {
                 .iter()
                 .filter(|(_, import)| import.resolved_path.as_path() == Some(imported_path))
                 .map(|(child_range, _)| {
-                    let definition = local_property_definition(db, importer_path, self.name)
-                        .or_else(|| {
-                            last_property_in_imports_before(
-                                db,
-                                &info,
-                                *child_range,
-                                self.name,
-                                &mut [importer_path.to_path_buf()].into_iter().collect(),
-                            )
-                        });
+                    let definition = self.local_property_definition(importer_path).or_else(|| {
+                        self.last_property_in_imports_before(
+                            &info,
+                            *child_range,
+                            next_branch.clone(),
+                        )
+                    });
                     self.action(definition, next_branch.clone())
                 })
                 .collect(),
@@ -293,15 +292,10 @@ impl UpwardTraversalVisitor for CssPropertyTraversal<'_, '_> {
                     .chain(info.dynamic_import_paths.values())
                     .filter_map(|import| import.as_path())
                     .collect::<Vec<_>>();
-                self.actions_for_ordered_imports(
-                    db,
-                    importer_path,
-                    imported_path,
-                    &imports,
-                    next_branch,
-                )
+                self.actions_for_ordered_imports(imported_path, &imports, next_branch, None)
             }
             ModuleInfoKind::Html(info) => {
+                let local_definition = self.global_html_property_definition(importer_path);
                 let imports = info
                     .imported_stylesheets
                     .iter()
@@ -310,11 +304,10 @@ impl UpwardTraversalVisitor for CssPropertyTraversal<'_, '_> {
                     .filter_map(|import| import.as_path())
                     .collect::<Vec<_>>();
                 self.actions_for_ordered_imports(
-                    db,
-                    importer_path,
                     imported_path,
                     &imports,
                     next_branch,
+                    local_definition,
                 )
             }
         }
@@ -328,24 +321,151 @@ impl CssPropertyTraversal<'_, '_> {
     /// farthest. Imports authored after the occurrence are not visible.
     fn actions_for_ordered_imports(
         &mut self,
-        db: &dyn ModuleDb,
-        importer_path: &Utf8Path,
         imported_path: &Utf8Path,
         imports: &[&Utf8Path],
         next_branch: CssPropertyBranch,
+        local_definition: Option<CssPropertyDefinition>,
     ) -> Vec<UpwardTraversalAction<CssPropertyDefinition, CssPropertyBranch>> {
         imports
             .iter()
             .enumerate()
             .filter(|(_, path)| **path == imported_path)
             .map(|(child_index, _)| {
-                let mut ancestry = [importer_path.to_path_buf()].into_iter().collect();
-                let definition = imports.iter().take(child_index).rev().find_map(|path| {
-                    last_property_in_css_context(db, path, self.name, &mut ancestry)
+                let definition = local_definition.clone().or_else(|| {
+                    imports.iter().take(child_index).rev().find_map(|path| {
+                        self.last_property_in_css_context_from(path, next_branch.clone())
+                    })
                 });
                 self.action(definition, next_branch.clone())
             })
             .collect()
+    }
+
+    /// Returns the last visible definition in an HTML-like document.
+    ///
+    /// Embedded styles take precedence over linked stylesheets and imports.
+    pub(crate) fn last_property_in_html_context(
+        &self,
+        path: &Utf8Path,
+    ) -> Option<CssPropertyDefinition> {
+        self.local_html_property_definition(path).or_else(|| {
+            let info = self.db.html_module_info_for_path(path)?;
+            let branch = CssPropertyBranch::new(path.to_path_buf());
+            info.imported_stylesheets
+                .iter()
+                .chain(info.static_import_paths.values())
+                .chain(info.dynamic_import_paths.values())
+                .rev()
+                .filter_map(|import| import.as_path())
+                .find_map(|path| self.last_property_in_css_context_from(path, branch.clone()))
+        })
+    }
+
+    /// Returns the last visible definition in a CSS import context.
+    ///
+    /// The stylesheet's local definition takes precedence. Otherwise, imports
+    /// are searched in reverse source order without revisiting a module in the
+    /// same branch.
+    pub(crate) fn last_property_in_css_context(
+        &self,
+        path: &Utf8Path,
+    ) -> Option<CssPropertyDefinition> {
+        self.last_property_in_css_context_from(path, CssPropertyBranch::default())
+    }
+
+    fn last_property_in_css_context_from(
+        &self,
+        path: &Utf8Path,
+        branch: CssPropertyBranch,
+    ) -> Option<CssPropertyDefinition> {
+        if branch.contains(path) {
+            return None;
+        }
+
+        let path = path.to_path_buf();
+        let mut stack = vec![(path.clone(), branch.with_path(path))];
+        while let Some((path, branch)) = stack.pop() {
+            if let Some(definition) = self.local_property_definition(&path) {
+                return Some(definition);
+            }
+
+            if let Some(info) = self.db.css_module_info_for_path(&path) {
+                stack.extend(info.imports.values().filter_map(|import| {
+                    let path = import.resolved_path.as_path()?;
+                    if branch.contains(path) {
+                        return None;
+                    }
+                    let path = path.to_path_buf();
+                    Some((path.clone(), branch.with_path(path)))
+                }));
+            }
+        }
+        None
+    }
+
+    /// Returns the last definition visible through imports preceding `child_range`.
+    fn last_property_in_imports_before(
+        &self,
+        info: &crate::CssModuleInfo,
+        child_range: TextRange,
+        branch: CssPropertyBranch,
+    ) -> Option<CssPropertyDefinition> {
+        info.imports
+            .iter()
+            .rev()
+            .filter(|(range, _)| range.start() < child_range.start())
+            .find_map(|(_, import)| {
+                let path = import.resolved_path.as_path()?;
+                self.last_property_in_css_context_from(path, branch.clone())
+            })
+    }
+
+    fn local_property_definition(&self, path: &Utf8Path) -> Option<CssPropertyDefinition> {
+        self.db.css_module_info_for_path(path)?;
+        let parsed = self.db.parsed_source_for_path(path)?;
+        let definition = css_property_definitions_from_source(self.db, parsed)
+            .iter()
+            .find(|definition| definition.name() == self.name)?;
+        Some(CssPropertyDefinition {
+            module_path: path.to_path_buf(),
+            range: definition.range(),
+        })
+    }
+
+    fn local_html_property_definition(&self, path: &Utf8Path) -> Option<CssPropertyDefinition> {
+        self.find_local_html_property_definition(path, |_| true)
+    }
+
+    fn global_html_property_definition(&self, path: &Utf8Path) -> Option<CssPropertyDefinition> {
+        self.find_local_html_property_definition(path, |source| {
+            source.embedding_applicability().is_global()
+        })
+    }
+
+    fn find_local_html_property_definition(
+        &self,
+        path: &Utf8Path,
+        includes: impl Fn(CssFileSource) -> bool,
+    ) -> Option<CssPropertyDefinition> {
+        self.db.html_module_info_for_path(path)?;
+        let source = self.db.parsed_source_for_path(path)?;
+        source.snippets(self.db).iter().rev().find_map(|snippet| {
+            let file_source = self
+                .db
+                .source_from_index(snippet.document_source_index(self.db))?
+                .to_css_file_source()?;
+            if !includes(file_source) {
+                return None;
+            }
+
+            let definition = css_property_definitions_from_snippet(self.db, *snippet)
+                .iter()
+                .find(|definition| definition.name() == self.name)?;
+            Some(CssPropertyDefinition {
+                module_path: path.to_path_buf(),
+                range: definition.range() + snippet.content_offset(self.db),
+            })
+        })
     }
 }
 
@@ -357,94 +477,6 @@ impl UpwardTraversal for CssPropertyTraversal<'_, '_> {
     fn stack(&mut self) -> &mut Vec<UpwardTraversalWork<Self::Item, Self::Branch>> {
         &mut self.stack
     }
-}
-
-/// Returns the last visible definition in a CSS import context.
-///
-/// The stylesheet's local definition takes precedence. Otherwise, imports are
-/// searched in reverse source order, and each imported stylesheet applies the
-/// same rule. Paths already present in `ancestry` are skipped. The traversal is
-/// iterative so authored import depth cannot overflow the call stack.
-pub(crate) fn last_property_in_css_context(
-    db: &dyn ModuleDb,
-    path: &Utf8Path,
-    name: &str,
-    ancestry: &mut FxHashSet<Utf8PathBuf>,
-) -> Option<CssPropertyDefinition> {
-    enum Work {
-        Visit(Utf8PathBuf),
-        Leave(Utf8PathBuf),
-    }
-
-    let mut stack = vec![Work::Visit(path.to_path_buf())];
-    while let Some(work) = stack.pop() {
-        match work {
-            Work::Visit(path) => {
-                if !ancestry.insert(path.clone()) {
-                    continue;
-                }
-                if let Some(definition) = local_property_definition(db, &path, name) {
-                    return Some(definition);
-                }
-
-                stack.push(Work::Leave(path.clone()));
-                if let Some(info) = db.css_module_info_for_path(&path) {
-                    stack.extend(info.imports.values().filter_map(|import| {
-                        import
-                            .resolved_path
-                            .as_path()
-                            .map(|path| Work::Visit(path.to_path_buf()))
-                    }));
-                }
-            }
-            Work::Leave(path) => {
-                ancestry.remove(&path);
-            }
-        }
-    }
-    None
-}
-
-/// Returns the last definition visible through imports preceding `child_range`.
-///
-/// Imports are searched in reverse source order. `child_range` identifies the
-/// authored edge to the child module, so later sibling imports are excluded.
-fn last_property_in_imports_before(
-    db: &dyn ModuleDb,
-    info: &crate::CssModuleInfo,
-    child_range: TextRange,
-    name: &str,
-    ancestry: &mut FxHashSet<Utf8PathBuf>,
-) -> Option<CssPropertyDefinition> {
-    info.imports
-        .iter()
-        .rev()
-        .filter(|(range, _)| range.start() < child_range.start())
-        .find_map(|(_, import)| {
-            let path = import.resolved_path.as_path()?;
-            last_property_in_css_context(db, path, name, ancestry)
-        })
-}
-
-/// Returns the local `@property` definition for `name` in a CSS module.
-///
-/// The parsed source is read directly so range-only edits invalidate tracked
-/// callers even when the semantic contents of the definition are unchanged.
-fn local_property_definition(
-    db: &dyn ModuleDb,
-    path: &Utf8Path,
-    name: &str,
-) -> Option<CssPropertyDefinition> {
-    db.css_module_info_for_path(path)?;
-    let parsed = db.parsed_source_for_path(path)?;
-    let _ = parsed.parsed(db);
-    let source = AnyParsedSource::ParsedSource(parsed);
-    let model = css_semantic_model(db, &source);
-    let at_property = model.global_custom_variables().get(name)?.at_property()?;
-    Some(CssPropertyDefinition {
-        module_path: path.to_path_buf(),
-        range: at_property.range(),
-    })
 }
 
 /// Returns whether `module` imports `path` through a supported import edge.
