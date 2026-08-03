@@ -10,6 +10,7 @@ const literal = "value" as SomeType;
 const angleVariable = <SomeType>myVar;
 const angleLiteral = <SomeType>"value";
 
+(myVar as SomeType).value = "foo";
 (myVar as SomeType) = { value: "value" };
 (<SomeType>myVar) = { value: "value" };
 

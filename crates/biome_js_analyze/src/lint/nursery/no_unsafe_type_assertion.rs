@@ -36,6 +36,14 @@ declare_lint_rule! {
     /// const asserted = <SomeType>value;
     /// ```
     ///
+    /// ```ts,expect_diagnostic
+    /// interface SomeType {
+    ///     value: string;
+    /// }
+    /// declare const asserted: unknown;
+    /// (asserted as SomeType).value = "foo";
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```ts
