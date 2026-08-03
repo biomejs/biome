@@ -1,0 +1,28 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: printer/style-inside-comment.svelte
+---
+
+# Input
+
+```svelte
+<!--<style>div { color: red }</style>-->
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1 @@
+-<!--<style>div { color: red }</style>-->
++<!--<style>div { color: red }</style>-->
+\ No newline at end of file
+```
+
+# Output
+
+```svelte
+<!--<style>div { color: red }</style>-->```
