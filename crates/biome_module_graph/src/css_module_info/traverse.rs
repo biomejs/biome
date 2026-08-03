@@ -409,13 +409,16 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
                 else {
                     continue;
                 };
-                if only_global && !file_source.embedding_applicability().is_global() {
-                    continue;
-                }
+                let snippet_is_global = file_source.embedding_applicability().is_global();
                 contexts.extend(
                     css_property_definitions_from_snippet(self.db, *snippet)
                         .iter()
-                        .filter(|definition| definition.matches(self.name))
+                        .filter(|definition| {
+                            definition.matches(self.name)
+                                && (!only_global
+                                    || snippet_is_global
+                                    || definition.is_globally_scoped())
+                        })
                         .map(|definition| {
                             // Parsed snippet trees exclude their parser base offset.
                             let range = definition.range() + snippet.content_offset(self.db);

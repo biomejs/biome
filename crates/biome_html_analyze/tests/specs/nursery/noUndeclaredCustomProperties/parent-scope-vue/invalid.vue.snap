@@ -4,7 +4,7 @@ expression: invalid.vue
 ---
 # Input
 ```vue
-<!-- should generate one diagnostic -->
+<!-- should generate diagnostics -->
 <template>
 	<div style="color: var(--global-color); border-color: var(--selector-global-color); background: var(--local-color)"></div>
 </template>
@@ -13,11 +13,53 @@ expression: invalid.vue
 
 # Diagnostics
 ```
+invalid.vue:3:25 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The custom property --global-color is not defined.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │ 	<div style="color: var(--global-color); border-color: var(--selector-global-color); background: var(--local-color)"></div>
+      │ 	                       ^^^^^^^^^^^^^^
+    4 │ </template>
+    5 │ 
+  
+  i An undefined custom property uses its fallback when present; without one, the declaration is invalid.
+  
+  i Define the custom property in an available stylesheet or correct its name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:3:60 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The custom property --selector-global-color is not defined.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │ 	<div style="color: var(--global-color); border-color: var(--selector-global-color); background: var(--local-color)"></div>
+      │ 	                                                          ^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ </template>
+    5 │ 
+  
+  i An undefined custom property uses its fallback when present; without one, the declaration is invalid.
+  
+  i Define the custom property in an available stylesheet or correct its name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
 invalid.vue:3:102 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The custom property --local-color is not defined.
   
-    1 │ <!-- should generate one diagnostic -->
+    1 │ <!-- should generate diagnostics -->
     2 │ <template>
   > 3 │ 	<div style="color: var(--global-color); border-color: var(--selector-global-color); background: var(--local-color)"></div>
       │ 	                                                                                                    ^^^^^^^^^^^^^
