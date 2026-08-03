@@ -913,43 +913,20 @@ fn lower_promise_globals(
         }
     }
 
-    let [
-        catch,
-        finally,
-        then,
-        all,
-        all_settled,
-        any,
-        race,
-        reject,
-        resolve,
-        try_method,
-    ] = PROMISE_METHOD_SPECIFICATIONS;
+    let members = std::iter::once(LoweredTypeMember {
+        name: Text::from("constructor"),
+        kind: LoweredMemberKind::Constructor,
+        type_reference: LoweredTypeReference::Predefined("GLOBAL_PROMISE_CONSTRUCTOR_ID"),
+    })
+    .chain(PROMISE_METHOD_SPECIFICATIONS.map(promise_member))
+    .collect();
     globals.push(LoweredGlobal {
         name: Text::from("Promise"),
         id_constant: "PROMISE_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Class(LoweredClass {
             name: Text::from("Promise"),
             type_parameters: Box::new([LoweredTypeReference::Predefined("GLOBAL_T_ID")]),
-            members: Box::new([
-                LoweredTypeMember {
-                    name: Text::from("constructor"),
-                    kind: LoweredMemberKind::Constructor,
-                    type_reference: LoweredTypeReference::Predefined(
-                        "GLOBAL_PROMISE_CONSTRUCTOR_ID",
-                    ),
-                },
-                promise_member(catch),
-                promise_member(finally),
-                promise_member(then),
-                promise_member(all),
-                promise_member(all_settled),
-                promise_member(any),
-                promise_member(race),
-                promise_member(reject),
-                promise_member(resolve),
-                promise_member(try_method),
-            ]),
+            members,
         }),
     });
     globals.push(LoweredGlobal {
