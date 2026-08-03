@@ -4,7 +4,10 @@
 //! queries resolve imports and turn these raw entries into inferred types later.
 
 use std::borrow::Cow;
+use std::cell::RefCell;
 use std::str::FromStr;
+
+use rustc_hash::FxHashMap;
 
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsBinding,
@@ -3184,8 +3187,8 @@ fn unescaped_text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text>
 /// outer guard via the same invalidation check used for writes, so it can
 /// never be composed with an inner guard on the shadowed binding.
 fn typeof_guard_narrowed_tag(id: &JsReferenceIdentifier) -> Option<TypeofTag> {
-    let name = id.name().ok()?;
-    let name = name.text();
+    let name_token = id.name().ok()?;
+    let name = name_token.text();
     let mut child = id.syntax().clone();
     let mut found: Option<TypeofTag> = None;
     for ancestor in id.syntax().ancestors().skip(1) {
@@ -3194,7 +3197,7 @@ fn typeof_guard_narrowed_tag(id: &JsReferenceIdentifier) -> Option<TypeofTag> {
                 .consequent()
                 .is_ok_and(|consequent| consequent.syntax() == &child)
                 && let Some(tag) = typeof_guard_tag(&if_stmt, name)
-                && !narrowing_invalidated_within(&child, name)
+                && !narrowing_invalidated_within(&child, name, &name_token)
             {
                 match found {
                     None => found = Some(tag),
@@ -3269,18 +3272,55 @@ fn typeof_tag_from_literal(expr: &AnyJsExpression) -> Option<TypeofTag> {
     TypeofTag::from_literal(literal.inner_string_text().ok()?.text())
 }
 
+/// Upper bound on cached entries in [NARROWING_INVALIDATION_CACHE].
+///
+/// Each entry's key clones the guarded consequent's `JsSyntaxNode`, which
+/// (via rowan's parent chain) keeps that node's whole syntax tree alive, so
+/// this cap bounds retained *trees*, not raw bytes -- kept low so a burst of
+/// distinct large files can't pin more than a handful of them per thread.
+const MAX_NARROWING_INVALIDATION_CACHE_ENTRIES: usize = 256;
+
+thread_local! {
+    /// Caches [narrowing_invalidated_within] results per `(node, name)`.
+    ///
+    /// `typeof_guard_narrowed_tag` calls this once per reference identifier
+    /// inside a guarded consequent, so a branch with `N` references would
+    /// otherwise re-scan the same subtree `N` times. `JsSyntaxNode`'s
+    /// `Eq`/`Hash` are green-tree-identity based, so cached entries remain
+    /// valid for the lifetime of the (immutable) syntax tree they came from.
+    static NARROWING_INVALIDATION_CACHE: RefCell<FxHashMap<(JsSyntaxNode, Text), bool>> =
+        RefCell::new(FxHashMap::default());
+}
+
 /// Returns whether narrowing of `name` is invalidated within `node`, either
 /// because a new binding with the same name is declared, or because the
 /// value is written to.
-fn narrowing_invalidated_within(node: &JsSyntaxNode, name: &str) -> bool {
-    node.descendants().any(|descendant| {
+fn narrowing_invalidated_within(node: &JsSyntaxNode, name: &str, name_token: &TokenText) -> bool {
+    let key = (node.clone(), Text::from(name_token.clone()));
+    if let Some(cached) =
+        NARROWING_INVALIDATION_CACHE.with(|cache| cache.borrow().get(&key).copied())
+    {
+        return cached;
+    }
+
+    let invalidated = node.descendants().any(|descendant| {
         matches!(
             descendant.kind(),
             JsSyntaxKind::JS_IDENTIFIER_BINDING | JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT
         ) && descendant
             .first_token()
             .is_some_and(|token| token.text_trimmed() == name)
-    })
+    });
+
+    NARROWING_INVALIDATION_CACHE.with(|cache| {
+        let mut cache = cache.borrow_mut();
+        if cache.len() >= MAX_NARROWING_INVALIDATION_CACHE_ENTRIES {
+            cache.clear();
+        }
+        cache.insert(key, invalidated);
+    });
+
+    invalidated
 }
 
 fn is_function_boundary(node: &JsSyntaxNode) -> bool {
