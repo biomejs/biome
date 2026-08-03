@@ -3173,11 +3173,21 @@ fn unescaped_text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text>
 ///
 /// This is a purely syntactic check. It bails out conservatively when the
 /// consequent declares or assigns a binding with the same name, and it does
-/// not look for guards outside the enclosing function.
+/// not look for guards outside the enclosing function. Nested guards on the
+/// same name are composed: if enclosing guards agree, their common tag is
+/// used; if they contradict each other (an impossible runtime state), no
+/// narrowing is applied rather than confidently returning just the innermost
+/// guard's tag.
+///
+/// A shadowing declaration for `name` inside an outer guard's consequent
+/// (e.g. a `let` with the same name in a nested block) disqualifies that
+/// outer guard via the same invalidation check used for writes, so it can
+/// never be composed with an inner guard on the shadowed binding.
 fn typeof_guard_narrowed_tag(id: &JsReferenceIdentifier) -> Option<TypeofTag> {
     let name = id.name().ok()?;
     let name = name.text();
     let mut child = id.syntax().clone();
+    let mut found: Option<TypeofTag> = None;
     for ancestor in id.syntax().ancestors().skip(1) {
         if let Some(if_stmt) = JsIfStatement::cast_ref(&ancestor) {
             if if_stmt
@@ -3186,14 +3196,18 @@ fn typeof_guard_narrowed_tag(id: &JsReferenceIdentifier) -> Option<TypeofTag> {
                 && let Some(tag) = typeof_guard_tag(&if_stmt, name)
                 && !narrowing_invalidated_within(&child, name)
             {
-                return Some(tag);
+                match found {
+                    None => found = Some(tag),
+                    Some(existing) if existing == tag => {}
+                    Some(_) => return None,
+                }
             }
         } else if is_function_boundary(&ancestor) {
-            return None;
+            break;
         }
         child = ancestor;
     }
-    None
+    found
 }
 
 /// Returns the tag of a `typeof <name> === "<tag>"` test of the given `if`
