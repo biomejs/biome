@@ -7,7 +7,7 @@ use biome_js_syntax::{
     AnyTsType, TsAsAssignment, TsAsExpression, TsTypeAssertionAssignment,
     TsTypeAssertionExpression,
 };
-use biome_rowan::{AstNode, declare_node_union};
+use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_unsafe_type_assertion::NoUnsafeTypeAssertionOptions;
 
 declare_lint_rule! {
@@ -74,20 +74,20 @@ impl AnyTsTypeAssertionLike {
 
 impl Rule for NoUnsafeTypeAssertion {
     type Query = Ast<AnyTsTypeAssertionLike>;
-    type State = ();
+    type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = NoUnsafeTypeAssertionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let ty = ctx.query().ty()?;
-        (!is_const_reference_type(&ty)).then_some(())
+        (!is_const_reference_type(&ty)).then_some(ty.range())
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                ctx.query().range(),
+                range,
                 markup! {
                     "Avoid unsafe type assertions."
                 },
