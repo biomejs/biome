@@ -92,18 +92,7 @@ impl ReporterVisitor for JunitReporterVisitor {
 
             let location = diagnostic.location();
 
-            if let (Some(span), Some(source_code), Some(resource)) =
-                (location.span, location.source_code, location.resource)
-            {
-                let source = SourceFile::new(source_code);
-                let start = source.location(span.start())?;
-
-                status.set_description(format!(
-                    "line {row:?}, col {col:?}, {body}",
-                    row = start.line_number.get(),
-                    col = start.column_number.get(),
-                    body = message
-                ));
+            if let Some(Resource::File(path)) = location.resource {
                 let mut case = TestCase::new(
                     format!(
                         "org.biome.{}",
@@ -116,20 +105,30 @@ impl ReporterVisitor for JunitReporterVisitor {
                     status,
                 );
 
-                if let Resource::File(path) = resource {
-                    let mut test_suite = TestSuite::new(path);
+                if let (Some(span), Some(source_code)) = (location.span, location.source_code) {
+                    let source = SourceFile::new(source_code);
+                    let start = source.location(span.start())?;
+
+                    case.status.set_description(format!(
+                        "line {row:?}, col {col:?}, {body}",
+                        row = start.line_number.get(),
+                        col = start.column_number.get(),
+                        body = message
+                    ));
                     case.extra
                         .insert("line".into(), start.line_number.get().to_string().into());
                     case.extra.insert(
                         "column".into(),
                         start.column_number.get().to_string().into(),
                     );
-                    test_suite
-                        .extra
-                        .insert("package".into(), "org.biome".into());
-                    test_suite.add_test_case(case);
-                    self.0.add_test_suite(test_suite);
                 }
+
+                let mut test_suite = TestSuite::new(path);
+                test_suite
+                    .extra
+                    .insert("package".into(), "org.biome".into());
+                test_suite.add_test_case(case);
+                self.0.add_test_suite(test_suite);
             }
         }
 

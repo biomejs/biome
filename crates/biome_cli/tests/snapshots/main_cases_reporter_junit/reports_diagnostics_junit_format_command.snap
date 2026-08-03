@@ -45,7 +45,17 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 
 ```block
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="Biome" tests="0" failures="0" errors="2" time="<TIME>">
+<testsuites name="Biome" tests="2" failures="2" errors="2" time="<TIME>">
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.format">
+            <failure message="Formatter would have printed the following content:"/>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.format">
+            <failure message="Formatter would have printed the following content:"/>
+        </testcase>
+    </testsuite>
 </testsuites>
 
 ```

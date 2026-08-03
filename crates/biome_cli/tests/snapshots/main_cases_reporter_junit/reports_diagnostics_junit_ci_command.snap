@@ -1,5 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 577
 expression: redactor(content)
 ---
 ## `index.ts`
@@ -45,7 +46,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 
 ```block
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="Biome" tests="22" failures="22" errors="16" time="<TIME>">
+<testsuites name="Biome" tests="24" failures="24" errors="16" time="<TIME>">
     <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
         <testcase name="org.biome.lint.correctness.noUnusedImports" line="1" column="8">
             <failure message="This import is unused.">line 1, col 8, This import is unused.</failure>
@@ -121,6 +122,11 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
             <failure message="&apos;f&apos; is redeclared in the same scope.">line 9, col 7, &apos;f&apos; is redeclared in the same scope.</failure>
         </testcase>
     </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.format">
+            <failure message="File content differs from formatting output"/>
+        </testcase>
+    </testsuite>
     <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
         <testcase name="org.biome.assist.source.organizeImports" line="1" column="1">
             <failure message="Sort these imports.">line 1, col 1, Sort these imports.</failure>
@@ -154,6 +160,11 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
         <testcase name="org.biome.lint.suspicious.noRedeclare" line="9" column="7">
             <failure message="&apos;f&apos; is redeclared in the same scope.">line 9, col 7, &apos;f&apos; is redeclared in the same scope.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.format">
+            <failure message="File content differs from formatting output"/>
         </testcase>
     </testsuite>
 </testsuites>
