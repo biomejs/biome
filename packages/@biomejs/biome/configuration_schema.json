@@ -6976,7 +6976,7 @@
 					]
 				},
 				"noUnsafeTypeAssertion": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-unsafe-type-assertion",
+					"description": "Disallow TypeScript type assertions other than const assertions.\nSee https://biomejs.dev/linter/rules/no-unsafe-type-assertion",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnsafeTypeAssertionConfiguration" },
 						{ "type": "null" }
