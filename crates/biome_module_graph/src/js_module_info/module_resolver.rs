@@ -228,7 +228,11 @@ impl ModuleResolver {
         let mut i = 0;
         while i < self.modules.len() {
             let module = self.modules[i].clone();
-            for JsImportPath { resolved_path, .. } in module.static_import_paths.values() {
+            for JsImportPath { resolved_path, .. } in module
+                .import_paths
+                .iter()
+                .filter(|import| import.kind.is_static())
+            {
                 self.register_module(resolved_path.clone());
             }
 
@@ -450,9 +454,9 @@ impl TypeResolver for ModuleResolver {
                 .and_then(|import| {
                     // TODO: Determine if this is a type-only import
                     // JsImport doesn't store phase information directly
-                    // We may need to look it up from static_import_paths
+                    // We may need to look it up from import_paths
                     let type_only = module
-                        .static_import_paths
+                        .import_paths
                         .get(import.specifier.text())
                         .is_some_and(|path| path.phase == crate::JsImportPhase::Type);
 
@@ -536,14 +540,14 @@ fn resolve_binding_as_import(
     }
 
     // Resolve the import directly from static_imports.
-    // Note: We don't need to check dynamic_import_paths because:
+    // Note: We don't need to check dynamic imports because:
     // - Dynamic imports (import('./foo')) return Promises and don't create direct bindings
     // - CommonJS require() calls are expressions that return values, not import bindings
     // - Only static imports (import { foo } from '...') create bindings that
     //   is_binding_imported() recognizes as imported
     let import = module.static_imports.get(name.text())?;
     let type_only = module
-        .static_import_paths
+        .import_paths
         .get(import.specifier.text())
         .is_some_and(|path| path.phase == crate::JsImportPhase::Type);
 

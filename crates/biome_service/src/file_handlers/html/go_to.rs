@@ -160,10 +160,7 @@ fn resolve_import_definition(
     result: &mut GoToDefinitionResult,
 ) -> Option<()> {
     let module_info = module_db.html_module_info_for_path(current_path)?;
-    let html_import = module_info
-        .static_import_paths
-        .get(source)
-        .or_else(|| module_info.dynamic_import_paths.get(source))?;
+    let html_import = module_info.import_paths.get(source)?;
 
     let target_path = html_import.as_path()?;
 

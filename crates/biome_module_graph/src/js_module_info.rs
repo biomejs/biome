@@ -7,6 +7,7 @@ pub(crate) use scope::TsBindingReferenceExt;
 mod utils;
 mod visitor;
 
+use crate::ImportPathMap;
 use crate::css_module_info::CssClassReference;
 use biome_js_semantic::{JsDeclarationKind, ScopeId};
 use biome_js_syntax::AnyJsImportLike;
@@ -117,8 +118,9 @@ impl JsModuleInfo {
                 .collect(),
 
             static_import_paths: self
-                .static_import_paths
-                .iter()
+                .import_paths
+                .named_iter()
+                .filter(|(_, import)| import.kind.is_static())
                 .map(|(specifier, JsImportPath { resolved_path, .. })| {
                     (
                         specifier.to_string(),
@@ -134,8 +136,9 @@ impl JsModuleInfo {
                 .collect::<BTreeSet<_>>(),
 
             dynamic_imports: self
-                .dynamic_import_paths
-                .iter()
+                .import_paths
+                .named_iter()
+                .filter(|(_, import)| import.kind.is_dynamic())
                 .map(|(text, _)| text.to_string())
                 .collect::<BTreeSet<_>>(),
 
@@ -157,8 +160,9 @@ impl JsModuleInfo {
             .get(name)
             .and_then(|import| import.resolved_path.as_path())
             .or_else(|| {
-                self.dynamic_import_paths
+                self.import_paths
                     .get(name)
+                    .filter(|import| import.kind.is_dynamic())
                     .and_then(|import| import.resolved_path.as_path())
             })
     }
@@ -223,29 +227,15 @@ pub struct JsModuleInfoInner {
     /// [Self::blanket_reexports].
     pub static_imports: Imports,
 
-    /// Map of all the paths from static imports in the module.
-    ///
-    /// Maps from the source specifier name to a [JsImportPath] with the
-    /// absolute path it resolves to. The resolved path may be looked up as key
-    /// in the [ModuleDb] map, although it is not required to exist
-    /// (for instance, if the path is outside the project's scope).
-    pub static_import_paths: IndexMap<Text, JsImportPath>,
-
-    /// Map of all dynamic import paths found in the module for which the import
-    /// specifier could be statically determined.
+    /// Static and dynamic import paths in source order.
     ///
     /// Dynamic imports for which the specifier cannot be statically determined
     /// (for instance, because a template string with variables is used) will be
-    /// omitted from this map.
-    ///
-    /// Maps from the source specifier name to a [JsImportPath] with the
-    /// absolute path it resolves to. The resolved path may be looked up as key
-    /// in the [ModuleDb] map, although it is not required to exist
-    /// (for instance, if the path is outside the project's scope).
+    /// omitted.
     ///
     /// Paths found in `require()` expressions in CommonJS sources are also
-    /// included with the dynamic import paths.
-    pub dynamic_import_paths: IndexMap<Text, JsImportPath>,
+    /// included as dynamic imports.
+    pub import_paths: ImportPathMap<JsImportPath>,
 
     /// Map of exports from the module.
     ///
@@ -347,10 +337,37 @@ pub enum JsImportPhase {
     Type,
 }
 
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+pub enum JsImportKind {
+    #[default]
+    Static,
+    Dynamic,
+    StaticAndDynamic,
+}
+
+impl JsImportKind {
+    pub const fn is_static(self) -> bool {
+        matches!(self, Self::Static | Self::StaticAndDynamic)
+    }
+
+    pub const fn is_dynamic(self) -> bool {
+        matches!(self, Self::Dynamic | Self::StaticAndDynamic)
+    }
+
+    fn union(self, other: Self) -> Self {
+        if self == other {
+            self
+        } else {
+            Self::StaticAndDynamic
+        }
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct JsImportPath {
     pub resolved_path: ResolvedPath,
     pub phase: JsImportPhase,
+    pub kind: JsImportKind,
 }
 
 impl JsImportPath {
@@ -424,12 +441,7 @@ impl JsModuleInfoInner {
     /// Returns the information about a given import by its syntax node.
     pub fn get_import_path_by_js_node(&self, node: &AnyJsImportLike) -> Option<&JsImportPath> {
         let specifier_text = node.inner_string_text()?;
-        let specifier = specifier_text.text();
-        if node.is_static_import() {
-            self.static_import_paths.get(specifier)
-        } else {
-            self.dynamic_import_paths.get(specifier)
-        }
+        self.import_paths.get(specifier_text.text())
     }
 
     pub fn types(&self) -> Vec<&TypeData> {
@@ -556,21 +568,9 @@ impl Iterator for ImportPathIterator {
     type Item = JsImportPath;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let num_static_imports = self.module_info.static_import_paths.len();
-        let resolved_path = if self.index < num_static_imports {
-            let resolved_path = &self.module_info.static_import_paths[self.index];
-            self.index += 1;
-            resolved_path
-        } else if self.index < self.module_info.dynamic_import_paths.len() + num_static_imports {
-            let resolved_path =
-                &self.module_info.dynamic_import_paths[self.index - num_static_imports];
-            self.index += 1;
-            resolved_path
-        } else {
-            return None;
-        };
-
-        Some(resolved_path.clone())
+        let path = self.module_info.import_paths.get_index(self.index)?.clone();
+        self.index += 1;
+        Some(path)
     }
 }
 

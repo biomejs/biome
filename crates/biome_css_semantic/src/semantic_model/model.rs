@@ -116,11 +116,18 @@ pub(crate) struct SemanticModelData {
     pub(crate) all_rules: Vec<RuleData>,
     /// IDs of top-level rules only
     pub(crate) top_level_rule_ids: Vec<RuleId>,
-    /// Map of names declared in `:root` or through an `@property` rule.
+    /// Custom property names declared in `:root` or by an `@property` rule.
+    ///
+    /// The associated data retains the `:root` declaration. `@property` data is
+    /// stored separately because the same name may be declared more than once.
     pub(crate) global_custom_variables: FxHashMap<TokenText, CssGlobalCustomVariableData>,
-    /// Authored `@property` rules in source order.
+    /// Every authored `@property` rule in source order, including declarations
+    /// shadowed by a later rule with the same name.
     pub(crate) at_property_rules: Vec<CssPropertyAtRuleData>,
-    /// Index of the last authored `@property` rule for each name.
+    /// The effective `@property` rule for each name.
+    ///
+    /// Each value indexes the last matching declaration in
+    /// [`Self::at_property_rules`].
     pub(crate) last_at_property_by_name: FxHashMap<TokenText, usize>,
     /// Map from text range to RuleId
     pub(crate) range_to_rule_id: BTreeMap<TextRange, RuleId>,

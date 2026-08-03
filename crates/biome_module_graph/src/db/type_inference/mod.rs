@@ -249,8 +249,9 @@ fn inference_scc(
         db.unwind_if_revision_cancelled();
 
         let dependency_paths = source_info
-            .static_import_paths
-            .values()
+            .import_paths
+            .iter()
+            .filter(|import| import.kind.is_static())
             .map(|import| &import.resolved_path)
             .chain(
                 source_info

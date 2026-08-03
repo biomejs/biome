@@ -25,10 +25,10 @@ use biome_json_value::{JsonObject, JsonString};
 use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
 use biome_languages::{CssFileSource, DocumentFileSource, HtmlFileSource, JsFileSource};
 use biome_module_graph::{
-    HtmlEmbeddedContent, ImportSymbol, JsExport, JsExportedSymbolLookup, JsImport, JsImportPath,
-    JsImportPhase, JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic,
-    ModuleInfo, ModuleInfoKind, ModuleResolver, PathInfoCache, ResolvedPath, SymbolFromModuleInfo,
-    TypeInferenceMode, css_property_definitions, find_js_exported_symbol,
+    HtmlEmbeddedContent, ImportSymbol, JsExport, JsExportedSymbolLookup, JsImport, JsImportKind,
+    JsImportPath, JsImportPhase, JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb,
+    ModuleDiagnostic, ModuleInfo, ModuleInfoKind, ModuleResolver, PathInfoCache, ResolvedPath,
+    SymbolFromModuleInfo, TypeInferenceMode, css_property_definitions, find_js_exported_symbol,
     is_class_referenced_by_importers, resolve_css_module, resolve_html_module,
     resolve_js_module_with_inference_mode, transitive_importers_of,
     traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
@@ -459,6 +459,56 @@ fn css_property_query_deduplicates_diamonds_and_stops_cycles() {
 }
 
 #[test]
+fn css_property_query_does_not_cache_branch_specific_empty_results() {
+    let db = build_css_property_db(&[
+        ("/leaf.css", ".leaf { color: var(--value); }"),
+        (
+            "/definition.css",
+            "@property --value { syntax: \"<color>\"; inherits: true; initial-value: red; }",
+        ),
+        ("/right.css", "@import \"leaf.css\";"),
+        (
+            "/left.css",
+            "@import \"leaf.css\";\n@import \"definition.css\";",
+        ),
+        ("/join.css", "@import \"right.css\";\n@import \"left.css\";"),
+        ("/root.css", "@import \"left.css\";\n@import \"join.css\";"),
+    ]);
+    let module = db.module_for_path(Utf8Path::new("/leaf.css")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", module);
+
+    let definitions = css_property_definitions(&db, property);
+
+    assert_eq!(definitions.len(), 1);
+    assert_eq!(definitions[0].module_path, Utf8Path::new("/definition.css"));
+}
+
+#[test]
+fn css_property_query_preserves_branch_specific_continuations() {
+    let db = build_css_property_db(&[
+        ("/leaf.css", ".leaf { color: var(--value); }"),
+        (
+            "/definition.css",
+            "@property --value { syntax: \"<color>\"; inherits: true; initial-value: red; }",
+        ),
+        ("/b.css", "@import \"leaf.css\";"),
+        (
+            "/a.css",
+            "@import \"leaf.css\";\n@import \"definition.css\";\n@import \"y.css\";",
+        ),
+        ("/x.css", "@import \"b.css\";\n@import \"a.css\";"),
+        ("/y.css", "@import \"x.css\";"),
+    ]);
+    let module = db.module_for_path(Utf8Path::new("/leaf.css")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", module);
+
+    let definitions = css_property_definitions(&db, property);
+
+    assert_eq!(definitions.len(), 1);
+    assert_eq!(definitions[0].module_path, Utf8Path::new("/definition.css"));
+}
+
+#[test]
 fn css_property_query_reads_the_current_semantic_model() {
     let mut db = build_css_property_db(&[(
         "/value.css",
@@ -522,6 +572,168 @@ fn css_property_query_skips_non_css_sibling_imports() {
     let module = db.module_for_path(Utf8Path::new("/leaf.css")).unwrap();
     let property = SymbolFromModuleInfo::new(&db, "--value", module);
     assert!(css_property_definitions(&db, property).is_empty());
+}
+
+#[test]
+fn css_property_query_reads_stylesheets_imported_by_js() {
+    let property_style =
+        r#"@property --value { syntax: "<color>"; inherits: true; initial-value: red; }"#;
+    for source in ["import './theme.css';", "import('./theme.css');"] {
+        let db = build_css_property_db(&[("/theme.css", property_style)]);
+        let fs = MemoryFileSystem::default();
+        fs.insert("/theme.css".into(), property_style);
+        fs.insert("/app.js".into(), source);
+        let paths = [BiomePath::new("/app.js")];
+        let roots = get_added_js_paths(&fs, &paths);
+        add_js_modules(&db, &fs, &ProjectLayout::default(), &roots, false);
+
+        let module = db.module_for_path(Utf8Path::new("/app.js")).unwrap();
+        let property = SymbolFromModuleInfo::new(&db, "--value", module);
+        let definitions = css_property_definitions(&db, property);
+
+        assert_eq!(definitions.len(), 1, "{source}");
+        assert_eq!(definitions[0].module_path, Utf8Path::new("/theme.css"));
+    }
+}
+
+#[test]
+fn css_property_query_preserves_js_import_order() {
+    let db = build_css_property_db(&[
+        (
+            "/first.css",
+            r#"@property --value { syntax: "<color>"; inherits: true; initial-value: red; }"#,
+        ),
+        (
+            "/second.css",
+            r#"@property --value { syntax: "<length>"; inherits: true; initial-value: 0px; }"#,
+        ),
+    ]);
+    let fs = MemoryFileSystem::default();
+    fs.insert("/first.css".into(), "");
+    fs.insert("/second.css".into(), "");
+    fs.insert(
+        "/app.js".into(),
+        "import('./first.css'); import './second.css';",
+    );
+    let paths = [BiomePath::new("/app.js")];
+    let roots = get_added_js_paths(&fs, &paths);
+    add_js_modules(&db, &fs, &ProjectLayout::default(), &roots, false);
+
+    let module = db.module_for_path(Utf8Path::new("/app.js")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", module);
+    let definitions = css_property_definitions(&db, property);
+
+    assert_eq!(definitions.len(), 1);
+    assert_eq!(definitions[0].module_path, Utf8Path::new("/second.css"));
+}
+
+#[test]
+fn js_import_paths_are_deduplicated_at_the_last_occurrence() {
+    fn assert_iterator<I>(_: I)
+    where
+        I: DoubleEndedIterator + ExactSizeIterator + std::iter::FusedIterator,
+    {
+    }
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/first.css".into(), "");
+    fs.insert("/second.css".into(), "");
+    fs.insert("/third.css".into(), "");
+    fs.insert(
+        "/app.ts".into(),
+        "import './first.css'; import type Second from './second.css'; import('./second.css'); import('./first.css'); import type { First } from './first.css'; import('./third.css'); import type Third from './third.css';",
+    );
+    let paths = [BiomePath::new("/app.ts")];
+    let roots = get_added_js_paths(&fs, &paths);
+    let db = WorkspaceDb::default();
+    add_js_modules(&db, &fs, &ProjectLayout::default(), &roots, false);
+    let info = db
+        .js_module_info_for_path(Utf8Path::new("/app.ts"))
+        .unwrap();
+
+    assert_iterator(info.import_paths.iter());
+    assert_eq!(
+        info.import_paths
+            .named_iter()
+            .map(|(specifier, _)| specifier.text())
+            .collect::<Vec<_>>(),
+        ["./second.css", "./first.css", "./third.css"]
+    );
+
+    let mut imports = info.import_paths.iter();
+    assert_eq!(imports.len(), 3);
+    let first = imports.next().unwrap();
+    assert_eq!(first.kind, JsImportKind::StaticAndDynamic);
+    assert_eq!(first.phase, JsImportPhase::Type);
+    let third = imports.next_back().unwrap();
+    assert_eq!(third.kind, JsImportKind::StaticAndDynamic);
+    assert_eq!(third.phase, JsImportPhase::Type);
+    let second = imports.next().unwrap();
+    assert_eq!(second.kind, JsImportKind::StaticAndDynamic);
+    assert_eq!(second.phase, JsImportPhase::Default);
+    assert!(imports.next().is_none());
+    assert!(imports.next().is_none());
+}
+
+#[test]
+fn css_property_query_ignores_type_only_js_imports() {
+    let property_style =
+        r#"@property --value { syntax: "<color>"; inherits: true; initial-value: red; }"#;
+    let db = build_css_property_db(&[("/theme.css", property_style)]);
+    let fs = MemoryFileSystem::default();
+    fs.insert("/theme.css".into(), property_style);
+    fs.insert(
+        "/app.ts".into(),
+        "import type { Theme } from './theme.css';",
+    );
+    fs.insert("/component.ts".into(), "export type Component = true;");
+    fs.insert(
+        "/parent.ts".into(),
+        "import './theme.css'; import type { Component } from './component.ts';",
+    );
+    let paths = [
+        BiomePath::new("/app.ts"),
+        BiomePath::new("/component.ts"),
+        BiomePath::new("/parent.ts"),
+    ];
+    let roots = get_added_js_paths(&fs, &paths);
+    add_js_modules(&db, &fs, &ProjectLayout::default(), &roots, false);
+
+    for path in ["/app.ts", "/component.ts"] {
+        let module = db.module_for_path(Utf8Path::new(path)).unwrap();
+        let property = SymbolFromModuleInfo::new(&db, "--value", module);
+        assert!(css_property_definitions(&db, property).is_empty(), "{path}");
+    }
+}
+
+#[test]
+fn css_property_query_traverses_js_importers() {
+    let property_style =
+        r#"@property --value { syntax: "<color>"; inherits: true; initial-value: red; }"#;
+    for (parent_source, finds_definition) in [
+        ("import './theme.css'; import './component.js';", true),
+        ("import './component.js'; import './theme.css';", false),
+        ("import('./theme.css'); import './component.js';", true),
+        ("import './component.js'; import('./theme.css');", false),
+    ] {
+        let db = build_css_property_db(&[("/theme.css", property_style)]);
+        let fs = MemoryFileSystem::default();
+        fs.insert("/theme.css".into(), property_style);
+        fs.insert("/component.js".into(), "export const component = true;");
+        fs.insert("/parent.js".into(), parent_source);
+        let paths = [
+            BiomePath::new("/component.js"),
+            BiomePath::new("/parent.js"),
+        ];
+        let roots = get_added_js_paths(&fs, &paths);
+        add_js_modules(&db, &fs, &ProjectLayout::default(), &roots, false);
+
+        let module = db.module_for_path(Utf8Path::new("/component.js")).unwrap();
+        let property = SymbolFromModuleInfo::new(&db, "--value", module);
+        let definitions = css_property_definitions(&db, property);
+
+        assert_eq!(definitions.len(), usize::from(finds_definition));
+    }
 }
 
 #[test]
@@ -804,6 +1016,29 @@ fn css_property_query_follows_stylesheets_imported_from_html_scripts() {
 }
 
 #[test]
+fn css_property_query_preserves_html_script_import_order() {
+    let first = r#"@property --value { syntax: "<color>"; inherits: true; initial-value: red; }"#;
+    let second = r#"@property --value { syntax: "<length>"; inherits: true; initial-value: 0px; }"#;
+    let script = "import('./first.css'); import './second.css';";
+    let source = format!("<script>{script}</script>");
+    let db = build_html_property_db(
+        "/index.html",
+        &source,
+        HtmlFileSource::html(),
+        &[],
+        &[script],
+        &[("/first.css", first), ("/second.css", second)],
+    );
+    let module = db.module_for_path(Utf8Path::new("/index.html")).unwrap();
+    let property = SymbolFromModuleInfo::new(&db, "--value", module);
+
+    let definitions = css_property_definitions(&db, property);
+
+    assert_eq!(definitions.len(), 1);
+    assert_eq!(definitions[0].module_path, Utf8Path::new("/second.css"));
+}
+
+#[test]
 fn css_imports_preserve_duplicate_occurrences() {
     let db = build_css_property_db(&[
         ("/theme.css", ""),
@@ -818,7 +1053,7 @@ fn css_imports_preserve_duplicate_occurrences() {
         .unwrap();
 
     assert_eq!(info.imports.len(), 3);
-    assert!(info.imports.keys().is_sorted());
+    assert!(info.imports.iter().map(|import| import.range).is_sorted());
 }
 
 #[test]
@@ -2978,10 +3213,11 @@ fn test_resolve_swr_types() {
         )))
         .expect("module must exist");
     assert_eq!(
-        index_module.static_import_paths.get("swr"),
+        index_module.import_paths.get("swr"),
         Some(&JsImportPath {
             resolved_path: ResolvedPath::from_path(format!("{swr_path}/dist/index/index.d.mts")),
             phase: JsImportPhase::Default,
+            kind: JsImportKind::Static,
         })
     );
 
@@ -2989,14 +3225,13 @@ fn test_resolve_swr_types() {
         .js_module_info_for_path(Utf8Path::new(&format!("{swr_path}/dist/index/index.d.mts")))
         .expect("module must exist");
     assert_eq!(
-        swr_index_module
-            .static_import_paths
-            .get("../_internal/index.mjs"),
+        swr_index_module.import_paths.get("../_internal/index.mjs"),
         Some(&JsImportPath {
             resolved_path: ResolvedPath::from_path(format!(
                 "{swr_path}/dist/_internal/index.d.mts"
             )),
             phase: JsImportPhase::Default,
+            kind: JsImportKind::Static,
         })
     );
 
@@ -3114,12 +3349,12 @@ fn test_node_builtin_imports_resolve_to_builtin_error() {
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .unwrap();
 
-    // All three `node:*` specifiers must be present in static_import_paths.
+    // All three `node:*` specifiers must be present in import_paths.
     for specifier in ["node:fs", "node:path", "node:url"] {
         let import_path = module
-            .static_import_paths
+            .import_paths
             .get(specifier)
-            .unwrap_or_else(|| panic!("specifier `{specifier}` not found in static_import_paths"));
+            .unwrap_or_else(|| panic!("specifier `{specifier}` not found in import_paths"));
 
         assert_eq!(
             import_path.resolved_path.error(),
@@ -3497,7 +3732,7 @@ fn test_namespace_reexport_type_inference() {
 }
 
 /// Verifies that a JSX file that imports a CSS file shows:
-/// - the CSS import edge in `static_import_paths`
+/// - the CSS import path in `import_paths`
 /// - `referenced_classes` populated from `className="..."` attributes
 /// - the CSS module info showing the defined classes
 #[test]
@@ -3541,8 +3776,8 @@ export function App() {
         .expect("App.jsx must be in module graph");
     assert!(
         app_info
-            .static_import_paths
-            .values()
+            .import_paths
+            .iter()
             .any(|p| p.as_path() == Some(Utf8Path::new("/src/styles.css"))),
         "App.jsx must have a resolved import edge to styles.css"
     );
@@ -4623,7 +4858,7 @@ fn test_vue_upward_traversal() {
         .expect("App.vue must be in module graph");
 
     assert!(
-        !app_info.static_import_paths.is_empty(),
+        !app_info.import_paths.is_empty(),
         "App.vue should have static import paths (app.css and Page.vue)"
     );
 
@@ -4632,7 +4867,7 @@ fn test_vue_upward_traversal() {
         .expect("Page.vue must be in module graph");
 
     assert!(
-        !page_info.static_import_paths.is_empty(),
+        !page_info.import_paths.is_empty(),
         "Page.vue should have static import paths (Button.vue)"
     );
 
