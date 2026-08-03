@@ -17,6 +17,10 @@ autotests            = false
 name = "local_inference"
 path = "tests/local_inference.rs"
 
+[[test]]
+name = "type_data"
+path = "tests/type_data.rs"
+
 [dependencies]
 biome_db          = { workspace = true }
 biome_formatter   = { workspace = true }

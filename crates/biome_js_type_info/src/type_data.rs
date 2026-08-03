@@ -19,7 +19,7 @@ use biome_rowan::Text;
 
 use crate::{
     globals::{GLOBAL_NUMBER_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID},
-    globals_ids::GlobalTypeId,
+    globals_ids::{GlobalTypeId, global_type_name},
     literal::RegexpLiteral,
     type_data::literal::{BooleanLiteral, NumberLiteral, StringLiteral},
 };
@@ -35,10 +35,22 @@ pub(super) const UNKNOWN_DATA: TypeData = TypeData::Reference(UNKNOWN_REFERENCE)
 pub struct TypeId(u32);
 
 /// Identity of a type referenced from the collector's raw type table.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub enum RawTypeId {
     Local(TypeId),
     Global(GlobalTypeId),
+}
+
+impl Debug for RawTypeId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FormatResult {
+        match self {
+            Self::Global(id) => match global_type_name(id.as_type_id()) {
+                Some(name) => f.write_str(name),
+                None => write!(f, "Global {:?}", id.as_type_id()),
+            },
+            Self::Local(id) => write!(f, "Local {id:?}"),
+        }
+    }
 }
 
 pub type ResolvedTypeId = RawTypeId;
@@ -1826,6 +1838,18 @@ mod tests {
         assert!(RawTypeId::Global(UNKNOWN_ID_GLOBAL_TYPE_ID).is_unknown());
         assert!(!RawTypeId::Global(STRING_ID_GLOBAL_TYPE_ID).is_unknown());
         assert!(!RawTypeId::Local(TypeId::new(0)).is_unknown());
+    }
+
+    #[test]
+    fn raw_type_id_debug_is_readable() {
+        assert_eq!(
+            format!("{:?}", RawTypeId::Global(STRING_ID_GLOBAL_TYPE_ID)),
+            "string"
+        );
+        assert_eq!(
+            format!("{:?}", RawTypeId::Local(TypeId::new(3))),
+            "Local TypeId(3)"
+        );
     }
 
     #[test]

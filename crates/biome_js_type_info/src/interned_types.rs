@@ -19,10 +19,10 @@ use crate::{
     builders::{IntersectionBuilder, UnionBuilder},
     globals_ids::{
         ARRAY_ID_GLOBAL_TYPE_ID, ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID, DATE_ID_GLOBAL_TYPE_ID,
-        DISPOSABLE_ID_GLOBAL_TYPE_ID, ERROR_ID_GLOBAL_TYPE_ID, GLOBAL_SYMBOL_ASYNC_DISPOSE_ID,
-        GLOBAL_SYMBOL_DISPOSE_ID, GlobalTypeId, MAP_ID_GLOBAL_TYPE_ID, PROMISE_ID_GLOBAL_TYPE_ID,
-        REGEXP_ID_GLOBAL_TYPE_ID, SET_ID_GLOBAL_TYPE_ID, SYMBOL_ID_GLOBAL_TYPE_ID,
-        WEAK_MAP_ID_GLOBAL_TYPE_ID,
+        DISPOSABLE_ID_GLOBAL_TYPE_ID, ERROR_ID_GLOBAL_TYPE_ID, GlobalTypeId, MAP_ID_GLOBAL_TYPE_ID,
+        PROMISE_ID_GLOBAL_TYPE_ID, REGEXP_ID_GLOBAL_TYPE_ID, SET_ID_GLOBAL_TYPE_ID,
+        SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID, SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID,
+        SYMBOL_ID_GLOBAL_TYPE_ID, WEAK_MAP_ID_GLOBAL_TYPE_ID,
     },
     literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral},
     type_data as raw,
@@ -36,28 +36,25 @@ pub type ReferenceResolver<'db, 'resolver> =
 const MAX_GENERIC_REPLACEMENT_STEPS: usize = 64;
 const MAX_OBJECT_RELATION_DEPTH: usize = 50;
 
-pub fn well_known_symbol_name(reference: &raw::TypeReference) -> Option<Text> {
-    match reference {
-        raw::TypeReference::Resolved(id) if *id == GLOBAL_SYMBOL_DISPOSE_ID => {
+pub fn well_known_symbol_name(ty: TypeData) -> Option<Text> {
+    match ty {
+        TypeData::GlobalType(id) if id == SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID => {
             Some(Text::new_static("Symbol.dispose"))
         }
-        raw::TypeReference::Resolved(id) if *id == GLOBAL_SYMBOL_ASYNC_DISPOSE_ID => {
+        TypeData::GlobalType(id) if id == SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID => {
             Some(Text::new_static("Symbol.asyncDispose"))
-        }
-        raw::TypeReference::Qualifier(qualifier) => {
-            let mut parts = qualifier.path.iter();
-            match (parts.next(), parts.next(), parts.next()) {
-                (Some(symbol), Some(member), None)
-                    if symbol.text() == "Symbol"
-                        && matches!(member.text(), "dispose" | "asyncDispose") =>
-                {
-                    Some(Text::new_owned(format!("Symbol.{}", member.text()).into()))
-                }
-                _ => None,
-            }
         }
         _ => None,
     }
+}
+
+pub fn well_known_symbol_type<'db>(member_name: &str) -> Option<TypeData<'db>> {
+    let id = match member_name {
+        "dispose" => SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID,
+        "asyncDispose" => SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
+        _ => return None,
+    };
+    Some(TypeData::GlobalType(id))
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, salsa::Update)]
@@ -2449,16 +2446,17 @@ fn convert_type_member_kind<'db>(
         raw::TypeMemberKind::CallSignature => TypeMemberKind::CallSignature,
         raw::TypeMemberKind::ComputedValue(ty) => {
             let resolved = resolve_reference(ty);
-            well_known_symbol_name(ty).map_or(TypeMemberKind::ComputedValue(resolved), |name| {
-                TypeMemberKind::ComputedValueNamed(name, resolved)
-            })
+            well_known_symbol_name(resolved)
+                .map_or(TypeMemberKind::ComputedValue(resolved), |name| {
+                    TypeMemberKind::ComputedValueNamed(name, resolved)
+                })
         }
         raw::TypeMemberKind::ConstAssertedCallSignature => {
             TypeMemberKind::ConstAssertedCallSignature
         }
         raw::TypeMemberKind::ConstAssertedComputedValue(ty) => {
             let resolved = resolve_reference(ty);
-            well_known_symbol_name(ty).map_or(
+            well_known_symbol_name(resolved).map_or(
                 TypeMemberKind::ConstAssertedComputedValue(resolved),
                 |name| TypeMemberKind::ConstAssertedComputedValueNamed(name, resolved),
             )

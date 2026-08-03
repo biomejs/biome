@@ -1,6 +1,5 @@
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
-use biome_fs::MemoryFileSystem;
 use biome_html_formatter::HtmlFormatOptions;
 use biome_html_parser::HtmlParserOptions;
 use biome_js_formatter::context::JsFormatOptions;
@@ -18,11 +17,6 @@ pub struct ModuleGraphSnapshot<'a> {
 }
 
 impl<'a> ModuleGraphSnapshot<'a> {
-    pub fn new(module_db: &'a dyn ModuleDb, fs: &'a MemoryFileSystem) -> Self {
-        let files = source_files_from_memory_fs(fs);
-        Self { module_db, files }
-    }
-
     /// Build a snapshot from a pre-collected list of `(path, source)` pairs.
     ///
     /// Use this when the [`MemoryFileSystem`] has been moved into a
@@ -138,18 +132,6 @@ impl<'a> ModuleGraphSnapshot<'a> {
             insta::assert_snapshot!(test_name, content);
         });
     }
-}
-
-pub fn source_files_from_memory_fs(fs: &MemoryFileSystem) -> BTreeMap<String, String> {
-    fs.files
-        .read()
-        .iter()
-        .map(|(file, entry)| {
-            let content = entry.lock();
-            let content = String::from_utf8_lossy(content.as_slice()).into_owned();
-            (file.as_str().to_string(), content)
-        })
-        .collect()
 }
 
 pub fn write_source_file(content: &mut String, file_name: &Utf8PathBuf, source_code: &str) {

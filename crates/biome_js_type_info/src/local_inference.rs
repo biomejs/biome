@@ -34,7 +34,7 @@ use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
 
 use crate::globals::{
     GLOBAL_GLOBAL_ID, GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_ID, GLOBAL_STRING_ID,
-    GLOBAL_SYMBOL_ASYNC_DISPOSE_ID, GLOBAL_SYMBOL_DISPOSE_ID, GLOBAL_UNDEFINED_ID,
+    GLOBAL_UNDEFINED_ID,
 };
 use crate::literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral};
 use crate::{
@@ -2467,14 +2467,13 @@ fn computed_member_reference(
             member.member().ok().and_then(text_from_any_js_name),
         )
         && object_name.text() == "Symbol"
+        && matches!(member_name.text(), "dispose" | "asyncDispose")
     {
-        match member_name.text() {
-            "dispose" => return TypeReference::Resolved(GLOBAL_SYMBOL_DISPOSE_ID),
-            "asyncDispose" => {
-                return TypeReference::Resolved(GLOBAL_SYMBOL_ASYNC_DISPOSE_ID);
-            }
-            _ => {}
-        }
+        return TypeReferenceQualifier::from_path(
+            scope_id,
+            Path::Qualified(vec![object_name, member_name].into_boxed_slice()),
+        )
+        .into();
     }
 
     TypeReference::from_any_js_expression(collector, scope_id, expression)
