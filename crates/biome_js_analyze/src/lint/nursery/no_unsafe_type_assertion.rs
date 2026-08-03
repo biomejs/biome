@@ -1,75 +1,117 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, Ast
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::JsIdentifierBinding;
-use biome_rowan::AstNode;
+use biome_diagnostics::Severity;
+use biome_js_syntax::{
+    AnyTsType, TsAsAssignment, TsAsExpression, TsTypeAssertionAssignment,
+    TsTypeAssertionExpression,
+};
+use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::no_unsafe_type_assertion::NoUnsafeTypeAssertionOptions;
 
 declare_lint_rule! {
-    /// Succinct description of the rule.
+    /// Disallow TypeScript type assertions other than const assertions.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// You can use asides to highlight important information:
-    /// :::note
-    /// Important information for users.
-    /// :::
+    /// Type assertions override TypeScript's inferred type without performing any runtime checks.
+    /// This can hide invalid assumptions about a value and lead to runtime errors.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// ```ts,expect_diagnostic
+    /// interface SomeType {
+    ///     value: string;
+    /// }
+    /// declare const value: unknown;
+    /// const asserted = value as SomeType;
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// interface SomeType {
+    ///     value: string;
+    /// }
+    /// declare const value: unknown;
+    /// const asserted = <SomeType>value;
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js
-    /// // var a = 1;
+    /// ```ts
+    /// const tuple = ["value", 1] as const;
+    /// const annotated: string = "value";
+    /// const checked = { value: "value" } satisfies { value: string };
     /// ```
-    ///
     pub NoUnsafeTypeAssertion {
         version: "next",
         name: "noUnsafeTypeAssertion",
-        language: "js",
+        language: "ts",
+        sources: &[RuleSource::EslintTypeScript("consistent-type-assertions").inspired()],
         recommended: false,
+        severity: Severity::Error,
+    }
+}
+
+declare_node_union! {
+    pub AnyTsTypeAssertionLike =
+        TsAsAssignment
+        | TsAsExpression
+        | TsTypeAssertionAssignment
+        | TsTypeAssertionExpression
+}
+
+impl AnyTsTypeAssertionLike {
+    fn ty(&self) -> Option<AnyTsType> {
+        match self {
+            Self::TsAsAssignment(assertion) => assertion.ty().ok(),
+            Self::TsAsExpression(assertion) => assertion.ty().ok(),
+            Self::TsTypeAssertionAssignment(assertion) => assertion.ty().ok(),
+            Self::TsTypeAssertionExpression(assertion) => assertion.ty().ok(),
+        }
     }
 }
 
 impl Rule for NoUnsafeTypeAssertion {
-    type Query = Ast<JsIdentifierBinding>;
+    type Query = Ast<AnyTsTypeAssertionLike>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoUnsafeTypeAssertionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let _binding = ctx.query();
-        Some(())
+        let ty = ctx.query().ty()?;
+        (!is_const_reference_type(&ty)).then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
-        let node = ctx.query();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.range(),
+                ctx.query().range(),
                 markup! {
-                    "Variable is read here."
+                    "Avoid unsafe type assertions."
                 },
             )
             .note(markup! {
-                "This note will give you more information."
+                "Type assertions bypass TypeScript's type checking and can cause runtime errors."
+            })
+            .note(markup! {
+                "I suggest using a type annotation, the "<Emphasis>"satisfies"</Emphasis>" operator, a type guard, or control-flow narrowing instead."
             }),
         )
     }
+}
+
+// Copied from `biome_js_type_info::local_inference::is_const_reference_type`.
+fn is_const_reference_type(type_annotation: &AnyTsType) -> bool {
+    let Some(reference_type) = type_annotation.as_ts_reference_type() else {
+        return false;
+    };
+
+    reference_type.type_arguments().is_none()
+        && reference_type.name().ok().is_some_and(|name| {
+            name.as_js_reference_identifier()
+                .and_then(|identifier| identifier.value_token().ok())
+                .is_some_and(|token| token.text_trimmed() == "const")
+        })
 }
