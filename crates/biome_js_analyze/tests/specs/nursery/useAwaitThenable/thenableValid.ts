@@ -27,4 +27,5 @@ async function awaitCastThenable(): Promise<void> {
 async function awaitUnknownValues(): Promise<void> {
     await value;
     await unknownThen;
+    await recursiveThen;
 }
