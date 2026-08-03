@@ -104,7 +104,7 @@ impl Rule for NoUnsafeTypeAssertion {
                 "Type assertions bypass TypeScript's type checking and can cause runtime errors."
             })
             .note(markup! {
-                "I suggest using a type annotation, the "<Emphasis>"satisfies"</Emphasis>" operator, a type guard, or control-flow narrowing instead."
+                "Use a type annotation, the "<Emphasis>"satisfies"</Emphasis>" operator, a type guard, or control-flow narrowing instead."
             }),
         )
     }
