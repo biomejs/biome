@@ -35,6 +35,19 @@ declare_lint_rule! {
     /// <></>
     /// ```
     ///
+    /// A fragment used as an attribute value is reported as well:
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <Component prop={<><div /></>} />
+    /// ```
+    ///
+    /// No code fix is offered when such a fragment holds nothing that can take its
+    /// place, since an attribute can't be left without a value:
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <Component prop={<>{}</>} />
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```jsx

@@ -10,5 +10,6 @@ const cases = (
         />
         <Component nested={<><><span /></></>} />
         <Component expression={<>{value}</>} />
+        <Component emptyExpression={<>{}</>} />
     </>
 );
