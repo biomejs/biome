@@ -1,7 +1,7 @@
 use crate::data::{
-    PropertySyntax, PropertySyntaxComponent, PropertySyntaxComponentName, PropertySyntaxDiagnostic,
-    PropertySyntaxErrorKind, PropertySyntaxMultiplier, PropertySyntaxParseDiagnostic,
-    PropertySyntaxResult, PropertySyntaxType, RESERVED_CUSTOM_IDENTIFIERS,
+    PropertySyntax, PropertySyntaxComponent, PropertySyntaxComponentName, PropertySyntaxErrorKind,
+    PropertySyntaxMultiplier, PropertySyntaxParseDiagnostic, PropertySyntaxResult,
+    PropertySyntaxType, RESERVED_CUSTOM_IDENTIFIERS,
 };
 use biome_css_syntax::{CssString, is_css_newline_byte, is_css_whitespace_byte};
 use biome_rowan::{AstNode, TextRange, TextSize};
@@ -27,7 +27,7 @@ pub fn encode(string: &CssString) -> PropertySyntaxResult {
 
     match Encoder::new(DecodedCursor::new_css_string(value.text(), source_start)).encode() {
         Ok(value) => PropertySyntaxResult::Value(value),
-        Err(diagnostic) => PropertySyntaxResult::Error(PropertySyntaxDiagnostic::Parse(diagnostic)),
+        Err(diagnostic) => PropertySyntaxResult::Error(diagnostic),
     }
 }
 
@@ -35,13 +35,14 @@ pub fn encode(string: &CssString) -> PropertySyntaxResult {
 pub(crate) fn encode_decoded(value: &str, range: TextRange) -> PropertySyntaxResult {
     match Encoder::new(DecodedCursor::new(value, range.start())).encode() {
         Ok(value) => PropertySyntaxResult::Value(value),
-        Err(diagnostic) => PropertySyntaxResult::Error(PropertySyntaxDiagnostic::Parse(diagnostic)),
+        Err(diagnostic) => PropertySyntaxResult::Error(diagnostic),
     }
 }
 
 fn invalid_css_string(range: TextRange) -> PropertySyntaxResult {
-    PropertySyntaxResult::Error(PropertySyntaxDiagnostic::Parse(
-        PropertySyntaxParseDiagnostic::new(PropertySyntaxErrorKind::ExpectedString, range),
+    PropertySyntaxResult::Error(PropertySyntaxParseDiagnostic::new(
+        PropertySyntaxErrorKind::ExpectedString,
+        range,
     ))
 }
 
@@ -619,7 +620,7 @@ mod tests {
         }
     }
 
-    fn encode_error(value: &str) -> PropertySyntaxDiagnostic {
+    fn encode_error(value: &str) -> PropertySyntaxParseDiagnostic {
         match encode_decoded(
             value,
             TextRange::new(10.into(), (10 + value.len() as u32).into()),

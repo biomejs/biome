@@ -355,6 +355,7 @@ dependencies = [
  "biome_module_graph",
  "biome_plugin_loader",
  "biome_project_layout",
+ "biome_property_codec",
  "biome_rowan",
  "biome_rule_options",
  "biome_string_case",

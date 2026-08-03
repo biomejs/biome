@@ -8,6 +8,7 @@ use biome_analyze_macros::RuleSourceVariantIndex;
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::location::AsSpan;
+use biome_diagnostics::serde::Advices as SerializableAdvices;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
     Visit,
@@ -1611,6 +1612,10 @@ impl Advices for RuleDiagnostic {
             visitor.record_list(&list)?;
         }
 
+        for advices in &self.rule_advice.parent_advices {
+            advices.record(visitor)?;
+        }
+
         Ok(())
     }
 }
@@ -1621,6 +1626,8 @@ pub struct RuleAdvice {
     pub(crate) details: Vec<Detail>,
     pub(crate) notes: Vec<(LogCategory, MarkupBuf)>,
     pub(crate) suggestion_list: Option<SuggestionList>,
+    /// Advices provided by other diagnostics
+    pub(crate) parent_advices: Vec<SerializableAdvices>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -1655,6 +1662,9 @@ impl RuleDiagnostic {
 
     pub(crate) fn set_advice_offset(&mut self, offset: TextSize) {
         self.advice_offset = Some(offset);
+        for advices in &mut self.rule_advice.parent_advices {
+            advices.offset_by(offset);
+        }
     }
 
     /// Marks this diagnostic as deprecated code, which will
@@ -1711,6 +1721,14 @@ impl RuleDiagnostic {
     /// Adds a footer to this [`RuleDiagnostic`], with the `Info` log category.
     pub fn note(self, msg: impl Display) -> Self {
         self.footer(LogCategory::Info, msg)
+    }
+
+    /// Attaches advice emitted by `advices`.
+    pub fn with_advices(mut self, advices: impl Advices) -> Self {
+        self.rule_advice
+            .parent_advices
+            .push(SerializableAdvices::new(&advices));
+        self
     }
 
     /// It creates a new footer note which contains a message and a list of possible suggestions.

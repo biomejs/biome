@@ -1050,9 +1050,9 @@ impl CssGlobalCustomVariable {
     }
 
     /// Returns the semantic data for the `@property` rule, if present.
-    pub fn at_property(&self) -> Option<CssPropertyAtRule> {
+    pub fn at_property(&self) -> Option<CustomProperty> {
         let index = *self.data.last_at_property_by_name.get(&self.name)?;
-        Some(CssPropertyAtRule {
+        Some(CustomProperty {
             data: self.data.clone(),
             index,
         })
@@ -1064,12 +1064,12 @@ impl CssGlobalCustomVariable {
 /// This view represents the authored rule even when its descriptors do not
 /// form a valid browser registration.
 #[derive(Debug, Clone)]
-pub struct CssPropertyAtRule {
+pub struct CustomProperty {
     data: Arc<SemanticModelData>,
     index: usize,
 }
 
-impl CssPropertyAtRule {
+impl CustomProperty {
     fn value(&self) -> &CssPropertyAtRuleData {
         // SAFETY: Instances are created only from indices stored by the semantic model builder.
         &self.data.at_property_rules[self.index]
@@ -1152,7 +1152,7 @@ impl<'a> GlobalCustomVariables<'a> {
     ///
     /// Each custom-property name occurs at most once. When a name is authored
     /// multiple times, only its last rule is returned.
-    pub fn at_properties(&self) -> impl Iterator<Item = CssPropertyAtRule> + '_ {
+    pub fn at_properties(&self) -> impl Iterator<Item = CustomProperty> + '_ {
         self.data
             .at_property_rules
             .iter()
@@ -1163,7 +1163,7 @@ impl<'a> GlobalCustomVariables<'a> {
                     .get(&rule.name)
                     .is_some_and(|last| last == index)
             })
-            .map(|(index, _)| CssPropertyAtRule {
+            .map(|(index, _)| CustomProperty {
                 data: self.data.clone(),
                 index,
             })
