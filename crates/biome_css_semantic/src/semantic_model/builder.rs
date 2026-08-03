@@ -279,16 +279,20 @@ impl SemanticModelBuilder {
                         .entry(property_name.clone())
                         .or_default();
                     let index = self.at_property_rules.len();
-                    self.at_property_rules.push(CssPropertyAtRuleData {
+                    let rule = CssPropertyAtRuleData {
                         name: property_name.clone(),
                         property: AstPtr::new(&property),
                         initial_value,
                         syntax,
                         inherits,
                         range,
-                    });
+                    };
+                    let is_registration_candidate = rule.is_registration_candidate(&self.root);
+                    self.at_property_rules.push(rule);
                     self.at_property_by_range.insert(range, index);
-                    self.last_at_property_by_name.insert(property_name, index);
+                    if is_registration_candidate {
+                        self.last_at_property_by_name.insert(property_name, index);
+                    }
                 }
             }
         }

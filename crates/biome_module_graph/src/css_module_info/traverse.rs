@@ -7,8 +7,7 @@ use biome_css_semantic::db::{
     css_property_definitions_from_snippet, css_property_definitions_from_source,
 };
 use biome_fs::normalize_path;
-use biome_languages::CssFileSource;
-use biome_rowan::{TextRange, TokenText};
+use biome_rowan::{TextRange, TextSize, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexMap;
 use rustc_hash::FxHashSet;
@@ -167,6 +166,17 @@ struct CssPropertyBranchNode {
     parent: Option<Rc<Self>>,
 }
 
+/// One definition or import positioned in an HTML-like document.
+struct HtmlPropertyContext {
+    position: TextSize,
+    kind: HtmlPropertyContextKind,
+}
+
+enum HtmlPropertyContextKind {
+    Definition(CssPropertyDefinition),
+    Import(Utf8PathBuf),
+}
+
 impl CssPropertyBranch {
     /// Starts a branch with `path` as its first visited module.
     pub(crate) fn new(path: Utf8PathBuf) -> Self {
@@ -257,22 +267,20 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
     }
 
     /// Returns the last visible definition in an HTML-like document.
-    ///
-    /// Embedded styles take precedence over linked stylesheets and imports.
     pub(crate) fn last_property_in_html_context(
         &self,
         path: &Utf8Path,
     ) -> Option<CssPropertyDefinition> {
-        self.local_html_property_definition(path).or_else(|| {
-            let info = self.db.html_module_info_for_path(path)?;
-            let branch = CssPropertyBranch::new(path.to_path_buf());
-            info.imported_stylesheets
-                .iter()
-                .chain(info.import_paths.iter())
-                .rev()
-                .filter_map(|import| import.as_path())
-                .find_map(|path| self.last_property_in_css_context_from(path, branch.clone()))
-        })
+        let branch = CssPropertyBranch::new(path.to_path_buf());
+        self.html_property_contexts(path, false)
+            .into_iter()
+            .rev()
+            .find_map(|context| match context.kind {
+                HtmlPropertyContextKind::Definition(definition) => Some(definition),
+                HtmlPropertyContextKind::Import(path) => {
+                    self.last_property_in_css_context_from(&path, branch.clone())
+                }
+            })
     }
 
     /// Returns the last visible definition imported by a JavaScript module.
@@ -348,51 +356,113 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
     }
 
     fn local_property_definition(&self, path: &Utf8Path) -> Option<CssPropertyDefinition> {
+        self.local_property_definition_before(path, None)
+    }
+
+    fn local_property_definition_before(
+        &self,
+        path: &Utf8Path,
+        before: Option<TextSize>,
+    ) -> Option<CssPropertyDefinition> {
         self.db.css_module_info_for_path(path)?;
         let parsed = self.db.parsed_source_for_path(path)?;
         let definition = css_property_definitions_from_source(self.db, parsed)
             .iter()
-            .find(|definition| definition.name() == self.name)?;
+            .rev()
+            .find(|definition| {
+                definition.name() == self.name
+                    && before.is_none_or(|before| definition.range().start() < before)
+            })?;
         Some(CssPropertyDefinition {
             module_path: normalize_path(path),
             range: definition.range(),
         })
     }
 
-    fn local_html_property_definition(&self, path: &Utf8Path) -> Option<CssPropertyDefinition> {
-        self.find_local_html_property_definition(path, |_| true)
-    }
-
-    fn global_html_property_definition(&self, path: &Utf8Path) -> Option<CssPropertyDefinition> {
-        self.find_local_html_property_definition(path, |source| {
-            source.embedding_applicability().is_global()
-        })
-    }
-
-    fn find_local_html_property_definition(
+    fn html_property_contexts(
         &self,
         path: &Utf8Path,
-        includes: impl Fn(CssFileSource) -> bool,
-    ) -> Option<CssPropertyDefinition> {
-        self.db.html_module_info_for_path(path)?;
-        let source = self.db.parsed_source_for_path(path)?;
-        source.snippets(self.db).iter().rev().find_map(|snippet| {
-            let file_source = self
-                .db
-                .source_from_index(snippet.document_source_index(self.db))?
-                .to_css_file_source()?;
-            if !includes(file_source) {
-                return None;
-            }
-
-            let definition = css_property_definitions_from_snippet(self.db, *snippet)
-                .iter()
-                .find(|definition| definition.name() == self.name)?;
-            Some(CssPropertyDefinition {
-                module_path: normalize_path(path),
-                range: definition.range() + snippet.content_offset(self.db),
+        only_global: bool,
+    ) -> Vec<HtmlPropertyContext> {
+        let Some(info) = self.db.html_module_info_for_path(path) else {
+            return Vec::new();
+        };
+        let mut contexts = info
+            .imported_stylesheets
+            .iter()
+            .chain(info.import_paths.iter())
+            .filter(|import| !only_global || import.applicability.is_global())
+            .filter_map(|import| {
+                Some(HtmlPropertyContext {
+                    position: import.range.start(),
+                    kind: HtmlPropertyContextKind::Import(import.as_path()?.to_path_buf()),
+                })
             })
-        })
+            .collect::<Vec<_>>();
+
+        if let Some(source) = self.db.parsed_source_for_path(path) {
+            for snippet in source.snippets(self.db) {
+                let Some(file_source) = self
+                    .db
+                    .source_from_index(snippet.document_source_index(self.db))
+                    .and_then(|source| source.to_css_file_source())
+                else {
+                    continue;
+                };
+                if only_global && !file_source.embedding_applicability().is_global() {
+                    continue;
+                }
+                contexts.extend(
+                    css_property_definitions_from_snippet(self.db, *snippet)
+                        .iter()
+                        .filter(|definition| definition.name() == self.name)
+                        .map(|definition| {
+                            // Parsed snippet trees exclude their parser base offset.
+                            let range = definition.range() + snippet.content_offset(self.db);
+                            HtmlPropertyContext {
+                                position: range.start(),
+                                kind: HtmlPropertyContextKind::Definition(CssPropertyDefinition {
+                                    module_path: normalize_path(path),
+                                    range,
+                                }),
+                            }
+                        }),
+                );
+            }
+        }
+
+        contexts.sort_by_key(|context| context.position);
+        contexts
+    }
+
+    fn actions_for_html_imports(
+        &mut self,
+        imported_path: &Utf8Path,
+        importer_path: &Utf8Path,
+        next_branch: CssPropertyBranch,
+    ) -> Vec<UpwardTraversalAction<CssPropertyDefinition, CssPropertyBranch>> {
+        let contexts = self.html_property_contexts(importer_path, true);
+        contexts
+            .iter()
+            .enumerate()
+            .filter(|(_, context)| {
+                matches!(
+                    &context.kind,
+                    HtmlPropertyContextKind::Import(path) if path == imported_path
+                )
+            })
+            .map(|(child_index, _)| {
+                let definition = contexts.iter().take(child_index).rev().find_map(|context| {
+                    match &context.kind {
+                        HtmlPropertyContextKind::Definition(definition) => Some(definition.clone()),
+                        HtmlPropertyContextKind::Import(path) => {
+                            self.last_property_in_css_context_from(path, next_branch.clone())
+                        }
+                    }
+                });
+                self.action(definition, next_branch.clone())
+            })
+            .collect()
     }
 }
 
@@ -417,9 +487,8 @@ impl UpwardTraversalVisitor for CssPropertyTraversal<'_, '_> {
     /// Resolves the definition visible from each import of `imported_path`.
     ///
     /// CSS importers prefer their local definition, then preceding sibling
-    /// imports. HTML importers prefer definitions from globally applicable
-    /// embedded styles, then preceding CSS contexts. JavaScript importers search
-    /// preceding CSS contexts.
+    /// imports. HTML and JavaScript importers search preceding CSS contexts in
+    /// document order; only globally applicable embedded styles escape an HTML importer.
     fn visit_importer(
         &mut self,
         imported_path: &Utf8Path,
@@ -436,7 +505,10 @@ impl UpwardTraversalVisitor for CssPropertyTraversal<'_, '_> {
                 .iter()
                 .filter(|import| import.resolved_path.as_path() == Some(imported_path))
                 .map(|child_import| {
-                    let local_definition = self.local_property_definition(importer_path);
+                    let local_definition = self.local_property_definition_before(
+                        importer_path,
+                        Some(child_import.range.start()),
+                    );
                     let definition = local_definition.or_else(|| {
                         self.last_property_in_imports_before(
                             &info,
@@ -453,20 +525,8 @@ impl UpwardTraversalVisitor for CssPropertyTraversal<'_, '_> {
                     .collect::<Vec<_>>();
                 self.actions_for_ordered_imports(imported_path, &imports, next_branch, None)
             }
-            ModuleInfoKind::Html(info) => {
-                let local_definition = self.global_html_property_definition(importer_path);
-                let imports = info
-                    .imported_stylesheets
-                    .iter()
-                    .chain(info.import_paths.iter())
-                    .filter_map(|import| import.as_path())
-                    .collect::<Vec<_>>();
-                self.actions_for_ordered_imports(
-                    imported_path,
-                    &imports,
-                    next_branch,
-                    local_definition,
-                )
+            ModuleInfoKind::Html(_) => {
+                self.actions_for_html_imports(imported_path, importer_path, next_branch)
             }
         }
     }

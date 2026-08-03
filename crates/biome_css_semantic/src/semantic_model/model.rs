@@ -3,9 +3,8 @@ use biome_css_syntax::{
     CssContainerAtRule, CssCustomPropertyValue, CssDashedIdentifier, CssDeclaration,
     CssGenericComponentValueList, CssIdentifier, CssMediaAtRule, CssNestedQualifiedRule,
     CssQualifiedRule, CssScopeAtRule, CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind,
-    CssSyntaxNode, CssSyntaxToken, ScssExpression, ScssPartialCombinatorSelector,
+    CssSyntaxNode, CssSyntaxToken, ScssExpression, ScssPartialCombinatorSelector, property_syntax::PropertySyntaxResult,
 };
-use biome_property_codec::PropertySyntaxResult;
 use biome_rowan::{
     AstNode, AstNodeList, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, TextRange,
     TextSize, TokenText, declare_node_union,
@@ -126,7 +125,7 @@ pub(crate) struct SemanticModelData {
     pub(crate) at_property_rules: Vec<CssPropertyAtRuleData>,
     /// Maps each authored `@property` rule range to its index.
     pub(crate) at_property_by_range: FxHashMap<TextRange, usize>,
-    /// The effective `@property` rule for each name.
+    /// The last `@property` rule with the required registration descriptors for each name.
     ///
     /// Each value indexes the last matching declaration in
     /// [`Self::at_property_rules`].
@@ -1010,6 +1009,25 @@ impl CssGlobalCustomVariableData {
 }
 
 impl CssPropertyAtRuleData {
+    /// Returns whether the rule's descriptors form a registration candidate.
+    pub(crate) fn is_registration_candidate(&self, root: &AnyCssRoot) -> bool {
+        let Some(syntax) = self.syntax.as_valid() else {
+            return false;
+        };
+        if self.inherits.is_none() {
+            return false;
+        }
+        if syntax.is_universal() {
+            return true;
+        }
+        let Some(CssPropertyInitialValueKind::GenericComponent(initial_value)) =
+            &self.initial_value
+        else {
+            return false;
+        };
+        syntax.matches_initial_value(&initial_value.to_node(root.syntax()))
+    }
+
     fn semantic_eq(&self, other: &Self, self_root: &AnyCssRoot, other_root: &AnyCssRoot) -> bool {
         self.name == other.name
             && self.inherits == other.inherits
@@ -1132,6 +1150,22 @@ pub struct GlobalCustomVariables<'a> {
 }
 
 impl<'a> GlobalCustomVariables<'a> {
+    /// Returns every authored registration candidate in source order.
+    pub(crate) fn at_property_registration_candidates(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = CustomProperty> + '_ {
+        let root = self.data.root();
+        self.data
+            .at_property_rules
+            .iter()
+            .enumerate()
+            .filter(move |(_, rule)| rule.is_registration_candidate(&root))
+            .map(|(index, _)| CustomProperty {
+                data: self.data.clone(),
+                index,
+            })
+    }
+
     /// Returns whether a custom property with `name` is present.
     pub fn contains_key(&self, name: impl AsRef<str>) -> bool {
         self.data
@@ -1161,10 +1195,11 @@ impl<'a> GlobalCustomVariables<'a> {
         })
     }
 
-    /// Returns effective `@property` rules in the source order of their last definitions.
+    /// Returns `@property` registration candidates in the source order of their last valid
+    /// descriptor sets.
     ///
     /// Each custom-property name occurs at most once. When a name is authored
-    /// multiple times, only its last rule is returned.
+    /// multiple times, only its last rule with all required descriptors is returned.
     pub fn at_properties(&self) -> impl Iterator<Item = CustomProperty> + '_ {
         self.data
             .at_property_rules

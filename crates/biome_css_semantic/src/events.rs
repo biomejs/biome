@@ -1,11 +1,12 @@
 use biome_css_syntax::{
     AnyCssDashedIdentifier, AnyCssDeclarationName, AnyCssGenericComponentValue,
     AnyCssGenericPropertyValueOrExpression, AnyCssProperty, AnyCssRelativeSelector, AnyCssSelector,
-    AnyCssValue, CssDashedIdentifier, CssDeclaration, CssPropertyAtRule, CssSyntaxKind::*,
-};
-use biome_property_codec::{
-    PropertySyntaxErrorKind, PropertySyntaxParseDiagnostic, PropertySyntaxResult,
-    decode_css_identifier, encode,
+    AnyCssValue, CssDashedIdentifier, CssDeclaration, CssPropertyAtRule,
+    CssSyntaxKind::*,
+    decode_css_identifier,
+    property_syntax::{
+        PropertySyntaxErrorKind, PropertySyntaxParseDiagnostic, PropertySyntaxResult, encode,
+    },
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxNodeOptionExt, TextRange};
 use std::collections::VecDeque;
