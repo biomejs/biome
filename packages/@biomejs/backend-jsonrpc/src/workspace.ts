@@ -2577,6 +2577,11 @@ See https://biomejs.dev/linter/rules/no-unsafe-plus-operands
 	 */
 	noUnsafePlusOperands?: NoUnsafePlusOperandsConfiguration;
 	/**
+	* Succinct description of the rule.
+See https://biomejs.dev/linter/rules/no-unsafe-type-assertion 
+	 */
+	noUnsafeTypeAssertion?: NoUnsafeTypeAssertionConfiguration;
+	/**
 	* Disallow dependencies with untrusted licenses.
 See https://biomejs.dev/linter/rules/no-untrusted-licenses 
 	 */
@@ -4787,6 +4792,9 @@ export type NoUnnecessaryTemplateExpressionConfiguration =
 export type NoUnsafePlusOperandsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafePlusOperandsOptions;
+export type NoUnsafeTypeAssertionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnsafeTypeAssertionOptions;
 export type NoUntrustedLicensesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUntrustedLicensesOptions;
@@ -6692,6 +6700,10 @@ export interface RuleWithNoUnsafePlusOperandsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnsafePlusOperandsOptions;
 }
+export interface RuleWithNoUnsafeTypeAssertionOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnsafeTypeAssertionOptions;
+}
 export interface RuleWithNoUntrustedLicensesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUntrustedLicensesOptions;
@@ -8433,6 +8445,7 @@ export type NoTopLevelLiteralsOptions = {};
 export type NoUndeclaredClassesOptions = {};
 export type NoUnnecessaryTemplateExpressionOptions = {};
 export type NoUnsafePlusOperandsOptions = {};
+export type NoUnsafeTypeAssertionOptions = {};
 export interface NoUntrustedLicensesOptions {
 	/**
 	* Additional license identifiers to trust, beyond valid SPDX identifiers.
@@ -9858,6 +9871,7 @@ export type Category =
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUnnecessaryTemplateExpression"
 	| "lint/nursery/noUnsafePlusOperands"
+	| "lint/nursery/noUnsafeTypeAssertion"
 	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUnwantedPolyfillio"

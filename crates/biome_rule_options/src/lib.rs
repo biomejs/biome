@@ -280,6 +280,7 @@ pub mod no_unsafe_finally;
 pub mod no_unsafe_negation;
 pub mod no_unsafe_optional_chaining;
 pub mod no_unsafe_plus_operands;
+pub mod no_unsafe_type_assertion;
 pub mod no_untrusted_licenses;
 pub mod no_unused_classes;
 pub mod no_unused_expressions;
