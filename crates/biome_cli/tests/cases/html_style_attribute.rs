@@ -5,25 +5,30 @@ use biome_fs::MemoryFileSystem;
 use bpaf::Args;
 use camino::Utf8Path;
 
-const CONFIG: &str = r#"{ "html": { "formatter": { "enabled": true } } }"#;
+const LINTER_CONFIG: &str =
+    r#"{ "html": { "linter": { "enabled": true }, "experimentalFullSupportEnabled": true } }"#;
 
-/// The value of a `style` attribute is CSS, so it is formatted as a list of
-/// declarations. It stays on the tag's line while it fits, and breaks onto its
-/// own lines once it does not.
 #[test]
-fn formats_style_attribute_as_css() {
+fn lints_dom_style_attributes_as_css() {
     let mut console = BufferConsole::default();
     let fs = MemoryFileSystem::default();
 
     let config = Utf8Path::new("biome.json");
-    fs.insert(config.into(), CONFIG.as_bytes());
+    fs.insert(config.into(), LINTER_CONFIG.as_bytes());
 
-    let file = Utf8Path::new("index.html");
+    let html_file = Utf8Path::new("index.html");
     fs.insert(
-        file.into(),
-        r#"<div style="color:#fFf;  background:red"></div>
-<div style='color:red'></div>
-<div style="all: initial;display:block;contain:content;text-align:center;max-width:500px;margin:0 auto"></div>
+        html_file.into(),
+        r#"<div style="colr: blue"></div>
+<my-element style="colr: blue"></my-element>
+"#
+        .as_bytes(),
+    );
+
+    let vue_file = Utf8Path::new("component.vue");
+    fs.insert(
+        vue_file.into(),
+        r#"<template><Button style="colr: blue" /></template>
 "#
         .as_bytes(),
     );
@@ -31,38 +36,40 @@ fn formats_style_attribute_as_css() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", file.as_str()].as_slice()),
+        Args::from(["lint", html_file.as_str(), vue_file.as_str()].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "formats_style_attribute_as_css",
+        "lints_dom_style_attributes_as_css",
         fs,
         console,
         result,
     ));
 }
 
-/// A value that is not a list of declarations is left exactly as written: a
-/// prop that happens to be called `style`, an interpolation, or nothing at all.
 #[test]
-fn leaves_non_css_style_attributes_alone() {
+fn does_not_lint_component_style_props_as_css() {
     let mut console = BufferConsole::default();
     let fs = MemoryFileSystem::default();
 
     let config = Utf8Path::new("biome.json");
-    fs.insert(config.into(), CONFIG.as_bytes());
+    fs.insert(config.into(), LINTER_CONFIG.as_bytes());
 
-    let file = Utf8Path::new("index.html");
+    let svelte_file = Utf8Path::new("component.svelte");
     fs.insert(
-        file.into(),
-        r#"<div style="{{ dynamic }}"></div>
-<div style="primary"></div>
-<div style=""></div>
-<div style="   "></div>
-<div style></div>
+        svelte_file.into(),
+        r#"<Button style="colr: blue" />
+"#
+        .as_bytes(),
+    );
+
+    let astro_file = Utf8Path::new("component.astro");
+    fs.insert(
+        astro_file.into(),
+        r#"<Button style="colr: blue" />
 "#
         .as_bytes(),
     );
@@ -70,14 +77,14 @@ fn leaves_non_css_style_attributes_alone() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", file.as_str()].as_slice()),
+        Args::from(["lint", svelte_file.as_str(), astro_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "leaves_non_css_style_attributes_alone",
+        "does_not_lint_component_style_props_as_css",
         fs,
         console,
         result,

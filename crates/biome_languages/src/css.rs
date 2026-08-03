@@ -14,8 +14,7 @@ pub enum CssEmbeddingKind {
     Html(EmbeddingHtmlKind),
 
     /// The value of a `style` attribute, which is a list of declarations
-    /// rather than a stylesheet, and which is printed on the attribute's own
-    /// line rather than as a block.
+    /// rather than a stylesheet.
     HtmlStyleAttribute,
 
     #[default]

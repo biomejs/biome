@@ -16,7 +16,6 @@ use comments::HtmlCommentStyle;
 use context::HtmlFormatContext;
 pub use context::HtmlFormatOptions;
 use cst::FormatHtmlSyntaxNode;
-use std::rc::Rc;
 
 mod angular;
 mod astro;
@@ -42,23 +41,9 @@ pub fn format_node(
     root: &HtmlSyntaxNode,
     delegate_fmt_embedded_nodes: bool,
 ) -> FormatResult<Formatted<HtmlFormatContext>> {
-    format_node_with_embedded_ranges(options, root, delegate_fmt_embedded_nodes, Rc::from([]))
-}
-
-/// Formats `root`, leaving a hole at each of `embedded_node_ranges` for
-/// another formatter to fill.
-///
-/// A hole nothing fills prints as nothing, so a range only belongs here once
-/// its content has actually been parsed.
-pub fn format_node_with_embedded_ranges(
-    options: HtmlFormatOptions,
-    root: &HtmlSyntaxNode,
-    delegate_fmt_embedded_nodes: bool,
-    embedded_node_ranges: Rc<[TextRange]>,
-) -> FormatResult<Formatted<HtmlFormatContext>> {
     biome_formatter::format_node(
         root,
-        HtmlFormatLanguage::new(options).with_embedded_node_ranges(embedded_node_ranges),
+        HtmlFormatLanguage::new(options),
         delegate_fmt_embedded_nodes,
     )
 }
@@ -162,20 +147,11 @@ where
 #[derive(Debug, Clone)]
 pub struct HtmlFormatLanguage {
     options: HtmlFormatOptions,
-    embedded_node_ranges: Rc<[TextRange]>,
 }
 
 impl HtmlFormatLanguage {
     pub fn new(options: HtmlFormatOptions) -> Self {
-        Self {
-            options,
-            embedded_node_ranges: Rc::from([]),
-        }
-    }
-
-    pub fn with_embedded_node_ranges(mut self, ranges: Rc<[TextRange]>) -> Self {
-        self.embedded_node_ranges = ranges;
-        self
+        Self { options }
     }
 }
 
@@ -195,9 +171,7 @@ impl FormatLanguage for HtmlFormatLanguage {
         delegate_fmt_embedded_nodes: bool,
     ) -> Self::Context {
         let comments = Comments::from_node(root, &HtmlCommentStyle, source_map.as_ref());
-        let context = HtmlFormatContext::new(self.options, comments)
-            .with_source_map(source_map)
-            .with_embedded_node_ranges(self.embedded_node_ranges);
+        let context = HtmlFormatContext::new(self.options, comments).with_source_map(source_map);
         if delegate_fmt_embedded_nodes {
             context.with_fmt_embedded_nodes()
         } else {
@@ -260,14 +234,10 @@ where
                 state.track_token(&token);
             }
 
-            let format_embedded = format_with(|f| {
-                f.write_elements(vec![
-                    FormatElement::Tag(StartEmbedded(range)),
-                    FormatElement::Tag(EndEmbedded),
-                ])
-            });
-
-            self.fmt_embedded_node(node, &format_embedded, f)?;
+            f.write_elements(vec![
+                FormatElement::Tag(StartEmbedded(range)),
+                FormatElement::Tag(EndEmbedded),
+            ])?;
         } else {
             self.fmt_fields(node, f)?;
         }
@@ -278,18 +248,6 @@ where
     /// If so, the function must return the range of the nodes that will be formatted in the second phase.
     fn embedded_node_range(&self, _node: &N, _f: &mut HtmlFormatter) -> Option<TextRange> {
         None
-    }
-
-    /// Formats the host syntax around the embedded document.
-    ///
-    /// The default implementation replaces the entire node with the embedded document.
-    fn fmt_embedded_node(
-        &self,
-        _node: &N,
-        embedded: &dyn Format<HtmlFormatContext>,
-        f: &mut HtmlFormatter,
-    ) -> FormatResult<()> {
-        embedded.fmt(f)
     }
 
     /// Formats the node's fields.

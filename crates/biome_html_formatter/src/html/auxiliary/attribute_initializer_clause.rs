@@ -4,10 +4,7 @@ use crate::prelude::*;
 use crate::shared::FmtAnyAttributeInitializer;
 use crate::utils::srcset::{FormatSrcsetCandidates, parse_srcset};
 use biome_formatter::{CstFormatContext, FormatRuleWithOptions, write};
-use biome_html_syntax::{
-    AnyHtmlAttributeInitializer, HtmlAttributeInitializerClause,
-    HtmlAttributeInitializerClauseFields,
-};
+use biome_html_syntax::{HtmlAttributeInitializerClause, HtmlAttributeInitializerClauseFields};
 use biome_rowan::TokenText;
 
 #[derive(Debug, Clone, Default)]
@@ -185,20 +182,6 @@ impl FormatNodeRule<HtmlAttributeInitializerClause> for FormatHtmlAttributeIniti
                                     token("\"")
                                 ]
                             )
-                        }
-                        (_, Some(attribute_name))
-                            if attribute_name.eq_ignore_ascii_case("style") =>
-                        {
-                            let content = html_string.inner_string_text()?;
-                            if content.text().trim().is_empty() {
-                                let value_token = html_string.value_token()?;
-                                write!(
-                                    f,
-                                    [fmt_eq_token, format_removed(&value_token), token("\"\"")]
-                                )
-                            } else {
-                                write!(f, [fmt_eq_token, value.format()])
-                            }
                         }
                         _ => {
                             write!(f, [fmt_eq_token, value.format()])

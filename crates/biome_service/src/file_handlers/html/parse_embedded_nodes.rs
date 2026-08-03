@@ -3,7 +3,7 @@ use crate::embed::html::{
     EmbedBlockKind, EmbedCandidate, EmbedDetectorsRegistry, EmbedMatch, GuestLanguage,
     SvelteBlockKind,
 };
-use crate::file_handlers::html::{EmbedParseContext, ParsedEmbed};
+use crate::file_handlers::html::{EmbedParseContext, ParsedEmbed, is_component_element};
 use crate::file_handlers::{DocumentFileSource, ParseEmbedResult, ParseEmbeddedParams};
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
 use biome_css_syntax::{CssLanguage, TextSize};
@@ -398,7 +398,7 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
 
     for element in html_root.syntax().descendants() {
         if let Some(attribute) = HtmlAttribute::cast_ref(&element)
-            && let Some(candidate) = build_attribute_candidate(&attribute)
+            && let Some(candidate) = build_attribute_candidate(&attribute, file_source.variant())
         {
             ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
         }
@@ -771,13 +771,23 @@ fn build_text_expression_candidate(expression: &HtmlTextExpression) -> Option<Em
     })
 }
 
-fn build_attribute_candidate(attribute: &HtmlAttribute) -> Option<EmbedCandidate> {
+fn build_attribute_candidate(
+    attribute: &HtmlAttribute,
+    host_variant: &HtmlVariant,
+) -> Option<EmbedCandidate> {
     let name = attribute
         .name()
         .ok()?
         .value_token()
         .ok()?
         .token_text_trimmed();
+
+    if matches!(host_variant, HtmlVariant::Astro | HtmlVariant::Svelte)
+        && is_component_element(attribute)
+    {
+        return None;
+    }
+
     let value = attribute.initializer()?.value().ok()?;
     let html_string = value.as_html_string()?;
     let value_token = html_string.value_token().ok()?;

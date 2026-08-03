@@ -24,16 +24,6 @@ impl FormatNodeRule<CssDeclarationWithSemicolon> for FormatCssDeclarationWithSem
 
         write!(f, [declaration.format()])?;
 
-        // The last declaration of a `style` attribute only needs its semicolon
-        // once the attribute breaks across lines. Kept on one line, a trailing
-        // `;` is noise the author did not write.
-        if f.options().is_html_style_attribute() && node.syntax().next_sibling().is_none() {
-            if let Some(semicolon) = semicolon_token.as_ref() {
-                write!(f, [format_removed(semicolon)])?;
-            }
-            return write!(f, [if_group_breaks(&token(";"))]);
-        }
-
         match semicolon_token.as_ref() {
             Some(semicolon) => {
                 if preserve_source_gap_before_semicolon
