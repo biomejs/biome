@@ -83,9 +83,6 @@ impl Format<CssFormatContext> for FormatRawScssStringInterpolation<'_> {
     }
 }
 
-/// Returns the raw body of `#{...}` without the interpolation braces.
-///
-/// Example: `#{ get($map, "key") }` returns ` get($map, "key") `.
 fn raw_interpolation_body(interpolation: &ScssInterpolation) -> Option<SyntaxNodeText> {
     let body_range = raw_interpolation_body_range(interpolation)?;
     let raw_start = interpolation.syntax().text_trimmed_range().start();
@@ -96,10 +93,6 @@ fn raw_interpolation_body(interpolation: &ScssInterpolation) -> Option<SyntaxNod
     Some(raw.slice(relative_range))
 }
 
-/// Streams the raw body of `#{...}` inside strings.
-///
-/// Prettier keeps `#{.5 + .6}` raw, but changes `#{".5" + ".6"}` to
-/// `#{"0.5" + "0.6"}`.
 struct FormatRawScssStringInterpolationBody<'a> {
     interpolation: &'a ScssInterpolation,
 }
@@ -125,9 +118,6 @@ impl Format<CssFormatContext> for FormatRawScssStringInterpolationBody<'_> {
     }
 }
 
-/// Returns the source range between interpolation braces.
-///
-/// Example: `#{ get($map) }` returns the range for ` get($map) `.
 fn raw_interpolation_body_range(interpolation: &ScssInterpolation) -> Option<TextRange> {
     let range = interpolation.syntax().text_trimmed_range();
 
@@ -151,9 +141,6 @@ fn format_raw_interpolation_token(
     }
 }
 
-/// Writes one string token in a raw interpolation body.
-///
-/// Example: `#{".5"}` prints the string token as `"0.5"`.
 fn write_raw_string_token(
     token: &CssSyntaxToken,
     range: TextRange,
@@ -182,9 +169,6 @@ fn write_raw_string_token(
     Ok(CssVerbatimTokenFormat::Replacement)
 }
 
-/// Normalizes CSS-like numbers in one raw string token.
-///
-/// Example: `".5px"` becomes `"0.5px"`.
 fn normalize_numbers_in_string_token(raw: &str) -> Cow<'_, str> {
     if has_string_escape(raw) {
         return Cow::Borrowed(raw);
@@ -245,10 +229,6 @@ fn normalize_numbers_in_string_token(raw: &str) -> Cow<'_, str> {
     }
 }
 
-/// Detects CSS escapes inside a raw string token.
-///
-/// Example: `"\\.5"` stays raw because changing `.5` to `0.5` would change the
-/// escaped string value.
 fn has_string_escape(raw: &str) -> bool {
     raw.as_bytes().contains(&b'\\')
 }

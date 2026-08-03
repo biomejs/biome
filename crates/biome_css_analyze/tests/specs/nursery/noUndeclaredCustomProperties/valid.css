@@ -1,6 +1,14 @@
 /* should not generate diagnostics */
 
 :root {
+	--backslash\\61: red;
+}
+
+a {
+	color: var(--backslash\\61);
+}
+
+:root {
 	--root-color: red;
 	--escaped\2d color: green;
 }

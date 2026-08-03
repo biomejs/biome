@@ -11,6 +11,7 @@ impl FormatRule<AnyCssRoot> for FormatAnyCssRoot {
             AnyCssRoot::CssDeclarationSnippetRoot(node) => node.format().fmt(f),
             AnyCssRoot::CssRoot(node) => node.format().fmt(f),
             AnyCssRoot::CssSnippetRoot(node) => node.format().fmt(f),
+            AnyCssRoot::CssValueRoot(node) => node.format().fmt(f),
         }
     }
 }

@@ -145,4 +145,5 @@ pub(crate) mod value_at_rule_declaration_clause;
 pub(crate) mod value_at_rule_import_clause;
 pub(crate) mod value_at_rule_import_specifier;
 pub(crate) mod value_at_rule_named_import_specifier;
+pub(crate) mod value_root;
 pub(crate) mod view_transition_at_rule_declarator;

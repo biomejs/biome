@@ -445,6 +445,15 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
         next_branch: CssPropertyBranch,
     ) -> Vec<UpwardTraversalAction<CssPropertyDefinition, CssPropertyBranch>> {
         let contexts = self.html_property_contexts(importer_path, true);
+        let global_definition = contexts
+            .iter()
+            .rev()
+            .find_map(|context| match &context.kind {
+                HtmlPropertyContextKind::Definition(definition) => Some(definition.clone()),
+                HtmlPropertyContextKind::Import(path) => {
+                    self.last_property_in_css_context_from(path, next_branch.clone())
+                }
+            });
         contexts
             .iter()
             .enumerate()
@@ -455,13 +464,15 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
                 )
             })
             .map(|(child_index, _)| {
-                let definition = contexts.iter().take(child_index).rev().find_map(|context| {
-                    match &context.kind {
-                        HtmlPropertyContextKind::Definition(definition) => Some(definition.clone()),
-                        HtmlPropertyContextKind::Import(path) => {
-                            self.last_property_in_css_context_from(path, next_branch.clone())
+                let definition = global_definition.clone().or_else(|| {
+                    contexts.iter().take(child_index).rev().find_map(|context| {
+                        match &context.kind {
+                            HtmlPropertyContextKind::Definition(_) => None,
+                            HtmlPropertyContextKind::Import(path) => {
+                                self.last_property_in_css_context_from(path, next_branch.clone())
+                            }
                         }
-                    }
+                    })
                 });
                 self.action(definition, next_branch.clone())
             })

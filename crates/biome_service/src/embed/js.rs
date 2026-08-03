@@ -24,12 +24,17 @@ pub(crate) enum EmbedCandidate {
         tag: TemplateTagKind,
         content: EmbedContent,
     },
+    StaticStyleValue {
+        content: EmbedContent,
+    },
 }
 
 impl EmbedCandidate {
     pub fn content(&self) -> EmbedContent {
         match self {
-            Self::TaggedTemplate { content, .. } => content.clone(),
+            Self::TaggedTemplate { content, .. } | Self::StaticStyleValue { content } => {
+                content.clone()
+            }
         }
     }
 }
@@ -77,6 +82,9 @@ enum EmbedDetector {
         object: &'static str,
         target: EmbedTarget,
     },
+    StaticStyleValue {
+        target: EmbedTarget,
+    },
 }
 
 impl EmbedDetector {
@@ -119,6 +127,9 @@ impl EmbedDetector {
                 }
                 _ => None,
             },
+            (Self::StaticStyleValue { target }, EmbedCandidate::StaticStyleValue { .. }) => {
+                target.resolve(candidate, file_source)
+            }
             _ => None,
         }
     }
@@ -140,7 +151,7 @@ impl EmbedTarget {
     }
 }
 
-static JS_DETECTORS: [EmbedDetector; 5] = [
+static JS_DETECTORS: [EmbedDetector; 6] = [
     EmbedDetector::TemplateTag {
         tag: "css",
         target: EmbedTarget::Static(GuestLanguage::Css),
@@ -160,5 +171,8 @@ static JS_DETECTORS: [EmbedDetector; 5] = [
     EmbedDetector::TemplateExpression {
         object: "graphql",
         target: EmbedTarget::Static(GuestLanguage::GraphQL),
+    },
+    EmbedDetector::StaticStyleValue {
+        target: EmbedTarget::Static(GuestLanguage::Css),
     },
 ];

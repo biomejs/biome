@@ -435,7 +435,7 @@ fn pnpm_workspace_update_reapplies_catalogs() {
 #[test]
 fn store_embedded_nodes_with_current_ranges() {
     const FILE_CONTENT: &str = r#"<html>
-    <head>
+    <head style="color: var(--foreground)">
         <style>
             .#id {}
         </style>
@@ -483,7 +483,7 @@ fn store_embedded_nodes_with_current_ranges() {
         })
         .collect();
     assert_eq!(scripts.len(), 1);
-    assert_eq!(styles.len(), 1);
+    assert_eq!(styles.len(), 2);
 
     let script = scripts.first().unwrap();
     let style = styles.first().unwrap();

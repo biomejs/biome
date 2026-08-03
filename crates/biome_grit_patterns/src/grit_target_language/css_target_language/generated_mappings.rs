@@ -314,6 +314,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssValueAtRuleNamedImportSpecifier" => lang::CssValueAtRuleNamedImportSpecifier::KIND_SET
             .iter()
             .next(),
+        "CssValueRoot" => lang::CssValueRoot::KIND_SET.iter().next(),
         "CssViewTransitionAtRule" => lang::CssViewTransitionAtRule::KIND_SET.iter().next(),
         "CssViewTransitionAtRuleDeclarator" => lang::CssViewTransitionAtRuleDeclarator::KIND_SET
             .iter()
@@ -651,6 +652,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "CssValueAtRuleImportClause" => &[("specifiers", 0), ("source", 2)],
         "CssValueAtRuleImportSpecifier" => &[("name", 0)],
         "CssValueAtRuleNamedImportSpecifier" => &[("name", 0), ("local_name", 2)],
+        "CssValueRoot" => &[("items", 0)],
         "CssViewTransitionAtRule" => &[("declarator", 0), ("block", 1)],
         "ScssArbitraryArgument" => &[("value", 0)],
         "ScssAtRootAtRule" => &[("query", 1), ("selector", 2), ("block", 3)],
