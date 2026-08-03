@@ -38,7 +38,7 @@ biome_formatter_test = { path = "../biome_formatter_test", features = ["lang_htm
 biome_fs             = { path = "../biome_fs" }
 biome_html_parser    = { path = "../biome_html_parser" }
 biome_parser         = { path = "../biome_parser" }
-biome_service        = { path = "../biome_service", features = ["lang_html"] }
+biome_service        = { path = "../biome_service", features = ["html_embeds", "lang_html"] }
 biome_test_utils     = { path = "../biome_test_utils", features = ["lang_html"] }
 camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
