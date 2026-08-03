@@ -2,8 +2,7 @@ use crate::model::SemanticModel;
 use crate::semantic_model;
 use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
 use biome_css_syntax::{
-    AnyCssRoot, CssGenericProperty, CssNestedQualifiedRule, CssQualifiedRule,
-    decode_css_identifier,
+    AnyCssRoot, CssGenericProperty, CssNestedQualifiedRule, CssQualifiedRule, decode_css_identifier,
 };
 use biome_db::{AnyParsedSource, Db, ParsedSnippet, ParsedSource};
 use biome_rowan::{AstNode, TextRange, TokenText};
