@@ -2578,6 +2578,11 @@ See https://biomejs.dev/linter/rules/no-undeclared-classes
 	 */
 	noUndeclaredClasses?: NoUndeclaredClassesConfiguration;
 	/**
+	* Reports custom properties used with var() that have no visible definition.
+See https://biomejs.dev/linter/rules/no-undeclared-custom-properties 
+	 */
+	noUndeclaredCustomProperties?: NoUndeclaredCustomPropertiesConfiguration;
+	/**
 	* Disallow unnecessary template expressions.
 See https://biomejs.dev/linter/rules/no-unnecessary-template-expression 
 	 */
@@ -4828,6 +4833,9 @@ export type NoTopLevelLiteralsConfiguration =
 export type NoUndeclaredClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUndeclaredClassesOptions;
+export type NoUndeclaredCustomPropertiesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUndeclaredCustomPropertiesOptions;
 export type NoUnnecessaryTemplateExpressionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryTemplateExpressionOptions;
@@ -6756,6 +6764,10 @@ export interface RuleWithNoUndeclaredClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUndeclaredClassesOptions;
 }
+export interface RuleWithNoUndeclaredCustomPropertiesOptions {
+	level: RulePlainConfiguration;
+	options?: NoUndeclaredCustomPropertiesOptions;
+}
 export interface RuleWithNoUnnecessaryTemplateExpressionOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8531,6 +8543,7 @@ export type NoTopLevelLiteralsOptions = {};
  * Options for the `noUndeclaredClasses` rule.
  */
 export type NoUndeclaredClassesOptions = {};
+export type NoUndeclaredCustomPropertiesOptions = {};
 export type NoUnnecessaryTemplateExpressionOptions = {};
 export type NoUnsafePlusOperandsOptions = {};
 export type NoUnsafeTypeAssertionOptions = {};
@@ -9945,6 +9958,7 @@ export type Category =
 	| "lint/nursery/noIdenticalTestTitle"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImpliedEval"
+	| "lint/nursery/noInconsistentPropertyInitValue"
 	| "lint/nursery/noInlineStyles"
 	| "lint/nursery/noInvalidPropertyInitValue"
 	| "lint/nursery/noJsRestrictedProperties"
@@ -9976,6 +9990,7 @@ export type Category =
 	| "lint/nursery/noTailwindArbitraryValue"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
+	| "lint/nursery/noUndeclaredCustomProperties"
 	| "lint/nursery/noUnnecessaryTemplateExpression"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeTypeAssertion"
