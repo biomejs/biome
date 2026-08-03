@@ -50,8 +50,8 @@ pub(crate) use keyframes::{
 };
 pub(crate) use media::{
     is_at_scss_interpolated_media_in_parens, is_at_scss_media_condition, is_at_scss_media_query,
-    parse_scss_interpolated_media_in_parens, parse_scss_media_condition, parse_scss_media_query,
-    parse_scss_media_query_or_condition_query,
+    parse_scss_interpolated_media_in_parens, parse_scss_media_condition,
+    parse_scss_media_condition_from_query, parse_scss_media_query,
 };
 pub(crate) use mixin_at_rule::parse_scss_mixin_at_rule;
 pub(crate) use query_feature::parse_scss_interpolated_query_feature;

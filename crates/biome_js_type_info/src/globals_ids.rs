@@ -476,6 +476,10 @@ mod tests {
         assert_eq!(
             migrated,
             &[
+                ARRAY_ID_GLOBAL_TYPE_ID,
+                ARRAY_FILTER_ID_GLOBAL_TYPE_ID,
+                ARRAY_FOREACH_ID_GLOBAL_TYPE_ID,
+                ARRAY_MAP_ID_GLOBAL_TYPE_ID,
                 REGEXP_ID_GLOBAL_TYPE_ID,
                 REGEXP_EXEC_ID_GLOBAL_TYPE_ID,
                 SYMBOL_ID_GLOBAL_TYPE_ID,
