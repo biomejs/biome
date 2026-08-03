@@ -5774,6 +5774,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUndeclaredCustomPropertiesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUndeclaredCustomPropertiesOptions" }
+			]
+		},
+		"NoUndeclaredCustomPropertiesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUndeclaredDependenciesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7002,6 +7012,13 @@
 					"description": "Reports CSS class names in HTML class attributes that are not defined in any \\<style> block or linked stylesheet available to the file.\nSee https://biomejs.dev/linter/rules/no-undeclared-classes",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUndeclaredClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUndeclaredCustomProperties": {
+					"description": "Reports custom properties used with var() that have no visible definition.\nSee https://biomejs.dev/linter/rules/no-undeclared-custom-properties",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUndeclaredCustomPropertiesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10416,6 +10433,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUndeclaredClassesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUndeclaredCustomPropertiesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUndeclaredCustomPropertiesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
