@@ -6079,6 +6079,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnsafeTypeAssertionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnsafeTypeAssertionOptions" }
+			]
+		},
+		"NoUnsafeTypeAssertionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUntrustedLicensesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7016,6 +7026,13 @@
 					"description": "Disallow + operations with operands that are known to be unsafe.\nSee https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnsafePlusOperandsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnsafeTypeAssertion": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-unsafe-type-assertion",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnsafeTypeAssertionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10625,6 +10642,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnsafePlusOperandsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnsafeTypeAssertionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnsafeTypeAssertionOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
