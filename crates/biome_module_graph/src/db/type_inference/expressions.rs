@@ -2220,7 +2220,12 @@ impl<'db> ResolutionCtx<'db, '_> {
 
         for _ in 0..MAX_CONDITIONAL_FILTER_STEPS {
             let Some(ty) = pending.pop() else {
-                return collected_type_result(self.db, types);
+                // The filter ran to completion: an empty result here means no
+                // member of the union matched, i.e. the subset is
+                // conclusively empty, not merely indeterminate.
+                return Some(
+                    collected_type_result(self.db, types).unwrap_or(InferredTypeData::NeverKeyword),
+                );
             };
             let ty = self.resolve_inferred_type(ty);
             if !seen.insert(ty) {
