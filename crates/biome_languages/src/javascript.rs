@@ -285,6 +285,13 @@ impl JsEmbeddingKind {
             }
         )
     }
+
+    pub fn as_svelte_embedding_kind(&self) -> Option<&SvelteEmbeddingKind> {
+        match self {
+            Self::Svelte { embedding_kind, .. } => Some(embedding_kind),
+            _ => None,
+        }
+    }
 }
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
