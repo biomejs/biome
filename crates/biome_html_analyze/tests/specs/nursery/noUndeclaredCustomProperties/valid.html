@@ -8,4 +8,6 @@
 <div style="background: var(--custom-bg); content: 'var(--not-a-reference)'"></div>
 <div style="color: var(--escaped-color)"></div>
 <div style="--inline-color: red; color: var(--inline-color)"></div>
+<div style="--escaped-leading: red; color: var(\2d \2d escaped-leading)"></div>
 <div style="--inherited-color: red"><span style="color: var(--inherited-color)"></span></div>
+<div style="--self-closing-color: red"><img style="color: var(--self-closing-color)" /></div>

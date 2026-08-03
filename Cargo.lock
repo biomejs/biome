@@ -877,8 +877,6 @@ dependencies = [
  "biome_aria",
  "biome_aria_metadata",
  "biome_console",
- "biome_css_parser",
- "biome_css_syntax",
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",

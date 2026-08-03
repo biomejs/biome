@@ -311,6 +311,27 @@ pub fn module_graph_for_test_file(
         let css_paths = get_css_like_paths_in_dir(&dir);
         let css_roots = get_css_added_paths(&fs, &css_paths);
         for (path, root) in css_roots {
+            let DocumentFileSource::Css(file_source) =
+                DocumentFileSource::from_path(path.as_path(), false)
+            else {
+                continue;
+            };
+            let content = fs.read_file_from_path(path).expect("CSS test file exists");
+            let options = if file_source.is_css_modules() {
+                CssParserOptions::default().allow_css_modules()
+            } else {
+                CssParserOptions::default()
+            };
+            let parsed = biome_css_parser::parse_css(&content, file_source, options);
+            let source_index = db.insert_source(file_source.into());
+            let parsed_source = ParsedSource::new(
+                &db,
+                path.as_path().to_path_buf(),
+                parsed.into(),
+                source_index,
+                Vec::new(),
+            );
+            db.insert_file(path.as_path(), parsed_source);
             let (module_info, _, _) =
                 resolve_css_module(root, path, &fs, project_layout, &path_info_cache);
             let md = biome_module_graph::ModuleInfo::new(

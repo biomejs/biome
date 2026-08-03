@@ -21,8 +21,6 @@ biome_analyze_macros     = { workspace = true }
 biome_aria               = { workspace = true }
 biome_aria_metadata      = { workspace = true }
 biome_console            = { workspace = true }
-biome_css_parser         = { workspace = true }
-biome_css_syntax         = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }

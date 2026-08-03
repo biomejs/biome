@@ -1,7 +1,7 @@
 use crate::services::module_graph::CssModuleGraph;
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_css_syntax::{CssFunction, decode_css_identifier, property_syntax::custom_property_name_from_var_function};
+use biome_css_syntax::{CssFunction, property_syntax::custom_property_name_from_var_function};
 use biome_module_graph::{SymbolFromModuleInfo, css_property_definitions};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_undeclared_custom_properties::NoUndeclaredCustomPropertiesOptions;
@@ -20,7 +20,7 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```css
+    /// ```css,file=invalid.css
     /// a {
     ///   color: var(--link-color);
     /// }
@@ -28,7 +28,7 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```css
+    /// ```css,file=valid.css
     /// :root {
     ///   --link-color: blue;
     /// }
@@ -56,13 +56,12 @@ impl Rule for NoUndeclaredCustomProperties {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let property = custom_property_name_from_var_function(ctx.query())?;
         let name = property.value_token().ok()?;
-        let name = decode_css_identifier(name.text_trimmed());
         let db = ctx.db();
         let module = db.module_for_path(ctx.file_path())?;
 
         css_property_definitions(
             db,
-            SymbolFromModuleInfo::new(db, name.as_ref(), module),
+            SymbolFromModuleInfo::new(db, name.text_trimmed(), module),
         )
         .is_empty()
         .then(|| property.range())

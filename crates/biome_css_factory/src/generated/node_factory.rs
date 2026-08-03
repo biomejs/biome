@@ -3179,6 +3179,15 @@ pub fn css_value_at_rule_named_import_specifier(
         ],
     ))
 }
+pub fn css_value_root(items: CssGenericComponentValueList, eof_token: SyntaxToken) -> CssValueRoot {
+    CssValueRoot::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VALUE_ROOT,
+        [
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(eof_token)),
+        ],
+    ))
+}
 pub fn css_view_transition_at_rule(
     declarator: CssViewTransitionAtRuleDeclarator,
     block: AnyCssDeclarationBlock,

@@ -17,7 +17,7 @@ pub struct CssPropertyDefinition {
 
 impl CssPropertyDefinition {
     pub fn matches(&self, name: &str) -> bool {
-        decode_css_identifier(self.name.text()).as_ref() == name
+        decode_css_identifier(self.name.text()) == decode_css_identifier(name)
     }
 
     pub fn range(&self) -> TextRange {

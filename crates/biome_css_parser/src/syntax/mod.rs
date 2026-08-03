@@ -17,6 +17,7 @@ use crate::syntax::parse_error::{
     expected_any_rule, expected_any_rule_list_item, expected_non_css_wide_keyword_identifier,
     inconsistent_scss_bracketed_list_separators, scss_only_syntax_error, tailwind_disabled,
 };
+use crate::syntax::property::GenericComponentValueList;
 use crate::syntax::property::color::{is_at_color, parse_color};
 use crate::syntax::property::unicode_range::{is_at_unicode_range, parse_unicode_range};
 use crate::syntax::scss::{
@@ -45,7 +46,7 @@ use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, SyntaxFeature};
+use biome_parser::{Parser, SyntaxFeature, token_set};
 use value::dimension::{is_at_any_dimension, parse_any_dimension};
 
 pub(crate) enum CssSyntaxFeatures {
@@ -100,6 +101,12 @@ pub(crate) fn parse_root(p: &mut CssParser) {
             m.complete(p, CSS_ROOT);
         }
     }
+}
+
+pub(crate) fn parse_value_root(p: &mut CssParser) {
+    let m = p.start();
+    GenericComponentValueList::new(token_set![EOF], token_set![EOF]).parse_list(p);
+    m.complete(p, CSS_VALUE_ROOT);
 }
 
 struct RootItemList;
