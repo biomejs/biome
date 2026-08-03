@@ -108,6 +108,11 @@ fn load_ignored_tests(root_path: &Utf8Path) -> &'static [String] {
     })
 }
 
+/// Formats a whole file the way the workspace does, so that content a host
+/// document holds in another language is formatted by that language's
+/// formatter. See [`PrettierSnapshot::with_embed_formatter`].
+pub type EmbedFormatter<'a> = Box<dyn Fn(&str) -> Result<Printed, String> + 'a>;
+
 pub struct PrettierSnapshot<'a, L>
 where
     L: TestFormatLanguage,
@@ -116,6 +121,7 @@ where
     language: L,
     // options: <L::ServiceLanguage as ServiceLanguage>::FormatOptions,
     format_language: L::FormatLanguage,
+    embed_formatter: Option<EmbedFormatter<'a>>,
 }
 
 enum FormatAttempt {
@@ -151,7 +157,19 @@ where
             test_file,
             language,
             format_language,
+            embed_formatter: None,
         }
+    }
+
+    /// Formats through `formatter` rather than through the language's own
+    /// formatter, which only knows the host language. Prettier formats what a
+    /// `<script>` or a `<style>` holds, so a comparison against it has to as
+    /// well.
+    ///
+    /// Whole files only: a sample that asks for a range keeps the plain path.
+    pub fn with_embed_formatter(mut self, formatter: EmbedFormatter<'a>) -> Self {
+        self.embed_formatter = Some(formatter);
+        self
     }
 
     fn format_for_snapshot(&self, parsed: &AnyParse) -> Option<FormatAttempt> {
@@ -176,35 +194,37 @@ where
         &self,
         syntax: &biome_rowan::SyntaxNode<L::ServiceLanguage>,
     ) -> Option<Result<Printed, PrettierSnapshotError>> {
-        match self.test_file.range() {
-            (Some(start), Some(end)) => self.format_range_once(syntax, start, end),
-            _ => Some(self.format_node_once(syntax)),
-        }
-    }
+        let range = match self.test_file.range() {
+            (Some(start), Some(end)) => {
+                // Skip reversed range tests because TextRange cannot represent them.
+                if end < start {
+                    return None;
+                }
 
-    fn format_range_once(
-        &self,
-        syntax: &biome_rowan::SyntaxNode<L::ServiceLanguage>,
-        start: usize,
-        end: usize,
-    ) -> Option<Result<Printed, PrettierSnapshotError>> {
-        // Skip reversed range tests because TextRange cannot represent them.
-        if end < start {
-            return None;
+                Some(TextRange::new(
+                    TextSize::try_from(start).unwrap(),
+                    TextSize::try_from(end).unwrap(),
+                ))
+            }
+            _ => None,
+        };
+
+        if let Some(format_embedded) = self.embed_formatter.as_ref()
+            && range.is_none()
+        {
+            return Some(
+                format_embedded(self.test_file.parse_input())
+                    .map_err(PrettierSnapshotError::Format),
+            );
         }
 
-        Some(
-            self.language
-                .format_range(
-                    self.format_language.clone(),
-                    syntax,
-                    TextRange::new(
-                        TextSize::try_from(start).unwrap(),
-                        TextSize::try_from(end).unwrap(),
-                    ),
-                )
+        Some(match range {
+            Some(range) => self
+                .language
+                .format_range(self.format_language.clone(), syntax, range)
                 .map_err(|err| PrettierSnapshotError::Format(err.to_string())),
-        )
+            None => self.format_node_once(syntax),
+        })
     }
 
     fn format_node_once(
@@ -264,6 +284,11 @@ where
         syntax: &biome_rowan::SyntaxNode<L::ServiceLanguage>,
         formatted: &str,
     ) -> Result<(), PrettierSnapshotError> {
+        if let Some(format_embedded) = self.embed_formatter.as_ref() {
+            let printed = format_embedded(formatted).map_err(PrettierSnapshotError::Format)?;
+            return Self::verify_embedded_reformat(&printed, formatted);
+        }
+
         let check_reformat = CheckReformat::new(
             syntax,
             formatted,
@@ -275,6 +300,34 @@ where
         check_reformat
             .check_reformat()
             .map_err(PrettierSnapshotError::Reformat)
+    }
+
+    /// The embed-aware counterpart of [`CheckReformat`]. The IR of a document
+    /// holding embedded snippets is assembled by the workspace rather than by a
+    /// single formatter, so there is no second IR to diff against; the printed
+    /// output is all there is to compare.
+    fn verify_embedded_reformat(
+        printed: &Printed,
+        formatted: &str,
+    ) -> Result<(), PrettierSnapshotError> {
+        if printed.as_code() == formatted {
+            return Ok(());
+        }
+
+        let mut output_diff = Vec::new();
+        similar::TextDiff::from_lines(printed.as_code(), formatted)
+            .unified_diff()
+            .header("re-formatted", "formatted")
+            .to_writer(&mut output_diff)
+            .expect("writing a diff to a buffer cannot fail");
+
+        Err(PrettierSnapshotError::Reformat(
+            ReformatError::OutputMismatch {
+                output_diff: String::from_utf8(output_diff)
+                    .expect("the diff of two strings is utf8"),
+                ir_diff: None,
+            },
+        ))
     }
 
     pub fn test(self) {

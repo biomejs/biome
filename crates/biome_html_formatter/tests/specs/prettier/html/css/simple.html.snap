@@ -29,22 +29,26 @@ info: html/css/simple.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -2,16 +2,9 @@
- <html>
+@@ -3,15 +3,15 @@
    <head>
      <title>Sample styled page</title>
--    <style>
+     <style>
 -      a {
 -        color: red;
 -      }
--    </style>
-+    <style>a { color: red; }</style>
++    a {
++      color: red;
++    }
+     </style>
      <style>
 -      body {
 -        background: navy;
 -        color: yellow;
 -      }
-+      body { background: navy; color: yellow; }
++    body {
++      background: navy;
++      color: yellow;
++    }
      </style>
    </head>
    <body>
@@ -57,9 +61,16 @@ info: html/css/simple.html
 <html>
   <head>
     <title>Sample styled page</title>
-    <style>a { color: red; }</style>
     <style>
-      body { background: navy; color: yellow; }
+    a {
+      color: red;
+    }
+    </style>
+    <style>
+    body {
+      background: navy;
+      color: yellow;
+    }
     </style>
   </head>
   <body>

@@ -23,27 +23,42 @@ info: html/css/single-style.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,4 @@
--<style>
+@@ -1,12 +1,12 @@
+ <style>
 -  a {
 -    color: red;
 -  }
--</style>
-+<style>a { color: red; }</style>
++a {
++  color: red;
++}
+ </style>
  <style>
-   h1 {
-     font-size: 120%;
+-  h1 {
+-    font-size: 120%;
+-    font-family: Verdana, Arial, Helvetica, sans-serif;
+-    color: #333366;
+-  }
++h1 {
++  font-size: 120%;
++  font-family: Verdana, Arial, Helvetica, sans-serif;
++  color: #333366;
++}
+ </style>
 ```
 
 # Output
 
 ```html
-<style>a { color: red; }</style>
 <style>
-  h1 {
-    font-size: 120%;
-    font-family: Verdana, Arial, Helvetica, sans-serif;
-    color: #333366;
-  }
+a {
+  color: red;
+}
+</style>
+<style>
+h1 {
+  font-size: 120%;
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  color: #333366;
+}
 </style>
 ```

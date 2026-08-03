@@ -22,13 +22,16 @@ info: html/css/postcss.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,13 +1,7 @@
+@@ -1,13 +1,13 @@
  <style type="text/css">
 -  body {
 -    background: navy;
 -    color: yellow;
 -  }
-+  body { background: navy; color: yellow; }
++body {
++  background: navy;
++  color: yellow;
++}
  </style>
  
  <style lang="postcss">
@@ -36,7 +39,10 @@ info: html/css/postcss.html
 -    background: navy;
 -    color: yellow;
 -  }
-+  body { background: navy; color: yellow; }
++body {
++  background: navy;
++  color: yellow;
++}
  </style>
 ```
 
@@ -44,10 +50,16 @@ info: html/css/postcss.html
 
 ```html
 <style type="text/css">
-  body { background: navy; color: yellow; }
+body {
+  background: navy;
+  color: yellow;
+}
 </style>
 
 <style lang="postcss">
-  body { background: navy; color: yellow; }
+body {
+  background: navy;
+  color: yellow;
+}
 </style>
 ```

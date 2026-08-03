@@ -1,6 +1,5 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 249
 info: html/basics/with-colon.html
 ---
 
@@ -238,60 +237,72 @@ e-wrap </html:textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -206,53 +186,25 @@
+@@ -206,53 +186,49 @@
      </h1>
    </div>
    <script>
 -    const func = function () {
 -      console.log("Hello, there");
 -    };
-+  const func = function() { console.log('Hello, there');}
++  const func = function () {
++    console.log("Hello, there");
++  };
    </script>
  </with:colon>
  
  <!-- script like -->
  <with:colon>
--  <style>
+   <style>
 -    .a {
 -      color: #f00;
 -    }
--  </style>
-+  <style>.a{color:#f00}</style>
++  .a {
++    color: #f00;
++  }
+   </style>
    <script>
 -    const func = function () {
 -      console.log("Hello, there");
 -    };
-+  const func = function() { console.log('Hello, there');}
++  const func = function () {
++    console.log("Hello, there");
++  };
    </script>
--  <style>
+   <style>
 -    .A {
 -      color: #f00;
 -    }
--  </style>
-+  <style>.A{COLOR:#F00}</style>
++  .A {
++    color: #f00;
++  }
+   </style>
    <html:script
      >const func = function() { console.log('Hello, there');}</html:script
    >
 -  <html:style
 -    >.a{color:#f00}</html:style
 -  >
--  <svg>
--    <style>
--      .a {
--        color: #f00;
--      }
--    </style>
--  </svg>
--  <svg>
--    <style>
--      .a {
--        color: #f00;
--      }
--    </style>
--  </svg>
 +  <html:style>.a { color:#f00}</html:style>
-+  <svg><style>.a{color:#f00}</style></svg>
-+  <svg><style>.a{color:#f00}</style></svg>
+   <svg>
+     <style>
+-      .a {
+-        color: #f00;
+-      }
++    .a {
++      color: #f00;
++    }
+     </style>
+   </svg>
+   <svg>
+     <style>
+-      .a {
+-        color: #f00;
+-      }
++    .a {
++      color: #f00;
++    }
+     </style>
+   </svg>
  </with:colon>
  <html:script
    >const func = function() { console.log('Hello, there');}</html:script
@@ -493,23 +504,47 @@ e-wrap </textarea>
     </h1>
   </div>
   <script>
-  const func = function() { console.log('Hello, there');}
+  const func = function () {
+    console.log("Hello, there");
+  };
   </script>
 </with:colon>
 
 <!-- script like -->
 <with:colon>
-  <style>.a{color:#f00}</style>
+  <style>
+  .a {
+    color: #f00;
+  }
+  </style>
   <script>
-  const func = function() { console.log('Hello, there');}
+  const func = function () {
+    console.log("Hello, there");
+  };
   </script>
-  <style>.A{COLOR:#F00}</style>
+  <style>
+  .A {
+    color: #f00;
+  }
+  </style>
   <html:script
     >const func = function() { console.log('Hello, there');}</html:script
   >
   <html:style>.a { color:#f00}</html:style>
-  <svg><style>.a{color:#f00}</style></svg>
-  <svg><style>.a{color:#f00}</style></svg>
+  <svg>
+    <style>
+    .a {
+      color: #f00;
+    }
+    </style>
+  </svg>
+  <svg>
+    <style>
+    .a {
+      color: #f00;
+    }
+    </style>
+  </svg>
 </with:colon>
 <html:script
   >const func = function() { console.log('Hello, there');}</html:script

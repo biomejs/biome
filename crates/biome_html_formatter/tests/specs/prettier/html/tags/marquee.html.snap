@@ -27,12 +27,9 @@ info: html/tags/marquee.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -7,7 +7,7 @@
-   width="250"
-   height="200"
+@@ -9,5 +9,5 @@
    behavior="alternate"
--  style="border: solid"
-+  style="border:solid"
+   style="border: solid"
  >
 -  <marquee behavior="alternate">This text will bounce</marquee>
 +  <marquee behavior="alternate"> This text will bounce </marquee>
@@ -51,7 +48,7 @@ info: html/tags/marquee.html
   width="250"
   height="200"
   behavior="alternate"
-  style="border:solid"
+  style="border: solid"
 >
   <marquee behavior="alternate"> This text will bounce </marquee>
 </marquee>

@@ -47,14 +47,13 @@ info: vue/html-vue/hello-world.html
 -          message: "Hello Vue!",
 -        },
 -      });
--    </script>
 +    var app = new Vue({
-+      el: '#app',
++      el: "#app",
 +      data: {
-+        message: 'Hello Vue!'
-+      }
-+    })
-+  </script>
++        message: "Hello Vue!",
++      },
++    });
+     </script>
    </body>
  </html>
 ```
@@ -76,12 +75,12 @@ info: vue/html-vue/hello-world.html
 
     <script>
     var app = new Vue({
-      el: '#app',
+      el: "#app",
       data: {
-        message: 'Hello Vue!'
-      }
-    })
-  </script>
+        message: "Hello Vue!",
+      },
+    });
+    </script>
   </body>
 </html>
 ```

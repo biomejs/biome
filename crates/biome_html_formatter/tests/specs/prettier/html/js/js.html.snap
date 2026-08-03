@@ -42,8 +42,27 @@ info: html/js/js.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -14,16 +14,14 @@
-   alert(message);
+@@ -1,29 +1,29 @@
+ <script type="text/javascript">
+-  var message = "Alert!";
++var message = "Alert!";
+ 
+-  alert(message);
++alert(message);
+ </script>
+ <script type="application/javascript">
+-  var message = "Alert!";
++var message = "Alert!";
+ 
+-  alert(message);
++alert(message);
+ </script>
+ <script>
+-  var message = "Alert!";
++var message = "Alert!";
+ 
+-  alert(message);
++alert(message);
  </script>
  <script type="text/babel">
 -  const someJS = "this should be formatted";
@@ -56,34 +75,34 @@ info: html/js/js.html
  
  <script type="module">
 -  import lib from "./lib.js";
--
++import lib from "./lib.js";
+ 
 -  function myFunction() {
 -    return "foo";
 -  }
--</script>
-+      import lib from './lib.js';
-+  
-+        function myFunction() { return 'foo'; }
-+  </script>
++function myFunction() {
++  return "foo";
++}
+ </script>
 ```
 
 # Output
 
 ```html
 <script type="text/javascript">
-  var message = "Alert!";
+var message = "Alert!";
 
-  alert(message);
+alert(message);
 </script>
 <script type="application/javascript">
-  var message = "Alert!";
+var message = "Alert!";
 
-  alert(message);
+alert(message);
 </script>
 <script>
-  var message = "Alert!";
+var message = "Alert!";
 
-  alert(message);
+alert(message);
 </script>
 <script type="text/babel">
             const    someJS    =   'this should be formatted'
@@ -93,8 +112,10 @@ info: html/js/js.html
 </script>
 
 <script type="module">
-      import lib from './lib.js';
-  
-        function myFunction() { return 'foo'; }
-  </script>
+import lib from "./lib.js";
+
+function myFunction() {
+  return "foo";
+}
+</script>
 ```

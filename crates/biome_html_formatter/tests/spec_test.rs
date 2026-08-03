@@ -14,6 +14,10 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
 
     let config = Configuration {
         html: Some(HtmlConfiguration {
+            // Without this the workspace hands `.vue` and `.svelte` to the
+            // JavaScript handler, which knows nothing about the blocks a
+            // single-file component is made of.
+            experimental_full_support_enabled: Some(true.into()),
             formatter: Some(HtmlFormatterConfiguration {
                 enabled: Some(true.into()),
                 ..Default::default()

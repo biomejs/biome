@@ -119,10 +119,12 @@ info: html/js/typescript.html
      return "Hello, " + person.firstName + " " + person.lastName;
    }
  
-@@ -26,13 +22,9 @@
+@@ -24,66 +20,63 @@
+   document.body.innerHTML = greeter(user);
+ </script>
  <script lang="ts">
-   class Student {
-     fullName: string;
+-  class Student {
+-    fullName: string;
 -    constructor(
 -      public firstName: string,
 -      public middleInitial: string,
@@ -130,23 +132,33 @@ info: html/js/typescript.html
 -    ) {
 -      this.fullName = firstName + " " + middleInitial + " " + lastName;
 -    }
-+    constructor(public firstName: string, public middleInitial: string, public lastName: string) {
++class Student {
++  fullName: string;
++  constructor(
++    public firstName: string,
++    public middleInitial: string,
++    public lastName: string,
++  ) {
 +    this.fullName = firstName + " " + middleInitial + " " + lastName;
-+  }
    }
++}
  
-   interface Person {
-@@ -40,7 +32,7 @@
+-  interface Person {
++interface Person {
+     firstName: string;
      lastName: string;
    }
  
 -  function greeter(person: Person) {
-+  function greeter(person : Person) {
++function greeter(person : Person) {
      return "Hello, " + person.firstName + " " + person.lastName;
    }
  
-@@ -49,41 +41,38 @@
-   document.body.innerHTML = greeter(user);
+-  let user = new Student("Jane", "M.", "User");
++let user = new Student("Jane", "M.", "User");
+ 
+-  document.body.innerHTML = greeter(user);
++document.body.innerHTML = greeter(user);
  </script>
  <script lang="tsx">
 -  class CommentBox extends React.Component<
@@ -155,7 +167,7 @@ info: html/js/typescript.html
 -  > {
 -    constructor() {
 -      super();
-+  class CommentBox extends React.Component<{ url: string, pollInterval: number}, CommentData> {
++class CommentBox extends React.Component<{ url: string, pollInterval: number}, CommentData> {
 +    constructor(){
 +      super()
        this.state = { data: [] };
@@ -228,28 +240,32 @@ info: html/js/typescript.html
   document.body.innerHTML = greeter(user);
 </script>
 <script lang="ts">
-  class Student {
-    fullName: string;
-    constructor(public firstName: string, public middleInitial: string, public lastName: string) {
+class Student {
+  fullName: string;
+  constructor(
+    public firstName: string,
+    public middleInitial: string,
+    public lastName: string,
+  ) {
     this.fullName = firstName + " " + middleInitial + " " + lastName;
   }
-  }
+}
 
-  interface Person {
+interface Person {
     firstName: string;
     lastName: string;
   }
 
-  function greeter(person : Person) {
+function greeter(person : Person) {
     return "Hello, " + person.firstName + " " + person.lastName;
   }
 
-  let user = new Student("Jane", "M.", "User");
+let user = new Student("Jane", "M.", "User");
 
-  document.body.innerHTML = greeter(user);
+document.body.innerHTML = greeter(user);
 </script>
 <script lang="tsx">
-  class CommentBox extends React.Component<{ url: string, pollInterval: number}, CommentData> {
+class CommentBox extends React.Component<{ url: string, pollInterval: number}, CommentData> {
     constructor(){
       super()
       this.state = { data: [] };
@@ -289,6 +305,5 @@ info: html/js/typescript.html
 # Lines exceeding max width of 80 characters
 ```
     4:     constructor(public firstName: string, public middleInitial: string, public lastName: string) {
-   25:     constructor(public firstName: string, public middleInitial: string, public lastName: string) {
-   44:   class CommentBox extends React.Component<{ url: string, pollInterval: number}, CommentData> {
+   48: class CommentBox extends React.Component<{ url: string, pollInterval: number}, CommentData> {
 ```

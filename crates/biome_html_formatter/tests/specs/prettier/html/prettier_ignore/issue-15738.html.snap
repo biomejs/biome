@@ -34,19 +34,19 @@ But this HTML is <mark>actually parsed</mark> just like **normal**.
 ```diff
 --- Prettier
 +++ Biome
-@@ -3,11 +3,7 @@
-   rel="stylesheet"
+@@ -4,9 +4,9 @@
    href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css"
  />
--<style>
+ <style>
 -  marked-md:not(:defined) {
 -    display: none;
 -  }
--</style>
-+<style>marked-md:not(:defined) { display: none }</style>
++marked-md:not(:defined) {
++  display: none;
++}
+ </style>
  <script type="module" src="../auto.js"></script>
  <!-- prettier-ignore -->
- <marked-md display="block"><plaintext>
 ```
 
 # Output
@@ -57,7 +57,11 @@ But this HTML is <mark>actually parsed</mark> just like **normal**.
   rel="stylesheet"
   href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css"
 />
-<style>marked-md:not(:defined) { display: none }</style>
+<style>
+marked-md:not(:defined) {
+  display: none;
+}
+</style>
 <script type="module" src="../auto.js"></script>
 <!-- prettier-ignore -->
 <marked-md display="block"><plaintext>
@@ -94,5 +98,5 @@ issue-15738.html:20:1 parse ━━━━━━━━━━━━━━━━━�
 
 # Lines exceeding max width of 80 characters
 ```
-   19: > <em>Markdown</em> lets you include <strong>arbitrary</strong> <abbr>HTML</abbr> in it.
+   23: > <em>Markdown</em> lets you include <strong>arbitrary</strong> <abbr>HTML</abbr> in it.
 ```
