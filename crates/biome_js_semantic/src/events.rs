@@ -3,7 +3,7 @@
 use JsSyntaxKind::*;
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::{
-    AnyJsIdentifierUsage, JsDirective, JsLanguage, JsSyntaxKind, JsSyntaxNode, TextRange,
+    AnyJsIdentifierReference, JsDirective, JsLanguage, JsSyntaxKind, JsSyntaxNode, TextRange,
     TsTypeParameterName, inner_string_text,
 };
 use biome_js_syntax::{AnyJsImportClause, AnyJsNamedImportSpecifier, AnyTsType};
@@ -320,7 +320,7 @@ impl SemanticEventExtractor {
             }
 
             JS_REFERENCE_IDENTIFIER | JSX_REFERENCE_IDENTIFIER | JS_IDENTIFIER_ASSIGNMENT => {
-                self.enter_identifier_usage(AnyJsIdentifierUsage::unwrap_cast(node.clone()));
+                self.enter_identifier_reference(AnyJsIdentifierReference::unwrap_cast(node.clone()));
             }
 
             JS_MODULE => {
@@ -807,14 +807,14 @@ impl SemanticEventExtractor {
         }
     }
 
-    fn enter_identifier_usage(&mut self, node: AnyJsIdentifierUsage) {
+    fn enter_identifier_reference(&mut self, node: AnyJsIdentifierReference) {
         let range = node.syntax().text_trimmed_range();
         let Ok(name_token) = node.value_token() else {
             return;
         };
         let name = name_token.token_text_trimmed();
         match node {
-            AnyJsIdentifierUsage::JsReferenceIdentifier(node) => {
+            AnyJsIdentifierReference::JsReferenceIdentifier(node) => {
                 let Some(parent) = node.syntax().parent() else {
                     self.push_reference(
                         BindingName::Value(name),
@@ -913,14 +913,14 @@ impl SemanticEventExtractor {
                     }
                 }
             }
-            AnyJsIdentifierUsage::JsxReferenceIdentifier(_) => {
+            AnyJsIdentifierReference::JsxReferenceIdentifier(_) => {
                 if name.text() == "this" {
                     // Ignore `this` in JSX. e.g. `<this.foo />`.
                     return;
                 }
                 self.push_reference(BindingName::Value(name), Reference::Read(range));
             }
-            AnyJsIdentifierUsage::JsIdentifierAssignment(_) => {
+            AnyJsIdentifierReference::JsIdentifierAssignment(_) => {
                 self.push_reference(BindingName::Value(name), Reference::Write(range));
             }
         }
