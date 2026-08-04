@@ -18,7 +18,7 @@ declare_syntax_rule! {
     //  }
     /// ```
     pub NoInvalidPropertySyntax {
-        version: "next",
+        version: "2.5.7",
         name: "noInvalidPropertySyntax",
         language: "css",
     }
