@@ -7,16 +7,17 @@ expression: valid.css
 /* should not generate diagnostics */
 
 :root {
-	--backslash//61: red;
+	--backslash\\61: red;
 }
 
 a {
-	color: var(--backslash//61);
+	color: var(--backslash\\61);
 }
 
 :root {
 	--root-color: red;
-	--escaped/2d color: green;
+	--escaped\2d color: green;
+	\2d\2d escaped-leading: purple;
 }
 
 .theme {
@@ -34,6 +35,7 @@ a {
 	background: var(--local-color);
 	border-color: var(--registered-color);
 	outline-color: var(--escaped-color);
+	text-decoration-color: var(--escaped-leading);
 }
 
 .malformed {

@@ -2,7 +2,7 @@ use super::EmbedContent;
 use biome_languages::{CssFileSource, DocumentFileSource, GraphqlFileSource};
 use biome_rowan::TokenText;
 
-/// Language that can be embedded inside JavaScript template literals.
+/// Language embedded in JavaScript source.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub(crate) enum GuestLanguage {
     Css,
@@ -24,7 +24,7 @@ pub(crate) enum EmbedCandidate {
         tag: TemplateTagKind,
         content: EmbedContent,
     },
-    StaticStyleValue {
+    JsxStyleAttribute {
         content: EmbedContent,
     },
 }
@@ -32,7 +32,7 @@ pub(crate) enum EmbedCandidate {
 impl EmbedCandidate {
     pub fn content(&self) -> EmbedContent {
         match self {
-            Self::TaggedTemplate { content, .. } | Self::StaticStyleValue { content } => {
+            Self::TaggedTemplate { content, .. } | Self::JsxStyleAttribute { content } => {
                 content.clone()
             }
         }
@@ -64,6 +64,11 @@ impl EmbedDetectorsRegistry {
         candidate: &EmbedCandidate,
         file_source: &DocumentFileSource,
     ) -> Option<EmbedMatch> {
+        if matches!(candidate, EmbedCandidate::JsxStyleAttribute { .. }) {
+            return Some(EmbedMatch {
+                guest: GuestLanguage::Css,
+            });
+        }
         for detector in JS_DETECTORS.iter() {
             if let Some(guest) = detector.try_match(candidate, file_source) {
                 return Some(EmbedMatch { guest });
@@ -80,9 +85,6 @@ enum EmbedDetector {
     },
     TemplateExpression {
         object: &'static str,
-        target: EmbedTarget,
-    },
-    StaticStyleValue {
         target: EmbedTarget,
     },
 }
@@ -127,9 +129,6 @@ impl EmbedDetector {
                 }
                 _ => None,
             },
-            (Self::StaticStyleValue { target }, EmbedCandidate::StaticStyleValue { .. }) => {
-                target.resolve(candidate, file_source)
-            }
             _ => None,
         }
     }
@@ -151,7 +150,7 @@ impl EmbedTarget {
     }
 }
 
-static JS_DETECTORS: [EmbedDetector; 6] = [
+static JS_DETECTORS: [EmbedDetector; 5] = [
     EmbedDetector::TemplateTag {
         tag: "css",
         target: EmbedTarget::Static(GuestLanguage::Css),
@@ -171,8 +170,5 @@ static JS_DETECTORS: [EmbedDetector; 6] = [
     EmbedDetector::TemplateExpression {
         object: "graphql",
         target: EmbedTarget::Static(GuestLanguage::GraphQL),
-    },
-    EmbedDetector::StaticStyleValue {
-        target: EmbedTarget::Static(GuestLanguage::Css),
     },
 ];

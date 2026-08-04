@@ -9,7 +9,7 @@ expression: invalid.css
 .card {
 	background: var(--missing-background);
 	color: var(--missing-color, red);
-	border-color: v/61r(--escaped-function);
+	border-color: v\61r(--escaped-function);
 }
 
 ```
@@ -24,11 +24,11 @@ invalid.css:4:18 lint/nursery/noUndeclaredCustomProperties ━━━━━━━
   > 4 │ 	background: var(--missing-background);
       │ 	                ^^^^^^^^^^^^^^^^^^^^
     5 │ 	color: var(--missing-color, red);
-    6 │ 	border-color: v/61r(--escaped-function);
+    6 │ 	border-color: v\61r(--escaped-function);
   
-  i An undefined custom property uses its fallback when present; without one, the declaration is invalid.
+  i An undeclared custom property can indicate a misspelled name or a missing declaration.
   
-  i Define the custom property in an available stylesheet or correct its name.
+  i Define the custom property in an available stylesheet, rename it or remove it.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -44,12 +44,12 @@ invalid.css:5:13 lint/nursery/noUndeclaredCustomProperties ━━━━━━━
     4 │ 	background: var(--missing-background);
   > 5 │ 	color: var(--missing-color, red);
       │ 	           ^^^^^^^^^^^^^^^
-    6 │ 	border-color: v/61r(--escaped-function);
+    6 │ 	border-color: v\61r(--escaped-function);
     7 │ }
   
-  i An undefined custom property uses its fallback when present; without one, the declaration is invalid.
+  i An undeclared custom property can indicate a misspelled name or a missing declaration.
   
-  i Define the custom property in an available stylesheet or correct its name.
+  i Define the custom property in an available stylesheet, rename it or remove it.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -63,14 +63,14 @@ invalid.css:6:22 lint/nursery/noUndeclaredCustomProperties ━━━━━━━
   
     4 │ 	background: var(--missing-background);
     5 │ 	color: var(--missing-color, red);
-  > 6 │ 	border-color: v/61r(--escaped-function);
+  > 6 │ 	border-color: v\61r(--escaped-function);
       │ 	                    ^^^^^^^^^^^^^^^^^^
     7 │ }
     8 │ 
   
-  i An undefined custom property uses its fallback when present; without one, the declaration is invalid.
+  i An undeclared custom property can indicate a misspelled name or a missing declaration.
   
-  i Define the custom property in an available stylesheet or correct its name.
+  i Define the custom property in an available stylesheet, rename it or remove it.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

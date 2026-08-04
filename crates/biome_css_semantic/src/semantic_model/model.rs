@@ -4,6 +4,7 @@ use biome_css_syntax::{
     CssGenericComponentValueList, CssIdentifier, CssMediaAtRule, CssNestedQualifiedRule,
     CssQualifiedRule, CssScopeAtRule, CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind,
     CssSyntaxNode, CssSyntaxToken, ScssExpression, ScssPartialCombinatorSelector,
+    decode_css_identifier,
     property_syntax::PropertySyntaxResult,
 };
 use biome_rowan::{
@@ -46,6 +47,26 @@ impl SemanticModel {
 
     pub fn global_custom_variables(&self) -> GlobalCustomVariables<'_> {
         GlobalCustomVariables { data: &self.data }
+    }
+
+    /// Returns declarations that assign values to custom properties.
+    pub fn custom_property_declarations(&self) -> impl Iterator<Item = CssModelDeclaration> + '_ {
+        self.data
+            .root_declarations
+            .iter()
+            .filter(|declaration| {
+                decode_css_identifier(declaration.property_name.text()).starts_with("--")
+            })
+            .map(|declaration| CssModelDeclaration::from_data(self.data.clone(), declaration))
+            .chain(self.data.all_rules.iter().flat_map(|rule| {
+                rule.declarations
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, declaration)| {
+                        decode_css_identifier(declaration.property_name.text()).starts_with("--")
+                    })
+                    .map(|(index, _)| CssModelDeclaration::new(self.data.clone(), rule.id, index))
+            }))
     }
 
     pub fn get_rule_by_id(&self, id: &RuleId) -> Option<Rule> {
@@ -116,6 +137,8 @@ pub(crate) struct SemanticModelData {
     pub(crate) all_rules: Vec<RuleData>,
     /// IDs of top-level rules only
     pub(crate) top_level_rule_ids: Vec<RuleId>,
+    /// Declarations parsed outside a rule, such as declarations in a `style` attribute.
+    pub(crate) root_declarations: Vec<CssModelDeclarationData>,
     /// Custom property names declared in `:root` or by an `@property` rule.
     ///
     /// The associated data retains the `:root` declaration. `@property` data is
@@ -154,6 +177,13 @@ impl PartialEq for SemanticModel {
                 .zip(other_rules.iter())
                 .all(|(self_rule, other_rule)| self_rule == other_rule)
             && self.data.top_level_rule_ids == other.data.top_level_rule_ids
+            && self.data.root_declarations.len() == other.data.root_declarations.len()
+            && self
+                .data
+                .root_declarations
+                .iter()
+                .zip(&other.data.root_declarations)
+                .all(|(this, other)| this.semantic_eq(other, &self_root, &other_root))
             && self.data.range_to_rule_id.len() == other.data.range_to_rule_id.len()
             && self.data.at_property_rules.len() == other.data.at_property_rules.len()
             && self
@@ -742,19 +772,29 @@ impl PartialEq for CssModelDeclaration {
 }
 
 impl CssModelDeclaration {
-    fn new(data: Arc<SemanticModelData>, rule_id: RuleId, index: usize) -> Self {
-        let declaration = &data.all_rules[rule_id.index()].declarations[index];
-        let declaration_ptr = declaration.declaration.clone();
-        let property = declaration.property.clone();
-        let property_name = declaration.property_name.clone();
-        let value = declaration.value.clone();
+    fn from_data(data: Arc<SemanticModelData>, declaration: &CssModelDeclarationData) -> Self {
         Self {
             data: data.clone(),
-            declaration: declaration_ptr,
-            property,
-            property_name,
-            value: CssPropertyInitialValue { data, kind: value },
+            declaration: declaration.declaration.clone(),
+            property: declaration.property.clone(),
+            property_name: declaration.property_name.clone(),
+            value: CssPropertyInitialValue {
+                data,
+                kind: declaration.value.clone(),
+            },
         }
+    }
+
+    fn new(data: Arc<SemanticModelData>, rule_id: RuleId, index: usize) -> Self {
+        let rule = data
+            .all_rules
+            .get(rule_id.index())
+            .expect("declaration rule ID must belong to the semantic model");
+        let declaration = rule
+            .declarations
+            .get(index)
+            .expect("declaration index must belong to its rule");
+        Self::from_data(data.clone(), declaration)
     }
 
     pub fn declaration(&self, _root: &AnyCssRoot) -> CssDeclaration {
@@ -767,6 +807,19 @@ impl CssModelDeclaration {
 
     pub fn value(&self) -> &CssPropertyInitialValue {
         &self.value
+    }
+
+    /// Returns the authored property name.
+    pub fn name(&self) -> &TokenText {
+        &self.property_name
+    }
+
+    /// Returns the range of the complete declaration.
+    pub fn range(&self) -> TextRange {
+        self.declaration
+            .to_node(self.data.root().syntax())
+            .syntax()
+            .text_trimmed_range()
     }
 }
 

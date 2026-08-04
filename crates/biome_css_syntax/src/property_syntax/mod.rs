@@ -11,13 +11,11 @@ pub use data::{
 pub use parser::encode;
 pub use serializer::decode;
 
-use crate::{CssDashedIdentifier, CssFunction, decode_css_identifier};
+use crate::{AnyCssValue, CssFunction, CssSyntaxToken, decode_css_identifier};
 use biome_rowan::{AstNodeList, AstSeparatedList};
 
 /// Returns the custom-property name from a well-formed `var()` function.
-pub fn custom_property_name_from_var_function(
-    function: &CssFunction,
-) -> Option<CssDashedIdentifier> {
+pub fn custom_property_name_from_var_function(function: &CssFunction) -> Option<CssSyntaxToken> {
     let name = function
         .name()
         .ok()?
@@ -28,7 +26,7 @@ pub fn custom_property_name_from_var_function(
         return None;
     }
 
-    function
+    let value = function
         .items()
         .iter()
         .next()?
@@ -36,8 +34,16 @@ pub fn custom_property_name_from_var_function(
         .as_css_list_of_component_values_expression()?
         .css_component_value_list()
         .iter()
-        .next()?
-        .as_any_css_dashed_identifier()?
-        .as_css_dashed_identifier()
-        .cloned()
+        .next()?;
+    let token = match value {
+        AnyCssValue::AnyCssDashedIdentifier(identifier) => {
+            identifier.as_css_dashed_identifier()?.value_token().ok()?
+        }
+        AnyCssValue::CssCustomIdentifier(identifier) => identifier.value_token().ok()?,
+        AnyCssValue::CssIdentifier(identifier) => identifier.value_token().ok()?,
+        _ => return None,
+    };
+    decode_css_identifier(token.text_trimmed())
+        .starts_with("--")
+        .then_some(token)
 }

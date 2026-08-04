@@ -43,7 +43,7 @@ fn css_property_query_uses_last_local_definition() {
 }
 
 #[test]
-fn css_property_query_only_sees_preceding_siblings() {
+fn css_property_query_sees_sibling_imports_regardless_of_order() {
     assert_eq!(
         definitions(
             &[
@@ -55,7 +55,7 @@ fn css_property_query_only_sees_preceding_siblings() {
         ),
         ["/theme.css"]
     );
-    assert!(
+    assert_eq!(
         definitions(
             &[
                 ("/theme.css", PROPERTY),
@@ -63,8 +63,8 @@ fn css_property_query_only_sees_preceding_siblings() {
                 ("/parent.css", "@import 'leaf.css'; @import 'theme.css';")
             ],
             "/leaf.css"
-        )
-        .is_empty()
+        ),
+        ["/theme.css"]
     );
 }
 
@@ -226,13 +226,7 @@ fn js_definitions(js: &str, target: &str) -> Vec<String> {
 
 #[test]
 fn css_property_query_skips_non_css_sibling_imports() {
-    assert!(
-        js_definitions(
-            "import './component.js'; import './theme.css';",
-            "/component.js"
-        )
-        .is_empty()
-    );
+    assert!(js_definitions("import './component.js';", "/component.js").is_empty());
 }
 #[test]
 fn css_property_query_reads_stylesheets_imported_by_js() {
@@ -268,12 +262,12 @@ fn css_property_query_traverses_js_importers() {
         ),
         ["/theme.css"]
     );
-    assert!(
+    assert_eq!(
         js_definitions(
             "import './component.js'; import './theme.css';",
             "/component.js"
-        )
-        .is_empty()
+        ),
+        ["/theme.css"]
     );
 }
 
@@ -290,6 +284,117 @@ fn css_property_query_reads_html_like_embedded_styles() {
             [path]
         );
     }
+}
+
+#[test]
+fn css_property_query_reads_html_style_attributes() {
+    assert_eq!(
+        workspace_definitions(
+            &[("/index.html", "<div style='--value: red'></div>")],
+            "/index.html"
+        ),
+        ["/index.html"]
+    );
+}
+
+#[test]
+fn css_property_query_ignores_named_type_only_component_imports() {
+    assert!(
+        workspace_definitions(
+            &[
+                (
+                    "/Parent.vue",
+                    "<script setup lang='ts'>import './theme.css'; import { type Child } from './Child.vue';</script>"
+                ),
+                ("/Child.vue", "<div></div>"),
+                ("/theme.css", PROPERTY),
+            ],
+            "/Child.vue"
+        )
+        .is_empty()
+    );
+    assert!(
+        workspace_definitions(
+            &[
+                (
+                    "/Parent.svelte",
+                    "<script>import Child from './Child.svelte';</script><style>:not(:global(.theme)) { --value: red; }</style><Child />"
+                ),
+                ("/Child.svelte", "<div></div>"),
+            ],
+            "/Child.svelte"
+        )
+        .is_empty()
+    );
+}
+
+#[test]
+fn css_property_query_exposes_property_registrations_from_scoped_styles() {
+    assert_eq!(
+        workspace_definitions(
+            &[
+                (
+                    "/Parent.svelte",
+                    &format!(
+                        "<script>import Child from './Child.svelte';</script><style>{PROPERTY}</style><Child />"
+                    )
+                ),
+                ("/Child.svelte", "<div></div>"),
+            ],
+            "/Child.svelte"
+        ),
+        ["/Parent.svelte"]
+    );
+}
+
+#[test]
+fn css_property_query_reads_global_styles_from_imported_components() {
+    assert_eq!(
+        workspace_definitions(
+            &[
+                (
+                    "/Parent.vue",
+                    "<script>import Child from './Child.vue';</script><Child />"
+                ),
+                (
+                    "/Child.vue",
+                    "<style>:root { --value: red; }</style><template><div /></template>"
+                ),
+            ],
+            "/Parent.vue"
+        ),
+        ["/Child.vue"]
+    );
+}
+
+#[test]
+fn css_property_query_does_not_expose_mixed_global_selectors() {
+    assert!(
+        workspace_definitions(
+            &[
+                (
+                    "/Parent.svelte",
+                    "<script>import Child from './Child.svelte';</script><style>:global(.theme) .local { --value: red; }</style><Child />"
+                ),
+                ("/Child.svelte", "<div></div>"),
+            ],
+            "/Child.svelte"
+        )
+        .is_empty()
+    );
+    assert!(
+        workspace_definitions(
+            &[
+                (
+                    "/Parent.svelte",
+                    "<script>import Child from './Child.svelte';</script><style>.local { :global(:root) { --value: red; } }</style><Child />"
+                ),
+                ("/Child.svelte", "<div></div>"),
+            ],
+            "/Child.svelte"
+        )
+        .is_empty()
+    );
 }
 #[test]
 fn css_property_query_tracks_html_style_offsets() {
@@ -354,9 +459,7 @@ fn css_property_query_only_exposes_global_html_importer_styles() {
             &[
                 (
                     "/Local.vue",
-                    &format!(
-                        "<style scoped>{PROPERTY}</style><link rel='stylesheet' href='./leaf.css'>"
-                    )
+                    "<style scoped>:root { --value: red; }</style><link rel='stylesheet' href='./leaf.css'>"
                 ),
                 ("/leaf.css", ".leaf{}")
             ],

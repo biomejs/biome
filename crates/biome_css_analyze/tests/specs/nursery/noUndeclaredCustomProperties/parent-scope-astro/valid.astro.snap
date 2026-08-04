@@ -1,15 +1,18 @@
 ---
-source: crates/biome_html_analyze/tests/spec_tests.rs
-expression: valid.svelte
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.astro
 ---
 # Input
-```svelte
+```astro
 <!-- should not generate diagnostics -->
-<script>
+---
+import Child from "./invalid.astro";
 import "./global.css";
-import Child from "./invalid.svelte";
-</script>
+---
 
+<style is:global>
+:root { --global-color: green; }
+</style>
 <style>
 :root { --local-color: red; }
 :global(:root) { --selector-global-color: blue; }

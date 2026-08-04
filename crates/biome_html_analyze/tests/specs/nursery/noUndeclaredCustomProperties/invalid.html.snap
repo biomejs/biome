@@ -5,27 +5,26 @@ expression: invalid.html
 # Input
 ```html
 <!-- should generate diagnostics -->
-<div style="background: var(--missing-background); color: var(--missing-color, red)"></div>
-<div style="color: var(/* comment */ --comment-trivia)"></div>
-<div style=color:var(--unquoted)></div>
+<div style="color: var(--missing-color)"></div>
+<div style="color: var(/* comment */ --missing-commented)"></div>
 
 ```
 
 # Diagnostics
 ```
-invalid.html:2:29 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:2:24 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The custom property --missing-background is not defined.
+  i The custom property --missing-color is not defined.
   
     1 │ <!-- should generate diagnostics -->
-  > 2 │ <div style="background: var(--missing-background); color: var(--missing-color, red)"></div>
-      │                             ^^^^^^^^^^^^^^^^^^^^
-    3 │ <div style="color: var(/* comment */ --comment-trivia)"></div>
-    4 │ <div style=color:var(--unquoted)></div>
+  > 2 │ <div style="color: var(--missing-color)"></div>
+      │                        ^^^^^^^^^^^^^^^
+    3 │ <div style="color: var(/* comment */ --missing-commented)"></div>
+    4 │ 
   
-  i An undefined custom property uses its fallback when present; without one, the declaration is invalid.
+  i An undeclared custom property can indicate a misspelled name or a missing declaration.
   
-  i Define the custom property in an available stylesheet or correct its name.
+  i Define the custom property in an available stylesheet, rename it or remove it.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -35,38 +34,17 @@ invalid.html:2:29 lint/nursery/noUndeclaredCustomProperties ━━━━━━�
 ```
 invalid.html:3:38 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The custom property --comment-trivia is not defined.
+  i The custom property --missing-commented is not defined.
   
     1 │ <!-- should generate diagnostics -->
-    2 │ <div style="background: var(--missing-background); color: var(--missing-color, red)"></div>
-  > 3 │ <div style="color: var(/* comment */ --comment-trivia)"></div>
-      │                                      ^^^^^^^^^^^^^^^^
-    4 │ <div style=color:var(--unquoted)></div>
-    5 │ 
+    2 │ <div style="color: var(--missing-color)"></div>
+  > 3 │ <div style="color: var(/* comment */ --missing-commented)"></div>
+      │                                      ^^^^^^^^^^^^^^^^^^^
+    4 │ 
   
-  i An undefined custom property uses its fallback when present; without one, the declaration is invalid.
+  i An undeclared custom property can indicate a misspelled name or a missing declaration.
   
-  i Define the custom property in an available stylesheet or correct its name.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.html:4:22 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The custom property --unquoted is not defined.
-  
-    2 │ <div style="background: var(--missing-background); color: var(--missing-color, red)"></div>
-    3 │ <div style="color: var(/* comment */ --comment-trivia)"></div>
-  > 4 │ <div style=color:var(--unquoted)></div>
-      │                      ^^^^^^^^^^
-    5 │ 
-  
-  i An undefined custom property uses its fallback when present; without one, the declaration is invalid.
-  
-  i Define the custom property in an available stylesheet or correct its name.
+  i Define the custom property in an available stylesheet, rename it or remove it.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
