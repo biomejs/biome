@@ -320,7 +320,9 @@ impl SemanticEventExtractor {
             }
 
             JS_REFERENCE_IDENTIFIER | JSX_REFERENCE_IDENTIFIER | JS_IDENTIFIER_ASSIGNMENT => {
-                self.enter_identifier_reference(AnyJsIdentifierReference::unwrap_cast(node.clone()));
+                self.enter_identifier_reference(AnyJsIdentifierReference::unwrap_cast(
+                    node.clone(),
+                ));
             }
 
             JS_MODULE => {
