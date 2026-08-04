@@ -235,30 +235,71 @@ where
 /// Counts lines in a syntax tree, used by `noExcessiveLinesPerFile`.
 ///
 /// When `skip_blank_lines` is true, counts tokens with leading newlines (excluding blank lines).
+/// When `skip_comments` is true, lines consisting only of comments are not counted.
 /// When false, counts all newline characters in leading trivia (trailing trivia is trimmed
 /// to prevent double-counting). Returns total + 1 to account for the first line.
 pub fn count_lines_in_file<L: Language>(
     node: &SyntaxNode<L>,
     is_eof_token: impl Fn(&SyntaxToken<L>) -> bool,
     skip_blank_lines: bool,
+    skip_comments: bool,
 ) -> usize {
-    let mut count = 0;
-    for descendant in node.descendants() {
-        for token in descendant.tokens() {
-            if is_eof_token(&token) {
+    if skip_comments {
+        // Operate on raw text for accurate detection of comment-only lines
+        let text = node.text_with_trivia().to_string();
+        let mut count = 0;
+        let mut in_block_comment = false;
+
+        for line in text.lines() {
+            let trimmed = line.trim();
+
+            // Handle block comments (/* ... */)
+            if in_block_comment {
+                if trimmed.contains("*/") {
+                    in_block_comment = false;
+                }
                 continue;
             }
-            if skip_blank_lines {
-                count += token.has_leading_newline() as usize;
-            } else {
-                count += token
-                    .trim_trailing_trivia()
-                    .leading_trivia()
-                    .pieces()
-                    .filter(|piece| piece.is_newline())
-                    .count();
+            if trimmed.starts_with("/*") {
+                in_block_comment = true;
+                if trimmed.contains("*/") {
+                    in_block_comment = false;
+                }
+                continue;
+            }
+
+            // Skip blank lines if enabled
+            if skip_blank_lines && trimmed.is_empty() {
+                continue;
+            }
+
+            // Skip single-line comments
+            if trimmed.starts_with("//") {
+                continue;
+            }
+
+            count += 1;
+        }
+        count
+    } else {
+        let mut count = 0;
+        for descendant in node.descendants() {
+            for token in descendant.tokens() {
+                if is_eof_token(&token) {
+                    continue;
+                }
+                if skip_blank_lines {
+                    count += token.has_leading_newline() as usize;
+                } else {
+                    count += token
+                        .trim_trailing_trivia()
+                        .leading_trivia()
+                        .pieces()
+                        .filter(|piece| piece.is_newline())
+                        .count();
+                }
             }
         }
+        count + 1
     }
-    count + 1
 }
