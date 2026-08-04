@@ -167,5 +167,11 @@ mod tests {
         assert_eq!(decode_css_identifier("plain"), "plain");
         assert_eq!(decode_css_identifier(r"f\6f o"), "foo");
         assert_eq!(decode_css_identifier(r"p\78"), "px");
+        assert_eq!(decode_css_identifier("\\"), "\u{fffd}");
+        assert_eq!(decode_css_identifier(r"\_"), "_");
+        assert_eq!(decode_css_identifier("a\\\nb"), "ab");
+        assert_eq!(decode_css_identifier("a\0b"), "a\u{fffd}b");
+        assert_eq!(decode_css_identifier(r"\d800"), "\u{fffd}");
+        assert_eq!(decode_css_identifier(r"\110000"), "\u{fffd}");
     }
 }
