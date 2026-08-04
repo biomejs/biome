@@ -1167,16 +1167,18 @@ impl WorkspaceServerWithDb<'_> {
         &self,
         path: &BiomePath,
         code: &str,
-        mut file_source: DocumentFileSource,
+        file_source: DocumentFileSource,
         settings: &SettingsWithEditor,
         real_capabilities: bool,
     ) -> Result<ProcessFileState, WorkspaceError> {
         #[cfg(feature = "lang_js")]
-        if matches!(file_source, DocumentFileSource::Js(_))
+        let file_source = if matches!(file_source, DocumentFileSource::Js(_))
             && matches!(path.extension(), Some("astro" | "svelte" | "vue"))
         {
-            file_source = DocumentFileSource::from_path(path.as_path(), false);
-        }
+            DocumentFileSource::from_path(path.as_path(), false)
+        } else {
+            file_source
+        };
         let capabilities = if real_capabilities {
             self.features.get_real_capabilities(file_source)
         } else {

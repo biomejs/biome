@@ -52,7 +52,6 @@ impl Rule for NoInvalidPropertySyntax {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
         let model = ctx.model();
         let node = ctx.query();
 
