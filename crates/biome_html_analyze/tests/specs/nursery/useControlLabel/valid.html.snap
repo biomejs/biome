@@ -1,0 +1,28 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+
+<button>Submit</button>
+
+<button aria-label="Close"></button>
+
+<button aria-labelledby="save-label"></button>
+
+<button title="Close"></button>
+
+<button><span>Delete</span></button>
+
+<!-- Hidden from the accessibility tree; no label needed. -->
+<button aria-hidden="true"></button>
+
+<!-- Not a control this rule checks; `area` is covered by `useAltText`. -->
+<area href="#" />
+
+<!-- Not a control at all. -->
+<div></div>
+
+```

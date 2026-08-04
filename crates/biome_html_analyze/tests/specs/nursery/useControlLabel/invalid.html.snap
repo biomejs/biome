@@ -1,0 +1,147 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+
+<button></button>
+
+<button>   </button>
+
+<menuitem></menuitem>
+
+<!-- `aria-hidden="false"` is still exposed — a label is still required. -->
+<button aria-hidden="false"></button>
+
+<!-- An empty labeling attribute is not a real label. -->
+<button aria-label=""></button>
+
+<!-- A hidden child does not supply an accessible label. -->
+<button><span aria-hidden="true">Delete</span></button>
+
+```
+
+# Diagnostics
+```
+invalid.html:3:1 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ <button></button>
+      │ ^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ <button>   </button>
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:5:1 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    3 │ <button></button>
+    4 │ 
+  > 5 │ <button>   </button>
+      │ ^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ <menuitem></menuitem>
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:7:1 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    5 │ <button>   </button>
+    6 │ 
+  > 7 │ <menuitem></menuitem>
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ <!-- `aria-hidden="false"` is still exposed — a label is still required. -->
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:10:1 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+     9 │ <!-- `aria-hidden="false"` is still exposed — a label is still required. -->
+  > 10 │ <button aria-hidden="false"></button>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ <!-- An empty labeling attribute is not a real label. -->
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:13:1 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    12 │ <!-- An empty labeling attribute is not a real label. -->
+  > 13 │ <button aria-label=""></button>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ <!-- A hidden child does not supply an accessible label. -->
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:16:1 lint/nursery/useControlLabel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This control element has no accessible label.
+  
+    15 │ <!-- A hidden child does not supply an accessible label. -->
+  > 16 │ <button><span aria-hidden="true">Delete</span></button>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+  
+  i Assistive technology announces it as an anonymous control, so its purpose is unclear to screen-reader users.
+  
+  i Add text content, or an aria-label, aria-labelledby, or title attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

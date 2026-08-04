@@ -261,6 +261,7 @@ define_categories! {
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
     "lint/nursery/useConsistentObjectDefinition": "https://biomejs.dev/linter/rules/use-consistent-object-definition",
     "lint/nursery/useConsistentTestIt": "https://biomejs.dev/linter/rules/use-consistent-test-it",
+    "lint/nursery/useControlLabel": "https://biomejs.dev/linter/rules/use-control-label",
     "lint/nursery/useDisposables": "https://biomejs.dev/linter/rules/use-disposables",
     "lint/nursery/useDomNodeTextContent": "https://biomejs.dev/linter/rules/use-dom-node-text-content",
     "lint/nursery/useDomQuerySelector": "https://biomejs.dev/linter/rules/use-dom-query-selector",

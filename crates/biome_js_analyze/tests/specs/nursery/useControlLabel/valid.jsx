@@ -1,0 +1,23 @@
+/* should not generate diagnostics */
+
+const a = <button>Submit</button>;
+
+const b = <button aria-label="Close" />;
+
+const c = <button aria-labelledby="save-label" />;
+
+const d = <button title="Close" />;
+
+const e = <button><Icon /><span>Delete</span></button>;
+
+// Hidden from the accessibility tree; no label needed.
+const f = <button aria-hidden="true" />;
+
+// Not a control this rule checks; `area` is covered by `useAltText`.
+const g = <area href="#" />;
+
+// Custom component, not a native control.
+const h = <Button />;
+
+// A dynamic expression child is assumed to eventually render a label.
+const i = <button>{label}</button>;

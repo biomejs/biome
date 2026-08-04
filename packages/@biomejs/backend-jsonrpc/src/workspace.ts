@@ -2635,6 +2635,11 @@ See https://biomejs.dev/linter/rules/use-consistent-test-it
 	 */
 	useConsistentTestIt?: UseConsistentTestItConfiguration;
 	/**
+	* Enforce that interactive control elements have an accessible label.
+See https://biomejs.dev/linter/rules/use-control-label 
+	 */
+	useControlLabel?: UseControlLabelConfiguration;
+	/**
 	* Detects a disposable object assigned to a variable without using or await using syntax.
 See https://biomejs.dev/linter/rules/use-disposables 
 	 */
@@ -4817,6 +4822,9 @@ export type UseBaselineConfiguration =
 export type UseConsistentTestItConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentTestItOptions;
+export type UseControlLabelConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseControlLabelOptions;
 export type UseDisposablesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDisposablesOptions;
@@ -6734,6 +6742,10 @@ export interface RuleWithUseConsistentTestItOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentTestItOptions;
 }
+export interface RuleWithUseControlLabelOptions {
+	level: RulePlainConfiguration;
+	options?: UseControlLabelOptions;
+}
 export interface RuleWithUseDisposablesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8522,6 +8534,7 @@ Default: `"it"`
 	 */
 	withinDescribe?: TestFunctionKind;
 }
+export type UseControlLabelOptions = {};
 export type UseDisposablesOptions = {};
 export type UseDomNodeTextContentOptions = {};
 export interface UseDomQuerySelectorOptions {
@@ -9872,6 +9885,7 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTestIt"
+	| "lint/nursery/useControlLabel"
 	| "lint/nursery/useDisposables"
 	| "lint/nursery/useDomNodeTextContent"
 	| "lint/nursery/useDomQuerySelector"

@@ -1,0 +1,16 @@
+<!-- should generate diagnostics -->
+
+<button></button>
+
+<button>   </button>
+
+<menuitem></menuitem>
+
+<!-- `aria-hidden="false"` is still exposed — a label is still required. -->
+<button aria-hidden="false"></button>
+
+<!-- An empty labeling attribute is not a real label. -->
+<button aria-label=""></button>
+
+<!-- A hidden child does not supply an accessible label. -->
+<button><span aria-hidden="true">Delete</span></button>
