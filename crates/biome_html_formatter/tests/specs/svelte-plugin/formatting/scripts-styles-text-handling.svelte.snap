@@ -25,7 +25,7 @@ hello
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,10 +1,9 @@
+@@ -1,10 +1,10 @@
 +<script> </script>
 +
  <!-- above module script -->
@@ -33,7 +33,7 @@ hello
 -
 -<script>
 -</script>
--
+ 
  hello
  
  <style>
@@ -48,6 +48,7 @@ hello
 
 <!-- above module script -->
 <script module></script>
+
 hello
 
 <style>
