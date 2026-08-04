@@ -22,7 +22,7 @@ use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_module_graph::{
     CallArgumentTypeInput, CallExpressionTypeInput, InferredModuleTypes, JsExport, JsOwnExport,
-    ModuleDb, ModuleInfo, ModuleInfoKind, NormalizeTypeInput, PathInfoCache,
+    ModuleDb, ModuleGraphGeneration, ModuleInfo, ModuleInfoKind, NormalizeTypeInput, PathInfoCache,
     find_value_member_type, infer_call_argument_type,
     infer_call_expression_type as infer_call_expression_type_query,
     infer_constructor_argument_type, infer_module_types, infer_module_types_bottom_up,
@@ -95,7 +95,7 @@ struct TestModuleDb {
 impl TestModuleDb {
     fn new() -> Self {
         let events = Events::default();
-        Self {
+        let db = Self {
             modules: BTreeMap::new(),
             storage: salsa::Storage::new(Some(Box::new({
                 let events = events.clone();
@@ -104,7 +104,9 @@ impl TestModuleDb {
                 }
             }))),
             events,
-        }
+        };
+        ModuleGraphGeneration::new(&db, 0);
+        db
     }
 
     fn take_salsa_events(&self) -> Vec<salsa::Event> {
