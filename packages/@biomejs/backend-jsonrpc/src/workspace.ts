@@ -2578,7 +2578,7 @@ See https://biomejs.dev/linter/rules/no-undeclared-classes
 	 */
 	noUndeclaredClasses?: NoUndeclaredClassesConfiguration;
 	/**
-	* Reports custom properties used with var() that have no visible definition.
+	* Reports custom properties used in static HTML style attributes that have no declaration.
 See https://biomejs.dev/linter/rules/no-undeclared-custom-properties 
 	 */
 	noUndeclaredCustomProperties?: NoUndeclaredCustomPropertiesConfiguration;
