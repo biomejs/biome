@@ -18,6 +18,16 @@ export interface I {
 export abstract class AbstractClass {
 	abstract method<T>(): void;
 }
+// A method with a body only implements a signature of the same static-ness.
+export class MismatchedStaticness {
+	static onlyInstanceImplementation<T>(): void;
+	onlyInstanceImplementation(): void {}
+
+	onlyStaticImplementation<T>(): void;
+	static onlyStaticImplementation(): void {}
+}
+// An overload signature left without any implementation is not exempt.
+export function orphanSignature<T>();
 ```
 
 # Diagnostics
@@ -163,6 +173,7 @@ invalidTypeParam.ts:13:18 lint/correctness/noUnusedVariables  FIXABLE  ━━━
   > 13 │ 	abstract method<T>(): void;
        │ 	                ^
     14 │ }
+    15 │ // A method with a body only implements a signature of the same static-ness.
   
   i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
   
@@ -173,6 +184,81 @@ invalidTypeParam.ts:13:18 lint/correctness/noUnusedVariables  FIXABLE  ━━━
     13    │ - → abstract·method<T>():·void;
        13 │ + → abstract·method<_T>():·void;
     14 14 │   }
+    15 15 │   // A method with a body only implements a signature of the same static-ness.
+  
+
+```
+
+```
+invalidTypeParam.ts:17:36 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type parameter T is unused.
+  
+    15 │ // A method with a body only implements a signature of the same static-ness.
+    16 │ export class MismatchedStaticness {
+  > 17 │ 	static onlyInstanceImplementation<T>(): void;
+       │ 	                                  ^
+    18 │ 	onlyInstanceImplementation(): void {}
+    19 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend T with an underscore.
+  
+    15 15 │   // A method with a body only implements a signature of the same static-ness.
+    16 16 │   export class MismatchedStaticness {
+    17    │ - → static·onlyInstanceImplementation<T>():·void;
+       17 │ + → static·onlyInstanceImplementation<_T>():·void;
+    18 18 │     onlyInstanceImplementation(): void {}
+    19 19 │   
+  
+
+```
+
+```
+invalidTypeParam.ts:20:27 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type parameter T is unused.
+  
+    18 │ 	onlyInstanceImplementation(): void {}
+    19 │ 
+  > 20 │ 	onlyStaticImplementation<T>(): void;
+       │ 	                         ^
+    21 │ 	static onlyStaticImplementation(): void {}
+    22 │ }
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend T with an underscore.
+  
+    18 18 │     onlyInstanceImplementation(): void {}
+    19 19 │   
+    20    │ - → onlyStaticImplementation<T>():·void;
+       20 │ + → onlyStaticImplementation<_T>():·void;
+    21 21 │     static onlyStaticImplementation(): void {}
+    22 22 │   }
+  
+
+```
+
+```
+invalidTypeParam.ts:24:33 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type parameter T is unused.
+  
+    22 │ }
+    23 │ // An overload signature left without any implementation is not exempt.
+  > 24 │ export function orphanSignature<T>();
+       │                                 ^
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend T with an underscore.
+  
+    22 22 │   }
+    23 23 │   // An overload signature left without any implementation is not exempt.
+    24    │ - export·function·orphanSignature<T>();
+       24 │ + export·function·orphanSignature<_T>();
   
 
 ```

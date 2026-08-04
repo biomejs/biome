@@ -12,3 +12,13 @@ export interface I {
 export abstract class AbstractClass {
 	abstract method<T>(): void;
 }
+// A method with a body only implements a signature of the same static-ness.
+export class MismatchedStaticness {
+	static onlyInstanceImplementation<T>(): void;
+	onlyInstanceImplementation(): void {}
+
+	onlyStaticImplementation<T>(): void;
+	static onlyStaticImplementation(): void {}
+}
+// An overload signature left without any implementation is not exempt.
+export function orphanSignature<T>();

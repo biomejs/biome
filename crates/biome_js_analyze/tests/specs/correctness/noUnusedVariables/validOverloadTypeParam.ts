@@ -17,5 +17,11 @@ class C {
 	m<T>(x?: T): void {
 		console.log(x);
 	}
+
+	static s<T>(): void;
+	static s<T>(x?: T): void {
+		console.log(x);
+	}
 }
 new C().m();
+C.s();
