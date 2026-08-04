@@ -4,10 +4,7 @@ use crate::prelude::*;
 use crate::shared::FmtAnyAttributeInitializer;
 use crate::utils::srcset::{FormatSrcsetCandidates, parse_srcset};
 use biome_formatter::{CstFormatContext, FormatRuleWithOptions, write};
-use biome_html_syntax::{
-    AnyHtmlAttributeInitializer, HtmlAttributeInitializerClause,
-    HtmlAttributeInitializerClauseFields,
-};
+use biome_html_syntax::{HtmlAttributeInitializerClause, HtmlAttributeInitializerClauseFields};
 use biome_rowan::TokenText;
 
 #[derive(Debug, Clone, Default)]

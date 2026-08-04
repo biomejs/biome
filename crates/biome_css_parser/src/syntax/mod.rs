@@ -87,6 +87,11 @@ pub(crate) fn parse_root(p: &mut CssParser) {
 
             m.complete(p, CSS_SNIPPET_ROOT);
         }
+        CssEmbeddingKind::HtmlStyleAttribute => {
+            DeclarationList::new(EOF).parse_list(p);
+
+            m.complete(p, CSS_DECLARATION_SNIPPET_ROOT);
+        }
         CssEmbeddingKind::None | CssEmbeddingKind::Html(_) => {
             p.eat(UNICODE_BOM);
 
