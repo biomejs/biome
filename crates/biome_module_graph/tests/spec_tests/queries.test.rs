@@ -91,6 +91,48 @@ fn test_binding_query_resolves_imports_without_complete_module_inference() {
 }
 
 #[test]
+fn test_binding_query_keeps_local_export_granular_beside_deep_import_branch() {
+    const IMPORT_COUNT: usize = 129;
+
+    let fs = MemoryFileSystem::default();
+    let mut paths = (0..=IMPORT_COUNT)
+        .map(|index| format!("/src/branch{index}.ts"))
+        .collect::<Vec<_>>();
+    for (index, path) in paths.iter().enumerate().take(IMPORT_COUNT) {
+        fs.insert(
+            path.clone().into(),
+            format!("import './branch{}.ts';", index + 1),
+        );
+    }
+    fs.insert(paths[IMPORT_COUNT].clone().into(), "export {};");
+    fs.insert(
+        "/src/source.ts".into(),
+        "import './branch0.ts'; export const value = 1;",
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        "import { value } from './source.ts'; export const result = value;",
+    );
+    paths.extend(["/src/source.ts".to_string(), "/src/index.ts".to_string()]);
+    let path_refs = paths.iter().map(String::as_str).collect::<Vec<_>>();
+    let db = build_js_test_module_db(&fs, &path_refs, true);
+    let source = db
+        .module_for_path(Utf8Path::new("/src/source.ts"))
+        .expect("source module must exist");
+    let index = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let input = BindingTypeInput::new(&db, index, binding_range_by_name(&db, index, "result"));
+
+    db.clear_salsa_events();
+    let ty = infer_binding_type(&db, input).expect("result type must be inferred");
+    assert!(is_inferred_number(&db, ty));
+    let events = db.take_salsa_events();
+    assert_function_query_was_not_run(&db, infer_module_types, source, &events);
+    assert_function_query_was_not_run(&db, infer_module_types, index, &events);
+}
+
+#[test]
 fn test_namespace_query_keeps_named_exports_symbolic() {
     let fs = MemoryFileSystem::default();
     fs.insert("/src/source.ts".into(), "export class Value { field = 1; }");
@@ -793,7 +835,7 @@ fn test_binding_query_is_invalidated_when_an_import_changes() {
 
 #[test]
 fn test_binding_query_handles_long_import_chains() {
-    const MODULE_COUNT: usize = 1024;
+    const MODULE_COUNT: usize = 2048;
 
     let fs = MemoryFileSystem::default();
     let paths = (0..MODULE_COUNT)
@@ -809,17 +851,57 @@ fn test_binding_query_handles_long_import_chains() {
             ),
         );
     }
-    let path_refs = paths.iter().map(String::as_str).collect::<Vec<_>>();
+    fs.insert("/src/unrelated.ts".into(), "export const unrelated = 1;");
+    let mut path_refs = paths.iter().map(String::as_str).collect::<Vec<_>>();
+    path_refs.push("/src/unrelated.ts");
 
-    let db = build_js_test_module_db(&fs, &path_refs, true);
+    let mut db = build_js_test_module_db(&fs, &path_refs, true);
     let module = db
         .module_for_path(Utf8Path::new(&paths[MODULE_COUNT - 1]))
         .expect("last module must exist");
-    let input = BindingTypeInput::new(&db, module, binding_range_by_name(&db, module, "value"));
+    let range = binding_range_by_name(&db, module, "value");
 
+    {
+        let input = BindingTypeInput::new(&db, module, range);
+        db.clear_salsa_events();
+        let ty = infer_binding_type(&db, input).expect("value type must be inferred");
+        assert!(is_inferred_number(&db, ty));
+
+        db.clear_salsa_events();
+        let ty = infer_binding_type(&db, input).expect("cached value type must be inferred");
+        assert!(is_inferred_number(&db, ty));
+        let events = db.take_salsa_events();
+        assert_function_query_was_not_run(&db, infer_binding_type, input, &events);
+    }
+
+    let unrelated = db
+        .module_for_path(Utf8Path::new("/src/unrelated.ts"))
+        .expect("unrelated module must exist");
+    fs.insert(
+        "/src/unrelated.ts".into(),
+        "export const unrelated = 'changed';",
+    );
+    let unrelated_kind = resolve_js_module_kind_for_test(&fs, "/src/unrelated.ts", true);
+    salsa::Setter::to(unrelated.set_kind(&mut db), unrelated_kind);
     db.clear_salsa_events();
-    let ty = infer_binding_type(&db, input).expect("value type must be inferred");
+    let input = BindingTypeInput::new(&db, module, range);
+    let ty = infer_binding_type(&db, input).expect("value type must remain inferred");
     assert!(is_inferred_number(&db, ty));
+    let events = db.take_salsa_events();
+    assert_function_query_was_not_run(&db, infer_binding_type, input, &events);
+
+    let terminal = db
+        .module_for_path(Utf8Path::new(&paths[0]))
+        .expect("terminal module must exist");
+    fs.insert(paths[0].clone().into(), "export const value = 'changed';");
+    let terminal_kind = resolve_js_module_kind_for_test(&fs, &paths[0], true);
+    salsa::Setter::to(terminal.set_kind(&mut db), terminal_kind);
+    db.clear_salsa_events();
+    let input = BindingTypeInput::new(&db, module, range);
+    let ty = infer_binding_type(&db, input).expect("changed value type must be inferred");
+    assert!(is_inferred_string(&db, ty));
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(&db, infer_binding_type, input, &events);
 }
 
 #[test]

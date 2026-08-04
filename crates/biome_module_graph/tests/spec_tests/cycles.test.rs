@@ -57,7 +57,7 @@ fn test_import_chains_preserve_terminal_export_across_on_demand_depth_boundary()
 
 #[test]
 fn test_deep_import_cycle_preserves_neighboring_acyclic_export() {
-    const CYCLE_LENGTH: usize = 129;
+    const CYCLE_LENGTH: usize = 1024;
 
     let fs = MemoryFileSystem::default();
     let mut paths = (0..CYCLE_LENGTH)
@@ -219,7 +219,7 @@ fn test_infer_module_types_bounds_mutual_namespace_reexports() {
     let inferred = infer_module_types_bottom_up(&db, index_module).expect("types must be inferred");
     let mut ty = inferred_binding_ty_by_name(&db, index_module, inferred, "cyclic")
         .expect("cyclic binding type must be inferred");
-    let mut reached_unknown = false;
+    let mut reached_unknown = ty == InferredTypeData::Unknown;
     for name in ["a", "b"].into_iter().cycle().take(128) {
         let Some(member_ty) = inferred.find_member_type(&db, ty, name) else {
             break;
@@ -280,4 +280,47 @@ fn test_binding_query_preserves_acyclic_data_next_to_an_import_cycle() {
         is_inferred_number(&db, stable),
         "stable member must be numeric, got {stable:?}"
     );
+}
+
+#[test]
+fn test_binding_query_is_invalidated_when_import_cycle_is_broken() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/a.ts".into(),
+        "import { b } from './b.ts'; export const value = b;",
+    );
+    fs.insert(
+        "/src/b.ts".into(),
+        "import { value } from './a.ts'; export const b = value;",
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        "import { value } from './a.ts'; export const result = value;",
+    );
+    let mut db = build_js_test_module_db(&fs, &["/src/a.ts", "/src/b.ts", "/src/index.ts"], true);
+    let index = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let range = binding_range_by_name(&db, index, "result");
+    {
+        let input = BindingTypeInput::new(&db, index, range);
+        assert_eq!(
+            infer_binding_type(&db, input),
+            Some(InferredTypeData::Unknown)
+        );
+    }
+
+    let b = db
+        .module_for_path(Utf8Path::new("/src/b.ts"))
+        .expect("b module must exist");
+    fs.insert("/src/b.ts".into(), "export const b = 1;");
+    let b_kind = resolve_js_module_kind_for_test(&fs, "/src/b.ts", true);
+    salsa::Setter::to(b.set_kind(&mut db), b_kind);
+
+    db.clear_salsa_events();
+    let input = BindingTypeInput::new(&db, index, range);
+    let ty = infer_binding_type(&db, input).expect("result type must be inferred");
+    assert!(is_inferred_number(&db, unwrap_typeof_values(&db, ty)));
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(&db, infer_binding_type, input, &events);
 }

@@ -6,6 +6,7 @@ use biome_console::markup;
 use biome_css_semantic::db::{
     css_property_definitions_from_snippet, css_property_definitions_from_source,
 };
+use biome_fs::normalize_path;
 use biome_languages::CssFileSource;
 use biome_rowan::{TextRange, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -353,7 +354,7 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
             .iter()
             .find(|definition| definition.name() == self.name)?;
         Some(CssPropertyDefinition {
-            module_path: path.to_path_buf(),
+            module_path: normalize_path(path),
             range: definition.range(),
         })
     }
@@ -388,7 +389,7 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
                 .iter()
                 .find(|definition| definition.name() == self.name)?;
             Some(CssPropertyDefinition {
-                module_path: path.to_path_buf(),
+                module_path: normalize_path(path),
                 range: definition.range() + snippet.content_offset(self.db),
             })
         })

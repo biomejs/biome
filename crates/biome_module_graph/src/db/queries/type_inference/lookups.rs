@@ -11,7 +11,7 @@ use crate::db::type_inference::{
     ImportResolution, ResolutionCtx, find_member_type_on_demand as find_member_type_impl,
     find_value_member_type_on_demand as find_value_member_type_impl, resolve_local_type_on_demand,
 };
-use crate::module_graph::ModuleInfoKind;
+use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::type_inference::profiling::{
     TypeInferenceProfileOrigin, TypeInferenceQueryKind, execute_query,
 };
@@ -51,7 +51,8 @@ pub fn infer_expression_type<'db>(
             }
 
             let reference = js_info.raw_expressions.get(&expression)?.clone();
-            let mut ctx = ResolutionCtx::new(db, module, &js_info, ImportResolution::OnDemand);
+            let mut ctx =
+                ResolutionCtx::new(db, module, &js_info, ImportResolution::on_demand(module));
             Some(ctx.resolve(&reference))
         },
     )
@@ -79,18 +80,7 @@ pub fn infer_binding_type<'db>(
         TypeInferenceQueryKind::Lookups,
         TypeInferenceProfileOrigin::exact(module, range),
         "infer_binding_type",
-        || {
-            let ModuleInfoKind::Js(js_info) = module.kind(db) else {
-                return None;
-            };
-            if !js_info.infer_types {
-                return None;
-            }
-
-            let reference = js_info.raw_binding_types.get(&range)?.clone();
-            let mut ctx = ResolutionCtx::new(db, module, &js_info, ImportResolution::OnDemand);
-            Some(ctx.resolve(&reference))
-        },
+        || infer_binding_type_impl(db, input, ImportResolution::on_demand(module)),
     )
 }
 
@@ -117,19 +107,65 @@ pub fn infer_local_type<'db>(
         TypeInferenceQueryKind::Lookups,
         TypeInferenceProfileOrigin::document(module),
         "infer_local_type",
-        || {
-            let ModuleInfoKind::Js(js_info) = module.kind(db) else {
-                return None;
-            };
-            let type_id = input.type_id(db);
-            if !js_info.infer_types || type_id.index() >= js_info.raw_types.len() {
-                return None;
-            }
-
-            let mut ctx = ResolutionCtx::new(db, module, &js_info, ImportResolution::OnDemand);
-            Some(ctx.resolve_raw_type_id(TypeId::new(type_id.index())))
-        },
+        || infer_local_type_impl(db, input, ImportResolution::on_demand(module)),
     )
+}
+
+#[salsa::tracked(cycle_result=infer_binding_type_with_import_budget_cycle_result)]
+pub(crate) fn infer_binding_type_with_import_budget<'db>(
+    db: &'db dyn ModuleDb,
+    input: BindingTypeInput<'db>,
+    root: ModuleInfo,
+    remaining: u8,
+) -> Option<InferredTypeData<'db>> {
+    infer_binding_type_impl(db, input, ImportResolution::OnDemand { root, remaining })
+}
+
+#[salsa::tracked(cycle_result=infer_local_type_with_import_budget_cycle_result)]
+pub(crate) fn infer_local_type_with_import_budget<'db>(
+    db: &'db dyn ModuleDb,
+    input: LocalTypeInput<'db>,
+    root: ModuleInfo,
+    remaining: u8,
+) -> Option<InferredTypeData<'db>> {
+    infer_local_type_impl(db, input, ImportResolution::OnDemand { root, remaining })
+}
+
+fn infer_binding_type_impl<'db>(
+    db: &'db dyn ModuleDb,
+    input: BindingTypeInput<'db>,
+    import_resolution: ImportResolution<'_>,
+) -> Option<InferredTypeData<'db>> {
+    let module = input.module(db);
+    let range = input.range(db);
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        return None;
+    };
+    if !js_info.infer_types {
+        return None;
+    }
+
+    let reference = js_info.raw_binding_types.get(&range)?.clone();
+    let mut ctx = ResolutionCtx::new(db, module, &js_info, import_resolution);
+    Some(ctx.resolve(&reference))
+}
+
+fn infer_local_type_impl<'db>(
+    db: &'db dyn ModuleDb,
+    input: LocalTypeInput<'db>,
+    import_resolution: ImportResolution<'_>,
+) -> Option<InferredTypeData<'db>> {
+    let module = input.module(db);
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        return None;
+    };
+    let type_id = input.type_id(db);
+    if !js_info.infer_types || type_id.index() >= js_info.raw_types.len() {
+        return None;
+    }
+
+    let mut ctx = ResolutionCtx::new(db, module, &js_info, import_resolution);
+    Some(ctx.resolve_raw_type_id(TypeId::new(type_id.index())))
 }
 
 // #endregion
@@ -156,6 +192,26 @@ fn infer_local_type_cycle_result<'db>(
     _db: &'db dyn ModuleDb,
     _id: salsa::Id,
     _input: LocalTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    Some(InferredTypeData::Unknown)
+}
+
+fn infer_binding_type_with_import_budget_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: BindingTypeInput<'db>,
+    _root: ModuleInfo,
+    _remaining: u8,
+) -> Option<InferredTypeData<'db>> {
+    Some(InferredTypeData::Unknown)
+}
+
+fn infer_local_type_with_import_budget_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: LocalTypeInput<'db>,
+    _root: ModuleInfo,
+    _remaining: u8,
 ) -> Option<InferredTypeData<'db>> {
     Some(InferredTypeData::Unknown)
 }
