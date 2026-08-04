@@ -1,4 +1,9 @@
 use crate::assert_semantics;
+use crate::{SemanticModelOptions, semantic_model};
+use biome_js_parser::JsParserOptions;
+use biome_js_syntax::AnyJsIdentifierReference;
+use biome_languages::JsFileSource;
+use biome_rowan::AstNode;
 
 // Reads
 
@@ -32,6 +37,29 @@ f(1);"#,
         console.log(5, a/*READ A1*/);",
     ok_reference_recursive,
         "const fn/*#A*/ = (callback) => { callback(fn/*READ A*/) };",
+}
+
+#[test]
+fn classifies_global_and_unresolved_references() {
+    let parse = biome_js_parser::parse(
+        "configured; missing;",
+        JsFileSource::js_module(),
+        JsParserOptions::default(),
+    );
+    let mut options = SemanticModelOptions::default();
+    options.globals.insert("configured".into());
+    let model = semantic_model(&parse.tree(), options);
+    let mut references = parse
+        .syntax()
+        .descendants()
+        .filter_map(AnyJsIdentifierReference::cast);
+    let configured = references.next().expect("configured reference");
+    let missing = references.next().expect("unresolved reference");
+
+    assert!(model.is_global_reference(&configured));
+    assert!(!model.is_unresolved_reference(&configured));
+    assert!(model.is_unresolved_reference(&missing));
+    assert!(!model.is_global_reference(&missing));
 }
 
 // Read Hoisting

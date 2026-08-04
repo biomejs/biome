@@ -8,6 +8,12 @@ use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent}
 use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 
+/// ## Warning
+///
+/// Using this type as a [biome_analyze::Rule] `Query` is discouraged, because it enforces the inspections of an entire
+/// document, even when the document doesn't contain the nodes that needs to be inspected.
+///
+/// Prefer the use of `Semantic<Node>` to trigger the rule only for those nodes that might trigger the rule.
 pub struct SemanticServices {
     model: SemanticModel,
 }

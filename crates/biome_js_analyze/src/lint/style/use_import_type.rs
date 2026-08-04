@@ -14,7 +14,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyJsCombinedSpecifier, AnyJsIdentifierUsage, AnyJsImportClause, AnyJsModuleItem,
+    AnyJsCombinedSpecifier, AnyJsIdentifierReference, AnyJsImportClause, AnyJsModuleItem,
     AnyJsModuleSource, AnyJsNamedImportSpecifier, AnyJsRoot, JsIdentifierBinding, JsImport,
     JsImportCombinedClause, JsImportDefaultClause, JsLanguage, JsModuleItemList,
     JsNamedImportSpecifierList, JsNamedImportSpecifiers, JsSyntaxNode, JsSyntaxToken, T,
@@ -838,7 +838,7 @@ fn is_only_used_as_type(
     let mut all_type_only = true;
     for reference in binding.all_references(model) {
         has_reference = true;
-        if let Some(reference) = AnyJsIdentifierUsage::cast_ref(&reference.syntax())
+        if let Some(reference) = AnyJsIdentifierReference::cast_ref(&reference.syntax())
             && !reference.is_only_type()
         {
             all_type_only = false;
