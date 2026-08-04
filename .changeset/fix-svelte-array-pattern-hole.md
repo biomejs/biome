@@ -10,4 +10,3 @@ Fixed the HTML formatter refusing to format a Svelte file containing an array pa
 {/each}
 ```
 
-The skipped position has no node of its own, which the formatter treated as a syntax error, so the whole file was left unformatted.
