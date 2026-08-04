@@ -51,7 +51,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoExtendNative {
-        version: "next",
+        version: "2.5.7",
         name: "noExtendNative",
         language: "js",
         recommended: false,
