@@ -17,7 +17,7 @@ expression: redactor(content)
 lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Some errors were emitted while running checks.
-
+  
 
 
 ```
@@ -28,15 +28,15 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 check.css:2:14 syntax/correctness/noInvalidPropertySyntax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Use a supported property syntax type.
-
+  
     1 │ @property --value {
   > 2 │     syntax: "<unknown>";
       │              ^^^^^^^^^
     3 │     inherits: false;
     4 │ }
-
+  
   i Supported types:
-
+  
   - <angle>
   - <color>
   - <custom-ident>
@@ -52,7 +52,7 @@ check.css:2:14 syntax/correctness/noInvalidPropertySyntax ━━━━━━━�
   - <transform-function>
   - <transform-list>
   - <url>
-
+  
 
 ```
 
