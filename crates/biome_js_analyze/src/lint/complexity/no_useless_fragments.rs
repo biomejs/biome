@@ -35,8 +35,6 @@ declare_lint_rule! {
     /// <></>
     /// ```
     ///
-    /// A fragment used as an attribute value is reported as well:
-    ///
     /// ```jsx,expect_diagnostic
     /// <Component prop={<><div /></>} />
     /// ```
