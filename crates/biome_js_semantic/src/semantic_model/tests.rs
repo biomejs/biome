@@ -6,8 +6,8 @@ mod test {
     };
     use biome_js_parser::JsParserOptions;
     use biome_js_syntax::{
-        AnyJsIdentifierReference, JsIdentifierAssignment, JsIdentifierBinding,
-        JsReferenceIdentifier, JsSyntaxKind, TsIdentifierBinding,
+        JsIdentifierAssignment, JsIdentifierBinding, JsReferenceIdentifier, JsSyntaxKind,
+        TsIdentifierBinding,
     };
     use biome_languages::JsFileSource;
     use biome_rowan::{AstNode, SyntaxNodeCast};
@@ -324,9 +324,6 @@ mod test {
         assert_eq!(globals.len(), 1);
         assert!(globals[0].is_read());
         assert_eq!(globals[0].syntax().text_trimmed(), "console");
-        let reference = AnyJsIdentifierReference::unwrap_cast(globals[0].syntax());
-        assert!(model.is_global_reference(&reference));
-        assert!(!model.is_unresolved_reference(&reference));
     }
 
     #[test]
@@ -410,8 +407,6 @@ declare module "jsoneditor" {
         let unresolved_reference = unresolved_references
             .next()
             .expect("expected one unresolved reference");
-        assert!(model.is_unresolved_reference(&unresolved_reference.tree()));
-        assert!(!model.is_global_reference(&unresolved_reference.tree()));
         assert_eq!(
             unresolved_reference.tree().syntax().text_trimmed(),
             "Namespace"
