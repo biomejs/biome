@@ -516,11 +516,11 @@ impl Format<FormatTypeContext> for CssImports {
         &self,
         f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
     ) -> FormatResult<()> {
-        if self.0.is_empty() {
+        if self.is_empty() {
             return write!(f, [token("No imports")]);
         }
         let mut joiner = f.join();
-        for (_, import) in &self.0 {
+        for import in self.iter() {
             let entry = format_with(|f| {
                 write!(
                     f,
@@ -772,8 +772,8 @@ impl Format<FormatTypeContext> for HtmlModuleInfoInner {
 
         let script_imports_section = format_with(|f| {
             let mut sorted: Vec<_> = self
-                .static_import_paths
-                .iter()
+                .import_paths
+                .named_iter()
                 .map(|(specifier, resolved)| {
                     let resolved_str = resolved.as_path().map_or("<unresolved>".to_string(), |p| {
                         p.as_str().replace('\\', "/")

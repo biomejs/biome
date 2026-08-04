@@ -165,7 +165,7 @@ impl QueryMatch for SemanticModelEvent {
 impl Visitor for SemanticModelVisitor {
     type Language = JsLanguage;
 
-    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, mut ctx: VisitorContext<JsLanguage>) {
+    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, mut ctx: VisitorContext<Self::Language>) {
         let root = match event {
             WalkEvent::Enter(node) => {
                 if node.parent().is_some() {

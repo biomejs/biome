@@ -4,8 +4,7 @@ use biome_css_syntax::{
     CssDashedIdentifier, CssDeclaration, CssPropertyAtRule, CssRelativeSelector, CssSyntaxKind::*,
 };
 use biome_property_codec::{
-    PropertySyntaxDiagnostic, PropertySyntaxErrorKind, PropertySyntaxParseDiagnostic,
-    PropertySyntaxResult, encode,
+    PropertySyntaxErrorKind, PropertySyntaxParseDiagnostic, PropertySyntaxResult, encode,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxNodeOptionExt, TextRange};
 use std::collections::VecDeque;
@@ -330,7 +329,8 @@ fn parse_property_syntax(value: AnyCssGenericPropertyValueOrExpression) -> Prope
 }
 
 fn invalid_property_syntax(range: TextRange) -> PropertySyntaxResult {
-    PropertySyntaxResult::Error(PropertySyntaxDiagnostic::Parse(
-        PropertySyntaxParseDiagnostic::new(PropertySyntaxErrorKind::ExpectedString, range),
+    PropertySyntaxResult::Error(PropertySyntaxParseDiagnostic::new(
+        PropertySyntaxErrorKind::ExpectedString,
+        range,
     ))
 }
