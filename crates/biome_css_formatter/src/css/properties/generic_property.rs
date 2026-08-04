@@ -248,23 +248,20 @@ impl<'a> CssPropertyColonComments<'a> {
         let formatted = format_dangling_comment(comment);
 
         if comment.lines_before() > 0 {
-            if comment.kind().is_line() {
-                if let Some(source_indent) = source_indent_before_comment(comment) {
-                    return write!(
-                        f,
-                        [dedent_to_root(&align(
-                            source_indent,
-                            &format_args![hard_line_break(), formatted]
-                        ))]
-                    );
-                }
+            if let Some(source_indent) = source_indent_before_comment(comment) {
+                return write!(
+                    f,
+                    [dedent_to_root(&align(
+                        source_indent,
+                        &format_args![hard_line_break(), formatted]
+                    ))]
+                );
+            }
 
+            if comment.kind().is_line() {
                 return write!(f, [hard_line_break(), formatted]);
             }
 
-            // Keep the block comment at its raw column:
-            // a { color:
-            // /* note */ red; }
             return write!(
                 f,
                 [dedent_to_root(&format_args![hard_line_break(), formatted])]
