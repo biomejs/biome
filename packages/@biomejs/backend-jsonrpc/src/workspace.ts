@@ -2427,6 +2427,11 @@ See https://biomejs.dev/linter/rules/no-implied-eval
 	 */
 	noImpliedEval?: NoImpliedEvalConfiguration;
 	/**
+	* Checks that the initial-value of an @property rule follows the value format declared by its syntax.
+See https://biomejs.dev/linter/rules/no-inconsistent-property-init-value 
+	 */
+	noInconsistentPropertyInitValue?: NoInconsistentPropertyInitValueConfiguration;
+	/**
 	* Disallow the use of inline styles.
 See https://biomejs.dev/linter/rules/no-inline-styles 
 	 */
@@ -4707,6 +4712,9 @@ export type NoIdenticalTestTitleConfiguration =
 export type NoImpliedEvalConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoImpliedEvalOptions;
+export type NoInconsistentPropertyInitValueConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoInconsistentPropertyInitValueOptions;
 export type NoInlineStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInlineStylesOptions;
@@ -6578,6 +6586,10 @@ export interface RuleWithNoImpliedEvalOptions {
 	level: RulePlainConfiguration;
 	options?: NoImpliedEvalOptions;
 }
+export interface RuleWithNoInconsistentPropertyInitValueOptions {
+	level: RulePlainConfiguration;
+	options?: NoInconsistentPropertyInitValueOptions;
+}
 export interface RuleWithNoInlineStylesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8382,6 +8394,7 @@ name will not trigger this rule.
 export type NoFloatingPromisesOptions = {};
 export type NoIdenticalTestTitleOptions = {};
 export type NoImpliedEvalOptions = {};
+export type NoInconsistentPropertyInitValueOptions = {};
 export type NoInlineStylesOptions = {};
 export interface NoJsRestrictedPropertiesOptions {
 	/**
@@ -9908,6 +9921,7 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentObjectDefinition"
+	| "lint/nursery/noInconsistentPropertyInitValue"
 	| "lint/nursery/useConsistentTestIt"
 	| "lint/nursery/useDisposables"
 	| "lint/nursery/useDomNodeTextContent"

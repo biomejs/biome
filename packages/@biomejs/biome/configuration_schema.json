@@ -4434,6 +4434,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoInconsistentPropertyInitValueConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoInconsistentPropertyInitValueOptions" }
+			]
+		},
+		"NoInconsistentPropertyInitValueOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoIncrementDecrementConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6782,6 +6792,13 @@
 					"description": "Disallow the use of eval()-like methods.\nSee https://biomejs.dev/linter/rules/no-implied-eval",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoImpliedEvalConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noInconsistentPropertyInitValue": {
+					"description": "Checks that the initial-value of an @property rule follows the value format declared by its syntax.\nSee https://biomejs.dev/linter/rules/no-inconsistent-property-init-value",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoInconsistentPropertyInitValueConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9246,6 +9263,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoImportantStylesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoInconsistentPropertyInitValueOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoInconsistentPropertyInitValueOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
