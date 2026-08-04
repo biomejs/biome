@@ -569,6 +569,51 @@ fn should_lint_a_html_file() {
 }
 
 #[test]
+fn should_handle_htm_file() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let htm_file = Utf8Path::new("index.htm");
+    fs.insert(
+        htm_file.into(),
+        r#"<div scope = "col"></div>
+"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "html": {
+        "formatter": {
+            "enabled": true
+        },
+        "linter": {
+            "enabled": true
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", htm_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_handle_htm_file",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn should_handle_svg_file() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
