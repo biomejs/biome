@@ -1,11 +1,13 @@
-use std::fmt::Debug;
-
 use crate::prelude::*;
 use crate::shared::FmtAnyAttributeInitializer;
 use crate::utils::srcset::{FormatSrcsetCandidates, parse_srcset};
 use biome_formatter::{CstFormatContext, FormatRuleWithOptions, write};
-use biome_html_syntax::{HtmlAttributeInitializerClause, HtmlAttributeInitializerClauseFields};
+use biome_html_syntax::{
+    AnyHtmlAttributeInitializer, HtmlAttributeInitializerClause,
+    HtmlAttributeInitializerClauseFields,
+};
 use biome_rowan::TokenText;
+use std::fmt::Debug;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlAttributeInitializerClause {
