@@ -32,4 +32,4 @@ a { font-family: revert-layer }
 /* @supports feature declarations (the condition part) should not trigger the rule */
 @supports (font: -apple-system-body) {
   /* styles inside @supports block will be checked separately */
-}
+}a { font-family: math; }

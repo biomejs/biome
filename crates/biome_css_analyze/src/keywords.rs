@@ -10,9 +10,10 @@ pub const SYSTEM_FAMILY_NAME_KEYWORDS: [&str; 6] = [
     "status-bar",
 ];
 
-pub const FONT_FAMILY_KEYWORDS: [&str; 10] = [
+pub const FONT_FAMILY_KEYWORDS: [&str; 11] = [
     "cursive",
     "fantasy",
+    "math",
     "monospace",
     "sans-serif",
     "serif",
