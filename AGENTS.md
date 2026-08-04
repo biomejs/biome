@@ -214,11 +214,22 @@ touch src/lib.rs  # Triggers recompilation
 cargo test
 ```
 
-### 6. Read Before You Edit
+### 6. Final Code Review
+
+After implementation, code generation, formatting, linting, and tests are complete, review the finished change with the `biome-code-review` skill before committing or opening a pull request.
+
+- Prefer running the review in a fresh sub-agent when sub-agents are available.
+- Give the reviewer only the review scope and the intended business behavior of the fix or feature.
+- Do not include implementation details, suspected defects, areas to prioritize, previous review findings, or expected outcomes. Leave your bias out.
+- The review scope should be a pull request number, branch, commit range, or complete working-tree diff.
+- If a sub-agent is unavailable, load the skill in the current agent and perform the review directly.
+- Resolve actionable findings, rerun the affected verification, and repeat the review when the fixes materially change the implementation.
+
+### 7. Read Before You Edit
 
 Read files in full before making wide-ranging changes, before editing files you have not already fully inspected, and when the user asks you to investigate or audit something. Do not rely only on search snippets for broad changes.
 
-### 7. Comments and Doc Comments
+### 8. Comments and Doc Comments
 
 These rules apply to **every** comment you write, including ones added incidentally while fixing a bug. Full guidance with examples: [`.claude/skills/doc-comments/SKILL.md`](./.claude/skills/doc-comments/SKILL.md).
 
@@ -236,6 +247,7 @@ These rules apply to **every** comment you write, including ones added incidenta
 Located in `.claude/skills/`, these provide step-by-step workflows:
 
 - **biome-developer** - General development best practices and common gotchas
+- **biome-code-review** - Reviewing a completed change for correctness and compliance before committing or opening a pull request
 - **changeset** - Creating and writing proper changesets
 - **doc-comments** - Writing comments and rustdoc addressed to developers
 - **eslint-migrate-options** - Implementing ESLint-to-Biome rule option migrators
@@ -372,6 +384,8 @@ Before opening a PR, verify:
   - [ ] Analyzer/Bindings: Optional (CI Autofix handles this)
 - [ ] Code formatted (`just f`)
 - [ ] Code linted (`just l`)
+- [ ] Completed change reviewed with `biome-code-review`, preferably in a fresh sub-agent with only the scope and intended business behavior
+- [ ] Actionable review findings resolved and affected verification rerun
 - [ ] Changeset created if user-facing (file in `.changeset/` with correct type)
 - [ ] PR template filled out completely
 - [ ] AI assistance disclosed if applicable
