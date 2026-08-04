@@ -163,7 +163,9 @@ fn is_reportable_selector(selector: &AnyCssSelector) -> bool {
     // Count class selectors anywhere in the selector subtree so pseudo-class
     // arguments such as :is(.foo, .bar) and :nth-child(... of .foo) contribute
     // to the same top-level selector total.
-    let (AnyCssSelector::CssCompoundSelector(_) | AnyCssSelector::CssComplexSelector(_)) = selector
+    let (AnyCssSelector::CssCompoundSelector(_)
+    | AnyCssSelector::CssComplexSelector(_)
+    | AnyCssSelector::ScssPartialCombinatorSelector(_)) = selector
     else {
         return false;
     };
