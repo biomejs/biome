@@ -14,7 +14,7 @@ fn definitions(files: &[(&str, &str)], path: &str) -> Vec<String> {
     let module = db.module_for_path(Utf8Path::new(path)).unwrap();
     css_property_definitions(&db, SymbolFromModuleInfo::new(&db, "--value", module))
         .iter()
-        .map(|definition| definition.module_path.to_string())
+        .map(|definition| definition.module_path.as_str().replace('\\', "/"))
         .collect()
 }
 
@@ -23,7 +23,7 @@ fn workspace_definitions(files: &[(&str, &str)], path: &str) -> Vec<String> {
     let module = db.module_for_path(Utf8Path::new(path)).unwrap();
     css_property_definitions(&db, SymbolFromModuleInfo::new(&db, "--value", module))
         .iter()
-        .map(|definition| definition.module_path.to_string())
+        .map(|definition| definition.module_path.as_str().replace('\\', "/"))
         .collect()
 }
 
@@ -220,7 +220,7 @@ fn js_definitions(js: &str, target: &str) -> Vec<String> {
     let module = db.module_for_path(Utf8Path::new(target)).unwrap();
     css_property_definitions(&db, SymbolFromModuleInfo::new(&db, "--value", module))
         .iter()
-        .map(|d| d.module_path.to_string())
+        .map(|definition| definition.module_path.as_str().replace('\\', "/"))
         .collect()
 }
 
