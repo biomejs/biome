@@ -1,7 +1,11 @@
 use super::{BindingTypeData, InferredModuleTypes, globals::global_type};
-use crate::db::queries::{LocalTypeInput, infer_local_type, infer_module_types};
+use crate::db::queries::{
+    LocalTypeInput, infer_local_type, infer_module_types, infer_module_types_from_tables,
+    inference_module_sccs,
+};
 use crate::module_graph::ModuleInfo;
-use crate::{JsModuleInfo, ModuleDb, module_for_key};
+use crate::{JsModuleInfo, ModuleDb, ModuleGraphGeneration, module_for_key};
+use biome_js_syntax::TsModuleDeclaration;
 use biome_js_type_info::{
     GlobalTypeId, RawTypeData, ResolvedTypeId, ScopeId, TypeId, TypeReference,
     TypeReferenceQualifier, TypeResolverLevel,
@@ -11,6 +15,7 @@ use biome_js_type_info::{
         TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
     },
 };
+use biome_rowan::AstNode;
 use rustc_hash::{FxHashMap, FxHashSet};
 use salsa::plumbing::AsId;
 use std::cell::Cell;
@@ -20,6 +25,7 @@ use std::cell::Cell;
 // handles before recursion, so the remaining depth comes from structural types
 // nested within one declaration.
 pub(super) const MAX_RAW_TYPE_RESOLUTION_DEPTH: usize = 64;
+pub(super) const MAX_ON_DEMAND_IMPORT_DEPTH: u8 = 128;
 const MAX_INFERRED_EXPRESSION_WRAPPER_STEPS: usize = 64;
 const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 
@@ -33,13 +39,25 @@ const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 #[derive(Clone, Copy)]
 pub(in crate::db) enum ImportResolution<'a> {
     /// Resolves imported symbols through export and lookup queries.
-    OnDemand,
-    /// Reads imports from module tables while blocking the active cyclic component.
+    OnDemand { root: ModuleInfo, remaining: u8 },
+    /// Reads imports from complete module tables while blocking cyclic edges.
+    FromTables { root: ModuleInfo },
+    /// Reads imports from complete module tables while blocking the active cycle.
     CycleFallback(&'a FxHashSet<ModuleInfo>),
+}
+
+impl ImportResolution<'_> {
+    pub(in crate::db) fn on_demand(root: ModuleInfo) -> Self {
+        Self::OnDemand {
+            root,
+            remaining: MAX_ON_DEMAND_IMPORT_DEPTH,
+        }
+    }
 }
 
 pub(in crate::db) struct ResolutionCtx<'db, 'a> {
     pub(in crate::db::type_inference) db: &'db dyn ModuleDb,
+    pub(in crate::db::type_inference) module: ModuleInfo,
     pub(in crate::db::type_inference) module_key: ModuleKey,
     pub(in crate::db::type_inference) js_info: &'a JsModuleInfo,
     pub(in crate::db::type_inference) import_resolution: ImportResolution<'a>,
@@ -97,6 +115,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
     ) -> Self {
         Self {
             db,
+            module,
             module_key: ModuleKey::new(module.as_id()),
             js_info,
             import_resolution,
@@ -116,7 +135,15 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
         module: ModuleInfo,
     ) -> Option<&'db InferredModuleTypes<'db>> {
         match self.import_resolution {
-            ImportResolution::OnDemand => infer_module_types(self.db, module),
+            ImportResolution::OnDemand { .. } => infer_module_types(self.db, module),
+            ImportResolution::FromTables { root } => {
+                let sccs = inference_module_sccs(self.db, ModuleGraphGeneration::get(self.db));
+                if module == self.module || sccs.contains_cycle_between(self.module, module) {
+                    None
+                } else {
+                    infer_module_types_from_tables(self.db, root, module)
+                }
+            }
             ImportResolution::CycleFallback(blocked) => {
                 if blocked.contains(&module) {
                     None
@@ -219,35 +246,30 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
             }
             _ => return fallback,
         };
-        let scope_id = self
-            .js_info
-            .semantic_model
-            .all_bindings()
-            .find_map(|binding| {
-                let reference = self
-                    .js_info
-                    .raw_binding_types
-                    .get(&binding.syntax().text_trimmed_range())?;
-                matches!(
-                    reference,
-                    TypeReference::Resolved(id)
-                        if id.level() == TypeResolverLevel::Thin && id.id() == type_id
-                )
-                .then(|| binding.scope().id())
-            });
-        let Some(scope_id) = scope_id else {
-            return fallback;
-        };
-
         let members = self
             .js_info
             .semantic_model
             .all_bindings()
-            .filter(|binding| {
-                binding
-                    .scope()
-                    .parent()
-                    .is_some_and(|parent| parent.id() == scope_id)
+            .filter_map(|binding| {
+                let reference = self
+                    .js_info
+                    .raw_binding_types
+                    .get(&binding.syntax().text_trimmed_range())?;
+                if !matches!(
+                    reference,
+                    TypeReference::Resolved(id)
+                        if id.level() == TypeResolverLevel::Thin && id.id() == type_id
+                ) {
+                    return None;
+                }
+                let declaration = binding.tree().declaration()?;
+                TsModuleDeclaration::cast(declaration.syntax().clone())
+            })
+            .flat_map(|declaration| {
+                self.js_info
+                    .semantic_model
+                    .scope(declaration.syntax())
+                    .bindings()
             })
             .filter_map(|binding| {
                 let name = binding

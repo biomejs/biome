@@ -2,7 +2,7 @@
 
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::type_inference::profiling::record_cycle_recovery;
-use crate::{JsExport, JsModuleInfo, JsOwnExport, ModuleDb};
+use crate::{JsModuleInfo, ModuleDb};
 use biome_css_syntax::TextRange;
 use biome_js_type_info::interned_types::{
     LocalTypeId, ModuleKey, TypeData as InferredTypeData, TypeTransformError,
@@ -224,58 +224,22 @@ pub(super) fn infer_module_types_cycle_result<'db>(
 /// graph walks complete, the set is the strongly connected component containing
 /// `root`: every member is reachable from `root` and can also reach `root`.
 ///
-/// The forward and reverse walks each have their own work limit. If the forward
-/// walk reaches its limit, the exact cycle is unknown and the function returns
-/// every reachable module discovered so far, conservatively blocking acyclic
-/// dependencies too. If the reverse walk reaches its limit, the function
-/// returns the part of the cycle discovered so far. In either walk, the module
-/// that exhausts the limit is included but is not expanded.
 fn inference_scc(
     db: &dyn ModuleDb,
     root: ModuleInfo,
     root_info: &JsModuleInfo,
 ) -> FxHashSet<ModuleInfo> {
-    const MAX_DEPENDENCY_STEPS: usize = 1024;
-
     // Record every dependency reachable from the root while building the
     // reverse graph needed to determine which modules can reach it again.
     let mut reachable = FxHashSet::default();
     let mut reverse = FxHashMap::<ModuleInfo, Vec<ModuleInfo>>::default();
     let mut pending = vec![(root, root_info.clone())];
-    let mut remaining_dependency_steps = MAX_DEPENDENCY_STEPS;
     reachable.insert(root);
 
     while let Some((source, source_info)) = pending.pop() {
         db.unwind_if_revision_cancelled();
 
-        let dependency_paths = source_info
-            .import_paths
-            .iter()
-            .filter(|import| import.kind.is_static())
-            .map(|import| &import.resolved_path)
-            .chain(
-                source_info
-                    .blanket_reexports
-                    .iter()
-                    .map(|reexport| &reexport.import.resolved_path),
-            )
-            .chain(
-                source_info
-                    .exports
-                    .values()
-                    .filter_map(|export| match export {
-                        JsExport::Reexport(reexport) | JsExport::ReexportType(reexport) => {
-                            Some(&reexport.import.resolved_path)
-                        }
-                        JsExport::Own(JsOwnExport::Namespace(reexport))
-                        | JsExport::OwnType(JsOwnExport::Namespace(reexport)) => {
-                            Some(&reexport.import.resolved_path)
-                        }
-                        JsExport::Own(_) | JsExport::OwnType(_) => None,
-                    }),
-            );
-
-        for resolved_path in dependency_paths {
+        for resolved_path in source_info.type_inference_dependency_paths() {
             let Some(path) = resolved_path.as_path() else {
                 continue;
             };
@@ -291,13 +255,6 @@ fn inference_scc(
 
             reverse.entry(target).or_default().push(source);
             if reachable.insert(target) {
-                if remaining_dependency_steps == 0 {
-                    // The search cannot determine the exact cycle within its
-                    // step limit. Block every dependency found so far to avoid
-                    // starting another long inference chain from the fallback.
-                    return reachable;
-                }
-                remaining_dependency_steps -= 1;
                 pending.push((target, target_info));
             }
         }
@@ -308,17 +265,12 @@ fn inference_scc(
     // component. Acyclic dependencies have no reverse path and remain usable.
     let mut scc = FxHashSet::default();
     let mut pending = vec![root];
-    let mut remaining_dependency_steps = MAX_DEPENDENCY_STEPS;
     scc.insert(root);
     while let Some(target) = pending.pop() {
         db.unwind_if_revision_cancelled();
         if let Some(predecessors) = reverse.get(&target) {
             for predecessor in predecessors {
                 if scc.insert(*predecessor) {
-                    if remaining_dependency_steps == 0 {
-                        return scc;
-                    }
-                    remaining_dependency_steps -= 1;
                     pending.push(*predecessor);
                 }
             }

@@ -51,6 +51,27 @@ impl JsModuleInfo {
         }
     }
 
+    pub(crate) fn type_inference_dependency_paths(&self) -> impl Iterator<Item = &ResolvedPath> {
+        self.static_imports
+            .values()
+            .map(|import| &import.resolved_path)
+            .chain(
+                self.blanket_reexports
+                    .iter()
+                    .map(|reexport| &reexport.import.resolved_path),
+            )
+            .chain(self.exports.values().filter_map(|export| match export {
+                JsExport::Reexport(reexport) | JsExport::ReexportType(reexport) => {
+                    Some(&reexport.import.resolved_path)
+                }
+                JsExport::Own(JsOwnExport::Namespace(reexport))
+                | JsExport::OwnType(JsOwnExport::Namespace(reexport)) => {
+                    Some(&reexport.import.resolved_path)
+                }
+                JsExport::Own(_) | JsExport::OwnType(_) => None,
+            }))
+    }
+
     pub fn diagnostics(&self) -> &[ModuleDiagnostic] {
         self.diagnostics.as_slice()
     }

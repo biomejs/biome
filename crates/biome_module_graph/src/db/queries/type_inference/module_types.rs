@@ -9,6 +9,7 @@
 //! imported from other modules. Prefer a lookup query when only one type is
 //! needed.
 
+use crate::db::queries::js_scc::compute_sccs;
 use crate::db::type_inference::{
     ImportResolution, InferredModuleTypes, infer_module_types_cycle_result, resolve_raw_types,
 };
@@ -19,9 +20,9 @@ use crate::type_inference::profiling::{
     start_whole_module_inference, start_whole_module_inference_at,
 };
 use crate::{
-    JsExport, JsOwnExport, ModuleDb, ResolvedPath, type_inference::TypeInferenceCodeReference,
+    ModuleDb, ModuleGraphGeneration, ResolvedPath, type_inference::TypeInferenceCodeReference,
 };
-use rustc_hash::FxHashSet;
+use rustc_hash::{FxHashMap, FxHashSet};
 
 // #region COMPLETE MODULE QUERY
 
@@ -66,13 +67,112 @@ pub fn infer_module_types<'db>(
                 );
                 whole_module
             });
-            let result = resolve_raw_types(db, module, &js_info, ImportResolution::OnDemand);
+            let result =
+                resolve_raw_types(db, module, &js_info, ImportResolution::on_demand(module));
             if let Some(whole_module) = whole_module {
                 whole_module.complete();
             }
             Some(result)
         },
     )
+}
+
+#[salsa::tracked(returns(as_ref), cycle_result=infer_module_types_from_tables_cycle_result)]
+pub(crate) fn infer_module_types_from_tables<'db>(
+    db: &'db dyn ModuleDb,
+    root: ModuleInfo,
+    module: ModuleInfo,
+) -> Option<InferredModuleTypes<'db>> {
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        return None;
+    };
+    if !js_info.infer_types {
+        return None;
+    }
+
+    Some(resolve_raw_types(
+        db,
+        module,
+        &js_info,
+        ImportResolution::FromTables { root },
+    ))
+}
+
+fn infer_module_types_from_tables_cycle_result<'db>(
+    db: &'db dyn ModuleDb,
+    id: salsa::Id,
+    _root: ModuleInfo,
+    module: ModuleInfo,
+) -> Option<InferredModuleTypes<'db>> {
+    infer_module_types_cycle_result(db, id, module)
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub(crate) struct InferenceModuleSccs {
+    component_by_module: FxHashMap<ModuleInfo, u32>,
+    component_sizes: Box<[u32]>,
+}
+
+impl InferenceModuleSccs {
+    pub(crate) fn contains_cycle_between(&self, from: ModuleInfo, to: ModuleInfo) -> bool {
+        let (Some(&from_component), Some(&to_component)) = (
+            self.component_by_module.get(&from),
+            self.component_by_module.get(&to),
+        ) else {
+            return false;
+        };
+
+        from_component == to_component
+            && self
+                .component_sizes
+                .get(from_component as usize)
+                .is_some_and(|&size| size > 1)
+    }
+}
+
+#[salsa::tracked(returns(ref))]
+pub(crate) fn inference_module_sccs(
+    db: &dyn ModuleDb,
+    generation: ModuleGraphGeneration,
+) -> InferenceModuleSccs {
+    let _ = generation.value(db);
+    let mut id_by_module = FxHashMap::default();
+
+    db.for_each_module(&mut |module| {
+        if matches!(module.kind(db), ModuleInfoKind::Js(_)) {
+            id_by_module.insert(module, id_by_module.len() as u32);
+        }
+    });
+
+    let mut edges = vec![Vec::new(); id_by_module.len()];
+    db.for_each_module(&mut |module| {
+        let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+            return;
+        };
+        let Some(&from_id) = id_by_module.get(&module) else {
+            return;
+        };
+        let Some(edges) = edges.get_mut(from_id as usize) else {
+            return;
+        };
+        push_inference_dependency_ids(db, &id_by_module, edges, &js_info);
+    });
+
+    let (component_by_id, component_sizes) = compute_sccs(&edges);
+    let component_by_module = id_by_module
+        .into_iter()
+        .filter_map(|(module, id)| {
+            component_by_id
+                .get(id as usize)
+                .copied()
+                .map(|component| (module, component))
+        })
+        .collect();
+
+    InferenceModuleSccs {
+        component_by_module,
+        component_sizes: component_sizes.into_boxed_slice(),
+    }
 }
 
 // #endregion
@@ -107,7 +207,7 @@ pub fn infer_module_types_bottom_up<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
 ) -> Option<&'db InferredModuleTypes<'db>> {
-    infer_module_types_bottom_up_impl(db, module)
+    infer_module_types_bottom_up_impl(db, module, ModuleInferenceMode::OnDemand)
 }
 
 pub(crate) fn infer_module_types_bottom_up_for_import_depth<'db>(
@@ -120,7 +220,7 @@ pub(crate) fn infer_module_types_bottom_up_for_import_depth<'db>(
         TypeInferenceProfileOrigin::Inherited,
         implementation,
     );
-    let result = infer_module_types_bottom_up_impl(db, module);
+    let result = infer_module_types_bottom_up_impl(db, module, ModuleInferenceMode::FromTables);
     whole_module.complete();
     result
 }
@@ -128,13 +228,19 @@ pub(crate) fn infer_module_types_bottom_up_for_import_depth<'db>(
 fn infer_module_types_bottom_up_impl<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
+    mode: ModuleInferenceMode,
 ) -> Option<&'db InferredModuleTypes<'db>> {
     let mut visited = FxHashSet::default();
     let mut stack = vec![(module, false)];
 
     while let Some((current, imports_visited)) = stack.pop() {
         if imports_visited {
-            let inferred = infer_module_types(db, current);
+            let inferred = match mode {
+                ModuleInferenceMode::OnDemand => infer_module_types(db, current),
+                ModuleInferenceMode::FromTables => {
+                    infer_module_types_from_tables(db, module, current)
+                }
+            };
             if current == module {
                 return inferred;
             }
@@ -150,37 +256,16 @@ fn infer_module_types_bottom_up_impl<'db>(
         let ModuleInfoKind::Js(js_info) = current.kind(db) else {
             continue;
         };
-        for import in js_info.static_imports.values() {
-            push_inference_dependency(db, &visited, &mut stack, &import.resolved_path);
-        }
-        for reexport in js_info.blanket_reexports.iter() {
-            push_inference_dependency(db, &visited, &mut stack, &reexport.import.resolved_path);
-        }
-        for export in js_info.exports.values() {
-            match export {
-                JsExport::Reexport(reexport) | JsExport::ReexportType(reexport) => {
-                    push_inference_dependency(
-                        db,
-                        &visited,
-                        &mut stack,
-                        &reexport.import.resolved_path,
-                    );
-                }
-                JsExport::Own(JsOwnExport::Namespace(reexport))
-                | JsExport::OwnType(JsOwnExport::Namespace(reexport)) => {
-                    push_inference_dependency(
-                        db,
-                        &visited,
-                        &mut stack,
-                        &reexport.import.resolved_path,
-                    );
-                }
-                JsExport::Own(_) | JsExport::OwnType(_) => {}
-            }
-        }
+        push_scheduled_inference_dependencies(db, &visited, &mut stack, &js_info);
     }
 
     None
+}
+
+#[derive(Clone, Copy)]
+enum ModuleInferenceMode {
+    OnDemand,
+    FromTables,
 }
 
 // #endregion
@@ -198,6 +283,37 @@ fn push_inference_dependency(
         && !visited.contains(&target)
     {
         stack.push((target, false));
+    }
+}
+
+fn push_scheduled_inference_dependencies(
+    db: &dyn ModuleDb,
+    visited: &FxHashSet<ModuleInfo>,
+    stack: &mut Vec<(ModuleInfo, bool)>,
+    js_info: &crate::JsModuleInfo,
+) {
+    for resolved_path in js_info.type_inference_dependency_paths() {
+        push_inference_dependency(db, visited, stack, resolved_path);
+    }
+}
+
+fn push_inference_dependency_ids(
+    db: &dyn ModuleDb,
+    id_by_module: &FxHashMap<ModuleInfo, u32>,
+    edges: &mut Vec<u32>,
+    js_info: &crate::JsModuleInfo,
+) {
+    let mut push = |resolved_path: &ResolvedPath| {
+        if let Some(path) = resolved_path.as_path()
+            && let Some(module) = db.module_for_path(path)
+            && let Some(&id) = id_by_module.get(&module)
+        {
+            edges.push(id);
+        }
+    };
+
+    for resolved_path in js_info.type_inference_dependency_paths() {
+        push(resolved_path);
     }
 }
 

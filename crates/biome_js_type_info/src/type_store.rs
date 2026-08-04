@@ -9,7 +9,10 @@ use rustc_hash::FxHasher;
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::AnyJsExpression;
 
-use crate::{RawTypeId, TypeData, TypeId, TypeReference, Union, globals::GLOBAL_UNDEFINED_ID};
+use crate::{
+    RawTypeId, TypeData, TypeId, TypeReference, Union, globals::GLOBAL_UNDEFINED_ID,
+    type_data::UNKNOWN_DATA,
+};
 
 /// Collector-side type table with indexed access and deduplicated insertion.
 #[derive(Default)]
@@ -24,7 +27,7 @@ impl TypeStore {
         let mut table = HashTable::with_capacity(types.len());
         for (i, data) in types.iter().enumerate() {
             let hash = hash_data(data);
-            table.insert_unique(hash, i, |index| hash_data(&types[*index]));
+            table.insert_unique(hash, i, |index| types.get(*index).map_or(0, hash_data));
         }
         Self { types, table }
     }
@@ -54,12 +57,12 @@ impl TypeStore {
         let hash = hash_data(data);
 
         self.table
-            .find(hash, |i| &self.types[*i] == data)
+            .find(hash, |i| self.types.get(*i).is_some_and(|ty| ty == data))
             .map(|index| TypeId::new(*index))
     }
 
     pub fn get_by_id(&self, id: TypeId) -> &TypeData {
-        &self.types[id.index()]
+        self.types.get(id.index()).unwrap_or(&UNKNOWN_DATA)
     }
 
     /// Inserts the given `data` if it is not registered yet.
@@ -69,8 +72,8 @@ impl TypeStore {
     pub fn insert_cow(&mut self, data: Cow<TypeData>) -> TypeId {
         let entry = self.table.entry(
             hash_data(&data),
-            |i| &self.types[*i] == data.as_ref(),
-            |i| hash_data(&self.types[*i]),
+            |i| self.types.get(*i).is_some_and(|ty| ty == data.as_ref()),
+            |i| self.types.get(*i).map_or(0, hash_data),
         );
         match entry {
             Entry::Occupied(entry) => TypeId::new(*entry.get()),

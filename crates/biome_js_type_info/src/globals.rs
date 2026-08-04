@@ -24,13 +24,15 @@ impl Default for RawGlobalTypes {
         // Builds a named instance member resolving to `id` in the global resolver.
         let member = |name: &'static str, id: TypeId| TypeMember {
             kind: TypeMemberKind::Named(Text::new_static(name)),
-            ty: RawTypeId::Global(GlobalTypeId::try_from_type_id(id).unwrap()).into(),
+            ty: GlobalTypeId::try_from_type_id(id)
+                .map_or_else(TypeReference::unknown, |id| RawTypeId::Global(id).into()),
         };
 
         // Builds a named static member resolving to `id` in the global resolver.
         let static_member = |name: &'static str, id: TypeId| TypeMember {
             kind: TypeMemberKind::NamedStatic(Text::new_static(name)),
-            ty: RawTypeId::Global(GlobalTypeId::try_from_type_id(id).unwrap()).into(),
+            ty: GlobalTypeId::try_from_type_id(id)
+                .map_or_else(TypeReference::unknown, |id| RawTypeId::Global(id).into()),
         };
 
         // Builds an empty-body global `Class` with `name` and `type_parameters`.
@@ -120,10 +122,8 @@ impl Default for RawGlobalTypes {
                     bindings: Default::default(),
                     is_optional: false,
                     is_rest: false,
-                    ty: RawTypeId::Global(
-                        GlobalTypeId::try_from_type_id(VOID_CALLBACK_ID).unwrap(),
-                    )
-                    .into(),
+                    ty: GlobalTypeId::try_from_type_id(VOID_CALLBACK_ID)
+                        .map_or_else(TypeReference::unknown, |id| RawTypeId::Global(id).into()),
                 })]
                 .into(),
                 return_type: ReturnType::Type(GLOBAL_VOID_ID.into()),
@@ -334,7 +334,10 @@ pub struct GlobalTypes<'db> {
 
 impl<'db> GlobalTypes<'db> {
     pub fn get(&self, id: GlobalTypeId) -> InferredTypeData<'db> {
-        self.types[id.index()]
+        self.types
+            .get(id.index())
+            .copied()
+            .unwrap_or(InferredTypeData::Unknown)
     }
 
     pub fn typeof_literal(&self, value: &str) -> InferredTypeData<'db> {
@@ -361,7 +364,7 @@ impl<'db> GlobalTypes<'db> {
 pub fn global_types<'db>(db: &'db dyn crate::TypeDb) -> GlobalTypes<'db> {
     let mut types: Box<[InferredTypeData<'db>]> = (0..NUM_PREDEFINED_TYPES)
         .map(|index| {
-            let id = GlobalTypeId::try_from_type_id(TypeId::new(index)).unwrap();
+            let id = GlobalTypeId::new(TypeId::new(index));
             InferredTypeData::from_raw_with_resolver(
                 db,
                 raw_global_type(id),
@@ -377,23 +380,29 @@ pub fn global_types<'db>(db: &'db dyn crate::TypeDb) -> GlobalTypes<'db> {
             )
         })
         .collect();
-    types[TYPEOF_OPERATOR_RETURN_UNION_ID_GLOBAL_TYPE_ID.index()] =
-        InferredTypeData::union_from_types(
-            db,
-            [
-                BIGINT_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-                BOOLEAN_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-                FUNCTION_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-                NUMBER_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-                OBJECT_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-                STRING_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-                SYMBOL_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-                UNDEFINED_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-            ]
-            .into_iter()
-            .map(|id| types[id.index()])
-            .collect(),
-        );
+    let typeof_types = [
+        BIGINT_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+        BOOLEAN_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+        FUNCTION_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+        NUMBER_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+        OBJECT_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+        STRING_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+        SYMBOL_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+        UNDEFINED_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+    ]
+    .into_iter()
+    .map(|id| {
+        types
+            .get(id.index())
+            .copied()
+            .unwrap_or(InferredTypeData::Unknown)
+    })
+    .collect();
+    if let Some(typeof_union) =
+        types.get_mut(TYPEOF_OPERATOR_RETURN_UNION_ID_GLOBAL_TYPE_ID.index())
+    {
+        *typeof_union = InferredTypeData::union_from_types(db, typeof_types);
+    }
     GlobalTypes { types }
 }
 

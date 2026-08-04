@@ -134,6 +134,68 @@ fn test_infer_module_types_resolves_local_multisegment_qualifiers() {
         .expect("result type must be inferred");
     assert!(is_inferred_string(&db, normalize_type(&db, module, result)));
 }
+
+#[test]
+fn test_infer_module_types_keeps_sibling_namespace_members_isolated() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            namespace Alpha {
+                export const alpha = "alpha";
+            }
+
+            module Beta {
+                export const beta = 1;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let alpha = inferred_binding_ty_by_name(&db, module, inferred, "Alpha")
+        .expect("Alpha type must be inferred");
+    assert!(inferred.find_member_type(&db, alpha, "alpha").is_some());
+    assert!(inferred.find_member_type(&db, alpha, "beta").is_none());
+
+    let beta = inferred_binding_ty_by_name(&db, module, inferred, "Beta")
+        .expect("Beta type must be inferred");
+    assert!(inferred.find_member_type(&db, beta, "beta").is_some());
+    assert!(inferred.find_member_type(&db, beta, "alpha").is_none());
+}
+
+#[test]
+fn test_infer_module_types_aggregates_merged_namespace_members() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            namespace Merged {
+                export const first = "first";
+            }
+
+            namespace Merged {
+                export const second = 2;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let merged = inferred_binding_ty_by_name(&db, module, inferred, "Merged")
+        .expect("Merged type must be inferred");
+
+    assert!(inferred.find_member_type(&db, merged, "first").is_some());
+    assert!(inferred.find_member_type(&db, merged, "second").is_some());
+}
+
 #[test]
 fn test_infer_module_types_resolves_record_index_signature_on_build() {
     let fs = MemoryFileSystem::default();

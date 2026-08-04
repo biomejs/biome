@@ -69,7 +69,8 @@ impl RawTypeId {
             TypeResolverLevel::Global => Self::Global(GlobalTypeId::new(id)),
             TypeResolverLevel::Thin => Self::Local(id),
             TypeResolverLevel::Import | TypeResolverLevel::Full => {
-                panic!("raw type IDs cannot use import or full resolution levels")
+                debug_assert!(false, "raw type IDs require global or thin resolution");
+                Self::Local(id)
             }
         }
     }
@@ -102,7 +103,7 @@ impl RawTypeId {
 
 impl TypeId {
     pub const fn new(index: usize) -> Self {
-        assert!(index <= u32::MAX as usize, "type index exceeds u32::MAX");
+        debug_assert!(index <= u32::MAX as usize, "type index exceeds u32::MAX");
         Self(index as u32)
     }
 
