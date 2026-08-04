@@ -7,11 +7,10 @@ use biome_js_syntax::AnyJsExpression;
 use biome_rowan::Text;
 
 use crate::{
-    Class, Function, FunctionParameter, GenericTypeParameter, Literal, PatternFunctionParameter,
+    Function, FunctionParameter, GenericTypeParameter, Literal, PatternFunctionParameter,
     Resolvable, ResolvedTypeData, ResolvedTypeId, ResolverId, ReturnType, ScopeId, TypeData,
-    TypeId, TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
-    TypeResolver, TypeResolverLevel, TypeStore, Union, flattening::MAX_FLATTEN_DEPTH,
-    interned_types::TypeData as InferredTypeData,
+    TypeId, TypeInstance, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+    TypeStore, Union, flattening::MAX_FLATTEN_DEPTH, interned_types::TypeData as InferredTypeData,
 };
 
 use super::globals_builder::GlobalsResolverBuilder;
@@ -41,41 +40,6 @@ pub struct GlobalsResolver {
 impl Default for RawGlobalTypes {
     /// Generated globals take precedence; manual definitions only fill missing slots.
     fn default() -> Self {
-        // Builds a named instance member resolving to `id` in the global resolver.
-        let member = |name: &'static str, id: TypeId| TypeMember {
-            kind: TypeMemberKind::Named(Text::new_static(name)),
-            ty: ResolvedTypeId::new(TypeResolverLevel::Global, id).into(),
-        };
-
-        // Builds a named static member resolving to `id` in the global resolver.
-        let static_member = |name: &'static str, id: TypeId| TypeMember {
-            kind: TypeMemberKind::NamedStatic(Text::new_static(name)),
-            ty: ResolvedTypeId::new(TypeResolverLevel::Global, id).into(),
-        };
-
-        // Builds an empty-body global `Class` with `name` and `type_parameters`.
-        let class = |name: &'static str, type_parameters: Box<[TypeReference]>| {
-            TypeData::Class(Box::new(Class {
-                name: Some(Text::new_static(name)),
-                type_parameters,
-                extends: None,
-                implements: Box::default(),
-                members: Box::default(),
-            }))
-        };
-
-        // Builds a zero-argument `Promise` method named after `id` that returns
-        // an instance of `Promise`.
-        let promise_method_definition = |id: TypeId| {
-            TypeData::from(Function {
-                is_async: false,
-                type_parameters: Default::default(),
-                name: Some(Text::new_static(global_type_name(id).unwrap_or("unknown"))),
-                parameters: Default::default(),
-                return_type: ReturnType::Type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
-            })
-        };
-
         // Builds a string-literal `TypeData` whose value is the static text
         // `value`.
         let string_literal = |value: &'static str| -> TypeData {
@@ -105,76 +69,6 @@ impl Default for RawGlobalTypes {
         builder.set_manual_type_data(GLOBAL_ID_GLOBAL_TYPE_ID, || TypeData::Global);
         builder.set_manual_type_data(INSTANCEOF_PROMISE_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_PROMISE_ID))
-        });
-        builder.set_manual_type_data(PROMISE_ID_GLOBAL_TYPE_ID, || {
-            TypeData::Class(Box::new(Class {
-                name: Some(Text::new_static("Promise")),
-                type_parameters: Box::new([TypeReference::from(GLOBAL_T_ID)]),
-                extends: None,
-                implements: Box::default(),
-                members: Box::new([
-                    TypeMember {
-                        kind: TypeMemberKind::Constructor,
-                        ty: GLOBAL_PROMISE_CONSTRUCTOR_ID.into(),
-                    },
-                    member("catch", PROMISE_CATCH_ID),
-                    member("finally", PROMISE_FINALLY_ID),
-                    member("then", PROMISE_THEN_ID),
-                    static_member("all", PROMISE_ALL_ID),
-                    static_member("allSettled", PROMISE_ALL_SETTLED_ID),
-                    static_member("any", PROMISE_ANY_ID),
-                    static_member("race", PROMISE_RACE_ID),
-                    static_member("reject", PROMISE_REJECT_ID),
-                    static_member("resolve", PROMISE_RESOLVE_ID),
-                    static_member("try", PROMISE_TRY_ID),
-                ]),
-            }))
-        });
-
-        builder.set_manual_type_data(PROMISE_CONSTRUCTOR_ID_GLOBAL_TYPE_ID, || {
-            TypeData::from(Function {
-                is_async: false,
-                type_parameters: Default::default(),
-                name: Some(Text::new_static(PROMISE_CONSTRUCTOR_ID_NAME)),
-                parameters: [FunctionParameter::Pattern(PatternFunctionParameter {
-                    bindings: Default::default(),
-                    is_optional: false,
-                    is_rest: false,
-                    ty: ResolvedTypeId::new(GLOBAL_LEVEL, VOID_CALLBACK_ID).into(),
-                })]
-                .into(),
-                return_type: ReturnType::Type(GLOBAL_VOID_ID.into()),
-            })
-        });
-        builder.set_manual_type_data(PROMISE_CATCH_ID_GLOBAL_TYPE_ID, || {
-            promise_method_definition(PROMISE_CATCH_ID)
-        });
-        builder.set_manual_type_data(PROMISE_FINALLY_ID_GLOBAL_TYPE_ID, || {
-            promise_method_definition(PROMISE_FINALLY_ID)
-        });
-        builder.set_manual_type_data(PROMISE_THEN_ID_GLOBAL_TYPE_ID, || {
-            promise_method_definition(PROMISE_THEN_ID)
-        });
-        builder.set_manual_type_data(PROMISE_ALL_ID_GLOBAL_TYPE_ID, || {
-            promise_method_definition(PROMISE_ALL_ID)
-        });
-        builder.set_manual_type_data(PROMISE_ALL_SETTLED_ID_GLOBAL_TYPE_ID, || {
-            promise_method_definition(PROMISE_ALL_SETTLED_ID)
-        });
-        builder.set_manual_type_data(PROMISE_ANY_ID_GLOBAL_TYPE_ID, || {
-            promise_method_definition(PROMISE_ANY_ID)
-        });
-        builder.set_manual_type_data(PROMISE_RACE_ID_GLOBAL_TYPE_ID, || {
-            promise_method_definition(PROMISE_RACE_ID)
-        });
-        builder.set_manual_type_data(PROMISE_REJECT_ID_GLOBAL_TYPE_ID, || {
-            promise_method_definition(PROMISE_REJECT_ID)
-        });
-        builder.set_manual_type_data(PROMISE_RESOLVE_ID_GLOBAL_TYPE_ID, || {
-            promise_method_definition(PROMISE_RESOLVE_ID)
-        });
-        builder.set_manual_type_data(PROMISE_TRY_ID_GLOBAL_TYPE_ID, || {
-            promise_method_definition(PROMISE_TRY_ID)
         });
         builder.set_manual_type_data(BIGINT_STRING_LITERAL_ID_GLOBAL_TYPE_ID, || {
             string_literal("bigint")
@@ -285,9 +179,6 @@ impl Default for RawGlobalTypes {
         });
         builder.set_manual_type_data(INSTANCEOF_ERROR_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_ERROR_ID))
-        });
-        builder.set_manual_type_data(ERROR_ID_GLOBAL_TYPE_ID, || {
-            class(ERROR_ID_NAME, Box::default())
         });
         builder.set_manual_type_data(INSTANCEOF_SYMBOL_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_SYMBOL_ID))
