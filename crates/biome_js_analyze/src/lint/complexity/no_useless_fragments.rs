@@ -39,8 +39,7 @@ declare_lint_rule! {
     /// <Component prop={<><div /></>} />
     /// ```
     ///
-    /// No code fix is offered when such a fragment holds nothing that can take its
-    /// place, since an attribute can't be left without a value:
+    /// The rule doesn't emit a code fix if the a fragment inside an attribute doesn't have any value:
     ///
     /// ```jsx,expect_diagnostic
     /// <Component prop={<>{}</>} />
