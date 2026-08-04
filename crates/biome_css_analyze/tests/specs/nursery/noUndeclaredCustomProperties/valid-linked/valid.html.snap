@@ -1,5 +1,5 @@
 ---
-source: crates/biome_html_analyze/tests/spec_tests.rs
+source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: valid.html
 ---
 # Input

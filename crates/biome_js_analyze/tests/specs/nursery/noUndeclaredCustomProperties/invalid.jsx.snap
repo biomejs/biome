@@ -5,88 +5,24 @@ expression: invalid.jsx
 # Input
 ```jsx
 /* should generate diagnostics */
-const invalid = <div style={{ color: "var(--missing-color)" }} />;
-const invalidTemplate = <div style={{ color: `var(--missing-template-color)` }} />;
-const invalidMultiple = <div style={{ color: "var(--first-missing)", background: "var(--second-missing)" }} />;
+export const Component = () => <div style="color: var(--missing-color)" />;
 
 ```
 
 # Diagnostics
 ```
-invalid.jsx:2:43 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:2:55 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The custom property --missing-color is not defined.
   
     1 │ /* should generate diagnostics */
-  > 2 │ const invalid = <div style={{ color: "var(--missing-color)" }} />;
-      │                                           ^^^^^^^^^^^^^^^
-    3 │ const invalidTemplate = <div style={{ color: `var(--missing-template-color)` }} />;
-    4 │ const invalidMultiple = <div style={{ color: "var(--first-missing)", background: "var(--second-missing)" }} />;
+  > 2 │ export const Component = () => <div style="color: var(--missing-color)" />;
+      │                                                       ^^^^^^^^^^^^^^^
+    3 │ 
   
-  i An undefined custom property uses its fallback when present; without one, the declaration is invalid.
+  i An undeclared custom property can indicate a misspelled name or a missing declaration.
   
-  i Define the custom property in an available stylesheet or correct its name.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.jsx:3:51 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The custom property --missing-template-color is not defined.
-  
-    1 │ /* should generate diagnostics */
-    2 │ const invalid = <div style={{ color: "var(--missing-color)" }} />;
-  > 3 │ const invalidTemplate = <div style={{ color: `var(--missing-template-color)` }} />;
-      │                                                   ^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ const invalidMultiple = <div style={{ color: "var(--first-missing)", background: "var(--second-missing)" }} />;
-    5 │ 
-  
-  i An undefined custom property uses its fallback when present; without one, the declaration is invalid.
-  
-  i Define the custom property in an available stylesheet or correct its name.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.jsx:4:51 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The custom property --first-missing is not defined.
-  
-    2 │ const invalid = <div style={{ color: "var(--missing-color)" }} />;
-    3 │ const invalidTemplate = <div style={{ color: `var(--missing-template-color)` }} />;
-  > 4 │ const invalidMultiple = <div style={{ color: "var(--first-missing)", background: "var(--second-missing)" }} />;
-      │                                                   ^^^^^^^^^^^^^^^
-    5 │ 
-  
-  i An undefined custom property uses its fallback when present; without one, the declaration is invalid.
-  
-  i Define the custom property in an available stylesheet or correct its name.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.jsx:4:87 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The custom property --second-missing is not defined.
-  
-    2 │ const invalid = <div style={{ color: "var(--missing-color)" }} />;
-    3 │ const invalidTemplate = <div style={{ color: `var(--missing-template-color)` }} />;
-  > 4 │ const invalidMultiple = <div style={{ color: "var(--first-missing)", background: "var(--second-missing)" }} />;
-      │                                                                                       ^^^^^^^^^^^^^^^^
-    5 │ 
-  
-  i An undefined custom property uses its fallback when present; without one, the declaration is invalid.
-  
-  i Define the custom property in an available stylesheet or correct its name.
+  i Define the custom property in an available stylesheet, rename it or remove it.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

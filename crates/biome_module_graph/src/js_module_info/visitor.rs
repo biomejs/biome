@@ -10,7 +10,7 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::{ImportSymbol, RawTypeCollector, TypeData, TypeReference};
 use biome_resolver::{ResolveOptions, resolve};
-use biome_rowan::{AstNode, TokenText, WalkEvent};
+use biome_rowan::{AstNode, AstSeparatedList, TokenText, WalkEvent};
 use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::{
@@ -138,7 +138,16 @@ impl<'a> JsModuleVisitor<'a> {
                             JsImportPhase::Type
                         }
                         AnyJsImportClause::JsImportNamedClause(clause)
-                            if clause.type_token().is_some() =>
+                            if clause.type_token().is_some()
+                                || clause.named_specifiers().is_ok_and(|specifiers| {
+                                    let mut specifiers = specifiers.specifiers().iter();
+                                    specifiers.len() > 0
+                                        && specifiers.all(|specifier| {
+                                            specifier.is_ok_and(|specifier| {
+                                                specifier.imports_only_types()
+                                            })
+                                        })
+                                }) =>
                         {
                             JsImportPhase::Type
                         }

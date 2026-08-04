@@ -40,7 +40,7 @@ use biome_configuration::javascript::{
     JsxEverywhere, JsxRuntime, UnsafeParameterDecoratorsEnabled,
 };
 #[cfg(feature = "js_embeds")]
-use biome_css_parser::{parse_css_value_with_offset_and_cache, parse_css_with_offset_and_cache};
+use biome_css_parser::parse_css_with_offset_and_cache;
 #[cfg(feature = "js_embeds")]
 use biome_css_syntax::CssLanguage;
 use biome_db::AnyParsedSource;
@@ -73,9 +73,8 @@ use biome_js_semantic::{
 };
 #[cfg(feature = "js_embeds")]
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, AnyJsObjectMember, AnyJsTemplateElement,
-    AnyJsxAttributeValue, JsCallArgumentList, JsCallArguments, JsCallExpression,
-    JsObjectExpression, JsTemplateExpression, JsxAttribute,
+    AnyJsExpression, AnyJsTemplateElement, AnyJsxAttributeValue, JsCallArgumentList,
+    JsCallArguments, JsCallExpression, JsTemplateExpression, JsxAttribute,
 };
 #[cfg(feature = "type_inference")]
 use biome_js_syntax::{
@@ -677,127 +676,49 @@ fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
 
     let js_root: AnyJsRoot = any_parse.tree();
 
-    let mut nodes = js_root
+    let candidates = js_root
         .syntax()
         .descendants()
         .filter_map(JsTemplateExpression::cast)
-        .filter_map(|expr| {
-            let candidate = build_js_template_candidate(&expr)?;
+        .filter_map(|expr| build_js_template_candidate(&expr))
+        .chain(
+            js_root
+                .syntax()
+                .descendants()
+                .filter_map(JsxAttribute::cast)
+                .filter_map(|attribute| build_jsx_style_candidate(&attribute)),
+        );
+    let nodes = candidates
+        .filter_map(|candidate| {
             let embed_match = EmbedDetectorsRegistry::detect_match(&candidate, file_source)?;
             let (snippet, content, doc_source) =
                 parse_js_matched_embed(&candidate, &embed_match, node_cache, path, settings)?;
             Some((snippet, content, doc_source))
         })
-        .collect::<Vec<_>>();
-
-    for attribute in js_root
-        .syntax()
-        .descendants()
-        .filter_map(JsxAttribute::cast)
-    {
-        for candidate in build_jsx_style_value_candidates(&attribute) {
-            let Some(embed_match) = EmbedDetectorsRegistry::detect_match(&candidate, file_source)
-            else {
-                continue;
-            };
-            if let Some(node) =
-                parse_js_matched_embed(&candidate, &embed_match, node_cache, path, settings)
-            {
-                nodes.push(node);
-            }
-        }
-    }
+        .collect();
 
     ParseEmbedResult { nodes }
 }
 
 #[cfg(feature = "js_embeds")]
-fn build_jsx_style_value_candidates(attribute: &JsxAttribute) -> Vec<EmbedCandidate> {
-    let Some(object) = jsx_style_object(attribute) else {
-        return Vec::new();
-    };
-    let mut candidates = Vec::new();
-
-    for member in object.members().iter() {
-        let Ok(AnyJsObjectMember::JsPropertyObjectMember(property)) = member else {
-            return Vec::new();
-        };
-        if property.name().ok().and_then(|name| name.name()).is_none() {
-            return Vec::new();
-        }
-        let Ok(value) = property.value() else {
-            return Vec::new();
-        };
-        let value = value.omit_parentheses();
-        let content = match value {
-            AnyJsExpression::AnyJsLiteralExpression(
-                AnyJsLiteralExpression::JsStringLiteralExpression(string),
-            ) => {
-                let Ok(token) = string.value_token() else {
-                    return Vec::new();
-                };
-                let Ok(text) = string.inner_string_text() else {
-                    return Vec::new();
-                };
-                if text.text().contains('\\') {
-                    continue;
-                }
-                let content_offset = token.text_trimmed_range().start() + TextSize::from(1);
-                EmbedContent {
-                    element_range: string.range(),
-                    content_range: TextRange::at(
-                        content_offset,
-                        TextSize::from(text.text().len() as u32),
-                    ),
-                    content_offset,
-                    text,
-                }
-            }
-            AnyJsExpression::JsTemplateExpression(template)
-                if template.tag().is_none() && template.elements().len() == 1 =>
-            {
-                let Some(AnyJsTemplateElement::JsTemplateChunkElement(chunk)) =
-                    template.elements().first()
-                else {
-                    continue;
-                };
-                let Ok(token) = chunk.template_chunk_token() else {
-                    return Vec::new();
-                };
-                if token.text_trimmed().contains('\\') {
-                    continue;
-                }
-                EmbedContent {
-                    element_range: template.range(),
-                    content_range: token.text_trimmed_range(),
-                    content_offset: token.text_trimmed_range().start(),
-                    text: token.token_text_trimmed(),
-                }
-            }
-            _ => continue,
-        };
-        candidates.push(EmbedCandidate::StaticStyleValue { content });
-    }
-
-    candidates
-}
-
-#[cfg(feature = "js_embeds")]
-fn jsx_style_object(attribute: &JsxAttribute) -> Option<JsObjectExpression> {
+fn build_jsx_style_candidate(attribute: &JsxAttribute) -> Option<EmbedCandidate> {
     if attribute.name_value_token().ok()?.text_trimmed() != "style" {
         return None;
     }
-    let AnyJsxAttributeValue::JsxExpressionAttributeValue(value) =
-        attribute.initializer()?.value().ok()?
-    else {
+    let AnyJsxAttributeValue::JsxString(value) = attribute.initializer()?.value().ok()? else {
         return None;
     };
-    value
-        .expression()
-        .ok()?
-        .omit_parentheses()
-        .as_js_object_expression()
-        .cloned()
+    let value_token = value.value_token().ok()?;
+    let text = value.inner_string_text().ok()?;
+    let content_range = text.source_range(value_token.text_range());
+    Some(EmbedCandidate::JsxStyleAttribute {
+        content: EmbedContent {
+            element_range: attribute.range(),
+            content_range,
+            content_offset: content_range.start(),
+            text,
+        },
+    })
 }
 
 /// Build an `EmbedCandidate::TaggedTemplate` from a `JsTemplateExpression`.
@@ -911,30 +832,21 @@ fn parse_js_matched_embed(
 
     match embed_match.guest {
         GuestLanguage::Css => {
-            let css_source = if matches!(candidate, EmbedCandidate::StaticStyleValue { .. }) {
-                CssFileSource::css()
+            let embedding_kind = if matches!(candidate, EmbedCandidate::JsxStyleAttribute { .. }) {
+                CssEmbeddingKind::HtmlStyleAttribute
             } else {
-                CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Styled)
+                CssEmbeddingKind::Styled
             };
-            let file_source = DocumentFileSource::Css(css_source);
+            let file_source =
+                DocumentFileSource::Css(CssFileSource::css().with_embedding_kind(embedding_kind));
             let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
-            let parse = if matches!(candidate, EmbedCandidate::StaticStyleValue { .. }) {
-                parse_css_value_with_offset_and_cache(
-                    content.text.text(),
-                    css_source,
-                    content.content_offset,
-                    cache,
-                    options,
-                )
-            } else {
-                parse_css_with_offset_and_cache(
-                    content.text.text(),
-                    css_source,
-                    content.content_offset,
-                    cache,
-                    options,
-                )
-            };
+            let parse = parse_css_with_offset_and_cache(
+                content.text.text(),
+                file_source.to_css_file_source().unwrap_or_default(),
+                content.content_offset,
+                cache,
+                options,
+            );
 
             Some((parse.into(), content.clone(), file_source))
         }

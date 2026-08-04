@@ -239,11 +239,8 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
         }
     }
 
-    /// Evaluates every occurrence of `imported_path` in an ordered import list.
-    ///
-    /// For each occurrence, preceding imports are searched from nearest to
-    /// farthest. Imports authored after the occurrence are not visible.
-    fn actions_for_ordered_imports(
+    /// Evaluates every occurrence of `imported_path` in an import list.
+    fn actions_for_imports(
         &mut self,
         imported_path: &Utf8Path,
         imports: &[&Utf8Path],
@@ -252,13 +249,11 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
     ) -> Vec<UpwardTraversalAction<CssPropertyDefinition, CssPropertyBranch>> {
         imports
             .iter()
-            .enumerate()
-            .filter(|(_, path)| **path == imported_path)
-            .map(|(child_index, _)| {
-                let preceding_imports = imports.iter().take(child_index);
+            .filter(|path| **path == imported_path)
+            .map(|_| {
                 let definition = local_definition.clone().or_else(|| {
-                    preceding_imports.rev().find_map(|path| {
-                        self.last_property_in_css_context_from(path, next_branch.clone())
+                    imports.iter().rev().find_map(|path| {
+                        self.last_property_in_module_context_from(path, next_branch.clone())
                     })
                 });
                 self.action(definition, next_branch.clone())
@@ -278,7 +273,7 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
             .find_map(|context| match context.kind {
                 HtmlPropertyContextKind::Definition(definition) => Some(definition),
                 HtmlPropertyContextKind::Import(path) => {
-                    self.last_property_in_css_context_from(&path, branch.clone())
+                    self.last_property_in_module_context_from(&path, branch.clone())
                 }
             })
     }
@@ -293,7 +288,7 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
         js_import_paths_in_source_order(&info)
             .rev()
             .filter_map(|import| import.as_path())
-            .find_map(|path| self.last_property_in_css_context_from(path, branch.clone()))
+            .find_map(|path| self.last_property_in_module_context_from(path, branch.clone()))
     }
 
     /// Returns the last visible definition in a CSS import context.
@@ -305,10 +300,10 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
         &self,
         path: &Utf8Path,
     ) -> Option<CssPropertyDefinition> {
-        self.last_property_in_css_context_from(path, CssPropertyBranch::default())
+        self.last_property_in_module_context_from(path, CssPropertyBranch::default())
     }
 
-    fn last_property_in_css_context_from(
+    fn last_property_in_module_context_from(
         &self,
         path: &Utf8Path,
         branch: CssPropertyBranch,
@@ -320,59 +315,70 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
         let path = path.to_path_buf();
         let mut stack = vec![(path.clone(), branch.with_path(path))];
         while let Some((path, branch)) = stack.pop() {
-            if let Some(definition) = self.local_property_definition(&path) {
-                return Some(definition);
-            }
-
-            if let Some(info) = self.db.css_module_info_for_path(&path) {
-                stack.extend(info.imports.iter().filter_map(|import| {
-                    let path = import.resolved_path.as_path()?;
-                    if branch.contains(path) {
-                        return None;
+            let Some(module) = self.db.module_for_path(&path) else {
+                continue;
+            };
+            match module.kind(self.db) {
+                ModuleInfoKind::Css(info) => {
+                    if let Some(definition) = self.local_property_definition(&path) {
+                        return Some(definition);
                     }
-                    let path = path.to_path_buf();
-                    Some((path.clone(), branch.with_path(path)))
-                }));
+                    stack.extend(info.imports.iter().filter_map(|import| {
+                        let path = import.resolved_path.as_path()?;
+                        if branch.contains(path) {
+                            return None;
+                        }
+                        let path = path.to_path_buf();
+                        Some((path.clone(), branch.with_path(path)))
+                    }));
+                }
+                ModuleInfoKind::Html(_) => {
+                    for context in self.html_property_contexts(&path, true) {
+                        match context.kind {
+                            HtmlPropertyContextKind::Definition(definition) => {
+                                return Some(definition);
+                            }
+                            HtmlPropertyContextKind::Import(path) if !branch.contains(&path) => {
+                                stack.push((path.clone(), branch.with_path(path)));
+                            }
+                            HtmlPropertyContextKind::Import(_) => {}
+                        }
+                    }
+                }
+                ModuleInfoKind::Js(info) => {
+                    stack.extend(js_import_paths_in_source_order(&info).filter_map(|import| {
+                        let path = import.as_path()?;
+                        if branch.contains(path) {
+                            return None;
+                        }
+                        let path = path.to_path_buf();
+                        Some((path.clone(), branch.with_path(path)))
+                    }));
+                }
             }
         }
         None
     }
 
-    /// Returns the last definition visible through imports preceding `child_range`.
-    fn last_property_in_imports_before(
+    /// Returns the last definition visible through the stylesheet's imports.
+    fn last_property_in_imports(
         &self,
         info: &crate::CssModuleInfo,
-        child_range: TextRange,
         branch: CssPropertyBranch,
     ) -> Option<CssPropertyDefinition> {
-        info.imports
-            .iter()
-            .rev()
-            .filter(|import| import.range.start() < child_range.start())
-            .find_map(|import| {
-                let path = import.resolved_path.as_path()?;
-                self.last_property_in_css_context_from(path, branch.clone())
-            })
+        info.imports.iter().rev().find_map(|import| {
+            let path = import.resolved_path.as_path()?;
+            self.last_property_in_module_context_from(path, branch.clone())
+        })
     }
 
     fn local_property_definition(&self, path: &Utf8Path) -> Option<CssPropertyDefinition> {
-        self.local_property_definition_before(path, None)
-    }
-
-    fn local_property_definition_before(
-        &self,
-        path: &Utf8Path,
-        before: Option<TextSize>,
-    ) -> Option<CssPropertyDefinition> {
         self.db.css_module_info_for_path(path)?;
         let parsed = self.db.parsed_source_for_path(path)?;
         let definition = css_property_definitions_from_source(self.db, parsed)
             .iter()
             .rev()
-            .find(|definition| {
-                definition.matches(self.name)
-                    && before.is_none_or(|before| definition.range().start() < before)
-            })?;
+            .find(|definition| definition.matches(self.name))?;
         Some(CssPropertyDefinition {
             module_path: normalize_path(path),
             range: definition.range(),
@@ -409,6 +415,9 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
                 else {
                     continue;
                 };
+                if only_global && file_source.as_embedding_kind().is_html_style_attribute() {
+                    continue;
+                }
                 let snippet_is_global = file_source.embedding_applicability().is_global();
                 contexts.extend(
                     css_property_definitions_from_snippet(self.db, *snippet)
@@ -451,7 +460,7 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
             .find_map(|context| match &context.kind {
                 HtmlPropertyContextKind::Definition(definition) => Some(definition.clone()),
                 HtmlPropertyContextKind::Import(path) => {
-                    self.last_property_in_css_context_from(path, next_branch.clone())
+                    self.last_property_in_module_context_from(path, next_branch.clone())
                 }
             });
         contexts
@@ -469,7 +478,7 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
                         match &context.kind {
                             HtmlPropertyContextKind::Definition(_) => None,
                             HtmlPropertyContextKind::Import(path) => {
-                                self.last_property_in_css_context_from(path, next_branch.clone())
+                                self.last_property_in_module_context_from(path, next_branch.clone())
                             }
                         }
                     })
@@ -500,9 +509,9 @@ impl UpwardTraversalVisitor for CssPropertyTraversal<'_, '_> {
 
     /// Resolves the definition visible from each import of `imported_path`.
     ///
-    /// CSS importers prefer their local definition, then preceding sibling
-    /// imports. HTML and JavaScript importers search preceding CSS contexts in
-    /// document order; only globally applicable embedded styles escape an HTML importer.
+    /// CSS importers prefer their local definition, then sibling imports. HTML
+    /// and JavaScript importers search their CSS contexts; only globally
+    /// applicable embedded styles escape an HTML importer.
     fn visit_importer(
         &mut self,
         imported_path: &Utf8Path,
@@ -518,15 +527,10 @@ impl UpwardTraversalVisitor for CssPropertyTraversal<'_, '_> {
                 .imports
                 .iter()
                 .filter(|import| import.resolved_path.as_path() == Some(imported_path))
-                .map(|child_import| {
+                .map(|_| {
                     let local_definition = self.local_property_definition(importer_path);
-                    let definition = local_definition.or_else(|| {
-                        self.last_property_in_imports_before(
-                            &info,
-                            child_import.range,
-                            next_branch.clone(),
-                        )
-                    });
+                    let definition = local_definition
+                        .or_else(|| self.last_property_in_imports(&info, next_branch.clone()));
                     self.action(definition, next_branch.clone())
                 })
                 .collect(),
@@ -534,7 +538,7 @@ impl UpwardTraversalVisitor for CssPropertyTraversal<'_, '_> {
                 let imports = js_import_paths_in_source_order(&info)
                     .filter_map(|import| import.as_path())
                     .collect::<Vec<_>>();
-                self.actions_for_ordered_imports(imported_path, &imports, next_branch, None)
+                self.actions_for_imports(imported_path, &imports, next_branch, None)
             }
             ModuleInfoKind::Html(_) => {
                 self.actions_for_html_imports(imported_path, importer_path, next_branch)

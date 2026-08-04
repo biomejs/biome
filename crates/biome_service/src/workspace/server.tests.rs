@@ -12,6 +12,7 @@ use biome_css_syntax::CssLanguage;
 use biome_formatter::{IndentStyle, LineWidth};
 use biome_fs::MemoryFileSystem;
 use biome_js_syntax::JsLanguage;
+use biome_languages::css::CssEmbeddingKind;
 use biome_rowan::TextSize;
 use camino::Utf8Path;
 use std::panic::AssertUnwindSafe;
@@ -435,7 +436,7 @@ fn pnpm_workspace_update_reapplies_catalogs() {
 #[test]
 fn store_embedded_nodes_with_current_ranges() {
     const FILE_CONTENT: &str = r#"<html>
-    <head style="color: var(--foreground)">
+    <head>
         <style>
             .#id {}
         </style>
@@ -483,7 +484,7 @@ fn store_embedded_nodes_with_current_ranges() {
         })
         .collect();
     assert_eq!(scripts.len(), 1);
-    assert_eq!(styles.len(), 2);
+    assert_eq!(styles.len(), 1);
 
     let script = scripts.first().unwrap();
     let style = styles.first().unwrap();
@@ -1162,6 +1163,72 @@ const Bar = styled(Component)`
     	color: red;
     `;
     ");
+}
+
+#[test]
+fn stores_string_jsx_style_attributes_as_css_snippets() {
+    const FILE_PATH: &str = "/project/file.jsx";
+    const FILE_CONTENT: &str = r#"const Valid = <div style="color: red" />;
+const Expression = <div style={"color: blue"} />;
+const Object = <div style={{ color: "green" }} />;
+const Empty = <div style />;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let db = workspace.get_db();
+    let snippets = workspace.get_snippets(Utf8Path::new(FILE_PATH));
+    let style_snippets = snippets
+        .iter()
+        .filter(|snippet| {
+            db.source_from_index(snippet.document_source_index(&db))
+                .and_then(|source| source.to_css_file_source())
+                .is_some_and(|source| {
+                    matches!(
+                        source.as_embedding_kind(),
+                        CssEmbeddingKind::HtmlStyleAttribute
+                    )
+                })
+        })
+        .collect::<Vec<_>>();
+
+    assert_eq!(style_snippets.len(), 1);
+    assert_eq!(
+        style_snippets[0]
+            .parsed(&db)
+            .clone()
+            .embedded_syntax::<CssLanguage>()
+            .text_with_trivia()
+            .to_string(),
+        "color: red"
+    );
 }
 
 #[test]

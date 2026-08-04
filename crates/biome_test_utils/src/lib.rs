@@ -403,7 +403,15 @@ pub fn module_graph_for_css_test_file(
 
     #[cfg(feature = "lang_js")]
     {
-        let js_paths = get_js_like_paths_in_dir(Utf8Path::new(&dir));
+        let js_paths = get_js_like_paths_in_dir(Utf8Path::new(&dir))
+            .into_iter()
+            .filter(|path| {
+                matches!(
+                    path.as_path().extension(),
+                    Some("cjs" | "cts" | "js" | "jsx" | "mjs" | "mts" | "ts" | "tsx")
+                )
+            })
+            .collect::<Vec<_>>();
         let js_roots = get_added_js_paths(&fs, &js_paths);
         for (path, root, semantic_model) in js_roots {
             let (module_info, _, _) = resolve_js_module(

@@ -7387,40 +7387,6 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssValueAtRuleNamedImpor
         FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: value_at_rule_named_import_specifier :: FormatCssValueAtRuleNamedImportSpecifier :: default ())
     }
 }
-impl FormatRule<biome_css_syntax::CssValueRoot>
-    for crate::css::auxiliary::value_root::FormatCssValueRoot
-{
-    type Context = CssFormatContext;
-    #[inline(always)]
-    fn fmt(&self, node: &biome_css_syntax::CssValueRoot, f: &mut CssFormatter) -> FormatResult<()> {
-        FormatNodeRule::<biome_css_syntax::CssValueRoot>::fmt(self, node, f)
-    }
-}
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssValueRoot {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_css_syntax::CssValueRoot,
-        crate::css::auxiliary::value_root::FormatCssValueRoot,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::css::auxiliary::value_root::FormatCssValueRoot::default(),
-        )
-    }
-}
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssValueRoot {
-    type Format = FormatOwnedWithRule<
-        biome_css_syntax::CssValueRoot,
-        crate::css::auxiliary::value_root::FormatCssValueRoot,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::css::auxiliary::value_root::FormatCssValueRoot::default(),
-        )
-    }
-}
 impl FormatRule<biome_css_syntax::CssViewTransitionAtRule>
     for crate::css::statements::view_transition_at_rule::FormatCssViewTransitionAtRule
 {

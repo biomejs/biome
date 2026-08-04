@@ -3,7 +3,7 @@
 #![deny(clippy::use_self)]
 
 use crate::parser::CssParser;
-use crate::syntax::{parse_root, parse_value_root};
+use crate::syntax::parse_root;
 use biome_css_factory::CssSyntaxFactory;
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssSyntaxNode};
 use biome_languages::CssFileSource;
@@ -250,32 +250,10 @@ pub fn parse_css_with_offset_and_cache(
     CssOffsetParse::new(offset_node, parse_diagnostics)
 }
 
-/// Parses an embedded CSS declaration value with an offset and cache.
-pub fn parse_css_value_with_offset_and_cache(
-    source: &str,
-    source_type: CssFileSource,
-    base_offset: TextSize,
-    cache: &mut NodeCache,
-    options: CssParserOptions,
-) -> CssOffsetParse {
-    let mut parser = CssParser::new(source, source_type, options);
-
-    parse_value_root(&mut parser);
-
-    let (events, diagnostics, trivia) = parser.finish();
-    let mut tree_sink = CssOffsetLosslessTreeSink::with_cache(source, &trivia, cache, base_offset);
-    biome_parser::event::process(&mut tree_sink, events, diagnostics);
-    let (offset_node, parse_diagnostics) = tree_sink.finish();
-
-    CssOffsetParse::new(offset_node, parse_diagnostics)
-}
-
 #[cfg(test)]
 mod tests {
     use crate::{CssParserOptions, parse_css};
-    use crate::{
-        parse_css_value_with_offset_and_cache, parse_css_with_cache, parse_css_with_offset,
-    };
+    use crate::{parse_css_with_cache, parse_css_with_offset};
     use biome_languages::{CssFileSource, css::CssEmbeddingKind};
     use biome_rowan::TextSize;
 
@@ -354,26 +332,6 @@ mod tests {
         assert_eq!(
             offset_parse.syntax().inner().text_with_trivia().to_string(),
             normal_parse.syntax().text_with_trivia().to_string()
-        );
-    }
-
-    #[test]
-    fn parses_embedded_css_value_with_offset() {
-        let css = "var(--foreground, red)";
-        let offset = TextSize::from(25);
-        let parse = parse_css_value_with_offset_and_cache(
-            css,
-            CssFileSource::css(),
-            offset,
-            &mut biome_rowan::NodeCache::default(),
-            CssParserOptions::default(),
-        );
-
-        assert!(!parse.has_errors(), "{:#?}", parse.diagnostics());
-        assert!(parse.tree().as_css_value_root().is_some());
-        assert_eq!(
-            parse.syntax().text_range_with_trivia(),
-            biome_rowan::TextRange::at(offset, TextSize::from(css.len() as u32))
         );
     }
 
