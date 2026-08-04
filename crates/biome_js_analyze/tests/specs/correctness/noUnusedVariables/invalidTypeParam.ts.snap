@@ -9,6 +9,15 @@ export class C<T> {}
 export type Alias<T> = number
 export type Inferred<T> = T extends (infer I)[] ? number : never;
 export type TestUnionType<T> = T extends (infer B)[] | infer B ? number : never;
+// Only function/method signatures with a body-bearing implementation are exempt;
+// interface members and abstract methods, which never get one, still report.
+// See https://github.com/biomejs/biome/issues/11214
+export interface I {
+	m<T>(): void;
+}
+export abstract class AbstractClass {
+	abstract method<T>(): void;
+}
 ```
 
 # Diagnostics
@@ -26,10 +35,10 @@ invalidTypeParam.ts:1:19 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unsafe fix: If this is intentional, prepend T with an underscore.
   
-    1   │ - export·function·f<T>()·{}
-      1 │ + export·function·f<_T>()·{}
-    2 2 │   export class C<T> {}
-    3 3 │   export type Alias<T> = number
+     1    │ - export·function·f<T>()·{}
+        1 │ + export·function·f<_T>()·{}
+     2  2 │   export class C<T> {}
+     3  3 │   export type Alias<T> = number
   
 
 ```
@@ -49,11 +58,11 @@ invalidTypeParam.ts:2:16 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unsafe fix: If this is intentional, prepend T with an underscore.
   
-    1 1 │   export function f<T>() {}
-    2   │ - export·class·C<T>·{}
-      2 │ + export·class·C<_T>·{}
-    3 3 │   export type Alias<T> = number
-    4 4 │   export type Inferred<T> = T extends (infer I)[] ? number : never;
+     1  1 │   export function f<T>() {}
+     2    │ - export·class·C<T>·{}
+        2 │ + export·class·C<_T>·{}
+     3  3 │   export type Alias<T> = number
+     4  4 │   export type Inferred<T> = T extends (infer I)[] ? number : never;
   
 
 ```
@@ -74,12 +83,12 @@ invalidTypeParam.ts:3:19 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unsafe fix: If this is intentional, prepend T with an underscore.
   
-    1 1 │   export function f<T>() {}
-    2 2 │   export class C<T> {}
-    3   │ - export·type·Alias<T>·=·number
-      3 │ + export·type·Alias<_T>·=·number
-    4 4 │   export type Inferred<T> = T extends (infer I)[] ? number : never;
-    5 5 │   export type TestUnionType<T> = T extends (infer B)[] | infer B ? number : never;
+     1  1 │   export function f<T>() {}
+     2  2 │   export class C<T> {}
+     3    │ - export·type·Alias<T>·=·number
+        3 │ + export·type·Alias<_T>·=·number
+     4  4 │   export type Inferred<T> = T extends (infer I)[] ? number : never;
+     5  5 │   export type TestUnionType<T> = T extends (infer B)[] | infer B ? number : never;
   
 
 ```
@@ -94,6 +103,7 @@ invalidTypeParam.ts:4:44 lint/correctness/noUnusedVariables ━━━━━━�
   > 4 │ export type Inferred<T> = T extends (infer I)[] ? number : never;
       │                                            ^
     5 │ export type TestUnionType<T> = T extends (infer B)[] | infer B ? number : never;
+    6 │ // Only function/method signatures with a body-bearing implementation are exempt;
   
   i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
   
@@ -109,8 +119,60 @@ invalidTypeParam.ts:5:62 lint/correctness/noUnusedVariables ━━━━━━�
     4 │ export type Inferred<T> = T extends (infer I)[] ? number : never;
   > 5 │ export type TestUnionType<T> = T extends (infer B)[] | infer B ? number : never;
       │                                                              ^
+    6 │ // Only function/method signatures with a body-bearing implementation are exempt;
+    7 │ // interface members and abstract methods, which never get one, still report.
   
   i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+
+```
+
+```
+invalidTypeParam.ts:10:4 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type parameter T is unused.
+  
+     8 │ // See https://github.com/biomejs/biome/issues/11214
+     9 │ export interface I {
+  > 10 │ 	m<T>(): void;
+       │ 	  ^
+    11 │ }
+    12 │ export abstract class AbstractClass {
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend T with an underscore.
+  
+     8  8 │   // See https://github.com/biomejs/biome/issues/11214
+     9  9 │   export interface I {
+    10    │ - → m<T>():·void;
+       10 │ + → m<_T>():·void;
+    11 11 │   }
+    12 12 │   export abstract class AbstractClass {
+  
+
+```
+
+```
+invalidTypeParam.ts:13:18 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type parameter T is unused.
+  
+    11 │ }
+    12 │ export abstract class AbstractClass {
+  > 13 │ 	abstract method<T>(): void;
+       │ 	                ^
+    14 │ }
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend T with an underscore.
+  
+    11 11 │   }
+    12 12 │   export abstract class AbstractClass {
+    13    │ - → abstract·method<T>():·void;
+       13 │ + → abstract·method<_T>():·void;
+    14 14 │   }
   
 
 ```
