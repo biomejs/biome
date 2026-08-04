@@ -1,0 +1,6 @@
+{
+    "options": {
+        "maxLines": 3,
+        "skipComments": true
+    }
+}

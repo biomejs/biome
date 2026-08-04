@@ -135,6 +135,7 @@ impl Rule for NoExcessiveLinesPerFile {
             node.syntax(),
             |token| token.kind() == GraphqlSyntaxKind::EOF,
             options.skip_blank_lines(),
+            options.skip_comments(),
         );
 
         if file_lines_count > options.max_lines().get().into() {
