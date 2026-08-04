@@ -1,6 +1,6 @@
 ---
 name: biome-code-review
-description: Static, read-only code review of a Biome (github.com/biomejs/biome) pull request, local branch, commit range, diff, or working tree being prepared as a PR. Applies Biome's own conventions - nursery placement and naming for lint rules, diagnostics quality, allocation and borrow discipline around TokenText and SyntaxToken, parser error recovery, formatter IR and idempotency, codegen freshness, insta snapshots, dev-dependency paths, doc style, changesets, branch targeting, PR titles, and AI disclosure. Only when asked to review Biome PRs or a branch before opening a PR. Not for issue triage, bug reproduction, or implementing fixes. Reports findings only - never edits files or runs cargo, just, pnpm, tests, builds, or codegen.
+description: Static, read-only code review of a Biome (github.com/biomejs/biome) pull request, local branch, commit range, diff, or working tree being prepared as a PR. Applies Biome's own conventions - nursery placement and naming for lint rules, diagnostics quality, allocation and borrow discipline around TokenText and SyntaxToken, parser error recovery, formatter IR and idempotency, codegen freshness, insta snapshots, dev-dependency paths, doc style, changesets, branch targeting, PR titles, and AI disclosure. Only when asked to review a Biome pull request, branch, commit range, diff, or working tree. Not for issue triage, bug reproduction, or implementing fixes. Reports findings only - never edits files or runs cargo, just, pnpm, tests, builds, or codegen.
 compatibility: Designed for read-only review of the Biome codebase (github.com/biomejs/biome).
 metadata:
   repository: biomejs/biome
@@ -72,7 +72,7 @@ Otherwise review the current branch and working tree:
 2. Pick the base: the tracking branch if it is `origin/main` or `origin/next`; otherwise compute the merge base against both and take the branch whose merge base is a descendant of the other. If genuinely ambiguous, ask. Never fall back to `HEAD`: it reviews only uncommitted work and drops every commit on the branch without saying so.
 3. Fetch that base once.
 4. Diff merge-base to working tree — this covers committed, staged, and unstaged changes.
-5. Read untracked files from `git status` directly. New rules, specs, and `.changeset/*.md` entries are frequently untracked.
+5. Use `git status` to identify untracked file paths, then read the contents of each with the file-reading tool. New rules, specs, and `.changeset/*.md` entries are frequently untracked.
 
 Establish intended behavior from the description, commit messages, the linked issue, changed tests, and surrounding code. Where correctness depends on requirements not available locally, state the assumption or ask.
 
@@ -80,7 +80,7 @@ Establish intended behavior from the description, commit messages, the linked is
 
 Read enough surrounding code to review the change rather than the diff in isolation.
 
-- Read complete changed functions and the relevant parts of their files.
+- Read every changed file in full before inspecting related files.
 - Inspect callers, the rule registry, and the configuration surface the change touches.
 - Inspect existing tests and conventions in the same `tests/specs/` directory.
 - Search for an existing helper before accepting a new abstraction. The utility surface is large: `biome_rowan`, `biome_string_case`, the `*_ext.rs` traits, `biome_analyze` services.
@@ -154,7 +154,7 @@ Two salsa storage modes back the split (`workspace/db.rs:26-29`):
 | Client | Constructed with | Storage | Consequence |
 | --- | --- | --- | --- |
 | CLI | `DbState::default()` (`workspace/server.rs:393`) | `Shared` | No setters, so no cancellation exists |
-| LSP | `DbState::lsp()` (`biome_lsp/src/session.rs:1614`) | `Owned` | Setters, pending-write cancellation, deadlock risk |
+| LSP | `DbState::lsp()` (`biome_lsp/src/server.rs:791-805`) | `Owned` | Setters, pending-write cancellation, deadlock risk |
 
 **CLI is read-only after the scan; writes go to the filesystem.** Once `scan_project` finishes every per-file operation is a read: workers call `process_file` and the runner writes final bytes to disk (`biome_cli/src/runner/process_file.rs:319`). The module graph in use is the one the scan produced. A worker must never call `change_file` — publishing module data while another worker holds a snapshot for type-aware analysis is the race this design removes. The one exception is `--use-server`, where synchronization is **deferred and sequential**: `crawl_inputs` returns, all workers join, then a plain `for` loop replays the changes one at a time (`runner/crawler.rs:70-86`, draining at `:288`). Without `--use-server` there is no synchronization; the workspace dies with the command.
 
@@ -196,13 +196,15 @@ Production is everything outside `#[cfg(test)]` modules, `tests/`, `*.tests.rs` 
 | Construct | Accepted when | Otherwise |
 | --- | --- | --- |
 | `panic!` `unreachable!` `todo!` `unimplemented!` `assert!` | never in production | `medium`; `high` if user input reaches it |
-| `.unwrap()` `.expect(..)` `[i]` `[a..b]` | a `// SAFETY:` comment **or** a `debug_assert!` establishes the invariant in the same function, before the operation | `medium` |
+| `.unwrap()` `.expect(..)` `[i]` `[a..b]` | release-mode control flow, a checked API, a type invariant, or an API contract proves the operation cannot fail | `medium` |
+| Partial collection or string `.remove(..)` `.swap(..)` `.split_at(..)` | the receiver type is identified and release-mode evidence proves every index and boundary is valid; total map and set removals are not findings | `medium` |
+| Integer `/` `%` | release-mode control flow or a type invariant proves the divisor is nonzero, or the code uses checked division or remainder | `medium` |
 
 **Presence is the finding.** You need not show that input reaches the panic; the reachability requirement in [Finding Threshold](#finding-threshold) does not apply to this section. Establishing totality is the author's burden, and a reviewer who cannot reconstruct the invariant from the diff has found the defect. "This branch cannot happen" is not a defence — if it truly cannot, the invariant is cheap to write down.
 
-**Both justifications count.** `// SAFETY:` is the established form for a justified partial operation, not only for a genuine `unsafe` block, and `debug_assert!` is equally established.
+**Comments and debug assertions are supporting evidence only.** A `// SAFETY:` comment can state the invariant and a `debug_assert!` can check it during development, but neither prevents the operation from failing in release mode. Accept a partial operation only when release-mode control flow, a type, or an API contract establishes the invariant.
 
-**Take the model from the code, not from this file.** Search the touched crate for `// SAFETY:` and for `debug_assert!`, read the two or three occurrences nearest the change, and judge the diff against those. Any exemplar named here would be a snapshot of a codebase that keeps moving; the search returns the current one. Check three things in each: the invariant is named rather than gestured at, it is established in the same function and before the operation, and the surrounding code genuinely establishes it. A justification the code does not establish is worse than none — it tells the next reader the case was considered.
+**Take the model from the code, not from this file.** Search the touched crate for `// SAFETY:` and for `debug_assert!`, read the two or three occurrences nearest the change, and judge the diff against those. Any exemplar named here would be a snapshot of a codebase that keeps moving; the search returns the current one. Check three things in each: the invariant is named rather than gestured at, release-mode code or an API contract establishes it before the operation, and any comment or debug assertion accurately documents that proof. A justification the code does not establish is worse than none — it tells the next reader the case was considered.
 
 **Indexing is the class most often missed.** A constant index (`[0]`, `[len - 1]`) is easy to see; a variable one is not. Flag every `slice[i]`, `self.bytes[self.position]`, `&self.source[start..end]`, and `map[&key]` whose index is not proven in range in the same function. Range slicing a `&str` also panics on a non-char boundary, not only out of bounds.
 
@@ -243,7 +245,7 @@ Also:
 - Extract quoted contents with `inner_string_text()` — never manual quote-slicing, never `text_trimmed()`.
 - `format!()` inside `markup!` allocates; `markup!` interpolates directly.
 - `clippy.toml` bans `str::to_lowercase`, `str::to_ascii_lowercase`, `OsStr::to_ascii_lowercase`, and `to_trimmed_text()`; the `biome_string_case` cow variants and trimmed token accessors replace them.
-- No module may copy or clone data from another module, even behind `Arc`. Use `TypeReference`.
+- **Module graph and type inference:** Module graph entries may not copy or clone data from another module, even behind `Arc`. Use `TypeReference` for cross-module type data.
 
 ### API Shape and Type Design
 
