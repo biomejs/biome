@@ -21,7 +21,6 @@ mod local_inference;
 pub mod resolved;
 mod return_type_relation;
 mod stringification;
-mod stringification;
 mod type_data;
 mod type_store;
 mod type_transform;
@@ -38,7 +37,6 @@ pub use interned_types::{RawTypeData, TypeDb};
 pub use return_type_relation::{
     NarrowedTypeCandidates, ReturnTypeRelation, ReturnTypeVerdict, compare_declared_return_type,
 };
-pub use stringification::{StringificationMode, StringificationUsefulness};
 pub use stringification::{StringificationMode, StringificationUsefulness};
 pub use type_data::*;
 pub use type_store::{RawTypeCollector, TypeStore, UnionCollector};
