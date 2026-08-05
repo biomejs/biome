@@ -23,9 +23,3 @@ glommed: |-
 next: value
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"\n  # content line\n # comment line the lexer includes in the scalar" => 11..77
