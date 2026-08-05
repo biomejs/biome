@@ -14,6 +14,15 @@ declare_lint_rule! {
     /// Type assertions override TypeScript's inferred type without performing any runtime checks.
     /// This can hide invalid assumptions about a value and lead to runtime errors.
     ///
+    /// Safer alternatives include:
+    ///
+    /// - [Type annotations](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-annotations-on-variables)
+    /// - The [`satisfies` operator](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator)
+    /// - [Type predicates](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates)
+    /// - [Assertion functions](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#assertion-functions)
+    /// - [Control-flow narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#control-flow-analysis)
+    /// - Validation libraries, like [Zod](https://zod.dev/), [Valibot](https://valibot.dev/), or [arktype](https://arktype.dev/)
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -22,7 +31,7 @@ declare_lint_rule! {
     /// interface SomeType {
     ///     value: string;
     /// }
-    /// declare const value: unknown;
+    /// declare const value;
     /// const asserted = value as SomeType;
     /// ```
     ///
@@ -30,7 +39,7 @@ declare_lint_rule! {
     /// interface SomeType {
     ///     value: string;
     /// }
-    /// declare const value: unknown;
+    /// declare const value;
     /// const asserted = <SomeType>value;
     /// ```
     ///
@@ -38,16 +47,56 @@ declare_lint_rule! {
     /// interface SomeType {
     ///     value: string;
     /// }
-    /// declare const asserted: unknown;
+    /// declare const asserted;
     /// (asserted as SomeType).value = "foo";
     /// ```
     ///
     /// ### Valid
     ///
+    /// `const` assertions are allowed:
+    ///
     /// ```ts
     /// const tuple = ["value", 1] as const;
+    /// ```
+    ///
+    /// Use a [type annotation](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-annotations-on-variables):
+    ///
+    /// ```ts
     /// const annotated: string = "value";
+    /// ```
+    ///
+    /// Use the [`satisfies` operator](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator):
+    ///
+    /// ```ts
     /// const checked = { value: "value" } satisfies { value: string };
+    /// ```
+    ///
+    /// Use a [type predicate](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates):
+    ///
+    /// ```ts
+    /// function isString(value: unknown): value is string {
+    ///     return typeof value === "string";
+    /// }
+    /// ```
+    ///
+    /// Use an [assertion function](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#assertion-functions):
+    ///
+    /// ```ts
+    /// function assertIsString(value: unknown): asserts value is string {
+    ///     if (!isString(value)) {
+    ///         throw new TypeError("Expected a string");
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// Use [control-flow narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#control-flow-analysis):
+    ///
+    /// ```ts
+    /// function narrow(value: string | undefined) {
+    ///     if (value !== undefined) {
+    ///         return value.length;
+    ///     }
+    /// }
     /// ```
     pub NoUnsafeTypeAssertion {
         version: "next",
@@ -123,10 +172,10 @@ impl Rule for NoUnsafeTypeAssertion {
                 },
             )
             .note(markup! {
-                "Type assertions bypass TypeScript's type checking and can cause runtime errors."
+                "Type assertions override the type for this expression, which can hide type errors and lead to runtime errors."
             })
             .note(markup! {
-                "Use a type annotation, the "<Emphasis>"satisfies"</Emphasis>" operator, a type guard, or control-flow narrowing instead."
+                "Use a "<Hyperlink href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-annotations-on-variables">"type annotation"</Hyperlink>", the "<Hyperlink href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator">"satisfies operator"</Hyperlink>", a "<Hyperlink href="https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates">"type predicate"</Hyperlink>", or "<Hyperlink href="https://www.typescriptlang.org/docs/handbook/2/narrowing.html#control-flow-analysis">"control-flow narrowing"</Hyperlink>" instead."
             }),
         )
     }

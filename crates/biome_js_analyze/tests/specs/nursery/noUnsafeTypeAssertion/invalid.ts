@@ -3,7 +3,7 @@ interface SomeType {
     value: string;
 }
 
-declare let myVar: unknown;
+declare let myVar;
 
 const variable = myVar as SomeType;
 const literal = "value" as SomeType;
