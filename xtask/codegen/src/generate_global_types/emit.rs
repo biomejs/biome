@@ -3,9 +3,9 @@ use std::path::Path;
 use anyhow::{Result, bail};
 
 use super::lower::{
-    LoweredClass, LoweredConstructor, LoweredFunction, LoweredFunctionParameter, LoweredGlobal,
-    LoweredGlobalTypes, LoweredInterface, LoweredMemberKind, LoweredTypeData, LoweredTypeMember,
-    LoweredTypeReference,
+    LoweredClass, LoweredConstructor, LoweredFunction, LoweredFunctionParameter,
+    LoweredFunctionParameterBinding, LoweredGlobal, LoweredGlobalTypes, LoweredInterface,
+    LoweredMemberKind, LoweredTypeData, LoweredTypeMember, LoweredTypeReference,
 };
 
 /// Relative path of the generated global types module from the workspace root.
@@ -16,6 +16,12 @@ const OUTPUT_RELATIVE_PATH: &str = "crates/biome_js_type_info/src/generated/glob
 /// The index is the row position in `PREDEFINED_ID_ROWS`. This keeps
 /// `MIGRATED_PREDEFINED_IDS` sorted for the runtime `binary_search`.
 const GLOBAL_ID_EMIT_ORDER: &[&str] = &[
+    "ARRAY_ID_GLOBAL_TYPE_ID",
+    "ARRAY_FILTER_ID_GLOBAL_TYPE_ID",
+    "ARRAY_FOREACH_ID_GLOBAL_TYPE_ID",
+    "ARRAY_MAP_ID_GLOBAL_TYPE_ID",
+    "REGEXP_ID_GLOBAL_TYPE_ID",
+    "REGEXP_EXEC_ID_GLOBAL_TYPE_ID",
     "SYMBOL_ID_GLOBAL_TYPE_ID",
     "SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID",
     "SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
@@ -23,6 +29,10 @@ const GLOBAL_ID_EMIT_ORDER: &[&str] = &[
     "DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID",
     "ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID",
     "ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
+    "DATE_ID_GLOBAL_TYPE_ID",
+    "MAP_ID_GLOBAL_TYPE_ID",
+    "SET_ID_GLOBAL_TYPE_ID",
+    "WEAK_MAP_ID_GLOBAL_TYPE_ID",
     "ERROR_ID_GLOBAL_TYPE_ID",
     "ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID",
     "ERROR_CALL_ID_GLOBAL_TYPE_ID",
@@ -105,14 +115,30 @@ fn render_class(class: &LoweredClass) -> String {
     format!(
         "crate::TypeData::Class(Box::new(crate::Class {{
             name: Some(biome_rowan::Text::new_static({name})),
-            type_parameters: Box::default(),
+            type_parameters: {type_parameters},
             extends: None,
             implements: Box::default(),
             members: Box::new([{members}]),
         }}))",
         name = rust_string_literal(class.name()),
+        type_parameters = render_type_references(class.type_parameters()),
         members = render_members(class.members()),
     )
+}
+
+/// Builds a boxed type-reference expression list.
+fn render_type_references(references: &[LoweredTypeReference]) -> String {
+    if references.is_empty() {
+        return "Box::default()".to_string();
+    }
+
+    let mut rendered = String::from("Box::new([");
+    for reference in references {
+        rendered.push_str(&render_type_reference(reference));
+        rendered.push(',');
+    }
+    rendered.push_str("])");
+    rendered
 }
 
 /// Builds a `TypeData::Interface` expression.
@@ -161,12 +187,13 @@ fn render_function(function: &LoweredFunction) -> String {
     format!(
         "crate::TypeData::Function(Box::new(crate::Function {{
             is_async: {is_async},
-            type_parameters: Box::default(),
+            type_parameters: {type_parameters},
             name: {name},
             parameters: Box::new([{parameters}]),
             return_type: crate::ReturnType::Type({return_type}),
         }}))",
         is_async = function.is_async(),
+        type_parameters = render_type_references(function.type_parameters()),
         parameters = render_function_parameters(function.parameters()),
         return_type = render_type_reference(function.return_type()),
     )
@@ -247,20 +274,37 @@ fn render_function_parameters(parameters: &[LoweredFunctionParameter]) -> String
     rendered
 }
 
-/// Builds one named parameter expression.
+/// Preserves named bindings and uses pattern parameters for synthetic callback slots.
 fn render_function_parameter(parameter: &LoweredFunctionParameter) -> String {
-    format!(
-        "crate::FunctionParameter::Named(crate::NamedFunctionParameter {{
-            name: biome_rowan::Text::new_static({name}),
-            ty: {type_reference},
-            is_optional: {is_optional},
-            is_rest: {is_rest},
-        }})",
-        name = rust_string_literal(parameter.name()),
-        type_reference = render_type_reference(parameter.type_reference()),
-        is_optional = parameter.is_optional(),
-        is_rest = parameter.is_rest(),
-    )
+    match parameter.binding() {
+        LoweredFunctionParameterBinding::Named(name) => {
+            format!(
+                "crate::FunctionParameter::Named(crate::NamedFunctionParameter {{
+                    name: biome_rowan::Text::new_static({name}),
+                    ty: {type_reference},
+                    is_optional: {is_optional},
+                    is_rest: {is_rest},
+                }})",
+                name = rust_string_literal(name.text()),
+                type_reference = render_type_reference(parameter.type_reference()),
+                is_optional = parameter.is_optional(),
+                is_rest = parameter.is_rest(),
+            )
+        }
+        LoweredFunctionParameterBinding::Pattern => {
+            format!(
+                "crate::FunctionParameter::Pattern(crate::PatternFunctionParameter {{
+                    bindings: Box::default(),
+                    ty: {type_reference},
+                    is_optional: {is_optional},
+                    is_rest: {is_rest},
+                }})",
+                type_reference = render_type_reference(parameter.type_reference()),
+                is_optional = parameter.is_optional(),
+                is_rest = parameter.is_rest(),
+            )
+        }
+    }
 }
 
 /// Builds a generated `TypeReference` expression.

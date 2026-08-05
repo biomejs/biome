@@ -473,28 +473,22 @@ fn initialize_profile_documents(db: &dyn ModuleDb) -> bool {
 }
 
 fn collect_profile_documents(db: &dyn ModuleDb) -> (HashMap<ModuleInfo, DocumentInfo>, u32) {
-    let mut paths = Vec::new();
+    let mut modules = Vec::new();
     let mut dropped_documents = 0u32;
-    db.for_each_module(&mut |path, kind| {
-        if matches!(kind, ModuleInfoKind::Js(_)) {
-            if paths.len() < MAX_DOCUMENTS {
-                paths.push(path.to_path_buf());
+    db.for_each_module(&mut |module| {
+        if matches!(module.kind(db), ModuleInfoKind::Js(_)) {
+            if modules.len() < MAX_DOCUMENTS {
+                modules.push(module);
             } else {
                 dropped_documents = dropped_documents.saturating_add(1);
             }
         }
     });
-    let documents = paths
+    let documents = modules
         .into_iter()
-        .filter_map(|path| {
-            db.module_for_path(&path).map(|module| {
-                (
-                    module,
-                    DocumentInfo {
-                        path: path.into_string().into_boxed_str(),
-                    },
-                )
-            })
+        .map(|module| {
+            let path = module.path(db).as_str().into();
+            (module, DocumentInfo { path })
         })
         .collect();
     (documents, dropped_documents)

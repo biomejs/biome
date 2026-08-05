@@ -172,6 +172,30 @@ sorted: truncate overflow-hidden text-clip
 input:  group peer flex p-4
 sorted: group peer flex p-4
 ---
+input:  border border-4 border-x border-x-4 flex
+sorted: flex border border-4 border-x border-x-4
+---
+input:  ring ring-2 ring-inset shadow
+sorted: shadow ring ring-2 ring-inset
+---
+input:  shadow shadow-lg shadow-none rounded
+sorted: rounded shadow shadow-lg shadow-none
+---
+input:  rounded rounded-lg rounded-none border
+sorted: rounded rounded-lg rounded-none border
+---
+input:  transition transition-all transition-none grow
+sorted: grow transition transition-all transition-none
+---
+input:  grow grow-0 shrink shrink-0
+sorted: shrink shrink-0 grow grow-0
+---
+input:  outline outline-2 outline-none border-t
+sorted: border-t outline outline-2 outline-none
+---
+input:  blur blur-sm grayscale invert
+sorted: blur blur-sm grayscale invert
+---
 input:  p-4 foo flex
 sorted: foo flex p-4
 ---
@@ -341,7 +365,7 @@ input:  not-a-class! flex
 sorted: not-a-class! flex
 ---
 input:  shadow-sm text-card-foreground border bg-card gap-6 py-6 rounded-xl flex flex-col
-sorted: text-card-foreground border bg-card flex flex-col gap-6 rounded-xl py-6 shadow-sm
+sorted: text-card-foreground bg-card flex flex-col gap-6 rounded-xl border py-6 shadow-sm
 ---
 input:  bg-accent animate-pulse rounded-md
 sorted: bg-accent animate-pulse rounded-md
@@ -353,7 +377,7 @@ input:  px-4 has-[>svg]:px-3 h-9 py-2
 sorted: has-[>svg]:px-3 h-9 py-2 px-4
 ---
 input:  hover:text-accent-foreground border bg-background shadow-xs hover:bg-accent dark:border-input dark:bg-input/30 dark:hover:bg-input/50
-sorted: hover:text-accent-foreground border bg-background hover:bg-accent dark:border-input dark:bg-input/30 dark:hover:bg-input/50 shadow-xs
+sorted: hover:text-accent-foreground bg-background hover:bg-accent dark:border-input dark:bg-input/30 dark:hover:bg-input/50 border shadow-xs
 ---
 input:  items-center [&_svg]:pointer-events-none inline-flex disabled:opacity-50 gap-2 focus-visible:border-ring justify-center rounded-md text-sm shrink-0 transition-all font-medium outline-none whitespace-nowrap focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:shrink-0
 sorted: [&_svg]:pointer-events-none disabled:opacity-50 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:shrink-0 inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none

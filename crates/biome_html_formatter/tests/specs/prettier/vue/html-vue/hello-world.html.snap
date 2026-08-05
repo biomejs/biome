@@ -37,13 +37,6 @@ info: vue/html-vue/hello-world.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,5 @@
- <!-- Hello World example from https://github.com/vuejs/vuejs.org/blob/master/src/v2/examples/vue-20-hello-world/index.html -->
--<!doctype html>
-+<!DOCTYPE html>
- <html>
-   <head>
-     <title>My first Vue app</title>
 @@ -11,12 +11,12 @@
      </div>
  
@@ -70,7 +63,7 @@ info: vue/html-vue/hello-world.html
 
 ```html
 <!-- Hello World example from https://github.com/vuejs/vuejs.org/blob/master/src/v2/examples/vue-20-hello-world/index.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <title>My first Vue app</title>

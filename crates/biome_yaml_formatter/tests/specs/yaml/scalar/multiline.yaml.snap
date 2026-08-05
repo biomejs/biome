@@ -6,9 +6,9 @@ info: yaml/scalar/multiline.yaml
 # Input
 
 ```yaml
-plain: one   
-      two   
-        deep	
+plain: one
+      two
+        deep
       three
 
       after blank
@@ -18,15 +18,15 @@ plain: one
 seq:
   - first
      second
-double: "  
-   folded 
- 
+double: "
+   folded
+
    line"
 single: 'a
    b'
 ---
 top
-level  
+level
   scalar
 
 ```
@@ -51,8 +51,8 @@ double: "
   folded
 
   line"
-single: 'a
-  b'
+single: "a
+  b"
 ---
 top
 level

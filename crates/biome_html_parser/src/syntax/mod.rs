@@ -27,7 +27,8 @@ use crate::syntax::vue::{
     parse_vue_v_on_shorthand_directive, parse_vue_v_slot_shorthand_directive,
 };
 use crate::token_source::{
-    HtmlEmbeddedLanguage, HtmlFramework, HtmlLexContext, HtmlReLexContext, TextExpressionKind,
+    HtmlEmbeddedLanguage, HtmlFramework, HtmlLexContext, HtmlReLexContext, PreformattedElement,
+    TextExpressionKind,
 };
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
@@ -99,9 +100,22 @@ const VOID_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(
 );
 
 /// Elements whose content is treated as raw text / an embedded language. `script`
-/// and `style` share their kinds between HTML and SVG.
-const EMBEDDED_LANGUAGE_ELEMENTS: TokenSet<HtmlSyntaxKind> =
-    token_set!(T![script], T![style], T![pre]);
+/// and `style` share their kinds between HTML and SVG. The rest are
+/// preformatted: their text is whitespace-sensitive, and lexing it as one
+/// literal keeps the whitespace in the token instead of losing it to trivia.
+const EMBEDDED_LANGUAGE_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(
+    T![script],
+    T![style],
+    T![pre],
+    T![textarea],
+    T![xmp],
+    T![plaintext]
+);
+
+/// The subset of [`EMBEDDED_LANGUAGE_ELEMENTS`] that is raw text because it is
+/// preformatted rather than because it hosts another language.
+const PREFORMATTED_ELEMENTS: TokenSet<HtmlSyntaxKind> =
+    token_set!(T![pre], T![textarea], T![xmp], T![plaintext]);
 
 pub(crate) fn parse_root(p: &mut HtmlParser) {
     let m = p.start();
@@ -127,7 +141,13 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
     p.set_after_frontmatter(true);
 
     parse_doc_type(p).ok();
-    ElementList.parse_list(p);
+    // Only a real `.vue` document has single-file-component blocks. Plain HTML
+    // parsed with the Vue extensions turned on keeps ordinary element nesting,
+    // where an unknown top-level tag is a custom element rather than a block.
+    ElementList {
+        vue_sfc_top_level: Vue.is_supported(p) && !p.options().is_html(),
+    }
+    .parse_list(p);
 
     m.complete(p, HTML_ROOT);
 }
@@ -273,33 +293,81 @@ fn parse_processing_instruction(p: &mut HtmlParser) -> ParsedSyntax {
         ));
     }
 
-    AttributeList.parse_list(p);
+    AttributeList::default().parse_list(p);
 
     p.expect(T![?>]);
 
     Present(m.complete(p, HTML_PROCESSING_INSTRUCTION))
 }
 
-fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
+/// Whether a top-level block of a Vue single-file component holds something
+/// other than HTML, and so has to be read as opaque text.
+///
+/// `<script>` and `<style>` are excluded because the embedded-language path
+/// already handles them. A `<template>` is markup unless a `lang` attribute
+/// names a preprocessor such as Pug; which one it names doesn't matter, since
+/// nobody writes out the markup default. Everything else is a custom block like
+/// `<i18n>` or `<docs>`, whose content the SFC spec leaves entirely to whichever
+/// tool consumes it, so it may not even be markup.
+///
+/// `<html>` is excluded as well: a document that opens with it is a plain HTML
+/// page that happens to carry a `.vue` extension, not a component.
+///
+/// See <https://vuejs.org/api/sfc-spec.html#custom-blocks>.
+fn is_vue_raw_text_block(name_kind: HtmlSyntaxKind, names_a_language: bool) -> bool {
+    match name_kind {
+        T![script] | T![style] | T![html] => false,
+        T![template] => names_a_language,
+        _ => true,
+    }
+}
+
+fn parse_element(p: &mut HtmlParser, at_vue_sfc_top_level: bool) -> ParsedSyntax {
     if !p.at(T![<]) {
         return Absent;
     }
+
+    if at_vue_sfc_top_level {
+        // A block of a single-file component runs to its closing tag, so one
+        // that is never closed would swallow the rest of the file and turn a
+        // single typo into a cascade of errors. Custom blocks can be named
+        // anything, which makes that easy to hit by accident. Read the block,
+        // and if it turns out to be unclosed, parse the element again as
+        // ordinary markup so that its diagnostics stay where the mistake is.
+        let checkpoint = p.checkpoint();
+        match parse_element_allowing_sfc_blocks(p, true) {
+            block @ Present(_) => return block,
+            Absent => p.rewind(checkpoint),
+        }
+    }
+
+    parse_element_allowing_sfc_blocks(p, false)
+}
+
+/// Parses an element, reading its content as opaque text when it opens a block
+/// of a Vue single-file component and `sfc_blocks` allows it.
+///
+/// Returns `Absent` only when such a block turned out to have no closing tag.
+/// The caller has already established that the parser is at a `<`, so nothing
+/// else can make this fail.
+fn parse_element_allowing_sfc_blocks(p: &mut HtmlParser, sfc_blocks: bool) -> ParsedSyntax {
     let m = p.start();
 
     p.bump_with_context(T![<], inside_tag_context(p));
     // The tag-name token has already been lexed and classified by the lexer, so
     // these checks are now `O(1)` on the token kind.
     let name_kind = p.cur();
+    let name_range = p.cur_range();
     let opening_tag_name = p.cur_text().to_string();
     let should_be_self_closing = VOID_ELEMENTS.contains(name_kind);
-    // In Svelte files, <pre> must be parsed as a regular element so that
-    // Svelte expressions inside it ({@html expr}, {expr}) are visible as AST
-    // nodes for variable-reference tracking.  The HTML formatter's
-    // HTML_VERBATIM_TAGS list independently ensures <pre> content is still
-    // printed verbatim, so removing <pre> from the embedded-language path
-    // here has no effect on formatting output.
+    // In Svelte files, the preformatted elements must be parsed as regular
+    // elements so that Svelte expressions inside them ({@html expr}, {expr})
+    // are visible as AST nodes for variable-reference tracking. The formatter
+    // decides verbatim printing on its own, so keeping them off the
+    // embedded-language path here costs nothing but the leading and trailing
+    // whitespace, which ends up as trivia.
     let is_embedded_language_tag = EMBEDDED_LANGUAGE_ELEMENTS.contains(name_kind)
-        && !(name_kind == T![pre] && Svelte.is_supported(p));
+        && !(PREFORMATTED_ELEMENTS.contains(name_kind) && Svelte.is_supported(p));
 
     parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
 
@@ -313,7 +381,13 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
         _ => {}
     }
 
-    AttributeList.parse_list(p);
+    // Only a top-level block of a single-file component asks about `lang`, so
+    // the list looks for it there and nowhere else.
+    let mut attributes = AttributeList::new(sfc_blocks);
+    attributes.parse_list(p);
+    let is_raw_text_block =
+        sfc_blocks && is_vue_raw_text_block(name_kind, attributes.names_a_language);
+    let is_raw_text = is_embedded_language_tag || is_raw_text_block;
 
     if p.at(T![/]) {
         p.bump_with_context(T![/], inside_tag_context(p));
@@ -329,11 +403,22 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
         }
         p.expect_with_context(
             T![>],
-            if is_embedded_language_tag {
+            if is_raw_text_block {
+                HtmlLexContext::EmbeddedLanguage(HtmlEmbeddedLanguage::RawTextBlock {
+                    name: name_range,
+                })
+            } else if is_embedded_language_tag {
                 HtmlLexContext::EmbeddedLanguage(match name_kind {
                     T![script] => HtmlEmbeddedLanguage::Script,
                     T![style] => HtmlEmbeddedLanguage::Style,
-                    T![pre] => HtmlEmbeddedLanguage::Preformatted,
+                    T![pre] => HtmlEmbeddedLanguage::Preformatted(PreformattedElement::Pre),
+                    T![textarea] => {
+                        HtmlEmbeddedLanguage::Preformatted(PreformattedElement::Textarea)
+                    }
+                    T![xmp] => HtmlEmbeddedLanguage::Preformatted(PreformattedElement::Xmp),
+                    T![plaintext] => {
+                        HtmlEmbeddedLanguage::Preformatted(PreformattedElement::Plaintext)
+                    }
                     _ => unreachable!(),
                 })
             } else {
@@ -348,8 +433,8 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
             p.re_lex(HtmlReLexContext::HtmlText);
         }
 
-        if is_embedded_language_tag {
-            // embedded language tags always have 1 element as content
+        if is_raw_text {
+            // raw text tags always have 1 element as content
             let list = p.start();
             if p.at(HTML_LITERAL) {
                 let m = p.start();
@@ -358,10 +443,17 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
             }
             list.complete(p, HTML_ELEMENT_LIST);
 
-            parse_closing_tag(p).or_add_diagnostic(p, expected_closing_tag);
+            let closing_tag = parse_closing_tag(p);
+            if is_raw_text_block && closing_tag.is_absent() {
+                // The lexer read to the end of the file looking for the closing
+                // tag, so the block is unclosed. Give up and let the caller
+                // parse the element as ordinary markup.
+                return Absent;
+            }
+            closing_tag.or_add_diagnostic(p, expected_closing_tag);
         } else {
             loop {
-                ElementList.parse_list(p);
+                ElementList::default().parse_list(p);
                 if let Some(mut closing) =
                     parse_closing_tag(p).or_add_diagnostic(p, expected_closing_tag)
                 {
@@ -435,11 +527,11 @@ fn is_void_closing_tag(p: &HtmlParser, closing: &CompletedMarker) -> bool {
 }
 
 #[inline]
-pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
+pub(crate) fn parse_html_element(p: &mut HtmlParser, at_vue_sfc_top_level: bool) -> ParsedSyntax {
     match p.cur() {
         T!["<![CDATA["] => parse_cdata_section(p),
         T![<?] => parse_processing_instruction(p),
-        T![<] => parse_element(p),
+        T![<] => parse_element(p, at_vue_sfc_top_level),
         T!["{{"] => HtmlSyntaxFeatures::DoubleTextExpressions.parse_exclusive_syntax(
             p,
             |p| parse_double_text_expression(p, HtmlLexContext::Regular),
@@ -478,7 +570,12 @@ pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
 }
 
 #[derive(Default)]
-struct ElementList;
+struct ElementList {
+    /// Whether this list holds the top-level blocks of a Vue single-file
+    /// component. Only the outermost list, so that a `<docs>` nested inside a
+    /// `<template>` stays ordinary markup.
+    vue_sfc_top_level: bool,
+}
 
 impl ParseNodeList for ElementList {
     type Kind = HtmlSyntaxKind;
@@ -486,7 +583,7 @@ impl ParseNodeList for ElementList {
     const LIST_KIND: Self::Kind = HTML_ELEMENT_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_html_element(p)
+        parse_html_element(p, self.vue_sfc_top_level)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -510,7 +607,23 @@ impl ParseNodeList for ElementList {
 }
 
 #[derive(Default)]
-struct AttributeList;
+struct AttributeList {
+    /// Whether to watch for a `lang` attribute. Off unless the caller asks, so
+    /// that ordinary attribute parsing doesn't pay for the lookahead.
+    track_lang: bool,
+    /// Whether the list held a `lang` attribute naming a language. Always false
+    /// without [`Self::track_lang`].
+    names_a_language: bool,
+}
+
+impl AttributeList {
+    fn new(track_lang: bool) -> Self {
+        Self {
+            track_lang,
+            names_a_language: false,
+        }
+    }
+}
 
 impl ParseNodeList for AttributeList {
     type Kind = HtmlSyntaxKind;
@@ -518,6 +631,10 @@ impl ParseNodeList for AttributeList {
     const LIST_KIND: Self::Kind = HTML_ATTRIBUTE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        if self.track_lang {
+            self.names_a_language |= is_at_lang_naming_a_language(p);
+        }
+
         parse_attribute(p)
     }
 
@@ -536,6 +653,31 @@ impl ParseNodeList for AttributeList {
             expected_attribute,
         )
     }
+}
+
+/// Whether the parser sits at a `lang` attribute that names a language, as in
+/// `lang="pug"`.
+///
+/// The value is only reachable as a token while it is being consumed, so this
+/// looks ahead over it instead of reading it back once the attribute has been
+/// parsed. The lookahead bumps the same tokens in the same contexts that
+/// [`parse_attribute_initializer`] does, so it sees the same value.
+fn is_at_lang_naming_a_language(p: &mut HtmlParser) -> bool {
+    if !p.at(HTML_LITERAL) || !p.cur_text().eq_ignore_ascii_case("lang") {
+        return false;
+    }
+
+    p.lookahead(|p| {
+        p.bump_with_context(HTML_LITERAL, inside_tag_context(p));
+        if !p.at(T![=]) {
+            return false;
+        }
+        p.bump_with_context(T![=], HtmlLexContext::AttributeValue);
+
+        // `lang`, `lang=""` and `lang=''` all name no language, and prettier
+        // keeps reading such a block as markup.
+        p.at(HTML_STRING_LITERAL) && !matches!(p.cur_text(), "" | "\"\"" | "''")
+    })
 }
 
 fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {

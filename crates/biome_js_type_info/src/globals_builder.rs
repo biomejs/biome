@@ -1,7 +1,5 @@
-use std::sync::Arc;
-
 use crate::generated::global_types::MIGRATED_PREDEFINED_IDS;
-use crate::{NUM_PREDEFINED_TYPES, TypeData, TypeStore};
+use crate::{TypeData, TypeStore, globals_ids::NUM_PREDEFINED_TYPES};
 
 use super::{globals::RawGlobalTypes, globals_ids::GlobalTypeId};
 
@@ -57,10 +55,10 @@ impl GlobalsResolverBuilder {
             );
         }
 
-        let types: Vec<Arc<TypeData>> = self
+        let types: Vec<TypeData> = self
             .types
             .into_iter()
-            .map(|slot| Arc::new(slot.unwrap_or(TypeData::Unknown)))
+            .map(|slot| slot.unwrap_or(TypeData::Unknown))
             .collect();
 
         RawGlobalTypes {

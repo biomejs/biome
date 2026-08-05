@@ -32,26 +32,79 @@ p { font-size : 2em ; text-align : center ; }
 ```
 
 
-# Errors
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,30 +1,22 @@
+ <template>
+   <h1>{{ greeting }} world</h1>
+-  <script>
+-    kikoo();
+-  </script>
++  <script>kikoo ( ) </script>
+ </template>
+
+ <script>
+-module.exports = {
+-  data: function () {
+-    return {
+-      greeting: "Hello",
+-    };
+-  },
+-};
++module  .  exports  =
++{data : function () {return {
++	greeting: "Hello"
++}}
++}
+ </script>
+
+ <style scoped>
+-p {
+-  font-size: 2em;
+-  text-align: center;
+-}
+-</style>
++p { font-size : 2em ; text-align : center ; }
++
++  </style>
+
+ <style lang="postcss">
+-p {
+-  font-size: 2em;
+-  text-align: center;
+-}
+-</style>
++p { font-size : 2em ; text-align : center ; }
++
++  </style>
 ```
-vue-component.vue:23:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a closing tag but instead found the end of the file.
-  
-    22 │   </style >
-  > 23 │ 
-       │ 
-  
-  i Expected a closing tag here.
-  
-    22 │   </style >
-  > 23 │ 
-       │ 
-  
+# Output
 
-```
+```vue
+<template>
+  <h1>{{ greeting }} world</h1>
+  <script>kikoo ( ) </script>
+</template>
 
-# Error
-```text
-format: Can't format code because it contains syntax errors
+<script>
+module  .  exports  =
+{data : function () {return {
+	greeting: "Hello"
+}}
+}
+</script>
+
+<style scoped>
+p { font-size : 2em ; text-align : center ; }
+
+  </style>
+
+<style lang="postcss">
+p { font-size : 2em ; text-align : center ; }
+
+  </style>
 ```

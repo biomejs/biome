@@ -1,0 +1,9 @@
+single: !!str # comment
+  123
+plain2: !!str # one
+# two
+  hello
+flowtag: !!map # comment
+  {}
+anchored: &default # This key
+  subkey: value

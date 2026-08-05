@@ -44,45 +44,19 @@ PrEtTiEr
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,25 +4,25 @@
- <custom lang="uppercase-rocks" src="foo.uppercase-rocks"></custom>
- <template lang="uppercase-rocks" src></template>
- <template lang="uppercase-rocks" src=""></template>
--<template lang="uppercase-rocks" src>PrEtTiEr</template>
--<template lang="uppercase-rocks" src="">PrEtTiEr</template>
--<template lang="uppercase-rocks" src>
--
--     </template>
--<template lang="uppercase-rocks" src="">
--
--     </template>
-+<template lang="uppercase-rocks" src
-+  >PrEtTiEr</template
-+>
-+<template lang="uppercase-rocks" src=""
-+  >PrEtTiEr</template
-+>
-+<template lang="uppercase-rocks" src> </template>
-+<template lang="uppercase-rocks" src=""> </template>
- 
- <template lang="uppercase-rocks" src="foo.uppercase-rocks">
--PrEtTiEr
-+  PrEtTiEr
+@@ -17,12 +17,8 @@
+ PrEtTiEr
  </template>
- 
+
 -<template lang="uppercase-rocks" :src="">
 -PRETTIER
 -</template>
 -<template lang="uppercase-rocks" @src="">
 -PRETTIER
 -</template>
-+<template lang="uppercase-rocks" :src=""
-+  >PrEtTiEr</template
-+>
-+<template lang="uppercase-rocks" @src=""
-+  >PrEtTiEr</template
-+>
- 
++<template lang="uppercase-rocks" :src="">PrEtTiEr</template>
++<template lang="uppercase-rocks" @src="">PrEtTiEr</template>
+
  <template lang="uppercase-rocks" src="foo.uppercase-rocks" />
  <style lang="uppercase-rocks" src="foo.uppercase-rocks" />
 ```
@@ -96,25 +70,21 @@ PrEtTiEr
 <custom lang="uppercase-rocks" src="foo.uppercase-rocks"></custom>
 <template lang="uppercase-rocks" src></template>
 <template lang="uppercase-rocks" src=""></template>
-<template lang="uppercase-rocks" src
-  >PrEtTiEr</template
->
-<template lang="uppercase-rocks" src=""
-  >PrEtTiEr</template
->
-<template lang="uppercase-rocks" src> </template>
-<template lang="uppercase-rocks" src=""> </template>
+<template lang="uppercase-rocks" src>PrEtTiEr</template>
+<template lang="uppercase-rocks" src="">PrEtTiEr</template>
+<template lang="uppercase-rocks" src>
+
+     </template>
+<template lang="uppercase-rocks" src="">
+
+     </template>
 
 <template lang="uppercase-rocks" src="foo.uppercase-rocks">
-  PrEtTiEr
+PrEtTiEr
 </template>
 
-<template lang="uppercase-rocks" :src=""
-  >PrEtTiEr</template
->
-<template lang="uppercase-rocks" @src=""
-  >PrEtTiEr</template
->
+<template lang="uppercase-rocks" :src="">PrEtTiEr</template>
+<template lang="uppercase-rocks" @src="">PrEtTiEr</template>
 
 <template lang="uppercase-rocks" src="foo.uppercase-rocks" />
 <style lang="uppercase-rocks" src="foo.uppercase-rocks" />

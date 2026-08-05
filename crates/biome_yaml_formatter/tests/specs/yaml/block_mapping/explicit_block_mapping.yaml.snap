@@ -17,16 +17,7 @@ info: yaml/block_mapping/explicit_block_mapping.yaml
 # Formatted
 
 ```yaml
-? a
-: 10
-? b
-: 11
+a: 10
+b: 11
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"? a\n: 10" => 0..8
-"? b\n: 11\n" => 9..18

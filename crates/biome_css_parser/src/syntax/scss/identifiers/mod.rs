@@ -14,7 +14,8 @@ pub(crate) use interpolated_dashed::{
     parse_scss_interpolated_dashed_identifier,
 };
 pub(crate) use interpolated_identifier::{
-    is_at_scss_interpolated_identifier, is_nth_at_scss_interpolated_identifier,
+    complete_scss_interpolated_identifier, is_at_scss_interpolated_identifier,
+    is_nth_at_scss_interpolated_identifier, is_nth_source_tight,
 };
 pub(crate) use interpolated_regular::{
     is_nth_at_scss_hyphen_interpolated_identifier, parse_scss_hyphen_interpolated_identifier,

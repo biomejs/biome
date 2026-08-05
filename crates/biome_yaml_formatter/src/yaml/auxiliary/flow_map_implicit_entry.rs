@@ -1,10 +1,10 @@
-use crate::comments::subtree_has_comments;
 use crate::prelude::*;
-use crate::utils::needs_space_before_colon;
+use crate::comments::subtree_has_comments;
+use crate::utils::{FormatMultilineKeyEntry, multiline_plain_key, needs_space_before_colon};
 use biome_formatter::{format_args, write};
 use biome_rowan::AstNode;
 use biome_yaml_syntax::{
-    AnyYamlFlowNode, AnyYamlMappingImplicitKey, YamlFlowMapImplicitEntry,
+    AnyYamlEntryValue, AnyYamlFlowNode, AnyYamlMappingImplicitKey, YamlFlowMapImplicitEntry,
     YamlFlowMapImplicitEntryFields, YamlSyntaxKind, YamlSyntaxToken,
 };
 #[derive(Debug, Clone, Default)]
@@ -26,6 +26,22 @@ impl FormatNodeRule<YamlFlowMapImplicitEntry> for FormatYamlFlowMapImplicitEntry
             .parent()
             .is_some_and(|parent| parent.kind() == YamlSyntaxKind::YAML_FLOW_MAP_ENTRY_LIST);
 
+        // A key spanning multiple lines can only be held by the explicit
+        // `? key : value` form, so the entry converts to it
+        if key.as_ref().and_then(multiline_plain_key).is_some()
+            && let (Some(entry_key), Some(colon_token)) = (&key, &colon_token)
+        {
+            return write!(
+                f,
+                [FormatMultilineKeyEntry {
+                    question_mark_token: None,
+                    key: entry_key,
+                    colon_token,
+                    value: &value,
+                }]
+            );
+        }
+
         if let (Some(entry_key), Some(colon_token), Some(entry_value)) =
             (&key, &colon_token, &value)
             && entry_key.is_flow_collection()
@@ -35,7 +51,7 @@ impl FormatNodeRule<YamlFlowMapImplicitEntry> for FormatYamlFlowMapImplicitEntry
                 [FormatCollectionKeyEntry {
                     key: entry_key,
                     colon_token,
-                    value: entry_value
+                    value: entry_value.clone().into(),
                 }]
             );
         }
@@ -69,10 +85,10 @@ impl FormatNodeRule<YamlFlowMapImplicitEntry> for FormatYamlFlowMapImplicitEntry
 /// of its own, and conditional content on that group picks between the
 /// implicit and the explicit form. A comment inside the key expands the
 /// group, so it picks the explicit form as well.
-struct FormatCollectionKeyEntry<'a> {
-    key: &'a AnyYamlMappingImplicitKey,
-    colon_token: &'a YamlSyntaxToken,
-    value: &'a AnyYamlFlowNode,
+pub(crate) struct FormatCollectionKeyEntry<'a> {
+    pub(crate) key: &'a AnyYamlMappingImplicitKey,
+    pub(crate) colon_token: &'a YamlSyntaxToken,
+    pub(crate) value: AnyYamlEntryValue,
 }
 
 impl Format<YamlFormatContext> for FormatCollectionKeyEntry<'_> {
@@ -80,7 +96,13 @@ impl Format<YamlFormatContext> for FormatCollectionKeyEntry<'_> {
         let group_id = f.group_id("collection_key");
         let key_format = self.key.format().memoized();
         let colon_format = self.colon_token.format().memoized();
-        let value_format = self.value.format().memoized();
+        let value_format = format_with(|f| match &self.value {
+            AnyYamlEntryValue::AnyYamlFlowNode(value) => write!(f, [value.format()]),
+            AnyYamlEntryValue::AnyYamlBlockNode(value) => write!(f, [value.format()]),
+        })
+        .memoized();
+        // A comment inside the value forces it to break
+        let value_has_comments = subtree_has_comments(f.comments(), self.value.syntax());
 
         write!(
             f,
@@ -103,7 +125,7 @@ impl Format<YamlFormatContext> for FormatCollectionKeyEntry<'_> {
                 .with_group_id(Some(group_id)),
                 if_group_fits_on_line(&format_with(|f| {
                     write!(f, [colon_format])?;
-                    if subtree_has_comments(f.comments(), self.value.syntax()) {
+                    if value_has_comments {
                         // A value that a comment forces to break stays on the
                         // key's line instead of moving to its own line:
                         //
@@ -188,6 +210,13 @@ impl Format<YamlFormatContext> for FormatImplicitEntryBody<'_> {
         }
 
         write!(f, [colon_token.format()])?;
+
+        // In the single-pair form inside a flow sequence, the space that
+        // would separate the value is printed even when there is none:
+        // `[ : ]` becomes `[: ]`
+        if self.value.is_none() && !self.in_flow_mapping {
+            write!(f, [space()])?;
+        }
 
         if let Some(value) = self.value {
             if !value.is_flow_collection() {

@@ -1,0 +1,17 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<meta name="viewport" content="width=device-width, user-scalable=yes">
+<meta name="viewport" content="width=device-width" />
+<meta name="viewport" content="user-scalable=nope" />
+<meta name="viewport" content="not-user-scalable=no" />
+<meta name="viewport" content="user-scalable" />
+<meta name="other" content="user-scalable=no" />
+<meta content="user-scalable=no" />
+<div name="viewport" content="user-scalable=no"></div>
+
+```

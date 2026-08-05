@@ -8,6 +8,7 @@ use biome_analyze_macros::RuleSourceVariantIndex;
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::location::AsSpan;
+use biome_diagnostics::serde::Advices as SerializableAdvices;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
     Visit,
@@ -176,6 +177,8 @@ pub enum RuleSource<'a> {
     EslintSonarJs(&'a str),
     /// Rules from [Eslint Plugin Stylistic](https://eslint.style)
     EslintStylistic(&'a str),
+    /// Rules from [Eslint Plugin Tailwindcss](https://github.com/francoismassart/eslint-plugin-tailwindcss)
+    EslintTailwindcss(&'a str),
     /// Rules from [Eslint Plugin Typescript](https://typescript-eslint.io)
     EslintTypeScript(&'a str),
     /// Rules from [Eslint Plugin Unicorn](https://github.com/sindresorhus/eslint-plugin-unicorn)
@@ -260,6 +263,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintSvelte(_) => write!(f, "eslint-plugin-svelte"),
             Self::EslintSonarJs(_) => write!(f, "eslint-plugin-sonarjs"),
             Self::EslintStylistic(_) => write!(f, "@stylistic/eslint-plugin"),
+            Self::EslintTailwindcss(_) => write!(f, "eslint-plugin-tailwindcss"),
             Self::EslintTypeScript(_) => write!(f, "typescript-eslint"),
             Self::EslintUnicorn(_) => write!(f, "eslint-plugin-unicorn"),
             Self::EslintUnusedImports(_) => write!(f, "eslint-plugin-unused-imports"),
@@ -349,6 +353,7 @@ impl<'a> RuleSource<'a> {
             | Self::EslintSvelte(rule_name)
             | Self::EslintSonarJs(rule_name)
             | Self::EslintStylistic(rule_name)
+            | Self::EslintTailwindcss(rule_name)
             | Self::EslintTypeScript(rule_name)
             | Self::EslintUnicorn(rule_name)
             | Self::EslintUnusedImports(rule_name)
@@ -422,6 +427,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintPlaywright(_) => "playwright",
             Self::EslintE18e(_) => "e18e",
             Self::EslintBetterTailwindcss(_) => "better-tailwindcss",
+            Self::EslintTailwindcss(_) => "tailwindcss",
             Self::EslintJson(_) => "json",
             Self::EslintMarkdown(_) => "markdown",
             Self::EslintYml(_) => "yml",
@@ -479,6 +485,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintSvelte(rule_name) => format!("https://sveltejs.github.io/eslint-plugin-svelte/rules/{rule_name}/"),
             Self::EslintSonarJs(rule_name) => format!("https://github.com/SonarSource/eslint-plugin-sonarjs/blob/HEAD/docs/rules/{rule_name}.md"),
             Self::EslintStylistic(rule_name) => format!("https://eslint.style/rules/default/{rule_name}"),
+            Self::EslintTailwindcss(rule_name) => format!("https://github.com/francoismassart/eslint-plugin-tailwindcss/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintTypeScript(rule_name) => format!("https://typescript-eslint.io/rules/{rule_name}"),
             Self::EslintUnicorn(rule_name) => format!("https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintUnusedImports(rule_name) => format!("https://github.com/sweepline/eslint-plugin-unused-imports/blob/master/docs/rules/{rule_name}.md"),
@@ -1605,6 +1612,10 @@ impl Advices for RuleDiagnostic {
             visitor.record_list(&list)?;
         }
 
+        for advices in &self.rule_advice.parent_advices {
+            advices.record(visitor)?;
+        }
+
         Ok(())
     }
 }
@@ -1615,6 +1626,8 @@ pub struct RuleAdvice {
     pub(crate) details: Vec<Detail>,
     pub(crate) notes: Vec<(LogCategory, MarkupBuf)>,
     pub(crate) suggestion_list: Option<SuggestionList>,
+    /// Advices provided by other diagnostics
+    pub(crate) parent_advices: Vec<SerializableAdvices>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -1649,6 +1662,9 @@ impl RuleDiagnostic {
 
     pub(crate) fn set_advice_offset(&mut self, offset: TextSize) {
         self.advice_offset = Some(offset);
+        for advices in &mut self.rule_advice.parent_advices {
+            advices.offset_by(offset);
+        }
     }
 
     /// Marks this diagnostic as deprecated code, which will
@@ -1705,6 +1721,14 @@ impl RuleDiagnostic {
     /// Adds a footer to this [`RuleDiagnostic`], with the `Info` log category.
     pub fn note(self, msg: impl Display) -> Self {
         self.footer(LogCategory::Info, msg)
+    }
+
+    /// Attaches advice emitted by `advices`.
+    pub fn with_advices(mut self, advices: impl Advices) -> Self {
+        self.rule_advice
+            .parent_advices
+            .push(SerializableAdvices::new(&advices));
+        self
     }
 
     /// It creates a new footer note which contains a message and a list of possible suggestions.

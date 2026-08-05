@@ -124,7 +124,7 @@ pub(super) fn flattened_expression(
             }
         }
         TypeofExpression::Destructure(expr) => flattened_destructure(expr, resolver),
-        TypeofExpression::Index(expr) => {
+        TypeofExpression::Index(expr) | TypeofExpression::OptionalChainIndex(expr) => {
             let object = resolver.resolve_and_get(&expr.object)?;
             object
                 .find_element_type_at_index(resolver, expr.index)
@@ -207,7 +207,8 @@ pub(super) fn flattened_expression(
                 None
             }
         }
-        TypeofExpression::StaticMember(expr) => {
+        TypeofExpression::StaticMember(expr)
+        | TypeofExpression::OptionalChainStaticMember(expr) => {
             let object = resolver.resolve_and_get(&expr.object)?;
             if let TypeData::TypeofExpression(object_expr) = object.to_data()
                 && should_flatten_static_member_object(&object_expr)
@@ -258,7 +259,10 @@ pub(super) fn flattened_expression(
 fn should_flatten_static_member_object(expr: &TypeofExpression) -> bool {
     matches!(
         expr,
-        TypeofExpression::Call(_) | TypeofExpression::New(_) | TypeofExpression::StaticMember(_)
+        TypeofExpression::Call(_)
+            | TypeofExpression::New(_)
+            | TypeofExpression::StaticMember(_)
+            | TypeofExpression::OptionalChainStaticMember(_)
     )
 }
 
@@ -322,7 +326,8 @@ fn flattened_static_member_object_expression(
                 let object = flattened_new(&expr, resolver)?;
                 apply_static_member_chain(object, pending_members, resolver)
             }
-            TypeofExpression::StaticMember(ref member_expr) => {
+            TypeofExpression::StaticMember(ref member_expr)
+            | TypeofExpression::OptionalChainStaticMember(ref member_expr) => {
                 let object = resolver.resolve_and_get(&member_expr.object)?;
                 if let TypeData::TypeofExpression(object_expr) = object.to_data()
                     && should_flatten_static_member_object(&object_expr)
@@ -600,7 +605,8 @@ fn resolve_callee_to_function(
                     callee = flattened_new(&expr, resolver)?;
                     continue;
                 }
-                TypeofExpression::StaticMember(expr) => {
+                TypeofExpression::StaticMember(expr)
+                | TypeofExpression::OptionalChainStaticMember(expr) => {
                     callee = resolver.resolve_and_get(&expr.object)?.to_data();
                     continuations.push(CalleeContinuation::Member(expr.member))?;
                     continue;

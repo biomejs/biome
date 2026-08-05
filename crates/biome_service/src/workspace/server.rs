@@ -3964,8 +3964,11 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         #[cfg(feature = "module_graph")]
         let mut data = FxHashMap::default();
         #[cfg(feature = "module_graph")]
-        db.for_each_module(&mut |path, kind| {
-            data.insert(path.as_str().to_string(), kind.dump());
+        db.for_each_module(&mut |module| {
+            data.insert(
+                module.path(&*db).as_str().to_string(),
+                module.kind(&*db).dump(),
+            );
         });
         #[cfg(not(feature = "module_graph"))]
         let data = {

@@ -19,7 +19,7 @@ next: value
 ```yaml
 glommed: |-
   # content line
- # comment line the lexer includes in the scalar
+# comment line the lexer includes in the scalar
 next: value
 
 ```

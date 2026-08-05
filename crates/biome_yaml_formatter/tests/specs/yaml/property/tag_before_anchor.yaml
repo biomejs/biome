@@ -1,0 +1,9 @@
+- !!str &a a
+- &b !!int 2
+- !!int &c 4
+---
+!!str &a1 scalar1
+---
+&a2
+!!str
+scalar2

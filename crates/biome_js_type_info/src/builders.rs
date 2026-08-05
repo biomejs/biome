@@ -187,7 +187,12 @@ pub(crate) fn object_from_members<'db>(
     db: &'db dyn TypeDb,
     members: Vec<TypeMember<'db>>,
 ) -> TypeData<'db> {
-    TypeData::Object(InternedObject::new(db, None, members.into_boxed_slice()))
+    TypeData::Object(InternedObject::new(
+        db,
+        None,
+        members.into_boxed_slice(),
+        false,
+    ))
 }
 
 pub(crate) fn pick_members<'db>(
@@ -289,7 +294,10 @@ enum MergedType<'db> {
     Interface(Vec<TypeMember<'db>>),
     Namespace(Vec<TypeMember<'db>>),
     Never,
-    Object(Vec<TypeMember<'db>>),
+    /// Members of an object, and whether the operand they came from could hold
+    /// members that inference did not model. See
+    /// [`crate::type_data::Object::has_unknown_members`].
+    Object(Vec<TypeMember<'db>>, bool),
     Primitive(TypeData<'db>),
     Unknown,
 }
@@ -368,7 +376,9 @@ impl<'db> MergedType<'db> {
             | TypeData::String
             | TypeData::Symbol
             | TypeData::Undefined => Some(Self::Primitive(ty)),
-            TypeData::Class(class) => Some(Self::Object(class_static_members(class.members(db)))),
+            TypeData::Class(class) => {
+                Some(Self::Object(class_static_members(class.members(db)), false))
+            }
             TypeData::Function(function) => Some(Self::Function(function)),
             TypeData::InstanceOf(instance) => match instance.ty(db) {
                 TypeData::Class(class) => Some(Self::ClassInstance(class_instance_members(
@@ -383,12 +393,15 @@ impl<'db> MergedType<'db> {
                 | Literal::Number(_)
                 | Literal::String(_)
                 | Literal::Template(_) => Some(Self::Primitive(ty)),
-                Literal::Object(members) => Some(Self::Object(members.to_vec())),
+                Literal::Object(members) => Some(Self::Object(members.to_vec(), false)),
                 Literal::RegExp(_) => Some(Self::Unknown),
             },
             TypeData::Namespace(namespace) => Some(Self::Namespace(namespace.members(db).to_vec())),
             TypeData::NeverKeyword => Some(Self::Never),
-            TypeData::Object(object) => Some(Self::Object(object.members(db).to_vec())),
+            TypeData::Object(object) => Some(Self::Object(
+                object.members(db).to_vec(),
+                object.has_unknown_members(db),
+            )),
             TypeData::Unknown | TypeData::UnknownKeyword => Some(Self::Unknown),
             _ => None,
         }
@@ -407,37 +420,52 @@ impl<'db> MergedType<'db> {
             }
             (Self::Unknown, _) | (_, Self::Unknown) => Self::Unknown,
             (left, right) => {
-                let (left_kind, left_members) = left.into_kind_with_members();
-                let (right_kind, right_members) = right.into_kind_with_members();
+                let (left_kind, left_members, left_unknown) = left.into_kind_with_members();
+                let (right_kind, right_members, right_unknown) = right.into_kind_with_members();
                 let mut members = left_members;
                 merge_members(db, &mut members, &right_members);
-                Self::from_kind_and_members(left_kind.intersection_with(right_kind), members)
+                Self::from_kind_and_members(
+                    left_kind.intersection_with(right_kind),
+                    members,
+                    left_unknown || right_unknown,
+                )
             }
         }
     }
 
-    fn into_kind_with_members(self) -> (MergedTypeKind, Vec<TypeMember<'db>>) {
+    /// Splits the merged type into the parts that intersection combines.
+    ///
+    /// The trailing flag reports whether the operand could hold members that
+    /// inference did not model. Only an object can carry it; every other kind
+    /// reports `false`.
+    fn into_kind_with_members(self) -> (MergedTypeKind, Vec<TypeMember<'db>>, bool) {
         match self {
-            Self::Any => (MergedTypeKind::Any, Vec::new()),
-            Self::ClassInstance(members) => (MergedTypeKind::ClassInstance, members),
-            Self::Function(_) => (MergedTypeKind::Function, Vec::new()),
-            Self::Interface(members) => (MergedTypeKind::Interface, members),
-            Self::Namespace(members) => (MergedTypeKind::Namespace, members),
-            Self::Never => (MergedTypeKind::Never, Vec::new()),
-            Self::Object(members) => (MergedTypeKind::Object, members),
-            Self::Primitive(_) => (MergedTypeKind::Primitive, Vec::new()),
-            Self::Unknown => (MergedTypeKind::Unknown, Vec::new()),
+            Self::Any => (MergedTypeKind::Any, Vec::new(), false),
+            Self::ClassInstance(members) => (MergedTypeKind::ClassInstance, members, false),
+            Self::Function(_) => (MergedTypeKind::Function, Vec::new(), false),
+            Self::Interface(members) => (MergedTypeKind::Interface, members, false),
+            Self::Namespace(members) => (MergedTypeKind::Namespace, members, false),
+            Self::Never => (MergedTypeKind::Never, Vec::new(), false),
+            Self::Object(members, has_unknown_members) => {
+                (MergedTypeKind::Object, members, has_unknown_members)
+            }
+            Self::Primitive(_) => (MergedTypeKind::Primitive, Vec::new(), false),
+            Self::Unknown => (MergedTypeKind::Unknown, Vec::new(), false),
         }
     }
 
-    fn from_kind_and_members(kind: MergedTypeKind, members: Vec<TypeMember<'db>>) -> Self {
+    fn from_kind_and_members(
+        kind: MergedTypeKind,
+        members: Vec<TypeMember<'db>>,
+        has_unknown_members: bool,
+    ) -> Self {
         match kind {
             MergedTypeKind::Any => Self::Any,
             MergedTypeKind::ClassInstance => Self::ClassInstance(members),
             MergedTypeKind::Interface => Self::Interface(members),
             MergedTypeKind::Namespace => Self::Namespace(members),
             MergedTypeKind::Never => Self::Never,
-            MergedTypeKind::Object => Self::Object(members),
+            MergedTypeKind::Object => Self::Object(members, has_unknown_members),
             MergedTypeKind::Function | MergedTypeKind::Primitive | MergedTypeKind::Unknown => {
                 Self::Unknown
             }
@@ -474,9 +502,12 @@ impl<'db> MergedType<'db> {
                 Path::from(Text::new_static("")),
             )),
             Self::Never => TypeData::NeverKeyword,
-            Self::Object(members) => {
-                TypeData::Object(InternedObject::new(db, None, members.into_boxed_slice()))
-            }
+            Self::Object(members, has_unknown_members) => TypeData::Object(InternedObject::new(
+                db,
+                None,
+                members.into_boxed_slice(),
+                has_unknown_members,
+            )),
             Self::Primitive(primitive) => primitive,
             Self::Unknown => TypeData::Unknown,
         }

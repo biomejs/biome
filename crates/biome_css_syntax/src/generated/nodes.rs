@@ -2453,6 +2453,46 @@ pub struct CssDeclarationOrRuleBlockFields {
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssDeclarationSnippetRoot {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssDeclarationSnippetRoot {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssDeclarationSnippetRootFields {
+        CssDeclarationSnippetRootFields {
+            declarations: self.declarations(),
+            eof_token: self.eof_token(),
+        }
+    }
+    pub fn declarations(&self) -> CssDeclarationList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for CssDeclarationSnippetRoot {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssDeclarationSnippetRootFields {
+    pub declarations: CssDeclarationList,
+    pub eof_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssDeclarationWithSemicolon {
     pub(crate) syntax: SyntaxNode,
 }
@@ -5051,7 +5091,7 @@ impl CssMediaType {
             value: self.value(),
         }
     }
-    pub fn value(&self) -> SyntaxResult<CssIdentifier> {
+    pub fn value(&self) -> SyntaxResult<AnyCssMediaTypeName> {
         support::required_node(&self.syntax, 0usize)
     }
 }
@@ -5065,7 +5105,7 @@ impl Serialize for CssMediaType {
 }
 #[derive(Serialize)]
 pub struct CssMediaTypeFields {
-    pub value: SyntaxResult<CssIdentifier>,
+    pub value: SyntaxResult<AnyCssMediaTypeName>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssMediaTypeQuery {
@@ -11471,11 +11511,15 @@ impl ScssMediaQuery {
     }
     pub fn as_fields(&self) -> ScssMediaQueryFields {
         ScssMediaQueryFields {
-            query: self.query(),
+            head: self.head(),
+            tail: self.tail(),
         }
     }
-    pub fn query(&self) -> SyntaxResult<ScssInterpolation> {
+    pub fn head(&self) -> SyntaxResult<CssMediaTypeQuery> {
         support::required_node(&self.syntax, 0usize)
+    }
+    pub fn tail(&self) -> Option<CssMediaType> {
+        support::node(&self.syntax, 1usize)
     }
 }
 impl Serialize for ScssMediaQuery {
@@ -11488,7 +11532,8 @@ impl Serialize for ScssMediaQuery {
 }
 #[derive(Serialize)]
 pub struct ScssMediaQueryFields {
-    pub query: SyntaxResult<ScssInterpolation>,
+    pub head: SyntaxResult<CssMediaTypeQuery>,
+    pub tail: Option<CssMediaType>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssMixinAtRule {
@@ -15756,6 +15801,25 @@ impl AnyCssMediaTypeCondition {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssMediaTypeName {
+    CssIdentifier(CssIdentifier),
+    ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
+}
+impl AnyCssMediaTypeName {
+    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
+        match &self {
+            Self::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
+        match &self {
+            Self::ScssInterpolatedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssMediaTypeQuery {
     CssMediaAndTypeQuery(CssMediaAndTypeQuery),
     CssMediaTypeQuery(CssMediaTypeQuery),
@@ -16408,10 +16472,17 @@ impl AnyCssRelativeSelector {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssRoot {
+    CssDeclarationSnippetRoot(CssDeclarationSnippetRoot),
     CssRoot(CssRoot),
     CssSnippetRoot(CssSnippetRoot),
 }
 impl AnyCssRoot {
+    pub fn as_css_declaration_snippet_root(&self) -> Option<&CssDeclarationSnippetRoot> {
+        match &self {
+            Self::CssDeclarationSnippetRoot(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_root(&self) -> Option<&CssRoot> {
         match &self {
             Self::CssRoot(item) => Some(item),
@@ -16499,6 +16570,25 @@ impl AnyCssRuleBlock {
     pub fn as_css_rule_block(&self) -> Option<&CssRuleBlock> {
         match &self {
             Self::CssRuleBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssRuleListItem {
+    AnyCssRule(AnyCssRule),
+    ScssVariableDeclaration(ScssVariableDeclaration),
+}
+impl AnyCssRuleListItem {
+    pub fn as_any_css_rule(&self) -> Option<&AnyCssRule> {
+        match &self {
+            Self::AnyCssRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_variable_declaration(&self) -> Option<&ScssVariableDeclaration> {
+        match &self {
+            Self::ScssVariableDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -20833,6 +20923,54 @@ impl From<CssDeclarationOrRuleBlock> for SyntaxNode {
 }
 impl From<CssDeclarationOrRuleBlock> for SyntaxElement {
     fn from(n: CssDeclarationOrRuleBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssDeclarationSnippetRoot {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_DECLARATION_SNIPPET_ROOT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_DECLARATION_SNIPPET_ROOT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssDeclarationSnippetRoot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssDeclarationSnippetRoot")
+                .field("declarations", &self.declarations())
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("CssDeclarationSnippetRoot").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssDeclarationSnippetRoot> for SyntaxNode {
+    fn from(n: CssDeclarationSnippetRoot) -> Self {
+        n.syntax
+    }
+}
+impl From<CssDeclarationSnippetRoot> for SyntaxElement {
+    fn from(n: CssDeclarationSnippetRoot) -> Self {
         n.syntax.into()
     }
 }
@@ -31843,7 +31981,8 @@ impl std::fmt::Debug for ScssMediaQuery {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("ScssMediaQuery")
-                .field("query", &support::DebugSyntaxResult(self.query()))
+                .field("head", &support::DebugSyntaxResult(self.head()))
+                .field("tail", &support::DebugOptionalElement(self.tail()))
                 .finish()
         } else {
             f.debug_struct("ScssMediaQuery").finish()
@@ -40493,6 +40632,68 @@ impl From<AnyCssMediaTypeCondition> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssIdentifier> for AnyCssMediaTypeName {
+    fn from(node: CssIdentifier) -> Self {
+        Self::CssIdentifier(node)
+    }
+}
+impl From<ScssInterpolatedIdentifier> for AnyCssMediaTypeName {
+    fn from(node: ScssInterpolatedIdentifier) -> Self {
+        Self::ScssInterpolatedIdentifier(node)
+    }
+}
+impl AstNode for AnyCssMediaTypeName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssIdentifier::KIND_SET.union(ScssInterpolatedIdentifier::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            SCSS_INTERPOLATED_IDENTIFIER => {
+                Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssIdentifier(it) => it.syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssIdentifier(it) => it.into_syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssMediaTypeName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssMediaTypeName> for SyntaxNode {
+    fn from(n: AnyCssMediaTypeName) -> Self {
+        match n {
+            AnyCssMediaTypeName::CssIdentifier(it) => it.into_syntax(),
+            AnyCssMediaTypeName::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssMediaTypeName> for SyntaxElement {
+    fn from(n: AnyCssMediaTypeName) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssMediaAndTypeQuery> for AnyCssMediaTypeQuery {
     fn from(node: CssMediaAndTypeQuery) -> Self {
         Self::CssMediaAndTypeQuery(node)
@@ -42214,6 +42415,11 @@ impl From<AnyCssRelativeSelector> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssDeclarationSnippetRoot> for AnyCssRoot {
+    fn from(node: CssDeclarationSnippetRoot) -> Self {
+        Self::CssDeclarationSnippetRoot(node)
+    }
+}
 impl From<CssRoot> for AnyCssRoot {
     fn from(node: CssRoot) -> Self {
         Self::CssRoot(node)
@@ -42226,12 +42432,20 @@ impl From<CssSnippetRoot> for AnyCssRoot {
 }
 impl AstNode for AnyCssRoot {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssRoot::KIND_SET.union(CssSnippetRoot::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssDeclarationSnippetRoot::KIND_SET
+        .union(CssRoot::KIND_SET)
+        .union(CssSnippetRoot::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_ROOT | CSS_SNIPPET_ROOT)
+        matches!(
+            kind,
+            CSS_DECLARATION_SNIPPET_ROOT | CSS_ROOT | CSS_SNIPPET_ROOT
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_DECLARATION_SNIPPET_ROOT => {
+                Self::CssDeclarationSnippetRoot(CssDeclarationSnippetRoot { syntax })
+            }
             CSS_ROOT => Self::CssRoot(CssRoot { syntax }),
             CSS_SNIPPET_ROOT => Self::CssSnippetRoot(CssSnippetRoot { syntax }),
             _ => return None,
@@ -42240,12 +42454,14 @@ impl AstNode for AnyCssRoot {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::CssDeclarationSnippetRoot(it) => it.syntax(),
             Self::CssRoot(it) => it.syntax(),
             Self::CssSnippetRoot(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::CssDeclarationSnippetRoot(it) => it.into_syntax(),
             Self::CssRoot(it) => it.into_syntax(),
             Self::CssSnippetRoot(it) => it.into_syntax(),
         }
@@ -42254,6 +42470,7 @@ impl AstNode for AnyCssRoot {
 impl std::fmt::Debug for AnyCssRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::CssDeclarationSnippetRoot(it) => std::fmt::Debug::fmt(it, f),
             Self::CssRoot(it) => std::fmt::Debug::fmt(it, f),
             Self::CssSnippetRoot(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -42262,6 +42479,7 @@ impl std::fmt::Debug for AnyCssRoot {
 impl From<AnyCssRoot> for SyntaxNode {
     fn from(n: AnyCssRoot) -> Self {
         match n {
+            AnyCssRoot::CssDeclarationSnippetRoot(it) => it.into_syntax(),
             AnyCssRoot::CssRoot(it) => it.into_syntax(),
             AnyCssRoot::CssSnippetRoot(it) => it.into_syntax(),
         }
@@ -42491,6 +42709,71 @@ impl From<AnyCssRuleBlock> for SyntaxNode {
 }
 impl From<AnyCssRuleBlock> for SyntaxElement {
     fn from(n: AnyCssRuleBlock) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<ScssVariableDeclaration> for AnyCssRuleListItem {
+    fn from(node: ScssVariableDeclaration) -> Self {
+        Self::ScssVariableDeclaration(node)
+    }
+}
+impl AstNode for AnyCssRuleListItem {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssRule::KIND_SET.union(ScssVariableDeclaration::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            SCSS_VARIABLE_DECLARATION => true,
+            k if AnyCssRule::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SCSS_VARIABLE_DECLARATION => {
+                Self::ScssVariableDeclaration(ScssVariableDeclaration { syntax })
+            }
+            _ => {
+                if let Some(any_css_rule) = AnyCssRule::cast(syntax) {
+                    return Some(Self::AnyCssRule(any_css_rule));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::ScssVariableDeclaration(it) => it.syntax(),
+            Self::AnyCssRule(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::ScssVariableDeclaration(it) => it.into_syntax(),
+            Self::AnyCssRule(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssRuleListItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssRule(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssRuleListItem> for SyntaxNode {
+    fn from(n: AnyCssRuleListItem) -> Self {
+        match n {
+            AnyCssRuleListItem::AnyCssRule(it) => it.into_syntax(),
+            AnyCssRuleListItem::ScssVariableDeclaration(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssRuleListItem> for SyntaxElement {
+    fn from(n: AnyCssRuleListItem) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -46726,6 +47009,11 @@ impl std::fmt::Display for AnyCssMediaTypeCondition {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssMediaTypeName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssMediaTypeQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -46837,6 +47125,11 @@ impl std::fmt::Display for AnyCssRule {
     }
 }
 impl std::fmt::Display for AnyCssRuleBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssRuleListItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -47357,6 +47650,11 @@ impl std::fmt::Display for CssDeclarationOrAtRuleBlock {
     }
 }
 impl std::fmt::Display for CssDeclarationOrRuleBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssDeclarationSnippetRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -53181,7 +53479,7 @@ impl Serialize for CssRuleList {
 }
 impl AstNodeList for CssRuleList {
     type Language = Language;
-    type Node = AnyCssRule;
+    type Node = AnyCssRuleListItem;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -53196,15 +53494,15 @@ impl Debug for CssRuleList {
     }
 }
 impl IntoIterator for &CssRuleList {
-    type Item = AnyCssRule;
-    type IntoIter = AstNodeListIterator<Language, AnyCssRule>;
+    type Item = AnyCssRuleListItem;
+    type IntoIter = AstNodeListIterator<Language, AnyCssRuleListItem>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 impl IntoIterator for CssRuleList {
-    type Item = AnyCssRule;
-    type IntoIter = AstNodeListIterator<Language, AnyCssRule>;
+    type Item = AnyCssRuleListItem;
+    type IntoIter = AstNodeListIterator<Language, AnyCssRuleListItem>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

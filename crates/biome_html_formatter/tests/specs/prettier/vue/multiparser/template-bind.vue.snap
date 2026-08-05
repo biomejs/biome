@@ -39,17 +39,17 @@ info: vue/multiparser/template-bind.vue
 -  <div v-bind:id="rawId | formatId"></div>
 -  <div v-bind:id="ok ? 'YES' : 'NO'"></div>
 +  <div v-bind:id=" 'list-'   +  id "></div>
-+  <div v-bind:id=" &quot;list-&quot;   +  id "></div>
-+  <div v-bind:id=" &apos;list-&apos;   +  id "></div>
-+  <div v-bind:id=" &apos;&quot;&apos;   +  id "></div>
++  <div v-bind:id=' "list-"   +  id '></div>
++  <div v-bind:id=" 'list-'   +  id "></div>
++  <div v-bind:id=" '&quot;'   +  id "></div>
 +  <div v-bind:id="  rawId | formatId "></div>
 +  <div v-bind:id=" ok ? 'YES' : 'NO' "></div>
- 
+
 -  <button :disabled="a && b"></button>
 -  <button .disabled="a && b"></button>
 +  <button :disabled="   a &&b "></button>
 +  <button .disabled="   a &&b "></button>
- 
+
 -  <button @click="foo(arg, 'string')"></button>
 +  <button @click=" foo ( arg, 'string' ) "></button>
  </template>
@@ -60,9 +60,9 @@ info: vue/multiparser/template-bind.vue
 ```vue
 <template>
   <div v-bind:id=" 'list-'   +  id "></div>
-  <div v-bind:id=" &quot;list-&quot;   +  id "></div>
-  <div v-bind:id=" &apos;list-&apos;   +  id "></div>
-  <div v-bind:id=" &apos;&quot;&apos;   +  id "></div>
+  <div v-bind:id=' "list-"   +  id '></div>
+  <div v-bind:id=" 'list-'   +  id "></div>
+  <div v-bind:id=" '&quot;'   +  id "></div>
   <div v-bind:id="  rawId | formatId "></div>
   <div v-bind:id=" ok ? 'YES' : 'NO' "></div>
 
@@ -78,38 +78,38 @@ info: vue/multiparser/template-bind.vue
 template-bind.vue:11:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an attribute but instead found '.disabled="   a &&b ">'.
-  
+
     10 │     <button :disabled="   a &&b "></button>
   > 11 │     <button .disabled="   a &&b "></button>
        │             ^^^^^^^^^^^^^^^^^^^^^^
-    12 │ 
+    12 │
     13 │     <button @click=" foo ( arg, 'string' ) "></button>
-  
+
   i Expected an attribute here.
-  
+
     10 │     <button :disabled="   a &&b "></button>
   > 11 │     <button .disabled="   a &&b "></button>
        │             ^^^^^^^^^^^^^^^^^^^^^^
-    12 │ 
+    12 │
     13 │     <button @click=" foo ( arg, 'string' ) "></button>
-  
+
 template-bind.vue:11:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an attribute but instead found '<'.
-  
+
     10 │     <button :disabled="   a &&b "></button>
   > 11 │     <button .disabled="   a &&b "></button>
        │                                   ^
-    12 │ 
+    12 │
     13 │     <button @click=" foo ( arg, 'string' ) "></button>
-  
+
   i Expected an attribute here.
-  
+
     10 │     <button :disabled="   a &&b "></button>
   > 11 │     <button .disabled="   a &&b "></button>
        │                                   ^
-    12 │ 
+    12 │
     13 │     <button @click=" foo ( arg, 'string' ) "></button>
-  
+
 
 ```

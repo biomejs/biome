@@ -87,6 +87,10 @@ impl Rule for NoDelete {
         let argument = node.argument().ok()?;
 
         let should_report = if let Some(computed) = argument.as_js_computed_member_expression() {
+            let object = computed.object().ok()?;
+            if is_process_env(&object).unwrap_or_default() {
+                return None;
+            }
             // `delete record[x]` is allowed, but if `x` is a literal value.
             computed
                 .member()
@@ -96,9 +100,8 @@ impl Rule for NoDelete {
         } else {
             let static_member_expression = argument.as_js_static_member_expression();
             if let Some(static_member_expression) = static_member_expression {
-                if let AnyJsExpression::JsStaticMemberExpression(static_expression) =
-                    static_member_expression.object().ok()?
-                {
+                let object = static_member_expression.object().ok()?;
+                if let Some(static_expression) = object.as_js_static_member_expression() {
                     let name = static_expression.member().ok()?;
                     let name = name.as_js_name()?;
                     if name.value_token().ok()?.text_trimmed() == "dataset" {
@@ -108,7 +111,7 @@ impl Rule for NoDelete {
                 // Skip `delete process.env.FOO`: Node.js documents `delete` as the way
                 // to remove environment variables.
                 // https://nodejs.org/api/process.html#processenv
-                if is_process_env(static_member_expression).unwrap_or_default() {
+                if is_process_env(&object).unwrap_or_default() {
                     return None;
                 }
                 true
@@ -157,10 +160,9 @@ impl Rule for NoDelete {
     }
 }
 
-/// Check if a static member expression targets `process.env.*`.
-fn is_process_env(expr: &biome_js_syntax::JsStaticMemberExpression) -> Option<bool> {
-    let object = expr.object().ok()?;
-    let static_obj = object.as_js_static_member_expression()?;
+/// Returns whether `expression` is a static `process.env` member access.
+fn is_process_env(expression: &AnyJsExpression) -> Option<bool> {
+    let static_obj = expression.as_js_static_member_expression()?;
     let member = static_obj.member().ok()?;
     let name = member.as_js_name()?;
     if name

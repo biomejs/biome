@@ -5,23 +5,23 @@ use camino::{Utf8Path, Utf8PathBuf};
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
-/// Global options applied to all commands
+/// These options are available to many commands and control general CLI behavior, diagnostics, and output.
 #[derive(Debug, Default, Clone, Bpaf)]
 pub struct CliOptions {
-    /// Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
+    /// Controls ANSI styling: `off` disables it, while `force` enables it even when the output does not appear to support ANSI escapes.
     #[bpaf(long("colors"), argument("off|force"))]
     pub colors: Option<ColorsArg>,
 
-    /// Connect to a running instance of the Biome daemon server.
+    /// Connects to a running instance of the Biome daemon server.
     #[bpaf(long("use-server"), switch, fallback(false))]
     pub use_server: bool,
 
-    /// Print additional diagnostics, and some diagnostics show more information. Also, print out what files were processed and which ones were modified.
+    /// Shows additional diagnostic details and lists the files that were processed or modified.
     #[bpaf(long("verbose"), switch, fallback(false))]
     pub verbose: bool,
 
-    /// Set the file path to the configuration file, or the directory path to find `biome.json` or `biome.jsonc`.
-    /// If used, it disables the default configuration file resolution.
+    /// Sets the path to the configuration file or the directory where Biome should search for `biome.json` or `biome.jsonc`.
+    /// This option disables the default configuration file resolution.
     #[bpaf(
         long("config-path"),
         env("BIOME_CONFIG_PATH"),
@@ -30,32 +30,33 @@ pub struct CliOptions {
     )]
     pub config_path: Option<String>,
 
-    /// Cap the amount of diagnostics displayed. When `none` is provided, the limit is lifted.
+    /// Limits the number of diagnostics displayed. Use `none` to remove the limit.
     #[bpaf(
         long("max-diagnostics"),
-        argument("none|<NUMBER>"),
+        argument("none|NUMBER"),
         fallback(MaxDiagnostics::default()),
         display_fallback
     )]
     pub max_diagnostics: MaxDiagnostics,
 
-    /// Skip over files containing syntax errors instead of emitting an error diagnostic.
+    /// Skips files containing syntax errors instead of emitting an error diagnostic.
     #[bpaf(long("skip-parse-errors"), switch)]
     pub skip_parse_errors: bool,
 
-    /// Silence errors that would be emitted in case no files were processed during the execution of the command.
+    /// Does not emit an error when no files are processed.
     #[bpaf(long("no-errors-on-unmatched"), switch)]
     pub no_errors_on_unmatched: bool,
 
-    /// Tell Biome to exit with an error code if some diagnostics emit warnings.
+    /// Exits with an error status if any warning diagnostics are emitted.
     #[bpaf(long("error-on-warnings"), switch)]
     pub error_on_warnings: bool,
 
-    /// Allows to change how diagnostics and summary are reported.
+    /// Changes how diagnostics and the run summary are written.
     #[bpaf(external, many)]
     pub cli_reporter: Vec<CliReporter>,
 
-    /// The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
+    /// Sets the minimum diagnostic severity to display: `info`, `warn`, or `error`.
+    /// For example, `--diagnostic-level=error` displays only error-level diagnostics.
     #[bpaf(
         long("diagnostic-level"),
         argument("info|warn|error"),
@@ -66,7 +67,7 @@ pub struct CliOptions {
 }
 
 impl CliOptions {
-    /// Computes the [ConfigurationPathHint] based on the options passed by the user
+    /// Computes the [ConfigurationPathHint] based on the options passed by the user.
     pub(crate) fn as_configuration_path_hint(
         &self,
         working_directory: &Utf8Path,
@@ -118,15 +119,18 @@ impl FromStr for ColorsArg {
 #[derive(Debug, Default, Clone, Eq, PartialEq, Bpaf)]
 #[bpaf(adjacent)]
 pub struct CliReporter {
+    /// Changes how diagnostics and the run summary are written.
     #[bpaf(
         long("reporter"),
         argument(
-            "default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif|concise"
+            "default|concise|summary|json|json-pretty|github|gitlab|junit|checkstyle|rdjson|sarif"
         ),
-        fallback(CliReporterKind::default())
+        fallback(CliReporterKind::default()),
+        display_fallback
     )]
     pub(crate) kind: CliReporterKind,
 
+    /// Writes the associated reporter's output to `PATH`. Without `--reporter`, it writes the default reporter's output.
     #[bpaf(long("reporter-file"), argument("PATH"))]
     pub(crate) destination: Option<Utf8PathBuf>,
 }
@@ -139,28 +143,28 @@ impl CliReporter {
 
 #[derive(Debug, Default, Clone, Eq, PartialEq)]
 pub enum CliReporterKind {
-    /// The default reporter
+    /// Full diagnostics and a summary for use in a terminal.
     #[default]
     Default,
-    /// Reports information using the JSON format
+    /// Machine-readable JSON.
     Json,
-    /// Reports information using the JSON format, formatted.
+    /// Pretty-printed JSON using Biome's default JSON formatting settings.
     JsonPretty,
-    /// Diagnostics are printed for GitHub workflow commands
+    /// [GitHub workflow commands](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands) that create annotations.
     GitHub,
-    /// Diagnostics and summary are printed in JUnit format
+    /// JUnit XML for test and CI integrations.
     Junit,
-    /// Reports diagnostics grouped by category and number of hits. Reports formatter diagnostics grouped by file.
+    /// Diagnostics grouped by category and rule, and formatter diagnostics grouped by file.
     Summary,
-    /// Reports diagnostics using the [GitLab Code Quality report](https://docs.gitlab.com/ee/ci/testing/code_quality.html#implement-a-custom-tool).
+    /// A [GitLab Code Quality report](https://docs.gitlab.com/ci/testing/code_quality/#implement-a-custom-tool).
     GitLab,
-    /// Reports diagnostics in Checkstyle XML format
+    /// [Checkstyle XML](https://checkstyle.org/).
     Checkstyle,
-    /// Reports diagnostics using the [Reviewdog JSON format](https://deepwiki.com/reviewdog/reviewdog/3.2-reviewdog-diagnostic-format)
+    /// [Reviewdog diagnostic JSON](https://deepwiki.com/reviewdog/reviewdog/3.2-reviewdog-diagnostic-format).
     RdJson,
-    /// Reports diagnostics using the SARIF format
+    /// [SARIF](https://sarifweb.azurewebsites.net/) for static analysis integrations.
     Sarif,
-    /// Reports diagnostics in a concise one-line-per-diagnostic format, with formatter diagnostics aggregated
+    /// One line per diagnostic, with formatter diagnostics grouped together.
     Concise,
 }
 

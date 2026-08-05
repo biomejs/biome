@@ -8,14 +8,17 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["src/**/*"]
 
 [dependencies]
-biome_formatter        = { workspace = true }
-biome_markdown_factory = { workspace = true }
-biome_markdown_syntax  = { workspace = true }
-biome_rowan            = { workspace = true }
-schemars               = { workspace = true, optional = true }
-serde                  = { workspace = true, features = ["derive"], optional = true }
+biome_deserialize        = { workspace = true }
+biome_deserialize_macros = { workspace = true }
+biome_formatter          = { workspace = true }
+biome_markdown_factory   = { workspace = true }
+biome_markdown_syntax    = { workspace = true }
+biome_rowan              = { workspace = true }
+schemars                 = { workspace = true, optional = true }
+serde                    = { workspace = true, features = ["derive"], optional = true }
 
 [dev-dependencies]
 biome_configuration   = { path = "../biome_configuration" }

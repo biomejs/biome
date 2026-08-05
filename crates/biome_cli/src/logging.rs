@@ -13,21 +13,14 @@ use tracing_subscriber::layer::{Context, Filter, SubscriberExt};
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{Layer as _, registry};
 
-/// Options to control logging (CLI and Daemon)
+/// Options that control internal CLI and daemon server logging.
 #[derive(Debug, Clone, Bpaf)]
 pub struct LogOptions {
-    /// Optional path/file to redirect log messages to. This option is applicable only to the CLI.
-    ///
-    /// If omitted, logs are printed to stdout.
-    #[bpaf(
-        long("log-file"),
-        env("BIOME_LOG_FILE"),
-        argument("STRING"),
-        hide_usage
-    )]
+    /// For file-processing commands, writes internal CLI logs to this file instead of standard output.
+    #[bpaf(long("log-file"), env("BIOME_LOG_FILE"), argument("PATH"), hide_usage)]
     pub log_file: Option<String>,
 
-    // Allows changing the prefix applied to the file name of the logs. This option is applicable only to the daemon.
+    /// When starting the daemon server, sets the file name prefix used for rotated log files.
     #[bpaf(
         env("BIOME_LOG_PREFIX_NAME"),
         long("log-prefix-name"),
@@ -37,7 +30,7 @@ pub struct LogOptions {
     )]
     pub log_prefix_name: String,
 
-    /// Allows changing the folder where logs are stored. This option is applicable only to the daemon.
+    /// When starting the daemon server, sets the directory where log files are stored.
     #[bpaf(
         env("BIOME_LOG_PATH"),
         long("log-path"),
@@ -47,20 +40,17 @@ pub struct LogOptions {
     )]
     pub log_path: Utf8PathBuf,
 
-    /// The level of logging. In order, from the most verbose to the least
-    /// verbose: debug, info, warn, error.
-    ///
-    /// The value `none` won't show any logging.
+    /// For file-processing commands, sets the internal CLI logging level to `tracing`, `debug`, `info`, `warn`, `error`, or `none`.
     #[bpaf(
         long("log-level"),
         env("BIOME_LOG_LEVEL"),
-        argument("none|debug|info|warn|error"),
+        argument("none|tracing|debug|info|warn|error"),
         fallback(LoggingLevel::default()),
         display_fallback
     )]
     pub log_level: LoggingLevel,
 
-    /// What the log should look like.
+    /// For file-processing commands, selects the internal CLI log format: `pretty`, `compact`, or `json`.
     #[bpaf(
         long("log-kind"),
         env("BIOME_LOG_KIND"),
@@ -128,7 +118,7 @@ pub fn setup_cli_subscriber(
 
 #[derive(Copy, Debug, Default, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub enum LoggingLevel {
-    /// No logs should be shown
+    /// Disables logging.
     #[default]
     None,
     Tracing,
@@ -180,14 +170,14 @@ impl Display for LoggingLevel {
 }
 
 /// Tracing filter enabling:
-/// - Spans and events at the requested level in `biome*` crates
-/// - Spans and events at level info or higher in dependencies
-/// - Spans and events at level warn or higher in Salsa
+/// - Spans and events at the requested level in `biome*` crates.
+/// - Spans and events at level info or higher in dependencies.
+/// - Spans and events at level warn or higher in Salsa.
 struct LoggingFilter {
     level: LoggingLevel,
 }
 
-/// Tracing filter used for spans emitted by `biome*` crates
+/// Tracing filter used for spans emitted by `biome*` crates.
 const SELF_FILTER: LevelFilter = if cfg!(debug_assertions) {
     LevelFilter::TRACE
 } else {
@@ -234,15 +224,15 @@ impl<S> Filter<S> for LoggingFilter {
     }
 }
 
-/// The kind of logging
+/// The log output format.
 #[derive(Copy, Debug, Default, Clone, Eq, PartialEq)]
 pub enum LoggingKind {
-    /// A pretty log on multiple lines with nice colours
+    /// Displays human-readable, multiline logs with ANSI styling when enabled.
     #[default]
     Pretty,
-    /// A more cluttered logging
+    /// Displays compact logs.
     Compact,
-    /// Logs are emitted in JSON format
+    /// Emits logs as JSON.
     Json,
 }
 

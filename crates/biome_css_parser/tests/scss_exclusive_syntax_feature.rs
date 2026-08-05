@@ -1,10 +1,13 @@
 use biome_css_parser::{CssParserOptions, parse_css};
+use biome_css_syntax::CssSyntaxKind::{CSS_BOGUS_MEDIA_QUERY, SCSS_MEDIA_QUERY};
 use biome_languages::CssFileSource;
 
 const SCSS_VARIABLE_DECLARATION: &str = "$color: red;";
 const SCSS_VARIABLE_VALUE: &str = ".selector { color: $color; }";
 const SCSS_DIMENSION_INTERPOLATED_VALUE: &str = ".selector { width: 10px#{suffix}; }";
 const SCSS_NUMBER_INTERPOLATED_VALUE: &str = ".selector { width: 10#{unit}; }";
+const SCSS_INTERPOLATED_MEDIA_QUERIES: &[&str] =
+    &["@media print-#{$suffix} {}", "@media all #{$query} {}"];
 
 fn diagnostic_text(parse: &biome_css_parser::CssParse) -> String {
     format!("{:?}", parse.diagnostics())
@@ -87,6 +90,27 @@ fn reporting_scss_exclusive_syntax_only_changes_diagnostic_text() {
         assert!(
             reporting_diagnostics.contains("SCSS"),
             "expected reporting parser option to emit SCSS diagnostics, got: {reporting_diagnostics}"
+        );
+    }
+}
+
+#[test]
+fn css_files_recover_interpolated_media_queries_as_bogus() {
+    for source in SCSS_INTERPOLATED_MEDIA_QUERIES {
+        let parse = parse_css(source, CssFileSource::css(), CssParserOptions::default());
+        let syntax = parse.syntax();
+
+        assert!(
+            syntax
+                .descendants()
+                .any(|node| node.kind() == CSS_BOGUS_MEDIA_QUERY),
+            "expected an interpolated media query to be bogus in CSS: {source}"
+        );
+        assert!(
+            !syntax
+                .descendants()
+                .any(|node| node.kind() == SCSS_MEDIA_QUERY),
+            "expected no SCSS media-query node in CSS: {source}"
         );
     }
 }
