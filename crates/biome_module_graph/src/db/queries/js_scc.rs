@@ -1,13 +1,14 @@
 use crate::{JsImportPath, ModuleDb, ModuleGraphGeneration, ModuleInfoKind};
+use biome_fs::is_node_modules_path;
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashMap;
 
 /// Strongly connected components of the JavaScript import graph.
 ///
 /// Two modules belong to the same component when each is reachable from the
-/// other by following imports. All resolved edges between indexed JavaScript
-/// modules are included, so callers may use this as a conservative prefilter
-/// when they traverse a narrower graph.
+/// other by following imports. Resolved edges between indexed JavaScript
+/// modules outside `node_modules` are included, so callers may use this as a
+/// conservative prefilter when they traverse a narrower graph.
 ///
 /// See: <https://en.wikipedia.org/wiki/Kosaraju%27s_algorithm>
 #[derive(Debug, Eq, PartialEq)]
@@ -41,8 +42,9 @@ pub fn js_module_sccs(db: &dyn ModuleDb, generation: ModuleGraphGeneration) -> J
     let mut id_by_path = FxHashMap::default();
 
     db.for_each_module(&mut |module| {
-        if matches!(module.kind(db), ModuleInfoKind::Js(_)) {
-            id_by_path.insert(module.path(db).to_path_buf(), id_by_path.len() as u32);
+        let path = module.path(db);
+        if matches!(module.kind(db), ModuleInfoKind::Js(_)) && !is_node_modules_path(path) {
+            id_by_path.insert(path.to_path_buf(), id_by_path.len() as u32);
         }
     });
 
@@ -84,7 +86,7 @@ pub fn js_module_sccs(db: &dyn ModuleDb, generation: ModuleGraphGeneration) -> J
 pub(super) fn compute_sccs(edges: &[Vec<u32>]) -> (Vec<u32>, Vec<u32>) {
     let node_count = edges.len();
     let mut visited = vec![false; node_count];
-    let mut next_edge = vec![0; node_count];
+    let mut next_edge = vec![0u32; node_count];
     let mut finish_order = Vec::with_capacity(node_count);
     let mut stack = Vec::new();
 
@@ -101,7 +103,7 @@ pub(super) fn compute_sccs(edges: &[Vec<u32>]) -> (Vec<u32>, Vec<u32>) {
 
         while let Some(&node) = stack.last() {
             let node = node as usize;
-            if let Some(&next) = edges[node].get(next_edge[node]) {
+            if let Some(&next) = edges[node].get(next_edge[node] as usize) {
                 next_edge[node] += 1;
                 if !visited[next as usize] {
                     visited[next as usize] = true;
@@ -158,7 +160,23 @@ pub(super) fn compute_sccs(edges: &[Vec<u32>]) -> (Vec<u32>, Vec<u32>) {
 
 #[cfg(test)]
 mod tests {
-    use super::compute_sccs;
+    use super::{JsModuleSccs, compute_sccs};
+    use camino::{Utf8Path, Utf8PathBuf};
+
+    fn module_sccs(paths: &[&str], edges: &[Vec<u32>]) -> JsModuleSccs {
+        assert_eq!(paths.len(), edges.len());
+        let (component_by_id, component_sizes) = compute_sccs(edges);
+        let component_by_path = paths
+            .iter()
+            .enumerate()
+            .map(|(id, path)| (Utf8PathBuf::from(*path), component_by_id[id]))
+            .collect();
+
+        JsModuleSccs {
+            component_by_path,
+            component_sizes: component_sizes.into_boxed_slice(),
+        }
+    }
 
     #[test]
     fn separates_acyclic_nodes() {
@@ -181,5 +199,77 @@ mod tests {
         assert_ne!(components[3], components[0]);
         assert_eq!(components[4], components[5]);
         assert_eq!(sizes[components[4] as usize], 2);
+    }
+
+    #[test]
+    fn importing_into_cycle_does_not_join_cycle() {
+        let (components, sizes) = compute_sccs(&[vec![1], vec![0], vec![0]]);
+
+        assert_eq!(components[0], components[1]);
+        assert_eq!(sizes[components[0] as usize], 2);
+        assert_ne!(components[2], components[0]);
+        assert_eq!(sizes[components[2] as usize], 1);
+    }
+
+    #[test]
+    fn convergence_without_cycle_separates_all_nodes() {
+        let (components, sizes) = compute_sccs(&[vec![1, 2], vec![3], vec![3], vec![]]);
+
+        for (node, &component) in components.iter().enumerate() {
+            assert_eq!(sizes[component as usize], 1);
+            assert!(components[..node].iter().all(|&other| other != component));
+        }
+    }
+
+    #[test]
+    fn chord_does_not_split_cycle() {
+        let (components, sizes) = compute_sccs(&[vec![1], vec![2, 3], vec![3], vec![0]]);
+
+        assert!(
+            components
+                .iter()
+                .all(|&component| component == components[0])
+        );
+        assert_eq!(sizes[components[0] as usize], 4);
+    }
+
+    #[test]
+    fn contains_cycle_between_nodes_in_cycle() {
+        let sccs = module_sccs(&["/a.js", "/b.js"], &[vec![1], vec![0]]);
+
+        assert!(sccs.contains_cycle_between(Utf8Path::new("/a.js"), Utf8Path::new("/b.js")));
+        assert!(sccs.contains_cycle_between(Utf8Path::new("/b.js"), Utf8Path::new("/a.js")));
+    }
+
+    #[test]
+    fn does_not_contain_cycle_for_edge_exiting_cycle() {
+        let sccs = module_sccs(&["/a.js", "/b.js", "/c.js"], &[vec![1, 2], vec![0], vec![]]);
+
+        assert!(sccs.contains_cycle_between(Utf8Path::new("/a.js"), Utf8Path::new("/b.js")));
+        assert!(!sccs.contains_cycle_between(Utf8Path::new("/a.js"), Utf8Path::new("/c.js")));
+    }
+
+    #[test]
+    fn does_not_contain_cycle_for_single_self_import() {
+        let sccs = module_sccs(&["/a.js"], &[vec![0]]);
+
+        assert!(!sccs.contains_cycle_between(Utf8Path::new("/a.js"), Utf8Path::new("/a.js")));
+    }
+
+    #[test]
+    fn does_not_contain_cycle_between_unrelated_cycles() {
+        let sccs = module_sccs(
+            &["/a.js", "/b.js", "/c.js", "/d.js"],
+            &[vec![1], vec![0], vec![3], vec![2]],
+        );
+
+        assert!(!sccs.contains_cycle_between(Utf8Path::new("/a.js"), Utf8Path::new("/c.js")));
+    }
+
+    #[test]
+    fn does_not_contain_cycle_for_unknown_path() {
+        let sccs = module_sccs(&["/a.js", "/b.js"], &[vec![1], vec![0]]);
+
+        assert!(!sccs.contains_cycle_between(Utf8Path::new("/a.js"), Utf8Path::new("/unknown.js")));
     }
 }
