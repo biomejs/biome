@@ -122,6 +122,11 @@ fn test_expression_function_return_classifies_returned_calls() {
         const asyncCallback = () => invokeAsync(() => {});
         const syncCallback = () => invokeSync(() => {});
         const genericCallback = () => identity(Promise.resolve());
+        class Runner {
+            async otherMethod() {}
+            callback() { return this.otherMethod(); }
+            run() { consume(this.callback); }
+        }
         consume(asyncCallback);
         consume(syncCallback);
         consume(genericCallback);
@@ -140,6 +145,7 @@ fn test_expression_function_return_classifies_returned_calls() {
             "genericCallback",
             TypeInferenceClassification::Indeterminate,
         ),
+        ("this.callback", TypeInferenceClassification::Match),
     ] {
         assert_eq!(
             expression_function_returns_promise(&db, module, SOURCE, expression),
