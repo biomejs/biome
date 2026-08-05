@@ -5,7 +5,7 @@ use biome_js_syntax::{
     AnyTsType, TsAsAssignment, TsAsExpression, TsTypeAssertionAssignment,
     TsTypeAssertionExpression,
 };
-use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::no_unsafe_type_assertion::NoUnsafeTypeAssertionOptions;
 
 declare_lint_rule! {
@@ -79,16 +79,41 @@ impl AnyTsTypeAssertionLike {
 
 impl Rule for NoUnsafeTypeAssertion {
     type Query = Ast<AnyTsTypeAssertionLike>;
-    type State = TextRange;
+    type State = ();
     type Signals = Option<Self::State>;
     type Options = NoUnsafeTypeAssertionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let ty = ctx.query().ty()?;
-        (!is_const_reference_type(&ty)).then_some(ty.range())
+        (!is_const_reference_type(&ty)).then_some(())
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+        let query = ctx.query();
+        let ty = query.ty()?;
+        let range = match query {
+            AnyTsTypeAssertionLike::TsAsAssignment(assertion) => assertion
+                .as_token()
+                .ok()?
+                .text_trimmed_range()
+                .cover(ty.range()),
+            AnyTsTypeAssertionLike::TsAsExpression(assertion) => assertion
+                .as_token()
+                .ok()?
+                .text_trimmed_range()
+                .cover(ty.range()),
+            AnyTsTypeAssertionLike::TsTypeAssertionAssignment(assertion) => assertion
+                .l_angle_token()
+                .ok()?
+                .text_trimmed_range()
+                .cover(assertion.r_angle_token().ok()?.text_trimmed_range()),
+            AnyTsTypeAssertionLike::TsTypeAssertionExpression(assertion) => assertion
+                .l_angle_token()
+                .ok()?
+                .text_trimmed_range()
+                .cover(assertion.r_angle_token().ok()?.text_trimmed_range()),
+        };
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),

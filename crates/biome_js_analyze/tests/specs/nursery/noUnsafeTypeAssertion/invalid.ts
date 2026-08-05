@@ -16,3 +16,9 @@ const angleLiteral = <SomeType>"value";
 
 ((myVar as unknown) as SomeType) = { value: "value" };
 ([myVar as SomeType] = [{ value: "value" }]);
+
+const multilineAs = myVar as
+    SomeType;
+const multilineAngle = <
+    SomeType
+>myVar;
