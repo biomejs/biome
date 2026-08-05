@@ -835,16 +835,13 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                 write!(
                     f,
                     [&format_args![
-                        token("Narrowed"),
-                        token("("),
-                        token("typeof"),
+                        token("Narrowed(typeof"),
                         space(),
                         token("=="),
                         space(),
                         token("\""),
                         text(expr.tag.as_str(), None),
-                        token("\""),
-                        token(","),
+                        token("\","),
                         space(),
                         &expr.ty,
                         token(")")

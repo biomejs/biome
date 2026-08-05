@@ -4,19 +4,16 @@
 //! queries resolve imports and turn these raw entries into inferred types later.
 
 use std::borrow::Cow;
-use std::cell::RefCell;
 use std::str::FromStr;
 
-use rustc_hash::FxHashMap;
-
 use biome_js_syntax::{
-    AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsBinding,
-    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember, AnyJsClassMemberName,
-    AnyJsConstructorParameter, AnyJsDeclaration, AnyJsDeclarationClause,
-    AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter, AnyJsFunction,
-    AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
-    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyTsModuleName, AnyTsName,
-    AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
+    AnyFunctionLike, AnyJsArrayBindingPatternElement, AnyJsArrayElement,
+    AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsBindingPattern, AnyJsCallArgument,
+    AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter, AnyJsDeclaration,
+    AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter,
+    AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName,
+    AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter,
+    AnyTsModuleName, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
     JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList,
@@ -567,7 +564,7 @@ impl TypeData {
             }
             AnyJsExpression::JsIdentifierExpression(expr) => expr
                 .name()
-                .map(|name| Self::from_js_reference_identifier(scope_id, &name))
+                .map(|name| Self::from_js_reference_identifier(collector, scope_id, &name))
                 .unwrap_or_default(),
             AnyJsExpression::JsImportCallExpression(_expr) => {
                 Self::reference(GLOBAL_INSTANCEOF_PROMISE_ID)
@@ -1191,12 +1188,19 @@ impl TypeData {
         }))
     }
 
-    pub fn from_js_reference_identifier(scope_id: ScopeId, id: &JsReferenceIdentifier) -> Self {
-        id.name().map_or(Self::unknown(), |name| match name.text() {
+    pub fn from_js_reference_identifier(
+        resolver: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        id: &JsReferenceIdentifier,
+    ) -> Self {
+        let Ok(name) = id.name() else {
+            return Self::unknown();
+        };
+        match name.text() {
             "globalThis" => Self::reference(GLOBAL_GLOBAL_ID),
             "undefined" => Self::Undefined,
             _ => {
-                let tag = typeof_guard_narrowed_tag(id);
+                let tag = typeof_guard_narrowed_tag(resolver, id);
                 let reference = TypeReference::from_name(scope_id, name);
                 match tag {
                     Some(tag) => Self::from(TypeofExpression::Narrowed(TypeofNarrowedExpression {
@@ -1206,7 +1210,7 @@ impl TypeData {
                     None => Self::reference(reference),
                 }
             }
-        })
+        }
     }
 
     pub fn from_js_unary_expression(
@@ -3174,30 +3178,37 @@ fn unescaped_text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text>
 /// Returns the `typeof` tag to which a reference is narrowed when it appears
 /// inside the consequent of an `if (typeof x === "<tag>")` guard.
 ///
-/// This is a purely syntactic check. It bails out conservatively when the
-/// consequent declares or assigns a binding with the same name, and it does
-/// not look for guards outside the enclosing function. Nested guards on the
-/// same name are composed: if enclosing guards agree, their common tag is
-/// used; if they contradict each other (an impossible runtime state), no
-/// narrowing is applied rather than confidently returning just the innermost
-/// guard's tag.
+/// This is a purely syntactic check, scoped to the enclosing function. A
+/// guard whose consequent declares or assigns a binding with the same name
+/// is ignored, since it no longer says anything about that binding.
 ///
-/// A shadowing declaration for `name` inside an outer guard's consequent
-/// (e.g. a `let` with the same name in a nested block) disqualifies that
-/// outer guard via the same invalidation check used for writes, so it can
-/// never be composed with an inner guard on the shadowed binding.
-fn typeof_guard_narrowed_tag(id: &JsReferenceIdentifier) -> Option<TypeofTag> {
+/// Guards can nest on the same name:
+///
+/// ```js
+/// if (typeof x === "string") {
+///   if (typeof x === "string") {
+///     x; // both guards agree: narrowed to "string"
+///   }
+///   if (typeof x === "number") {
+///     x; // guards disagree: a value can't be both, so we don't narrow
+///   }
+/// }
+/// ```
+fn typeof_guard_narrowed_tag(
+    resolver: &mut dyn RawTypeCollector,
+    id: &JsReferenceIdentifier,
+) -> Option<TypeofTag> {
     let name_token = id.name().ok()?;
     let name = name_token.text();
     let mut child = id.syntax().clone();
-    let mut found: Option<TypeofTag> = None;
+    let mut found = None;
     for ancestor in id.syntax().ancestors().skip(1) {
         if let Some(if_stmt) = JsIfStatement::cast_ref(&ancestor) {
             if if_stmt
                 .consequent()
                 .is_ok_and(|consequent| consequent.syntax() == &child)
                 && let Some(tag) = typeof_guard_tag(&if_stmt, name)
-                && !narrowing_invalidated_within(&child, name, &name_token)
+                && !narrowing_invalidated_within(resolver, &child, name, &name_token)
             {
                 match found {
                     None => found = Some(tag),
@@ -3218,7 +3229,7 @@ fn typeof_guard_narrowed_tag(id: &JsReferenceIdentifier) -> Option<TypeofTag> {
 ///
 /// Handles both operand orders, and treats `==` like `===`.
 fn typeof_guard_tag(if_stmt: &JsIfStatement, name: &str) -> Option<TypeofTag> {
-    let test = skip_parenthesized(if_stmt.test().ok()?)?;
+    let test = if_stmt.test().ok()?.omit_parentheses();
     let binary = test.as_js_binary_expression()?;
     if !matches!(
         binary.operator().ok()?,
@@ -3227,8 +3238,8 @@ fn typeof_guard_tag(if_stmt: &JsIfStatement, name: &str) -> Option<TypeofTag> {
         return None;
     }
 
-    let left = skip_parenthesized(binary.left().ok()?)?;
-    let right = skip_parenthesized(binary.right().ok()?)?;
+    let left = binary.left().ok()?.omit_parentheses();
+    let right = binary.right().ok()?.omit_parentheses();
     if is_typeof_of(&left, name) {
         typeof_tag_from_literal(&right)
     } else if is_typeof_of(&right, name) {
@@ -3236,13 +3247,6 @@ fn typeof_guard_tag(if_stmt: &JsIfStatement, name: &str) -> Option<TypeofTag> {
     } else {
         None
     }
-}
-
-fn skip_parenthesized(mut expr: AnyJsExpression) -> Option<AnyJsExpression> {
-    while let AnyJsExpression::JsParenthesizedExpression(parenthesized) = expr {
-        expr = parenthesized.expression().ok()?;
-    }
-    Some(expr)
 }
 
 /// Returns whether `expr` is a `typeof` expression over a reference with the
@@ -3257,7 +3261,7 @@ fn is_typeof_of(expr: &AnyJsExpression, name: &str) -> bool {
     unary
         .argument()
         .ok()
-        .and_then(skip_parenthesized)
+        .map(AnyJsExpression::omit_parentheses)
         .as_ref()
         .and_then(AnyJsExpression::as_js_identifier_expression)
         .and_then(|identifier| identifier.name().ok())
@@ -3272,33 +3276,25 @@ fn typeof_tag_from_literal(expr: &AnyJsExpression) -> Option<TypeofTag> {
     TypeofTag::from_literal(literal.inner_string_text().ok()?.text())
 }
 
-/// Upper bound on cached entries in [NARROWING_INVALIDATION_CACHE].
+/// Returns whether `name` is invalidated as a narrowing target somewhere
+/// inside `node`: either a new binding named `name` is declared there, or
+/// `name` is assigned to (written) within `node`.
 ///
-/// Each entry's key clones the guarded consequent's `JsSyntaxNode`, which
-/// (via rowan's parent chain) keeps that node's whole syntax tree alive, so
-/// this cap bounds retained *trees*, not raw bytes -- kept low so a burst of
-/// distinct large files can't pin more than a handful of them per thread.
-const MAX_NARROWING_INVALIDATION_CACHE_ENTRIES: usize = 256;
-
-thread_local! {
-    /// Caches [narrowing_invalidated_within] results per `(node, name)`.
-    ///
-    /// `typeof_guard_narrowed_tag` calls this once per reference identifier
-    /// inside a guarded consequent, so a branch with `N` references would
-    /// otherwise re-scan the same subtree `N` times. `JsSyntaxNode`'s
-    /// `Eq`/`Hash` are green-tree-identity based, so cached entries remain
-    /// valid for the lifetime of the (immutable) syntax tree they came from.
-    static NARROWING_INVALIDATION_CACHE: RefCell<FxHashMap<(JsSyntaxNode, Text), bool>> =
-        RefCell::new(FxHashMap::default());
-}
-
-/// Returns whether narrowing of `name` is invalidated within `node`, either
-/// because a new binding with the same name is declared, or because the
-/// value is written to.
-fn narrowing_invalidated_within(node: &JsSyntaxNode, name: &str, name_token: &TokenText) -> bool {
+/// `typeof_guard_narrowed_tag` calls this once per reference identifier
+/// inside a guarded consequent, so a branch with many references would
+/// otherwise re-scan the same subtree repeatedly. When `resolver` provides a
+/// [narrowing invalidation cache](RawTypeCollector::narrowing_invalidation_cache),
+/// the result is memoized there for the lifetime of that cache.
+fn narrowing_invalidated_within(
+    resolver: &mut dyn RawTypeCollector,
+    node: &JsSyntaxNode,
+    name: &str,
+    name_token: &TokenText,
+) -> bool {
     let key = (node.clone(), Text::from(name_token.clone()));
-    if let Some(cached) =
-        NARROWING_INVALIDATION_CACHE.with(|cache| cache.borrow().get(&key).copied())
+
+    if let Some(cache) = resolver.narrowing_invalidation_cache()
+        && let Some(&cached) = cache.get(&key)
     {
         return cached;
     }
@@ -3312,28 +3308,27 @@ fn narrowing_invalidated_within(node: &JsSyntaxNode, name: &str, name_token: &To
             .is_some_and(|token| token.text_trimmed() == name)
     });
 
-    NARROWING_INVALIDATION_CACHE.with(|cache| {
-        let mut cache = cache.borrow_mut();
-        if cache.len() >= MAX_NARROWING_INVALIDATION_CACHE_ENTRIES {
-            cache.clear();
-        }
+    if let Some(cache) = resolver.narrowing_invalidation_cache() {
         cache.insert(key, invalidated);
-    });
+    }
 
     invalidated
 }
 
+/// Returns whether `node` is a function-like scope boundary (a function,
+/// method, or constructor), including sync-only members (getters, setters,
+/// static initialization blocks) where `typeof` guards can't cross either.
+///
+/// Equivalent to `biome_js_analyze::ast_utils::is_function_boundary`, which
+/// this crate can't depend on (it's the other way around).
 fn is_function_boundary(node: &JsSyntaxNode) -> bool {
-    AnyJsFunction::can_cast(node.kind())
+    AnyFunctionLike::can_cast(node.kind())
         || matches!(
             node.kind(),
-            JsSyntaxKind::JS_METHOD_CLASS_MEMBER
-                | JsSyntaxKind::JS_METHOD_OBJECT_MEMBER
-                | JsSyntaxKind::JS_GETTER_CLASS_MEMBER
-                | JsSyntaxKind::JS_SETTER_CLASS_MEMBER
+            JsSyntaxKind::JS_GETTER_CLASS_MEMBER
                 | JsSyntaxKind::JS_GETTER_OBJECT_MEMBER
+                | JsSyntaxKind::JS_SETTER_CLASS_MEMBER
                 | JsSyntaxKind::JS_SETTER_OBJECT_MEMBER
-                | JsSyntaxKind::JS_CONSTRUCTOR_CLASS_MEMBER
                 | JsSyntaxKind::JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER
         )
 }

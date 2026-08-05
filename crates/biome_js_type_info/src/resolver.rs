@@ -1,8 +1,9 @@
 use std::{borrow::Cow, fmt::Debug};
 
-use biome_js_syntax::AnyJsExpression;
+use biome_js_syntax::{AnyJsExpression, JsSyntaxNode};
 use biome_js_type_info_macros::Resolvable;
 use biome_rowan::Text;
+use rustc_hash::FxHashMap;
 
 use crate::{
     GLOBAL_UNKNOWN_ID, Literal, NUM_PREDEFINED_TYPES, Object, ScopeId, TypeData, TypeId,
@@ -753,6 +754,20 @@ pub trait TypeResolver {
 
     /// Returns the resolver's fallback, if it has one.
     fn fallback_resolver(&self) -> Option<&dyn TypeResolver> {
+        None
+    }
+
+    /// Returns a scratch cache for memoizing `typeof`-guard narrowing
+    /// invalidation checks, if this resolver wants to provide one.
+    ///
+    /// Resolvers that don't override this (the default) simply don't get
+    /// memoization; the check is re-run every time. Resolvers backing a
+    /// single collection pass over one module (like the module graph's
+    /// collector) can store a map alongside their other per-module caches
+    /// and return it here, scoping the cache to that pass's lifetime.
+    fn narrowing_invalidation_cache(
+        &mut self,
+    ) -> Option<&mut FxHashMap<(JsSyntaxNode, Text), bool>> {
         None
     }
 
