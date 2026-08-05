@@ -47,7 +47,7 @@ PrEtTiEr
 @@ -17,12 +17,8 @@
  PrEtTiEr
  </template>
-
+ 
 -<template lang="uppercase-rocks" :src="">
 -PRETTIER
 -</template>
@@ -56,7 +56,7 @@ PrEtTiEr
 -</template>
 +<template lang="uppercase-rocks" :src="">PrEtTiEr</template>
 +<template lang="uppercase-rocks" @src="">PrEtTiEr</template>
-
+ 
  <template lang="uppercase-rocks" src="foo.uppercase-rocks" />
  <style lang="uppercase-rocks" src="foo.uppercase-rocks" />
 ```

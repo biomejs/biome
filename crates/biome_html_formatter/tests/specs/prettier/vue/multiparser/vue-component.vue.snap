@@ -45,7 +45,7 @@ p { font-size : 2em ; text-align : center ; }
 -  </script>
 +  <script>kikoo ( ) </script>
  </template>
-
+ 
  <script>
 -module.exports = {
 -  data: function () {
@@ -60,7 +60,7 @@ p { font-size : 2em ; text-align : center ; }
 +}}
 +}
  </script>
-
+ 
  <style scoped>
 -p {
 -  font-size: 2em;
@@ -70,7 +70,7 @@ p { font-size : 2em ; text-align : center ; }
 +p { font-size : 2em ; text-align : center ; }
 +
 +  </style>
-
+ 
  <style lang="postcss">
 -p {
 -  font-size: 2em;
