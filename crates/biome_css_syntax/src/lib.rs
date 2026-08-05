@@ -10,6 +10,7 @@ pub mod selector_ext;
 pub mod stmt_ext;
 mod string_ext;
 mod syntax_node;
+mod whitespace_ext;
 
 pub use self::generated::*;
 pub use biome_rowan::{
@@ -29,6 +30,9 @@ pub use scss_ext::{
     single_expression_item, unwrap_single_expression_item,
 };
 pub use syntax_node::*;
+pub use whitespace_ext::{
+    is_css_horizontal_whitespace_byte, is_css_newline_byte, is_css_whitespace_byte,
+};
 
 use crate::CssSyntaxKind::*;
 use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, TokenText};

@@ -1,16 +1,11 @@
-use std::{
-    borrow::Cow,
-    sync::{Arc, LazyLock},
-};
+use std::sync::LazyLock;
 
-use biome_js_syntax::AnyJsExpression;
 use biome_rowan::Text;
 
 use crate::{
     Class, Function, FunctionParameter, GenericTypeParameter, Literal, PatternFunctionParameter,
-    Resolvable, ResolvedTypeData, ResolvedTypeId, ResolverId, ReturnType, ScopeId, TypeData,
-    TypeId, TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
-    TypeResolver, TypeResolverLevel, TypeStore, Union, flattening::MAX_FLATTEN_DEPTH,
+    RawTypeId, ReturnType, TypeData, TypeId, TypeInstance, TypeMember, TypeMemberKind,
+    TypeReference, TypeReferenceQualifier, TypeStore, Union,
     interned_types::TypeData as InferredTypeData,
 };
 
@@ -19,23 +14,8 @@ use crate::generated::global_types::set_generated_global_type_data;
 
 pub use super::globals_ids::*;
 
-pub(super) const GLOBAL_LEVEL: TypeResolverLevel = TypeResolverLevel::Global;
-pub(super) const GLOBAL_RESOLVER_ID: ResolverId = ResolverId::from_level(GLOBAL_LEVEL);
-
-pub static GLOBAL_RESOLVER: LazyLock<Arc<GlobalsResolver>> =
-    LazyLock::new(|| Arc::new(GlobalsResolver::default()));
-
 pub(super) struct RawGlobalTypes {
     pub(super) types: TypeStore,
-}
-
-/// Resolver that is limited to resolving symbols in the global scope.
-///
-/// This resolver does not check whether qualifiers that are being resolved have
-/// been shadowed by local declarations, so it should generally only be used
-/// after all other resolvers have failed.
-pub struct GlobalsResolver {
-    pub(crate) types: TypeStore,
 }
 
 impl Default for RawGlobalTypes {
@@ -44,13 +24,15 @@ impl Default for RawGlobalTypes {
         // Builds a named instance member resolving to `id` in the global resolver.
         let member = |name: &'static str, id: TypeId| TypeMember {
             kind: TypeMemberKind::Named(Text::new_static(name)),
-            ty: ResolvedTypeId::new(TypeResolverLevel::Global, id).into(),
+            ty: GlobalTypeId::try_from_type_id(id)
+                .map_or_else(TypeReference::unknown, |id| RawTypeId::Global(id).into()),
         };
 
         // Builds a named static member resolving to `id` in the global resolver.
         let static_member = |name: &'static str, id: TypeId| TypeMember {
             kind: TypeMemberKind::NamedStatic(Text::new_static(name)),
-            ty: ResolvedTypeId::new(TypeResolverLevel::Global, id).into(),
+            ty: GlobalTypeId::try_from_type_id(id)
+                .map_or_else(TypeReference::unknown, |id| RawTypeId::Global(id).into()),
         };
 
         // Builds an empty-body global `Class` with `name` and `type_parameters`.
@@ -63,29 +45,6 @@ impl Default for RawGlobalTypes {
                 members: Box::default(),
             }))
         };
-
-        // Builds a one-argument `Array.prototype` method named after `id`.
-        let array_method_definition =
-            |id: TypeId,
-             param_type_id: TypeId,
-             return_type_id: TypeId,
-             type_parameters: Box<[TypeReference]>| {
-                TypeData::from(Function {
-                    is_async: false,
-                    type_parameters,
-                    name: Some(Text::new_static(global_type_name(id).unwrap_or("unknown"))),
-                    parameters: [FunctionParameter::Pattern(PatternFunctionParameter {
-                        bindings: Default::default(),
-                        is_optional: false,
-                        is_rest: false,
-                        ty: ResolvedTypeId::new(TypeResolverLevel::Global, param_type_id).into(),
-                    })]
-                    .into(),
-                    return_type: ReturnType::Type(
-                        ResolvedTypeId::new(TypeResolverLevel::Global, return_type_id).into(),
-                    ),
-                })
-            };
 
         // Builds a zero-argument `Promise` method named after `id` that returns
         // an instance of `Promise`.
@@ -125,47 +84,6 @@ impl Default for RawGlobalTypes {
                 type_parameters: [GLOBAL_U_ID.into()].into(),
             })
         });
-        builder.set_manual_type_data(ARRAY_ID_GLOBAL_TYPE_ID, || {
-            TypeData::Class(Box::new(Class {
-                name: Some(Text::new_static("Array")),
-                type_parameters: Box::new([TypeReference::from(GLOBAL_T_ID)]),
-                extends: None,
-                implements: Box::default(),
-                members: Box::new([
-                    member("filter", ARRAY_FILTER_ID),
-                    member("forEach", ARRAY_FOREACH_ID),
-                    member("map", ARRAY_MAP_ID),
-                    TypeMember {
-                        kind: TypeMemberKind::Named(Text::new_static("length")),
-                        ty: GLOBAL_NUMBER_ID.into(),
-                    },
-                ]),
-            }))
-        });
-        builder.set_manual_type_data(ARRAY_FILTER_ID_GLOBAL_TYPE_ID, || {
-            array_method_definition(
-                ARRAY_FILTER_ID,
-                CONDITIONAL_CALLBACK_ID,
-                INSTANCEOF_ARRAY_T_ID,
-                Default::default(),
-            )
-        });
-        builder.set_manual_type_data(ARRAY_FOREACH_ID_GLOBAL_TYPE_ID, || {
-            array_method_definition(
-                ARRAY_FOREACH_ID,
-                VOID_CALLBACK_ID,
-                VOID_ID,
-                Default::default(),
-            )
-        });
-        builder.set_manual_type_data(ARRAY_MAP_ID_GLOBAL_TYPE_ID, || {
-            array_method_definition(
-                ARRAY_MAP_ID,
-                MAP_CALLBACK_ID,
-                INSTANCEOF_ARRAY_U_ID,
-                [GLOBAL_U_ID.into()].into(),
-            )
-        });
         builder.set_manual_type_data(GLOBAL_ID_GLOBAL_TYPE_ID, || TypeData::Global);
         builder.set_manual_type_data(INSTANCEOF_PROMISE_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_PROMISE_ID))
@@ -204,7 +122,8 @@ impl Default for RawGlobalTypes {
                     bindings: Default::default(),
                     is_optional: false,
                     is_rest: false,
-                    ty: ResolvedTypeId::new(GLOBAL_LEVEL, VOID_CALLBACK_ID).into(),
+                    ty: GlobalTypeId::try_from_type_id(VOID_CALLBACK_ID)
+                        .map_or_else(TypeReference::unknown, |id| RawTypeId::Global(id).into()),
                 })]
                 .into(),
                 return_type: ReturnType::Type(GLOBAL_VOID_ID.into()),
@@ -335,59 +254,17 @@ impl Default for RawGlobalTypes {
         builder.set_manual_type_data(INSTANCEOF_REGEXP_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_REGEXP_ID))
         });
-        builder.set_manual_type_data(REGEXP_ID_GLOBAL_TYPE_ID, || {
-            TypeData::Class(Box::new(Class {
-                name: Some(Text::new_static(REGEXP_ID_NAME)),
-                type_parameters: Box::default(),
-                extends: None,
-                implements: Box::default(),
-                members: Box::new([member("exec", REGEXP_EXEC_ID)]),
-            }))
-        });
-        builder.set_manual_type_data(REGEXP_EXEC_ID_GLOBAL_TYPE_ID, || {
-            TypeData::from(Function {
-                is_async: false,
-                type_parameters: Default::default(),
-                name: Some(Text::new_static(REGEXP_EXEC_ID_NAME)),
-                parameters: Default::default(),
-                return_type: ReturnType::Type(GLOBAL_INSTANCEOF_REGEXP_ID.into()),
-            })
-        });
         builder.set_manual_type_data(INSTANCEOF_DATE_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_DATE_ID))
-        });
-        builder.set_manual_type_data(DATE_ID_GLOBAL_TYPE_ID, || {
-            class(DATE_ID_NAME, Box::default())
         });
         builder.set_manual_type_data(INSTANCEOF_MAP_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_MAP_ID))
         });
-        builder.set_manual_type_data(MAP_ID_GLOBAL_TYPE_ID, || {
-            class(
-                MAP_ID_NAME,
-                Box::new([
-                    TypeReference::from(GLOBAL_T_ID),
-                    TypeReference::from(GLOBAL_U_ID),
-                ]),
-            )
-        });
         builder.set_manual_type_data(INSTANCEOF_SET_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_SET_ID))
         });
-        builder.set_manual_type_data(SET_ID_GLOBAL_TYPE_ID, || {
-            class(SET_ID_NAME, Box::new([TypeReference::from(GLOBAL_T_ID)]))
-        });
         builder.set_manual_type_data(INSTANCEOF_WEAK_MAP_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_WEAK_MAP_ID))
-        });
-        builder.set_manual_type_data(WEAK_MAP_ID_GLOBAL_TYPE_ID, || {
-            class(
-                WEAK_MAP_ID_NAME,
-                Box::new([
-                    TypeReference::from(GLOBAL_T_ID),
-                    TypeReference::from(GLOBAL_U_ID),
-                ]),
-            )
         });
         builder.set_manual_type_data(INSTANCEOF_ERROR_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_ERROR_ID))
@@ -399,14 +276,6 @@ impl Default for RawGlobalTypes {
             TypeData::instance_of(TypeReference::from(GLOBAL_SYMBOL_ID))
         });
         builder.build()
-    }
-}
-
-impl Default for GlobalsResolver {
-    fn default() -> Self {
-        Self {
-            types: RawGlobalTypes::default().types,
-        }
     }
 }
 
@@ -465,7 +334,10 @@ pub struct GlobalTypes<'db> {
 
 impl<'db> GlobalTypes<'db> {
     pub fn get(&self, id: GlobalTypeId) -> InferredTypeData<'db> {
-        self.types[id.index()]
+        self.types
+            .get(id.index())
+            .copied()
+            .unwrap_or(InferredTypeData::Unknown)
     }
 
     pub fn typeof_literal(&self, value: &str) -> InferredTypeData<'db> {
@@ -492,162 +364,46 @@ impl<'db> GlobalTypes<'db> {
 pub fn global_types<'db>(db: &'db dyn crate::TypeDb) -> GlobalTypes<'db> {
     let mut types: Box<[InferredTypeData<'db>]> = (0..NUM_PREDEFINED_TYPES)
         .map(|index| {
-            let id = GlobalTypeId::try_from_type_id(TypeId::new(index)).unwrap();
+            let id = GlobalTypeId::new(TypeId::new(index));
             InferredTypeData::from_raw_with_resolver(
                 db,
                 raw_global_type(id),
                 true,
                 &mut |reference| match reference {
-                    TypeReference::Resolved(id) if id.level() == TypeResolverLevel::Global => {
-                        InferredTypeData::GlobalType(
-                            GlobalTypeId::try_from_type_id(id.id()).unwrap(),
-                        )
+                    TypeReference::Resolved(RawTypeId::Global(id)) => {
+                        InferredTypeData::GlobalType(*id)
                     }
-                    TypeReference::Resolved(_)
+                    TypeReference::Resolved(RawTypeId::Local(_))
                     | TypeReference::Qualifier(_)
                     | TypeReference::Import(_) => InferredTypeData::Unknown,
                 },
             )
         })
         .collect();
-    types[TYPEOF_OPERATOR_RETURN_UNION_ID_GLOBAL_TYPE_ID.index()] =
-        InferredTypeData::union_from_types(
-            db,
-            [
-                BIGINT_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-                BOOLEAN_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-                FUNCTION_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-                NUMBER_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-                OBJECT_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-                STRING_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-                SYMBOL_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-                UNDEFINED_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-            ]
-            .into_iter()
-            .map(|id| types[id.index()])
-            .collect(),
-        );
+    let typeof_types = [
+        BIGINT_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+        BOOLEAN_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+        FUNCTION_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+        NUMBER_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+        OBJECT_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+        STRING_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+        SYMBOL_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+        UNDEFINED_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
+    ]
+    .into_iter()
+    .map(|id| {
+        types
+            .get(id.index())
+            .copied()
+            .unwrap_or(InferredTypeData::Unknown)
+    })
+    .collect();
+    if let Some(typeof_union) =
+        types.get_mut(TYPEOF_OPERATOR_RETURN_UNION_ID_GLOBAL_TYPE_ID.index())
+    {
+        *typeof_union = InferredTypeData::union_from_types(db, typeof_types);
+    }
     GlobalTypes { types }
-}
-
-impl GlobalsResolver {
-    pub fn run_inference(&mut self) {
-        self.resolve_all();
-        self.flatten_all();
-    }
-
-    pub fn resolve_all(&mut self) {
-        let mut i = NUM_PREDEFINED_TYPES;
-        while i < self.types.len() {
-            if let Some(ty) = self.types.get(i).resolved(self) {
-                self.types.replace(i, ty)
-            }
-            i += 1;
-        }
-    }
-
-    fn flatten_all(&mut self) {
-        for _ in 0..MAX_FLATTEN_DEPTH {
-            let mut did_flatten = false;
-
-            let mut i = NUM_PREDEFINED_TYPES;
-            while i < self.types.len() {
-                if let Some(ty) = self.types.get(i).flattened(self) {
-                    self.types.replace(i, ty);
-                    did_flatten = true;
-                }
-                i += 1;
-            }
-
-            if !did_flatten {
-                break;
-            }
-        }
-    }
-}
-
-impl TypeResolver for GlobalsResolver {
-    fn level(&self) -> TypeResolverLevel {
-        GLOBAL_LEVEL
-    }
-
-    fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
-        self.types.find(type_data)
-    }
-
-    fn get_by_id(&self, id: TypeId) -> &TypeData {
-        self.types.get_by_id(id)
-    }
-
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData<'_>> {
-        (id.level() == GLOBAL_LEVEL).then(|| (id, self.get_by_id(id.id())).into())
-    }
-
-    fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
-        self.types.insert_cow(type_data)
-    }
-
-    fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
-        match ty {
-            TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),
-            TypeReference::Resolved(resolved_id) => {
-                (resolved_id.level() == GLOBAL_LEVEL).then_some(*resolved_id)
-            }
-            TypeReference::Import(_) => None,
-        }
-    }
-
-    fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
-        if qualifier.is_array() && !qualifier.has_known_type_parameters() {
-            Some(GLOBAL_ARRAY_ID)
-        } else if qualifier.is_promise() && !qualifier.has_known_type_parameters() {
-            Some(GLOBAL_PROMISE_ID)
-        } else if qualifier.is_regex() && !qualifier.has_known_type_parameters() {
-            Some(GLOBAL_REGEXP_ID)
-        } else if qualifier.is_symbol() && !qualifier.has_known_type_parameters() {
-            Some(GLOBAL_SYMBOL_ID)
-        } else if qualifier.is_date() && !qualifier.has_known_type_parameters() {
-            Some(GLOBAL_DATE_ID)
-        } else if qualifier.is_map() && !qualifier.has_known_type_parameters() {
-            Some(GLOBAL_MAP_ID)
-        } else if qualifier.is_set() && !qualifier.has_known_type_parameters() {
-            Some(GLOBAL_SET_ID)
-        } else if qualifier.is_weak_map() && !qualifier.has_known_type_parameters() {
-            Some(GLOBAL_WEAK_MAP_ID)
-        } else if qualifier.is_error() && !qualifier.has_known_type_parameters() {
-            Some(GLOBAL_ERROR_ID)
-        } else if qualifier.is_disposable() && !qualifier.has_known_type_parameters() {
-            Some(GLOBAL_DISPOSABLE_ID)
-        } else if qualifier.is_async_disposable() && !qualifier.has_known_type_parameters() {
-            Some(GLOBAL_ASYNC_DISPOSABLE_ID)
-        } else if !qualifier.type_only
-            && let Some(ident) = qualifier.path.identifier()
-        {
-            self.resolve_type_of(ident, qualifier.scope_id)
-        } else {
-            None
-        }
-    }
-
-    fn resolve_type_of(&self, identifier: &Text, _scope_id: ScopeId) -> Option<ResolvedTypeId> {
-        match identifier.text() {
-            "fetch" => Some(GLOBAL_FETCH_ID),
-            "globalThis" | "window" => Some(GLOBAL_GLOBAL_ID),
-            _ => None,
-        }
-    }
-
-    fn resolve_expression(
-        &mut self,
-        scope_id: ScopeId,
-        expr: &AnyJsExpression,
-    ) -> Cow<'_, TypeData> {
-        Cow::Owned(TypeData::from_any_js_expression(self, scope_id, expr))
-    }
-
-    fn registered_types(&self) -> Vec<&TypeData> {
-        self.types.as_references()[NUM_PREDEFINED_TYPES..].to_vec()
-    }
 }
 
 #[cfg(test)]
@@ -722,5 +478,44 @@ mod tests {
             assert_eq!(member.ty, InferredTypeData::GlobalType(global_type_id));
             assert_eq!(globals.get(global_type_id), InferredTypeData::Symbol);
         }
+    }
+
+    #[test]
+    fn generated_weak_map_global_keeps_type_parameters() {
+        let db = TestDb::default();
+        let InferredTypeData::Class(weak_map) = global_types(&db).get(WEAK_MAP_ID_GLOBAL_TYPE_ID)
+        else {
+            panic!("WeakMap must be a class");
+        };
+        assert_eq!(
+            weak_map.type_parameters(&db).as_ref(),
+            &[
+                InferredTypeData::GlobalType(T_ID_GLOBAL_TYPE_ID),
+                InferredTypeData::GlobalType(U_ID_GLOBAL_TYPE_ID),
+            ]
+        );
+        assert!(weak_map.members(&db).is_empty());
+    }
+
+    #[test]
+    fn generated_date_global_keeps_existing_shape() {
+        let TypeData::Class(raw_date) = raw_global_type(DATE_ID_GLOBAL_TYPE_ID) else {
+            panic!("Date must be a class");
+        };
+        assert_eq!(raw_date.name.as_ref().map(Text::text), Some("Date"));
+        assert!(raw_date.type_parameters.is_empty());
+        assert!(raw_date.extends.is_none());
+        assert!(raw_date.implements.is_empty());
+        assert!(raw_date.members.is_empty());
+
+        let db = TestDb::default();
+        let InferredTypeData::Class(date) = global_types(&db).get(DATE_ID_GLOBAL_TYPE_ID) else {
+            panic!("Date must be a class");
+        };
+        assert_eq!(date.name(&db).as_ref().map(Text::text), Some("Date"));
+        assert!(date.type_parameters(&db).is_empty());
+        assert!(date.extends(&db).is_none());
+        assert!(date.implements(&db).is_empty());
+        assert!(date.members(&db).is_empty());
     }
 }

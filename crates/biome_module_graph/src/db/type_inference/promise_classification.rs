@@ -24,8 +24,8 @@ use crate::js_module_info::TsBindingReferenceExt;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsExport, JsOwnExport, ModuleDb, ResolvedPath, SymbolFromModuleInfo};
 use biome_js_type_info::{
-    GlobalTypeId, ImportSymbol, Literal, RawTypeData, ScopeId, TypeId, TypeMember, TypeReference,
-    TypeReferenceQualifier, TypeResolverLevel, TypeofExpression, global_types,
+    GlobalTypeId, ImportSymbol, Literal, RawTypeData, RawTypeId, ScopeId, TypeId, TypeMember,
+    TypeReference, TypeReferenceQualifier, TypeResolverLevel, TypeofExpression, global_types,
     interned_types::{ReturnType, TypeData as InferredTypeData},
 };
 use biome_rowan::Text;
@@ -220,7 +220,7 @@ fn classify_expression(
                                     db,
                                     state.module,
                                     &js_info,
-                                    ImportResolution::OnDemand,
+                                    ImportResolution::on_demand(state.module),
                                 );
                                 let Some(awaited) = ctx.resolve_await_expression(*return_ty) else {
                                     return Indeterminate;
@@ -329,7 +329,7 @@ fn classify_expression(
                             db,
                             state.module,
                             &js_info,
-                            ImportResolution::OnDemand,
+                            ImportResolution::on_demand(state.module),
                         );
                         let mut ty = ctx.resolve_qualifier(&qualifier);
                         for member in &members {
@@ -462,7 +462,7 @@ fn classify_expression(
                             db,
                             state.module,
                             &js_info,
-                            ImportResolution::OnDemand,
+                            ImportResolution::on_demand(state.module),
                         );
                         let ty = ctx.resolve(return_ty);
                         let result = match state.projection {
@@ -509,15 +509,18 @@ fn classify_expression(
                         }
                     }
                     RawTypeData::TypeofExpression(expression) => match expression.as_ref() {
-                        TypeofExpression::StaticMember(expression) => ClassificationState {
-                            module: state.module,
-                            target: ClassificationTarget::Reference(expression.object.clone()),
-                            mode: MemberLookupMode::Value,
-                            members: std::iter::once(expression.member.clone())
-                                .chain(state.members.iter().cloned())
-                                .collect(),
-                            projection: state.projection,
-                        },
+                        TypeofExpression::StaticMember(expression)
+                        | TypeofExpression::OptionalChainStaticMember(expression) => {
+                            ClassificationState {
+                                module: state.module,
+                                target: ClassificationTarget::Reference(expression.object.clone()),
+                                mode: MemberLookupMode::Value,
+                                members: std::iter::once(expression.member.clone())
+                                    .chain(state.members.iter().cloned())
+                                    .collect(),
+                                projection: state.projection,
+                            }
+                        }
                         TypeofExpression::This(expression) => ClassificationState {
                             module: state.module,
                             target: ClassificationTarget::Reference(expression.parent.clone()),
@@ -580,6 +583,7 @@ fn classify_expression(
                         | TypeofExpression::Conditional(_)
                         | TypeofExpression::Destructure(_)
                         | TypeofExpression::Index(_)
+                        | TypeofExpression::OptionalChainIndex(_)
                         | TypeofExpression::IterableValueOf(_)
                         | TypeofExpression::LogicalAnd(_)
                         | TypeofExpression::LogicalOr(_)
@@ -619,7 +623,7 @@ fn classify_expression(
                                 db,
                                 state.module,
                                 &js_info,
-                                ImportResolution::OnDemand,
+                                ImportResolution::on_demand(state.module),
                             );
                             return match is_array_of_promise_type(
                                 db,
@@ -642,7 +646,7 @@ fn classify_expression(
                                 db,
                                 state.module,
                                 &js_info,
-                                ImportResolution::OnDemand,
+                                ImportResolution::on_demand(state.module),
                             );
                             let ty = ctx.resolve_raw_type_id(type_id);
                             let Some(awaited) = ctx.resolve_await_expression(ty) else {
@@ -802,7 +806,7 @@ fn classify_expression(
                             db,
                             state.module,
                             &js_info,
-                            ImportResolution::OnDemand,
+                            ImportResolution::on_demand(state.module),
                         );
                         let target = ctx.resolve_raw_type_id(type_id);
                         let instance = InferredTypeData::instance_of(db, target, Box::default());
@@ -906,7 +910,7 @@ fn classify_expression(
                     return Indeterminate;
                 };
                 let Some(JsExport::Own(own_export) | JsExport::OwnType(own_export)) =
-                    js_info.raw_exports.get(name.text())
+                    js_info.exports.get(name.text())
                 else {
                     return Indeterminate;
                 };
@@ -926,7 +930,9 @@ fn classify_expression(
                     }
                     JsOwnExport::Type(resolved) => ClassificationState {
                         module,
-                        target: ClassificationTarget::Reference(TypeReference::Resolved(*resolved)),
+                        target: ClassificationTarget::Reference(TypeReference::Resolved(
+                            RawTypeId::Local(*resolved),
+                        )),
                         mode: state.mode,
                         members: state.members,
                         projection: state.projection,

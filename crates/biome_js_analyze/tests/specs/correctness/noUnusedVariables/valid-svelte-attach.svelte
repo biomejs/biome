@@ -1,0 +1,30 @@
+<!-- should not generate diagnostics -->
+<script lang="ts">
+function myAttachment(node: HTMLElement) {
+  console.log(node);
+}
+
+function tooltip(content: string) {
+  return (node: HTMLElement) => {
+    console.log(content, node);
+  };
+}
+
+let content = "hello";
+let color = "red";
+</script>
+
+<div {@attach myAttachment}>...</div>
+<button {@attach tooltip(content)}>Hover me</button>
+<canvas
+	width={32}
+	height={32}
+	{@attach (canvas: HTMLCanvasElement) => {
+		const context = canvas.getContext('2d');
+
+		$effect(() => {
+			context.fillStyle = color;
+			context.fillRect(0, 0, canvas.width, canvas.height);
+		});
+	}}
+></canvas>

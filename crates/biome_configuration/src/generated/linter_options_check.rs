@@ -517,6 +517,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_exports_in_test::NoExportsInTestOptions>(),
     ));
     result.push((
+        "nursery",
+        "noExtendNative",
+        TypeId::of::<biome_rule_options::no_extend_native::NoExtendNativeOptions>(),
+    ));
+    result.push((
         "complexity",
         "noExtraBooleanCast",
         TypeId::of::<biome_rule_options::no_extra_boolean_cast::NoExtraBooleanCastOptions>(),
@@ -840,6 +845,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "style",
         "noNonNullAssertion",
         TypeId::of::<biome_rule_options::no_non_null_assertion::NoNonNullAssertionOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noNonScalableViewport",
+        TypeId::of::<biome_rule_options::no_non_scalable_viewport::NoNonScalableViewportOptions>(),
     ));
     result.push(("a11y", "noNoninteractiveElementInteractions", TypeId::of::<biome_rule_options::no_noninteractive_element_interactions::NoNoninteractiveElementInteractionsOptions>()));
     result.push(("a11y", "noNoninteractiveElementToInteractiveRole", TypeId::of::<biome_rule_options::no_noninteractive_element_to_interactive_role::NoNoninteractiveElementToInteractiveRoleOptions>()));
@@ -1165,6 +1175,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "performance",
         "noSyncScripts",
         TypeId::of::<biome_rule_options::no_sync_scripts::NoSyncScriptsOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noTailwindArbitraryValue",
+        TypeId::of::<
+            biome_rule_options::no_tailwind_arbitrary_value::NoTailwindArbitraryValueOptions,
+        >(),
     ));
     result.push(("suspicious", "noTemplateCurlyInString", TypeId::of::<biome_rule_options::no_template_curly_in_string::NoTemplateCurlyInStringOptions>()));
     result.push((

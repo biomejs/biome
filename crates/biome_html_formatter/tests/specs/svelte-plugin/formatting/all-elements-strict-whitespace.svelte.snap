@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/all-elements-strict-whitespace.svelte
+---
+
+# Input
+
+```svelte
+<div><div>looooooooooong</div>looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<div><p>hi</p><p>hi</p></div></div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,6 @@
+ <div
+-    ><div>looooooooooong</div
++    ><div
++        >looooooooooong</div
+     >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<div
+         ><p>hi</p><p>hi</p></div
+     ></div
+```
+
+# Output
+
+```svelte
+<div
+    ><div
+        >looooooooooong</div
+    >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<div
+        ><p>hi</p><p>hi</p></div
+    ></div
+>
+```

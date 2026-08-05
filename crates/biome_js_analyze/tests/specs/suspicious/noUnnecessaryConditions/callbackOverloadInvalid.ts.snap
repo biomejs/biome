@@ -1,0 +1,63 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: callbackOverloadInvalid.ts
+---
+# Input
+```ts
+declare function schedule(handler: () => void): string;
+declare function schedule(handler: () => Promise<void>): string | undefined;
+
+export function scheduled() {
+    return schedule(async () => {}) ?? "fallback";
+}
+
+type Mapper<T> = () => T;
+
+declare function map<T>(mapper: Mapper<T>): T;
+
+export function mapped(flag: boolean) {
+    return map(() => 42) || flag;
+}
+
+```
+
+# Diagnostics
+```
+callbackOverloadInvalid.ts:5:12 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    4 │ export function scheduled() {
+  > 5 │     return schedule(async () => {}) ?? "fallback";
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ }
+    7 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+    4 │ export function scheduled() {
+  > 5 │     return schedule(async () => {}) ?? "fallback";
+      │                                     ^^
+    6 │ }
+    7 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+callbackOverloadInvalid.ts:13:12 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    12 │ export function mapped(flag: boolean) {
+  > 13 │     return map(() => 42) || flag;
+       │            ^^^^^^^^^^^^^
+    14 │ }
+    15 │ 
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```

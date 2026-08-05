@@ -89,6 +89,7 @@ function collectSignaturePool(utils: ExtractedUtilities): {
 	for (const u of utils.static) intern(u.sort);
 	for (const u of utils.functional) {
 		internBranches(u.namedBranches, u.arbitraryBranches);
+		if (u.bare) intern(u.bare);
 		if (u.negative?.kind === "Distinct") {
 			internBranches(u.negative.namedBranches, u.negative.arbitraryBranches);
 		}
@@ -230,6 +231,7 @@ function renderFunctionalUtilities(
 		(u) =>
 			u.namedBranches.length > 0 ||
 			u.arbitraryBranches.length > 0 ||
+			u.bare !== null ||
 			u.negative !== null,
 	);
 	const entries = populated.map((u) => {
@@ -244,10 +246,16 @@ function renderFunctionalUtilities(
 			u.arbitraryBranches,
 			sigIdx,
 		);
+		let bare = "None";
+		if (u.bare) {
+			const { sig, count } = checked(u.bare, sigIdx(u.bare));
+			bare = `Some((${sig}, ${count}))`;
+		}
 		const negative = renderNegative(u, sigIdx, keywordIdx);
 		return `    ${rustString(u.basename)} => FunctionalEntry {
 ${renderBranchSlice("        ", "named_branches", namedItems)}
 ${renderBranchSlice("        ", "arbitrary_branches", arbitraryItems)}
+        bare: ${bare},
 ${negative}
     },`;
 	});

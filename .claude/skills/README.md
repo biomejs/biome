@@ -14,6 +14,7 @@ Project-wide standards — no emojis, the evidence rule, dev-dependency rules, t
 
 | Skill | Use for |
 | --- | --- |
+| biome-code-review | Reviewing completed changes before committing or opening a PR |
 | lint-rule-development | Creating and implementing lint rules and assists, code actions, rule options |
 | formatter-development | Implementing formatters, IR primitives, comment handling, Prettier comparison |
 | parser-development | Grammars (`.ungram`), lexers, parse rules, error recovery |

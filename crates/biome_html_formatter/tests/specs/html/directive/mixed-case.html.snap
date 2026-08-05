@@ -14,6 +14,6 @@ info: directive/mixed-case.html
 # Formatted
 
 ```html
-<!DoCtYpE html>
+<!doctype html>
 
 ```

@@ -19,5 +19,5 @@ a => bool: true
 ## Registered types
 
 ```
-Global TypeId(0) => bool: true
+Module TypeId(0) => bool: true
 ```

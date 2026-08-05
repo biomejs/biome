@@ -186,11 +186,10 @@ pub struct OverrideFormatterConfiguration {
     #[cfg_attr(feature = "cli", bpaf(long("bracket-spacing"), argument("true|false")))]
     pub bracket_spacing: Option<BracketSpacing>,
 
-    /// Whether to insert spaces inside delimiters (after the opening delimiter and before the
-    /// closing delimiter), such as parentheses, brackets, angle brackets, and template literal
-    /// interpolations. Spaces are not added before the opening delimiter, and empty delimiters
-    /// are not affected. Only applies when the content fits on a single line. The specific
-    /// delimiters affected depend on the language. Defaults to false.
+    /// Controls spaces immediately inside supported delimiters when their content fits on one line.
+    /// It doesn't add spaces before opening delimiters or inside empty delimiters.
+    ///
+    /// The affected delimiters vary by language. If unset, uses the configured formatter setting.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(
         feature = "cli",
@@ -198,12 +197,18 @@ pub struct OverrideFormatterConfiguration {
     )]
     pub delimiter_spacing: Option<DelimiterSpacing>,
 
-    /// Whether to expand arrays and objects on multiple lines.
-    /// When set to `auto`, object literals are formatted on multiple lines if the first property has a newline,
-    /// and array literals are formatted on a single line if it fits in the line.
-    /// When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
-    /// When set to `never`, these literals are formatted on a single line if it fits in the line.
-    /// When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
+    /// Controls whether arrays and objects are formatted on one line or multiple lines.
+    ///
+    /// `auto` formats objects on multiple lines if the first property has a newline, and arrays on
+    /// one line if they fit.
+    ///
+    /// `always` formats arrays and objects on multiple lines.
+    ///
+    /// `never` formats arrays and objects on one line if they fit.
+    ///
+    /// If unset, uses the configured formatter setting.
+    ///
+    /// When formatting `package.json`, Biome uses `always` unless configured otherwise.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(
         feature = "cli",

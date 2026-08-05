@@ -146,6 +146,10 @@ pub enum ArbitraryBranch {
 pub struct FunctionalEntry {
     pub named_branches: &'static [NamedBranch],
     pub arbitrary_branches: &'static [ArbitraryBranch],
+    /// Placement of the bare basename when the utility compiles without
+    /// a value (`border`, `ring`, `shadow` have defaults; `w` does
+    /// not), as a (`SIGNATURE_POOL` index, declaration count) pair.
+    pub bare: Option<(u16, u8)>,
     pub negative: Option<Negative>,
 }
 

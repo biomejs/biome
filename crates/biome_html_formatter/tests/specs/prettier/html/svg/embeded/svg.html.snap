@@ -44,12 +44,6 @@ element.fillStyle = 'currentColor'
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,4 +1,4 @@
--<!doctype html>
-+<!DOCTYPE html>
- <html>
-   <head>
-     <title>SVG</title>
 @@ -6,25 +6,24 @@
    <body>
      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
@@ -97,7 +91,7 @@ element.fillStyle = 'currentColor'
 # Output
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <title>SVG</title>

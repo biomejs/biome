@@ -2,7 +2,9 @@ use crate::prelude::*;
 use crate::utils::comment_trivia::{
     is_leading_comment_on_node, is_token_boundary_suppressed, is_trailing_comment_on_node,
 };
+use crate::utils::component_value_list::is_comma_separated_declaration_value_list;
 use crate::utils::custom_property::CustomPropertyContainer;
+use crate::utils::scss_declaration_list::find_scss_declaration_list_group;
 use crate::utils::scss_include_comments::{
     place_list_trailing_separator_comment, place_map_trailing_separator_comment,
     place_separated_list_comment,
@@ -11,11 +13,11 @@ use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssMediaQuery, AnyCssProperty, AnyCssRoot, AnyCssSelector,
     CssComplexSelector, CssDeclaration, CssDeclarationImportant, CssDeclarationOrRuleBlock,
     CssFunction, CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssLanguage,
-    CssMediaQueryList, CssNestedQualifiedRule, CssQualifiedRule, CssSyntaxKind, CssSyntaxToken,
-    ScssAtRootAtRule, ScssAtRootSelector, ScssEachHeader, ScssEachValueList, ScssExpression,
-    ScssExpressionItemList, ScssIfAtRule, ScssListExpression, ScssListExpressionElement,
-    ScssMapExpression, ScssMapExpressionPair, ScssVariableDeclaration, T, TextLen, TextSize,
-    is_in_scss_include_arguments,
+    CssMediaQueryList, CssNestedQualifiedRule, CssQualifiedRule, CssSyntaxKind, CssSyntaxNode,
+    CssSyntaxToken, ScssAtRootAtRule, ScssAtRootSelector, ScssEachHeader, ScssEachValueList,
+    ScssExpression, ScssExpressionItemList, ScssIfAtRule, ScssListExpression,
+    ScssListExpressionElement, ScssMapExpression, ScssMapExpressionPair, ScssVariableDeclaration,
+    T, TextLen, TextSize, is_in_scss_include_arguments,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
@@ -24,7 +26,7 @@ use biome_formatter::comments::{
 };
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{FormatResult, FormatRule, write};
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxTriviaPieceComments};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxTriviaPieceComments, TextRange};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
 
 pub type CssComments = Comments<CssLanguage>;
@@ -127,6 +129,7 @@ impl CommentStyle for CssCommentStyle {
             // Handle SCSS variable name/colon comments before generic properties.
             .or_else(handle_scss_variable_declaration_comment)
             .or_else(handle_declaration_important_comment)
+            .or_else(handle_component_value_boundary_comment)
             .or_else(handle_generic_property_comment)
             .or_else(handle_declaration_name_comment)
             .or_else(handle_selector_block_comment)
@@ -510,6 +513,57 @@ fn handle_declaration_important_comment(
     } else {
         CommentPlacement::Default(comment)
     }
+}
+
+/// Attaches a movable block comment to the declaration-value list that formats it.
+///
+/// CSS values share one component-value list. SCSS comma groups are formatted
+/// separately, so a comment after a comma belongs to the following group:
+///
+/// ```scss
+/// a { box-shadow: $x, /* boundary */ $y; }
+/// ```
+fn handle_component_value_boundary_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    if !comment.kind().is_inline_block() || CssCommentStyle::is_suppression(comment.piece().text())
+    {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(owner) = find_value_boundary_owner(&comment) else {
+        return CommentPlacement::Default(comment);
+    };
+
+    CommentPlacement::dangling(owner, comment)
+}
+
+/// Finds the declaration-value list that consumes a boundary comment.
+fn find_value_boundary_owner(comment: &DecoratedComment<CssLanguage>) -> Option<CssSyntaxNode> {
+    let preceding = comment.preceding_node()?;
+    let following = comment.following_node()?;
+    let preceding_parent = preceding.parent()?;
+    let following_parent = following.parent()?;
+
+    if preceding_parent == following_parent
+        && is_comma_separated_declaration_value_list(&preceding_parent)
+    {
+        return Some(preceding_parent);
+    }
+
+    let group = find_scss_declaration_list_group(following)?;
+    let separator = group
+        .syntax()
+        .first_token()
+        .and_then(|token| token.prev_token())
+        .filter(|token| token.kind() == CssSyntaxKind::COMMA)?;
+
+    TextRange::new(
+        separator.text_trimmed_range().end(),
+        group.syntax().text_trimmed_range().start(),
+    )
+    .contains_range(comment.piece().text_range())
+    .then(|| group.into_syntax())
 }
 
 fn handle_generic_property_comment(

@@ -6,9 +6,11 @@ info: vue/v-for/quotes-and-of.vue
 # Input
 
 ```vue
-<div v-for=' item      of   items '>{{ item }}</div>
-<div v-for="item     of    items">{{ item }}</div>
-<div v-for='( value , key )     of object'>{{ key }}: {{ value }}</div>
+<template>
+	<div v-for=' item      of   items '>{{ item }}</div>
+	<div v-for="item     of    items">{{ item }}</div>
+	<div v-for='( value , key )     of object'>{{ key }}: {{ value }}</div>
+</template>
 
 ```
 
@@ -16,8 +18,10 @@ info: vue/v-for/quotes-and-of.vue
 # Formatted
 
 ```vue
-<div v-for='item of items'>{{ item }}</div>
-<div v-for="item of items">{{ item }}</div>
-<div v-for='(value, key) of object'>{{ key }}: {{ value }}</div>
+<template>
+	<div v-for='item of items'>{{ item }}</div>
+	<div v-for="item of items">{{ item }}</div>
+	<div v-for='(value, key) of object'>{{ key }}: {{ value }}</div>
+</template>
 
 ```

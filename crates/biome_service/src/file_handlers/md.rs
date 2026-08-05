@@ -15,7 +15,7 @@ use biome_configuration::markdown::{MarkdownFormatterConfiguration, MarkdownForm
 use biome_db::AnyParsedSource;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
 use biome_fs::BiomePath;
-use biome_markdown_formatter::context::MdFormatOptions;
+use biome_markdown_formatter::context::{MdFormatOptions, ProseWrap};
 use biome_markdown_formatter::format_node;
 use biome_markdown_parser::{MarkdownParserOptions, parse_markdown_with_cache};
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdDocument};
@@ -34,6 +34,7 @@ pub struct MarkdownFormatterSettings {
     pub indent_style: Option<IndentStyle>,
     pub trailing_newline: Option<TrailingNewline>,
     pub enabled: Option<MarkdownFormatterEnabled>,
+    pub prose_wrap: Option<ProseWrap>,
 }
 
 impl From<MarkdownFormatterConfiguration> for MarkdownFormatterSettings {
@@ -45,6 +46,7 @@ impl From<MarkdownFormatterConfiguration> for MarkdownFormatterSettings {
             indent_style: configuration.indent_style,
             enabled: configuration.enabled,
             trailing_newline: configuration.trailing_newline,
+            prose_wrap: configuration.prose_wrap,
         }
     }
 }
@@ -117,12 +119,14 @@ impl ServiceLanguage for MarkdownLanguage {
             .trailing_newline
             .or(global.trailing_newline)
             .unwrap_or_default();
+        let prose_wrap = language.prose_wrap.unwrap_or_default();
         MdFormatOptions::new()
             .with_indent_style(indent_style)
             .with_indent_width(indent_width)
             .with_line_width(line_width)
             .with_line_ending(line_ending)
             .with_trailing_newline(trailing_newline)
+            .with_prose_wrap(prose_wrap)
     }
 
     fn resolve_analyzer_options(

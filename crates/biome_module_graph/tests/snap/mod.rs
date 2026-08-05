@@ -1,52 +1,28 @@
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
-use biome_fs::MemoryFileSystem;
 use biome_html_formatter::HtmlFormatOptions;
 use biome_html_parser::HtmlParserOptions;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_languages::{CssFileSource, HtmlFileSource, JsFileSource};
-use biome_module_graph::{JsExport, JsOwnExport, ModuleDb, ModuleInfoKind, ModuleResolver};
-use biome_resolver::ResolvedPath;
+use biome_module_graph::{JsExport, ModuleDb, ModuleInfoKind};
 use biome_rowan::AstNode;
-use biome_test_utils::{dump_registered_module_types, dump_registered_types};
 use camino::Utf8PathBuf;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 
 pub struct ModuleGraphSnapshot<'a> {
     module_db: &'a dyn ModuleDb,
     files: BTreeMap<String, String>,
-    resolver: Option<&'a ModuleResolver>,
 }
 
 impl<'a> ModuleGraphSnapshot<'a> {
-    pub fn new(module_db: &'a dyn ModuleDb, fs: &'a MemoryFileSystem) -> Self {
-        let files = source_files_from_memory_fs(fs);
-        Self {
-            module_db,
-            files,
-            resolver: None,
-        }
-    }
-
     /// Build a snapshot from a pre-collected list of `(path, source)` pairs.
     ///
     /// Use this when the [`MemoryFileSystem`] has been moved into a
     /// [`WorkspaceServer`] and is no longer directly accessible.
     pub fn from_files(module_db: &'a dyn ModuleDb, files: BTreeMap<String, String>) -> Self {
-        Self {
-            module_db,
-            files,
-            resolver: None,
-        }
-    }
-
-    pub fn with_resolver(self, resolver: &'a ModuleResolver) -> Self {
-        Self {
-            resolver: Some(resolver),
-            ..self
-        }
+        Self { module_db, files }
     }
 
     pub fn assert_snapshot(&self, test_name: &str) {
@@ -54,7 +30,7 @@ impl<'a> ModuleGraphSnapshot<'a> {
         let files = self.files.clone();
         for (file_name, source_code) in &files {
             let file_name = Utf8PathBuf::from(file_name.as_str());
-            write_source_file(&mut content, &file_name, source_code, self.resolver);
+            write_source_file(&mut content, &file_name, source_code);
 
             if let Some(data) = self.module_db.module_info_for_path(file_name.as_path()) {
                 content.push_str("\n\n## Module Info\n\n");
@@ -92,8 +68,9 @@ impl<'a> ModuleGraphSnapshot<'a> {
                             .collect();
 
                         let side_effect_paths: Vec<_> = data
-                            .static_import_paths
-                            .iter()
+                            .import_paths
+                            .named_iter()
+                            .filter(|(_, import)| import.kind.is_static())
                             .filter(|(specifier, _)| {
                                 let s = specifier.text().to_string();
                                 !named_import_specifiers.contains(&s)
@@ -133,39 +110,6 @@ impl<'a> ModuleGraphSnapshot<'a> {
                         }
 
                         content.push_str("\n```\n\n");
-
-                        let exported_binding_ranges: BTreeSet<_> = data
-                            .exports
-                            .values()
-                            .filter_map(JsExport::as_own_export)
-                            .filter_map(|export| match export {
-                                JsOwnExport::Binding(binding_range) => Some(*binding_range),
-                                JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => None,
-                            })
-                            .collect();
-                        if !exported_binding_ranges.is_empty() {
-                            content.push_str("## Exported Bindings\n\n");
-                            content.push_str("```");
-                            for binding_range in exported_binding_ranges {
-                                if let Some(type_data) = data.binding_type_data(binding_range) {
-                                    // Get the binding name from the semantic model
-                                    let binding_name = data
-                                        .semantic_model
-                                        .all_bindings()
-                                        .find(|b| b.syntax().text_trimmed_range() == binding_range)
-                                        .and_then(|b| b.tree().name_token().ok())
-                                        .map_or_else(|| "<unknown>".to_string(), |b| b.to_string());
-
-                                    content.push_str(&format!(
-                                        "\n{} => {}\n",
-                                        binding_name, type_data
-                                    ));
-                                }
-                            }
-                            content.push_str("```\n\n");
-                        }
-
-                        dump_registered_module_types(&mut content, &data.types());
                     }
                     ModuleInfoKind::Css(css_data) => {
                         content.push_str("```\n");
@@ -181,11 +125,6 @@ impl<'a> ModuleGraphSnapshot<'a> {
             }
         }
 
-        if let Some(resolver) = self.resolver {
-            content.push_str("\n# Module Resolver\n\n");
-            dump_registered_types(&mut content, resolver);
-        }
-
         insta::with_settings!({
             snapshot_path => "../snapshots",
             prepend_module_to_snapshot => false,
@@ -195,43 +134,12 @@ impl<'a> ModuleGraphSnapshot<'a> {
     }
 }
 
-pub fn source_files_from_memory_fs(fs: &MemoryFileSystem) -> BTreeMap<String, String> {
-    fs.files
-        .read()
-        .iter()
-        .map(|(file, entry)| {
-            let content = entry.lock();
-            let content = String::from_utf8_lossy(content.as_slice()).into_owned();
-            (file.as_str().to_string(), content)
-        })
-        .collect()
-}
-
-pub fn write_source_file(
-    content: &mut String,
-    file_name: &Utf8PathBuf,
-    source_code: &str,
-    resolver: Option<&ModuleResolver>,
-) {
+pub fn write_source_file(content: &mut String, file_name: &Utf8PathBuf, source_code: &str) {
     let extension = file_name.extension().unwrap_or_default();
 
     content.push_str("\n# `");
     content.push_str(file_name.as_str());
     content.push('`');
-    if let Some(resolver) = resolver {
-        content.push_str(" (");
-        match resolver
-            .modules_by_path
-            .get(&ResolvedPath::from_path(file_name))
-        {
-            Some(module_id) => {
-                content.push_str("Module ");
-                content.push_str(&module_id.index().to_string());
-            }
-            None => content.push_str("Not imported by resolver"),
-        }
-        content.push(')');
-    }
     content.push_str("\n\n## Source\n\n");
     content.push_str("```");
     content.push_str(extension);

@@ -62,103 +62,427 @@ info: markdown/blockquote/ignore-code.md
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -13,13 +13,16 @@
- > ```
- 
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -15,13 +15,11 @@
  > - test
-->   ```md
-->   <!-- prettier-ignore -->
-->   - This is a long long
-->     long long long long
-->     long long paragraph.
+ >
+ >   ```md
+-  ```
+-<!-- biome-ignore format: prettier ignore -->
++  > <!-- biome-ignore format: prettier ignore -->
+   > - This is a long long
+   >     long long long long
+   >     long long paragraph.
+->
 ->   ```
- 
-+  ```md
-+  > <!-- prettier-ignore -->
-+  > - This is a long long
-+  >     long long long long
-+  >     long long paragraph.
 +  > 
-+  ```
-+
-+
- ````md
- > ```md
- > <!-- prettier-ignore -->
-@@ -40,8 +43,9 @@
+   ```
  
- > <!-- prettier-ignore -->
- > - This is a long long
-->   long long long long
-->   long long paragraph.
-+  long long long long
-+  long long paragraph.
-+
  
- > ```js
- > // prettier-ignore
-```
 
-# Output
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -126,280 +126,254 @@
+     "test",
+     hard_line_break,
+     dedentRoot([hard_line_break, ">", hard_line_break, ">   "]),
+-    source_position(250),
++    source_position(248),
+     "```",
+-    source_position(253),
++    source_position(251),
+     "md",
+     hard_line_break,
++    source_position(254),
++    ">",
++    source_position(255),
++    " ",
++    source_position(258),
++    "<!-- biome-ignore format: prettier ignore -->",
+     hard_line_break,
+-    "```",
+-    hard_line_break
+-  ]),
+-  source_position(260),
+-  "<!-- biome-ignore format: prettier ignore -->",
+-  source_position(305),
+-  "
+-",
+-  source_position(306),
+-  "  ",
+-  source_position(308),
+-  ">",
+-  source_position(309),
+-  " ",
+-  source_position(310),
+-  "-",
+-  source_position(311),
+-  " ",
+-  align("  ", [
+-    source_position(312),
+-    "This is a long long",
+-    source_position(331),
+-    "
+-",
+-    source_position(332),
+-    "  ",
+-    source_position(334),
++    source_position(304),
+     ">",
+-    source_position(335),
++    source_position(305),
+     " ",
+-    source_position(336),
+-    "  ",
+-    source_position(338),
+-    "  long long long long",
+-    source_position(359),
+-    "
+-",
+-    source_position(360),
+-    "  ",
+-    source_position(362),
++    source_position(308),
++    "- This is a long long",
++    hard_line_break,
++    source_position(330),
+     ">",
+-    source_position(363),
++    source_position(331),
+     " ",
+-    source_position(364),
+-    "  ",
+-    source_position(366),
+-    "  long long paragraph.",
+-    source_position(388),
+-    "
+-",
++    source_position(332),
++    "    long long long long",
+     hard_line_break,
+-    dedentRoot([hard_line_break, ">", hard_line_break, ">   "]),
+-    source_position(396),
+-    "```",
++    source_position(356),
++    ">",
++    source_position(357),
++    " ",
++    source_position(358),
++    "    long long paragraph.",
+     hard_line_break,
++    source_position(383),
++    ">",
++    source_position(384),
++    " ",
+     hard_line_break,
++    source_position(387),
+     "```",
+     hard_line_break
+   ]),
+-  source_position(400),
++  source_position(390),
+   "
+ ",
+-  source_position(401),
++  source_position(391),
+   "
+ ",
+-  source_position(402),
++  source_position(392),
+   "````",
+-  source_position(406),
++  source_position(396),
+   "md",
+   hard_line_break,
+-  source_position(409),
++  source_position(399),
+   "> ```md",
+   literal_line_break_without_parent,
+-  source_position(417),
++  source_position(407),
+   "> <!-- biome-ignore format: prettier ignore -->",
+   literal_line_break_without_parent,
+-  source_position(465),
++  source_position(455),
+   "> - This is a long long",
+   literal_line_break_without_parent,
+-  source_position(489),
++  source_position(479),
+   ">   long long long long",
+   literal_line_break_without_parent,
+-  source_position(513),
++  source_position(503),
+   ">   long long paragraph.",
+   literal_line_break_without_parent,
+-  source_position(538),
++  source_position(528),
+   "> ```",
+   literal_line_break_without_parent,
+-  source_position(544),
++  source_position(534),
+   "````",
+-  source_position(548),
++  source_position(538),
+   "
+ ",
+-  source_position(549),
++  source_position(539),
+   "
+ ",
+-  source_position(550),
++  source_position(540),
+   ">",
+-  source_position(551),
++  source_position(541),
+   " ",
+-  source_position(552),
++  source_position(542),
+   "````",
+-  source_position(556),
++  source_position(546),
+   "md",
+   hard_line_break,
+-  source_position(559),
++  source_position(549),
+   ">",
+-  source_position(560),
++  source_position(550),
+   " ",
+-  source_position(561),
++  source_position(551),
+   "> ```md",
+-  source_position(568),
++  source_position(558),
+   "
+ ",
+-  source_position(569),
++  source_position(559),
+   ">",
+-  source_position(570),
++  source_position(560),
+   " ",
+-  source_position(571),
++  source_position(561),
+   "> <!-- biome-ignore format: prettier ignore -->",
+-  source_position(618),
++  source_position(608),
+   "
+ ",
+-  source_position(619),
++  source_position(609),
+   ">",
+-  source_position(620),
++  source_position(610),
+   " ",
+-  source_position(621),
++  source_position(611),
+   "> - This is a long long",
+-  source_position(644),
++  source_position(634),
+   "
+ ",
+-  source_position(645),
++  source_position(635),
+   ">",
+-  source_position(646),
++  source_position(636),
+   " ",
+-  source_position(647),
++  source_position(637),
+   ">   long long long long",
+-  source_position(670),
++  source_position(660),
+   "
+ ",
+-  source_position(671),
++  source_position(661),
+   ">",
+-  source_position(672),
++  source_position(662),
+   " ",
+-  source_position(673),
++  source_position(663),
+   ">   long long paragraph.",
+-  source_position(697),
++  source_position(687),
+   "
+ ",
+-  source_position(698),
++  source_position(688),
+   ">",
+-  source_position(699),
++  source_position(689),
+   " ",
+-  source_position(700),
++  source_position(690),
+   "> ```",
+-  source_position(705),
++  source_position(695),
+   "
+ ",
+-  source_position(706),
++  source_position(696),
+   ">",
+-  source_position(707),
++  source_position(697),
+   " ",
+-  source_position(708),
++  source_position(698),
+   "````",
+-  source_position(712),
++  source_position(702),
+   "
+ ",
+-  source_position(713),
++  source_position(703),
+   "
+ ",
+-  source_position(714),
++  source_position(707),
+   ">",
+-  source_position(715),
++  source_position(708),
+   " ",
+-  source_position(716),
++  source_position(709),
+   "<!-- biome-ignore format: prettier ignore -->",
+-  source_position(761),
++  source_position(754),
+   "
+ ",
+-  source_position(762),
++  source_position(755),
+   ">",
+-  source_position(763),
++  source_position(756),
+   " ",
+-  source_position(764),
++  source_position(757),
+   "-",
+-  source_position(765),
++  source_position(758),
+   " ",
+   align("  ", [
+-    source_position(766),
++    source_position(759),
+     "This is a long long",
+-    source_position(785),
++    source_position(778),
+     "
+ ",
+-    source_position(786),
++    source_position(779),
+     ">",
+-    source_position(787),
++    source_position(780),
+     " ",
+-    source_position(788),
++    source_position(781),
+     "  ",
+-    source_position(790),
++    source_position(783),
+     "long long long long",
+-    source_position(809),
++    source_position(802),
+     "
+ ",
+-    source_position(810),
++    source_position(803),
+     ">",
+-    source_position(811),
++    source_position(804),
+     " ",
+-    source_position(812),
++    source_position(805),
+     "  ",
+-    source_position(814),
++    source_position(807),
+     "long long paragraph.",
+-    source_position(834),
++    source_position(827),
+     "
+ ",
+     hard_line_break,
+-    hard_line_break
++    empty_line
+   ]),
+-  source_position(835),
++  source_position(831),
+   "
+ ",
+-  source_position(836),
+-  "
+-",
+-  source_position(837),
++  source_position(832),
+   ">",
+-  source_position(838),
++  source_position(833),
+   " ",
+-  source_position(839),
++  source_position(834),
+   "```",
+-  source_position(842),
++  source_position(838),
+   "js",
+   hard_line_break,
+-  source_position(845),
++  source_position(841),
+   ">",
+-  source_position(846),
++  source_position(842),
+   " ",
+-  source_position(847),
++  source_position(843),
+   "// biome-ignore format: prettier ignore",
+-  source_position(886),
++  source_position(882),
+   "
+ ",
+-  source_position(887),
++  source_position(883),
+   ">",
+-  source_position(888),
++  source_position(884),
+   " ",
+-  source_position(889),
++  source_position(885),
+   "const x = 1,",
+-  source_position(901),
++  source_position(897),
+   "
+ ",
+-  source_position(902),
++  source_position(898),
+   ">",
+-  source_position(903),
++  source_position(899),
+   " ",
+-  source_position(904),
++  source_position(900),
+   "b = 2",
+-  source_position(909),
++  source_position(905),
+   "
+ ",
+-  source_position(910),
++  source_position(906),
+   ">",
+-  source_position(911),
++  source_position(907),
+   " ",
++  source_position(908),
++  "```",
+   source_position(912),
+-  "```",
+-  source_position(915),
+   "
+ ",
+   hard_line_break
 
-```md
-> ````md
-> <!-- prettier-ignore -->
-> ```js
-> ugly   ( code ) ;
-> ```
-> ````
-
-> ```md
-> <!-- prettier-ignore -->
-> - This is a long long
->   long long long long
->   long long paragraph.
-> ```
-
-> - test
-
-  ```md
-  > <!-- prettier-ignore -->
-  > - This is a long long
-  >     long long long long
-  >     long long paragraph.
-  > 
-  ```
-
-
-````md
-> ```md
-> <!-- prettier-ignore -->
-> - This is a long long
->   long long long long
->   long long paragraph.
-> ```
-````
-
-> ````md
-> > ```md
-> > <!-- prettier-ignore -->
-> > - This is a long long
-> >   long long long long
-> >   long long paragraph.
-> > ```
-> ````
-
-> <!-- prettier-ignore -->
-> - This is a long long
-  long long long long
-  long long paragraph.
-
-
-> ```js
-> // prettier-ignore
-> const x = 1,
-> b = 2
-> ```
 ```

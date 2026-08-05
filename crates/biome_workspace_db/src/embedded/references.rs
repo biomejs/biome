@@ -283,6 +283,21 @@ mod tests {
     }
 
     #[test]
+    fn is_value_reference_used_finds_vue_assignment_targets() {
+        let db = TestDb::new();
+        let path = parse_vue_source_with_js_snippet(&db, "() => isNewSheetOpen = true");
+
+        assert!(is_value_reference_used(
+            &db,
+            InternedReference::new(&db, path.clone(), token_text("isNewSheetOpen"))
+        ));
+        assert!(!is_value_reference_used(
+            &db,
+            InternedReference::new(&db, path, token_text("Missing"))
+        ));
+    }
+
+    #[test]
     fn is_reference_used_classifies_type_references() {
         let db = TestDb::new();
         let path = parse_vue_source_with_js_snippet(&db, "foo as IconType");

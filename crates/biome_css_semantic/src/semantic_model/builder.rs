@@ -4,8 +4,8 @@ use rustc_hash::FxHashMap;
 use std::collections::BTreeMap;
 
 use super::model::{
-    CssGlobalCustomVariableData, CssModelDeclarationData, ResolvedSelector, RuleData, RuleId,
-    SelectorData, SemanticModel, SemanticModelData, Specificity, selector_tokens,
+    CssGlobalCustomVariableData, CssModelDeclarationData, CssPropertyAtRuleData, ResolvedSelector,
+    RuleData, RuleId, SelectorData, SemanticModel, SemanticModelData, Specificity, selector_tokens,
 };
 use crate::events::SemanticEvent;
 use crate::model::AnyRuleStart;
@@ -17,6 +17,8 @@ pub struct SemanticModelBuilder {
     /// IDs of top-level rules only
     top_level_rule_ids: Vec<RuleId>,
     global_custom_variables: FxHashMap<TokenText, CssGlobalCustomVariableData>,
+    at_property_rules: Vec<CssPropertyAtRuleData>,
+    last_at_property_by_name: FxHashMap<TokenText, usize>,
     /// Stack of rule IDs to keep track of the current rule hierarchy
     current_rule_stack: Vec<RuleId>,
     /// Map from text range to RuleId
@@ -33,6 +35,8 @@ impl SemanticModelBuilder {
             top_level_rule_ids: Vec::new(),
             current_rule_stack: Vec::new(),
             global_custom_variables: FxHashMap::default(),
+            at_property_rules: Vec::new(),
+            last_at_property_by_name: FxHashMap::default(),
             range_to_rule_id: BTreeMap::default(),
             is_in_root_selector: false,
         }
@@ -121,6 +125,8 @@ impl SemanticModelBuilder {
             all_rules: self.all_rules,
             top_level_rule_ids: self.top_level_rule_ids,
             global_custom_variables: self.global_custom_variables,
+            at_property_rules: self.at_property_rules,
+            last_at_property_by_name: self.last_at_property_by_name,
             range_to_rule_id: self.range_to_rule_id,
         };
         SemanticModel::new(data)
@@ -231,15 +237,16 @@ impl SemanticModelBuilder {
                     && let Ok(property_name) = property.value()
                 {
                     if is_global_var {
-                        self.global_custom_variables.insert(
-                            property_name.clone(),
-                            CssGlobalCustomVariableData::Root(CssModelDeclarationData {
-                                declaration: AstPtr::new(&node),
-                                property: AstPtr::new(&property),
-                                value: value.clone(),
-                                property_name: property_name.clone(),
-                            }),
-                        );
+                        let variable = self
+                            .global_custom_variables
+                            .entry(property_name.clone())
+                            .or_default();
+                        variable.root = Some(CssModelDeclarationData {
+                            declaration: AstPtr::new(&node),
+                            property: AstPtr::new(&property),
+                            value: value.clone(),
+                            property_name: property_name.clone(),
+                        });
                     }
                     let current_rule = &mut self.all_rules[current_rule_id.index()];
                     current_rule.declarations.push(CssModelDeclarationData {
@@ -263,17 +270,21 @@ impl SemanticModelBuilder {
                 inherits,
                 range,
             } => {
-                if let Ok(property_name) = property.value() {
-                    self.global_custom_variables.insert(
-                        property_name,
-                        CssGlobalCustomVariableData::AtProperty {
-                            _property: AstPtr::new(&property),
-                            initial_value,
-                            syntax,
-                            inherits,
-                            _range: range,
-                        },
-                    );
+                if let Ok(property_name) = property.value_token() {
+                    let property_name = property_name.token_text_trimmed();
+                    self.global_custom_variables
+                        .entry(property_name.clone())
+                        .or_default();
+                    let index = self.at_property_rules.len();
+                    self.at_property_rules.push(CssPropertyAtRuleData {
+                        name: property_name.clone(),
+                        property: AstPtr::new(&property),
+                        initial_value,
+                        syntax,
+                        inherits,
+                        range,
+                    });
+                    self.last_at_property_by_name.insert(property_name, index);
                 }
             }
         }

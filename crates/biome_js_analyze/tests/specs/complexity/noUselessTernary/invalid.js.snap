@@ -24,6 +24,7 @@ var a = x instanceof foo ? true : false;
 
 var a = 'make' in car ? true : false;
 var a = 'make' in car ? false : true;
+const pauseEventLane = document.cookie.indexOf('cid_debug=false') > -1 ? true : false;
 ```
 
 # Diagnostics
@@ -151,7 +152,7 @@ invalid.js:6:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━�
      4  4 │   var a = foo() ? false : true;
      5  5 │   var a = foo ? false : true;
      6    │ - var·a·=·foo·===·1·?·false·:·true;
-        6 │ + var·a·=·foo·!==1;
+        6 │ + var·a·=·foo·!==·1;
      7  7 │   var a = foo + 1 ? false : true;
      8  8 │   
   
@@ -263,13 +264,8 @@ invalid.js:11:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━
   
   i Unsafe fix: Remove the conditional expression with
   
-     9  9 │   var a = foo() ? true : false;
-    10 10 │   var a = foo ? true : false;
-    11    │ - var·a·=·foo·===·1·?·true·:·false;
-       11 │ + var·a·=·foo··===·1;
-    12 12 │   var a = foo + 1 ? true : false;
-    13 13 │   
-  
+    11 │ var·a·=·foo·===·1·?·true·:·false;
+       │                  --------------- 
 
 ```
 
@@ -373,13 +369,8 @@ invalid.js:17:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━
   
   i Unsafe fix: Remove the conditional expression with
   
-    15 15 │   
-    16 16 │   var a = x instanceof foo ? false : true;
-    17    │ - var·a·=·x·instanceof·foo·?·true·:·false;
-       17 │ + var·a·=·x··instanceof·foo;
-    18 18 │   
-    19 19 │   var a = 'make' in car ? true : false;
-  
+    17 │ var·a·=·x·instanceof·foo·?·true·:·false;
+       │                         --------------- 
 
 ```
 
@@ -393,6 +384,7 @@ invalid.js:19:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━
   > 19 │ var a = 'make' in car ? true : false;
        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     20 │ var a = 'make' in car ? false : true;
+    21 │ const pauseEventLane = document.cookie.indexOf('cid_debug=false') > -1 ? true : false;
   
   i Simplify your code by directly assigning the result without using a ternary operator.
   
@@ -401,12 +393,8 @@ invalid.js:19:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━
   
   i Unsafe fix: Remove the conditional expression with
   
-    17 17 │   var a = x instanceof foo ? true : false;
-    18 18 │   
-    19    │ - var·a·=·'make'·in·car·?·true·:·false;
-       19 │ + var·a·=·'make'··in·car;
-    20 20 │   var a = 'make' in car ? false : true;
-  
+    19 │ var·a·=·'make'·in·car·?·true·:·false;
+       │                      --------------- 
 
 ```
 
@@ -418,6 +406,7 @@ invalid.js:20:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━
     19 │ var a = 'make' in car ? true : false;
   > 20 │ var a = 'make' in car ? false : true;
        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ const pauseEventLane = document.cookie.indexOf('cid_debug=false') > -1 ? true : false;
   
   i Simplify your code by directly assigning the result without using a ternary operator.
   
@@ -430,6 +419,29 @@ invalid.js:20:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━
     19 19 │   var a = 'make' in car ? true : false;
     20    │ - var·a·=·'make'·in·car·?·false·:·true;
        20 │ + var·a·=·!('make'·in·car·);
+    21 21 │   const pauseEventLane = document.cookie.indexOf('cid_debug=false') > -1 ? true : false;
   
+
+```
+
+```
+invalid.js:21:24 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary use of boolean literals in conditional expression.
+  
+    19 │ var a = 'make' in car ? true : false;
+    20 │ var a = 'make' in car ? false : true;
+  > 21 │ const pauseEventLane = document.cookie.indexOf('cid_debug=false') > -1 ? true : false;
+       │                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
+  i Unsafe fix: Remove the conditional expression with
+  
+    21 │ const·pauseEventLane·=·document.cookie.indexOf('cid_debug=false')·>·-1·?·true·:·false;
+       │                                                                       --------------- 
 
 ```

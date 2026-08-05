@@ -4,9 +4,10 @@
 //! incremental boundary. The algorithms here share bounded traversal state and
 //! resolved argument representations with expression inference.
 
+use crate::db::queries::resolve_callable_type;
 use crate::db::type_inference::{
-    apply_substitutions_to_root_body, collected_type_result, resolve_local_type_on_demand,
-    substitutions_for_instance,
+    apply_substitutions_to_root_body, collected_type_result, find_member_type_on_demand,
+    resolve_local_type_on_demand, substitutions_for_instance,
 };
 use crate::module_graph::ModuleInfoKind;
 use crate::{ModuleDb, module_for_key};
@@ -24,12 +25,14 @@ use biome_js_type_info::{
         TypeTransformResult,
     },
 };
+use biome_rowan::Text;
 use rustc_hash::FxHashSet;
 
 const MAX_ARGUMENT_MATCH_STEPS: usize = 1024;
 const MAX_ARGUMENT_SEQUENCE_STEPS: usize = 4096;
 const MAX_ARGUMENT_TYPE_STEPS: usize = 1024;
 const MAX_LOCAL_EXTENDS_STEPS: usize = 1024;
+const MAX_STRUCTURAL_MEMBER_STEPS: usize = 1024;
 
 // #region CALL INFERENCE IMPLEMENTATION
 
@@ -890,6 +893,42 @@ fn merged_reference_targets<'db>(
     .collect()
 }
 
+/// Finds the function a value of type `ty` can be called as.
+///
+/// A class instance contributes its type arguments, so a callable reached
+/// through `InstanceOf` describes its parameters and return type in terms of
+/// the arguments the instance was built with. Every other wrapper, and the
+/// shapes that are too ambiguous to resolve, are described on
+/// [`resolve_callable_type`].
+pub(in crate::db) fn resolve_callable_function<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+) -> Option<InferredFunction<'db>> {
+    if let InferredTypeData::InstanceOf(instance) = resolve_local_type_on_demand(db, ty) {
+        let target = resolve_local_type_on_demand(db, instance.ty(db));
+        let substitutions =
+            substitutions_for_instance(db, target, instance.type_parameters(db), &[]);
+        let substituted = apply_substitutions_to_root_body(db, target, &substitutions);
+        return resolve_callable_type(db, substituted)?.callable_function(db);
+    }
+
+    resolve_callable_type(db, ty)?.callable_function(db)
+}
+
+/// Returns whether the function declares that its result is discarded.
+///
+/// A `void` return position accepts a function returning anything, so an
+/// `async` callback satisfies a parameter of type `() => void`.
+fn returns_void<'db>(db: &'db dyn ModuleDb, function: InferredFunction<'db>) -> bool {
+    match function.return_type(db) {
+        ReturnType::Type(ty) => matches!(
+            resolve_local_type_on_demand(db, *ty),
+            InferredTypeData::VoidKeyword
+        ),
+        ReturnType::Predicate(_) | ReturnType::Asserts(_) => false,
+    }
+}
+
 /// A directional relation between an expected parameter type and an actual argument type.
 ///
 /// Union and intersection decomposition depend on which side contains the
@@ -912,18 +951,21 @@ impl<'db> ArgumentTypeCompatibility<'db> {
     /// overload selection.
     ///
     /// Unsupported relations and work-budget exhaustion remain viable.
-    /// Callable types must also agree on whether they return a Promise.
+    /// Callable types must also agree on whether they return a Promise, unless
+    /// the parameter discards its return value by declaring `void`.
     fn is_satisfied(self, db: &'db dyn ModuleDb) -> bool {
         if !self.may_match(db) {
             return false;
         }
 
         match (
-            self.parameter_ty.callable_function(db),
-            self.argument_ty.callable_function(db),
+            resolve_callable_function(db, self.parameter_ty),
+            resolve_callable_function(db, self.argument_ty),
         ) {
             (Some(parameter_function), Some(argument_function)) => {
-                parameter_function.returns_promise(db) == argument_function.returns_promise(db)
+                returns_void(db, parameter_function)
+                    || parameter_function.returns_promise(db)
+                        == argument_function.returns_promise(db)
             }
             _ => true,
         }
@@ -968,6 +1010,19 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                 pending.push(continuation);
                 continue;
             }
+
+            // Resolving aliases here keeps them off the work budget. Spending
+            // one iteration per alias would let a long chain exhaust the loop,
+            // and exhaustion leaves every overload viable.
+            let compatibility = compatibility.with_types(
+                resolve_local_type_on_demand(db, compatibility.parameter_ty),
+                resolve_local_type_on_demand(db, compatibility.argument_ty),
+            );
+            if compatibility.parameter_ty == compatibility.argument_ty {
+                pending.push(continuation);
+                continue;
+            }
+
             if let (InferredTypeData::Literal(parameter), InferredTypeData::Literal(argument)) =
                 (compatibility.parameter_ty, compatibility.argument_ty)
                 && !matches!(parameter.literal(db), InferredLiteral::Object(_))
@@ -998,10 +1053,7 @@ impl<'db> ArgumentTypeCompatibility<'db> {
 
     /// Decomposes a nontrivial relation into conjunctive or alternative requirements.
     fn action(self, db: &'db dyn ModuleDb) -> ArgumentMatchAction<'db> {
-        let parameter_ty = self.parameter_ty;
-        let arg_ty = self.argument_ty;
-
-        match (parameter_ty, arg_ty) {
+        match (self.parameter_ty, self.argument_ty) {
             (InferredTypeData::Generic(generic), arg_ty) => {
                 generic
                     .constraint(db)
@@ -1121,6 +1173,12 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                 Vec::from([self.with_types(parameter_ty, argument.ty(db))]),
             ),
             (
+                InferredTypeData::Interface(_) | InferredTypeData::Object(_),
+                InferredTypeData::Interface(_)
+                | InferredTypeData::Object(_)
+                | InferredTypeData::Literal(_),
+            ) => self.structural_object_action(db),
+            (
                 InferredTypeData::BigInt
                 | InferredTypeData::Boolean
                 | InferredTypeData::Null
@@ -1213,6 +1271,54 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                 | InferredTypeData::Tuple(_),
             ) => ArgumentMatchAction::Mismatch,
         }
+    }
+
+    /// Turns an object relation into one requirement per member the parameter
+    /// requires.
+    ///
+    /// A parameter whose required members cannot be listed matches, because
+    /// nothing about the argument can be disproved. An empty list of
+    /// requirements also matches: the parameter asks for nothing.
+    ///
+    /// A required member missing from the argument rejects the relation only
+    /// when the argument lists every member it has. An object literal whose
+    /// spread inference could not expand, or a type carrying an index
+    /// signature, may hold the name without saying so, so its absence proves
+    /// nothing and the relation stays viable.
+    ///
+    /// A member the parameter declares but that cannot be looked up is skipped
+    /// instead of becoming a requirement no argument could meet.
+    ///
+    /// Here the first overload is rejected because `{}` lists every member it
+    /// has and `initial` is not among them, so the call returns `boolean`:
+    ///
+    /// ```ts
+    /// declare function query(options: { initial: string }): { isPending: false };
+    /// declare function query(options: { initial?: string }): { isPending: boolean };
+    ///
+    /// const { isPending } = query({});
+    /// ```
+    fn structural_object_action(self, db: &'db dyn ModuleDb) -> ArgumentMatchAction<'db> {
+        let Some(required_names) = required_structural_member_names(db, self.parameter_ty) else {
+            return ArgumentMatchAction::Match;
+        };
+        let argument_lists_every_member = lists_every_member(db, self.argument_ty);
+        let mut requirements = Vec::with_capacity(required_names.len());
+        for name in required_names {
+            let Some(parameter_member) =
+                find_member_type_on_demand(db, self.parameter_ty, name.text())
+            else {
+                continue;
+            };
+            match find_member_type_on_demand(db, self.argument_ty, name.text()) {
+                Some(argument_member) => {
+                    requirements.push(self.with_types(parameter_member, argument_member));
+                }
+                None if argument_lists_every_member => return ArgumentMatchAction::Mismatch,
+                None => {}
+            }
+        }
+        ArgumentMatchAction::All(requirements)
     }
 
     fn argument_extends_local_parameter(
@@ -1342,6 +1448,128 @@ impl<'db> ArgumentTypeCompatibility<'db> {
 
         false
     }
+}
+
+/// Lists the names a value must carry to be usable as `ty`, in declaration
+/// order.
+///
+/// Optional and static members are left out because neither has to be present
+/// on a value. Inherited names are included: an interface's `extends` clauses
+/// and an object's prototype are traversed as well.
+///
+/// The result is `None` when `ty` is not a shape whose members can be listed,
+/// or when the traversal exceeds its work limit. Both mean the requirements are
+/// unknown, not that there are none.
+fn required_structural_member_names<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+) -> Option<Vec<Text>> {
+    let mut names = Vec::new();
+    let mut collected_names = FxHashSet::default();
+    let mut seen_types = FxHashSet::default();
+    let mut pending = Vec::from([ty]);
+
+    for _ in 0..MAX_STRUCTURAL_MEMBER_STEPS {
+        let Some(ty) = pending.pop() else {
+            return Some(names);
+        };
+        let ty = resolve_local_type_on_demand(db, ty);
+        if !seen_types.insert(ty) {
+            continue;
+        }
+
+        let members = match ty {
+            InferredTypeData::Interface(interface) => {
+                pending.extend(interface.extends(db).iter().copied());
+                interface.members(db)
+            }
+            InferredTypeData::InstanceOf(instance) => {
+                pending.push(instance.ty(db));
+                continue;
+            }
+            InferredTypeData::Object(object) => {
+                if let Some(prototype) = object.prototype(db) {
+                    pending.push(prototype);
+                }
+                object.members(db)
+            }
+            _ => return None,
+        };
+
+        for member in members {
+            if member.kind.is_optional() || member.kind.is_static() {
+                continue;
+            }
+            if let Some(name) = member.kind.name()
+                && collected_names.insert(name.clone())
+            {
+                names.push(name);
+            }
+        }
+    }
+
+    None
+}
+
+/// Returns whether the members of `ty` can be enumerated in full.
+///
+/// A missing name proves that a value of this type lacks the name only when
+/// this returns `true`. Three things make the answer `false`: an object literal
+/// that inference could only model in part, such as one built with a spread; a
+/// member keyed by anything other than a fixed name, which can answer a lookup
+/// for any name; and a shape this traversal does not support, including a type
+/// alias that could not be resolved. Exhausting the work limit also answers
+/// `false`, since the unvisited part may hold either.
+fn lists_every_member<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    let mut seen_types = FxHashSet::default();
+    let mut pending = Vec::from([ty]);
+
+    for _ in 0..MAX_STRUCTURAL_MEMBER_STEPS {
+        let Some(ty) = pending.pop() else {
+            return true;
+        };
+        let ty = resolve_local_type_on_demand(db, ty);
+        if !seen_types.insert(ty) {
+            continue;
+        }
+
+        let members = match ty {
+            InferredTypeData::Interface(interface) => {
+                pending.extend(interface.extends(db).iter().copied());
+                interface.members(db)
+            }
+            InferredTypeData::InstanceOf(instance) => {
+                pending.push(instance.ty(db));
+                continue;
+            }
+            InferredTypeData::Object(object) => {
+                if object.has_unknown_members(db) {
+                    return false;
+                }
+                if let Some(prototype) = object.prototype(db) {
+                    pending.push(prototype);
+                }
+                object.members(db)
+            }
+            InferredTypeData::Literal(literal) => match literal.literal(db) {
+                InferredLiteral::Object(members) => members,
+                _ => return false,
+            },
+            _ => return false,
+        };
+
+        // A call signature carries no name to look up, but every other nameless
+        // member is keyed by a computed value or an index signature and can
+        // stand in for any name.
+        if members
+            .iter()
+            .any(|member| member.kind.name().is_none() && !member.kind.is_call_signature())
+        {
+            return false;
+        }
+    }
+
+    false
 }
 
 fn raw_local_extends_class_name<'db>(
@@ -1508,13 +1736,13 @@ fn infer_generic_return_type<'db>(
             continue;
         }
 
-        let Some(parameter_function) = parameter_ty.callable_function(db) else {
+        let Some(parameter_function) = resolve_callable_function(db, parameter_ty) else {
             continue;
         };
         let ReturnType::Type(parameter_return_ty) = parameter_function.return_type(db) else {
             continue;
         };
-        let Some(argument_function) = arg.callable_function(db) else {
+        let Some(argument_function) = resolve_callable_function(db, arg) else {
             continue;
         };
         let ReturnType::Type(argument_return_ty) = argument_function.return_type(db) else {

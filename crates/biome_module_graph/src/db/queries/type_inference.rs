@@ -33,7 +33,9 @@ mod module_types;
 mod normalization;
 mod promises;
 
-pub(in crate::db) use calls::{ResolvedCallArgument, infer_call_expression_return_type_from_args};
+pub(in crate::db) use calls::{
+    ResolvedCallArgument, infer_call_expression_return_type_from_args, resolve_callable_function,
+};
 pub use calls::{
     infer_call_argument_type, infer_call_expression_type, infer_constructor_argument_type,
 };
@@ -47,8 +49,14 @@ pub use lookups::{
     find_member_type, find_value_member_type, infer_binding_type, infer_expression_type,
     infer_local_type, resolve_callable_type,
 };
-pub(crate) use module_types::infer_module_types_bottom_up_for_import_depth;
+pub(crate) use lookups::{
+    infer_binding_type_with_import_budget, infer_local_type_with_import_budget,
+};
 pub use module_types::{infer_module_types, infer_module_types_bottom_up};
+pub(crate) use module_types::{
+    infer_module_types_bottom_up_for_import_depth, infer_module_types_from_tables,
+    inference_module_sccs,
+};
 pub use normalization::normalize_type;
 pub use promises::{
     function_returns_promise, infer_expression_function_returns_promise,

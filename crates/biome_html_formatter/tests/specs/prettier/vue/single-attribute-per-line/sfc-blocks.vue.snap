@@ -51,7 +51,7 @@ p {
  </script>
  
  <style scoped lang="scss">
-@@ -10,23 +10,23 @@
+@@ -10,14 +10,14 @@
  
  <unknown-block foo bar="bar" baz long_long_long_long_attribute></unknown-block>
  
@@ -70,23 +70,8 @@ p {
 +<script lang="ts" src="./short">
 +</script>
  
--<template lang="pug" src="./long_long_long_long_long_long_file_path.pug">
--</template>
-+<template
-+  lang="pug"
-+  src="./long_long_long_long_long_long_file_path.pug"
-+> </template>
- 
- <template
-   lang="pug"
-   src="./long_long_long_long_long_long_long_long_file_path.pug"
-->
--</template>
-+> </template>
- 
--<template lang="pug" src="./short">
--</template>
-+<template lang="pug" src="./short"> </template>
+ <template lang="pug" src="./long_long_long_long_long_long_file_path.pug">
+ </template>
 ```
 
 # Output
@@ -113,15 +98,15 @@ p {
 <script lang="ts" src="./short">
 </script>
 
-<template
-  lang="pug"
-  src="./long_long_long_long_long_long_file_path.pug"
-> </template>
+<template lang="pug" src="./long_long_long_long_long_long_file_path.pug">
+</template>
 
 <template
   lang="pug"
   src="./long_long_long_long_long_long_long_long_file_path.pug"
-> </template>
+>
+</template>
 
-<template lang="pug" src="./short"> </template>
+<template lang="pug" src="./short">
+</template>
 ```

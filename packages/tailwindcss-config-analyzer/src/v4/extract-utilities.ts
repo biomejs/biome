@@ -99,6 +99,10 @@ export type FunctionalUtility = {
 	registration_idx: number;
 	namedBranches: NamedBranch[];
 	arbitraryBranches: ArbitraryBranch[];
+	// The placement of the bare basename when the utility compiles
+	// without a value (`border`, `ring`, `shadow` have defaults; `w`
+	// does not).
+	bare: PropertySort | null;
 	negative: Negative | null;
 };
 
@@ -204,6 +208,7 @@ export async function extractUtilities(): Promise<ExtractedUtilities> {
 				basename: key,
 				registration_idx: i,
 				...branches,
+				bare: propertySortOf(ds, key),
 				negative: null,
 			});
 		}
