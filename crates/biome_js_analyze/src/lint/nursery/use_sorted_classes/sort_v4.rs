@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxNodeText, TokenText};
+use biome_rowan::{AstNode, AstNodeList, SyntaxNodeText, TokenText};
 use biome_string_case::Collator;
 use biome_tailwind_syntax::{
     AnyTwCandidate, AnyTwFullCandidate, AnyTwModifier, AnyTwValue, CssGenericComponentValueList,
@@ -14,6 +14,9 @@ use super::tailwind_preset_v4_types::{
     ArbitraryBranch, NamedBranch, NamedValueType, Negative, UtilityEntry,
 };
 use super::arbitrary_value_match::value_matches_type;
+use super::sort_v4_variants::{
+    VariantBits, VariantGroups, VariantKey, variant_keys_from_candidate,
+};
 
 #[cfg(test)]
 use super::tailwind_preset_v4_types::{CssDataType, ThemeNamespace};
@@ -22,12 +25,31 @@ use super::tailwind_preset_v4_types::{CssDataType, ThemeNamespace};
 /// space-separated result.
 pub fn sort_class_list(root: &TwRoot) -> String {
     let candidates = root.candidates();
-    let mut keyed: Vec<(SortKey, SyntaxNodeText)> = Vec::with_capacity(candidates.len());
+
+    // A variant's weight depends on the whole list, so classify first and
+    // weight in a second pass.
+    let mut pending: Vec<(PendingSortKey, SyntaxNodeText)> =
+        Vec::with_capacity(candidates.len());
     for candidate in candidates {
         let text = candidate.syntax().text_trimmed();
-        let key = SortKey::from_candidate(&candidate);
-        keyed.push((key, text));
+        let key = PendingSortKey::from_candidate(&candidate);
+        pending.push((key, text));
     }
+
+    // Group the variants across the list, then weight each pending key.
+    let variant_groups = VariantGroups::new(
+        pending
+            .iter()
+            .filter_map(|(key, _)| match key {
+                PendingSortKey::Known { variants, .. } => Some(variants.as_slice()),
+                PendingSortKey::Unknown => None,
+            })
+            .flatten(),
+    );
+    let mut keyed: Vec<(SortKey, SyntaxNodeText)> = pending
+        .into_iter()
+        .map(|(key, text)| (key.into_sort_key(&variant_groups), text))
+        .collect();
 
     // `Vec::sort_by` is stable, so Unknown-vs-Unknown comparisons returning
     // `Equal` keep input order, and Known entries with identical keys
@@ -52,12 +74,32 @@ pub fn sort_class_list(root: &TwRoot) -> String {
 enum SortKey {
     Unknown,
     Known {
+        /// Variant weight (`hover:`, `sm:`, …), empty for a plain
+        /// utility. The outermost sort key, so variantless utilities
+        /// sort first.
+        variant_bits: VariantBits,
         signature: Signature,
         /// Total declaration count — Tailwind's tie-break after the
         /// signature (wider utilities sort first).
         count: u8,
         name: NameKey,
         important: bool,
+    },
+}
+
+/// A classified candidate whose variants are resolved but not yet
+/// weighted — weighting needs the whole list.
+/// [PendingSortKey::into_sort_key] finishes the [SortKey] once the
+/// [VariantGroups] are built.
+#[derive(Clone, Debug, Eq, PartialEq)]
+enum PendingSortKey {
+    Unknown,
+    Known {
+        signature: Signature,
+        count: u8,
+        name: NameKey,
+        important: bool,
+        variants: Vec<VariantKey>,
     },
 }
 
@@ -181,19 +223,18 @@ impl Collator for TwNameCollator {
     }
 }
 
-impl SortKey {
-    /// Build a sort key from a parsed candidate. Returns `Unknown` for
-    /// shapes we cannot yet place; each `// TODO:` below tags an input
-    /// class awaiting follow-up implementation.
+impl PendingSortKey {
+    /// Classify a candidate into its utility placement and variants, or
+    /// `Unknown` for a shape we can't place.
     fn from_candidate(candidate: &AnyTwFullCandidate) -> Self {
         let AnyTwFullCandidate::TwFullCandidate(node) = candidate else {
             return Self::Unknown;
         };
 
-        // TODO: variant weight (`hover:`, `sm:`, `[&:hover]:`).
-        if !node.variants().is_empty() {
+        // An unrecognized variant leaves the candidate unplaced.
+        let Some(variants) = variant_keys_from_candidate(node) else {
             return Self::Unknown;
-        }
+        };
 
         let is_negative = node.negative_token().is_some();
         // An important candidate (`flex!`) sorts exactly where its plain
@@ -301,7 +342,34 @@ impl SortKey {
                     text: Some(inner.syntax().text_trimmed()),
                 },
                 important: is_important,
+                variants,
             },
+        }
+    }
+
+    /// Finish a [SortKey] by weighting the variants against
+    /// `variant_groups`.
+    fn into_sort_key(self, variant_groups: &VariantGroups) -> SortKey {
+        match self {
+            Self::Unknown => SortKey::Unknown,
+            Self::Known {
+                signature,
+                count,
+                name,
+                important,
+                variants,
+            } => {
+                let Some(variant_bits) = variant_groups.bits_for(&variants) else {
+                    return SortKey::Unknown;
+                };
+                SortKey::Known {
+                    variant_bits,
+                    signature,
+                    count,
+                    name,
+                    important,
+                }
+            }
         }
     }
 }
@@ -319,19 +387,24 @@ fn compare(a: &SortKey, b: &SortKey) -> Ordering {
         (SortKey::Known { .. }, SortKey::Unknown) => Ordering::Greater,
         (
             SortKey::Known {
+                variant_bits: v1,
                 signature: s1,
                 count: c1,
                 name: n1,
                 important: i1,
             },
             SortKey::Known {
+                variant_bits: v2,
                 signature: s2,
                 count: c2,
                 name: n2,
                 important: i2,
             },
-        ) => s1
-            .cmp(s2)
+            // Variants sort outermost — a plain utility before any
+            // variant (`flex hover:flex sm:flex`).
+        ) => v1
+            .cmp_numeric(v2)
+            .then_with(|| s1.cmp(s2))
             // Wider utilities (e.g. `sr-only` setting 9 properties) win
             // a signature tie so they sort before narrower utilities.
             .then_with(|| c2.cmp(c1))
@@ -511,6 +584,7 @@ mod tests {
 
     fn known(property_idx: u16, property_count: u8) -> SortKey {
         SortKey::Known {
+            variant_bits: VariantBits::default(),
             signature: Signature::Property(property_idx),
             count: property_count,
             name: NameKey::default(),
@@ -541,7 +615,15 @@ mod tests {
     fn classify(input: &str) -> SortKey {
         let parsed = parse_tailwind(input);
         let full = parsed.tree().candidates().iter().next().unwrap();
-        SortKey::from_candidate(&full)
+        let pending = PendingSortKey::from_candidate(&full);
+        // Groups from this one candidate; a plain utility gets empty
+        // `variant_bits`.
+        let variants: &[VariantKey] = match &pending {
+            PendingSortKey::Known { variants, .. } => variants,
+            PendingSortKey::Unknown => &[],
+        };
+        let groups = VariantGroups::new(variants);
+        pending.into_sort_key(&groups)
     }
 
     fn functional_parts(input: &str) -> (AnyTwValue, Option<AnyTwModifier>) {
@@ -604,6 +686,7 @@ mod tests {
     fn compare_breaks_exact_key_tie_plain_before_important() {
         let plain = known(5, 1);
         let important = SortKey::Known {
+            variant_bits: VariantBits::default(),
             signature: Signature::Property(5),
             count: 1,
             name: NameKey::default(),
@@ -813,10 +896,8 @@ mod tests {
 
     #[test]
     fn arbitrary_candidate_takes_signature_from_property_index() {
-        let parsed = parse_tailwind("[display:block]");
-        let full = parsed.tree().candidates().iter().next().unwrap();
         let display_idx = *PROPERTY_INDEX.get("display").unwrap();
-        let key = SortKey::from_candidate(&full);
+        let key = classify("[display:block]");
         let SortKey::Known {
             signature,
             count,
@@ -834,6 +915,7 @@ mod tests {
     #[test]
     fn important_suffix_is_position_neutral_in_the_key() {
         let SortKey::Known {
+            variant_bits,
             signature,
             count,
             name,
@@ -845,6 +927,7 @@ mod tests {
         assert_eq!(
             classify("flex!"),
             SortKey::Known {
+                variant_bits,
                 signature,
                 count,
                 name,
@@ -872,9 +955,18 @@ mod tests {
     }
 
     #[test]
-    fn important_with_variants_is_still_unknown() {
-        // Variant weight is the remaining TODO; `!` must not bypass it.
-        assert_eq!(classify("hover:flex!"), SortKey::Unknown);
+    fn variants_classify_and_keep_importance() {
+        // A recognized variant places the candidate; `!` still rides
+        // through as the final tiebreak.
+        assert!(matches!(
+            classify("hover:flex!"),
+            SortKey::Known { important: true, .. }
+        ));
+        // A variant sorts after its variantless twin.
+        assert_eq!(
+            compare(&classify("flex"), &classify("hover:flex")),
+            Ordering::Less
+        );
     }
 
     #[test]

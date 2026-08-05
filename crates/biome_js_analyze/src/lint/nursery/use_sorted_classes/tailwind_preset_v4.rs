@@ -6,6 +6,7 @@
 //! Source references (Tailwind v4):
 //! - property-order:  https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/property-order.ts
 //! - utilities:       https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/utilities.ts
+//! - variants:        https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/variants.ts
 //! - default theme:   https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/theme.css
 //! - infer-data-type: https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/utils/infer-data-type.ts
 
@@ -13,7 +14,7 @@ use phf::{phf_map, phf_set};
 
 use super::tailwind_preset_v4_types::{
     ArbitraryBranch, CssDataType, FunctionalEntry, NamedBranch, NamedValueType, Negative::*,
-    ThemeNamespace, UtilityEntry,
+    ThemeNamespace, UtilityEntry, VariantCompare, VariantEntry, VariantKind,
 };
 
 pub static PROPERTY_INDEX: phf::Map<&'static str, u16> = phf_map! {
@@ -4406,6 +4407,121 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         bare: Some((9, 1)),
         negative: Some(SameBranches),
     },
+};
+
+pub static VARIANTS: phf::Map<&'static str, VariantEntry> = phf_map! {
+    "*" => VariantEntry { kind: VariantKind::Static, order: 1, compare: VariantCompare::Default, compounds: 0, compounds_with: 0 },
+    "**" => VariantEntry { kind: VariantKind::Static, order: 2, compare: VariantCompare::Default, compounds: 0, compounds_with: 0 },
+    "not" => VariantEntry { kind: VariantKind::Compound, order: 3, compare: VariantCompare::Default, compounds: 2, compounds_with: 3 },
+    "group" => VariantEntry { kind: VariantKind::Compound, order: 4, compare: VariantCompare::Default, compounds: 2, compounds_with: 2 },
+    "peer" => VariantEntry { kind: VariantKind::Compound, order: 5, compare: VariantCompare::Default, compounds: 2, compounds_with: 2 },
+    "first-letter" => VariantEntry { kind: VariantKind::Static, order: 6, compare: VariantCompare::Default, compounds: 0, compounds_with: 0 },
+    "first-line" => VariantEntry { kind: VariantKind::Static, order: 7, compare: VariantCompare::Default, compounds: 0, compounds_with: 0 },
+    "marker" => VariantEntry { kind: VariantKind::Static, order: 8, compare: VariantCompare::Default, compounds: 0, compounds_with: 0 },
+    "selection" => VariantEntry { kind: VariantKind::Static, order: 9, compare: VariantCompare::Default, compounds: 0, compounds_with: 0 },
+    "file" => VariantEntry { kind: VariantKind::Static, order: 10, compare: VariantCompare::Default, compounds: 0, compounds_with: 0 },
+    "placeholder" => VariantEntry { kind: VariantKind::Static, order: 11, compare: VariantCompare::Default, compounds: 0, compounds_with: 0 },
+    "backdrop" => VariantEntry { kind: VariantKind::Static, order: 12, compare: VariantCompare::Default, compounds: 0, compounds_with: 0 },
+    "details-content" => VariantEntry { kind: VariantKind::Static, order: 13, compare: VariantCompare::Default, compounds: 0, compounds_with: 0 },
+    "before" => VariantEntry { kind: VariantKind::Static, order: 14, compare: VariantCompare::Default, compounds: 0, compounds_with: 0 },
+    "after" => VariantEntry { kind: VariantKind::Static, order: 15, compare: VariantCompare::Default, compounds: 0, compounds_with: 0 },
+    "first" => VariantEntry { kind: VariantKind::Static, order: 16, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "last" => VariantEntry { kind: VariantKind::Static, order: 17, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "only" => VariantEntry { kind: VariantKind::Static, order: 18, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "odd" => VariantEntry { kind: VariantKind::Static, order: 19, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "even" => VariantEntry { kind: VariantKind::Static, order: 20, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "first-of-type" => VariantEntry { kind: VariantKind::Static, order: 21, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "last-of-type" => VariantEntry { kind: VariantKind::Static, order: 22, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "only-of-type" => VariantEntry { kind: VariantKind::Static, order: 23, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "visited" => VariantEntry { kind: VariantKind::Static, order: 24, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "target" => VariantEntry { kind: VariantKind::Static, order: 25, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "open" => VariantEntry { kind: VariantKind::Static, order: 26, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "default" => VariantEntry { kind: VariantKind::Static, order: 27, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "checked" => VariantEntry { kind: VariantKind::Static, order: 28, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "indeterminate" => VariantEntry { kind: VariantKind::Static, order: 29, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "placeholder-shown" => VariantEntry { kind: VariantKind::Static, order: 30, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "autofill" => VariantEntry { kind: VariantKind::Static, order: 31, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "optional" => VariantEntry { kind: VariantKind::Static, order: 32, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "required" => VariantEntry { kind: VariantKind::Static, order: 33, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "valid" => VariantEntry { kind: VariantKind::Static, order: 34, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "invalid" => VariantEntry { kind: VariantKind::Static, order: 35, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "user-valid" => VariantEntry { kind: VariantKind::Static, order: 36, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "user-invalid" => VariantEntry { kind: VariantKind::Static, order: 37, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "in-range" => VariantEntry { kind: VariantKind::Static, order: 38, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "out-of-range" => VariantEntry { kind: VariantKind::Static, order: 39, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "read-only" => VariantEntry { kind: VariantKind::Static, order: 40, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "empty" => VariantEntry { kind: VariantKind::Static, order: 41, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "focus-within" => VariantEntry { kind: VariantKind::Static, order: 42, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "hover" => VariantEntry { kind: VariantKind::Static, order: 43, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "focus" => VariantEntry { kind: VariantKind::Static, order: 44, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "focus-visible" => VariantEntry { kind: VariantKind::Static, order: 45, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "active" => VariantEntry { kind: VariantKind::Static, order: 46, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "enabled" => VariantEntry { kind: VariantKind::Static, order: 47, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "disabled" => VariantEntry { kind: VariantKind::Static, order: 48, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "inert" => VariantEntry { kind: VariantKind::Static, order: 49, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "in" => VariantEntry { kind: VariantKind::Compound, order: 50, compare: VariantCompare::Default, compounds: 2, compounds_with: 2 },
+    "has" => VariantEntry { kind: VariantKind::Compound, order: 51, compare: VariantCompare::Default, compounds: 2, compounds_with: 2 },
+    "aria" => VariantEntry { kind: VariantKind::Functional, order: 52, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "data" => VariantEntry { kind: VariantKind::Functional, order: 53, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "nth" => VariantEntry { kind: VariantKind::Functional, order: 54, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "nth-last" => VariantEntry { kind: VariantKind::Functional, order: 55, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "nth-of-type" => VariantEntry { kind: VariantKind::Functional, order: 56, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "nth-last-of-type" => VariantEntry { kind: VariantKind::Functional, order: 57, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "supports" => VariantEntry { kind: VariantKind::Functional, order: 58, compare: VariantCompare::Default, compounds: 1, compounds_with: 0 },
+    "motion-safe" => VariantEntry { kind: VariantKind::Static, order: 59, compare: VariantCompare::Default, compounds: 1, compounds_with: 0 },
+    "motion-reduce" => VariantEntry { kind: VariantKind::Static, order: 60, compare: VariantCompare::Default, compounds: 1, compounds_with: 0 },
+    "contrast-more" => VariantEntry { kind: VariantKind::Static, order: 61, compare: VariantCompare::Default, compounds: 1, compounds_with: 0 },
+    "contrast-less" => VariantEntry { kind: VariantKind::Static, order: 62, compare: VariantCompare::Default, compounds: 1, compounds_with: 0 },
+    "max" => VariantEntry { kind: VariantKind::Functional, order: 63, compare: VariantCompare::BreakpointDesc, compounds: 1, compounds_with: 0 },
+    "2xl" => VariantEntry { kind: VariantKind::Static, order: 64, compare: VariantCompare::BreakpointAsc, compounds: 1, compounds_with: 0 },
+    "lg" => VariantEntry { kind: VariantKind::Static, order: 64, compare: VariantCompare::BreakpointAsc, compounds: 1, compounds_with: 0 },
+    "md" => VariantEntry { kind: VariantKind::Static, order: 64, compare: VariantCompare::BreakpointAsc, compounds: 1, compounds_with: 0 },
+    "min" => VariantEntry { kind: VariantKind::Functional, order: 64, compare: VariantCompare::BreakpointAsc, compounds: 1, compounds_with: 0 },
+    "sm" => VariantEntry { kind: VariantKind::Static, order: 64, compare: VariantCompare::BreakpointAsc, compounds: 1, compounds_with: 0 },
+    "xl" => VariantEntry { kind: VariantKind::Static, order: 64, compare: VariantCompare::BreakpointAsc, compounds: 1, compounds_with: 0 },
+    "@max" => VariantEntry { kind: VariantKind::Functional, order: 65, compare: VariantCompare::ContainerDesc, compounds: 1, compounds_with: 0 },
+    "@" => VariantEntry { kind: VariantKind::Functional, order: 66, compare: VariantCompare::ContainerAsc, compounds: 1, compounds_with: 0 },
+    "@min" => VariantEntry { kind: VariantKind::Functional, order: 66, compare: VariantCompare::ContainerAsc, compounds: 1, compounds_with: 0 },
+    "portrait" => VariantEntry { kind: VariantKind::Static, order: 67, compare: VariantCompare::Default, compounds: 1, compounds_with: 0 },
+    "landscape" => VariantEntry { kind: VariantKind::Static, order: 68, compare: VariantCompare::Default, compounds: 1, compounds_with: 0 },
+    "ltr" => VariantEntry { kind: VariantKind::Static, order: 69, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "rtl" => VariantEntry { kind: VariantKind::Static, order: 70, compare: VariantCompare::Default, compounds: 2, compounds_with: 0 },
+    "dark" => VariantEntry { kind: VariantKind::Static, order: 71, compare: VariantCompare::Default, compounds: 1, compounds_with: 0 },
+    "starting" => VariantEntry { kind: VariantKind::Static, order: 72, compare: VariantCompare::Default, compounds: 0, compounds_with: 0 },
+    "print" => VariantEntry { kind: VariantKind::Static, order: 73, compare: VariantCompare::Default, compounds: 1, compounds_with: 0 },
+    "forced-colors" => VariantEntry { kind: VariantKind::Static, order: 74, compare: VariantCompare::Default, compounds: 1, compounds_with: 0 },
+    "inverted-colors" => VariantEntry { kind: VariantKind::Static, order: 75, compare: VariantCompare::Default, compounds: 1, compounds_with: 0 },
+    "pointer-none" => VariantEntry { kind: VariantKind::Static, order: 76, compare: VariantCompare::Default, compounds: 1, compounds_with: 0 },
+    "pointer-coarse" => VariantEntry { kind: VariantKind::Static, order: 77, compare: VariantCompare::Default, compounds: 1, compounds_with: 0 },
+    "pointer-fine" => VariantEntry { kind: VariantKind::Static, order: 78, compare: VariantCompare::Default, compounds: 1, compounds_with: 0 },
+    "any-pointer-none" => VariantEntry { kind: VariantKind::Static, order: 79, compare: VariantCompare::Default, compounds: 1, compounds_with: 0 },
+    "any-pointer-coarse" => VariantEntry { kind: VariantKind::Static, order: 80, compare: VariantCompare::Default, compounds: 1, compounds_with: 0 },
+    "any-pointer-fine" => VariantEntry { kind: VariantKind::Static, order: 81, compare: VariantCompare::Default, compounds: 1, compounds_with: 0 },
+    "noscript" => VariantEntry { kind: VariantKind::Static, order: 82, compare: VariantCompare::Default, compounds: 1, compounds_with: 0 },
+};
+
+pub static BREAKPOINT_VALUES: phf::Map<&'static str, &'static str> = phf_map! {
+    "2xl" => "96rem",
+    "lg" => "64rem",
+    "md" => "48rem",
+    "sm" => "40rem",
+    "xl" => "80rem",
+};
+
+pub static CONTAINER_VALUES: phf::Map<&'static str, &'static str> = phf_map! {
+    "2xl" => "42rem",
+    "2xs" => "18rem",
+    "3xl" => "48rem",
+    "3xs" => "16rem",
+    "4xl" => "56rem",
+    "5xl" => "64rem",
+    "6xl" => "72rem",
+    "7xl" => "80rem",
+    "lg" => "32rem",
+    "md" => "28rem",
+    "sm" => "24rem",
+    "xl" => "36rem",
+    "xs" => "20rem",
 };
 
 pub(super) static THEME_KEYS_COLOR: phf::Set<&'static str> = phf_set! {
