@@ -1,5 +1,5 @@
-use crate::prelude::*;
 use super::flow_map_implicit_entry::FormatImplicitEntryBody;
+use crate::prelude::*;
 use crate::utils::{FormatMultilineKeyEntry, multiline_plain_key};
 use biome_formatter::trivia::format_dangling_comments;
 use biome_formatter::{format_args, write};

@@ -1,5 +1,5 @@
-use crate::parser::CssParser;
 use crate::lexer::CssLexContext;
+use crate::parser::CssParser;
 use crate::syntax::scss::expression::parse_scss_regular_interpolation;
 use crate::syntax::scss::identifiers::interpolated_identifier::{
     is_at_identifier_hyphen, is_at_scss_interpolated_identifier, is_nth_at_identifier_hyphen_part,

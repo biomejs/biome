@@ -1,5 +1,5 @@
-use crate::prelude::*;
 use crate::comments::subtree_has_comments;
+use crate::prelude::*;
 use crate::utils::{FormatMultilineKeyEntry, multiline_plain_key, needs_space_before_colon};
 use biome_formatter::{format_args, write};
 use biome_rowan::AstNode;

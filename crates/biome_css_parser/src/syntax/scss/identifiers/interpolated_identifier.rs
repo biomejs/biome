@@ -1,5 +1,5 @@
-use crate::parser::CssParser;
 use crate::lexer::CssLexContext;
+use crate::parser::CssParser;
 use crate::syntax::is_nth_at_identifier;
 use crate::syntax::scss::is_nth_at_scss_interpolation;
 use biome_css_syntax::CssSyntaxKind::{
