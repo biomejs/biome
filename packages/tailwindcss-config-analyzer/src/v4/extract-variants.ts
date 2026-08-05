@@ -67,7 +67,10 @@ export async function extractVariants(): Promise<ExtractedVariants> {
 			compounds: variant.compounds,
 			compounds_with: variant.compoundsWith,
 		}))
-		.sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+		.sort(
+			(a, b) =>
+				a.order - b.order || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
+		);
 
 	return { variants, breakpoints, containers };
 }
@@ -78,7 +81,7 @@ function themeValues(
 ): ThemeValue[] {
 	return [...ds.theme.namespace(namespace)]
 		.map(([name, value]) => ({ name, value }))
-		.sort((a, b) => a.name.localeCompare(b.name));
+		.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
 }
 
 function variantKind(kind: RawVariant["kind"]): VariantKind {

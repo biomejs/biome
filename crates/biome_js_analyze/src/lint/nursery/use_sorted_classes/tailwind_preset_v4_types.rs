@@ -120,7 +120,12 @@ pub struct VariantEntry {
     pub kind: VariantKind,
     pub order: u16,
     pub compare: VariantCompare,
+    /// Tailwind's `Compounds` bitflags for what this variant emits:
+    /// `1` = at-rules (media / container queries), `2` = style rules
+    /// (selectors), `0` = neither.
     pub compounds: u8,
+    /// The `Compounds` bitflags a compound variant (`group-*`, `has-*`)
+    /// accepts as its nested variant; `0` for non-compound variants.
     pub compounds_with: u8,
 }
 

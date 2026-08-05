@@ -626,6 +626,33 @@ mod tests {
         pending.into_sort_key(&groups)
     }
 
+    /// Classify a whole class list against one shared [VariantGroups], the
+    /// way `sort_class_list` does. Needed to exercise variant-against-variant
+    /// ordering: [classify] builds groups per candidate, so every lone
+    /// variant lands in group 0 and compares equal to any other.
+    fn classify_all(input: &str) -> Vec<SortKey> {
+        let parsed = parse_tailwind(input);
+        let pending: Vec<PendingSortKey> = parsed
+            .tree()
+            .candidates()
+            .iter()
+            .map(|candidate| PendingSortKey::from_candidate(&candidate))
+            .collect();
+        let groups = VariantGroups::new(
+            pending
+                .iter()
+                .filter_map(|key| match key {
+                    PendingSortKey::Known { variants, .. } => Some(variants.as_slice()),
+                    PendingSortKey::Unknown => None,
+                })
+                .flatten(),
+        );
+        pending
+            .into_iter()
+            .map(|key| key.into_sort_key(&groups))
+            .collect()
+    }
+
     fn functional_parts(input: &str) -> (AnyTwValue, Option<AnyTwModifier>) {
         let parsed = parse_tailwind(input);
         let full = parsed.tree().candidates().iter().next().unwrap();
@@ -967,6 +994,27 @@ mod tests {
             compare(&classify("flex"), &classify("hover:flex")),
             Ordering::Less
         );
+    }
+
+    #[test]
+    fn variants_order_against_each_other_by_breakpoint() {
+        // Shared groups (via `classify_all`) are what make one variant
+        // comparable to another. Ascending breakpoints: `sm` before `md`.
+        let keys = classify_all("sm:flex md:flex");
+        assert_eq!(compare(&keys[0], &keys[1]), Ordering::Less);
+        // `max-*` is descending, so the larger breakpoint sorts first.
+        let keys = classify_all("max-lg:flex max-sm:flex");
+        assert_eq!(compare(&keys[0], &keys[1]), Ordering::Less);
+    }
+
+    #[test]
+    fn unparseable_arbitrary_breakpoints_keep_the_comparator_total() {
+        // Parseable and unparseable arbitrary breakpoint values sharing one
+        // order bucket used to compare non-transitively (unparseable values
+        // compared equal to everything), which can panic the sort. The
+        // unparseable value now ranks last, so grouping the list completes.
+        let keys = classify_all("min-[2rem]:flex min-[10rem]:flex min-[15xyz]:flex sm:flex flex");
+        assert_eq!(keys.len(), 5);
     }
 
     #[test]

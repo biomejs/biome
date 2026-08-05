@@ -100,6 +100,9 @@ impl VariantGroups {
         Self { groups }
     }
 
+    /// Returns `None` if a variant was not part of the list the groups
+    /// were built from. Unreachable when the groups come from these same
+    /// candidates, so callers fold it into `Unknown`.
     pub(super) fn bits_for(&self, variants: &[VariantKey]) -> Option<VariantBits> {
         let mut bits = VariantBits::default();
         for variant in variants {
@@ -167,7 +170,7 @@ fn variant_key_from_segments(segments: &[VariantSegment]) -> Option<VariantKey> 
                 VariantKind::Static if value_segments.is_empty() => Some(VariantKey::Static(root)),
                 VariantKind::Functional => Some(VariantKey::Functional {
                     root,
-                    value: variant_value_from_segments(value_segments)?,
+                    value: Some(variant_value_from_segments(value_segments)?),
                 }),
                 VariantKind::Compound => Some(VariantKey::Compound {
                     root,
@@ -205,12 +208,10 @@ fn variant_root_from_segments(
     Some((root.into_boxed_str(), entry, &segments[rest_index..]))
 }
 
-fn variant_value_from_segments(segments: &[VariantSegment]) -> Option<Option<VariantValue>> {
+fn variant_value_from_segments(segments: &[VariantSegment]) -> Option<VariantValue> {
     match segments {
-        [] => None,
-        [VariantSegment::Named(value)] => Some(Some(VariantValue::Named(value.clone()))),
-        [VariantSegment::Arbitrary(value)] => Some(Some(VariantValue::Arbitrary(value.clone()))),
-        [VariantSegment::CssVariable] => None,
+        [VariantSegment::Named(value)] => Some(VariantValue::Named(value.clone())),
+        [VariantSegment::Arbitrary(value)] => Some(VariantValue::Arbitrary(value.clone())),
         _ => None,
     }
 }
@@ -310,7 +311,10 @@ fn variant_compare_value(key: &VariantKey, compare: VariantCompare) -> Option<f6
         VariantCompare::Default => return None,
     };
 
-    parse_length_value(resolved)
+    // An arbitrary value that does not parse (e.g. `min-[foo]`) ranks
+    // after every parseable one rather than comparing equal to all of
+    // them, which would make the comparator non-transitive.
+    Some(parse_length_value(resolved).unwrap_or(f64::INFINITY))
 }
 
 fn parse_length_value(value: &str) -> Option<f64> {

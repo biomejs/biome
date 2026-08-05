@@ -344,17 +344,17 @@ function renderVariants(variants: ExtractedVariant[]): string {
 		(v) =>
 			`    ${rustString(v.name)} => VariantEntry { kind: VariantKind::${v.kind}, order: ${v.order}, compare: VariantCompare::${v.compare}, compounds: ${v.compounds}, compounds_with: ${v.compounds_with} },`,
 	);
-	return `pub static VARIANTS: phf::Map<&'static str, VariantEntry> = phf_map! {
+	return `pub(super) static VARIANTS: phf::Map<&'static str, VariantEntry> = phf_map! {
 ${lines.join("\n")}
 };
 `;
 }
 
-function renderThemeValueMap(name: string, values: ThemeValue[]): string {
+function renderThemeValueMap(mapName: string, values: ThemeValue[]): string {
 	const lines = values.map(
 		({ name, value }) => `    ${rustString(name)} => ${rustString(value)},`,
 	);
-	return `pub static ${name}: phf::Map<&'static str, &'static str> = phf_map! {
+	return `pub(super) static ${mapName}: phf::Map<&'static str, &'static str> = phf_map! {
 ${lines.join("\n")}
 };
 `;

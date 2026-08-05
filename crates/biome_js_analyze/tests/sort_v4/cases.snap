@@ -384,6 +384,9 @@ sorted: flex group-hover:flex peer-focus:flex
 input:  has-[:checked]:flex not-hover:flex flex
 sorted: flex not-hover:flex has-[:checked]:flex
 ---
+input:  dark:flex hover:flex flex
+sorted: flex hover:flex dark:flex
+---
 input:  md:flex sm:flex flex max-lg:flex max-sm:flex min-lg:flex
 sorted: flex max-lg:flex max-sm:flex sm:flex md:flex min-lg:flex
 ---

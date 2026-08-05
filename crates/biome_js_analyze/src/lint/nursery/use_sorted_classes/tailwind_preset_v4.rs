@@ -4409,7 +4409,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
 };
 
-pub static VARIANTS: phf::Map<&'static str, VariantEntry> = phf_map! {
+pub(super) static VARIANTS: phf::Map<&'static str, VariantEntry> = phf_map! {
     "*" => VariantEntry { kind: VariantKind::Static, order: 1, compare: VariantCompare::Default, compounds: 0, compounds_with: 0 },
     "**" => VariantEntry { kind: VariantKind::Static, order: 2, compare: VariantCompare::Default, compounds: 0, compounds_with: 0 },
     "not" => VariantEntry { kind: VariantKind::Compound, order: 3, compare: VariantCompare::Default, compounds: 2, compounds_with: 3 },
@@ -4500,7 +4500,7 @@ pub static VARIANTS: phf::Map<&'static str, VariantEntry> = phf_map! {
     "noscript" => VariantEntry { kind: VariantKind::Static, order: 82, compare: VariantCompare::Default, compounds: 1, compounds_with: 0 },
 };
 
-pub static BREAKPOINT_VALUES: phf::Map<&'static str, &'static str> = phf_map! {
+pub(super) static BREAKPOINT_VALUES: phf::Map<&'static str, &'static str> = phf_map! {
     "2xl" => "96rem",
     "lg" => "64rem",
     "md" => "48rem",
@@ -4508,7 +4508,7 @@ pub static BREAKPOINT_VALUES: phf::Map<&'static str, &'static str> = phf_map! {
     "xl" => "80rem",
 };
 
-pub static CONTAINER_VALUES: phf::Map<&'static str, &'static str> = phf_map! {
+pub(super) static CONTAINER_VALUES: phf::Map<&'static str, &'static str> = phf_map! {
     "2xl" => "42rem",
     "2xs" => "18rem",
     "3xl" => "48rem",
