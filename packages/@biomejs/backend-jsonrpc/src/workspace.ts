@@ -2588,7 +2588,7 @@ See https://biomejs.dev/linter/rules/no-unsafe-plus-operands
 	noUnsafePlusOperands?: NoUnsafePlusOperandsConfiguration;
 	/**
 	* Disallow TypeScript type assertions other than const assertions.
-See https://biomejs.dev/linter/rules/no-unsafe-type-assertion
+See https://biomejs.dev/linter/rules/no-unsafe-type-assertion 
 	 */
 	noUnsafeTypeAssertion?: NoUnsafeTypeAssertionConfiguration;
 	/**
