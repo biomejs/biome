@@ -113,6 +113,43 @@ fn test_expression_function_return_classifies_promise_like_returns() {
 }
 
 #[test]
+fn test_expression_function_return_classifies_returned_calls() {
+    const SOURCE: &str = r#"
+        declare function invokeAsync(callback: () => void): Promise<void>;
+        declare function invokeSync(callback: () => void): void;
+        declare function identity<T>(value: T): T;
+        declare function consume(value: unknown): void;
+        const asyncCallback = () => invokeAsync(() => {});
+        const syncCallback = () => invokeSync(() => {});
+        const genericCallback = () => identity(Promise.resolve());
+        consume(asyncCallback);
+        consume(syncCallback);
+        consume(genericCallback);
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+
+    for (expression, expected) in [
+        ("asyncCallback", TypeInferenceClassification::Match),
+        ("syncCallback", TypeInferenceClassification::NoMatch),
+        (
+            "genericCallback",
+            TypeInferenceClassification::Indeterminate,
+        ),
+    ] {
+        assert_eq!(
+            expression_function_returns_promise(&db, module, SOURCE, expression),
+            expected,
+            "{expression}"
+        );
+    }
+}
+
+#[test]
 fn test_expression_function_return_classifies_this_member_chains() {
     const SOURCE: &str = r#"
         declare function consume(value: unknown): void;
