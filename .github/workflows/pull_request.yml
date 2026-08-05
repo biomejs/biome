@@ -41,7 +41,7 @@ jobs:
           - os: depot-ubuntu-24.04-arm-16
     steps:
       - name: Enable Git long paths
-        if: matrix.os == 'depot-windows-2022-16'
+        if: matrix.os == 'depot-windows-2022'
         run: git config --system core.longpaths true
       - name: Checkout PR Branch
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
