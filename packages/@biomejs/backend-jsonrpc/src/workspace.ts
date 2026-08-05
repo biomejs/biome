@@ -2407,6 +2407,11 @@ See https://biomejs.dev/linter/rules/no-excessive-selector-classes
 	 */
 	noExcessiveSelectorClasses?: NoExcessiveSelectorClassesConfiguration;
 	/**
+	* Disallow extending the prototype of built-in objects.
+See https://biomejs.dev/linter/rules/no-extend-native 
+	 */
+	noExtendNative?: NoExtendNativeConfiguration;
+	/**
 	* Require Promise-like statements to be handled appropriately.
 See https://biomejs.dev/linter/rules/no-floating-promises 
 	 */
@@ -2461,6 +2466,11 @@ See https://biomejs.dev/linter/rules/no-misused-promises
 See https://biomejs.dev/linter/rules/no-negation-in-equality-check 
 	 */
 	noNegationInEqualityCheck?: NoNegationInEqualityCheckConfiguration;
+	/**
+	* Disallow disabling zoom with user-scalable=no in the \<meta name="viewport"> element.
+See https://biomejs.dev/linter/rules/no-non-scalable-viewport 
+	 */
+	noNonScalableViewport?: NoNonScalableViewportConfiguration;
 	/**
 	* Disallow usage of element handles (page.$() and page.$$()).
 See https://biomejs.dev/linter/rules/no-playwright-element-handle 
@@ -2704,6 +2714,11 @@ See https://biomejs.dev/linter/rules/use-qwik-loader-location
 See https://biomejs.dev/linter/rules/use-react-async-server-function 
 	 */
 	useReactAsyncServerFunction?: UseReactAsyncServerFunctionConfiguration;
+	/**
+	* Validate files with React Compiler.
+See https://biomejs.dev/linter/rules/use-react-compiler 
+	 */
+	useReactCompiler?: UseReactCompilerConfiguration;
 	/**
 	* Enforce a specific function type for React function components.
 See https://biomejs.dev/linter/rules/use-react-function-component-definition 
@@ -4675,6 +4690,9 @@ export type NoExcessiveNestedCallbacksConfiguration =
 export type NoExcessiveSelectorClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveSelectorClassesOptions;
+export type NoExtendNativeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExtendNativeOptions;
 export type NoFloatingPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFloatingPromisesOptions;
@@ -4708,6 +4726,9 @@ export type NoMisusedPromisesConfiguration =
 export type NoNegationInEqualityCheckConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNegationInEqualityCheckOptions;
+export type NoNonScalableViewportConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNonScalableViewportOptions;
 export type NoPlaywrightElementHandleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightElementHandleOptions;
@@ -4849,6 +4870,9 @@ export type UseQwikLoaderLocationConfiguration =
 export type UseReactAsyncServerFunctionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactAsyncServerFunctionOptions;
+export type UseReactCompilerConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseReactCompilerOptions;
 export type UseReactFunctionComponentDefinitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactFunctionComponentDefinitionOptions;
@@ -6529,6 +6553,10 @@ export interface RuleWithNoExcessiveSelectorClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoExcessiveSelectorClassesOptions;
 }
+export interface RuleWithNoExtendNativeOptions {
+	level: RulePlainConfiguration;
+	options?: NoExtendNativeOptions;
+}
 export interface RuleWithNoFloatingPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6577,6 +6605,10 @@ export interface RuleWithNoNegationInEqualityCheckOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoNegationInEqualityCheckOptions;
+}
+export interface RuleWithNoNonScalableViewportOptions {
+	level: RulePlainConfiguration;
+	options?: NoNonScalableViewportOptions;
 }
 export interface RuleWithNoPlaywrightElementHandleOptions {
 	fix?: FixKind;
@@ -6781,6 +6813,10 @@ export interface RuleWithUseReactAsyncServerFunctionOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseReactAsyncServerFunctionOptions;
+}
+export interface RuleWithUseReactCompilerOptions {
+	level: RulePlainConfiguration;
+	options?: UseReactCompilerOptions;
 }
 export interface RuleWithUseReactFunctionComponentDefinitionOptions {
 	fix?: FixKind;
@@ -8321,6 +8357,16 @@ Use `0` to disallow class selectors entirely.
 	 */
 	maxClasses?: number;
 }
+/**
+ * Options for the `noExtendNative` rule.
+ */
+export interface NoExtendNativeOptions {
+	/**
+	* Built-in names to ignore. Extending the prototype of an ignored
+name will not trigger this rule. 
+	 */
+	ignore?: string[];
+}
 export type NoFloatingPromisesOptions = {};
 export type NoIdenticalTestTitleOptions = {};
 export type NoImpliedEvalOptions = {};
@@ -8346,6 +8392,7 @@ export type NoLoopFuncOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
+export type NoNonScalableViewportOptions = {};
 export type NoPlaywrightElementHandleOptions = {};
 export type NoPlaywrightEvalOptions = {};
 export type NoPlaywrightForceOptionOptions = {};
@@ -8558,6 +8605,12 @@ export interface UseNullishCoalescingOptions {
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseQwikLoaderLocationOptions = {};
 export type UseReactAsyncServerFunctionOptions = {};
+export interface UseReactCompilerOptions {
+	/**
+	 * Which functions React Compiler analyzes. Defaults to `infer`.
+	 */
+	compilationMode?: CompilationMode;
+}
 export interface UseReactFunctionComponentDefinitionOptions {
 	/**
 	 * The function style to enforce for named React components.
@@ -9329,6 +9382,10 @@ export type TestFunctionKind = "it" | "test";
 export type IgnorePrimitives =
 	| boolean
 	| { bigint?: boolean; boolean?: boolean; number?: boolean; string?: boolean };
+/**
+ * Controls which functions React Compiler analyzes.
+ */
+export type CompilationMode = "infer" | "annotation" | "all";
 export type ComponentDefinitionStyle =
 	| "functionDeclaration"
 	| "functionExpression"
@@ -9787,6 +9844,7 @@ export type Category =
 	| "lint/nursery/noEmptyObjectKeys"
 	| "lint/nursery/noExcessiveNestedCallbacks"
 	| "lint/nursery/noExcessiveSelectorClasses"
+	| "lint/nursery/noExtendNative"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noIdenticalTestTitle"
 	| "lint/nursery/noImplicitCoercion"
@@ -9800,6 +9858,7 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNegationInEqualityCheck"
+	| "lint/nursery/noNonScalableViewport"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
@@ -9860,6 +9919,7 @@ export type Category =
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useReactAsyncServerFunction"
 	| "lint/nursery/useReactFunctionComponentDefinition"
+	| "lint/nursery/useReactCompiler"
 	| "lint/nursery/useReactNativePlatformComponents"
 	| "lint/nursery/useReduceTypeParameter"
 	| "lint/nursery/useRegexpExec"
@@ -10133,6 +10193,7 @@ export type Category =
 	| "assist/source/useSortedProperties"
 	| "assist/source/useSortedSelectionSet"
 	| "assist/source/useSortedTypeFields"
+	| "syntax/correctness/noInvalidPropertySyntax"
 	| "syntax/correctness/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
@@ -10481,7 +10542,11 @@ export type LanguageVersion = "eS2022" | "eSNext";
  * It represents the extension of the file
  */
 export type JsonFileVariant = "standard" | "jsonc";
-export type CssEmbeddingKind = "None" | "Styled" | { Html: EmbeddingHtmlKind };
+export type CssEmbeddingKind =
+	| "None"
+	| "Styled"
+	| { Html: EmbeddingHtmlKind }
+	| "HtmlStyleAttribute";
 /**
  * The language of the stylesheet.
  */

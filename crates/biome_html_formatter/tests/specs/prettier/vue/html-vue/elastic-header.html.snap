@@ -121,13 +121,6 @@ info: vue/html-vue/elastic-header.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,5 @@
- <!-- https://github.com/vuejs/vue/blob/dev/examples/elastic-header/index.html -->
--<!doctype html>
-+<!DOCTYPE html>
- <html lang="en">
-   <head>
-     <meta charset="utf-8" />
 @@ -54,69 +54,65 @@
      </div>
  
@@ -259,7 +252,7 @@ info: vue/html-vue/elastic-header.html
 
 ```html
 <!-- https://github.com/vuejs/vue/blob/dev/examples/elastic-header/index.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />

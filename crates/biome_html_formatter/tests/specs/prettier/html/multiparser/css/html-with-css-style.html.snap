@@ -27,9 +27,7 @@ info: html/multiparser/css/html-with-css-style.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,10 +1,10 @@
--<!doctype html>
-+<!DOCTYPE html>
+@@ -2,9 +2,9 @@
  <html lang="en">
    <head>
      <style>
@@ -47,7 +45,7 @@ info: html/multiparser/css/html-with-css-style.html
 # Output
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <style>

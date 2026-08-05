@@ -62,6 +62,7 @@ impl ReporterVisitor for ProfilersReporterVisitor {
         verbose: bool,
     ) -> io::Result<()> {
         if self.rule_profiler {
+            rayon::broadcast(|_| biome_analyze::profiling::flush_thread_profiler());
             let rule_profiles = biome_analyze::profiling::drain_sorted_by_total(true);
             if !rule_profiles.is_empty() {
                 writer.log(markup! {{ DisplayProfiles(rule_profiles, None) }});

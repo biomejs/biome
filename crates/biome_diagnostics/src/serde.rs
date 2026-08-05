@@ -48,11 +48,11 @@ impl Diagnostic {
         // SAFETY: Writing to a MarkupBuf should never fail
         diag.message(&mut fmt).unwrap();
 
-        let mut advices = Advices::new();
+        let mut advices = Advices::default();
         // SAFETY: The Advices visitor never returns an error
         diag.advices(&mut advices).unwrap();
 
-        let mut verbose_advices = Advices::new();
+        let mut verbose_advices = Advices::default();
         // SAFETY: The Advices visitor never returns an error
         diag.verbose_advices(&mut verbose_advices).unwrap();
 
@@ -171,22 +171,25 @@ impl From<super::Location<'_>> for Location {
 }
 
 /// Implementation of [Visitor] collecting serializable [Advice] into a vector.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[cfg_attr(test, derive(Eq, PartialEq))]
-struct Advices {
+pub struct Advices {
     advices: Vec<Advice>,
 }
 
 impl Advices {
-    fn new() -> Self {
-        Self {
-            advices: Vec::new(),
-        }
+    /// Captures the ordered events emitted by `advices`.
+    pub fn new<A: super::Advices + ?Sized>(advices: &A) -> Self {
+        let mut result = Self::default();
+        // SAFETY: The Advices visitor never returns an error
+        advices.record(&mut result).unwrap();
+        result
     }
 
-    fn offset_by(&mut self, offset: TextSize) {
+    /// Shifts locations in the captured advice by `offset`.
+    pub fn offset_by(&mut self, offset: TextSize) {
         for advicde in &mut self.advices {
             advicde.offset_by(offset);
         }
@@ -251,7 +254,7 @@ impl Visit for Advices {
         title: &dyn fmt::Display,
         advice: &dyn super::Advices,
     ) -> io::Result<()> {
-        let mut advices = Self::new();
+        let mut advices = Self::default();
         advice.record(&mut advices)?;
 
         self.advices

@@ -1,0 +1,3 @@
+@media print-#{$suffix} {}
+@media all #{$query} {}
+@media #{$modifier} screen {}

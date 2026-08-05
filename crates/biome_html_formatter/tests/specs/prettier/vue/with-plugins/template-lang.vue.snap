@@ -19,11 +19,12 @@ world!
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,4 +1,3 @@
+@@ -1,4 +1,4 @@
  <template lang="uppercase-rocks">
 -HELLO,
 -WORLD!
-+  hello, world!
++hello,
++world!
  </template>
 ```
 
@@ -31,6 +32,7 @@ world!
 
 ```vue
 <template lang="uppercase-rocks">
-  hello, world!
+hello,
+world!
 </template>
 ```

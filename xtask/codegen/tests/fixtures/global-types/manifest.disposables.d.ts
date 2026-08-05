@@ -34,6 +34,19 @@ interface AsyncDisposable {
     [Symbol.asyncDispose](): PromiseLike<void>;
 }
 
+interface Array<T> {
+    length: number;
+    filter(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any): T[];
+    forEach(callbackfn: (value: T, index: number, array: T[]) => void, thisArg?: any): void;
+    map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any): U[];
+}
+
+interface RegExpExecArray {}
+
+interface RegExp {
+    exec(string: string): RegExpExecArray | null;
+}
+
 interface Date {
     toString(): string;
 }
@@ -41,5 +54,9 @@ interface Date {
 interface Date {
     valueOf(): number;
 }
+
+interface Map<K, V> {}
+
+interface Set<T> {}
 
 interface WeakMap<K, V> {}

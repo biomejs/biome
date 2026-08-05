@@ -2,7 +2,7 @@ use crate::parser::CssParser;
 use crate::syntax::is_nth_at_identifier;
 use crate::syntax::scss::expression::parse_scss_selector_interpolation;
 use crate::syntax::scss::identifiers::interpolated_identifier::{
-    is_at_scss_interpolated_identifier, is_nth_at_identifier_hyphen_part,
+    is_at_scss_interpolated_identifier, is_nth_at_identifier_hyphen_part, is_nth_source_tight,
     parse_identifier_hyphen_part, parse_scss_interpolated_identifier_parts,
 };
 use crate::syntax::scss::{is_at_scss_interpolation, is_nth_at_scss_interpolation};
@@ -11,7 +11,6 @@ use crate::syntax::selector::{
     selector_lex_context,
 };
 use biome_css_syntax::CssSyntaxKind::{SCSS_INTERPOLATED_IDENTIFIER, SCSS_INTERPOLATION};
-use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 
@@ -53,15 +52,15 @@ pub(crate) fn is_nth_at_scss_interpolated_selector_identifier(p: &mut CssParser,
 #[inline]
 fn is_nth_at_scss_selector_hyphen_start(p: &mut CssParser, n: usize) -> bool {
     if !is_nth_at_identifier_hyphen_part(p, n)
-        || p.has_nth_preceding_whitespace(n)
-        || p.has_nth_preceding_whitespace(n + 1)
+        || !is_nth_source_tight(p, n)
+        || !is_nth_source_tight(p, n + 1)
     {
         return false;
     }
 
     is_nth_at_scss_interpolation(p, n + 1)
         || (is_nth_at_identifier_hyphen_part(p, n + 1)
-            && !p.has_nth_preceding_whitespace(n + 2)
+            && is_nth_source_tight(p, n + 2)
             && is_nth_at_scss_interpolation(p, n + 2))
 }
 
@@ -74,7 +73,7 @@ fn is_nth_at_scss_selector_hyphen_start(p: &mut CssParser, n: usize) -> bool {
 /// ```
 #[inline]
 fn is_nth_at_scss_selector_identifier_suffix(p: &mut CssParser, n: usize) -> bool {
-    if p.has_nth_preceding_whitespace(n) {
+    if !is_nth_source_tight(p, n) {
         return false;
     }
 
@@ -82,13 +81,13 @@ fn is_nth_at_scss_selector_identifier_suffix(p: &mut CssParser, n: usize) -> boo
         return true;
     }
 
-    if !is_nth_at_identifier_hyphen_part(p, n) || p.has_nth_preceding_whitespace(n + 1) {
+    if !is_nth_at_identifier_hyphen_part(p, n) || !is_nth_source_tight(p, n + 1) {
         return false;
     }
 
     is_nth_at_scss_interpolation(p, n + 1)
         || (is_nth_at_identifier_hyphen_part(p, n + 1)
-            && !p.has_nth_preceding_whitespace(n + 2)
+            && is_nth_source_tight(p, n + 2)
             && is_nth_at_scss_interpolation(p, n + 2))
 }
 
@@ -157,7 +156,7 @@ fn parse_scss_selector_identifier_with_fragment(
     // A plain selector identifier only becomes an interpolated identifier when
     // another selector identifier fragment follows with no separating trivia.
     if first_fragment.kind(p) != SCSS_INTERPOLATION
-        && (p.has_preceding_whitespace() || !is_at_selector_identifier_part(p))
+        && (!is_nth_source_tight(p, 0) || !is_at_selector_identifier_part(p))
     {
         return Present(first_fragment);
     }

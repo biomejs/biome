@@ -76,6 +76,7 @@ biome_json_syntax            = { path = "./crates/biome_json_syntax", version = 
 biome_json_value             = { path = "./crates/biome_json_value", version = "0.1.0" }
 biome_line_index             = { path = "./crates/biome_line_index", version = "0.1.0" }
 biome_lsp                    = { path = "./crates/biome_lsp" }
+biome_property_codec         = { path = "./crates/biome_property_codec", version = "0.1.0" }
 biome_lsp_converters         = { path = "./crates/biome_lsp_converters", version = "0.1.0" }
 biome_markdown_factory       = { path = "./crates/biome_markdown_factory", version = "0.0.1" }
 biome_markdown_formatter     = { path = "./crates/biome_markdown_formatter", version = "0.0.1" }
@@ -89,6 +90,7 @@ biome_package                = { path = "./crates/biome_package", version = "0.5
 biome_parser                 = { path = "./crates/biome_parser", version = "0.5.7" }
 biome_plugin_loader          = { path = "./crates/biome_plugin_loader", version = "0.0.1" }
 biome_project_layout         = { path = "./crates/biome_project_layout", version = "0.0.1" }
+biome_react_compiler         = { path = "./crates/biome_react_compiler", version = "0.0.0" }
 biome_resolver               = { path = "./crates/biome_resolver", version = "0.1.0" }
 biome_rowan                  = { path = "./crates/biome_rowan", version = "0.5.7" }
 biome_rule_options           = { path = "./crates/biome_rule_options", version = "0.0.1" }
@@ -111,8 +113,8 @@ biome_yaml_syntax            = { path = "./crates/biome_yaml_syntax", version = 
 biome_languages              = { path = "./crates/biome_languages", version = "0.1.0" }
 boa_engine                   = "0.21.1"
 boxcar                       = "0.2.14"
-bpaf                         = { version = "0.9.26", features = ["derive"] }
-camino                       = "1.2.4"
+bpaf                         = { version = "0.9.27", features = ["derive"] }
+camino                       = "1.2.5"
 cfg-if                       = "1.0.4"
 countme                      = "3.0.1"
 crossbeam                    = "0.8.4"
@@ -147,9 +149,9 @@ reqwest                      = { version = "0.12.19", default-features = false }
 rust-lapper                  = "1.2.0"
 rustc-hash                   = "2.1.3"
 salsa                        = "0.27.2"
-schemars                     = { version = "1.2.1", features = ["indexmap2", "smallvec1"] }
-serde                        = { version = "1.0.228", features = ["derive"] }
-serde_json                   = "1.0.150"
+schemars                     = { version = "1.2.2", features = ["indexmap2", "smallvec1"] }
+serde                        = { version = "1.0.229", features = ["derive"] }
+serde_json                   = "1.0.151"
 similar                      = "2.7.0"
 similar-asserts              = "1.7.0"
 smallvec                     = { version = "1.15.2", features = ["const_new", "serde", "union"] }
@@ -260,7 +262,8 @@ unused_macro_rules             = "warn"
 
 # Dev optimisations
 [profile.dev]
-debug = "line-tables-only"
+debug           = "line-tables-only"
+split-debuginfo = "unpacked"
 
 [profile.dev.package."*"]
 debug = false

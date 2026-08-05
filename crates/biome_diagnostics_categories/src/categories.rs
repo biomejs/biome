@@ -211,6 +211,7 @@ define_categories! {
     "lint/nursery/noEmptyObjectKeys": "https://biomejs.dev/linter/rules/no-empty-object-keys",
     "lint/nursery/noExcessiveNestedCallbacks": "https://biomejs.dev/linter/rules/no-excessive-nested-callbacks",
     "lint/nursery/noExcessiveSelectorClasses": "https://biomejs.dev/linter/rules/no-excessive-selector-classes",
+    "lint/nursery/noExtendNative": "https://biomejs.dev/linter/rules/no-extend-native",
     "lint/nursery/noFloatingPromises": "https://biomejs.dev/linter/rules/no-floating-promises",
     "lint/nursery/noIdenticalTestTitle": "https://biomejs.dev/linter/rules/no-identical-test-title",
     "lint/nursery/noImplicitCoercion": "https://biomejs.dev/linter/rules/no-implicit-coercion",
@@ -224,6 +225,7 @@ define_categories! {
     "lint/nursery/noMissingGenericFamilyKeyword": "https://biomejs.dev/linter/rules/no-missing-generic-family-keyword",
     "lint/nursery/noMisusedPromises": "https://biomejs.dev/linter/rules/no-misused-promises",
     "lint/nursery/noNegationInEqualityCheck": "https://biomejs.dev/linter/rules/no-negation-in-equality-check",
+    "lint/nursery/noNonScalableViewport": "https://biomejs.dev/linter/rules/no-non-scalable-viewport",
     "lint/nursery/noPlaywrightElementHandle": "https://biomejs.dev/linter/rules/no-playwright-element-handle",
     "lint/nursery/noPlaywrightEval": "https://biomejs.dev/linter/rules/no-playwright-eval",
     "lint/nursery/noPlaywrightForceOption": "https://biomejs.dev/linter/rules/no-playwright-force-option",
@@ -284,6 +286,7 @@ define_categories! {
     "lint/nursery/useQwikValidLexicalScope": "https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope",
     "lint/nursery/useReactAsyncServerFunction": "https://biomejs.dev/linter/rules/use-react-async-server-function",
     "lint/nursery/useReactFunctionComponentDefinition": "https://biomejs.dev/linter/rules/use-react-function-component-definition",
+    "lint/nursery/useReactCompiler": "https://biomejs.dev/linter/rules/use-react-compiler",
     "lint/nursery/useReactNativePlatformComponents": "https://biomejs.dev/linter/rules/use-react-native-platform-components",
     "lint/nursery/useReduceTypeParameter": "https://biomejs.dev/linter/rules/use-reduce-type-parameter",
     "lint/nursery/useRegexpExec": "https://biomejs.dev/linter/rules/use-regexp-exec",
@@ -561,6 +564,7 @@ define_categories! {
     "assist/source/useSortedTypeFields": "https://biomejs.dev/assist/actions/use-sorted-type-fields",
     // end assist actions
     ; // start syntax rules
+    "syntax/correctness/noInvalidPropertySyntax",
     "syntax/correctness/noTypeOnlyImportAttributes",
     "syntax/correctness/noSuperWithoutExtends",
     "syntax/correctness/noInitializerWithDefinite",

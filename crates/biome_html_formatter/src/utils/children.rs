@@ -346,7 +346,13 @@ where
                                 continue;
                             }
 
-                            builder.entry(HtmlChild::Newline)
+                            // Text that follows a blank line keeps it, the same
+                            // way an element that follows one does.
+                            if whitespace.bytes().filter(|byte| *byte == b'\n').count() > 1 {
+                                builder.entry(HtmlChild::EmptyLine)
+                            } else {
+                                builder.entry(HtmlChild::Newline)
+                            }
                         } else {
                             // if there's newlines before a comment, we need to preserve them
                             if whitespace.contains('\n')

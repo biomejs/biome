@@ -66,7 +66,7 @@ declare_lint_rule! {
     /// Default: `[]` (the `class` attribute is always checked).
     ///
     pub NoTailwindArbitraryValue {
-        version: "next",
+        version: "2.5.7",
         name: "noTailwindArbitraryValue",
         language: "html",
         sources: &[RuleSource::EslintTailwindcss("no-arbitrary-value").same()],

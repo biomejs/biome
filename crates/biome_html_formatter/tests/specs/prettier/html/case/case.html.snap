@@ -31,12 +31,6 @@ info: html/case/case.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,4 +1,4 @@
--<!doctype html>
-+<!DOCTYPE html>
- <html class="no-js mY-ClAsS">
-   <head>
-     <meta charset="utf-8" />
 @@ -11,13 +11,8 @@
        This is HTML5 Boilerplate.
      </p>
@@ -58,7 +52,7 @@ info: html/case/case.html
 # Output
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html class="no-js mY-ClAsS">
   <head>
     <meta charset="utf-8" />
