@@ -708,9 +708,9 @@ impl Display for RuleSelector {
 impl biome_console::fmt::Display for AnalyzerSelector {
     fn fmt(&self, f: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         match self {
-            AnalyzerSelector::Rule(rule) => f.write_markup(markup! {{rule}}),
-            AnalyzerSelector::Domain(domain) => f.write_markup(markup! {{domain}}),
-            AnalyzerSelector::Plugin => f.write_str("plugin/plugin"),
+            Self::Rule(rule) => f.write_markup(markup! {{rule}}),
+            Self::Domain(domain) => f.write_markup(markup! {{domain}}),
+            Self::Plugin => f.write_str("plugin/plugin"),
         }
     }
 }
@@ -718,13 +718,13 @@ impl biome_console::fmt::Display for AnalyzerSelector {
 impl biome_console::fmt::Display for RuleSelector {
     fn fmt(&self, f: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         match self {
-            RuleSelector::Group(group) => {
+            Self::Group(group) => {
                 let link = format!("https://biomejs.dev/linter/#{}", group);
                 f.write_markup(markup! {
                     <Hyperlink href={link}>{group}</Hyperlink>
                 })
             }
-            RuleSelector::Rule(group, rule) => {
+            Self::Rule(group, rule) => {
                 let rule = Case::Kebab.convert(rule);
                 f.write_markup(markup! {
                     <Hyperlink href={format!("https://biomejs.dev/linter/rules/{}/", rule)}>{group}"/"{rule}</Hyperlink>
