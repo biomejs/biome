@@ -24,8 +24,8 @@ use crate::js_module_info::TsBindingReferenceExt;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsExport, JsOwnExport, ModuleDb, ResolvedPath, SymbolFromModuleInfo};
 use biome_js_type_info::{
-    GlobalTypeId, ImportSymbol, Literal, RawTypeData, ScopeId, TypeId, TypeMember, TypeReference,
-    TypeReferenceQualifier, TypeResolverLevel, TypeofExpression, global_types,
+    GlobalTypeId, ImportSymbol, Literal, RawTypeData, RawTypeId, ScopeId, TypeId, TypeMember,
+    TypeReference, TypeReferenceQualifier, TypeResolverLevel, TypeofExpression, global_types,
     interned_types::{ReturnType, TypeData as InferredTypeData},
 };
 use biome_rowan::Text;
@@ -220,7 +220,7 @@ fn classify_expression(
                                     db,
                                     state.module,
                                     &js_info,
-                                    ImportResolution::OnDemand,
+                                    ImportResolution::on_demand(state.module),
                                 );
                                 let Some(awaited) = ctx.resolve_await_expression(*return_ty) else {
                                     return Indeterminate;
@@ -329,7 +329,7 @@ fn classify_expression(
                             db,
                             state.module,
                             &js_info,
-                            ImportResolution::OnDemand,
+                            ImportResolution::on_demand(state.module),
                         );
                         let mut ty = ctx.resolve_qualifier(&qualifier);
                         for member in &members {
@@ -458,32 +458,50 @@ fn classify_expression(
                         let Some(return_ty) = function.return_type.as_type() else {
                             return DoesNotReturnPromise;
                         };
-                        let mut ctx = ResolutionCtx::new(
-                            db,
-                            state.module,
-                            &js_info,
-                            ImportResolution::OnDemand,
-                        );
-                        let ty = ctx.resolve(return_ty);
-                        let result = match state.projection {
-                            Projection::FunctionReturn => is_promise_type(db, ty),
-                            Projection::ArrayFunctionReturn => is_array_of_promise_type(db, ty),
-                            Projection::AwaitedArrayFunctionReturn => {
-                                let Some(awaited) = ctx.resolve_await_expression(ty) else {
-                                    return Indeterminate;
-                                };
-                                is_array_of_promise_type(db, awaited)
+                        if matches!(state.projection, Projection::FunctionReturn)
+                            && let TypeReference::Resolved(resolved) = return_ty
+                            && resolved.level() == TypeResolverLevel::Thin
+                            && matches!(
+                                js_info.raw_types.get(resolved.id().index()),
+                                Some(RawTypeData::TypeofExpression(expression))
+                                    if matches!(expression.as_ref(), TypeofExpression::Call(_))
+                            )
+                        {
+                            ClassificationState {
+                                module: state.module,
+                                target: ClassificationTarget::Reference(return_ty.clone()),
+                                mode: MemberLookupMode::Value,
+                                members: Box::default(),
+                                projection: Projection::Promise,
                             }
-                            Projection::Promise
-                            | Projection::PromiseTarget
-                            | Projection::ArrayPromise
-                            | Projection::AwaitedArrayPromise => unreachable!(),
-                        };
-                        return match result {
-                            Some(true) => ReturnsPromise,
-                            Some(false) => DoesNotReturnPromise,
-                            None => Indeterminate,
-                        };
+                        } else {
+                            let mut ctx = ResolutionCtx::new(
+                                db,
+                                state.module,
+                                &js_info,
+                                ImportResolution::on_demand(state.module),
+                            );
+                            let ty = ctx.resolve(return_ty);
+                            let result = match state.projection {
+                                Projection::FunctionReturn => is_promise_type(db, ty),
+                                Projection::ArrayFunctionReturn => is_array_of_promise_type(db, ty),
+                                Projection::AwaitedArrayFunctionReturn => {
+                                    let Some(awaited) = ctx.resolve_await_expression(ty) else {
+                                        return Indeterminate;
+                                    };
+                                    is_array_of_promise_type(db, awaited)
+                                }
+                                Projection::Promise
+                                | Projection::PromiseTarget
+                                | Projection::ArrayPromise
+                                | Projection::AwaitedArrayPromise => unreachable!(),
+                            };
+                            return match result {
+                                Some(true) => ReturnsPromise,
+                                Some(false) => DoesNotReturnPromise,
+                                None => Indeterminate,
+                            };
+                        }
                     }
                     RawTypeData::Reference(reference) => ClassificationState {
                         target: ClassificationTarget::Reference(reference.clone()),
@@ -623,7 +641,7 @@ fn classify_expression(
                                 db,
                                 state.module,
                                 &js_info,
-                                ImportResolution::OnDemand,
+                                ImportResolution::on_demand(state.module),
                             );
                             return match is_array_of_promise_type(
                                 db,
@@ -646,7 +664,7 @@ fn classify_expression(
                                 db,
                                 state.module,
                                 &js_info,
-                                ImportResolution::OnDemand,
+                                ImportResolution::on_demand(state.module),
                             );
                             let ty = ctx.resolve_raw_type_id(type_id);
                             let Some(awaited) = ctx.resolve_await_expression(ty) else {
@@ -806,7 +824,7 @@ fn classify_expression(
                             db,
                             state.module,
                             &js_info,
-                            ImportResolution::OnDemand,
+                            ImportResolution::on_demand(state.module),
                         );
                         let target = ctx.resolve_raw_type_id(type_id);
                         let instance = InferredTypeData::instance_of(db, target, Box::default());
@@ -910,7 +928,7 @@ fn classify_expression(
                     return Indeterminate;
                 };
                 let Some(JsExport::Own(own_export) | JsExport::OwnType(own_export)) =
-                    js_info.raw_exports.get(name.text())
+                    js_info.exports.get(name.text())
                 else {
                     return Indeterminate;
                 };
@@ -930,7 +948,9 @@ fn classify_expression(
                     }
                     JsOwnExport::Type(resolved) => ClassificationState {
                         module,
-                        target: ClassificationTarget::Reference(TypeReference::Resolved(*resolved)),
+                        target: ClassificationTarget::Reference(TypeReference::Resolved(
+                            RawTypeId::Local(*resolved),
+                        )),
                         mode: state.mode,
                         members: state.members,
                         projection: state.projection,

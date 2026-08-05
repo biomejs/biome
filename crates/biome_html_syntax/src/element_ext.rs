@@ -651,6 +651,11 @@ impl AnyEmbeddedContent {
     }
 }
 
+/// Whether the value of a `style` attribute should be read as CSS.
+pub fn is_css_style_attribute_value(value: &str) -> bool {
+    !value.trim().is_empty() && value.contains(':') && !value.contains("{{")
+}
+
 #[cfg(test)]
 mod tests {
     use biome_html_factory::syntax::{HtmlAttribute, HtmlElement};

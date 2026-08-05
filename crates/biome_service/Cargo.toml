@@ -103,7 +103,7 @@ web-time                 = { workspace = true }
 [dev-dependencies]
 biome_configuration = { path = "../biome_configuration", features = ["test-utils"] }
 biome_service       = { path = ".", features = ["testing"] }
-divan               = { package = "codspeed-divan-compat", version = "=4.4.1" }
+divan               = { package = "codspeed-divan-compat", version = "=5.0.1" }
 insta               = { workspace = true }
 static_assertions   = { workspace = true }
 

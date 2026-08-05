@@ -24,20 +24,6 @@ function f() { console.log(arguments); }
 # Emitted Messages
 
 ```block
-test1.js:1:28 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use the rest parameters instead of arguments.
-  
-  > 1 │ function f() { console.log(arguments); }
-      │                            ^^^^^^^^^
-    2 │ 
-  
-  i arguments does not have Array.prototype methods and can be inconvenient to use.
-  
-
-```
-
-```block
 test1.js:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This function f is unused.
@@ -53,6 +39,20 @@ test1.js:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━
     1   │ - function·f()·{·console.log(arguments);·}
       1 │ + function·_f()·{·console.log(arguments);·}
     2 2 │   
+  
+
+```
+
+```block
+test1.js:1:28 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the rest parameters instead of arguments.
+  
+  > 1 │ function f() { console.log(arguments); }
+      │                            ^^^^^^^^^
+    2 │ 
+  
+  i arguments does not have Array.prototype methods and can be inconvenient to use.
   
 
 ```

@@ -6,6 +6,7 @@ use biome_js_type_info::{
     interned_types::{
         Literal as InferredLiteral, LocalTypeHandle, LocalTypeId, TypeData as InferredTypeData,
         TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
+        well_known_symbol_type,
     },
 };
 use biome_rowan::Text;
@@ -244,7 +245,16 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> Option<InferredTypeData<'db>> {
         let mut parts = qualifier.path.iter();
         let first = parts.next()?;
-        let mut target = parts.next().and_then(|member| {
+        let members = parts.collect::<Vec<_>>();
+        if first.text() == "Symbol"
+            && let [member] = members.as_slice()
+            && let Some(ty) = well_known_symbol_type(member.text())
+        {
+            return Some(ty);
+        }
+
+        let member = members.first()?;
+        let mut target = {
             let base = global_type_id_for_qualifier(&TypeReferenceQualifier {
                 path: Path::from(first.clone()),
                 type_parameters: Box::default(),
@@ -254,9 +264,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             })
             .map(|id| super::globals::global_type(self.db, id))?;
             self.resolve_static_member_expression(base, member.text())
-        })?;
+        }?;
 
-        for member in parts {
+        for member in members.iter().skip(1) {
             target = self.resolve_static_member_expression(target, member.text())?;
         }
 

@@ -36,7 +36,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoNonScalableViewport {
-        version: "next",
+        version: "2.5.7",
         name: "noNonScalableViewport",
         language: "html",
         recommended: false,
