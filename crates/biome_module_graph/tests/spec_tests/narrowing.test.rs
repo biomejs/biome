@@ -40,18 +40,15 @@ export function reversed(y: string | undefined) {
             .expect("reference type must be inferred")
     };
 
-    // Inside the consequent, `x` is narrowed to the callable variant.
     let narrowed_offset = SOURCE.find("x;").expect("guarded reference must exist");
     let narrowed = normalize_type(&db, module, expression_ty_at(narrowed_offset));
     assert!(narrowed.callable_function(&db).is_some());
     assert!(!contains_inferred_number(&db, narrowed));
 
-    // After the `if` statement, `x` still has its declared union type.
     let unnarrowed_offset = SOURCE.rfind("x;").expect("trailing reference must exist");
     let unnarrowed = normalize_type(&db, module, expression_ty_at(unnarrowed_offset));
     assert!(contains_inferred_number(&db, unnarrowed));
 
-    // An `undefined` guard selects the `undefined` variant.
     let undefined_offset = SOURCE
         .find("y;")
         .expect("undefined-guarded reference must exist");
@@ -59,7 +56,6 @@ export function reversed(y: string | undefined) {
     assert!(contains_inferred_undefined(&db, narrowed_to_undefined));
     assert!(!contains_inferred_string(&db, narrowed_to_undefined));
 
-    // Reversed operands and `==` are recognized as well.
     let string_offset = SOURCE
         .rfind("y;")
         .expect("string-guarded reference must exist");
