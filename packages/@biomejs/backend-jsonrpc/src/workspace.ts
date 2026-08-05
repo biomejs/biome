@@ -10223,6 +10223,7 @@ export type Category =
 	| "reporter/parse"
 	| "reporter/format"
 	| "reporter/violations"
+	| "reporter/profiler"
 	| "parse"
 	| "lint"
 	| "lint/a11y"

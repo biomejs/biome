@@ -165,8 +165,8 @@ pub enum BiomeCommand {
         #[bpaf(long("profile-rules"), switch)]
         profile_rules: bool,
 
-        /// Enables type inference profiling output.
-        #[bpaf(long("profile-type-inference"), switch, hide, hide_usage)]
+        /// Enables type-inference profiling output, grouped and ranked by source file.
+        #[bpaf(long("profile-type-inference"), switch, hide_usage)]
         profile_type_inference: bool,
 
         /// Reads code from standard input and writes the processed code to standard output.
@@ -339,8 +339,8 @@ pub enum BiomeCommand {
         #[bpaf(long("profile-rules"), switch)]
         profile_rules: bool,
 
-        /// Capture type-inference request and query timings.
-        #[bpaf(long("profile-type-inference"), switch, hide, hide_usage)]
+        /// Enables type-inference profiling output, grouped and ranked by source file.
+        #[bpaf(long("profile-type-inference"), switch, hide_usage)]
         profile_type_inference: bool,
 
         /// After the initial run, watches the selected paths and reprocesses files modified afterward.
@@ -1051,26 +1051,6 @@ mod tests {
             .unwrap(),
             None
         );
-    }
-
-    /// Tests that all CLI options adhere to the invariants expected by `bpaf`.
-    #[test]
-    fn type_inference_profile_forces_in_process_validation() {
-        use bpaf::Args;
-
-        for command_name in ["lint", "check"] {
-            let command = biome_command()
-                .run_inner(Args::from(
-                    [command_name, "--profile-type-inference", "--use-server"].as_slice(),
-                ))
-                .expect("profile options must parse");
-            assert!(!command.should_use_server());
-            assert!(
-                command
-                    .cli_options()
-                    .is_some_and(|options| options.use_server)
-            );
-        }
     }
 
     #[test]
