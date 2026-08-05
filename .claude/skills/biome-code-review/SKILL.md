@@ -289,6 +289,24 @@ Apply only the subsections the diff touches. Each names the skill that owns the 
 
 **Types and module graph** — load `type-inference` (deeper: `crates/biome_js_type_info/CONTRIBUTING.md`). Beyond it: treating `TypeData::Unknown` as a negative result rather than "could be anything" produces false positives and is `high`. A Salsa query reading an input it does not track serves stale results after an edit — `high`, and invisible to snapshot tests, so it must be caught by inspection.
 
+For every changed resolution boundary, trace the changed path in review notes
+before judging it:
+
+```text
+required result <- consuming query <- raw starting reference
+                -> inference layer -> reachable data -> fallback
+```
+
+The trace names the caller's exact result, the narrowest reference containing
+the required information, every parameter, argument, member, import, or module
+the resolution may visit, and the condition that broadens or abandons the
+lookup. For imported references, it also names the module that owns the
+reference. Treat an unexplained visit, a broader-than-necessary starting point,
+or a fallback that changes the caller's semantics as a finding. Require semantic
+tests for the type structures the changed path actually traverses; require
+query-event tests only when the change claims a narrower dependency or inference
+scope.
+
 **Formatter** — load `formatter-development` for IR primitives, `format_verbatim_node`, `space()` vs `token(" ")`, dangling comments, idempotency, and the internal-vs-Prettier test split. Two things it does not cover, both derived from the crates:
 
 *Formatting logic belongs in a type implementing `Format`.* The unit of composition is a type implementing `Format<Context>` (`biome_formatter/src/lib.rs:1338`), and the trait's own rustdoc example is a struct. A change that instead grows free functions is a design finding, reported once against the cluster.

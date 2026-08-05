@@ -418,6 +418,52 @@ fn test_expression_function_return_query_skips_expression_and_sibling_type_queri
 }
 
 #[test]
+fn test_expression_function_return_query_skips_returned_call_arguments() {
+    const SOURCE: &str = r#"
+        import type { Noise } from "./noise.ts";
+        declare function invoke(callback: (value: Noise) => void): Promise<void>;
+        declare function consume(value: unknown): void;
+        const callback = () => invoke((value: Noise) => { void value; });
+        consume(callback);
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/noise.ts".into(),
+        "export interface Noise { nested: string; }",
+    );
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/noise.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let noise_module = db
+        .module_for_path(Utf8Path::new("/src/noise.ts"))
+        .expect("noise module must exist");
+    let expression = ExpressionTypeInput::new(
+        &db,
+        index_module,
+        expression_range_by_source(&db, index_module, SOURCE, "callback"),
+    );
+    let noise = LocalTypeInput::new(
+        &db,
+        noise_module,
+        local_type_id_by_name(&db, noise_module, "Noise"),
+    );
+
+    db.clear_salsa_events();
+    assert_eq!(
+        infer_expression_function_returns_promise(&db, expression),
+        TypeInferenceClassification::Match
+    );
+    let events = db.take_salsa_events();
+
+    assert_function_query_was_not_run(&db, infer_expression_type, expression, &events);
+    assert_function_query_was_not_run(&db, infer_local_type, noise, &events);
+    assert_function_query_was_not_run(&db, infer_module_types, noise_module, &events);
+}
+
+#[test]
 fn test_expression_function_return_query_follows_only_interface_call_signature() {
     const SOURCE: &str = r#"
         interface Noise {

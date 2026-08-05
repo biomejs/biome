@@ -458,32 +458,50 @@ fn classify_expression(
                         let Some(return_ty) = function.return_type.as_type() else {
                             return DoesNotReturnPromise;
                         };
-                        let mut ctx = ResolutionCtx::new(
-                            db,
-                            state.module,
-                            &js_info,
-                            ImportResolution::on_demand(state.module),
-                        );
-                        let ty = ctx.resolve(return_ty);
-                        let result = match state.projection {
-                            Projection::FunctionReturn => is_promise_type(db, ty),
-                            Projection::ArrayFunctionReturn => is_array_of_promise_type(db, ty),
-                            Projection::AwaitedArrayFunctionReturn => {
-                                let Some(awaited) = ctx.resolve_await_expression(ty) else {
-                                    return Indeterminate;
-                                };
-                                is_array_of_promise_type(db, awaited)
+                        if matches!(state.projection, Projection::FunctionReturn)
+                            && let TypeReference::Resolved(resolved) = return_ty
+                            && resolved.level() == TypeResolverLevel::Thin
+                            && matches!(
+                                js_info.raw_types.get(resolved.id().index()),
+                                Some(RawTypeData::TypeofExpression(expression))
+                                    if matches!(expression.as_ref(), TypeofExpression::Call(_))
+                            )
+                        {
+                            ClassificationState {
+                                module: state.module,
+                                target: ClassificationTarget::Reference(return_ty.clone()),
+                                mode: MemberLookupMode::Value,
+                                members: Box::default(),
+                                projection: Projection::Promise,
                             }
-                            Projection::Promise
-                            | Projection::PromiseTarget
-                            | Projection::ArrayPromise
-                            | Projection::AwaitedArrayPromise => unreachable!(),
-                        };
-                        return match result {
-                            Some(true) => ReturnsPromise,
-                            Some(false) => DoesNotReturnPromise,
-                            None => Indeterminate,
-                        };
+                        } else {
+                            let mut ctx = ResolutionCtx::new(
+                                db,
+                                state.module,
+                                &js_info,
+                                ImportResolution::on_demand(state.module),
+                            );
+                            let ty = ctx.resolve(return_ty);
+                            let result = match state.projection {
+                                Projection::FunctionReturn => is_promise_type(db, ty),
+                                Projection::ArrayFunctionReturn => is_array_of_promise_type(db, ty),
+                                Projection::AwaitedArrayFunctionReturn => {
+                                    let Some(awaited) = ctx.resolve_await_expression(ty) else {
+                                        return Indeterminate;
+                                    };
+                                    is_array_of_promise_type(db, awaited)
+                                }
+                                Projection::Promise
+                                | Projection::PromiseTarget
+                                | Projection::ArrayPromise
+                                | Projection::AwaitedArrayPromise => unreachable!(),
+                            };
+                            return match result {
+                                Some(true) => ReturnsPromise,
+                                Some(false) => DoesNotReturnPromise,
+                                None => Indeterminate,
+                            };
+                        }
                     }
                     RawTypeData::Reference(reference) => ClassificationState {
                         target: ClassificationTarget::Reference(reference.clone()),
