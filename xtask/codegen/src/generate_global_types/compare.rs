@@ -4,12 +4,25 @@ use anyhow::{Result, bail};
 
 use super::lower::{
     LoweredClass, LoweredConstructor, LoweredFunction, LoweredFunctionParameter,
-    LoweredGlobalTypes, LoweredInterface, LoweredMemberKind, LoweredTypeData, LoweredTypeReference,
+    LoweredFunctionParameterBinding, LoweredGlobalTypes, LoweredInterface, LoweredMemberKind,
+    LoweredTypeData, LoweredTypeReference,
 };
 
 /// Number of `Error` class members expected in generated output.
 const ERROR_MEMBER_COUNT: usize = 6;
+const ARRAY_MEMBER_COUNT: usize = 4;
+const ARRAY_TYPE_PARAMETERS: &[LoweredTypeReference] =
+    &[LoweredTypeReference::Predefined("GLOBAL_T_ID")];
+const ARRAY_MAP_TYPE_PARAMETERS: &[LoweredTypeReference] =
+    &[LoweredTypeReference::Predefined("GLOBAL_U_ID")];
+const NO_TYPE_PARAMETERS: &[LoweredTypeReference] = &[];
 const SYMBOL_MEMBER_COUNT: usize = 2;
+const MAP_TYPE_PARAMETERS: &[LoweredTypeReference] = &[
+    LoweredTypeReference::Predefined("GLOBAL_T_ID"),
+    LoweredTypeReference::Predefined("GLOBAL_U_ID"),
+];
+const SET_TYPE_PARAMETERS: &[LoweredTypeReference] =
+    &[LoweredTypeReference::Predefined("GLOBAL_T_ID")];
 const WEAK_MAP_TYPE_PARAMETERS: &[LoweredTypeReference] = &[
     LoweredTypeReference::Predefined("GLOBAL_T_ID"),
     LoweredTypeReference::Predefined("GLOBAL_U_ID"),
@@ -81,6 +94,8 @@ pub fn compare_lowered_globals(lowered: &LoweredGlobalTypes) -> Result<()> {
         "DATE_ID_GLOBAL_TYPE_ID",
         DATE_TYPE_PARAMETERS,
     )?;
+    assert_memberless_class_shape(lowered, "Map", "MAP_ID_GLOBAL_TYPE_ID", MAP_TYPE_PARAMETERS)?;
+    assert_memberless_class_shape(lowered, "Set", "SET_ID_GLOBAL_TYPE_ID", SET_TYPE_PARAMETERS)?;
     assert_memberless_class_shape(
         lowered,
         "WeakMap",
@@ -115,7 +130,122 @@ pub fn compare_lowered_globals(lowered: &LoweredGlobalTypes) -> Result<()> {
             return_type_id: "GLOBAL_INSTANCEOF_PROMISE_ID",
         },
     )?;
+    assert_array_shape(lowered)?;
 
+    Ok(())
+}
+
+/// Rejects output that differs from the predefined `Array` projection used by the resolver.
+fn assert_array_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
+    let Some(array) = lowered.global("Array") else {
+        bail!("generated globals are missing the Array global");
+    };
+    if array.id_constant() != "ARRAY_ID_GLOBAL_TYPE_ID" {
+        bail!(
+            "generated Array global targets {}, expected ARRAY_ID_GLOBAL_TYPE_ID",
+            array.id_constant()
+        );
+    }
+    let LoweredTypeData::Class(class) = array.data() else {
+        bail!("generated Array global is not a class");
+    };
+    if class.name() != "Array" {
+        bail!(
+            "generated Array class has name {}, expected Array",
+            class.name()
+        );
+    }
+    if class.type_parameters() != ARRAY_TYPE_PARAMETERS {
+        bail!("generated Array global has unexpected type parameters");
+    }
+    if class.members().len() != ARRAY_MEMBER_COUNT {
+        bail!(
+            "generated Array global has {} members, expected {ARRAY_MEMBER_COUNT}",
+            class.members().len()
+        );
+    }
+
+    assert_array_member(class, "filter", "GLOBAL_ARRAY_FILTER_ID")?;
+    assert_array_member(class, "forEach", "GLOBAL_ARRAY_FOREACH_ID")?;
+    assert_array_member(class, "map", "GLOBAL_ARRAY_MAP_ID")?;
+    assert_array_member(class, "length", "GLOBAL_NUMBER_ID")?;
+
+    assert_array_method(
+        lowered,
+        "Array.prototype.filter",
+        "ARRAY_FILTER_ID_GLOBAL_TYPE_ID",
+        NO_TYPE_PARAMETERS,
+        "GLOBAL_CONDITIONAL_CALLBACK_ID",
+        "GLOBAL_INSTANCEOF_ARRAY_T_ID",
+    )?;
+    assert_array_method(
+        lowered,
+        "Array.prototype.forEach",
+        "ARRAY_FOREACH_ID_GLOBAL_TYPE_ID",
+        NO_TYPE_PARAMETERS,
+        "GLOBAL_VOID_CALLBACK_ID",
+        "GLOBAL_VOID_ID",
+    )?;
+    assert_array_method(
+        lowered,
+        "Array.prototype.map",
+        "ARRAY_MAP_ID_GLOBAL_TYPE_ID",
+        ARRAY_MAP_TYPE_PARAMETERS,
+        "GLOBAL_MAP_CALLBACK_ID",
+        "GLOBAL_INSTANCEOF_ARRAY_U_ID",
+    )?;
+
+    Ok(())
+}
+
+/// Requires a named, non-optional Array member with the expected predefined type.
+fn assert_array_member(class: &LoweredClass, name: &str, type_id: &'static str) -> Result<()> {
+    let Some(member) = class.member(name) else {
+        bail!("generated Array global is missing {name}");
+    };
+    if member.kind() != &(LoweredMemberKind::Named { optional: false }) {
+        bail!("generated Array.{name} has unexpected kind");
+    }
+    if member.type_reference() != &LoweredTypeReference::Predefined(type_id) {
+        bail!("generated Array.{name} has unexpected type");
+    }
+    Ok(())
+}
+
+/// Checks an Array helper's identity, type parameters, callback slot, and return type.
+fn assert_array_method(
+    lowered: &LoweredGlobalTypes,
+    name: &str,
+    id_constant: &str,
+    type_parameters: &[LoweredTypeReference],
+    parameter_type_id: &'static str,
+    return_type_id: &'static str,
+) -> Result<()> {
+    let function = generated_function(lowered, name, id_constant)?;
+    if function.is_async() {
+        bail!("generated {name} helper must not be async");
+    }
+    if function.type_parameters() != type_parameters {
+        bail!("generated {name} helper has unexpected type parameters");
+    }
+    if function.name() != Some(name) {
+        bail!("generated {name} helper has unexpected function name");
+    }
+    let [parameter] = function.parameters() else {
+        bail!("generated {name} helper must have one parameter");
+    };
+    if parameter.binding() != &LoweredFunctionParameterBinding::Pattern {
+        bail!("generated {name} helper must have a pattern parameter");
+    }
+    if parameter.type_reference() != &LoweredTypeReference::Predefined(parameter_type_id) {
+        bail!("generated {name} helper has unexpected parameter type");
+    }
+    if parameter.is_optional() || parameter.is_rest() {
+        bail!("generated {name} helper parameter must be required and non-rest");
+    }
+    if function.return_type() != &LoweredTypeReference::Predefined(return_type_id) {
+        bail!("generated {name} helper has unexpected return type");
+    }
     Ok(())
 }
 
@@ -159,6 +289,9 @@ fn assert_regexp_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
     let exec = generated_function(lowered, "RegExp.exec", "REGEXP_EXEC_ID_GLOBAL_TYPE_ID")?;
     if exec.is_async() {
         bail!("generated RegExp.exec helper must not be async");
+    }
+    if !exec.type_parameters().is_empty() {
+        bail!("generated RegExp.exec helper must not have type parameters");
     }
     if exec.name() != Some("RegExp.exec") {
         bail!("generated RegExp.exec helper has unexpected function name");
@@ -399,6 +532,12 @@ fn assert_disposable_shape(lowered: &LoweredGlobalTypes, shape: DisposableShape)
             shape.helper_name
         );
     }
+    if !helper.type_parameters().is_empty() {
+        bail!(
+            "generated {} helper should not have type parameters",
+            shape.helper_name
+        );
+    }
     if helper.name().is_some() {
         bail!("generated {} helper should be anonymous", shape.helper_name);
     }
@@ -520,6 +659,9 @@ fn assert_error_call_shape(call: &LoweredFunction) -> Result<()> {
     if call.is_async() {
         bail!("generated Error call helper should not be async");
     }
+    if !call.type_parameters().is_empty() {
+        bail!("generated Error call helper should not have type parameters");
+    }
     if call.name() != Some("Error") {
         bail!("generated Error call helper has unexpected function name");
     }
@@ -541,8 +683,11 @@ fn assert_single_optional_message_parameter(
             parameters.len()
         );
     };
-    if parameter.name() != "message" {
-        bail!("{owner} has unexpected parameter name {}", parameter.name());
+    let LoweredFunctionParameterBinding::Named(name) = parameter.binding() else {
+        bail!("{owner} message parameter must be named");
+    };
+    if name.text() != "message" {
+        bail!("{owner} has unexpected parameter name {}", name.text());
     }
     if parameter.type_reference() != &LoweredTypeReference::Predefined("GLOBAL_STRING_ID") {
         bail!("{owner} message parameter has unexpected type");

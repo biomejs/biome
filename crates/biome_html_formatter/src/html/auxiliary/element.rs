@@ -164,13 +164,23 @@ impl FormatHtmlElement {
             .is_some_and(|ancestor| HtmlRoot::can_cast(ancestor.kind()));
         let is_template_element = get_tag_name_text(&tag_name)
             .is_some_and(|tt| tt.to_ascii_lowercase_cow() == "template");
-        let should_be_verbatim = match tag_name {
-            AnyHtmlTagName::HtmlComponentName(_) | AnyHtmlTagName::HtmlMemberName(_) => false,
-            AnyHtmlTagName::HtmlTagName(tag_name) => tag_name
-                .value_token()
-                .as_ref()
-                .is_ok_and(|tag_name_token| is_verbatim_tag(tag_name_token.text_trimmed())),
-        };
+        // The parser hands us a single `HtmlEmbeddedContent` child whenever it
+        // read the content as raw text, which covers the tags below as well as
+        // the blocks of a Vue single-file component, whose names are arbitrary.
+        let has_embedded_content = children.iter().any(|child| {
+            matches!(
+                child,
+                AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlEmbeddedContent(_))
+            )
+        });
+        let should_be_verbatim = has_embedded_content
+            || match tag_name {
+                AnyHtmlTagName::HtmlComponentName(_) | AnyHtmlTagName::HtmlMemberName(_) => false,
+                AnyHtmlTagName::HtmlTagName(tag_name) => tag_name
+                    .value_token()
+                    .as_ref()
+                    .is_ok_and(|tag_name_token| is_verbatim_tag(tag_name_token.text_trimmed())),
+            };
 
         let should_format_embedded_nodes = if f.context().should_delegate_fmt_embedded_nodes() {
             // Only delegate for supported <script> or <style> content

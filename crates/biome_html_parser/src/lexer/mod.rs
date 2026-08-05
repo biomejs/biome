@@ -570,6 +570,32 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    /// Whether the lexer sits at the closing tag `</name>`, ignoring case the
+    /// way tag names are matched everywhere else.
+    ///
+    /// Whitespace is allowed before the `>`, as browsers accept it. The name
+    /// has to end where the tag does, so that `</pre>` does not stop a
+    /// `</prefetch>` from being ordinary text.
+    fn is_at_closing_tag(&self, name: &str) -> bool {
+        let Some(after_name) = self
+            .source
+            .get(self.position..)
+            .and_then(|rest| rest.strip_prefix("</"))
+            .and_then(|rest| {
+                let candidate = rest.get(..name.len())?;
+                candidate
+                    .eq_ignore_ascii_case(name)
+                    .then(|| &rest[name.len()..])
+            })
+        else {
+            return false;
+        };
+
+        after_name
+            .trim_start_matches([' ', '\t', '\n', '\r', '\x0C'])
+            .starts_with('>')
+    }
+
     /// Consume an embedded language in its entirety. Stops immediately:
     /// - before the closing tag
     /// - before the Astro fence, if applicable
@@ -580,7 +606,7 @@ impl<'src> HtmlLexer<'src> {
         context: HtmlLexContext,
     ) -> HtmlSyntaxKind {
         let start = self.text_position();
-        let end_tag = lang.end_tag();
+        let closing_tag_name = lang.closing_tag_name(self.source);
         // double, single, template
         let mut quotes_seen = QuotesSeen::new();
         self.assert_current_char_boundary();
@@ -589,12 +615,7 @@ impl<'src> HtmlLexer<'src> {
                 quotes_seen.check_byte(byte);
             }
 
-            let end = self.position + end_tag.len();
-            let both_ends_at_char_boundaries =
-                self.source.is_char_boundary(self.position) && self.source.is_char_boundary(end);
-            if both_ends_at_char_boundaries
-                && self.source[self.position..end].eq_ignore_ascii_case(end_tag)
-            {
+            if self.is_at_closing_tag(closing_tag_name) {
                 break;
             }
             self.advance_byte_or_char(byte);

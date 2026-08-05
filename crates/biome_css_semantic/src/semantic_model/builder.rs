@@ -17,6 +17,8 @@ pub struct SemanticModelBuilder {
     /// IDs of top-level rules only
     top_level_rule_ids: Vec<RuleId>,
     global_custom_variables: FxHashMap<TokenText, CssGlobalCustomVariableData>,
+    at_property_rules: Vec<CssPropertyAtRuleData>,
+    last_at_property_by_name: FxHashMap<TokenText, usize>,
     /// Stack of rule IDs to keep track of the current rule hierarchy
     current_rule_stack: Vec<RuleId>,
     /// Map from text range to RuleId
@@ -33,6 +35,8 @@ impl SemanticModelBuilder {
             top_level_rule_ids: Vec::new(),
             current_rule_stack: Vec::new(),
             global_custom_variables: FxHashMap::default(),
+            at_property_rules: Vec::new(),
+            last_at_property_by_name: FxHashMap::default(),
             range_to_rule_id: BTreeMap::default(),
             is_in_root_selector: false,
         }
@@ -121,6 +125,8 @@ impl SemanticModelBuilder {
             all_rules: self.all_rules,
             top_level_rule_ids: self.top_level_rule_ids,
             global_custom_variables: self.global_custom_variables,
+            at_property_rules: self.at_property_rules,
+            last_at_property_by_name: self.last_at_property_by_name,
             range_to_rule_id: self.range_to_rule_id,
         };
         SemanticModel::new(data)
@@ -266,17 +272,19 @@ impl SemanticModelBuilder {
             } => {
                 if let Ok(property_name) = property.value_token() {
                     let property_name = property_name.token_text_trimmed();
-                    let variable = self
-                        .global_custom_variables
-                        .entry(property_name)
+                    self.global_custom_variables
+                        .entry(property_name.clone())
                         .or_default();
-                    variable.at_property = Some(CssPropertyAtRuleData {
+                    let index = self.at_property_rules.len();
+                    self.at_property_rules.push(CssPropertyAtRuleData {
+                        name: property_name.clone(),
                         property: AstPtr::new(&property),
                         initial_value,
                         syntax,
                         inherits,
                         range,
                     });
+                    self.last_at_property_by_name.insert(property_name, index);
                 }
             }
         }

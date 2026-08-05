@@ -43,6 +43,7 @@ pub(crate) mod declaration_block;
 pub(crate) mod declaration_important;
 pub(crate) mod declaration_or_at_rule_block;
 pub(crate) mod declaration_or_rule_block;
+pub(crate) mod declaration_snippet_root;
 pub(crate) mod declaration_with_semicolon;
 pub(crate) mod document_custom_matcher;
 pub(crate) mod else_keyword;

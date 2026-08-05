@@ -11,9 +11,15 @@ impl FormatNodeRule<ScssMediaQuery> for FormatScssMediaQuery {
     }
 
     fn fmt_fields(&self, node: &ScssMediaQuery, f: &mut CssFormatter) -> FormatResult<()> {
-        let ScssMediaQueryFields { query } = node.as_fields();
+        let ScssMediaQueryFields { head, tail } = node.as_fields();
 
-        write!(f, [query.format()])
+        write!(f, [head.format()])?;
+
+        if let Some(tail) = tail {
+            write!(f, [space(), tail.format()])?;
+        }
+
+        Ok(())
     }
 
     fn fmt_leading_comments(

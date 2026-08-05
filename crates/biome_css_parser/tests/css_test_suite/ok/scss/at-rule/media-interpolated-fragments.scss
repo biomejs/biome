@@ -1,0 +1,35 @@
+$condition: "(min-width: 40rem)";
+$query-tail: "and (min-width: 40rem)";
+$modifier: only;
+$type: screen;
+$prefix: print;
+$suffix: color;
+
+@media #{$condition} {}
+@media bar#{12} {}
+@media #{$prefix}-screen {}
+@media scr#{"ee"}n {}
+@media print-#{$suffix} {}
+
+@media all #{$query-tail} {}
+@media screen
+#{$query-tail} {}
+@media #{$modifier} screen {}
+@media #{$modifier} #{$type} {}
+@media only #{$type} {}
+@media not #{$type} {}
+
+@media #{$type} and (color) {}
+@media all #{$query-tail} and (color) {}
+@media (color) and #{$condition} {}
+@media #{"only screen"} and #{"(min-width: 700px)"} and #{"(max-width: "+"1920px)"} {}
+@media scr#{"een, pri"}nt a#{"nd (max-width: 300px)"} {}
+
+@media screen, all #{$query-tail}, print-#{$suffix} {}
+
+@media only#{$type} {}
+@media not#{$type} {}
+@media screen and#{$suffix} {}
+@media screen or#{$suffix} {}
+@media only/**/#{$type} {}
+@media screen and/**/#{$suffix} {}

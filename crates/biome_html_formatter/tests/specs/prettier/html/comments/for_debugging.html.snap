@@ -33,11 +33,7 @@ info: html/comments/for_debugging.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,14 +1,12 @@
--<!doctype html>
-+<!DOCTYPE html>
- <html>
-   <body>
+@@ -4,11 +4,9 @@
      <!-- Do not display this at the moment
  <img border="0" src="pic_trulli.jpg" alt="Trulli">
  -->
@@ -54,7 +50,7 @@ info: html/comments/for_debugging.html
 # Output
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <body>
     <!-- Do not display this at the moment

@@ -340,6 +340,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_ROOT",
         "CSS_ROOT_ITEM_LIST",
         "CSS_SNIPPET_ROOT",
+        "CSS_DECLARATION_SNIPPET_ROOT",
         "CSS_RULE_LIST",
         "CSS_QUALIFIED_RULE",
         "CSS_NESTED_QUALIFIED_RULE",

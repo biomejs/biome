@@ -31,9 +31,7 @@ info: html/js/simple.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,10 +1,8 @@
--<!doctype html>
-+<!DOCTYPE html>
+@@ -2,9 +2,7 @@
  <html>
    <head>
      <title>Sample styled page</title>
@@ -49,7 +47,7 @@ info: html/js/simple.html
 # Output
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <title>Sample styled page</title>

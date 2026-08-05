@@ -4,21 +4,25 @@ expression: invalid.vue
 ---
 # Input
 ```vue
-<!-- should generate diagnostics -->
-<CustomLabel aria-label="A label" />
+<template>
+	<!-- should generate diagnostics -->
+	<CustomLabel aria-label="A label" />
+</template>
 
 ```
 
 # Diagnostics
 ```
-invalid.vue:2:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:3:2 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × A form label must be associated with an input.
   
-    1 │ <!-- should generate diagnostics -->
-  > 2 │ <CustomLabel aria-label="A label" />
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ 
+    1 │ <template>
+    2 │ 	<!-- should generate diagnostics -->
+  > 3 │ 	<CustomLabel aria-label="A label" />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ </template>
+    5 │ 
   
   i Consider adding a "for" attribute to the label element or moving the input element to inside the label element.
   

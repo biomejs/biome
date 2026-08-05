@@ -846,6 +846,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noNonNullAssertion",
         TypeId::of::<biome_rule_options::no_non_null_assertion::NoNonNullAssertionOptions>(),
     ));
+    result.push((
+        "nursery",
+        "noNonScalableViewport",
+        TypeId::of::<biome_rule_options::no_non_scalable_viewport::NoNonScalableViewportOptions>(),
+    ));
     result.push(("a11y", "noNoninteractiveElementInteractions", TypeId::of::<biome_rule_options::no_noninteractive_element_interactions::NoNoninteractiveElementInteractionsOptions>()));
     result.push(("a11y", "noNoninteractiveElementToInteractiveRole", TypeId::of::<biome_rule_options::no_noninteractive_element_to_interactive_role::NoNoninteractiveElementToInteractiveRoleOptions>()));
     result.push(("a11y", "noNoninteractiveTabindex", TypeId::of::<biome_rule_options::no_noninteractive_tabindex::NoNoninteractiveTabindexOptions>()));

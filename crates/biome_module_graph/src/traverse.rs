@@ -35,6 +35,21 @@ pub(crate) trait UpwardTraversalVisitor {
     /// A value yielded by the traversal.
     type Item;
 
+    /// Returns the module database searched for importers.
+    fn db(&self) -> &dyn ModuleDb;
+
+    /// Wraps this visitor in an upward traversal iterator.
+    fn into_upward_iter(
+        self,
+        start: Utf8PathBuf,
+        branch: Self::Branch,
+    ) -> UpwardTraversalIterator<Self>
+    where
+        Self: Sized,
+    {
+        TraversalIterator(UpwardTraversal::new(self, start, branch))
+    }
+
     /// Returns whether `importer` should be visited from `imported_path`.
     fn should_visit_importer(
         &self,
@@ -68,7 +83,7 @@ pub(crate) struct UpwardTraversalAction<Item, Branch> {
 }
 
 /// Work waiting to be processed by an [UpwardTraversal].
-pub(crate) enum UpwardTraversalWork<Item, Branch> {
+enum UpwardTraversalWork<Item, Branch> {
     /// Finds modules that import `imported_path`.
     ExploreImporters {
         imported_path: Utf8PathBuf,
@@ -80,7 +95,7 @@ pub(crate) enum UpwardTraversalWork<Item, Branch> {
 }
 
 impl<Item, Branch> UpwardTraversalWork<Item, Branch> {
-    pub(crate) fn explore(imported_path: Utf8PathBuf, branch: Branch) -> Self {
+    fn explore(imported_path: Utf8PathBuf, branch: Branch) -> Self {
         Self::ExploreImporters {
             imported_path,
             branch,
@@ -92,31 +107,46 @@ impl<Item, Branch> UpwardTraversalWork<Item, Branch> {
 ///
 /// The visitor chooses which importers to visit and whether to continue from
 /// them. Importer and item order are unspecified.
-pub(crate) trait UpwardTraversal: UpwardTraversalVisitor {
-    fn db(&self) -> &dyn ModuleDb;
+pub(crate) struct UpwardTraversal<V>
+where
+    V: UpwardTraversalVisitor,
+{
+    visitor: V,
+    stack: Vec<UpwardTraversalWork<V::Item, V::Branch>>,
+}
 
-    fn stack(&mut self) -> &mut Vec<UpwardTraversalWork<Self::Item, Self::Branch>>;
-
-    /// Wraps this traversal in the standard-library iterator interface.
-    fn into_upward_iter(self) -> UpwardTraversalIterator<Self>
-    where
-        Self: Sized,
-    {
-        TraversalIterator(UpwardTraversalAdapter(self))
+impl<V> UpwardTraversal<V>
+where
+    V: UpwardTraversalVisitor,
+{
+    fn new(visitor: V, start: Utf8PathBuf, branch: V::Branch) -> Self {
+        Self {
+            visitor,
+            stack: vec![UpwardTraversalWork::explore(start, branch)],
+        }
     }
+}
 
-    /// Returns the next item produced while exploring importers.
-    fn next_upward(&mut self) -> Option<Self::Item> {
+impl<V> Traversal for UpwardTraversal<V>
+where
+    V: UpwardTraversalVisitor,
+{
+    type Item = V::Item;
+
+    fn next_item(&mut self) -> Option<Self::Item> {
         loop {
-            match self.stack().pop()? {
+            match self.stack.pop()? {
                 UpwardTraversalWork::Emit(item) => return Some(item),
                 UpwardTraversalWork::ExploreImporters {
                     imported_path,
                     branch,
                 } => {
                     let mut importers = Vec::new();
-                    self.db().for_each_module(&mut |importer| {
-                        if self.should_visit_importer(&imported_path, importer, &branch) {
+                    self.visitor.db().for_each_module(&mut |importer| {
+                        if self
+                            .visitor
+                            .should_visit_importer(&imported_path, importer, &branch)
+                        {
                             importers.push(importer);
                         }
                     });
@@ -124,8 +154,10 @@ pub(crate) trait UpwardTraversal: UpwardTraversalVisitor {
                     let mut items = Vec::new();
                     let mut explorations = Vec::new();
                     for importer in importers {
-                        let importer_path = importer.path(self.db()).to_path_buf();
-                        let actions = self.visit_importer(&imported_path, importer, &branch);
+                        let importer_path = importer.path(self.visitor.db()).to_path_buf();
+                        let actions =
+                            self.visitor
+                                .visit_importer(&imported_path, importer, &branch);
                         for action in actions {
                             for item in action.items {
                                 items.push(UpwardTraversalWork::Emit(item));
@@ -138,27 +170,13 @@ pub(crate) trait UpwardTraversal: UpwardTraversalVisitor {
                             }
                         }
                     }
-                    self.stack().extend(explorations);
-                    self.stack().extend(items.into_iter().rev());
+                    self.stack.extend(explorations);
+                    self.stack.extend(items.into_iter().rev());
                 }
             }
         }
     }
 }
 
-/// Adapts an [UpwardTraversal] to the direction-neutral [Traversal] interface.
-pub(crate) struct UpwardTraversalAdapter<T>(T);
-
-impl<T> Traversal for UpwardTraversalAdapter<T>
-where
-    T: UpwardTraversal,
-{
-    type Item = T::Item;
-
-    fn next_item(&mut self) -> Option<Self::Item> {
-        self.0.next_upward()
-    }
-}
-
 /// Iterator adapter for an [UpwardTraversal].
-pub(crate) type UpwardTraversalIterator<T> = TraversalIterator<UpwardTraversalAdapter<T>>;
+pub(crate) type UpwardTraversalIterator<V> = TraversalIterator<UpwardTraversal<V>>;
