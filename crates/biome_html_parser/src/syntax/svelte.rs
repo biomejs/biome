@@ -1126,11 +1126,8 @@ impl ParseNodeList for SvelteElementList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        let at_l_angle0 = p.at(T![<]);
-        let at_slash1 = p.nth_at(1, T![/]);
-        let at_eof = p.at(EOF);
-        at_l_angle0 && at_slash1
-            || at_eof
+        p.at(EOF)
+            || p.at(T![<]) && p.nth_at(1, T![/])
             || p.at(T!["{/"])
             || (self.stop_at_curly_colon && p.at(T!["{:"]))
     }
