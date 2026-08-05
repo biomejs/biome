@@ -4,6 +4,10 @@
     console.log("hai!");
   };
 
+  export function someExportedFunctionDeclaration() {
+    console.log("yo!");
+  }
+
   const someOtherFunction = () => {
     console.log("heyy");
   };
@@ -11,5 +15,6 @@
 
 <script lang="ts">
   someFunction();
+  someExportedFunctionDeclaration();
   someOtherFunction();
 </script>

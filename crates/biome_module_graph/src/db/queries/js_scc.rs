@@ -81,7 +81,7 @@ pub fn js_module_sccs(db: &dyn ModuleDb, generation: ModuleGraphGeneration) -> J
 /// Computes strongly connected components with Kosaraju's algorithm
 ///
 /// See: <https://en.wikipedia.org/wiki/Kosaraju%27s_algorithm>
-fn compute_sccs(edges: &[Vec<u32>]) -> (Vec<u32>, Vec<u32>) {
+pub(super) fn compute_sccs(edges: &[Vec<u32>]) -> (Vec<u32>, Vec<u32>) {
     let node_count = edges.len();
     let mut visited = vec![false; node_count];
     let mut next_edge = vec![0; node_count];

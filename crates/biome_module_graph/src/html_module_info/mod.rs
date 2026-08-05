@@ -1,11 +1,12 @@
 mod visitor;
 
+use crate::ImportPathMap;
 use crate::css_module_info::{CssClassDefinition, CssClassReference};
 use biome_css_syntax::{AnyCssRoot, TextRange};
 use biome_js_syntax::AnyJsRoot;
 use biome_languages::CssFileSource;
 use biome_resolver::ResolvedPath;
-use biome_rowan::{Text, TextSize, TokenText};
+use biome_rowan::{TextSize, TokenText};
 use indexmap::IndexMap;
 use indexmap::IndexSet;
 use std::collections::BTreeSet;
@@ -59,15 +60,13 @@ impl HtmlModuleInfo {
         style_classes: IndexSet<CssClassDefinition>,
         referenced_classes: Vec<CssClassReference>,
         imported_stylesheets: Vec<ResolvedPath>,
-        static_import_paths: IndexMap<Text, ResolvedPath>,
-        dynamic_import_paths: IndexMap<Text, ResolvedPath>,
+        import_paths: ImportPathMap<ResolvedPath>,
     ) -> Self {
         let info = HtmlModuleInfoInner {
             style_classes,
             referenced_classes,
             imported_stylesheets,
-            static_import_paths,
-            dynamic_import_paths,
+            import_paths,
         };
         Self(Arc::new(info))
     }
@@ -115,15 +114,8 @@ pub struct HtmlModuleInfoInner {
     /// `<link rel="stylesheet" href="...">`.
     pub imported_stylesheets: Vec<ResolvedPath>,
 
-    /// Resolved paths of JS/TS modules imported from embedded `<script>` blocks.
-    ///
-    /// Keys are the raw import specifiers (e.g. `"./Button.vue"`); values are
-    /// their resolved absolute paths. Only static imports (`import … from "…"`)
-    /// are tracked here — dynamic imports are ignored for upward-traversal.
-    pub static_import_paths: IndexMap<Text, ResolvedPath>,
-
-    /// Resolved paths of JS/TS modules imported from dynamic imports.
-    pub dynamic_import_paths: IndexMap<Text, ResolvedPath>,
+    /// Resolved paths imported from embedded `<script>` blocks in source order.
+    pub import_paths: ImportPathMap<ResolvedPath>,
 }
 
 impl HtmlModuleInfoInner {

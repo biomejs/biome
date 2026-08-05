@@ -10,6 +10,10 @@ expression: valid_issue_9541_module_export.svelte
     console.log("hai!");
   };
 
+  export function someExportedFunctionDeclaration() {
+    console.log("yo!");
+  }
+
   const someOtherFunction = () => {
     console.log("heyy");
   };
@@ -17,6 +21,7 @@ expression: valid_issue_9541_module_export.svelte
 
 <script lang="ts">
   someFunction();
+  someExportedFunctionDeclaration();
   someOtherFunction();
 </script>
 

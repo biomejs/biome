@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: printer/pre-element-with-code-element.svelte
+---
+
+# Input
+
+```svelte
+<pre>
+    <code>
+        const greeting = "Hello",
+            name = "World",
+            text = greeting + ", " + name + "!";
+    </code>
+</pre>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,5 @@
+-<pre>
+-    <code>
++<pre><code>
+         const greeting = "Hello",
+             name = "World",
+             text = greeting + ", " + name + "!";
+-    </code>
+-</pre>
++    </code></pre>
+```
+
+# Output
+
+```svelte
+<pre><code>
+        const greeting = "Hello",
+            name = "World",
+            text = greeting + ", " + name + "!";
+    </code></pre>
+```

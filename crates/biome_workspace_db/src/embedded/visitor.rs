@@ -11,7 +11,7 @@ use biome_html_syntax::{
 use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement, AnyJsArrayElement,
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsDeclarationClause,
-    AnyJsExpression, AnyJsIdentifierUsage, AnyJsModuleItem, AnyJsObjectAssignmentPatternMember,
+    AnyJsExpression, AnyJsIdentifierReference, AnyJsModuleItem, AnyJsObjectAssignmentPatternMember,
     AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsRoot, AnyJsStatement,
     AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression, JsCallExpression, JsExport,
     JsIdentifierAssignment, JsImport, JsModuleItemList, JsReferenceIdentifier,
@@ -1331,9 +1331,9 @@ impl EmbeddedReferencesBuilder {
     }
 
     fn visit_reference_identifier(&mut self, reference: JsReferenceIdentifier) -> Option<()> {
-        let usage = AnyJsIdentifierUsage::from(reference.clone());
+        let reference = AnyJsIdentifierReference::from(reference.clone());
         let name_token = reference.value_token().ok()?;
-        if usage.is_only_type() {
+        if reference.is_only_type() {
             self.register_type_reference(
                 name_token.text_trimmed_range(),
                 name_token.token_text_trimmed(),

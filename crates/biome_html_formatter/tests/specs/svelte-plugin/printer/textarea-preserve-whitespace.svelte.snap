@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: printer/textarea-preserve-whitespace.svelte
+---
+
+# Input
+
+```svelte
+<textarea>
+  A
+  B
+</textarea>
+
+<textarea name="value">
+  hello
+  world
+</textarea>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,9 +1,5 @@
+-<textarea>
+-  A
+-  B
+-</textarea>
++<textarea>A
++  B</textarea>
+ 
+-<textarea name="value">
+-  hello
+-  world
+-</textarea>
++<textarea name="value">hello
++  world</textarea>
+```
+
+# Output
+
+```svelte
+<textarea>A
+  B</textarea>
+
+<textarea name="value">hello
+  world</textarea>
+```

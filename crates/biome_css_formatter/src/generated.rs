@@ -1817,6 +1817,38 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssDeclarationOrRuleBloc
         FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: declaration_or_rule_block :: FormatCssDeclarationOrRuleBlock :: default ())
     }
 }
+impl FormatRule<biome_css_syntax::CssDeclarationSnippetRoot>
+    for crate::css::auxiliary::declaration_snippet_root::FormatCssDeclarationSnippetRoot
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssDeclarationSnippetRoot,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssDeclarationSnippetRoot>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssDeclarationSnippetRoot {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssDeclarationSnippetRoot,
+        crate::css::auxiliary::declaration_snippet_root::FormatCssDeclarationSnippetRoot,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: declaration_snippet_root :: FormatCssDeclarationSnippetRoot :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssDeclarationSnippetRoot {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssDeclarationSnippetRoot,
+        crate::css::auxiliary::declaration_snippet_root::FormatCssDeclarationSnippetRoot,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: declaration_snippet_root :: FormatCssDeclarationSnippetRoot :: default ())
+    }
+}
 impl FormatRule<biome_css_syntax::CssDeclarationWithSemicolon>
     for crate::css::auxiliary::declaration_with_semicolon::FormatCssDeclarationWithSemicolon
 {

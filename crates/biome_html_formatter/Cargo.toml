@@ -43,6 +43,7 @@ biome_test_utils     = { path = "../biome_test_utils", features = ["lang_html"] 
 camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
 criterion            = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+serde_json           = { workspace = true }
 similar-asserts      = { workspace = true }
 tests_macros         = { workspace = true }
 

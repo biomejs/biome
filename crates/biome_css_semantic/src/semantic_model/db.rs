@@ -2,6 +2,24 @@ use crate::model::SemanticModel;
 use crate::semantic_model;
 use biome_css_syntax::AnyCssRoot;
 use biome_db::{AnyParsedSource, Db, ParsedSnippet, ParsedSource};
+use biome_rowan::{TextRange, TokenText};
+
+/// The name and source range of an effective `@property` rule.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct CssPropertyDefinition {
+    name: TokenText,
+    range: TextRange,
+}
+
+impl CssPropertyDefinition {
+    pub fn name(&self) -> &str {
+        self.name.text()
+    }
+
+    pub fn range(&self) -> TextRange {
+        self.range
+    }
+}
 
 #[salsa::tracked(returns(ref))]
 pub(crate) fn css_model_from_parsed_source(db: &dyn Db, file: ParsedSource) -> SemanticModel {
@@ -13,6 +31,37 @@ pub(crate) fn css_model_from_parsed_source(db: &dyn Db, file: ParsedSource) -> S
 pub(crate) fn css_model_from_parsed_snippet(db: &dyn Db, file: ParsedSnippet) -> SemanticModel {
     let parsed: AnyCssRoot = file.parsed(db).tree();
     semantic_model(&parsed)
+}
+
+/// Returns effective `@property` rules from a parsed CSS document.
+#[salsa::tracked(returns(ref))]
+pub fn css_property_definitions_from_source(
+    db: &dyn Db,
+    file: ParsedSource,
+) -> Vec<CssPropertyDefinition> {
+    let _ = file.parsed(db);
+    collect_property_definitions(css_model_from_parsed_source(db, file))
+}
+
+/// Returns effective `@property` rules from an embedded CSS document.
+#[salsa::tracked(returns(ref))]
+pub fn css_property_definitions_from_snippet(
+    db: &dyn Db,
+    file: ParsedSnippet,
+) -> Vec<CssPropertyDefinition> {
+    let _ = file.parsed(db);
+    collect_property_definitions(css_model_from_parsed_snippet(db, file))
+}
+
+fn collect_property_definitions(model: &SemanticModel) -> Vec<CssPropertyDefinition> {
+    model
+        .global_custom_variables()
+        .at_properties()
+        .map(|property| CssPropertyDefinition {
+            name: property.name().clone(),
+            range: property.range(),
+        })
+        .collect()
 }
 
 pub fn css_semantic_model<'db>(db: &'db dyn Db, file: &AnyParsedSource) -> &'db SemanticModel {
@@ -281,6 +330,39 @@ mod tests {
 
         let new_parsed = parse_css(
             r#"@property --value { syntax: "<length>"; inherits: true; initial-value: 10px; }"#,
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        )
+        .into();
+        salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+
+        db.clear_salsa_events();
+        assert_eq!(
+            property_syntax_type(&db, file),
+            Some(PropertySyntaxType::Length)
+        );
+        let events = db.take_salsa_events();
+
+        assert_function_query_was_run(&db, css_model_from_parsed_source, file, &events);
+        assert_function_query_was_run(&db, property_syntax_type, file, &events);
+    }
+
+    #[test]
+    fn shadowed_at_property_change_recomputes_downstream() {
+        let mut db = TestDb::new();
+        let file = make_file(
+            &db,
+            r#"@property --value { syntax: "<color>"; inherits: true; initial-value: red; }
+@property --value { syntax: "<length>"; inherits: true; initial-value: 1px; }"#,
+        );
+        assert_eq!(
+            property_syntax_type(&db, file),
+            Some(PropertySyntaxType::Length)
+        );
+
+        let new_parsed = parse_css(
+            r#"@property --value { syntax: "<number>"; inherits: true; initial-value: 1; }
+@property --value { syntax: "<length>"; inherits: true; initial-value: 1px; }"#,
             CssFileSource::css(),
             CssParserOptions::default(),
         )

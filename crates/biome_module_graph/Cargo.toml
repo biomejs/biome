@@ -11,6 +11,15 @@ keywords.workspace   = true
 categories.workspace = true
 include              = ["README.md", "src/**/*"]
 publish              = true
+autotests            = false
+
+[[test]]
+name = "spec_tests"
+path = "tests/spec_tests.rs"
+
+[[test]]
+name = "js_scc"
+path = "tests/js_scc.rs"
 
 [[bench]]
 harness = false

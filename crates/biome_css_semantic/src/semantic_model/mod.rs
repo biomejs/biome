@@ -466,6 +466,40 @@ or>";
         };
 
         assert_eq!(diagnostic.kind(), PropertySyntaxErrorKind::ExpectedTypeName);
+        assert_eq!(model.global_custom_variables().at_properties().count(), 1);
+    }
+
+    #[test]
+    fn test_effective_at_properties_follow_last_definition_order() {
+        let parse = parse_css(
+            r#"@property --b { syntax: "<color>"; inherits: true; initial-value: red; }
+@property --a { syntax: "<length>"; inherits: true; initial-value: 1px; }
+@property --b { syntax: "<number>"; inherits: true; initial-value: 1; }
+@property --c { syntax: "<percentage>"; inherits: true; initial-value: 1%; }"#,
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+
+        let model = super::semantic_model(&parse.tree());
+        let properties = model
+            .global_custom_variables()
+            .at_properties()
+            .collect::<Vec<_>>();
+        let names = properties
+            .iter()
+            .map(|property| property.name().text())
+            .collect::<Vec<_>>();
+
+        assert_eq!(names, ["--a", "--b", "--c"]);
+        let PropertySyntaxResult::Value(PropertySyntax::Components(components)) =
+            properties[1].syntax()
+        else {
+            panic!("expected the last --b syntax");
+        };
+        assert_eq!(
+            components[0].name,
+            PropertySyntaxComponentName::Type(PropertySyntaxType::Number)
+        );
     }
 
     #[test]
