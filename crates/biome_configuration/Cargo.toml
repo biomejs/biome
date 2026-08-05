@@ -40,6 +40,7 @@ biome_plugin_loader        = { workspace = true, optional = true }
 biome_resolver             = { workspace = true }
 biome_rowan                = { workspace = true, features = ["serde"] }
 biome_rule_options         = { workspace = true }
+biome_string_case          = { workspace = true }
 biome_yaml_syntax          = { workspace = true, optional = true }
 bpaf                       = { workspace = true, optional = true }
 camino                     = { workspace = true }

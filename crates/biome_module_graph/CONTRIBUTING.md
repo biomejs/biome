@@ -153,8 +153,9 @@ Like an analyzer rule's metadata trait, `TypeInferenceRequestMetadata` is
 implemented by each request type and required by `TypeInferenceRequest`. A
 request therefore cannot compile without its static identity.
 
-Request IDs are stable maintenance identifiers printed in profiles. Use
-lowercase words separated by hyphens after the `request.` prefix:
+Request IDs are stable identities used to aggregate records for the same
+request contract. Use lowercase words separated by hyphens after the
+`request.` prefix:
 
 ```text
 request.expected-call-argument-type
@@ -319,10 +320,10 @@ line, and symbol adjacent to the canonical `execute` method. Inference profiles
 use this reference to lead maintainers from a reported source range to the
 implementation that orchestrated the work.
 
-Query families and whole-module reasons also have stable IDs. Each recorded
-query execution retains its own implementation reference, so multiple query
-bodies can share one family. Code references correspond to the Biome version
-that produced a report.
+Each recorded query execution retains its own implementation reference, so
+multiple query bodies can share one family. Whole-module records retain the
+implementation responsible for widening inference to complete tables. Code
+references correspond to the Biome version that produced a report.
 
 Do not read `ModuleInfo::path` from inside a tracked query for profiling. The
 path is a Salsa input, so reading it changes the query's dependency set. The
@@ -332,17 +333,23 @@ request and carries only module identities and `TextRange` values.
 
 ## Profiling inference
 
-Maintainers can ask a user to reproduce CLI inference work with the hidden
-maintenance option:
+Use `--profile-type-inference` to inspect CLI inference work:
 
 ```shell
 biome lint --profile-type-inference path/to/reproduction
 biome check --profile-type-inference path/to/reproduction
 ```
 
-The default report ranks requests by consumer, tracked query bodies, and
-whole-module widening. Use `--verbose` to show every recorded source range and
-implementation reference.
+The report groups records by source file. The default output shows the ten files
+with the highest cumulative request time. Within each file, it shows the top
+five request groups, top eight query groups, and top five whole-module groups.
+It includes the total number of groups, source records, and completed executions
+so omitted work remains visible.
+
+Use `--verbose` to show detailed metrics and implementation references for the
+top five request records, top eight query records, and top five whole-module
+records in each file. Verbose output includes every file while retaining the
+per-file limits.
 
 Request and query timings are inclusive and must not be added together. A high
 request count with few tracked query executions usually indicates Salsa reuse.

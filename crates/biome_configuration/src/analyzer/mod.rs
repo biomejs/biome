@@ -7,11 +7,13 @@ pub use crate::analyzer::linter::*;
 use crate::analyzer::presets::PresetConfig;
 use biome_analyze::options::RuleOptions;
 use biome_analyze::{FixKind, PLUGIN_GROUP, Rule, RuleCategory, RuleDomain, RuleFilter};
+use biome_console::markup;
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext, Merge,
 };
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::Severity;
+use biome_string_case::Case;
 use rustc_hash::FxHashSet;
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
@@ -700,6 +702,44 @@ impl Display for RuleSelector {
             Self::Group(group) => write!(f, "{group}",),
             Self::Rule(group, rule) => write!(f, "{group}/{rule}",),
         }
+    }
+}
+
+impl biome_console::fmt::Display for AnalyzerSelector {
+    fn fmt(&self, f: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        match self {
+            AnalyzerSelector::Rule(rule) => f.write_markup(markup! {{rule}}),
+            AnalyzerSelector::Domain(domain) => f.write_markup(markup! {{domain}}),
+            AnalyzerSelector::Plugin => f.write_str("plugin/plugin"),
+        }
+    }
+}
+
+impl biome_console::fmt::Display for RuleSelector {
+    fn fmt(&self, f: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        match self {
+            RuleSelector::Group(group) => {
+                let link = format!("https://biomejs.dev/linter/#{}", group);
+                f.write_markup(markup! {
+                    <Hyperlink href={link}>{group}</Hyperlink>
+                })
+            }
+            RuleSelector::Rule(group, rule) => {
+                let rule = Case::Kebab.convert(rule);
+                f.write_markup(markup! {
+                    <Hyperlink href={format!("https://biomejs.dev/linter/rules/{}/", rule)}>{group}"/"{rule}</Hyperlink>
+                })
+            }
+        }
+    }
+}
+
+impl biome_console::fmt::Display for DomainSelector {
+    fn fmt(&self, f: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        let link = format!("https://biomejs.dev/linter/domains/#{}", self.0);
+        f.write_markup(markup! {
+            <Hyperlink href={link}>{Case::Upper.convert(self.0)}</Hyperlink>
+        })
     }
 }
 

@@ -10215,6 +10215,7 @@ export type Category =
 	| "deserialize"
 	| "plugin"
 	| "project"
+	| "profiler"
 	| "search"
 	| "internalError/io"
 	| "internalError/fs"
