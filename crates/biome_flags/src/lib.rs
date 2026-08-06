@@ -37,9 +37,9 @@ impl BiomeEnv {
 
 The following installation sources are supported:
 
-- `npm`: Treats Biome as installed through an npm-compatible package manager. You must update Biome using that package manager.
-- `homebrew`: Updates Biome by running `brew upgrade biome`.
-- `standalone`: Updates the standalone Biome binary directly.
+- `npm`: updates Biome by running an npm-compatible package manager command.
+- `homebrew`: updates Biome by running `brew upgrade biome`.
+- `standalone`: updates the standalone Biome binary directly.
 
 Use this when `biome upgrade` cannot correctly detect how Biome was installed, such as a Homebrew installation under a custom prefix.
 
@@ -84,11 +84,11 @@ BIOME_LOG_PREFIX_NAME=my-project.log biome start
 The following logging levels are supported:
 
 - `none`: Disables internal logging.
-- `tracing`: Shows the most detailed logs, including span timing.
-- `debug`: Shows detailed information useful for debugging.
 - `info`: Shows general information about Biome's operation.
 - `warn`: Shows warnings and errors.
 - `error`: Shows only errors.
+- `debug`: Shows detailed information useful for debugging.
+- `tracing`: Shows the most detailed logs, including span timing.
 
 Use this to inspect Biome's internal CLI activity while checking a project.
 
