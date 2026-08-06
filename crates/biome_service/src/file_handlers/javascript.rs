@@ -232,7 +232,7 @@ impl From<JsxRuntime> for JsEnvironmentSettings {
 /// template expression, so they are never declared in user code.
 ///
 /// Vue 2-only members (`$children`, `$listeners`, `$scopedSlots`, `$set`, `$delete`, `$on`,
-/// `$off`, `$once`, `$destroy`) are intentionally excluded.
+/// `$off`, `$once`, `$destroy`) are intentionally excluded, because Vue 2 is end of life.
 ///
 /// See <https://vuejs.org/api/component-instance.html>
 const VUE_TEMPLATE_INSTANCE_PROPERTIES: [&str; 13] = [
