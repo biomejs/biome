@@ -42,11 +42,11 @@ pub fn parse_markdown_with_cache(
 
     parse_document(&mut parser);
 
-    let output = inline_phase::parse_deferred_inlines(source, &options, parser.finish());
-    debug_assert!(
-        output.deferred_inlines.is_empty(),
-        "There shouldn't be deferred inline nodes."
-    );
+    let mut output = parser.finish();
+    if !inline_phase::parse_deferred_inlines(source, &options, &mut output) {
+        output.deferred_inlines.clear();
+    }
+    debug_assert!(output.deferred_inlines.is_empty());
 
     let mut tree_sink = MarkdownLosslessTreeSink::with_cache(source, &output.trivia, cache);
     biome_parser::event::process(&mut tree_sink, output.events, output.diagnostics);

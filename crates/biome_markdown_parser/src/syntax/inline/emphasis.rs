@@ -1,13 +1,13 @@
+use crate::MarkdownParser;
+use crate::syntax::parse_error::unclosed_emphasis;
+use crate::syntax::reference::normalize_reference_label;
 use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::T;
 use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
 use biome_unicode_table::is_unicode_punctuation;
-
-use crate::MarkdownParser;
-use crate::syntax::parse_error::unclosed_emphasis;
-use crate::syntax::reference::normalize_reference_label;
+use std::rc::Rc;
 
 // ============================================================================
 // Delimiter Stack Types for Emphasis Parsing
@@ -667,7 +667,7 @@ pub(crate) fn parse_inline_italic(p: &mut MarkdownParser) -> ParsedSyntax {
 pub(crate) fn set_inline_emphasis_context_until(
     p: &mut MarkdownParser,
     stop: MarkdownSyntaxKind,
-) -> Option<EmphasisContext> {
+) -> Option<Rc<EmphasisContext>> {
     let source_len = inline_list_source_len_until(p, stop);
     let source = p.source_after_current();
     let inline_source = if source_len <= source.len() {
@@ -680,7 +680,7 @@ pub(crate) fn set_inline_emphasis_context_until(
     let context = EmphasisContext::new(inline_source, base_offset, |label| {
         p.has_link_reference_definition(label)
     });
-    p.set_emphasis_context(Some(context))
+    p.set_new_emphasis_context(context)
 }
 
 fn inline_list_source_len_until(p: &mut MarkdownParser, stop: MarkdownSyntaxKind) -> usize {
