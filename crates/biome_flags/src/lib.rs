@@ -165,7 +165,7 @@ BIOME_WATCHER_KIND=polling BIOME_WATCHER_POLLING_INTERVAL=1000 biome start
 Use this to run a system-installed or locally built binary through the `@biomejs/biome` package.
 
 ```shell
-BIOME_BINARY=/usr/local/bin/biome npx @biomejs/biome check .
+BIOME_BINARY=/usr/local/bin/biome npx @biomejs/biome check
 ```"#,
         ),
         &BiomeEnvVariable::new(
