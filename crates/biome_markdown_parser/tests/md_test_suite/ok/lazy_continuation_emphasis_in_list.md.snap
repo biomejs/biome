@@ -28,7 +28,7 @@ baz **em**
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
     value: MdBlockList [
         MdOrderedListItem {
@@ -370,7 +370,7 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..158
+0: MD_ROOT@0..158
   0: (empty)
   1: MD_BLOCK_LIST@0..158
     0: MD_ORDERED_LIST_ITEM@0..22

@@ -61,25 +61,6 @@ pub(crate) fn unclosed_image(
         .with_hint("Format: ![alt text](image-url)")
 }
 
-/// ATX heading with too many hashes (>6).
-///
-/// ```markdown
-/// ####### heading
-/// ^^^^^^^ too many hashes (max 6)
-/// ```
-pub(crate) fn too_many_hashes(
-    p: &MarkdownParser,
-    range: TextRange,
-    count: usize,
-) -> ParseDiagnostic {
-    p.err_builder(
-        format!("ATX heading has {count} hashes, but maximum is 6."),
-        range,
-    )
-    .with_detail(range, "heading started here")
-    .with_hint("Use 1-6 `#` characters for headings. This will be parsed as a paragraph.")
-}
-
 /// Block quote nesting too deep.
 ///
 /// ```markdown

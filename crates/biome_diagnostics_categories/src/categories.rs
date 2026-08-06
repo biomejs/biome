@@ -259,6 +259,7 @@ define_categories! {
     "lint/nursery/useAwaitThenable": "https://biomejs.dev/linter/rules/use-await-thenable",
     "lint/nursery/useBaseline": "https://biomejs.dev/linter/rules/use-baseline",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
+    "lint/nursery/useConsistentHeaderLevel": "https://biomejs.dev/linter/rules/use-consistent-header-level",
     "lint/nursery/useConsistentObjectDefinition": "https://biomejs.dev/linter/rules/use-consistent-object-definition",
     "lint/nursery/useConsistentTestIt": "https://biomejs.dev/linter/rules/use-consistent-test-it",
     "lint/nursery/useDisposables": "https://biomejs.dev/linter/rules/use-disposables",

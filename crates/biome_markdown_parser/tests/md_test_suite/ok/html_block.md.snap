@@ -19,7 +19,7 @@ Next paragraph after blank line.
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
     value: MdBlockList [
         MdHtmlBlock {
@@ -52,7 +52,7 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..101
+0: MD_ROOT@0..101
   0: (empty)
   1: MD_BLOCK_LIST@0..101
     0: MD_HTML_BLOCK@0..66

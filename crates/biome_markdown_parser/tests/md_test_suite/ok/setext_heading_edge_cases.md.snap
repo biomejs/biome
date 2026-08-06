@@ -28,7 +28,7 @@ Foo\
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
     value: MdBlockList [
         MdSetextHeader {
@@ -172,7 +172,7 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..66
+0: MD_ROOT@0..66
   0: (empty)
   1: MD_BLOCK_LIST@0..66
     0: MD_SETEXT_HEADER@0..11

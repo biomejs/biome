@@ -22,7 +22,7 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
     value: MdBlockList [
         MdLinkReferenceDefinition {
@@ -192,7 +192,7 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..111
+0: MD_ROOT@0..111
   0: (empty)
   1: MD_BLOCK_LIST@0..111
     0: MD_LINK_REFERENCE_DEFINITION@0..30
