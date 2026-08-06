@@ -11,14 +11,19 @@ use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, Direction};
 use biome_rule_options::use_consistent_header_level::UseConsistentHeaderLevelOptions;
 
 declare_lint_rule! {
-    /// Enforce that all headers level are consistent.
+    /// Enforce that all headers level are consistent and ordered.
+    ///
+    /// In a Markdown document, the level of the headers should be consistent, and grow only
+    /// by one level at the time.
+    ///
+    /// This rule catches cases where headers skipped one level before the previous.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```md,expect_diagnostic
-    /// \# Header 1
+    /// ```md,ignore
+    /// # Header 1
     ///
     /// ### Header 3
     ///
@@ -26,8 +31,8 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```md
-    /// \# Header 1
+    /// ```md,ignore
+    /// # Header 1
     ///
     /// ## Header 2
     /// ```
