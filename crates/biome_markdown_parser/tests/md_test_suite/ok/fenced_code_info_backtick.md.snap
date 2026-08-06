@@ -15,7 +15,7 @@ Backtick in info string should not open fence:
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
     value: MdBlockList [
         MdParagraph {
@@ -54,7 +54,7 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..62
+0: MD_ROOT@0..62
   0: (empty)
   1: MD_BLOCK_LIST@0..62
     0: MD_PARAGRAPH@0..62

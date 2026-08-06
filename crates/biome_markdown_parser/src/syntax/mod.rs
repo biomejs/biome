@@ -127,7 +127,7 @@ pub(crate) fn parse_document(p: &mut MarkdownParser) {
     let _ = parse_block_list(p);
     // Bump the EOF token - required by the grammar
     p.bump(T![EOF]);
-    m.complete(p, MD_DOCUMENT);
+    m.complete(p, MD_ROOT);
 }
 
 /// Result of updating parenthesis depth when scanning link destinations.
@@ -327,24 +327,9 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
             parse_paragraph(p)
         }
     } else if at_header(p) {
-        // Check for too many hashes BEFORE try_parse (which would lose diagnostics on rewind)
-        let too_many = check_too_many_hashes(p);
-        let header_result = try_parse(p, |p| {
-            let header = parse_header(p);
-            if header.is_absent() {
-                return Err(());
-            }
-            Ok(header)
-        });
-        if let Ok(parsed) = header_result {
-            parsed
-        } else {
-            // Emit diagnostic for too many hashes (outside try_parse to persist)
-            if let Some((range, count)) = too_many {
-                p.error(parse_error::too_many_hashes(p, range, count));
-            }
-            // Not a valid header, parse as paragraph
-            parse_paragraph(p)
+        match parse_header(p) {
+            Present(header) => Present(header),
+            Absent => parse_paragraph(p),
         }
     } else if at_quote(p) {
         parse_quote(p)
@@ -2254,51 +2239,20 @@ pub(crate) fn is_whitespace_only(text: &str) -> bool {
     !text.is_empty() && text.chars().all(|c| c == ' ' || c == '\t')
 }
 
-/// Check if the current position has too many hashes for an ATX heading (>6).
-///
-/// Returns `Some((range, count))` if there are >6 hashes, `None` otherwise.
-/// This is used to emit a diagnostic BEFORE `try_parse` which would lose it on rewind.
-fn check_too_many_hashes(p: &mut MarkdownParser) -> Option<(biome_rowan::TextRange, usize)> {
-    p.lookahead(|p| {
-        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-
-        if !p.at(T![#]) {
-            return None;
-        }
-
-        // The lexer emits all consecutive `#` as a single HASH token.
-        // Get the count from token text length.
-        let range = p.cur_range();
-        let count = p.cur_text().len();
-
-        if count > MAX_ATX_HEADING_LEVEL {
-            Some((range, count))
-        } else {
-            None
-        }
-    })
-}
-
 /// Check if we're at a valid ATX heading start (1-6 `#` followed by space or EOL).
 /// Uses lookahead to verify without consuming tokens.
 fn is_valid_atx_heading_start(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
         p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
-        // The lexer emits all consecutive `#` as a single HASH token.
-        // Count hash characters from the token's text length.
-        if !p.at(T![#]) {
-            return false;
+        let mut hash_count = 0;
+        while hash_count < MAX_ATX_HEADING_LEVEL && p.eat(T![#]) {
+            hash_count += 1;
         }
 
-        let hash_count = p.cur_text().len();
-
-        // Too many hashes - not a valid heading (must be 1-6)
-        if hash_count > MAX_ATX_HEADING_LEVEL {
+        if hash_count == 0 || p.at(T![#]) {
             return false;
         }
-
-        p.bump(T![#]);
 
         // Check if followed by space, tab, or EOL/EOF per CommonMark §4.2
         // In Markdown, whitespace is significant and included in token text.

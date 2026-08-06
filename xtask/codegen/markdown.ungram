@@ -45,7 +45,7 @@ MdBogusBlock = SyntaxElement*
 // to parse mid-list.
 MdBogusBullet = SyntaxElement*
 
-MdDocument =
+MdRoot =
   bom: 'UNICODE_BOM'?
   value: MdBlockList
   eof: 'EOF'

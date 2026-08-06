@@ -43,7 +43,7 @@ still the same paragraph
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
     value: MdBlockList [
         MdParagraph {
@@ -158,7 +158,10 @@ MdDocument {
             indent: MdIndentTokenList [],
             before: MdHashList [
                 MdHash {
-                    hash_token: HASH@197..199 "##" [] [],
+                    hash_token: HASH@197..198 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@198..199 "#" [] [],
                 },
             ],
             content: MdParagraph {
@@ -306,7 +309,7 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..505
+0: MD_ROOT@0..505
   0: (empty)
   1: MD_BLOCK_LIST@0..505
     0: MD_PARAGRAPH@0..16
@@ -380,8 +383,10 @@ MdDocument {
     13: MD_HEADER@197..224
       0: MD_INDENT_TOKEN_LIST@197..197
       1: MD_HASH_LIST@197..199
-        0: MD_HASH@197..199
-          0: HASH@197..199 "##" [] []
+        0: MD_HASH@197..198
+          0: HASH@197..198 "#" [] []
+        1: MD_HASH@198..199
+          0: HASH@198..199 "#" [] []
       2: MD_PARAGRAPH@199..224
         0: MD_INLINE_ITEM_LIST@199..224
           0: MD_TEXTUAL@199..224

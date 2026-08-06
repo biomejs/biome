@@ -15,7 +15,7 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
     value: MdBlockList [
         MdQuote {
@@ -59,7 +59,7 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..14
+0: MD_ROOT@0..14
   0: (empty)
   1: MD_BLOCK_LIST@0..14
     0: MD_QUOTE@0..14
