@@ -132,7 +132,10 @@ indexmap                     = { version = "2.14.0" }
 insta                        = "1.48.0"
 jiff                         = "0.2.35"
 libc                         = "0.2.189"
-mimalloc                     = "0.1.48"
+# mimalloc is pinned because of bug that causes access violation crashes on windows arm 64
+# See: https://github.com/biomejs/biome/issues/10270
+# See: https://github.com/biomejs/biome/issues/11242
+mimalloc                     = "=0.1.48"
 notify                       = "8.2.0"
 papaya                       = "0.2.4"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
