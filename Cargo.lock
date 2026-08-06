@@ -2126,11 +2126,13 @@ dependencies = [
  "biome_unicode_table",
  "biome_yaml_factory",
  "biome_yaml_syntax",
+ "codspeed-criterion-compat",
  "insta",
+ "mimalloc",
  "quickcheck",
  "quickcheck_macros",
  "tests_macros",
- "tracing",
+ "tikv-jemallocator",
 ]
 
 [[package]]

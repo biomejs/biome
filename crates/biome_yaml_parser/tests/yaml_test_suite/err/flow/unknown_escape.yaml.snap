@@ -60,7 +60,7 @@ YamlRoot {
 ```
 unknown_escape.yaml:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unknown escape sequence in double-quoted scalar
+  × Unknown escape sequence in double-quoted scalar.
   
   > 1 │ "\q"
       │  ^^

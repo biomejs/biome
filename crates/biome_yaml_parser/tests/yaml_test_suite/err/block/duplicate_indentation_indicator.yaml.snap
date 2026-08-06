@@ -76,7 +76,7 @@ YamlRoot {
 ```
 duplicate_indentation_indicator.yaml:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A block scalar can have only one indentation indicator
+  × A block scalar can have only one indentation indicator.
   
   > 1 │ |1+2
       │    ^

@@ -60,7 +60,7 @@ YamlRoot {
 ```
 incomplete_hex_escape.yaml:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected 2 hexadecimal digits in escape sequence
+  × Expected 2 hexadecimal digits in escape sequence.
   
   > 1 │ "\x1"
       │  ^^^

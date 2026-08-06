@@ -174,7 +174,7 @@ invalid_headers.yaml:1:6 parse ━━━━━━━━━━━━━━━━�
   
 invalid_headers.yaml:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A block scalar can have only one indentation indicator
+  × A block scalar can have only one indentation indicator.
   
   > 1 │ - |+1-2
       │       ^

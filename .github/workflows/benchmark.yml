@@ -32,6 +32,7 @@ jobs:
     outputs:
       js: ${{ steps.outputs.outputs.js }}
       json: ${{ steps.outputs.outputs.json }}
+      yaml: ${{ steps.outputs.outputs.yaml }}
       css: ${{ steps.outputs.outputs.css }}
       html: ${{ steps.outputs.outputs.html }}
       graphql: ${{ steps.outputs.outputs.graphql }}
@@ -76,6 +77,13 @@ jobs:
               - 'crates/biome_json_parser/**/*.rs'
               - 'crates/biome_json_*/**/*.rs'
               - 'crates/biome_formatter/**/*.rs'
+              - 'crates/biome_rowan/**/*.rs'
+              - 'crates/biome_parser/**/*.rs'
+            yaml:
+              - '.github/workflows/benchmark.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_yaml_parser/**/*'
+              - 'crates/biome_yaml_*/**/*.rs'
               - 'crates/biome_rowan/**/*.rs'
               - 'crates/biome_parser/**/*.rs'
             css:
@@ -174,6 +182,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           JS: ${{ steps.filter.outputs.js }}
           JSON: ${{ steps.filter.outputs.json }}
+          YAML: ${{ steps.filter.outputs.yaml }}
           CSS: ${{ steps.filter.outputs.css }}
           HTML: ${{ steps.filter.outputs.html }}
           GRAPHQL: ${{ steps.filter.outputs.graphql }}
@@ -189,6 +198,7 @@ jobs:
           if [ "$EVENT_NAME" = 'workflow_dispatch' ] || [ "$EVENT_NAME" = 'merge_group' ]; then
             JS=true
             JSON=true
+            YAML=true
             CSS=true
             HTML=true
             GRAPHQL=true
@@ -204,6 +214,7 @@ jobs:
 
           echo "js=$JS" >> "$GITHUB_OUTPUT"
           echo "json=$JSON" >> "$GITHUB_OUTPUT"
+          echo "yaml=$YAML" >> "$GITHUB_OUTPUT"
           echo "css=$CSS" >> "$GITHUB_OUTPUT"
           echo "html=$HTML" >> "$GITHUB_OUTPUT"
           echo "graphql=$GRAPHQL" >> "$GITHUB_OUTPUT"
@@ -326,6 +337,20 @@ jobs:
           - biome_json_parser
           - biome_json_formatter
           - biome_json_analyze
+    steps: *bench_steps
+
+  yaml:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.yaml == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Bench YAML
+    runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_yaml_parser
     steps: *bench_steps
 
   css:

@@ -90,7 +90,7 @@ YamlRoot {
 ```
 tab_indentation.yaml:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Tabs are not allowed for indentation in YAML
+  × Tabs are not allowed for indentation in YAML.
   
   > 1 │ 	key: value
       │ ^^

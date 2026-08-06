@@ -113,19 +113,13 @@ impl ParseNodeList for BlockMapEntryList {
     ) -> biome_parser::parse_recovery::RecoveryResult {
         parsed_element.or_recover(
             p,
-            &BlockMapEntryListParseRecovery::new(),
+            &BlockMapEntryListParseRecovery,
             expected_block_mapping_entry,
         )
     }
 }
 
 struct BlockMapEntryListParseRecovery;
-
-impl BlockMapEntryListParseRecovery {
-    fn new() -> Self {
-        Self
-    }
-}
 
 impl ParseRecovery for BlockMapEntryListParseRecovery {
     type Kind = YamlSyntaxKind;
@@ -241,19 +235,13 @@ impl ParseNodeList for BlockSequenceEntryList {
     ) -> biome_parser::parse_recovery::RecoveryResult {
         parsed_element.or_recover(
             p,
-            &BlockSequenceEntryListParseRecovery::new(),
+            &BlockSequenceEntryListParseRecovery,
             expected_block_sequence_entry,
         )
     }
 }
 
 struct BlockSequenceEntryListParseRecovery;
-
-impl BlockSequenceEntryListParseRecovery {
-    fn new() -> Self {
-        Self
-    }
-}
 
 impl ParseRecovery for BlockSequenceEntryListParseRecovery {
     type Kind = YamlSyntaxKind;
@@ -368,7 +356,7 @@ impl ParseNodeList for BlockHeaderList {
             INDENTATION_INDICATOR => {
                 if self.seen_indentation {
                     let diagnostic = p.err_builder(
-                        "A block scalar can have only one indentation indicator",
+                        "A block scalar can have only one indentation indicator.",
                         p.cur_range(),
                     );
                     p.error(diagnostic);

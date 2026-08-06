@@ -60,7 +60,7 @@ YamlRoot {
 ```
 invalid_unicode_escape.yaml:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Escape sequence does not encode a valid Unicode scalar value
+  × Escape sequence does not encode a valid Unicode scalar value.
   
   > 1 │ "\uD800"
       │  ^^^^^^
