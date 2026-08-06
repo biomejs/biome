@@ -2,9 +2,9 @@ use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_parser::ParserContext;
 use biome_parser::event::Event;
 use biome_parser::prelude::*;
-use biome_parser::token_source::Trivia;
+use biome_parser::token_source::{BumpWithContext, Trivia};
 use biome_parser::{ParserContextCheckpoint, diagnostic::merge_diagnostics};
-use biome_rowan::{TextRange, TextSize};
+use biome_rowan::{TextRange, TextSize, TriviaPieceKind};
 use std::cell::Cell;
 use std::collections::HashMap;
 use std::hash::{DefaultHasher, Hash, Hasher};
@@ -14,6 +14,7 @@ use crate::lexer::{MarkdownLexContext, MarkdownReLexContext};
 use crate::syntax::TAB_STOP_SPACES;
 use crate::syntax::inline::EmphasisContext;
 use crate::syntax::parse_error::DEFAULT_MAX_NESTING_DEPTH;
+use crate::syntax::reference::normalize_reference_label;
 use crate::token_source::{MarkdownTokenSource, MarkdownTokenSourceCheckpoint};
 
 /// Options for configuring the markdown parser.
@@ -200,6 +201,8 @@ pub(crate) struct InlineContainerContext {
 pub(crate) struct LinkReferenceDefinitions {
     /// Source ranges of definition labels in document order.
     ranges: Vec<TextRange>,
+    /// Normalized-label hashes corresponding to `ranges`.
+    hashes: Vec<u64>,
     /// Normalized-label hash to indices in `ranges`.
     ///
     /// Each hash can identify multiple ranges because duplicate definitions and
@@ -212,6 +215,7 @@ impl LinkReferenceDefinitions {
     fn insert(&mut self, range: TextRange, hash: u64) {
         let index = self.ranges.len();
         self.ranges.push(range);
+        self.hashes.push(hash);
         self.ranges_by_hash.entry(hash).or_default().push(index);
     }
 
@@ -220,7 +224,7 @@ impl LinkReferenceDefinitions {
     }
 
     fn contains(&self, source: &str, normalized_label: &str) -> bool {
-        let hash = normalized_label_hash(normalized_label);
+        let hash = hash_normalized_label(normalized_label);
         self.ranges_by_hash
             .get(&hash)
             .into_iter()
@@ -232,18 +236,38 @@ impl LinkReferenceDefinitions {
             })
     }
 
-    fn truncate(&mut self, len: usize, hashes: impl IntoIterator<Item = (usize, u64)>) {
-        self.ranges.truncate(len);
-        self.ranges_by_hash.clear();
-        for (index, hash) in hashes {
-            self.ranges_by_hash.entry(hash).or_default().push(index);
+    fn truncate(&mut self, len: usize) {
+        while self.ranges.len() > len {
+            let index = self.ranges.len() - 1;
+            self.ranges.pop();
+            let Some(hash) = self.hashes.pop() else {
+                self.ranges.truncate(len);
+                self.ranges_by_hash.clear();
+                return;
+            };
+            let Some(indices) = self.ranges_by_hash.get_mut(&hash) else {
+                continue;
+            };
+            if indices.last() == Some(&index) {
+                indices.pop();
+            } else {
+                indices.retain(|candidate| *candidate != index);
+            }
+            let remove_bucket = indices.is_empty();
+            if remove_bucket {
+                self.ranges_by_hash.remove(&hash);
+            }
         }
     }
 }
 
 fn normalized_label_hash(label: &str) -> u64 {
+    hash_normalized_label(&normalize_reference_label(label))
+}
+
+fn hash_normalized_label(label: &str) -> u64 {
     let mut hasher = DefaultHasher::new();
-    crate::syntax::reference::normalize_reference_label(label).hash(&mut hasher);
+    label.hash(&mut hasher);
     hasher.finish()
 }
 
@@ -737,8 +761,6 @@ impl<'source> MarkdownParser<'source> {
     /// but not appear as explicit CST nodes. The token is removed from the
     /// event stream and attached as `Whitespace` trivia on the next real token.
     pub fn consume_as_whitespace_trivia(&mut self) {
-        use biome_parser::token_source::BumpWithContext;
-        use biome_rowan::TriviaPieceKind;
         self.source_mut().skip_as_trivia_of_kind_with_context(
             TriviaPieceKind::Whitespace,
             MarkdownLexContext::Regular,
@@ -816,25 +838,9 @@ impl<'source> MarkdownParser<'source> {
         self.context.rewind(context);
         self.source.rewind(source);
         self.state.deferred_inlines.truncate(deferred_inlines_len);
-        let hashes = self
-            .state
-            .link_reference_definitions
-            .ranges
-            .iter()
-            .take(link_reference_definitions_len)
-            .enumerate()
-            .filter_map(|range| {
-                let (index, range) = range;
-                self.source
-                    .source_text()
-                    .get(usize::from(range.start())..usize::from(range.end()))
-                    .map(|label| (index, label))
-            })
-            .map(|(index, label)| (index, normalized_label_hash(label)))
-            .collect::<Vec<_>>();
         self.state
             .link_reference_definitions
-            .truncate(link_reference_definitions_len, hashes);
+            .truncate(link_reference_definitions_len);
     }
 
     /// Execute a lookahead operation without consuming tokens.
@@ -942,4 +948,30 @@ pub struct MarkdownParserCheckpoint {
     pub(super) source: MarkdownTokenSourceCheckpoint,
     deferred_inlines_len: usize,
     link_reference_definitions_len: usize,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn rewind_removes_only_speculative_link_definitions() {
+        let source = "foo Foo bar";
+        let mut parser = MarkdownParser::new(source, MarkdownParserOptions::default());
+        parser.record_link_reference_definition(TextRange::new(0.into(), 3.into()));
+        let checkpoint = parser.checkpoint();
+
+        parser.record_link_reference_definition(TextRange::new(4.into(), 7.into()));
+        parser.record_link_reference_definition(TextRange::new(8.into(), 11.into()));
+        parser.rewind(checkpoint);
+
+        assert!(parser.has_link_reference_definition("foo"));
+        assert!(!parser.has_link_reference_definition("bar"));
+        assert_eq!(parser.state.link_reference_definitions.ranges.len(), 1);
+        assert_eq!(parser.state.link_reference_definitions.hashes.len(), 1);
+        assert_eq!(
+            parser.state.link_reference_definitions.ranges_by_hash.len(),
+            1
+        );
+    }
 }
