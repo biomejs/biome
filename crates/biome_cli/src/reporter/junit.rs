@@ -86,7 +86,7 @@ impl ReporterVisitor for JunitReporterVisitor {
             }
         });
 
-        // One JUnit <testsuite> per file path; multiple diagnostics accumulate as <testcase>s.
+        // `Report::add_test_suite` does not merge suites with the same path.
         let mut suites: BTreeMap<&str, TestSuite> = BTreeMap::new();
 
         for diagnostic in diagnostics {
@@ -125,6 +125,9 @@ impl ReporterVisitor for JunitReporterVisitor {
                         "column".into(),
                         start.column_number.get().to_string().into(),
                     );
+                } else {
+                    // Formatter diagnostics often omit span/source; still emit failure text.
+                    case.status.set_description(message);
                 }
 
                 let suite = suites.entry(path).or_insert_with(|| {

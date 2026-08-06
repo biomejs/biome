@@ -48,12 +48,12 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 <testsuites name="Biome" tests="2" failures="2" errors="2" time="<TIME>">
     <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
         <testcase name="org.biome.format">
-            <failure message="Formatter would have printed the following content:"/>
+            <failure message="Formatter would have printed the following content:">Formatter would have printed the following content:</failure>
         </testcase>
     </testsuite>
     <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
         <testcase name="org.biome.format">
-            <failure message="Formatter would have printed the following content:"/>
+            <failure message="Formatter would have printed the following content:">Formatter would have printed the following content:</failure>
         </testcase>
     </testsuite>
 </testsuites>

@@ -42,7 +42,7 @@ expression: redactor(content)
             <failure message="&apos;f&apos; is redeclared in the same scope.">line 9, col 7, &apos;f&apos; is redeclared in the same scope.</failure>
         </testcase>
         <testcase name="org.biome.format">
-            <failure message="Formatter would have printed the following content:"/>
+            <failure message="Formatter would have printed the following content:">Formatter would have printed the following content:</failure>
         </testcase>
     </testsuite>
     <testsuite name="main.ts" tests="12" disabled="0" errors="0" failures="12" package="org.biome">
@@ -80,7 +80,7 @@ expression: redactor(content)
             <failure message="&apos;f&apos; is redeclared in the same scope.">line 9, col 7, &apos;f&apos; is redeclared in the same scope.</failure>
         </testcase>
         <testcase name="org.biome.format">
-            <failure message="Formatter would have printed the following content:"/>
+            <failure message="Formatter would have printed the following content:">Formatter would have printed the following content:</failure>
         </testcase>
     </testsuite>
 </testsuites>
