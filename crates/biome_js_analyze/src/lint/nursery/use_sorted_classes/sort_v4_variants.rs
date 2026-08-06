@@ -187,11 +187,8 @@ fn variant_key_from_variant(variant: &AnyTwVariant) -> Option<VariantKey> {
             variant.selector_token().ok()?.text_trimmed().into(),
         )),
         AnyTwVariant::TwVariantExpression(expression) => {
-            // `raw` is only a lookup buffer; the key stores the registry's
-            // own `&'static str`, never this string. (The whole-expression
-            // match is also reachable through the segment path below, so
-            // this early check could likely be dropped — kept for now to
-            // preserve behavior.)
+            // `raw` is only a lookup buffer; the stored key borrows the
+            // registry's own `&'static str`, never this string.
             let raw = syntax_text_to_box(&expression.syntax().text_trimmed());
             if let Some((&name, entry)) = VARIANTS.get_entry(raw.as_ref())
                 && entry.kind == VariantKind::Static
