@@ -42,7 +42,7 @@ use biome_parser::{
     prelude::ParsedSyntax::{self, *},
     token_set,
 };
-use biome_rowan::TextSize;
+use biome_rowan::{TextRange, TextSize};
 use fenced_code_block::{
     at_fenced_code_block, info_string_has_backtick, parse_fenced_code_block,
     parse_fenced_code_block_force,
@@ -64,6 +64,7 @@ use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 
 use crate::MarkdownParser;
 use crate::lexer::MarkdownReLexContext;
+use crate::parser::{DeferredInline, DeferredInlineFlavor};
 
 /// Check if current token consists only of ASCII spaces and/or tabs.
 ///
@@ -666,9 +667,24 @@ fn consume_blank_line(p: &mut MarkdownParser) {
 pub(crate) fn parse_paragraph(p: &mut MarkdownParser) -> ParsedSyntax {
     let m = p.start();
 
+    let event_start = p.context().events().len();
+    let context = p.inline_container_context();
+    let definitions_len = p.link_reference_definitions_len();
     let inline_start: usize = p.cur_range().start().into();
     parse_inline_item_list(p);
     let inline_end: usize = p.cur_range().start().into();
+    let event_end = p.context().events().len();
+
+    p.record_deferred_inline(DeferredInline {
+        event_range: event_start..event_end,
+        source_range: TextRange::new(
+            TextSize::from(inline_start as u32),
+            TextSize::from(inline_end as u32),
+        ),
+        flavor: DeferredInlineFlavor::Paragraph,
+        context,
+        definitions_len,
+    });
 
     let has_inline_content = inline_has_non_whitespace(p, inline_start, inline_end);
     let allow_setext = has_inline_content && allow_setext_heading(p);
