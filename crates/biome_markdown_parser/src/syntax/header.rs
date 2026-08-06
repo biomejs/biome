@@ -24,7 +24,9 @@
 //! ---------
 //! ```
 
-use crate::parser::{MarkdownParser, MarkdownParserCheckpoint};
+use crate::parser::{
+    DeferredInline, DeferredInlineFlavor, MarkdownParser, MarkdownParserCheckpoint,
+};
 use crate::syntax::MAX_BLOCK_PREFIX_INDENT;
 use crate::syntax::inline::EmphasisContext;
 use crate::syntax::parse_any_inline;
@@ -35,6 +37,7 @@ use biome_parser::{
     Parser,
     prelude::ParsedSyntax::{self, *},
 };
+use biome_rowan::TextRange;
 
 /// Maximum number of `#` characters allowed in an ATX heading (CommonMark §4.2).
 const MAX_HEADER_HASHES: usize = 6;
@@ -171,6 +174,10 @@ pub(crate) fn parse_header_content(p: &mut MarkdownParser) {
     let prev_context = set_header_emphasis_context(p);
 
     // Parse content as a paragraph containing inline items
+    let event_start = p.context().events().len();
+    let source_start = p.cur_range().start();
+    let context = p.inline_container_context();
+    let definitions_len = p.link_reference_definitions_len();
     let m = p.start();
     let inline_m = p.start();
 
@@ -214,6 +221,15 @@ pub(crate) fn parse_header_content(p: &mut MarkdownParser) {
 
     inline_m.complete(p, MD_INLINE_ITEM_LIST);
     m.complete(p, MD_PARAGRAPH);
+    let event_end = p.context().events().len();
+
+    p.record_deferred_inline(DeferredInline {
+        event_range: event_start..event_end,
+        source_range: TextRange::new(source_start, p.cur_range().start()),
+        flavor: DeferredInlineFlavor::AtxParagraph,
+        context,
+        definitions_len,
+    });
 
     // Restore previous emphasis context
     p.set_emphasis_context(prev_context);
