@@ -126,7 +126,7 @@ BIOME_CONFIG_PATH="$HOME/.config/biome/biome.json" biome check .
             "BIOME_THREADS",
             r#"Number of worker threads used by `biome ci`. Defaults to automatic selection.
 
-Use this to limit CPU and memory usage in a constrained CI runner.
+Use this to limit CPU usage in a constrained CI runner.
 
 ```shell
 BIOME_THREADS=2 biome ci .
@@ -165,7 +165,7 @@ BIOME_WATCHER_KIND=polling BIOME_WATCHER_POLLING_INTERVAL=1000 biome start
 Use this to run a system-installed or locally built binary through the `@biomejs/biome` package.
 
 ```shell
-BIOME_BINARY=/usr/local/bin/biome npx @biomejs/biome check .
+BIOME_BINARY=/usr/local/bin/biome npx @biomejs/biome check
 ```"#,
         ),
         &BiomeEnvVariable::new(
