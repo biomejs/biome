@@ -94,6 +94,83 @@ fn correctly_computes_analyzer_options() {
 }
 
 #[test]
+fn vue_template_expressions_get_instance_properties() {
+    use biome_languages::JsFileSource;
+    use biome_languages::javascript::JsEmbeddingKind;
+
+    let settings = Settings::default();
+    let language = JsLanguage::lookup_settings(&settings.languages);
+    let environment = JsLanguage::resolve_environment(&settings);
+
+    let template_source = JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+        setup: false,
+        is_source: false,
+        event_handler: false,
+        allow_statements: false,
+    });
+    let options = JsLanguage::resolve_analyzer_options(
+        &settings,
+        &language.linter,
+        environment,
+        &BiomePath::new(Utf8PathBuf::from("/test.vue")),
+        &DocumentFileSource::from(template_source),
+        None,
+    );
+
+    assert!(options.globals().contains(&"$slots".into()));
+    assert!(!options.globals().contains(&"$event".into()));
+}
+
+#[test]
+fn vue_event_handlers_get_dollar_event() {
+    use biome_languages::JsFileSource;
+    use biome_languages::javascript::JsEmbeddingKind;
+
+    let settings = Settings::default();
+    let language = JsLanguage::lookup_settings(&settings.languages);
+    let environment = JsLanguage::resolve_environment(&settings);
+
+    let event_handler_source =
+        JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+            setup: false,
+            is_source: false,
+            event_handler: true,
+            allow_statements: false,
+        });
+    let options = JsLanguage::resolve_analyzer_options(
+        &settings,
+        &language.linter,
+        environment,
+        &BiomePath::new(Utf8PathBuf::from("/test.vue")),
+        &DocumentFileSource::from(event_handler_source),
+        None,
+    );
+
+    assert!(options.globals().contains(&"$event".into()));
+    assert!(options.globals().contains(&"$slots".into()));
+}
+
+#[test]
+fn vue_script_setup_does_not_get_instance_properties() {
+    let settings = Settings::default();
+    let language = JsLanguage::lookup_settings(&settings.languages);
+    let environment = JsLanguage::resolve_environment(&settings);
+
+    let options = JsLanguage::resolve_analyzer_options(
+        &settings,
+        &language.linter,
+        environment,
+        &BiomePath::new(Utf8PathBuf::from("/test.vue")),
+        &DocumentFileSource::from(biome_languages::JsFileSource::vue_setup()),
+        None,
+    );
+
+    assert!(options.globals().contains(&"defineProps".into()));
+    assert!(!options.globals().contains(&"$slots".into()));
+    assert!(!options.globals().contains(&"$event".into()));
+}
+
+#[test]
 fn javascript_resolver_experimental_pnpm_catalogs_is_opt_in() {
     let mut default_settings = Settings::default();
     default_settings
