@@ -1,7 +1,7 @@
 use biome_css_syntax::{
     AnyCssDashedIdentifier, AnyCssDeclarationName, AnyCssGenericComponentValue,
-    AnyCssGenericPropertyValueOrExpression, AnyCssProperty, AnyCssSelector, AnyCssValue,
-    CssDashedIdentifier, CssDeclaration, CssPropertyAtRule, CssRelativeSelector, CssSyntaxKind::*,
+    AnyCssGenericPropertyValueOrExpression, AnyCssProperty, AnyCssRelativeSelector, AnyCssSelector,
+    AnyCssValue, CssDashedIdentifier, CssDeclaration, CssPropertyAtRule, CssSyntaxKind::*,
 };
 use biome_property_codec::{
     PropertySyntaxErrorKind, PropertySyntaxParseDiagnostic, PropertySyntaxResult, encode,
@@ -13,7 +13,9 @@ use crate::model::{AnyCssSelectorLike, AnyRuleStart};
 use crate::{
     model::{CssProperty, CssPropertyInitialValueKind},
     semantic_model::model::Specificity,
-    specificity::{evaluate_complex_selector, evaluate_compound_selector},
+    specificity::{
+        evaluate_complex_selector, evaluate_compound_selector, evaluate_partial_combinator_selector,
+    },
 };
 
 const ROOT_SELECTOR: &str = ":root";
@@ -96,9 +98,18 @@ impl SemanticEventExtractor {
                     return;
                 };
                 node.children()
-                    .filter_map(CssRelativeSelector::cast)
-                    .filter_map(|s| s.selector().ok())
-                    .for_each(|s| self.process_selector(s));
+                    .filter_map(AnyCssRelativeSelector::cast)
+                    .for_each(|selector| match selector {
+                        AnyCssRelativeSelector::CssRelativeSelector(selector) => {
+                            if let Ok(selector) = selector.selector() {
+                                self.process_selector(selector);
+                            }
+                        }
+                        AnyCssRelativeSelector::ScssPartialCombinatorSelector(selector) => {
+                            self.process_selector(selector.into());
+                        }
+                        AnyCssRelativeSelector::CssBogusSelector(_) => {}
+                    });
             }
             CSS_DECLARATION => {
                 if matches!(node.parent().kind(), Some(CSS_SUPPORTS_FEATURE_DECLARATION)) {
@@ -196,6 +207,10 @@ impl SemanticEventExtractor {
                 }
                 let specificity = evaluate_compound_selector(&selector);
                 self.add_selector_event(selector.into(), specificity)
+            }
+            AnyCssSelector::ScssPartialCombinatorSelector(selector) => {
+                let specificity = evaluate_partial_combinator_selector(&selector);
+                self.add_selector_event(selector.into(), specificity);
             }
             _ => {}
         }

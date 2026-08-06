@@ -14,7 +14,7 @@
 
 use crate::runner::{TestCase, TestRunOutcome, TestSuite};
 use biome_markdown_parser::{document_to_html, parse_markdown};
-use biome_markdown_syntax::MdDocument;
+use biome_markdown_syntax::MdRoot;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::{AstNode, TextRange};
 use serde::Deserialize;
@@ -45,7 +45,7 @@ impl TestCase for CommonMarkTestCase {
     fn run(&self) -> TestRunOutcome {
         let parsed = parse_markdown(&self.markdown);
 
-        let Some(document) = MdDocument::cast(parsed.syntax()) else {
+        let Some(document) = MdRoot::cast(parsed.syntax()) else {
             return TestRunOutcome::IncorrectlyErrored {
                 errors: vec![ParseDiagnostic::new(
                     format!("Bogus node: {:?}", parsed.syntax().kind()),

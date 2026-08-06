@@ -82,6 +82,7 @@ biome_markdown_factory       = { path = "./crates/biome_markdown_factory", versi
 biome_markdown_formatter     = { path = "./crates/biome_markdown_formatter", version = "0.0.1" }
 biome_markdown_parser        = { path = "./crates/biome_markdown_parser", version = "0.0.1" }
 biome_markdown_syntax        = { path = "./crates/biome_markdown_syntax", version = "0.0.1" }
+biome_markdown_analyze       = { path = "./crates/biome_markdown_analyze", version = "0.1.0" }
 biome_markup                 = { path = "./crates/biome_markup", version = "0.5.7" }
 biome_migrate                = { path = "./crates/biome_migrate" }
 biome_module_graph           = { path = "./crates/biome_module_graph", version = "0.0.1" }

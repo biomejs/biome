@@ -126,6 +126,7 @@ CssSelectorList = (AnyCssSelector (',' AnyCssSelector)*)
 AnyCssSelector =
 	CssComplexSelector
 	| CssCompoundSelector
+	| ScssPartialCombinatorSelector
 	| CssBogusSelector
 	| CssMetavariable
 
@@ -137,6 +138,14 @@ CssComplexSelector =
 	left: AnyCssSelector
 	combinator: ('>' | '+' | '~' | '||' | 'css_space_literal')
 	right: AnyCssSelector
+
+// .sidebar > {}
+// ^^^^^^^^^^
+// .card { + {} }
+//         ^
+ScssPartialCombinatorSelector =
+	left: AnyCssSelector?
+	combinator: ('>' | '+' | '~')
 
 // .class {}
 // ^^^^^^^
@@ -381,6 +390,7 @@ CssRelativeSelectorList = (AnyCssRelativeSelector (',' AnyCssRelativeSelector)*)
 
 AnyCssRelativeSelector =
 	CssRelativeSelector
+	| ScssPartialCombinatorSelector
 	| CssBogusSelector
 
 // :has(> img, +dt) {}

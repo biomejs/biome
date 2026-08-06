@@ -42,7 +42,7 @@ use biome_parser::{Parser, token_set};
 use crate::MarkdownParser;
 use crate::lexer::MarkdownReLexContext;
 use crate::syntax::fenced_code_block::parse_fenced_code_block;
-use crate::syntax::header::{parse_header_content, parse_trailing_hashes};
+use crate::syntax::header::parse_header;
 use crate::syntax::html_block::{at_html_block, parse_html_block};
 use crate::syntax::link_block::{at_link_block, parse_link_block};
 use crate::syntax::parse_error::list_nesting_too_deep;
@@ -53,10 +53,10 @@ use crate::syntax::quote::{
 use crate::syntax::thematic_break_block::parse_thematic_break_block;
 use crate::syntax::with_virtual_line_start;
 use crate::syntax::{
-    INDENT_CODE_BLOCK_SPACES, MAX_ATX_HEADING_LEVEL, MAX_BLOCK_PREFIX_INDENT,
-    MAX_ORDERED_LIST_MARKER_DIGITS, MIN_FENCE_RUN_LENGTH, MIN_THEMATIC_BREAK_RUN, TAB_STOP_SPACES,
-    at_block_interrupt, at_indent_code_block, is_ordered_list_starts_with_one, is_paragraph_like,
-    is_whitespace_only, parse_empty_paragraph,
+    INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, MAX_ORDERED_LIST_MARKER_DIGITS,
+    MIN_FENCE_RUN_LENGTH, MIN_THEMATIC_BREAK_RUN, TAB_STOP_SPACES, at_block_interrupt,
+    at_indent_code_block, is_ordered_list_starts_with_one, is_paragraph_like, is_whitespace_only,
+    parse_empty_paragraph,
 };
 use crate::syntax::{parse_any_block_with_indent_code_policy, parse_paragraph};
 use biome_rowan::{TextRange, TextSize};
@@ -2551,62 +2551,15 @@ fn parse_first_line_atx_heading(p: &mut MarkdownParser, state: &mut ListItemLoop
     if p.at(MD_TEXTUAL_LITERAL) && p.cur_text().starts_with('#') {
         p.force_relex_at_line_start();
     }
-    let atx_heading_info = p.lookahead(|p| {
-        while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-            p.bump(MD_TEXTUAL_LITERAL);
-        }
-        let is_hash =
-            p.at(T![#]) || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == '#'));
-        if !is_hash {
-            return None;
-        }
-        let text = p.cur_text();
-        let hash_count = text.len();
-        if !(1..=MAX_ATX_HEADING_LEVEL).contains(&hash_count) {
-            return None;
-        }
-        p.bump(p.cur());
-        if p.at(NEWLINE) || p.at(T![EOF]) {
-            return Some(hash_count);
-        }
-        if p.at(MD_TEXTUAL_LITERAL) {
-            let t = p.cur_text();
-            if t.starts_with(' ') || t.starts_with('\t') {
-                return Some(hash_count);
-            }
-        }
-        None
-    });
 
-    if atx_heading_info.is_none() {
-        return false;
-    }
-
-    let header_m = p.start();
-
-    // Emit the required MdIndentTokenList slot (slot 0) so the CST matches the grammar.
-    // In list context we are never at line start, so this produces an empty list node.
-    p.emit_line_indent(MAX_BLOCK_PREFIX_INDENT);
-
-    // Can't reuse header::parse_hash_list(): in list context `#` may be lexed as
-    // MD_TEXTUAL_LITERAL and requires bump_remap. Keep in sync with parse_hash_list().
-    let hash_list_m = p.start();
-    let hash_m = p.start();
-    if p.at(T![#]) {
-        p.bump(T![#]);
+    let start = p.cur_range().start();
+    let parsed = with_virtual_line_start(p, start, parse_header);
+    if parsed.is_present() {
+        state.record_first_line_block();
+        true
     } else {
-        p.bump_remap(T![#]);
+        false
     }
-    hash_m.complete(p, MD_HASH);
-    hash_list_m.complete(p, MD_HASH_LIST);
-
-    parse_header_content(p);
-    parse_trailing_hashes(p);
-
-    header_m.complete(p, MD_HEADER);
-
-    state.record_first_line_block();
-    true
 }
 
 /// Parse a blockquote on the first line of list item content.

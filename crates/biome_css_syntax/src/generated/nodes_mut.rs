@@ -4847,6 +4847,20 @@ impl ScssParenthesizedExpression {
         )
     }
 }
+impl ScssPartialCombinatorSelector {
+    pub fn with_left(self, element: Option<AnyCssSelector>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            0usize..=0usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_combinator_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+}
 impl ScssPlaceholderSelector {
     pub fn with_percent_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(

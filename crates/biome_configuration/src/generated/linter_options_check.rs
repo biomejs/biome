@@ -1160,6 +1160,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::no_suspicious_semicolon_in_jsx::NoSuspiciousSemicolonInJsxOptions,
         >(),
     ));
+    result.push((
+        "nursery",
+        "noSvelteLegacyConst",
+        TypeId::of::<biome_rule_options::no_svelte_legacy_const::NoSvelteLegacyConstOptions>(),
+    ));
     result.push(("nursery", "noSvelteUnnecessaryStateWrap", TypeId::of::<biome_rule_options::no_svelte_unnecessary_state_wrap::NoSvelteUnnecessaryStateWrapOptions>()));
     result.push((
         "a11y",
@@ -1704,6 +1709,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push(("style", "useConsistentGraphqlDescriptions", TypeId::of::<biome_rule_options::use_consistent_graphql_descriptions::UseConsistentGraphqlDescriptionsOptions>()));
+    result.push((
+        "nursery",
+        "useConsistentHeaderLevel",
+        TypeId::of::<
+            biome_rule_options::use_consistent_header_level::UseConsistentHeaderLevelOptions,
+        >(),
+    ));
     result.push(("style", "useConsistentMemberAccessibility", TypeId::of::<biome_rule_options::use_consistent_member_accessibility::UseConsistentMemberAccessibilityOptions>()));
     result.push(("style", "useConsistentMethodSignatures", TypeId::of::<biome_rule_options::use_consistent_method_signatures::UseConsistentMethodSignaturesOptions>()));
     result.push(("style", "useConsistentObjectDefinitions", TypeId::of::<biome_rule_options::use_consistent_object_definitions::UseConsistentObjectDefinitionsOptions>()));

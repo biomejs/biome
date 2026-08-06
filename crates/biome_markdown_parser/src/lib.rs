@@ -1,7 +1,7 @@
 #![deny(clippy::use_self)]
 
 use biome_markdown_factory::MarkdownSyntaxFactory;
-use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdDocument};
+use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdRoot};
 use biome_parser::{AnyParse, NodeParse, prelude::ParseDiagnostic, tree_sink::LosslessTreeSink};
 use biome_rowan::{AstNode, NodeCache};
 use parser::MarkdownParser;
@@ -126,8 +126,8 @@ impl MarkdownParse {
     ///
     /// # Panics
     /// Panics if the node represented by this parse result mismatches.
-    pub fn tree(&self) -> MdDocument {
-        MdDocument::unwrap_cast(self.syntax())
+    pub fn tree(&self) -> MdRoot {
+        MdRoot::unwrap_cast(self.syntax())
     }
 }
 
