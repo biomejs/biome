@@ -50,7 +50,7 @@ impl Rule for UseConsistentHeaderLevel {
             .syntax()
             .siblings(Direction::Next)
             .skip(1)
-            .find_map(|header| MdHeader::cast(header))?;
+            .find_map(MdHeader::cast)?;
 
         if next_header.level() > this_header.level() + 1 {
             Some(next_header)
