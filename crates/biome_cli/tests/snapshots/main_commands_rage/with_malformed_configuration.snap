@@ -35,7 +35,7 @@ Environment:
   BIOME_WATCHER_KIND:                unset
   BIOME_WATCHER_POLLING_INTERVAL:    unset
   BIOME_BINARY:                      unset
-  RUST_BACKTRACE:                    unset
+  RUST_BACKTRACE:                    **PLACEHOLDER**
   NO_COLOR:                     **PLACEHOLDER**
   TERM:                         **PLACEHOLDER**
   JS_RUNTIME_VERSION:           unset
