@@ -4,6 +4,7 @@ expression: skipCommentsInvalid.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 // This comment won't count
 const a = 1;
 const b = 2;
@@ -14,32 +15,21 @@ const d = 4;
 
 # Diagnostics
 ```
-skipCommentsInvalid.options:2:5 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+skipCommentsInvalid.js:3:1 lint/style/noExcessiveLinesPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Found an unknown key `options`.
+  i This file has too many lines (4). Maximum allowed is 3.
   
-    1 │ {
-  > 2 │     "options": {
-      │     ^^^^^^^^^
-    3 │         "maxLines": 3,
-    4 │         "skipComments": true
+    1 │ /* should generate diagnostics */
+    2 │ // This comment won't count
+  > 3 │ const a = 1;
+      │ ^^^^^^^^^^^^
+  > 4 │ const b = 2;
+  > 5 │ const c = 3;
+  > 6 │ const d = 4;
+      │ ^^^^^^^^^^^^
+    7 │ 
   
-  i Known keys:
-  
-  - $schema
-  - root
-  - extends
-  - vcs
-  - files
-  - formatter
-  - linter
-  - javascript
-  - json
-  - css
-  - grit
-  - html
-  - overrides
-  - assist
+  i Consider splitting this file into smaller files.
   
 
 ```

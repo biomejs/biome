@@ -1,6 +1,16 @@
 {
-    "options": {
-        "maxLines": 3,
-        "skipComments": true
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "style": {
+        "noExcessiveLinesPerFile": {
+          "level": "error",
+          "options": {
+            "maxLines": 3,
+            "skipComments": true
+          }
+        }
+      }
     }
+  }
 }

@@ -12,35 +12,3 @@ const b = 2;
 const c = 3;
 
 ```
-
-# Diagnostics
-```
-skipComments.options:2:5 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Found an unknown key `options`.
-  
-    1 │ {
-  > 2 │     "options": {
-      │     ^^^^^^^^^
-    3 │         "maxLines": 3,
-    4 │         "skipComments": true
-  
-  i Known keys:
-  
-  - $schema
-  - root
-  - extends
-  - vcs
-  - files
-  - formatter
-  - linter
-  - javascript
-  - json
-  - css
-  - grit
-  - html
-  - overrides
-  - assist
-  
-
-```

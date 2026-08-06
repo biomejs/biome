@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 // This comment won't count
 const a = 1;
 const b = 2;
