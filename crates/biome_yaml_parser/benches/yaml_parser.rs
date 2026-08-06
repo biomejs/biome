@@ -23,8 +23,13 @@ static GLOBAL: std::alloc::System = std::alloc::System;
 fn bench_parser(criterion: &mut Criterion) {
     let mut group = criterion.benchmark_group("yaml_parser");
     for url in include_str!("libs-yaml.txt").lines() {
-        let test_case = BenchCase::try_from(url)
-            .unwrap_or_else(|error| panic!("failed to load YAML benchmark `{url}`: {error}"));
+        let test_case = match BenchCase::try_from(url) {
+            Ok(test_case) => test_case,
+            Err(error) => {
+                eprintln!("failed to load YAML benchmark `{url}`: {error}");
+                continue;
+            }
+        };
         let code = test_case.code();
         group.throughput(Throughput::Bytes(code.len() as u64));
         group.bench_with_input(

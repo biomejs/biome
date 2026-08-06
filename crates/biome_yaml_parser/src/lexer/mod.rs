@@ -99,8 +99,7 @@ impl<'src> YamlLexer<'src> {
         let bom_kind = if self.position() == 0 {
             self.consume_potential_bom(UNICODE_BOM)
                 .map(|(kind, _)| kind)
-        } else if self.bom_allowed && current == 0xef && self.current_char_unchecked() == '\u{feff}'
-        {
+        } else if self.is_at_document_prefix_bom() {
             self.advance('\u{feff}'.len_utf8());
             Some(UNICODE_BOM)
         } else {
@@ -118,7 +117,7 @@ impl<'src> YamlLexer<'src> {
             self.bom_allowed = false;
         }
 
-        if current == 0xef && self.current_char_unchecked() == '\u{feff}' {
+        if self.is_at_bom() {
             let token = self.consume_unexpected_token();
             self.tokens.push_back(token);
             return;
@@ -240,7 +239,7 @@ impl<'src> YamlLexer<'src> {
             .is_none_or(|scope| scope.indent(scope_coordinate))
         {
             if self.is_at_mapping_indicator() {
-                self.report_multiline_implicit_key(start_coordinate, key_end);
+                self.report_multiline_implicit_key(key_coordinate, key_end);
                 let indicator = self.consume_byte_as_token(T![:]);
                 tokens.push_front(LexToken::pseudo(MAPPING_START, start_coordinate));
                 tokens.push_back(indicator);
@@ -252,7 +251,7 @@ impl<'src> YamlLexer<'src> {
                 tokens.push_back(LexToken::pseudo(FLOW_END, self.current_coordinate));
             }
         } else if self.is_at_mapping_indicator() {
-            self.report_multiline_implicit_key(start_coordinate, key_end);
+            self.report_multiline_implicit_key(key_coordinate, key_end);
             // At a valid mapping key, lex the `:` so that the lexer wouldn't confuse it with a
             // standalone `:` token, which indicate the start of an empty mapping key
             let indicator = self.consume_byte_as_token(T![:]);
@@ -796,6 +795,10 @@ impl<'src> YamlLexer<'src> {
                 break;
             }
         }
+        if self.is_at_document_prefix_bom() {
+            self.current_coordinate = start;
+            return false;
+        }
         // A document marker at the start of a line always ends the current
         // document, so it can never be part of a multiline scalar
         // https://yaml.org/spec/1.2.2/#rule-c-forbidden
@@ -1177,6 +1180,21 @@ impl<'src> YamlLexer<'src> {
 
     fn current_char_is_yaml_printable(&self) -> bool {
         is_yaml_printable(self.current_char_unchecked())
+    }
+
+    fn is_at_bom(&self) -> bool {
+        self.current_byte() == Some(0xef) && self.current_char_unchecked() == '\u{feff}'
+    }
+
+    fn is_at_document_prefix_bom(&self) -> bool {
+        self.is_at_bom()
+            && (self.bom_allowed
+                || (self.current_coordinate.column == 0
+                    && (self.byte_at(3) == Some(b'%')
+                        || (self.byte_at(3) == Some(b'-')
+                            && self.byte_at(4) == Some(b'-')
+                            && self.byte_at(5) == Some(b'-')
+                            && self.byte_at(6).is_none_or(is_blank)))))
     }
 
     fn consume_double_quoted_escape(&mut self) {
