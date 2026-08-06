@@ -33,12 +33,13 @@
 //! rather than comparing equal to all of them, which would make the
 //! comparator non-transitive and can panic the sort.
 
-use std::{cmp::Ordering, collections::HashMap};
+use std::cmp::Ordering;
 
 use biome_rowan::{AstNode, SyntaxNodeText, TokenText};
 use biome_tailwind_syntax::{
     AnyTwVariant, AnyTwVariantSegment, TwFullCandidate, TwVariantSegmentList,
 };
+use smallvec::SmallVec;
 
 use super::tailwind_preset_v4::{BREAKPOINT_VALUES, CONTAINER_VALUES, VARIANTS};
 use super::tailwind_preset_v4_types::{VariantCompare, VariantEntry, VariantKind};
@@ -49,11 +50,12 @@ use super::tailwind_preset_v4_types::{VariantCompare, VariantEntry, VariantKind}
 /// This is the outermost field of the utility sort key. Empty (a plain
 /// utility) is zero and sorts first; a higher-ordered variant sets a
 /// higher bit, so the weight is larger and sorts later — the way
-/// Tailwind ranks variant combinations. Backed by `Vec<u64>` rather
-/// than a fixed-width integer because a class list's distinct-variant
-/// count is unbounded.
+/// Tailwind ranks variant combinations. Backed by a `SmallVec<[u64; 1]>`:
+/// inline (no heap) for the ≤64 distinct-variant case that covers
+/// essentially every class list, spilling to the heap only in the
+/// unbounded pathological case.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
-pub(super) struct VariantWeight(Vec<u64>);
+pub(super) struct VariantWeight(SmallVec<[u64; 1]>);
 
 impl VariantWeight {
     fn set(&mut self, index: usize) {
@@ -135,39 +137,29 @@ enum VariantSegment {
 }
 
 pub(super) struct VariantGroups {
-    groups: HashMap<VariantKey, usize>,
+    /// Distinct variant keys in ascending order; a key's rank — its
+    /// weight-bit index — is its position here.
+    ranked: Vec<VariantKey>,
 }
 
 impl VariantGroups {
     pub(super) fn new<'a>(variants: impl IntoIterator<Item = &'a VariantKey>) -> Self {
-        let mut variants: Vec<&VariantKey> = variants.into_iter().collect();
-        variants.sort();
-
-        let mut groups = HashMap::new();
-        let mut previous: Option<&VariantKey> = None;
-        let mut group = 0usize;
-
-        for variant in variants {
-            if groups.contains_key(variant) {
-                continue;
-            }
-            if previous.is_some_and(|previous| previous.cmp(variant) != Ordering::Equal) {
-                group += 1;
-            }
-            groups.insert((*variant).clone(), group);
-            previous = Some(variant);
-        }
-
-        Self { groups }
+        // Each distinct key's index is its rank. The comparator agrees
+        // with `Eq`, so equal keys are adjacent after sorting and `dedup`
+        // collapses them.
+        let mut ranked: Vec<VariantKey> = variants.into_iter().cloned().collect();
+        ranked.sort();
+        ranked.dedup();
+        Self { ranked }
     }
 
-    /// Returns `None` if a variant was not part of the list the groups
-    /// were built from. Unreachable when the groups come from these same
+    /// Returns `None` if a variant was not part of the list the ranks
+    /// were built from. Unreachable when the ranks come from these same
     /// candidates, so callers fold it into `Unknown`.
     pub(super) fn weight_for(&self, variants: &[VariantKey]) -> Option<VariantWeight> {
         let mut weight = VariantWeight::default();
         for variant in variants {
-            weight.set(*self.groups.get(variant)?);
+            weight.set(self.ranked.binary_search(variant).ok()?);
         }
         Some(weight)
     }
