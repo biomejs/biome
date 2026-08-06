@@ -6,6 +6,7 @@ use biome_diagnostics::display::SourceFile;
 use biome_diagnostics::{Error, Resource};
 use camino::{Utf8Path, Utf8PathBuf};
 use quick_junit::{NonSuccessKind, Report, TestCase, TestCaseStatus, TestSuite};
+use std::collections::BTreeMap;
 use std::fmt::{Display, Formatter};
 use std::io;
 
@@ -85,6 +86,9 @@ impl ReporterVisitor for JunitReporterVisitor {
             }
         });
 
+        // One JUnit <testsuite> per file path; multiple diagnostics accumulate as <testcase>s.
+        let mut suites: BTreeMap<&str, TestSuite> = BTreeMap::new();
+
         for diagnostic in diagnostics {
             let mut status = TestCaseStatus::non_success(NonSuccessKind::Failure);
             let message = format!("{}", JunitDiagnostic { diagnostic });
@@ -123,13 +127,17 @@ impl ReporterVisitor for JunitReporterVisitor {
                     );
                 }
 
-                let mut test_suite = TestSuite::new(path);
-                test_suite
-                    .extra
-                    .insert("package".into(), "org.biome".into());
-                test_suite.add_test_case(case);
-                self.0.add_test_suite(test_suite);
+                let suite = suites.entry(path).or_insert_with(|| {
+                    let mut suite = TestSuite::new(path);
+                    suite.extra.insert("package".into(), "org.biome".into());
+                    suite
+                });
+                suite.add_test_case(case);
             }
+        }
+
+        for suite in suites.into_values() {
+            self.0.add_test_suite(suite);
         }
 
         writer.log(markup! {
