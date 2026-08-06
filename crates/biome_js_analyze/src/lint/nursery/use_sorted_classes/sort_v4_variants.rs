@@ -15,9 +15,8 @@
 //! 1. Parse each candidate's variants into [VariantKey]s
 //!    ([variant_keys_from_candidate]).
 //! 2. Collect every distinct key across the list into [VariantGroups]:
-//!    sort them by Tailwind's variant order ([compare_variant_keys]) and
-//!    give each an ascending group index. Keys Tailwind treats as
-//!    order-equivalent share a group.
+//!    sort them by [VariantKey]'s `Ord` (Tailwind's variant order) and
+//!    give each an ascending group index.
 //! 3. Each candidate's [VariantWeight] is the set of group indices its
 //!    variants land in — a bitset compared as one big number. No
 //!    variants means zero, which sorts first; a higher-ordered variant
@@ -142,7 +141,7 @@ pub(super) struct VariantGroups {
 impl VariantGroups {
     pub(super) fn new<'a>(variants: impl IntoIterator<Item = &'a VariantKey>) -> Self {
         let mut variants: Vec<&VariantKey> = variants.into_iter().collect();
-        variants.sort_by(|left, right| compare_variant_keys(left, right));
+        variants.sort();
 
         let mut groups = HashMap::new();
         let mut previous: Option<&VariantKey> = None;
@@ -152,9 +151,7 @@ impl VariantGroups {
             if groups.contains_key(variant) {
                 continue;
             }
-            if previous
-                .is_some_and(|previous| compare_variant_keys(previous, variant) != Ordering::Equal)
-            {
+            if previous.is_some_and(|previous| previous.cmp(variant) != Ordering::Equal) {
                 group += 1;
             }
             groups.insert((*variant).clone(), group);
@@ -286,22 +283,26 @@ fn variant_value_from_segments(segments: &[VariantSegment]) -> Option<VariantVal
     }
 }
 
-/// Orders variant keys the way Tailwind orders variants, so a list of
-/// keys can be bucketed into [VariantGroups].
-///
-/// Deliberately a free function rather than an `Ord` impl on
-/// [VariantKey]: this is a *grouping* order in which distinct keys can
-/// compare `Equal` (e.g. two arbitrary breakpoints that resolve to the
-/// same length share a bucket). [VariantKey] derives `Eq`/`Hash` and is
-/// used as a `HashMap` key, and `Ord` must agree with `Eq` — an `Ord`
-/// returning `Equal` for `a != b` would break that contract. Keeping the
-/// grouping order out of the trait keeps them from disagreeing.
-fn compare_variant_keys(left: &VariantKey, right: &VariantKey) -> Ordering {
-    match (left, right) {
-        (VariantKey::Arbitrary(left), VariantKey::Arbitrary(right)) => left.cmp(right),
-        (VariantKey::Arbitrary(_), _) => Ordering::Greater,
-        (_, VariantKey::Arbitrary(_)) => Ordering::Less,
-        _ => compare_registered_variant_keys(left, right),
+impl Ord for VariantKey {
+    /// Ranks variants the way Tailwind orders them, so [VariantGroups] can
+    /// position each distinct variant of a class list. Arbitrary selectors
+    /// sort after every registered variant and among themselves by text;
+    /// registered variants sort by Tailwind's `order`, then resolved
+    /// breakpoint/container length, then root and functional value. This
+    /// is a total order consistent with the derived `Eq`.
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self, other) {
+            (Self::Arbitrary(left), Self::Arbitrary(right)) => left.cmp(right),
+            (Self::Arbitrary(_), _) => Ordering::Greater,
+            (_, Self::Arbitrary(_)) => Ordering::Less,
+            _ => compare_registered_variant_keys(self, other),
+        }
+    }
+}
+
+impl PartialOrd for VariantKey {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
@@ -337,7 +338,7 @@ fn compare_same_order_variant_keys(
     ) = (left, right)
         && left_root == right_root
     {
-        return compare_variant_keys(left_variant, right_variant);
+        return left_variant.cmp(right_variant);
     }
 
     compare_variant_values(left, left_entry.compare, right, right_entry.compare)
