@@ -1,9 +1,9 @@
 use biome_css_syntax::{
-    AnyCssRoot, CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector,
+    AnyCssRoot, AnyCssSelector, CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector,
     CssContainerAtRule, CssCustomPropertyValue, CssDashedIdentifier, CssDeclaration,
     CssGenericComponentValueList, CssIdentifier, CssMediaAtRule, CssNestedQualifiedRule,
     CssQualifiedRule, CssScopeAtRule, CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind,
-    CssSyntaxNode, CssSyntaxToken, ScssExpression,
+    CssSyntaxNode, CssSyntaxToken, ScssExpression, ScssPartialCombinatorSelector,
 };
 use biome_property_codec::PropertySyntaxResult;
 use biome_rowan::{
@@ -335,22 +335,33 @@ impl AnyRuleStart {
 }
 
 declare_node_union! {
-    pub AnyCssSelectorLike = CssCompoundSelector | CssComplexSelector
+    pub AnyCssSelectorLike = CssCompoundSelector | CssComplexSelector | ScssPartialCombinatorSelector
 }
 
 impl AnyCssSelectorLike {
     pub fn has_nesting_selectors(&self) -> bool {
-        match self {
-            Self::CssCompoundSelector(node) => !node.nesting_selectors().is_empty(),
-            Self::CssComplexSelector(node) => node.nesting_level() > 0,
-        }
+        self.nesting_level() > 0
     }
 
     pub fn nesting_level(&self) -> usize {
         match self {
             Self::CssCompoundSelector(node) => node.nesting_selectors().len(),
             Self::CssComplexSelector(node) => node.nesting_level(),
+            Self::ScssPartialCombinatorSelector(node) => {
+                node.left().as_ref().map_or(0, selector_nesting_level)
+            }
         }
+    }
+}
+
+fn selector_nesting_level(selector: &AnyCssSelector) -> usize {
+    match selector {
+        AnyCssSelector::CssCompoundSelector(node) => node.nesting_selectors().len(),
+        AnyCssSelector::CssComplexSelector(node) => node.nesting_level(),
+        AnyCssSelector::ScssPartialCombinatorSelector(node) => {
+            node.left().as_ref().map_or(0, selector_nesting_level)
+        }
+        AnyCssSelector::CssBogusSelector(_) | AnyCssSelector::CssMetavariable(_) => 0,
     }
 }
 

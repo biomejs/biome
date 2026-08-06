@@ -1,0 +1,11 @@
+.columns {
+  || {
+    .column {}
+  }
+}
+
+.selector:has(>) {}
+
+.component {
+  @extend .target >;
+}

@@ -3,8 +3,8 @@
 #[rustfmt::skip]
 mod tests;
 
-use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::MarkdownSyntaxKind::*;
+use biome_markdown_syntax::{MarkdownSyntaxKind, T};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
@@ -325,7 +325,7 @@ impl<'src> MarkdownLexer<'src> {
             PLS => self.consume_byte(PLUS),
             HAS => {
                 if self.is_at_heading_hash() {
-                    self.consume_hash()
+                    self.consume_byte(T![#])
                 } else {
                     self.consume_textual(context)
                 }
@@ -1121,27 +1121,6 @@ impl<'src> MarkdownLexer<'src> {
         self.consume_textual(MarkdownLexContext::Regular)
     }
 
-    /// Consume hash character(s).
-    ///
-    /// Emits a single HASH token containing all consecutive `#` characters.
-    /// The parser can determine the heading level by checking the token's length.
-    ///
-    /// Per CommonMark §4.2: ATX headings use 1-6 `#` characters.
-    fn consume_hash(&mut self) -> MarkdownSyntaxKind {
-        self.assert_at_char_boundary();
-
-        // Count consecutive hash characters
-        let mut count = 0;
-        while let Some(b'#') = self.byte_at(count) {
-            count += 1;
-        }
-
-        // Emit all consecutive hashes as a single HASH token
-        // The parser determines heading level from token length
-        self.advance(count);
-        HASH
-    }
-
     /// Consume backtick(s).
     ///
     /// At line start with 3+ backticks: emits TRIPLE_BACKTICK for fenced code blocks.
@@ -1489,7 +1468,25 @@ impl<'src> MarkdownLexer<'src> {
     /// it opens a heading at the start of a line (§4.2) or closes one at the
     /// end. Anywhere else `#` is plain text.
     fn is_at_heading_hash(&self) -> bool {
-        self.after_newline || self.is_at_container_line_start() || self.is_at_atx_closing_sequence()
+        self.after_newline
+            || self.is_at_container_line_start()
+            || self.is_in_atx_opening_sequence()
+            || self.is_at_atx_closing_sequence()
+    }
+
+    /// Returns true when earlier hashes on the line form an ATX opening sequence.
+    fn is_in_atx_opening_sequence(&self) -> bool {
+        let before = &self.source[..self.position];
+        let line_start = before.rfind(['\n', '\r']).map_or(0, |pos| pos + 1);
+        let line_prefix = &before[line_start..];
+        let Some(hash_start) = line_prefix.find('#') else {
+            return false;
+        };
+
+        line_prefix[..hash_start]
+            .bytes()
+            .all(|b| is_space_or_tab_byte(b) || b == b'>')
+            && line_prefix[hash_start..].bytes().all(|b| b == b'#')
     }
 
     /// Returns true if the current line holds nothing before this position

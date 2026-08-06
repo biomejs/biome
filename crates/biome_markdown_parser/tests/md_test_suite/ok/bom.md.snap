@@ -16,7 +16,7 @@ world
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: UNICODE_BOM@0..3 "\u{feff}" [] [],
     value: MdBlockList [
         MdHeader {
@@ -59,7 +59,7 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..18
+0: MD_ROOT@0..18
   0: UNICODE_BOM@0..3 "\u{feff}" [] []
   1: MD_BLOCK_LIST@3..18
     0: MD_HEADER@3..10

@@ -1004,7 +1004,7 @@ pub fn assert_diagnostics_expectation_comment<L: Language>(
 
     let is_valid_test_file = match file_path.extension().unwrap_or_default() {
         // Excluded files types which cannot contain comment in the source code
-        "snap" | "json" | "jsonc" | "svelte" | "vue" | "astro" | "html" => false,
+        "snap" | "json" | "jsonc" | "svelte" | "vue" | "astro" | "html" | "md" => false,
         _ => {
             let name = file_path.file_name().unwrap().to_ascii_lowercase_cow();
             // We can't know all the valid file names, but this should catch most common cases.

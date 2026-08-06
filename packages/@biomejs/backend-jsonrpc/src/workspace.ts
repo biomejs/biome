@@ -2547,6 +2547,11 @@ See https://biomejs.dev/linter/rules/no-restricted-dependencies
 	 */
 	noRestrictedDependencies?: NoRestrictedDependenciesConfiguration;
 	/**
+	* Disallow legacy Svelte {@const} tags.
+See https://biomejs.dev/linter/rules/no-svelte-legacy-const 
+	 */
+	noSvelteLegacyConst?: NoSvelteLegacyConstConfiguration;
+	/**
 	* Disallow unnecessary $state wrapping of reactive classes.
 See https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap 
 	 */
@@ -4774,6 +4779,9 @@ export type NoReactStringRefsConfiguration =
 export type NoRestrictedDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRestrictedDependenciesOptions;
+export type NoSvelteLegacyConstConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteLegacyConstOptions;
 export type NoSvelteUnnecessaryStateWrapConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteUnnecessaryStateWrapOptions;
@@ -6674,6 +6682,10 @@ export interface RuleWithNoRestrictedDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: NoRestrictedDependenciesOptions;
 }
+export interface RuleWithNoSvelteLegacyConstOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteLegacyConstOptions;
+}
 export interface RuleWithNoSvelteUnnecessaryStateWrapOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8413,6 +8425,7 @@ export interface NoReactNativeRawTextOptions {
 }
 export type NoReactStringRefsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
+export type NoSvelteLegacyConstOptions = {};
 export interface NoSvelteUnnecessaryStateWrapOptions {
 	/**
 	 * Additional class names to treat as already reactive (beyond the built-in `svelte/reactivity` classes).
@@ -9874,6 +9887,7 @@ export type Category =
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactStringRefs"
 	| "lint/nursery/noRestrictedDependencies"
+	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTailwindArbitraryValue"
 	| "lint/nursery/noTopLevelLiterals"
@@ -9892,6 +9906,7 @@ export type Category =
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBaseline"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useConsistentHeaderLevel"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTestIt"
 	| "lint/nursery/useDisposables"
@@ -9918,8 +9933,8 @@ export type Category =
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useReactAsyncServerFunction"
-	| "lint/nursery/useReactFunctionComponentDefinition"
 	| "lint/nursery/useReactCompiler"
+	| "lint/nursery/useReactFunctionComponentDefinition"
 	| "lint/nursery/useReactNativePlatformComponents"
 	| "lint/nursery/useReduceTypeParameter"
 	| "lint/nursery/useRegexpExec"

@@ -34,7 +34,7 @@ Starts with arrow <!---> should be text.
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
     value: MdBlockList [
         MdHeader {
@@ -76,7 +76,10 @@ MdDocument {
             indent: MdIndentTokenList [],
             before: MdHashList [
                 MdHash {
-                    hash_token: HASH@86..88 "##" [] [],
+                    hash_token: HASH@86..87 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@87..88 "#" [] [],
                 },
             ],
             content: MdParagraph {
@@ -126,7 +129,10 @@ MdDocument {
             indent: MdIndentTokenList [],
             before: MdHashList [
                 MdHash {
-                    hash_token: HASH@197..199 "##" [] [],
+                    hash_token: HASH@197..198 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@198..199 "#" [] [],
                 },
             ],
             content: MdParagraph {
@@ -236,7 +242,10 @@ MdDocument {
             indent: MdIndentTokenList [],
             before: MdHashList [
                 MdHash {
-                    hash_token: HASH@507..509 "##" [] [],
+                    hash_token: HASH@507..508 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@508..509 "#" [] [],
                 },
             ],
             content: MdParagraph {
@@ -329,7 +338,7 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..658
+0: MD_ROOT@0..658
   0: (empty)
   1: MD_BLOCK_LIST@0..658
     0: MD_HEADER@0..27
@@ -357,8 +366,10 @@ MdDocument {
     5: MD_HEADER@86..107
       0: MD_INDENT_TOKEN_LIST@86..86
       1: MD_HASH_LIST@86..88
-        0: MD_HASH@86..88
-          0: HASH@86..88 "##" [] []
+        0: MD_HASH@86..87
+          0: HASH@86..87 "#" [] []
+        1: MD_HASH@87..88
+          0: HASH@87..88 "#" [] []
       2: MD_PARAGRAPH@88..107
         0: MD_INLINE_ITEM_LIST@88..107
           0: MD_TEXTUAL@88..107
@@ -389,8 +400,10 @@ MdDocument {
     9: MD_HEADER@197..213
       0: MD_INDENT_TOKEN_LIST@197..197
       1: MD_HASH_LIST@197..199
-        0: MD_HASH@197..199
-          0: HASH@197..199 "##" [] []
+        0: MD_HASH@197..198
+          0: HASH@197..198 "#" [] []
+        1: MD_HASH@198..199
+          0: HASH@198..199 "#" [] []
       2: MD_PARAGRAPH@199..213
         0: MD_INLINE_ITEM_LIST@199..213
           0: MD_TEXTUAL@199..213
@@ -461,8 +474,10 @@ MdDocument {
     13: MD_HEADER@507..526
       0: MD_INDENT_TOKEN_LIST@507..507
       1: MD_HASH_LIST@507..509
-        0: MD_HASH@507..509
-          0: HASH@507..509 "##" [] []
+        0: MD_HASH@507..508
+          0: HASH@507..508 "#" [] []
+        1: MD_HASH@508..509
+          0: HASH@508..509 "#" [] []
       2: MD_PARAGRAPH@509..526
         0: MD_INLINE_ITEM_LIST@509..526
           0: MD_TEXTUAL@509..526
