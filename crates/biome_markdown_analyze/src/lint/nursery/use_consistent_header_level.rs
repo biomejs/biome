@@ -11,22 +11,25 @@ use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, Direction};
 use biome_rule_options::use_consistent_header_level::UseConsistentHeaderLevelOptions;
 
 declare_lint_rule! {
-    /// Enforce that all headers level are consistent
+    /// Enforce that all headers level are consistent.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```md,expect_diagnostic
-    /// # Header 1
+    /// \# Header 1
     ///
-    /// # Header 3
+    /// ### Header 3
     ///
     /// ```
     ///
     /// ### Valid
     ///
     /// ```md
+    /// \# Header 1
+    ///
+    /// ## Header 2
     /// ```
     ///
     pub UseConsistentHeaderLevel {

@@ -119,7 +119,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     });
 }
 
-#[expect(clippy::too_many_arguments)]
 pub(crate) fn analyze_and_snap(
     snapshot: &mut String,
     input_code: &str,
@@ -227,6 +226,7 @@ fn check_code_action(path: &Utf8Path, source: &str, action: &AnalyzerAction<Mark
     assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
 }
 
+#[expect(unused)]
 pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
 

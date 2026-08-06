@@ -29,6 +29,7 @@ use biome_languages::{
     DocumentFileSource, HtmlFileSource,
     javascript::{JsEmbeddingKind, JsFileSource},
 };
+use biome_markdown_syntax::MarkdownLanguage;
 use biome_ruledoc_utils::{
     AnalyzerServicesBuilder, CodeBlock, DiagnosticConsoleWriter, DiagnosticWriter,
     OptionsParsingMode, parse_rule_options,
@@ -213,12 +214,23 @@ pub fn check_rules() -> anyhow::Result<()> {
         }
     }
 
+    impl RegistryVisitor<MarkdownLanguage> for LintRulesVisitor {
+        fn record_rule<R>(&mut self)
+        where
+            R: Rule<Options: Default, Query: Queryable<Language = MarkdownLanguage, Output: Clone>>
+                + 'static,
+        {
+            self.push_rule::<R, <R::Query as Queryable>::Language>()
+        }
+    }
+
     let mut visitor = LintRulesVisitor::default();
     biome_js_analyze::visit_registry(&mut visitor);
     biome_json_analyze::visit_registry(&mut visitor);
     biome_css_analyze::visit_registry(&mut visitor);
     biome_graphql_analyze::visit_registry(&mut visitor);
     biome_html_analyze::visit_registry(&mut visitor);
+    biome_markdown_analyze::visit_registry(&mut visitor);
 
     let LintRulesVisitor { groups, errors } = visitor;
     if !errors.is_empty() {
@@ -501,8 +513,44 @@ fn assert_lint(
                 );
             }
         }
+        DocumentFileSource::Markdown(_) => {
+            let parse = biome_markdown_parser::parse_markdown(code);
+
+            if parse.has_errors() {
+                for diag in parse.into_diagnostics() {
+                    let error = diag
+                        .with_file_path(test.file_path())
+                        .with_file_source_code(code);
+                    diagnostics.write_parse_error(error);
+                }
+            } else {
+                let root = parse.tree();
+
+                let rule_filter = RuleFilter::Rule(group, rule);
+                let filter = AnalysisFilter {
+                    enabled_rules: Some(slice::from_ref(&rule_filter)),
+                    ..AnalysisFilter::default()
+                };
+
+                let options = test.create_analyzer_options::<MarkdownLanguage>(config)?;
+
+                biome_markdown_analyze::analyze(&root, filter, &options, |signal| {
+                    if let Some(mut diag) = signal.diagnostic() {
+                        for action in signal.actions(ActionFilter::rule_fix()) {
+                            diag = diag.add_code_suggestion(action.into());
+                        }
+
+                        let error = diag
+                            .with_file_path(test.file_path())
+                            .with_file_source_code(code);
+                        diagnostics.write_diagnostic(error);
+                    }
+
+                    ControlFlow::<()>::Continue(())
+                });
+            }
+        }
         DocumentFileSource::Grit(..) => todo!("Grit analysis is not yet supported"),
-        DocumentFileSource::Markdown(..) => todo!("Markdown analysis is not yet supported"),
         DocumentFileSource::Yaml(..) => todo!("Yaml analysis is not yet supported"),
 
         // Unknown code blocks should be ignored by tests
