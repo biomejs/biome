@@ -1,6 +1,42 @@
+//! Variant ordering for the Tailwind v4 class sorter.
+//!
+//! A candidate's variants (`hover:`, `sm:`, `group-has-[…]:`) form the
+//! *outermost* part of its sort key: a plain utility sorts before any
+//! variant of it, so `flex hover:flex sm:flex` keeps that order. This
+//! module turns each candidate's variants into a [VariantWeight] that
+//! [`sort_v4`](super::sort_v4) compares ahead of the utility signature.
+//!
+//! # Weighting takes two passes
+//!
+//! A variant's weight depends on the *whole* class list, not the
+//! candidate alone, so the list is classified first and weighted second
+//! (see [`sort_class_list`](super::sort_v4::sort_class_list)):
+//!
+//! 1. Parse each candidate's variants into [VariantKey]s
+//!    ([variant_keys_from_candidate]).
+//! 2. Collect every distinct key across the list into [VariantGroups]:
+//!    sort them by Tailwind's variant order ([compare_variant_keys]) and
+//!    give each an ascending group index. Keys Tailwind treats as
+//!    order-equivalent share a group.
+//! 3. Each candidate's [VariantWeight] is the set of group indices its
+//!    variants land in — a bitset compared as one big number. No
+//!    variants means zero, which sorts first; a higher-ordered variant
+//!    sets a higher bit, so the weight is larger and sorts later. This
+//!    mirrors how Tailwind ranks variant combinations.
+//!
+//! # Where the order comes from
+//!
+//! [VARIANTS] is generated from Tailwind's own design system, so each
+//! variant's `order` is Tailwind's. Breakpoints and containers instead
+//! compare by resolved length — ascending for `min-*`/`sm`/`md`,
+//! descending for `max-*` ([compare_variant_values]). An arbitrary value
+//! that does not parse (`min-[15xyz]`) ranks after every parseable one
+//! rather than comparing equal to all of them, which would make the
+//! comparator non-transitive and can panic the sort.
+
 use std::{cmp::Ordering, collections::HashMap};
 
-use biome_rowan::{AstNode, SyntaxNodeText};
+use biome_rowan::{AstNode, SyntaxNodeText, TokenText};
 use biome_tailwind_syntax::{
     AnyTwVariant, AnyTwVariantSegment, TwFullCandidate, TwVariantSegmentList,
 };
@@ -8,10 +44,19 @@ use biome_tailwind_syntax::{
 use super::tailwind_preset_v4::{BREAKPOINT_VALUES, CONTAINER_VALUES, VARIANTS};
 use super::tailwind_preset_v4_types::{VariantCompare, VariantEntry, VariantKind};
 
+/// The variants a candidate carries, as the set of [VariantGroups]
+/// indices they occupy — a bitset compared as one big number.
+///
+/// This is the outermost field of the utility sort key. Empty (a plain
+/// utility) is zero and sorts first; a higher-ordered variant sets a
+/// higher bit, so the weight is larger and sorts later — the way
+/// Tailwind ranks variant combinations. Backed by `Vec<u64>` rather
+/// than a fixed-width integer because a class list's distinct-variant
+/// count is unbounded.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
-pub(super) struct VariantBits(Vec<u64>);
+pub(super) struct VariantWeight(Vec<u64>);
 
-impl VariantBits {
+impl VariantWeight {
     fn set(&mut self, index: usize) {
         let word = index / 64;
         if self.0.len() <= word {
@@ -19,8 +64,15 @@ impl VariantBits {
         }
         self.0[word] |= 1u64 << (index % 64);
     }
+}
 
-    pub(super) fn cmp_numeric(&self, other: &Self) -> Ordering {
+impl Ord for VariantWeight {
+    fn cmp(&self, other: &Self) -> Ordering {
+        // Compare as a big-endian integer: longer weights first, then
+        // most-significant word first. `set` only grows the vec to hold
+        // a new bit and never clears one, so the top word is always
+        // non-zero — equal weights have equal vecs, which keeps this
+        // `Ord` consistent with the derived `Eq`.
         let self_len = trimmed_word_len(&self.0);
         let other_len = trimmed_word_len(&other.0);
         match self_len.cmp(&other_len) {
@@ -37,6 +89,12 @@ impl VariantBits {
     }
 }
 
+impl PartialOrd for VariantWeight {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
 fn trimmed_word_len(words: &[u64]) -> usize {
     words
         .iter()
@@ -44,15 +102,21 @@ fn trimmed_word_len(words: &[u64]) -> usize {
         .map_or(0, |index| index + 1)
 }
 
+/// A parsed variant. Registered roots borrow their name straight from
+/// the [VARIANTS] registry (`&'static str`); source-derived text is a
+/// [TokenText] (a cheap ref-counted slice, no heap copy). Only
+/// `Arbitrary` owns a `Box<str>`: its selector is a
+/// `CssGenericComponentValueList` that can span several tokens, so no
+/// single slice covers it.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub(super) enum VariantKey {
-    Static(Box<str>),
+    Static(&'static str),
     Functional {
-        root: Box<str>,
+        root: &'static str,
         value: Option<VariantValue>,
     },
     Compound {
-        root: Box<str>,
+        root: &'static str,
         variant: Box<Self>,
     },
     Arbitrary(Box<str>),
@@ -60,13 +124,13 @@ pub(super) enum VariantKey {
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub(super) enum VariantValue {
-    Named(Box<str>),
+    Named(TokenText),
     Arbitrary(Box<str>),
 }
 
 #[derive(Clone, Debug)]
 enum VariantSegment {
-    Named(Box<str>),
+    Named(TokenText),
     Arbitrary(Box<str>),
     CssVariable,
 }
@@ -103,12 +167,12 @@ impl VariantGroups {
     /// Returns `None` if a variant was not part of the list the groups
     /// were built from. Unreachable when the groups come from these same
     /// candidates, so callers fold it into `Unknown`.
-    pub(super) fn bits_for(&self, variants: &[VariantKey]) -> Option<VariantBits> {
-        let mut bits = VariantBits::default();
+    pub(super) fn weight_for(&self, variants: &[VariantKey]) -> Option<VariantWeight> {
+        let mut weight = VariantWeight::default();
         for variant in variants {
-            bits.set(*self.groups.get(variant)?);
+            weight.set(*self.groups.get(variant)?);
         }
-        Some(bits)
+        Some(weight)
     }
 }
 
@@ -126,12 +190,16 @@ fn variant_key_from_variant(variant: &AnyTwVariant) -> Option<VariantKey> {
             variant.selector_token().ok()?.text_trimmed().into(),
         )),
         AnyTwVariant::TwVariantExpression(expression) => {
+            // `raw` is only a lookup buffer; the key stores the registry's
+            // own `&'static str`, never this string. (The whole-expression
+            // match is also reachable through the segment path below, so
+            // this early check could likely be dropped — kept for now to
+            // preserve behavior.)
             let raw = syntax_text_to_box(&expression.syntax().text_trimmed());
-            if VARIANTS
-                .get(raw.as_ref())
-                .is_some_and(|entry| entry.kind == VariantKind::Static)
+            if let Some((&name, entry)) = VARIANTS.get_entry(raw.as_ref())
+                && entry.kind == VariantKind::Static
             {
-                return Some(VariantKey::Static(raw));
+                return Some(VariantKey::Static(name));
             }
 
             let segments = variant_segments(expression.segments())?;
@@ -147,7 +215,7 @@ fn variant_segments(segments: TwVariantSegmentList) -> Option<Vec<VariantSegment
         let segment = segment.ok()?;
         result.push(match segment {
             AnyTwVariantSegment::TwNamedVariantSegment(segment) => {
-                VariantSegment::Named(segment.value_token().ok()?.text_trimmed().into())
+                VariantSegment::Named(segment.value_token().ok()?.token_text_trimmed())
             }
             AnyTwVariantSegment::TwArbitraryVariantSegment(segment) => VariantSegment::Arbitrary(
                 syntax_text_to_box(&segment.value().syntax().text_trimmed()),
@@ -185,7 +253,10 @@ fn variant_key_from_segments(segments: &[VariantSegment]) -> Option<VariantKey> 
 
 fn variant_root_from_segments(
     segments: &[VariantSegment],
-) -> Option<(Box<str>, &'static VariantEntry, &[VariantSegment])> {
+) -> Option<(&'static str, &'static VariantEntry, &[VariantSegment])> {
+    // `root` is a scratch buffer that grows one segment at a time to probe
+    // the registry for the longest matching prefix; the matched key is
+    // stored, not this string.
     let mut root = String::new();
     let mut best = None;
 
@@ -198,14 +269,13 @@ fn variant_root_from_segments(
         }
         root.push_str(segment);
 
-        if let Some(entry) = VARIANTS.get(root.as_str()) {
-            best = Some((root.len(), entry, index + 1));
+        if let Some((&name, entry)) = VARIANTS.get_entry(root.as_str()) {
+            best = Some((name, entry, index + 1));
         }
     }
 
-    let (root_len, entry, rest_index) = best?;
-    root.truncate(root_len);
-    Some((root.into_boxed_str(), entry, &segments[rest_index..]))
+    let (name, entry, rest_index) = best?;
+    Some((name, entry, &segments[rest_index..]))
 }
 
 fn variant_value_from_segments(segments: &[VariantSegment]) -> Option<VariantValue> {
@@ -216,6 +286,16 @@ fn variant_value_from_segments(segments: &[VariantSegment]) -> Option<VariantVal
     }
 }
 
+/// Orders variant keys the way Tailwind orders variants, so a list of
+/// keys can be bucketed into [VariantGroups].
+///
+/// Deliberately a free function rather than an `Ord` impl on
+/// [VariantKey]: this is a *grouping* order in which distinct keys can
+/// compare `Equal` (e.g. two arbitrary breakpoints that resolve to the
+/// same length share a bucket). [VariantKey] derives `Eq`/`Hash` and is
+/// used as a `HashMap` key, and `Ord` must agree with `Eq` — an `Ord`
+/// returning `Equal` for `a != b` would break that contract. Keeping the
+/// grouping order out of the trait keeps them from disagreeing.
 fn compare_variant_keys(left: &VariantKey, right: &VariantKey) -> Ordering {
     match (left, right) {
         (VariantKey::Arbitrary(left), VariantKey::Arbitrary(right)) => left.cmp(right),
@@ -294,7 +374,7 @@ fn compare_variant_values(
 
 fn variant_compare_value(key: &VariantKey, compare: VariantCompare) -> Option<f64> {
     let value = match key {
-        VariantKey::Static(root) => root.as_ref(),
+        VariantKey::Static(root) => *root,
         VariantKey::Functional {
             value: Some(value), ..
         } => value.text(),
@@ -359,17 +439,26 @@ fn variant_value(key: &VariantKey) -> Option<&VariantValue> {
 impl VariantValue {
     fn text(&self) -> &str {
         match self {
-            Self::Named(value) | Self::Arbitrary(value) => value,
+            Self::Named(value) => value,
+            Self::Arbitrary(value) => value,
         }
     }
+}
 
+impl Ord for VariantValue {
     fn cmp(&self, other: &Self) -> Ordering {
         match (self, other) {
-            (Self::Named(left), Self::Named(right))
-            | (Self::Arbitrary(left), Self::Arbitrary(right)) => left.cmp(right),
+            (Self::Named(left), Self::Named(right)) => left.cmp(right),
+            (Self::Arbitrary(left), Self::Arbitrary(right)) => left.cmp(right),
             (Self::Named(_), Self::Arbitrary(_)) => Ordering::Less,
             (Self::Arbitrary(_), Self::Named(_)) => Ordering::Greater,
         }
+    }
+}
+
+impl PartialOrd for VariantValue {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 

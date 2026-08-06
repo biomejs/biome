@@ -15,7 +15,7 @@ use super::tailwind_preset_v4_types::{
 };
 use super::arbitrary_value_match::value_matches_type;
 use super::sort_v4_variants::{
-    VariantBits, VariantGroups, VariantKey, variant_keys_from_candidate,
+    VariantWeight, VariantGroups, VariantKey, variant_keys_from_candidate,
 };
 
 #[cfg(test)]
@@ -77,7 +77,7 @@ enum SortKey {
         /// Variant weight (`hover:`, `sm:`, …), empty for a plain
         /// utility. The outermost sort key, so variantless utilities
         /// sort first.
-        variant_bits: VariantBits,
+        variant_weight: VariantWeight,
         signature: Signature,
         /// Total declaration count — Tailwind's tie-break after the
         /// signature (wider utilities sort first).
@@ -359,11 +359,11 @@ impl PendingSortKey {
                 important,
                 variants,
             } => {
-                let Some(variant_bits) = variant_groups.bits_for(&variants) else {
+                let Some(variant_weight) = variant_groups.weight_for(&variants) else {
                     return SortKey::Unknown;
                 };
                 SortKey::Known {
-                    variant_bits,
+                    variant_weight,
                     signature,
                     count,
                     name,
@@ -387,14 +387,14 @@ fn compare(a: &SortKey, b: &SortKey) -> Ordering {
         (SortKey::Known { .. }, SortKey::Unknown) => Ordering::Greater,
         (
             SortKey::Known {
-                variant_bits: v1,
+                variant_weight: v1,
                 signature: s1,
                 count: c1,
                 name: n1,
                 important: i1,
             },
             SortKey::Known {
-                variant_bits: v2,
+                variant_weight: v2,
                 signature: s2,
                 count: c2,
                 name: n2,
@@ -403,7 +403,7 @@ fn compare(a: &SortKey, b: &SortKey) -> Ordering {
             // Variants sort outermost — a plain utility before any
             // variant (`flex hover:flex sm:flex`).
         ) => v1
-            .cmp_numeric(v2)
+            .cmp(v2)
             .then_with(|| s1.cmp(s2))
             // Wider utilities (e.g. `sr-only` setting 9 properties) win
             // a signature tie so they sort before narrower utilities.
@@ -584,7 +584,7 @@ mod tests {
 
     fn known(property_idx: u16, property_count: u8) -> SortKey {
         SortKey::Known {
-            variant_bits: VariantBits::default(),
+            variant_weight: VariantWeight::default(),
             signature: Signature::Property(property_idx),
             count: property_count,
             name: NameKey::default(),
@@ -617,7 +617,7 @@ mod tests {
         let full = parsed.tree().candidates().iter().next().unwrap();
         let pending = PendingSortKey::from_candidate(&full);
         // Groups from this one candidate; a plain utility gets empty
-        // `variant_bits`.
+        // `variant_weight`.
         let variants: &[VariantKey] = match &pending {
             PendingSortKey::Known { variants, .. } => variants,
             PendingSortKey::Unknown => &[],
@@ -713,7 +713,7 @@ mod tests {
     fn compare_breaks_exact_key_tie_plain_before_important() {
         let plain = known(5, 1);
         let important = SortKey::Known {
-            variant_bits: VariantBits::default(),
+            variant_weight: VariantWeight::default(),
             signature: Signature::Property(5),
             count: 1,
             name: NameKey::default(),
@@ -942,7 +942,7 @@ mod tests {
     #[test]
     fn important_suffix_is_position_neutral_in_the_key() {
         let SortKey::Known {
-            variant_bits,
+            variant_weight,
             signature,
             count,
             name,
@@ -954,7 +954,7 @@ mod tests {
         assert_eq!(
             classify("flex!"),
             SortKey::Known {
-                variant_bits,
+                variant_weight,
                 signature,
                 count,
                 name,
