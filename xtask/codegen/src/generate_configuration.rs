@@ -340,6 +340,8 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     biome_graphql_analyze::visit_registry(&mut assist_visitor);
     biome_html_analyze::visit_registry(&mut lint_visitor);
     biome_html_analyze::visit_registry(&mut assist_visitor);
+    biome_markdown_analyze::visit_registry(&mut lint_visitor);
+    biome_markdown_analyze::visit_registry(&mut assist_visitor);
 
     // let LintRulesVisitor { groups } = lint_visitor;
 
