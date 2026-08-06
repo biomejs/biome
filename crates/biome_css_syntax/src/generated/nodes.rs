@@ -12141,6 +12141,46 @@ pub struct ScssParenthesizedExpressionFields {
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssPartialCombinatorSelector {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssPartialCombinatorSelector {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssPartialCombinatorSelectorFields {
+        ScssPartialCombinatorSelectorFields {
+            left: self.left(),
+            combinator: self.combinator(),
+        }
+    }
+    pub fn left(&self) -> Option<AnyCssSelector> {
+        support::node(&self.syntax, 0usize)
+    }
+    pub fn combinator(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for ScssPartialCombinatorSelector {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssPartialCombinatorSelectorFields {
+    pub left: Option<AnyCssSelector>,
+    pub combinator: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssPlaceholderSelector {
     pub(crate) syntax: SyntaxNode,
 }
@@ -16455,6 +16495,7 @@ impl AnyCssQueryFeatureValue {
 pub enum AnyCssRelativeSelector {
     CssBogusSelector(CssBogusSelector),
     CssRelativeSelector(CssRelativeSelector),
+    ScssPartialCombinatorSelector(ScssPartialCombinatorSelector),
 }
 impl AnyCssRelativeSelector {
     pub fn as_css_bogus_selector(&self) -> Option<&CssBogusSelector> {
@@ -16466,6 +16507,12 @@ impl AnyCssRelativeSelector {
     pub fn as_css_relative_selector(&self) -> Option<&CssRelativeSelector> {
         match &self {
             Self::CssRelativeSelector(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_partial_combinator_selector(&self) -> Option<&ScssPartialCombinatorSelector> {
+        match &self {
+            Self::ScssPartialCombinatorSelector(item) => Some(item),
             _ => None,
         }
     }
@@ -16632,6 +16679,7 @@ pub enum AnyCssSelector {
     CssComplexSelector(CssComplexSelector),
     CssCompoundSelector(CssCompoundSelector),
     CssMetavariable(CssMetavariable),
+    ScssPartialCombinatorSelector(ScssPartialCombinatorSelector),
 }
 impl AnyCssSelector {
     pub fn as_css_bogus_selector(&self) -> Option<&CssBogusSelector> {
@@ -16655,6 +16703,12 @@ impl AnyCssSelector {
     pub fn as_css_metavariable(&self) -> Option<&CssMetavariable> {
         match &self {
             Self::CssMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_partial_combinator_selector(&self) -> Option<&ScssPartialCombinatorSelector> {
+        match &self {
+            Self::ScssPartialCombinatorSelector(item) => Some(item),
             _ => None,
         }
     }
@@ -32724,6 +32778,54 @@ impl From<ScssParenthesizedExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssPartialCombinatorSelector {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_PARTIAL_COMBINATOR_SELECTOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_PARTIAL_COMBINATOR_SELECTOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssPartialCombinatorSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssPartialCombinatorSelector")
+                .field("left", &support::DebugOptionalElement(self.left()))
+                .field("combinator", &support::DebugSyntaxResult(self.combinator()))
+                .finish()
+        } else {
+            f.debug_struct("ScssPartialCombinatorSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssPartialCombinatorSelector> for SyntaxNode {
+    fn from(n: ScssPartialCombinatorSelector) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssPartialCombinatorSelector> for SyntaxElement {
+    fn from(n: ScssPartialCombinatorSelector) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssPlaceholderSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -42365,17 +42467,29 @@ impl From<CssRelativeSelector> for AnyCssRelativeSelector {
         Self::CssRelativeSelector(node)
     }
 }
+impl From<ScssPartialCombinatorSelector> for AnyCssRelativeSelector {
+    fn from(node: ScssPartialCombinatorSelector) -> Self {
+        Self::ScssPartialCombinatorSelector(node)
+    }
+}
 impl AstNode for AnyCssRelativeSelector {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusSelector::KIND_SET.union(CssRelativeSelector::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusSelector::KIND_SET
+        .union(CssRelativeSelector::KIND_SET)
+        .union(ScssPartialCombinatorSelector::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_SELECTOR | CSS_RELATIVE_SELECTOR)
+        matches!(
+            kind,
+            CSS_BOGUS_SELECTOR | CSS_RELATIVE_SELECTOR | SCSS_PARTIAL_COMBINATOR_SELECTOR
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BOGUS_SELECTOR => Self::CssBogusSelector(CssBogusSelector { syntax }),
             CSS_RELATIVE_SELECTOR => Self::CssRelativeSelector(CssRelativeSelector { syntax }),
+            SCSS_PARTIAL_COMBINATOR_SELECTOR => {
+                Self::ScssPartialCombinatorSelector(ScssPartialCombinatorSelector { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -42384,12 +42498,14 @@ impl AstNode for AnyCssRelativeSelector {
         match self {
             Self::CssBogusSelector(it) => it.syntax(),
             Self::CssRelativeSelector(it) => it.syntax(),
+            Self::ScssPartialCombinatorSelector(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBogusSelector(it) => it.into_syntax(),
             Self::CssRelativeSelector(it) => it.into_syntax(),
+            Self::ScssPartialCombinatorSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -42398,6 +42514,7 @@ impl std::fmt::Debug for AnyCssRelativeSelector {
         match self {
             Self::CssBogusSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssRelativeSelector(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssPartialCombinatorSelector(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -42406,6 +42523,7 @@ impl From<AnyCssRelativeSelector> for SyntaxNode {
         match n {
             AnyCssRelativeSelector::CssBogusSelector(it) => it.into_syntax(),
             AnyCssRelativeSelector::CssRelativeSelector(it) => it.into_syntax(),
+            AnyCssRelativeSelector::ScssPartialCombinatorSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -42888,16 +43006,26 @@ impl From<CssMetavariable> for AnyCssSelector {
         Self::CssMetavariable(node)
     }
 }
+impl From<ScssPartialCombinatorSelector> for AnyCssSelector {
+    fn from(node: ScssPartialCombinatorSelector) -> Self {
+        Self::ScssPartialCombinatorSelector(node)
+    }
+}
 impl AstNode for AnyCssSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusSelector::KIND_SET
         .union(CssComplexSelector::KIND_SET)
         .union(CssCompoundSelector::KIND_SET)
-        .union(CssMetavariable::KIND_SET);
+        .union(CssMetavariable::KIND_SET)
+        .union(ScssPartialCombinatorSelector::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_SELECTOR | CSS_COMPLEX_SELECTOR | CSS_COMPOUND_SELECTOR | CSS_METAVARIABLE
+            CSS_BOGUS_SELECTOR
+                | CSS_COMPLEX_SELECTOR
+                | CSS_COMPOUND_SELECTOR
+                | CSS_METAVARIABLE
+                | SCSS_PARTIAL_COMBINATOR_SELECTOR
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -42906,6 +43034,9 @@ impl AstNode for AnyCssSelector {
             CSS_COMPLEX_SELECTOR => Self::CssComplexSelector(CssComplexSelector { syntax }),
             CSS_COMPOUND_SELECTOR => Self::CssCompoundSelector(CssCompoundSelector { syntax }),
             CSS_METAVARIABLE => Self::CssMetavariable(CssMetavariable { syntax }),
+            SCSS_PARTIAL_COMBINATOR_SELECTOR => {
+                Self::ScssPartialCombinatorSelector(ScssPartialCombinatorSelector { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -42916,6 +43047,7 @@ impl AstNode for AnyCssSelector {
             Self::CssComplexSelector(it) => it.syntax(),
             Self::CssCompoundSelector(it) => it.syntax(),
             Self::CssMetavariable(it) => it.syntax(),
+            Self::ScssPartialCombinatorSelector(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -42924,6 +43056,7 @@ impl AstNode for AnyCssSelector {
             Self::CssComplexSelector(it) => it.into_syntax(),
             Self::CssCompoundSelector(it) => it.into_syntax(),
             Self::CssMetavariable(it) => it.into_syntax(),
+            Self::ScssPartialCombinatorSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -42934,6 +43067,7 @@ impl std::fmt::Debug for AnyCssSelector {
             Self::CssComplexSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssCompoundSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssPartialCombinatorSelector(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -42944,6 +43078,7 @@ impl From<AnyCssSelector> for SyntaxNode {
             AnyCssSelector::CssComplexSelector(it) => it.into_syntax(),
             AnyCssSelector::CssCompoundSelector(it) => it.into_syntax(),
             AnyCssSelector::CssMetavariable(it) => it.into_syntax(),
+            AnyCssSelector::ScssPartialCombinatorSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -48795,6 +48930,11 @@ impl std::fmt::Display for ScssParentSelectorValue {
     }
 }
 impl std::fmt::Display for ScssParenthesizedExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssPartialCombinatorSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
