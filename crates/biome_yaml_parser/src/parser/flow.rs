@@ -17,7 +17,7 @@ use super::{
 };
 
 pub(crate) fn parse_any_flow_node(p: &mut YamlParser) -> ParsedSyntax {
-    let property_list = PropertyList.parse_list(p);
+    let property_list = PropertyList::default().parse_list(p);
     let property_empty = property_list.range(p).is_empty();
 
     if is_at_flow_json_node(p) {
@@ -154,7 +154,7 @@ impl ParseSeparatedList for FlowSequenceEntryList {
                 Present(alias_node)
             }
         } else {
-            let property_list = PropertyList.parse_list(p);
+            let property_list = PropertyList::default().parse_list(p);
             let property_empty = property_list.range(p).is_empty();
 
             if is_at_flow_json_node(p) {
@@ -271,7 +271,7 @@ fn parse_flow_map_explicit_entry(p: &mut YamlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T![?]);
 
-    let property_list = PropertyList.parse_list(p);
+    let property_list = PropertyList::default().parse_list(p);
     let property_empty = property_list.range(p).is_empty();
 
     if is_at_flow_json_node(p) {
@@ -303,7 +303,7 @@ fn parse_flow_map_explicit_entry(p: &mut YamlParser) -> ParsedSyntax {
 }
 
 fn parse_flow_map_implicit_entry(p: &mut YamlParser) -> ParsedSyntax {
-    let property_list = PropertyList.parse_list(p);
+    let property_list = PropertyList::default().parse_list(p);
     let property_empty = property_list.range(p).is_empty();
 
     if is_at_flow_json_node(p) {

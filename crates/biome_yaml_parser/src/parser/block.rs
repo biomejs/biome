@@ -1,9 +1,7 @@
-use std::cell::RefCell;
-
 use biome_parser::{
     CompletedMarker, Parser, TokenSet,
     parse_lists::ParseNodeList,
-    parse_recovery::{ParseRecovery, ParseRecoveryTokenSet},
+    parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryError, RecoveryResult},
     prelude::ParsedSyntax::{self, *},
     token_set,
 };
@@ -68,7 +66,7 @@ fn parse_block_map_entry_value(p: &mut YamlParser) -> ParsedSyntax {
 
 fn parse_block_in_block_node(p: &mut YamlParser) -> CompletedMarker {
     let m = p.start();
-    PropertyList.parse_list(p);
+    PropertyList::default().parse_list(p);
     if p.at(MAPPING_START) {
         parse_block_mapping(p);
     } else if p.at(SEQUENCE_START) {
@@ -121,17 +119,11 @@ impl ParseNodeList for BlockMapEntryList {
     }
 }
 
-struct BlockMapEntryListParseRecovery {
-    /// Track the number of nested mapping encountered, so that the parser can always deal with
-    /// `MAPPING_START` and `MAPPING_END` in pair
-    num_nested_mapping: RefCell<usize>,
-}
+struct BlockMapEntryListParseRecovery;
 
 impl BlockMapEntryListParseRecovery {
     fn new() -> Self {
-        Self {
-            num_nested_mapping: RefCell::new(0),
-        }
+        Self
     }
 }
 
@@ -141,16 +133,11 @@ impl ParseRecovery for BlockMapEntryListParseRecovery {
     const RECOVERED_KIND: Self::Kind = YAML_BOGUS_BLOCK_MAP_ENTRY;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        if p.at(MAPPING_START) {
-            self.num_nested_mapping.replace_with(|nested| *nested + 1);
-            false
-        } else if p.at(MAPPING_END) {
-            self.num_nested_mapping
-                .replace_with(|nested| nested.saturating_sub(1));
-            *self.num_nested_mapping.borrow() == 0
-        } else {
-            false
-        }
+        p.at(MAPPING_END)
+    }
+
+    fn recover(&self, p: &mut Self::Parser<'_>) -> RecoveryResult {
+        recover_balanced_collection(p, MAPPING_END, Self::RECOVERED_KIND)
     }
 }
 
@@ -181,7 +168,7 @@ fn parse_block_map_explicit_entry(p: &mut YamlParser) -> ParsedSyntax {
 }
 
 fn parse_block_map_implicit_entry(p: &mut YamlParser) -> ParsedSyntax {
-    let property_list = PropertyList.parse_list(p);
+    let property_list = PropertyList::default().parse_list(p);
     let property_empty = property_list.range(p).is_empty();
 
     if is_at_flow_json_node(p) {
@@ -260,18 +247,11 @@ impl ParseNodeList for BlockSequenceEntryList {
     }
 }
 
-struct BlockSequenceEntryListParseRecovery {
-    /// Track the number of nested sequence encountered, so that the parser can always deal with
-    /// `SEQUENCE_START` and `SEQUENCE_END` in pair
-    num_nested: RefCell<usize>,
-}
+struct BlockSequenceEntryListParseRecovery;
 
 impl BlockSequenceEntryListParseRecovery {
     fn new() -> Self {
-        Self {
-            // Since the lexer must have been inside a mapping
-            num_nested: RefCell::new(0),
-        }
+        Self
     }
 }
 
@@ -281,17 +261,50 @@ impl ParseRecovery for BlockSequenceEntryListParseRecovery {
     const RECOVERED_KIND: Self::Kind = YAML_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        if p.at(SEQUENCE_START) {
-            self.num_nested.replace_with(|nested| *nested + 1);
-            false
-        } else if p.at(SEQUENCE_END) {
-            self.num_nested
-                .replace_with(|nested| nested.saturating_sub(1));
-            *self.num_nested.borrow() == 0
-        } else {
-            false
+        p.at(SEQUENCE_END)
+    }
+
+    fn recover(&self, p: &mut Self::Parser<'_>) -> RecoveryResult {
+        recover_balanced_collection(p, SEQUENCE_END, Self::RECOVERED_KIND)
+    }
+}
+
+fn recover_balanced_collection(
+    p: &mut YamlParser,
+    end_kind: YamlSyntaxKind,
+    recovered_kind: YamlSyntaxKind,
+) -> RecoveryResult {
+    if p.at(EOF) {
+        return Err(RecoveryError::Eof);
+    }
+    if p.at(end_kind) {
+        return Err(RecoveryError::AlreadyRecovered);
+    }
+    if p.is_speculative_parsing() {
+        return Err(RecoveryError::RecoveryDisabled);
+    }
+
+    let marker = p.start();
+    let mut nested_end_kinds = Vec::new();
+    while !p.at(EOF) {
+        let mut closes_nested_collection = false;
+        if p.at(MAPPING_START) {
+            nested_end_kinds.push(MAPPING_END);
+        } else if p.at(SEQUENCE_START) {
+            nested_end_kinds.push(SEQUENCE_END);
+        } else if nested_end_kinds.last().is_some_and(|kind| p.at(*kind)) {
+            nested_end_kinds.pop();
+            closes_nested_collection = nested_end_kinds.is_empty();
+        } else if p.at(end_kind) && nested_end_kinds.is_empty() {
+            break;
+        }
+        p.bump_any();
+        if closes_nested_collection {
+            break;
         }
     }
+
+    Ok(marker.complete(p, recovered_kind))
 }
 
 fn parse_block_sequence_entry(p: &mut YamlParser) -> ParsedSyntax {
@@ -317,7 +330,7 @@ fn parse_flow_in_block_node(p: &mut YamlParser) -> CompletedMarker {
 fn parse_literal_scalar(p: &mut YamlParser) -> CompletedMarker {
     let m = p.start();
     p.bump(T![|]);
-    BlockHeaderList.parse_list(p);
+    BlockHeaderList::default().parse_list(p);
     parse_block_content(p);
     m.complete(p, YAML_LITERAL_SCALAR)
 }
@@ -325,13 +338,16 @@ fn parse_literal_scalar(p: &mut YamlParser) -> CompletedMarker {
 fn parse_folded_scalar(p: &mut YamlParser) -> CompletedMarker {
     let m = p.start();
     p.bump(T![>]);
-    BlockHeaderList.parse_list(p);
+    BlockHeaderList::default().parse_list(p);
     parse_block_content(p);
     m.complete(p, YAML_FOLDED_SCALAR)
 }
 
 #[derive(Default)]
-pub(crate) struct BlockHeaderList;
+pub(crate) struct BlockHeaderList {
+    seen_chomping: bool,
+    seen_indentation: bool,
+}
 
 impl ParseNodeList for BlockHeaderList {
     type Kind = YamlSyntaxKind;
@@ -341,9 +357,25 @@ impl ParseNodeList for BlockHeaderList {
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         match p.cur() {
-            T![-] => Present(parse_strip_indicator(p)),
-            T![+] => Present(parse_keep_indicator(p)),
-            INDENTATION_INDICATOR => Present(parse_indentation_indicator(p)),
+            T![-] => {
+                self.report_duplicate_chomping_indicator(p);
+                Present(parse_strip_indicator(p))
+            }
+            T![+] => {
+                self.report_duplicate_chomping_indicator(p);
+                Present(parse_keep_indicator(p))
+            }
+            INDENTATION_INDICATOR => {
+                if self.seen_indentation {
+                    let diagnostic = p.err_builder(
+                        "A block scalar can have only one indentation indicator",
+                        p.cur_range(),
+                    );
+                    p.error(diagnostic);
+                }
+                self.seen_indentation = true;
+                Present(parse_indentation_indicator(p))
+            }
             _ => Absent,
         }
     }
@@ -362,6 +394,19 @@ impl ParseNodeList for BlockHeaderList {
             &ParseRecoveryTokenSet::new(YAML_BOGUS_BLOCK_HEADER, token_set![BLOCK_CONTENT_LITERAL]),
             expected_header,
         )
+    }
+}
+
+impl BlockHeaderList {
+    fn report_duplicate_chomping_indicator(&mut self, p: &mut YamlParser) {
+        if self.seen_chomping {
+            let diagnostic = p.err_builder(
+                "A block scalar can have only one chomping indicator.",
+                p.cur_range(),
+            );
+            p.error(diagnostic);
+        }
+        self.seen_chomping = true;
     }
 }
 

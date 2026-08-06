@@ -91,6 +91,23 @@ impl<'src> YamlLexer<'src> {
 
         let start = self.text_position();
 
+        if self.position() == 0
+            && let Some((kind, _)) = self.consume_potential_bom(UNICODE_BOM)
+        {
+            self.tokens.push_back(LexToken::new(
+                kind,
+                TextCoordinate::default(),
+                self.current_coordinate,
+            ));
+            return;
+        }
+
+        if !self.current_char_is_yaml_printable() {
+            let token = self.consume_unexpected_token();
+            self.tokens.push_back(token);
+            return;
+        }
+
         let tokens = match current {
             c if is_break(c) => self.evaluate_block_scope(),
             c if is_space(c) => self.consume_whitespace_token().into(),
@@ -309,13 +326,18 @@ impl<'src> YamlLexer<'src> {
         let start = self.current_coordinate;
 
         while let Some(current) = self.current_byte() {
+            if !self.current_char_is_yaml_printable() {
+                self.consume_invalid_character();
+                continue;
+            }
+
             if is_break(current) {
                 let might_be_token_end = self.current_coordinate;
                 if !self.is_scalar_continuation() {
                     return LexToken::new(BLOCK_CONTENT_LITERAL, start, might_be_token_end);
                 }
             } else {
-                self.advance(1);
+                self.advance_char_unchecked();
             }
         }
 
@@ -399,6 +421,11 @@ impl<'src> YamlLexer<'src> {
         // Should be lexed as `{"a": b}`, instead of `{"a" (missing colon) :b}`
         let mut just_lexed_json_key = false;
         while let Some(current) = self.current_byte() {
+            if !self.current_char_is_yaml_printable() {
+                collection_tokens.push_back(self.consume_unexpected_token());
+                continue;
+            }
+
             if is_break(current) {
                 let start = self.current_coordinate;
                 let mut trivia = self.consume_trivia(false);
@@ -488,6 +515,11 @@ impl<'src> YamlLexer<'src> {
         ));
         let start = self.current_coordinate;
         while let Some(c) = self.current_byte() {
+            if !self.current_char_is_yaml_printable() {
+                self.consume_invalid_character();
+                continue;
+            }
+
             // https://yaml.org/spec/1.2.2/#rule-ns-plain-char
             if is_plain_safe(c, in_flow_collection) && c != b':' && c != b'#' {
                 self.advance_char_unchecked();
@@ -538,11 +570,7 @@ impl<'src> YamlLexer<'src> {
         let token_end = loop {
             match self.current_byte() {
                 Some(b'\\') => {
-                    if matches!(self.peek_byte(), Some(b'"')) {
-                        self.advance(2)
-                    } else {
-                        self.advance(1)
-                    }
+                    self.consume_double_quoted_escape();
                 }
                 Some(b'"') => {
                     self.advance(1);
@@ -555,7 +583,10 @@ impl<'src> YamlLexer<'src> {
                         break might_be_token_end;
                     }
                 }
-                Some(_) => self.advance(1),
+                Some(_) if !self.current_char_is_yaml_printable() => {
+                    self.consume_invalid_character();
+                }
+                Some(_) => self.advance_char_unchecked(),
                 None => {
                     let err = ParseDiagnostic::new(
                         "Missing closing `\"` quote",
@@ -594,7 +625,10 @@ impl<'src> YamlLexer<'src> {
                         break might_be_token_end;
                     }
                 }
-                Some(_) => self.advance(1),
+                Some(_) if !self.current_char_is_yaml_printable() => {
+                    self.consume_invalid_character();
+                }
+                Some(_) => self.advance_char_unchecked(),
                 None => {
                     let err = ParseDiagnostic::new(
                         "Missing closing `'` quote",
@@ -619,7 +653,11 @@ impl<'src> YamlLexer<'src> {
             if is_break(current) || self.is_at_directive_trailing_trivia() {
                 break;
             }
-            self.advance_char_unchecked();
+            if self.current_char_is_yaml_printable() {
+                self.advance_char_unchecked();
+            } else {
+                self.consume_invalid_character();
+            }
         }
 
         LexToken::new(DIRECTIVE_LITERAL, start, self.current_coordinate)
@@ -721,7 +759,7 @@ impl<'src> YamlLexer<'src> {
         let mut trivia = LinkedList::new();
         while let Some(current) = self.current_byte() {
             if is_space(current) {
-                trivia.push_back(self.consume_whitespace_token());
+                trivia.push_back(self.consume_scalar_continuation_whitespace_token());
             } else if is_break(current) {
                 trivia.push_back(self.consume_newline_token());
             } else {
@@ -740,9 +778,35 @@ impl<'src> YamlLexer<'src> {
     }
 
     fn consume_whitespace_token(&mut self) -> LexToken {
+        self.consume_whitespace_token_with_tab_policy(false)
+    }
+
+    fn consume_scalar_continuation_whitespace_token(&mut self) -> LexToken {
+        self.consume_whitespace_token_with_tab_policy(true)
+    }
+
+    fn consume_whitespace_token_with_tab_policy(
+        &mut self,
+        allow_tab_after_space: bool,
+    ) -> LexToken {
         debug_assert!(self.current_byte().is_some_and(is_space));
         let start = self.current_coordinate;
         self.consume_whitespaces();
+
+        if start.column == 0
+            && let Some(relative_offset) = self
+                .source
+                .get(start.offset..self.current_coordinate.offset)
+                .and_then(|text| text.bytes().position(|byte| byte == b'\t'))
+            && (!allow_tab_after_space || relative_offset == 0)
+            && let Ok(offset) = TextSize::try_from(start.offset + relative_offset)
+        {
+            self.diagnostics.push(ParseDiagnostic::new(
+                "Tabs are not allowed for indentation in YAML",
+                offset..offset + TextSize::from(1),
+            ));
+        }
+
         LexToken::new(WHITESPACE, start, self.current_coordinate)
     }
 
@@ -760,7 +824,11 @@ impl<'src> YamlLexer<'src> {
             if is_break(c) {
                 break;
             }
-            self.advance(1);
+            if self.current_char_is_yaml_printable() {
+                self.advance_char_unchecked();
+            } else {
+                self.consume_invalid_character();
+            }
         }
         LexToken::new(COMMENT, start, self.current_coordinate)
     }
@@ -868,7 +936,11 @@ impl<'src> YamlLexer<'src> {
             // section 7.1 of the spec), which includes `:`, so `*a:` is an
             // alias named `a:` rather than an alias used as a mapping key
             if is_anchor_char(c) {
-                self.advance(1);
+                if self.current_char_is_yaml_printable() {
+                    self.advance_char_unchecked();
+                } else {
+                    self.consume_invalid_character();
+                }
             } else {
                 break;
             }
@@ -884,7 +956,11 @@ impl<'src> YamlLexer<'src> {
 
         while let Some(c) = self.current_byte() {
             if is_anchor_char(c) {
-                self.advance(1);
+                if self.current_char_is_yaml_printable() {
+                    self.advance_char_unchecked();
+                } else {
+                    self.consume_invalid_character();
+                }
             } else {
                 break;
             }
@@ -913,7 +989,11 @@ impl<'src> YamlLexer<'src> {
                     if !is_non_blank_char(c) {
                         break;
                     }
-                    self.advance(1);
+                    if self.current_char_is_yaml_printable() {
+                        self.advance_char_unchecked();
+                    } else {
+                        self.consume_invalid_character();
+                    }
                 }
             }
             // secondary handle: !!body
@@ -921,7 +1001,11 @@ impl<'src> YamlLexer<'src> {
                 self.advance(1);
                 while let Some(c) = self.current_byte() {
                     if is_tag_char(c) {
-                        self.advance(1);
+                        if self.current_char_is_yaml_printable() {
+                            self.advance_char_unchecked();
+                        } else {
+                            self.consume_invalid_character();
+                        }
                     } else {
                         break;
                     }
@@ -945,7 +1029,11 @@ impl<'src> YamlLexer<'src> {
                 }
                 while let Some(c) = self.current_byte() {
                     if is_tag_char(c) {
-                        self.advance(1);
+                        if self.current_char_is_yaml_printable() {
+                            self.advance_char_unchecked();
+                        } else {
+                            self.consume_invalid_character();
+                        }
                     } else {
                         break;
                     }
@@ -983,7 +1071,11 @@ impl<'src> YamlLexer<'src> {
             if is_break(c) {
                 break;
             }
-            self.advance_char_unchecked();
+            if self.current_char_is_yaml_printable() {
+                self.advance_char_unchecked();
+            } else {
+                self.consume_invalid_character();
+            }
         }
         tokens.push_back(LexToken::new(ERROR_TOKEN, start, self.current_coordinate));
         tokens
@@ -999,6 +1091,86 @@ impl<'src> YamlLexer<'src> {
         );
         self.diagnostics.push(err);
         self.advance(char.len_utf8());
+    }
+
+    fn consume_invalid_character(&mut self) {
+        let character = self.current_char_unchecked();
+        let start = self.text_position();
+        self.advance(character.len_utf8());
+        self.diagnostics.push(ParseDiagnostic::new(
+            "Character is not allowed in YAML",
+            start..self.text_position(),
+        ));
+    }
+
+    fn current_char_is_yaml_printable(&self) -> bool {
+        is_yaml_printable(self.current_char_unchecked())
+    }
+
+    fn consume_double_quoted_escape(&mut self) {
+        debug_assert_eq!(self.current_byte(), Some(b'\\'));
+        let start = self.text_position();
+        self.advance(1);
+
+        match self.current_byte() {
+            Some(
+                b'0' | b'a' | b'b' | b't' | b'n' | b'v' | b'f' | b'r' | b'e' | b' ' | b'"' | b'/'
+                | b'\\' | b'N' | b'_' | b'L' | b'P',
+            ) => self.advance(1),
+            Some(b'x') => {
+                self.advance(1);
+                self.consume_hex_escape_digits(start, 2);
+            }
+            Some(b'u') => {
+                self.advance(1);
+                self.consume_hex_escape_digits(start, 4);
+            }
+            Some(b'U') => {
+                self.advance(1);
+                self.consume_hex_escape_digits(start, 8);
+            }
+            Some(current) if is_break(current) => {}
+            Some(_) => {
+                self.advance_char_unchecked();
+                self.diagnostics.push(ParseDiagnostic::new(
+                    "Unknown escape sequence in double-quoted scalar",
+                    start..self.text_position(),
+                ));
+            }
+            None => {
+                self.diagnostics.push(ParseDiagnostic::new(
+                    "Incomplete escape sequence in double-quoted scalar",
+                    start..self.text_position(),
+                ));
+            }
+        }
+    }
+
+    fn consume_hex_escape_digits(&mut self, escape_start: TextSize, count: usize) {
+        let digits_start = self.text_position();
+        let mut consumed = 0;
+        let mut value = 0u32;
+        while consumed < count {
+            let Some(byte) = self.current_byte().filter(u8::is_ascii_hexdigit) else {
+                break;
+            };
+            let digit = u32::from(byte & 0x0f) + u32::from(byte.is_ascii_alphabetic()) * 9;
+            value = value * 16 + digit;
+            self.advance(1);
+            consumed += 1;
+        }
+
+        if consumed != count {
+            self.diagnostics.push(ParseDiagnostic::new(
+                format!("Expected {count} hexadecimal digits in escape sequence"),
+                escape_start..self.text_position().max(digits_start),
+            ));
+        } else if char::from_u32(value).is_none() {
+            self.diagnostics.push(ParseDiagnostic::new(
+                "Escape sequence does not encode a valid Unicode scalar value",
+                escape_start..self.text_position(),
+            ));
+        }
     }
 
     fn is_at_mapping_indicator(&self) -> bool {
@@ -1305,7 +1477,7 @@ fn maybe_at_mapping_start(current: u8, peek: Option<u8>) -> bool {
         || current == b'\''
         || current == b'*'
         // empty key
-        || current == b':'
+        || (current == b':' && peek.is_none_or(is_blank))
 }
 
 // https://yaml.org/spec/1.2.2/#rule-ns-plain-first
@@ -1329,7 +1501,16 @@ fn is_plain_safe(c: u8, in_flow_collection: bool) -> bool {
 // https://yaml.org/spec/1.2.2/#rule-ns-char
 #[inline]
 fn is_non_blank_char(c: u8) -> bool {
-    !is_blank(c)
+    c >= 0x80 || c.is_ascii_graphic()
+}
+
+#[inline]
+fn is_yaml_printable(c: char) -> bool {
+    matches!(
+        c,
+        '\u{0009}' | '\u{000A}' | '\u{000D}' | '\u{0020}'..='\u{007E}' | '\u{0085}'
+            | '\u{00A0}'..='\u{D7FF}' | '\u{E000}'..='\u{FFFD}' | '\u{10000}'..='\u{10FFFF}'
+    )
 }
 
 #[inline]
