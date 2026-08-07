@@ -9,6 +9,7 @@ use biome_json_syntax::TextSize;
 use biome_text_edit::TextEdit;
 use std::io;
 
+/// Receives diagnostics and code actions produced from rule documentation.
 pub trait DiagnosticWriter {
     fn write_diagnostic(&mut self, diag: biome_diagnostics::Error) -> Result<()>;
     fn write_parse_error(&mut self, diag: biome_diagnostics::Error) -> Result<()>;
@@ -60,11 +61,13 @@ impl DiagnosticWriter for DiagnosticConsoleWriter {
 }
 
 #[derive(Clone, Copy, Debug)]
+/// Selects the output rendered by [`DiagnosticHtmlWriter`].
 pub enum DiagnosticHtmlWriterMode {
     Diagnostics,
     Actions,
 }
 
+/// Renders rule diagnostics or code actions as HTML.
 pub struct DiagnosticHtmlWriter<'a> {
     buffer: &'a mut dyn Write,
     mode: DiagnosticHtmlWriterMode,
@@ -72,6 +75,7 @@ pub struct DiagnosticHtmlWriter<'a> {
 }
 
 impl<'a> DiagnosticHtmlWriter<'a> {
+    /// Creates a writer that renders the selected output mode into `buffer`.
     pub fn new(buffer: &'a mut dyn Write, mode: DiagnosticHtmlWriterMode) -> Self {
         Self {
             buffer,
@@ -141,7 +145,7 @@ impl Diagnostic for CodeAction {
 
 impl DiagnosticConsoleWriter {
     /// Adjusts the location of the diagnostic to account for synthetic nodes
-    /// that arent't present in the source code but only in the AST.
+    /// that aren't present in the source code but only in the AST.
     pub fn adjust_span_offset(&self, diag: biome_diagnostics::Error) -> biome_diagnostics::Error {
         adjust_span_offset(diag, self.subtract_offset)
     }

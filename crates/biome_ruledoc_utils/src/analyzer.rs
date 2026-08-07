@@ -23,6 +23,9 @@ use biome_rowan::Language;
 use camino::Utf8PathBuf;
 use std::slice;
 
+/// Analyzes a documentation code block with a single rule enabled.
+///
+/// Diagnostics, parse errors, and code actions are sent to `writer`.
 pub struct RuleCodeAnalyzer<'a> {
     pub group: &'static str,
     pub rule: &'static str,
@@ -35,11 +38,13 @@ pub struct RuleCodeAnalyzer<'a> {
 }
 
 impl RuleCodeAnalyzer<'_> {
+    /// Parses the code block and runs the selected rule.
     pub fn analyze(self) -> Result<()> {
         analyze_rule_code(self)
     }
 }
 
+/// Parses a documentation code block and runs the rule selected by `analyzer`.
 pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
     let RuleCodeAnalyzer {
         group,
@@ -263,10 +268,12 @@ fn process_signal<L: Language>(
     }
 
     for action in actions {
-        let (_, edit) = action
+        let Some((_, edit)) = action
             .text_edit
             .or_else(|| action.mutation.to_text_range_and_edit())
-            .unwrap_or_default();
+        else {
+            continue;
+        };
         if let Err(error) = writer.write_action(source, file_path, edit) {
             return ControlFlow::Break(error);
         }
