@@ -2220,12 +2220,26 @@ impl<'db> ResolutionCtx<'db, '_> {
 
         for _ in 0..MAX_CONDITIONAL_FILTER_STEPS {
             let Some(ty) = pending.pop() else {
-                // The filter ran to completion: an empty result here means no
-                // member of the union matched, i.e. the subset is
-                // conclusively empty, not merely indeterminate.
-                return Some(
-                    collected_type_result(self.db, types).unwrap_or(InferredTypeData::NeverKeyword),
-                );
+                // The filter ran to completion. For a `typeof` guard, an empty
+                // result means no member can produce the requested `typeof`
+                // value, which is conclusively `never`:
+                //
+                //   function f(x: Promise<void>) {
+                //     if (typeof x === "number") { x; } // x is `never`
+                //   }
+                //
+                // The other subsets keep treating an empty result as
+                // indeterminate, so their callers fall back to the
+                // un-narrowed type.
+                return match subset {
+                    ConditionalSubset::Typeof(_) => Some(
+                        collected_type_result(self.db, types)
+                            .unwrap_or(InferredTypeData::NeverKeyword),
+                    ),
+                    ConditionalSubset::Falsy
+                    | ConditionalSubset::Truthy
+                    | ConditionalSubset::NonNullish => collected_type_result(self.db, types),
+                };
             };
             let ty = self.resolve_inferred_type(ty);
             if !seen.insert(ty) {
