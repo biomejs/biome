@@ -1,5 +1,6 @@
 #![deny(clippy::use_self)]
 
+use crate as biome_console;
 use std::io;
 use std::io::{IsTerminal, Read, Write};
 use std::panic::RefUnwindSafe;
@@ -37,6 +38,14 @@ pub trait Console: Send + Sync + RefUnwindSafe {
     /// Prints a message (formatted using [markup!]) to the console.
     fn print(&mut self, level: LogLevel, args: Markup);
 
+    /// Prints text without applying markup formatting or terminal sanitization.
+    ///
+    /// Console implementations that transform text in [Console::print] should override this
+    /// method when they can preserve the original bytes.
+    fn print_raw(&mut self, level: LogLevel, content: &str) {
+        self.print(level, markup! {{content}});
+    }
+
     /// It reads from a source, and if this source contains something, it's converted into a [String]
     fn read(&mut self) -> Option<String>;
 
@@ -63,6 +72,9 @@ pub trait ConsoleExt: Console {
     ///
     /// It doesn't add any line
     fn append(&mut self, args: Markup);
+
+    /// Prints text unchanged with level [LogLevel::Log].
+    fn append_raw(&mut self, content: &str);
 }
 
 impl<T: Console + ?Sized> ConsoleExt for T {
@@ -76,6 +88,10 @@ impl<T: Console + ?Sized> ConsoleExt for T {
 
     fn append(&mut self, args: Markup) {
         self.print(LogLevel::Log, args);
+    }
+
+    fn append_raw(&mut self, content: &str) {
+        self.print_raw(LogLevel::Log, content);
     }
 }
 
@@ -172,6 +188,15 @@ impl Console for EnvConsole {
             .unwrap();
 
         write!(out, "").unwrap();
+    }
+
+    fn print_raw(&mut self, level: LogLevel, content: &str) {
+        let mut out = match level {
+            LogLevel::Error => self.err.lock(),
+            LogLevel::Log => self.out.lock(),
+        };
+
+        out.write_all(content.as_bytes()).unwrap();
     }
 
     fn read(&mut self) -> Option<String> {
