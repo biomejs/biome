@@ -14,14 +14,14 @@ expression: invalid.astro
 
 # Diagnostics
 ```
-invalid.astro:3:6 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:3:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
     1 │ <!-- should generate diagnostics -->
     2 │ 
   > 3 │ <div class="px-2 foo p-4 bar"></div>
-      │      ^^^^^^^^^^^^^^^^^^^^^^^^
+      │            ^^^^^^^^^^^^^^^^^^
     4 │ 
     5 │ <div class="hover:focus:m-2 foo hover:px-2 p-4"></div>
   
@@ -42,14 +42,14 @@ invalid.astro:3:6 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.astro:5:6 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:5:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
     3 │ <div class="px-2 foo p-4 bar"></div>
     4 │ 
   > 5 │ <div class="hover:focus:m-2 foo hover:px-2 p-4"></div>
-      │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9181 for more information or to report possible bugs.

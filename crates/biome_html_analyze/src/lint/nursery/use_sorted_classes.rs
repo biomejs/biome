@@ -107,11 +107,10 @@ impl Rule for UseSortedClasses {
         None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             rule_category!(),
-            node.range(),
+            state.html_string.range(),
             "These CSS classes should be sorted.",
         ))
     }
