@@ -6,10 +6,11 @@
 //! - Other options, such as prefix and separator.
 
 use std::collections::HashMap;
+use std::sync::LazyLock;
 
 use bitvec::{order::Lsb0, vec::BitVec};
 
-use super::presets::ConfigPreset;
+use super::presets::{ConfigPreset, UseSortedClassesPreset, get_config_preset};
 
 /// A utility layer, containing its name and an ordered list of classes.
 pub struct UtilityLayer {
@@ -40,7 +41,7 @@ pub struct SortConfig {
 
 impl SortConfig {
     /// Creates a new sort config.
-    pub fn new(preset: &ConfigPreset) -> Self {
+    pub(crate) fn new(preset: &ConfigPreset) -> Self {
         // Compute the layer index map.
         let mut layer_index_map: HashMap<&'static str, usize> = HashMap::new();
         let mut index = 0;
@@ -57,3 +58,7 @@ impl SortConfig {
         }
     }
 }
+
+/// The default sort config, using the Tailwind CSS preset.
+pub static DEFAULT_SORT_CONFIG: LazyLock<SortConfig> =
+    LazyLock::new(|| SortConfig::new(&get_config_preset(&UseSortedClassesPreset::default())));

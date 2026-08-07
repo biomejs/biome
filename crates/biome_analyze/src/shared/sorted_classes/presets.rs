@@ -8,8 +8,6 @@ use super::{
 
 #[derive(Default)]
 pub enum UseSortedClassesPreset {
-    #[expect(unused)]
-    None,
     #[default]
     TailwindCSS,
 }
@@ -21,15 +19,7 @@ pub struct ConfigPreset {
 
 pub fn get_config_preset(preset: &UseSortedClassesPreset) -> ConfigPreset {
     match preset {
-        UseSortedClassesPreset::None => get_empty_preset(),
         UseSortedClassesPreset::TailwindCSS => get_tailwind_css_preset(),
-    }
-}
-
-pub fn get_empty_preset() -> ConfigPreset {
-    ConfigPreset {
-        utilities: [].as_slice(),
-        variants: [].as_slice(),
     }
 }
 
