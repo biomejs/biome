@@ -35,7 +35,7 @@
 
 use std::cmp::Ordering;
 
-use biome_rowan::{AstNode, Text, TokenText};
+use biome_rowan::{AstNode, Text, TextRange, TextSize, TokenText};
 use biome_tailwind_syntax::{
     AnyTwVariant, AnyTwVariantSegment, TwFullCandidate, TwVariantSegmentList,
 };
@@ -209,8 +209,13 @@ fn variant_key_from_segments(segments: &[VariantSegment]) -> Option<VariantKey> 
         VariantSegment::Arbitrary(selector) if segments.len() == 1 => {
             Some(VariantKey::Arbitrary(selector.clone()))
         }
-        VariantSegment::Named(_) => {
-            let (root, entry, value_segments) = variant_root_from_segments(segments)?;
+        VariantSegment::Named(name) => {
+            let Some((root, entry, value_segments)) = variant_root_from_segments(segments) else {
+                // `@sm` glues the container root to its size with no `-` for
+                // the segment splitter to see (unlike `@max-lg` / `@min-[…]`,
+                // whose root is a registered dashed prefix).
+                return glued_container_variant(name);
+            };
             match entry.kind {
                 VariantKind::Static if value_segments.is_empty() => Some(VariantKey::Static(root)),
                 VariantKind::Functional => Some(VariantKey::Functional {
@@ -274,6 +279,25 @@ fn variant_root_from_segments(
 
     let (name, entry, rest_index) = best?;
     Some((name, entry, &segments[rest_index..]))
+}
+
+/// Resolve a glued container-query variant (`@sm`, `@3xl`) to the `@`
+/// container root plus its size value. The `@` root borrows from the
+/// registry and the size is a no-copy [TokenText] slice past the `@`. A
+/// remainder that is not a known container size (`@container`) is not a
+/// sortable variant, matching Tailwind.
+fn glued_container_variant(name: &TokenText) -> Option<VariantKey> {
+    let value = name.text().strip_prefix('@')?;
+    if !CONTAINER_VALUES.contains_key(value) {
+        return None;
+    }
+    let value = name
+        .clone()
+        .slice(TextRange::new(TextSize::from(1), name.len()));
+    Some(VariantKey::Functional {
+        root: "@",
+        value: Some(VariantValue::Named(value)),
+    })
 }
 
 fn variant_value_from_segments(segments: &[VariantSegment]) -> Option<VariantValue> {
