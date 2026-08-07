@@ -2439,8 +2439,8 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// given type, or `None` if the tag cannot be determined statically.
     ///
     /// This mirrors [`Self::resolve_typeof_operator()`], except that types
-    /// with call signatures map to the `function` tag, following TypeScript's
-    /// narrowing semantics.
+    /// with call or construct signatures map to the `function` tag, following
+    /// TypeScript's narrowing semantics.
     fn typeof_tag_of(&self, ty: InferredTypeData<'db>) -> Option<TypeofTag> {
         match ty {
             InferredTypeData::BigInt => Some(TypeofTag::Bigint),
@@ -2461,17 +2461,18 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Null => Some(TypeofTag::Object),
             InferredTypeData::Number => Some(TypeofTag::Number),
             InferredTypeData::Interface(interface) => {
-                if has_call_signature(interface.members(self.db)) {
+                if is_callable_at_runtime(interface.members(self.db)) {
                     Some(TypeofTag::Function)
                 } else if interface.extends(self.db).is_empty() {
                     Some(TypeofTag::Object)
                 } else {
-                    // A base interface could contribute a call signature.
+                    // A base interface could contribute a call or construct
+                    // signature.
                     None
                 }
             }
             InferredTypeData::Object(object) => {
-                if has_call_signature(object.members(self.db)) {
+                if is_callable_at_runtime(object.members(self.db)) {
                     Some(TypeofTag::Function)
                 } else {
                     Some(TypeofTag::Object)
@@ -2601,9 +2602,13 @@ fn rest_member_mode_allows(member: &InferredTypeMember<'_>, mode: RestMemberMode
     }
 }
 
-/// Returns whether the given members contain a call signature.
-fn has_call_signature(members: &[InferredTypeMember<'_>]) -> bool {
-    members.iter().any(|member| member.kind.is_call_signature())
+/// Returns whether values of a type with these members are functions at
+/// runtime. Construct signatures count, since `typeof Ctor` is `"function"`
+/// for an `interface Ctor { new (): T }`.
+fn is_callable_at_runtime(members: &[InferredTypeMember<'_>]) -> bool {
+    members
+        .iter()
+        .any(|member| member.kind.is_call_signature() || member.kind.is_constructor())
 }
 
 enum FilterAction<'db> {
