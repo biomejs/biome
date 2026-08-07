@@ -997,6 +997,22 @@ mod tests {
     }
 
     #[test]
+    fn static_variant_names_resolve_through_the_root_probe() {
+        // Statics whose registered name spans several named segments
+        // (`motion-safe`, and `any-pointer-coarse` at the probe-buffer
+        // bound) reassemble through the same longest-prefix probe as
+        // functional roots.
+        assert!(matches!(
+            classify("motion-safe:flex"),
+            SortKey::Known { .. }
+        ));
+        assert!(matches!(
+            classify("any-pointer-coarse:flex"),
+            SortKey::Known { .. }
+        ));
+    }
+
+    #[test]
     fn variants_order_against_each_other_by_breakpoint() {
         // Shared groups (via `classify_all`) are what make one variant
         // comparable to another. Ascending breakpoints: `sm` before `md`.
