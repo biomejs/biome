@@ -1,0 +1,56 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: combined.md
+---
+# Input
+```md
+<!-- should generate diagnostics for both options -->
+
+```python title="example.py"
+print(1)
+```
+
+```
+
+# Diagnostics
+```
+combined.md:3:4 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This language isn't in the list of allowed languages.
+  
+    1 │ <!-- should generate diagnostics for both options -->
+    2 │ 
+  > 3 │ ```python title="example.py"
+      │    ^^^^^^
+    4 │ print(1)
+    5 │ ```
+  
+  i The allowedLanguages option restricts fenced code blocks to a specific set of languages.
+  
+  i Use one of the allowed languages: "js", "ts".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+combined.md:3:10 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This info string contains more than just the language.
+  
+    1 │ <!-- should generate diagnostics for both options -->
+    2 │ 
+  > 3 │ ```python title="example.py"
+      │          ^^^^^^^^^^^^^^^^^^^
+    4 │ print(1)
+    5 │ ```
+  
+  i The languageOnly option requires the info string to contain nothing but the language.
+  
+  i Remove any whitespace or extra content surrounding the language.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
