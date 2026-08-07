@@ -1,10 +1,22 @@
 /* should not generate diagnostics */
 
-// The guard is incompatible with `x`'s declared type, so narrowing
-// eliminates every candidate and `x` is `never` inside the `if`.
+// Each guard below is incompatible with its parameter's declared type, so
+// narrowing eliminates every candidate and `x` is `never` inside the `if`.
 // Nothing is reported because `never` is not promise-like.
 function impossibleGuard(x: Promise<void>) {
 	if (typeof x === "number") {
 		x;
+	}
+}
+
+function impossibleGuardMultiMemberUnion(x: string | Promise<void>) {
+	if (typeof x === "boolean") {
+		x;
+	}
+}
+
+function impossibleGuardOnCallable(x: (() => Promise<void>) | (() => void)) {
+	if (typeof x === "object") {
+		x();
 	}
 }
