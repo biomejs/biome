@@ -8,14 +8,12 @@ expression: typeofGuardNarrowingInvalid.ts
 
 function narrowedToPromise(x: number | Promise<void>) {
 	if (typeof x === "object") {
-		// `x` is narrowed to `Promise<void>` here, so the bare statement floats.
 		x;
 	}
 }
 
 function guardedCall(x: number | (() => Promise<void>)) {
 	if (typeof x === "function") {
-		// `x` is narrowed to `() => Promise<void>` here, so the call floats.
 		x();
 	}
 }
@@ -36,16 +34,16 @@ function looseEquality(x: number | (() => Promise<void>)) {
 
 # Diagnostics
 ```
-typeofGuardNarrowingInvalid.ts:6:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+typeofGuardNarrowingInvalid.ts:5:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
+    3 │ function narrowedToPromise(x: number | Promise<void>) {
     4 │ 	if (typeof x === "object") {
-    5 │ 		// `x` is narrowed to `Promise<void>` here, so the bare statement floats.
-  > 6 │ 		x;
+  > 5 │ 		x;
       │ 		^^
-    7 │ 	}
-    8 │ }
+    6 │ 	}
+    7 │ }
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -55,16 +53,16 @@ typeofGuardNarrowingInvalid.ts:6:3 lint/nursery/noFloatingPromises ━━━━�
 ```
 
 ```
-typeofGuardNarrowingInvalid.ts:13:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+typeofGuardNarrowingInvalid.ts:11:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    11 │ 	if (typeof x === "function") {
-    12 │ 		// `x` is narrowed to `() => Promise<void>` here, so the call floats.
-  > 13 │ 		x();
+     9 │ function guardedCall(x: number | (() => Promise<void>)) {
+    10 │ 	if (typeof x === "function") {
+  > 11 │ 		x();
        │ 		^^^^
-    14 │ 	}
-    15 │ }
+    12 │ 	}
+    13 │ }
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -74,16 +72,16 @@ typeofGuardNarrowingInvalid.ts:13:3 lint/nursery/noFloatingPromises ━━━━
 ```
 
 ```
-typeofGuardNarrowingInvalid.ts:19:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+typeofGuardNarrowingInvalid.ts:17:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    17 │ function reversedOperands(x: number | (() => Promise<void>)) {
-    18 │ 	if ("function" === typeof x) {
-  > 19 │ 		x();
+    15 │ function reversedOperands(x: number | (() => Promise<void>)) {
+    16 │ 	if ("function" === typeof x) {
+  > 17 │ 		x();
        │ 		^^^^
-    20 │ 	}
-    21 │ }
+    18 │ 	}
+    19 │ }
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -93,16 +91,16 @@ typeofGuardNarrowingInvalid.ts:19:3 lint/nursery/noFloatingPromises ━━━━
 ```
 
 ```
-typeofGuardNarrowingInvalid.ts:25:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+typeofGuardNarrowingInvalid.ts:23:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    23 │ function looseEquality(x: number | (() => Promise<void>)) {
-    24 │ 	if (typeof x == "function") {
-  > 25 │ 		x();
+    21 │ function looseEquality(x: number | (() => Promise<void>)) {
+    22 │ 	if (typeof x == "function") {
+  > 23 │ 		x();
        │ 		^^^^
-    26 │ 	}
-    27 │ }
+    24 │ 	}
+    25 │ }
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   

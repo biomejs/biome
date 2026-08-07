@@ -6,11 +6,11 @@ expression: typeofGuardNarrowingNestedAgreeingInvalid.ts
 ```ts
 // should generate diagnostics
 
+// Repeating the same `typeof` check keeps `x` narrowed to the
+// promise-returning function rather than resetting to its declared type.
 function nestedAgreeingGuards(x: number | (() => Promise<void>)) {
 	if (typeof x === "function") {
 		if (typeof x === "function") {
-			// Both guards agree on the same tag, so `x` is still narrowed
-			// to the promise-returning function here.
 			x();
 		}
 	}
@@ -24,8 +24,8 @@ typeofGuardNarrowingNestedAgreeingInvalid.ts:8:4 lint/nursery/noFloatingPromises
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-     6 │ 			// Both guards agree on the same tag, so `x` is still narrowed
-     7 │ 			// to the promise-returning function here.
+     6 │ 	if (typeof x === "function") {
+     7 │ 		if (typeof x === "function") {
    > 8 │ 			x();
        │ 			^^^^
      9 │ 		}

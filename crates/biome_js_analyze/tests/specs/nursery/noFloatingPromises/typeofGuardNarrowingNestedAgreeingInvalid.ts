@@ -1,10 +1,10 @@
 // should generate diagnostics
 
+// Repeating the same `typeof` check keeps `x` narrowed to the
+// promise-returning function rather than resetting to its declared type.
 function nestedAgreeingGuards(x: number | (() => Promise<void>)) {
 	if (typeof x === "function") {
 		if (typeof x === "function") {
-			// Both guards agree on the same tag, so `x` is still narrowed
-			// to the promise-returning function here.
 			x();
 		}
 	}

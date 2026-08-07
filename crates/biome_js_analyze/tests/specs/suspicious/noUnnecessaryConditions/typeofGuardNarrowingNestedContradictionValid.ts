@@ -1,15 +1,11 @@
 /* should not generate diagnostics */
 
+// `x` cannot be both a string and a function, so this code is unreachable.
+// Honouring only the innermost `typeof` would wrongly narrow `x` to a
+// function and report `if (x)` as always truthy.
 function nestedContradictoryGuards(x: string | (() => void)) {
 	if (typeof x === "string") {
 		if (typeof x === "function") {
-			// The inner guard contradicts the outer one: `x` cannot be both
-			// a "string" and a "function" here. Applying just the
-			// innermost guard's tag would wrongly narrow `x` to a
-			// function (always truthy), reporting this as an
-			// unnecessary condition. The guards being contradictory
-			// means this branch is unreachable, not that `x` is
-			// conclusively a function.
 			if (x) {
 				x();
 			}

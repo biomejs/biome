@@ -6,22 +6,26 @@ expression: typeofGuardNarrowingValid.ts
 ```ts
 /* should not generate diagnostics */
 
-// `x` is narrowed to `number` inside the guard, so the bare statement cannot
-// be a floating promise. Without narrowing this is a false positive.
+// Without narrowing, `x` keeps its declared type here and is reported as a
+// floating promise, which is a false positive.
 function narrowedToNumber(x: number | Promise<void>) {
 	if (typeof x === "number") {
 		x;
 	}
 }
 
-// The promise is awaited inside the guarded branch.
+// The cases below stay quiet with or without narrowing. They exist to catch
+// narrowing producing a promise type where there is none, not to prove that
+// narrowing happens -- the inferred types themselves are pinned by the
+// snapshots in `biome_module_graph`.
+
 async function handled(x: number | (() => Promise<void>)) {
 	if (typeof x === "function") {
 		await x();
 	}
 }
 
-// The narrowed callable does not return a promise.
+// Narrowing to a callable must not add a promise the signature doesn't have.
 function syncCallable(x: number | (() => void)) {
 	if (typeof x === "function") {
 		x();

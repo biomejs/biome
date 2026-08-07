@@ -8,7 +8,6 @@ expression: typeofGuardNarrowingInvalid.ts
 
 function alwaysTruthyAfterGuard(x: number | (() => void)) {
 	if (typeof x === "function") {
-		// `x` is narrowed to a function here, so this condition is always truthy.
 		if (x) {
 			x();
 		}
@@ -19,16 +18,16 @@ function alwaysTruthyAfterGuard(x: number | (() => void)) {
 
 # Diagnostics
 ```
-typeofGuardNarrowingInvalid.ts:6:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━
+typeofGuardNarrowingInvalid.ts:5:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This condition is always truthy.
   
+    3 │ function alwaysTruthyAfterGuard(x: number | (() => void)) {
     4 │ 	if (typeof x === "function") {
-    5 │ 		// `x` is narrowed to a function here, so this condition is always truthy.
-  > 6 │ 		if (x) {
+  > 5 │ 		if (x) {
       │ 		    ^
-    7 │ 			x();
-    8 │ 		}
+    6 │ 			x();
+    7 │ 		}
   
   i The value's type can never be falsy, so this check is redundant.
   
