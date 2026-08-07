@@ -1,0 +1,89 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: languageOnly.md
+---
+# Input
+```md
+<!-- should generate diagnostics -->
+
+```js
+console.log(1)
+```
+
+```js title="a.js"
+console.log(1)
+```
+
+```js   
+console.log(1)
+```
+
+``` js
+console.log(1)
+```
+
+```
+
+# Diagnostics
+```
+languageOnly.md:7:6 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This info string contains more than just the language.
+  
+    5 │ ```
+    6 │ 
+  > 7 │ ```js title="a.js"
+      │      ^^^^^^^^^^^^^
+    8 │ console.log(1)
+    9 │ ```
+  
+  i The languageOnly option requires the info string to contain nothing but the language.
+  
+  i Remove any whitespace or extra content surrounding the language.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+languageOnly.md:11:6 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This info string contains more than just the language.
+  
+     9 │ ```
+    10 │ 
+  > 11 │ ```js···
+       │      ^^^
+    12 │ console.log(1)
+    13 │ ```
+  
+  i The languageOnly option requires the info string to contain nothing but the language.
+  
+  i Remove any whitespace or extra content surrounding the language.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+languageOnly.md:15:4 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This info string contains more than just the language.
+  
+    13 │ ```
+    14 │ 
+  > 15 │ ``` js
+       │    ^
+    16 │ console.log(1)
+    17 │ ```
+  
+  i The languageOnly option requires the info string to contain nothing but the language.
+  
+  i Remove any whitespace or extra content surrounding the language.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
