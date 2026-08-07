@@ -523,23 +523,6 @@ impl JsFileSource {
     ///
     /// Don't use this function to write files on disk, as it might support "multiple extensions for the same file"
     pub fn file_extension(&self) -> &'static str {
-        if self.embedding_kind.is_astro() {
-            return "astro";
-        }
-        if self.embedding_kind.is_vue() {
-            return "vue";
-        }
-        if self.embedding_kind.is_svelte_source_module() {
-            return if self.is_typescript() {
-                "svelte.ts"
-            } else {
-                "svelte.js"
-            };
-        }
-        if self.embedding_kind.is_svelte() {
-            return "svelte";
-        }
-
         match self.language {
             Language::JavaScript => {
                 if matches!(self.variant, LanguageVariant::Jsx) {
@@ -550,12 +533,7 @@ impl JsFileSource {
                     ModuleKind::Module => "js",
                 }
             }
-            Language::TypeScript {
-                definition_file: true,
-            } => "d.ts",
-            Language::TypeScript {
-                definition_file: false,
-            } => {
+            Language::TypeScript { .. } => {
                 match self.variant {
                     LanguageVariant::Standard => "ts",
                     LanguageVariant::StandardRestricted => {
