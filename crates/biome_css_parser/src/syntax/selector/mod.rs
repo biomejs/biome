@@ -63,6 +63,7 @@ pub(crate) struct SelectorList {
     end_kind_ts: TokenSet<CssSyntaxKind>,
     recovery_ts: TokenSet<CssSyntaxKind>,
     is_recovery_disabled: bool,
+    is_partial_combinator_nesting_allowed: bool,
 }
 
 impl Default for SelectorList {
@@ -71,11 +72,24 @@ impl Default for SelectorList {
             end_kind_ts: token_set!(T!['{']),
             recovery_ts: token_set![T!['{']],
             is_recovery_disabled: false,
+            is_partial_combinator_nesting_allowed: false,
         }
     }
 }
 
 impl SelectorList {
+    /// Allows partial combinators immediately before an SCSS style-rule block.
+    ///
+    /// ```scss
+    /// .sidebar > {
+    ///   .error {}
+    /// }
+    /// ```
+    pub(crate) fn allow_partial_combinator_nesting(mut self) -> Self {
+        self.is_partial_combinator_nesting_allowed = true;
+        self
+    }
+
     /// Configures the `SelectorList` with a specified token set to indicate the end of the selector list.
     ///
     /// This method allows setting a custom `TokenSet<CssSyntaxKind>` that determines the tokens
@@ -114,7 +128,11 @@ impl ParseSeparatedList for SelectorList {
     const LIST_KIND: Self::Kind = CSS_SELECTOR_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_selector(p)
+        if self.is_partial_combinator_nesting_allowed {
+            parse_style_rule_selector(p)
+        } else {
+            parse_selector(p)
+        }
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -215,30 +233,81 @@ pub(crate) fn is_nth_at_selector(p: &mut CssParser, n: usize) -> bool {
 
 /// Parses a CSS selector.
 ///
-/// This function attempts to parse a CSS selector, which may be either a compound selector
-/// or a complex selector. Compound selectors are simple, unseparated chains of simple selectors,
-/// whereas complex selectors are compound selectors separated by combinators.
+/// A selector is either a compound selector, which chains simple selectors
+/// without combinators, or a complex selector, which joins compound selectors
+/// with combinators.
 ///
-/// Initially, the function tries to parse a compound selector. If successful, it then checks
-/// if this compound selector forms part of a complex selector and continues parsing accordingly.
+/// This entry point requires every combinator to have a right selector,
+/// including in SCSS selector consumers that do not parse style-rule preludes:
+///
+/// ```scss
+/// .selector:has(> .child) {}
+/// ```
 #[inline]
 pub(crate) fn parse_selector(p: &mut CssParser) -> ParsedSyntax {
+    parse_selector_with_partial_combinator_nesting(p, false)
+}
+
+/// Parses a selector in an SCSS style-rule prelude.
+///
+/// ```scss
+/// .sidebar > {
+///   .error {}
+/// }
+/// ```
+#[inline]
+fn parse_style_rule_selector(p: &mut CssParser) -> ParsedSyntax {
+    parse_selector_with_partial_combinator_nesting(p, true)
+}
+
+/// Parses a selector with the caller's style-rule partial-combinator setting.
+///
+/// ```scss
+/// .selector:has(> .child) {}
+///
+/// .sidebar > {
+///   .error {}
+/// }
+/// ```
+fn parse_selector_with_partial_combinator_nesting(
+    p: &mut CssParser,
+    is_partial_combinator_nesting_allowed: bool,
+) -> ParsedSyntax {
     if !is_nth_at_selector(p, 0) {
         return Absent;
     }
     if is_nth_at_metavariable(p, 0) {
         parse_metavariable(p)
     } else {
-        // In CSS, we have compound selectors and complex selectors.
-        // Compound selectors are simple, unseparated chains of selectors,
-        // while complex selectors are compound selectors separated by combinators.
-        // After parsing the compound selector, it then checks if this compound selector is a part of a complex selector.
-        parse_compound_selector(p).and_then(|selector| parse_complex_selector(p, selector))
+        // Compound selectors are unseparated chains of simple selectors. A
+        // following combinator turns the result into a complex selector.
+        parse_compound_selector(p).and_then(|selector| {
+            parse_complex_selector(p, selector, is_partial_combinator_nesting_allowed)
+        })
     }
 }
 
 const COMPLEX_SELECTOR_COMBINATOR_SET: TokenSet<CssSyntaxKind> =
     token_set![T![>], T![+], T![~], T![||], CSS_SPACE_LITERAL];
+const SCSS_PARTIAL_COMBINATOR_SET: TokenSet<CssSyntaxKind> = token_set![T![>], T![+], T![~]];
+
+/// Returns whether an SCSS partial-combinator selector starts at the current token.
+///
+/// ```scss
+/// .sidebar > {
+///   .error {}
+/// }
+///
+/// .card {
+///   + {
+///     .media {}
+///   }
+/// }
+/// ```
+#[inline]
+fn is_at_scss_partial_combinator_selector(p: &mut CssParser) -> bool {
+    p.at_ts(SCSS_PARTIAL_COMBINATOR_SET) && p.nth_at(1, T!['{'])
+}
 
 /// Checks if the current or nth token in the parser is a complex selector combinator.
 ///
@@ -254,13 +323,24 @@ fn is_nth_at_complex_selector_combinator(p: &mut CssParser, n: usize) -> bool {
 ///
 /// This function attempts to parse a complex selector, which combines compound selectors
 /// through combinators like '>', '+', ' ', and '~'. These combinators express relationships
-/// between elements in the document tree.
+/// between elements in the document tree. The enabled SCSS style-rule path completes a
+/// trailing combinator as `ScssPartialCombinatorSelector`:
+///
+/// ```scss
+/// .sidebar > {
+///   .error {}
+/// }
+/// ```
 ///
 /// The function iterates over the tokens, parsing each complex selector combinator and
 /// its associated compound selector. Parsing continues until no more complex combinators
 /// are found, at which point it returns the completed complex selector.
 #[inline]
-fn parse_complex_selector(p: &mut CssParser, mut left: CompletedMarker) -> ParsedSyntax {
+fn parse_complex_selector(
+    p: &mut CssParser,
+    mut left: CompletedMarker,
+    is_partial_combinator_nesting_allowed: bool,
+) -> ParsedSyntax {
     let mut progress = ParserProgress::default();
 
     loop {
@@ -269,8 +349,25 @@ fn parse_complex_selector(p: &mut CssParser, mut left: CompletedMarker) -> Parse
         if is_nth_at_complex_selector_combinator(p, 0) {
             let complex_selector = left.precede(p);
 
-            p.bump_ts(COMPLEX_SELECTOR_COMBINATOR_SET);
-            parse_compound_selector(p).or_add_diagnostic(p, expected_compound_selector);
+            if is_partial_combinator_nesting_allowed && is_at_scss_partial_combinator_selector(p) {
+                return CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                    p,
+                    |p| {
+                        p.bump_ts(SCSS_PARTIAL_COMBINATOR_SET);
+                        Present(complex_selector.complete(p, SCSS_PARTIAL_COMBINATOR_SELECTOR))
+                    },
+                    |p, marker| {
+                        scss_only_syntax_error(
+                            p,
+                            "SCSS partial combinator selectors",
+                            marker.range(p),
+                        )
+                    },
+                );
+            } else {
+                p.bump_ts(COMPLEX_SELECTOR_COMBINATOR_SET);
+                parse_compound_selector(p).or_add_diagnostic(p, expected_compound_selector);
+            }
             left = complex_selector.complete(p, CSS_COMPLEX_SELECTOR)
         } else {
             return Present(left);

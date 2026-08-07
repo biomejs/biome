@@ -133,39 +133,6 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 }
                 slots.into_node(MD_CONTINUATION_INDENT, children)
             }
-            MD_DOCUMENT => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element
-                    && element.kind() == T![UNICODE_BOM]
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && MdBlockList::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && element.kind() == T![EOF]
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        MD_DOCUMENT.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(MD_DOCUMENT, children)
-            }
             MD_ENTITY_REFERENCE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -1056,6 +1023,36 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                     );
                 }
                 slots.into_node(MD_REFERENCE_LINK_LABEL, children)
+            }
+            MD_ROOT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T![UNICODE_BOM]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && MdBlockList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![EOF]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(MD_ROOT.to_bogus(), children.into_iter().map(Some));
+                }
+                slots.into_node(MD_ROOT, children)
             }
             MD_SETEXT_HEADER => {
                 let mut elements = (&children).into_iter();

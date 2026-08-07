@@ -326,193 +326,112 @@ ns|* {}
 ```diff
 --- Prettier
 +++ Biome
-@@ -100,35 +100,37 @@
+@@ -100,7 +100,7 @@
  }
  .parent > .child {
  }
 -.parent > {
--  .child-one {
--  }
--  .child-two {
--  }
-+.parent>{
-+  .child-one {}
-+  .child-two {}
- }
- .parent > {
--  .child-one {
--  }
--  .child-two {
--  }
-+  .child-one {}
-+  .child-two {}
++.parent> {
+   .child-one {
+   }
+   .child-two {
+@@ -112,19 +112,22 @@
+   .child-two {
+   }
  }
 -.parent > {
--  .child-one {
--  }
--  .child-two {
--  }
-+.parent  >  {
-+  .child-one {}
-+  .child-two {}
++.parent  > {
+   .child-one {
+   }
+   .child-two {
+   }
  }
 -.parent > {
--  .child-one {
--  }
--  .child-two {
--  }
 +.parent
-+>
-+{
-+  .child-one
-+  {}
-+  .child-two
-+  {}
++> {
+   .child-one {
+   }
+   .child-two {
+   }
  }
 -.parent > {
--  .child-one {
--  }
--  .child-two {
--  }
 +.parent
 +
-+>
-+
-+{
-+  .child-one
-+
-+  {}
-+  .child-two
-+
-+  {}
- }
- .parent {
-   > .child-one {
-@@ -167,35 +169,37 @@
++> {
+   .child-one {
+   }
+   .child-two {
+@@ -167,7 +170,7 @@
  }
  .parent + .child {
  }
 -.parent + {
--  .child-one {
--  }
--  .child-two {
--  }
-+.parent+{
-+  .child-one {}
-+  .child-two {}
- }
- .parent + {
--  .child-one {
--  }
--  .child-two {
--  }
-+  .child-one {}
-+  .child-two {}
++.parent+ {
+   .child-one {
+   }
+   .child-two {
+@@ -179,19 +182,22 @@
+   .child-two {
+   }
  }
 -.parent + {
--  .child-one {
--  }
--  .child-two {
--  }
-+.parent  +  {
-+  .child-one {}
-+  .child-two {}
++.parent  + {
+   .child-one {
+   }
+   .child-two {
+   }
  }
 -.parent + {
--  .child-one {
--  }
--  .child-two {
--  }
 +.parent
-++
-+{
-+  .child-one
-+  {}
-+  .child-two
-+  {}
+++ {
+   .child-one {
+   }
+   .child-two {
+   }
  }
 -.parent + {
--  .child-one {
--  }
--  .child-two {
--  }
 +.parent
 +
-++
-+
-+{
-+  .child-one
-+
-+  {}
-+  .child-two
-+
-+  {}
- }
- .parent {
-   + .child-one {
-@@ -234,35 +238,37 @@
+++ {
+   .child-one {
+   }
+   .child-two {
+@@ -234,7 +240,7 @@
  }
  .parent ~ .child {
  }
 -.parent ~ {
--  .child-one {
--  }
--  .child-two {
--  }
-+.parent~{
-+  .child-one {}
-+  .child-two {}
- }
- .parent ~ {
--  .child-one {
--  }
--  .child-two {
--  }
-+  .child-one {}
-+  .child-two {}
++.parent~ {
+   .child-one {
+   }
+   .child-two {
+@@ -246,19 +252,22 @@
+   .child-two {
+   }
  }
 -.parent ~ {
--  .child-one {
--  }
--  .child-two {
--  }
-+.parent  ~  {
-+  .child-one {}
-+  .child-two {}
++.parent  ~ {
+   .child-one {
+   }
+   .child-two {
+   }
  }
 -.parent ~ {
--  .child-one {
--  }
--  .child-two {
--  }
 +.parent
-+~
-+{
-+  .child-one
-+  {}
-+  .child-two
-+  {}
++~ {
+   .child-one {
+   }
+   .child-two {
+   }
  }
 -.parent ~ {
--  .child-one {
--  }
--  .child-two {
--  }
 +.parent
 +
-+~
-+
-+{
-+  .child-one
-+
-+  {}
-+  .child-two
-+
-+  {}
- }
- .parent {
-   ~ .child-one {
-@@ -295,71 +301,60 @@
++~ {
+   .child-one {
+   }
+   .child-two {
+@@ -295,13 +304,10 @@
    }
  }
  
@@ -521,65 +440,42 @@ ns|* {}
 -.parent >>> .child {
 -}
 -.parent >>> .child {
+-}
+-.parent >>> {
 +.parent>>>.child {}
 +.parent >>> .child {}
 +.parent  >>>  .child {}
-+.parent>>>{
-+  .child-one {}
-+  .child-two {}
- }
- .parent >>> {
--  .child-one {
--  }
--  .child-two {
--  }
--}
--.parent >>> {
--  .child-one {
--  }
--  .child-two {
--  }
-+  .child-one {}
-+  .child-two {}
++.parent>>> {
+   .child-one {
+   }
+   .child-two {
+@@ -313,53 +319,46 @@
+   .child-two {
+   }
  }
 -.parent >>> {
--  .child-one {
--  }
--  .child-two {
--  }
-+.parent  >>>  {
-+  .child-one {}
-+  .child-two {}
++.parent  >>> {
+   .child-one {
+   }
+   .child-two {
+   }
  }
 -.parent >>> {
--  .child-one {
--  }
--  .child-two {
--  }
 +.parent
-+>>>
-+{
-+  .child-one
-+  {}
-+  .child-two
-+  {}
++>>> {
+   .child-one {
+   }
+   .child-two {
+   }
  }
 -.parent >>> {
--  .child-one {
--  }
--  .child-two {
--  }
 +.parent
 +
-+>>>
-+
-+{
-+  .child-one
-+
-+  {}
-+  .child-two
-+
-+  {}
++>>> {
+   .child-one {
+   }
+   .child-two {
+   }
  }
  .parent {
 -  >>> .child-one {
@@ -730,37 +626,38 @@ ns|* {}
 }
 .parent > .child {
 }
-.parent>{
-  .child-one {}
-  .child-two {}
+.parent> {
+  .child-one {
+  }
+  .child-two {
+  }
 }
 .parent > {
-  .child-one {}
-  .child-two {}
+  .child-one {
+  }
+  .child-two {
+  }
 }
-.parent  >  {
-  .child-one {}
-  .child-two {}
+.parent  > {
+  .child-one {
+  }
+  .child-two {
+  }
 }
 .parent
->
-{
-  .child-one
-  {}
-  .child-two
-  {}
+> {
+  .child-one {
+  }
+  .child-two {
+  }
 }
 .parent
 
->
-
-{
-  .child-one
-
-  {}
-  .child-two
-
-  {}
+> {
+  .child-one {
+  }
+  .child-two {
+  }
 }
 .parent {
   > .child-one {
@@ -799,37 +696,38 @@ ns|* {}
 }
 .parent + .child {
 }
-.parent+{
-  .child-one {}
-  .child-two {}
+.parent+ {
+  .child-one {
+  }
+  .child-two {
+  }
 }
 .parent + {
-  .child-one {}
-  .child-two {}
+  .child-one {
+  }
+  .child-two {
+  }
 }
-.parent  +  {
-  .child-one {}
-  .child-two {}
+.parent  + {
+  .child-one {
+  }
+  .child-two {
+  }
 }
 .parent
-+
-{
-  .child-one
-  {}
-  .child-two
-  {}
++ {
+  .child-one {
+  }
+  .child-two {
+  }
 }
 .parent
 
-+
-
-{
-  .child-one
-
-  {}
-  .child-two
-
-  {}
++ {
+  .child-one {
+  }
+  .child-two {
+  }
 }
 .parent {
   + .child-one {
@@ -868,37 +766,38 @@ ns|* {}
 }
 .parent ~ .child {
 }
-.parent~{
-  .child-one {}
-  .child-two {}
+.parent~ {
+  .child-one {
+  }
+  .child-two {
+  }
 }
 .parent ~ {
-  .child-one {}
-  .child-two {}
+  .child-one {
+  }
+  .child-two {
+  }
 }
-.parent  ~  {
-  .child-one {}
-  .child-two {}
-}
-.parent
-~
-{
-  .child-one
-  {}
-  .child-two
-  {}
+.parent  ~ {
+  .child-one {
+  }
+  .child-two {
+  }
 }
 .parent
+~ {
+  .child-one {
+  }
+  .child-two {
+  }
+}
+.parent
 
-~
-
-{
-  .child-one
-
-  {}
-  .child-two
-
-  {}
+~ {
+  .child-one {
+  }
+  .child-two {
+  }
 }
 .parent {
   ~ .child-one {
@@ -934,37 +833,38 @@ ns|* {}
 .parent>>>.child {}
 .parent >>> .child {}
 .parent  >>>  .child {}
-.parent>>>{
-  .child-one {}
-  .child-two {}
+.parent>>> {
+  .child-one {
+  }
+  .child-two {
+  }
 }
 .parent >>> {
-  .child-one {}
-  .child-two {}
+  .child-one {
+  }
+  .child-two {
+  }
 }
-.parent  >>>  {
-  .child-one {}
-  .child-two {}
-}
-.parent
->>>
-{
-  .child-one
-  {}
-  .child-two
-  {}
+.parent  >>> {
+  .child-one {
+  }
+  .child-two {
+  }
 }
 .parent
+>>> {
+  .child-one {
+  }
+  .child-two {
+  }
+}
+.parent
 
->>>
-
-{
-  .child-one
-
-  {}
-  .child-two
-
-  {}
+>>> {
+  .child-one {
+  }
+  .child-two {
+  }
 }
 .parent {
   >>>.child-one {}
@@ -1014,305 +914,185 @@ ns|* {
 
 # Errors
 ```
-selectors.css:75:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:75:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a compound selector but instead found '{'.
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     73 │ .parent > .child {}
     74 │ .parent  >  .child {}
   > 75 │ .parent>{
-       │         ^
+       │ ^^^^^^^^
     76 │   .child-one {}
     77 │   .child-two {}
   
-  i Expected a compound selector here.
-  
-    73 │ .parent > .child {}
-    74 │ .parent  >  .child {}
-  > 75 │ .parent>{
-       │         ^
-    76 │   .child-one {}
-    77 │   .child-two {}
-  
-selectors.css:79:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:79:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a compound selector but instead found '{'.
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     77 │   .child-two {}
     78 │ }
   > 79 │ .parent > {
-       │           ^
+       │ ^^^^^^^^^
     80 │   .child-one {}
     81 │   .child-two {}
   
-  i Expected a compound selector here.
-  
-    77 │   .child-two {}
-    78 │ }
-  > 79 │ .parent > {
-       │           ^
-    80 │   .child-one {}
-    81 │   .child-two {}
-  
-selectors.css:83:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:83:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a compound selector but instead found '{'.
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     81 │   .child-two {}
     82 │ }
   > 83 │ .parent  >  {
-       │             ^
+       │ ^^^^^^^^^^
     84 │   .child-one {}
     85 │   .child-two {}
   
-  i Expected a compound selector here.
+selectors.css:87:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
-    81 │   .child-two {}
-    82 │ }
-  > 83 │ .parent  >  {
-       │             ^
-    84 │   .child-one {}
     85 │   .child-two {}
-  
-selectors.css:89:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '{'.
-  
-    87 │ .parent
-    88 │ >
-  > 89 │ {
+    86 │ }
+  > 87 │ .parent
+       │ ^^^^^^^
+  > 88 │ >
        │ ^
+    89 │ {
     90 │   .child-one
-    91 │   {}
   
-  i Expected a compound selector here.
+selectors.css:95:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
-    87 │ .parent
-    88 │ >
-  > 89 │ {
+    93 │   {}
+    94 │ }
+  > 95 │ .parent
+       │ ^^^^^^^
+  > 96 │ 
+  > 97 │ >
        │ ^
-    90 │   .child-one
-    91 │   {}
+    98 │ 
+    99 │ {
   
-selectors.css:99:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:131:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a compound selector but instead found '{'.
-  
-     97 │ >
-     98 │ 
-   > 99 │ {
-        │ ^
-    100 │   .child-one
-    101 │ 
-  
-  i Expected a compound selector here.
-  
-     97 │ >
-     98 │ 
-   > 99 │ {
-        │ ^
-    100 │   .child-one
-    101 │ 
-  
-selectors.css:131:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '{'.
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     129 │ .parent + .child {}
     130 │ .parent  +  .child {}
   > 131 │ .parent+{
-        │         ^
+        │ ^^^^^^^^
     132 │   .child-one {}
     133 │   .child-two {}
   
-  i Expected a compound selector here.
-  
-    129 │ .parent + .child {}
-    130 │ .parent  +  .child {}
-  > 131 │ .parent+{
-        │         ^
-    132 │   .child-one {}
-    133 │   .child-two {}
-  
-selectors.css:135:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:135:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a compound selector but instead found '{'.
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     133 │   .child-two {}
     134 │ }
   > 135 │ .parent + {
-        │           ^
+        │ ^^^^^^^^^
     136 │   .child-one {}
     137 │   .child-two {}
   
-  i Expected a compound selector here.
-  
-    133 │   .child-two {}
-    134 │ }
-  > 135 │ .parent + {
-        │           ^
-    136 │   .child-one {}
-    137 │   .child-two {}
-  
-selectors.css:139:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:139:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a compound selector but instead found '{'.
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     137 │   .child-two {}
     138 │ }
   > 139 │ .parent  +  {
-        │             ^
+        │ ^^^^^^^^^^
     140 │   .child-one {}
     141 │   .child-two {}
   
-  i Expected a compound selector here.
+selectors.css:143:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
-    137 │   .child-two {}
-    138 │ }
-  > 139 │ .parent  +  {
-        │             ^
-    140 │   .child-one {}
     141 │   .child-two {}
-  
-selectors.css:145:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '{'.
-  
-    143 │ .parent
-    144 │ +
-  > 145 │ {
+    142 │ }
+  > 143 │ .parent
+        │ ^^^^^^^
+  > 144 │ +
         │ ^
+    145 │ {
     146 │   .child-one
-    147 │   {}
   
-  i Expected a compound selector here.
-  
-    143 │ .parent
-    144 │ +
-  > 145 │ {
-        │ ^
-    146 │   .child-one
-    147 │   {}
-  
-selectors.css:155:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:151:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a compound selector but instead found '{'.
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
-    153 │ +
-    154 │ 
-  > 155 │ {
+    149 │   {}
+    150 │ }
+  > 151 │ .parent
+        │ ^^^^^^^
+  > 152 │ 
+  > 153 │ +
         │ ^
-    156 │   .child-one
-    157 │ 
-  
-  i Expected a compound selector here.
-  
-    153 │ +
     154 │ 
-  > 155 │ {
-        │ ^
-    156 │   .child-one
-    157 │ 
+    155 │ {
   
-selectors.css:187:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:187:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a compound selector but instead found '{'.
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     185 │ .parent ~ .child {}
     186 │ .parent  ~  .child {}
   > 187 │ .parent~{
-        │         ^
+        │ ^^^^^^^^
     188 │   .child-one {}
     189 │   .child-two {}
   
-  i Expected a compound selector here.
-  
-    185 │ .parent ~ .child {}
-    186 │ .parent  ~  .child {}
-  > 187 │ .parent~{
-        │         ^
-    188 │   .child-one {}
-    189 │   .child-two {}
-  
-selectors.css:191:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:191:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a compound selector but instead found '{'.
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     189 │   .child-two {}
     190 │ }
   > 191 │ .parent ~ {
-        │           ^
+        │ ^^^^^^^^^
     192 │   .child-one {}
     193 │   .child-two {}
   
-  i Expected a compound selector here.
-  
-    189 │   .child-two {}
-    190 │ }
-  > 191 │ .parent ~ {
-        │           ^
-    192 │   .child-one {}
-    193 │   .child-two {}
-  
-selectors.css:195:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:195:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a compound selector but instead found '{'.
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     193 │   .child-two {}
     194 │ }
   > 195 │ .parent  ~  {
-        │             ^
+        │ ^^^^^^^^^^
     196 │   .child-one {}
     197 │   .child-two {}
   
-  i Expected a compound selector here.
+selectors.css:199:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
-    193 │   .child-two {}
-    194 │ }
-  > 195 │ .parent  ~  {
-        │             ^
-    196 │   .child-one {}
     197 │   .child-two {}
-  
-selectors.css:201:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '{'.
-  
-    199 │ .parent
-    200 │ ~
-  > 201 │ {
+    198 │ }
+  > 199 │ .parent
+        │ ^^^^^^^
+  > 200 │ ~
         │ ^
+    201 │ {
     202 │   .child-one
-    203 │   {}
   
-  i Expected a compound selector here.
-  
-    199 │ .parent
-    200 │ ~
-  > 201 │ {
-        │ ^
-    202 │   .child-one
-    203 │   {}
-  
-selectors.css:211:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:207:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a compound selector but instead found '{'.
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
-    209 │ ~
-    210 │ 
-  > 211 │ {
+    205 │   {}
+    206 │ }
+  > 207 │ .parent
+        │ ^^^^^^^
+  > 208 │ 
+  > 209 │ ~
         │ ^
-    212 │   .child-one
-    213 │ 
-  
-  i Expected a compound selector here.
-  
-    209 │ ~
     210 │ 
-  > 211 │ {
-        │ ^
-    212 │   .child-one
-    213 │ 
+    211 │ {
   
 selectors.css:240:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1470,23 +1250,14 @@ selectors.css:243:10 parse ━━━━━━━━━━━━━━━━━�
     244 │   .child-one {}
     245 │   .child-two {}
   
-selectors.css:243:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:243:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a compound selector but instead found '{'.
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     241 │ .parent >>> .child {}
     242 │ .parent  >>>  .child {}
   > 243 │ .parent>>>{
-        │           ^
-    244 │   .child-one {}
-    245 │   .child-two {}
-  
-  i Expected a compound selector here.
-  
-    241 │ .parent >>> .child {}
-    242 │ .parent  >>>  .child {}
-  > 243 │ .parent>>>{
-        │           ^
+        │ ^^^^^^^^^^
     244 │   .child-one {}
     245 │   .child-two {}
   
@@ -1530,23 +1301,14 @@ selectors.css:247:11 parse ━━━━━━━━━━━━━━━━━�
     248 │   .child-one {}
     249 │   .child-two {}
   
-selectors.css:247:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:247:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a compound selector but instead found '{'.
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     245 │   .child-two {}
     246 │ }
   > 247 │ .parent >>> {
-        │             ^
-    248 │   .child-one {}
-    249 │   .child-two {}
-  
-  i Expected a compound selector here.
-  
-    245 │   .child-two {}
-    246 │ }
-  > 247 │ .parent >>> {
-        │             ^
+        │ ^^^^^^^^^^^
     248 │   .child-one {}
     249 │   .child-two {}
   
@@ -1590,23 +1352,14 @@ selectors.css:251:12 parse ━━━━━━━━━━━━━━━━━�
     252 │   .child-one {}
     253 │   .child-two {}
   
-selectors.css:251:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:251:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a compound selector but instead found '{'.
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     249 │   .child-two {}
     250 │ }
   > 251 │ .parent  >>>  {
-        │               ^
-    252 │   .child-one {}
-    253 │   .child-two {}
-  
-  i Expected a compound selector here.
-  
-    249 │   .child-two {}
-    250 │ }
-  > 251 │ .parent  >>>  {
-        │               ^
+        │ ^^^^^^^^^^^^
     252 │   .child-one {}
     253 │   .child-two {}
   
@@ -1650,25 +1403,18 @@ selectors.css:256:3 parse ━━━━━━━━━━━━━━━━━━
     257 │ {
     258 │   .child-one
   
-selectors.css:257:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:255:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a compound selector but instead found '{'.
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
-    255 │ .parent
-    256 │ >>>
-  > 257 │ {
-        │ ^
+    253 │   .child-two {}
+    254 │ }
+  > 255 │ .parent
+        │ ^^^^^^^
+  > 256 │ >>>
+        │ ^^^
+    257 │ {
     258 │   .child-one
-    259 │   {}
-  
-  i Expected a compound selector here.
-  
-    255 │ .parent
-    256 │ >>>
-  > 257 │ {
-        │ ^
-    258 │   .child-one
-    259 │   {}
   
 selectors.css:265:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1710,25 +1456,19 @@ selectors.css:265:3 parse ━━━━━━━━━━━━━━━━━━
     266 │ 
     267 │ {
   
-selectors.css:267:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+selectors.css:263:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a compound selector but instead found '{'.
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
-    265 │ >>>
+    261 │   {}
+    262 │ }
+  > 263 │ .parent
+        │ ^^^^^^^
+  > 264 │ 
+  > 265 │ >>>
+        │ ^^^
     266 │ 
-  > 267 │ {
-        │ ^
-    268 │   .child-one
-    269 │ 
-  
-  i Expected a compound selector here.
-  
-    265 │ >>>
-    266 │ 
-  > 267 │ {
-        │ ^
-    268 │   .child-one
-    269 │ 
+    267 │ {
   
 selectors.css:276:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -2135,5 +1875,5 @@ selectors.css:293:6 parse ━━━━━━━━━━━━━━━━━━
 
 # Lines exceeding max width of 80 characters
 ```
-  360: /* This matches all XHTML <a> elements, as XHTML is the default unprefixed namespace */
+  364: /* This matches all XHTML <a> elements, as XHTML is the default unprefixed namespace */
 ```

@@ -90,3 +90,54 @@ fn scc_query_recomputes_after_module_graph_changes() {
             .contains_cycle_between(Utf8Path::new("/src/a.js"), Utf8Path::new("/src/b.js"))
     );
 }
+
+#[test]
+fn scc_query_recomputes_after_modules_are_added_and_removed() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/a.js".into(), "import './b.js';");
+    fs.insert("/src/b.js".into(), "import './a.js';");
+
+    let mut db = WorkspaceDb::default();
+    let a_path = Utf8Path::new("/src/a.js");
+    let b_path = Utf8Path::new("/src/b.js");
+    db.update_or_insert_module(a_path.to_path_buf(), resolve_module(&fs, "/src/a.js"));
+
+    assert!(
+        !js_module_sccs(&db, ModuleGraphGeneration::get(&db))
+            .contains_cycle_between(a_path, b_path)
+    );
+
+    let generation = db.module_graph_generation();
+    db.update_or_insert_module(b_path.to_path_buf(), resolve_module(&fs, "/src/b.js"));
+
+    assert_eq!(db.module_graph_generation(), generation.wrapping_add(1));
+    assert!(
+        js_module_sccs(&db, ModuleGraphGeneration::get(&db)).contains_cycle_between(a_path, b_path)
+    );
+
+    let generation = db.module_graph_generation();
+    db.remove_module(b_path);
+
+    assert_eq!(db.module_graph_generation(), generation.wrapping_add(1));
+    assert!(
+        !js_module_sccs(&db, ModuleGraphGeneration::get(&db))
+            .contains_cycle_between(a_path, b_path)
+    );
+}
+
+#[test]
+fn scc_query_ignores_paths_in_node_modules() {
+    let (_, db) = module_db(&[
+        ("/src/a.js", "import '../node_modules/dependency/index.js';"),
+        ("/src/b.js", "import './a.js';"),
+        (
+            "/node_modules/dependency/index.js",
+            "import '../../src/b.js';",
+        ),
+    ]);
+
+    assert!(
+        !js_module_sccs(&db, ModuleGraphGeneration::get(&db))
+            .contains_cycle_between(Utf8Path::new("/src/a.js"), Utf8Path::new("/src/b.js"))
+    );
+}

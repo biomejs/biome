@@ -1,4 +1,4 @@
-use biome_css_syntax::{AnyCssRoot, CssSyntaxKind, CssSyntaxToken};
+use biome_css_syntax::{AnyCssRoot, CssSyntaxKind, CssSyntaxToken, T};
 use biome_rowan::{AstNode, AstPtr, TextRange, TokenText};
 use rustc_hash::FxHashMap;
 use std::collections::BTreeMap;
@@ -301,14 +301,19 @@ fn space_combinator() -> (CssSyntaxKind, TokenText) {
     )
 }
 
+fn is_explicit_combinator(kind: CssSyntaxKind) -> bool {
+    matches!(kind, T![>] | T![+] | T![~] | T![||])
+}
+
 /// Resolves the `current` token sequence against each parent [`Selector`],
 /// producing one [`ResolvedSelector`] per parent selector.
 ///
 /// Resolution rules (per the CSS nesting spec):
 /// - If any token in `current` is an `AMP` (`&`), every such occurrence is
 ///   replaced in-place by the full token sequence of the parent selector.
-/// - If there is no `&`, the parent token sequence is prepended and a
-///   synthetic space-literal token is inserted as the descendant combinator.
+/// - If there is no `&`, the parent token sequence is prepended. A synthetic
+///   descendant combinator is inserted unless either sequence already meets at
+///   an explicit combinator.
 ///
 /// Tokens are stored as `(CssSyntaxKind, TokenText)` pairs so that the
 /// `Display` impl can reconstruct canonical whitespace around combinators.
@@ -337,10 +342,17 @@ fn resolve_selector(current: &[CssSyntaxToken], parents: &[SelectorData]) -> Vec
                 }
                 ResolvedSelector(tokens)
             } else {
-                // Prepend parent tokens + implicit descendant combinator.
                 let mut tokens = Vec::with_capacity(parent_tokens.len() + 1 + current.len());
                 tokens.extend(parent_tokens.iter().cloned());
-                tokens.push(space_combinator());
+                let has_combinator_boundary = current
+                    .first()
+                    .is_some_and(|token| is_explicit_combinator(token.kind()))
+                    || parent_tokens
+                        .last()
+                        .is_some_and(|(kind, _)| is_explicit_combinator(*kind));
+                if !has_combinator_boundary {
+                    tokens.push(space_combinator());
+                }
                 tokens.extend(current.iter().map(|t| (t.kind(), t.token_text_trimmed())));
                 ResolvedSelector(tokens)
             }

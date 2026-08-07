@@ -180,7 +180,9 @@ fn multiple_hashes() {
     // Multiple hashes emitted as a single token - parser determines level from length
     assert_lex! {
         "###",
-        HASH:3,
+        HASH:1,
+        HASH:1,
+        HASH:1,
     }
 }
 

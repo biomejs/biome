@@ -5608,6 +5608,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSvelteLegacyConstConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteLegacyConstOptions" }
+			]
+		},
+		"NoSvelteLegacyConstOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSvelteUnnecessaryStateWrapConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6940,6 +6950,13 @@
 					"description": "Disallow dependencies that are known to have better alternatives.\nSee https://biomejs.dev/linter/rules/no-restricted-dependencies",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoRestrictedDependenciesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSvelteLegacyConst": {
+					"description": "Disallow legacy Svelte {@const} tags.\nSee https://biomejs.dev/linter/rules/no-svelte-legacy-const",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteLegacyConstConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10250,6 +10267,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSuspiciousSemicolonInJsxOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSvelteLegacyConstOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteLegacyConstOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

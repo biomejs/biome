@@ -10,7 +10,10 @@ use biome_yaml_syntax::YamlSyntaxKind::{self, *};
 use super::YamlParser;
 
 #[derive(Default)]
-pub(crate) struct PropertyList;
+pub(crate) struct PropertyList {
+    seen_anchor: bool,
+    seen_tag: bool,
+}
 
 impl ParseNodeList for PropertyList {
     type Kind = YamlSyntaxKind;
@@ -20,8 +23,22 @@ impl ParseNodeList for PropertyList {
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if p.at(ANCHOR_PROPERTY_LITERAL) {
+            if self.seen_anchor {
+                let diagnostic = p.err_builder(
+                    "A YAML node can have only one anchor property.",
+                    p.cur_range(),
+                );
+                p.error(diagnostic);
+            }
+            self.seen_anchor = true;
             Present(parse_anchor_property(p))
         } else if p.at(TAG_PROPERTY_LITERAL) {
+            if self.seen_tag {
+                let diagnostic =
+                    p.err_builder("A YAML node can have only one tag property.", p.cur_range());
+                p.error(diagnostic);
+            }
+            self.seen_tag = true;
             Present(parse_tag_property(p))
         } else {
             Absent

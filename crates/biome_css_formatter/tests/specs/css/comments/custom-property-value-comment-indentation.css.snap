@@ -1,0 +1,36 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/comments/custom-property-value-comment-indentation.css
+---
+
+# Input
+
+```css
+:root {
+	--main-font-stack:
+		/* Why does this comment get placed without indentation? */
+		system-ui,
+		/* Comment 1 */
+		-apple-system,
+		BlinkMacSystemFont,
+		/* Comment 2 */
+		"Segoe UI",
+		Roboto, Ubuntu,
+		/* Comment 3 */
+		sans-serif;
+}
+
+```
+
+
+# Formatted
+
+```css
+:root {
+	--main-font-stack:
+		/* Why does this comment get placed without indentation? */
+		system-ui, /* Comment 1 */ -apple-system, BlinkMacSystemFont,
+		/* Comment 2 */ "Segoe UI", Roboto, Ubuntu, /* Comment 3 */ sans-serif;
+}
+
+```

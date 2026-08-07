@@ -98,7 +98,12 @@ impl<'src> HtmlLexer<'src> {
     }
 
     /// Consume a token in the [HtmlLexContext::InsideTag] context.
-    fn consume_token_inside_tag(&mut self, current: u8, mode: TagNameMode) -> HtmlSyntaxKind {
+    fn consume_token_inside_tag(
+        &mut self,
+        current: u8,
+        mode: TagNameMode,
+        double_text_expressions: bool,
+    ) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
 
         match dispatched {
@@ -111,7 +116,7 @@ impl<'src> HtmlLexer<'src> {
             EXL => self.consume_byte(T![!]),
             BEO if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
             BEO => {
-                if self.at_opening_double_text_expression() {
+                if double_text_expressions && self.at_opening_double_text_expression() {
                     self.consume_l_double_text_expression()
                 } else {
                     self.consume_byte(T!['{'])
@@ -301,7 +306,7 @@ impl<'src> HtmlLexer<'src> {
             EQL => self.consume_byte(T![=]),
             EXL => self.consume_byte(T![!]),
             BEO => {
-                if self.at_opening_double_text_expression() {
+                if !svelte && self.at_opening_double_text_expression() {
                     self.consume_l_double_text_expression()
                 } else {
                     self.consume_byte(T!['{'])
@@ -396,7 +401,7 @@ impl<'src> HtmlLexer<'src> {
             PRD => return self.consume_byte(T![.]),
             _ => {}
         }
-        self.consume_token_inside_tag(current, mode)
+        self.consume_token_inside_tag(current, mode, false)
     }
 
     fn consume_token_vue_v_for_value(&mut self, current: u8) -> HtmlSyntaxKind {
@@ -445,7 +450,7 @@ impl<'src> HtmlLexer<'src> {
     }
 
     /// Consume a token in the [HtmlLexContext::Regular] context.
-    fn consume_token(&mut self, current: u8) -> HtmlSyntaxKind {
+    fn consume_token(&mut self, current: u8, double_text_expressions: bool) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
 
         match dispatched {
@@ -458,7 +463,7 @@ impl<'src> HtmlLexer<'src> {
             }
             BEO if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
             BEO => {
-                if self.at_opening_double_text_expression() {
+                if double_text_expressions && self.at_opening_double_text_expression() {
                     self.consume_l_double_text_expression()
                 } else {
                     self.consume_byte(T!['{'])
@@ -491,7 +496,7 @@ impl<'src> HtmlLexer<'src> {
             }
             IDT => self
                 .consume_language_identifier(current)
-                .unwrap_or_else(|| self.consume_html_text(current)),
+                .unwrap_or_else(|| self.consume_html_text(current, double_text_expressions)),
             _ => {
                 if self.position == 0
                     && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
@@ -499,7 +504,7 @@ impl<'src> HtmlLexer<'src> {
                     self.unicode_bom_length = bom_size;
                     return bom;
                 }
-                self.consume_html_text(current)
+                self.consume_html_text(current, double_text_expressions)
             }
         }
     }
@@ -1543,7 +1548,7 @@ impl<'src> HtmlLexer<'src> {
     ///
     /// - See: <https://html.spec.whatwg.org/#space-separated-tokens>
     /// - See: <https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace>
-    fn consume_html_text(&mut self, current: u8) -> HtmlSyntaxKind {
+    fn consume_html_text(&mut self, current: u8, double_text_expressions: bool) -> HtmlSyntaxKind {
         let mut whitespace_started = None;
         let mut seen_newlines = 0;
 
@@ -1554,7 +1559,7 @@ impl<'src> HtmlLexer<'src> {
 
         match dispatched {
             BEO => {
-                if self.at_opening_double_text_expression() {
+                if double_text_expressions && self.at_opening_double_text_expression() {
                     self.consume_l_double_text_expression()
                 } else {
                     self.consume_byte(T!['{'])
@@ -1670,11 +1675,15 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
         } else {
             match self.current_byte() {
                 Some(current) => match context {
-                    HtmlLexContext::Regular => self.consume_token(current),
+                    HtmlLexContext::Regular { framework } => {
+                        self.consume_token(current, framework != HtmlFramework::Svelte)
+                    }
                     HtmlLexContext::InsideTag { framework } => {
                         let mode = TagNameMode::for_inside_tag(framework);
                         match framework {
-                            HtmlFramework::Plain => self.consume_token_inside_tag(current, mode),
+                            HtmlFramework::Plain => {
+                                self.consume_token_inside_tag(current, mode, true)
+                            }
                             HtmlFramework::Vue => {
                                 self.consume_token_inside_tag_directives(current, false, mode)
                             }
@@ -1804,11 +1813,13 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
         let re_lexed_kind = match self.current_byte() {
             Some(current) => match context {
                 HtmlReLexContext::Svelte => self.consume_svelte(current),
-                HtmlReLexContext::HtmlText => self.consume_html_text(current),
+                HtmlReLexContext::HtmlText { framework } => {
+                    self.consume_html_text(current, framework != HtmlFramework::Svelte)
+                }
                 // Re-lexing is only used mid-tag (e.g. to split `:`/`.`), never at the
                 // tag-name position, so the classification mode is irrelevant here.
                 HtmlReLexContext::InsideTag => {
-                    self.consume_token_inside_tag(current, TagNameMode::Html)
+                    self.consume_token_inside_tag(current, TagNameMode::Html, true)
                 }
                 HtmlReLexContext::InsideTagAstro => {
                     self.consume_token_inside_tag_astro(current, TagNameMode::Html)

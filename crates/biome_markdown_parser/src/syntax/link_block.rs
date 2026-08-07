@@ -23,6 +23,7 @@
 use biome_markdown_syntax::MarkdownSyntaxKind::*;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
+use biome_rowan::TextRange;
 
 use crate::MarkdownParser;
 use crate::lexer::MarkdownLexContext;
@@ -396,7 +397,10 @@ pub(crate) fn parse_link_block(p: &mut MarkdownParser) -> ParsedSyntax {
     p.expect(L_BRACK);
 
     // Label - parse until ]
+    let label_start = p.cur_range().start();
     parse_link_label(p);
+    let label_end = p.cur_range().start();
+    p.record_link_reference_definition(TextRange::new(label_start, label_end));
 
     // ] - closing bracket
     p.expect(R_BRACK);

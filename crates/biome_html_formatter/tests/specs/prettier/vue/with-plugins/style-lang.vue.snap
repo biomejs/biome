@@ -20,14 +20,15 @@ world!
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,5 @@
+@@ -1,5 +1,6 @@
  <style lang="uppercase-rocks">
 -/* SHOULD BE UPPERCASED */
 -HELLO,
 -WORLD!
 +/* Should be uppercased */
 +hello,
-+world!
++world 
++!
  </style>
 ```
 
@@ -37,6 +38,7 @@ world!
 <style lang="uppercase-rocks">
 /* Should be uppercased */
 hello,
-world!
+world 
+!
 </style>
 ```
