@@ -6,7 +6,7 @@ use biome_css_syntax::{
     property_syntax::PropertySyntaxResult,
 };
 use biome_rowan::{AstNode, TextRange};
-use biome_rule_options::no_inconsistent_property_init_value::NoInconsistentPropertyInitValueOptions;
+use biome_rule_options::no_invalid_property_init_value::NoInvalidPropertyInitValueOptions;
 
 declare_lint_rule! {
     /// Checks that the `initial-value` of an `@property` rule follows the value format declared by its `syntax`.
@@ -79,19 +79,19 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    pub NoInconsistentPropertyInitValue {
+    pub NoInvalidPropertyInitValue {
         version: "next",
-        name: "noInconsistentPropertyInitValue",
+        name: "noInvalidPropertyInitValue",
         language: "css",
         recommended: true,
     }
 }
 
-impl Rule for NoInconsistentPropertyInitValue {
+impl Rule for NoInvalidPropertyInitValue {
     type Query = Semantic<CssPropertyAtRule>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = NoInconsistentPropertyInitValueOptions;
+    type Options = NoInvalidPropertyInitValueOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

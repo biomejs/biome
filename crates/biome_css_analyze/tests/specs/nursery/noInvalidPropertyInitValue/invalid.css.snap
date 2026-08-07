@@ -180,7 +180,7 @@ expression: invalid.css
 
 # Diagnostics
 ```
-invalid.css:6:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:6:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -201,7 +201,7 @@ invalid.css:6:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━
 ```
 
 ```
-invalid.css:12:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:12:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -222,7 +222,7 @@ invalid.css:12:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:18:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:18:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -243,7 +243,7 @@ invalid.css:18:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:24:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:24:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -264,7 +264,7 @@ invalid.css:24:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:30:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:30:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -285,7 +285,7 @@ invalid.css:30:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:36:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:36:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -306,7 +306,7 @@ invalid.css:36:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:42:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:42:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -327,7 +327,7 @@ invalid.css:42:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:48:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:48:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -348,7 +348,7 @@ invalid.css:48:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:54:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:54:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -369,7 +369,7 @@ invalid.css:54:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:60:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:60:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -390,7 +390,7 @@ invalid.css:60:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:66:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:66:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -411,7 +411,7 @@ invalid.css:66:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:72:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:72:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -432,7 +432,7 @@ invalid.css:72:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:78:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:78:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -453,7 +453,7 @@ invalid.css:78:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:84:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:84:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -474,7 +474,7 @@ invalid.css:84:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:90:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:90:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -495,7 +495,7 @@ invalid.css:90:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:96:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:96:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -516,7 +516,7 @@ invalid.css:96:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:102:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:102:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -537,7 +537,7 @@ invalid.css:102:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:108:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:108:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -558,7 +558,7 @@ invalid.css:108:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:114:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:114:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -579,7 +579,7 @@ invalid.css:114:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:120:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:120:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -600,7 +600,7 @@ invalid.css:120:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:126:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:126:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -621,7 +621,7 @@ invalid.css:126:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:132:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:132:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -642,7 +642,7 @@ invalid.css:132:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:138:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:138:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -663,7 +663,7 @@ invalid.css:138:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:146:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:146:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -684,7 +684,7 @@ invalid.css:146:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:152:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:152:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -705,7 +705,7 @@ invalid.css:152:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:164:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:164:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
@@ -726,7 +726,7 @@ invalid.css:164:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━�
 ```
 
 ```
-invalid.css:170:17 lint/nursery/noInconsistentPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:170:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The initial-value does not match the registered property syntax.
   
