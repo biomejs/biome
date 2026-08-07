@@ -118,8 +118,14 @@ impl<'src> YamlLexer<'src> {
         }
 
         if self.is_at_bom() {
-            let token = self.consume_unexpected_token();
-            self.tokens.push_back(token);
+            let start = self.current_coordinate;
+            self.advance('\u{feff}'.len_utf8());
+            self.diagnostics.push(ParseDiagnostic::new(
+                "A byte order mark is only allowed at the start of a document.",
+                TextRange::new(start.into(), self.current_coordinate.into()),
+            ));
+            self.tokens
+                .push_back(LexToken::new(ERROR_TOKEN, start, self.current_coordinate));
             return;
         }
 
@@ -784,6 +790,7 @@ impl<'src> YamlLexer<'src> {
     fn is_scalar_continuation(&mut self, required_indent: Option<usize>) -> bool {
         debug_assert!(self.current_byte().is_some_and(is_break));
         let start = self.current_coordinate;
+        let diagnostics_len = self.diagnostics.len();
         let mut trivia = VecDeque::new();
         while let Some(current) = self.current_byte() {
             if is_space(current) {
@@ -797,6 +804,7 @@ impl<'src> YamlLexer<'src> {
         }
         if self.is_at_document_prefix_bom() {
             self.current_coordinate = start;
+            self.diagnostics.truncate(diagnostics_len);
             return false;
         }
         // A document marker at the start of a line always ends the current
@@ -804,6 +812,7 @@ impl<'src> YamlLexer<'src> {
         // https://yaml.org/spec/1.2.2/#rule-c-forbidden
         if self.breach_parent_scope() || self.is_at_directive_end() || self.is_at_doc_end() {
             self.current_coordinate = start;
+            self.diagnostics.truncate(diagnostics_len);
             false
         } else {
             if let Some(required_indent) = required_indent

@@ -59,7 +59,7 @@ YamlRoot {
 ```
 bom_after_document_start.yaml:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected character `�`
+  × A byte order mark is only allowed at the start of a document.
   
     1 │ ---
   > 2 │ �value
