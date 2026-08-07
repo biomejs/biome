@@ -119,11 +119,7 @@ impl<'src> YamlLexer<'src> {
 
         if self.is_at_bom() {
             let start = self.current_coordinate;
-            self.advance('\u{feff}'.len_utf8());
-            self.diagnostics.push(ParseDiagnostic::new(
-                "A byte order mark is only allowed at the start of a document.",
-                TextRange::new(start.into(), self.current_coordinate.into()),
-            ));
+            self.consume_misplaced_bom();
             self.tokens
                 .push_back(LexToken::new(ERROR_TOKEN, start, self.current_coordinate));
             return;
@@ -548,6 +544,10 @@ impl<'src> YamlLexer<'src> {
         ));
         let start = self.current_coordinate;
         while let Some(c) = self.current_byte() {
+            if self.is_at_bom() {
+                self.consume_misplaced_bom();
+                continue;
+            }
             if !self.current_char_is_yaml_printable() {
                 self.consume_invalid_character();
                 continue;
@@ -1172,6 +1172,16 @@ impl<'src> YamlLexer<'src> {
         self.diagnostics.push(ParseDiagnostic::new(
             "Character is not allowed in YAML.",
             start..self.text_position(),
+        ));
+    }
+
+    fn consume_misplaced_bom(&mut self) {
+        debug_assert!(self.is_at_bom());
+        let start = self.current_coordinate;
+        self.advance('\u{feff}'.len_utf8());
+        self.diagnostics.push(ParseDiagnostic::new(
+            "A byte order mark is only allowed at the start of a document.",
+            TextRange::new(start.into(), self.current_coordinate.into()),
         ));
     }
 
