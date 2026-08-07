@@ -1,40 +1,38 @@
 ---
 source: crates/biome_markdown_analyze/tests/spec_tests.rs
-expression: invalid.md
+expression: headers_bad.md
 ---
 # Input
 ```md
-<!-- should generate diagnostics -->
+# Header
 
-# One
+### Header 3
 
-### Three
+## Header 2
 
-##### Five
+#### Header 4
 
 ```
 
 # Diagnostics
 ```
-invalid.md:5:1 lint/nursery/useConsistentHeaderLevel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+headers_bad.md:3:1 lint/nursery/useConsistentHeadingLevel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This header skipped a level.
   
-    3 │ # One
+    1 │ # Header
+    2 │ 
+  > 3 │ ### Header 3
+      │ ^^^^^^^^^^^^
     4 │ 
-  > 5 │ ### Three
-      │ ^^^^^^^^^
-    6 │ 
-    7 │ ##### Five
+    5 │ ## Header 2
   
   i The previous header has level1.
   
-    1 │ <!-- should generate diagnostics -->
+  > 1 │ # Header
+      │ ^^^^^^^^
     2 │ 
-  > 3 │ # One
-      │ ^^^^^
-    4 │ 
-    5 │ ### Three
+    3 │ ### Header 3
   
   i Headers should follow a consistent level order. Failing to do so could cause issues when the file is transformed into HTML.
   
@@ -42,30 +40,30 @@ invalid.md:5:1 lint/nursery/useConsistentHeaderLevel  FIXABLE  ━━━━━�
   
   i Safe fix: Change the level of the header.
   
-    5 │ ###·Three
-      │   -      
+    3 │ ###·Header·3
+      │   -         
 
 ```
 
 ```
-invalid.md:7:1 lint/nursery/useConsistentHeaderLevel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+headers_bad.md:7:1 lint/nursery/useConsistentHeadingLevel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This header skipped a level.
   
-    5 │ ### Three
+    5 │ ## Header 2
     6 │ 
-  > 7 │ ##### Five
-      │ ^^^^^^^^^^
+  > 7 │ #### Header 4
+      │ ^^^^^^^^^^^^^
     8 │ 
   
-  i The previous header has level3.
+  i The previous header has level2.
   
-    3 │ # One
+    3 │ ### Header 3
     4 │ 
-  > 5 │ ### Three
-      │ ^^^^^^^^^
+  > 5 │ ## Header 2
+      │ ^^^^^^^^^^^
     6 │ 
-    7 │ ##### Five
+    7 │ #### Header 4
   
   i Headers should follow a consistent level order. Failing to do so could cause issues when the file is transformed into HTML.
   
@@ -73,7 +71,7 @@ invalid.md:7:1 lint/nursery/useConsistentHeaderLevel  FIXABLE  ━━━━━�
   
   i Safe fix: Change the level of the header.
   
-    7 │ #####·Five
-      │     -     
+    7 │ ####·Header·4
+      │    -         
 
 ```

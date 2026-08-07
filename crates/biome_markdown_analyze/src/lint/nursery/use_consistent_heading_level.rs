@@ -8,49 +8,48 @@ use biome_markdown_factory::make;
 use biome_markdown_factory::make::token;
 use biome_markdown_syntax::{MdHeader, T};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, Direction};
-use biome_rule_options::use_consistent_header_level::UseConsistentHeaderLevelOptions;
+use biome_rule_options::use_consistent_heading_level::UseConsistentHeadingLevelOptions;
 
 declare_lint_rule! {
-    /// Enforce that all headers level are consistent and ordered.
+    /// Enforce that all heading levels are consistent and ordered.
     ///
-    /// In a Markdown document, the level of the headers should be consistent, and grow only
-    /// by one level at the time.
+    /// In a Markdown document, the level of the headings should be consistent and grow only
+    /// by one level at a time.
     ///
-    /// This rule catches cases where headers skipped one level before the previous.
+    /// This rule catches cases where headings skipped one level before the previous.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```md,ignore
+    /// ````md,expect_diagnostic
     /// # Header 1
     ///
     /// ### Header 3
-    ///
-    /// ```
+    /// ````
     ///
     /// ### Valid
     ///
-    /// ```md,ignore
+    /// ````md
     /// # Header 1
     ///
     /// ## Header 2
-    /// ```
+    /// ````
     ///
-    pub UseConsistentHeaderLevel {
+    pub UseConsistentHeadingLevel {
         version: "next",
-        name: "useConsistentHeaderLevel",
+        name: "useConsistentHeadingLevel",
         language: "md",
         recommended: true,
         sources: &[RuleSource::MarkdownLint("md001", "heading-increment").same()],
     }
 }
 
-impl Rule for UseConsistentHeaderLevel {
+impl Rule for UseConsistentHeadingLevel {
     type Query = Ast<MdHeader>;
     type State = MdHeader;
     type Signals = Option<Self::State>;
-    type Options = UseConsistentHeaderLevelOptions;
+    type Options = UseConsistentHeadingLevelOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let this_header = ctx.query();

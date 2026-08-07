@@ -1711,9 +1711,9 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("style", "useConsistentGraphqlDescriptions", TypeId::of::<biome_rule_options::use_consistent_graphql_descriptions::UseConsistentGraphqlDescriptionsOptions>()));
     result.push((
         "nursery",
-        "useConsistentHeaderLevel",
+        "useConsistentHeadingLevel",
         TypeId::of::<
-            biome_rule_options::use_consistent_header_level::UseConsistentHeaderLevelOptions,
+            biome_rule_options::use_consistent_heading_level::UseConsistentHeadingLevelOptions,
         >(),
     ));
     result.push(("style", "useConsistentMemberAccessibility", TypeId::of::<biome_rule_options::use_consistent_member_accessibility::UseConsistentMemberAccessibilityOptions>()));
