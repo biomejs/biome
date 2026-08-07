@@ -11,7 +11,8 @@ use super::tailwind_preset_v4::{
     FUNCTIONAL_UTILITIES, KEYWORD_POOL, PROPERTY_INDEX, SIGNATURE_POOL, STATIC_UTILITIES,
 };
 use super::tailwind_preset_v4_types::{
-    ArbitraryBranch, NamedBranch, NamedValueType, Negative, UtilityEntry,
+    ArbitraryBranch, ModifierKind, NamedBranch, NamedValueType, Negative, ThemeNamespace,
+    UtilityEntry,
 };
 use super::arbitrary_value_match::value_matches_type;
 use super::sort_v4_variants::{
@@ -19,7 +20,7 @@ use super::sort_v4_variants::{
 };
 
 #[cfg(test)]
-use super::tailwind_preset_v4_types::{CssDataType, ThemeNamespace};
+use super::tailwind_preset_v4_types::CssDataType;
 
 /// Sort the candidates of a parsed Tailwind class list and return the joined,
 /// space-separated result.
@@ -439,7 +440,7 @@ fn compare(a: &SortKey, b: &SortKey) -> Ordering {
 fn entry_has_ratio_branch(branches: &[NamedBranch]) -> bool {
     branches
         .iter()
-        .any(|b| matches!(b, NamedBranch::Typed(NamedValueType::Ratio, _, _)))
+        .any(|b| matches!(b, NamedBranch::Typed(NamedValueType::Ratio, ..)))
 }
 
 /// `n/m` Tailwind fraction shorthand: the value is a bare number, the
@@ -533,11 +534,11 @@ fn resolve_named_branch(
     };
 
     for &branch in branches {
-        let (property_idx, property_count) = match branch {
+        let (modifier_kind, property_idx, property_count) = match branch {
             // Theme-namespace lookup (`text-lg` ↔ `--text-lg`). Both Named
             // and Number kinds query it — users can register numeric
             // theme keys like `--spacing-12`.
-            NamedBranch::Theme(namespace, p, c) => {
+            NamedBranch::Theme(namespace, m, p, c) => {
                 if has_fraction_modifier {
                     continue;
                 }
@@ -547,28 +548,73 @@ fn resolve_named_branch(
                 if !namespace.keys().contains(text.text()) {
                     continue;
                 }
-                (p, c)
+                (m, p, c)
             }
             // Hard-coded keyword pool (`origin-top`, `accent-current`).
-            NamedBranch::Keyword(pool_idx, p, c) => {
+            NamedBranch::Keyword(pool_idx, m, p, c) => {
                 let Some(text) = named_text(value) else {
                     continue;
                 };
                 if !KEYWORD_POOL[usize::from(pool_idx)].contains(&text.text()) {
                     continue;
                 }
-                (p, c)
+                (m, p, c)
             }
-            NamedBranch::Typed(value_type, p, c) => {
+            NamedBranch::Typed(value_type, m, p, c) => {
                 if !named_value_type_matches(value_type, value, has_fraction_modifier) {
                     continue;
                 }
-                (p, c)
+                (m, p, c)
             }
         };
+        // A non-fraction modifier is valid only on the branch that accepts
+        // one: a color branch takes an opacity modifier, a font-size branch
+        // a line-height modifier. A modifier on any other match — or an
+        // ill-formed one — makes the candidate invalid (`w-1/foo`, `p-4/2`).
+        if !has_fraction_modifier
+            && let Some(modifier) = modifier
+            && !modifier_accepted(modifier_kind, modifier)
+        {
+            return None;
+        }
         return Some((property_idx, property_count));
     }
     None
+}
+
+/// Whether `modifier` is a well-formed `/modifier` for a branch that accepts
+/// `kind`. Opacity takes a number, arbitrary value, or CSS variable;
+/// line-height takes those plus a `--leading-*` theme keyword. A percentage
+/// or a bare word is never a valid modifier.
+fn modifier_accepted(kind: ModifierKind, modifier: &AnyTwModifier) -> bool {
+    let AnyTwModifier::TwModifier(modifier) = modifier else {
+        return false;
+    };
+    let Ok(value) = modifier.value() else {
+        return false;
+    };
+    match kind {
+        ModifierKind::None => false,
+        ModifierKind::Opacity => is_numeric_modifier(&value),
+        ModifierKind::LineHeight => {
+            is_numeric_modifier(&value)
+                || matches!(&value, AnyTwValue::TwNamedValue(_))
+                    && named_text(&value)
+                        .is_some_and(|text| ThemeNamespace::Leading.keys().contains(text.text()))
+        }
+    }
+}
+
+/// A number (`/50`), an arbitrary value (`/[0.5]`), or a CSS variable
+/// (`/(--x)`) — the modifier value kinds every modifier-accepting branch
+/// allows.
+fn is_numeric_modifier(value: &AnyTwValue) -> bool {
+    matches!(
+        value,
+        AnyTwValue::TwNumberValue(_)
+            | AnyTwValue::TwArbitraryValue(_)
+            | AnyTwValue::TwCssVariableValue(_)
+    )
 }
 
 /// Walk a basename's arbitrary branch list and return the first matching
@@ -826,8 +872,8 @@ mod tests {
         // first one to match wins.
         let (value, modifier) = functional_parts("p-5");
         let branches = &[
-            NamedBranch::Typed(NamedValueType::Number, 10, 1),
-            NamedBranch::Typed(NamedValueType::Number, 20, 1),
+            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 10, 1),
+            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 20, 1),
         ];
         assert_eq!(
             resolve_named_branch(branches, &value, modifier.as_ref()),
@@ -838,7 +884,7 @@ mod tests {
     #[test]
     fn resolve_named_branch_classifies_value_internally() {
         let (value, modifier) = functional_parts("p-5");
-        let branches = &[NamedBranch::Typed(NamedValueType::Number, 10, 1)];
+        let branches = &[NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 10, 1)];
 
         assert_eq!(
             resolve_named_branch(branches, &value, modifier.as_ref()),
@@ -895,14 +941,14 @@ mod tests {
         // A named value like "abc" never satisfies NamedBranch::Typed(Number)
         // because dispatch is by parser node kind, not text scanning.
         let (value, modifier) = functional_parts("p-abc");
-        let branches = &[NamedBranch::Typed(NamedValueType::Number, 1, 1)];
+        let branches = &[NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 1, 1)];
         assert_eq!(resolve_named_branch(branches, &value, modifier.as_ref()), None);
     }
 
     #[test]
     fn resolve_named_branch_ratio_matches_ratio_typed_branch() {
         let (value, modifier) = functional_parts("w-1/2");
-        let branches = &[NamedBranch::Typed(NamedValueType::Ratio, 7, 1)];
+        let branches = &[NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 7, 1)];
         assert_eq!(
             resolve_named_branch(branches, &value, modifier.as_ref()),
             Some((7, 1))
@@ -913,8 +959,8 @@ mod tests {
     fn resolve_named_branch_percentage_only_matches_percentage_typed_branch() {
         let (value, modifier) = functional_parts("from-25%");
         let branches = &[
-            NamedBranch::Typed(NamedValueType::Number, 1, 1),
-            NamedBranch::Typed(NamedValueType::Percentage, 2, 1),
+            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 1, 1),
+            NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 2, 1),
         ];
         assert_eq!(
             resolve_named_branch(branches, &value, modifier.as_ref()),
@@ -923,14 +969,52 @@ mod tests {
     }
 
     #[test]
-    fn resolve_named_branch_ignores_non_fraction_modifier() {
+    fn resolve_named_branch_accepts_valid_opacity_modifier() {
+        // A numeric opacity modifier is valid on a color branch.
         let (value, modifier) = functional_parts("bg-red-500/50");
-        let branches = &[NamedBranch::Theme(ThemeNamespace::Color, 10, 1)];
-
+        let branches = &[NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 10, 1)];
         assert_eq!(
             resolve_named_branch(branches, &value, modifier.as_ref()),
             Some((10, 1))
         );
+    }
+
+    #[test]
+    fn resolve_named_branch_rejects_a_modifier_on_a_branch_that_takes_none() {
+        // `w-1/foo`: the number branch takes no modifier, so the `/foo`
+        // modifier makes the candidate invalid rather than sorting as `w-1`.
+        let (value, modifier) = functional_parts("w-1/foo");
+        let branches = &[NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 10, 1)];
+        assert_eq!(resolve_named_branch(branches, &value, modifier.as_ref()), None);
+    }
+
+    #[test]
+    fn resolve_named_branch_rejects_a_bare_word_opacity_modifier() {
+        // `bg-red-500/foo`: a color branch takes a numeric opacity modifier,
+        // not a bare word.
+        let (value, modifier) = functional_parts("bg-red-500/foo");
+        let branches = &[NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 10, 1)];
+        assert_eq!(resolve_named_branch(branches, &value, modifier.as_ref()), None);
+    }
+
+    #[test]
+    fn resolve_named_branch_accepts_a_leading_keyword_for_line_height() {
+        // `text-lg/loose` is a valid line-height modifier (`loose` is a
+        // `--leading-*` keyword).
+        let (value, modifier) = functional_parts("text-lg/loose");
+        let line_height = &[NamedBranch::Theme(ThemeNamespace::Text, ModifierKind::LineHeight, 10, 1)];
+        assert_eq!(
+            resolve_named_branch(line_height, &value, modifier.as_ref()),
+            Some((10, 1))
+        );
+    }
+
+    #[test]
+    fn resolve_named_branch_rejects_a_leading_keyword_on_an_opacity_branch() {
+        // `bg-red-500/loose`: a leading keyword is not a valid opacity modifier.
+        let (value, modifier) = functional_parts("bg-red-500/loose");
+        let opacity = &[NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 10, 1)];
+        assert_eq!(resolve_named_branch(opacity, &value, modifier.as_ref()), None);
     }
 
     // endregion: branch resolution

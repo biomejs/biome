@@ -142,9 +142,22 @@ pub struct UtilityEntry {
     pub has_negative: bool,
 }
 
+/// The `/modifier` a named branch accepts. A color branch takes an opacity
+/// modifier (`bg-red-500/50`); a font-size branch takes a line-height
+/// modifier (`text-lg/8`, `text-lg/loose`); every other branch takes none,
+/// so a modifier makes the candidate invalid (`w-1/foo`, `p-4/2`).
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[repr(u8)]
+pub enum ModifierKind {
+    None,
+    Opacity,
+    LineHeight,
+}
+
 // Named-path dispatch branches inside a functional utility's compileFn.
-// The trailing `(u16, u8)` payload on every variant is the placement:
-// a `SIGNATURE_POOL` index and the declaration count.
+// After the branch discriminant each variant carries a `ModifierKind` (the
+// `/modifier` it accepts) then the `(u16, u8)` placement: a `SIGNATURE_POOL`
+// index and the declaration count.
 //
 // - Theme:    theme-namespace lookup (`text-lg` ↔ `--text-lg`).
 // - Keyword:  hardcoded keyword set baked into the compileFn
@@ -154,9 +167,9 @@ pub struct UtilityEntry {
 //             `from-25%` Percentage, `w-1/2` Ratio).
 #[derive(Copy, Clone)]
 pub enum NamedBranch {
-    Theme(ThemeNamespace, u16, u8),
-    Keyword(u16, u16, u8),
-    Typed(NamedValueType, u16, u8),
+    Theme(ThemeNamespace, ModifierKind, u16, u8),
+    Keyword(u16, ModifierKind, u16, u8),
+    Typed(NamedValueType, ModifierKind, u16, u8),
 }
 
 // Arbitrary-path dispatch branches inside a functional utility's compileFn.

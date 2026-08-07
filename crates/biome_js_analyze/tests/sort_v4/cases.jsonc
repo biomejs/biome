@@ -141,9 +141,25 @@
 	"from-50% flex",              // TwPercentageValue → gradient-stop
 	"to-100% via-25% from-50%",   // three gradient stops, stable order within bucket
 	"flex w-1/2 w-1/3",           // two ratios share the same w branch, ordered by value text
-	"flex bg-red-500/50",         // color modifier — base named color sort key
-	"flex text-lg/8",             // line-height modifier — base named text-size sort key
-	"flex w-1/foo",               // non-fraction modifier — base number sort key
+
+	// ─── modifiers ─────────────────────────────────────────────────
+	// A `/modifier` is valid only where the utility accepts one: a color
+	// takes an opacity modifier (number / arbitrary / CSS variable), a
+	// font-size takes a line-height modifier (those plus a `--leading-*`
+	// keyword). A modifier anywhere else — or an ill-formed one — makes the
+	// candidate invalid, so it floats to the front like any unknown.
+	// Cross-checked against prettier-plugin-tailwindcss 0.8.0.
+	"flex bg-red-500/50",         // color + numeric opacity → valid
+	"flex bg-red-500/[0.5]",      // color + arbitrary opacity → valid
+	"flex bg-current/50",         // keyword color + opacity → valid
+	"flex text-lg/8",             // font-size + numeric line-height → valid
+	"flex text-lg/loose",         // font-size + `--leading-loose` keyword → valid
+	"flex w-1/foo",               // number takes no modifier → invalid, floats front
+	"flex bg-red-500/foo",        // bare word is not an opacity value → invalid
+	"flex bg-red-500/50%",        // percentage is not an opacity value → invalid
+	"flex text-lg/foo",           // bare word is not a line-height → invalid
+	"flex p-4/2",                 // padding takes no modifier → invalid
+	"flex text-red-500/loose",    // leading keyword is not an opacity value → invalid
 
 	// ─── sort_class_list edge cases ────────────────────────────────
 

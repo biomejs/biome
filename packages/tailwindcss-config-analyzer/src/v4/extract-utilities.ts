@@ -42,7 +42,11 @@ import {
 	THEME_NAMESPACES,
 	type ThemeNamespaceVariant,
 } from "./theme-namespaces.js";
-import type { CssDataType, NamedValueType } from "./value-types.js";
+import type {
+	CssDataType,
+	ModifierKind,
+	NamedValueType,
+} from "./value-types.js";
 
 // Tailwind's own per-candidate sort data: the deduplicated, ascending
 // property-order indices the compiled declarations touch, and the total
@@ -65,16 +69,19 @@ export type NamedBranch =
 	| {
 			kind: "Theme";
 			namespace: ThemeNamespaceVariant;
+			modifier: ModifierKind;
 			sort: PropertySort;
 	  }
 	| {
 			kind: "Keyword";
 			keywords: string[];
+			modifier: ModifierKind;
 			sort: PropertySort;
 	  }
 	| {
 			kind: "Typed";
 			value_type: NamedValueType;
+			modifier: ModifierKind;
 			sort: PropertySort;
 	  };
 
@@ -156,6 +163,16 @@ function propertySortOf(
 
 function sortKeyOf(sort: PropertySort): string {
 	return `${sort.order.join(".")}|${sort.count}`;
+}
+
+// The `/modifier` a branch accepts, probed from a representative candidate
+// that matches the branch (`bg-<colortoken>`, `text-<texttoken>`, `w-7`).
+// A numeric modifier compiling at all means the branch takes one; a
+// font-size utility additionally accepts a leading keyword (`/loose`),
+// which distinguishes line-height from opacity.
+function modifierKindOf(ds: DesignSystem, base: string): ModifierKind {
+	if (!propertySortOf(ds, `${base}/50`)) return "None";
+	return propertySortOf(ds, `${base}/loose`) ? "LineHeight" : "Opacity";
 }
 
 export async function extractUtilities(): Promise<ExtractedUtilities> {
@@ -295,15 +312,30 @@ function extractFunctionalBranches(
 		const branches = emptyFunctionalBranches();
 
 		for (const { variant } of THEME_NAMESPACES) {
-			const sort = propertySortOf(ds, `${basename}-${probeToken(variant)}`);
+			const probe = `${basename}-${probeToken(variant)}`;
+			const sort = propertySortOf(ds, probe);
 			if (!sort) continue;
-			branches.namedBranches.push({ kind: "Theme", namespace: variant, sort });
+			branches.namedBranches.push({
+				kind: "Theme",
+				namespace: variant,
+				modifier: modifierKindOf(ds, probe),
+				sort,
+			});
 		}
 
 		for (const p of NAMED_PREDICATE_PROBES) {
 			const sort = propertySortOf(ds, `${basename}-${p.value}`);
 			if (!sort) continue;
-			branches.namedBranches.push({ kind: "Typed", value_type: p.type, sort });
+			// A bare Number/Percentage/Ratio value is never a color or a
+			// font-size, so a typed branch never carries an opacity or
+			// line-height modifier. (Probing would also misread `w-7/50` as
+			// the fraction `7/50` on a ratio-capable utility.)
+			branches.namedBranches.push({
+				kind: "Typed",
+				value_type: p.type,
+				modifier: "None",
+				sort,
+			});
 		}
 
 		const nonsense = propertySortOf(ds, `${basename}-[${NONSENSE_PROBE}]`);
@@ -367,9 +399,13 @@ function addKeywordBranches(
 	for (const group of groups.values()) {
 		const branches =
 			ctx.branchesByBasename.get(group.basename) ?? emptyFunctionalBranches();
+		const keywords = [...group.keywords].sort();
 		branches.namedBranches.push({
 			kind: "Keyword",
-			keywords: [...group.keywords].sort(),
+			keywords,
+			// Color keywords (`bg-current`, `border-transparent`) take an
+			// opacity modifier; probe a representative keyword to find out.
+			modifier: modifierKindOf(ds, `${group.basename}-${keywords[0]}`),
 			sort: group.sort,
 		});
 		ctx.branchesByBasename.set(group.basename, branches);
@@ -412,11 +448,11 @@ function sameBranchList<T>(
 function namedBranchKey(b: NamedBranch): string {
 	switch (b.kind) {
 		case "Theme":
-			return `N|${b.namespace}|${sortKeyOf(b.sort)}`;
+			return `N|${b.namespace}|${b.modifier}|${sortKeyOf(b.sort)}`;
 		case "Keyword":
-			return `K|${b.keywords.join(",")}|${sortKeyOf(b.sort)}`;
+			return `K|${b.keywords.join(",")}|${b.modifier}|${sortKeyOf(b.sort)}`;
 		case "Typed":
-			return `NT|${b.value_type}|${sortKeyOf(b.sort)}`;
+			return `NT|${b.value_type}|${b.modifier}|${sortKeyOf(b.sort)}`;
 	}
 }
 
