@@ -168,7 +168,23 @@ impl FromStr for CodeBlock {
 
 /// Normalizes a file path to an absolute path for easier module graph path
 /// resolution.
-fn normalize_file_path(path: &str) -> String {
-    let path = path.trim_start_matches("./").trim_start_matches("../");
+pub(crate) fn normalize_file_path(path: &str) -> String {
+    let path = path
+        .trim_start_matches('/')
+        .trim_start_matches("./")
+        .trim_start_matches("../");
     format!("/{path}")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn normalizes_file_paths_to_virtual_absolute_paths() {
+        for path in ["file.js", "./file.js", "../file.js", "/file.js"] {
+            let code_block = CodeBlock::from_str(&format!("js file={path}")).unwrap();
+            assert_eq!(code_block.explicit_file_path(), Some("/file.js"));
+        }
+    }
 }

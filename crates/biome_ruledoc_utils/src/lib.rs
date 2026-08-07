@@ -78,7 +78,7 @@ impl AnalyzerServicesBuilder {
         let mut html_paths = Vec::new();
 
         for (path, src) in files {
-            let path_buf = Utf8PathBuf::from(path);
+            let path_buf = Utf8PathBuf::from(codeblock::normalize_file_path(&path));
             let biome_path = BiomePath::new(&path_buf);
             if biome_path.is_manifest() {
                 match biome_path.file_name() {
