@@ -1,0 +1,38 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "formatter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.vue`
+
+```vue
+<script setup lang="ts"></script>
+<template>
+	<RouterView v-slot="{   Component   }">
+		<component :is="Component" />
+	</RouterView>
+	<DataTable #row="[   first ,   ...rest   ]">
+		<span>{{ first }}{{ rest }}</span>
+	</DataTable>
+	<DataTable v-slot:cell="{ value : { nested } }">
+		<span>{{ nested }}</span>
+	</DataTable>
+</template>
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

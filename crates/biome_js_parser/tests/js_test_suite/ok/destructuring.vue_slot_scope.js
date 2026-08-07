@@ -1,0 +1,1 @@
+{ item = {}, nested: { value }, ...rest }

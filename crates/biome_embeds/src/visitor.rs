@@ -17,7 +17,7 @@ use biome_js_syntax::{
     AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression, JsCallExpression, JsExport,
     JsIdentifierAssignment, JsImport, JsModuleItemList, JsReferenceIdentifier,
     JsStaticMemberExpression, JsSvelteDeclarationRoot, JsSvelteSnippetRoot, JsVariableStatement,
-    JsxReferenceIdentifier,
+    JsVueSlotScopeRoot, JsxReferenceIdentifier,
 };
 use biome_languages::html::HtmlVariant;
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind};
@@ -159,26 +159,33 @@ fn collect_embedded_bindings(
         };
 
         if js_file_source.is_embedded_source()
+            || js_file_source.is_vue_slot_scope()
             || host_file_source.is_svelte()
             || is_script_element_snippet(&html_root, snippet.content_range)
         {
             let block_kind = block_kind_from_js_source(&js_file_source)
                 .or_else(|| block_kind_for_snippet(&html_root, snippet.content_range));
+            builder.scope_range = js_file_source
+                .is_vue_slot_scope()
+                .then(|| owning_element_content_range(&html_root, snippet.content_range))
+                .flatten();
             builder.visit_js_source_snippet(
                 &snippet.parse.tree(),
                 &host_file_source,
                 block_kind.as_ref(),
             );
+            builder.scope_range = None;
         }
     }
 
     builder
         .js_bindings
         .into_iter()
-        .map(|(range, text, source)| EmbeddedBinding {
+        .map(|(range, text, source, scope_range)| EmbeddedBinding {
             range,
             text,
             source,
+            scope_range,
         })
         .collect()
 }
@@ -313,6 +320,34 @@ fn block_kind_for_snippet(root: &HtmlRoot, content_range: TextRange) -> Option<E
     }
     None
 }
+fn owning_element_content_range(root: &HtmlRoot, content_range: TextRange) -> Option<TextRange> {
+    root.syntax()
+        .descendants()
+        .filter_map(|node| {
+            if let Some(element) = HtmlElement::cast_ref(&node) {
+                let range = element.range();
+                if !range.contains_range(content_range) {
+                    return None;
+                }
+                let start = element.opening_element().ok()?.range().end();
+                let end = element
+                    .closing_element()
+                    .ok()
+                    .map_or_else(|| range.end(), |closing| closing.range().start());
+                (start <= end).then(|| (range, TextRange::new(start, end)))
+            } else {
+                let element = HtmlSelfClosingElement::cast_ref(&node)?;
+                let range = element.range();
+                range
+                    .contains_range(content_range)
+                    .then(|| (range, TextRange::empty(range.end())))
+            }
+        })
+        // Innermost element wins, compared on the full element range: the content
+        // ranges of an element and its parent are not nested in general.
+        .min_by_key(|(element_range, _)| element_range.len())
+        .map(|(_, content)| content)
+}
 
 fn is_script_element_snippet(root: &HtmlRoot, content_range: TextRange) -> bool {
     root.syntax().descendants().any(|node| {
@@ -324,18 +359,20 @@ fn is_script_element_snippet(root: &HtmlRoot, content_range: TextRange) -> bool 
 
 #[derive(Debug)]
 struct EmbeddedBindingsBuilder {
-    js_bindings: Vec<(TextRange, TokenText, Option<TokenText>)>,
+    js_bindings: Vec<(TextRange, TokenText, Option<TokenText>, Option<TextRange>)>,
+    scope_range: Option<TextRange>,
 }
 
 impl EmbeddedBindingsBuilder {
     fn new() -> Self {
         Self {
             js_bindings: Vec::default(),
+            scope_range: None,
         }
     }
 
     fn register_binding(&mut self, range: TextRange, text: TokenText) {
-        self.js_bindings.push((range, text, None));
+        self.js_bindings.push((range, text, None, self.scope_range));
     }
 
     fn register_binding_with_source(
@@ -344,7 +381,8 @@ impl EmbeddedBindingsBuilder {
         text: TokenText,
         source: TokenText,
     ) {
-        self.js_bindings.push((range, text, Some(source)));
+        self.js_bindings
+            .push((range, text, Some(source), self.scope_range));
     }
 
     fn visit_vue_html_root(&mut self, root: &HtmlRoot) {
@@ -584,6 +622,10 @@ impl EmbeddedBindingsBuilder {
                         && host_file_source.is_svelte()
                     {
                         self.visit_svelte_declaration(&root, embed_block_kind);
+                    } else if let Some(root) = JsVueSlotScopeRoot::cast_ref(&node)
+                        && host_file_source.is_vue()
+                    {
+                        self.visit_vue_slot_scope_declaration(&root);
                     }
                 }
                 WalkEvent::Leave(_) => {}
@@ -653,6 +695,11 @@ impl EmbeddedBindingsBuilder {
         }
 
         Some(())
+    }
+
+    fn visit_vue_slot_scope_declaration(&mut self, root: &JsVueSlotScopeRoot) -> Option<()> {
+        let pattern = root.pattern().ok()?;
+        self.visit_any_js_binding_pattern(&pattern)
     }
 
     fn visit_svelte_block_call_expressions(

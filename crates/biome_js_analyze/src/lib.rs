@@ -26,7 +26,7 @@ use biome_languages::{JsFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
 use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::TextRange;
+use biome_rowan::{TextRange, TextSize};
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use biome_tailwind_logic::syntax_service::TwSyntaxService;
 use std::ops::Deref;
@@ -65,6 +65,7 @@ pub struct JsAnalyzerServices<'a> {
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
     semantic_model: Option<&'a SemanticModel>,
+    embedded_offset: Option<TextSize>,
 }
 
 impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices<'_> {
@@ -82,6 +83,7 @@ impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
             project_layout,
             source_type,
             semantic_model: None,
+            embedded_offset: None,
         }
     }
 }
@@ -95,6 +97,7 @@ impl From<&AnyJsRoot> for JsAnalyzerServices<'_> {
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
             semantic_model: None,
+            embedded_offset: None,
         }
     }
 }
@@ -112,6 +115,12 @@ impl<'a> JsAnalyzerServices<'a> {
 
     pub fn with_module_db(mut self, module_db: Rc<dyn ModuleDb>) -> Self {
         self.module_db = Some(module_db);
+        self
+    }
+
+    /// Records where this snippet starts in its host document.
+    pub fn with_embedded_offset(mut self, offset: Option<TextSize>) -> Self {
+        self.embedded_offset = offset;
         self
     }
 
@@ -187,6 +196,7 @@ where
         project_layout,
         source_type,
         semantic_model,
+        embedded_offset,
     } = services;
 
     let (registry, mut services, diagnostics, visitors) = registry.build();
@@ -250,9 +260,13 @@ where
     services.insert_service(type_resolver);
     services.insert_service(project_layout);
     if let Some(embedded_data) = embedded_data {
-        services.insert_service(EmbeddedService::from_data(embedded_data));
+        services.insert_service(EmbeddedService::from_data(embedded_data, embedded_offset));
     } else if let Some(embedded_db) = embedded_db {
-        services.insert_service(EmbeddedService::new(embedded_db, options.file_path.clone()));
+        services.insert_service(EmbeddedService::new(
+            embedded_db,
+            options.file_path.clone(),
+            embedded_offset,
+        ));
     }
     // If a pre-built model is available (workspace open_file/change_file path),
     // insert it now. Otherwise, SemanticModelBuilderVisitor will build it

@@ -232,7 +232,8 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 // Handle @click shorthand (VueVOnShorthandDirective)
                 if let Some(directive) = VueVOnShorthandDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
-                    && let Some(candidate) = build_vue_directive_candidate(&initializer, true)
+                    && let Some(candidate) =
+                        build_vue_directive_candidate(&initializer, true, false)
                 {
                     ctx.parse_and_push(
                         &candidate,
@@ -245,7 +246,8 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 // Handle :prop shorthand (VueVBindShorthandDirective)
                 if let Some(directive) = VueVBindShorthandDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
-                    && let Some(candidate) = build_vue_directive_candidate(&initializer, false)
+                    && let Some(candidate) =
+                        build_vue_directive_candidate(&initializer, false, false)
                 {
                     ctx.parse_and_push(
                         &candidate,
@@ -258,7 +260,8 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 // Handle #slot shorthand (VueVSlotShorthandDirective)
                 if let Some(directive) = VueVSlotShorthandDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
-                    && let Some(candidate) = build_vue_directive_candidate(&initializer, false)
+                    && let Some(candidate) =
+                        build_vue_directive_candidate(&initializer, false, true)
                 {
                     ctx.parse_and_push(
                         &candidate,
@@ -275,7 +278,9 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                     let is_v_on = directive
                         .name_token()
                         .is_ok_and(|t| t.text_trimmed() == "v-on" && directive.arg().is_some());
-                    if let Some(candidate) = build_vue_directive_candidate(&initializer, is_v_on) {
+                    if let Some(candidate) =
+                        build_vue_directive_candidate(&initializer, is_v_on, directive.is_slot())
+                    {
                         ctx.parse_and_push(
                             &candidate,
                             &doc_file_source,
@@ -667,6 +672,7 @@ fn build_text_expression_directive_candidate(
             text: content_token.token_text(),
         },
         is_event_handler: false,
+        slot_scope: false,
         is_class_attribute: false,
     })
 }
@@ -693,6 +699,7 @@ fn build_attribute_expression_candidate(
             text: content_token.token_text(),
         },
         is_event_handler: false,
+        slot_scope: false,
         is_class_attribute,
     })
 }
@@ -751,6 +758,7 @@ fn build_svelte_text_expression_candidate(
 fn build_vue_directive_candidate(
     initializer: &HtmlAttributeInitializerClause,
     is_event_handler: bool,
+    slot_scope: bool,
 ) -> Option<EmbedCandidate> {
     let value_node = initializer.value().ok()?;
     let html_string = value_node.as_html_string()?;
@@ -767,6 +775,7 @@ fn build_vue_directive_candidate(
             text: inner_text,
         },
         is_event_handler,
+        slot_scope,
         is_class_attribute: false,
     })
 }
@@ -1100,6 +1109,7 @@ fn parse_matched_embed(
                             setup: candidate.has_attribute("setup"),
                             is_source: true,
                             event_handler: false,
+                            slot_scope: false,
                             allow_statements: true,
                         });
                     }
@@ -1134,6 +1144,7 @@ fn parse_matched_embed(
                             setup: false,
                             is_source: false,
                             event_handler: false,
+                            slot_scope: false,
                             allow_statements: false,
                         });
                     }
@@ -1141,6 +1152,7 @@ fn parse_matched_embed(
                 }
                 EmbedCandidate::Directive {
                     is_event_handler,
+                    slot_scope,
                     is_class_attribute,
                     ..
                 } => {
@@ -1157,6 +1169,7 @@ fn parse_matched_embed(
                                 setup: false,
                                 is_source: false,
                                 event_handler: *is_event_handler,
+                                slot_scope: *slot_scope,
                                 allow_statements: false,
                             });
                         }

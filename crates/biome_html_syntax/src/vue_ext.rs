@@ -55,6 +55,12 @@ impl VueDirective {
     }
 
     #[inline]
+    pub fn is_slot(&self) -> bool {
+        self.name_token()
+            .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-slot"))
+    }
+
+    #[inline]
     pub fn is_if(&self) -> bool {
         self.name_token()
             .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-if"))

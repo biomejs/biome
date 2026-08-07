@@ -2868,6 +2868,20 @@ impl JsAstNode {
                     )),
                 );
             }
+            JsSyntaxKind::JS_VUE_SLOT_SCOPE_ROOT => {
+                register_js_ast_fields!(
+                    prototype,
+                    JsSyntaxKind::JS_VUE_SLOT_SCOPE_ROOT,
+                    JsVueSlotScopeRoot,
+                    ("pattern", |node, context| Self::wrap_optional_node(
+                        node.pattern().ok(),
+                        context
+                    )),
+                    ("eofToken", |node, context| Self::wrap_token(
+                        node.eof_token().ok()
+                    )),
+                );
+            }
             JsSyntaxKind::JS_WHILE_STATEMENT => {
                 register_js_ast_fields!(
                     prototype,
@@ -5545,6 +5559,7 @@ impl JsAstNode {
             "JS_VARIABLE_DECLARATION_CLAUSE" => JsSyntaxKind::JS_VARIABLE_DECLARATION_CLAUSE,
             "JS_VARIABLE_DECLARATOR" => JsSyntaxKind::JS_VARIABLE_DECLARATOR,
             "JS_VARIABLE_STATEMENT" => JsSyntaxKind::JS_VARIABLE_STATEMENT,
+            "JS_VUE_SLOT_SCOPE_ROOT" => JsSyntaxKind::JS_VUE_SLOT_SCOPE_ROOT,
             "JS_WHILE_STATEMENT" => JsSyntaxKind::JS_WHILE_STATEMENT,
             "JS_WITH_STATEMENT" => JsSyntaxKind::JS_WITH_STATEMENT,
             "JS_YIELD_ARGUMENT" => JsSyntaxKind::JS_YIELD_ARGUMENT,

@@ -1,0 +1,30 @@
+<!-- should not generate diagnostics -->
+<template>
+  <RouterView v-slot="{ Component }">
+    <component :is="Component" />
+  </RouterView>
+
+  <template v-slot:foo="{ x }">
+    <span>{{ x }}</span>
+  </template>
+
+  <RouterView #default="{ y }">
+    <span>{{ y }}</span>
+  </RouterView>
+
+  <RouterView v-slot="slotProps">
+    <span>{{ slotProps }}</span>
+  </RouterView>
+
+  <RouterView v-slot="{ item = {} }">
+    <span>{{ item }}</span>
+  </RouterView>
+
+  <RouterView v-slot="[first, ...others]">
+    <span>{{ first }}{{ others }}</span>
+  </RouterView>
+
+  <RouterView v-slot="{ a, b = a }">
+    <span>{{ a }}{{ b }}</span>
+  </RouterView>
+</template>
