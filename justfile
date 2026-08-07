@@ -195,6 +195,16 @@ new-graphql-assistrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=graphql --category=assist --name={{rulename}}
   just gen-analyzer
 
+# Creates a new markdown lint rule with the given name. Name has to be camel case.
+new-markdown-lintrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=markdown --category=lint --name={{rulename}}
+  just gen-analyzer
+
+# Creates a new markdown assist rule with the given name. Name has to be camel case.
+new-markdown-assistrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=markdown --category=assist --name={{rulename}}
+  just gen-analyzer
+
 # Creates a new html lint rule with the given name. Name has to be camel case.
 new-html-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=html --category=lint --name={{rulename}}
