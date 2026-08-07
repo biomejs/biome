@@ -183,8 +183,8 @@ pub enum NamedBranch {
 //              → `padding`). Resolved after every `Typed` branch.
 #[derive(Copy, Clone)]
 pub enum ArbitraryBranch {
-    Typed(CssDataType, u16, u8),
-    Fallback(u16, u8),
+    Typed(CssDataType, ModifierKind, u16, u8),
+    Fallback(ModifierKind, u16, u8),
 }
 
 #[derive(Copy, Clone)]

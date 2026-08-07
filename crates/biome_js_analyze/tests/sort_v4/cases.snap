@@ -255,6 +255,30 @@ sorted: p-4/2 flex
 input:  flex text-red-500/loose
 sorted: text-red-500/loose flex
 ---
+input:  flex bg-[#fff]/50
+sorted: flex bg-[#fff]/50
+---
+input:  flex bg-[#fff]/(--x)
+sorted: flex bg-[#fff]/(--x)
+---
+input:  flex text-[20px]/8
+sorted: flex text-[20px]/8
+---
+input:  flex p-[4px]/2
+sorted: p-[4px]/2 flex
+---
+input:  flex w-[1px]/foo
+sorted: w-[1px]/foo flex
+---
+input:  flex bg-[#fff]/foo
+sorted: bg-[#fff]/foo flex
+---
+input:  flex [color:red]/foo
+sorted: [color:red]/foo flex
+---
+input:  flex [padding:1px]/2
+sorted: flex [padding:1px]/2
+---
 input:  p-[10px] flex some-unknown
 sorted: some-unknown flex p-[10px]
 ---

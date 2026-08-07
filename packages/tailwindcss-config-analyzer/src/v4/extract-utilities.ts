@@ -89,10 +89,12 @@ export type ArbitraryBranch =
 	| {
 			kind: "Typed";
 			value_type: CssDataType;
+			modifier: ModifierKind;
 			sort: PropertySort;
 	  }
 	| {
 			kind: "Fallback";
+			modifier: ModifierKind;
 			sort: PropertySort;
 	  };
 
@@ -338,12 +340,18 @@ function extractFunctionalBranches(
 			});
 		}
 
-		const nonsense = propertySortOf(ds, `${basename}-[${NONSENSE_PROBE}]`);
+		const nonsenseProbe = `${basename}-[${NONSENSE_PROBE}]`;
+		const nonsense = propertySortOf(ds, nonsenseProbe);
 		if (nonsense) {
-			branches.arbitraryBranches.push({ kind: "Fallback", sort: nonsense });
+			branches.arbitraryBranches.push({
+				kind: "Fallback",
+				modifier: modifierKindOf(ds, nonsenseProbe),
+				sort: nonsense,
+			});
 		}
 		for (const p of ARBITRARY_PROBES) {
-			const sort = propertySortOf(ds, `${basename}-[${p.marker}:${p.value}]`);
+			const probe = `${basename}-[${p.marker}:${p.value}]`;
+			const sort = propertySortOf(ds, probe);
 			if (!sort) continue;
 			if (nonsense && sortKeyOf(sort) === sortKeyOf(nonsense)) {
 				continue;
@@ -351,6 +359,7 @@ function extractFunctionalBranches(
 			branches.arbitraryBranches.push({
 				kind: "Typed",
 				value_type: p.type,
+				modifier: modifierKindOf(ds, probe),
 				sort,
 			});
 		}
@@ -459,9 +468,9 @@ function namedBranchKey(b: NamedBranch): string {
 function arbitraryBranchKey(b: ArbitraryBranch): string {
 	switch (b.kind) {
 		case "Typed":
-			return `AT|${b.value_type}|${sortKeyOf(b.sort)}`;
+			return `AT|${b.value_type}|${b.modifier}|${sortKeyOf(b.sort)}`;
 		case "Fallback":
-			return `A|${sortKeyOf(b.sort)}`;
+			return `A|${b.modifier}|${sortKeyOf(b.sort)}`;
 	}
 }
 

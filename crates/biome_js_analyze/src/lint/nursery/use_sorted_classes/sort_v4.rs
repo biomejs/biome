@@ -258,6 +258,15 @@ impl PendingSortKey {
                 let Ok(property_token) = a.property_token() else {
                     return Self::Unknown;
                 };
+                // An arbitrary property accepts a numeric opacity-style
+                // modifier (`[color:red]/50`, `[padding:1px]/2`,
+                // `[--my-var:1]/(--x)`) but not a bare word or percentage
+                // (`[color:red]/foo`), regardless of the property.
+                if let Some(modifier) = a.modifier()
+                    && !modifier_accepted(ModifierKind::Opacity, &modifier)
+                {
+                    return Self::Unknown;
+                }
                 // Tailwind places every arbitrary-property candidate. A
                 // property in the known order sorts by its index; a custom
                 // property (`[--my-var:1]`) or an unknown property name has
@@ -338,10 +347,10 @@ impl PendingSortKey {
                         (entry.named_branches, entry.arbitrary_branches)
                     };
 
+                    let modifier = f.modifier();
                     let resolved = if let AnyTwValue::TwArbitraryValue(arb) = &value {
-                        resolve_arbitrary_branch(arbitrary_branches, &arb.value())
+                        resolve_arbitrary_branch(arbitrary_branches, &arb.value(), modifier.as_ref())
                     } else {
-                        let modifier = f.modifier();
                         resolve_named_branch(named_branches, &value, modifier.as_ref())
                     };
                     resolved.map(|(sig, count)| (pool_signature(sig), count))
@@ -619,21 +628,30 @@ fn is_numeric_modifier(value: &AnyTwValue) -> bool {
 
 /// Walk a basename's arbitrary branch list and return the first matching
 /// branch's `(property_idx, property_count)` placement. Typed branches
-/// precede the type-blind fallback in generated preset order.
+/// precede the type-blind fallback in generated preset order. A modifier is
+/// gated against the matched branch just as in [resolve_named_branch]: an
+/// arbitrary value on a branch that takes no modifier (`p-[4px]/2`,
+/// `w-[1px]/foo`) is not a real candidate.
 fn resolve_arbitrary_branch(
     branches: &[ArbitraryBranch],
     list: &CssGenericComponentValueList,
+    modifier: Option<&AnyTwModifier>,
 ) -> Option<(u16, u8)> {
     for &branch in branches {
-        let (property_idx, property_count) = match branch {
-            ArbitraryBranch::Typed(value_type, p, c) => {
+        let (modifier_kind, property_idx, property_count) = match branch {
+            ArbitraryBranch::Typed(value_type, m, p, c) => {
                 if !value_matches_type(list, value_type) {
                     continue;
                 }
-                (p, c)
+                (m, p, c)
             }
-            ArbitraryBranch::Fallback(p, c) => (p, c),
+            ArbitraryBranch::Fallback(m, p, c) => (m, p, c),
         };
+        if let Some(modifier) = modifier
+            && !modifier_accepted(modifier_kind, modifier)
+        {
+            return None;
+        }
         return Some((property_idx, property_count));
     }
     None
@@ -895,8 +913,8 @@ mod tests {
     #[test]
     fn resolve_arbitrary_branch_skips_typed_when_matcher_returns_false_then_falls_back() {
         let branches = &[
-            ArbitraryBranch::Typed(CssDataType::Number, 10, 1),
-            ArbitraryBranch::Fallback(20, 1),
+            ArbitraryBranch::Typed(CssDataType::Number, ModifierKind::None, 10, 1),
+            ArbitraryBranch::Fallback(ModifierKind::None, 20, 1),
         ];
         let full = parse_tailwind("p-[10px]").tree().candidates().iter().next().unwrap();
         let full = full.as_tw_full_candidate().unwrap();
@@ -908,7 +926,7 @@ mod tests {
             panic!("expected arbitrary value")
         };
         assert_eq!(
-            resolve_arbitrary_branch(branches, &arbitrary.value()),
+            resolve_arbitrary_branch(branches, &arbitrary.value(), None),
             Some((20, 1))
         );
     }
@@ -929,10 +947,39 @@ mod tests {
         let AnyTwValue::TwArbitraryValue(arbitrary) = functional.value().unwrap() else {
             panic!("expected arbitrary value")
         };
-        let branches = &[ArbitraryBranch::Fallback(20, 1)];
+        let branches = &[ArbitraryBranch::Fallback(ModifierKind::None, 20, 1)];
         assert_eq!(
-            resolve_arbitrary_branch(branches, &arbitrary.value()),
+            resolve_arbitrary_branch(branches, &arbitrary.value(), None),
             Some((20, 1))
+        );
+    }
+
+    #[test]
+    fn resolve_arbitrary_branch_rejects_a_modifier_on_a_branch_that_takes_none() {
+        // `p-[4px]/2`: the padding arbitrary branch accepts no modifier, so
+        // the `/2` makes the candidate invalid.
+        let (value, modifier) = functional_parts("p-[4px]/2");
+        let AnyTwValue::TwArbitraryValue(arb) = &value else {
+            panic!("expected arbitrary value")
+        };
+        let branches = &[ArbitraryBranch::Fallback(ModifierKind::None, 20, 1)];
+        assert_eq!(
+            resolve_arbitrary_branch(branches, &arb.value(), modifier.as_ref()),
+            None
+        );
+    }
+
+    #[test]
+    fn resolve_arbitrary_branch_accepts_a_numeric_modifier_on_an_opacity_branch() {
+        // `bg-[#fff]/50`: an arbitrary color takes a numeric opacity modifier.
+        let (value, modifier) = functional_parts("bg-[#fff]/50");
+        let AnyTwValue::TwArbitraryValue(arb) = &value else {
+            panic!("expected arbitrary value")
+        };
+        let branches = &[ArbitraryBranch::Typed(CssDataType::Color, ModifierKind::Opacity, 10, 1)];
+        assert_eq!(
+            resolve_arbitrary_branch(branches, &arb.value(), modifier.as_ref()),
+            Some((10, 1))
         );
     }
 

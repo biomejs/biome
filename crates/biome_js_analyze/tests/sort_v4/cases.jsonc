@@ -161,6 +161,19 @@
 	"flex p-4/2",                 // padding takes no modifier → invalid
 	"flex text-red-500/loose",    // leading keyword is not an opacity value → invalid
 
+	// Arbitrary values and arbitrary properties gate the modifier the same
+	// way: a color/font-size arbitrary takes a numeric opacity/line-height
+	// modifier, other arbitrary values take none, and an arbitrary property
+	// takes a numeric modifier regardless of the property.
+	"flex bg-[#fff]/50",          // arbitrary color + numeric opacity → valid
+	"flex bg-[#fff]/(--x)",       // arbitrary color + CSS-variable opacity → valid
+	"flex text-[20px]/8",         // arbitrary font-size + numeric line-height → valid
+	"flex p-[4px]/2",             // padding arbitrary takes no modifier → invalid
+	"flex w-[1px]/foo",           // width arbitrary takes no modifier → invalid
+	"flex bg-[#fff]/foo",         // bare word is not an opacity value → invalid
+	"flex [color:red]/foo",       // arbitrary property + bare word → invalid
+	"flex [padding:1px]/2",       // arbitrary property + numeric modifier → valid
+
 	// ─── sort_class_list edge cases ────────────────────────────────
 
 	"p-[10px] flex some-unknown",

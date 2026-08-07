@@ -315,11 +315,12 @@ function formatArbitraryBranch(
 	sigIdx: (sort: PropertySort) => number,
 ): string {
 	const { sig, count } = checked(b.sort, sigIdx(b.sort));
+	const m = `ModifierKind::${b.modifier}`;
 	switch (b.kind) {
 		case "Typed":
-			return `ArbitraryBranch::Typed(CssDataType::${b.value_type}, ${sig}, ${count})`;
+			return `ArbitraryBranch::Typed(CssDataType::${b.value_type}, ${m}, ${sig}, ${count})`;
 		case "Fallback":
-			return `ArbitraryBranch::Fallback(${sig}, ${count})`;
+			return `ArbitraryBranch::Fallback(${m}, ${sig}, ${count})`;
 	}
 }
 
