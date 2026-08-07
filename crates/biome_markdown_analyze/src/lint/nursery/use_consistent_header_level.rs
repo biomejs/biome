@@ -42,7 +42,7 @@ declare_lint_rule! {
         name: "useConsistentHeaderLevel",
         language: "md",
         recommended: true,
-        sources: &[RuleSource::MarkdownLint("MD001", "heading-increment").same()],
+        sources: &[RuleSource::MarkdownLint("md001", "heading-increment").same()],
     }
 }
 
