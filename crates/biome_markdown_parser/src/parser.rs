@@ -543,8 +543,18 @@ impl<'source> MarkdownParser<'source> {
     }
 
     pub(crate) fn finish_deferred_inline(&mut self, start: DeferredInlineStart) {
+        let event_end = self.context.events().len();
+        let Some(events) = self.context.events().get(start.event_start..event_end) else {
+            return;
+        };
+        if !events
+            .iter()
+            .any(|event| matches!(event, Event::Token { .. }))
+        {
+            return;
+        }
         self.state.deferred_inlines.push(DeferredInline {
-            event_range: start.event_start..self.context.events().len(),
+            event_range: start.event_start..event_end,
             source_range: TextRange::new(start.source_start, self.cur_range().start()),
             flavor: start.flavor,
             context: start.context,

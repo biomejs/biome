@@ -37,7 +37,10 @@ pub(crate) fn parse_deferred_inlines(
     options: &MarkdownParserOptions,
     output: &mut MarkdownParserOutput,
 ) -> bool {
-    debug_assert!(validate_deferred_inlines(source, output));
+    debug_assert!(
+        validate_deferred_inlines(source, output),
+        "Deferred inlines are invalid, reparsing may produce a mismatched fragment."
+    );
 
     let mut replacements = Vec::new();
 
