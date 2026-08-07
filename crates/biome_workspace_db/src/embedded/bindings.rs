@@ -107,6 +107,7 @@ mod tests {
     use biome_db::{Db, ParsedSnippet, ParsedSource};
     use biome_html_parser::{HtmlParserOptions, parse_html};
     use biome_js_parser::JsParserOptions;
+    use biome_languages::javascript::{JsEmbeddingKind, VueEmbeddingKind};
     use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
     use biome_rowan::{RawSyntaxKind, TextSize};
     use camino::{Utf8Path, Utf8PathBuf};
@@ -166,6 +167,12 @@ mod tests {
                 0 => DocumentFileSource::Html(HtmlFileSource::vue()),
                 2 => DocumentFileSource::Html(HtmlFileSource::html()),
                 3 => DocumentFileSource::Js(JsFileSource::js_module()),
+                4 => DocumentFileSource::Js(JsFileSource::ts().with_embedding_kind(
+                    JsEmbeddingKind::Vue {
+                        setup: false,
+                        embedding_kind: VueEmbeddingKind::SlotScope,
+                    },
+                )),
                 _ => DocumentFileSource::Js(JsFileSource::vue()),
             })
         }
@@ -218,6 +225,30 @@ mod tests {
         path
     }
 
+    fn parse_vue_source_with_slot_scope_snippet(db: &TestDb, html: &str, js: &str) -> Utf8PathBuf {
+        let path = Utf8PathBuf::from("src/App.vue");
+        let parsed = parse_html(html, HtmlParserOptions::default().with_vue()).into();
+        let snippet_source = JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Vue {
+            setup: false,
+            embedding_kind: VueEmbeddingKind::SlotScope,
+        });
+        let snippet_parse =
+            biome_js_parser::parse(js, snippet_source, JsParserOptions::default()).into();
+        let content_start = TextSize::from(html.find(js).expect("snippet should exist") as u32);
+        let content_end = content_start + TextSize::from(js.len() as u32);
+        let snippet = ParsedSnippet::new(
+            db,
+            snippet_parse,
+            TextRange::default(),
+            TextRange::new(content_start, content_end),
+            content_start,
+            4,
+        );
+        let file = ParsedSource::new(db, path.clone(), parsed, 0, vec![snippet]);
+        db.insert_file(path.clone(), file);
+        path
+    }
+
     fn token_text(text: &str) -> TokenText {
         TokenText::new_raw(RawSyntaxKind(0), text)
     }
@@ -238,6 +269,26 @@ mod tests {
         .expect("binding should exist");
 
         assert_eq!(found.text.text(), "Local");
+    }
+
+    #[test]
+    fn get_binding_by_name_finds_vue_slot_scope_bindings() {
+        let db = TestDb::new();
+        let js = r#"{ item = {}, nested: { value }, ...rest }"#;
+        let html = format!(r#"<template><div v-slot="{js}" /></template>"#);
+        let path = parse_vue_source_with_slot_scope_snippet(&db, &html, js);
+
+        for name in ["item", "value", "rest"] {
+            assert!(
+                get_binding_by_name(
+                    &db,
+                    InternedBindingTokenText::new(&db, path.clone(), token_text(name))
+                )
+                .as_ref()
+                .is_some_and(|binding| binding.text.text() == name),
+                "expected Vue slot binding {name}"
+            );
+        }
     }
 
     #[test]

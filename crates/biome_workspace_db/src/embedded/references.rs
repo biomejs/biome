@@ -130,7 +130,7 @@ mod tests {
     use biome_db::{Db, ParsedSnippet, ParsedSource};
     use biome_html_parser::{HtmlParserOptions, parse_html};
     use biome_js_parser::JsParserOptions;
-    use biome_languages::javascript::JsEmbeddingKind;
+    use biome_languages::javascript::{JsEmbeddingKind, VueEmbeddingKind};
     use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
     use biome_rowan::{RawSyntaxKind, TextRange, TextSize};
     use camino::{Utf8Path, Utf8PathBuf};
@@ -191,9 +191,7 @@ mod tests {
                 _ => DocumentFileSource::Js(JsFileSource::ts().with_embedding_kind(
                     JsEmbeddingKind::Vue {
                         setup: false,
-                        is_source: false,
-                        event_handler: false,
-                        allow_statements: false,
+                        embedding_kind: VueEmbeddingKind::Expression,
                     },
                 )),
             })
@@ -212,9 +210,7 @@ mod tests {
             "Component",
             JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Vue {
                 setup: false,
-                is_source: false,
-                event_handler: false,
-                allow_statements: false,
+                embedding_kind: VueEmbeddingKind::Expression,
             }),
             JsParserOptions::default(),
         )
@@ -243,9 +239,7 @@ mod tests {
             js_source,
             JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Vue {
                 setup: false,
-                is_source: false,
-                event_handler: false,
-                allow_statements: false,
+                embedding_kind: VueEmbeddingKind::Expression,
             }),
             JsParserOptions::default(),
         )

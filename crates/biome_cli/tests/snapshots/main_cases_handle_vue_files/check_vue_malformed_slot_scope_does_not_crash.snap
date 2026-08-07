@@ -1,0 +1,87 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.vue`
+
+```vue
+<script setup lang="ts"></script>
+<template>
+  <RouterView v-slot="{ item }: SlotProps">
+    <span>{{ item }}</span>
+  </RouterView>
+  <DataTable #row="42">
+    <span>row</span>
+  </DataTable>
+</template>
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.vue:3:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A `v-slot` value can only contain a single binding pattern
+  
+    1 │ <script setup lang="ts"></script>
+    2 │ <template>
+  > 3 │   <RouterView v-slot="{ item }: SlotProps">
+      │                               ^
+    4 │     <span>{{ item }}</span>
+    5 │   </RouterView>
+  
+  i Remove the extra code. Type annotations are not supported here.
+  
+
+```
+
+```block
+file.vue:6:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an array pattern, or an object pattern but instead found '42'.
+  
+    4 │     <span>{{ item }}</span>
+    5 │   </RouterView>
+  > 6 │   <DataTable #row="42">
+      │                    ^^
+    7 │     <span>row</span>
+    8 │   </DataTable>
+  
+  i Expected an identifier, an array pattern, or an object pattern here.
+  
+    4 │     <span>{{ item }}</span>
+    5 │   </RouterView>
+  > 6 │   <DataTable #row="42">
+      │                    ^^
+    7 │     <span>row</span>
+    8 │   </DataTable>
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 errors.
+```

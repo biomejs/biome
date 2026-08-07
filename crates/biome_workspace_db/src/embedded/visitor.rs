@@ -16,7 +16,7 @@ use biome_js_syntax::{
     AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression, JsCallExpression, JsExport,
     JsIdentifierAssignment, JsImport, JsModuleItemList, JsReferenceIdentifier,
     JsStaticMemberExpression, JsSvelteDeclarationRoot, JsSvelteSnippetRoot, JsVariableStatement,
-    JsxReferenceIdentifier,
+    JsVueSlotScopeRoot, JsxReferenceIdentifier,
 };
 use biome_languages::html::HtmlVariant;
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind};
@@ -87,6 +87,7 @@ pub fn embedded_bindings_from_source(
         };
 
         if js_file_source.is_embedded_source()
+            || js_file_source.is_vue_slot_scope()
             || host_file_source.is_svelte()
             || is_script_element_snippet(&html_root, snippet.content_range(db))
         {
@@ -486,6 +487,10 @@ impl EmbeddedBindingsBuilder {
                         && host_file_source.is_svelte()
                     {
                         self.visit_svelte_declaration(&root, embed_block_kind);
+                    } else if let Some(root) = JsVueSlotScopeRoot::cast_ref(&node)
+                        && host_file_source.is_vue()
+                    {
+                        self.visit_vue_slot_scope_declaration(&root);
                     }
                 }
                 WalkEvent::Leave(_) => {}
@@ -553,6 +558,11 @@ impl EmbeddedBindingsBuilder {
         }
 
         Some(())
+    }
+
+    fn visit_vue_slot_scope_declaration(&mut self, root: &JsVueSlotScopeRoot) -> Option<()> {
+        let pattern = root.pattern().ok()?;
+        self.visit_any_js_binding_pattern(&pattern)
     }
 
     fn visit_svelte_block_call_expressions(

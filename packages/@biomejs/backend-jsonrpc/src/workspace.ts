@@ -10506,19 +10506,10 @@ export type JsEmbeddingKind =
 	| {
 			Vue: {
 				/**
-	* Whether this embed should be parsed as statements (module/script).
-When `false`, the content is parsed as an expression via `parse_template_expression`.
-Source-level embeds (`<script>`) use `true`; directives and text expressions use `false`. 
+	* Which part of the Vue file this snippet came from, and therefore how
+the parser should read it. 
 	 */
-				allow_statements: boolean;
-				/**
-				 * Whether this is a v-on event handler (e.g., @click="handler")
-				 */
-				event_handler: boolean;
-				/**
-				 * Where the bindings are defined
-				 */
-				is_source: boolean;
+				embedding_kind: VueEmbeddingKind;
 				/**
 				 * Whether the script is inside script tag with setup attribute
 				 */
@@ -10586,6 +10577,18 @@ export type HtmlVariant =
 	| "Svelte"
 	| "Angular";
 export type GritVariant = "Standard";
+/**
+	* Identifies the parser contract for JavaScript embedded in a Vue file.
+
+The variants are mutually exclusive: a snippet is either the module that
+declares the component's bindings, or one of the template payloads, each of
+which the parser turns into a different root. 
+	 */
+export type VueEmbeddingKind =
+	| "Source"
+	| "Expression"
+	| "EventHandler"
+	| "SlotScope";
 /**
 	* Identifies the parser contract for JavaScript embedded in a Svelte file.
 
