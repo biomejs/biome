@@ -233,19 +233,8 @@ impl CssFileSource {
     pub const fn file_extension(&self) -> &'static str {
         if self.language.is_scss() {
             "scss"
-        } else if matches!(self.variant, CssVariant::CssModules) {
-            "module.css"
         } else {
-            match self.embedding_kind {
-                CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue { .. }) => "vue",
-                CssEmbeddingKind::Html(EmbeddingHtmlKind::Astro { .. }) => "astro",
-                CssEmbeddingKind::Html(EmbeddingHtmlKind::Svelte { .. }) => "svelte",
-                CssEmbeddingKind::Html(EmbeddingHtmlKind::Html)
-                | CssEmbeddingKind::HtmlStyleAttribute => "html",
-                CssEmbeddingKind::Styled
-                | CssEmbeddingKind::Html(EmbeddingHtmlKind::None)
-                | CssEmbeddingKind::None => "css",
-            }
+            "css"
         }
     }
 
