@@ -48,17 +48,7 @@ TwRoot {
                         DASH@21..22 "-" [] [],
                         TwArbitraryVariantSegment {
                             l_brack_token: L_BRACKET@22..23 "[" [] [],
-                            value: CssGenericComponentValueList [
-                                CssIdentifier {
-                                    ident_token: IDENT@23..28 "state" [] [],
-                                },
-                                CssGenericDelimiter {
-                                    value: EQ@28..29 "=" [] [],
-                                },
-                                CssIdentifier {
-                                    ident_token: IDENT@29..33 "open" [] [],
-                                },
-                            ],
+                            value_token: TW_SELECTOR@23..33 "state=open" [] [],
                             r_brack_token: R_BRACKET@33..34 "]" [] [],
                         },
                     ],
@@ -85,17 +75,7 @@ TwRoot {
                         DASH@51..52 "-" [] [],
                         TwArbitraryVariantSegment {
                             l_brack_token: L_BRACKET@52..53 "[" [] [],
-                            value: CssGenericComponentValueList [
-                                CssIdentifier {
-                                    ident_token: IDENT@53..58 "state" [] [],
-                                },
-                                CssGenericDelimiter {
-                                    value: EQ@58..59 "=" [] [],
-                                },
-                                CssIdentifier {
-                                    ident_token: IDENT@59..63 "open" [] [],
-                                },
-                            ],
+                            value_token: TW_SELECTOR@53..63 "state=open" [] [],
                             r_brack_token: R_BRACKET@63..64 "]" [] [],
                         },
                     ],
@@ -122,11 +102,7 @@ TwRoot {
                         DASH@80..81 "-" [] [],
                         TwArbitraryVariantSegment {
                             l_brack_token: L_BRACKET@81..82 "[" [] [],
-                            value: CssGenericComponentValueList [
-                                CssIdentifier {
-                                    ident_token: IDENT@82..83 "a" [] [],
-                                },
-                            ],
+                            value_token: TW_SELECTOR@82..83 "a" [] [],
                             r_brack_token: R_BRACKET@83..84 "]" [] [],
                         },
                     ],
@@ -149,11 +125,7 @@ TwRoot {
                         DASH@95..96 "-" [] [],
                         TwArbitraryVariantSegment {
                             l_brack_token: L_BRACKET@96..97 "[" [] [],
-                            value: CssGenericComponentValueList [
-                                CssIdentifier {
-                                    ident_token: IDENT@97..104 "checked" [] [],
-                                },
-                            ],
+                            value_token: TW_SELECTOR@97..104 "checked" [] [],
                             r_brack_token: R_BRACKET@104..105 "]" [] [],
                         },
                     ],
@@ -247,13 +219,7 @@ TwRoot {
             1: DASH@21..22 "-" [] []
             2: TW_ARBITRARY_VARIANT_SEGMENT@22..34
               0: L_BRACKET@22..23 "[" [] []
-              1: CSS_GENERIC_COMPONENT_VALUE_LIST@23..33
-                0: CSS_IDENTIFIER@23..28
-                  0: IDENT@23..28 "state" [] []
-                1: CSS_GENERIC_DELIMITER@28..29
-                  0: EQ@28..29 "=" [] []
-                2: CSS_IDENTIFIER@29..33
-                  0: IDENT@29..33 "open" [] []
+              1: TW_SELECTOR@23..33 "state=open" [] []
               2: R_BRACKET@33..34 "]" [] []
         1: COLON@34..35 ":" [] []
       1: (empty)
@@ -272,13 +238,7 @@ TwRoot {
             3: DASH@51..52 "-" [] []
             4: TW_ARBITRARY_VARIANT_SEGMENT@52..64
               0: L_BRACKET@52..53 "[" [] []
-              1: CSS_GENERIC_COMPONENT_VALUE_LIST@53..63
-                0: CSS_IDENTIFIER@53..58
-                  0: IDENT@53..58 "state" [] []
-                1: CSS_GENERIC_DELIMITER@58..59
-                  0: EQ@58..59 "=" [] []
-                2: CSS_IDENTIFIER@59..63
-                  0: IDENT@59..63 "open" [] []
+              1: TW_SELECTOR@53..63 "state=open" [] []
               2: R_BRACKET@63..64 "]" [] []
         1: COLON@64..65 ":" [] []
       1: (empty)
@@ -297,9 +257,7 @@ TwRoot {
             3: DASH@80..81 "-" [] []
             4: TW_ARBITRARY_VARIANT_SEGMENT@81..84
               0: L_BRACKET@81..82 "[" [] []
-              1: CSS_GENERIC_COMPONENT_VALUE_LIST@82..83
-                0: CSS_IDENTIFIER@82..83
-                  0: IDENT@82..83 "a" [] []
+              1: TW_SELECTOR@82..83 "a" [] []
               2: R_BRACKET@83..84 "]" [] []
         1: COLON@84..85 ":" [] []
       1: (empty)
@@ -315,9 +273,7 @@ TwRoot {
             1: DASH@95..96 "-" [] []
             2: TW_ARBITRARY_VARIANT_SEGMENT@96..105
               0: L_BRACKET@96..97 "[" [] []
-              1: CSS_GENERIC_COMPONENT_VALUE_LIST@97..104
-                0: CSS_IDENTIFIER@97..104
-                  0: IDENT@97..104 "checked" [] []
+              1: TW_SELECTOR@97..104 "checked" [] []
               2: R_BRACKET@104..105 "]" [] []
         1: COLON@105..106 ":" [] []
       1: (empty)

@@ -1,5 +1,4 @@
 use crate::parser::TailwindParser;
-use crate::syntax::css_value::parse_css_generic_component_value_list;
 use crate::syntax::parse_error::*;
 use crate::token_source::TailwindLexContext;
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -158,11 +157,13 @@ fn parse_named_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
 }
 
 fn parse_arbitrary_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
+    // The bracket body is a raw selector, not a CSS value list, so it is read
+    // as one opaque `tw_selector` token like the top-level `TwArbitraryVariant`
+    // — this keeps combinators (`has-[>svg]`, `[+p]`, `[~span]`) inside the
+    // selector instead of erroring on them in the CSS-value grammar.
     let m = p.start();
-    p.expect_with_context(T!['['], TailwindLexContext::CssValue);
-    if !parse_css_generic_component_value_list(p) {
-        p.error(expected_value(p, p.cur_range()));
-    }
+    p.expect_with_context(T!['['], TailwindLexContext::ArbitraryVariant);
+    p.expect_with_context(TW_SELECTOR, TailwindLexContext::ArbitraryVariant);
     p.expect(T![']']);
     Present(m.complete(p, TW_ARBITRARY_VARIANT_SEGMENT))
 }

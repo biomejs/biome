@@ -591,7 +591,7 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssGenericComponentValueList::can_cast(element.kind())
+                    && element.kind() == TW_SELECTOR
                 {
                     slots.mark_present();
                     current_element = elements.next();

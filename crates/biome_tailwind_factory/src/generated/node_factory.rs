@@ -267,14 +267,14 @@ pub fn tw_arbitrary_variant(
 }
 pub fn tw_arbitrary_variant_segment(
     l_brack_token: SyntaxToken,
-    value: CssGenericComponentValueList,
+    value_token: SyntaxToken,
     r_brack_token: SyntaxToken,
 ) -> TwArbitraryVariantSegment {
     TwArbitraryVariantSegment::unwrap_cast(SyntaxNode::new_detached(
         TailwindSyntaxKind::TW_ARBITRARY_VARIANT_SEGMENT,
         [
             Some(SyntaxElement::Token(l_brack_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(value_token)),
             Some(SyntaxElement::Token(r_brack_token)),
         ],
     ))

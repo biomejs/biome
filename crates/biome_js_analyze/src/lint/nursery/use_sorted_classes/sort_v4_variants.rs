@@ -35,7 +35,7 @@
 
 use std::cmp::Ordering;
 
-use biome_rowan::{AstNode, Text, TextRange, TextSize, TokenText};
+use biome_rowan::{Text, TextRange, TextSize, TokenText};
 use biome_tailwind_syntax::{
     AnyTwVariant, AnyTwVariantSegment, TwFullCandidate, TwVariantSegmentList,
 };
@@ -195,7 +195,7 @@ fn variant_segments(segments: TwVariantSegmentList) -> Option<Vec<VariantSegment
                 VariantSegment::Named(segment.value_token().ok()?.token_text_trimmed())
             }
             AnyTwVariantSegment::TwArbitraryVariantSegment(segment) => {
-                VariantSegment::Arbitrary(segment.value().syntax().text_trimmed().into_text())
+                VariantSegment::Arbitrary(segment.value_token().ok()?.token_text_trimmed().into())
             }
             AnyTwVariantSegment::TwCssVariableVariantSegment(_) => VariantSegment::CssVariable,
             AnyTwVariantSegment::TwBogusVariantSegment(_) => return None,

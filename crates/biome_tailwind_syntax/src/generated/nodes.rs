@@ -862,15 +862,15 @@ impl TwArbitraryVariantSegment {
     pub fn as_fields(&self) -> TwArbitraryVariantSegmentFields {
         TwArbitraryVariantSegmentFields {
             l_brack_token: self.l_brack_token(),
-            value: self.value(),
+            value_token: self.value_token(),
             r_brack_token: self.r_brack_token(),
         }
     }
     pub fn l_brack_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn value(&self) -> CssGenericComponentValueList {
-        support::list(&self.syntax, 1usize)
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
     }
     pub fn r_brack_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -887,7 +887,7 @@ impl Serialize for TwArbitraryVariantSegment {
 #[derive(Serialize)]
 pub struct TwArbitraryVariantSegmentFields {
     pub l_brack_token: SyntaxResult<SyntaxToken>,
-    pub value: CssGenericComponentValueList,
+    pub value_token: SyntaxResult<SyntaxToken>,
     pub r_brack_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -2848,7 +2848,10 @@ impl std::fmt::Debug for TwArbitraryVariantSegment {
                     "l_brack_token",
                     &support::DebugSyntaxResult(self.l_brack_token()),
                 )
-                .field("value", &self.value())
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
                 .field(
                     "r_brack_token",
                     &support::DebugSyntaxResult(self.r_brack_token()),

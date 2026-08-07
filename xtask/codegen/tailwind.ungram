@@ -137,7 +137,7 @@ TwNamedVariantSegment =
 
 TwArbitraryVariantSegment =
 	'['
-	value: CssGenericComponentValueList
+	value: 'tw_selector'
 	']'
 
 TwCssVariableVariantSegment =

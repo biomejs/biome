@@ -27,11 +27,7 @@ TwRoot {
                         DASH@4..5 "-" [] [],
                         TwArbitraryVariantSegment {
                             l_brack_token: L_BRACKET@5..6 "[" [] [],
-                            value: CssGenericComponentValueList [
-                                CssIdentifier {
-                                    ident_token: IDENT@6..14 "disabled" [] [],
-                                },
-                            ],
+                            value_token: TW_SELECTOR@6..14 "disabled" [] [],
                             r_brack_token: R_BRACKET@14..15 "]" [] [],
                         },
                     ],
@@ -69,9 +65,7 @@ TwRoot {
             1: DASH@4..5 "-" [] []
             2: TW_ARBITRARY_VARIANT_SEGMENT@5..15
               0: L_BRACKET@5..6 "[" [] []
-              1: CSS_GENERIC_COMPONENT_VALUE_LIST@6..14
-                0: CSS_IDENTIFIER@6..14
-                  0: IDENT@6..14 "disabled" [] []
+              1: TW_SELECTOR@6..14 "disabled" [] []
               2: R_BRACKET@14..15 "]" [] []
         1: COLON@15..16 ":" [] []
       1: (empty)

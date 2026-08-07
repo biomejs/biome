@@ -110,11 +110,7 @@ TwRoot {
                         DASH@61..62 "-" [] [],
                         TwArbitraryVariantSegment {
                             l_brack_token: L_BRACKET@62..63 "[" [] [],
-                            value: CssGenericComponentValueList [
-                                CssIdentifier {
-                                    ident_token: IDENT@63..70 "checked" [] [],
-                                },
-                            ],
+                            value_token: TW_SELECTOR@63..70 "checked" [] [],
                             r_brack_token: R_BRACKET@70..71 "]" [] [],
                         },
                     ],
@@ -176,14 +172,7 @@ TwRoot {
                         DASH@112..113 "-" [] [],
                         TwArbitraryVariantSegment {
                             l_brack_token: L_BRACKET@113..114 "[" [] [],
-                            value: CssGenericComponentValueList [
-                                CssGenericDelimiter {
-                                    value: COLON@114..115 ":" [] [],
-                                },
-                                CssIdentifier {
-                                    ident_token: IDENT@115..123 "disabled" [] [],
-                                },
-                            ],
+                            value_token: TW_SELECTOR@114..123 ":disabled" [] [],
                             r_brack_token: R_BRACKET@123..124 "]" [] [],
                         },
                     ],
@@ -307,9 +296,7 @@ TwRoot {
             1: DASH@61..62 "-" [] []
             2: TW_ARBITRARY_VARIANT_SEGMENT@62..71
               0: L_BRACKET@62..63 "[" [] []
-              1: CSS_GENERIC_COMPONENT_VALUE_LIST@63..70
-                0: CSS_IDENTIFIER@63..70
-                  0: IDENT@63..70 "checked" [] []
+              1: TW_SELECTOR@63..70 "checked" [] []
               2: R_BRACKET@70..71 "]" [] []
         5: COLON@71..72 ":" [] []
       1: (empty)
@@ -355,11 +342,7 @@ TwRoot {
             1: DASH@112..113 "-" [] []
             2: TW_ARBITRARY_VARIANT_SEGMENT@113..124
               0: L_BRACKET@113..114 "[" [] []
-              1: CSS_GENERIC_COMPONENT_VALUE_LIST@114..123
-                0: CSS_GENERIC_DELIMITER@114..115
-                  0: COLON@114..115 ":" [] []
-                1: CSS_IDENTIFIER@115..123
-                  0: IDENT@115..123 "disabled" [] []
+              1: TW_SELECTOR@114..123 ":disabled" [] []
               2: R_BRACKET@123..124 "]" [] []
         1: COLON@124..125 ":" [] []
       1: (empty)
