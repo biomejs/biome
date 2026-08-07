@@ -1,6 +1,6 @@
 use biome_rowan::{
-    AstNode, AstSeparatedElement, AstSeparatedList, Language, SyntaxError, SyntaxNode, SyntaxToken,
-    chain_trivia_pieces, trim_trailing_trivia_pieces,
+    AstNode, AstSeparatedElement, AstSeparatedList, Direction, Language, SyntaxError, SyntaxNode,
+    SyntaxToken, chain_trivia_pieces, trim_trailing_trivia_pieces,
 };
 use std::cmp::Ordering;
 
@@ -245,40 +245,25 @@ pub fn count_lines_in_file<L: Language>(
     skip_comments: bool,
 ) -> usize {
     if skip_comments {
-        // Operate on raw text for accurate detection of comment-only lines
-        let text = node.text_with_trivia().to_string();
+        // Each code token occupies exactly one line. Comments are stored as
+        // leading trivia of the following token, so comment-only lines never
+        // have a token starting on them. Counting tokens that begin a new line
+        // (have a leading newline) plus the first line gives the number of
+        // lines that contain code.
         let mut count = 0;
-        let mut in_block_comment = false;
+        let mut first_token_seen = false;
 
-        for line in text.lines() {
-            let trimmed = line.trim();
-
-            // Handle block comments (/* ... */)
-            if in_block_comment {
-                if trimmed.contains("*/") {
-                    in_block_comment = false;
-                }
-                continue;
-            }
-            if trimmed.starts_with("/*") {
-                in_block_comment = true;
-                if trimmed.contains("*/") {
-                    in_block_comment = false;
-                }
+        for token in node.descendants_tokens(biome_rowan::Direction::Next) {
+            if is_eof_token(&token) {
                 continue;
             }
 
-            // Skip blank lines if enabled
-            if skip_blank_lines && trimmed.is_empty() {
-                continue;
+            if !first_token_seen {
+                first_token_seen = true;
+                count = 1;
+            } else if token.has_leading_newline() {
+                count += 1;
             }
-
-            // Skip single-line comments
-            if trimmed.starts_with("//") {
-                continue;
-            }
-
-            count += 1;
         }
         count
     } else {
