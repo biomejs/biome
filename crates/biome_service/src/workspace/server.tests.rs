@@ -153,6 +153,71 @@ fn process_file_preserves_embedded_content_after_formatting() {
 }
 
 #[test]
+fn change_file_reparses_javascript_embeds_with_current_settings() {
+    const PATH: &str = "/project/index.tsx";
+    const SOURCE: &str = r#"const styles = css`color:red`;
+const component = styled.div`color:red`;
+const wrapped = styled(Component)`color:red`;
+const query = gql`query { version }`;
+const other_query = graphql`query { version }`;
+const called_query = graphql(`query { version }`);
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE);
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromClient {
+                content: SOURCE.into(),
+                version: 0,
+            },
+            document_file_source: Some(DocumentFileSource::from_language_id(
+                "typescriptreact",
+                Some("tsx"),
+            )),
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    assert!(workspace.get_snippets(Utf8Path::new(PATH)).is_empty());
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: SOURCE.into(),
+            version: 0,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    assert_eq!(workspace.get_snippets(Utf8Path::new(PATH)).len(), 6);
+}
+
+#[test]
 fn change_file_resumes_module_update_after_cancellation() {
     const BASE_PATH: &str = "/project/base.ts";
     const INDEX_PATH: &str = "/project/index.ts";

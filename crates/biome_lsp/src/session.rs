@@ -23,7 +23,7 @@ use biome_service::projects::ProjectKey;
 use biome_service::settings::{EditorFeature, ModuleGraphResolutionKind};
 use biome_service::workspace::db::DbState;
 use biome_service::workspace::{
-    FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
+    ChangeFileParams, FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
     PullDiagnosticsParams, RetryingWorkspace, SupportsFeatureParams,
 };
 use biome_service::workspace::{FileFeaturesResult, ServiceNotification};
@@ -1059,6 +1059,60 @@ impl Session {
             let config_file_path = base_path.to_path_buf();
             let status = self.load_biome_configuration_file(base_path, reload).await;
             self.record_configuration_status(config_file_path.as_deref(), status);
+        }
+
+        self.reparse_open_documents().await;
+    }
+
+    async fn reparse_open_documents(self: &Arc<Self>) {
+        let documents = self
+            .documents
+            .pin()
+            .iter()
+            .map(|(url, document)| (url.clone(), document.clone()))
+            .collect::<Vec<_>>();
+        let session = self.clone();
+        let inline_config = self.inline_config();
+        let editor_features = self.extension_settings.read().editor_features();
+
+        if let Err(error) = spawn_blocking(move || {
+            for (url, document) in documents {
+                let path = match session.file_path(&url) {
+                    Ok(path) => path,
+                    Err(error) => {
+                        error!(
+                            "Failed to resolve the path of open document {}: {error}",
+                            url.as_str()
+                        );
+                        continue;
+                    }
+                };
+                let content = match session.workspace().get_file_content(GetFileContentParams {
+                    project_key: document.project_key,
+                    path: path.clone(),
+                }) {
+                    Ok(content) => content,
+                    Err(error) => {
+                        error!("Failed to read open document {}: {error}", url.as_str());
+                        continue;
+                    }
+                };
+
+                if let Err(error) = session.workspace().change_file(ChangeFileParams {
+                    project_key: document.project_key,
+                    path,
+                    content,
+                    version: document.version,
+                    inline_config: inline_config.clone(),
+                    editor_features: Some(editor_features),
+                }) {
+                    error!("Failed to reparse open document {}: {error}", url.as_str());
+                }
+            }
+        })
+        .await
+        {
+            error!("Failed to reparse open documents: {error}");
         }
     }
 

@@ -221,8 +221,7 @@ pub(crate) async fn did_change(
         old_text,
         params.content_changes,
     );
-
-    session.insert_document(url.clone(), Document::new(doc.project_key, version, &text));
+    let document = Document::new(doc.project_key, version, &text);
 
     session.workspace().change_file(ChangeFileParams {
         project_key: doc.project_key,
@@ -232,6 +231,8 @@ pub(crate) async fn did_change(
         inline_config: session.inline_config(),
         editor_features: None,
     })?;
+
+    session.insert_document(url.clone(), document);
 
     session.schedule_diagnostics(url, version);
 
