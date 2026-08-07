@@ -216,6 +216,30 @@
 	"[display:block]! [color:red]", // arbitrary candidate + important
 	"mt-4 -mt-2!",                  // negative + important
 	"not-a-class! flex",            // unknown base stays front even with `!`
+	// ─── variants ──────────────────────────────────────────────────
+	// Variant weight sorts before the existing utility dimensions;
+	// variants group in Tailwind's canonical order. Expected order
+	// cross-checked against prettier-plugin-tailwindcss 0.8.0.
+
+	"hover:flex flex",
+	"focus:flex hover:flex flex",
+	"hover:flex [&:hover]:flex flex",
+	"data-[state=open]:flex aria-checked:flex flex",
+	"nth-last-3:flex nth-2:flex flex",
+	"peer-focus:flex group-hover:flex flex",
+	"has-[:checked]:flex not-hover:flex flex",
+	"dark:flex hover:flex flex",                          // dark mode
+	"md:flex sm:flex flex max-lg:flex max-sm:flex min-lg:flex", // responsive, min/max
+	"md:hover:flex hover:flex flex md:flex",              // compound
+
+	// ─── variants + important suffix ───────────────────────────────
+	// The important suffix reuses the underlying utility key, so it
+	// composes with variant weight.
+
+	"p-2! flex!",
+	"p-2! hover:flex! flex!",
+	"w-full! flex! p-4!",
+	"flex [color:red]!",
 
 	// ─── real-world strings (shadcn/ui v4, MIT) ─────────────────────
 	// Inputs scrambled; output captured by snapshot.
