@@ -2427,15 +2427,15 @@ See https://biomejs.dev/linter/rules/no-implied-eval
 	 */
 	noImpliedEval?: NoImpliedEvalConfiguration;
 	/**
-	* Checks that the initial-value of an @property rule follows the value format declared by its syntax.
-See https://biomejs.dev/linter/rules/no-inconsistent-property-init-value 
-	 */
-	noInconsistentPropertyInitValue?: NoInconsistentPropertyInitValueConfiguration;
-	/**
 	* Disallow the use of inline styles.
 See https://biomejs.dev/linter/rules/no-inline-styles 
 	 */
 	noInlineStyles?: NoInlineStylesConfiguration;
+	/**
+	* Checks that the initial-value of an @property rule follows the value format declared by its syntax.
+See https://biomejs.dev/linter/rules/no-invalid-property-init-value 
+	 */
+	noInvalidPropertyInitValue?: NoInvalidPropertyInitValueConfiguration;
 	/**
 	* Disallow specific object properties.
 See https://biomejs.dev/linter/rules/no-js-restricted-properties 
@@ -4712,12 +4712,12 @@ export type NoIdenticalTestTitleConfiguration =
 export type NoImpliedEvalConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoImpliedEvalOptions;
-export type NoInconsistentPropertyInitValueConfiguration =
-	| RulePlainConfiguration
-	| RuleWithNoInconsistentPropertyInitValueOptions;
 export type NoInlineStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInlineStylesOptions;
+export type NoInvalidPropertyInitValueConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoInvalidPropertyInitValueOptions;
 export type NoJsRestrictedPropertiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsRestrictedPropertiesOptions;
@@ -6586,14 +6586,14 @@ export interface RuleWithNoImpliedEvalOptions {
 	level: RulePlainConfiguration;
 	options?: NoImpliedEvalOptions;
 }
-export interface RuleWithNoInconsistentPropertyInitValueOptions {
-	level: RulePlainConfiguration;
-	options?: NoInconsistentPropertyInitValueOptions;
-}
 export interface RuleWithNoInlineStylesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoInlineStylesOptions;
+}
+export interface RuleWithNoInvalidPropertyInitValueOptions {
+	level: RulePlainConfiguration;
+	options?: NoInvalidPropertyInitValueOptions;
 }
 export interface RuleWithNoJsRestrictedPropertiesOptions {
 	level: RulePlainConfiguration;
@@ -8394,8 +8394,8 @@ name will not trigger this rule.
 export type NoFloatingPromisesOptions = {};
 export type NoIdenticalTestTitleOptions = {};
 export type NoImpliedEvalOptions = {};
-export type NoInconsistentPropertyInitValueOptions = {};
 export type NoInlineStylesOptions = {};
+export type NoInvalidPropertyInitValueOptions = {};
 export interface NoJsRestrictedPropertiesOptions {
 	/**
 	* Restriction entries for object/property access.
@@ -9921,7 +9921,7 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentObjectDefinition"
-	| "lint/nursery/noInconsistentPropertyInitValue"
+	| "lint/nursery/noInvalidPropertyInitValue"
 	| "lint/nursery/useConsistentTestIt"
 	| "lint/nursery/useDisposables"
 	| "lint/nursery/useDomNodeTextContent"

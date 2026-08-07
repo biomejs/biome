@@ -3,7 +3,8 @@ use biome_css_syntax::{
     CssContainerAtRule, CssCustomPropertyValue, CssDashedIdentifier, CssDeclaration,
     CssGenericComponentValueList, CssIdentifier, CssMediaAtRule, CssNestedQualifiedRule,
     CssQualifiedRule, CssScopeAtRule, CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind,
-    CssSyntaxNode, CssSyntaxToken, ScssExpression, ScssPartialCombinatorSelector, property_syntax::PropertySyntaxResult,
+    CssSyntaxNode, CssSyntaxToken, ScssExpression, ScssPartialCombinatorSelector,
+    property_syntax::PropertySyntaxResult,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, TextRange,
