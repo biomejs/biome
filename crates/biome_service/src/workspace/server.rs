@@ -576,6 +576,88 @@ impl WorkspaceServerWithDb<'_> {
         }
     }
 
+    fn reparse_client_documents_with_embeds(
+        &self,
+        project_key: ProjectKey,
+        workspace_directory: Option<&Utf8Path>,
+    ) -> Result<(), WorkspaceError> {
+        let project_path = self
+            .projects
+            .get_project_path(project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let workspace_directory = workspace_directory.unwrap_or(&project_path);
+        let documents = self.documents.pin();
+        let mut updates = Vec::new();
+
+        for path in documents
+            .keys()
+            .filter(|path| path.starts_with(workspace_directory))
+        {
+            let Some(document) = documents.get(path) else {
+                continue;
+            };
+            let Some(version) = document.version else {
+                continue;
+            };
+            let Some(document_file_source) = self.db_get_source(document.file_source_index) else {
+                continue;
+            };
+            let Some(settings) = self.projects.get_settings_based_on_path(project_key, path) else {
+                continue;
+            };
+            let path_source = DocumentFileSource::from_path(
+                path,
+                settings.experimental_full_html_support_enabled(),
+            );
+            let source_changed = Self::should_prefer_path_source(document_file_source, path_source)
+                || Self::should_prefer_path_source(path_source, document_file_source);
+            let supports_embeds = self
+                .features
+                .get_deprecated_capabilities(document_file_source)
+                .parser
+                .parse_embedded_nodes
+                .is_some()
+                || self
+                    .features
+                    .get_deprecated_capabilities(path_source)
+                    .parser
+                    .parse_embedded_nodes
+                    .is_some();
+
+            if supports_embeds {
+                let document_file_source = if source_changed {
+                    path_source
+                } else {
+                    document_file_source
+                };
+                updates.push((
+                    path.clone(),
+                    document.content.clone(),
+                    version,
+                    document_file_source,
+                ));
+            }
+        }
+        drop(documents);
+
+        for (path, content, version, document_file_source) in updates {
+            self.open_file_internal(
+                OpenFileReason::ClientRequest,
+                OpenFileParams {
+                    project_key,
+                    path: path.into(),
+                    content: FileContent::FromClient { content, version },
+                    document_file_source: Some(document_file_source),
+                    persist_node_cache: true,
+                    inline_config: None,
+                    editor_features: None,
+                },
+            )?;
+        }
+
+        Ok(())
+    }
+
     /// Starts the watcher.
     ///
     /// This method will not return until the watcher stops.
@@ -1098,10 +1180,7 @@ impl WorkspaceServerWithDb<'_> {
         node_cache: &mut NodeCache,
         settings: &SettingsWithEditor,
     ) -> Result<Vec<(AnyParse, EmbedContent, DocumentFileSource)>, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(
-            path,
-            settings.as_ref().experimental_full_html_support_enabled(),
-        );
+        let capabilities = self.features.get_deprecated_capabilities(*file_source);
         let Some(parse_embedded_nodes) = capabilities.parser.parse_embedded_nodes else {
             return Ok(Default::default());
         };
@@ -2646,6 +2725,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         if let Some(cache) = self.analyzer_cache.pin().get(&project_key) {
             cache.evict_cache();
         }
+
+        self.reparse_client_documents_with_embeds(project_key, workspace_directory.as_deref())?;
 
         Ok(UpdateSettingsResult { diagnostics })
     }

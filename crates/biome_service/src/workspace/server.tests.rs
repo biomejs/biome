@@ -152,6 +152,171 @@ fn process_file_preserves_embedded_content_after_formatting() {
     );
 }
 
+fn assert_format_after_enabling_full_html_support(
+    file_name: &str,
+    language_id: &str,
+    source: &str,
+    expected_markup: &str,
+) {
+    let path = format!("/project/package-a/{file_name}");
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(path.as_str()), source);
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(path.as_str()),
+            content: FileContent::from_client(source),
+            document_file_source: Some(DocumentFileSource::from_language_id(
+                language_id,
+                Utf8Path::new(file_name).extension(),
+            )),
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project/package-a")),
+            configuration: Configuration {
+                root: Some(Bool(false)),
+                html: Some(HtmlConfiguration {
+                    experimental_full_support_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: BiomePath::new(path.as_str()),
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert!(
+        result.as_code().contains("const foo = 1;"),
+        "{}",
+        result.as_code()
+    );
+    assert!(
+        result.as_code().contains(expected_markup),
+        "{}",
+        result.as_code()
+    );
+}
+
+#[test]
+fn format_astro_after_enabling_full_html_support() {
+    assert_format_after_enabling_full_html_support(
+        "index.astro",
+        "astro",
+        "---\nconst foo= 1;\n---\n<p>{foo}</p>\n",
+        "<p>{foo}</p>",
+    );
+}
+
+#[test]
+fn format_vue_after_enabling_full_html_support() {
+    assert_format_after_enabling_full_html_support(
+        "index.vue",
+        "vue",
+        "<script setup>const foo= 1;</script><template><p>{{ foo }}</p></template>\n",
+        "<template",
+    );
+}
+
+#[test]
+fn format_svelte_after_enabling_full_html_support() {
+    assert_format_after_enabling_full_html_support(
+        "index.svelte",
+        "svelte",
+        "<script>const foo= 1;</script><p>{foo}</p>\n",
+        "<p>{foo}</p>",
+    );
+}
+
+#[test]
+fn format_html_after_enabling_full_html_support() {
+    assert_format_after_enabling_full_html_support(
+        "index.html",
+        "html",
+        "<script>const foo= 1;</script><p>foo</p>\n",
+        "<p>foo</p>",
+    );
+}
+
+#[test]
+fn format_svg_after_enabling_full_html_support() {
+    assert_format_after_enabling_full_html_support(
+        "index.svg",
+        "xml",
+        "<svg><style>circle{fill:red}</style><script>const foo= 1;</script><circle /></svg>\n",
+        "<circle />",
+    );
+}
+
+#[test]
+fn parse_javascript_embeds_after_enabling_embedded_snippets() {
+    const PATH: &str = "/project/package-a/index.tsx";
+    const SOURCE: &str = r#"const styles = css`color:red`;
+const component = styled.div`color:red`;
+const wrapped = styled(Component)`color:red`;
+const query = gql`query { version }`;
+const otherQuery = graphql`query { version }`;
+const calledQuery = graphql(`query { version }`);
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE);
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::from_client(SOURCE),
+            document_file_source: Some(DocumentFileSource::from_language_id(
+                "typescriptreact",
+                Some("tsx"),
+            )),
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    assert!(workspace.get_snippets(Utf8Path::new(PATH)).is_empty());
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project/package-a")),
+            configuration: Configuration {
+                root: Some(Bool(false)),
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    assert_eq!(workspace.get_snippets(Utf8Path::new(PATH)).len(), 6);
+}
+
 #[test]
 fn change_file_resumes_module_update_after_cancellation() {
     const BASE_PATH: &str = "/project/base.ts";
