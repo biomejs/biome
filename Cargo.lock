@@ -271,6 +271,7 @@ dependencies = [
  "biome_resolver",
  "biome_rowan",
  "biome_rule_options",
+ "biome_string_case",
  "biome_yaml_syntax",
  "bpaf",
  "camino",

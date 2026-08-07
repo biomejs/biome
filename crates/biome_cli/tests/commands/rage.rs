@@ -188,6 +188,38 @@ fn with_malformed_configuration() {
 
 #[test]
 #[serial]
+fn with_files_configuration() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        Utf8Path::new("biome.json").to_path_buf(),
+        r#"{
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "**/*.js",
+      "**/*.ts",
+      "!**/generated/**"
+    ]
+  }
+}"#,
+    );
+
+    let (fs, result) = run_rage(fs, &mut console, Args::from(["rage"].as_slice()));
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "with_files_configuration",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+#[serial]
 fn with_formatter_configuration() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

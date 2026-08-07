@@ -229,6 +229,54 @@ fn extends_config_ok_from_npm_package_with_condition_names() {
 }
 
 #[test]
+fn extends_config_with_object_syntax_plugin_from_npm_package() {
+    let mut fs = TemporaryFs::new("extends_config_with_object_syntax_plugin_from_npm_package");
+
+    fs.create_file("biome.json", r#"{ "extends": ["@shared/config/biome"] }"#);
+
+    fs.create_file(
+        "node_modules/@shared/config/biome.jsonc",
+        r#"{ "root": false, "plugins": [{ "path": "./grit/no-object-assign.grit", "resolutionKind": "config" }], "linter": { "enabled": true } }"#,
+    );
+    fs.create_file(
+        "node_modules/@shared/config/package.json",
+        r#"{
+    "name": "@shared/config",
+    "exports": {
+        "./biome": "./biome.jsonc"
+    }
+}"#,
+    );
+    fs.create_file(
+        "node_modules/@shared/config/grit/no-object-assign.grit",
+        r#"`$fn($args)` where {
+    $fn <: `Object.assign`,
+    register_diagnostic(
+        span = $fn,
+        message = "Prefer object spread instead of Object.assign()",
+        severity = "warn"
+    )
+}"#,
+    );
+    fs.create_file("test.js", "const merged = Object.assign({}, a, b);\n");
+
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", &format!("{}/test.js", fs.cli_path())].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extends_config_with_object_syntax_plugin_from_npm_package",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn extends_config_ok_linter_not_formatter() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

@@ -143,6 +143,8 @@ Available options:
         --profile-rules       Enables rule profiling output. Captures timing only for rule
                               execution, not preprocessing such as querying or building the semantic
                               model.
+        --profile-type-inference  Enables type-inference profiling output, grouped and ranked by
+                              source file.
         --watch               After the initial run, watches the selected paths and reprocesses
                               files modified afterward.
     -h, --help                Prints help information
