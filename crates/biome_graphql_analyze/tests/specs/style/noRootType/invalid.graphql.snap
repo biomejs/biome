@@ -19,7 +19,7 @@ invalid.graphql:2:6 lint/style/noRootType ━━━━━━━━━━━━�
   
     1 │ # should generate diagnostics
   > 2 │ type Mutation {
-      │      ^^^^^^^^^
+      │      ^^^^^^^^
     3 │   createUser(input: CreateUserInput!): User!
     4 │ }
   
