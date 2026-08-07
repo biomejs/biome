@@ -3319,8 +3319,22 @@ fn narrowing_invalidated_within(
 /// method, or constructor), including sync-only members (getters, setters,
 /// static initialization blocks) where `typeof` guards can't cross either.
 ///
-/// Equivalent to `biome_js_analyze::ast_utils::is_function_boundary`, which
-/// this crate can't depend on (it's the other way around).
+/// Class property initializers count too. An instance field runs when the
+/// class is instantiated, which can be long after the guard was evaluated:
+///
+/// ```js
+/// if (typeof x === "number") {
+///   return class { p = x }; // `p` is initialized later, `x` may have changed
+/// }
+/// ```
+///
+/// A `static` field is evaluated with the class expression itself, so
+/// narrowing it would be correct. We treat the whole class body as one
+/// boundary anyway, rather than deciding per member.
+///
+/// This is `biome_js_analyze::ast_utils::is_function_boundary` plus class
+/// property members. That crate can't be depended on from here (it depends on
+/// this one), so the two are maintained separately and may drift.
 fn is_function_boundary(node: &JsSyntaxNode) -> bool {
     AnyFunctionLike::can_cast(node.kind())
         || matches!(
@@ -3330,5 +3344,7 @@ fn is_function_boundary(node: &JsSyntaxNode) -> bool {
                 | JsSyntaxKind::JS_SETTER_CLASS_MEMBER
                 | JsSyntaxKind::JS_SETTER_OBJECT_MEMBER
                 | JsSyntaxKind::JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER
+                | JsSyntaxKind::JS_PROPERTY_CLASS_MEMBER
+                | JsSyntaxKind::TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER
         )
 }
