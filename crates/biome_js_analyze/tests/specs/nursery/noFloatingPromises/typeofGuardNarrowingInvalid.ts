@@ -1,3 +1,5 @@
+// should generate diagnostics
+
 function narrowedToPromise(x: number | Promise<void>) {
 	if (typeof x === "object") {
 		// `x` is narrowed to `Promise<void>` here, so the bare statement floats.

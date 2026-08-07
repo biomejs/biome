@@ -1,3 +1,5 @@
+// should generate diagnostics
+
 function nestedAgreeingGuards(x: number | (() => Promise<void>)) {
 	if (typeof x === "function") {
 		if (typeof x === "function") {

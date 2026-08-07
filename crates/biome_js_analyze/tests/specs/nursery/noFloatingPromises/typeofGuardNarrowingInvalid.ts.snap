@@ -1,9 +1,11 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: typeofGuardNarrowing.ts
+expression: typeofGuardNarrowingInvalid.ts
 ---
 # Input
 ```ts
+// should generate diagnostics
+
 function narrowedToPromise(x: number | Promise<void>) {
 	if (typeof x === "object") {
 		// `x` is narrowed to `Promise<void>` here, so the bare statement floats.
@@ -34,16 +36,16 @@ function looseEquality(x: number | (() => Promise<void>)) {
 
 # Diagnostics
 ```
-typeofGuardNarrowing.ts:4:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+typeofGuardNarrowingInvalid.ts:6:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    2 │ 	if (typeof x === "object") {
-    3 │ 		// `x` is narrowed to `Promise<void>` here, so the bare statement floats.
-  > 4 │ 		x;
+    4 │ 	if (typeof x === "object") {
+    5 │ 		// `x` is narrowed to `Promise<void>` here, so the bare statement floats.
+  > 6 │ 		x;
       │ 		^^
-    5 │ 	}
-    6 │ }
+    7 │ 	}
+    8 │ }
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -53,16 +55,16 @@ typeofGuardNarrowing.ts:4:3 lint/nursery/noFloatingPromises ━━━━━━�
 ```
 
 ```
-typeofGuardNarrowing.ts:11:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+typeofGuardNarrowingInvalid.ts:13:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-     9 │ 	if (typeof x === "function") {
-    10 │ 		// `x` is narrowed to `() => Promise<void>` here, so the call floats.
-  > 11 │ 		x();
+    11 │ 	if (typeof x === "function") {
+    12 │ 		// `x` is narrowed to `() => Promise<void>` here, so the call floats.
+  > 13 │ 		x();
        │ 		^^^^
-    12 │ 	}
-    13 │ }
+    14 │ 	}
+    15 │ }
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -72,16 +74,16 @@ typeofGuardNarrowing.ts:11:3 lint/nursery/noFloatingPromises ━━━━━━�
 ```
 
 ```
-typeofGuardNarrowing.ts:17:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+typeofGuardNarrowingInvalid.ts:19:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    15 │ function reversedOperands(x: number | (() => Promise<void>)) {
-    16 │ 	if ("function" === typeof x) {
-  > 17 │ 		x();
+    17 │ function reversedOperands(x: number | (() => Promise<void>)) {
+    18 │ 	if ("function" === typeof x) {
+  > 19 │ 		x();
        │ 		^^^^
-    18 │ 	}
-    19 │ }
+    20 │ 	}
+    21 │ }
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -91,16 +93,16 @@ typeofGuardNarrowing.ts:17:3 lint/nursery/noFloatingPromises ━━━━━━�
 ```
 
 ```
-typeofGuardNarrowing.ts:23:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+typeofGuardNarrowingInvalid.ts:25:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    21 │ function looseEquality(x: number | (() => Promise<void>)) {
-    22 │ 	if (typeof x == "function") {
-  > 23 │ 		x();
+    23 │ function looseEquality(x: number | (() => Promise<void>)) {
+    24 │ 	if (typeof x == "function") {
+  > 25 │ 		x();
        │ 		^^^^
-    24 │ 	}
-    25 │ }
+    26 │ 	}
+    27 │ }
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
