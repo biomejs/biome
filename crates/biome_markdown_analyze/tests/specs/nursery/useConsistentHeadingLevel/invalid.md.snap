@@ -16,9 +16,9 @@ expression: invalid.md
 
 # Diagnostics
 ```
-invalid.md:5:1 lint/nursery/useConsistentHeaderLevel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.md:5:1 lint/nursery/useConsistentHeadingLevel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This header skipped a level.
+  i This heading skipped a level.
   
     3 │ # One
     4 │ 
@@ -27,7 +27,7 @@ invalid.md:5:1 lint/nursery/useConsistentHeaderLevel  FIXABLE  ━━━━━�
     6 │ 
     7 │ ##### Five
   
-  i The previous header has level1.
+  i The previous heading has level1.
   
     1 │ <!-- should generate diagnostics -->
     2 │ 
@@ -36,11 +36,11 @@ invalid.md:5:1 lint/nursery/useConsistentHeaderLevel  FIXABLE  ━━━━━�
     4 │ 
     5 │ ### Three
   
-  i Headers should follow a consistent level order. Failing to do so could cause issues when the file is transformed into HTML.
+  i headings should follow a consistent level order. Failing to do so could cause issues when the file is transformed into HTML.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Change the level of the header.
+  i Safe fix: Change the level of the heading.
   
     5 │ ###·Three
       │   -      
@@ -48,9 +48,9 @@ invalid.md:5:1 lint/nursery/useConsistentHeaderLevel  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.md:7:1 lint/nursery/useConsistentHeaderLevel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.md:7:1 lint/nursery/useConsistentHeadingLevel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This header skipped a level.
+  i This heading skipped a level.
   
     5 │ ### Three
     6 │ 
@@ -58,7 +58,7 @@ invalid.md:7:1 lint/nursery/useConsistentHeaderLevel  FIXABLE  ━━━━━�
       │ ^^^^^^^^^^
     8 │ 
   
-  i The previous header has level3.
+  i The previous heading has level3.
   
     3 │ # One
     4 │ 
@@ -67,11 +67,11 @@ invalid.md:7:1 lint/nursery/useConsistentHeaderLevel  FIXABLE  ━━━━━�
     6 │ 
     7 │ ##### Five
   
-  i Headers should follow a consistent level order. Failing to do so could cause issues when the file is transformed into HTML.
+  i headings should follow a consistent level order. Failing to do so could cause issues when the file is transformed into HTML.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Change the level of the header.
+  i Safe fix: Change the level of the heading.
   
     7 │ #####·Five
       │     -     

@@ -13,7 +13,7 @@ use std::str::FromStr;
 /// snippet, contain configuration to be applied to another code block, or be
 /// part of an in-memory file system used to run examples for rules with
 /// multi-file analysis.
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct CodeBlock {
     /// The language tag of this code block.
     pub tag: String,
