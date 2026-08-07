@@ -28,11 +28,7 @@ info: html/multiparser/js/script-tag-escaping.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,14 +1,10 @@
- <script>
--  document.write(/* HTML */ `
-+document.write(/* HTML */ `
-     <script>
+@@ -4,11 +4,7 @@
        document.write(/* HTML */ \`
          <!-- foo1 -->
          <script>
@@ -51,7 +47,7 @@ info: html/multiparser/js/script-tag-escaping.html
 
 ```html
 <script>
-document.write(/* HTML */ `
+  document.write(/* HTML */ `
     <script>
       document.write(/* HTML */ \`
         <!-- foo1 -->

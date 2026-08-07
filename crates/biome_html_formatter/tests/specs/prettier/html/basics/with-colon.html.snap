@@ -237,45 +237,7 @@ e-wrap </html:textarea>
      <span>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
      </span>
-@@ -206,53 +186,49 @@
-     </h1>
-   </div>
-   <script>
--    const func = function () {
--      console.log("Hello, there");
--    };
-+  const func = function () {
-+    console.log("Hello, there");
-+  };
-   </script>
- </with:colon>
- 
- <!-- script like -->
- <with:colon>
-   <style>
--    .a {
--      color: #f00;
--    }
-+  .a {
-+    color: #f00;
-+  }
-   </style>
-   <script>
--    const func = function () {
--      console.log("Hello, there");
--    };
-+  const func = function () {
-+    console.log("Hello, there");
-+  };
-   </script>
-   <style>
--    .A {
--      color: #f00;
--    }
-+  .A {
-+    color: #f00;
-+  }
-   </style>
+@@ -232,9 +212,7 @@
    <html:script
      >const func = function() { console.log('Hello, there');}</html:script
    >
@@ -285,25 +247,8 @@ e-wrap </html:textarea>
 +  <html:style>.a { color:#f00}</html:style>
    <svg>
      <style>
--      .a {
--        color: #f00;
--      }
-+    .a {
-+      color: #f00;
-+    }
-     </style>
-   </svg>
-   <svg>
-     <style>
--      .a {
--        color: #f00;
--      }
-+    .a {
-+      color: #f00;
-+    }
-     </style>
-   </svg>
- </with:colon>
+       .a {
+@@ -253,6 +231,4 @@
  <html:script
    >const func = function() { console.log('Hello, there');}</html:script
  >
@@ -504,28 +449,28 @@ e-wrap </textarea>
     </h1>
   </div>
   <script>
-  const func = function () {
-    console.log("Hello, there");
-  };
+    const func = function () {
+      console.log("Hello, there");
+    };
   </script>
 </with:colon>
 
 <!-- script like -->
 <with:colon>
   <style>
-  .a {
-    color: #f00;
-  }
+    .a {
+      color: #f00;
+    }
   </style>
   <script>
-  const func = function () {
-    console.log("Hello, there");
-  };
+    const func = function () {
+      console.log("Hello, there");
+    };
   </script>
   <style>
-  .A {
-    color: #f00;
-  }
+    .A {
+      color: #f00;
+    }
   </style>
   <html:script
     >const func = function() { console.log('Hello, there');}</html:script
@@ -533,16 +478,16 @@ e-wrap </textarea>
   <html:style>.a { color:#f00}</html:style>
   <svg>
     <style>
-    .a {
-      color: #f00;
-    }
+      .a {
+        color: #f00;
+      }
     </style>
   </svg>
   <svg>
     <style>
-    .a {
-      color: #f00;
-    }
+      .a {
+        color: #f00;
+      }
     </style>
   </svg>
 </with:colon>

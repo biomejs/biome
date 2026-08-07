@@ -25,18 +25,15 @@ new Vue({el: '#app'})
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,9 +1,9 @@
+@@ -1,7 +1,7 @@
  <!doctype html>
  <html>
    <body>
 -    <div v-if="foo === 'foo'"></div>
 +    <div v-if="foo ===    'foo'"></div>
      <script>
--      new Vue({ el: "#app" });
-+    new Vue({ el: "#app" });
+       new Vue({ el: "#app" });
      </script>
-   </body>
- </html>
 ```
 
 # Output
@@ -47,7 +44,7 @@ new Vue({el: '#app'})
   <body>
     <div v-if="foo ===    'foo'"></div>
     <script>
-    new Vue({ el: "#app" });
+      new Vue({ el: "#app" });
     </script>
   </body>
 </html>
