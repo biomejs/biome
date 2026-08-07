@@ -1330,16 +1330,7 @@ fn header_level(header: &MdHeader) -> usize {
 
 /// Render a setext header (underline style).
 fn setext_header_level(header: &MdSetextHeader) -> usize {
-    if let Ok(underline) = header.underline_token() {
-        let text = underline.text();
-        if text.trim_start().starts_with('=') {
-            1
-        } else {
-            2
-        }
-    } else {
-        1
-    }
+    header.level()
 }
 
 // ============================================================================

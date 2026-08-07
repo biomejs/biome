@@ -295,6 +295,7 @@ define_categories! {
     "lint/nursery/useRegexpExec": "https://biomejs.dev/linter/rules/use-regexp-exec",
     "lint/nursery/useRegexpTest": "https://biomejs.dev/linter/rules/use-regexp-test",
     "lint/nursery/useScopedStyles": "https://biomejs.dev/linter/rules/use-scoped-styles",
+    "lint/nursery/useSingleTopLevelHeading": "https://biomejs.dev/linter/rules/use-single-top-level-heading",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
     "lint/nursery/useStringStartsEndsWith": "https://biomejs.dev/linter/rules/use-string-starts-ends-with",
     "lint/nursery/useSvelteRequireEachKey": "https://biomejs.dev/linter/rules/use-svelte-require-each-key",
