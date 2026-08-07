@@ -849,9 +849,7 @@ impl EmbeddedBindingsBuilder {
             self.register_exported_declaration(declaration_clause);
         }
 
-        let Some(default_clause) = clause.as_js_export_default_expression_clause() else {
-            return None;
-        };
+        let default_clause = clause.as_js_export_default_expression_clause()?;
         let expression = default_clause.expression().ok()?;
         let object_expr = expression.as_js_object_expression()?;
 
