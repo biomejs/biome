@@ -2226,6 +2226,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         ),
     ));
     result.push((
+        "nursery",
+        "useSingleTopLevelHeading",
+        TypeId::of::<
+            biome_rule_options::use_single_top_level_heading::UseSingleTopLevelHeadingOptions,
+        >(),
+    ));
+    result.push((
         "style",
         "useSingleVarDeclarator",
         TypeId::of::<biome_rule_options::use_single_var_declarator::UseSingleVarDeclaratorOptions>(

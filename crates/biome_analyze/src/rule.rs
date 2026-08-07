@@ -15,6 +15,7 @@ use biome_diagnostics::{
 };
 use biome_diagnostics::{Applicability, Severity};
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange, TextSize};
+use biome_string_case::StrLikeExtension;
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::Debug;
@@ -193,6 +194,8 @@ pub enum RuleSource<'a> {
     GraphqlSchemaLinter(&'a str),
     /// Rules from [Stylelint](https://github.com/stylelint/stylelint)
     Stylelint(&'a str),
+    /// Rules from [markdownlint](https://github.com/DavidAnson/markdownlint)
+    Markdownlint(&'a str),
     /// Rules from [Eslint Plugin Turbo](https://github.com/vercel/turborepo/tree/main/packages/eslint-plugin-turbo)
     EslintTurbo(&'a str),
     /// Rules from [html-eslint](https://html-eslint.org/)
@@ -271,6 +274,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintVueJs(_) => write!(f, "eslint-plugin-vue"),
             Self::GraphqlSchemaLinter(_) => write!(f, "graphql-schema-linter"),
             Self::Stylelint(_) => write!(f, "Stylelint"),
+            Self::Markdownlint(_) => write!(f, "markdownlint"),
             Self::EslintTurbo(_) => write!(f, "eslint-plugin-turbo"),
             Self::HtmlEslint(_) => write!(f, "@html-eslint/eslint-plugin"),
             Self::EslintPlaywright(_) => write!(f, "eslint-plugin-playwright"),
@@ -361,6 +365,7 @@ impl<'a> RuleSource<'a> {
             | Self::EslintVueJs(rule_name)
             | Self::GraphqlSchemaLinter(rule_name)
             | Self::Stylelint(rule_name)
+            | Self::Markdownlint(rule_name)
             | Self::EslintTurbo(rule_name)
             | Self::HtmlEslint(rule_name)
             | Self::EslintCss(rule_name)
@@ -384,6 +389,7 @@ impl<'a> RuleSource<'a> {
             | Self::GraphqlSchemaLinter(_)
             | Self::SortPackageJson
             | Self::Stylelint(_)
+            | Self::Markdownlint(_)
             | Self::Sherif(_) => "",
             Self::EslintBarrelFiles(_) => "barrel-files",
             Self::EslintGraphql(_) => "@graphql-eslint",
@@ -493,6 +499,10 @@ impl<'a> RuleSource<'a> {
             Self::EslintVueJs(rule_name) => format!("https://eslint.vuejs.org/rules/{rule_name}"),
             Self::GraphqlSchemaLinter(rule_name) => format!("https://github.com/cjoudrey/graphql-schema-linter?tab=readme-ov-file#{rule_name}"),
             Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
+            Self::Markdownlint(rule_name) => format!(
+                "https://github.com/DavidAnson/markdownlint/blob/main/doc/{}.md",
+                rule_name.to_ascii_lowercase_cow()
+            ),
             Self::EslintTurbo(rule_name) => format!("https://github.com/vercel/turborepo/blob/main/packages/eslint-plugin-turbo/docs/rules/{rule_name}.md"),
             Self::HtmlEslint(rule_name) => format!("https://html-eslint.org/docs/rules/{rule_name}"),
             Self::EslintPlaywright(rule_name) => format!("https://github.com/playwright-community/eslint-plugin-playwright/blob/main/docs/rules/{rule_name}.md"),
@@ -526,6 +536,7 @@ impl<'a> RuleSource<'a> {
                 | Self::Eslint(_)
                 | Self::GraphqlSchemaLinter(_)
                 | Self::Stylelint(_)
+                | Self::Markdownlint(_)
                 | Self::SortPackageJson
                 | Self::Sherif(_)
         )
