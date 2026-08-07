@@ -1,0 +1,24 @@
+# Depot CI Migration
+# Source: .github/workflows/close-issue.yml
+#
+# No changes were necessary.
+
+name: Close issues
+on:
+  schedule:
+    - cron: "0 0 * * *"
+permissions:
+  issues: write
+jobs:
+  close-issues:
+    if: github.repository == 'biomejs/biome'
+    runs-on: depot-ubuntu-24.04-arm-small
+    steps:
+      - name: Close issue without reproduction
+        uses: actions-cool/issues-helper@71b62d7da76e59ff7b193904feb6e77d4dbb2777 # v3.7.6
+        with:
+          actions: "close-issues"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          labels: "S-Needs repro"
+          inactive-day: 3
+          body: "This issue has been automatically closed because it has been inactive for more than 3 days and it does not have a minimal reproduction."
