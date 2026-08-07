@@ -237,11 +237,23 @@ sorted: some-unknown flex p-[10px]
 input:  flex [color:red]
 sorted: flex [color:red]
 ---
-input:  flex [--my-var:1]
-sorted: [--my-var:1] flex
----
 input:  flex [color:red]/50
 sorted: flex [color:red]/50
+---
+input:  flex [--my-var:1]
+sorted: flex [--my-var:1]
+---
+input:  [display:block] flex [color:red] [--my-var:1]
+sorted: [display:block] flex [color:red] [--my-var:1]
+---
+input:  [--my-var:2] [--my-var:1] flex
+sorted: flex [--my-var:1] [--my-var:2]
+---
+input:  [foobar:1] [display:block] flex [color:red]
+sorted: [display:block] flex [color:red] [foobar:1]
+---
+input:  [--tw-x:1] [-my-var:1] [--my-var:1] [foobar:1]
+sorted: [--my-var:1] [--tw-x:1] [-my-var:1] [foobar:1]
 ---
 input:  bg-[50%] bg-[url('/a.png')] bg-[cover] bg-[#fff]
 sorted: bg-[#fff] bg-[url('/a.png')] bg-[cover] bg-[50%]

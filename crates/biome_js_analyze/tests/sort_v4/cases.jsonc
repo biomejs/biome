@@ -149,8 +149,19 @@
 
 	"p-[10px] flex some-unknown",
 	"flex [color:red]",
-	"flex [--my-var:1]",
 	"flex [color:red]/50",
+
+	// ─── arbitrary-property placement ──────────────────────────────
+	// Every arbitrary-property candidate is placed. A property in the
+	// known order sorts by its index; a custom property (`--my-var`) or
+	// an unknown property name has an empty Tailwind order and sorts
+	// after every real property, ordered among themselves by candidate
+	// text. Cross-checked against prettier-plugin-tailwindcss 0.8.0.
+	"flex [--my-var:1]",                              // custom prop sorts after `flex`
+	"[display:block] flex [color:red] [--my-var:1]",  // custom prop last, behind real props
+	"[--my-var:2] [--my-var:1] flex",                 // same property, ordered by value text
+	"[foobar:1] [display:block] flex [color:red]",    // unknown property also sorts last
+	"[--tw-x:1] [-my-var:1] [--my-var:1] [foobar:1]", // empty-order group ordered by text
 	"bg-[50%] bg-[url('/a.png')] bg-[cover] bg-[#fff]",
 	"border-[#f00] border-[2px]",
 	"text-[#fff] text-[larger] text-[20px]",

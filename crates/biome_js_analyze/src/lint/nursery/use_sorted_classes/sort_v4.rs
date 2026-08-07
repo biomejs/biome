@@ -119,6 +119,13 @@ enum Signature {
     /// A single property, for arbitrary-property candidates
     /// (`[display:block]`).
     Property(u16),
+    /// An arbitrary-property candidate Tailwind can't order: a custom
+    /// property (`[--my-var:1]`) or an unknown property name. Tailwind
+    /// emits an empty `propertySort`, which sorts after every real
+    /// property; `as_slice` returns `&[]` so the prefix comparison in
+    /// `Ord` places it last, and equal empty signatures let the name
+    /// break the tie (`[--my-var:1]` before `[--my-var:2]`).
+    CustomProperty,
 }
 
 impl Signature {
@@ -126,6 +133,7 @@ impl Signature {
         match self {
             Self::Pool(indices) => indices,
             Self::Property(index) => std::slice::from_ref(index),
+            Self::CustomProperty => &[],
         }
     }
 }
@@ -249,9 +257,17 @@ impl PendingSortKey {
                 let Ok(property_token) = a.property_token() else {
                     return Self::Unknown;
                 };
-                PROPERTY_INDEX
+                // Tailwind places every arbitrary-property candidate. A
+                // property in the known order sorts by its index; a custom
+                // property (`[--my-var:1]`) or an unknown property name has
+                // an empty Tailwind order and sorts after every real
+                // property, ordered among themselves by candidate text.
+                let signature = PROPERTY_INDEX
                     .get(property_token.text_trimmed())
-                    .map(|&property_idx| (Signature::Property(property_idx), 1))
+                    .map_or(Signature::CustomProperty, |&property_idx| {
+                        Signature::Property(property_idx)
+                    });
+                Some((signature, 1))
             }
             AnyTwCandidate::TwBogusCandidate(_) => None,
 
@@ -937,6 +953,26 @@ mod tests {
         assert_eq!(*signature, Signature::Property(display_idx));
         assert_eq!(*count, 1);
         assert_eq!(name_text(&key), "[display:block]");
+    }
+
+    #[test]
+    fn custom_and_unknown_arbitrary_properties_sort_after_real_ones() {
+        // Tailwind places every arbitrary-property candidate, but gives a
+        // custom property (`--my-var`) or an unknown property name an empty
+        // order, so it sorts after any candidate whose property is in the
+        // known order.
+        let display = classify("[display:block]");
+        let custom = classify("[--my-var:1]");
+        let unknown = classify("[foobar:1]");
+        assert!(matches!(custom, SortKey::Known { .. }));
+        assert!(matches!(unknown, SortKey::Known { .. }));
+        assert_eq!(compare(&display, &custom), Ordering::Less);
+        assert_eq!(compare(&display, &unknown), Ordering::Less);
+        // Empty-order candidates tie on signature and order by name text.
+        assert_eq!(
+            compare(&classify("[--my-var:1]"), &classify("[--my-var:2]")),
+            Ordering::Less
+        );
     }
 
     #[test]
