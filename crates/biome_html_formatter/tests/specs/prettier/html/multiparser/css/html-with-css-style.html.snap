@@ -34,9 +34,9 @@ info: html/multiparser/css/html-with-css-style.html
 -      blink {
 -        display: none;
 -      }
-+    blink{
-+
-+        display:  none ;}
++    blink {
++      display: none;
++    }
      </style>
    </head>
    <body></body>
@@ -49,9 +49,9 @@ info: html/multiparser/css/html-with-css-style.html
 <html lang="en">
   <head>
     <style>
-    blink{
-
-        display:  none ;}
+    blink {
+      display: none;
+    }
     </style>
   </head>
   <body></body>

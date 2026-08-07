@@ -31,17 +31,22 @@ info: html/js/simple.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -2,9 +2,7 @@
- <html>
+@@ -3,12 +3,12 @@
    <head>
      <title>Sample styled page</title>
--    <script>
--      alert("test");
--    </script>
-+    <script>alert('test');</script>
      <script>
-       var message = "Alert!";
+-      alert("test");
++    alert("test");
+     </script>
+     <script>
+-      var message = "Alert!";
++    var message = "Alert!";
  
+-      alert(message);
++    alert(message);
+     </script>
+   </head>
+   <body>
 ```
 
 # Output
@@ -51,11 +56,13 @@ info: html/js/simple.html
 <html>
   <head>
     <title>Sample styled page</title>
-    <script>alert('test');</script>
     <script>
-      var message = "Alert!";
+    alert("test");
+    </script>
+    <script>
+    var message = "Alert!";
 
-      alert(message);
+    alert(message);
     </script>
   </head>
   <body>
