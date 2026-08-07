@@ -1,6 +1,6 @@
 use crate::MarkdownRuleAction;
 use biome_analyze::{
-    Ast, Rule, RuleAction, RuleDiagnostic, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -42,6 +42,7 @@ declare_lint_rule! {
         name: "useConsistentHeaderLevel",
         language: "md",
         recommended: true,
+        sources: &[RuleSource::MarkdownLint("md001", "heading-increment").same()],
     }
 }
 

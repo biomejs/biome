@@ -217,6 +217,8 @@ pub enum RuleSource<'a> {
     Sherif(&'a str),
     /// Rules from [Eslint Plugin Typescript Sort Keys](https://github.com/infctr/eslint-plugin-typescript-sort-keys)
     EslintTypescriptSortKeys(&'a str),
+    /// Rules from [markdownlint](https://github.com/DavidAnson/markdownlint)
+    MarkdownLint(&'a str, &'a str),
 }
 
 impl<'a> std::fmt::Display for RuleSource<'a> {
@@ -283,6 +285,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::SortPackageJson => write!(f, "sort-package-json"),
             Self::Sherif(_) => write!(f, "Sherif"),
             Self::EslintTypescriptSortKeys(_) => write!(f, "eslint-plugin-typescript-sort-keys"),
+            Self::MarkdownLint(_, _) => write!(f, "markdownlint"),
         }
     }
 }
@@ -370,9 +373,10 @@ impl<'a> RuleSource<'a> {
             | Self::EslintYml(rule_name)
             | Self::EslintAstro(rule_name)
             | Self::EslintDrizzle(rule_name)
+            | Self::EslintTypescriptSortKeys(rule_name)
+            | Self::MarkdownLint(_, rule_name)
             | Self::Sherif(rule_name) => rule_name,
             Self::SortPackageJson => "sort-package-json",
-            Self::EslintTypescriptSortKeys(rule_name) => rule_name,
         }
     }
 
@@ -382,6 +386,7 @@ impl<'a> RuleSource<'a> {
             | Self::DenoLint(_)
             | Self::Eslint(_)
             | Self::GraphqlSchemaLinter(_)
+            | Self::MarkdownLint(_, _)
             | Self::SortPackageJson
             | Self::Stylelint(_)
             | Self::Sherif(_) => "",
@@ -450,6 +455,7 @@ impl<'a> RuleSource<'a> {
         match self {
             Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#{rule_name}"),
             Self::DenoLint(rule_name) => format!("https://lint.deno.land/rules/{rule_name}"),
+            Self::MarkdownLint(rule_id, _) => format!("https://github.com/DavidAnson/markdownlint/blob/main/doc/{rule_id}.md"),
             Self::Eslint(rule_name) => format!("https://eslint.org/docs/latest/rules/{rule_name}"),
             Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintE18e(_) => "https://github.com/e18e/eslint-plugin".to_string(),
@@ -528,6 +534,7 @@ impl<'a> RuleSource<'a> {
                 | Self::Stylelint(_)
                 | Self::SortPackageJson
                 | Self::Sherif(_)
+                | Self::MarkdownLint(_, _)
         )
     }
 
