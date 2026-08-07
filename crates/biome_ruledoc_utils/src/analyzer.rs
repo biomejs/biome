@@ -289,3 +289,43 @@ fn propagate_break<T>((result, _): (Option<anyhow::Error>, Vec<T>)) -> Result<()
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::DiagnosticConsoleWriter;
+    use std::{collections::HashMap, str::FromStr};
+
+    #[test]
+    fn resolves_relative_context_files_from_absolute_code_blocks() {
+        let mut services_builder = AnalyzerServicesBuilder::from_files(
+            HashMap::from([("foo.js".to_string(), "export const foo = 1;".to_string())]),
+            false,
+        );
+        let code_block =
+            CodeBlock::from_str("js expect_diagnostic file=bar.js").expect("valid code block");
+        let code = r#"import { missing } from "./foo.js";"#;
+        let mut writer = DiagnosticConsoleWriter::default();
+
+        RuleCodeAnalyzer {
+            group: "correctness",
+            rule: "noUnresolvedImports",
+            rule_language: "js",
+            code_block: &code_block,
+            code,
+            configuration: None,
+            services_builder: &mut services_builder,
+            writer: &mut writer,
+        }
+        .analyze()
+        .unwrap();
+
+        let diagnostic = writer
+            .all_diagnostics
+            .pop()
+            .expect("missing export diagnostic");
+        let diagnostic = biome_test_utils::diagnostic_to_string("/bar.js", code, diagnostic);
+        assert!(diagnostic.contains("has no export named missing"));
+        assert!(!diagnostic.contains("module not found"));
+    }
+}

@@ -225,6 +225,19 @@ impl CssFileSource {
         self.variant == CssVariant::TailwindCss
     }
 
+    /// Returns a possible file extension for this source without a leading dot.
+    ///
+    /// ## Warning
+    ///
+    /// Don't use this function to write files on disk, as it might support "multiple extensions for the same file"
+    pub const fn file_extension(&self) -> &'static str {
+        if self.language.is_scss() {
+            "scss"
+        } else {
+            "css"
+        }
+    }
+
     pub fn set_variant(&mut self, variant: CssVariant) {
         self.variant = variant;
     }

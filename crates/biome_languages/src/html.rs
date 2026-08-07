@@ -74,6 +74,20 @@ impl HtmlFileSource {
         self.is_vue() || self.is_svelte() || self.is_astro()
     }
 
+    /// Returns a possible file extension for this source without a leading dot.
+    ///
+    /// ## Warning
+    ///
+    /// Don't use this function to write files on disk, as it might support "multiple extensions for the same file"
+    pub const fn file_extension(&self) -> &'static str {
+        match self.variant {
+            HtmlVariant::Astro => "astro",
+            HtmlVariant::Vue => "vue",
+            HtmlVariant::Svelte => "svelte",
+            HtmlVariant::Standard(_) | HtmlVariant::Angular => "html",
+        }
+    }
+
     pub fn variant(&self) -> &HtmlVariant {
         &self.variant
     }
