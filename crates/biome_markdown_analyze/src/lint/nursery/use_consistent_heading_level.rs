@@ -16,7 +16,7 @@ declare_lint_rule! {
     /// In a Markdown document, the level of the headings should be consistent and grow only
     /// by one level at a time.
     ///
-    /// This rule catches cases where headings skipped one level before the previous.
+    /// This rule catches cases where a heading skips one or more levels.
     ///
     /// ## Examples
     ///
