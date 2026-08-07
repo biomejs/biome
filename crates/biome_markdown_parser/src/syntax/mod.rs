@@ -42,7 +42,7 @@ use biome_parser::{
     prelude::ParsedSyntax::{self, *},
     token_set,
 };
-use biome_rowan::{TextRange, TextSize};
+use biome_rowan::TextSize;
 use fenced_code_block::{
     at_fenced_code_block, info_string_has_backtick, parse_fenced_code_block,
     parse_fenced_code_block_force,
@@ -60,11 +60,12 @@ use quote::{
     at_quote, consume_quote_prefix, consume_quote_prefix_without_virtual, has_quote_prefix,
     line_has_quote_prefix_at_current, parse_quote,
 };
+use std::rc::Rc;
 use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 
 use crate::MarkdownParser;
 use crate::lexer::MarkdownReLexContext;
-use crate::parser::{DeferredInline, DeferredInlineFlavor};
+use crate::parser::DeferredInlineFlavor;
 
 /// Check if current token consists only of ASCII spaces and/or tabs.
 ///
@@ -425,12 +426,7 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
     };
 
     if start == p.cur_range().start() {
-        let range = p.cur_range();
-        p.error(parse_error::parse_any_block_no_progress(p, range));
-        if !p.at(T![EOF]) {
-            p.bump_any();
-        }
-        return Absent;
+        return recover_no_progress(p);
     }
 
     if let Present(marker) = &parsed
@@ -440,6 +436,19 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
     }
 
     parsed
+}
+
+fn recover_no_progress(p: &mut MarkdownParser) -> ParsedSyntax {
+    let range = p.cur_range();
+    p.error(parse_error::parse_any_block_no_progress(p, range));
+    if p.at(T![EOF]) {
+        return Absent;
+    }
+
+    p.state_mut().link_reference_definition_continuation = false;
+    let bogus = p.start();
+    p.bump_any();
+    Present(bogus.complete(p, MD_BOGUS_BLOCK))
 }
 
 pub(crate) fn with_virtual_line_start<F, R>(p: &mut MarkdownParser, start: TextSize, op: F) -> R
@@ -667,24 +676,11 @@ fn consume_blank_line(p: &mut MarkdownParser) {
 pub(crate) fn parse_paragraph(p: &mut MarkdownParser) -> ParsedSyntax {
     let m = p.start();
 
-    let event_start = p.context().events().len();
-    let context = p.inline_container_context();
-    let definitions_len = p.link_reference_definitions_len();
     let inline_start: usize = p.cur_range().start().into();
+    let deferred = p.start_deferred_inline(DeferredInlineFlavor::Paragraph);
     parse_inline_item_list(p);
     let inline_end: usize = p.cur_range().start().into();
-    let event_end = p.context().events().len();
-
-    p.record_deferred_inline(DeferredInline {
-        event_range: event_start..event_end,
-        source_range: TextRange::new(
-            TextSize::from(inline_start as u32),
-            TextSize::from(inline_end as u32),
-        ),
-        flavor: DeferredInlineFlavor::Paragraph,
-        context,
-        definitions_len,
-    });
+    p.finish_deferred_inline(deferred);
 
     let has_inline_content = inline_has_non_whitespace(p, inline_start, inline_end);
     let allow_setext = has_inline_content && allow_setext_heading(p);
@@ -1547,7 +1543,7 @@ fn is_quote_only_blank_line_from_source(p: &MarkdownParser, depth: usize) -> boo
 
 /// Build an emphasis context for the current inline list and install it on the parser.
 /// Returns the previous context so it can be restored.
-fn set_inline_emphasis_context(p: &mut MarkdownParser) -> Option<EmphasisContext> {
+fn set_inline_emphasis_context(p: &mut MarkdownParser) -> Option<Rc<EmphasisContext>> {
     let source_len = inline_list_source_len(p);
     let source = p.source_after_current();
     let inline_source = if source_len <= source.len() {
@@ -1560,7 +1556,7 @@ fn set_inline_emphasis_context(p: &mut MarkdownParser) -> Option<EmphasisContext
     let context = EmphasisContext::new(inline_source, base_offset, |label| {
         p.has_link_reference_definition(label)
     });
-    p.set_emphasis_context(Some(context))
+    p.set_new_emphasis_context(context)
 }
 
 // #region inline list length scanning
@@ -2354,4 +2350,24 @@ pub(crate) fn try_parse<T, E>(
     }
 
     res
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::MarkdownParserOptions;
+
+    #[test]
+    fn no_progress_recovery_returns_a_bogus_block_after_consuming() {
+        let mut parser = MarkdownParser::new("text", MarkdownParserOptions::default());
+        parser.state_mut().link_reference_definition_continuation = true;
+        let parsed = recover_no_progress(&mut parser);
+
+        assert!(matches!(
+            parsed,
+            Present(marker) if marker.kind(&parser) == MD_BOGUS_BLOCK
+        ));
+        assert!(parser.at(T![EOF]));
+        assert!(!parser.state().link_reference_definition_continuation);
+    }
 }

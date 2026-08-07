@@ -2120,6 +2120,10 @@ mod tests {
             render("[foo *bar][ref]*\n\n[ref]: /uri\n"),
             "<p><a href=\"/uri\">foo *bar</a>*</p>\n"
         );
+        assert_eq!(
+            render("# [foo][ref]  \n\n[ref]: /uri\n"),
+            "<h1><a href=\"/uri\">foo</a></h1>\n"
+        );
     }
 
     #[test]
