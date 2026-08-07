@@ -75,14 +75,14 @@ impl Rule for UseConsistentHeadingLevel {
                 rule_category!(),
                 state.range(),
                 markup! {
-                    "This header skipped a level."
+                    "This heading skipped a level."
                 },
             )
             .detail(node.range(), markup! {
-                "The previous header has level"<Emphasis>{node.level()}</Emphasis>"."
+                "The previous heading has level"<Emphasis>{node.level()}</Emphasis>"."
             })
             .note(markup! {
-                "Headers should follow a consistent level order. Failing to do so could cause issues when the file is transformed into HTML."
+                "headings should follow a consistent level order. Failing to do so could cause issues when the file is transformed into HTML."
             }),
         )
     }
@@ -100,7 +100,7 @@ impl Rule for UseConsistentHeadingLevel {
         Some(RuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             Applicability::Always,
-            markup! { "Change the level of the header." }.to_owned(),
+            markup! { "Change the level of the heading." }.to_owned(),
             mutation,
         ))
     }
