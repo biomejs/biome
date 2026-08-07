@@ -1,0 +1,123 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function guarded(x: number | (() => Promise<void>)) {
+	if (typeof x === "function") {
+		x;
+	}
+	x;
+}
+
+export function reversed(y: string | undefined) {
+	if (typeof y === "undefined") {
+		y;
+	}
+	if ("string" == typeof y) {
+		y;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding guarded "guarded" => sync Function "guarded" {
+  accepts: {
+    params: [
+      required x: number
+      | sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: instanceof Promise<void>
+      }
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: instanceof Promise<void>
+  }
+
+Expression "typeof x" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof x === \"function\"" => boolean
+
+Expression "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: instanceof Promise<void>
+  }
+
+Expression "\"function\"" => string: function
+
+Expression "x" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<void>
+}
+
+Expression "x" =>
+  number
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: instanceof Promise<void>
+  }
+
+Binding reversed "reversed" => sync Function "reversed" {
+  accepts: {
+    params: [
+      required y: string | undefined
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding y "y" => string | undefined
+
+Expression "typeof y" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof y === \"undefined\"" => boolean
+
+Expression "y" => string | undefined
+
+Expression "\"undefined\"" => string: undefined
+
+Expression "y" => undefined
+
+Expression "\"string\"" => string: string
+
+Expression "\"string\" == typeof y" => boolean
+
+Expression "typeof y" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "y" => string | undefined
+
+Expression "y" => string
+```

@@ -62,6 +62,12 @@ export function reversed(y: string | undefined) {
     let narrowed_to_string = normalize_type(&db, module, expression_ty_at(string_offset));
     assert!(contains_inferred_string(&db, narrowed_to_string));
     assert!(!contains_inferred_undefined(&db, narrowed_to_string));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_narrows_typeof_guarded_references",
+        &db,
+        &fs,
+    );
 }
 
 #[test]
@@ -90,6 +96,19 @@ export function classValue(c: typeof Service | number) {
         c;
     }
 }
+
+interface Ctor {
+    new (): { a: number };
+}
+
+export function constructSignature(k: Ctor | number) {
+    if (typeof k === "function") {
+        k;
+    }
+    if (typeof k === "object") {
+        k;
+    }
+}
 "#;
 
     let fs = MemoryFileSystem::default();
@@ -111,8 +130,9 @@ export function classValue(c: typeof Service | number) {
             .expect("reference type must be inferred")
     };
 
-    // A callable interface matches the `function` tag, so the guard retains
-    // it alongside the plain function and only strips `null`.
+    // An interface with a call signature is a function at runtime, so a
+    // `"function"` guard keeps it alongside the plain function and only
+    // strips `null`.
     let function_offset = SOURCE
         .find("f;")
         .expect("function-guarded reference must exist");
@@ -122,8 +142,8 @@ export function classValue(c: typeof Service | number) {
     assert!(formatted.contains("Function"), "{formatted}");
     assert!(!formatted.contains("null"), "{formatted}");
 
-    // Under the `object` tag, both callable variants are stripped, while
-    // `null` is retained because `typeof null` is `"object"`.
+    // An `"object"` guard strips both callable variants, but keeps `null`
+    // because `typeof null` is `"object"`.
     let object_offset = SOURCE
         .rfind("f;")
         .expect("object-guarded reference must exist");
@@ -133,11 +153,230 @@ export function classValue(c: typeof Service | number) {
     assert!(!formatted.contains("AsyncFn"), "{formatted}");
     assert!(!formatted.contains("Function"), "{formatted}");
 
-    // A class value is a constructor function at runtime, so the `function`
-    // tag retains it and strips the number.
+    // A class value is a constructor function at runtime, so a `"function"`
+    // guard keeps it and strips the number.
     let class_offset = SOURCE.find("c;").expect("class reference must exist");
     let narrowed = normalize_type(&db, module, expression_ty_at(class_offset));
     assert!(!contains_inferred_number(&db, narrowed));
     let formatted = format_inferred_type(&db, narrowed);
     assert!(formatted.contains("Service"), "{formatted}");
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_narrows_typeof_guards_with_callable_interfaces",
+        &db,
+        &fs,
+    );
+}
+
+/// A guard says nothing about a name that the guarded code rebinds or
+/// reassigns, so narrowing must be declined for it.
+#[test]
+fn test_infer_module_types_declines_narrowing_when_invalidated() {
+    const SOURCE: &str = r#"
+export function reassigned(x: number | string) {
+    if (typeof x === "string") {
+        x = 0;
+        x;
+    }
+}
+
+export function compoundAssigned(x: number | string) {
+    if (typeof x === "string") {
+        x += "!";
+        x;
+    }
+}
+
+// Without a case that does narrow, this snapshot would look the same
+// whether narrowing worked or was removed entirely.
+export function notInvalidated(x: number | string) {
+    if (typeof x === "string") {
+        x;
+    }
+}
+
+export function shadowed(x: number | string) {
+    if (typeof x === "string") {
+        const x: boolean = true;
+        x;
+    }
+}
+
+// A write to one name must not invalidate another name guarded in the same
+// nesting, which is what the per-name invalidation cache keys on.
+export function oneNameInvalidatedNotTheOther(a: number | string, b: number | string) {
+    if (typeof a === "string") {
+        if (typeof b === "string") {
+            a = 0;
+            a;
+            b;
+        }
+    }
+}
+
+// The scan is flow-insensitive, so a write that cannot reach the reference
+// still invalidates it. TypeScript narrows both of these.
+export function writeAfterUse(x: number | string) {
+    if (typeof x === "string") {
+        x;
+        x = 0;
+    }
+}
+
+export function writeInNestedClosure(x: number | string) {
+    if (typeof x === "string") {
+        x;
+        const later = () => {
+            x = 0;
+        };
+        later;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_declines_narrowing_when_invalidated",
+        &db,
+        &fs,
+    );
+}
+
+/// A guard must not reach into a nested function or a class body, because
+/// those run after the guarded name may have changed.
+#[test]
+fn test_infer_module_types_does_not_narrow_across_function_boundaries() {
+    const SOURCE: &str = r#"
+export function closureOverGuarded(x: number | (() => void)) {
+    if (typeof x === "function") {
+        x;
+        const callback = () => {
+            x;
+        };
+        callback;
+    }
+}
+
+export function nestedParameterShadowsName(x: number | (() => void)) {
+    if (typeof x === "function") {
+        function inner(x: string | boolean) {
+            x;
+        }
+        inner;
+    }
+}
+
+export function classFieldInitializer(x: number | (() => void)) {
+    if (typeof x === "function") {
+        x;
+        return class {
+            field = x;
+            static staticField = x;
+        };
+    }
+    return null;
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_does_not_narrow_across_function_boundaries",
+        &db,
+        &fs,
+    );
+}
+
+/// Covers the `typeof` results that the other tests leave out.
+#[test]
+fn test_infer_module_types_narrows_remaining_typeof_results() {
+    const SOURCE: &str = r#"
+export function booleanGuard(b: boolean | string) {
+    if (typeof b === "boolean") {
+        b;
+    }
+}
+
+export function bigintGuard(n: bigint | string) {
+    if (typeof n === "bigint") {
+        n;
+    }
+}
+
+export function symbolGuard(s: symbol | string) {
+    if (typeof s === "symbol") {
+        s;
+    }
+}
+
+export function numberGuard(v: number | string) {
+    if (typeof v === "number") {
+        v;
+    }
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_narrows_remaining_typeof_results",
+        &db,
+        &fs,
+    );
+}
+
+/// Pins the guard forms this slice deliberately leaves unhandled: they keep
+/// the declared type. The `x.length` receivers sit in a consequent that is
+/// handled, so those do narrow and keep the snapshot discriminating.
+#[test]
+fn test_infer_module_types_leaves_unsupported_guard_forms_unnarrowed() {
+    const SOURCE: &str = r#"
+export function negated(x: number | string) {
+    if (typeof x !== "string") {
+        x;
+    }
+}
+
+export function conjunction(x: number | string) {
+    if (typeof x === "string" && x.length > 0) {
+        x;
+    }
+}
+
+export function elseBranch(x: number | string) {
+    if (typeof x === "string") {
+        x.length;
+    } else {
+        x;
+    }
+}
+
+export function afterGuard(x: number | string) {
+    if (typeof x === "string") {
+        x.length;
+    }
+    x;
+}
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_leaves_unsupported_guard_forms_unnarrowed",
+        &db,
+        &fs,
+    );
 }

@@ -3277,8 +3277,14 @@ fn typeof_tag_from_literal(expr: &AnyJsExpression) -> Option<TypeofTag> {
 }
 
 /// Returns whether `name` is invalidated as a narrowing target somewhere
-/// inside `node`: either a new binding named `name` is declared there, or
+/// inside `node`: either a JavaScript binding named `name` is declared there
+/// (`let`, `const`, `function`, `class`, a parameter, a `catch` clause), or
 /// `name` is assigned to (written) within `node`.
+///
+/// The scan is deliberately coarse: a write anywhere in `node` invalidates
+/// every reference in it, even ones that precede the write. TypeScript-only
+/// value declarations (`enum`, `namespace`) are not matched, since those
+/// references resolve to the shadowing binding on their own.
 ///
 /// `typeof_guard_narrowed_tag` calls this once per reference identifier
 /// inside a guarded consequent, so a branch with many references would
