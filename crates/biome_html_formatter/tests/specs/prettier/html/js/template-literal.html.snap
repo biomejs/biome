@@ -40,16 +40,15 @@ info: html/js/template-literal.html
      <script>
 -      function foo() {
 -        return `
-+            function foo() {
-+                return `
++    function foo() {
++      return `
                      <div>
                          <p>Text</p>
                      </div>
                  `;
 -      }
--    </script>
-+            }
-+        </script>
++    }
+     </script>
    </body>
  </html>
 ```
@@ -62,14 +61,14 @@ info: html/js/template-literal.html
   <head></head>
   <body>
     <script>
-            function foo() {
-                return `
+    function foo() {
+      return `
                     <div>
                         <p>Text</p>
                     </div>
                 `;
-            }
-        </script>
+    }
+    </script>
   </body>
 </html>
 ```

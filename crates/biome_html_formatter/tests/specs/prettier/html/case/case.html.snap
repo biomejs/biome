@@ -31,7 +31,7 @@ info: html/case/case.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -11,13 +11,8 @@
+@@ -11,13 +11,13 @@
        This is HTML5 Boilerplate.
      </p>
      <script>
@@ -42,8 +42,13 @@ info: html/case/case.html
 -      ga.l = +new Date();
 -      ga("create", "UA-XXXXX-Y", "auto");
 -      ga("send", "pageview");
-+      window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
-+      ga('create', 'UA-XXXXX-Y', 'auto'); ga('send', 'pageview')
++    window.ga = function () {
++      ga.q.push(arguments);
++    };
++    ga.q = [];
++    ga.l = +new Date();
++    ga("create", "UA-XXXXX-Y", "auto");
++    ga("send", "pageview");
      </script>
      <script
        src="https://www.google-analytics.com/analytics.js"
@@ -65,8 +70,13 @@ info: html/case/case.html
       This is HTML5 Boilerplate.
     </p>
     <script>
-      window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
-      ga('create', 'UA-XXXXX-Y', 'auto'); ga('send', 'pageview')
+    window.ga = function () {
+      ga.q.push(arguments);
+    };
+    ga.q = [];
+    ga.l = +new Date();
+    ga("create", "UA-XXXXX-Y", "auto");
+    ga("send", "pageview");
     </script>
     <script
       src="https://www.google-analytics.com/analytics.js"
@@ -75,9 +85,4 @@ info: html/case/case.html
     ></script>
   </body>
 </html>
-```
-
-# Lines exceeding max width of 80 characters
-```
-   14:       window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
 ```

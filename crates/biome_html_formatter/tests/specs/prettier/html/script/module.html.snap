@@ -44,9 +44,8 @@ async function foo() {
 -    plugins: [parserGraphql],
 -  });
 +prettier.format("query { }", {
-+                      parser: "graphql",
-+  plugins: [
-+parserGraphql],
++  parser: "graphql",
++  plugins: [parserGraphql],
 +});
  </script>
  
@@ -57,8 +56,9 @@ async function foo() {
 -    await import("mod");
 -  }
 +async function foo() {
-+  let x=10;while(x-->0)console.log(x)
-+  await(import('mod'))
++  let x = 10;
++  while (x-- > 0) console.log(x);
++  await import("mod");
 +}
  </script>
 ```
@@ -71,16 +71,16 @@ import prettier from "prettier/standalone";
 import parserGraphql from "prettier/parser-graphql";
 
 prettier.format("query { }", {
-                      parser: "graphql",
-  plugins: [
-parserGraphql],
+  parser: "graphql",
+  plugins: [parserGraphql],
 });
 </script>
 
 <script type="module">
 async function foo() {
-  let x=10;while(x-->0)console.log(x)
-  await(import('mod'))
+  let x = 10;
+  while (x-- > 0) console.log(x);
+  await import("mod");
 }
 </script>
 ```

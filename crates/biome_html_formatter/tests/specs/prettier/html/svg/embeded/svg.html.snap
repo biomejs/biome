@@ -44,7 +44,7 @@ element.fillStyle = 'currentColor'
 ```diff
 --- Prettier
 +++ Biome
-@@ -6,25 +6,24 @@
+@@ -6,24 +6,24 @@
    <body>
      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
        <script>
@@ -54,20 +54,20 @@ element.fillStyle = 'currentColor'
 -            element.fillStyle = "currentColor";
 -          }
 -        });
--      </script>
-+document.addEventListener(
-+'DOMContentLoaded', () => {
-+  const element = document.getElementById('foo')
-+   if (element) {
-+element.fillStyle = 'currentColor'
-+}
-+});
-+</script>
++      document.addEventListener("DOMContentLoaded", () => {
++        const element = document.getElementById("foo");
++        if (element) {
++          element.fillStyle = "currentColor";
++        }
++      });
+       </script>
        <style>
 -        polygon {
 -          fill: black;
 -        }
-+    polygon { fill: black }
++      polygon {
++        fill: black;
++      }
  
 -        div {
 -          color: white;
@@ -75,17 +75,15 @@ element.fillStyle = 'currentColor'
 -          height: 100%;
 -          overflow: auto;
 -        }
--      </style>
-+    div {
-+  color: white;
-+      font:18px serif;
-+      height: 100%;
-+      overflow: auto;
-+    }
-+  </style>
++      div {
++        color: white;
++        font: 18px serif;
++        height: 100%;
++        overflow: auto;
++      }
+       </style>
      </svg>
    </body>
- </html>
 ```
 
 # Output
@@ -99,24 +97,25 @@ element.fillStyle = 'currentColor'
   <body>
     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
       <script>
-document.addEventListener(
-'DOMContentLoaded', () => {
-  const element = document.getElementById('foo')
-   if (element) {
-element.fillStyle = 'currentColor'
-}
-});
-</script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const element = document.getElementById("foo");
+        if (element) {
+          element.fillStyle = "currentColor";
+        }
+      });
+      </script>
       <style>
-    polygon { fill: black }
+      polygon {
+        fill: black;
+      }
 
-    div {
-  color: white;
-      font:18px serif;
-      height: 100%;
-      overflow: auto;
-    }
-  </style>
+      div {
+        color: white;
+        font: 18px serif;
+        height: 100%;
+        overflow: auto;
+      }
+      </style>
     </svg>
   </body>
 </html>
