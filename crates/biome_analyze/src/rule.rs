@@ -15,6 +15,7 @@ use biome_diagnostics::{
 };
 use biome_diagnostics::{Applicability, Severity};
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange, TextSize};
+use biome_string_case::StrOnlyExtension;
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::Debug;
@@ -217,6 +218,8 @@ pub enum RuleSource<'a> {
     Sherif(&'a str),
     /// Rules from [Eslint Plugin Typescript Sort Keys](https://github.com/infctr/eslint-plugin-typescript-sort-keys)
     EslintTypescriptSortKeys(&'a str),
+    /// Rules from [markdownlint](https://github.com/DavidAnson/markdownlint)
+    Markdownlint(&'a str),
 }
 
 impl<'a> std::fmt::Display for RuleSource<'a> {
@@ -283,6 +286,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::SortPackageJson => write!(f, "sort-package-json"),
             Self::Sherif(_) => write!(f, "Sherif"),
             Self::EslintTypescriptSortKeys(_) => write!(f, "eslint-plugin-typescript-sort-keys"),
+            Self::Markdownlint(_) => write!(f, "markdownlint"),
         }
     }
 }
@@ -370,7 +374,8 @@ impl<'a> RuleSource<'a> {
             | Self::EslintYml(rule_name)
             | Self::EslintAstro(rule_name)
             | Self::EslintDrizzle(rule_name)
-            | Self::Sherif(rule_name) => rule_name,
+            | Self::Sherif(rule_name)
+            | Self::Markdownlint(rule_name) => rule_name,
             Self::SortPackageJson => "sort-package-json",
             Self::EslintTypescriptSortKeys(rule_name) => rule_name,
         }
@@ -384,7 +389,8 @@ impl<'a> RuleSource<'a> {
             | Self::GraphqlSchemaLinter(_)
             | Self::SortPackageJson
             | Self::Stylelint(_)
-            | Self::Sherif(_) => "",
+            | Self::Sherif(_)
+            | Self::Markdownlint(_) => "",
             Self::EslintBarrelFiles(_) => "barrel-files",
             Self::EslintGraphql(_) => "@graphql-eslint",
             Self::EslintImport(_) => "import",
@@ -505,6 +511,7 @@ impl<'a> RuleSource<'a> {
             Self::SortPackageJson => "https://github.com/keithamus/sort-package-json".to_string(),
             Self::Sherif(rule_name) => format!("https://github.com/QuiiBz/sherif#{rule_name}"),
             Self::EslintTypescriptSortKeys(rule_name) => format!("https://github.com/infctr/eslint-plugin-typescript-sort-keys/blob/master/docs/rules/{rule_name}.md"),
+            Self::Markdownlint(rule_name) => format!("https://github.com/DavidAnson/markdownlint/blob/main/doc/{}.md", rule_name.to_lowercase_cow()),
         }
     }
 
@@ -528,6 +535,7 @@ impl<'a> RuleSource<'a> {
                 | Self::Stylelint(_)
                 | Self::SortPackageJson
                 | Self::Sherif(_)
+                | Self::Markdownlint(_)
         )
     }
 

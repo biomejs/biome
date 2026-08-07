@@ -1,0 +1,136 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: invalid.md
+---
+# Input
+```md
+<!-- should generate diagnostics -->
+
+```
+console.log(1)
+```
+
+~~~
+print(1)
+~~~
+
+- list item
+
+  ```
+  const a = 1;
+  ```
+
+> ```
+> fn main() {}
+> ```
+
+```
+unterminated fence
+
+```
+
+# Diagnostics
+```
+invalid.md:3:1 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fenced code block has no language specifier.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ ```
+      │ ^^^
+    4 │ console.log(1)
+    5 │ ```
+  
+  i Without a language, the code isn't syntax-highlighted when the document is rendered.
+  
+  i Add a language after the opening fence, such as js, or use text for plain text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.md:7:1 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fenced code block has no language specifier.
+  
+    5 │ ```
+    6 │ 
+  > 7 │ ~~~
+      │ ^^^
+    8 │ print(1)
+    9 │ ~~~
+  
+  i Without a language, the code isn't syntax-highlighted when the document is rendered.
+  
+  i Add a language after the opening fence, such as js, or use text for plain text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.md:13:3 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fenced code block has no language specifier.
+  
+    11 │ - list item
+    12 │ 
+  > 13 │   ```
+       │   ^^^
+    14 │   const a = 1;
+    15 │   ```
+  
+  i Without a language, the code isn't syntax-highlighted when the document is rendered.
+  
+  i Add a language after the opening fence, such as js, or use text for plain text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.md:17:3 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fenced code block has no language specifier.
+  
+    15 │   ```
+    16 │ 
+  > 17 │ > ```
+       │   ^^^
+    18 │ > fn main() {}
+    19 │ > ```
+  
+  i Without a language, the code isn't syntax-highlighted when the document is rendered.
+  
+  i Add a language after the opening fence, such as js, or use text for plain text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.md:21:1 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fenced code block has no language specifier.
+  
+    19 │ > ```
+    20 │ 
+  > 21 │ ```
+       │ ^^^
+    22 │ unterminated fence
+    23 │ 
+  
+  i Without a language, the code isn't syntax-highlighted when the document is rendered.
+  
+  i Add a language after the opening fence, such as js, or use text for plain text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
