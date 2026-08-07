@@ -17,7 +17,7 @@ use biome_js_syntax::{
     AnyJsRoot, AnyJsStatement, AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression,
     JsCallExpression, JsExport, JsIdentifierAssignment, JsImport, JsModuleItemList,
     JsReferenceIdentifier, JsStaticMemberExpression, JsSvelteDeclarationRoot, JsSvelteSnippetRoot,
-    JsVariableStatement, JsxReferenceIdentifier,
+    JsVariableStatement, JsVueSlotScopeRoot, JsxReferenceIdentifier,
 };
 use biome_languages::html::HtmlVariant;
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind};
@@ -176,7 +176,7 @@ fn collect_embedded_bindings(
     let mut builder = EmbeddedBindingsBuilder::new();
 
     if host_file_source.is_vue() {
-        builder.visit_vue_html_root(&html_root, snippets);
+        builder.visit_vue_html_root(&html_root);
         builder.has_unknown_vue_directive_options |= has_external_script_element(&html_root);
     } else if host_file_source.is_svelte() {
         builder.visit_svelte_html_root(&html_root);
@@ -188,6 +188,7 @@ fn collect_embedded_bindings(
         };
 
         if js_file_source.is_embedded_source()
+            || js_file_source.is_vue_slot_scope()
             || host_file_source.is_svelte()
             || is_script_element_snippet(&html_root, snippet.content_range)
         {
@@ -462,36 +463,10 @@ impl EmbeddedBindingsBuilder {
         self.js_bindings.push((range, text, source));
     }
 
-    fn visit_vue_html_root(&mut self, root: &HtmlRoot, snippets: &[EmbeddedSnippet]) {
+    fn visit_vue_html_root(&mut self, root: &HtmlRoot) {
         for node in root.syntax().descendants() {
             if let Some(value) = VueVForValue::cast_ref(&node) {
                 self.visit_vue_v_for_value(&value);
-            }
-
-            let initializer = match AnyVueDirective::cast_ref(&node) {
-                Some(AnyVueDirective::VueVSlotShorthandDirective(directive)) => {
-                    directive.initializer()
-                }
-                Some(AnyVueDirective::VueDirective(directive))
-                    if directive
-                        .name_token()
-                        .is_ok_and(|name| name.text_trimmed() == "v-slot") =>
-                {
-                    directive.initializer()
-                }
-                _ => None,
-            };
-            if let Some(initializer) = initializer
-                && let Some(snippet) = snippets
-                    .iter()
-                    .find(|snippet| initializer.range().contains_range(snippet.content_range))
-                && let Some(root) = snippet
-                    .parse
-                    .tree::<AnyJsRoot>()
-                    .as_js_expression_template_root()
-                && let Some(expression) = root.expression()
-            {
-                self.visit_expression_bindings(&expression);
             }
         }
     }
@@ -731,6 +706,10 @@ impl EmbeddedBindingsBuilder {
                         && host_file_source.is_svelte()
                     {
                         self.visit_svelte_declaration(&root, embed_block_kind);
+                    } else if let Some(root) = JsVueSlotScopeRoot::cast_ref(&node)
+                        && host_file_source.is_vue()
+                    {
+                        self.visit_vue_slot_scope_declaration(&root);
                     }
                 }
                 WalkEvent::Leave(_) => {}
@@ -803,6 +782,11 @@ impl EmbeddedBindingsBuilder {
         }
 
         Some(())
+    }
+
+    fn visit_vue_slot_scope_declaration(&mut self, root: &JsVueSlotScopeRoot) -> Option<()> {
+        let pattern = root.pattern().ok()?;
+        self.visit_any_js_binding_pattern(&pattern)
     }
 
     fn visit_svelte_block_call_expressions(

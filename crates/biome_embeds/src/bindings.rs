@@ -100,8 +100,8 @@ pub fn get_binding_by_text<'db>(
 mod tests {
     use super::*;
     use crate::testing::{
-        TestDb, parse_html_source_with_js_snippet, parse_vue_source,
-        parse_vue_source_with_js_snippet, token_text,
+        TestDb, VUE_SLOT_SCOPE_SOURCE_INDEX, parse_html_source_with_js_snippet, parse_vue_source,
+        parse_vue_source_with_js_snippet, parse_vue_source_with_js_snippets, token_text,
     };
     use biome_db::Db;
     use biome_db::testing::assert_function_query_was_not_run;
@@ -122,6 +122,27 @@ mod tests {
         .expect("binding should exist");
 
         assert_eq!(found.text.text(), "Local");
+    }
+
+    #[test]
+    fn get_binding_by_name_finds_vue_slot_scope_bindings() {
+        let db = TestDb::new();
+        let js = r#"{ item = {}, nested: { value }, ...rest }"#;
+        let html = format!(r#"<template><div v-slot="{js}" /></template>"#);
+        let path =
+            parse_vue_source_with_js_snippets(&db, &html, &[(js, VUE_SLOT_SCOPE_SOURCE_INDEX)]);
+
+        for name in ["item", "value", "rest"] {
+            assert!(
+                get_binding_by_name(
+                    &db,
+                    InternedBindingTokenText::new(&db, path.clone(), token_text(name))
+                )
+                .as_ref()
+                .is_some_and(|binding| binding.text.text() == name),
+                "expected Vue slot binding {name}"
+            );
+        }
     }
 
     #[test]

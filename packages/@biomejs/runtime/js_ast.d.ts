@@ -2148,6 +2148,15 @@ export interface JsVariableStatement extends JsAstNode {
 	token(field: "semicolonToken"): JsAstToken | undefined;
 	token(field: string): JsAstToken | undefined;
 }
+export interface JsVueSlotScopeRoot extends JsAstNode {
+	readonly kind: "JS_VUE_SLOT_SCOPE_ROOT";
+	readonly pattern: AnyJsBindingPattern | undefined;
+	withPattern(value: AnyJsBindingPattern): JsVueSlotScopeRoot;
+	readonly eofToken: string | undefined;
+	withEofToken(value: JsAstToken): JsVueSlotScopeRoot;
+	token(field: "eofToken"): JsAstToken | undefined;
+	token(field: string): JsAstToken | undefined;
+}
 export interface JsWhileStatement extends JsAstNode {
 	readonly kind: "JS_WHILE_STATEMENT";
 	readonly whileToken: string | undefined;
@@ -4177,6 +4186,7 @@ export type AnyJsRoot =
 	| JsScript
 	| JsSvelteDeclarationRoot
 	| JsSvelteSnippetRoot
+	| JsVueSlotScopeRoot
 	| TsDeclarationModule;
 export type AnyJsStatement =
 	| JsBlockStatement
@@ -4510,6 +4520,7 @@ export interface JsNodeByKind {
 	readonly JS_VARIABLE_DECLARATION_CLAUSE: JsVariableDeclarationClause;
 	readonly JS_VARIABLE_DECLARATOR: JsVariableDeclarator;
 	readonly JS_VARIABLE_STATEMENT: JsVariableStatement;
+	readonly JS_VUE_SLOT_SCOPE_ROOT: JsVueSlotScopeRoot;
 	readonly JS_WHILE_STATEMENT: JsWhileStatement;
 	readonly JS_WITH_STATEMENT: JsWithStatement;
 	readonly JS_YIELD_ARGUMENT: JsYieldArgument;

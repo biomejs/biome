@@ -4,6 +4,7 @@ use biome_db::testing::Events;
 use biome_db::{ParsedSnippet, ParsedSource};
 use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_js_parser::JsParserOptions;
+use biome_languages::javascript::JsEmbeddingKind;
 use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
 use biome_rowan::{RawSyntaxKind, TextRange, TextSize, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -68,6 +69,16 @@ impl LanguageDb for TestDb {
                 JsFileSource::ts()
                     .with_embedding_kind(*JsFileSource::vue_setup().as_embedding_kind()),
             ),
+            6 => DocumentFileSource::Js(JsFileSource::ts().with_embedding_kind(
+                JsEmbeddingKind::Vue {
+                    setup: false,
+                    is_source: false,
+                    event_handler: false,
+                    slot_scope: true,
+                    allow_statements: false,
+                    is_class_attribute: false,
+                },
+            )),
             _ => DocumentFileSource::Js(JsFileSource::vue()),
         })
     }
@@ -114,6 +125,9 @@ pub(crate) const VUE_SCRIPT_SETUP_SOURCE_INDEX: usize = 4;
 /// The source index [`TestDb::source_from_index`] resolves to a `<script setup lang="ts">`
 /// block, which is the only place type-only declarations can appear.
 pub(crate) const VUE_SCRIPT_SETUP_TS_SOURCE_INDEX: usize = 5;
+
+/// The source index [`TestDb::source_from_index`] resolves to a `v-slot` / `#` directive value.
+pub(crate) const VUE_SLOT_SCOPE_SOURCE_INDEX: usize = 6;
 
 /// Builds a Vue document from the given `<script>` snippets, each identified by the
 /// source index that decides whether it is a plain `<script>` or a `<script setup>`.
