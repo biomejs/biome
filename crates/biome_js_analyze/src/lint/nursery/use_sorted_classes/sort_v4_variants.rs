@@ -35,7 +35,7 @@
 
 use std::cmp::Ordering;
 
-use biome_rowan::{AstNode, SyntaxNodeText, TokenText};
+use biome_rowan::{AstNode, Text, TokenText};
 use biome_tailwind_syntax::{
     AnyTwVariant, AnyTwVariantSegment, TwFullCandidate, TwVariantSegmentList,
 };
@@ -104,12 +104,12 @@ fn trimmed_word_len(words: &[u64]) -> usize {
 }
 
 /// A parsed variant. Registered roots borrow their name straight from
-/// the [VARIANTS] registry (`&'static str`); source-derived text is a
-/// [TokenText] (a cheap ref-counted slice, no heap copy). Only
-/// `Arbitrary` owns a `Box<str>`: its selector is a
-/// `CssGenericComponentValueList` that can span several tokens, so no
-/// single slice covers it.
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+/// the [VARIANTS] registry (`&'static str`); named values borrow their
+/// source token as a [TokenText] (a cheap ref-counted slice). Arbitrary
+/// selectors hold a [Text], which likewise borrows single-token text
+/// and copies only when the selector spans several tokens
+/// (`data-[foo=bar]`'s bracketed CSS value list).
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub(super) enum VariantKey {
     Static(&'static str),
     Functional {
@@ -120,19 +120,19 @@ pub(super) enum VariantKey {
         root: &'static str,
         variant: Box<Self>,
     },
-    Arbitrary(Box<str>),
+    Arbitrary(Text),
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub(super) enum VariantValue {
     Named(TokenText),
-    Arbitrary(Box<str>),
+    Arbitrary(Text),
 }
 
 #[derive(Clone, Debug)]
 enum VariantSegment {
     Named(TokenText),
-    Arbitrary(Box<str>),
+    Arbitrary(Text),
     CssVariable,
 }
 
@@ -176,18 +176,9 @@ pub(super) fn variant_keys_from_candidate(candidate: &TwFullCandidate) -> Option
 fn variant_key_from_variant(variant: &AnyTwVariant) -> Option<VariantKey> {
     match variant {
         AnyTwVariant::TwArbitraryVariant(variant) => Some(VariantKey::Arbitrary(
-            variant.selector_token().ok()?.text_trimmed().into(),
+            variant.selector_token().ok()?.token_text_trimmed().into(),
         )),
         AnyTwVariant::TwVariantExpression(expression) => {
-            // `raw` is only a lookup buffer; the stored key borrows the
-            // registry's own `&'static str`, never this string.
-            let raw = syntax_text_to_box(&expression.syntax().text_trimmed());
-            if let Some((&name, entry)) = VARIANTS.get_entry(raw.as_ref())
-                && entry.kind == VariantKind::Static
-            {
-                return Some(VariantKey::Static(name));
-            }
-
             let segments = variant_segments(expression.segments())?;
             variant_key_from_segments(&segments)
         }
@@ -203,9 +194,9 @@ fn variant_segments(segments: TwVariantSegmentList) -> Option<Vec<VariantSegment
             AnyTwVariantSegment::TwNamedVariantSegment(segment) => {
                 VariantSegment::Named(segment.value_token().ok()?.token_text_trimmed())
             }
-            AnyTwVariantSegment::TwArbitraryVariantSegment(segment) => VariantSegment::Arbitrary(
-                syntax_text_to_box(&segment.value().syntax().text_trimmed()),
-            ),
+            AnyTwVariantSegment::TwArbitraryVariantSegment(segment) => {
+                VariantSegment::Arbitrary(segment.value().syntax().text_trimmed().into_text())
+            }
             AnyTwVariantSegment::TwCssVariableVariantSegment(_) => VariantSegment::CssVariable,
             AnyTwVariantSegment::TwBogusVariantSegment(_) => return None,
         });
@@ -237,25 +228,46 @@ fn variant_key_from_segments(segments: &[VariantSegment]) -> Option<VariantKey> 
     }
 }
 
+/// Upper bound on registered variant name length, so root names can be
+/// reassembled on the stack. The longest today is `any-pointer-coarse`
+/// at 18 bytes; a test asserts the registry stays within the bound.
+const LONGEST_VARIANT_NAME: usize = 24;
+
+/// Match the longest run of leading named segments against a registered
+/// variant root and return its entry plus the remaining value segments.
+///
+/// The grammar splits a variant on every `-` without consulting the
+/// registry, so which dashed prefix is the root (`group-has-[…]:` is
+/// root `group-has`, `group-hover:` is all root) is only decidable
+/// here. The name is reassembled without allocating in a stack buffer,
+/// the way [`sort_v4`](super::sort_v4) joins static utility names.
 fn variant_root_from_segments(
     segments: &[VariantSegment],
 ) -> Option<(&'static str, &'static VariantEntry, &[VariantSegment])> {
-    // `root` is a scratch buffer that grows one segment at a time to probe
-    // the registry for the longest matching prefix; the matched key is
-    // stored, not this string.
-    let mut root = String::new();
+    let mut buf = [0u8; LONGEST_VARIANT_NAME];
+    let mut len = 0;
     let mut best = None;
 
     for (index, segment) in segments.iter().enumerate() {
         let VariantSegment::Named(segment) = segment else {
             break;
         };
-        if !root.is_empty() {
-            root.push('-');
+        let segment = segment.text();
+        let start = if index == 0 { 0 } else { len + 1 };
+        let end = start + segment.len();
+        if end > LONGEST_VARIANT_NAME {
+            // No registered name is this long, and prefixes only grow.
+            break;
         }
-        root.push_str(segment);
+        if index != 0 {
+            buf[len] = b'-';
+        }
+        buf[start..end].copy_from_slice(segment.as_bytes());
+        len = end;
 
-        if let Some((&name, entry)) = VARIANTS.get_entry(root.as_str()) {
+        // Joining `str`s with an ASCII byte always forms valid UTF-8.
+        let probe = str::from_utf8(&buf[..len]).ok()?;
+        if let Some((&name, entry)) = VARIANTS.get_entry(probe) {
             best = Some((name, entry, index + 1));
         }
     }
@@ -452,8 +464,16 @@ impl PartialOrd for VariantValue {
     }
 }
 
-fn syntax_text_to_box(text: &SyntaxNodeText) -> Box<str> {
-    let mut result = String::with_capacity(usize::from(text.len()));
-    text.for_each_chunk(|chunk| result.push_str(chunk));
-    result.into_boxed_str()
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn every_registered_variant_name_fits_the_root_probe_buffer() {
+        let longest = VARIANTS.keys().map(|name| name.len()).max().unwrap();
+        assert!(
+            longest <= LONGEST_VARIANT_NAME,
+            "a registered variant name is {longest} bytes; grow LONGEST_VARIANT_NAME"
+        );
+    }
 }
