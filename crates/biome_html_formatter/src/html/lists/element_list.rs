@@ -490,6 +490,7 @@ impl FormatHtmlElementList {
             // A following element or word prints the borrowed closing `>` so any break occurs
             // inside the preceding tag rather than between whitespace-sensitive siblings.
             let mut borrowed_sibling_r_angle: Option<HtmlSyntaxToken> = None;
+            let mut borrowed_closing_tag = self.borrowed_tokens.borrowed_closing_tag.as_ref();
 
             let mut is_first_child = true;
 
@@ -532,14 +533,14 @@ impl FormatHtmlElementList {
                             write!(f, [r_angle.format()])?;
                         }
 
-                        // when we encounter a word, we need to collect all subsequent words
-                        // so we can use fill to format them together.
+                        // Hold back one word so the final fill entry can include a closing tag.
                         let mut fill = f.fill();
-                        fill.entry(&soft_line_break_or_space(), word);
+                        let mut last_word = word;
                         loop {
                             match children_iter.peek() {
                                 Some(HtmlChild::Word(next_word)) => {
-                                    fill.entry(&soft_line_break_or_space(), next_word);
+                                    fill.entry(&soft_line_break_or_space(), last_word);
+                                    last_word = next_word;
                                     children_iter.next();
                                 }
                                 Some(
@@ -566,6 +567,28 @@ impl FormatHtmlElementList {
                                     break;
                                 }
                             }
+                        }
+
+                        // A borrowed closing tag shares the final fill entry because the text and
+                        // tag must remain adjacent while their combined width determines wrapping.
+                        let hugged_closing_tag = if children_iter.peek().is_none()
+                            && self.is_container_whitespace_sensitive
+                        {
+                            borrowed_closing_tag.take()
+                        } else {
+                            None
+                        };
+
+                        if let Some(closing_tag) = hugged_closing_tag {
+                            fill.entry(
+                                &soft_line_break_or_space(),
+                                &format_with(|f| {
+                                    write!(f, [last_word])?;
+                                    format_partial_closing_tag(f, closing_tag)
+                                }),
+                            );
+                        } else {
+                            fill.entry(&soft_line_break_or_space(), last_word);
                         }
                         fill.finish()?;
 
@@ -1022,7 +1045,7 @@ impl FormatHtmlElementList {
             }
 
             // Print borrowed closing tag
-            if let Some(ref closing_tag) = self.borrowed_tokens.borrowed_closing_tag {
+            if let Some(closing_tag) = borrowed_closing_tag {
                 let closing_tag_format =
                     format_with(|f| format_partial_closing_tag(f, closing_tag));
                 write!(f, [closing_tag_format])?;
