@@ -95,7 +95,7 @@ declare_lint_rule! {
     /// }
     /// ```
     pub UseReactCompiler {
-        version: "next",
+        version: "2.5.8",
         name: "useReactCompiler",
         language: "js",
         recommended: false,

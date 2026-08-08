@@ -1,5 +1,83 @@
 # @biomejs/biome
 
+## 2.5.8
+
+### Patch Changes
+
+- [#10710](https://github.com/biomejs/biome/pull/10710) [`0a0fbc1`](https://github.com/biomejs/biome/commit/0a0fbc15d67c410c80dfae398903f845544fcd65) Thanks [@dyc3](https://github.com/dyc3)! - Added a new nursery rule [`useReactCompiler`](https://biomejs.dev/linter/rules/use-react-compiler/), which reports diagnostics from React Compiler lint mode.
+
+- [#11251](https://github.com/biomejs/biome/pull/11251) [`ea9dd8a`](https://github.com/biomejs/biome/commit/ea9dd8a93e65f849840415e8e26cd668aa1af913) Thanks [@dyc3](https://github.com/dyc3)! - Improved performance of [`noImportCycles`](https://biomejs.dev/linter/rules/no-import-cycles/).
+
+- [#11247](https://github.com/biomejs/biome/pull/11247) [`52b44d6`](https://github.com/biomejs/biome/commit/52b44d6795741d051bf703bd69c6cb447af8fd1d) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule [`noSvelteLegacyConst`](https://biomejs.dev/linter/rules/no-svelte-legacy-const/), which disallows legacy Svelte `{@const}` tags and recommends declaration tags with `$derived()`.
+
+  Invalid:
+
+  ```svelte
+  {#each boxes as box}
+    {@const area = box.width * box.height}
+    <p>{area}</p>
+  {/each}
+  ```
+
+  Valid:
+
+  ```svelte
+  {#each boxes as box}
+    {const area = $derived(box.width * box.height)}
+    <p>{area}</p>
+  {/each}
+  ```
+
+- [#11252](https://github.com/biomejs/biome/pull/11252) [`d5f5704`](https://github.com/biomejs/biome/commit/d5f570414fdcdddf62372e35c05f6dababad9287) Thanks [@Turtle-Hwan](https://github.com/Turtle-Hwan)! - Fixed [#11250](https://github.com/biomejs/biome/issues/11250): [`useAwait`](https://biomejs.dev/linter/rules/use-await/) no longer reports async functions that contain an `await using` declaration.
+
+- [#11143](https://github.com/biomejs/biome/pull/11143) [`6be7be1`](https://github.com/biomejs/biome/commit/6be7be1b147d7b4352ff5625a78bd54a48958950) Thanks [@vznh](https://github.com/vznh)! - Fixed [#11017](https://github.com/biomejs/biome/issues/11017): [`noUselessUndefined`](https://biomejs.dev/linter/rules/no-useless-undefined/) no longer reports `return undefined` when the enclosing function has a return type annotation other than `undefined` or `void`.
+
+- [#11234](https://github.com/biomejs/biome/pull/11234) [`caefe39`](https://github.com/biomejs/biome/commit/caefe393c66340914c481f7ccfc82979cf76b61b) Thanks [@subotac](https://github.com/subotac)! - Fixed [#11228](https://github.com/biomejs/biome/issues/11228): CSS block comments between a declaration colon and value now preserve their source indentation.
+
+  ```diff
+   :root {
+     --font-stack:
+  -/* comment */
+  +    /* comment */
+       system-ui;
+   }
+  ```
+
+- [#11080](https://github.com/biomejs/biome/pull/11080) [`af16a0b`](https://github.com/biomejs/biome/commit/af16a0bf884c48bad2caab70e7930096e81e1c99) Thanks [@dyc3](https://github.com/dyc3)! - HTML `style` attribute values are now parsed as CSS. All Biome CSS lint rules are applied to the `style` attributes.
+
+- [#11195](https://github.com/biomejs/biome/pull/11195) [`6a85588`](https://github.com/biomejs/biome/commit/6a85588578725195625281984a47c9a8563bf103) Thanks [@dyc3](https://github.com/dyc3)! - Fixed Svelte files failing to parse when an expression begins with an object literal.
+
+  Now the following snippet is correctly parsed:
+
+  ```svelte
+  <p>{{ a: true }}</p>
+  <div class={{ active: isActive }}></div>
+  ```
+
+- [#11173](https://github.com/biomejs/biome/pull/11173) [`481d008`](https://github.com/biomejs/biome/commit/481d008f6e8872a78749496fbbf1f9c761d9a770) Thanks [@Austin1serb](https://github.com/Austin1serb)! - Fixed [#10242](https://github.com/biomejs/biome/issues/10242): JavaScript GritQL patterns with multiple metavariables now match snippets consistently in WebAssembly.
+
+- [#11187](https://github.com/biomejs/biome/pull/11187) [`23c0369`](https://github.com/biomejs/biome/commit/23c0369c43b59284ca68c65883d6ede4228b6fb8) Thanks [@ematipico](https://github.com/ematipico)! - Added the nursery rule [`noInvalidPropertyInitValue`](https://biomejs.dev/linter/rules/no-invalid-property-init-value/), which reports an `@property` whose `initial-value` does not match its `syntax` descriptor. For example, the following declaration triggers the rule because `red` is not a `<length>`:
+
+  ```css
+  @property --size {
+    syntax: "<length>";
+    inherits: false;
+    initial-value: red;
+  }
+  ```
+
+- [#11272](https://github.com/biomejs/biome/pull/11272) [`73896e6`](https://github.com/biomejs/biome/commit/73896e6712ba4c398ba21141829f8361ace45eb2) Thanks [@ematipico](https://github.com/ematipico)! - Improved the diagnostic emitted by [`noRootType`](https://biomejs.dev/linter/rules/no-root-type).
+
+- [#11240](https://github.com/biomejs/biome/pull/11240) [`bd0b68d`](https://github.com/biomejs/biome/commit/bd0b68d418890059930074b46273aa616fbb735a) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#11223](https://github.com/biomejs/biome/issues/11223): Improved the
+  performance of [`noMisusedPromises`](https://biomejs.dev/linter/rules/no-misused-promises/)
+  when analyzing async class methods that call other methods through `this`.
+
+- [#11172](https://github.com/biomejs/biome/pull/11172) [`4a0bc5c`](https://github.com/biomejs/biome/commit/4a0bc5c46e6dbbefd17fa133ea426aa41f0a23f8) Thanks [@saberoueslati](https://github.com/saberoueslati)! - Fixed [#10806](https://github.com/biomejs/biome/issues/10806): [`noUselessFragments`](https://biomejs.dev/linter/rules/no-useless-fragments/) no longer causes Biome to panic when its unsafe fix removes a fragment used as a JSX attribute value.
+
+- [#11227](https://github.com/biomejs/biome/pull/11227) [`4d603b0`](https://github.com/biomejs/biome/commit/4d603b072fae45a69bd291ab92f3379232cd34df) Thanks [@saberoueslati](https://github.com/saberoueslati)! - Fixed [#11178](https://github.com/biomejs/biome/issues/11178): [`noUndeclaredVariables`](https://biomejs.dev/linter/rules/no-undeclared-variables/) no longer reports Vue's built-in instance properties, such as `$slots` and `$attrs`, in template expressions or `$event` in inline event-handler expressions. The instance properties are still reported inside `<script setup>`, where they are not defined.
+
+- [#11187](https://github.com/biomejs/biome/pull/11187) [`23c0369`](https://github.com/biomejs/biome/commit/23c0369c43b59284ca68c65883d6ede4228b6fb8) Thanks [@ematipico](https://github.com/ematipico)! - Fixed CSS parsing of registered custom properties: Biome now correctly validates the `syntax` descriptor of `@property` rules.
+
 ## 2.5.7
 
 ### Patch Changes
