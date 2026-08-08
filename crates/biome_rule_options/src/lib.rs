@@ -259,6 +259,7 @@ pub mod no_top_level_literals;
 pub mod no_ts_ignore;
 pub mod no_unassigned_variables;
 pub mod no_undeclared_classes;
+pub mod no_undeclared_custom_properties;
 pub mod no_undeclared_dependencies;
 pub mod no_undeclared_env_vars;
 pub mod no_undeclared_variables;
