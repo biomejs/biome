@@ -64,9 +64,8 @@ info: whitespace/block-like-edge-children/edges.vue
 
 <template
 	><span
-		><button type="button">
-			inline-block start
-		</button>following text that makes the parent wrap</span
+		><button type="button">inline-block start</button
+		>following text that makes the parent wrap</span
 	><span
 		>preceding text that makes the parent wrap<button
 			type="button"
