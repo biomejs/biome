@@ -1,0 +1,31 @@
+<!-- should not generate diagnostics -->
+<script>
+const active = false;
+const myClass = true;
+const color = "red";
+const fontWeight = "bold";
+const isActive = false;
+const textColor = "blue";
+let inputValue = "";
+</script>
+
+<main>
+  <!-- class: shorthand -->
+  <div class:active>Active</div>
+
+  <!-- class: shorthand with a mixed-case identifier -->
+  <div class:myClass>Mixed case</div>
+
+  <!-- style: shorthand -->
+  <div style:color>Styled</div>
+
+  <!-- style: shorthand with a mixed-case identifier -->
+  <div style:fontWeight>Bold</div>
+
+  <!-- longhand forms keep working -->
+  <div class:enabled={isActive}>Enabled</div>
+  <div style:background-color={textColor}>Background</div>
+
+  <!-- bind: shorthand keeps working -->
+  <input bind:inputValue />
+</main>

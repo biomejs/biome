@@ -1,0 +1,10 @@
+<!-- should not generate diagnostics -->
+<script>
+import { active } from "./flags";
+import { myClass } from "./styles";
+import { color } from "./theme";
+</script>
+
+<div class:active>Active</div>
+<div class:myClass>Mixed case</div>
+<div style:color>Styled</div>

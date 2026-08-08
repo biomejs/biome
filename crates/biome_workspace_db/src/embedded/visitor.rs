@@ -6,7 +6,7 @@ use biome_html_syntax::{
     AnySvelteBindingProperty, AnySvelteBlock, AnySvelteBlockItem, AnySvelteDestructuredName,
     AnySvelteDirective, AnySvelteEachName, AnyVueVForBinding, AnyVueVForBindingListElement,
     AnyVueVForDestructuredBinding, HtmlElement, HtmlRoot, HtmlSelfClosingElement,
-    VueVForIdentifierBinding, VueVForValue,
+    SvelteDirectiveValue, VueVForIdentifierBinding, VueVForValue,
 };
 use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement, AnyJsArrayElement,
@@ -21,6 +21,7 @@ use biome_languages::html::HtmlVariant;
 use biome_languages::javascript::JsEmbeddingKind;
 use biome_languages::{HtmlFileSource, JsFileSource, LanguageDb};
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
+use biome_unicode_table::is_js_ident;
 use std::collections::VecDeque;
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -215,6 +216,12 @@ fn is_script_element_snippet(root: &HtmlRoot, content_range: TextRange) -> bool 
             element.is_script_tag() && element.range().contains_range(content_range)
         })
     })
+}
+
+/// Returns the directive value only when the directive uses its shorthand form,
+/// where the property also names the referenced binding.
+fn svelte_shorthand_value(value: SvelteDirectiveValue) -> Option<SvelteDirectiveValue> {
+    value.initializer().is_none().then_some(value)
 }
 
 #[derive(Debug)]
@@ -1157,15 +1164,20 @@ impl EmbeddedReferencesBuilder {
             AnySvelteDirective::SvelteInDirective(directive) => directive.value().ok()?,
             AnySvelteDirective::SvelteOutDirective(directive) => directive.value().ok()?,
             AnySvelteDirective::SvelteAnimateDirective(directive) => directive.value().ok()?,
+            // `bind:value`, `class:active` and `style:color` are shorthands for
+            // `bind:value={value}`, `class:active={active}` and
+            // `style:color={color}`, so the property names a binding. The
+            // longhand forms carry their reference inside the initializer, which
+            // is extracted as an embedded JavaScript snippet instead.
             AnySvelteDirective::SvelteBindDirective(directive) => {
-                let value = directive.value().ok()?;
-                if value.initializer().is_some() {
-                    return None;
-                }
-                value
+                svelte_shorthand_value(directive.value().ok()?)?
             }
-            AnySvelteDirective::SvelteStyleDirective(_)
-            | AnySvelteDirective::SvelteClassDirective(_) => return None,
+            AnySvelteDirective::SvelteStyleDirective(directive) => {
+                svelte_shorthand_value(directive.value().ok()?)?
+            }
+            AnySvelteDirective::SvelteClassDirective(directive) => {
+                svelte_shorthand_value(directive.value().ok()?)?
+            }
         };
 
         self.register_svelte_binding_property(value.property().ok())
@@ -1177,8 +1189,18 @@ impl EmbeddedReferencesBuilder {
     ) -> Option<()> {
         let token = match property? {
             AnySvelteBindingProperty::SvelteName(name) => name.ident_token().ok()?,
-            AnySvelteBindingProperty::SvelteMemberProperty(_)
-            | AnySvelteBindingProperty::SvelteLiteral(_) => return None,
+            // `class:` and `style:` properties are lexed as literals, because
+            // they are class names and CSS property names first. Only those that
+            // are valid JavaScript identifiers can name a binding: neither
+            // `class:is-active` nor `style:background-color` can.
+            AnySvelteBindingProperty::SvelteLiteral(literal) => {
+                let token = literal.value_token().ok()?;
+                if !is_js_ident(token.text_trimmed()) {
+                    return None;
+                }
+                token
+            }
+            AnySvelteBindingProperty::SvelteMemberProperty(_) => return None,
         };
 
         self.register_reference(token.text_trimmed_range(), token.token_text_trimmed());
