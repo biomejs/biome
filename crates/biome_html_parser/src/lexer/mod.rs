@@ -1045,6 +1045,9 @@ impl<'src> HtmlLexer<'src> {
             b"for" => FOR_KW,
             b"empty" => EMPTY_KW,
             b"track" => TRACK_KW,
+            b"switch" => SWITCH_KW,
+            b"case" => CASE_KW,
+            b"default" => DEFAULT_KW,
 
             _ => {
                 self.position = starting_position;

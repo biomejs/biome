@@ -24,6 +24,19 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::AngularBlockBody::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::ANGULAR_CASE_CLAUSE => {
+                    let $pattern = unsafe { $crate::AngularCaseClause::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_DEFAULT_CLAUSE => {
+                    let $pattern = unsafe { $crate::AngularDefaultClause::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_DEFAULT_EXPRESSION_CLAUSE => {
+                    let $pattern =
+                        unsafe { $crate::AngularDefaultExpressionClause::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::ANGULAR_ELSE_CLAUSE => {
                     let $pattern = unsafe { $crate::AngularElseClause::new_unchecked(node) };
                     $body
@@ -96,6 +109,19 @@ macro_rules! map_syntax_node {
                 $crate::HtmlSyntaxKind::ANGULAR_STRUCTURAL_DIRECTIVE => {
                     let $pattern =
                         unsafe { $crate::AngularStructuralDirective::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_SWITCH_BLOCK => {
+                    let $pattern = unsafe { $crate::AngularSwitchBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_SWITCH_OPENING_BLOCK => {
+                    let $pattern =
+                        unsafe { $crate::AngularSwitchOpeningBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_SWITCH_PARAMETERS => {
+                    let $pattern = unsafe { $crate::AngularSwitchParameters::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::ANGULAR_TEMPLATE_REF_VARIABLE => {
@@ -563,6 +589,10 @@ macro_rules! map_syntax_node {
                 $crate::HtmlSyntaxKind::VUE_BOGUS_DIRECTIVE_ARGUMENT => {
                     let $pattern =
                         unsafe { $crate::VueBogusDirectiveArgument::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_CASE_CLAUSE_LIST => {
+                    let $pattern = unsafe { $crate::AngularCaseClauseList::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::ANGULAR_ELSE_IF_CLAUSE_LIST => {

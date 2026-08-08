@@ -2,3 +2,4 @@
 
 pub(crate) mod binding;
 pub(crate) mod block;
+pub(crate) mod default_clause_body;
