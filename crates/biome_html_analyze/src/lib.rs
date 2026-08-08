@@ -43,6 +43,7 @@ impl HtmlAnalyzerServices {
 
     pub fn with_project_layout(mut self, project_layout: Arc<ProjectLayout>) -> Self {
         self.project_layout = Some(project_layout);
+        self
     }
 }
 
