@@ -8,18 +8,22 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
+use biome_js_syntax::modifier_ext::Modifier;
 use biome_js_syntax::{
-    AnyJsExpression, JsCallExpression, JsClassExpression, JsForStatement, JsFunctionExpression,
-    JsIdentifierExpression, JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode,
-    JsVariableDeclarator, TsConditionalType, TsDeclarationModule, TsInferType,
-    TsInterfaceDeclaration, TsTypeAliasDeclaration,
+    AnyJsExpression, JsCallExpression, JsClassExpression, JsClassMemberList, JsExport,
+    JsExportDefaultDeclarationClause, JsForStatement, JsFunctionExpression, JsIdentifierExpression,
+    JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator,
+    TsConditionalType, TsDeclarationModule, TsDeclareFunctionDeclaration,
+    TsDeclareFunctionExportDefaultDeclaration, TsInferType, TsInterfaceDeclaration,
+    TsMethodSignatureClassMember, TsTypeAliasDeclaration, TsTypeParameters,
 };
 use biome_languages::JsFileSource;
 use biome_languages::javascript::JsEmbeddingKind;
-use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, Direction, SyntaxResult};
 use biome_rule_options::no_unused_variables::{
     NoUnusedVariablesOptions, NoUnusedVariablesOptionsIgnore,
 };
+use enumflags2::BitFlags;
 
 declare_lint_rule! {
     /// Disallow unused variables.
@@ -245,6 +249,156 @@ fn is_rest_spread_sibling(decl: &AnyJsBindingDeclaration) -> bool {
     }
 }
 
+/// Returns `true` if the type parameter belongs to a function or method
+/// signature (a declaration without a body, such as an overload signature)
+/// that has a body-bearing implementation of the same identity in scope.
+///
+/// TypeScript does not report unused type parameters on overload signatures.
+/// It checks the type parameters of the body-bearing implementation against
+/// references in that declaration's signature and body. A body-less method
+/// without an implementation, such as an abstract method, remains subject to
+/// this rule.
+/// See https://github.com/biomejs/biome/issues/11214
+fn is_type_parameter_of_signature(model: &SemanticModel, type_parameter: &JsSyntaxNode) -> bool {
+    let Some(owner) = type_parameter
+        .ancestors()
+        .find_map(TsTypeParameters::cast)
+        .and_then(|type_parameters| type_parameters.syntax().parent())
+    else {
+        return false;
+    };
+    match owner.kind() {
+        JsSyntaxKind::TS_DECLARE_FUNCTION_DECLARATION => {
+            TsDeclareFunctionDeclaration::cast(owner)
+                .is_some_and(|signature| declare_function_has_implementation(model, &signature))
+        }
+        JsSyntaxKind::TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION => {
+            TsDeclareFunctionExportDefaultDeclaration::cast(owner)
+                .is_some_and(|signature| declare_default_function_has_implementation(&signature))
+        }
+        JsSyntaxKind::TS_METHOD_SIGNATURE_CLASS_MEMBER => {
+            TsMethodSignatureClassMember::cast(owner)
+                .is_some_and(|signature| method_signature_has_implementation(&signature))
+        }
+        _ => false,
+    }
+}
+
+/// Returns `true` if `declaration` is a function declaration carrying a body,
+/// meaning it implements an overload set rather than adding a signature to it.
+fn is_function_implementation(declaration: &AnyJsBindingDeclaration) -> bool {
+    matches!(
+        declaration,
+        AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+            | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
+    )
+}
+
+/// Returns `true` if the name of `signature` is bound in the enclosing scope
+/// to a `function` declaration that TypeScript merges it with.
+///
+/// An overload signature always precedes its implementation, and a scope binds
+/// a name to the last declaration using it, so this lookup lands on the
+/// implementation whenever the overload set has one.
+fn declare_function_has_implementation(
+    model: &SemanticModel,
+    signature: &TsDeclareFunctionDeclaration,
+) -> bool {
+    let Some(name) = signature
+        .id()
+        .ok()
+        .and_then(|id| id.as_js_identifier_binding()?.name_token().ok())
+    else {
+        return false;
+    };
+    let signature = AnyJsBindingDeclaration::from(signature.clone());
+    let Some(statement_list) = containing_statement_list(&signature) else {
+        return false;
+    };
+    let Some(declaration) = model
+        .scope(&statement_list)
+        .get_binding(name.text_trimmed())
+        .and_then(|binding| binding.tree().declaration())
+    else {
+        return false;
+    };
+    is_function_implementation(&declaration) && signature.is_mergeable(&declaration)
+}
+
+/// Returns `true` if an `export default function` declaration with a body
+/// exists among the siblings of `signature`. There can only be one default
+/// export per module, so its mere presence identifies it as the
+/// implementation of this signature.
+///
+/// Unlike [`declare_function_has_implementation`], this cannot go through the
+/// semantic model: a default export overload may be anonymous, in which case
+/// it binds no name to look up.
+fn declare_default_function_has_implementation(
+    signature: &TsDeclareFunctionExportDefaultDeclaration,
+) -> bool {
+    let Some(export_clause) = signature
+        .syntax()
+        .ancestors()
+        .find_map(JsExportDefaultDeclarationClause::cast)
+    else {
+        return false;
+    };
+    let Some(export) = export_clause.syntax().parent() else {
+        return false;
+    };
+    let Some(container) = export.parent() else {
+        return false;
+    };
+    let signature = AnyJsBindingDeclaration::from(signature.clone());
+    container.children().any(|item| {
+        JsExport::can_cast(item.kind())
+            && item
+                .children()
+                .find_map(JsExportDefaultDeclarationClause::cast)
+                .is_some_and(|clause| {
+                    clause
+                        .syntax()
+                        .children()
+                        .filter_map(AnyJsBindingDeclaration::cast)
+                        .any(|declaration| {
+                            is_function_implementation(&declaration)
+                                && signature.is_mergeable(&declaration)
+                        })
+                })
+    })
+}
+
+/// Returns `true` if a class method with a body, the same name, and the same
+/// static-ness as `signature` exists among the members of the enclosing
+/// class. An abstract method never gets one, so its signature is left out of
+/// the exemption and is checked like any other declaration.
+fn method_signature_has_implementation(signature: &TsMethodSignatureClassMember) -> bool {
+    let Some(name) = signature.name().ok().and_then(|name| name.name()) else {
+        return false;
+    };
+    let is_static = BitFlags::<Modifier>::from(&signature.modifiers()).contains(Modifier::Static);
+    let Some(member_list) = signature
+        .syntax()
+        .ancestors()
+        .find_map(JsClassMemberList::cast)
+    else {
+        return false;
+    };
+    member_list.iter().any(|member| {
+        let Some(method) = member.as_js_method_class_member() else {
+            return false;
+        };
+        let other_is_static =
+            BitFlags::<Modifier>::from(&method.modifiers()).contains(Modifier::Static);
+        other_is_static == is_static
+            && method
+                .name()
+                .ok()
+                .and_then(|other_name| other_name.name())
+                .is_some_and(|other_name| other_name.text() == name.text())
+    })
+}
+
 fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedFix> {
     if binding.is_under_object_pattern_binding()? {
         Some(SuggestedFix::NoSuggestion)
@@ -256,6 +410,7 @@ fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedF
 // It is ok in some Typescripts constructs for a parameter to be unused.
 // Returning None means is ok to be unused
 fn suggested_fix_if_unused(
+    model: &SemanticModel,
     binding: &AnyJsIdentifierBinding,
     options: &NoUnusedVariablesOptions,
 ) -> Option<SuggestedFix> {
@@ -312,9 +467,12 @@ fn suggested_fix_if_unused(
         // Bindings under catch are never ok to be unused
         AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(SuggestedFix::PrefixUnderscore),
 
-        // Type parameters are never ok to be unused unless they are declared in an ambient context
+        // Type parameters are never ok to be unused unless they are declared in an
+        // ambient context or in an overload signature that has an implementation
         node @ AnyJsBindingDeclaration::TsTypeParameter(_) => {
-            if is_in_ambient_context(node.syntax()) {
+            if is_in_ambient_context(node.syntax())
+                || is_type_parameter_of_signature(model, node.syntax())
+            {
                 None
             } else {
                 Some(SuggestedFix::PrefixUnderscore)
@@ -457,7 +615,7 @@ impl Rule for NoUnusedVariables {
             {
                 return None;
             }
-            suggested_fix_if_unused(binding, ctx.options())
+            suggested_fix_if_unused(model, binding, ctx.options())
         } else {
             None
         }
