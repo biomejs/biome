@@ -5,7 +5,7 @@ use super::stmt::{VariableDeclarationParent, parse_statements, parse_variable_de
 use crate::JsParser;
 use crate::prelude::*;
 use crate::state::{ChangeParserState, EnableStrictMode, SignatureFlags};
-use crate::syntax::binding::parse_binding;
+use crate::syntax::binding::{parse_binding, parse_binding_pattern};
 use crate::syntax::expr::{ExpressionContext, parse_expression};
 use crate::syntax::function::{ParameterContext, parse_parameter_list};
 use crate::syntax::js_parse_error;
@@ -104,6 +104,10 @@ fn parse_svelte_declaration(p: &mut JsParser, m: Marker) -> CompletedMarker {
 /// This fixes issues where `{ duration }` was incorrectly parsed as a block statement
 /// instead of as an object literal expression.
 fn parse_template_expression(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    if p.source_type().as_embedding_kind().is_vue_slot_scope() {
+        return parse_vue_slot_scope(p, m);
+    }
+
     if p.source_type()
         .as_embedding_kind()
         .is_svelte_function_signature()
@@ -151,6 +155,40 @@ fn parse_template_expression(p: &mut JsParser, m: Marker) -> CompletedMarker {
     // Always complete as JS_EXPRESSION_TEMPLATE_ROOT
     // The expression child might be bogus, but the root should always be this type
     m.complete(p, JS_EXPRESSION_TEMPLATE_ROOT)
+}
+
+/// Parses the value of a Vue `v-slot` / `#slot` directive: `v-slot="{ item }"`.
+///
+/// The value declares the slot props, so it is a binding pattern rather than an
+/// expression. `JsVueSlotScopeRoot` only accepts a pattern and `EOF`, so anything
+/// left over has to be folded into the pattern slot as a `JsBogusBinding`;
+/// bumping it straight into the root would make the whole root bogus and
+/// `JsParse::tree` panics on a root it cannot cast.
+fn parse_vue_slot_scope(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    let pattern_marker = p.start();
+    let has_pattern = !parse_binding_pattern(p, ExpressionContext::default()).is_absent();
+
+    if !has_pattern {
+        p.error(js_parse_error::expected_binding(p, p.cur_range()));
+    }
+
+    if !p.at(EOF) {
+        p.error(js_parse_error::vue_slot_scope_trailing_code(
+            p,
+            p.cur_range(),
+        ));
+        while !p.at(EOF) {
+            p.bump_any();
+        }
+
+        pattern_marker.complete(p, JS_BOGUS_BINDING);
+    } else if !has_pattern {
+        pattern_marker.complete(p, JS_BOGUS_BINDING);
+    } else {
+        pattern_marker.abandon(p);
+    }
+
+    m.complete(p, JS_VUE_SLOT_SCOPE_ROOT)
 }
 
 fn parse_vue_event_handler(p: &mut JsParser, m: Marker) -> CompletedMarker {

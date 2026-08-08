@@ -96,7 +96,7 @@ fn correctly_computes_analyzer_options() {
 #[test]
 fn vue_template_expressions_get_instance_properties() {
     use biome_languages::JsFileSource;
-    use biome_languages::javascript::JsEmbeddingKind;
+    use biome_languages::javascript::{JsEmbeddingKind, VueEmbeddingKind};
 
     let settings = Settings::default();
     let language = JsLanguage::lookup_settings(&settings.languages);
@@ -104,9 +104,7 @@ fn vue_template_expressions_get_instance_properties() {
 
     let template_source = JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
         setup: false,
-        is_source: false,
-        event_handler: false,
-        allow_statements: false,
+        embedding_kind: VueEmbeddingKind::Expression,
     });
     let options = JsLanguage::resolve_analyzer_options(
         &settings,
@@ -124,7 +122,7 @@ fn vue_template_expressions_get_instance_properties() {
 #[test]
 fn vue_event_handlers_get_dollar_event() {
     use biome_languages::JsFileSource;
-    use biome_languages::javascript::JsEmbeddingKind;
+    use biome_languages::javascript::{JsEmbeddingKind, VueEmbeddingKind};
 
     let settings = Settings::default();
     let language = JsLanguage::lookup_settings(&settings.languages);
@@ -133,9 +131,7 @@ fn vue_event_handlers_get_dollar_event() {
     let event_handler_source =
         JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
             setup: false,
-            is_source: false,
-            event_handler: true,
-            allow_statements: false,
+            embedding_kind: VueEmbeddingKind::EventHandler,
         });
     let options = JsLanguage::resolve_analyzer_options(
         &settings,

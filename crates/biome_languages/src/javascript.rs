@@ -163,6 +163,32 @@ pub enum SvelteEmbeddingKind {
     Declaration,
 }
 
+/// Identifies the parser contract for JavaScript embedded in a Vue file.
+///
+/// The variants are mutually exclusive: a snippet is either the module that
+/// declares the component's bindings, or one of the template payloads, each of
+/// which the parser turns into a different root.
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
+pub enum VueEmbeddingKind {
+    /// A `<script>` or `<script setup>` block parsed as a JavaScript or
+    /// TypeScript module. This is where the template's bindings are declared,
+    /// and the only mode that allows statements.
+    #[default]
+    Source,
+    /// A `{{ }}` interpolation or an ordinary directive value (`:prop="x"`,
+    /// `v-if="y"`) parsed as a single expression.
+    Expression,
+    /// A `v-on` / `@` handler value, parsed as an expression when it looks like
+    /// a handler reference and as inline statements otherwise.
+    EventHandler,
+    /// A `v-slot` / `#` value, parsed as a binding pattern because it declares
+    /// the slot props rather than referencing them.
+    SlotScope,
+}
+
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
@@ -178,14 +204,9 @@ pub enum JsEmbeddingKind {
     Vue {
         /// Whether the script is inside script tag with setup attribute
         setup: bool,
-        /// Where the bindings are defined
-        is_source: bool,
-        /// Whether this is a v-on event handler (e.g., @click="handler")
-        event_handler: bool,
-        /// Whether this embed should be parsed as statements (module/script).
-        /// When `false`, the content is parsed as an expression via `parse_template_expression`.
-        /// Source-level embeds (`<script>`) use `true`; directives and text expressions use `false`.
-        allow_statements: bool,
+        /// Which part of the Vue file this snippet came from, and therefore how
+        /// the parser should read it.
+        embedding_kind: VueEmbeddingKind,
     },
     Svelte {
         /// `file_kind` models whether the Svelte file is a component document or a
@@ -222,7 +243,16 @@ impl JsEmbeddingKind {
         matches!(
             self,
             Self::Vue {
-                event_handler: true,
+                embedding_kind: VueEmbeddingKind::EventHandler,
+                ..
+            }
+        )
+    }
+    pub const fn is_vue_slot_scope(&self) -> bool {
+        matches!(
+            self,
+            Self::Vue {
+                embedding_kind: VueEmbeddingKind::SlotScope,
                 ..
             }
         )
@@ -359,9 +389,7 @@ impl JsFileSource {
     pub fn vue() -> Self {
         Self::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
             setup: false,
-            is_source: true,
-            event_handler: false,
-            allow_statements: true,
+            embedding_kind: VueEmbeddingKind::Source,
         })
     }
 
@@ -369,9 +397,7 @@ impl JsFileSource {
     pub fn vue_setup() -> Self {
         Self::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
             setup: true,
-            is_source: true,
-            event_handler: false,
-            allow_statements: true,
+            embedding_kind: VueEmbeddingKind::Source,
         })
     }
 
@@ -460,7 +486,7 @@ impl JsFileSource {
                 embedding_kind: SvelteEmbeddingKind::Source,
                 ..
             } | JsEmbeddingKind::Vue {
-                is_source: true,
+                embedding_kind: VueEmbeddingKind::Source,
                 ..
             } | JsEmbeddingKind::Astro {
                 frontmatter: true,
@@ -482,7 +508,9 @@ impl JsFileSource {
                     | SvelteEmbeddingKind::LegacyConst,
                 ..
             } | JsEmbeddingKind::Vue {
-                allow_statements: false,
+                embedding_kind: VueEmbeddingKind::Expression
+                    | VueEmbeddingKind::EventHandler
+                    | VueEmbeddingKind::SlotScope,
                 ..
             } | JsEmbeddingKind::Astro {
                 frontmatter: false,
@@ -494,6 +522,12 @@ impl JsFileSource {
     /// Returns true if this is a Vue event handler (v-on directive)
     pub const fn is_vue_event_handler(&self) -> bool {
         self.embedding_kind.is_vue_event_handler()
+    }
+
+    /// Returns true if this is a Vue `v-slot` / `#` directive value, whose
+    /// content declares the slot props instead of referencing them.
+    pub const fn is_vue_slot_scope(&self) -> bool {
+        self.embedding_kind.is_vue_slot_scope()
     }
 
     /// Returns true if this is a Svelte `{@const}` block
