@@ -16,10 +16,10 @@ use crate::file_handlers::{SvelteFileHandler, VueFileHandler};
 use crate::module_graph::ModuleDependencies;
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
 use crate::module_graph::resolve_css_module;
+#[cfg(all(feature = "module_graph", feature = "lang_html"))]
+use crate::module_graph::resolve_html_module;
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
 use crate::module_graph::resolve_js_module;
-#[cfg(all(feature = "module_graph", feature = "lang_html"))]
-use crate::module_graph::{HtmlEmbeddedContent, resolve_html_module};
 #[cfg(feature = "module_graph")]
 use crate::module_graph::{ModuleDb, ModuleInfoKind};
 use crate::projects::{GetFileFeaturesParams, ProjectKey, Projects};
@@ -65,7 +65,7 @@ use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
 #[cfg(all(feature = "module_graph", feature = "lang_html"))]
 use biome_html_syntax::HtmlRoot;
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
-use biome_js_semantic::{SemanticModel, js_semantic_model};
+use biome_js_semantic::js_semantic_model;
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
 use biome_js_syntax::AnyJsRoot;
 use biome_json_parser::JsonParserOptions;
@@ -217,20 +217,6 @@ impl ProcessFileState {
                 .map(|snippet| snippet.error_count(&self.db))
                 .sum::<usize>()
     }
-}
-
-/// The kind of operation to execute when updating the module graph due to an external trigger
-/// e.g. indexing, watcher, etc.
-#[cfg(feature = "module_graph")]
-enum ExtractedModuleInputs {
-    #[cfg(feature = "lang_js")]
-    Js(AnyJsRoot, Arc<SemanticModel>),
-    #[cfg(feature = "lang_css")]
-    Css(AnyCssRoot),
-    #[cfg(feature = "lang_html")]
-    Html(HtmlRoot, Vec<HtmlEmbeddedContent>),
-    Removed,
-    Unsupported,
 }
 
 /// The resoulution of the operation.
@@ -2026,151 +2012,69 @@ impl WorkspaceServerWithDb<'_> {
         update_kind: UpdateKind,
         infer_types: bool,
     ) -> Result<(ModuleDependencies, Vec<Error>), WorkspaceError> {
-        // Keep reads, resolution, and writes separated so commits never run
-        // while this thread still holds a database fork.
-        let inputs = {
-            let db = self.get_db();
-            self.extract_module_inputs(&db, path, &update_kind)?
-        };
-        let resolved = self.resolve_module_graph_update(path, inputs, infer_types);
-        self.commit_module_graph_update(path, resolved)
-    }
-
-    #[cfg(feature = "module_graph")]
-    fn extract_module_inputs(
-        &self,
-        db: &WorkspaceDb,
-        path: &BiomePath,
-        update_kind: &UpdateKind,
-    ) -> Result<ExtractedModuleInputs, WorkspaceError> {
-        #[cfg(not(feature = "html_embeds"))]
-        let _ = path;
-        match update_kind {
+        let resolved = match update_kind {
             UpdateKind::AddedOrChanged(_, root) => {
-                #[cfg(feature = "lang_js")]
-                if let Some(js_root) = root.clone().into_language_root::<AnyJsRoot>(db) {
-                    let semantic_model = js_semantic_model(db, root);
-                    return Ok(ExtractedModuleInputs::Js(
-                        js_root,
-                        Arc::new(semantic_model.clone()),
-                    ));
-                }
+                let db = self.get_db();
 
-                #[cfg(feature = "lang_css")]
-                if let Some(css_root) = root.clone().into_language_root::<AnyCssRoot>(db) {
-                    return Ok(ExtractedModuleInputs::Css(css_root));
-                }
+                'resolve: {
+                    #[cfg(feature = "lang_js")]
+                    if let Some(js_root) = root.clone().into_language_root::<AnyJsRoot>(&*db) {
+                        let semantic_model = Arc::new(js_semantic_model(&*db, &root).clone());
+                        let (module_info, dependencies, diagnostics) = resolve_js_module(
+                            js_root,
+                            path,
+                            self.fs.as_ref(),
+                            &self.project_layout,
+                            semantic_model,
+                            &self.db_state.path_info_cache,
+                            infer_types,
+                        );
+                        break 'resolve ResolvedModuleGraphUpdate::Upsert {
+                            kind: ModuleInfoKind::Js(module_info),
+                            dependencies,
+                            diagnostics: diagnostics.into_iter().map(Into::into).collect(),
+                        };
+                    }
 
-                #[cfg(feature = "lang_html")]
-                if let Some(html_root) = root.clone().into_language_root::<HtmlRoot>(db) {
-                    #[cfg(feature = "html_embeds")]
-                    let embedded_content: Vec<HtmlEmbeddedContent> = self
-                        .assert_parse(path)
-                        .and_then(|()| {
-                            db.get_file(path)
-                                .ok_or_else(|| WorkspaceError::not_found(path.to_string()))
-                        })
-                        .map(|doc| {
-                            doc.snippets(db)
-                                .iter()
-                                .filter_map(|snippet| {
-                                    let source =
-                                        db.source_from_index(snippet.document_source_index(db));
-                                    if let Some(css_source) =
-                                        source.and_then(|source| source.to_css_file_source())
-                                    {
-                                        Some(HtmlEmbeddedContent::Css(
-                                            snippet.parsed(db).tree(),
-                                            css_source,
-                                            snippet.content_offset(db),
-                                        ))
-                                    } else if source
-                                        .and_then(|source| source.to_js_file_source())
-                                        .is_some()
-                                    {
-                                        Some(HtmlEmbeddedContent::Js(
-                                            snippet.parsed(db).tree(),
-                                            snippet.content_offset(db),
-                                        ))
-                                    } else {
-                                        None
-                                    }
-                                })
-                                .collect()
-                        })
-                        .unwrap_or_default();
-                    #[cfg(not(feature = "html_embeds"))]
-                    let embedded_content: Vec<HtmlEmbeddedContent> = Vec::new();
+                    #[cfg(feature = "lang_css")]
+                    if let Some(css_root) = root.clone().into_language_root::<AnyCssRoot>(&*db) {
+                        let (module_info, dependencies, diagnostics) = resolve_css_module(
+                            css_root,
+                            path,
+                            self.fs.as_ref(),
+                            &self.project_layout,
+                            &self.db_state.path_info_cache,
+                        );
+                        break 'resolve ResolvedModuleGraphUpdate::Upsert {
+                            kind: ModuleInfoKind::Css(module_info),
+                            dependencies,
+                            diagnostics: diagnostics.into_iter().map(Into::into).collect(),
+                        };
+                    }
 
-                    return Ok(ExtractedModuleInputs::Html(html_root, embedded_content));
-                }
+                    #[cfg(feature = "lang_html")]
+                    if root.clone().into_language_root::<HtmlRoot>(&*db).is_some() {
+                        let (module_info, dependencies, diagnostics) = resolve_html_module(
+                            &*db,
+                            path,
+                            self.fs.as_ref(),
+                            &self.project_layout,
+                            &self.db_state.path_info_cache,
+                        );
+                        break 'resolve ResolvedModuleGraphUpdate::Upsert {
+                            kind: ModuleInfoKind::Html(module_info),
+                            dependencies,
+                            diagnostics: diagnostics.into_iter().map(Into::into).collect(),
+                        };
+                    }
 
-                let _ = root;
-                Ok(ExtractedModuleInputs::Unsupported)
-            }
-            UpdateKind::Removed => Ok(ExtractedModuleInputs::Removed),
-        }
-    }
-
-    #[cfg(feature = "module_graph")]
-    fn resolve_module_graph_update(
-        &self,
-        path: &BiomePath,
-        inputs: ExtractedModuleInputs,
-        infer_types: bool,
-    ) -> ResolvedModuleGraphUpdate {
-        match inputs {
-            #[cfg(feature = "lang_js")]
-            ExtractedModuleInputs::Js(js_root, semantic_model) => {
-                let (module_info, dependencies, diagnostics) = resolve_js_module(
-                    js_root,
-                    path,
-                    self.fs.as_ref(),
-                    &self.project_layout,
-                    semantic_model,
-                    &self.db_state.path_info_cache,
-                    infer_types,
-                );
-                ResolvedModuleGraphUpdate::Upsert {
-                    kind: ModuleInfoKind::Js(module_info),
-                    dependencies,
-                    diagnostics: diagnostics.into_iter().map(Into::into).collect(),
+                    let _ = root;
+                    ResolvedModuleGraphUpdate::Noop
                 }
             }
-            #[cfg(feature = "lang_css")]
-            ExtractedModuleInputs::Css(css_root) => {
-                let (module_info, dependencies, diagnostics) = resolve_css_module(
-                    css_root,
-                    path,
-                    self.fs.as_ref(),
-                    &self.project_layout,
-                    &self.db_state.path_info_cache,
-                );
-                ResolvedModuleGraphUpdate::Upsert {
-                    kind: ModuleInfoKind::Css(module_info),
-                    dependencies,
-                    diagnostics: diagnostics.into_iter().map(Into::into).collect(),
-                }
-            }
-            #[cfg(feature = "lang_html")]
-            ExtractedModuleInputs::Html(html_root, embedded_content) => {
-                let (module_info, dependencies, diagnostics) = resolve_html_module(
-                    html_root,
-                    &embedded_content,
-                    path,
-                    self.fs.as_ref(),
-                    &self.project_layout,
-                    &self.db_state.path_info_cache,
-                );
-                ResolvedModuleGraphUpdate::Upsert {
-                    kind: ModuleInfoKind::Html(module_info),
-                    dependencies,
-                    diagnostics: diagnostics.into_iter().map(Into::into).collect(),
-                }
-            }
-            ExtractedModuleInputs::Removed => ResolvedModuleGraphUpdate::Remove,
-            ExtractedModuleInputs::Unsupported => ResolvedModuleGraphUpdate::Noop,
-        }
+            UpdateKind::Removed => ResolvedModuleGraphUpdate::Remove,
+        };
+        self.commit_module_graph_update(path, resolved)
     }
 
     #[cfg(feature = "module_graph")]

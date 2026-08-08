@@ -5,7 +5,7 @@ pub(crate) use biome_module_graph::resolve_css_module;
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
 pub(crate) use biome_module_graph::resolve_js_module;
 #[cfg(all(feature = "module_graph", feature = "lang_html"))]
-pub(crate) use biome_module_graph::{HtmlEmbeddedContent, resolve_html_module};
+pub(crate) use biome_module_graph::resolve_html_module;
 #[cfg(feature = "module_graph")]
 pub(crate) use biome_module_graph::{
     ModuleDb, ModuleDependencies, ModuleInfo, ModuleInfoKind, PathInfoCache,

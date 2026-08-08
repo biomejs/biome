@@ -26,16 +26,12 @@ use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_fs::MemoryFileSystem;
 use biome_fs::{BiomePath, FileSystem, OsFileSystem};
 #[cfg(all(feature = "module_graph", feature = "lang_html"))]
-use biome_html_parser::HtmlParserOptions;
-#[cfg(all(feature = "module_graph", feature = "lang_html"))]
-use biome_html_syntax::HtmlRoot;
+use biome_html_parser::{HtmlParse, HtmlParserOptions};
 #[cfg(feature = "lang_js")]
 use biome_js_parser::{AnyJsRoot, JsParserOptions};
 #[cfg(feature = "type_inference")]
 use biome_js_type_info::TypeData;
 use biome_languages::DocumentFileSource;
-#[cfg(all(feature = "module_graph", feature = "lang_html"))]
-use biome_module_graph::HtmlEmbeddedContent;
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
 use biome_module_graph::resolve_css_module;
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
@@ -620,7 +616,7 @@ pub fn get_css_added_paths<'a>(
 pub fn get_html_added_paths<'a>(
     fs: &dyn FileSystem,
     paths: &'a [BiomePath],
-) -> Vec<(&'a BiomePath, HtmlRoot, Vec<HtmlEmbeddedContent>)> {
+) -> Vec<(&'a BiomePath, HtmlParse, DocumentFileSource)> {
     paths
         .iter()
         .filter_map(|path| {
@@ -629,7 +625,7 @@ pub fn get_html_added_paths<'a>(
             else {
                 return None;
             };
-            let root = fs.read_file_from_path(path).ok().map(|content| {
+            let parse = fs.read_file_from_path(path).ok().map(|content| {
                 let parsed =
                     biome_html_parser::parse_html(&content, HtmlParserOptions::from(&file_source));
                 let diagnostics = parsed.diagnostics();
@@ -637,12 +633,9 @@ pub fn get_html_added_paths<'a>(
                     diagnostics.is_empty(),
                     "Unexpected diagnostics: {diagnostics:?}\nWhile parsing:\n{content}"
                 );
-                parsed.tree()
+                parsed
             })?;
-            // For test utilities, we don't parse embedded content in HTML files.
-            // In real scenarios, the workspace server handles this by parsing
-            // embedded blocks separately and passing them to update_graph_for_html_paths.
-            Some((path, root, Vec::<HtmlEmbeddedContent>::new()))
+            Some((path, parse, DocumentFileSource::Html(file_source)))
         })
         .collect()
 }

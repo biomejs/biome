@@ -14,7 +14,7 @@ use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::DiagnosticExt;
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_html_analyze::HtmlAnalyzerServices;
-use biome_html_syntax::HtmlRoot;
+use biome_html_parser::HtmlParse;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::Parse;
 use biome_js_semantic::{SemanticModel, semantic_model_from_source};
@@ -155,10 +155,18 @@ impl AnalyzerServicesBuilder {
         }
 
         let html_added_paths = get_html_added_paths(&fs, &html_paths);
-        for (path, root, embedded_content) in html_added_paths {
+        for (path, parse, file_source) in html_added_paths {
+            let source_index = db.insert_source(file_source);
+            let parsed_source = ParsedSource::new(
+                &db,
+                path.as_path().to_path_buf(),
+                parse.into(),
+                source_index,
+                vec![],
+            );
+            db.insert_file(path.as_path(), parsed_source);
             let (module_info, _, _) = resolve_html_module(
-                root,
-                &embedded_content,
+                &db,
                 path,
                 &fs,
                 &layout,
@@ -185,7 +193,7 @@ impl AnalyzerServicesBuilder {
     pub fn build_for_js_parse(
         &mut self,
         path: Utf8PathBuf,
-        parse: biome_js_parser::Parse<biome_js_parser::AnyJsRoot>,
+        parse: Parse<biome_js_parser::AnyJsRoot>,
         file_source: JsFileSource,
     ) -> JsAnalyzerServices<'_> {
         let root = parse.tree();
@@ -232,10 +240,9 @@ impl AnalyzerServicesBuilder {
     pub fn build_for_html_parse(
         &mut self,
         path: Utf8PathBuf,
-        parse: Parse<HtmlRoot>,
+        parse: HtmlParse,
         file_source: HtmlFileSource,
     ) -> HtmlAnalyzerServices {
-        let root = parse.tree();
         let source_index = self
             .module_db
             .insert_source(DocumentFileSource::Html(file_source));
@@ -249,8 +256,7 @@ impl AnalyzerServicesBuilder {
         self.module_db.insert_file(&path, parsed_source);
 
         let (module_info, _, _) = resolve_html_module(
-            root,
-            &[],
+            &self.module_db,
             &BiomePath::new(&path),
             &self.file_system,
             &self.project_layout,

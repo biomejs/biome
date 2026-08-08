@@ -205,7 +205,7 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
                 }
             } else {
                 let root = parse.tree();
-                let services = services_builder.build_for_js_parse(
+                let services = services_builder.build_for_html_parse(
                     Utf8PathBuf::from(&file_path),
                     parse,
                     file_source,
@@ -216,7 +216,7 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
                     filter,
                     &options,
                     file_source,
-                    biome_html_analyze::HtmlAnalyzerServices::default(),
+                    services,
                     |signal| process_signal(signal, code, &file_path, writer),
                 );
                 propagate_break(result)?;

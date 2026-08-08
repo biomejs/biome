@@ -2,14 +2,14 @@ use std::collections::BTreeMap;
 
 use biome_configuration::{Configuration, HtmlConfiguration};
 use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css};
-use biome_db::ParsedSource;
+use biome_db::{ParsedSnippet, ParsedSource};
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
 use biome_languages::{CssFileSource, DocumentFileSource, HtmlFileSource};
 use biome_module_graph::{
-    HtmlEmbeddedContent, ModuleInfoKind, PathInfoCache, resolve_css_module, resolve_html_module,
-    resolve_js_module,
+    ModuleInfoKind, PathInfoCache, resolve_css_module, resolve_html_module, resolve_js_module,
 };
+use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
 use biome_service::Workspace;
 use biome_service::settings::ModuleGraphResolutionKind;
@@ -85,7 +85,7 @@ pub fn build_css_db(files: &[(&str, &str)]) -> (MemoryFileSystem, WorkspaceDb) {
     (fs, db)
 }
 
-pub fn parse_embedded_css(src: &str, file_source: CssFileSource) -> HtmlEmbeddedContent {
+pub fn parse_embedded_css(src: &str, file_source: CssFileSource) -> (AnyParse, CssFileSource) {
     let css_modules = match file_source.as_embedding_kind() {
         CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue { .. }) => CssModulesKind::Vue,
         CssEmbeddingKind::Html(
@@ -101,20 +101,48 @@ pub fn parse_embedded_css(src: &str, file_source: CssFileSource) -> HtmlEmbedded
             ..Default::default()
         },
     );
-    HtmlEmbeddedContent::Css(parsed.tree(), file_source, 0.into())
+    (parsed.into(), file_source)
 }
 
 pub fn build_html_db(
     fs: &MemoryFileSystem,
-    files: &[(&str, &str, HtmlFileSource, Vec<HtmlEmbeddedContent>)],
+    files: &[(&str, &str, HtmlFileSource, Vec<(AnyParse, CssFileSource)>)],
 ) -> WorkspaceDb {
     let mut db = WorkspaceDb::default();
     let cache = PathInfoCache::default();
     for (path, source, file_source, embedded) in files {
         let path = BiomePath::new(*path);
-        let root = biome_html_parser::parse_html(source, file_source.into()).tree();
-        let (info, _, _) =
-            resolve_html_module(root, embedded, &path, fs, &ProjectLayout::default(), &cache);
+        let snippets = embedded
+            .iter()
+            .map(|(parsed, file_source)| {
+                let source_index = db.insert_source(DocumentFileSource::Css(*file_source));
+                ParsedSnippet::new(
+                    &db,
+                    parsed.clone(),
+                    Default::default(),
+                    Default::default(),
+                    0.into(),
+                    source_index,
+                )
+            })
+            .collect();
+        let parsed = biome_html_parser::parse_html(source, file_source.into());
+        let source_index = db.insert_source(DocumentFileSource::Html(*file_source));
+        let parsed_source = ParsedSource::new(
+            &db,
+            path.as_path().to_path_buf(),
+            parsed.into(),
+            source_index,
+            snippets,
+        );
+        db.insert_file(path.as_path(), parsed_source);
+        let (info, _, _) = resolve_html_module(
+            &db,
+            &path,
+            fs,
+            &ProjectLayout::default(),
+            &cache,
+        );
         db.update_or_insert_module(path.as_path().to_path_buf(), ModuleInfoKind::Html(info));
     }
     db

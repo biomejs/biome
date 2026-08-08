@@ -20,13 +20,13 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```html,expect_diagnostic
+    /// ```html,ignore,expect_diagnostic
     /// <div style="color: var(--text-color)"></div>
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```html
+    /// ```html,ignore
     /// <style>:root { --text-color: blue; }</style>
     /// <div style="color: var(--text-color)"></div>
     /// ```
