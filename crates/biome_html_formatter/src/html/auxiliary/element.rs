@@ -165,6 +165,11 @@ impl FormatHtmlElement {
         // boundary across a block-like edge child would incorrectly make it hug the parent tag.
         let has_structural_fallback_children =
             tag_name_kind.is_some_and(|kind| STRUCTURAL_FALLBACK_ELEMENTS.contains(kind));
+        // Media fallback content and a root template describe document structure rather than
+        // phrasing content, so their block-like edge children must remain visually separate
+        // from the container tags.
+        let preserves_edge_child_layout =
+            has_structural_fallback_children || (is_root_element_list && is_template_element);
         // The parser hands us a single `HtmlEmbeddedContent` child whenever it
         // read the content as raw text, which covers the tags below as well as
         // the blocks of a Vue single-file component, whose names are arbitrary.
@@ -254,7 +259,7 @@ impl FormatHtmlElement {
         // should NOT borrow tokens because their children are always multiline.
         let should_borrow_opening_r_angle = is_element_internally_whitespace_sensitive
             && !children.is_empty()
-            && (!has_structural_fallback_children
+            && (!preserves_edge_child_layout
                 || children.iter().next().is_none_or(|child| {
                     get_element_css_display(&child).is_externally_whitespace_sensitive(f)
                 }))
@@ -263,7 +268,7 @@ impl FormatHtmlElement {
             && !should_format_embedded_nodes;
         let should_borrow_closing_tag = is_element_internally_whitespace_sensitive
             && !children.is_empty()
-            && (!has_structural_fallback_children
+            && (!preserves_edge_child_layout
                 || children.iter().next_back().is_none_or(|child| {
                     get_element_css_display(&child).is_externally_whitespace_sensitive(f)
                 }))
