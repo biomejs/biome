@@ -16,6 +16,7 @@ biome_deserialize        = { workspace = true, optional = true }
 biome_deserialize_macros = { workspace = true, optional = true }
 biome_text_size          = { workspace = true, optional = true }
 globset                  = { workspace = true }
+parking_lot              = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, optional = true }
 
