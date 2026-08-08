@@ -83,6 +83,8 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "define",
         // Angular keywords
         "let",
+        "for",
+        "empty",
         // Known HTML tag names. Each gets its own token kind (e.g. `div` ->
         // `DIV_KW`) so tag-name checks are `O(1)` integer comparisons. HTML tag
         // names are case-insensitive, so the lexer lower-cases before lookup.
@@ -453,6 +455,14 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "ANGULAR_ELSE_IF_CLAUSE",
         "ANGULAR_ELSE_CLAUSE",
         "ANGULAR_BLOCK_BODY",
+        "ANGULAR_FOR_BLOCK",
+        "ANGULAR_FOR_LET_CLAUSE",
+        "ANGULAR_FOR_OPENING_BLOCK",
+        "ANGULAR_FOR_PARAMETERS",
+        "ANGULAR_FOR_TRACK_CLAUSE",
+        "ANGULAR_FOR_LET_BINDING_LIST",
+        "ANGULAR_FOR_EXPRESSION",
+        "ANGULAR_EMPTY_CLAUSE",
         // Bogus nodes
         "HTML_BOGUS",
         "HTML_BOGUS_ELEMENT",
