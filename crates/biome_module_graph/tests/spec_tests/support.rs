@@ -19,6 +19,13 @@ use biome_service::workspace::UpdateSettingsParams;
 use biome_test_utils::{get_added_js_paths, get_css_added_paths};
 use camino::{Utf8Path, Utf8PathBuf};
 
+type HtmlTestFile<'a> = (
+    &'a str,
+    &'a str,
+    HtmlFileSource,
+    Vec<(AnyParse, CssFileSource)>,
+);
+
 pub fn add_js_modules(
     db: &mut WorkspaceDb,
     fs: &dyn biome_resolver::FsWithResolverProxy,
@@ -104,10 +111,7 @@ pub fn parse_embedded_css(src: &str, file_source: CssFileSource) -> (AnyParse, C
     (parsed.into(), file_source)
 }
 
-pub fn build_html_db(
-    fs: &MemoryFileSystem,
-    files: &[(&str, &str, HtmlFileSource, Vec<(AnyParse, CssFileSource)>)],
-) -> WorkspaceDb {
+pub fn build_html_db(fs: &MemoryFileSystem, files: &[HtmlTestFile<'_>]) -> WorkspaceDb {
     let mut db = WorkspaceDb::default();
     let cache = PathInfoCache::default();
     for (path, source, file_source, embedded) in files {
