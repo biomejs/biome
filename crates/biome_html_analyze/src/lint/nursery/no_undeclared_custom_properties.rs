@@ -20,13 +20,13 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```html,ignore
+    /// ```html,expect_diagnostic
     /// <div style="color: var(--text-color)"></div>
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```html,ignore
+    /// ```html
     /// <style>:root { --text-color: blue; }</style>
     /// <div style="color: var(--text-color)"></div>
     /// ```
@@ -61,13 +61,15 @@ impl Rule for NoUndeclaredCustomProperties {
             .into_iter()
             .filter_map(|(range, name)| {
                 let decoded_name = decode_css_identifier(name.text());
-                if properties.definitions.iter().any(|definition| {
-                    decode_css_identifier(definition.text()) == decoded_name
-                }) || !css_property_definitions(
-                    db,
-                    SymbolFromModuleInfo::new(db, decoded_name.as_ref(), module),
-                )
-                .is_empty()
+                if properties
+                    .definitions
+                    .iter()
+                    .any(|definition| decode_css_identifier(definition.text()) == decoded_name)
+                    || !css_property_definitions(
+                        db,
+                        SymbolFromModuleInfo::new(db, decoded_name.as_ref(), module),
+                    )
+                    .is_empty()
                 {
                     return None;
                 }
@@ -108,7 +110,8 @@ fn inline_style_text(attribute: &HtmlAttribute) -> Option<(TokenText, TextSize)>
     if name.text_trimmed().to_lowercase_cow() != "style" {
         return None;
     }
-    let AnyHtmlAttributeInitializer::HtmlString(value) = attribute.initializer()?.value().ok()? else {
+    let AnyHtmlAttributeInitializer::HtmlString(value) = attribute.initializer()?.value().ok()?
+    else {
         return None;
     };
     let value_token = value.value_token().ok()?;
@@ -139,10 +142,7 @@ fn inline_custom_properties(value: &str) -> InlineCustomProperties {
         .filter_map(CssFunction::cast)
         .filter_map(|function| {
             let property = custom_property_name_from_var_function(&function)?;
-            Some((
-                property.text_trimmed_range(),
-                property.token_text_trimmed(),
-            ))
+            Some((property.text_trimmed_range(), property.token_text_trimmed()))
         })
         .collect();
     InlineCustomProperties {

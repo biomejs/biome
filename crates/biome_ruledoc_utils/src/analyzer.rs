@@ -205,6 +205,11 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
                 }
             } else {
                 let root = parse.tree();
+                let services = services_builder.build_for_js_parse(
+                    Utf8PathBuf::from(&file_path),
+                    parse,
+                    file_source,
+                );
                 let options = code_block.create_analyzer_options::<HtmlLanguage>(configuration)?;
                 let result = biome_html_analyze::analyze(
                     &root,

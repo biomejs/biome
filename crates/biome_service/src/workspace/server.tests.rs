@@ -1169,6 +1169,9 @@ const Bar = styled(Component)`
 fn stores_string_jsx_style_attributes_as_css_snippets() {
     const FILE_PATH: &str = "/project/file.jsx";
     const FILE_CONTENT: &str = r#"const Valid = <div style="color: red" />;
+const Component = <Component style="color: orange" />;
+const Namespaced = <div css:style="color: purple" />;
+const Malformed = <. style="color: black" />;
 const Expression = <div style={"color: blue"} />;
 const Object = <div style={{ color: "green" }} />;
 const Empty = <div style />;"#;

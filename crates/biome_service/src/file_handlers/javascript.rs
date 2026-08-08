@@ -73,8 +73,9 @@ use biome_js_semantic::{
 };
 #[cfg(feature = "js_embeds")]
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsTemplateElement, AnyJsxAttributeValue, JsCallArgumentList,
-    JsCallArguments, JsCallExpression, JsTemplateExpression, JsxAttribute,
+    AnyJsExpression, AnyJsTemplateElement, AnyJsxAttributeName, AnyJsxAttributeValue,
+    JsCallArgumentList, JsCallArguments, JsCallExpression, JsTemplateExpression, JsxAttribute,
+    JsxAttributeList, jsx_ext::AnyJsxElement,
 };
 #[cfg(feature = "type_inference")]
 use biome_js_syntax::{
@@ -702,7 +703,16 @@ fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
 
 #[cfg(feature = "js_embeds")]
 fn build_jsx_style_candidate(attribute: &JsxAttribute) -> Option<EmbedCandidate> {
-    if attribute.name_value_token().ok()?.text_trimmed() != "style" {
+    let AnyJsxAttributeName::JsxName(name) = attribute.name().ok()? else {
+        return None;
+    };
+    if name.value_token().ok()?.text_trimmed() != "style" {
+        return None;
+    }
+    let element = attribute
+        .parent::<JsxAttributeList>()?
+        .parent::<AnyJsxElement>()?;
+    if !element.is_element() {
         return None;
     }
     let AnyJsxAttributeValue::JsxString(value) = attribute.initializer()?.value().ok()? else {
