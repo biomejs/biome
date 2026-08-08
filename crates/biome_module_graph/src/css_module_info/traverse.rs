@@ -505,10 +505,7 @@ impl UpwardTraversalVisitor for CssPropertyTraversal<'_, '_> {
                 .iter()
                 .filter(|import| import.resolved_path.as_path() == Some(imported_path))
                 .map(|child_import| {
-                    let local_definition = self.local_property_definition_before(
-                        importer_path,
-                        Some(child_import.range.start()),
-                    );
+                    let local_definition = self.local_property_definition(importer_path);
                     let definition = local_definition.or_else(|| {
                         self.last_property_in_imports_before(
                             &info,
