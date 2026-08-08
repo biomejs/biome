@@ -13,12 +13,15 @@ use biome_db::ParsedSource;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::DiagnosticExt;
 use biome_fs::{BiomePath, MemoryFileSystem};
+use biome_html_analyze::HtmlAnalyzerServices;
+use biome_html_syntax::HtmlRoot;
 use biome_js_analyze::JsAnalyzerServices;
+use biome_js_parser::Parse;
 use biome_js_semantic::{SemanticModel, semantic_model_from_source};
 use biome_json_factory::make;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonObjectValue};
-use biome_languages::{DocumentFileSource, JsFileSource};
+use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource};
 use biome_module_graph::{
     ModuleInfoKind, PathInfoCache, resolve_css_module, resolve_html_module, resolve_js_module,
 };
@@ -224,6 +227,41 @@ impl AnalyzerServicesBuilder {
                 .as_deref()
                 .expect("the semantic model was just created"),
         )
+    }
+
+    pub fn build_for_html_parse(
+        &mut self,
+        path: Utf8PathBuf,
+        parse: Parse<HtmlRoot>,
+        file_source: HtmlFileSource,
+    ) -> HtmlAnalyzerServices {
+        let root = parse.tree();
+        let source_index = self
+            .module_db
+            .insert_source(DocumentFileSource::Html(file_source));
+        let parsed_source = ParsedSource::new(
+            &self.module_db,
+            path.clone(),
+            parse.into(),
+            source_index,
+            vec![],
+        );
+        self.module_db.insert_file(&path, parsed_source);
+
+        let (module_info, _, _) = resolve_html_module(
+            root,
+            &[],
+            &BiomePath::new(&path),
+            &self.file_system,
+            &self.project_layout,
+            &self.path_info_cache,
+        );
+        self.module_db
+            .update_or_insert_module(path, ModuleInfoKind::Html(module_info));
+
+        HtmlAnalyzerServices::default()
+            .with_module_db(self.module_db.rc_module_db())
+            .with_project_layout(self.project_layout.clone())
     }
 }
 

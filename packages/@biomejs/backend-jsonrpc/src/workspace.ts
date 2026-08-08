@@ -9958,7 +9958,6 @@ export type Category =
 	| "lint/nursery/noIdenticalTestTitle"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImpliedEval"
-	| "lint/nursery/noInconsistentPropertyInitValue"
 	| "lint/nursery/noInlineStyles"
 	| "lint/nursery/noInvalidPropertyInitValue"
 	| "lint/nursery/noJsRestrictedProperties"

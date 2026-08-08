@@ -4,8 +4,7 @@ use biome_css_syntax::{
     CssGenericComponentValueList, CssIdentifier, CssMediaAtRule, CssNestedQualifiedRule,
     CssQualifiedRule, CssScopeAtRule, CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind,
     CssSyntaxNode, CssSyntaxToken, ScssExpression, ScssPartialCombinatorSelector,
-    decode_css_identifier,
-    property_syntax::PropertySyntaxResult,
+    decode_css_identifier, property_syntax::PropertySyntaxResult,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, TextRange,

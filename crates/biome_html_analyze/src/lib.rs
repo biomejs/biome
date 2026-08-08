@@ -12,22 +12,6 @@ pub use crate::registry::visit_registry;
 pub use crate::services::aria::{Aria, AriaServices};
 pub use crate::services::module_graph::{HtmlDbService, HtmlModuleGraph};
 use crate::suppression_action::HtmlSuppressionAction;
-
-/// Services available to HTML lint rules.
-#[derive(Default)]
-pub struct HtmlAnalyzerServices {
-    pub module_db: Option<Rc<dyn ModuleDb>>,
-    pub project_layout: Option<Arc<ProjectLayout>>,
-}
-
-impl std::fmt::Debug for HtmlAnalyzerServices {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HtmlAnalyzerServices")
-            .field("module_db", &self.module_db.as_ref().map(|_| "..."))
-            .field("project_layout", &self.project_layout)
-            .finish()
-    }
-}
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression, ControlFlow,
     LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
@@ -45,6 +29,33 @@ use biome_tailwind_logic::syntax_service::TwSyntaxService;
 use std::ops::Deref;
 use std::rc::Rc;
 use std::sync::{Arc, LazyLock};
+
+/// Services available to HTML lint rules.
+#[derive(Default)]
+pub struct HtmlAnalyzerServices {
+    pub module_db: Option<Rc<dyn ModuleDb>>,
+    pub project_layout: Option<Arc<ProjectLayout>>,
+}
+
+impl HtmlAnalyzerServices {
+    pub fn with_module_db(mut self, module_db: Rc<dyn ModuleDb>) -> Self {
+        self.module_db = Some(module_db);
+        self
+    }
+
+    pub fn with_project_layout(mut self, project_layout: Arc<ProjectLayout>) -> Self {
+        self.project_layout = Some(project_layout);
+    }
+}
+
+impl std::fmt::Debug for HtmlAnalyzerServices {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("HtmlAnalyzerServices")
+            .field("module_db", &self.module_db.as_ref().map(|_| "..."))
+            .field("project_layout", &self.project_layout)
+            .finish()
+    }
+}
 
 pub(crate) type HtmlRuleAction = RuleAction<HtmlLanguage>;
 
