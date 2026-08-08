@@ -20,8 +20,36 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::AngularBindingName::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::ANGULAR_BLOCK_BODY => {
+                    let $pattern = unsafe { $crate::AngularBlockBody::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_ELSE_CLAUSE => {
+                    let $pattern = unsafe { $crate::AngularElseClause::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_ELSE_IF_CLAUSE => {
+                    let $pattern = unsafe { $crate::AngularElseIfClause::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::ANGULAR_EVENT_BINDING => {
                     let $pattern = unsafe { $crate::AngularEventBinding::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_IF_AS_CLAUSE => {
+                    let $pattern = unsafe { $crate::AngularIfAsClause::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_IF_BLOCK => {
+                    let $pattern = unsafe { $crate::AngularIfBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_IF_OPENING_BLOCK => {
+                    let $pattern = unsafe { $crate::AngularIfOpeningBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_IF_PARAMETERS => {
+                    let $pattern = unsafe { $crate::AngularIfParameters::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::ANGULAR_LET_BLOCK => {
@@ -49,10 +77,6 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::ANGULAR_TWO_WAY_BINDING => {
                     let $pattern = unsafe { $crate::AngularTwoWayBinding::new_unchecked(node) };
-                    $body
-                }
-                $crate::HtmlSyntaxKind::ANY_ANGULAR_BLOCK => {
-                    let $pattern = unsafe { $crate::AnyAngularBlock::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::ASTRO_CLASS_DIRECTIVE => {
@@ -511,6 +535,10 @@ macro_rules! map_syntax_node {
                 $crate::HtmlSyntaxKind::VUE_BOGUS_DIRECTIVE_ARGUMENT => {
                     let $pattern =
                         unsafe { $crate::VueBogusDirectiveArgument::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_ELSE_IF_CLAUSE_LIST => {
+                    let $pattern = unsafe { $crate::AngularElseIfClauseList::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE_LIST => {

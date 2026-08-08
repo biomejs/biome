@@ -1193,7 +1193,9 @@ AngularTemplateRefVariable =
 
 AngularBindingName = value: 'html_literal'
 
-AnyAngularBlock = AngularLetBlock
+AnyAngularBlock =
+	AngularLetBlock
+	| AngularIfBlock
 
 // @let name = expression;
 // ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1207,3 +1209,57 @@ AngularLetBlock =
 AngularLetInitializerClause =
 	'='
 	expression: HtmlTextExpression
+
+// @if (cond; as items) { ... } @else if (other) { ... } @else { ... }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularIfBlock =
+	opening_block: AngularIfOpeningBlock
+	else_if_clauses: AngularElseIfClauseList
+	else_clause: AngularElseClause?
+
+// @if (cond; as items) { ... } @else if (other) { ... } @else { ... }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AngularIfOpeningBlock =
+	'@'
+	'if'
+	condition: AngularIfParameters
+	children: AngularBlockBody
+
+// @if (cond; as items) { ... } @else if (other) { ... } @else { ... }
+//     ^^^^^^^^^^^^^^^^
+AngularIfParameters =
+	'('
+	expression: HtmlTextExpression
+	as_clause: AngularIfAsClause?
+	')'
+
+// @if (cond; as items) { ... } @else if (other) { ... } @else { ... }
+//          ^^^^^^^^^^
+AngularIfAsClause =
+	';'
+	'as'
+	binding: HtmlTextExpression
+
+AngularElseIfClauseList = AngularElseIfClause*
+
+// @if (cond; as items) { ... } @else if (other) { ... } @else { ... }
+//                              ^^^^^^^^^^^^^^^^^^^^^^^^
+AngularElseIfClause =
+	'@'
+	'else'
+	'if'
+	condition: AngularIfParameters
+	children: AngularBlockBody
+
+// @if (cond; as items) { ... } @else if (other) { ... } @else { ... }
+//                                                       ^^^^^^^^^^^^^
+AngularElseClause =
+	'@'
+	'else'
+	children: AngularBlockBody
+
+// { ... } body used by Angular control-flow blocks.
+AngularBlockBody =
+	'{'
+	children: HtmlElementList
+	'}'

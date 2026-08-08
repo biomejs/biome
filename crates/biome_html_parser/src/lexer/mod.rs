@@ -934,6 +934,10 @@ impl<'src> HtmlLexer<'src> {
             WHS => self.consume_newline_or_whitespaces(),
             AT_ => self.consume_byte(T![@]),
             EQL => self.consume_byte(T![=]),
+            PNO => self.consume_byte(T!['(']),
+            PNC => self.consume_byte(T![')']),
+            BEO => self.consume_byte(T!['{']),
+            BEC => self.consume_byte(T!['}']),
             SEM => self.consume_byte(T![;]),
             IDT => self
                 .consume_language_identifier(current)

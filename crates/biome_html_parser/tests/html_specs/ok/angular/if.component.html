@@ -1,0 +1,13 @@
+@if (a > b) {
+  <p>{{a}} is greater than {{b}}</p>
+} @else if (b > a) {
+  <p>{{a}} is less than {{b}}</p>
+} @else if (a === b) {
+  <p>{{a}} is equal to {{b}}</p>
+} @else {
+  <p>unknown</p>
+}
+
+@if (users$ | async; as users) {
+  {{ users.length }}
+}
