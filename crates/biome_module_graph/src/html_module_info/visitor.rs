@@ -8,7 +8,7 @@ use biome_db::ParsedSource;
 use biome_html_syntax::{
     AnyHtmlAttributeInitializer, HtmlElement, HtmlRoot, HtmlSelfClosingElement,
 };
-use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, AnyJsRoot};
+use biome_js_syntax::{AnyJsImportLike, AnyJsRoot};
 use biome_languages::css::EmbeddingStyleApplicability;
 use biome_languages::{CssFileSource, LanguageDb};
 use biome_resolver::{ResolveOptions, ResolvedPath, resolve};
@@ -129,30 +129,7 @@ impl<'a> HtmlModuleVisitor<'a> {
             if let Some(any_source) = AnyJsImportLike::cast_ref(&node) {
                 match any_source {
                     AnyJsImportLike::JsModuleSource(source) => {
-                        if source
-                            .parent::<AnyJsImportClause>()
-                            .is_some_and(|clause| match clause {
-                                AnyJsImportClause::JsImportDefaultClause(clause) => {
-                                    clause.type_token().is_some()
-                                }
-                                AnyJsImportClause::JsImportNamedClause(clause) => {
-                                    clause.type_token().is_some()
-                                        || clause.named_specifiers().is_ok_and(|specifiers| {
-                                            let mut specifiers = specifiers.specifiers().iter();
-                                            specifiers.len() > 0
-                                                && specifiers.all(|specifier| {
-                                                    specifier.is_ok_and(|specifier| {
-                                                        specifier.imports_only_types()
-                                                    })
-                                                })
-                                        })
-                                }
-                                AnyJsImportClause::JsImportNamespaceClause(clause) => {
-                                    clause.type_token().is_some()
-                                }
-                                _ => false,
-                            })
-                        {
+                        if source.imports_only_types() {
                             continue;
                         }
                         let Some(specifier) = source.inner_string_text().ok() else {

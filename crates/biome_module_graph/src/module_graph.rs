@@ -123,12 +123,10 @@ pub fn resolve_html_module(
     fs: &dyn FsWithResolverProxy,
     project_layout: &ProjectLayout,
     path_info_cache: &PathInfoCache,
-) -> (HtmlModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
+) -> Option<(HtmlModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>)> {
     path_info_cache.prepopulate_directory_path_info(fs, &[path]);
 
-    let parsed_source = db
-        .parsed_source_for_path(path)
-        .expect("HTML module resolution requires a parsed source");
+    let parsed_source = db.parsed_source_for_path(path)?;
     let directory = path.parent().unwrap_or(path);
     let fs_proxy = ModuleGraphFsProxy::new(fs, path_info_cache, project_layout);
     let visitor =
@@ -146,7 +144,7 @@ pub fn resolve_html_module(
             dependencies.insert(p.to_path_buf());
         }
     }
-    (module, dependencies, Vec::new())
+    Some((module, dependencies, Vec::new()))
 }
 
 // #endregion

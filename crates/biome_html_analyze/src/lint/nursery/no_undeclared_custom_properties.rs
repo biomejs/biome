@@ -6,29 +6,30 @@ use biome_css_semantic::semantic_model;
 use biome_css_syntax::{
     CssFunction, decode_css_identifier, property_syntax::custom_property_name_from_var_function,
 };
-use biome_html_syntax::{AnyHtmlAttributeInitializer, HtmlAttribute};
-use biome_languages::{CssFileSource, css::CssEmbeddingKind};
+use biome_html_syntax::{
+    AnyHtmlAttributeInitializer, HtmlAttribute, HtmlElement, element_ext::AnyHtmlTagElement,
+};
+use biome_languages::{CssFileSource, HtmlFileSource, css::CssEmbeddingKind};
 use biome_module_graph::{SymbolFromModuleInfo, css_property_definitions};
 use biome_rowan::{AstNode, TextRange, TextSize, TokenText};
 use biome_rule_options::no_undeclared_custom_properties::NoUndeclaredCustomPropertiesOptions;
 use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
-    /// Reports custom properties used in static HTML `style` attributes that have no declaration.
+    /// Reports custom properties used with `var()` that have no visible declaration.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```html,ignore,expect_diagnostic
+    /// ```html,expect_diagnostic
     /// <div style="color: var(--text-color)"></div>
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```html,ignore
-    /// <style>:root { --text-color: blue; }</style>
-    /// <div style="color: var(--text-color)"></div>
+    /// ```html
+    /// <div style="--text-color: blue; color: var(--text-color)"></div>
     /// ```
     ///
     pub NoUndeclaredCustomProperties {
@@ -47,7 +48,9 @@ impl Rule for NoUndeclaredCustomProperties {
     type Options = NoUndeclaredCustomPropertiesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let Some((text, file_start)) = inline_style_text(ctx.query()) else {
+        let Some((text, file_start)) =
+            inline_style_text(ctx.query(), ctx.source_type::<HtmlFileSource>())
+        else {
             return Vec::new();
         };
         let db = ctx.db();
@@ -65,6 +68,11 @@ impl Rule for NoUndeclaredCustomProperties {
                     .definitions
                     .iter()
                     .any(|definition| decode_css_identifier(definition.text()) == decoded_name)
+                    || ancestor_defines_custom_property(
+                        ctx.query(),
+                        ctx.source_type::<HtmlFileSource>(),
+                        decoded_name.as_ref(),
+                    )
                     || !css_property_definitions(
                         db,
                         SymbolFromModuleInfo::new(db, decoded_name.as_ref(), module),
@@ -105,7 +113,19 @@ fn diagnostic(range: TextRange, name: &str) -> RuleDiagnostic {
     })
 }
 
-fn inline_style_text(attribute: &HtmlAttribute) -> Option<(TokenText, TextSize)> {
+fn inline_style_text(
+    attribute: &HtmlAttribute,
+    file_source: &HtmlFileSource,
+) -> Option<(TokenText, TextSize)> {
+    if file_source.supports_components()
+        && attribute
+            .syntax()
+            .ancestors()
+            .find_map(AnyHtmlTagElement::cast)
+            .is_some_and(|element| element.is_custom_component())
+    {
+        return None;
+    }
     let name = attribute.name().ok()?.value_token().ok()?;
     if name.text_trimmed().to_lowercase_cow() != "style" {
         return None;
@@ -149,4 +169,30 @@ fn inline_custom_properties(value: &str) -> InlineCustomProperties {
         definitions,
         references,
     }
+}
+
+fn ancestor_defines_custom_property(
+    attribute: &HtmlAttribute,
+    file_source: &HtmlFileSource,
+    name: &str,
+) -> bool {
+    let current = attribute
+        .syntax()
+        .ancestors()
+        .find_map(AnyHtmlTagElement::cast);
+    attribute
+        .syntax()
+        .ancestors()
+        .filter_map(HtmlElement::cast)
+        .filter_map(|element| element.opening_element().ok())
+        .filter(|element| {
+            current
+                .as_ref()
+                .is_none_or(|current| current.syntax() != element.syntax())
+        })
+        .flat_map(|element| element.attributes())
+        .filter_map(|attribute| attribute.as_html_attribute().cloned())
+        .filter_map(|attribute| inline_style_text(&attribute, file_source))
+        .flat_map(|(text, _)| inline_custom_properties(text.text()).definitions)
+        .any(|definition| decode_css_identifier(definition.text()) == name)
 }

@@ -785,10 +785,12 @@ impl CssModelDeclaration {
     }
 
     fn new(data: Arc<SemanticModelData>, rule_id: RuleId, index: usize) -> Self {
+        debug_assert!(rule_id.index() < data.all_rules.len());
         let rule = data
             .all_rules
             .get(rule_id.index())
             .expect("declaration rule ID must belong to the semantic model");
+        debug_assert!(index < rule.declarations.len());
         let declaration = rule
             .declarations
             .get(index)

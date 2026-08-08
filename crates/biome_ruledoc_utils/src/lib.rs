@@ -165,8 +165,9 @@ impl AnalyzerServicesBuilder {
                 vec![],
             );
             db.insert_file(path.as_path(), parsed_source);
-            let (module_info, _, _) =
-                resolve_html_module(&db, path, &fs, &layout, &path_info_cache);
+            let resolved = resolve_html_module(&db, path, &fs, &layout, &path_info_cache);
+            debug_assert!(resolved.is_some());
+            let (module_info, _, _) = resolved.expect("the parsed HTML source was just inserted");
             let md = biome_module_graph::ModuleInfo::new(
                 &db,
                 path.as_path().to_path_buf(),
@@ -250,13 +251,15 @@ impl AnalyzerServicesBuilder {
         );
         self.module_db.insert_file(&path, parsed_source);
 
-        let (module_info, _, _) = resolve_html_module(
+        let resolved = resolve_html_module(
             &self.module_db,
             &BiomePath::new(&path),
             &self.file_system,
             &self.project_layout,
             &self.path_info_cache,
         );
+        debug_assert!(resolved.is_some());
+        let (module_info, _, _) = resolved.expect("the parsed HTML source was just inserted");
         self.module_db
             .update_or_insert_module(path, ModuleInfoKind::Html(module_info));
 

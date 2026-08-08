@@ -5,4 +5,9 @@ export const Imported = () => <div style="color: var(--theme-color)" />;
 export const Inline = () => (
 	<div style="--inline-color: red; color: var(--inline-color)" />
 );
+export const Inherited = () => (
+	<div style="--inherited-color: red">
+		<span style="color: var(--inherited-color)" />
+	</div>
+);
 export const Dynamic = () => <div style={{ color: "var(--dynamic-color)" }} />;

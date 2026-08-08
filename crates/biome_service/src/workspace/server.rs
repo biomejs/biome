@@ -2038,7 +2038,8 @@ impl WorkspaceServerWithDb<'_> {
                             self.fs.as_ref(),
                             &self.project_layout,
                             &self.db_state.path_info_cache,
-                        );
+                        )
+                        .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
                         break 'resolve ResolvedModuleGraphUpdate::Upsert {
                             kind: ModuleInfoKind::Html(module_info),
                             dependencies,

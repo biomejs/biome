@@ -48,7 +48,8 @@ pub fn css_property_definitions_from_source(
     db: &dyn Db,
     file: ParsedSource,
 ) -> Vec<CssPropertyDefinition> {
-    collect_property_definitions(css_model_from_parsed_source(db, file))
+    let parsed: AnyCssRoot = file.parsed(db).tree();
+    collect_property_definitions(&semantic_model(&parsed))
 }
 
 /// Returns custom property definitions from an embedded CSS document.
@@ -57,7 +58,8 @@ pub fn css_property_definitions_from_snippet(
     db: &dyn Db,
     file: ParsedSnippet,
 ) -> Vec<CssPropertyDefinition> {
-    collect_property_definitions(css_model_from_parsed_snippet(db, file))
+    let parsed: AnyCssRoot = file.parsed(db).tree();
+    collect_property_definitions(&semantic_model(&parsed))
 }
 
 fn collect_property_definitions(model: &SemanticModel) -> Vec<CssPropertyDefinition> {
@@ -152,17 +154,21 @@ pub fn css_semantic_model<'db>(db: &'db dyn Db, file: &AnyParsedSource) -> &'db 
 
 #[cfg(test)]
 mod tests {
-    use super::{collect_property_definitions, css_model_from_parsed_source};
+    use super::{
+        collect_property_definitions, css_model_from_parsed_source,
+        css_property_definitions_from_snippet, css_property_definitions_from_source,
+    };
     use biome_css_parser::{CssParserOptions, parse_css};
     use biome_css_syntax::property_syntax::{
         PropertySyntax, PropertySyntaxComponentName, PropertySyntaxResult, PropertySyntaxType,
     };
-    use biome_db::ParsedSource;
     use biome_db::testing::{
         Events, assert_function_query_was_not_run, assert_function_query_was_run,
     };
+    use biome_db::{ParsedSnippet, ParsedSource};
     use biome_languages::css::CssFileSource;
     use biome_languages::{DocumentFileSource, LanguageDb};
+    use biome_rowan::TextSize;
     use camino::{Utf8Path, Utf8PathBuf};
     use salsa::Storage;
 
@@ -230,6 +236,50 @@ mod tests {
         let events = db.take_salsa_events();
 
         assert_function_query_was_not_run(&db, css_model_from_parsed_source, file, &events);
+    }
+
+    #[test]
+    fn property_definition_ranges_track_parse_changes() {
+        let mut db = TestDb::new();
+        let source = "@property --value { syntax: '<color>'; inherits: true; initial-value: red; }";
+        let file = make_file(&db, source);
+        let snippet = ParsedSnippet::new(
+            &db,
+            parse_css(source, CssFileSource::css(), CssParserOptions::default()).into(),
+            Default::default(),
+            Default::default(),
+            0.into(),
+            0,
+        );
+        let source_start = css_property_definitions_from_source(&db, file)[0]
+            .range()
+            .start();
+        let snippet_start = css_property_definitions_from_snippet(&db, snippet)[0]
+            .range()
+            .start();
+        let updated = format!("\n{source}");
+
+        salsa::Setter::to(
+            file.set_parsed(&mut db),
+            parse_css(&updated, CssFileSource::css(), CssParserOptions::default()).into(),
+        );
+        salsa::Setter::to(
+            snippet.set_parsed(&mut db),
+            parse_css(&updated, CssFileSource::css(), CssParserOptions::default()).into(),
+        );
+
+        assert_eq!(
+            css_property_definitions_from_source(&db, file)[0]
+                .range()
+                .start(),
+            source_start + TextSize::from(1)
+        );
+        assert_eq!(
+            css_property_definitions_from_snippet(&db, snippet)[0]
+                .range()
+                .start(),
+            snippet_start + TextSize::from(1)
+        );
     }
 
     #[test]

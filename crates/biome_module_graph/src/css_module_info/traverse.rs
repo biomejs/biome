@@ -177,6 +177,11 @@ enum HtmlPropertyContextKind {
     Import(Utf8PathBuf),
 }
 
+enum ModuleContextFrame {
+    Module(Utf8PathBuf, CssPropertyBranch),
+    Definition(CssPropertyDefinition),
+}
+
 impl CssPropertyBranch {
     /// Starts a branch with `path` as its first visited module.
     pub(crate) fn new(path: Utf8PathBuf) -> Self {
@@ -308,13 +313,16 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
         path: &Utf8Path,
         branch: CssPropertyBranch,
     ) -> Option<CssPropertyDefinition> {
-        if branch.contains(path) {
-            return None;
-        }
-
-        let path = path.to_path_buf();
-        let mut stack = vec![(path.clone(), branch.with_path(path))];
-        while let Some((path, branch)) = stack.pop() {
+        let mut stack = vec![ModuleContextFrame::Module(path.to_path_buf(), branch)];
+        while let Some(frame) = stack.pop() {
+            let (path, branch) = match frame {
+                ModuleContextFrame::Module(path, branch) => (path, branch),
+                ModuleContextFrame::Definition(definition) => return Some(definition),
+            };
+            if branch.contains(&path) {
+                continue;
+            }
+            let branch = branch.with_path(path.clone());
             let Some(module) = self.db.module_for_path(&path) else {
                 continue;
             };
@@ -328,22 +336,24 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
                         if branch.contains(path) {
                             return None;
                         }
-                        let path = path.to_path_buf();
-                        Some((path.clone(), branch.with_path(path)))
+                        Some(ModuleContextFrame::Module(
+                            path.to_path_buf(),
+                            branch.clone(),
+                        ))
                     }));
                 }
                 ModuleInfoKind::Html(_) => {
-                    for context in self.html_property_contexts(&path, true) {
-                        match context.kind {
-                            HtmlPropertyContextKind::Definition(definition) => {
-                                return Some(definition);
-                            }
-                            HtmlPropertyContextKind::Import(path) if !branch.contains(&path) => {
-                                stack.push((path.clone(), branch.with_path(path)));
-                            }
-                            HtmlPropertyContextKind::Import(_) => {}
-                        }
-                    }
+                    stack.extend(
+                        self.html_property_contexts(&path, true)
+                            .into_iter()
+                            .filter_map(|context| match context.kind {
+                                HtmlPropertyContextKind::Definition(definition) => {
+                                    Some(ModuleContextFrame::Definition(definition))
+                                }
+                                HtmlPropertyContextKind::Import(path) => (!branch.contains(&path))
+                                    .then(|| ModuleContextFrame::Module(path, branch.clone())),
+                            }),
+                    );
                 }
                 ModuleInfoKind::Js(info) => {
                     stack.extend(js_import_paths_in_source_order(&info).filter_map(|import| {
@@ -351,8 +361,10 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
                         if branch.contains(path) {
                             return None;
                         }
-                        let path = path.to_path_buf();
-                        Some((path.clone(), branch.with_path(path)))
+                        Some(ModuleContextFrame::Module(
+                            path.to_path_buf(),
+                            branch.clone(),
+                        ))
                     }));
                 }
             }
@@ -415,7 +427,7 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
                 else {
                     continue;
                 };
-                if only_global && file_source.as_embedding_kind().is_html_style_attribute() {
+                if file_source.as_embedding_kind().is_html_style_attribute() {
                     continue;
                 }
                 let snippet_is_global = file_source.embedding_applicability().is_global();

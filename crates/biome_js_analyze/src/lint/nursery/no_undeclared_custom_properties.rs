@@ -6,26 +6,27 @@ use biome_css_semantic::semantic_model;
 use biome_css_syntax::{
     CssFunction, decode_css_identifier, property_syntax::custom_property_name_from_var_function,
 };
-use biome_js_syntax::{AnyJsxAttributeValue, JsxAttribute};
+use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_js_syntax::{AnyJsxAttributeValue, JsxAttribute, JsxElement};
 use biome_languages::{CssFileSource, css::CssEmbeddingKind};
 use biome_module_graph::{SymbolFromModuleInfo, css_property_definitions};
 use biome_rowan::{AstNode, TextRange, TextSize, TokenText};
 use biome_rule_options::no_undeclared_custom_properties::NoUndeclaredCustomPropertiesOptions;
 
 declare_lint_rule! {
-    /// Reports custom properties used in static JSX `style` attributes that have no declaration.
+    /// Reports custom properties used with `var()` that have no visible declaration.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```jsx,ignore
+    /// ```jsx,expect_diagnostic
     /// <div style="color: var(--text-color)" />
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```jsx,ignore
+    /// ```jsx
     /// <div style="--text-color: blue; color: var(--text-color)" />
     /// ```
     ///
@@ -61,7 +62,8 @@ impl Rule for NoUndeclaredCustomProperties {
                 let decoded_name = decode_css_identifier(name.text());
                 if properties.definitions.iter().any(|definition| {
                     decode_css_identifier(definition.text()) == decoded_name
-                }) || !css_property_definitions(
+                }) || ancestor_defines_custom_property(ctx.query(), decoded_name.as_ref())
+                    || !css_property_definitions(
                     db,
                     SymbolFromModuleInfo::new(db, decoded_name.as_ref(), module),
                 )
@@ -102,6 +104,14 @@ fn diagnostic(range: TextRange, name: &str) -> RuleDiagnostic {
 }
 
 fn inline_style_text(attribute: &JsxAttribute) -> Option<(TokenText, TextSize)> {
+    if attribute
+        .syntax()
+        .ancestors()
+        .find_map(AnyJsxElement::cast)
+        .is_some_and(|element| element.is_custom_component())
+    {
+        return None;
+    }
     if attribute.name_value_token().ok()?.text_trimmed() != "style" {
         return None;
     }
@@ -146,4 +156,26 @@ fn inline_custom_properties(value: &str) -> InlineCustomProperties {
         definitions,
         references,
     }
+}
+
+fn ancestor_defines_custom_property(attribute: &JsxAttribute, name: &str) -> bool {
+    let current = attribute
+        .syntax()
+        .ancestors()
+        .find_map(AnyJsxElement::cast);
+    attribute
+        .syntax()
+        .ancestors()
+        .filter_map(JsxElement::cast)
+        .filter_map(|element| element.opening_element().ok())
+        .filter(|element| {
+            current
+                .as_ref()
+                .is_none_or(|current| current.syntax() != element.syntax())
+        })
+        .flat_map(|element| element.attributes())
+        .filter_map(|attribute| attribute.as_jsx_attribute().cloned())
+        .filter_map(|attribute| inline_style_text(&attribute))
+        .flat_map(|(text, _)| inline_custom_properties(text.text()).definitions)
+        .any(|definition| decode_css_identifier(definition.text()) == name)
 }

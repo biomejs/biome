@@ -8,8 +8,7 @@ use biome_rowan::TextRange;
 use biome_rule_options::no_undeclared_custom_properties::NoUndeclaredCustomPropertiesOptions;
 
 declare_lint_rule! {
-    /// Reports custom properties used with `var()` that aren't defined in any imported CSS file
-    /// or `<style>` tag.
+    /// Reports custom properties used with `var()` that have no visible declaration.
     ///
     /// This rule checks custom properties defined by declarations such as `--theme: blue`,
     /// registrations such as `@property --theme`, imported stylesheets, linked stylesheets, and
