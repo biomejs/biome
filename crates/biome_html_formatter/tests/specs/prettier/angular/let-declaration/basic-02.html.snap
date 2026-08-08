@@ -1,0 +1,37 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/let-declaration/basic-02.html
+---
+
+# Input
+
+```html
+<input #name>
+
+@let greeting     =  'Hello '     +   name.value;
+
+@let user = user$ | async;
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,2 @@
+ <input #name />
+-
+-@let greeting = "Hello " + name.value;
+-
+-@let user = user$ | async;
++@let greeting = 'Hello ' + name.value; @let user = user$ | async;
+```
+
+# Output
+
+```html
+<input #name />
+@let greeting = 'Hello ' + name.value; @let user = user$ | async;
+```

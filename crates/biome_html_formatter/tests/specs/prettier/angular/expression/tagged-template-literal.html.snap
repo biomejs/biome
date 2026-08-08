@@ -1,0 +1,56 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/expression/tagged-template-literal.html
+---
+
+# Input
+
+```html
+{{
+
+  (  (tag ` a ${ b } \\u0063 `))
+}}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1,4 @@
+-{{ tag` a ${b} \\u0063 ` }}
++{{
++
++  (  (tag ` a ${ b } \\u0063 `))
++}}
+```
+
+# Output
+
+```html
+{{
+
+  (  (tag ` a ${ b } \\u0063 `))
+}}
+```
+
+# Errors
+```
+tagged-template-literal.html:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+  > 1 │ {{
+      │ ^^
+  > 2 │ 
+  > 3 │   (  (tag ` a ${ b } \\u0063 `))
+  > 4 │ }}
+      │ ^^
+    5 │ 
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+
+```

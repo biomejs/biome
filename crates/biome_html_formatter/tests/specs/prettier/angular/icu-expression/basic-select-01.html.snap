@@ -1,0 +1,35 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/icu-expression/basic-select-01.html
+---
+
+# Input
+
+```html
+<span i18n>The author is {gender, select, male {male} female {female} other {other}}</span>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+ <span i18n
+-  >The author is
+-  {gender, select, male {male} female {female} other {other}}</span
++  >The author is { gender, select, male { male} female { female} other { other
++  }}</span
+ >
+```
+
+# Output
+
+```html
+<span i18n
+  >The author is { gender, select, male { male} female { female} other { other
+  }}</span
+>
+```

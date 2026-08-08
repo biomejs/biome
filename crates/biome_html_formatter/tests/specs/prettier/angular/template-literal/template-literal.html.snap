@@ -1,0 +1,128 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/template-literal/template-literal.html
+---
+
+# Input
+
+```html
+<div
+  (action)="
+      `   hello, ${   world   }  `
+  "
+  [binding]="
+      `   hello, ${   world   }  `
+  "
+  *directive="
+      `   hello, ${   world   }  `
+  "
+>
+{{
+`   hello, ${   world   }  `
+}}
+
+{{   ``  }}  {{   (   ( `a ${b} \u0063  `))}}
+</div>
+
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,9 +1,17 @@
+ <div
+-  (action)="(`   hello, ${world}  `)"
+-  [binding]="`   hello, ${world}  `"
+-  *directive="`   hello, ${world}  `"
++  (action)="
++      `   hello, ${   world   }  `
++  "
++  [binding]="
++      `   hello, ${   world   }  `
++  "
++  *directive="
++      `   hello, ${   world   }  `
++  "
+ >
+-  {{ `   hello, ${world}  ` }}
++  {{
++`   hello, ${   world   }  `
++}}
+ 
+-  {{ `` }} {{ `a ${b} \u0063  ` }}
++  {{   ``  }} {{   (   ( `a ${b} \u0063  `))}}
+ </div>
+```
+
+# Output
+
+```html
+<div
+  (action)="
+      `   hello, ${   world   }  `
+  "
+  [binding]="
+      `   hello, ${   world   }  `
+  "
+  *directive="
+      `   hello, ${   world   }  `
+  "
+>
+  {{
+`   hello, ${   world   }  `
+}}
+
+  {{   ``  }} {{   (   ( `a ${b} \u0063  `))}}
+</div>
+```
+
+# Errors
+```
+template-literal.html:12:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    10 │   "
+    11 │ >
+  > 12 │ {{
+       │ ^^
+  > 13 │ `   hello, ${   world   }  `
+  > 14 │ }}
+       │ ^^
+    15 │ 
+    16 │ {{   ``  }}  {{   (   ( `a ${b} \u0063  `))}}
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+template-literal.html:16:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    14 │ }}
+    15 │ 
+  > 16 │ {{   ``  }}  {{   (   ( `a ${b} \u0063  `))}}
+       │ ^^^^^^^^^^^
+    17 │ </div>
+    18 │ 
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+template-literal.html:16:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    14 │ }}
+    15 │ 
+  > 16 │ {{   ``  }}  {{   (   ( `a ${b} \u0063  `))}}
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ </div>
+    18 │ 
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+
+```

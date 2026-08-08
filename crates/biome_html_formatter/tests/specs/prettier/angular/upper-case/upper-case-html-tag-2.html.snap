@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/upper-case/upper-case-html-tag-2.html
+---
+
+# Input
+
+```html
+<!DOCTYPE html><HTML>
+  <body>
+  </body>
+</HTML>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+-<!doctype html>
+-<HTML>
++<!DOCTYPE html>
++<html>
+   <body></body>
+-</HTML>
++</html>
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<html>
+  <body></body>
+</html>
+```

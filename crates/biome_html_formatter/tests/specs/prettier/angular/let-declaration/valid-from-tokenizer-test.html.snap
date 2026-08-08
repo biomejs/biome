@@ -1,0 +1,177 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/let-declaration/valid-from-tokenizer-test.html
+---
+
+# Input
+
+```html
+<!--
+from
+https://github.com/angular/angular/commit/62c5b66b4119b7e1dfaf1e28c100e5f8431cb05b
+https://github.com/angular/angular/commit/18a675081f945ed4d7f4c0ee83172ca1528e7b2e
+-->
+
+@let foo = 123 + 456;
+
+@let               foo       =          123 + 456;
+@let foo=123 + 456;
+@let foo =123 + 456;
+@let foo=   123 + 456;
+
+@let
+foo = 123;
+@let    
+foo = 123;
+@let    
+              foo = 123;
+@let foo
+= 123;
+@let foo
+       = 123;
+@let foo   
+   = 123;
+@let  
+   foo   
+      = 123;
+
+@let foo = 
+123 + 
+ 456 + 
+ 789
+ ;
+
+@defer {@let foo = 123 + 456;}
+
+@let foo = 'a; b';
+@let foo = "';'";
+
+@let foo = '\';\'' + "\",";
+
+@let foo = fn(a, b) + fn2(c, d, e);
+
+@let foo = [1, 2, 3];
+
+@let foo = [0, [foo[1]], 3];
+
+@let foo = {a: 1, b: {c: something + 2}};
+@let foo = {};
+@let foo = {foo: ";"};
+
+@let foo = fn({a: 1, b: [otherFn([{c: ";"}], 321, {d: [',']})]});
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -4,31 +4,16 @@
+ https://github.com/angular/angular/commit/18a675081f945ed4d7f4c0ee83172ca1528e7b2e
+ -->
+ 
+-@let foo = 123 + 456;
+-
+-@let foo = 123 + 456;
+-@let foo = 123 + 456;
+-@let foo = 123 + 456;
+-@let foo = 123 + 456;
++@let foo = 123 + 456; @let foo = 123 + 456; @let foo=123 + 456; @let foo =123 +
++456; @let foo= 123 + 456; @let foo = 123; @let foo = 123; @let foo = 123; @let
++foo = 123; @let foo = 123; @let foo = 123; @let foo = 123; @let foo = 123 + 456
+++ 789 ; @defer
++{@let foo = 123 + 456;}
+ 
+-@let foo = 123;
+-@let foo = 123;
+-@let foo = 123;
+-@let foo = 123;
+-@let foo = 123;
+-@let foo = 123;
+-@let foo = 123;
+-
+-@let foo = 123 + 456 + 789;
+-
+-@defer {
+-  @let foo = 123 + 456;
+-}
+-
+-@let foo = "a; b";
++@let foo = 'a; b';
+ @let foo = "';'";
+ 
+-@let foo = "';'" + '",';
++@let foo = '\';\'' + "\",";
+ 
+ @let foo = fn(a, b) + fn2(c, d, e);
+ 
+@@ -36,8 +21,7 @@
+ 
+ @let foo = [0, [foo[1]], 3];
+ 
+-@let foo = { a: 1, b: { c: something + 2 } };
+-@let foo = {};
+-@let foo = { foo: ";" };
+-
+-@let foo = fn({ a: 1, b: [otherFn([{ c: ";" }], 321, { d: [","] })] });
++@let foo = {a: 1, b: {c: something + 2}};
++@let foo = {}
++; @let foo = { foo: ";"}; @let foo = fn( { a: 1, b: [otherFn([ { c: ";"}], 321,
++{ d: [','] } )]});
+```
+
+# Output
+
+```html
+<!--
+from
+https://github.com/angular/angular/commit/62c5b66b4119b7e1dfaf1e28c100e5f8431cb05b
+https://github.com/angular/angular/commit/18a675081f945ed4d7f4c0ee83172ca1528e7b2e
+-->
+
+@let foo = 123 + 456; @let foo = 123 + 456; @let foo=123 + 456; @let foo =123 +
+456; @let foo= 123 + 456; @let foo = 123; @let foo = 123; @let foo = 123; @let
+foo = 123; @let foo = 123; @let foo = 123; @let foo = 123; @let foo = 123 + 456
++ 789 ; @defer
+{@let foo = 123 + 456;}
+
+@let foo = 'a; b';
+@let foo = "';'";
+
+@let foo = '\';\'' + "\",";
+
+@let foo = fn(a, b) + fn2(c, d, e);
+
+@let foo = [1, 2, 3];
+
+@let foo = [0, [foo[1]], 3];
+
+@let foo = {a: 1, b: {c: something + 2}};
+@let foo = {}
+; @let foo = { foo: ";"}; @let foo = fn( { a: 1, b: [otherFn([ { c: ";"}], 321,
+{ d: [','] } )]});
+```
+
+# Errors
+```
+valid-from-tokenizer-test.html:36:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `render`, `html`, `const`, or `debug`
+  
+    34 │  ;
+    35 │ 
+  > 36 │ @defer {@let foo = 123 + 456;}
+       │          ^^^
+    37 │ 
+    38 │ @let foo = 'a; b';
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    3: https://github.com/angular/angular/commit/62c5b66b4119b7e1dfaf1e28c100e5f8431cb05b
+    4: https://github.com/angular/angular/commit/18a675081f945ed4d7f4c0ee83172ca1528e7b2e
+```

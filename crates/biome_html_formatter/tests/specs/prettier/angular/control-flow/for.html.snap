@@ -1,0 +1,372 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/control-flow/for.html
+---
+
+# Input
+
+```html
+<ul>
+@for (
+            let
+
+            item of items;index as
+i;
+            trackBy: trackByFn
+) {
+<li><strong>{{item.name}}</strong></li>
+}
+@empty {
+<span>The collection is empty</span>
+}
+</ul>
+
+
+<li *ngFor="
+            let
+
+            item of items;index as
+i;
+            trackBy: trackByFn
+"></li>
+
+
+
+<ul>
+@for (item of collection; track item.id; let index = $index, first = $first; let last = $last, even = $even, odd = $odd; let count = $count) {
+
+<li><strong>{{item.name}}</strong> index={{index}} first={{first}} last={{last}} even={{even}} odd={{odd}} count={{count}}</li>
+
+}
+</ul>
+
+<ul>
+@for (item of
+ emptyCollection; track item.id;) {
+<li><strong>{{item.name}}</strong></li>
+}
+@empty {
+  <span>The collection is empty</span>
+}
+</ul>
+<li *ngFor="
+item of
+ emptyCollection; track item.id;
+"></li>
+
+<div>
+  @for ( item of items; track item){
+  }
+
+  <div *ngFor="item of items; track item"></div>
+</div>
+
+<div>
+  @for (item of items; let i = $index; track block) {}
+
+  <div *ngFor="item of items; let i = $index; track block"></div>
+</div>
+
+<div>
+  @for (item of items; let i = $index; let count = $count; track block) {}
+
+  <div *ngFor="item of items; let i = $index; let count = $count; track block"></div>
+</div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,57 +1,65 @@
+ <ul>
+-  @for (let item of items; index as i; trackBy: trackByFn) {
+-    <li>
+-      <strong>{{ item.name }}</strong>
+-    </li>
++  @for ( let item of items;index as i; trackBy: trackByFn ) {
++  <li><strong>{{item.name}}</strong></li>
+   } @empty {
+-    <span>The collection is empty</span>
++  <span>The collection is empty</span>
+   }
+ </ul>
+ 
+-<li *ngFor="let item of items; index as i; trackBy: trackByFn"></li>
++<li
++  *ngFor="
++            let
++
++            item of items;index as
++i;
++            trackBy: trackByFn
++"
++></li>
+ 
+ <ul>
+-  @for (
+-    item of collection;
+-    track item.id;
+-    let index = $index, first = $first;
+-    let last = $last, even = $even, odd = $odd;
+-    let count = $count
+-  ) {
+-    <li>
+-      <strong>{{ item.name }}</strong> index={{ index }} first={{
+-        first
+-      }}
+-      last={{ last }} even={{ even }} odd={{ odd }} count={{ count }}
+-    </li>
++  @for (item of collection; track item.id; let index = $index, first = $first;
++  let last = $last, even = $even, odd = $odd; let count = $count) {
++
++  <li>
++    <strong>{{item.name}}</strong>
++    index={{index}}
++    first={{first}}
++    last={{last}}
++    even={{even}}
++    odd={{odd}}
++    count={{count}}
++  </li>
+   }
+ </ul>
+ 
+ <ul>
+-  @for (item of emptyCollection; track item.id) {
+-    <li>
+-      <strong>{{ item.name }}</strong>
+-    </li>
++  @for (item of emptyCollection; track item.id;) {
++  <li><strong>{{item.name}}</strong></li>
+   } @empty {
+-    <span>The collection is empty</span>
++  <span>The collection is empty</span>
+   }
+ </ul>
+-<li *ngFor="item of emptyCollection; track item.id"></li>
++<li
++  *ngFor="
++item of
++ emptyCollection; track item.id;
++"
++></li>
+ 
+ <div>
+-  @for (item of items; track item) {}
++  @for ( item of items; track item) { }
+ 
+   <div *ngFor="item of items; track item"></div>
+ </div>
+ 
+ <div>
+-  @for (item of items; let i = $index; track block) {}
++  @for (item of items; let i = $index; track block) { }
+ 
+   <div *ngFor="item of items; let i = $index; track block"></div>
+ </div>
+ 
+ <div>
+-  @for (item of items; let i = $index; let count = $count; track block) {}
++  @for (item of items; let i = $index; let count = $count; track block) { }
+ 
+   <div
+     *ngFor="item of items; let i = $index; let count = $count; track block"
+```
+
+# Output
+
+```html
+<ul>
+  @for ( let item of items;index as i; trackBy: trackByFn ) {
+  <li><strong>{{item.name}}</strong></li>
+  } @empty {
+  <span>The collection is empty</span>
+  }
+</ul>
+
+<li
+  *ngFor="
+            let
+
+            item of items;index as
+i;
+            trackBy: trackByFn
+"
+></li>
+
+<ul>
+  @for (item of collection; track item.id; let index = $index, first = $first;
+  let last = $last, even = $even, odd = $odd; let count = $count) {
+
+  <li>
+    <strong>{{item.name}}</strong>
+    index={{index}}
+    first={{first}}
+    last={{last}}
+    even={{even}}
+    odd={{odd}}
+    count={{count}}
+  </li>
+  }
+</ul>
+
+<ul>
+  @for (item of emptyCollection; track item.id;) {
+  <li><strong>{{item.name}}</strong></li>
+  } @empty {
+  <span>The collection is empty</span>
+  }
+</ul>
+<li
+  *ngFor="
+item of
+ emptyCollection; track item.id;
+"
+></li>
+
+<div>
+  @for ( item of items; track item) { }
+
+  <div *ngFor="item of items; track item"></div>
+</div>
+
+<div>
+  @for (item of items; let i = $index; track block) { }
+
+  <div *ngFor="item of items; let i = $index; track block"></div>
+</div>
+
+<div>
+  @for (item of items; let i = $index; let count = $count; track block) { }
+
+  <div
+    *ngFor="item of items; let i = $index; let count = $count; track block"
+  ></div>
+</div>
+```
+
+# Errors
+```
+for.html:9:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+     7 │             trackBy: trackByFn
+     8 │ ) {
+   > 9 │ <li><strong>{{item.name}}</strong></li>
+       │             ^^^^^^^^^^^^^
+    10 │ }
+    11 │ @empty {
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+for.html:30:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    28 │ @for (item of collection; track item.id; let index = $index, first = $first; let last = $last, even = $even, odd = $odd; let count = $count) {
+    29 │ 
+  > 30 │ <li><strong>{{item.name}}</strong> index={{index}} first={{first}} last={{last}} even={{even}} odd={{odd}} count={{count}}</li>
+       │             ^^^^^^^^^^^^^
+    31 │ 
+    32 │ }
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+for.html:30:42 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    28 │ @for (item of collection; track item.id; let index = $index, first = $first; let last = $last, even = $even, odd = $odd; let count = $count) {
+    29 │ 
+  > 30 │ <li><strong>{{item.name}}</strong> index={{index}} first={{first}} last={{last}} even={{even}} odd={{odd}} count={{count}}</li>
+       │                                          ^^^^^^^^^
+    31 │ 
+    32 │ }
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+for.html:30:58 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    28 │ @for (item of collection; track item.id; let index = $index, first = $first; let last = $last, even = $even, odd = $odd; let count = $count) {
+    29 │ 
+  > 30 │ <li><strong>{{item.name}}</strong> index={{index}} first={{first}} last={{last}} even={{even}} odd={{odd}} count={{count}}</li>
+       │                                                          ^^^^^^^^^
+    31 │ 
+    32 │ }
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+for.html:30:73 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    28 │ @for (item of collection; track item.id; let index = $index, first = $first; let last = $last, even = $even, odd = $odd; let count = $count) {
+    29 │ 
+  > 30 │ <li><strong>{{item.name}}</strong> index={{index}} first={{first}} last={{last}} even={{even}} odd={{odd}} count={{count}}</li>
+       │                                                                         ^^^^^^^^
+    31 │ 
+    32 │ }
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+for.html:30:87 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    28 │ @for (item of collection; track item.id; let index = $index, first = $first; let last = $last, even = $even, odd = $odd; let count = $count) {
+    29 │ 
+  > 30 │ <li><strong>{{item.name}}</strong> index={{index}} first={{first}} last={{last}} even={{even}} odd={{odd}} count={{count}}</li>
+       │                                                                                       ^^^^^^^^
+    31 │ 
+    32 │ }
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+for.html:30:100 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    28 │ @for (item of collection; track item.id; let index = $index, first = $first; let last = $last, even = $even, odd = $odd; let count = $count) {
+    29 │ 
+  > 30 │ <li><strong>{{item.name}}</strong> index={{index}} first={{first}} last={{last}} even={{even}} odd={{odd}} count={{count}}</li>
+       │                                                                                                    ^^^^^^^
+    31 │ 
+    32 │ }
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+for.html:30:114 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    28 │ @for (item of collection; track item.id; let index = $index, first = $first; let last = $last, even = $even, odd = $odd; let count = $count) {
+    29 │ 
+  > 30 │ <li><strong>{{item.name}}</strong> index={{index}} first={{first}} last={{last}} even={{even}} odd={{odd}} count={{count}}</li>
+       │                                                                                                                  ^^^^^^^^^
+    31 │ 
+    32 │ }
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+for.html:38:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    36 │ @for (item of
+    37 │  emptyCollection; track item.id;) {
+  > 38 │ <li><strong>{{item.name}}</strong></li>
+       │             ^^^^^^^^^^^^^
+    39 │ }
+    40 │ @empty {
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+
+```

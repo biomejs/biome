@@ -1,0 +1,73 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/interpolation/html/block.html
+---
+
+# Input
+
+```html
+@for (option of availableOwners?.(); track option) {
+  <mat-option [value]="option.id">
+    {{ option.name }}@{{ option.domain }}
+  </mat-option>
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+ @for (option of availableOwners?.(); track option) {
+-  <mat-option [value]="option.id">
+-    {{ option.name }}@{{ option.domain }}
+-  </mat-option>
++<mat-option [value]="option.id">
++  {{ option.name }}@{{ option.domain }}
++</mat-option>
+ }
+```
+
+# Output
+
+```html
+@for (option of availableOwners?.(); track option) {
+<mat-option [value]="option.id">
+  {{ option.name }}@{{ option.domain }}
+</mat-option>
+}
+```
+
+# Errors
+```
+block.html:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    1 │ @for (option of availableOwners?.(); track option) {
+    2 │   <mat-option [value]="option.id">
+  > 3 │     {{ option.name }}@{{ option.domain }}
+      │     ^^^^^^^^^^^^^^^^^
+    4 │   </mat-option>
+    5 │ }
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+block.html:3:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    1 │ @for (option of availableOwners?.(); track option) {
+    2 │   <mat-option [value]="option.id">
+  > 3 │     {{ option.name }}@{{ option.domain }}
+      │                       ^^^^^^^^^^^^^^^^^^^
+    4 │   </mat-option>
+    5 │ }
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+
+```

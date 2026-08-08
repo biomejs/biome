@@ -1,0 +1,30 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/control-flow/embedded-language-formatting-off/if.html
+---
+
+# Input
+
+```html
+@if      (should.   not.    format) {  }
+@else if (should.   not.    format) {  }
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1 @@
+-@if (should.   not.    format) {
+-} @else if (should.   not.    format) {}
++@if (should. not. format) { } @else if (should. not. format) { }
+```
+
+# Output
+
+```html
+@if (should. not. format) { } @else if (should. not. format) { }
+```
