@@ -1,0 +1,92 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```angular
+@let name = user.name;
+@let data = data$ | async;
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        AnyAngularBlock {
+            angular_let_block: AngularLetBlock {
+                at_token: AT@0..1 "@" [] [],
+                let_token: LET_KW@1..5 "let" [] [Whitespace(" ")],
+                name: AngularBindingName {
+                    value_token: HTML_LITERAL@5..10 "name" [] [Whitespace(" ")],
+                },
+                initializer: AngularLetInitializerClause {
+                    eq_token: EQ@10..11 "=" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@11..21 " user.name" [] [],
+                    },
+                },
+                semicolon_token: SEMICOLON@21..22 ";" [] [],
+            },
+        },
+        AnyAngularBlock {
+            angular_let_block: AngularLetBlock {
+                at_token: AT@22..24 "@" [Newline("\n")] [],
+                let_token: LET_KW@24..28 "let" [] [Whitespace(" ")],
+                name: AngularBindingName {
+                    value_token: HTML_LITERAL@28..33 "data" [] [Whitespace(" ")],
+                },
+                initializer: AngularLetInitializerClause {
+                    eq_token: EQ@33..34 "=" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@34..48 " data$ | async" [] [],
+                    },
+                },
+                semicolon_token: SEMICOLON@48..49 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@49..50 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..50
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..49
+    0: ANY_ANGULAR_BLOCK@0..22
+      0: ANGULAR_LET_BLOCK@0..22
+        0: AT@0..1 "@" [] []
+        1: LET_KW@1..5 "let" [] [Whitespace(" ")]
+        2: ANGULAR_BINDING_NAME@5..10
+          0: HTML_LITERAL@5..10 "name" [] [Whitespace(" ")]
+        3: ANGULAR_LET_INITIALIZER_CLAUSE@10..21
+          0: EQ@10..11 "=" [] []
+          1: HTML_TEXT_EXPRESSION@11..21
+            0: HTML_LITERAL@11..21 " user.name" [] []
+        4: SEMICOLON@21..22 ";" [] []
+    1: ANY_ANGULAR_BLOCK@22..49
+      0: ANGULAR_LET_BLOCK@22..49
+        0: AT@22..24 "@" [Newline("\n")] []
+        1: LET_KW@24..28 "let" [] [Whitespace(" ")]
+        2: ANGULAR_BINDING_NAME@28..33
+          0: HTML_LITERAL@28..33 "data" [] [Whitespace(" ")]
+        3: ANGULAR_LET_INITIALIZER_CLAUSE@33..48
+          0: EQ@33..34 "=" [] []
+          1: HTML_TEXT_EXPRESSION@34..48
+            0: HTML_LITERAL@34..48 " data$ | async" [] []
+        4: SEMICOLON@48..49 ";" [] []
+  4: EOF@49..50 "" [Newline("\n")] []
+
+```

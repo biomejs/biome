@@ -924,6 +924,43 @@ impl<'src> HtmlLexer<'src> {
 
         IDENT
     }
+
+    /// Consume a token in the [HtmlLexContext::Angular] context.
+    /// This context is used for Angular templates with Angular-specific syntax.
+    fn consume_angular(&mut self, current: u8) -> HtmlSyntaxKind {
+        let dispatched = lookup_byte(current);
+
+        match dispatched {
+            WHS => self.consume_newline_or_whitespaces(),
+            AT_ => self.consume_byte(T![@]),
+            EQL => self.consume_byte(T![=]),
+            SEM => self.consume_byte(T![;]),
+            IDT => self
+                .consume_language_identifier(current)
+                .unwrap_or_else(|| {
+                    // Advance past the unrecognized identifier bytes so the lexer
+                    // makes forward progress, then emit as a literal.
+                    while let Some(byte) = self.current_byte() {
+                        if is_at_continue_identifier(byte) {
+                            self.advance(1);
+                        } else {
+                            break;
+                        }
+                    }
+                    HTML_LITERAL
+                }),
+            _ => {
+                if self.position == 0
+                    && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
+                {
+                    self.unicode_bom_length = bom_size;
+                    return bom;
+                }
+                self.consume_unexpected_character()
+            }
+        }
+    }
+
     /// Bumps the current byte and creates a lexed token of the passed in kind.
     #[inline]
     fn consume_byte(&mut self, tok: HtmlSyntaxKind) -> HtmlSyntaxKind {
@@ -999,6 +1036,7 @@ impl<'src> HtmlLexer<'src> {
             b"use" => USE_KW,
             b"style" => STYLE_KW,
             b"class" => CLASS_KW,
+            b"let" => LET_KW,
 
             _ => {
                 self.position = starting_position;
@@ -1735,6 +1773,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     }
                     HtmlLexContext::Svelte => self.consume_svelte(current),
                     HtmlLexContext::SvelteBindingLiteral => self.consume_svelte_literal(),
+                    HtmlLexContext::Angular => self.consume_angular(current),
                 },
                 None => EOF,
             }
@@ -1828,6 +1867,7 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
                     self.consume_token_inside_tag_svelte(current, TagNameMode::Html)
                 }
                 HtmlReLexContext::SvelteAttributeString => self.consume_string_literal(current),
+                HtmlReLexContext::Angular => self.consume_angular(current),
             },
             None => EOF,
         };

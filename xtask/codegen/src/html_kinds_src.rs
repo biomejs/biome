@@ -21,6 +21,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         ("{#", "SV_CURLY_HASH"),
         ("{/", "SV_CURLY_SLASH"),
         ("{:", "SV_CURLY_COLON"),
+        (";", "SEMICOLON"),
         (",", "COMMA"),
         (":", "COLON"),
         ("@", "AT"),
@@ -80,6 +81,8 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "server",
         "is",
         "define",
+        // Angular keywords
+        "let",
         // Known HTML tag names. Each gets its own token kind (e.g. `div` ->
         // `DIV_KW`) so tag-name checks are `O(1)` integer comparisons. HTML tag
         // names are case-insensitive, so the lexer lower-cases before lookup.
@@ -440,6 +443,9 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "ANGULAR_TWO_WAY_BINDING",
         "ANGULAR_STRUCTURAL_DIRECTIVE",
         "ANGULAR_TEMPLATE_REF_VARIABLE",
+        "ANGULAR_LET_BLOCK",
+        "ANGULAR_LET_INITIALIZER_CLAUSE",
+        "ANY_ANGULAR_BLOCK",
         // Bogus nodes
         "HTML_BOGUS",
         "HTML_BOGUS_ELEMENT",
