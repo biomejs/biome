@@ -9,8 +9,8 @@ use biome_html_syntax::{
     AnyHtmlAttributeInitializer, HtmlElement, HtmlRoot, HtmlSelfClosingElement,
 };
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, AnyJsRoot};
-use biome_languages::{CssFileSource, LanguageDb};
 use biome_languages::css::EmbeddingStyleApplicability;
+use biome_languages::{CssFileSource, LanguageDb};
 use biome_resolver::{ResolveOptions, ResolvedPath, resolve};
 use biome_rowan::{AstNode, AstSeparatedList, Text, TextSize, TokenText, WalkEvent};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -92,12 +92,7 @@ impl<'a> HtmlModuleVisitor<'a> {
             let content_offset = snippet.content_offset(self.db);
             if let Some(file_source) = file_source.to_css_file_source() {
                 let css_root = snippet.parsed(self.db).tree::<AnyCssRoot>();
-                collect_css_classes(
-                    &css_root,
-                    &mut style_classes,
-                    &file_source,
-                    content_offset,
-                );
+                collect_css_classes(&css_root, &mut style_classes, &file_source, content_offset);
                 let css_info =
                     CssModuleVisitor::new(css_root, self.directory, self.fs_proxy).visit();
                 imported_stylesheets.extend(css_info.imports.iter().map(|import| HtmlImport {

@@ -131,13 +131,8 @@ pub fn resolve_html_module(
         .expect("HTML module resolution requires a parsed source");
     let directory = path.parent().unwrap_or(path);
     let fs_proxy = ModuleGraphFsProxy::new(fs, path_info_cache, project_layout);
-    let visitor = HtmlModuleVisitor::new(
-        db,
-        parsed_source,
-        path.to_path_buf(),
-        directory,
-        &fs_proxy,
-    );
+    let visitor =
+        HtmlModuleVisitor::new(db, parsed_source, path.to_path_buf(), directory, &fs_proxy);
 
     let module = visitor.visit();
     let mut dependencies = ModuleDependencies::default();
