@@ -136,13 +136,7 @@ pub fn build_html_db(
             snippets,
         );
         db.insert_file(path.as_path(), parsed_source);
-        let (info, _, _) = resolve_html_module(
-            &db,
-            &path,
-            fs,
-            &ProjectLayout::default(),
-            &cache,
-        );
+        let (info, _, _) = resolve_html_module(&db, &path, fs, &ProjectLayout::default(), &cache);
         db.update_or_insert_module(path.as_path().to_path_buf(), ModuleInfoKind::Html(info));
     }
     db
