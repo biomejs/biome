@@ -161,7 +161,8 @@ pub enum BiomeCommand {
         #[bpaf(external, hide_usage)]
         log_options: LogOptions,
 
-        /// Enables rule profiling output. Captures timing only for rule execution, not preprocessing such as querying or building the semantic model.
+        /// Reports how long each rule takes to run. It excludes the time spent preparing the analysis,
+        /// such as building the semantic model.
         #[bpaf(long("profile-rules"), switch)]
         profile_rules: bool,
 
@@ -172,7 +173,7 @@ pub enum BiomeCommand {
         /// Reads code from standard input and writes the processed code to standard output.
         ///
         /// Biome uses `PATH` to select settings and determine the input type from its extension.
-        /// Virtual paths don't need to exist or belong to the project and bypass `files.includes`
+        /// Virtual paths don't need to exist or belong to the project. They bypass `files.includes`
         /// and VCS ignore checks.
         ///
         /// Example:
@@ -183,13 +184,13 @@ pub enum BiomeCommand {
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
 
-        /// Processes only staged files. This option is intended for local use.
+        /// Checks only staged files. This option is intended for local use.
         #[bpaf(long("staged"), switch)]
         staged: bool,
 
-        /// Processes only files changed by commits since the merge base between `REF` and `HEAD`.
-        /// `REF` comes from `--since` or `vcs.defaultBranch`. Staged and unstaged changes are not
-        /// included. This option is intended for CI.
+        /// Checks only files with committed changes compared to the configured `vcs.defaultBranch`
+        /// or the base reference specified by `--since`. Staged and unstaged changes are not included.
+        /// This option is intended for CI.
         #[bpaf(long("changed"), switch)]
         changed: bool,
 
@@ -225,7 +226,7 @@ pub enum BiomeCommand {
         #[bpaf(long("watch"), switch)]
         watch: bool,
 
-        /// The optional `PATH` arguments accept one or more paths to files or directories. If omitted, Biome processes files in the current working directory.
+        /// The optional `PATH` arguments accept one or more paths to files or directories. If omitted, Biome checks files in the current working directory.
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
     },
@@ -311,7 +312,7 @@ pub enum BiomeCommand {
         /// Reads code from standard input and writes the processed code to standard output.
         ///
         /// Biome uses `PATH` to select settings and determine the input type from its extension.
-        /// Virtual paths don't need to exist or belong to the project and bypass `files.includes`
+        /// Virtual paths don't need to exist or belong to the project. They bypass `files.includes`
         /// and VCS ignore checks.
         ///
         /// Example:
@@ -322,20 +323,21 @@ pub enum BiomeCommand {
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
 
-        /// Processes only staged files. This option is intended for local use.
+        /// Lints only staged files. This option is intended for local use.
         #[bpaf(long("staged"), switch)]
         staged: bool,
 
-        /// Processes only files changed by commits since the merge base between `REF` and `HEAD`.
-        /// `REF` comes from `--since` or `vcs.defaultBranch`. Staged and unstaged changes are not
-        /// included. This option is intended for CI.
+        /// Lints only files with committed changes compared to the configured `vcs.defaultBranch`
+        /// or the base reference specified by `--since`. Staged and unstaged changes are not included.
+        /// This option is intended for CI.
         #[bpaf(long("changed"), switch)]
         changed: bool,
 
         /// Sets the base reference used by `--changed`, overriding `vcs.defaultBranch`. Requires `--changed`.
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
-        /// Enables rule profiling output. Captures timing only for rule execution, not preprocessing such as querying or building the semantic model.
+        /// Reports how long each rule takes to run. It excludes the time spent preparing the analysis,
+        /// such as building the semantic model.
         #[bpaf(long("profile-rules"), switch)]
         profile_rules: bool,
 
@@ -347,7 +349,7 @@ pub enum BiomeCommand {
         #[bpaf(long("watch"), switch)]
         watch: bool,
 
-        /// The optional `PATH` arguments accept one or more paths to files or directories. If omitted, Biome processes files in the current working directory.
+        /// The optional `PATH` arguments accept one or more paths to files or directories. If omitted, Biome lints files in the current working directory.
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
     },
@@ -386,7 +388,7 @@ pub enum BiomeCommand {
         /// Reads code from standard input and writes the processed code to standard output.
         ///
         /// Biome uses `PATH` to select settings and determine the input type from its extension.
-        /// Virtual paths don't need to exist or belong to the project and bypass `files.includes`
+        /// Virtual paths don't need to exist or belong to the project. They bypass `files.includes`
         /// and VCS ignore checks.
         ///
         /// Example:
@@ -411,13 +413,13 @@ pub enum BiomeCommand {
         #[bpaf(long("fix"), switch, hide_usage)]
         fix: bool,
 
-        /// Processes only staged files. This option is intended for local use.
+        /// Formats only staged files. This option is intended for local use.
         #[bpaf(long("staged"), switch)]
         staged: bool,
 
-        /// Processes only files changed by commits since the merge base between `REF` and `HEAD`.
-        /// `REF` comes from `--since` or `vcs.defaultBranch`. Staged and unstaged changes are not
-        /// included. This option is intended for CI.
+        /// Formats only files with committed changes compared to the configured `vcs.defaultBranch`
+        /// or the base reference specified by `--since`. Staged and unstaged changes are not included.
+        /// This option is intended for CI.
         #[bpaf(long("changed"), switch)]
         changed: bool,
 
@@ -429,7 +431,7 @@ pub enum BiomeCommand {
         #[bpaf(long("watch"), switch)]
         watch: bool,
 
-        /// The optional `PATH` arguments accept one or more paths to files or directories. If omitted, Biome processes files in the current working directory.
+        /// The optional `PATH` arguments accept one or more paths to files or directories. If omitted, Biome formats files in the current working directory.
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
     },
@@ -469,9 +471,9 @@ pub enum BiomeCommand {
         #[bpaf(external, hide_usage)]
         log_options: LogOptions,
 
-        /// Processes only files changed by commits since the merge base between `REF` and `HEAD`.
-        /// `REF` comes from `--since` or `vcs.defaultBranch`. Staged and unstaged changes are not
-        /// included. This option is intended for CI.
+        /// Checks only files with committed changes compared to the configured `vcs.defaultBranch`
+        /// or the base reference specified by `--since`. Staged and unstaged changes are not included.
+        /// This option is intended for CI.
         #[bpaf(long("changed"), switch)]
         changed: bool,
 
@@ -513,7 +515,7 @@ pub enum BiomeCommand {
         #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION|PLUGIN"))]
         skip: Vec<AnalyzerSelector>,
 
-        /// The optional `PATH` arguments accept one or more paths to files or directories. If omitted, Biome processes files in the current working directory.
+        /// The optional `PATH` arguments accept one or more paths to files or directories. If omitted, Biome checks files in the current working directory.
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
     },
@@ -561,15 +563,15 @@ pub enum BiomeCommand {
         sub_command: Option<MigrateSubCommand>,
     },
 
-    /// Finds code that matches a GritQL pattern. This command is experimental.
+    /// EXPERIMENTAL: Finds code that matches a GritQL pattern, optionally limited to specific files or directories.
     ///
-    /// GritQL delimits code snippets with backticks. Because many shells interpret backticks
-    /// specially, enclose the complete query in single quotes when the shell supports them.
+    /// Put the query inside single quotes when the shell supports them. This prevents the shell
+    /// from interpreting GritQL's backticks as commands.
     ///
     /// ### Example
     ///
     /// ```shell
-    /// biome search '`console.log($message)`' # find all `console.log` invocations
+    /// biome search '`console.log($message)`' ./src
     /// ```
     #[bpaf(command)]
     Search {
@@ -598,11 +600,11 @@ pub enum BiomeCommand {
         #[bpaf(long("language"), short('l'), argument("css|javascript|json"))]
         language: Option<SearchLanguage>,
 
-        /// The required `PATTERN` argument is the GritQL pattern to find. It must be a search pattern because rewrites are not supported.
+        /// The GritQL query to find. Rewrite queries aren't supported because `biome search` is read-only.
         #[bpaf(positional("PATTERN"))]
         pattern: String,
 
-        /// The optional `PATH` arguments limit the search to one or more files or directories. If omitted, Biome searches files in the current working directory.
+        /// One or more files or directories to search. Defaults to the current working directory.
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
     },
