@@ -1,6 +1,5 @@
 use crate::{
     CssRuleAction,
-    keywords::VENDOR_PREFIXES,
     order::PROPERTY_ORDER_MAP,
     utils::{get_longhand_sub_properties, get_reset_to_initial_properties, vender_prefix},
 };
@@ -11,7 +10,7 @@ use biome_console::markup;
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssDeclarationOrRule, AnyCssProperty, AnyCssRule,
     CssDeclarationOrRuleBlock, CssDeclarationOrRuleList, CssDeclarationWithSemicolon,
-    CssSyntaxKind, TextRange,
+    CssSyntaxKind, TextRange, keywords::VENDOR_PREFIXES,
 };
 use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken, SyntaxNode, TokenText};
 use biome_rule_options::use_sorted_properties::UseSortedPropertiesOptions;

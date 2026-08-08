@@ -1,4 +1,4 @@
-use crate::data::{PropertyFmtContext, PropertySyntax};
+use super::data::{PropertyFmtContext, PropertySyntax};
 
 /// Formats a parsed property syntax as a normalized syntax string.
 pub fn decode(value: &PropertySyntax) -> String {
@@ -16,9 +16,8 @@ pub fn decode(value: &PropertySyntax) -> String {
 
 #[cfg(test)]
 mod tests {
+    use super::super::{PropertySyntaxResult, parser::encode_decoded};
     use super::*;
-    use crate::PropertySyntaxResult;
-    use crate::encoder::encode_decoded;
     use biome_rowan::TextRange;
 
     fn round_trip(source: &str) -> String {

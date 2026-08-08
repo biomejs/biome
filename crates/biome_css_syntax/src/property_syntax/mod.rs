@@ -1,11 +1,12 @@
 mod data;
-mod decoder;
-mod encoder;
+mod matcher;
+mod parser;
+mod serializer;
 
 pub use data::{
     PropertySyntax, PropertySyntaxComponent, PropertySyntaxComponentName, PropertySyntaxErrorKind,
     PropertySyntaxMultiplier, PropertySyntaxParseDiagnostic, PropertySyntaxResult,
     PropertySyntaxType,
 };
-pub use decoder::decode;
-pub use encoder::encode;
+pub use parser::encode;
+pub use serializer::decode;

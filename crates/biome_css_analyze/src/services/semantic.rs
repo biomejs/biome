@@ -62,6 +62,8 @@ impl Queryable for SemanticServices {
     }
 
     fn unwrap_match(services: &ServiceBag, _: &SemanticModelEvent) -> Self::Output {
+        // SAFETY: `build_visitor` registers the model builder before the semantic visitor emits
+        // `SemanticModelEvent`, and the builder inserts the service when syntax traversal finishes.
         services
             .get_service::<SemanticModel>()
             .expect("SemanticModel service is not registered")

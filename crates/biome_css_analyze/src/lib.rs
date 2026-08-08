@@ -3,7 +3,6 @@
 mod assist;
 mod baseline_data;
 mod fonts;
-mod keywords;
 mod lint;
 mod order;
 mod registry;

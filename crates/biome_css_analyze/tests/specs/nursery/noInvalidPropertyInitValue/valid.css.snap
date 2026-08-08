@@ -1,0 +1,332 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+
+@property --angle {
+	syntax: "<angle>";
+	inherits: false;
+	initial-value: 45deg;
+}
+
+@property --color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: rebeccapurple;
+}
+
+@property --custom-ident {
+	syntax: "<custom-ident>";
+	inherits: false;
+	initial-value: custom-value;
+}
+
+@property --image {
+	syntax: "<image>";
+	inherits: false;
+	initial-value: linear-gradient(red, blue);
+}
+
+@property --integer {
+	syntax: "<integer>";
+	inherits: false;
+	initial-value: 10;
+}
+
+@property --length {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 10px;
+}
+
+@property --zero-length {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 0;
+}
+
+@property --length-percentage {
+	syntax: "<length-percentage>";
+	inherits: false;
+	initial-value: 10%;
+}
+
+@property --number {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: 1.5;
+}
+
+@property --percentage {
+	syntax: "<percentage>";
+	inherits: false;
+	initial-value: 50%;
+}
+
+@property --resolution {
+	syntax: "<resolution>";
+	inherits: false;
+	initial-value: 2dppx;
+}
+
+@property --string {
+	syntax: "<string>";
+	inherits: false;
+	initial-value: "initial";
+}
+
+@property --time {
+	syntax: "<time>";
+	inherits: false;
+	initial-value: 250ms;
+}
+
+@property --transform-function {
+	syntax: "<transform-function>";
+	inherits: false;
+	initial-value: translateX(10px);
+}
+
+@property --transform-list {
+	syntax: "<transform-list>";
+	inherits: false;
+	initial-value: translateX(10px) rotate(45deg);
+}
+
+@property --url {
+	syntax: "<url>";
+	inherits: false;
+	initial-value: url("image.png");
+}
+
+@property --src-url {
+	syntax: "<url>";
+	inherits: false;
+	initial-value: src("image.png");
+}
+
+@property --escaped-color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: r\65 d;
+}
+
+@property --escaped-length-unit {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 1p\78;
+}
+
+@property --escaped-keyword {
+	syntax: "foo";
+	inherits: false;
+	initial-value: f\6f o;
+}
+
+@property --dashed-custom-ident {
+	syntax: "<custom-ident>";
+	inherits: false;
+	initial-value: --theme;
+}
+
+@property --css-wide-keyword {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: inherit;
+}
+
+@property --escaped-descriptors {
+	s\79 ntax: "<length>";
+	inherits: false;
+	initial-\76 alue: 1px;
+}
+
+@property --progress {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: progress(50px from 0px to 100px);
+}
+
+@property --sibling-index {
+	syntax: "<integer>";
+	inherits: false;
+	initial-value: sibling-index();
+}
+
+@property --sibling-count {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: sibling-count();
+}
+
+@property --random-length {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: random(100px, 200px);
+}
+
+@property --alpha-color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: alpha(from red / 50%);
+}
+
+@property --keyword {
+	syntax: "compact | expanded";
+	inherits: false;
+	initial-value: compact;
+}
+
+@property --alternative-type {
+	syntax: "<length> | auto";
+	inherits: false;
+	initial-value: auto;
+}
+
+@property --space-separated {
+	syntax: "<length>+";
+	inherits: false;
+	initial-value: 10px 20px;
+}
+
+@property --comma-separated {
+	syntax: "<color>#";
+	inherits: false;
+	initial-value: red, blue;
+}
+
+@property --universal {
+	syntax: "*";
+	inherits: false;
+	initial-value: any tokens are accepted;
+}
+
+@property --universal-without-initial-value {
+	syntax: "*";
+	inherits: false;
+}
+
+@property --without-initial-value {
+	syntax: "<length>";
+	inherits: false;
+}
+
+@property --without-syntax {
+	inherits: false;
+	initial-value: 10px;
+}
+
+@property --invalid-syntax {
+	syntax: "<unknown>";
+	inherits: false;
+	initial-value: 10px;
+}
+
+@property --calculated-length {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: calc(1px + 2px);
+}
+
+@property --calculated-length-percentage {
+	syntax: "<length-percentage>";
+	inherits: false;
+	initial-value: calc(100% - 1rem);
+}
+
+@property --calculated-number {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: calc(1 + 2);
+}
+
+@property --calculated-integer {
+	syntax: "<integer>";
+	inherits: false;
+	initial-value: calc(1 + 2);
+}
+
+@property --calculated-angle {
+	syntax: "<angle>";
+	inherits: false;
+	initial-value: calc(45deg + 0.25turn);
+}
+
+@property --calculated-percentage {
+	syntax: "<percentage>";
+	inherits: false;
+	initial-value: calc(50% + 10%);
+}
+
+@property --calculated-resolution {
+	syntax: "<resolution>";
+	inherits: false;
+	initial-value: calc(1dppx + 96dpi);
+}
+
+@property --calculated-time {
+	syntax: "<time>";
+	inherits: false;
+	initial-value: calc(1s + 250ms);
+}
+
+@property --environment-length {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: env(safe-area-inset-top);
+}
+
+@property --unknown-environment-color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: env(custom-environment-color);
+}
+
+@property --indexed-scalar-environment-color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: env(safe-area-inset-top 0, red);
+}
+
+@property --text-scale {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: env(preferred-text-scale);
+}
+
+@property --sine {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: sin(1);
+}
+
+@property --inverse-sine {
+	syntax: "<angle>";
+	inherits: false;
+	initial-value: asin(0.5);
+}
+
+@property --duplicate-descriptors {
+	syntax: "<color>";
+	syntax: "<length>";
+	inherits: false;
+	initial-value: red;
+	initial-value: 1px;
+}
+
+@property --duplicate-rule {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 1px;
+}
+
+@property --duplicate-rule {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: red;
+}
+
+```

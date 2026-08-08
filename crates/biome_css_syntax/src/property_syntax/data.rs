@@ -47,6 +47,13 @@ impl PropertySyntaxResult {
     pub const fn is_valid(&self) -> bool {
         matches!(self, Self::Value(_))
     }
+
+    pub fn as_valid(&self) -> Option<&PropertySyntax> {
+        match self {
+            Self::Value(value) => Some(value),
+            _ => None,
+        }
+    }
 }
 
 /// Describes a syntax error and its absolute source range.
@@ -225,6 +232,12 @@ pub enum PropertySyntax {
     },
     /// An ordered list of syntax components separated by `|`.
     Components(Box<[PropertySyntaxComponent]>),
+}
+
+impl PropertySyntax {
+    pub const fn is_universal(&self) -> bool {
+        matches!(self, Self::Universal { .. })
+    }
 }
 
 /// A data type or custom identifier with an optional multiplier.

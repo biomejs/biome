@@ -1,5 +1,5 @@
 ---
-source: crates/biome_property_codec/src/encoder.rs
+source: crates/biome_css_syntax/src/property_syntax/parser.rs
 expression: snapshot
 ---
 property.css:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
