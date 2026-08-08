@@ -1048,6 +1048,17 @@ impl<'src> HtmlLexer<'src> {
             b"switch" => SWITCH_KW,
             b"case" => CASE_KW,
             b"default" => DEFAULT_KW,
+            b"defer" => DEFER_KW,
+            b"placeholder" => PLACEHOLDER_KW,
+            b"loading" => LOADING_KW,
+            b"error" => ERROR_KW,
+            b"minimum" => MINIMUM_KW,
+            b"when" => WHEN_KW,
+            b"prefetch" => PREFETCH_KW,
+            b"on" => ON_KW,
+            b"after" => AFTER_KW,
+            b"hydrate" => HYDRATE_KW,
+            b"never" => NEVER_KW,
 
             _ => {
                 self.position = starting_position;
