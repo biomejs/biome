@@ -39,8 +39,8 @@ const HEADER = `//! AUTO-GENERATED. DO NOT EDIT MANUALLY.
 use phf::{phf_map, phf_set};
 
 use super::tailwind_preset_v4_types::{
-    ArbitraryBranch, CssDataType, FunctionalEntry, NamedBranch, NamedValueType, Negative::*,
-    ThemeNamespace, UtilityEntry, VariantCompare, VariantEntry, VariantKind,
+    ArbitraryBranch, CssDataType, FunctionalEntry, ModifierKind, NamedBranch, NamedValueType,
+    Negative::*, ThemeNamespace, UtilityEntry, VariantCompare, VariantEntry, VariantKind,
 };
 `;
 
@@ -291,9 +291,10 @@ function formatNamedBranch(
 	keywordIdx: Map<string, number>,
 ): string {
 	const { sig, count } = checked(b.sort, sigIdx(b.sort));
+	const m = `ModifierKind::${b.modifier}`;
 	switch (b.kind) {
 		case "Theme":
-			return `NamedBranch::Theme(ThemeNamespace::${b.namespace}, ${sig}, ${count})`;
+			return `NamedBranch::Theme(ThemeNamespace::${b.namespace}, ${m}, ${sig}, ${count})`;
 		case "Keyword": {
 			const key = b.keywords.join("\0");
 			const pool = keywordIdx.get(key);
@@ -302,10 +303,10 @@ function formatNamedBranch(
 					`keyword pool missing entry for: ${b.keywords.join(",")}`,
 				);
 			}
-			return `NamedBranch::Keyword(${pool}, ${sig}, ${count})`;
+			return `NamedBranch::Keyword(${pool}, ${m}, ${sig}, ${count})`;
 		}
 		case "Typed":
-			return `NamedBranch::Typed(NamedValueType::${b.value_type}, ${sig}, ${count})`;
+			return `NamedBranch::Typed(NamedValueType::${b.value_type}, ${m}, ${sig}, ${count})`;
 	}
 }
 
@@ -314,11 +315,12 @@ function formatArbitraryBranch(
 	sigIdx: (sort: PropertySort) => number,
 ): string {
 	const { sig, count } = checked(b.sort, sigIdx(b.sort));
+	const m = `ModifierKind::${b.modifier}`;
 	switch (b.kind) {
 		case "Typed":
-			return `ArbitraryBranch::Typed(CssDataType::${b.value_type}, ${sig}, ${count})`;
+			return `ArbitraryBranch::Typed(CssDataType::${b.value_type}, ${m}, ${sig}, ${count})`;
 		case "Fallback":
-			return `ArbitraryBranch::Fallback(${sig}, ${count})`;
+			return `ArbitraryBranch::Fallback(${m}, ${sig}, ${count})`;
 	}
 }
 
