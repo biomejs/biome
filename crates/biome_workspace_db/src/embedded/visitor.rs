@@ -1,5 +1,6 @@
 use crate::embedded::bindings::EmbeddedBinding;
 use crate::embedded::references::{EmbeddedTypeReference, EmbeddedValueReference};
+use biome_css_syntax::{AnyCssFunctionName, CssFunction, CssIdentifier, CssRoot, CssString};
 use biome_db::ParsedSource;
 use biome_html_syntax::{
     AnyHtmlComponentObjectName, AnyHtmlTagName, AnySvelteBindingAssignmentBinding,
@@ -21,7 +22,7 @@ use biome_js_syntax::{
 use biome_languages::html::HtmlVariant;
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind};
 use biome_languages::{HtmlFileSource, JsFileSource, LanguageDb};
-use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
+use biome_rowan::{AstNode, AstSeparatedList, RawSyntaxKind, TextRange, TokenText, WalkEvent};
 use std::collections::VecDeque;
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -157,6 +158,9 @@ fn collect_embedded_references(
     let is_svelte = host_source
         .to_html_file_source()
         .is_some_and(|s| s.is_svelte());
+    let is_vue = host_source
+        .to_html_file_source()
+        .is_some_and(|s| s.is_vue());
 
     let mut builder = EmbeddedReferencesBuilder::new();
 
@@ -164,15 +168,19 @@ fn collect_embedded_references(
         let Some(file_source) = db.source_from_index(snippet.document_source_index(db)) else {
             continue;
         };
-        let Some(js_file_source) = file_source.to_js_file_source() else {
-            continue;
-        };
-        // Templates always; for Svelte also the sibling `<script>` blocks.
-        // A Svelte component's `<script module>` and `<script>` compile to
-        // one module and share a top-level scope, so a binding used only in
-        // the other block must still count as used.
-        if !js_file_source.is_embedded_source() || is_svelte {
-            builder.visit_non_source_snippet(&snippet.parsed(db).tree(), &js_file_source);
+        if let Some(js_file_source) = file_source.to_js_file_source() {
+            // Templates always; for Svelte also the sibling `<script>` blocks.
+            // A Svelte component's `<script module>` and `<script>` compile to
+            // one module and share a top-level scope, so a binding used only in
+            // the other block must still count as used.
+            if !js_file_source.is_embedded_source() || is_svelte {
+                builder.visit_non_source_snippet(&snippet.parsed(db).tree(), &js_file_source);
+            }
+        } else if is_vue && file_source.to_css_file_source().is_some() {
+            // Vue `<style>` blocks can reference script bindings through the
+            // `v-bind()` CSS function.
+            let css_root: CssRoot = snippet.parsed(db).tree();
+            builder.visit_css_snippet(&css_root);
         }
     }
 
@@ -222,6 +230,17 @@ fn is_script_element_snippet(root: &HtmlRoot, content_range: TextRange) -> bool 
             element.is_script_tag() && element.range().contains_range(content_range)
         })
     })
+}
+
+fn is_v_bind_function(function: &CssFunction) -> bool {
+    let Ok(name) = function.name() else {
+        return false;
+    };
+    let Some(name) = name.as_css_identifier() else {
+        return false;
+    };
+    name.value_token()
+        .is_ok_and(|token| token.text_trimmed() == "v-bind")
 }
 
 #[derive(Debug)]
@@ -1138,6 +1157,54 @@ impl EmbeddedReferencesBuilder {
 
     fn register_type_reference(&mut self, range: TextRange, text: TokenText) {
         self.type_references.push((range, text));
+    }
+
+    fn visit_css_snippet(&mut self, root: &CssRoot) {
+        for node in root.syntax().descendants() {
+            let Some(function) = CssFunction::cast_ref(&node) else {
+                continue;
+            };
+            if !is_v_bind_function(&function) {
+                continue;
+            }
+            self.visit_v_bind_function(&function);
+        }
+    }
+
+    fn visit_v_bind_function(&mut self, function: &CssFunction) -> Option<()> {
+        for node in function.items().syntax().descendants() {
+            if let Some(identifier) = CssIdentifier::cast_ref(&node) {
+                // Function names are `CssIdentifier`s too. The argument is the
+                // only reference, so skip function names to avoid registering
+                // e.g. `v-bind` itself in nested call expressions.
+                if identifier
+                    .syntax()
+                    .parent()
+                    .is_some_and(|parent| AnyCssFunctionName::can_cast(parent.kind()))
+                {
+                    continue;
+                }
+                let token = identifier.value_token().ok()?;
+                self.register_reference(token.text_trimmed_range(), token.token_text_trimmed());
+                return Some(());
+            }
+            if let Some(string) = CssString::cast_ref(&node) {
+                let content = string.inner_string_text().ok()?;
+                let binding = content.text().split('.').next().unwrap_or_default();
+                // An empty quoted expression such as `v-bind('')` has no
+                // identifier to reference, so don't register an empty one.
+                if binding.is_empty() {
+                    return Some(());
+                }
+                let token = string.value_token().ok()?;
+                self.register_reference(
+                    token.text_trimmed_range(),
+                    TokenText::new_raw(RawSyntaxKind(0), binding),
+                );
+                return Some(());
+            }
+        }
+        Some(())
     }
 
     fn visit_non_source_snippet(&mut self, root: &AnyJsRoot, file_source: &JsFileSource) {

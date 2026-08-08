@@ -1,0 +1,50 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-vue-css-v-bind.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+import { computed } from "vue";
+
+const size = computed(() => "1px");
+const unused = computed(() => "2px");
+</script>
+
+<template>
+  <button>hello</button>
+</template>
+
+<style scoped>
+button {
+  height: v-bind(size);
+}
+</style>
+
+```
+
+# Diagnostics
+```
+invalid-vue-css-v-bind.vue:6:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable unused is unused.
+  
+    5 │ const size = computed(() => "1px");
+  > 6 │ const unused = computed(() => "2px");
+      │       ^^^^^^
+    7 │ </script>
+    8 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend unused with an underscore.
+  
+    3 3 │   
+    4 4 │   const size = computed(() => "1px");
+    5   │ - const·unused·=·computed(()·=>·"2px");
+      5 │ + const·_unused·=·computed(()·=>·"2px");
+    6 6 │   
+  
+
+```

@@ -2069,6 +2069,8 @@ dependencies = [
 name = "biome_workspace_db"
 version = "0.1.0"
 dependencies = [
+ "biome_css_parser",
+ "biome_css_syntax",
  "biome_db",
  "biome_fs",
  "biome_html_parser",
