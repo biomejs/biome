@@ -69,31 +69,7 @@ unsorted.jsx:5:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━�
      3  3 │   	firstName="John"
      4  4 │   />;
      5    │ - <Hello·tel={5555555}·address="NY"·{...this.props}·lastName="Smith"·firstName="John"·/>;
-        5 │ + <Hello·tel={5555555}·address="NY"·{...this.props}·firstName="John"·lastName="Smith"·/>;
-     6  6 │   <Hello a10="" a9="" A="" />;
-     7  7 │   
-  
-
-```
-
-```
-unsorted.jsx:5:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The attributes are not sorted. 
-  
-    3 │ 	firstName="John"
-    4 │ />;
-  > 5 │ <Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │ <Hello a10="" a9="" A="" />;
-    7 │ 
-  
-  i Safe fix: Sort the JSX props.
-  
-     3  3 │   	firstName="John"
-     4  4 │   />;
-     5    │ - <Hello·tel={5555555}·address="NY"·{...this.props}·lastName="Smith"·firstName="John"·/>;
-        5 │ + <Hello·address="NY"·tel={5555555}·{...this.props}·lastName="Smith"·firstName="John"·/>;
+        5 │ + <Hello·address="NY"·tel={5555555}·{...this.props}·firstName="John"·lastName="Smith"·/>;
      6  6 │   <Hello a10="" a9="" A="" />;
      7  7 │   
   
